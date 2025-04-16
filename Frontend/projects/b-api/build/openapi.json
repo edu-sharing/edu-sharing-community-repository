@@ -1,1 +1,3346 @@
-{"openapi":"3.1.0","info":{"title":"Apply Default Global SecurityScheme in springdoc-openapi","version":"1.0.0"},"servers":[{"url":"https://b-api.staging.openeduhub.net","description":"Generated server url"}],"security":[{"X-API-KEY":[]},{"basicAuth":[]}],"paths":{"/api/v1/llm/{provider}/images/generations":{"post":{"tags":["Large Language Models"],"operationId":"imageGeneration","parameters":[{"name":"provider","in":"path","required":true,"schema":{"type":"string"}},{"name":"clear-cache","in":"query","description":"Clear cached results for the given request and retrieve results from the given provider","required":false,"schema":{"type":"boolean"}},{"name":"ignore-caching","in":"query","description":"Neither stores result in cache nor retrieves cached results for the given request and retrieve new results from the given provider","required":false,"schema":{"type":"boolean"}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/CreateImageRequest"}}},"required":true},"responses":{"400":{"description":"Bad Request","content":{"*/*":{"schema":{"type":"string"}}}},"504":{"description":"Gateway Timeout","content":{"*/*":{"schema":{"type":"string"}}}},"200":{"description":"OK","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ImageResult"}}}}}}},"/api/v1/llm/{provider}/embeddings":{"post":{"tags":["Large Language Models"],"operationId":"embeddings","parameters":[{"name":"provider","in":"path","required":true,"schema":{"type":"string"}},{"name":"clear-cache","in":"query","description":"Clear cached results for the given request and retrieve new results from the given provider","required":false,"schema":{"type":"boolean"}},{"name":"ignore-caching","in":"query","description":"Neither stores result in cache nor retrieves cached results for the given request and retrieve new results from the given provider","required":false,"schema":{"type":"boolean"}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/EmbeddingRequest"}}},"required":true},"responses":{"400":{"description":"Bad Request","content":{"*/*":{"schema":{"type":"string"}}}},"504":{"description":"Gateway Timeout","content":{"*/*":{"schema":{"type":"string"}}}},"200":{"description":"OK","content":{"application/json":{"schema":{"$ref":"#/components/schemas/EmbeddingResult"}}}}}}},"/api/v1/llm/{provider}/chat/completions":{"post":{"tags":["Large Language Models"],"operationId":"chatCompletion","parameters":[{"name":"provider","in":"path","required":true,"schema":{"type":"string"}},{"name":"clear-cache","in":"query","description":"Clear cached results for the given request and retrieve new results from the given provider","required":false,"schema":{"type":"boolean"}},{"name":"ignore-caching","in":"query","description":"Neither stores result in cache nor retrieves cached results for the given request and retrieve new results from the given provider","required":false,"schema":{"type":"boolean"}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/ChatCompletionRequest"}}},"required":true},"responses":{"400":{"description":"Bad Request","content":{"*/*":{"schema":{"type":"string"}}}},"504":{"description":"Gateway Timeout","content":{"*/*":{"schema":{"type":"string"}}}},"200":{"description":"OK","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ChatCompletionResult"}}}}}}},"/api/v1/llm/{provider}/models":{"get":{"tags":["Large Language Models"],"operationId":"listModels","parameters":[{"name":"provider","in":"path","required":true,"schema":{"type":"string"}}],"responses":{"400":{"description":"Bad Request","content":{"*/*":{"schema":{"type":"string"}}}},"504":{"description":"Gateway Timeout","content":{"*/*":{"schema":{"type":"string"}}}},"200":{"description":"OK","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/Model"}}}}}}}},"/api/v1/llm/provider":{"get":{"tags":["Large Language Models"],"operationId":"listProviders","responses":{"400":{"description":"Bad Request","content":{"*/*":{"schema":{"type":"string"}}}},"504":{"description":"Gateway Timeout","content":{"*/*":{"schema":{"type":"string"}}}},"200":{"description":"OK","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/ProviderInfoData"}}}}}}}},"/api/v1/proxy/topic-tree/generate-topic-tree":{"post":{"tags":["Themenbaum API"],"summary":"Generiere einen Themenbaum","description":"Generiert einen strukturierten Themenbaum basierend auf den übergebenen Parametern.\n\n    Der Themenbaum wird in folgender Hierarchie erstellt:\n    1. Hauptthemen (z.B. \"Mechanik\", \"Thermodynamik\")\n    2. Unterthemen (z.B. \"Kinematik\", \"Dynamik\")\n    3. Lehrplanthemen (z.B. \"Gleichförmige Bewegung\", \"Newtonsche Gesetze\")\n\n    Jeder Knoten im Themenbaum enthält:\n    - Titel und Kurztitel\n    - Beschreibung\n    - Schlagworte (Keywords)\n    - Standardisierte Metadaten (Properties)\n\n    Optional können URIs für Fach und Bildungsstufe übergeben werden (z.B. `\"discipline_uri\"` und `\"educational_context_uri\"`).","operationId":"generate_topic_tree_generate_topic_tree_post","parameters":[{"name":"clear-cache","in":"query","description":"Clear cached results for the given request","required":false,"schema":{"type":"boolean"}},{"name":"ignore-caching","in":"query","description":"Neither stores result in cache nor retrieves cached results for the given request","required":false,"schema":{"type":"boolean"}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/TopicTreeRequest"}}},"required":true},"responses":{"200":{"description":"Erfolgreich generierter Themenbaum","content":{"application/json":{"schema":{"type":"object","title":"Response Generate Topic Tree Generate Topic Tree Post"},"example":{"metadata":{"title":"Physik in Anlehnung an die Lehrpläne der Sekundarstufe 2","description":"Themenbaum für Physik in der Sekundarstufe II","created_at":"2025-02-05T11:28:40+01:00","version":"1.0","author":"Themenbaum Generator"},"collection":[{"title":"Allgemeines","shorttitle":"Allg","properties":{"cclom:general_keyword":["allgemein","grundlagen"],"ccm:collectionshorttitle":["Allg"],"ccm:educationalcontext":[],"ccm:educationalintendedenduserrole":["http://w3id.org/openeduhub/vocabs/intendedEndUserRole/teacher"],"ccm:taxonid":[],"cm:description":["Einführung in ..."],"cm:title":["Allgemeines"]},"subcollections":[]}]}}}},"500":{"description":"Interner Serverfehler","content":{"application/json":{"example":{"detail":"OpenAI API Key nicht gefunden"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/proxy/kidra/text-statistics":{"post":{"tags":["Kidra"],"summary":"Compute text statistics on the given text","description":"Note: Only German language is supported right now.\n    \n    Parameters\n    ----------\n    text : str\n        The text to be analyzed.\n    reading_speed : float, optional\n        The reading speed in characters per minute to use as a base-line.\n        Default: 200\n    generate_embeddings : bool, optional\n        Whether to also generate a vectorized representation of the text using\n        word embeddings.\n        \n    \n    Returns\n    -------\n    flesch_ease : float or null\n        The readability score of the text,\n        according to the Flesch reading ease.\n        null if undefined (i.e. text is empty).\n    flesch_classification : str or null\n        Interpretation of the Flesch readability score,\n        from 'Sehr leicht' to 'Sehr schwer'.\n        null if undefined (i.e. text is empty).\n    wiener_index : float or null\n        The appropriate school grade of the text, based on its readability,\n        according to the Wiener index.\n        null if undefined (i.e. text is empty).\n    reading_time : float or null\n        The predicted time to read the text, in seconds.\n        This is adjusted for the readability of the text,\n        according to the following formula:\n        reading_speed / 2 * exp(log(4) * flesch_ease / 121.5).\n        Thus, reading speed is doubled at the maximum readability\n        (121.5) and halved at readability 0.\n        null if undefined (i.e. text is empty).\n    embeddings : list[float] or null\n        If ``generate_embeddings`` was set to `True`, this will be the\n        vectorized representation of the text. Otherwise, `null`.\n    version : str\n        The version of the text statistics service.","operationId":"text_stats_analyze_text_post","parameters":[{"name":"clear-cache","in":"query","description":"Clear cached results for the given request","required":false,"schema":{"type":"boolean"}},{"name":"ignore-caching","in":"query","description":"Neither stores result in cache nor retrieves cached results for the given request","required":false,"schema":{"type":"boolean"}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/text-statistics-InputData"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/text-statistics-Result"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/text-statistics-HTTPValidationError"}}}}}}},"/api/v1/proxy/kidra/topic-statistics":{"post":{"tags":["Kidra"],"summary":"Counts","operationId":"counts_counts_post","parameters":[{"name":"clear-cache","in":"query","description":"Clear cached results for the given request","required":false,"schema":{"type":"boolean"}},{"name":"ignore-caching","in":"query","description":"Neither stores result in cache nor retrieves cached results for the given request","required":false,"schema":{"type":"boolean"}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/topic-statistics-Input_Stats"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/topic-statistics-Output_Stats"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/topic-statistics-HTTPValidationError"}}}}}}},"/api/v1/proxy/kidra/update-data":{"post":{"tags":["Kidra"],"summary":"Update Data","operationId":"update_data_update_data_post","parameters":[{"name":"clear-cache","in":"query","description":"Clear cached results for the given request","required":false,"schema":{"type":"boolean"}},{"name":"ignore-caching","in":"query","description":"Neither stores result in cache nor retrieves cached results for the given request","required":false,"schema":{"type":"boolean"}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/update-data-Input_Update"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/update-data-HTTPValidationError"}}}}}}},"/api/v1/proxy/kidra/text-extraction":{"post":{"tags":["Kidra"],"summary":"Extract text from a given URL","description":"Extract text from a given URL\n\n    Parameters\n    ---------\n    url : str\n        The URL from which to extract text.\n    lang : str, optional\n        The ISO 639-1 code for the language of the text.\n        If set to 'auto', try to detect it instead.\n        Default: 'auto'.\n    preference : str, optional\n        Whether to prioritize precision, recall, or neither\n        when extracting the text.\n        Default: 'none'\n    method : \"simple\" or \"browser\"\n        Whether to get the content of the website naively, or to use a headless\n        browser in order to e.g. deal with JavaScript-heavy pages.\n\n    Returns\n    -------\n    text : str\n        The extracted text.\n    lang : str\n        If lang was set to 'auto', the detected language.\n        Otherwise, whatever lang was set to.\n    version : str\n        The version of the text extractor.","operationId":"from_url_from_url_post","parameters":[{"name":"clear-cache","in":"query","description":"Clear cached results for the given request","required":false,"schema":{"type":"boolean"}},{"name":"ignore-caching","in":"query","description":"Neither stores result in cache nor retrieves cached results for the given request","required":false,"schema":{"type":"boolean"}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/text-extraction-Data"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/text-extraction-Result"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/text-extraction-HTTPValidationError"}}}}}}},"/api/v1/proxy/kidra/bayesian-predictions":{"post":{"tags":["Kidra"],"summary":"Predict the metadata fitting the given text.","description":"Note that all categories are not filtered out. Instead, they\n                are sorted by their mean predicted probability of being\n                relevant to the text.\n                \n                Parameters\n                ----------\n                text : str\n                    The text to be analyzed.\n                num_samples : int\n                    The number of samples to use in order to estimate the fit\n                    of each discipline. Higher numbers will result in less\n                    variance between calls, but take more time.\n                num_predictions : int\n                    The number of predicted disciplines (sorted by relevance)\n                    to return. This does not affect performance; it simply\n                    serves as an initial filtering tool.\n                interval_size : float (0, 1]\n                    The size of the credibility interval for the probability\n                    that a discipline is assigned to the given text.\n                    E.g. at 0.8, there is a probability of 80% that the\n                    predicted probability of the discipline belonging to the\n                    text is within the returned interval.\n\n                Returns\n                -------\n                predictions : dict[str, list[Prediction]]\n                    Map from predicted metadatum to predictions for this\n                    metadatum.\n                version : str\n                    The version of the prediction tool.\n\n                Prediction\n                ----------\n                id : str\n                    The URI of the category.\n                name : str\n                    The label of the category.\n                mean_prob : float [0, 1]\n                    The mean of the predicted probabilities that this category\n                    belongs to the given text.\n                median_prob : float [0, 1]\n                    The median of the above probabilities.\n                prob_interval : 2-tuple of floats in [0, 1]\n                    The credibility interval of the predicted probabilities\n                    above.","operationId":"predict_predict_post","parameters":[{"name":"clear-cache","in":"query","description":"Clear cached results for the given request","required":false,"schema":{"type":"boolean"}},{"name":"ignore-caching","in":"query","description":"Neither stores result in cache nor retrieves cached results for the given request","required":false,"schema":{"type":"boolean"}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/bayesian-predictions-Prediction_Data"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/bayesian-predictions-Prediction_Result"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/bayesian-predictions-HTTPValidationError"}}}}}}},"/api/v1/proxy/kidra/disciplines":{"post":{"tags":["Kidra"],"summary":"Predict the OpenEduHub disciplines of the given text","description":"Predict the OpenEduHub disciplines of the given text\n\n        Parameters\n        ----------\n        text : str\n            The text to be analyzed.\n\n        Returns\n        -------\n        disciplines : list of Discipline\n            The predicted disciplines of the text.\n            This contains the id of the discipline,\n            and a score from 0 to 1.\n        version : str\n            The version of the discipline predictor.","operationId":"predict_subjects_kidra_predict_subjects_post","parameters":[{"name":"clear-cache","in":"query","description":"Clear cached results for the given request","required":false,"schema":{"type":"boolean"}},{"name":"ignore-caching","in":"query","description":"Neither stores result in cache nor retrieves cached results for the given request","required":false,"schema":{"type":"boolean"}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/disciplines-Data"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/disciplines-Result"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/disciplines-HTTPValidationError"}}}}}}},"/api/v1/proxy/kidra/topic-assistant-keywords":{"post":{"tags":["Kidra"],"summary":"Predict topics from the OpenEduHub topic tree, using keywords","description":"Predict topics from the OpenEduHub topic tree, using keywords\n\n        Parameters\n        ----------\n        text : str\n            The text to be analyzed.\n\n        Returns\n        -------\n        topics : list of Topic\n            The predicted topics from the topic tree.\n            Contains the following attributes:\n        \n            weight : int\n                The number of matches in the sub tree.\n            uri : str\n                The URI of the topic.\n            label : str, optional\n                The label of the topic.\n            match : str, optional\n                The keyword in the text that was associated with the topic.\n                If there are multiple, comma separated.\n        version : str\n            The version of the topic prediction tool.","operationId":"topics_flat_topics_flat_post","parameters":[{"name":"clear-cache","in":"query","description":"Clear cached results for the given request","required":false,"schema":{"type":"boolean"}},{"name":"ignore-caching","in":"query","description":"Neither stores result in cache nor retrieves cached results for the given request","required":false,"schema":{"type":"boolean"}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/topic-assistant-keywords-Data"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/topic-assistant-keywords-Result"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/topic-assistant-keywords-HTTPValidationError"}}}}}}},"/api/v1/proxy/kidra/topic-assistant-embeddings":{"post":{"tags":["Kidra"],"summary":"Predict topics from the OpenEduHub topic tree, using text embeddings","description":"Predict topics from the OpenEduHub topic tree, using text embeddings\n\n        Parameters\n        ----------\n        text : str\n            The text to be analyzed.\n\n        Returns\n        -------\n        topics : list of Topic\n            The predicted topics from the topic tree.\n            Contains the following attributes:\n        \n            weight : int\n                The weight attributed to the sub tree.\n            uri : str\n                The URI of the topic.\n            label : str, optional\n                The label of the topic.\n            match : null\n                Irrelevant for this function.\n        version : str\n            The version of the topic prediction tool.","operationId":"topics2_flat_topics2_flat_post","parameters":[{"name":"clear-cache","in":"query","description":"Clear cached results for the given request","required":false,"schema":{"type":"boolean"}},{"name":"ignore-caching","in":"query","description":"Neither stores result in cache nor retrieves cached results for the given request","required":false,"schema":{"type":"boolean"}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/topic-assistant-embeddings-Data"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/topic-assistant-embeddings-Result"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/topic-assistant-embeddings-HTTPValidationError"}}}}}}},"/api/v1/proxy/kidra/link-wikipedia":{"post":{"tags":["Kidra"],"summary":"Collect relevant Wikipedia articles for the given text","description":"Collect relevant Wikipedia articles for the given text\n\n        Parameters\n        ----------\n        text : str\n            The text to be analyzed.\n\n        Returns\n        -------\n        text : str\n            A modified version of the given text,\n            where matched phrases are replaced with hyperlinks to their\n            corresponding Wikipedia entry.\n        entities : list of Entity\n            All Wikipedia entries that were matched for the given text.\n            Contains the following attributes:\n\n            entity : str\n                The name of the entry.\n            start : int\n                The start position of the phrase that was matched to this entity.\n            end : int\n                The end position of the phrase that was matched to this entity.\n            score : float\n                The score (from 0 to 1) of the match.\n            categories : list of str\n                The German Wikipedia categories associated with this entity.\n        essentialCategories : list of str\n            A list of German Wikipedia categories that are shared between\n            multiple associated entities.\n        version : str\n            The version of the Wikipedia linking service.\n            Currently a placeholder.","operationId":"fun_link_wikipedia_post","parameters":[{"name":"clear-cache","in":"query","description":"Clear cached results for the given request","required":false,"schema":{"type":"boolean"}},{"name":"ignore-caching","in":"query","description":"Neither stores result in cache nor retrieves cached results for the given request","required":false,"schema":{"type":"boolean"}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Data"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Result"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}}},"components":{"schemas":{"CreateImageRequest":{"type":"object","properties":{"prompt":{"type":"string"},"model":{"type":"string"},"n":{"type":"integer","format":"int32"},"quality":{"type":"string"},"size":{"type":"string"},"style":{"type":"string"},"user":{"type":"string"},"response_format":{"type":"string"}}},"Image":{"type":"object","properties":{"url":{"type":"string"},"b64_json":{"type":"string"},"revised_prompt":{"type":"string"}}},"ImageResult":{"type":"object","properties":{"created":{"type":"integer","format":"int64"},"data":{"type":"array","items":{"$ref":"#/components/schemas/Image"}}}},"EmbeddingRequest":{"type":"object","properties":{"model":{"type":"string"},"input":{"type":"object"},"dimensions":{"type":"integer","format":"int32"},"user":{"type":"string"},"encoding_format":{"type":"string"}}},"Embedding":{"type":"object","properties":{"object":{"type":"string"},"embedding":{"type":"object"},"index":{"type":"integer","format":"int32"}}},"EmbeddingResult":{"type":"object","properties":{"model":{"type":"string"},"object":{"type":"string"},"data":{"type":"array","items":{"$ref":"#/components/schemas/Embedding"}},"usage":{"$ref":"#/components/schemas/Usage"}}},"Usage":{"type":"object","properties":{"prompt_tokens":{"type":"integer","format":"int64"},"completion_tokens":{"type":"integer","format":"int64"},"total_tokens":{"type":"integer","format":"int64"}}},"AssistantMessage":{"allOf":[{"$ref":"#/components/schemas/ChatMessage"},{"type":"object","properties":{"content":{"type":"string"},"refusal":{"type":"string"},"audio":{"$ref":"#/components/schemas/AssistantMessageAudio"},"tool_calls":{"type":"array","items":{"$ref":"#/components/schemas/ChatToolCall"}},"function_call":{"$ref":"#/components/schemas/ChatFunctionCall","deprecated":true}}}]},"AssistantMessageAudio":{"type":"object","properties":{"id":{"type":"string"},"transcript":{"type":"string"},"data":{"type":"string"},"expires_at":{"type":"integer","format":"int32"}}},"Audio":{"type":"object","properties":{"voice":{"type":"string"},"format":{"type":"string"}}},"ChatCompletionRequest":{"type":"object","properties":{"model":{"type":"string"},"messages":{"type":"array","items":{"oneOf":[{"$ref":"#/components/schemas/AssistantMessage"},{"$ref":"#/components/schemas/FunctionMessage"},{"$ref":"#/components/schemas/SystemMessage"},{"$ref":"#/components/schemas/ToolMessage"},{"$ref":"#/components/schemas/UserMessage"}]}},"temperature":{"type":"number","format":"double"},"n":{"type":"integer","format":"int32"},"stream":{"type":"boolean"},"stop":{"type":"array","items":{"type":"string"}},"user":{"type":"string"},"functions":{"type":"array","deprecated":true,"items":{"type":"object","deprecated":true}},"seed":{"type":"integer","format":"int32"},"logprobs":{"type":"boolean"},"tools":{"type":"array","items":{"$ref":"#/components/schemas/ChatTool"}},"modalities":{"type":"array","items":{"type":"string"}},"audio":{"$ref":"#/components/schemas/Audio"},"response_format":{"$ref":"#/components/schemas/ChatResponseFormat"},"top_p":{"type":"number","format":"double"},"stream_options":{"$ref":"#/components/schemas/StreamOption"},"max_tokens":{"type":"integer","format":"int32"},"presence_penalty":{"type":"number","format":"double"},"frequency_penalty":{"type":"number","format":"double"},"logit_bias":{"type":"object","additionalProperties":{"type":"integer","format":"int32"}},"function_call":{"$ref":"#/components/schemas/ChatCompletionRequestFunctionCall","deprecated":true},"top_logprobs":{"type":"integer","format":"int32"},"tool_choice":{"$ref":"#/components/schemas/ToolChoice"},"parallel_tool_calls":{"type":"boolean"}}},"ChatCompletionRequestFunctionCall":{"type":"object","properties":{"name":{"type":"string"}}},"ChatFunctionCall":{"type":"object","properties":{"name":{"type":"string"},"arguments":{"$ref":"#/components/schemas/JsonNode"}}},"ChatMessage":{"type":"object","discriminator":{"propertyName":"role"},"properties":{"role":{"type":"string"},"textContent":{"type":"string"},"name":{"type":"string"}}},"ChatResponseFormat":{"type":"object","properties":{"type":{"type":"string"},"jsonSchema":{"$ref":"#/components/schemas/ResponseJsonSchema"}}},"ChatTool":{"type":"object","properties":{"type":{"type":"string"},"function":{"type":"object"}}},"ChatToolCall":{"type":"object","properties":{"index":{"type":"integer","format":"int32","writeOnly":true},"id":{"type":"string"},"type":{"type":"string"},"function":{"$ref":"#/components/schemas/ChatFunctionCall"}}},"Function":{"type":"object","properties":{"name":{"type":"string"}}},"FunctionMessage":{"allOf":[{"$ref":"#/components/schemas/ChatMessage"},{"type":"object","properties":{"content":{"type":"string"}}}]},"JsonNode":{"type":"object"},"ResponseJsonSchema":{"type":"object","properties":{"name":{"type":"string"},"strict":{"type":"boolean"},"schema":{"type":"object"}}},"StreamOption":{"type":"object","properties":{"include_usage":{"type":"boolean"}}},"SystemMessage":{"allOf":[{"$ref":"#/components/schemas/ChatMessage"},{"type":"object","properties":{"content":{"type":"string"}}}]},"ToolChoice":{"type":"object","properties":{"function":{"$ref":"#/components/schemas/Function"},"type":{"type":"string"}}},"ToolMessage":{"allOf":[{"$ref":"#/components/schemas/ChatMessage"},{"type":"object","properties":{"content":{"type":"string"},"tool_call_id":{"type":"string"}}}]},"UserMessage":{"allOf":[{"$ref":"#/components/schemas/ChatMessage"},{"type":"object","properties":{"content":{"type":"object"}}}]},"ChatCompletionChoice":{"type":"object","properties":{"index":{"type":"integer","format":"int32"},"message":{"$ref":"#/components/schemas/AssistantMessage"},"logprobs":{"$ref":"#/components/schemas/Logprobs"},"finish_reason":{"type":"string"}}},"ChatCompletionResult":{"type":"object","properties":{"id":{"type":"string"},"object":{"type":"string"},"created":{"type":"integer","format":"int64"},"model":{"type":"string"},"choices":{"type":"array","items":{"$ref":"#/components/schemas/ChatCompletionChoice"}},"usage":{"$ref":"#/components/schemas/Usage"},"system_fingerprint":{"type":"string"}}},"Logprobs":{"type":"object","properties":{"content":{"type":"array","items":{"$ref":"#/components/schemas/LogprobsContent"}}}},"LogprobsContent":{"type":"object","properties":{"token":{"type":"string"},"logprob":{"type":"number"},"bytes":{"type":"array","items":{"type":"integer","format":"int32"}},"top_logprobs":{"type":"array","items":{"$ref":"#/components/schemas/TopLogprobs"}}}},"TopLogprobs":{"type":"object","properties":{"token":{"type":"string"},"logprob":{"type":"number"},"bytes":{"type":"array","items":{"type":"integer","format":"int32"}}}},"Model":{"type":"object","properties":{"id":{"type":"string"},"object":{"type":"string"},"permission":{"type":"array","deprecated":true,"items":{"$ref":"#/components/schemas/Permission"}},"root":{"type":"string"},"parent":{"type":"string"},"owned_by":{"type":"string"}}},"Permission":{"type":"object","properties":{"id":{"type":"string"},"object":{"type":"string"},"created":{"type":"integer","format":"int64"},"organization":{"type":"string"},"group":{"type":"string"},"allow_create_engine":{"type":"boolean"},"allow_sampling":{"type":"boolean"},"allow_log_probs":{"type":"boolean"},"allow_search_indices":{"type":"boolean"},"allow_view":{"type":"boolean"},"allow_fine_tuning":{"type":"boolean"},"is_blocking":{"type":"boolean"}}},"ProviderInfoData":{"type":"object","properties":{"provider":{"type":"string"},"description":{"type":"string"},"link":{"type":"string"}},"required":["provider"]},"HTTPValidationError":{"type":"object","properties":{"detail":{"type":"array","items":{"$ref":"#/components/schemas/ValidationError"},"title":"Detail"}},"title":"HTTPValidationError"},"Ping":{"type":"object","properties":{"status":{"type":"string","default":"not ok","description":"Ping response of the server. Should be 'ok' in happy-case.","examples":["not ok","ok"],"title":"Status"}},"title":"Ping"},"TopicTreeRequest":{"type":"object","description":"Request-Modell für die Generierung eines Themenbaums.\nHierüber kommen Parameter wie Thema, Anzahl an Hauptthemen,\nAnzahl an Unterthemen und Anzahl an Lehrplanthemen.\n\n'discipline_uri' und 'educational_context_uri' sind optional.\nFalls sie mitgegeben werden, landen sie als URIs in den Metadaten.","example":{"discipline_uri":"http://w3id.org/openeduhub/vocabs/discipline/460","educational_context_uri":"http://w3id.org/openeduhub/vocabs/educationalContext/sekundarstufe_2","include_general_topic":true,"include_methodology_topic":true,"model":"gpt-4o-mini","num_curriculum_topics":2,"num_main_topics":5,"num_subtopics":3,"theme":"Physik in Anlehnung an die Lehrpläne der Sekundarstufe 2"},"properties":{"theme":{"type":"string","description":"Das Hauptthema des Themenbaums","examples":["Physik in Anlehnung an die Lehrpläne der Sekundarstufe 2"],"title":"Theme"},"num_main_topics":{"type":"integer","default":5,"description":"Anzahl der zu generierenden Hauptthemen","examples":[5],"maximum":20.0,"minimum":1.0,"title":"Num Main Topics"},"num_subtopics":{"type":"integer","default":3,"description":"Anzahl der Unterthemen pro Hauptthema","examples":[3],"maximum":20.0,"minimum":1.0,"title":"Num Subtopics"},"num_curriculum_topics":{"type":"integer","default":2,"description":"Anzahl der Lehrplanthemen pro Unterthema","examples":[2],"maximum":20.0,"minimum":1.0,"title":"Num Curriculum Topics"},"include_general_topic":{"type":"boolean","default":false,"description":"Wenn True, wird 'Allgemeines' als erstes Hauptthema eingefügt","examples":[true,false],"title":"Include General Topic"},"include_methodology_topic":{"type":"boolean","default":false,"description":"Wenn True, wird 'Methodik und Didaktik' als letztes Hauptthema eingefügt","examples":[true,false],"title":"Include Methodology Topic"},"discipline_uri":{"anyOf":[{"type":"string"},{"type":"null"}],"description":"Optionale URI für den Fachbereich. Wenn leer, bleibt es in den Metadaten leer.","examples":["http://w3id.org/openeduhub/vocabs/discipline/460"],"title":"Discipline Uri"},"educational_context_uri":{"anyOf":[{"type":"string"},{"type":"null"}],"description":"Optionale URI für die Bildungsstufe. Wenn leer, bleibt es leer.","examples":["http://w3id.org/openeduhub/vocabs/educationalContext/sekundarstufe_2"],"title":"Educational Context Uri"},"model":{"type":"string","default":"gpt-4o-mini","description":"Das zu verwendende OpenAI-Sprachmodell","examples":["gpt-4o-mini"],"title":"Model"}},"required":["theme"],"title":"TopicTreeRequest"},"ValidationError":{"type":"object","properties":{"loc":{"type":"array","items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"required":["loc","msg","type"],"title":"ValidationError"},"Data":{"type":"object","properties":{"text":{"type":"string","title":"Text"}},"required":["text"],"title":"Data"},"Entity":{"type":"object","properties":{"entity":{"type":"string","title":"Entity"},"start":{"type":"integer","title":"Start"},"end":{"type":"integer","title":"End"},"score":{"type":"number","title":"Score"},"categories":{"type":"array","items":{"type":"string"},"title":"Categories"}},"required":["categories","end","entity","score","start"],"title":"Entity"},"Result":{"type":"object","properties":{"text":{"type":"string","title":"Text"},"entities":{"type":"array","items":{"$ref":"#/components/schemas/Entity"},"title":"Entities"},"essentialCategories":{"type":"array","items":{"type":"string"},"title":"Essentialcategories"},"version":{"type":"string","default":"0.1.0","title":"Version"}},"required":["entities","essentialCategories","text"],"title":"Result"},"text-statistics-HTTPValidationError":{"type":"object","properties":{"detail":{"type":"array","items":{"$ref":"#/components/schemas/text-statistics-ValidationError"},"title":"Detail"}},"title":"HTTPValidationError"},"text-statistics-InputData":{"type":"object","properties":{"text":{"type":"string","minLength":1,"title":"Text"},"reading_speed":{"type":"number","default":200.0,"minimum":1.0,"title":"Reading Speed"},"generate_embeddings":{"type":"boolean","default":false,"title":"Generate Embeddings"}},"required":["text"],"title":"InputData"},"text-statistics-Result":{"type":"object","properties":{"flesch_ease":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Flesch Ease"},"classification":{"anyOf":[{"type":"string","enum":["Sehr leicht","Leicht","Mittelleicht","Mittel","Mittelschwer","Schwer","Sehr schwer"]},{"type":"null"}],"title":"Classification"},"wiener_index":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Wiener Index"},"reading_time":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Reading Time"},"embeddings":{"anyOf":[{"type":"array","items":{"type":"number"},"maxItems":300,"minItems":300},{"type":"null"}],"title":"Embeddings"},"version":{"type":"string","default":"1.1.0","title":"Version"}},"required":["classification","embeddings","flesch_ease","reading_time","wiener_index"],"title":"Result"},"text-statistics-ValidationError":{"type":"object","properties":{"loc":{"type":"array","items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"required":["loc","msg","type"],"title":"ValidationError"},"topic-statistics-Category_Count":{"type":"object","properties":{"total":{"type":"integer","title":"Total"},"editorially_confirmed":{"type":"integer","title":"Editorially Confirmed"},"category":{"type":"string","title":"Category"}},"required":["category","editorially_confirmed","total"],"title":"Category_Count"},"topic-statistics-Count":{"type":"object","properties":{"total":{"type":"integer","title":"Total"},"editorially_confirmed":{"type":"integer","title":"Editorially Confirmed"}},"required":["editorially_confirmed","total"],"title":"Count"},"topic-statistics-Field_Counts":{"type":"object","properties":{"field":{"type":"string","title":"Field"},"counts":{"type":"array","items":{"$ref":"#/components/schemas/topic-statistics-Category_Count"},"title":"Counts"}},"required":["counts","field"],"title":"Field_Counts"},"topic-statistics-Fields":{"type":"string","description":"A selection of commonly used metadata fields.","enum":["properties.ccm:educationaltypicalagerange","properties.ccm:oeh_course_coursemode","collections.properties.cclom:location","collections.properties.cm:title","collections.properties.sys:node-uuid","properties.ccm:competence","properties.cclom:general_description","properties.cclom:duration","properties.ccm:educationalcontext","properties.ccm:fskRating","nodeRef.id","properties.ccm:educationalintendedenduserrole","properties.cclom:classification_keyword","properties.cclom:general_keyword","properties.cclom:general_language","properties.ccm:oeh_lrt","properties.ccm:taxonid","properties.ccm:oeh_taxonid_university","properties.ccm:oeh_ai_test_data","properties.cclom:title","properties.ccm:curriculum","properties.ccm:wwwurl"],"title":"Fields"},"topic-statistics-HTTPValidationError":{"type":"object","properties":{"detail":{"type":"array","items":{"$ref":"#/components/schemas/topic-statistics-ValidationError"},"title":"Detail"}},"title":"HTTPValidationError"},"topic-statistics-Input_Stats":{"type":"object","properties":{"topic_uri":{"type":"string","title":"Topic Uri"},"topic_url":{"type":"string","title":"Topic Url"},"group_by_fields":{"anyOf":[{"type":"array","items":{"$ref":"#/components/schemas/topic-statistics-Fields"}},{"type":"null"}],"examples":[["properties.ccm:taxonid"]],"title":"Group By Fields"}},"required":["topic_uri","topic_url"],"title":"Input_Stats"},"topic-statistics-Input_Update":{"type":"object","properties":{"skip_if_exists":{"type":"boolean","default":true,"title":"Skip If Exists"}},"title":"Input_Update"},"topic-statistics-Output_Stats":{"type":"object","properties":{"total":{"$ref":"#/components/schemas/topic-statistics-Count"},"by_fields":{"anyOf":[{"type":"array","items":{"$ref":"#/components/schemas/topic-statistics-Field_Counts"}},{"type":"null"}],"title":"By Fields"}},"required":["total"],"title":"Output_Stats"},"topic-statistics-ValidationError":{"type":"object","properties":{"loc":{"type":"array","items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"required":["loc","msg","type"],"title":"ValidationError"},"update-data-Category_Count":{"type":"object","properties":{"total":{"type":"integer","title":"Total"},"editorially_confirmed":{"type":"integer","title":"Editorially Confirmed"},"category":{"type":"string","title":"Category"}},"required":["category","editorially_confirmed","total"],"title":"Category_Count"},"update-data-Count":{"type":"object","properties":{"total":{"type":"integer","title":"Total"},"editorially_confirmed":{"type":"integer","title":"Editorially Confirmed"}},"required":["editorially_confirmed","total"],"title":"Count"},"update-data-Field_Counts":{"type":"object","properties":{"field":{"type":"string","title":"Field"},"counts":{"type":"array","items":{"$ref":"#/components/schemas/update-data-Category_Count"},"title":"Counts"}},"required":["counts","field"],"title":"Field_Counts"},"update-data-Fields":{"type":"string","description":"A selection of commonly used metadata fields.","enum":["properties.ccm:educationaltypicalagerange","properties.ccm:oeh_course_coursemode","collections.properties.cclom:location","collections.properties.cm:title","collections.properties.sys:node-uuid","properties.ccm:competence","properties.cclom:general_description","properties.cclom:duration","properties.ccm:educationalcontext","properties.ccm:fskRating","nodeRef.id","properties.ccm:educationalintendedenduserrole","properties.cclom:classification_keyword","properties.cclom:general_keyword","properties.cclom:general_language","properties.ccm:oeh_lrt","properties.ccm:taxonid","properties.ccm:oeh_taxonid_university","properties.ccm:oeh_ai_test_data","properties.cclom:title","properties.ccm:curriculum","properties.ccm:wwwurl"],"title":"Fields"},"update-data-HTTPValidationError":{"type":"object","properties":{"detail":{"type":"array","items":{"$ref":"#/components/schemas/update-data-ValidationError"},"title":"Detail"}},"title":"HTTPValidationError"},"update-data-Input_Stats":{"type":"object","properties":{"topic_uri":{"type":"string","title":"Topic Uri"},"topic_url":{"type":"string","title":"Topic Url"},"group_by_fields":{"anyOf":[{"type":"array","items":{"$ref":"#/components/schemas/update-data-Fields"}},{"type":"null"}],"examples":[["properties.ccm:taxonid"]],"title":"Group By Fields"}},"required":["topic_uri","topic_url"],"title":"Input_Stats"},"update-data-Input_Update":{"type":"object","properties":{"skip_if_exists":{"type":"boolean","default":true,"title":"Skip If Exists"}},"title":"Input_Update"},"update-data-Output_Stats":{"type":"object","properties":{"total":{"$ref":"#/components/schemas/update-data-Count"},"by_fields":{"anyOf":[{"type":"array","items":{"$ref":"#/components/schemas/update-data-Field_Counts"}},{"type":"null"}],"title":"By Fields"}},"required":["total"],"title":"Output_Stats"},"update-data-ValidationError":{"type":"object","properties":{"loc":{"type":"array","items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"required":["loc","msg","type"],"title":"ValidationError"},"text-extraction-Data":{"type":"object","properties":{"url":{"type":"string","title":"Url"},"method":{"allOf":[{"$ref":"#/components/schemas/text-extraction-Methods"}],"default":"simple"},"browser_location":{"anyOf":[{"type":"string"},{"type":"null"}],"examples":[null],"title":"Browser Location"},"lang":{"type":"string","default":"auto","title":"Lang"},"preference":{"type":"string","default":"none","enum":["none","recall","precision"],"title":"Preference"}},"required":["url"],"title":"Data"},"text-extraction-HTTPValidationError":{"type":"object","properties":{"detail":{"type":"array","items":{"$ref":"#/components/schemas/text-extraction-ValidationError"},"title":"Detail"}},"title":"HTTPValidationError"},"text-extraction-Methods":{"type":"string","enum":["simple","browser"],"title":"Methods"},"text-extraction-Result":{"type":"object","properties":{"text":{"type":"string","title":"Text"},"lang":{"type":"string","title":"Lang"},"version":{"type":"string","default":"0.2.0","title":"Version"}},"required":["lang","text"],"title":"Result"},"text-extraction-ValidationError":{"type":"object","properties":{"loc":{"type":"array","items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"required":["loc","msg","type"],"title":"ValidationError"},"bayesian-predictions-HTTPValidationError":{"type":"object","properties":{"detail":{"type":"array","items":{"$ref":"#/components/schemas/bayesian-predictions-ValidationError"},"title":"Detail"}},"title":"HTTPValidationError"},"bayesian-predictions-Prediction_Data":{"type":"object","description":"Input to be used for prediction.","properties":{"text":{"type":"string","title":"Text"},"num_samples":{"type":"integer","default":500,"exclusiveMinimum":1.0,"maximum":100000.0,"title":"Num Samples"},"num_predictions":{"type":"integer","default":10,"exclusiveMinimum":0.0,"title":"Num Predictions"},"interval_size":{"type":"number","default":0.8,"exclusiveMaximum":1.0,"exclusiveMinimum":0.0,"title":"Interval Size"}},"required":["text"],"title":"Prediction_Data"},"bayesian-predictions-Prediction_Result":{"type":"object","description":"The output of the prediction.","properties":{"predictions":{"type":"object","additionalProperties":{"type":"array","items":{"$ref":"#/components/schemas/bayesian-predictions-Prediction_Score"}},"title":"Predictions"},"version":{"type":"string","default":"0.2.4","title":"Version"}},"required":["predictions"],"title":"Prediction_Result"},"bayesian-predictions-Prediction_Score":{"type":"object","description":"An individual prediction for a particular target.","properties":{"id":{"type":"string","title":"Id"},"name":{"type":"string","title":"Name"},"mean_prob":{"type":"number","title":"Mean Prob"},"median_prob":{"type":"number","title":"Median Prob"},"baseline_diff":{"type":"number","title":"Baseline Diff"},"prob_interval":{"type":"array","examples":[[0.1,0.5]],"items":{"type":"number"},"title":"Prob Interval"}},"required":["baseline_diff","id","mean_prob","median_prob","name","prob_interval"],"title":"Prediction_Score"},"bayesian-predictions-ValidationError":{"type":"object","properties":{"loc":{"type":"array","items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"required":["loc","msg","type"],"title":"ValidationError"},"disciplines-Data":{"type":"object","properties":{"text":{"type":"string","title":"Text"}},"required":["text"],"title":"Data"},"disciplines-Discipline":{"type":"object","properties":{"id":{"type":"string","title":"Id"},"score":{"type":"number","title":"Score"}},"required":["id","score"],"title":"Discipline"},"disciplines-HTTPValidationError":{"type":"object","properties":{"detail":{"type":"array","items":{"$ref":"#/components/schemas/disciplines-ValidationError"},"title":"Detail"}},"title":"HTTPValidationError"},"disciplines-Result":{"type":"object","properties":{"disciplines":{"type":"array","items":{"$ref":"#/components/schemas/disciplines-Discipline"},"title":"Disciplines"},"version":{"type":"string","default":"0.1.0","title":"Version"}},"required":["disciplines"],"title":"Result"},"disciplines-ValidationError":{"type":"object","properties":{"loc":{"type":"array","items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"required":["loc","msg","type"],"title":"ValidationError"},"topic-assistant-keywords-Data":{"type":"object","properties":{"text":{"type":"string","title":"Text"}},"required":["text"],"title":"Data"},"topic-assistant-keywords-HTTPValidationError":{"type":"object","properties":{"detail":{"type":"array","items":{"$ref":"#/components/schemas/topic-assistant-keywords-ValidationError"},"title":"Detail"}},"title":"HTTPValidationError"},"topic-assistant-keywords-Result":{"type":"object","properties":{"topics":{"type":"array","items":{"$ref":"#/components/schemas/topic-assistant-keywords-Topic"},"title":"Topics"},"version":{"type":"string","default":"0.1.4","title":"Version"}},"required":["topics"],"title":"Result"},"topic-assistant-keywords-Topic":{"type":"object","properties":{"weight":{"type":"number","title":"Weight"},"uri":{"type":"string","title":"Uri"},"label":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Label"},"match":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Match"}},"required":["uri","weight"],"title":"Topic"},"topic-assistant-keywords-ValidationError":{"type":"object","properties":{"loc":{"type":"array","items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"required":["loc","msg","type"],"title":"ValidationError"},"topic-assistant-embeddings-Data":{"type":"object","properties":{"text":{"type":"string","title":"Text"}},"required":["text"],"title":"Data"},"topic-assistant-embeddings-HTTPValidationError":{"type":"object","properties":{"detail":{"type":"array","items":{"$ref":"#/components/schemas/topic-assistant-embeddings-ValidationError"},"title":"Detail"}},"title":"HTTPValidationError"},"topic-assistant-embeddings-Result":{"type":"object","properties":{"topics":{"type":"array","items":{"$ref":"#/components/schemas/topic-assistant-embeddings-Topic"},"title":"Topics"},"version":{"type":"string","default":"0.1.4","title":"Version"}},"required":["topics"],"title":"Result"},"topic-assistant-embeddings-Topic":{"type":"object","properties":{"weight":{"type":"number","title":"Weight"},"uri":{"type":"string","title":"Uri"},"label":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Label"},"match":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Match"}},"required":["uri","weight"],"title":"Topic"},"topic-assistant-embeddings-ValidationError":{"type":"object","properties":{"loc":{"type":"array","items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"required":["loc","msg","type"],"title":"ValidationError"}},"securitySchemes":{"basicAuth":{"type":"http","scheme":"basic"},"X-API-KEY":{"type":"apiKey","name":"X-API-KEY","in":"header"},"bearerAuth":{"type":"http","in":"header","scheme":"bearer"}}}}
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apply Default Global SecurityScheme in springdoc-openapi",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://b-api.staging.openeduhub.net",
+      "description": "Generated server url"
+    }
+  ],
+  "security": [
+    {
+      "X-API-KEY": []
+    },
+    {
+      "basicAuth": []
+    }
+  ],
+  "paths": {
+    "/api/v1/llm/{provider}/images/generations": {
+      "post": {
+        "tags": [
+          "Large Language Models"
+        ],
+        "summary": " \n            Given a prompt and/or an input image, the model will generate a new image.\n            Results can be cached to reduce costs for the same request on the provider side.\n            (only results with b64_json response format can be cached)\n        ",
+        "operationId": "imageGeneration",
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "description": "e.g. openai, academiccloud",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request and retrieve results from the given provider",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request and retrieve new results from the given provider",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateImageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway Timeout",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImageResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/llm/{provider}/embeddings": {
+      "post": {
+        "tags": [
+          "Large Language Models"
+        ],
+        "summary": " \n            Get a vector representation of a given input that can be easily consumed by machine learning models and algorithms. \n            Results can be cached to reduce costs for the same request on the provider side.\n        ",
+        "operationId": "embeddings",
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "description": "e.g. openai, academiccloud",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request and retrieve new results from the given provider",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request and retrieve new results from the given provider",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmbeddingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway Timeout",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmbeddingResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/llm/{provider}/chat/completions": {
+      "post": {
+        "tags": [
+          "Large Language Models"
+        ],
+        "summary": " \n            Creates a model response for the given chat conversation. \n            Results can be cached to reduce costs for the same request on the provider side\n        ",
+        "operationId": "chatCompletion",
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "description": "e.g. openai, academiccloud",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request and retrieve new results from the given provider",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request and retrieve new results from the given provider",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatCompletionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway Timeout",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatCompletionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/edu-sharing/images/generations": {
+      "post": {
+        "tags": [
+          "edu-sharing LLM"
+        ],
+        "summary": " \n            Generate create image requests based on bapi configuration nodes. \n            Template substitution allows prompts to be enriched with node, user, and value space data\n            Mainly used to restrict use of chat completion usage by edu-sharing repository specifications.\n        ",
+        "operationId": "imageGeneration_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EduSharingLlmRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway Timeout",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImageResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/edu-sharing/chat/completion": {
+      "post": {
+        "tags": [
+          "edu-sharing LLM"
+        ],
+        "summary": " \n            Generate chat completions requests based on bapi configuration nodes. \n            Template substitution allows prompts to be enriched with node, user, and value space data\n            Mainly used to restrict use of chat completion usage by edu-sharing repository specifications.\n        ",
+        "operationId": "chatCompletions",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EduSharingLlmRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway Timeout",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatCompletionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/llm/{provider}/models": {
+      "get": {
+        "tags": [
+          "Large Language Models"
+        ],
+        "summary": " \n            List and describe the various models available for the provider\n        ",
+        "operationId": "listModels",
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "description": "e.g. openai, academiccloud",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway Timeout",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Model"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/llm/provider": {
+      "get": {
+        "tags": [
+          "Large Language Models"
+        ],
+        "summary": " \n           List and describe the various provider available in the API\n        ",
+        "operationId": "listProviders",
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway Timeout",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProviderInfoData"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/topic-tree/generate-topic-tree": {
+      "post": {
+        "tags": [
+          "Themenbaum API"
+        ],
+        "summary": "Generiere einen Themenbaum",
+        "description": "Generiert einen strukturierten Themenbaum basierend auf den übergebenen Parametern.\n\n    Der Themenbaum wird in folgender Hierarchie erstellt:\n    1. Hauptthemen (z.B. \"Mechanik\", \"Thermodynamik\")\n    2. Unterthemen (z.B. \"Kinematik\", \"Dynamik\")\n    3. Lehrplanthemen (z.B. \"Gleichförmige Bewegung\", \"Newtonsche Gesetze\")\n\n    Jeder Knoten im Themenbaum enthält:\n    - Titel und Kurztitel\n    - Beschreibung\n    - Schlagworte (Keywords)\n    - Standardisierte Metadaten (Properties)\n\n    Optional können URIs für Fach und Bildungsstufe übergeben werden (z.B. `\"discipline_uri\"` und `\"educational_context_uri\"`).",
+        "operationId": "generate_topic_tree_generate_topic_tree_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TopicTreeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Erfolgreich generierter Themenbaum",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Response Generate Topic Tree Generate Topic Tree Post"
+                },
+                "example": {
+                  "metadata": {
+                    "title": "Physik in Anlehnung an die Lehrpläne der Sekundarstufe 2",
+                    "description": "Themenbaum für Physik in der Sekundarstufe II",
+                    "created_at": "2025-02-05T11:28:40+01:00",
+                    "version": "1.0",
+                    "author": "Themenbaum Generator"
+                  },
+                  "collection": [
+                    {
+                      "title": "Allgemeines",
+                      "shorttitle": "Allg",
+                      "properties": {
+                        "cclom:general_keyword": [
+                          "allgemein",
+                          "grundlagen"
+                        ],
+                        "ccm:collectionshorttitle": [
+                          "Allg"
+                        ],
+                        "ccm:educationalcontext": [],
+                        "ccm:educationalintendedenduserrole": [
+                          "http://w3id.org/openeduhub/vocabs/intendedEndUserRole/teacher"
+                        ],
+                        "ccm:taxonid": [],
+                        "cm:description": [
+                          "Einführung in ..."
+                        ],
+                        "cm:title": [
+                          "Allgemeines"
+                        ]
+                      },
+                      "subcollections": []
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interner Serverfehler",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "OpenAI API Key nicht gefunden"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/kidra/text-statistics": {
+      "post": {
+        "tags": [
+          "Kidra"
+        ],
+        "summary": "Compute text statistics on the given text",
+        "description": "Note: Only German language is supported right now.\n    \n    Parameters\n    ----------\n    text : str\n        The text to be analyzed.\n    reading_speed : float, optional\n        The reading speed in characters per minute to use as a base-line.\n        Default: 200\n    generate_embeddings : bool, optional\n        Whether to also generate a vectorized representation of the text using\n        word embeddings.\n        \n    \n    Returns\n    -------\n    flesch_ease : float or null\n        The readability score of the text,\n        according to the Flesch reading ease.\n        null if undefined (i.e. text is empty).\n    flesch_classification : str or null\n        Interpretation of the Flesch readability score,\n        from 'Sehr leicht' to 'Sehr schwer'.\n        null if undefined (i.e. text is empty).\n    wiener_index : float or null\n        The appropriate school grade of the text, based on its readability,\n        according to the Wiener index.\n        null if undefined (i.e. text is empty).\n    reading_time : float or null\n        The predicted time to read the text, in seconds.\n        This is adjusted for the readability of the text,\n        according to the following formula:\n        reading_speed / 2 * exp(log(4) * flesch_ease / 121.5).\n        Thus, reading speed is doubled at the maximum readability\n        (121.5) and halved at readability 0.\n        null if undefined (i.e. text is empty).\n    embeddings : list[float] or null\n        If ``generate_embeddings`` was set to `True`, this will be the\n        vectorized representation of the text. Otherwise, `null`.\n    version : str\n        The version of the text statistics service.",
+        "operationId": "text_stats_analyze_text_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/text-statistics-InputData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/text-statistics-Result"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/text-statistics-HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/kidra/topic-statistics": {
+      "post": {
+        "tags": [
+          "Kidra"
+        ],
+        "summary": "Counts",
+        "operationId": "counts_counts_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/topic-statistics-Input_Stats"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/topic-statistics-Output_Stats"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/topic-statistics-HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/kidra/update-data": {
+      "post": {
+        "tags": [
+          "Kidra"
+        ],
+        "summary": "Update Data",
+        "operationId": "update_data_update_data_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/update-data-Input_Update"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/update-data-HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/kidra/text-extraction": {
+      "post": {
+        "tags": [
+          "Kidra"
+        ],
+        "summary": "Extract text from a given URL",
+        "description": "Extract text from a given URL\n\n    Parameters\n    ---------\n    url : str\n        The URL from which to extract text.\n    lang : str, optional\n        The ISO 639-1 code for the language of the text.\n        If set to 'auto', try to detect it instead.\n        Default: 'auto'.\n    preference : str, optional\n        Whether to prioritize precision, recall, or neither\n        when extracting the text.\n        Default: 'none'\n    method : \"simple\" or \"browser\"\n        Whether to get the content of the website naively, or to use a headless\n        browser in order to e.g. deal with JavaScript-heavy pages.\n\n    Returns\n    -------\n    text : str\n        The extracted text.\n    lang : str\n        If lang was set to 'auto', the detected language.\n        Otherwise, whatever lang was set to.\n    version : str\n        The version of the text extractor.",
+        "operationId": "from_url_from_url_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/text-extraction-Data"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/text-extraction-Result"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/text-extraction-HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/kidra/bayesian-predictions": {
+      "post": {
+        "tags": [
+          "Kidra"
+        ],
+        "summary": "Predict the metadata fitting the given text.",
+        "description": "Note that all categories are not filtered out. Instead, they\n                are sorted by their mean predicted probability of being\n                relevant to the text.\n                \n                Parameters\n                ----------\n                text : str\n                    The text to be analyzed.\n                num_samples : int\n                    The number of samples to use in order to estimate the fit\n                    of each discipline. Higher numbers will result in less\n                    variance between calls, but take more time.\n                num_predictions : int\n                    The number of predicted disciplines (sorted by relevance)\n                    to return. This does not affect performance; it simply\n                    serves as an initial filtering tool.\n                interval_size : float (0, 1]\n                    The size of the credibility interval for the probability\n                    that a discipline is assigned to the given text.\n                    E.g. at 0.8, there is a probability of 80% that the\n                    predicted probability of the discipline belonging to the\n                    text is within the returned interval.\n\n                Returns\n                -------\n                predictions : dict[str, list[Prediction]]\n                    Map from predicted metadatum to predictions for this\n                    metadatum.\n                version : str\n                    The version of the prediction tool.\n\n                Prediction\n                ----------\n                id : str\n                    The URI of the category.\n                name : str\n                    The label of the category.\n                mean_prob : float [0, 1]\n                    The mean of the predicted probabilities that this category\n                    belongs to the given text.\n                median_prob : float [0, 1]\n                    The median of the above probabilities.\n                prob_interval : 2-tuple of floats in [0, 1]\n                    The credibility interval of the predicted probabilities\n                    above.",
+        "operationId": "predict_predict_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/bayesian-predictions-Prediction_Data"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bayesian-predictions-Prediction_Result"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bayesian-predictions-HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/kidra/disciplines": {
+      "post": {
+        "tags": [
+          "Kidra"
+        ],
+        "summary": "Predict the OpenEduHub disciplines of the given text",
+        "description": "Predict the OpenEduHub disciplines of the given text\n\n        Parameters\n        ----------\n        text : str\n            The text to be analyzed.\n\n        Returns\n        -------\n        disciplines : list of Discipline\n            The predicted disciplines of the text.\n            This contains the id of the discipline,\n            and a score from 0 to 1.\n        version : str\n            The version of the discipline predictor.",
+        "operationId": "predict_subjects_kidra_predict_subjects_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/disciplines-Data"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/disciplines-Result"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/disciplines-HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/kidra/topic-assistant-keywords": {
+      "post": {
+        "tags": [
+          "Kidra"
+        ],
+        "summary": "Predict topics from the OpenEduHub topic tree, using keywords",
+        "description": "Predict topics from the OpenEduHub topic tree, using keywords\n\n        Parameters\n        ----------\n        text : str\n            The text to be analyzed.\n\n        Returns\n        -------\n        topics : list of Topic\n            The predicted topics from the topic tree.\n            Contains the following attributes:\n        \n            weight : int\n                The number of matches in the sub tree.\n            uri : str\n                The URI of the topic.\n            label : str, optional\n                The label of the topic.\n            match : str, optional\n                The keyword in the text that was associated with the topic.\n                If there are multiple, comma separated.\n        version : str\n            The version of the topic prediction tool.",
+        "operationId": "topics_flat_topics_flat_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/topic-assistant-keywords-Data"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/topic-assistant-keywords-Result"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/topic-assistant-keywords-HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/kidra/topic-assistant-embeddings": {
+      "post": {
+        "tags": [
+          "Kidra"
+        ],
+        "summary": "Predict topics from the OpenEduHub topic tree, using text embeddings",
+        "description": "Predict topics from the OpenEduHub topic tree, using text embeddings\n\n        Parameters\n        ----------\n        text : str\n            The text to be analyzed.\n\n        Returns\n        -------\n        topics : list of Topic\n            The predicted topics from the topic tree.\n            Contains the following attributes:\n        \n            weight : int\n                The weight attributed to the sub tree.\n            uri : str\n                The URI of the topic.\n            label : str, optional\n                The label of the topic.\n            match : null\n                Irrelevant for this function.\n        version : str\n            The version of the topic prediction tool.",
+        "operationId": "topics2_flat_topics2_flat_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/topic-assistant-embeddings-Data"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/topic-assistant-embeddings-Result"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/topic-assistant-embeddings-HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/kidra/link-wikipedia": {
+      "post": {
+        "tags": [
+          "Kidra"
+        ],
+        "summary": "Collect relevant Wikipedia articles for the given text",
+        "description": "Collect relevant Wikipedia articles for the given text\n\n        Parameters\n        ----------\n        text : str\n            The text to be analyzed.\n\n        Returns\n        -------\n        text : str\n            A modified version of the given text,\n            where matched phrases are replaced with hyperlinks to their\n            corresponding Wikipedia entry.\n        entities : list of Entity\n            All Wikipedia entries that were matched for the given text.\n            Contains the following attributes:\n\n            entity : str\n                The name of the entry.\n            start : int\n                The start position of the phrase that was matched to this entity.\n            end : int\n                The end position of the phrase that was matched to this entity.\n            score : float\n                The score (from 0 to 1) of the match.\n            categories : list of str\n                The German Wikipedia categories associated with this entity.\n        essentialCategories : list of str\n            A list of German Wikipedia categories that are shared between\n            multiple associated entities.\n        version : str\n            The version of the Wikipedia linking service.\n            Currently a placeholder.",
+        "operationId": "fun_link_wikipedia_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Data"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateImageRequest": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "n": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "quality": {
+            "type": "string"
+          },
+          "size": {
+            "type": "string"
+          },
+          "style": {
+            "type": "string"
+          },
+          "user": {
+            "type": "string"
+          },
+          "response_format": {
+            "type": "string"
+          }
+        }
+      },
+      "Image": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "b64_json": {
+            "type": "string"
+          },
+          "revised_prompt": {
+            "type": "string"
+          }
+        }
+      },
+      "ImageResult": {
+        "type": "object",
+        "properties": {
+          "created": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Image"
+            }
+          }
+        }
+      },
+      "EmbeddingRequest": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string"
+          },
+          "input": {
+            "type": "object"
+          },
+          "dimensions": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "user": {
+            "type": "string"
+          },
+          "encoding_format": {
+            "type": "string"
+          }
+        }
+      },
+      "Embedding": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string"
+          },
+          "embedding": {
+            "type": "object"
+          },
+          "index": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "EmbeddingResult": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string"
+          },
+          "object": {
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Embedding"
+            }
+          },
+          "usage": {
+            "$ref": "#/components/schemas/Usage"
+          }
+        }
+      },
+      "Usage": {
+        "type": "object",
+        "properties": {
+          "prompt_tokens": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "completion_tokens": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total_tokens": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AssistantMessage": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ChatMessage"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "content": {
+                "type": "string"
+              },
+              "refusal": {
+                "type": "string"
+              },
+              "audio": {
+                "$ref": "#/components/schemas/AssistantMessageAudio"
+              },
+              "tool_calls": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ChatToolCall"
+                }
+              },
+              "function_call": {
+                "$ref": "#/components/schemas/ChatFunctionCall",
+                "deprecated": true
+              }
+            }
+          }
+        ]
+      },
+      "AssistantMessageAudio": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "transcript": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string"
+          },
+          "expires_at": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "Audio": {
+        "type": "object",
+        "properties": {
+          "voice": {
+            "type": "string"
+          },
+          "format": {
+            "type": "string"
+          }
+        }
+      },
+      "ChatCompletionRequest": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/AssistantMessage"
+                },
+                {
+                  "$ref": "#/components/schemas/FunctionMessage"
+                },
+                {
+                  "$ref": "#/components/schemas/SystemMessage"
+                },
+                {
+                  "$ref": "#/components/schemas/ToolMessage"
+                },
+                {
+                  "$ref": "#/components/schemas/UserMessage"
+                }
+              ]
+            }
+          },
+          "temperature": {
+            "type": "number",
+            "format": "double"
+          },
+          "n": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "stream": {
+            "type": "boolean"
+          },
+          "stop": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "user": {
+            "type": "string"
+          },
+          "functions": {
+            "type": "array",
+            "deprecated": true,
+            "items": {
+              "type": "object",
+              "deprecated": true
+            }
+          },
+          "seed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "logprobs": {
+            "type": "boolean"
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatTool"
+            }
+          },
+          "modalities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "audio": {
+            "$ref": "#/components/schemas/Audio"
+          },
+          "response_format": {
+            "$ref": "#/components/schemas/ChatResponseFormat"
+          },
+          "top_p": {
+            "type": "number",
+            "format": "double"
+          },
+          "stream_options": {
+            "$ref": "#/components/schemas/StreamOption"
+          },
+          "max_tokens": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "presence_penalty": {
+            "type": "number",
+            "format": "double"
+          },
+          "frequency_penalty": {
+            "type": "number",
+            "format": "double"
+          },
+          "logit_bias": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "function_call": {
+            "$ref": "#/components/schemas/ChatCompletionRequestFunctionCall",
+            "deprecated": true
+          },
+          "top_logprobs": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tool_choice": {
+            "$ref": "#/components/schemas/ToolChoice"
+          },
+          "parallel_tool_calls": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ChatCompletionRequestFunctionCall": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "ChatFunctionCall": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "arguments": {
+            "$ref": "#/components/schemas/JsonNode"
+          }
+        }
+      },
+      "ChatMessage": {
+        "type": "object",
+        "discriminator": {
+          "propertyName": "role"
+        },
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "textContent": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "ChatResponseFormat": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "jsonSchema": {
+            "$ref": "#/components/schemas/ResponseJsonSchema"
+          }
+        }
+      },
+      "ChatTool": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "function": {
+            "type": "object"
+          }
+        }
+      },
+      "ChatToolCall": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "format": "int32",
+            "writeOnly": true
+          },
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "function": {
+            "$ref": "#/components/schemas/ChatFunctionCall"
+          }
+        }
+      },
+      "Function": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "FunctionMessage": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ChatMessage"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "content": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "JsonNode": {
+        "type": "object"
+      },
+      "ResponseJsonSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "strict": {
+            "type": "boolean"
+          },
+          "schema": {
+            "type": "object"
+          }
+        }
+      },
+      "StreamOption": {
+        "type": "object",
+        "properties": {
+          "include_usage": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SystemMessage": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ChatMessage"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "content": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "ToolChoice": {
+        "type": "object",
+        "properties": {
+          "function": {
+            "$ref": "#/components/schemas/Function"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "ToolMessage": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ChatMessage"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "content": {
+                "type": "string"
+              },
+              "tool_call_id": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "UserMessage": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ChatMessage"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "content": {
+                "type": "object"
+              }
+            }
+          }
+        ]
+      },
+      "ChatCompletionChoice": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "$ref": "#/components/schemas/AssistantMessage"
+          },
+          "logprobs": {
+            "$ref": "#/components/schemas/Logprobs"
+          },
+          "finish_reason": {
+            "type": "string"
+          }
+        }
+      },
+      "ChatCompletionResult": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "object": {
+            "type": "string"
+          },
+          "created": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "model": {
+            "type": "string"
+          },
+          "choices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatCompletionChoice"
+            }
+          },
+          "usage": {
+            "$ref": "#/components/schemas/Usage"
+          },
+          "system_fingerprint": {
+            "type": "string"
+          }
+        }
+      },
+      "Logprobs": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LogprobsContent"
+            }
+          }
+        }
+      },
+      "LogprobsContent": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "logprob": {
+            "type": "number"
+          },
+          "bytes": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "top_logprobs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TopLogprobs"
+            }
+          }
+        }
+      },
+      "TopLogprobs": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "logprob": {
+            "type": "number"
+          },
+          "bytes": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        }
+      },
+      "EduSharingLlmRequest": {
+        "type": "object",
+        "description": "Request object for LLM chat completion, containing the necessary configuration for generating chat responses.",
+        "properties": {
+          "configNodeIds": {
+            "type": "array",
+            "description": "\n        A list of config nodesId those objects are storing the LLM request configuration or parts of it in the ccm:bapi_config property. \n        Note: Within the list, each subsequent element takes precedence over the previous one.\n        Schema of bapi_config: \n        {\n            \"provider\": \"provider name\", -> Required, provider of the chat completions model e.g. openai \n            \"useCaching\": \"true/false\", -> Optional, should the result be cached in the Database, default: false \n            \"metadataSet\": \"used metadata set for variables\", -> Optional, default: mds \n            \"chatCompletion\": { ... } -> required only for chat completion requests, see ChatCompletionRequest schema\n            \"createImage\": { ... } -> required only for create image requests, see CreateImageRequest schema\n        }\n        ",
+            "items": {
+              "type": "string"
+            }
+          },
+          "user": {
+            "type": "string",
+            "description": "\n            The user account to be used  for prompt substitution. \n            Template: {{user.<profilePropertyName>}} \n            e.g. {{user.firstName}}\n        "
+          },
+          "contextNodeId": {
+            "type": "string",
+            "description": "\n            The context Node Id to be used for prompt substitution.\n            Template: {{node.<propertyNameInShortFormat>}}\n            e.g. {{node.cclom:general_description}}\n        "
+          },
+          "variables": {
+            "type": "array",
+            "description": "\n            A list of widgetId and valueId pairs to be used for prompt substitution.\n            The caption of the value space item is inserted into the prompt.\n            Template: {{var.<widgetId>}} \n            e.g. {{var.ccm:taxonid}}\n        ",
+            "items": {
+              "$ref": "#/components/schemas/Variable"
+            }
+          }
+        },
+        "required": [
+          "configNodeIds",
+          "contextNodeId",
+          "user",
+          "variables"
+        ]
+      },
+      "Variable": {
+        "type": "object",
+        "properties": {
+          "widgetId": {
+            "type": "string"
+          },
+          "valueId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "valueId",
+          "widgetId"
+        ]
+      },
+      "Model": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "object": {
+            "type": "string"
+          },
+          "permission": {
+            "type": "array",
+            "deprecated": true,
+            "items": {
+              "$ref": "#/components/schemas/Permission"
+            }
+          },
+          "root": {
+            "type": "string"
+          },
+          "parent": {
+            "type": "string"
+          },
+          "owned_by": {
+            "type": "string"
+          }
+        }
+      },
+      "Permission": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "object": {
+            "type": "string"
+          },
+          "created": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "organization": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "allow_create_engine": {
+            "type": "boolean"
+          },
+          "allow_sampling": {
+            "type": "boolean"
+          },
+          "allow_log_probs": {
+            "type": "boolean"
+          },
+          "allow_search_indices": {
+            "type": "boolean"
+          },
+          "allow_view": {
+            "type": "boolean"
+          },
+          "allow_fine_tuning": {
+            "type": "boolean"
+          },
+          "is_blocking": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ProviderInfoData": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "link": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "provider"
+        ]
+      },
+      "HTTPValidationError": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail"
+          }
+        },
+        "title": "HTTPValidationError"
+      },
+      "Ping": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "default": "not ok",
+            "description": "Ping response of the server. Should be 'ok' in happy-case.",
+            "examples": [
+              "not ok",
+              "ok"
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "Ping"
+      },
+      "TopicTreeRequest": {
+        "type": "object",
+        "description": "Request-Modell für die Generierung eines Themenbaums.\nHierüber kommen Parameter wie Thema, Anzahl an Hauptthemen,\nAnzahl an Unterthemen und Anzahl an Lehrplanthemen.\n\n'discipline_uri' und 'educational_context_uri' sind optional.\nFalls sie mitgegeben werden, landen sie als URIs in den Metadaten.",
+        "example": {
+          "discipline_uri": "http://w3id.org/openeduhub/vocabs/discipline/460",
+          "educational_context_uri": "http://w3id.org/openeduhub/vocabs/educationalContext/sekundarstufe_2",
+          "include_general_topic": true,
+          "include_methodology_topic": true,
+          "model": "gpt-4o-mini",
+          "num_curriculum_topics": 2,
+          "num_main_topics": 5,
+          "num_subtopics": 3,
+          "theme": "Physik in Anlehnung an die Lehrpläne der Sekundarstufe 2"
+        },
+        "properties": {
+          "theme": {
+            "type": "string",
+            "description": "Das Hauptthema des Themenbaums",
+            "examples": [
+              "Physik in Anlehnung an die Lehrpläne der Sekundarstufe 2"
+            ],
+            "title": "Theme"
+          },
+          "num_main_topics": {
+            "type": "integer",
+            "default": 5,
+            "description": "Anzahl der zu generierenden Hauptthemen",
+            "examples": [
+              5
+            ],
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Num Main Topics"
+          },
+          "num_subtopics": {
+            "type": "integer",
+            "default": 3,
+            "description": "Anzahl der Unterthemen pro Hauptthema",
+            "examples": [
+              3
+            ],
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Num Subtopics"
+          },
+          "num_curriculum_topics": {
+            "type": "integer",
+            "default": 2,
+            "description": "Anzahl der Lehrplanthemen pro Unterthema",
+            "examples": [
+              2
+            ],
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Num Curriculum Topics"
+          },
+          "include_general_topic": {
+            "type": "boolean",
+            "default": false,
+            "description": "Wenn True, wird 'Allgemeines' als erstes Hauptthema eingefügt",
+            "examples": [
+              true,
+              false
+            ],
+            "title": "Include General Topic"
+          },
+          "include_methodology_topic": {
+            "type": "boolean",
+            "default": false,
+            "description": "Wenn True, wird 'Methodik und Didaktik' als letztes Hauptthema eingefügt",
+            "examples": [
+              true,
+              false
+            ],
+            "title": "Include Methodology Topic"
+          },
+          "discipline_uri": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optionale URI für den Fachbereich. Wenn leer, bleibt es in den Metadaten leer.",
+            "examples": [
+              "http://w3id.org/openeduhub/vocabs/discipline/460"
+            ],
+            "title": "Discipline Uri"
+          },
+          "educational_context_uri": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optionale URI für die Bildungsstufe. Wenn leer, bleibt es leer.",
+            "examples": [
+              "http://w3id.org/openeduhub/vocabs/educationalContext/sekundarstufe_2"
+            ],
+            "title": "Educational Context Uri"
+          },
+          "model": {
+            "type": "string",
+            "default": "gpt-4o-mini",
+            "description": "Das zu verwendende OpenAI-Sprachmodell",
+            "examples": [
+              "gpt-4o-mini"
+            ],
+            "title": "Model"
+          }
+        },
+        "required": [
+          "theme"
+        ],
+        "title": "TopicTreeRequest"
+      },
+      "ValidationError": {
+        "type": "object",
+        "properties": {
+          "loc": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "Data": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "Data"
+      },
+      "Entity": {
+        "type": "object",
+        "properties": {
+          "entity": {
+            "type": "string",
+            "title": "Entity"
+          },
+          "start": {
+            "type": "integer",
+            "title": "Start"
+          },
+          "end": {
+            "type": "integer",
+            "title": "End"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Categories"
+          }
+        },
+        "required": [
+          "categories",
+          "end",
+          "entity",
+          "score",
+          "start"
+        ],
+        "title": "Entity"
+      },
+      "Result": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Entity"
+            },
+            "title": "Entities"
+          },
+          "essentialCategories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Essentialcategories"
+          },
+          "version": {
+            "type": "string",
+            "default": "0.1.0",
+            "title": "Version"
+          }
+        },
+        "required": [
+          "entities",
+          "essentialCategories",
+          "text"
+        ],
+        "title": "Result"
+      },
+      "text-statistics-HTTPValidationError": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/text-statistics-ValidationError"
+            },
+            "title": "Detail"
+          }
+        },
+        "title": "HTTPValidationError"
+      },
+      "text-statistics-InputData": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Text"
+          },
+          "reading_speed": {
+            "type": "number",
+            "default": 200.0,
+            "minimum": 1.0,
+            "title": "Reading Speed"
+          },
+          "generate_embeddings": {
+            "type": "boolean",
+            "default": false,
+            "title": "Generate Embeddings"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "InputData"
+      },
+      "text-statistics-Result": {
+        "type": "object",
+        "properties": {
+          "flesch_ease": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flesch Ease"
+          },
+          "classification": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Sehr leicht",
+                  "Leicht",
+                  "Mittelleicht",
+                  "Mittel",
+                  "Mittelschwer",
+                  "Schwer",
+                  "Sehr schwer"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Classification"
+          },
+          "wiener_index": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wiener Index"
+          },
+          "reading_time": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reading Time"
+          },
+          "embeddings": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "maxItems": 300,
+                "minItems": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Embeddings"
+          },
+          "version": {
+            "type": "string",
+            "default": "1.1.0",
+            "title": "Version"
+          }
+        },
+        "required": [
+          "classification",
+          "embeddings",
+          "flesch_ease",
+          "reading_time",
+          "wiener_index"
+        ],
+        "title": "Result"
+      },
+      "text-statistics-ValidationError": {
+        "type": "object",
+        "properties": {
+          "loc": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "topic-statistics-Category_Count": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "editorially_confirmed": {
+            "type": "integer",
+            "title": "Editorially Confirmed"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          }
+        },
+        "required": [
+          "category",
+          "editorially_confirmed",
+          "total"
+        ],
+        "title": "Category_Count"
+      },
+      "topic-statistics-Count": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "editorially_confirmed": {
+            "type": "integer",
+            "title": "Editorially Confirmed"
+          }
+        },
+        "required": [
+          "editorially_confirmed",
+          "total"
+        ],
+        "title": "Count"
+      },
+      "topic-statistics-Field_Counts": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "title": "Field"
+          },
+          "counts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/topic-statistics-Category_Count"
+            },
+            "title": "Counts"
+          }
+        },
+        "required": [
+          "counts",
+          "field"
+        ],
+        "title": "Field_Counts"
+      },
+      "topic-statistics-Fields": {
+        "type": "string",
+        "description": "A selection of commonly used metadata fields.",
+        "enum": [
+          "properties.ccm:educationaltypicalagerange",
+          "properties.ccm:oeh_course_coursemode",
+          "collections.properties.cclom:location",
+          "collections.properties.cm:title",
+          "collections.properties.sys:node-uuid",
+          "properties.ccm:competence",
+          "properties.cclom:general_description",
+          "properties.cclom:duration",
+          "properties.ccm:educationalcontext",
+          "properties.ccm:fskRating",
+          "nodeRef.id",
+          "properties.ccm:educationalintendedenduserrole",
+          "properties.cclom:classification_keyword",
+          "properties.cclom:general_keyword",
+          "properties.cclom:general_language",
+          "properties.ccm:oeh_lrt",
+          "properties.ccm:taxonid",
+          "properties.ccm:oeh_taxonid_university",
+          "properties.ccm:oeh_ai_test_data",
+          "properties.cclom:title",
+          "properties.ccm:curriculum",
+          "properties.ccm:wwwurl"
+        ],
+        "title": "Fields"
+      },
+      "topic-statistics-HTTPValidationError": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/topic-statistics-ValidationError"
+            },
+            "title": "Detail"
+          }
+        },
+        "title": "HTTPValidationError"
+      },
+      "topic-statistics-Input_Stats": {
+        "type": "object",
+        "properties": {
+          "topic_uri": {
+            "type": "string",
+            "title": "Topic Uri"
+          },
+          "topic_url": {
+            "type": "string",
+            "title": "Topic Url"
+          },
+          "group_by_fields": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/topic-statistics-Fields"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              [
+                "properties.ccm:taxonid"
+              ]
+            ],
+            "title": "Group By Fields"
+          }
+        },
+        "required": [
+          "topic_uri",
+          "topic_url"
+        ],
+        "title": "Input_Stats"
+      },
+      "topic-statistics-Input_Update": {
+        "type": "object",
+        "properties": {
+          "skip_if_exists": {
+            "type": "boolean",
+            "default": true,
+            "title": "Skip If Exists"
+          }
+        },
+        "title": "Input_Update"
+      },
+      "topic-statistics-Output_Stats": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "$ref": "#/components/schemas/topic-statistics-Count"
+          },
+          "by_fields": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/topic-statistics-Field_Counts"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "By Fields"
+          }
+        },
+        "required": [
+          "total"
+        ],
+        "title": "Output_Stats"
+      },
+      "topic-statistics-ValidationError": {
+        "type": "object",
+        "properties": {
+          "loc": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "update-data-Category_Count": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "editorially_confirmed": {
+            "type": "integer",
+            "title": "Editorially Confirmed"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          }
+        },
+        "required": [
+          "category",
+          "editorially_confirmed",
+          "total"
+        ],
+        "title": "Category_Count"
+      },
+      "update-data-Count": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "editorially_confirmed": {
+            "type": "integer",
+            "title": "Editorially Confirmed"
+          }
+        },
+        "required": [
+          "editorially_confirmed",
+          "total"
+        ],
+        "title": "Count"
+      },
+      "update-data-Field_Counts": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "title": "Field"
+          },
+          "counts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/update-data-Category_Count"
+            },
+            "title": "Counts"
+          }
+        },
+        "required": [
+          "counts",
+          "field"
+        ],
+        "title": "Field_Counts"
+      },
+      "update-data-Fields": {
+        "type": "string",
+        "description": "A selection of commonly used metadata fields.",
+        "enum": [
+          "properties.ccm:educationaltypicalagerange",
+          "properties.ccm:oeh_course_coursemode",
+          "collections.properties.cclom:location",
+          "collections.properties.cm:title",
+          "collections.properties.sys:node-uuid",
+          "properties.ccm:competence",
+          "properties.cclom:general_description",
+          "properties.cclom:duration",
+          "properties.ccm:educationalcontext",
+          "properties.ccm:fskRating",
+          "nodeRef.id",
+          "properties.ccm:educationalintendedenduserrole",
+          "properties.cclom:classification_keyword",
+          "properties.cclom:general_keyword",
+          "properties.cclom:general_language",
+          "properties.ccm:oeh_lrt",
+          "properties.ccm:taxonid",
+          "properties.ccm:oeh_taxonid_university",
+          "properties.ccm:oeh_ai_test_data",
+          "properties.cclom:title",
+          "properties.ccm:curriculum",
+          "properties.ccm:wwwurl"
+        ],
+        "title": "Fields"
+      },
+      "update-data-HTTPValidationError": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/update-data-ValidationError"
+            },
+            "title": "Detail"
+          }
+        },
+        "title": "HTTPValidationError"
+      },
+      "update-data-Input_Stats": {
+        "type": "object",
+        "properties": {
+          "topic_uri": {
+            "type": "string",
+            "title": "Topic Uri"
+          },
+          "topic_url": {
+            "type": "string",
+            "title": "Topic Url"
+          },
+          "group_by_fields": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/update-data-Fields"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              [
+                "properties.ccm:taxonid"
+              ]
+            ],
+            "title": "Group By Fields"
+          }
+        },
+        "required": [
+          "topic_uri",
+          "topic_url"
+        ],
+        "title": "Input_Stats"
+      },
+      "update-data-Input_Update": {
+        "type": "object",
+        "properties": {
+          "skip_if_exists": {
+            "type": "boolean",
+            "default": true,
+            "title": "Skip If Exists"
+          }
+        },
+        "title": "Input_Update"
+      },
+      "update-data-Output_Stats": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "$ref": "#/components/schemas/update-data-Count"
+          },
+          "by_fields": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/update-data-Field_Counts"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "By Fields"
+          }
+        },
+        "required": [
+          "total"
+        ],
+        "title": "Output_Stats"
+      },
+      "update-data-ValidationError": {
+        "type": "object",
+        "properties": {
+          "loc": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "text-extraction-Data": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "method": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/text-extraction-Methods"
+              }
+            ],
+            "default": "simple"
+          },
+          "browser_location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              null
+            ],
+            "title": "Browser Location"
+          },
+          "lang": {
+            "type": "string",
+            "default": "auto",
+            "title": "Lang"
+          },
+          "preference": {
+            "type": "string",
+            "default": "none",
+            "enum": [
+              "none",
+              "recall",
+              "precision"
+            ],
+            "title": "Preference"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "Data"
+      },
+      "text-extraction-HTTPValidationError": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/text-extraction-ValidationError"
+            },
+            "title": "Detail"
+          }
+        },
+        "title": "HTTPValidationError"
+      },
+      "text-extraction-Methods": {
+        "type": "string",
+        "enum": [
+          "simple",
+          "browser"
+        ],
+        "title": "Methods"
+      },
+      "text-extraction-Result": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "lang": {
+            "type": "string",
+            "title": "Lang"
+          },
+          "version": {
+            "type": "string",
+            "default": "0.2.0",
+            "title": "Version"
+          }
+        },
+        "required": [
+          "lang",
+          "text"
+        ],
+        "title": "Result"
+      },
+      "text-extraction-ValidationError": {
+        "type": "object",
+        "properties": {
+          "loc": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "bayesian-predictions-HTTPValidationError": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/bayesian-predictions-ValidationError"
+            },
+            "title": "Detail"
+          }
+        },
+        "title": "HTTPValidationError"
+      },
+      "bayesian-predictions-Prediction_Data": {
+        "type": "object",
+        "description": "Input to be used for prediction.",
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "num_samples": {
+            "type": "integer",
+            "default": 500,
+            "exclusiveMinimum": 1.0,
+            "maximum": 100000.0,
+            "title": "Num Samples"
+          },
+          "num_predictions": {
+            "type": "integer",
+            "default": 10,
+            "exclusiveMinimum": 0.0,
+            "title": "Num Predictions"
+          },
+          "interval_size": {
+            "type": "number",
+            "default": 0.8,
+            "exclusiveMaximum": 1.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Interval Size"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "Prediction_Data"
+      },
+      "bayesian-predictions-Prediction_Result": {
+        "type": "object",
+        "description": "The output of the prediction.",
+        "properties": {
+          "predictions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/bayesian-predictions-Prediction_Score"
+              }
+            },
+            "title": "Predictions"
+          },
+          "version": {
+            "type": "string",
+            "default": "0.2.4",
+            "title": "Version"
+          }
+        },
+        "required": [
+          "predictions"
+        ],
+        "title": "Prediction_Result"
+      },
+      "bayesian-predictions-Prediction_Score": {
+        "type": "object",
+        "description": "An individual prediction for a particular target.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "mean_prob": {
+            "type": "number",
+            "title": "Mean Prob"
+          },
+          "median_prob": {
+            "type": "number",
+            "title": "Median Prob"
+          },
+          "baseline_diff": {
+            "type": "number",
+            "title": "Baseline Diff"
+          },
+          "prob_interval": {
+            "type": "array",
+            "examples": [
+              [
+                0.1,
+                0.5
+              ]
+            ],
+            "items": {
+              "type": "number"
+            },
+            "title": "Prob Interval"
+          }
+        },
+        "required": [
+          "baseline_diff",
+          "id",
+          "mean_prob",
+          "median_prob",
+          "name",
+          "prob_interval"
+        ],
+        "title": "Prediction_Score"
+      },
+      "bayesian-predictions-ValidationError": {
+        "type": "object",
+        "properties": {
+          "loc": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "disciplines-Data": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "Data"
+      },
+      "disciplines-Discipline": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          }
+        },
+        "required": [
+          "id",
+          "score"
+        ],
+        "title": "Discipline"
+      },
+      "disciplines-HTTPValidationError": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/disciplines-ValidationError"
+            },
+            "title": "Detail"
+          }
+        },
+        "title": "HTTPValidationError"
+      },
+      "disciplines-Result": {
+        "type": "object",
+        "properties": {
+          "disciplines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/disciplines-Discipline"
+            },
+            "title": "Disciplines"
+          },
+          "version": {
+            "type": "string",
+            "default": "0.1.0",
+            "title": "Version"
+          }
+        },
+        "required": [
+          "disciplines"
+        ],
+        "title": "Result"
+      },
+      "disciplines-ValidationError": {
+        "type": "object",
+        "properties": {
+          "loc": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "topic-assistant-keywords-Data": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "Data"
+      },
+      "topic-assistant-keywords-HTTPValidationError": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/topic-assistant-keywords-ValidationError"
+            },
+            "title": "Detail"
+          }
+        },
+        "title": "HTTPValidationError"
+      },
+      "topic-assistant-keywords-Result": {
+        "type": "object",
+        "properties": {
+          "topics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/topic-assistant-keywords-Topic"
+            },
+            "title": "Topics"
+          },
+          "version": {
+            "type": "string",
+            "default": "0.1.4",
+            "title": "Version"
+          }
+        },
+        "required": [
+          "topics"
+        ],
+        "title": "Result"
+      },
+      "topic-assistant-keywords-Topic": {
+        "type": "object",
+        "properties": {
+          "weight": {
+            "type": "number",
+            "title": "Weight"
+          },
+          "uri": {
+            "type": "string",
+            "title": "Uri"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "match": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match"
+          }
+        },
+        "required": [
+          "uri",
+          "weight"
+        ],
+        "title": "Topic"
+      },
+      "topic-assistant-keywords-ValidationError": {
+        "type": "object",
+        "properties": {
+          "loc": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "topic-assistant-embeddings-Data": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "Data"
+      },
+      "topic-assistant-embeddings-HTTPValidationError": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/topic-assistant-embeddings-ValidationError"
+            },
+            "title": "Detail"
+          }
+        },
+        "title": "HTTPValidationError"
+      },
+      "topic-assistant-embeddings-Result": {
+        "type": "object",
+        "properties": {
+          "topics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/topic-assistant-embeddings-Topic"
+            },
+            "title": "Topics"
+          },
+          "version": {
+            "type": "string",
+            "default": "0.1.4",
+            "title": "Version"
+          }
+        },
+        "required": [
+          "topics"
+        ],
+        "title": "Result"
+      },
+      "topic-assistant-embeddings-Topic": {
+        "type": "object",
+        "properties": {
+          "weight": {
+            "type": "number",
+            "title": "Weight"
+          },
+          "uri": {
+            "type": "string",
+            "title": "Uri"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "match": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match"
+          }
+        },
+        "required": [
+          "uri",
+          "weight"
+        ],
+        "title": "Topic"
+      },
+      "topic-assistant-embeddings-ValidationError": {
+        "type": "object",
+        "properties": {
+          "loc": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      },
+      "X-API-KEY": {
+        "type": "apiKey",
+        "name": "X-API-KEY",
+        "in": "header"
+      },
+      "bearerAuth": {
+        "type": "http",
+        "in": "header",
+        "scheme": "bearer"
+      }
+    }
+  }
+}
