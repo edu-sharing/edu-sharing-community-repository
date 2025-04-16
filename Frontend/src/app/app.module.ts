@@ -44,6 +44,7 @@ import { KeyboardShortcutsService } from './services/keyboard-shortcuts.service'
 import { OptionsHelperService } from './services/options-helper.service';
 import { Toast } from './services/toast';
 import { SharedModule } from './shared/shared.module';
+import { BApiModule } from 'ngx-edu-sharing-b-api';
 
 const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     showDelay: 500,
@@ -62,6 +63,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DragDropModule,
         EduSharingApiModule.forRoot(),
         EduSharingUiModule.forRoot({ production: environment.production }),
+        BApiModule.forRoot({ rootUrl: '/edu-sharing/rest/bapi' }),
         extensionImports,
         HttpClientModule,
         MainModule,

@@ -161,7 +161,9 @@ export class MdsEditorInstanceService implements OnDestroy {
         private showMissingRequiredFunction: (shouldScrollIntoView: boolean) => boolean;
         private readonly ready = new Subject<void>();
         readonly initialValuesSubject = new BehaviorSubject<InitialValues>(null);
-        private suggestionValues: SuggestionResponseDto[];
+        private readonly suggestionValuesSubject = new BehaviorSubject<SuggestionResponseDto[]>(
+            null,
+        );
 
         /**
          * An observable of the values that are common between all nodes if the property was to be
@@ -229,7 +231,10 @@ export class MdsEditorInstanceService implements OnDestroy {
                         return jointProperty?.[0]?.length >= 1;
                     }
                 }),
-                map((result) => result !== condition.negate),
+                map((result) => {
+                    console.log(condition, this.definition.id, result);
+                    return result !== condition.negate;
+                }),
             );
         }
 
@@ -295,15 +300,22 @@ export class MdsEditorInstanceService implements OnDestroy {
             }
             this.initialValuesSubject.next(this.initialValues);
             if (nodes?.length === 1) {
-                this.suggestionValues =
-                    this.mdsEditorInstanceService.suggestionMetadata$.value?.[0].suggestions[
-                        this.definition.id
-                    ];
+                this.updateSuggestions();
+                this.mdsEditorInstanceService.suggestionMetadata$
+                    .pipe(takeUntil(this.mdsEditorInstanceService.destroyed$))
+                    .subscribe(() => this.updateSuggestions());
             }
             this.ready.next();
             this.ready.complete();
         }
-
+        private updateSuggestions() {
+            this.suggestionValuesSubject.next(
+                this.mdsEditorInstanceService.suggestionMetadata$.value?.[0].suggestions[
+                    this.definition.id
+                ],
+            );
+            console.log(this.suggestionValuesSubject.value, this.definition.id);
+        }
         initWithValues(values?: Values): void {
             if (this.relation === 'suggestions') {
                 this.initialValues = { jointValues: [] };
@@ -331,7 +343,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             return this.initialValues;
         }
         getSuggestions() {
-            return this.suggestionValues;
+            return this.suggestionValuesSubject;
         }
 
         getInitalValuesAsync(): Promise<InitialValues> {
@@ -635,6 +647,10 @@ export class MdsEditorInstanceService implements OnDestroy {
     mdsDefinition$ = new BehaviorSubject<MdsDefinition>(null);
     /** Nodes with updated and complete metadata. */
     nodes$ = new BehaviorSubject<Node[]>(null);
+    /**
+     * behaviour subject representing the current available suggestions for the node
+     * Currently NOT supported in bulk!
+     */
     suggestionMetadata$ = new BehaviorSubject<NodeSuggestionResponseDto[]>(null);
 
     /** Current values (if not in node mode) */

@@ -4,7 +4,7 @@ import { MAT_FORM_FIELD } from '@angular/material/form-field';
 import { TranslateService } from '@ngx-translate/core';
 import { SuggestionResponseDto, SuggestionStatus } from 'ngx-edu-sharing-api';
 import { DateHelper } from 'ngx-edu-sharing-ui';
-import { filter } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import { Toast } from '../../../../../services/toast';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
@@ -61,7 +61,9 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
     }
 
     getSuggestions() {
-        return this.widget.getSuggestions()?.filter((s) => s.status === 'PENDING') ?? [];
+        return this.widget
+            .getSuggestions()
+            .pipe(map((suggestions) => suggestions?.filter((s) => s.status === 'PENDING')));
     }
 
     focus(): void {

@@ -16,7 +16,6 @@ platformBrowserDynamic()
 
 */
 export function init() {
-    console.log('Howdy!');
     platformBrowserDynamic()
         .bootstrapModule(AppModule)
         .catch((err) => console.error(err));

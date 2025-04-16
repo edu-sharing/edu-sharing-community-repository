@@ -66,8 +66,8 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -76,8 +76,8 @@
               }
             }
           },
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
@@ -146,8 +146,8 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -156,8 +156,8 @@
               }
             }
           },
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
@@ -226,8 +226,8 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -236,8 +236,8 @@
               }
             }
           },
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
@@ -252,6 +252,60 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ChatCompletionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/edu-sharing/suggestions": {
+      "post": {
+        "tags": [
+          "edu-sharing LLM"
+        ],
+        "summary": "  \n            Create suggestions for widgets based on widget and mds aiConfig and store them as suggestions in edu-sharing \n            Generate chat completions or create image requests based on bapi configuration in the metadata sets and widgets. \n            Template substitution allows prompts to be enriched with node and user data as well as passed input properties \n        ",
+        "operationId": "suggestions",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EduSharingSuggestionLlmRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "504": {
+            "description": "Gateway Timeout",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SuggestionResponseDTO"
+                  }
                 }
               }
             }
@@ -277,8 +331,8 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -287,8 +341,8 @@
               }
             }
           },
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
@@ -328,8 +382,8 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -338,8 +392,8 @@
               }
             }
           },
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
@@ -380,8 +434,8 @@
           }
         ],
         "responses": {
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -390,8 +444,8 @@
               }
             }
           },
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
@@ -424,8 +478,8 @@
         "summary": " \n           List and describe the various provider available in the API\n        ",
         "operationId": "listProviders",
         "responses": {
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -434,8 +488,8 @@
               }
             }
           },
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
@@ -1726,6 +1780,326 @@
           }
         }
       },
+      "EduSharingSuggestionLlmRequest": {
+        "type": "object",
+        "description": "Request object for LLM chat completion, containing the necessary configuration for suggestions.",
+        "properties": {
+          "metadataSet": {
+            "type": "string",
+            "description": "The name of the metadata set to be used for the request"
+          },
+          "mdsAiConfigIds": {
+            "type": "array",
+            "description": "\n        A list of aiConfig id's those stored in the metadata set provided by the metadataSet property. \n        Note: Within the list, each subsequent element takes precedence over the previous one.        \n        ",
+            "items": {
+              "type": "string"
+            }
+          },
+          "user": {
+            "type": "string",
+            "description": "\n            The user account to be used  for prompt substitution. \n            Template: {{user.<profilePropertyName>}} \n            e.g. {{user.firstName}}\n        "
+          },
+          "contextNodeId": {
+            "type": "string",
+            "description": "\n            The context Node Id to be used for prompt substitution.\n            Template: {{node.<propertyNameInShortFormat>}}\n            e.g. {{node.cclom:general_description}}\n        "
+          },
+          "variables": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "\n            A key-value map containing non persistent properties for prompt substitution.\n            example: {\n                \"cclom:general_description\": [\"lorem ipsum\", \"dolor sit amet\"]\n            }\n        "
+          },
+          "widgetAiConfigs": {
+            "type": "array",
+            "description": "\n            List of widget id and aiConfig id pairs to be used for prompt substitution.\n        ",
+            "items": {
+              "$ref": "#/components/schemas/WidgetAiConfigInfo"
+            }
+          }
+        },
+        "required": [
+          "contextNodeId",
+          "mdsAiConfigIds",
+          "metadataSet",
+          "user",
+          "variables",
+          "widgetAiConfigs"
+        ]
+      },
+      "WidgetAiConfigInfo": {
+        "type": "object",
+        "properties": {
+          "widgetId": {
+            "type": "string"
+          },
+          "aiConfigId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "aiConfigId",
+          "widgetId"
+        ]
+      },
+      "GroupProfile": {
+        "type": "object",
+        "properties": {
+          "customAttributes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "groupEmail": {
+            "type": "string"
+          },
+          "groupType": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          }
+        }
+      },
+      "NodeRef": {
+        "type": "object",
+        "properties": {
+          "archived": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "isHomeRepo": {
+            "type": "boolean"
+          },
+          "repo": {
+            "type": "string"
+          }
+        }
+      },
+      "Organization": {
+        "type": "object",
+        "properties": {
+          "administrationAccess": {
+            "type": "boolean"
+          },
+          "aspects": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "authorityName": {
+            "type": "string"
+          },
+          "authorityType": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "GROUP",
+              "OWNER",
+              "EVERYONE",
+              "GUEST"
+            ]
+          },
+          "editable": {
+            "type": "boolean"
+          },
+          "groupName": {
+            "type": "string"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/GroupProfile"
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "ref": {
+            "$ref": "#/components/schemas/NodeRef"
+          },
+          "sharedFolder": {
+            "$ref": "#/components/schemas/NodeRef"
+          },
+          "signupMethod": {
+            "type": "string",
+            "enum": [
+              "simple",
+              "password",
+              "list"
+            ]
+          }
+        }
+      },
+      "SuggestionResponseDTO": {
+        "type": "object",
+        "properties": {
+          "confidence": {
+            "type": "number",
+            "format": "double"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "$ref": "#/components/schemas/UserSimple"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "modifiedBy": {
+            "$ref": "#/components/schemas/UserSimple"
+          },
+          "nodeId": {
+            "type": "string"
+          },
+          "propertyId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACCEPTED",
+              "PENDING",
+              "DECLINED"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "AI",
+              "USER_PROPOSAL"
+            ]
+          },
+          "value": {
+            "type": "object"
+          },
+          "version": {
+            "type": "string"
+          }
+        }
+      },
+      "UserProfile": {
+        "type": "object",
+        "properties": {
+          "about": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "primaryAffiliation": {
+            "type": "string"
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "types": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "vcard": {
+            "type": "string"
+          }
+        }
+      },
+      "UserSimple": {
+        "type": "object",
+        "properties": {
+          "authorityName": {
+            "type": "string"
+          },
+          "authorityType": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "GROUP",
+              "OWNER",
+              "EVERYONE",
+              "GUEST"
+            ]
+          },
+          "editable": {
+            "type": "boolean"
+          },
+          "organizations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Organization"
+            }
+          },
+          "profile": {
+            "$ref": "#/components/schemas/UserProfile"
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "status": {
+            "$ref": "#/components/schemas/UserStatus"
+          },
+          "userName": {
+            "type": "string"
+          }
+        }
+      },
+      "UserStatus": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "blocked",
+              "todelete"
+            ]
+          }
+        }
+      },
       "EduSharingLlmRequest": {
         "type": "object",
         "description": "Request object for LLM chat completion, containing the necessary configuration for generating chat responses.",
@@ -1749,7 +2123,7 @@
             "type": "array",
             "description": "\n            A list of widgetId and valueId pairs to be used for prompt substitution.\n            The caption of the value space item is inserted into the prompt.\n            Template: {{var.<widgetId>}} \n            e.g. {{var.ccm:taxonid}}\n        ",
             "items": {
-              "$ref": "#/components/schemas/Variable"
+              "$ref": "#/components/schemas/WidgetValueSpaceValuePair"
             }
           }
         },
@@ -1760,7 +2134,7 @@
           "variables"
         ]
       },
-      "Variable": {
+      "WidgetValueSpaceValuePair": {
         "type": "object",
         "properties": {
           "widgetId": {
