@@ -524,6 +524,7 @@ public class MetadataReader {
                         break;
                     case "aiConfigs":
                         widget.setAiConfigs(getAiConfigs(data.getChildNodes()));
+                        break;
                     case "suggestionReceiver":
                         widget.setSuggestionReceiver(value);
                         break;
@@ -692,7 +693,32 @@ public class MetadataReader {
     }
 
     private MetadataCondition getCondition(Node node, String id) {
-        return null;
+        boolean negate = false;
+        boolean dynamic = false;
+        String pattern = null;
+        NamedNodeMap attr = node.getAttributes();
+        MetadataCondition.CONDITION_TYPE type = MetadataCondition.CONDITION_TYPE.PROPERTY;
+        if (attr != null) {
+            if (attr.getNamedItem("type") != null) {
+                try {
+                    type = MetadataCondition.CONDITION_TYPE.valueOf(attr.getNamedItem("type").getTextContent());
+                } catch (Throwable t) {
+                    log.warn("Object {} has condition, but the given type {} is invalid. Will use default type {}", id, attr.getNamedItem("type").getTextContent(), type);
+                }
+            } else {
+                log.warn("Object {} has condition, but no type for condition was specified. Using default type {}", id, type);
+            }
+            if (attr.getNamedItem("negate") != null && attr.getNamedItem("negate").getTextContent().equalsIgnoreCase("true")) {
+                negate = true;
+            }
+            if (attr.getNamedItem("dynamic") != null && attr.getNamedItem("dynamic").getTextContent().equalsIgnoreCase("true")) {
+                dynamic = true;
+            }
+            if (attr.getNamedItem("pattern") != null) {
+                pattern = attr.getNamedItem("pattern").getTextContent();
+            }
+        }
+        return new MetadataCondition(node.getTextContent(), type, negate, dynamic, pattern);
     }
 
     private ValuespaceData getValuespace(ValuespaceInfo info, MetadataWidget widget, String valuespaceI18n, String valuespaceI18nPrefix) throws Exception {
