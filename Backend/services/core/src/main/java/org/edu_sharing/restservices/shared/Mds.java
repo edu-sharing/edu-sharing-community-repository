@@ -16,6 +16,8 @@ public class Mds {
 
 	private Create create = null;
 
+	private List<MdsAiConfig> aiConfigs = null;
+
 	@JsonProperty(required = true)
 	private List<MdsWidget> widgets = null;
 

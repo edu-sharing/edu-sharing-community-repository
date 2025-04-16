@@ -1,6 +1,29 @@
 <metadataset id="default" label="default" hidden="false">
   <name>Core Metadataset</name>
   <i18n>mds</i18n>
+
+  <aiConfigs>
+    <aiConfig>
+      <id>suggestion_ai</id>
+      <provider>openai</provider>
+      <useCaching>false</useCaching>
+      <chatCompletion>
+        {
+          "model": "gpt-4.1",
+          "messages": [
+            {
+              "role":"system",
+              "textContent": "Du bist ein Assistent für edu-sharing.\nDu sollst dem Nutzer helfen die Metadaten der Materialien mit passenden Vorschlägen zu vervollständigen. Gibt nur den Vorschlag als Wert zurück.
+            },
+            {
+              "role": "user",
+              "textContent": "Ich benötige hilfe bei diesem Material. Es hat die folgenden Eigenschaften \nTitel: {{var.cclom:title|-}}\nDateiname: {{var.cm:name|-}}\nLink: {{var.ccm:wwwwurl|-}}\nMaterialart: {{var.ccm:educationallearningresourcetype|-}}\nSchlagworte: {{var.cclom:general_keyword|-}}\nBeschreibung: {{var.cclom:general_description|-}}\nFormat: {{var.cclom:format|-}}\nMedientyp: {{var.virtual:mediatype|-}}\n"
+            }
+          ]
+        }
+      </chatCompletion>
+    </aiConfig>
+  </aiConfigs>
   <widgets>
     <widget>
       <id>cm:name</id>
@@ -20,18 +43,22 @@
       <bottomCaption>cm_title_bottom</bottomCaption>
       <type>text</type>
       <hideIfEmpty>true</hideIfEmpty>
-
+      <aiConfigs>
+        <aiConfig>
+          <chatCompletion>
+            {
+              "messages": [
+                {
+                  "role": "user",
+                  "textContent": "Erzeuge einen aussagekräftigen Titel"
+                }
+              ]
+            }
+          </chatCompletion>
+        </aiConfig>
+      </aiConfigs>
       <required>mandatoryForPublish</required>
       <condition type="PROPERTY" negate="true">ccm:wwwurl</condition>
-    </widget>
-    <widget>
-      <id>cclom:title</id>
-      <id rel="graphql">lom.general.title</id>
-      <caption>cm_title_wwwurl</caption>
-      <placeholder>cm_title_placeholder</placeholder>
-      <type>text</type>
-      <required>mandatoryForPublish</required>
-      <condition type="PROPERTY">ccm:wwwurl</condition>
     </widget>
     <widget>
       <id>virtual:mediatype</id>
@@ -58,6 +85,20 @@
       <caption>lom_prop_educational_description</caption>
       <placeholder>lom_prop_educational_description_placeholder</placeholder>
       <hideIfEmpty>true</hideIfEmpty>
+      <aiConfigs>
+        <aiConfig>
+          <chatCompletion>
+            {
+              "messages": [
+                {
+                  "role": "user",
+                  "textContent": "Erzeuge eine kurze zusammenfassende Beschreibung"
+                }
+              ]
+            }
+          </chatCompletion>
+        </aiConfig>
+      </aiConfigs>
     </widget>
     <widget>
       <id>cm:description</id>
@@ -74,6 +115,20 @@
       <placeholder>lom_prop_general_keyword_placeholder</placeholder>
       <hideIfEmpty>true</hideIfEmpty>
       <searchable>true</searchable>
+      <aiConfigs>
+        <aiConfig>
+          <chatCompletion>
+            {
+              "messages": [
+                {
+                  "role": "user",
+                  "textContent": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"
+                }
+              ]
+            }
+          </chatCompletion>
+        </aiConfig>
+      </aiConfigs>
     </widget>
     <widget>
       <id>ccm:published_handle_id</id>
@@ -98,6 +153,20 @@
       <type>multivalueSuggestBadges</type>
       <caption>lom_prop_general_keyword_tagcloud</caption>
       <template>search_suggestions</template>
+      <aiConfigs>
+        <aiConfig>
+          <chatCompletion>
+            {
+              "messages": [
+                {
+                  "role": "user",
+                  "textContent": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"
+                }
+              ]
+            }
+          </chatCompletion>
+        </aiConfig>
+      </aiConfigs>
     </widget>
     <widget>
       <id>cclom:general_keyword</id>
@@ -106,6 +175,20 @@
       <caption>lom_prop_general_keyword</caption>
       <placeholder>lom_prop_general_keyword_placeholder_search</placeholder>
       <template>search</template>
+      <aiConfigs>
+        <aiConfig>
+          <chatCompletion>
+            {
+              "messages": [
+                {
+                  "role": "user",
+                  "textContent": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"
+                }
+              ]
+            }
+          </chatCompletion>
+        </aiConfig>
+      </aiConfigs>
     </widget>
     <widget>
       <id>ccm:author_freetext</id>
@@ -125,6 +208,20 @@
       <valuespace_i18n>valuespaces_i18n</valuespace_i18n>
       <valuespace_sort>caption</valuespace_sort>
       <searchable>true</searchable>
+      <aiConfigs>
+        <aiConfig>
+          <chatCompletion>
+            {
+              "messages": [
+                {
+                  "role": "user",
+                  "textContent": "Ordne das Material in einer der folgende kategorien ein: {{widget:$.ccm:educationallearningresourcetype.values..caption}}"
+                }
+              ]
+            }
+          </chatCompletion>
+        </aiConfig>
+      </aiConfigs>
     </widget>
     <widget>
       <id>ccm:restricted_access</id>

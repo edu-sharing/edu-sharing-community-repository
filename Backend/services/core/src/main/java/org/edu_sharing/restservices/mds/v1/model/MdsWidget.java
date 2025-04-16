@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Data
 public class MdsWidget {
@@ -80,6 +81,8 @@ public class MdsWidget {
     private MetadataWidget.WidgetFilterMode filterMode;
     private MetadataWidget.WidgetExpandable expandable;
 
+    private List<MdsAiConfig> aiConfigs;
+
     public MdsWidget() {
     }
 
@@ -137,6 +140,12 @@ public class MdsWidget {
             }
         }
 
+        if (widget.getAiConfigs() != null) {
+            this.aiConfigs = widget.getAiConfigs()
+                    .stream()
+                    .map(x -> new MdsAiConfig(x.getId(), x.getProvider(), x.isUseCaching(), x.getChatCompletion(), x.getCreateImage()))
+                    .collect(Collectors.toList());
+        }
     }
 }
 

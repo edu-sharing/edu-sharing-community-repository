@@ -5,11 +5,13 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import lombok.Data;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionBaseService;
 import org.edu_sharing.metadataset.v2.MetadataWidget.Subwidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
 
+@Data
 public class MetadataSet implements Serializable {
 	static Logger logger = Logger.getLogger(MetadataSet.class);
 
@@ -18,6 +20,7 @@ public class MetadataSet implements Serializable {
 	
 	private String id,repositoryId,label,i18n,name,inherit;
 	private List<MetadataWidget> widgets;
+	private List<AiConfig> aiConfigs;
 	private boolean hidden;
 	private List<MetadataTemplate> templates;
 	private List<MetadataGroup> groups;
@@ -25,96 +28,9 @@ public class MetadataSet implements Serializable {
 	private List<MetadataSort> sorts;
 	private Map<String, MetadataQueries> queries;
 	private MetadataCreate create;
-	public String getId() {
-		return id;
-	}
-	public void setId(String id) {
-		this.id = id;
-	}	
-	
-	public String getRepositoryId() {
-		return repositoryId;
-	}
-	public void setRepositoryId(String repositoryId) {
-		this.repositoryId = repositoryId;
-	}
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	public String getInherit() {
-		return inherit;
-	}
-	public void setInherit(String inherit) {
-		this.inherit = inherit;
-	}
-	public String getLabel() {
-		return label;
-	}
-	public void setLabel(String label) {
-		this.label = label;
-	}
-	public List<MetadataWidget> getWidgets() {
-		return widgets;
-	}
-	public List<MetadataTemplate> getTemplates() {
-		return templates;
-	}
-	public List<MetadataGroup> getGroups() {
-		return groups;
-	}
-	public boolean isHidden() {
-		return hidden;
-	}
-	public void setHidden(boolean hidden) {
-		this.hidden = hidden;
-	}
-	
-	public void setWidgets(List<MetadataWidget> widgets) {
-		this.widgets = widgets;
-	}
-	public void setTemplates(List<MetadataTemplate> templates) {
-		this.templates = templates;		
-	}
-	public void setGroups(List<MetadataGroup> groups) {
-		this.groups = groups;		
-	}
-	public String getI18n() {
-		return i18n;
-	}
-	public void setI18n(String i18n) {
-		this.i18n = i18n;
-	}
-	public Map<String, MetadataQueries> getQueries() {
-		return queries;
-	}
+
 	public MetadataQueries getQueries(String syntax) {
 		return queries.get(syntax);
-	}
-	public void setQueries(Map<String, MetadataQueries> queries) {
-		this.queries = queries;
-	}
-	public MetadataCreate getCreate() {
-		return create;
-	}
-	public void setCreate(MetadataCreate create) {
-		this.create = create;
-	}
-	public List<MetadataList> getLists() {
-		return lists;
-	}
-	public void setLists(List<MetadataList> lists) {
-		this.lists = lists;
-	}
-
-	public List<MetadataSort> getSorts() {
-		return sorts;
-	}
-
-	public void setSorts(List<MetadataSort> sorts) {
-		this.sorts = sorts;
 	}
 
 	public void overrideWith(MetadataSet mdsOverride) {
@@ -192,8 +108,9 @@ public class MetadataSet implements Serializable {
 			if(widget.getId().equals(widgetId))
 				found.add(widget);
 		}
-		if(found.size()>0)
+		if(!found.isEmpty()) {
 			return found;
+		}
 		throw new IllegalArgumentException("Widget "+widgetId+" was not found in the mds "+id);
 	}
 	public MetadataGroup findGroup(String groupId) {
@@ -253,7 +170,7 @@ public class MetadataSet implements Serializable {
 				if(html.contains("<" + widget.getId())) {
 					usedWidgets.add(widget);
 					// handle group (sub) widgets
-					if(widget.getSubwidgets()!=null && widget.getSubwidgets().size()>0) {
+					if(widget.getSubwidgets()!=null && !widget.getSubwidgets().isEmpty()) {
 						for(Subwidget subwidget : widget.getSubwidgets()) {
 							usedWidgets.addAll(findAllWidgets(subwidget.getId()));
 						}
@@ -276,7 +193,7 @@ public class MetadataSet implements Serializable {
 					found.add(widget);
 			  }
 		  }
-		  if(found.size()==0) {
+		  if(found.isEmpty()) {
 			  throw new IllegalArgumentException("Widget " + widgetId + " was not found in the mds " + id);
 		  }
 		  List<MetadataWidget> result=new ArrayList<>();
@@ -315,10 +232,7 @@ public class MetadataSet implements Serializable {
 		if(result.isEmpty()) {
 			return null;
 		}
-		if(found.isEmpty()) {
-			throw new IllegalArgumentException("Widget " + widgetId + " was not found in the mds " + id);
-		}
-		if (result.size() > 1) {
+        if (result.size() > 1) {
 			logger.warn("Widget " + widgetId + " has multiple candidates (" + result.size() + ") when rendered with template " + template + ", will use the first one that matches. Check the metadataset definitions for that widget to ensure only one candidate always matches.");
 		}
 		result.get(0).setHideIfEmpty(true);
@@ -330,8 +244,10 @@ public class MetadataSet implements Serializable {
 		if(!empty){
 			empty=true;
 			for(String check :value){
-				if(check!=null && !check.isEmpty())
-					empty=false;
+                if (check != null && !check.isEmpty()) {
+                    empty = false;
+                    break;
+                }
 		}
 	  }
 		return empty;

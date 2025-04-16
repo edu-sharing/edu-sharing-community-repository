@@ -128,6 +128,7 @@ public class MetadataWidget extends MetadataTranslatable {
     private MetadataCondition condition;
     private String link;
     private String suggestionReceiver;
+    private List<AiConfig> aiConfigs = new ArrayList<>();
 
 
     public boolean isMultivalue() {

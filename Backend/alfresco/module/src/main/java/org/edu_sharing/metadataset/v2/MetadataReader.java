@@ -9,7 +9,6 @@ import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.metadataset.v2.MetadataCondition.CONDITION_TYPE;
 import org.edu_sharing.metadataset.v2.valuespace_reader.ValuespaceReader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -332,19 +331,19 @@ public class MetadataReader {
                 .map(Node::getAttributes);
 
         MetadataQueryParameter.MetadataQueryFacet.SortBy sortBy = attributes
-                .map(x->x.getNamedItem("sortBy"))
+                .map(x -> x.getNamedItem("sortBy"))
                 .map(Node::getNodeValue)
                 .map(MetadataQueryParameter.MetadataQueryFacet.SortBy::valueOf)
                 .orElse(MetadataQueryParameter.MetadataQueryFacet.SortBy.count);
 
         MetadataQueryParameter.MetadataQueryFacet.SortOrder sortOrder = attributes
-                .map(x->x.getNamedItem("sortOrder"))
+                .map(x -> x.getNamedItem("sortOrder"))
                 .map(Node::getNodeValue)
                 .map(MetadataQueryParameter.MetadataQueryFacet.SortOrder::valueOf)
                 .orElse(MetadataQueryParameter.MetadataQueryFacet.SortOrder.desc);
 
         Integer maxBucketSize = attributes
-                .map(x->x.getNamedItem("maxBucketSize"))
+                .map(x -> x.getNamedItem("maxBucketSize"))
                 .map(Node::getNodeValue)
                 .map(Integer::valueOf)
                 .orElse(null);
@@ -363,7 +362,7 @@ public class MetadataReader {
                 metadataQueryFacetItemList.add(metadataQueryFacetItem);
             }
         }
-        return new MetadataQueryParameter.MetadataQueryFacet(sortBy, sortOrder, maxBucketSize,  metadataQueryFacetItemList);
+        return new MetadataQueryParameter.MetadataQueryFacet(sortBy, sortOrder, maxBucketSize, metadataQueryFacetItemList);
     }
 
     private static InputStream getFile(String name, Filetype type) throws IOException {
@@ -428,6 +427,7 @@ public class MetadataReader {
 
         mds.setCreate(getCreate());
         mds.setWidgets(getWidgets());
+        mds.setAiConfigs(getAiConfigs());
         mds.setTemplates(getTemplates());
         mds.setGroups(getGroups());
         mds.setLists(getLists());
@@ -522,6 +522,8 @@ public class MetadataReader {
                     case "condition":
                         widget.setCondition(getCondition(data, widget.getId()));
                         break;
+                    case "aiConfigs":
+                        widget.setAiConfigs(getAiConfigs(data.getChildNodes()));
                     case "suggestionReceiver":
                         widget.setSuggestionReceiver(value);
                         break;
@@ -652,33 +654,45 @@ public class MetadataReader {
         return widgets;
     }
 
-    private MetadataCondition getCondition(Node node, String id) {
-        boolean negate = false;
-        boolean dynamic = false;
-        String pattern = null;
-        NamedNodeMap attr = node.getAttributes();
-        CONDITION_TYPE type = CONDITION_TYPE.PROPERTY;
-        if (attr != null) {
-            if (attr.getNamedItem("type") != null) {
-                try {
-                    type = CONDITION_TYPE.valueOf(attr.getNamedItem("type").getTextContent());
-                } catch (Throwable t) {
-                    log.warn("Object {} has condition, but the given type {} is invalid. Will use default type {}", id, attr.getNamedItem("type").getTextContent(), type);
+    private List<AiConfig> getAiConfigs() throws XPathExpressionException {
+        NodeList aiConfigNodes = (NodeList) xpath.evaluate("/metadataset/aiConfigs/aiConfig", doc, XPathConstants.NODESET);
+        return getAiConfigs(aiConfigNodes);
+    }
+
+    private List<AiConfig> getAiConfigs(NodeList childNodes) {
+        List<AiConfig> result = new ArrayList<>(childNodes.getLength());
+        for (int i = 0; i < childNodes.getLength(); i++) {
+            Node promptNode = childNodes.item(i);
+
+            AiConfig aiConfig = new AiConfig();
+            NodeList innerNodes = promptNode.getChildNodes();
+            for (int j = 0; j < innerNodes.getLength(); j++) {
+                Node innerNode = innerNodes.item(j);
+                switch (innerNode.getNodeName()) {
+                    case "id":
+                        aiConfig.setId(innerNode.getNodeValue());
+                        break;
+                    case "provider":
+                        aiConfig.setProvider(innerNode.getNodeValue());
+                        break;
+                    case "useCaching":
+                        aiConfig.setUseCaching(Boolean.parseBoolean(innerNode.getNodeValue()));
+                        break;
+                    case "chatCompletion":
+                        aiConfig.setChatCompletion(innerNode.getNodeValue());
+                        break;
+                    case "createImage":
+                        aiConfig.setCreateImage(innerNode.getNodeValue());
+                        break;
                 }
-            } else {
-                log.warn("Object {} has condition, but no type for condition was specified. Using default type {}", id, type);
             }
-            if (attr.getNamedItem("negate") != null && attr.getNamedItem("negate").getTextContent().equalsIgnoreCase("true")) {
-                negate = true;
-            }
-            if (attr.getNamedItem("dynamic") != null && attr.getNamedItem("dynamic").getTextContent().equalsIgnoreCase("true")) {
-                dynamic = true;
-            }
-            if (attr.getNamedItem("pattern") != null) {
-                pattern = attr.getNamedItem("pattern").getTextContent();
-            }
+            result.add(aiConfig);
         }
-        return new MetadataCondition(node.getTextContent(), type, negate, dynamic, pattern);
+        return result;
+    }
+
+    private MetadataCondition getCondition(Node node, String id) {
+        return null;
     }
 
     private ValuespaceData getValuespace(ValuespaceInfo info, MetadataWidget widget, String valuespaceI18n, String valuespaceI18nPrefix) throws Exception {
@@ -709,8 +723,8 @@ public class MetadataReader {
         if (reader != null) {
             try {
                 return reader.getValuespace(locale);
-            } catch(Throwable t) {
-                if(value.isLenient()) {
+            } catch (Throwable t) {
+                if (value.isLenient()) {
                     log.error("Could not read valuespace " + value.getValue() + ": " + t.getMessage(), t);
                     return new ValuespaceData(new MetadataKey(), Collections.emptyList());
                 } else {
@@ -749,13 +763,14 @@ public class MetadataReader {
             if (keyNode.getChildNodes().getLength() > 0) {
                 for (int j = 0; j < keyNode.getChildNodes().getLength(); j++) {
                     Node child = keyNode.getChildNodes().item(j);
-                    if(child.getNodeName().equals("value") || child.getNodeName().equals("#text")) {
+                    if (child.getNodeName().equals("value") || child.getNodeName().equals("#text")) {
                         key.setKey(child.getTextContent());
-                    } if(child.getNodeName().equals("relation")) {
+                    }
+                    if (child.getNodeName().equals("relation")) {
                         MetadataKey.MetadataKeyRelated related = new MetadataKey.MetadataKeyRelated(MetadataKey.MetadataKeyRelated.Relation.relatedMatch);
-                        if(child.getAttributes() != null && child.getAttributes().getNamedItem("type") != null) {
+                        if (child.getAttributes() != null && child.getAttributes().getNamedItem("type") != null) {
                             related.setRelation(MetadataKey.MetadataKeyRelated.Relation.valueOf(child.getAttributes().getNamedItem("type").getTextContent()));
-                        } else if(child.getNodeName().equals("target")) {
+                        } else if (child.getNodeName().equals("target")) {
                             related.setTarget(child.getTextContent());
                         }
                         related.setKey(child.getTextContent());
@@ -981,7 +996,7 @@ public class MetadataReader {
                 if (name.equals("defaultSearch")) {
                     NodeList list3 = data.getChildNodes();
                     for (int k = 0; k < list3.getLength(); k++) {
-                        if(sort.getDefaultValueSearch() == null) {
+                        if (sort.getDefaultValueSearch() == null) {
                             sort.setDefaultValueSearch(new MetadataSort.MetadataSortDefault());
                         }
                         Node data2 = list3.item(k);

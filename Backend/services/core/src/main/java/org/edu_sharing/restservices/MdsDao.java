@@ -83,6 +83,7 @@ public class MdsDao {
 
         data.setName(mds.getName());
         data.setCreate(mds.getCreate() != null ? new Mds.Create(mds.getCreate()) : null);
+        data.setAiConfigs(getAiConfigs());
         data.setWidgets(getWidgets());
         data.setViews(getViews());
         data.setGroups(getGroups());
@@ -90,6 +91,13 @@ public class MdsDao {
         data.setSorts(getSorts());
 
         return data;
+    }
+
+    private List<MdsAiConfig> getAiConfigs() {
+        return this.mds.getAiConfigs()
+                .stream()
+                .map(x -> new MdsAiConfig(x.getId(), x.getProvider(), x.isUseCaching(), x.getChatCompletion(), x.getCreateImage()))
+                .collect(Collectors.toList());
     }
 
     private List<MdsWidget> getWidgets() {

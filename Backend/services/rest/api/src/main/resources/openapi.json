@@ -3073,6 +3073,12 @@
       },
       "Mds": {
         "properties": {
+          "aiConfigs": {
+            "items": {
+              "$ref": "#/components/schemas/MdsAiConfig"
+            },
+            "type": "array"
+          },
           "create": {
             "$ref": "#/components/schemas/Create"
           },
@@ -3118,6 +3124,26 @@
           "views",
           "widgets"
         ],
+        "type": "object"
+      },
+      "MdsAiConfig": {
+        "properties": {
+          "chatCompletion": {
+            "type": "string"
+          },
+          "createImage": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "useCaching": {
+            "type": "boolean"
+          }
+        },
         "type": "object"
       },
       "MdsColumn": {
@@ -3324,6 +3350,12 @@
       },
       "MdsWidget": {
         "properties": {
+          "aiConfigs": {
+            "items": {
+              "$ref": "#/components/schemas/MdsAiConfig"
+            },
+            "type": "array"
+          },
           "allowValuespaceSuggestions": {
             "type": "boolean"
           },
@@ -8153,6 +8185,7 @@
             "type": "string"
           },
           "type": {
+            "description": "Type of the suggestion",
             "enum": [
               "AI",
               "USER_PROPOSAL"
@@ -39296,6 +39329,7 @@
             "name": "type",
             "required": true,
             "schema": {
+              "description": "Type of the suggestion",
               "enum": [
                 "AI",
                 "USER_PROPOSAL"
