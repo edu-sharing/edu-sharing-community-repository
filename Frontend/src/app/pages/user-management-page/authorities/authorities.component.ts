@@ -1029,11 +1029,9 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 this.addToSelection[groupPosition].authorityName,
                 this.addToList[position].authorityName,
             )
-            .subscribe(
-                () => {
-                    this.addToSingle(callback, position + 1, groupPosition, errors);
-                },
-                (error: any) => {
+            .subscribe({
+                next: () => this.addToSingle(callback, position + 1, groupPosition, errors),
+                error: (error: any) => {
                     if (error.status == RestConstants.DUPLICATE_NODE_RESPONSE) {
                         errors++;
                     } else {
@@ -1041,7 +1039,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                     }
                     this.addToSingle(callback, position + 1, groupPosition, errors);
                 },
-            );
+            });
     }
     private async deleteAuthority(data: any, callback: Function) {
         const list = this.getList(data);
