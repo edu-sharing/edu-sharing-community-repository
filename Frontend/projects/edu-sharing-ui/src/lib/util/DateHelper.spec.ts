@@ -1,5 +1,5 @@
 import { DateHelper, FormatOptions, RelativeMode } from './DateHelper';
-import { TranslateService } from '@ngx-translate/core/lib/translate.service';
+import { TranslateService } from '@ngx-translate/core/dist/lib/translate.service';
 
 const translateServiceMock = {
     instant: (key: string, values?: any) => key + JSON.stringify(values),
