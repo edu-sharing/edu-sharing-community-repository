@@ -848,6 +848,8 @@
     "SAVED": "Saved changes"
   },
   "RENDERING": {
+    "CONVERTING": "Converting",
+    "QUEUED": "Queued",
     "REVOKED": {
       "DETAILS": "The publisher or editorial team has revoked this object. Only the metadata are available.\n\nCheck the reason below for more details",
       "DATE": "Date of revocation",
@@ -855,7 +857,19 @@
       "FEEDBACK": "Contact editorial team"
     },
     "ERROR": {
-      "RS2_NOT_CONFIGURED": "The rendering service 2 is currently not connected to this repository"
+      "GENERIC_ERROR_MESSAGE": "An error has occurred.",
+      "RS2_NOT_CONFIGURED": "The rendering service 2 is currently not connected to this repository",
+      "ERROR_PROCESSING_JOB": "The rendering job for displaying the object could not be completed.",
+      "GENERIC_CONVERSION_ERROR": "Object conversion failed.",
+      "GENERIC_NOT_FOUND": "Resource could not be found.",
+      "GENERIC_BAD_REQUEST": "Bad request",
+      "GENERIC_MODULE_NOT_AVAILABLE": "The rendering module needed to display the object is not available.",
+      "GENERIC_OBJECT_NOT_SUPPORTED": "This object is not supported by the rendering service.",
+      "GENERIC_INTERNAL_SERVER_ERROR": "Internal server error"
+    },
+    "GDPR": {
+      "GDPR_DIALOG": "This content is provided by a third party resource.",
+      "GDPR_CONTINUE": "Continue"
     }
   },
   "TOAST": {

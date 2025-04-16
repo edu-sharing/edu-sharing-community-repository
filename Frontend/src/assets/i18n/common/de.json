@@ -889,6 +889,8 @@
     "SAVED": "Änderungen wurden gespeichert."
   },
   "RENDERING": {
+    "CONVERTING": "Konvertierung",
+    "QUEUED": "Warteschlange",
     "REVOKED": {
       "DETAILS": "Der Herausgebende bzw. die Redaktion hat dieses Objekt zurückgezogen. Es sind nur noch die Metadaten des ursprünglichen Elements verfügbar.\n\nWeitere Details finden Sie in der Begründung unten.",
       "DATE": "Datum der Löschung",
@@ -896,7 +898,19 @@
       "FEEDBACK": "Redaktion kontaktieren"
     },
     "ERROR": {
-      "RS2_NOT_CONFIGURED": "Der Rendering-Service 2 ist derzeit nicht am Repository angeschlossen."
+      "GENERIC_ERROR_MESSAGE": "Ein Fehler ist aufgetreten.",
+      "RS2_NOT_CONFIGURED": "Der Rendering-Service 2 ist derzeit nicht am Repository angeschlossen.",
+      "ERROR_PROCESSING_JOB": "Der Rendering-Job zur Darstellung des Objekts konnte nicht abgeschlossen werden.",
+      "GENERIC_CONVERSION_ERROR": "Die Konvertierung des Objektes ist fehlgeschlagen.",
+      "GENERIC_NOT_FOUND": "Die Ressource konnte nicht gefunden werden.",
+      "GENERIC_BAD_REQUEST": "Ungültige Anfrage",
+      "GENERIC_MODULE_NOT_AVAILABLE": "Das zur Anzeige des Objekts nötige Rendering-Modul ist nicht verfügbar.",
+      "GENERIC_OBJECT_NOT_SUPPORTED": "Das Objekt wird vom Rendering-Service nicht unterstützt.",
+      "GENERIC_INTERNAL_SERVER_ERROR": "Die Anfrage konnte vom Server nicht bearbeitet werden"
+    },
+    "GDPR": {
+      "GDPR_DIALOG": "Dieser Inhalt stammt von einer externen Resource.",
+      "GDPR_CONTINUE": "Weiter"
     }
   },
   "TOAST": {
