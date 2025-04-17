@@ -60,7 +60,7 @@
               <!--configHelp>true</configHelp-->
               <configOptions>
                 <useJakartaEe>true</useJakartaEe>
-                <dateLibrary>java8</dateLibrary>
+                <dateLibrary>legacy</dateLibrary>
               </configOptions>
             </configuration>
           </execution>
