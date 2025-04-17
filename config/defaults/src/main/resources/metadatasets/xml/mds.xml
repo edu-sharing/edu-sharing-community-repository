@@ -13,11 +13,11 @@
           "messages": [
             {
               "role":"system",
-              "textContent": "Du bist ein Assistent für edu-sharing.\nDu sollst dem Nutzer helfen die Metadaten der Materialien mit passenden Vorschlägen zu vervollständigen. Gibt nur den Vorschlag als Wert zurück.
+              "textContent": "Du bist ein Assistent für edu-sharing.\nDu sollst dem Nutzer helfen die Metadaten der Materialien mit passenden Vorschlägen zu vervollständigen. Gibt nur den Vorschlag als Wert zurück."
             },
             {
               "role": "user",
-              "textContent": "Ich benötige hilfe bei diesem Material. Es hat die folgenden Eigenschaften \nTitel: {{var.cclom:title|-}}\nDateiname: {{var.cm:name|-}}\nLink: {{var.ccm:wwwwurl|-}}\nMaterialart: {{var.ccm:educationallearningresourcetype|-}}\nSchlagworte: {{var.cclom:general_keyword|-}}\nBeschreibung: {{var.cclom:general_description|-}}\nFormat: {{var.cclom:format|-}}\nMedientyp: {{var.virtual:mediatype|-}}\n"
+              "textContent": "Ich benötige hilfe bei diesem Material. Es hat die folgenden Eigenschaften \nTitel: {{var.cclom:title|-}}\nDateiname: {{var.cm:name|-}}\nLink: {{var.ccm:wwwwurl|-}}\nMaterialart: {{var.ccm:educationallearningresourcetype|-}}\nSchlagworte: {{var.cclom:general_keyword|-}}\nBeschreibung: {{var.cclom:general_description|-}}\nFormat: {{var.cclom:format|-}}\nMedientyp: {{var.virtual:mediatype|-}}"
             }
           ]
         }
@@ -45,6 +45,7 @@
       <hideIfEmpty>true</hideIfEmpty>
       <aiConfigs>
         <aiConfig>
+          <id>default</id>
           <chatCompletion>
             {
               "messages": [
@@ -87,6 +88,7 @@
       <hideIfEmpty>true</hideIfEmpty>
       <aiConfigs>
         <aiConfig>
+          <id>default</id>
           <chatCompletion>
             {
               "messages": [
@@ -117,6 +119,7 @@
       <searchable>true</searchable>
       <aiConfigs>
         <aiConfig>
+          <id>default</id>
           <chatCompletion>
             {
               "messages": [
@@ -155,6 +158,7 @@
       <template>search_suggestions</template>
       <aiConfigs>
         <aiConfig>
+          <id>default</id>
           <chatCompletion>
             {
               "messages": [
@@ -177,6 +181,7 @@
       <template>search</template>
       <aiConfigs>
         <aiConfig>
+          <id>default</id>
           <chatCompletion>
             {
               "messages": [
@@ -210,6 +215,7 @@
       <searchable>true</searchable>
       <aiConfigs>
         <aiConfig>
+          <id>default</id>
           <chatCompletion>
             {
               "messages": [

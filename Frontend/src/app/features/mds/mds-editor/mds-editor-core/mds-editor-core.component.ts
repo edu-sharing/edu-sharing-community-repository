@@ -1,9 +1,14 @@
 import { Component, QueryList, ViewChildren } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 import { EditorMode, MdsView } from '../../types/types';
 import { MdsEditorViewComponent } from '../mds-editor-view/mds-editor-view.component';
+import { AuthenticationService, RestConstants } from 'ngx-edu-sharing-api';
+import { Toast } from '../../../../services/toast';
+import { DialogsService } from '../../../dialogs/dialogs.service';
+import { EduSharingLlmService, WidgetAiConfigInfo } from 'ngx-edu-sharing-b-api';
+import { MdsEditorCommonService } from '../mds-editor-common.service';
 
 @Component({
     selector: 'es-mds-editor-core',
@@ -18,8 +23,16 @@ export class MdsEditorCoreComponent {
     hasExtendedWidgets$: Observable<boolean>;
     readonly editorMode: EditorMode;
     readonly shouldShowExtendedWidgets$: BehaviorSubject<boolean>;
+    readonly hasAi = new BehaviorSubject(false);
 
-    constructor(public mdsEditorInstance: MdsEditorInstanceService) {
+    constructor(
+        public mdsEditorInstance: MdsEditorInstanceService,
+        public mdsEditorCommonService: MdsEditorCommonService,
+        public dialogs: DialogsService,
+        public toast: Toast,
+        public eduSharingLlmService: EduSharingLlmService,
+        public auth: AuthenticationService,
+    ) {
         this.shouldShowExtendedWidgets$ = this.mdsEditorInstance.shouldShowExtendedWidgets$;
         this.editorMode = this.mdsEditorInstance.editorMode;
         this.mdsEditorInstance.mdsInitDone.subscribe(() => this.init());
@@ -49,6 +62,58 @@ export class MdsEditorCoreComponent {
         // Wait for `MdsEditorViewComponent`s to inject their widgets.
         await tick();
         this.mdsEditorInstance.mdsInflated.next(true);
+        this.auth
+            .hasToolpermission(RestConstants.TOOLPERMISSION_BAPI)
+            .then((has) => this.hasAi.next(has && this.mdsEditorInstance.suggestionsSupported));
+    }
+
+    async generateSuggestions() {
+        this.toast.showProgressSpinner();
+        try {
+            const widgets: WidgetAiConfigInfo[] = this.mdsEditorInstance.widgets.value
+                .filter(
+                    (w) =>
+                        !w.getIsDirty() &&
+                        w.definition.aiConfigs?.length &&
+                        this.mdsEditorInstance.nodes$.value?.length === 1,
+                )
+                .map((w) => {
+                    return {
+                        widgetId: w.definition.id,
+                        aiConfigId: w.definition.aiConfigs[0].id,
+                    };
+                });
+            const values = await this.mdsEditorInstance.getValues(null, false);
+            await firstValueFrom(
+                this.eduSharingLlmService.suggestions({
+                    body: {
+                        user: (await firstValueFrom(this.auth.observeLoginInfo())).authorityName,
+                        metadataSet: this.mdsEditorInstance.mdsId,
+                        mdsAiConfigIds: ['suggestion_ai'], // [this.mdsEditorInstance.mdsDefinition$.value.aiConfigs.find(a => a.id === 'suggestion_ai').id],
+                        widgetAiConfigs: widgets,
+                        contextNodeId: this.mdsEditorInstance.nodes$.value[0].ref.id,
+                        variables: values,
+                    },
+                }),
+            );
+            this.mdsEditorInstance.suggestionMetadata$.next(
+                await this.mdsEditorCommonService.fetchNodesSuggestions(
+                    this.mdsEditorInstance.nodes$.value,
+                ),
+            );
+            /*this.mdsEditorInstance.suggestionMetadata$.next([{
+                suggestions: {
+                    'cclom:title': [{
+                        value: 'Hello World',
+                        type: 'AI',
+                        status: 'PENDING',
+                    }]
+                }
+            }])*/
+        } catch (e) {
+            console.warn('Could not fetch suggestion data', e);
+        }
+        this.toast.closeProgressSpinner();
     }
 }
 

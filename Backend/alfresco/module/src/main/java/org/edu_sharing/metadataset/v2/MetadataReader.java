@@ -671,19 +671,19 @@ public class MetadataReader {
                 Node innerNode = innerNodes.item(j);
                 switch (innerNode.getNodeName()) {
                     case "id":
-                        aiConfig.setId(innerNode.getNodeValue());
+                        aiConfig.setId(innerNode.getTextContent());
                         break;
                     case "provider":
-                        aiConfig.setProvider(innerNode.getNodeValue());
+                        aiConfig.setProvider(innerNode.getTextContent());
                         break;
                     case "useCaching":
-                        aiConfig.setUseCaching(Boolean.parseBoolean(innerNode.getNodeValue()));
+                        aiConfig.setUseCaching(Boolean.parseBoolean(innerNode.getTextContent()));
                         break;
                     case "chatCompletion":
-                        aiConfig.setChatCompletion(innerNode.getNodeValue());
+                        aiConfig.setChatCompletion(innerNode.getTextContent());
                         break;
                     case "createImage":
-                        aiConfig.setCreateImage(innerNode.getNodeValue());
+                        aiConfig.setCreateImage(innerNode.getTextContent());
                         break;
                 }
             }

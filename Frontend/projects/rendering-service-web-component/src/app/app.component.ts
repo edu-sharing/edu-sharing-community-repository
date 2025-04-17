@@ -23,8 +23,6 @@ export class AppComponent implements OnChanges {
     constructor(private renderHelperService: RenderHelperService) {}
 
     async ngOnChanges(changes: SimpleChanges) {
-        console.log('Changes:');
-        console.log(changes);
         if (changes.encoded_node) {
             const data = await this.renderHelperService.getRenderDataForLms(
                 this.encoded_node,

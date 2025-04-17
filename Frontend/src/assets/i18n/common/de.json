@@ -791,6 +791,11 @@
     "NO_ARBITRARY_VALUES_NOTICE": "Für dieses Feld können Werte nicht frei gewählt werden. Bitte wählen Sie Werte aus der Liste.",
     "DELETE_KEY_NOTICE": "Löschen mit Entf-Taste",
     "SHOW_EXTENDED": "Erweitere Infos anzeigen",
+    "AI": {
+      "GENERATE_ALL_TITLE": "Metadaten generieren",
+      "GENERATE_ALL_INFO": "Für alle Metadaten-Felder, welche über die KI generiert werden können, Vorschläge erzeugen",
+      "GENERATE_ALL_BUTTON": "KI-Vorschläge generieren"
+    },
     "SUGGESTIONS": {
       "LIST_TITLE": "Vorschläge für dieses Feld",
       "TYPE_AI": "KI",

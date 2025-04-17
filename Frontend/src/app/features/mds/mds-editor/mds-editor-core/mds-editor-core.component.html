@@ -1,3 +1,13 @@
+<div *ngIf="hasAi | async" class="ai-info">
+  <div>
+    <div class="title">{{ 'MDS.AI.GENERATE_ALL_TITLE' | translate }}</div>
+    <div class="details">{{ 'MDS.AI.GENERATE_ALL_INFO' | translate }}</div>
+  </div>
+  <button mat-flat-button color="primary" (click)="generateSuggestions()">
+    {{ 'MDS.AI.GENERATE_ALL_BUTTON' | translate }}
+  </button>
+</div>
+
 <div *ngIf="hasExtendedWidgets$ | async" class="extended-toggle-container">
   <mat-slide-toggle
     class="extended-toggle"

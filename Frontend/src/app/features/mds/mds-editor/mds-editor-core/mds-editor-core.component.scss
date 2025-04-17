@@ -15,3 +15,28 @@
         }
     }
 }
+
+.ai-info {
+    position: sticky;
+    display: flex;
+    width: 100%;
+    padding: 10px 20px;
+    color: var(--aiColorText);
+    background-color: var(--aiColor);
+    gap: 10px;
+    > div {
+        display: flex;
+        flex-grow: 1;
+        flex-direction: column;
+        .title {
+            font-weight: bold;
+        }
+    }
+    button {
+        background-color: #fff;
+        color: var(--aiColor);
+        &:focus {
+            background-color: #fff;
+        }
+    }
+}
