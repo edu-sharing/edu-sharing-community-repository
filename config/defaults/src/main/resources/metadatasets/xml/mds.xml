@@ -13,11 +13,11 @@
           "messages": [
             {
               "role":"system",
-              "textContent": "Du bist ein Assistent für edu-sharing.\nDu sollst dem Nutzer helfen die Metadaten der Materialien mit passenden Vorschlägen zu vervollständigen. Gibt nur den Vorschlag als Wert zurück."
+              "content": "Du bist ein Assistent für edu-sharing.\nDu sollst dem Nutzer helfen die Metadaten der Materialien mit passenden Vorschlägen zu vervollständigen. Gibt nur den Vorschlag als Wert zurück."
             },
             {
               "role": "user",
-              "textContent": "Ich benötige hilfe bei diesem Material. Es hat die folgenden Eigenschaften \nTitel: {{var.cclom:title|-}}\nDateiname: {{var.cm:name|-}}\nLink: {{var.ccm:wwwwurl|-}}\nMaterialart: {{var.ccm:educationallearningresourcetype|-}}\nSchlagworte: {{var.cclom:general_keyword|-}}\nBeschreibung: {{var.cclom:general_description|-}}\nFormat: {{var.cclom:format|-}}\nMedientyp: {{var.virtual:mediatype|-}}"
+              "content": "Ich benötige hilfe bei diesem Material. Es hat die folgenden Eigenschaften \nTitel: {{var.cclom:title|-}}\nDateiname: {{var.cm:name|-}}\nLink: {{var.ccm:wwwwurl|-}}\nMaterialart: {{var.ccm:educationallearningresourcetype|-}}\nSchlagworte: {{var.cclom:general_keyword|-}}\nBeschreibung: {{var.cclom:general_description|-}}\nFormat: {{node.cclom:format|-}}\nMedientyp: {{node.virtual:mediatype|-}}"
             }
           ]
         }
@@ -51,7 +51,7 @@
               "messages": [
                 {
                   "role": "user",
-                  "textContent": "Erzeuge einen aussagekräftigen Titel"
+                  "content": "Erzeuge einen aussagekräftigen Titel"
                 }
               ]
             }
@@ -94,7 +94,7 @@
               "messages": [
                 {
                   "role": "user",
-                  "textContent": "Erzeuge eine kurze zusammenfassende Beschreibung"
+                  "content": "Erzeuge eine kurze zusammenfassende Beschreibung"
                 }
               ]
             }
@@ -125,7 +125,7 @@
               "messages": [
                 {
                   "role": "user",
-                  "textContent": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"
+                  "content": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"
                 }
               ]
             }
@@ -164,7 +164,7 @@
               "messages": [
                 {
                   "role": "user",
-                  "textContent": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"
+                  "content": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"
                 }
               ]
             }
@@ -187,7 +187,7 @@
               "messages": [
                 {
                   "role": "user",
-                  "textContent": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"
+                  "content": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"
                 }
               ]
             }
@@ -221,7 +221,7 @@
               "messages": [
                 {
                   "role": "user",
-                  "textContent": "Ordne das Material in einer der folgende kategorien ein: {{widget:$.ccm:educationallearningresourcetype.values..caption}}"
+                  "content": "Ordne das Material in einer der folgende Kategorien ein: {{widget.$.ccm:educationallearningresourcetype.values..caption}}"
                 }
               ]
             }
