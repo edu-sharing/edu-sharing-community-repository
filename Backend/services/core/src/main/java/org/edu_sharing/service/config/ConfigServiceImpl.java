@@ -360,6 +360,7 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
 
     private void refresh() {
         configCache.clear();
+        contextCacheById.clear();
         contextCacheByDomain.clear();
         try {
             getConfig();
