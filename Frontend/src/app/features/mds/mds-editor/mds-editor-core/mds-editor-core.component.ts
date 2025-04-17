@@ -5,7 +5,7 @@ import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 import { EditorMode, MdsView } from '../../types/types';
 import { MdsEditorViewComponent } from '../mds-editor-view/mds-editor-view.component';
 import { AuthenticationService, RestConstants } from 'ngx-edu-sharing-api';
-import { Toast } from '../../../../services/toast';
+import { Toast, ToastType } from '../../../../services/toast';
 import { DialogsService } from '../../../dialogs/dialogs.service';
 import { EduSharingLlmService, WidgetAiConfigInfo } from 'ngx-edu-sharing-b-api';
 import { MdsEditorCommonService } from '../mds-editor-common.service';
@@ -24,6 +24,7 @@ export class MdsEditorCoreComponent {
     readonly editorMode: EditorMode;
     readonly shouldShowExtendedWidgets$: BehaviorSubject<boolean>;
     readonly hasAi = new BehaviorSubject(false);
+    readonly aiLoading = new BehaviorSubject(false);
 
     constructor(
         public mdsEditorInstance: MdsEditorInstanceService,
@@ -68,7 +69,12 @@ export class MdsEditorCoreComponent {
     }
 
     async generateSuggestions() {
-        this.toast.showProgressSpinner();
+        this.aiLoading.next(true);
+        this.toast.show({
+            message: 'MDS.AI.GENERATE_ASYNC_STARTED',
+            type: 'info',
+            subtype: ToastType.InfoAction,
+        });
         try {
             const widgets: WidgetAiConfigInfo[] = this.mdsEditorInstance.widgets.value
                 .filter(
@@ -80,7 +86,7 @@ export class MdsEditorCoreComponent {
                 .map((w) => {
                     return {
                         widgetId: w.definition.id,
-                        aiConfigId: w.definition.aiConfigs[0].id,
+                        aiConfigId: 'default', //w.definition.aiConfigs[0].id,
                     };
                 });
             const values = await this.mdsEditorInstance.getValues(null, false);
@@ -113,7 +119,12 @@ export class MdsEditorCoreComponent {
         } catch (e) {
             console.warn('Could not fetch suggestion data', e);
         }
-        this.toast.closeProgressSpinner();
+        this.toast.show({
+            message: 'MDS.AI.GENERATE_ASYNC_FINISHED',
+            type: 'info',
+            subtype: ToastType.InfoAction,
+        });
+        this.aiLoading.next(false);
     }
 }
 

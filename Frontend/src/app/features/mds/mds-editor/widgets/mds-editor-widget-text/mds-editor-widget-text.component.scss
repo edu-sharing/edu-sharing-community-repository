@@ -23,9 +23,12 @@
             align-items: center;
             flex-grow: 1;
             gap: 10px;
+            .actions {
+                min-width: 98px;
+            }
             .content {
                 flex-grow: 1;
-                white-space: pre;
+                white-space: pre-line;
                 // font-family: 'Lucida Console', monospace;
                 border: 1px solid var(--palette-primary-300);
                 padding: 5px 10px;

@@ -55,6 +55,9 @@ mat-chip {
 }
 .mat-chip-suggestions {
     padding-left: 8px;
+    .mat-chip-label {
+        @include limitLineLength(135px);
+    }
     .mat-chip-suggestion {
         mat-icon {
             line-height: normal;

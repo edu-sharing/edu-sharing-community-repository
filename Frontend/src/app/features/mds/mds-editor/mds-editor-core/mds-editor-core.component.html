@@ -3,7 +3,13 @@
     <div class="title">{{ 'MDS.AI.GENERATE_ALL_TITLE' | translate }}</div>
     <div class="details">{{ 'MDS.AI.GENERATE_ALL_INFO' | translate }}</div>
   </div>
-  <button mat-flat-button color="primary" (click)="generateSuggestions()">
+  <button
+    mat-flat-button
+    color="primary"
+    (click)="generateSuggestions()"
+    [disabled]="aiLoading | async"
+  >
+    <es-spinner-small *ngIf="aiLoading | async"></es-spinner-small>
     {{ 'MDS.AI.GENERATE_ALL_BUTTON' | translate }}
   </button>
 </div>
