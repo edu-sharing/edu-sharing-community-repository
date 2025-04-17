@@ -16,6 +16,10 @@
       "ngx-edu-sharing-ui": [
         "dist/edu-sharing-ui/edu-sharing-ui",
         "dist/edu-sharing-ui"
+      ],
+      "ngx-edu-sharing-b-api": [
+        "dist/b-api/b-api",
+        "dist/b-api"
       ]
     }
   },
