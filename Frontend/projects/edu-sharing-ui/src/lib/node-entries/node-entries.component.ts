@@ -11,12 +11,11 @@ import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
-import { first, takeUntil } from 'rxjs/operators';
+import { filter, first, takeUntil } from 'rxjs/operators';
 import { NodeEntriesDataType, NodeEntriesDisplayType } from './entries-model';
 import { NodeEntriesGlobalService } from './node-entries-global.service';
 import { NodeEntriesTemplatesService } from './node-entries-templates.service';
 import { NodeEntriesService } from '../services/node-entries.service';
-import { Node, GenericAuthority } from 'ngx-edu-sharing-api';
 import { KeyboardShortcutsService } from '../services/abstract/keyboard-shortcuts.service';
 import { NodeDataSourceRemote } from './node-data-source-remote';
 
@@ -33,6 +32,7 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType>
     @ViewChild(MatPaginator) paginator: MatPaginator;
 
     private readonly destroyed = new Subject<void>();
+    private readonly updateKeyboardShortcuts = new Subject<void>();
 
     constructor(
         public changeDetectorRef: ChangeDetectorRef,

@@ -263,6 +263,11 @@
     "TOGGLE_ALL": "Alle / Nichts auswählen",
     "CONFIGURE_COLUMNS": "Spalten konfigurieren"
   },
+  "MAPTYPE": {
+    "IMAGES": "Bilder",
+    "USERDATAFOLDER": "Dokumente",
+    "INBOX": "Inbox"
+  },
   "NODE": {
     "cm:name": "Dateiname",
     "cm:title": "Titel",
@@ -901,6 +906,7 @@
     "DOWNLOAD_TRY_AGAIN": "Erneut versuchen",
     "STORAGE_LOCATION_SAVED": "Der Ordner \"{{name}}\" wird zukünftig standardmäßig für Uploads verwendet",
     "STORAGE_LOCATION_RESET": "Der Standard-Ordner für Uploads wurde zurückgesetzt",
+    "OPTION_DISABLED_OR_UNAVAILABLE": "Die gewünschte Aktion steht leider nicht zur Verfügung",
     "API_FORBIDDEN": "Keine Rechte, um auf diesen Inhalt zuzugreifen",
     "API_FORBIDDEN_LOGIN": "Bitte anmelden, um auf diesen Bereich zuzugreifen"
   },

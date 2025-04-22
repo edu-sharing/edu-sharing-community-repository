@@ -286,8 +286,8 @@ export class DialogsService {
         );
         return this.cardDialog.open(SearchNodeStoreComponent, {
             title: 'SEARCH.NODE_STORE.TITLE',
-            width: 400,
-            minHeight: 600,
+            width: 500,
+            minHeight: 500,
             contentPadding: 0,
         });
     }

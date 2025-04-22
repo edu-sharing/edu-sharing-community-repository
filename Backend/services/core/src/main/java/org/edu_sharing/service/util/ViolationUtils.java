@@ -1,7 +1,6 @@
 package org.edu_sharing.service.util;
 
 import jakarta.validation.ConstraintViolation;
-import org.edu_sharing.restservices.ConstraintViolationExceptionMapper;
 
 public class ViolationUtils {
 
@@ -13,7 +12,8 @@ public class ViolationUtils {
         return violation.getMessage().split(":")[0];
     }
     public static String getViolationMessage(ConstraintViolation<?> violation){
-        return violation.getMessage().split(":")[1];
+        String[] split = violation.getMessage().split(":");
+        return split.length > 1 ? split[1] : split[0];
     }
 
 }

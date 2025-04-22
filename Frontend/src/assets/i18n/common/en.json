@@ -243,6 +243,11 @@
     "nextPageLabel": "Next page",
     "previousPageLabel": "Previous page"
   },
+  "MAPTYPE": {
+    "IMAGES": "Images",
+    "USERDATAFOLDER": "Documents",
+    "INBOX": "Inbox"
+  },
   "NODE": {
     "cm:name": "filename",
     "cm:title": "title",
@@ -861,7 +866,8 @@
     "DOWNLOAD_FAILED": "Download of \"{{name}}\" failed.\nCheck your Internet connection and try again",
     "DOWNLOAD_TRY_AGAIN": "Try again",
     "STORAGE_LOCATION_SAVED": "The folder \"{{name}}\" will be used by default for uploads in the future",
-    "STORAGE_LOCATION_RESET": "The default folder for uploads has been reset"
+    "STORAGE_LOCATION_RESET": "The default folder for uploads has been reset",
+    "OPTION_DISABLED_OR_UNAVAILABLE": "The selected action is currently unavailable"
   },
   "NODE_SEARCH_SELECTOR": {
     "MORE_FILTERS": "Extended search filters",

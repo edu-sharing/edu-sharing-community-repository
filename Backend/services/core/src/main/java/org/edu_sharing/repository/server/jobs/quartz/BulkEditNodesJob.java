@@ -113,7 +113,7 @@ public class BulkEditNodesJob extends AbstractJob{
 		ReplaceToken,
 		@JobFieldDescription(description = "Find specific keys in the list and map it to new ones (list must contain oldValue and newValue as csv-headings!)")
 		ReplaceMapping,
-		@JobFieldDescription(description = "Add value to an multivalue property. use \"value\" param for the new value")
+		@JobFieldDescription(description = "Add value to an multivalue property. use \"value\" param for the new value or \"copy\" to merge an other field")
 		Append,
 		@JobFieldDescription(description = "Remove the property. Use with searchtoken: one value must be equal, than the property is removed. When no search token is given, the property will be removed on every node")
 		Remove,
@@ -313,27 +313,40 @@ public class BulkEditNodesJob extends AbstractJob{
 						}
 					}
 				} else if(mode.equals(Mode.Append)){
-					if(value == null ){
-						logger.warn("can not append value cause its's null");
-					}else if(!(value instanceof String)){
-						logger.warn("only strings as value supported");
+					ArrayList<String> values = new ArrayList<>();
+					if(value == null){
+						logger.warn("can not append value cause its null");
+					} else if((value instanceof String)){
+						values.add((String) value);
+					}else if(value instanceof Collection) {
+						values.addAll((Collection<? extends String>) value);
+					} else {
+						logger.warn("Unsupported value type: " + value.getClass().getName());
+					}
+
+					Serializable current = nodeService.getProperty(nodeRef, QName.createQName(property));
+					if(current != null && !(current instanceof List)){
+						logger.info("property "+property +" is no list");
 					}else{
-						Serializable current = nodeService.getProperty(nodeRef, QName.createQName(property));
-						if(current == null){
-							logger.info("current is null");
-						}else if(!(current instanceof List)){
-							logger.info("property "+property +" is no list");
-						}else{
-							ArrayList newList = new ArrayList((List)current);
+						ArrayList<String> newList;
+						if(current != null) {
+							newList = new ArrayList<>((List)current);
+						} else {
+							newList = new ArrayList<>();
+						}
+						boolean changed = false;
+						for (String value: values) {
 							if(newList.contains(value)){
 								logger.info(nodeRef + " already contains "+value +" in "+property);
 							}else{
 								newList.add(value);
-								setProperty(nodeRef, QName.createQName(property),newList);
+								changed = true;
 							}
 						}
+						if(changed) {
+							setProperty(nodeRef, QName.createQName(property),newList);
+						}
 					}
-
 				}  else if(mode.equals(Mode.SetInterceptor)){
 					HashMap<String, Object> properties = nodeService.getProperties(nodeRef).entrySet().stream().collect(
 							HashMap::new,

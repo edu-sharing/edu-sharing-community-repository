@@ -42,6 +42,9 @@ global:
     common: ${docker.common}
 
   metrics:
+    rules:
+      ## @param global.metrics.rules.enabled Enable metrics rules
+      enabled: false
     scrape:
       ## @param global.metrics.scrape.interval Set prometheus scrape interval
       interval: 60s
@@ -107,6 +110,20 @@ config:
     enabled: true
     ## @param config.metrics.relabelings Relable metrics
     relabelings: []
+
+    rules:
+
+      jvmHighGCRate:
+        ## @param config.metrics.rules.jvmHighGCRate.enabled Enable metric rule jvmHighGCRate
+        enabled: true
+        config:
+          ## @param config.metrics.rules.jvmHighGCRate.config.max Set metric rule jvmHighGCRate max gc rate
+          max: 0.3
+        ## @param config.metrics.rules.jvmHighGCRate.for Set metric rule jvmHighGCRate wait interval
+        for: 5m
+        labels:
+          ## @param config.metrics.rules.jvmHighGCRate.labels.severity Set metric rule jvmHighGCRate severity level
+          severity: critical
 
   override:
     application:

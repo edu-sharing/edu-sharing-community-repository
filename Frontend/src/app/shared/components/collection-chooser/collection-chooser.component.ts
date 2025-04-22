@@ -71,8 +71,8 @@ export class CollectionChooserComponent implements OnInit {
     searchQuery = '';
     currentRoot: Node;
     breadcrumbs: Node[];
-    dataSourceLatest = new NodeDataSource();
-    dataSourceTree = new NodeDataSource();
+    dataSourceLatest = new NodeDataSource<Node>();
+    dataSourceTree = new NodeDataSource<Node>();
     createCollectionOptionItem = new OptionItem('OPTIONS.NEW_COLLECTION', 'add', () =>
         this.createCollection(),
     );
@@ -231,12 +231,12 @@ export class CollectionChooserComponent implements OnInit {
         );
     }
 
-    goIntoCollection(node: Node | GenericAuthority) {
+    goIntoCollection(node: Node) {
         this.currentRoot = node as Node;
         this.loadMy();
     }
 
-    clickCollection(node: Node | GenericAuthority) {
+    clickCollection(node: Node) {
         if (!this.checkPermissions(node as Node)) {
             return;
         }

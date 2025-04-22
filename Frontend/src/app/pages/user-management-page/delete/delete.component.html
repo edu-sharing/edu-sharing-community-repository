@@ -17,18 +17,18 @@
     {{ 'PERMISSIONS.DELETE.MAIN_HEADING' | translate }}
   </h2>
   <div class="group">
-    <es-spinner *ngIf="usersDataSource.isLoading"></es-spinner>
     <h3 class="mat-heading-3 mat-heading-underline" *ngIf="!usersDataSource.isLoading">
       <span>{{ 'PERMISSIONS.DELETE.USER_LIST' | translate }}</span
       ><button mat-icon-button (click)="refresh()"><i esIcon="refresh"></i></button>
     </h3>
-    <div class="user-list" *ngIf="!usersDataSource.isEmpty()">
+    <div class="user-list" *ngIf="usersDataSource.isLoading || !usersDataSource.isEmpty()">
       <es-node-entries-wrapper
         [displayType]="DisplayType.Table"
         [columns]="columns"
         [dataSource]="usersDataSource"
         [checkbox]="true"
         [elementInteractionType]="InteractionType.Emitter"
+        (fetchData)="fetchMore($event)"
       ></es-node-entries-wrapper>
     </div>
   </div>
@@ -37,7 +37,7 @@
     *ngIf="!usersDataSource.isLoading && usersDataSource.isEmpty()"
     message="{{ 'PERMISSIONS.DELETE.STATE.NO_USERS' | translate }}"
   ></es-info-message>
-  <div *ngIf="!usersDataSource.isLoading && !usersDataSource.isEmpty() && options">
+  <div *ngIf="!usersDataSource.isEmpty() && options">
     <div class="group group-jobs" *ngIf="jobs?.length">
       <h3 class="mat-heading-3 mat-heading-underline">
         {{ 'PERMISSIONS.DELETE.JOBS.CAPTION' | translate }}

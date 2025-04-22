@@ -63,6 +63,9 @@ global:
     common: ${docker.common}
 
   metrics:
+    rules:
+      ## @param global.metrics.rules.enabled Enable metrics rules
+      enabled: false
     scrape:
       ## @param global.metrics.scrape.interval Set prometheus scrape interval
       interval: 60s
@@ -325,6 +328,47 @@ config:
     ## @param config.metrics.relabelings Relable metrics
     relabelings: []
 
+    rules:
+
+      dbPoolFull:
+        ## @param config.metrics.rules.dbPoolFull.enabled Enable metric rule dbPoolFull
+        enabled: true
+        ## @param config.metrics.rules.dbPoolFull.for Set metric rule dbPoolFull wait interval
+        for: 5m
+        labels:
+          ## @param config.metrics.rules.dbPoolFull.labels.severity Set metric rule dbPoolFull severity level
+          severity: critical
+
+      hazelcastInsufficientMemberships:
+        ## @param config.metrics.rules.hazelcastInsufficientMemberships.enabled Enable metric rule hazelcastInsufficientMemberships
+        enabled: true
+        ## @param config.metrics.rules.hazelcastInsufficientMemberships.for Set metric rule hazelcastInsufficientMemberships wait interval
+        for: 5m
+        labels:
+          ## @param config.metrics.rules.hazelcastInsufficientMemberships.labels.severity Set metric rule hazelcastInsufficientMemberships severity level
+          severity: critical
+
+      hazelcastUp:
+        ## @param config.metrics.rules.hazelcastUp.enabled Enable metric rule hazelcastUp
+        enabled: true
+        ## @param config.metrics.rules.hazelcastUp.for Set metric rule hazelcastUp wait interval
+        for: 5m
+        labels:
+          ## @param config.metrics.rules.hazelcastUp.labels.severity Set metric rule hazelcastUp severity level
+          severity: critical
+
+      jvmHighGCRate:
+        ## @param config.metrics.rules.jvmHighGCRate.enabled Enable metric rule jvmHighGCRate
+        enabled: true
+        config:
+          ## @param config.metrics.rules.jvmHighGCRate.config.max Set metric rule jvmHighGCRate max gc rate
+          max: 0.3
+        ## @param config.metrics.rules.jvmHighGCRate.for Set metric rule jvmHighGCRate wait interval
+        for: 5m
+        labels:
+          ## @param config.metrics.rules.jvmHighGCRate.labels.severity Set metric rule jvmHighGCRate severity level
+          severity: critical
+
   http:
     client:
       ## @param config.http.client.disablesni4host Disable SNI for host in http client
@@ -352,8 +396,10 @@ config:
         default: ""
         ## @param config.http.server.csp.font Set font CSP for http server
         font: ""
-        ## @param config.http.server.csp.frame Set frame CSP for http server
+        ## @param config.http.server.csp.frame Set frame-ancestors CSP for http server
         frame: ""
+        ## @param config.http.server.csp.framesrc Set frame-src CSP for http server
+        framesrc: ""
         ## @param config.http.server.csp.img Set image CSP for http server
         img: ""
         ## @param config.http.server.csp.media Set media CSP for http server

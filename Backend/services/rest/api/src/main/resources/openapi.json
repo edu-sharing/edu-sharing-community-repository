@@ -781,10 +781,8 @@
         },
         "required": [
           "access",
-          "collection",
           "createdAt",
           "createdBy",
-          "downloadUrl",
           "name",
           "owner",
           "ref"
@@ -1318,6 +1316,8 @@
         "properties": {
           "confidence": {
             "format": "double",
+            "maximum": 1,
+            "minimum": 0,
             "type": "number"
           },
           "description": {
@@ -1330,6 +1330,11 @@
             "type": "object"
           }
         },
+        "required": [
+          "description",
+          "propertyId",
+          "value"
+        ],
         "type": "object"
       },
       "CreateUsage": {
@@ -3358,10 +3363,8 @@
         },
         "required": [
           "access",
-          "collection",
           "createdAt",
           "createdBy",
-          "downloadUrl",
           "name",
           "owner",
           "ref"
@@ -3517,10 +3520,8 @@
         },
         "required": [
           "access",
-          "collection",
           "createdAt",
           "createdBy",
-          "downloadUrl",
           "name",
           "owner",
           "ref"
@@ -35758,6 +35759,7 @@
         ]
       },
       "post": {
+        "description": "Pass a list of suggestions for each property and value. For each entry, exactly one suggestion value is set for the respective property. If multiple suggestion values are defined for a property, they must be transmitted in separate entries for each value.\n* propertyId: abbreviation of the property (e.g., cclom:general_description)\n* value: suggestion value – corresponds to the data type of the property (string, long, double, boolean), always single-valued. Dates and times should always be provided in Unix timestamp format.\n* description: notes for the editor explaining why this suggestion is a good fit.\n* confidence: nominal value indicating how well the suggestion fits (value between 0-1).",
         "operationId": "createSuggestions",
         "parameters": [
           {
@@ -35793,7 +35795,7 @@
             }
           },
           {
-            "description": "Version of the suggestion",
+            "description": "Version of the suggestion mainly used from services",
             "in": "query",
             "name": "version",
             "required": true,

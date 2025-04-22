@@ -21,6 +21,7 @@ import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.search.SearchServiceElastic;
+import org.jetbrains.annotations.NotNull;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
@@ -32,43 +33,27 @@ import java.util.List;
 import java.util.Map;
 
 @JobDescription(description = "checks for nodes removed in repository but still exist in elasticsearch. please check that tracker is 100% finished and tracker is disabled before running ths job.")
-public class FixElasticSearchDeletedNodes extends AbstractJobMapAnnotationParams {
+public class FixElasticSearchDeletedNodes extends FixElasticSearchBase {
+
+    @JobFieldDescription(description = "Try to check the nested arrays like children or collections and clean them up as well", sampleValue = "true")
+    boolean cleanupChildren = true;
 
     @JobFieldDescription(description = "if false (default) no changes will be done.")
     boolean execute;
 
     @JobFieldDescription(description = "query that delivers a result of nodes that have to be checked. optional. if not set all nodes will be searched.", sampleValue = "{\"term\":{\"type\":\"ccm:io\"}}")
-    String query;
+    protected String query;
 
-
-    @JobFieldDescription(description = "Try to check the nested arrays like children or collections and clean them up as well", sampleValue = "true")
-    boolean cleanupChildren = true;
-
-    SearchServiceElastic searchServiceElastic = new SearchServiceElastic(ApplicationInfoList.getHomeRepository().getAppId());
-
-    private static int pageSize = 1000;
 
     Logger logger = Logger.getLogger(FixElasticSearchDeletedNodes.class);
 
-    ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-    ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-    NodeService nodeService = serviceRegistry.getNodeService();
 
     @Override
     public void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
 
         AuthenticationUtil.runAsSystem(() -> {
             try {
-                String unescapedQuery = StringEscapeUtils.unescapeJson(query);
-                logger.info("query:" + unescapedQuery);
-
-                Query.Builder builder = new Query.Builder();
-                if (query == null) {
-                    builder.bool(b -> b.must(q -> q.matchAll(all -> all)));
-                } else {
-                    builder.wrapper(w -> w.query(unescapedQuery));
-                }
-
+                Query.Builder builder = getBuilder(query);
                 search( builder.build(), new DeletedNodesHandler());
             } catch (IOException e) {
                 logger.error(e.getMessage(), e);
@@ -77,62 +62,10 @@ public class FixElasticSearchDeletedNodes extends AbstractJobMapAnnotationParams
         });
     }
 
-    private void search(Query query, SearchResultHandler searchResultHandler) throws IOException {
-        logger.info("search with handler: " + searchResultHandler.getClass().getName());
-
-        Time scroll = Time.of(time -> time.time("4h"));
-        ResponseBody<Map> response = null;
-        int page = 0;
-        do {
-            if (response == null) {
-                response = search(SearchServiceElastic.WORKSPACE_INDEX, query, scroll);
-            } else {
-                response = scroll(scroll, response.scrollId());
-            }
-            HitsMetadata<Map> searchHits = response.hits();
-            logger.info("page:" + page + " with result size:" + searchHits.hits().size() + " of:" + searchHits.total().value());
-            for (Hit<Map> searchHit : searchHits.hits()) {
-                searchResultHandler.handleSearchHit(searchHit);
-            }
-            page++;
-        } while (response.hits() != null && !response.hits().hits().isEmpty());
-
-        boolean clearSuccess = clearScroll(response.scrollId());
-        if (clearSuccess) logger.info("cleared scroll successfully");
-        else logger.error("clear of scroll " + response.scrollId() + " failed");
-    }
-
-
-    private SearchResponse<Map> search(String index, Query query, Time scroll) throws IOException {
-        return searchServiceElastic.searchNative(SearchRequest.of(req -> req
-                .index(index)
-                .size(pageSize)
-                .source(src->src.filter(filter->filter.excludes("preview", "content")))
-                .scroll(scroll)
-                .query(query)));
-    }
-
-    private ScrollResponse<Map> scroll(Time scroll, String scrollId) throws IOException {
-        return searchServiceElastic.scrollNative(ScrollRequest.of(sq -> sq
-                .scrollId(scrollId)
-                .scroll(scroll)));
-    }
-
-    private boolean clearScroll(String scrollId) throws IOException {
-        ClearScrollResponse clearScrollResponse = searchServiceElastic.clearScrollNative(ClearScrollRequest.of(req -> req.scrollId(scrollId)));
-        return clearScrollResponse.succeeded();
-    }
-
-    public interface SearchResultHandler {
-        public void handleSearchHit(Hit<Map> searchHit) throws IOException;
-    }
-
     public class DeletedNodesHandler implements SearchResultHandler {
         @Override
         public void handleSearchHit(Hit<Map> searchHit) throws IOException {
 
-            Map nodeRef = (Map) searchHit.source().get("nodeRef");
-            String nodeId = (String) nodeRef.get("id");
             String dbid = searchHit.id();
 
             Map properties = (Map) searchHit.source().get("properties");
@@ -140,11 +73,7 @@ public class FixElasticSearchDeletedNodes extends AbstractJobMapAnnotationParams
             String type = (String) searchHit.source().get("type");
             List<String> aspects = (List<String>) searchHit.source().get("aspects");
 
-            Map storeRef = (Map) nodeRef.get("storeRef");
-            String protocol = (String) storeRef.get("protocol");
-            String identifier = (String) storeRef.get("identifier");
-
-            NodeRef alfNodeRef = new NodeRef(new StoreRef(protocol, identifier), nodeId);
+            NodeRef alfNodeRef = getNodeRef(searchHit);
             if (!nodeService.exists(alfNodeRef)) {
                 logger.info(alfNodeRef + ";dbid:" + dbid + ";type:" + type + ";name:" + name + ";does not longer exist in repo. will remove.");
                 //tracker gets 2 events when a node is deleted from workspace: delete and create for archive store

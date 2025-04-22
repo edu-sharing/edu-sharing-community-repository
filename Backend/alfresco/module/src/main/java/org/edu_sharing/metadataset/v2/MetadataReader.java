@@ -711,14 +711,14 @@ public class MetadataReader {
                 return reader.getValuespace(locale);
             } catch(Throwable t) {
                 if(value.isLenient()) {
-                    log.error("Could not read valuespace " + value.getValue() + ": " + t.getMessage(), t);
+                    log.warn("Could not read valuespace " + value.getValue() + ": " + t.getMessage() + " (will continue since lenient=true)", t);
                     return new ValuespaceData(new MetadataKey(), Collections.emptyList());
                 } else {
                     throw t;
                 }
             }
         } else {
-            log.warn("No viable metadata reader found for url {}", value);
+            log.error("No viable metadata reader found for url {}", value);
         }
         return null;
     }
@@ -796,8 +796,8 @@ public class MetadataReader {
                             ? key.getKey()
                             : cap,
                     fallback));
-            key.setDescription(getTranslation(key, description, ""));
-            key.setAbbreviation(getTranslation(key, abbreviation, ""));
+            key.setDescription(getTranslation(key, description, StringUtils.isEmpty(key.getI18nPrefix()) ? description : ""));
+            key.setAbbreviation(getTranslation(key, abbreviation, StringUtils.isEmpty(key.getI18nPrefix()) ? abbreviation : ""));
             keys.add(key);
         }
         return keys;

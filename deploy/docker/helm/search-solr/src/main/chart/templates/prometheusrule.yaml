@@ -1,0 +1,24 @@
+{{- if .Capabilities.APIVersions.Has "monitoring.coreos.com/v1" }}
+{{- if .Values.global.metrics.rules.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "edusharing_common_lib.names.name" . }}
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
+spec:
+  groups:
+    - name: {{ include "edusharing_common_lib.names.name" . }}
+      rules:
+        {{- if .Values.config.metrics.rules.jvmHighGCRate.enabled }}
+        - alert: jvmHighGCRate
+          annotations:
+            description: >-
+              {{ include "edusharing_common_lib.names.name" . }} has high JVM GC time rate (> {{ .Values.config.metrics.rules.jvmHighGCRate.config.max | float64 }}s) since {{ .Values.config.metrics.rules.jvmHighGCRate.for }}.
+            summary: {{ include "edusharing_common_lib.names.name" . }} has high JVM GC time rate.
+          expr: >-
+            rate(jvm_gc_collection_seconds_sum{namespace="{{ .Release.Namespace }}",pod=~"{{ include "edusharing_common_lib.names.name" . }}.*"}[5m]) > {{ .Values.config.metrics.rules.jvmHighGCRate.config.max | float64 }}
+          for: {{ .Values.config.metrics.rules.jvmHighGCRate.for }}
+          labels: {{ toYaml .Values.config.metrics.rules.jvmHighGCRate.labels | nindent 12 }}
+        {{- end }}
+{{- end }}
+{{- end }}

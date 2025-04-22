@@ -101,7 +101,10 @@
       "ORG_ADMINISTRATORS": "administrators",
       "CLASS": "class",
       "WORKING_GROUP": "working group",
-      "LESSON": "lesson"
+      "LESSON": "lesson",
+      "SCHOOL_NATIONAL": "national school",
+      "SCHOOL_MUNICIPAL": "municipal school",
+      "SCHOOL_PRIVATE": "private school"
     },
     "SCOPE_TYPE": {
       "null": "Local / Default visibility",
