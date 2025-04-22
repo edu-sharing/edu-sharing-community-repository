@@ -8199,6 +8199,18 @@
             "type": "string"
           }
         },
+        "required": [
+          "confidence",
+          "created",
+          "createdBy",
+          "id",
+          "nodeId",
+          "propertyId",
+          "status",
+          "type",
+          "value",
+          "version"
+        ],
         "type": "object"
       },
       "Suggestions": {
