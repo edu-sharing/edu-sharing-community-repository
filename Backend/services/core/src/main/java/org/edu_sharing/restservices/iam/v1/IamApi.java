@@ -78,6 +78,7 @@ public class IamApi {
             @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount,
             @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
             @Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+            @Parameter(description = "if true it resolves the organisations the users are member of", required = false, schema = @Schema(defaultValue = "true")) @QueryParam("resolveOrganisations") boolean resolveOrganisations,
             @Context HttpServletRequest req) {
 
         try {
@@ -98,7 +99,7 @@ public class IamApi {
 
             List<UserSimple> result = new ArrayList<>();
             for (String user : search.getData()) {
-                result.add(new PersonDao(repoDao, user).asPersonSimple(true));
+                result.add(new PersonDao(repoDao, user).asPersonSimple(resolveOrganisations));
             }
             UserEntries response = new UserEntries();
             response.setUsers(result);

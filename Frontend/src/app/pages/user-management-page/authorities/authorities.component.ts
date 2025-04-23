@@ -928,11 +928,13 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                         this.dataSource.isLoading = false;
                     });
             } else if (this._mode == 'USER') {
-                this.iam.searchUsers(query, true, '', request).subscribe(async (data: IamUsers) => {
-                    this.dataSource.setPagination(data.pagination);
-                    await this.dataSource.appendData(data.users as unknown as User[]);
-                    this.dataSource.isLoading = false;
-                });
+                this.iam
+                    .searchUsers(query, true, '', request, RestConstants.HOME_REPOSITORY, false)
+                    .subscribe(async (data: IamUsers) => {
+                        this.dataSource.setPagination(data.pagination);
+                        await this.dataSource.appendData(data.users as unknown as User[]);
+                        this.dataSource.isLoading = false;
+                    });
             }
         }
     }
