@@ -20,3 +20,5 @@ export function init() {
         .bootstrapModule(AppModule)
         .catch((err) => console.error(err));
 }
+
+init();

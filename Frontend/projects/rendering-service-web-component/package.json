@@ -1,6 +1,6 @@
 {
   "name": "ngx-edu-sharing-rendering-web-component",
-  "version": "0.0.1",
+  "version": "0.0.9",
   "//": [
     "We use --deploy-url here although Angular complains it is deprecated since this seems to be ",
     "the only way to get Angular to load lazy scripts from a route that differs from base HREF as ",
