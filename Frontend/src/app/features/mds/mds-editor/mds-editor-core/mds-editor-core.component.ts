@@ -65,7 +65,13 @@ export class MdsEditorCoreComponent {
         this.mdsEditorInstance.mdsInflated.next(true);
         this.auth
             .hasToolpermission(RestConstants.TOOLPERMISSION_BAPI)
-            .then((has) => this.hasAi.next(has && this.mdsEditorInstance.suggestionsSupported));
+            .then((has) =>
+                this.hasAi.next(
+                    has &&
+                        this.mdsEditorInstance.suggestionsSupported &&
+                        this.mdsEditorInstance.editorMode === 'nodes',
+                ),
+            );
     }
 
     async generateSuggestions() {
