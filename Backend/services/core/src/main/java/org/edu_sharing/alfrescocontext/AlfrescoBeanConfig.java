@@ -26,10 +26,7 @@ import org.alfresco.service.cmr.rendition.RenditionService;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.search.CategoryService;
 import org.alfresco.service.cmr.search.SearchService;
-import org.alfresco.service.cmr.security.AuthorityService;
-import org.alfresco.service.cmr.security.MutableAuthenticationService;
-import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.cmr.security.PersonService;
+import org.alfresco.service.cmr.security.*;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.cmr.tagging.TaggingService;
 import org.alfresco.service.cmr.version.VersionService;
@@ -42,6 +39,7 @@ import org.edu_sharing.alfresco.policy.HomeFolderTool;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.repository.server.tools.cache.UserCache;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -279,6 +277,12 @@ public class AlfrescoBeanConfig {
         return applicationContext.getBean("WebDavAuthenticationFilter", DependencyInjectedFilter.class);
     }
 
+    @Primary
+    @Bean(name = "OwnableService")
+    public OwnableService ownableService() {
+        return serviceRegistry.getOwnableService();
+    }
+
     @Bean
     public NodeService alfrescoDefaultDbNodeService() {
         return applicationContext.getBean("alfrescoDefaultDbNodeService", NodeService.class);
@@ -332,5 +336,15 @@ public class AlfrescoBeanConfig {
     @Bean
     public SqlSessionFactory sqlSessionFactoryBean(){
         return applicationContext.getBean("repoSqlSessionFactory", SqlSessionFactory.class);
+    }
+
+    @Bean
+    public UserCache userCache(){
+        return applicationContext.getBean(UserCache.class);
+    }
+
+    @Bean
+    public org.edu_sharing.alfresco.service.AuthorityService eduAuthorityService(){
+        return (org.edu_sharing.alfresco.service.AuthorityService) applicationContext.getBean("eduAuthorityService");
     }
 }

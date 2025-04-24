@@ -112,4 +112,12 @@ public interface AuthorityService {
 	void setCustomAttributes(String authorityName, Map<String, Serializable> customAttributes);
 
 	String[] searchGroupNames(String pattern) throws Exception;
+
+	String activate2Fa(String username);
+
+	void deactivate2Fa(String username);
+
+	boolean validate2FA(String username, int code);
+
+	byte[] generate2FaQRCode(String username);
 }

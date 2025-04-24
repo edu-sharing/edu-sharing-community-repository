@@ -25,8 +25,6 @@ import org.edu_sharing.repository.server.tools.cache.PersonCache;
 import org.edu_sharing.restservices.iam.v1.model.GroupEntries;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.NotAnAdminException;
-import org.edu_sharing.service.authentication.totp.OneTimeTokenService;
-import org.edu_sharing.service.authentication.totp.OneTimeTokenServiceFactory;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
@@ -774,8 +772,7 @@ public class PersonDao {
 			throw new AccessDeniedException("External managed users can't activate 2fa. Please contact your system administrator.");
 		}
 
-		OneTimeTokenService oneTimeTokenServiceService = OneTimeTokenServiceFactory.getOneTimeTokenServiceService(repoDao.getId());
-		return oneTimeTokenServiceService.generateKey(getUserName());
+		return authorityService.activate2Fa(getUserName());
 	}
 
 	public void deactivate2Fa() {
@@ -783,8 +780,7 @@ public class PersonDao {
 			throw new AccessDeniedException("External managed users can't deactivate 2fa. Please contact your system administrator.");
 		}
 
-		OneTimeTokenService oneTimeTokenServiceService = OneTimeTokenServiceFactory.getOneTimeTokenServiceService(repoDao.getId());
-		oneTimeTokenServiceService.removeKey(getUserName());
+		authorityService.deactivate2Fa(getUserName());
 	}
 
 	public byte[] getQRCode() {
@@ -792,7 +788,6 @@ public class PersonDao {
 			throw new AccessDeniedException("External managed users can't get a QR code. Please contact your system administrator.");
 		}
 
-		OneTimeTokenService oneTimeTokenServiceService = OneTimeTokenServiceFactory.getOneTimeTokenServiceService(repoDao.getId());
-		return oneTimeTokenServiceService.generateQRCode(getUserName());
+		return authorityService.generate2FaQRCode(getUserName());
 	}
 }
