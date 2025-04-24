@@ -1,7 +1,6 @@
 package org.edu_sharing.repository.server.authentication;
 
 import java.io.IOException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
@@ -14,12 +13,10 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.AuthenticationService;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -202,7 +199,7 @@ public class AuthenticationFilterPreview implements jakarta.servlet.Filter {
 			
 		} else if (authHdr!=null && authHdr.length() > 5 && authHdr.substring(0, 5).equalsIgnoreCase("BASIC")) {
 			try {
-				Map<String, String> authResult = ApiAuthenticationFilter.httpBasicAuth(authHdr);
+				Map<String, String> authResult = ApiAuthenticationFilter.httpBasicAuth(httpServletRequest, authHdr, true);
 				if(authResult == null) {
 					throw new Exception("Auth failed");
 				}
