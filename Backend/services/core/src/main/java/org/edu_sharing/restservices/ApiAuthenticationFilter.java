@@ -9,15 +9,13 @@ import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
-import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.authentication.AuthenticationFilter;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.service.authentication.oauth2.TokenService;
 import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
-import org.edu_sharing.service.authentication.totp.OneTimeTokenService;
-import org.edu_sharing.service.authentication.totp.OneTimeTokenServiceFactory;
+import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.config.ConfigServiceFactory;
@@ -256,8 +254,8 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
             //check 2FA
             if(!ignore2FA) {
                 int twoFaCode = httpReq.getIntHeader("X-2FA-Token");
-                OneTimeTokenService oneTimeTokenService = OneTimeTokenServiceFactory.getLocalService();
-                if (!oneTimeTokenService.isValid(username, twoFaCode)) {
+                AuthorityService authorityService = AuthorityServiceFactory.getLocalService();
+                if (!authorityService.validate2FA(username, twoFaCode)) {
                     httpReq.setAttribute(CCConstants.AUTH_ERROR_STATUS, CCConstants.AUTH_ERROR_STATUS_2FA);
                     throw new AuthenticationException("Invalid verification code for 2FA");
                 }

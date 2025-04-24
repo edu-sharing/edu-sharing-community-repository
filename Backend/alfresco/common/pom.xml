@@ -17,6 +17,13 @@
   <packaging>jar</packaging>
 
   <name>edu_sharing-community-repository-backend-alfresco-common</name>
+  <dependencies>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
 
   <build>
 

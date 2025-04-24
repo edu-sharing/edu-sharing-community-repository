@@ -28,40 +28,32 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class OneTimeTokenService {
 
-    private final OneTimeTokenMapper oneTimeTokenMapper;
-
     // Generate a new TOTP key
-    public String generateKey(String username) {
+    public String generateKey() {
         GoogleAuthenticator gAuth = new GoogleAuthenticator();
         final GoogleAuthenticatorKey key = gAuth.createCredentials();
-        oneTimeTokenMapper.save(new OneTimeToken(username, key.getKey()));
         return key.getKey();
     }
 
-    public void removeKey(String userName) {
-        oneTimeTokenMapper.deleteByUserName(userName);
-    }
 
     // Validate the TOTP code
-    public boolean isValid(String username, int code) {
-        OneTimeToken oneTimeToken = oneTimeTokenMapper.findByUserName(username);
-        if (oneTimeToken == null) {
+    public boolean isValid(String secret, int code) {
+        if (secret == null) {
             return true;
         }
 
         GoogleAuthenticator gAuth = new GoogleAuthenticator(
                 new GoogleAuthenticatorConfig.GoogleAuthenticatorConfigBuilder().build()
         );
-        return gAuth.authorize(oneTimeToken.getSecret(), code);
+        return gAuth.authorize(secret, code);
     }
 
     // Generate a QR code URL for Google Authenticator
-    public String generateQRUrl(String username) {
-        OneTimeToken oneTimeToken = oneTimeTokenMapper.findByUserName(username);
+    public String generateQRUrl(String secret,String username) {
         String url = GoogleAuthenticatorQRGenerator.getOtpAuthTotpURL(
                 ApplicationInfoList.getHomeRepository().getDomain(),
                 username,
-                new GoogleAuthenticatorKey.Builder(oneTimeToken.getSecret()).build());
+                new GoogleAuthenticatorKey.Builder(secret).build());
         try {
             return generateQRBase64(url);
         } catch (Exception e) {
@@ -69,12 +61,11 @@ public class OneTimeTokenService {
         }
     }
 
-    public byte[] generateQRCode(String username) {
-        OneTimeToken oneTimeToken = oneTimeTokenMapper.findByUserName(username);
+    public byte[] generateQRCode(String secret,String username) {
         String url = GoogleAuthenticatorQRGenerator.getOtpAuthTotpURL(
                 ApplicationInfoList.getHomeRepository().getDomain(),
                 username,
-                new GoogleAuthenticatorKey.Builder(oneTimeToken.getSecret()).build());
+                new GoogleAuthenticatorKey.Builder(secret).build());
         try {
             return generateQR(url);
         } catch (Exception e) {
