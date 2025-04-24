@@ -73,6 +73,7 @@ public class LoginApi {
         if (!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
             personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
         }
+
         String status = null;
         if (authenticated && personActiveStatus != null && !personActiveStatus.trim().equals("")) {
             String username = (String) req.getSession().getAttribute(CCConstants.AUTH_USERNAME);
@@ -90,12 +91,22 @@ public class LoginApi {
                 req.getSession().invalidate();
             }
         }
-
-        if (status != null) {
-            return Response.ok(new Login(authenticated, authTool.getScope(), null, req.getSession(), status)).build();
-        } else {
-            return Response.ok(new Login(authenticated, authTool.getScope(), req.getSession())).build();
+        if (status == null) {
+            org.edu_sharing.alfresco.repository.server.authentication.Context authContext =
+                    org.edu_sharing.alfresco.repository.server.authentication.Context.getCurrentInstance();
+            if (authContext != null) {
+                switch (authContext.getAuthErrorStatus()) {
+                    case CCConstants.AUTH_ERROR_STATUS_2FA:
+                        status = Login.STATUS_CODE_2FA;
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
+
+        Login login = new Login(authenticated, authTool.getScope(), null, req.getSession(), status);
+        return Response.ok(login).build();
     }
 
     @GET
