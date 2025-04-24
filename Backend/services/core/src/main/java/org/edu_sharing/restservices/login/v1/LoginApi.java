@@ -39,10 +39,7 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.spring.security.openid.SilentLoginModeRedirect;
 import org.springframework.context.ApplicationContext;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Path("/authentication/v1")
 @Tag(name = "AUTHENTICATION v1")
@@ -92,10 +89,11 @@ public class LoginApi {
             }
         }
         if (status == null) {
-            org.edu_sharing.alfresco.repository.server.authentication.Context authContext =
-                    org.edu_sharing.alfresco.repository.server.authentication.Context.getCurrentInstance();
-            if (authContext != null) {
-                switch (authContext.getAuthErrorStatus()) {
+            org.edu_sharing.alfresco.repository.server.authentication.Context authContext = org.edu_sharing.alfresco.repository.server.authentication.Context.getCurrentInstance();
+            Optional<String> authErrorStatus = Optional.ofNullable(authContext)
+                    .map(org.edu_sharing.alfresco.repository.server.authentication.Context::getAuthErrorStatus);
+            if (authErrorStatus.isPresent()) {
+                switch (authErrorStatus.get()) {
                     case CCConstants.AUTH_ERROR_STATUS_2FA:
                         status = Login.STATUS_CODE_2FA;
                         break;
@@ -106,7 +104,9 @@ public class LoginApi {
         }
 
         Login login = new Login(authenticated, authTool.getScope(), null, req.getSession(), status);
-        return Response.ok(login).build();
+        return Response.ok(login).
+
+                build();
     }
 
     @GET
