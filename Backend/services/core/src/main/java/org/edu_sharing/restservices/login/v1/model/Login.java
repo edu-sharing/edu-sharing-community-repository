@@ -52,6 +52,7 @@ public class Login {
     public final static String STATUS_CODE_INVALID_SCOPE = "INVALID_SCOPE";
     public final static String STATUS_CODE_PASSWORD_EXPIRED = "PASSWORD_EXPIRED";
     public final static String STATUS_CODE_PERSON_BLOCKED = "PERSON_BLOCKED";
+    public final static String STATUS_CODE_2FA = "2FA";
 
     @Data
     public static class LTISession {
@@ -79,10 +80,14 @@ public class Login {
 
 
     public Login(boolean isValidLogin, String scope, HttpSession session) {
-        this(isValidLogin, scope, null, session, (isValidLogin) ? STATUS_CODE_OK : STATUS_CODE_INVALID_CREDENTIALS);
+        this(isValidLogin, scope, null, session, null);
     }
 
     public Login(boolean isValidLogin, String scope, String userHome, HttpSession session, String statusCode) {
+
+        if (statusCode == null) {
+            statusCode = (isValidLogin) ? STATUS_CODE_OK : STATUS_CODE_INVALID_CREDENTIALS;
+        }
 
         org.edu_sharing.service.authority.AuthorityService service = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
 

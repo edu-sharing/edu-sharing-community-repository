@@ -132,6 +132,10 @@ public class CCConstants {
 
 	public final static String AUTH_HEADER_EDU_TICKET = "EDU-TICKET";
 
+	public final static String AUTH_ERROR_STATUS = "AUTH_ERROR_STATUS";
+
+	public final static String AUTH_ERROR_STATUS_2FA = "2FA";
+
 	/**
 	 * access on nodes that was validated by lms
 	 */
