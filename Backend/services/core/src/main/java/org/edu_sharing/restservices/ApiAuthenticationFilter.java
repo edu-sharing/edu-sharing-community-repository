@@ -5,6 +5,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
@@ -14,6 +15,8 @@ import org.edu_sharing.repository.server.authentication.AuthenticationFilter;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.service.authentication.oauth2.TokenService;
 import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
+import org.edu_sharing.service.authentication.totp.OneTimeTokenService;
+import org.edu_sharing.service.authentication.totp.OneTimeTokenServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.config.ConfigServiceFactory;
@@ -60,7 +63,7 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
 
             if (authHdr.length() > 5 && authHdr.substring(0, 5).equalsIgnoreCase("BASIC")) {
                 logger.debug("auth is BASIC");
-                validatedAuth = httpBasicAuth(authHdr);
+                validatedAuth = httpBasicAuth(httpReq, authHdr);
                 if (validatedAuth != null) {
                     String succsessfullAuthMethod = SubsystemChainingAuthenticationService.getSuccessFullAuthenticationMethod();
                     String authMethod = ("alfrescoNtlm1".equals(succsessfullAuthMethod) || "alfinst".equals(succsessfullAuthMethod)) ? CCConstants.AUTH_TYPE_DEFAULT : CCConstants.AUTH_TYPE + succsessfullAuthMethod;
@@ -222,7 +225,11 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
         chain.doFilter(req, resp);
     }
 
-    public static Map<String, String> httpBasicAuth(String authHdr) {
+    public static Map<String, String> httpBasicAuth(HttpServletRequest httpReq, String authHdr) {
+        return httpBasicAuth(httpReq, authHdr, false);
+    }
+
+    public static Map<String, String> httpBasicAuth(HttpServletRequest httpReq, String authHdr, boolean ignore2FA) {
         Map<String, String> validatedAuth = null;
         AuthenticationToolAPI authTool = new AuthenticationToolAPI();
 
@@ -245,7 +252,14 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
         }
 
         try {
-
+            //check 2FA
+            if(!ignore2FA) {
+                int twoFaCode = httpReq.getIntHeader("X-2FA-Token");
+                OneTimeTokenService oneTimeTokenService = OneTimeTokenServiceFactory.getLocalService();
+                if (!oneTimeTokenService.isValid(username, twoFaCode)) {
+                    throw new AuthenticationException("Invalid verification code for 2FA");
+                }
+            }
             // Authenticate the user
             validatedAuth = authTool.createNewSession(username, password);
         } catch (Exception ex) {

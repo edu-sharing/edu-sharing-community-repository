@@ -10,7 +10,6 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.rpc.EduGroup;
@@ -26,6 +25,8 @@ import org.edu_sharing.repository.server.tools.cache.PersonCache;
 import org.edu_sharing.restservices.iam.v1.model.GroupEntries;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.NotAnAdminException;
+import org.edu_sharing.service.authentication.totp.OneTimeTokenService;
+import org.edu_sharing.service.authentication.totp.OneTimeTokenServiceFactory;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
@@ -766,5 +767,32 @@ public class PersonDao {
 							oldStatus,
 							status.name());
 		}
+	}
+
+	public String activate2Fa() {
+		if(Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")){
+			throw new AccessDeniedException("External managed users can't activate 2fa. Please contact your system administrator.");
+		}
+
+		OneTimeTokenService oneTimeTokenServiceService = OneTimeTokenServiceFactory.getOneTimeTokenServiceService(repoDao.getId());
+		return oneTimeTokenServiceService.generateKey(getUserName());
+	}
+
+	public void deactivate2Fa() {
+		if(Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")){
+			throw new AccessDeniedException("External managed users can't deactivate 2fa. Please contact your system administrator.");
+		}
+
+		OneTimeTokenService oneTimeTokenServiceService = OneTimeTokenServiceFactory.getOneTimeTokenServiceService(repoDao.getId());
+		oneTimeTokenServiceService.removeKey(getUserName());
+	}
+
+	public byte[] getQRCode() {
+		if(Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")){
+			throw new AccessDeniedException("External managed users can't get a QR code. Please contact your system administrator.");
+		}
+
+		OneTimeTokenService oneTimeTokenServiceService = OneTimeTokenServiceFactory.getOneTimeTokenServiceService(repoDao.getId());
+		return oneTimeTokenServiceService.generateQRCode(getUserName());
 	}
 }
