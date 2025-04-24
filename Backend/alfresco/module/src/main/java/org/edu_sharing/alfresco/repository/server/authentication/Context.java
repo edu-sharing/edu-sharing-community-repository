@@ -221,7 +221,11 @@ public class Context {
 
     @Nullable
     public String getAuthErrorStatus(){
-        return request.getParameter(CCConstants.AUTH_ERROR_STATUS);
+        Object attribute = request.getAttribute(CCConstants.AUTH_ERROR_STATUS);
+        if(attribute == null) {
+            return null;
+        }
+        return attribute.toString();
     }
 
     public interface B3 {
