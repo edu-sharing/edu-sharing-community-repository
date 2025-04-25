@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.Map;
 
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import lombok.Data;
@@ -72,7 +73,10 @@ public class ErrorResponse {
         handleLog(t, logging);
 
         if (errorCode != null) {
-            return Response.status(errorCode).entity(new ErrorResponse(t)).build();
+            return Response.status(errorCode)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(new ErrorResponse(t))
+                    .build();
         }
 
         // in case alfresco transaction exception, map to causing exception which is the DAO exception
@@ -83,34 +87,58 @@ public class ErrorResponse {
             t = t.getCause();
         }
         if (t instanceof DAOValidationException) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(new ErrorResponse(t))
+                    .build();
         }
         if (t instanceof DAOSecurityException) {
-            return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
+            return Response.status(Response.Status.FORBIDDEN)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(new ErrorResponse(t))
+                    .build();
         }
         if (t instanceof UsageException && Usage2Service.NO_CCPUBLISH_PERMISSION.equals(t.getMessage())) {
-            return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
+            return Response.status(Response.Status.FORBIDDEN)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(new ErrorResponse(t))
+                    .build();
         }
         if (t instanceof DAOMissingException) {
-            return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
+            return Response.status(Response.Status.NOT_FOUND)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(new ErrorResponse(t))
+                    .build();
         }
         if (t instanceof DAOMimetypeVerificationException || t instanceof DAOFileExtensionVerificationException) {
-            return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).entity(new ErrorResponse(t)).build();
+            return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(new ErrorResponse(t))
+                    .build();
         }
         if (t instanceof DAOVirusDetectedException || t instanceof DAOVirusScanFailedException) {
-            return Response.status(HttpStatus.UNPROCESSABLE_ENTITY.value()).entity(new ErrorResponse(t)).build();
+            return Response.status(HttpStatus.UNPROCESSABLE_ENTITY.value())
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(new ErrorResponse(t))
+                    .build();
         }
         if (t instanceof DAOQuotaException) {
 
             logger.info(t.getMessage(), t);
-            return Response.status(CCConstants.HTTP_INSUFFICIENT_STORAGE).entity(new ErrorResponse(t)).build();
+            return Response.status(CCConstants.HTTP_INSUFFICIENT_STORAGE)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(new ErrorResponse(t))
+                    .build();
         }
         if (t instanceof DAODuplicateNodeNameException || t instanceof DAODuplicateNodeException) {
-            return Response.status(Response.Status.CONFLICT).entity(new ErrorResponse(t)).build();
+            return Response.status(Response.Status.CONFLICT)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(new ErrorResponse(t))
+                    .build();
         }
 
 
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).type(MediaType.APPLICATION_JSON_TYPE).build();
     }
 
     private static void handleLog(Throwable t, ErrorResponseLogging logging) {
