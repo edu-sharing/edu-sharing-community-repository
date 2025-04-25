@@ -16,7 +16,9 @@ import { environment } from '../environments/environment';
         EduSharingUiModule.forRoot({ production: environment.production, isEmbedded: true }),
         RenderComponent,
         TranslationsModule,
-        RenderingServiceLibModule,
+        RenderingServiceLibModule.forRoot({
+            assetsUrl: 'node_modules/ngx-edu-sharing-rendering-web-component/assets',
+        }),
     ],
     providers: [provideHttpClient(), RenderHelperService],
 })

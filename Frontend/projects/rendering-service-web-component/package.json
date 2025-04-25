@@ -1,6 +1,6 @@
 {
   "name": "ngx-edu-sharing-rendering-web-component",
-  "version": "0.0.9",
+  "version": "0.0.15",
   "//": [
     "We use --deploy-url here although Angular complains it is deprecated since this seems to be ",
     "the only way to get Angular to load lazy scripts from a route that differs from base HREF as ",
@@ -10,7 +10,7 @@
     "start": "ng serve",
     "preview": "npm run build && npm run serve",
     "build": "ng build rendering-service",
-    "publish": "npm run build && cp {package.json,README.md} ../../dist/rendering-service-web-component && cd ../../dist/rendering-service-web-component && npm publish",
+    "publish-npm": "npm run build && cp {package.json,README.md} ../../dist/rendering-service-web-component && cd ../../dist/rendering-service-web-component && npm publish",
     "serve": "source ../../.env && http-server --gzip --port 4200 --proxy $BACKEND_URL example"
   },
   "devDependencies": {
