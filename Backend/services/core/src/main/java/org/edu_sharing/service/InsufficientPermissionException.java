@@ -1,6 +1,6 @@
 package org.edu_sharing.service;
 
-public class InsufficientPermissionException extends Exception {
+public class InsufficientPermissionException extends RuntimeException {
 
 	/**
 	 * 

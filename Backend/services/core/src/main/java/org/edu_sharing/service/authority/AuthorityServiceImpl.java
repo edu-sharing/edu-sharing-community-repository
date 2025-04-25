@@ -33,9 +33,11 @@ import org.edu_sharing.repository.server.PropertyRequiredException;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.KeyTool;
 import org.edu_sharing.repository.server.tools.cache.UserCache;
+import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authentication.totp.OneTimeTokenService;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -721,6 +723,10 @@ public class AuthorityServiceImpl implements AuthorityService {
                 ? AuthenticationUtil.getFullyAuthenticatedUser()
                 : username;
 
+        if(!canChange2Fa(user)){
+            throw new InsufficientPermissionException("You are not allowed to activate 2 factor authorization");
+        }
+
         String secret = oneTimeTokenService.generateKey();
         retryingTransactionHelper.doInTransaction(() -> {
             Throwable runAs = AuthenticationUtil.runAs(() -> {
@@ -747,14 +753,26 @@ public class AuthorityServiceImpl implements AuthorityService {
         return secret;
     }
 
+    boolean canChange2Fa(@NotNull String username) {
+        if(isGlobalAdmin()){
+            return true;
+        }
+
+        String authenticatedUser = AuthenticationUtil.getFullyAuthenticatedUser();
+        return username.equals(authenticatedUser);
+    }
+
     @Override
     public void deactivate2Fa(String username) {
-        // TODO check permissions
 
         //check if userName exist, if not get login USER
         String user = (username == null)
                 ? AuthenticationUtil.getFullyAuthenticatedUser()
                 : username;
+
+        if(!canChange2Fa(user)){
+            throw new InsufficientPermissionException("You are not allowed to deactivate 2 factor authorization");
+        }
 
         retryingTransactionHelper.doInTransaction(() -> {
             Throwable runAs = AuthenticationUtil.runAs(() -> {
@@ -801,6 +819,10 @@ public class AuthorityServiceImpl implements AuthorityService {
         String user = (username == null)
                 ? AuthenticationUtil.getFullyAuthenticatedUser()
                 : username;
+
+        if(!canChange2Fa(user)){
+            throw new InsufficientPermissionException("You are not allowed to generate a 2 factor authorization");
+        }
 
         String secret = retryingTransactionHelper.doInTransaction(() ->
                 AuthenticationUtil.runAs(() -> {

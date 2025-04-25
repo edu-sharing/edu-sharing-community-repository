@@ -4,6 +4,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.rpc.User;
+import org.edu_sharing.service.InsufficientPermissionException;
 
 import java.io.Serializable;
 import java.util.ArrayList;
