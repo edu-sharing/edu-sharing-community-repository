@@ -92,8 +92,8 @@ export class SimpleEditDialogComponent {
             nodes: this._nodes,
         });
         const updatedNodes = await dialogRef.afterClosed().toPromise();
-        if (updatedNodes) {
-            this._nodes = updatedNodes;
+        if (Array.isArray(updatedNodes)) {
+            this._nodes = updatedNodes as Node[];
         }
     }
 

@@ -72,7 +72,7 @@ import {
     MdsEditorDialogDataGraphql,
     MdsEditorDialogDataNodes,
     MdsEditorDialogDataValues,
-    MdsEditorDialogResultNodes,
+    MdsEditorDialogResult,
     MdsEditorDialogResultValues,
 } from './dialog-modules/mds-editor-dialog/mds-editor-dialog-data';
 import { NodeEmbedDialogData } from './dialog-modules/node-embed-dialog/node-embed-dialog.component';
@@ -539,7 +539,7 @@ export class DialogsService {
     async openMdsEditorDialogForNodes(
         data: MdsEditorDialogDataNodes,
         mode: 'graphql' | 'rest' = 'graphql',
-    ): Promise<CardDialogRef<MdsEditorDialogData, MdsEditorDialogResultNodes>> {
+    ): Promise<CardDialogRef<MdsEditorDialogData, MdsEditorDialogResult>> {
         const { MdsEditorDialogComponent } = await import(
             './dialog-modules/mds-editor-dialog/mds-editor-dialog.module'
         );
