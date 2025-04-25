@@ -794,7 +794,9 @@
     "AI": {
       "GENERATE_ALL_TITLE": "Metadaten generieren",
       "GENERATE_ALL_INFO": "Für alle Metadaten-Felder, welche über die KI generiert werden können, Vorschläge erzeugen",
-      "GENERATE_ALL_BUTTON": "KI-Vorschläge generieren"
+      "GENERATE_ALL_BUTTON": "KI-Vorschläge generieren",
+      "GENERATE_ASYNC_STARTED": "Vorschläge werden generiert. Das Formular wird automatisch ergänzt, sobald die Daten verfügbar sind",
+      "GENERATE_ASYNC_FINISHED": "Vorschläge sind jetzt verfügbar"
     },
     "SUGGESTIONS": {
       "LIST_TITLE": "Vorschläge für dieses Feld",

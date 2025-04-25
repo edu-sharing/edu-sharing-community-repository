@@ -760,7 +760,9 @@
     "AI": {
       "GENERATE_ALL_TITLE": "Generate meta information",
       "GENERATE_ALL_INFO": "Auto-generate suggestions for all fields which can be handled by ai",
-      "GENERATE_ALL_BUTTON": "Generate ai suggestions"
+      "GENERATE_ALL_BUTTON": "Generate ai suggestions",
+      "GENERATE_ASYNC_STARTED": "Suggestions will be generated. The form will automatically display them",
+      "GENERATE_ASYNC_FINISHED": "Suggestions are now available"
     },
     "SUGGESTIONS": {
       "LIST_TITLE": "Suggestions for this field",

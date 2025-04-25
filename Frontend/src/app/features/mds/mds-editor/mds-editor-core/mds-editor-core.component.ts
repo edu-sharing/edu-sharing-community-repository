@@ -4,7 +4,7 @@ import { map } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 import { EditorMode, MdsView } from '../../types/types';
 import { MdsEditorViewComponent } from '../mds-editor-view/mds-editor-view.component';
-import { AuthenticationService, RestConstants } from 'ngx-edu-sharing-api';
+import { AuthenticationService, FeaturesHelperService } from 'ngx-edu-sharing-api';
 import { Toast, ToastType } from '../../../../services/toast';
 import { DialogsService } from '../../../dialogs/dialogs.service';
 import { EduSharingLlmService, WidgetAiConfigInfo } from 'ngx-edu-sharing-b-api';
@@ -27,6 +27,7 @@ export class MdsEditorCoreComponent {
     readonly aiLoading = new BehaviorSubject(false);
 
     constructor(
+        private featuresHelperService: FeaturesHelperService,
         public mdsEditorInstance: MdsEditorInstanceService,
         public mdsEditorCommonService: MdsEditorCommonService,
         public dialogs: DialogsService,
@@ -63,15 +64,13 @@ export class MdsEditorCoreComponent {
         // Wait for `MdsEditorViewComponent`s to inject their widgets.
         await tick();
         this.mdsEditorInstance.mdsInflated.next(true);
-        this.auth
-            .hasToolpermission(RestConstants.TOOLPERMISSION_BAPI)
-            .then((has) =>
-                this.hasAi.next(
-                    has &&
-                        this.mdsEditorInstance.suggestionsSupported &&
-                        this.mdsEditorInstance.editorMode === 'nodes',
-                ),
-            );
+        const aiSupport = await this.featuresHelperService.hasUserAISupport();
+        this.hasAi.next(
+            aiSupport &&
+                this.mdsEditorInstance.suggestionsSupported &&
+                this.mdsEditorInstance.editorMode === 'nodes' &&
+                this.mdsEditorInstance.groupId === 'io',
+        );
     }
 
     async generateSuggestions() {
