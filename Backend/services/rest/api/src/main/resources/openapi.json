@@ -20733,6 +20733,15 @@
               },
               "type": "array"
             }
+          },
+          {
+            "description": "if true it resolves the organisations the users are member of",
+            "in": "query",
+            "name": "resolveOrganisations",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
