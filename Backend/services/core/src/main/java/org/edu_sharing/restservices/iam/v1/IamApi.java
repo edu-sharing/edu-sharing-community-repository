@@ -714,17 +714,17 @@ public class IamApi {
     }
 
     @PUT
-    @Produces({"text/plain"})
+    @Produces({"text/plain", "application/json"})
     @Path("/people/{repository}/{person}/credential/2fa/activate")
     @Operation(summary = "Activate two factor authentication for user", description = "Activate two factor authentication for user (To activate foreign 2fa method, admin rights are required.)")
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode = "200", description = "OK.", content = @Content(schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode = "400", description = "Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "401", description = "Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "200", description = "OK.", content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode = "400", description = "Preconditions are not present.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = "Authorization failed.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "403", description = "Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "404", description = "Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "500", description = "Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+                    @ApiResponse(responseCode = "404", description = "Ressources are not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = "Fatal error occured.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
             })
     public Response activate2Fa(
             @Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
