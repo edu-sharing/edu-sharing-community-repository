@@ -254,19 +254,19 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             if (!this.enabledCache[option.name]) {
                 this.enabledCache[option.name] = {};
             }
-            if (this.enabledCache[option.name]?.[objects[0]?.ref?.id] !== undefined) {
-                return await this.enabledCache[option.name][objects[0]?.ref?.id]
+            if (this.enabledCache[option.name]?.[objects?.[0]?.ref?.id] !== undefined) {
+                return await this.enabledCache[option.name][objects?.[0]?.ref?.id]
                     .pipe(
                         filter((f) => f !== null),
                         first(),
                     )
                     .toPromise();
             }
-            this.enabledCache[option.name][objects[0]?.ref?.id] = new BehaviorSubject<boolean>(
+            this.enabledCache[option.name][objects?.[0]?.ref?.id] = new BehaviorSubject<boolean>(
                 null,
             );
             const status = await option.customEnabledCallback(objects);
-            this.enabledCache[option.name][objects[0]?.ref?.id].next(status);
+            this.enabledCache[option.name][objects?.[0]?.ref?.id].next(status);
             return status;
         }
         return true;

@@ -116,7 +116,7 @@ export class MetadataSidebarComponent {
         });
         dialogRef
             .afterClosed()
-            .subscribe((updatedNodes) => this.closeMdsEditor(nodes, updatedNodes));
+            .subscribe((updatedNodes) => this.closeMdsEditor(nodes, updatedNodes as Node[]));
     }
 
     private closeMdsEditor(originalNodes: Node[], updatedNodes: Node[] = null) {

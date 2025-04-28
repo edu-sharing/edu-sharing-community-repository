@@ -198,6 +198,7 @@ export enum Scope {
     Sharing = 'Sharing',
     Oer = 'Oer',
     UserManagement = 'UserManagement',
+    UserProfile = 'UserProfile',
     Stream = 'Stream',
     CreateMenu = 'CreateMenu',
 
