@@ -1,15 +1,12 @@
 package org.edu_sharing.service.lti13.registration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.nimbusds.jose.jwk.AsymmetricJWK;
-import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.JWKSet;
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.DefaultClaims;
 import lombok.RequiredArgsConstructor;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.methods.HttpPost;
@@ -37,7 +34,6 @@ import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
-import java.net.URL;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -122,7 +118,7 @@ public class RegistrationService {
         write(tokens);
     }
 
-    public void ltiDynamicRegistration(String openidConfiguration, String registrationToken, String eduSharingRegistrationToken) throws Throwable {
+    public void ltiDynamicPlatformRegistration(String openidConfigurationUrl, String registrationToken, String eduSharingRegistrationToken) throws Throwable {
 
         if(eduSharingRegistrationToken == null || eduSharingRegistrationToken.trim().equals("")){
             throw new Exception("no eduSharingRegistrationToken provided");
@@ -143,40 +139,39 @@ public class RegistrationService {
             throw new Exception("eduSharing registration token already used");
         }
 
-        if(openidConfiguration == null){
-            throw new Exception("no openidConfiguration present");
+        if(openidConfigurationUrl == null){
+            throw new Exception("no openidConfigurationUrl present");
         }
 
 
-        String platformConfiguration = new HttpQueryTool().query(openidConfiguration);
-        JSONParser jsonParser = new JSONParser();
-        JSONObject oidConfig = (JSONObject) jsonParser.parse(platformConfiguration);
-        String issuer = (String) oidConfig.get("issuer");
+        String platformConfiguration = new HttpQueryTool().query(openidConfigurationUrl);
+
+        OpenIdConfiguration openIdConfiguration = new ObjectMapper().readValue(platformConfiguration, OpenIdConfiguration.class);
+
+
+        String issuer = openIdConfiguration.getIssuer();
         /**
          * @TODO it seems that moodle can not be validated like spec
          * validate https://www.imsglobal.org/spec/lti-dr/v1p0#issuer-and-openid-configuration-url-match
          *
          * 3.5.1 Issuer and OpenID Configuration URL Match
          */
-        String keySetUrl = (String) oidConfig.get("jwks_uri");
-        if(keySetUrl == null){
+        if(openIdConfiguration.getJwks_uri() == null){
             throw new Exception("no jwks_uri provided");
         }
-        String authorizationEndpoint = (String) oidConfig.get("authorization_endpoint");
-        if(authorizationEndpoint == null){
+        if(openIdConfiguration.getAuthorization_endpoint() == null){
             throw new Exception("no authorization_endpoint provided");
         }
-        String registrationEndpoint = (String) oidConfig.get("registration_endpoint");
-        if(registrationEndpoint == null){
+        if(openIdConfiguration.getRegistration_endpoint() == null){
             throw new Exception("no registration_endpoint provided");
         }
 
-        String authTokenUrl = (String) oidConfig.get("token_endpoint");
+        String authTokenUrl = openIdConfiguration.getToken_endpoint();
         if(authTokenUrl == null){
             throw new Exception("no token_endpoint provided");
         }
 
-        List<String> claimsSupported = (List<String>) oidConfig.get("claims_supported");
+        List<String> claimsSupported = openIdConfiguration.getClaims_supported();
         ApplicationInfo homeApp = ApplicationInfoList.getHomeRepository();
 
         JSONObject jsonResponse = new JSONObject();
@@ -210,7 +205,7 @@ public class RegistrationService {
         //jsonResponse.put("token_endpoint_auth_method","private_key_jwt");
         HttpPost post = new HttpPost();
         post.setEntity(new StringEntity(jsonResponse.toJSONString()));
-        post.setURI(new URI(registrationEndpoint));
+        post.setURI(new URI(openIdConfiguration.getRegistration_endpoint()));
         post.setHeader("Content-Type","application/json");
         post.setHeader("Accept","application/json");
 
@@ -220,6 +215,7 @@ public class RegistrationService {
 
         String result = new HttpQueryTool().query(null,null,post,false);
 
+        JSONParser jsonParser = new JSONParser();
         JSONObject registrationResult;
         try {
             registrationResult = (JSONObject) jsonParser.parse(result);
@@ -259,34 +255,38 @@ public class RegistrationService {
         JSONObject ltiToolConfigInfo = (JSONObject)registrationResult.get("https://purl.imsglobal.org/spec/lti-tool-configuration");
         String deploymentId = (String)ltiToolConfigInfo.get("deployment_id");
 
-        registerPlatform(issuer, clientId, deploymentId, authorizationEndpoint, keySetUrl,null,authTokenUrl, foundToken);
+        registerPlatform(openIdConfiguration, clientId, deploymentId,  null, foundToken);
     }
 
-    public void registerPlatform(String platformId,
+    public void registerPlatform(OpenIdConfiguration openIdConfiguration,
                                  String clientId, String deploymentId,
-                                 String authenticationRequestUrl,
-                                 String keysetUrl,
-                                 String keyId,
-                                 String authTokenUrl) throws Exception{
-        registerPlatform(platformId, clientId, deploymentId, authenticationRequestUrl, keysetUrl, keyId, authTokenUrl,null);
+                                 String keyId) throws Exception{
+        registerPlatform(openIdConfiguration, clientId, deploymentId,   keyId, null);
     }
-    public void registerPlatform(String platformId,
+    public void registerPlatform(OpenIdConfiguration openIdConfiguration,
                                   String clientId, String deploymentId,
-                                  String authenticationRequestUrl,
-                                  String keysetUrl,
                                   String keyId,
-                                  String authTokenUrl, DynamicRegistrationToken token) throws Exception{
+                                  DynamicRegistrationToken token) throws Exception{
         Map<String,String> properties = new HashMap<>();
-        String appId = new RepoTools().getAppId(platformId,clientId,deploymentId);
+        String appId = new RepoTools().getAppId(openIdConfiguration.getIssuer(),clientId,deploymentId);
         properties.put(ApplicationInfo.KEY_APPID, appId);
         properties.put(ApplicationInfo.KEY_TYPE, ApplicationInfo.TYPE_LTIPLATFORM);
         properties.put(ApplicationInfo.KEY_LTI_DEPLOYMENT_ID, deploymentId);
-        properties.put(ApplicationInfo.KEY_LTI_ISS, platformId);
+        properties.put(ApplicationInfo.KEY_LTI_ISS, openIdConfiguration.getIssuer());
         properties.put(ApplicationInfo.KEY_LTI_CLIENT_ID, clientId);
-        properties.put(ApplicationInfo.KEY_LTI_OIDC_ENDPOINT, authenticationRequestUrl);
-        properties.put(ApplicationInfo.KEY_LTI_AUTH_TOKEN_ENDPOINT,authTokenUrl);
-        properties.put(ApplicationInfo.KEY_LTI_KEYSET_URL,keysetUrl);
+        properties.put(ApplicationInfo.KEY_LTI_OIDC_ENDPOINT, openIdConfiguration.getAuthorization_endpoint());
+        properties.put(ApplicationInfo.KEY_LTI_AUTH_TOKEN_ENDPOINT,openIdConfiguration.getToken_endpoint());
+        properties.put(ApplicationInfo.KEY_LTI_KEYSET_URL,openIdConfiguration.getJwks_uri());
         if(keyId != null) properties.put(ApplicationInfo.KEY_LTI_KID,keyId);
+
+        OpenIdConfiguration.LTIPlatformConfiguration ltiPlatformConfiguration = openIdConfiguration.getLtiPlatformConfiguration();
+        if(ltiPlatformConfiguration != null){
+            String productFamilyCode = ltiPlatformConfiguration.getProduct_family_code();
+            if(productFamilyCode != null){
+                properties.put(ApplicationInfo.KEY_SUBTYPE,productFamilyCode);
+            }
+        }
+
 
         /*JWKSet publicKeys = JWKSet.load(new URL(keysetUrl));
         if(publicKeys == null){
