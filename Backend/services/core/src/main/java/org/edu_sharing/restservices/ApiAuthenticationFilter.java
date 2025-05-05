@@ -255,7 +255,7 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
             if(!ignore2FA) {
                 int twoFaCode = httpReq.getIntHeader("X-2FA-Token");
                 AuthorityService authorityService = AuthorityServiceFactory.getLocalService();
-                if (!authorityService.validate2FA(username, twoFaCode)) {
+                if (!authorityService.validate2Fa(username, twoFaCode)) {
                     httpReq.setAttribute(CCConstants.AUTH_ERROR_STATUS, CCConstants.AUTH_ERROR_STATUS_2FA);
                     throw new AuthenticationException("Invalid verification code for 2FA");
                 }

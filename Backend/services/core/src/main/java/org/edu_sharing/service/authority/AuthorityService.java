@@ -4,7 +4,6 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.rpc.User;
-import org.edu_sharing.service.InsufficientPermissionException;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -114,11 +113,13 @@ public interface AuthorityService {
 
 	String[] searchGroupNames(String pattern) throws Exception;
 
-	String activate2Fa(String username);
+	String generate2FaCode(String username);
+
+	void activate2Fa(String username, int code);
 
 	void deactivate2Fa(String username);
 
-	boolean validate2FA(String username, int code);
+	boolean validate2Fa(String username, int code);
 
 	byte[] generate2FaQRCode(String username);
 }

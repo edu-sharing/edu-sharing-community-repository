@@ -356,6 +356,8 @@ public class CCConstants {
 
 	public final static String CM_PROP_PERSON_2FA_SECRET = "{http://www.alfresco.org/model/content/1.0}2faSecret";
 
+	public final static String CM_PROP_PERSON_2FA_ACTIVATED= "{http://www.alfresco.org/model/content/1.0}2faActivated";
+
 
 	public final static String CM_PROP_OWNER = "{http://www.alfresco.org/model/content/1.0}owner";
 
