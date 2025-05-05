@@ -1127,6 +1127,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		return ltitoolLoginInitiationsUrl != null && ltitoolRedirectUrls != null;
 	}
 
+	public boolean isLtiPlatform(){return TYPE_LTIPLATFORM.equals(getType());}
+
 	public String getLtitoolDescription() {return ltitoolDescription;}
 
 	public boolean hasLtiToolCustomContentOption(){
