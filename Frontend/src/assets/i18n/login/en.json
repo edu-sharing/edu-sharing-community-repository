@@ -30,7 +30,14 @@
     "NO_ACCESS": "No permissions to access this area",
     "APP_LOGO": "Logo",
     "SHOW_PASSWORD": "Show password",
-    "HIDE_PASSWORD": "Hide password"
+    "HIDE_PASSWORD": "Hide password",
+    "2FA": {
+      "TITLE": "Two-Factor Authentication",
+      "SUBTITLE": "Confirm Two-Factor Authentication",
+      "CONFIRM_CODE": "Please confirm the second factor using your authentication app",
+      "CODE": "Code",
+      "WRONG_CODE": "Incorrect code"
+    }
   },
   "LOGIN_APP": {
     "SERVERLIST_OWN": "set own server",
