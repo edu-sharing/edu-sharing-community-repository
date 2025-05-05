@@ -23,6 +23,7 @@ import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.organization.v1.model.GroupSignupDetails;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.authority.QRCode2Fa;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.password.ValidPassword;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
@@ -713,7 +714,30 @@ public class IamApi {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
         }
     }
+    @GET
+    @Produces({"text/plain", "application/json"})
+    @Path("/people/{repository}/{person}/credential/2fa/status")
+    @Operation(summary = "Fetches the status of the current 2fa of the user", description = "Fetches the status of the current 2fa of the user (To generate foreign 2fa secrets, admin rights are required.)")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(mediaType = "text/plain", schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+            })
+    public Response get2FaStatus(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue = "-me-")) @PathParam("person") String person,
+            @Context HttpServletRequest req) {
 
+        RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+        PersonDao personDao = PersonDao.getPerson(repoDao, person);
+
+        boolean status = personDao.get2FaStatus();
+        return Response.status(Response.Status.OK).entity(status).build();
+    }
     @PUT
     @Produces({"text/plain", "application/json"})
     @Path("/people/{repository}/{person}/credential/2fa/generate")
@@ -791,9 +815,18 @@ public class IamApi {
     }
 
     @GET
-    @Produces({"image/png"})
-    @Path("/people/{repository}/{person}/credential/2fa/qrcode")
-    @Operation(summary = "Get QR validationCode for 2fa secret", description = "Get QR validationCode for 2fa secret")
+    @Produces({"application/json"})
+    @Path("/people/{repository}/{person}/credential/2fa/code")
+    @Operation(summary = "Get QR validationCode + code for local use for 2fa secret", description = "Get QR validationCode for 2fa secret")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(mediaType = "application/json", schema = @Schema(implementation = QRCode2Fa.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+            })
     public Response getQRCode2Fa(
             @Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
             @Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue = "-me-")) @PathParam("person") String person,

@@ -50,6 +50,7 @@ export class GenericDialogConfig<R extends string> extends GenericDialogData<R> 
 export interface GenericDialogButton<R extends string> {
     label: R;
     config: ButtonConfig;
+    disabled?: boolean;
     /*
      custom callback
      Promise should return if the dialog shall be closed or not
@@ -62,6 +63,9 @@ export const CLOSE: GenericDialogButton<'CLOSE'>[] = [
 ];
 
 export const OK: GenericDialogButton<'OK'>[] = [{ label: 'OK', config: { color: 'primary' } }];
+export const NEXT: GenericDialogButton<'NEXT'>[] = [
+    { label: 'NEXT', config: { color: 'primary' } },
+];
 
 export const OK_OR_CANCEL: GenericDialogButton<'OK' | 'CANCEL'>[] = [
     { label: 'CANCEL', config: { color: 'standard' } },

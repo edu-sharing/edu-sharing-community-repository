@@ -28,6 +28,7 @@
     "MENU_ADD_GROUP_MEMBERS": "Nutzer{{GENDER_SEPARATOR}}in hinzufügen",
     "MENU_EDIT_GROUPS": "Mitgliedschaften verwalten",
     "MENU_EXCLUDE": "Ausschließen",
+    "MENU_2FA": "Zweiter Faktor",
     "MENU_REMOVE_MEMBERSHIP": "Aus Gruppe(n) entfernen",
     "MENU_STATUS": "Status festlegen",
     "USER_QUOTA_HINT": "Wenn kein Wert gesetzt ist gilt keine Beschränkung",
@@ -262,6 +263,17 @@
       "simple_DETAILS": "Nutzer{{GENDER_SEPARATOR}}innen können sich selbstständig in die Organisation/Gruppe einschreiben und werden sofort Mitglied.",
       "password_DETAILS": "Nutzer{{GENDER_SEPARATOR}}innen können sich selbstständig in die Organisation/Gruppe einschreiben und werden sofort Mitglied, sofern sie das korrekte Passwort kennen.",
       "list_DETAILS": "Nutzer{{GENDER_SEPARATOR}}innen können sich selbstständig in die Organisation/Gruppe einschreiben und werden auf eine Warteliste gesetzt. Eine Person mit Admin-Rechten muss die Einschreibung anschließend bestätigen."
+    },
+    "2FA": {
+      "TITLE": "Zwei-Faktor-Authentifizierung einrichten",
+      "DESCRIPTION": "Durch die Zwei-Faktor Authentifizierung muss bei jedem Login des Nutzers der zweite Faktor mithilfe eines zeitbasierten Tokens verifiziert werden. Dies erhöht die Sicherheit des Zugangs.",
+      "REGENERATE": "Hierdurch wird im nächsten Schritt ein neuer Schlüssel generiert.",
+      "STATUS": "Zwei-Faktor Authentifikation aktivieren",
+      "GENERATE_NEW_SECRET": "Einen neuen Schlüssel (Secret) generieren",
+      "ACTIVATED": "Zwei-Faktor Authentifikation wurde aktiviert",
+      "DEACTIVATED": "Zwei-Faktor Authentifikation wurde deaktiviert",
+      "CODES": "Zwei-Faktor Code bestätigen",
+      "CONFIRM_CODE": "Zwei-Faktor Code eingeben"
     }
   }
 }

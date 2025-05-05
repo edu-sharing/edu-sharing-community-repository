@@ -11,6 +11,7 @@ import { ApiConfiguration } from './api/api-configuration';
 })
 export class ApiRequestConfiguration {
     private authForNextRequest: string | null = null;
+    private code2FaForNextRequest: string | null = null;
     private _locale: string | null = null;
     private _language: string | null = null;
 
@@ -40,6 +41,9 @@ export class ApiRequestConfiguration {
 
     setBasicAuthForNextRequest(auth: { username: string; password: string }): void {
         this.authForNextRequest = 'Basic ' + btoa(auth.username + ':' + auth.password);
+    }
+    set2FaCodeForNextRequest(code2Fa: string) {
+        this.code2FaForNextRequest = code2Fa;
     }
     setBearerAuthForNextRequest(accessToken?: string): void {
         this.authForNextRequest = 'Bearer ' + accessToken;
@@ -74,6 +78,11 @@ export class ApiRequestConfiguration {
         if (this.authForNextRequest) {
             headers.Authorization = this.authForNextRequest;
             this.authForNextRequest = null;
+        }
+        if (this.code2FaForNextRequest) {
+            headers['X-2FA-Token'] = this.code2FaForNextRequest;
+            console.log('x 2fa', this.code2FaForNextRequest);
+            this.code2FaForNextRequest = null;
         }
         return req.clone({
             setHeaders: headers,

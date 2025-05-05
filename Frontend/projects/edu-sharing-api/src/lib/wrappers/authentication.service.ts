@@ -28,6 +28,7 @@ type LoginAction =
           username: string;
           password: string;
           scope?: string;
+          code2Fa?: string;
       }
     | {
           // Logs the user in with the provided credentials.
@@ -140,12 +141,18 @@ export class AuthenticationService {
      * The returned login information might be the result of a different action in case a different
      * action was triggered before the login could be completed.
      */
-    login(username: string, password: string, scope?: string): Observable<LoginInfo> {
+    login(
+        username: string,
+        password: string,
+        scope?: string,
+        code2Fa?: string,
+    ): Observable<LoginInfo> {
         this.loginActionTrigger.next({
             kind: 'login',
             username,
             password,
             scope,
+            code2Fa,
         });
         return this.loginInfo$.pipe(first());
     }
@@ -380,7 +387,11 @@ export class AuthenticationService {
                 if (action.scope) {
                     return this.loginToScope(action.username, action.password, action.scope);
                 } else {
-                    return this.loginWithBasicAuth(action.username, action.password);
+                    return this.loginWithBasicAuth(
+                        action.username,
+                        action.password,
+                        action.code2Fa,
+                    );
                 }
             case 'loginToken':
                 return this.loginWithToken(action.accessToken);
@@ -403,13 +414,20 @@ export class AuthenticationService {
     /**
      * request authentication by providing an username and password
      */
-    private loginWithBasicAuth(username: string, password: string): Observable<LoginInfo> {
+    private loginWithBasicAuth(
+        username: string,
+        password: string,
+        code2Fa?: string,
+    ): Observable<LoginInfo> {
         return rxjs.of(void 0).pipe(
             // Make `setBasicAuthForNextRequest` part of the observable, so it is guaranteed to
             // be run together with the login request.
-            tap(() =>
-                this.apiRequestConfiguration.setBasicAuthForNextRequest({ username, password }),
-            ),
+            tap(() => {
+                this.apiRequestConfiguration.setBasicAuthForNextRequest({ username, password });
+                if (code2Fa) {
+                    this.apiRequestConfiguration.set2FaCodeForNextRequest(code2Fa);
+                }
+            }),
             switchMap(() => this.authentication.login()),
         );
     }

@@ -20,9 +20,10 @@ import {
     Group,
     GroupProfile,
     HOME_REPOSITORY,
-    Node,
     IamV1Service,
+    Node,
     OrganizationV1Service,
+    QrCode2Fa,
     User,
     UserProfileEdit,
 } from 'ngx-edu-sharing-api';
@@ -47,7 +48,7 @@ import {
     Scope,
     UIAnimation,
 } from 'ngx-edu-sharing-ui';
-import { forkJoin } from 'rxjs';
+import { firstValueFrom, forkJoin } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { SuggestItem } from '../../../pages/admin-page/autocomplete/autocomplete.component';
 import {
@@ -72,12 +73,19 @@ import { Helper } from '../../../core-module/rest/helper';
 import { NodeHelperService } from '../../../services/node-helper.service';
 import { Toast, ToastType } from '../../../services/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { DELETE_OR_CANCEL } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
+import {
+    CLOSE,
+    DELETE_OR_CANCEL,
+    OK,
+    SAVE_OR_CANCEL,
+} from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
 import { InputPasswordComponent } from '../../../shared/components/input-password/input-password.component';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { AuthoritySearchMode } from '../../../shared/components/authority-search-input/authority-search-input.component';
+import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
     selector: 'es-permissions-authorities',
@@ -102,6 +110,8 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         columns: [],
     };
     @ViewChild('exclude') excludeRef: TemplateRef<unknown>;
+    @ViewChild('faTemplate') faTemplate: TemplateRef<unknown>;
+    @ViewChild('faCode') faCode: TemplateRef<unknown>;
     @ViewChild('actionbar') actionbar: ActionbarComponent;
     @ViewChild('passwordRef') passwordRef: InputPasswordComponent;
     @ViewChild('actionbarMember') actionbarMember: ActionbarComponent;
@@ -112,6 +122,13 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     @ViewChild('addToComponent') addToComponent: PermissionsAuthoritiesComponent;
     excludeForm = new FormGroup({
         mode: new FormControl('none'),
+    });
+    faForm = new FormGroup({
+        status: new FormControl(false),
+        generate: new FormControl(false),
+    });
+    faConfirm = new FormGroup({
+        code: new FormControl('', [Validators.required, Validators.pattern(/^\d{6}$/)]),
     });
     excludeReceiver: Authority;
     receiverIsMemberOfOrg: boolean;
@@ -174,6 +191,8 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     groupSignupDetails: GroupSignupDetails;
     private _org: Organization;
     @Output() deselectOrg = new EventEmitter<void>();
+    faInititalStatus: boolean;
+    faData: QrCode2Fa;
 
     @Input() set searchQuery(searchQuery: string) {
         this._searchQuery = searchQuery;
@@ -337,6 +356,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     constructor(
         private breadcrumbsService: BreadcrumbsService,
         private connector: RestConnectorService,
+        public sanitizer: DomSanitizer,
         private dialogs: DialogsService,
         private iam: RestIamService,
         private iamService: IamV1Service,
@@ -607,7 +627,16 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             personStatus.constrains = [Constrain.NoBulk, Constrain.Admin];
             personStatus.elementType = [ElementType.Person];
             personStatus.group = DefaultGroups.Edit;
+            personStatus.priority = 40;
             options.push(personStatus);
+            const person2fa = new OptionItem('PERMISSIONS.MENU_2FA', 'flag', (data: Authority) =>
+                this.show2Fa(this.getList(data)[0]),
+            );
+            person2fa.constrains = [Constrain.NoBulk, Constrain.Admin];
+            person2fa.elementType = [ElementType.Person];
+            person2fa.group = DefaultGroups.Edit;
+            person2fa.priority = 20;
+            options.push(person2fa);
             const personPassword = new OptionItem(
                 'PERMISSIONS.MENU_RESET_PASSWORD',
                 'lock',
@@ -616,6 +645,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             personPassword.constrains = [Constrain.NoBulk, Constrain.Admin];
             personPassword.elementType = [ElementType.Person];
             personPassword.group = DefaultGroups.Edit;
+            personPassword.priority = 30;
             options.push(personPassword);
             if (this.org) {
                 const excludePerson = new OptionItem('PERMISSIONS.MENU_EXCLUDE', 'delete', (data) =>
@@ -1596,5 +1626,108 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 .getUserGroups(authority.authorityName, this.org.authorityName)
                 .toPromise()
         ).groups.some((g) => g.authorityName === this.org.authorityName);
+    }
+
+    private async show2Fa(authority: Authority) {
+        this.faInititalStatus = await firstValueFrom(
+            this.iamService.get2FaStatus({
+                repository: HOME_REPOSITORY,
+                person: authority.authorityName,
+            }),
+        );
+        this.faForm.reset();
+        this.faForm.get('generate').enable();
+        this.faForm.patchValue({
+            status: this.faInititalStatus,
+            generate: !this.faInititalStatus,
+        });
+        if (!this.faInititalStatus) {
+            this.faForm.get('generate').disable();
+        }
+        const dialog = await this.dialogs.openGenericDialog({
+            title: 'PERMISSIONS.2FA.TITLE',
+            nodes: [authority] as unknown as Node[],
+            contentTemplate: this.faTemplate,
+            minWidth: 500,
+            closable: Closable.Standard,
+            buttons: SAVE_OR_CANCEL,
+        });
+        const result = await firstValueFrom(dialog.afterClosed());
+        if (result === 'SAVE') {
+            // disable
+            if (this.faInititalStatus && this.faForm.get('status').value === false) {
+                await firstValueFrom(
+                    this.iamService.deactivate2Fa({
+                        repository: HOME_REPOSITORY,
+                        person: authority.authorityName,
+                    }),
+                );
+                this.toast.show({
+                    message: 'PERMISSIONS.2FA.DEACTIVATED',
+                    type: 'info',
+                    subtype: ToastType.InfoData,
+                });
+            } else if (this.faForm.get('generate').value) {
+                await firstValueFrom(
+                    this.iamService.generate2FaSecret({
+                        repository: HOME_REPOSITORY,
+                        person: authority.authorityName,
+                    }),
+                );
+                this.faData = await firstValueFrom(
+                    this.iamService.getQrCode2Fa({
+                        repository: HOME_REPOSITORY,
+                        person: authority.authorityName,
+                    }),
+                );
+                await this.confirm2Fa(authority);
+            }
+        }
+    }
+
+    private async confirm2Fa(authority: Authority) {
+        this.faConfirm.reset();
+        const dialog = await this.dialogs.openGenericDialog({
+            closable: Closable.Disabled,
+            buttons: OK,
+            minWidth: 500,
+            avatar: { kind: 'icon', icon: 'flag' },
+            title: 'PERMISSIONS.2FA.CODES',
+            contentTemplate: this.faCode,
+        });
+        let button = new DialogButton('SAVE', DialogButton.TYPE_PRIMARY, () => dialog.close('OK'));
+        button.disabled = true;
+        setTimeout(() => {
+            dialog.patchConfig({
+                buttons: [button],
+            });
+        });
+        this.faConfirm.statusChanges.subscribe((status) => {
+            button.disabled = status !== 'VALID';
+            dialog.patchConfig({
+                buttons: [button],
+            });
+        });
+        await firstValueFrom(dialog.afterClosed());
+        try {
+            this.toast.showProgressSpinner();
+            await firstValueFrom(
+                this.iamService.activate2Fa({
+                    repository: HOME_REPOSITORY,
+                    person: authority.authorityName,
+                    'X-2FA-Token': parseInt(this.faConfirm.get('code').value),
+                }),
+            );
+            this.toast.closeProgressSpinner();
+            this.toast.show({
+                message: 'PERMISSIONS.2FA.ACTIVATED',
+                type: 'info',
+                subtype: ToastType.InfoData,
+            });
+        } catch (e) {
+            this.toast.closeProgressSpinner();
+            this.toast.error(e);
+            void this.confirm2Fa(authority);
+        }
     }
 }

@@ -250,3 +250,28 @@ label.search {
         width: 100%;
     }
 }
+.fa-config {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    es-info-message {
+        margin: 10px 0;
+    }
+}
+.fa-confirm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    img {
+        width: 80%;
+    }
+    .code {
+        font-family: monospace;
+        padding: 10px 30px;
+        background-color: #eee;
+        border: 1px solid #888;
+    }
+    mat-form-field {
+        margin-top: 30px;
+    }
+}

@@ -492,3 +492,33 @@
     </ng-container>
   </form>
 </ng-template>
+<ng-template #faTemplate>
+  <form [formGroup]="faForm" class="fa-config">
+    <es-info-message mode="info">{{ 'PERMISSIONS.2FA.DESCRIPTION' | translate }}</es-info-message>
+
+    <mat-checkbox formControlName="status">{{ 'PERMISSIONS.2FA.STATUS' | translate }}</mat-checkbox>
+    <div *ngIf="faForm.get('status').value">
+      <mat-checkbox formControlName="generate">{{
+        'PERMISSIONS.2FA.GENERATE_NEW_SECRET' | translate
+      }}</mat-checkbox>
+      <es-info-message mode="warning" *ngIf="faInititalStatus && faForm.get('generate').value"
+        >{{ 'PERMISSIONS.2FA.REGENERATE' | translate }}
+      </es-info-message>
+    </div>
+  </form>
+</ng-template>
+<ng-template #faCode>
+  <div class="fa-confirm">
+    <img
+      [src]="sanitizer.bypassSecurityTrustResourceUrl('data:image/png;base64,' + faData.qrCode)"
+      alt=""
+    />
+    <div class="code">{{ faData.code }}</div>
+    <form [formGroup]="faConfirm">
+      <mat-form-field>
+        <mat-label>{{ 'PERMISSIONS.2FA.CONFIRM_CODE' | translate }} </mat-label>
+        <input matInput formControlName="code" maxlength="6" minlength="6" placeholder="000000" />
+      </mat-form-field>
+    </form>
+  </div>
+</ng-template>

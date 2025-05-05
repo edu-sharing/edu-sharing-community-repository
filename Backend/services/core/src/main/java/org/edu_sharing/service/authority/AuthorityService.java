@@ -117,9 +117,11 @@ public interface AuthorityService {
 
 	void activate2Fa(String username, int code);
 
+	boolean is2FaActive(String username);
+
 	void deactivate2Fa(String username);
 
 	boolean validate2Fa(String username, int code);
 
-	byte[] generate2FaQRCode(String username);
+	QRCode2Fa generate2FaQRCode(String username);
 }

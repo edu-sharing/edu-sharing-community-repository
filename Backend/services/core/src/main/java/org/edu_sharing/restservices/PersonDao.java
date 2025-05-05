@@ -27,6 +27,7 @@ import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.authority.QRCode2Fa;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -774,6 +775,9 @@ public class PersonDao {
 
 		return authorityService.generate2FaCode(getUserName());
 	}
+	public boolean get2FaStatus() {
+		return authorityService.is2FaActive(getUserName());
+	}
 
 	public void activate2Fa(int code) {
 		if(Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")){
@@ -791,7 +795,7 @@ public class PersonDao {
 		authorityService.deactivate2Fa(getUserName());
 	}
 
-	public byte[] getQRCode() {
+	public QRCode2Fa getQRCode() {
 		if(Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")){
 			throw new AccessDeniedException("External managed users can't get a QR code. Please contact your system administrator.");
 		}

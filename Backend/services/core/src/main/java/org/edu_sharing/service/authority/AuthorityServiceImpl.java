@@ -740,6 +740,7 @@ public class AuthorityServiceImpl implements AuthorityService {
                             CCConstants.CM_PROP_PERSON_2FA_ACTIVATED, false
                     );
                     personService.setPersonProperties(user, transformQName(userInfo));
+                    userCache.refresh(username);
                 } catch (Throwable e) {
                     log.error(e.getMessage(), e);
                     return e;
@@ -754,6 +755,19 @@ public class AuthorityServiceImpl implements AuthorityService {
             return null;
         }, false);
         return secret;
+    }
+
+    @Override
+    public boolean is2FaActive(String username) {
+        String user = (username == null)
+                ? AuthenticationUtil.getFullyAuthenticatedUser()
+                : username;
+
+        if(!canChange2Fa(user)){
+            throw new InsufficientPermissionException("You are not allowed to check 2 factor authorization");
+        }
+        Boolean status = (Boolean) nodeService.getProperty(authorityService.getAuthorityNodeRef(username), QName.createQName(CCConstants.CM_PROP_PERSON_2FA_ACTIVATED));
+        return status != null && status;
     }
 
     @Override
@@ -780,6 +794,7 @@ public class AuthorityServiceImpl implements AuthorityService {
                     }
                     Map<String, Serializable> userInfo = Map.of(CCConstants.CM_PROP_PERSON_2FA_ACTIVATED, true);
                     personService.setPersonProperties(user, transformQName(userInfo));
+                    userCache.refresh(username);
                 } catch (Throwable e) {
                     log.error(e.getMessage(), e);
                     return e;
@@ -824,6 +839,8 @@ public class AuthorityServiceImpl implements AuthorityService {
                         return null;
                     }
                     nodeService.removeProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_2FA_SECRET));
+                    nodeService.removeProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_2FA_ACTIVATED));
+                    userCache.refresh(username);
                 } catch (Throwable e) {
                     log.error(e.getMessage(), e);
                     return e;
@@ -869,7 +886,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 
 
     @Override
-    public byte[] generate2FaQRCode(String username) {
+    public QRCode2Fa generate2FaQRCode(String username) {
         //check if userName exist, if not get login USER
         String user = (username == null)
                 ? AuthenticationUtil.getFullyAuthenticatedUser()
@@ -885,6 +902,6 @@ public class AuthorityServiceImpl implements AuthorityService {
                     return userObject.getTwoFactorAuthenticationSecret();
                 }, AuthenticationUtil.getFullyAuthenticatedUser()), false);
 
-        return oneTimeTokenService.generateQRCode(username, secret);
+        return new QRCode2Fa(oneTimeTokenService.generateQRCode(username, secret), secret);
     }
 }

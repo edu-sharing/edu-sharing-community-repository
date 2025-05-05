@@ -30,7 +30,14 @@
     "NO_ACCESS": "Keine Berechtigungen für diesen Bereich",
     "APP_LOGO": "Logo",
     "SHOW_PASSWORD": "Passwort anzeigen",
-    "HIDE_PASSWORD": "Passwort ausblenden"
+    "HIDE_PASSWORD": "Passwort ausblenden",
+    "2FA": {
+      "TITLE": "Zweiter Faktor",
+      "SUBTITLE": "Zweiten Faktor bestätigen",
+      "CONFIRM_CODE": "Bitte mithilfe der Authentifikations-App den zweiten Faktor bestätigen",
+      "CODE": "Code",
+      "WRONG_CODE": "Falscher Code"
+    }
   },
   "LOGIN_APP": {
     "SERVERLIST_OWN": "Eigenen Server angeben",

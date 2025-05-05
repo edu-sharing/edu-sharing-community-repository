@@ -1,5 +1,5 @@
 <es-global-progress *ngIf="isLoading"></es-global-progress>
-<div *ngIf="!isLoading">
+<div *ngIf="!isLoading && !show2FaDialog">
   <es-card
     role="main"
     esSkipTarget="MAIN_CONTENT"
@@ -154,3 +154,14 @@
     [ngClass]="{ 'powered-down': config.register.local || config.register.registerUrl }"
   ></es-powered-by>
 </div>
+<ng-template #faConfirmRef>
+  <form class="fa-confirm" [formGroup]="faConfirm" (ngSubmit)="show2FaDialog.close('NEXT')">
+    <h3 class="mat-heading-6">
+      {{ 'LOGIN.2FA.CONFIRM_CODE' | translate }}
+    </h3>
+    <mat-form-field>
+      <mat-label>{{ 'LOGIN.2FA.CODE' | translate }} </mat-label>
+      <input matInput formControlName="code" maxlength="6" minlength="6" placeholder="000000" />
+    </mat-form-field>
+  </form>
+</ng-template>
