@@ -59,6 +59,7 @@ public class UserCache {
             user.setGivenName((String)props.get(QName.createQName(CCConstants.CM_PROP_PERSON_FIRSTNAME)));
             user.setSurname(((String)props.get(QName.createQName(CCConstants.CM_PROP_PERSON_LASTNAME))));
             user.setTwoFactorAuthenticationSecret(((String)props.get(QName.createQName(CCConstants.CM_PROP_PERSON_2FA_SECRET))));
+            user.setTwoFactorAuthenticationActivated(((boolean)props.getOrDefault(QName.createQName(CCConstants.CM_PROP_PERSON_2FA_ACTIVATED), false)));
             user.setNodeId(persNoderef.getId());
             Map<String, Serializable> userProperties = new HashMap<>();
             for (Map.Entry<QName, Serializable> entry : props.entrySet()) {

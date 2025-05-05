@@ -18,6 +18,7 @@ public class User extends Authority {
 	private String repositoryId;
 	private String username;
 	private String twoFactorAuthenticationSecret;
+	private boolean isTwoFactorAuthenticationActivated;
 	private Map<String, Serializable> profileSettings;
 	private Map<String, Serializable> properties;
 

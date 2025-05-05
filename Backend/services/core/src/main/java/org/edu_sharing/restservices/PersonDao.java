@@ -767,12 +767,20 @@ public class PersonDao {
 		}
 	}
 
-	public String activate2Fa() {
+	public String generate2FaCode() {
 		if(Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")){
 			throw new AccessDeniedException("External managed users can't activate 2fa. Please contact your system administrator.");
 		}
 
-		return authorityService.activate2Fa(getUserName());
+		return authorityService.generate2FaCode(getUserName());
+	}
+
+	public void activate2Fa(int code) {
+		if(Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")){
+			throw new AccessDeniedException("External managed users can't activate 2fa. Please contact your system administrator.");
+		}
+
+		authorityService.activate2Fa(getUserName(), code);
 	}
 
 	public void deactivate2Fa() {

@@ -12,6 +12,7 @@ import org.alfresco.repo.security.authority.AuthorityInfo;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
+import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -716,8 +717,7 @@ public class AuthorityServiceImpl implements AuthorityService {
     }
 
     @Override
-    public String activate2Fa(String username) {
-        // TODO check permissions
+    public String generate2FaCode(String username){
         //check if userName exist, if not get login USER
         String user = (username == null)
                 ? AuthenticationUtil.getFullyAuthenticatedUser()
@@ -735,7 +735,10 @@ public class AuthorityServiceImpl implements AuthorityService {
                     if (personNodeRef == null) {
                         return null;
                     }
-                    Map<String, Serializable> userInfo = Map.of(CCConstants.CM_PROP_PERSON_2FA_SECRET, secret);
+                    Map<String, Serializable> userInfo = Map.of(
+                            CCConstants.CM_PROP_PERSON_2FA_SECRET, secret,
+                            CCConstants.CM_PROP_PERSON_2FA_ACTIVATED, false
+                    );
                     personService.setPersonProperties(user, transformQName(userInfo));
                 } catch (Throwable e) {
                     log.error(e.getMessage(), e);
@@ -751,6 +754,45 @@ public class AuthorityServiceImpl implements AuthorityService {
             return null;
         }, false);
         return secret;
+    }
+
+    @Override
+    public void activate2Fa(String username, int code) {
+        //check if userName exist, if not get login USER
+        String user = (username == null)
+                ? AuthenticationUtil.getFullyAuthenticatedUser()
+                : username;
+
+        if(!canChange2Fa(user)){
+            throw new InsufficientPermissionException("You are not allowed to activate 2 factor authorization");
+        }
+
+        if(!validate2Fa(user, code, true)){
+            throw new InvalidArgumentException("Invalid 2FA code");
+        }
+
+        retryingTransactionHelper.doInTransaction(() -> {
+            Throwable runAs = AuthenticationUtil.runAs(() -> {
+                try {
+                    NodeRef personNodeRef = personService.getPersonOrNull(user);
+                    if (personNodeRef == null) {
+                        return null;
+                    }
+                    Map<String, Serializable> userInfo = Map.of(CCConstants.CM_PROP_PERSON_2FA_ACTIVATED, true);
+                    personService.setPersonProperties(user, transformQName(userInfo));
+                } catch (Throwable e) {
+                    log.error(e.getMessage(), e);
+                    return e;
+                }
+                return null;
+            }, ApplicationInfoList.getHomeRepository().getUsername());
+
+            if (runAs != null) {
+                throw runAs;
+            }
+
+            return null;
+        }, false);
     }
 
     boolean canChange2Fa(@NotNull String username) {
@@ -798,10 +840,22 @@ public class AuthorityServiceImpl implements AuthorityService {
     }
 
     @Override
-    public boolean validate2FA(String username, int code) {
+    public boolean validate2Fa(String username, int code) {
+        return validate2Fa(username, code, false);
+    }
+
+    public boolean validate2Fa(String username, int code, boolean ignoreActivationStatus) {
         String secret = retryingTransactionHelper.doInTransaction(() ->
                 AuthenticationUtil.runAs(() -> {
                     User user = this.getUser(username);
+                    if(user == null){
+                        return null;
+                    }
+
+                    if(!ignoreActivationStatus && !user.isTwoFactorAuthenticationActivated()){
+                        return null;
+                    }
+
                     return user.getTwoFactorAuthenticationSecret();
 
                 }, ApplicationInfoList.getHomeRepository().getUsername()), false);
@@ -812,6 +866,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 
         return oneTimeTokenService.isValid(secret, code);
     }
+
 
     @Override
     public byte[] generate2FaQRCode(String username) {

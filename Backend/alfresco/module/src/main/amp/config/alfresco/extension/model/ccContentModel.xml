@@ -181,6 +181,9 @@
             <property name="cm:2faSecret">
                <type>d:text</type>
             </property>
+            <property name="cm:2faActivated">
+               <type>d:boolean</type>
+            </property>
             <property name="cm:homeFolder">
                <type>d:noderef</type>
                <mandatory>true</mandatory>

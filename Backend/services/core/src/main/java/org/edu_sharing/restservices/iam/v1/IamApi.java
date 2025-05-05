@@ -715,8 +715,8 @@ public class IamApi {
 
     @PUT
     @Produces({"text/plain", "application/json"})
-    @Path("/people/{repository}/{person}/credential/2fa/activate")
-    @Operation(summary = "Activate two factor authentication for user", description = "Activate two factor authentication for user (To activate foreign 2fa method, admin rights are required.)")
+    @Path("/people/{repository}/{person}/credential/2fa/generate")
+    @Operation(summary = "Generates a two factor authentication secret for the user", description = "Generates a two factor authentication secret for the user (To generate foreign 2fa secrets, admin rights are required.)")
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = "OK.", content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))),
@@ -726,7 +726,7 @@ public class IamApi {
                     @ApiResponse(responseCode = "404", description = "Ressources are not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "500", description = "Fatal error occured.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
             })
-    public Response activate2Fa(
+    public Response generate2FaSecret(
             @Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
             @Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue = "-me-")) @PathParam("person") String person,
             @Context HttpServletRequest req) {
@@ -734,10 +734,36 @@ public class IamApi {
         RepositoryDao repoDao = RepositoryDao.getRepository(repository);
         PersonDao personDao = PersonDao.getPerson(repoDao, person);
 
-        String secret = personDao.activate2Fa();
+        String secret = personDao.generate2FaCode();
         return Response.status(Response.Status.OK).entity(secret).build();
-
     }
+
+    @PUT
+    @Produces({"application/json"})
+    @Path("/people/{repository}/{person}/credential/2fa/activate")
+    @Operation(summary = "Activate two factor authentication for user", description = "Activate two factor authentication for user (To activate foreign 2fa method, admin rights are required.)")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "OK.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode = "400", description = "Preconditions are not present.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = "Authorization failed.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = "Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "Ressources are not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = "Fatal error occured.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+            })
+    public Response activate2Fa(
+            @Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue = "-me-")) @PathParam("person") String person,
+            @HeaderParam("X-2FA-Token") int validationCode,
+            @Context HttpServletRequest req) {
+
+        RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+        PersonDao personDao = PersonDao.getPerson(repoDao, person);
+
+        personDao.activate2Fa(validationCode);
+        return Response.status(Response.Status.OK).build();
+    }
+
 
     @DELETE
     @Path("/people/{repository}/{person}/credential/2fa/deactivate")
@@ -766,7 +792,7 @@ public class IamApi {
     @GET
     @Produces({"image/png"})
     @Path("/people/{repository}/{person}/credential/2fa/qrcode")
-    @Operation(summary = "Get QR code for 2fa secret", description = "Get QR code for 2fa secret")
+    @Operation(summary = "Get QR validationCode for 2fa secret", description = "Get QR validationCode for 2fa secret")
     public Response getQRCode2Fa(
             @Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
             @Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue = "-me-")) @PathParam("person") String person,
