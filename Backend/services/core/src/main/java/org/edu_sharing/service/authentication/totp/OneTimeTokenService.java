@@ -61,7 +61,7 @@ public class OneTimeTokenService {
         }
     }
 
-    public byte[] generateQRCode(String secret,String username) {
+    public byte[] generateQRCode(String username, String secret) {
         String url = GoogleAuthenticatorQRGenerator.getOtpAuthTotpURL(
                 ApplicationInfoList.getHomeRepository().getDomain(),
                 username,
