@@ -14,10 +14,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.converter.RsaKeyConverters;
 import org.springframework.security.saml2.core.Saml2X509Credential;
-import org.springframework.security.saml2.provider.service.registration.InMemoryRelyingPartyRegistrationRepository;
-import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration;
-import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
-import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrations;
+import org.springframework.security.saml2.provider.service.registration.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -70,15 +67,19 @@ public class SecurityConfigurationSamlRelyingParties {
                         String relyingPartyId = getRelyingPartyId(builder);
                         int count = rpIds.computeIfAbsent(relyingPartyId, k -> new AtomicInteger(0)).incrementAndGet();
                         relyingPartyId = (count > 1) ? relyingPartyId + "-" + count : relyingPartyId;
-                        return builder.registrationId(relyingPartyId)
+                        RelyingPartyRegistration.Builder rpBuilder = builder.registrationId(relyingPartyId)
                                 .entityId("{baseUrl}/saml2/service-provider-metadata/" + globalSPRegistrationId)
                                 .assertionConsumerServiceLocation("{baseUrl}/login/saml2/sso/" + globalSPRegistrationId)
                                 .singleLogoutServiceLocation("{baseUrl}/logout/saml2/slo")
                                 .signingX509Credentials(
                                         (c) -> c.add(Saml2X509Credential.signing(privateKey, relyingPartyCertificate())))
                                 .decryptionX509Credentials(
-                                        (c) -> c.add(Saml2X509Credential.decryption(privateKey, relyingPartyCertificate())))
-                                .build();
+                                        (c) -> c.add(Saml2X509Credential.decryption(privateKey, relyingPartyCertificate())));
+                        if(config.hasPath("security.sso.saml.slo.binding")){
+                            rpBuilder.singleLogoutServiceBinding(Saml2MessageBinding.from(config.getString("security.sso.saml.slo.binding")));
+                        }
+                        return rpBuilder.build();
+
                     }).collect(Collectors.toList());
             return new InMemoryRelyingPartyRegistrationRepository(relyingPartyRegistration);
         }catch (IOException e){

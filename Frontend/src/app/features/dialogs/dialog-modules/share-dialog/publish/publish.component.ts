@@ -172,8 +172,8 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
             immediatelyShowMissingRequiredWidgets: true,
         });
         dialogRef.afterClosed().subscribe((nodes) => {
-            if (nodes) {
-                this.node = nodes[0];
+            if (nodes && nodes !== 'CANCEL') {
+                this.node = (nodes as Node[])[0];
                 // this.node = (
                 //     await this.legacyNodeService
                 //         .getNodeMetadata(this.node.ref.id, [RestConstants.ALL])

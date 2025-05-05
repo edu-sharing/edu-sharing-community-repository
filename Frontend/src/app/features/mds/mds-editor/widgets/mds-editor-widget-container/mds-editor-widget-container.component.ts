@@ -160,7 +160,7 @@ export class MdsEditorWidgetContainerComponent
         if (changes.widget) {
             this.registerIsHidden();
         }
-        if (changes.control) {
+        if (changes.control && this.control) {
             this.initFormControl(this.control);
         }
     }
@@ -302,11 +302,11 @@ export class MdsEditorWidgetContainerComponent
     private setDisabled(isDisabled: boolean): void {
         this.isDisabled = isDisabled;
         if (isDisabled) {
-            if (!this.control.disabled) {
+            if (!this.control?.disabled) {
                 this.control.disable();
             }
         } else {
-            if (this.control.disabled) {
+            if (this.control?.disabled) {
                 this.control.enable();
             }
         }

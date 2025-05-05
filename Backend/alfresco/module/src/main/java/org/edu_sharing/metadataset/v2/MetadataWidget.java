@@ -56,6 +56,8 @@ public class MetadataWidget extends MetadataTranslatable {
         none,
         // escape html but allow basic formatting and links (default)
         htmlBasic,
+        // escape html and only allow very basic styling (b, strong, i, em, br, ul, ol, li)
+        htmlRestricted,
         // escape all data, only allow text
         all
     }
@@ -86,7 +88,10 @@ public class MetadataWidget extends MetadataTranslatable {
             "multivalueCombined"
     };
 
+
+
     private Map<IdRelation, String> ids = new HashMap<>();
+    private MetadataWidgetDefaults widgetDefaults;
     private String id;
     private String type; //return MetadataReaderV2.getTranslation(this,caption,locale);
     private String caption;
@@ -130,6 +135,14 @@ public class MetadataWidget extends MetadataTranslatable {
     private String suggestionReceiver;
     private List<AiConfig> aiConfigs = new ArrayList<>();
 
+    public void setDefaults(MetadataWidgetDefaults widgetDefaults) {
+        this.widgetDefaults = widgetDefaults;
+        if(widgetDefaults != null) {
+            if (widgetDefaults.getTextEscapingPolicy() != null) {
+                this.setTextEscapingPolicy(widgetDefaults.getTextEscapingPolicy());
+            }
+        }
+    }
 
     public boolean isMultivalue() {
         return Arrays.asList(MULTIVALUE_WIDGETS).contains(type);

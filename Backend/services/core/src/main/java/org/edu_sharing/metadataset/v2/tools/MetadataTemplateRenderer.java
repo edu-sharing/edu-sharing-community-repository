@@ -760,6 +760,11 @@ public class MetadataTemplateRenderer {
 							.toFactory()
 			);
 			return policy.sanitize(untrustedHTML);
+		} else if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.htmlRestricted)){
+			PolicyFactory policy = new HtmlPolicyBuilder().allowElements("b", "strong", "i", "em", "br", "ul", "ol", "li")
+					.toFactory();
+			return policy.sanitize(untrustedHTML);
+
 		} else if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.all)){
 			return StringEscapeUtils.escapeHtml4(untrustedHTML).replaceAll("[\\u0000-\\u001F\\u007F-\\u009F]","");
 		} else if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.none)){

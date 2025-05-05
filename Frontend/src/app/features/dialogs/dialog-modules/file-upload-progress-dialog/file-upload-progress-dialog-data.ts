@@ -5,4 +5,7 @@ export class FileUploadProgressDialogData {
     files: File[];
 }
 
-export type FileUploadProgressDialogResult = Node[] | null;
+export type FileUploadProgressDialogResult = {
+    status: 'FINISHED' | 'CANCELED';
+    nodes: Node[] | null;
+};

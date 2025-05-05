@@ -129,23 +129,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         this.destroyed.next();
         this.destroyed.complete();
     }
-
-    private handleKeyboardEvent(event: KeyboardEvent) {
-        if (this.globalOptions && !this.keyboardShortcuts.shouldIgnoreShortcut(event)) {
-            const matchedOption = this.globalOptions.find(
-                (option: OptionItem) =>
-                    option.isEnabled &&
-                    option.keyboardShortcut &&
-                    matchesShortcutCondition(event, option.keyboardShortcut),
-            );
-            if (matchedOption) {
-                event.preventDefault();
-                event.stopPropagation();
-                this.ngZone.run(() => matchedOption.callback(null));
-            }
-        }
-    }
-
     private cutCopyNode(data: OptionData, node: Node, copy: boolean) {
         let list = this.getObjects(node, data);
         if (!list || !list.length) {
@@ -274,19 +257,19 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             if (!this.enabledCache[option.name]) {
                 this.enabledCache[option.name] = {};
             }
-            if (this.enabledCache[option.name]?.[objects[0]?.ref?.id] !== undefined) {
-                return await this.enabledCache[option.name][objects[0]?.ref?.id]
+            if (this.enabledCache[option.name]?.[objects?.[0]?.ref?.id] !== undefined) {
+                return await this.enabledCache[option.name][objects?.[0]?.ref?.id]
                     .pipe(
                         filter((f) => f !== null),
                         first(),
                     )
                     .toPromise();
             }
-            this.enabledCache[option.name][objects[0]?.ref?.id] = new BehaviorSubject<boolean>(
+            this.enabledCache[option.name][objects?.[0]?.ref?.id] = new BehaviorSubject<boolean>(
                 null,
             );
             const status = await option.customEnabledCallback(objects);
-            this.enabledCache[option.name][objects[0]?.ref?.id].next(status);
+            this.enabledCache[option.name][objects?.[0]?.ref?.id].next(status);
             return status;
         }
         return true;
@@ -2043,16 +2026,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         }
         options = this.sortOptionsByGroup(options);
         return options;
-    }
-
-    registerGlobalKeyboardShortcuts() {
-        this.ngZone.runOutsideAngular(() => {
-            if (!this.keyboardShortcutsSubscription) {
-                this.keyboardShortcutsSubscription = fromEvent(document, 'keydown')
-                    .pipe(takeUntil(this.destroyed))
-                    .subscribe((event: KeyboardEvent) => this.handleKeyboardEvent(event));
-            }
-        });
     }
 
     private unblockImportedNodes(nodes: Node[]) {

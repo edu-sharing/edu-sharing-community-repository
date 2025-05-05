@@ -426,7 +426,9 @@ public class MetadataReader {
         mds.setLabel(label);
 
         mds.setCreate(getCreate());
-        mds.setWidgets(getWidgets());
+        MetadataWidgetDefaults defaults = getWidgetDefaults();
+        mds.setWidgetDefaults(defaults);
+        mds.setWidgets(getWidgets(defaults));
         mds.setAiConfigs(getAiConfigs());
         mds.setTemplates(getTemplates());
         mds.setGroups(getGroups());
@@ -451,14 +453,36 @@ public class MetadataReader {
         }
         return create;
     }
-
-    private List<MetadataWidget> getWidgets() throws Exception {
+    private MetadataWidgetDefaults getWidgetDefaults() throws Exception {
+        MetadataWidgetDefaults defaults = null;
+        NodeList widgetsDefaultNode = (NodeList) xpath.evaluate("/metadataset/widgets/defaults", doc, XPathConstants.NODESET);
+        for (int i = 0; i < widgetsDefaultNode.getLength(); i++) {
+            Node widgetNode = widgetsDefaultNode.item(i);
+            NodeList list2 = widgetNode.getChildNodes();
+            for (int j = 0; j < list2.getLength(); j++) {
+                Node data = list2.item(j);
+                String name = data.getNodeName();
+                String value = data.getTextContent();
+                if(defaults == null) {
+                    defaults = new MetadataWidgetDefaults();
+                }
+                switch (name) {
+                    case "textEscapingPolicy":
+                        defaults.setTextEscapingPolicy(MetadataWidget.TextEscapingPolicy.valueOf(value));
+                        break;
+                }
+            }
+        }
+        return defaults;
+    }
+    private List<MetadataWidget> getWidgets(MetadataWidgetDefaults defaults) throws Exception {
         List<MetadataWidget> widgets = new ArrayList<>();
         NodeList widgetsNode = (NodeList) xpath.evaluate("/metadataset/widgets/widget", doc, XPathConstants.NODESET);
         for (int i = 0; i < widgetsNode.getLength(); i++) {
             Node widgetNode = widgetsNode.item(i);
             NodeList list2 = widgetNode.getChildNodes();
             MetadataWidget widget = new MetadataWidget();
+            widget.setDefaults(defaults);
             widget.setI18n(i18nPath);
             String valuespaceI18n = i18nPath;
             String valuespaceI18nPrefix = "";
@@ -751,14 +775,14 @@ public class MetadataReader {
                 return reader.getValuespace(locale);
             } catch (Throwable t) {
                 if (value.isLenient()) {
-                    log.error("Could not read valuespace " + value.getValue() + ": " + t.getMessage(), t);
+                    log.warn("Could not read valuespace " + value.getValue() + ": " + t.getMessage() + " (will continue since lenient=true)", t);
                     return new ValuespaceData(new MetadataKey(), Collections.emptyList());
                 } else {
                     throw t;
                 }
             }
         } else {
-            log.warn("No viable metadata reader found for url {}", value);
+            log.error("No viable metadata reader found for url {}", value);
         }
         return null;
     }

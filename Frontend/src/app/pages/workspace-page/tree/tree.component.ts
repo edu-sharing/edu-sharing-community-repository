@@ -12,6 +12,9 @@ import {
 import { WorkspacePageComponent } from '../workspace-page.component';
 import { WorkspaceSubTreeComponent } from '../sub-tree/sub-tree.component';
 import { NodeEntriesService } from 'ngx-edu-sharing-ui/services/node-entries.service';
+import { HOME_REPOSITORY, RestConstants } from 'ngx-edu-sharing-api';
+import { TranslateService } from '@ngx-translate/core';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
 
 @Component({
     selector: 'es-workspace-tree',
@@ -47,7 +50,11 @@ export class WorkspaceTreeComponent {
 
     currentPath: string[] = [];
 
-    constructor(private optionsHelperDataService: OptionsHelperDataService) {
+    constructor(
+        private optionsHelperDataService: OptionsHelperDataService,
+        private dialogsService: DialogsService,
+        private translate: TranslateService,
+    ) {
         this.optionsHelperDataService.setData({
             scope: Scope.WorkspaceTree,
         });
@@ -57,15 +64,36 @@ export class WorkspaceTreeComponent {
     canDropOnRecycle = (dragData: DragData<'RECYCLE'>): CanDrop => {
         return { accept: dragData.action === 'move' };
     };
+    canDropOnMyFiles = (dragData: DragData<'MY_FILES'>): CanDrop => {
+        return { accept: true };
+    };
+    canDropOnMySharedFiles = (dragData: DragData<'RECYCLE'>): CanDrop => {
+        return { accept: dragData.action === 'move' };
+    };
 
     doSetRoot(root: NodeRoot) {
         this.setRoot.emit(root);
         this.currentPath = [];
     }
 
-    onNodesDrop(dragData: DragData<'RECYCLE'>) {
+    onNodesDrop(dragData: DragData<string | 'MY_FILES' | 'MY_SHARED_FILES' | 'RECYCLE'>) {
         if (dragData.target === this.RECYCLE && dragData.action === 'move') {
             this.deleteNodes.emit(dragData.draggedNodes);
+        } else if (dragData.target === this.MY_FILES) {
+            this.drop({
+                target: {
+                    ref: { id: RestConstants.USERHOME, repo: HOME_REPOSITORY },
+                    name: this.translate.instant('WORKSPACE.MY_FILES'),
+                } as Node,
+                source: {
+                    element: dragData.draggedNodes,
+                    mode: dragData.action,
+                },
+            });
+        } else if (dragData.target === this.MY_SHARED_FILES) {
+            void this.dialogsService.openShareDialog({
+                nodes: dragData.draggedNodes,
+            });
         }
     }
 

@@ -319,6 +319,9 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
     }
 
     private void overrideList(List<KeyValuePair> list, List<KeyValuePair> override) {
+        if(list == null || override == null) {
+            return;
+        }
         for (KeyValuePair obj : override) {
             list.remove(obj);
             list.add(obj);
@@ -357,6 +360,7 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
 
     private void refresh() {
         configCache.clear();
+        contextCacheById.clear();
         contextCacheByDomain.clear();
         try {
             getConfig();

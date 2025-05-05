@@ -24,7 +24,6 @@ import jakarta.ws.rs.core.Response;
 import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -37,6 +36,7 @@ import org.edu_sharing.restservices.lti.v13.model.JWKResult;
 import org.edu_sharing.restservices.lti.v13.model.JWKSResult;
 import org.edu_sharing.restservices.lti.v13.model.RegistrationUrl;
 import org.edu_sharing.restservices.ltiplatform.v13.LTIPlatformConstants;
+import org.edu_sharing.restservices.ltiplatform.v13.model.OpenIdConfiguration;
 import org.edu_sharing.restservices.ltiplatform.v13.model.ValidationException;
 import org.edu_sharing.restservices.rendering.v1.RenderingApi;
 import org.edu_sharing.restservices.rendering.v1.model.RenderingDetailsEntry;
@@ -56,7 +56,6 @@ import org.edu_sharing.service.lti13.uoc.Config;
 import org.edu_sharing.service.lti13.uoc.elc.spring.lti.security.openid.HttpSessionOIDCLaunchSession;
 import org.edu_sharing.service.usage.Usage2Service;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.util.StringUtils;
 
 import java.net.*;
@@ -597,7 +596,7 @@ public class LTIApi {
        try{
             Throwable throwable = AuthenticationUtil.runAsSystem(() -> {
                 try {
-                    registrationService.ltiDynamicRegistration(openidConfiguration, registrationToken, eduSharingRegistrationToken);
+                    registrationService.ltiDynamicPlatformRegistration(openidConfiguration, registrationToken, eduSharingRegistrationToken);
                 } catch (Throwable ex) {
                     return ex;
                 }
@@ -701,7 +700,12 @@ public class LTIApi {
                                  @Context HttpServletRequest req
     ){
         try {
-            registrationService.registerPlatform(platformId,clientId,deploymentId,authenticationRequestUrl,keysetUrl,keyId,authTokenUrl);
+            OpenIdConfiguration openIdConfiguration = new OpenIdConfiguration();
+            openIdConfiguration.setIssuer(platformId);
+            openIdConfiguration.setJwks_uri(keysetUrl);
+            openIdConfiguration.setToken_endpoint(authTokenUrl);
+            openIdConfiguration.setAuthorization_endpoint(authenticationRequestUrl);
+            registrationService.registerPlatform(openIdConfiguration,clientId,deploymentId,keyId);
             return Response.ok().build();
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
@@ -729,11 +733,13 @@ public class LTIApi {
                                    @Context HttpServletRequest req
     ){
         try {
-            registrationService.registerPlatform(baseUrl,clientId,deploymentId,
-                    baseUrl + LTIConstants.MOODLE_AUTHENTICATION_REQUEST_URL_PATH,
-                    baseUrl + LTIConstants.MOODLE_KEYSET_URL_PATH,
-                    null,
-                    baseUrl+LTIConstants.MOODLE_AUTH_TOKEN_URL_PATH);
+            OpenIdConfiguration openIdConfiguration = new OpenIdConfiguration();
+            openIdConfiguration.setIssuer(baseUrl);
+            openIdConfiguration.setJwks_uri(baseUrl + LTIConstants.MOODLE_KEYSET_URL_PATH);
+            openIdConfiguration.setToken_endpoint(baseUrl+LTIConstants.MOODLE_AUTH_TOKEN_URL_PATH);
+            openIdConfiguration.setAuthorization_endpoint(baseUrl + LTIConstants.MOODLE_AUTHENTICATION_REQUEST_URL_PATH);
+            registrationService.registerPlatform(openIdConfiguration,clientId,deploymentId,
+                    null);
             return Response.ok().build();
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);

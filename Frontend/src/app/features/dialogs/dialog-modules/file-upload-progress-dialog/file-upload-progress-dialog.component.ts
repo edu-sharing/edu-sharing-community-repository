@@ -18,7 +18,7 @@ import {
 import { map, switchMap } from 'rxjs/operators';
 import { DialogsService } from '../../dialogs.service';
 import { from, of } from 'rxjs';
-import { NodeService, Node } from 'ngx-edu-sharing-api';
+import { Node, NodeService } from 'ngx-edu-sharing-api';
 
 /**
  * A dialog that handles uploading a given list of files and shows a progress bar per file to the
@@ -56,7 +56,9 @@ export class FileUploadProgressDialogComponent implements OnInit {
 
     ngOnInit(): void {
         this.dialogRef.patchConfig({
-            buttons: [new DialogButton('CANCEL', { color: 'standard' }, () => this._cancel())],
+            buttons: [
+                new DialogButton('CANCEL', { color: 'standard' }, () => this._done('CANCELED')),
+            ],
         });
         for (const file of this.data.files) {
             this.progress.push({ name: file.name, progress: { progress: 0 } });
@@ -82,7 +84,7 @@ export class FileUploadProgressDialogComponent implements OnInit {
                     this._updateSubtitle();
                     this._upload(0);
                 } else {
-                    this._cancel();
+                    this._done('FINISHED');
                 }
             });
     }
@@ -114,12 +116,15 @@ export class FileUploadProgressDialogComponent implements OnInit {
         return result !== 'CANCEL';
     }
 
-    private _cancel() {
+    private _done(status: 'CANCELED' | 'FINISHED') {
         // first check whether the dialog has already been closed
         if (this.dialogRef.getLifecycleState() !== 'open') return;
         if (this.resultList.length > 0) {
             // Close with nodes uploaded until now. Could also delete these nodes.
-            this.dialogRef.close(this.resultList);
+            this.dialogRef.close({
+                status,
+                nodes: this.resultList,
+            });
         } else {
             this.dialogRef.close(null);
         }
@@ -160,9 +165,14 @@ export class FileUploadProgressDialogComponent implements OnInit {
     private _upload(number: number) {
         if (number >= this.data.files.length) {
             if (this.error) {
-                this.dialogRef.patchConfig({ closable: Closable.Casual });
+                this.dialogRef.patchConfig({
+                    buttons: DialogButton.getNextCancel(
+                        () => this._done('CANCELED'),
+                        () => this._done('FINISHED'),
+                    ),
+                });
             } else {
-                this._cancel();
+                this._done('FINISHED');
             }
             return;
         }

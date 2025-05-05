@@ -97,9 +97,20 @@ export class UploadDialogService {
      */
     async uploadFilesAndCreateNodes(data: FileData): Promise<Node[] | null> {
         const dialogRef = await this.dialogs.openFileUploadProgressDialog(data);
-        const nodes = await dialogRef.afterClosed().toPromise();
-        if (nodes) {
-            return this._onFilesUploaded(nodes);
+        const result = await dialogRef.afterClosed().toPromise();
+        if (result.status === 'FINISHED' && result.nodes) {
+            return this._onFilesUploaded(result.nodes);
+        } else if (result.status === 'CANCELED' && result.nodes) {
+            try {
+                await Promise.all(
+                    result.nodes.map((n) =>
+                        this.nodeApi.deleteNode(n.ref.id, { recycle: false }).toPromise(),
+                    ),
+                );
+            } catch (e) {
+                console.warn(e);
+            }
+            return null;
         } else {
             return null;
         }

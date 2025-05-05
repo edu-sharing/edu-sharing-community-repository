@@ -25,6 +25,9 @@
     </aiConfig>
   </aiConfigs>
   <widgets>
+    <defaults>
+      <textEscapingPolicy>htmlBasic</textEscapingPolicy>
+    </defaults>
     <widget>
       <id>cm:name</id>
       <id rel="graphql">info.filename</id>
