@@ -2,6 +2,9 @@
   <name>Core Metadataset</name>
   <i18n>mds</i18n>
   <widgets>
+    <defaults>
+      <textEscapingPolicy>htmlBasic</textEscapingPolicy>
+    </defaults>
     <widget>
       <id>cm:name</id>
       <id rel="graphql">info.filename</id>

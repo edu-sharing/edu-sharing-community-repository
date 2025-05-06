@@ -106,4 +106,5 @@ public class LTIConstants {
 
     public static final String LTI_NONCE = "nonce";
 
+    public static final String OPEN_ID_CONFIG_LTIPLATFORM = "https://purl.imsglobal.org/spec/lti-platform-configuration";
 }

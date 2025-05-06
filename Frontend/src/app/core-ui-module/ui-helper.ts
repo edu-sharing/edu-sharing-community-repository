@@ -13,8 +13,8 @@ import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Ace, LoginInfo } from 'ngx-edu-sharing-api';
 import { ListItem, OPEN_URL_MODE, UIConstants } from 'ngx-edu-sharing-ui';
-import { forkJoin as observableForkJoin, Observable, Observer, of } from 'rxjs';
-import { catchError, first, take } from 'rxjs/operators';
+import { from, Observable, Observer, of } from 'rxjs';
+import { catchError, concatMap, first, take, toArray } from 'rxjs/operators';
 import { BridgeService } from '../services/bridge.service';
 import {
     CollectionReference,
@@ -408,7 +408,7 @@ export class UIHelper {
         callback: (nodes: CollectionReference[]) => void = null,
         allowDuplicate: boolean | 'ignore' = false,
     ) {
-        observableForkJoin(
+        from(
             nodes.map((node) =>
                 collectionService
                     .addNodeToCollection(
@@ -420,76 +420,83 @@ export class UIHelper {
                     )
                     .pipe(catchError((error) => of({ error, node }))),
             ),
-        ).subscribe(async (results) => {
-            const success: NodeWrapper[] = results.filter((r) => !(r as any).error);
-            const failed: { node: Node; error: any }[] = results.filter(
-                (r) => !!(r as any).error,
-            ) as { node: Node; error: any }[];
-            if (success.length > 0) {
-                UIHelper.showAddedToCollectionInfo(
-                    bridge,
-                    router,
-                    collection,
-                    success.length,
-                    asProposal,
-                );
-            }
-            if (failed.length > 0) {
-                const duplicated = failed.filter(
-                    ({ error }) => error.status === RestConstants.DUPLICATE_NODE_RESPONSE,
-                );
-                if (duplicated.length > 0 && !asProposal) {
-                    if (allowDuplicate !== 'ignore') {
-                        const dialogRef = await bridge.openGenericDialog({
-                            title: 'COLLECTIONS.ADD_TO.DUPLICATE_TITLE',
-                            message: 'COLLECTIONS.ADD_TO.DUPLICATE_MESSAGE',
-                            messageParameters: { count: duplicated.length.toString() },
-                            buttons: YES_OR_NO,
-                        });
-                        dialogRef.afterClosed().subscribe((response) => {
-                            if (response === 'YES') {
-                                UIHelper.addToCollection(
-                                    nodeHelper,
-                                    collectionService,
-                                    router,
-                                    bridge,
-                                    collection,
-                                    duplicated.map((d) => d.node),
-                                    false,
-                                    (nodes) =>
-                                        // Invoke `callback` with both, the nodes successfully added
-                                        // before and the duplicate nodes added now.
-                                        callback?.([
-                                            ...success.map((n) => n.node as CollectionReference),
-                                            ...nodes,
-                                        ]),
-                                    true,
-                                );
-                            } else if (response === 'NO') {
-                                // Invoke `callback` only with the nodes successfully added
-                                // before.
-                                callback?.(success.map((n) => n.node as CollectionReference));
-                            } else {
-                                // Dialog was canceled by the user.
-                                //
-                                // TODO: should we invoke `callback` here?
-                                bridge.closeModalDialog();
-                            }
-                        });
-                        return;
-                    }
-                } else {
-                    nodeHelper.handleNodeError(
-                        RestHelper.getTitle(failed[0].node),
-                        failed[0].error,
+        )
+            .pipe(
+                concatMap((req) => req),
+                toArray(),
+            )
+            .subscribe(async (results) => {
+                const success: NodeWrapper[] = results.filter((r) => !(r as any).error);
+                const failed: { node: Node; error: any }[] = results.filter(
+                    (r) => !!(r as any).error,
+                ) as { node: Node; error: any }[];
+                if (success.length > 0) {
+                    UIHelper.showAddedToCollectionInfo(
+                        bridge,
+                        router,
+                        collection,
+                        success.length,
+                        asProposal,
                     );
                 }
-            }
+                if (failed.length > 0) {
+                    const duplicated = failed.filter(
+                        ({ error }) => error.status === RestConstants.DUPLICATE_NODE_RESPONSE,
+                    );
+                    if (duplicated.length > 0 && !asProposal) {
+                        if (allowDuplicate !== 'ignore') {
+                            const dialogRef = await bridge.openGenericDialog({
+                                title: 'COLLECTIONS.ADD_TO.DUPLICATE_TITLE',
+                                message: 'COLLECTIONS.ADD_TO.DUPLICATE_MESSAGE',
+                                messageParameters: { count: duplicated.length.toString() },
+                                buttons: YES_OR_NO,
+                            });
+                            dialogRef.afterClosed().subscribe((response) => {
+                                if (response === 'YES') {
+                                    UIHelper.addToCollection(
+                                        nodeHelper,
+                                        collectionService,
+                                        router,
+                                        bridge,
+                                        collection,
+                                        duplicated.map((d) => d.node),
+                                        false,
+                                        (nodes) =>
+                                            // Invoke `callback` with both, the nodes successfully added
+                                            // before and the duplicate nodes added now.
+                                            callback?.([
+                                                ...success.map(
+                                                    (n) => n.node as CollectionReference,
+                                                ),
+                                                ...nodes,
+                                            ]),
+                                        true,
+                                    );
+                                } else if (response === 'NO') {
+                                    // Invoke `callback` only with the nodes successfully added
+                                    // before.
+                                    callback?.(success.map((n) => n.node as CollectionReference));
+                                } else {
+                                    // Dialog was canceled by the user.
+                                    //
+                                    // TODO: should we invoke `callback` here?
+                                    bridge.closeModalDialog();
+                                }
+                            });
+                            return;
+                        }
+                    } else {
+                        nodeHelper.handleNodeError(
+                            RestHelper.getTitle(failed[0].node),
+                            failed[0].error,
+                        );
+                    }
+                }
 
-            if (callback) {
-                callback(success.map((n) => n.node as CollectionReference));
-            }
-        });
+                if (callback) {
+                    callback(success.map((n) => n.node as CollectionReference));
+                }
+            });
     }
 
     static openConnector(

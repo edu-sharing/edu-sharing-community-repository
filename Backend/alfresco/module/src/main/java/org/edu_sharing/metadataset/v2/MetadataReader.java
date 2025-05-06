@@ -427,7 +427,9 @@ public class MetadataReader {
         mds.setLabel(label);
 
         mds.setCreate(getCreate());
-        mds.setWidgets(getWidgets());
+        MetadataWidgetDefaults defaults = getWidgetDefaults();
+        mds.setWidgetDefaults(defaults);
+        mds.setWidgets(getWidgets(defaults));
         mds.setTemplates(getTemplates());
         mds.setGroups(getGroups());
         mds.setLists(getLists());
@@ -451,14 +453,36 @@ public class MetadataReader {
         }
         return create;
     }
-
-    private List<MetadataWidget> getWidgets() throws Exception {
+    private MetadataWidgetDefaults getWidgetDefaults() throws Exception {
+        MetadataWidgetDefaults defaults = null;
+        NodeList widgetsDefaultNode = (NodeList) xpath.evaluate("/metadataset/widgets/defaults", doc, XPathConstants.NODESET);
+        for (int i = 0; i < widgetsDefaultNode.getLength(); i++) {
+            Node widgetNode = widgetsDefaultNode.item(i);
+            NodeList list2 = widgetNode.getChildNodes();
+            for (int j = 0; j < list2.getLength(); j++) {
+                Node data = list2.item(j);
+                String name = data.getNodeName();
+                String value = data.getTextContent();
+                if(defaults == null) {
+                    defaults = new MetadataWidgetDefaults();
+                }
+                switch (name) {
+                    case "textEscapingPolicy":
+                        defaults.setTextEscapingPolicy(MetadataWidget.TextEscapingPolicy.valueOf(value));
+                        break;
+                }
+            }
+        }
+        return defaults;
+    }
+    private List<MetadataWidget> getWidgets(MetadataWidgetDefaults defaults) throws Exception {
         List<MetadataWidget> widgets = new ArrayList<>();
         NodeList widgetsNode = (NodeList) xpath.evaluate("/metadataset/widgets/widget", doc, XPathConstants.NODESET);
         for (int i = 0; i < widgetsNode.getLength(); i++) {
             Node widgetNode = widgetsNode.item(i);
             NodeList list2 = widgetNode.getChildNodes();
             MetadataWidget widget = new MetadataWidget();
+            widget.setDefaults(defaults);
             widget.setI18n(i18nPath);
             String valuespaceI18n = i18nPath;
             String valuespaceI18nPrefix = "";
