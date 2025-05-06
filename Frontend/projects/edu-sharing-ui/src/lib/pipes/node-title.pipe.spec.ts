@@ -1,4 +1,4 @@
-import { TranslateService } from '@ngx-translate/core/lib/translate.service';
+import { TranslateService } from '@ngx-translate/core';
 import { NodeTitlePipe } from './node-title.pipe';
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
 
