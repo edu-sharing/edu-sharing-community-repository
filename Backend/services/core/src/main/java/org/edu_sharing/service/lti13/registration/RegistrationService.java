@@ -12,6 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.action.RessourceInfoExecuter;
 import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -284,6 +285,10 @@ public class RegistrationService {
             String productFamilyCode = ltiPlatformConfiguration.getProduct_family_code();
             if(productFamilyCode != null){
                 properties.put(ApplicationInfo.KEY_SUBTYPE,productFamilyCode);
+                if(productFamilyCode.equals(RessourceInfoExecuter.CCM_RESSOURCETYPE_GEOGEBRA)){
+                    properties.put(ApplicationInfo.KEY_LTI_SCOPEUSERNAME,"false");
+                    properties.put(ApplicationInfo.KEY_LTI_SYNCREADERS,"true");
+                }
             }
         }
 
