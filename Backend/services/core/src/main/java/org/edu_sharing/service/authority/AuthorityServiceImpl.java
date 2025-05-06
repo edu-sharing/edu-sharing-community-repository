@@ -67,6 +67,7 @@ public class AuthorityServiceImpl implements AuthorityService {
     private final LightbendConfigLoader lightbendConfigLoader;
     private final PersonService personService;
     private final org.alfresco.service.cmr.security.MutableAuthenticationService authenticationService;
+    private final org.alfresco.repo.security.authentication.RepositoryAuthenticationDao authenticationDao;
 
     /**
      * Returns a property for a certain authority (it will fetch the coressponding node and load the property)
@@ -731,16 +732,13 @@ public class AuthorityServiceImpl implements AuthorityService {
         retryingTransactionHelper.doInTransaction(() -> {
             Throwable runAs = AuthenticationUtil.runAs(() -> {
                 try {
-                    NodeRef personNodeRef = personService.getPersonOrNull(user);
+                    NodeRef personNodeRef = authenticationDao.getUserOrNull(user);
                     if (personNodeRef == null) {
                         return null;
                     }
-                    Map<String, Serializable> userInfo = Map.of(
-                            CCConstants.CM_PROP_PERSON_2FA_SECRET, secret,
-                            CCConstants.CM_PROP_PERSON_2FA_ACTIVATED, false
-                    );
-                    personService.setPersonProperties(user, transformQName(userInfo));
-                    userCache.refresh(username);
+
+                    nodeService.setProperty(personNodeRef, QName.createQName(CCConstants.CCM_PROP_PERSON_2FA_SECRET), secret);
+                    nodeService.setProperty(personNodeRef, QName.createQName(CCConstants.CCM_PROP_PERSON_2FA_ACTIVATED), false);
                 } catch (Throwable e) {
                     log.error(e.getMessage(), e);
                     return e;
@@ -766,7 +764,16 @@ public class AuthorityServiceImpl implements AuthorityService {
         if(!canChange2Fa(user)){
             throw new InsufficientPermissionException("You are not allowed to check 2 factor authorization");
         }
-        Boolean status = (Boolean) nodeService.getProperty(authorityService.getAuthorityNodeRef(username), QName.createQName(CCConstants.CM_PROP_PERSON_2FA_ACTIVATED));
+
+//        Boolean status = retryingTransactionHelper.doInTransaction(() -> AuthenticationUtil.runAs(() -> {
+                NodeRef personNodeRef = authenticationDao.getUserOrNull(user);
+                if (personNodeRef == null) {
+                    return false;
+                }
+        Boolean status = (Boolean) nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CCM_PROP_PERSON_2FA_ACTIVATED));
+//        return (Boolean) nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CCM_PROP_PERSON_2FA_ACTIVATED));
+//            }, ApplicationInfoList.getHomeRepository().getUsername()));
+
         return status != null && status;
     }
 
@@ -788,13 +795,11 @@ public class AuthorityServiceImpl implements AuthorityService {
         retryingTransactionHelper.doInTransaction(() -> {
             Throwable runAs = AuthenticationUtil.runAs(() -> {
                 try {
-                    NodeRef personNodeRef = personService.getPersonOrNull(user);
+                    NodeRef personNodeRef = authenticationDao.getUserOrNull(user);
                     if (personNodeRef == null) {
                         return null;
                     }
-                    Map<String, Serializable> userInfo = Map.of(CCConstants.CM_PROP_PERSON_2FA_ACTIVATED, true);
-                    personService.setPersonProperties(user, transformQName(userInfo));
-                    userCache.refresh(username);
+                    nodeService.setProperty(personNodeRef, QName.createQName(CCConstants.CCM_PROP_PERSON_2FA_ACTIVATED), true);
                 } catch (Throwable e) {
                     log.error(e.getMessage(), e);
                     return e;
@@ -834,13 +839,11 @@ public class AuthorityServiceImpl implements AuthorityService {
         retryingTransactionHelper.doInTransaction(() -> {
             Throwable runAs = AuthenticationUtil.runAs(() -> {
                 try {
-                    NodeRef personNodeRef = personService.getPersonOrNull(user);
+                    NodeRef personNodeRef = authenticationDao.getUserOrNull(user);
                     if (personNodeRef == null) {
                         return null;
                     }
-                    nodeService.removeProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_2FA_SECRET));
-                    nodeService.removeProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_2FA_ACTIVATED));
-                    userCache.refresh(username);
+                    nodeService.setProperty(personNodeRef, QName.createQName(CCConstants.CCM_PROP_PERSON_2FA_ACTIVATED), false);
                 } catch (Throwable e) {
                     log.error(e.getMessage(), e);
                     return e;
@@ -864,16 +867,17 @@ public class AuthorityServiceImpl implements AuthorityService {
     public boolean validate2Fa(String username, int code, boolean ignoreActivationStatus) {
         String secret = retryingTransactionHelper.doInTransaction(() ->
                 AuthenticationUtil.runAs(() -> {
-                    User user = this.getUser(username);
-                    if(user == null){
+                    NodeRef personNodeRef = authenticationDao.getUserOrNull(username);
+                    if (personNodeRef == null) {
                         return null;
                     }
 
-                    if(!ignoreActivationStatus && !user.isTwoFactorAuthenticationActivated()){
+                    Boolean isActivated = (Boolean) nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CCM_PROP_PERSON_2FA_ACTIVATED));
+                    if(!ignoreActivationStatus && isActivated != null && !isActivated) {
                         return null;
                     }
 
-                    return user.getTwoFactorAuthenticationSecret();
+                    return (String) nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CCM_PROP_PERSON_2FA_SECRET));
 
                 }, ApplicationInfoList.getHomeRepository().getUsername()), false);
 
@@ -898,8 +902,11 @@ public class AuthorityServiceImpl implements AuthorityService {
 
         String secret = retryingTransactionHelper.doInTransaction(() ->
                 AuthenticationUtil.runAs(() -> {
-                    User userObject = this.getUser(user);
-                    return userObject.getTwoFactorAuthenticationSecret();
+                    NodeRef personNodeRef = authenticationDao.getUserOrNull(username);
+                    if (personNodeRef == null) {
+                        return null;
+                    }
+                    return (String) nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CCM_PROP_PERSON_2FA_SECRET));
                 }, AuthenticationUtil.getFullyAuthenticatedUser()), false);
 
         return new QRCode2Fa(oneTimeTokenService.generateQRCode(username, secret), secret);

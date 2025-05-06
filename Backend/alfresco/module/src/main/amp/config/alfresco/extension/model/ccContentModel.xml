@@ -178,12 +178,6 @@
                   <constraint ref="cm:userNameConstraint" />
                </constraints>
             </property>
-            <property name="cm:2faSecret">
-               <type>d:text</type>
-            </property>
-            <property name="cm:2faActivated">
-               <type>d:boolean</type>
-            </property>
             <property name="cm:homeFolder">
                <type>d:noderef</type>
                <mandatory>true</mandatory>
@@ -760,7 +754,6 @@
    
    
    <aspects>
-   
       <aspect name="cm:titled">
          <title>Titled</title>
          <properties>
