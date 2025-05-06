@@ -28,6 +28,8 @@
 package org.edu_sharing.service.usage;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.NumberRangeQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -216,15 +218,17 @@ public class AlfServicesWrapper implements UsageDAO{
 	}
 	
 	@Override
-	public Map<String, Map<String, Object>> getUsagesByAppId(String appId) throws Exception {
+	public Map<String, Map<String, Object>> getUsagesByAppId(String appId, Long from, Long to) throws Exception {
 		Map<String, Map<String, Object>> result = new HashMap<>();
 
 
 		SearchToken searchToken = new SearchToken();
-		searchToken.setElasticQuery(QueryBuilders.bool()
-				.must(m -> m.term(t -> t.field("type").value("ccm:usage")))
-				.must(m -> m.term(t -> t.field("properties.ccm:usageappid.keyword").value(appId)))
-				.build());
+
+		BoolQuery.Builder queryBuilder = QueryBuilders.bool();
+		queryBuilder.must(m -> m.term(t -> t.field("type").value("ccm:usage")));
+		queryBuilder.must(m -> m.term(t -> t.field("properties.ccm:usageappid.keyword").value(appId)));
+		applyDateQuery(from,to,queryBuilder);
+		searchToken.setElasticQuery(queryBuilder.build());
 
 		searchToken.setFrom(0);
 		searchToken.setMaxResult(Integer.MAX_VALUE);
@@ -282,14 +286,9 @@ public class AlfServicesWrapper implements UsageDAO{
 				if(nodeId != null && nodeId.trim().length() > 0) {
 					queryBuilder.must(m -> m.term(t -> t.field("properties.ccm:usageparentnodeid.keyword").value(nodeId)));
 				}
-				if(from != null) {
-					Long to2 = (to == null) ? new Date().getTime() : to;
-					queryBuilder.must(m -> m.range(r -> r.number(n -> n
-							.field("properties.cm:created.number")
-							.gte(from.doubleValue())
-							.lte(to2.doubleValue())))
-					);
-				}
+
+				applyDateQuery(from, to, queryBuilder);
+
 				searchToken.setElasticQuery(queryBuilder.build());
 				SearchResultNodeRef search = searchService.search(searchToken);
 				search.getData().forEach(n -> {
@@ -319,14 +318,9 @@ public class AlfServicesWrapper implements UsageDAO{
                 if(nodeId != null && nodeId.trim().length() > 0) {
 					queryBuilder.must(m -> m.term(t -> t.field("properties.ccm:remotenodeid.keyword").value(nodeId)));
                 }
-                if(from != null) {
-					Long to2 = (to == null) ? new Date().getTime() : to;
-					queryBuilder.must(m -> m.range(r -> r.number(n -> n
-							.field("properties.cm:created.number")
-							.gte(from.doubleValue())
-							.lte(to2.doubleValue())))
-					);
-                }
+
+				applyDateQuery(from, to, queryBuilder);
+
 				searchToken.setElasticQuery(queryBuilder.build());
 				SearchResultNodeRef search = searchService.search(searchToken);
 				search.getData().forEach(n -> {
@@ -355,6 +349,20 @@ public class AlfServicesWrapper implements UsageDAO{
         };
 		
 		return AuthenticationUtil.runAsSystem(runAs);
+	}
+
+	private void applyDateQuery(Long from, Long to, BoolQuery.Builder queryBuilder) {
+		if(from != null || to != null) {
+			NumberRangeQuery.Builder rangeQueryBuilder = new NumberRangeQuery.Builder();
+			rangeQueryBuilder.field("properties.cm:created.number");
+			if(from != null) {
+				rangeQueryBuilder.from(from.doubleValue());
+			}
+			if(to != null) {
+				rangeQueryBuilder.to(to.doubleValue());
+			}
+			queryBuilder.must(rangeQueryBuilder.build()._toRangeQuery()._toQuery());
+		}
 	}
 
 	public Map<String, Map<String, Object>> getChildrenByType(String nodeId, String type) {

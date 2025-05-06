@@ -100,15 +100,18 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 		
 		return AuthenticationUtil.runAsSystem(runAs);
 	}
-	
-	
-	public List<Usage> getUsages(String appId)throws UsageException{
+
+	public List<Usage> getUsages(String appId) throws UsageException{
+		return getUsages(appId,null,null);
+	}
+
+	public List<Usage> getUsages(String appId, Long from, Long to)throws UsageException{
 		
 		List<Usage> result = new ArrayList<>();
 
 		try{
 			AuthenticationUtil.runAsSystem(()->{
-				Map<String,Map<String,Object>> usages =  usageDao.getUsagesByAppId(appId);
+				Map<String,Map<String,Object>> usages =  usageDao.getUsagesByAppId(appId,from,to);
 				for(Map.Entry<String, Map<String,Object>> entry : usages.entrySet()){
 					result.add(getUsageResult(entry.getValue()));
 				}

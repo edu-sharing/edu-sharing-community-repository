@@ -14,7 +14,7 @@ public interface UsageDAO {
 	
 	Map<String, Map<String, Object>> getUsagesByCourse(String lmsId, String courseId) throws Exception;
 	
-	Map<String, Map<String, Object>> getUsagesByAppId(String appId) throws Exception;
+	Map<String, Map<String, Object>> getUsagesByAppId(String appId, Long from, Long to) throws Exception;
 	
 	Map<String, Map<String, Object>> getUsages(String repositoryId,
                                                String nodeId,
