@@ -17,6 +17,7 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+import org.apache.tika.utils.StringUtils;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
@@ -50,7 +51,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 	NodeService nodeService = serviceRegistry.getNodeService();
 	OwnableService ownableService = serviceRegistry.getOwnableService();
 	PermissionService permissionService = serviceRegistry.getPermissionService();
-    org.edu_sharing.alfresco.service.AuthorityService eduAuthorityService = (org.edu_sharing.alfresco.service.AuthorityService)alfApplicationContext.getBean("eduAuthorityService");
+	org.edu_sharing.alfresco.service.AuthorityService eduAuthorityService = (org.edu_sharing.alfresco.service.AuthorityService)alfApplicationContext.getBean("eduAuthorityService");
 	GuestService guestService = alfApplicationContext.getBean(GuestService.class);
 	Optional<CustomAuthorityAttributesMapping> customAuthorityAttributesMapping;
 
@@ -100,42 +101,42 @@ public class AuthorityServiceImpl implements AuthorityService {
 	public void deleteAuthority(String authorityName) {
 		serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
 
-                new RetryingTransactionCallback<Void>()
-                {
-                    public Void execute() throws Throwable
-                    {
-                		String key =  authorityName;
-                		String groupType = (String) getAuthorityProperty(key,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
+				new RetryingTransactionCallback<Void>()
+				{
+					public Void execute() throws Throwable
+					{
+						String key =  authorityName;
+						String groupType = (String) getAuthorityProperty(key,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
 						if(authorityName.equals(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)) {
 							throw new AccessDeniedException("Not allowed to delete group " + CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS);
 						}
-                		if(groupType!=null && groupType.equals(CCConstants.ADMINISTRATORS_GROUP_TYPE) && !new MCAlfrescoAPIClient().isAdmin(AuthenticationUtil.getFullyAuthenticatedUser()))
-                			throw new AccessDeniedException("An admin group can not be deleted");
-                		authorityService.deleteAuthority(key, true);
+						if(groupType!=null && groupType.equals(CCConstants.ADMINISTRATORS_GROUP_TYPE) && !new MCAlfrescoAPIClient().isAdmin(AuthenticationUtil.getFullyAuthenticatedUser()))
+							throw new AccessDeniedException("An admin group can not be deleted");
+						authorityService.deleteAuthority(key, true);
 
-                		return null;
-                    }
-                }, false);
+						return null;
+					}
+				}, false);
 	}
 
 	@Override
 	public synchronized boolean hasModifyAccessToGroup(String groupName){
-    	Set<String> memberships=serviceRegistry.getAuthorityService().getAuthorities();
-    	if(AuthorityServiceHelper.isAdmin()) {
+		Set<String> memberships=serviceRegistry.getAuthorityService().getAuthorities();
+		if(AuthorityServiceHelper.isAdmin()) {
 			return true;
 		}
 		if(!LightbendConfigLoader.get().getBoolean("repository.organizations.admins.canManage")) {
 			return false;
 		}
-				// Detect the group prefix and decide
-    	String[] split=groupName.split("_");
-    	if(split.length<2)
-    		return false;
-    	String adminGroup=PermissionService.GROUP_PREFIX+split[0]+"_"+org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP;
-    	if(memberships.contains(adminGroup)) {
+		// Detect the group prefix and decide
+		String[] split=groupName.split("_");
+		if(split.length<2)
+			return false;
+		String adminGroup=PermissionService.GROUP_PREFIX+split[0]+"_"+org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP;
+		if(memberships.contains(adminGroup)) {
 			return isAdminGroup(adminGroup);
 		}
-    	return false;
+		return false;
 	}
 
 	private boolean isAdminGroup(String group) {
@@ -145,7 +146,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 
 	private boolean groupIsOfType(String adminGroup, String type) {
 		String typeProp=(String) serviceRegistry.getNodeService().getProperty(serviceRegistry.getAuthorityService().getAuthorityNodeRef(adminGroup),QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE));
-    	return typeProp.equals(type);
+		return typeProp.equals(type);
 	}
 	@Override
 	public boolean isGuest() {
@@ -155,7 +156,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 		}
 		return false;
 	}
-    private synchronized boolean hasAdminAccessToGroup(String groupName,String postfix){
+	private synchronized boolean hasAdminAccessToGroup(String groupName,String postfix){
 		try {
 			// strip the group prefix, if present
 			if(groupName.startsWith(PermissionService.GROUP_PREFIX)){
@@ -193,7 +194,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 		}
 		return
 				LightbendConfigLoader.get().getBoolean("repository.organizations.admins.canManage") &&
-				hasAdminAccessToGroup(groupName,org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP);
+						hasAdminAccessToGroup(groupName,org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP);
 	}
 	@Override
 	public boolean hasAdminAccessToMediacenter(String groupName){
@@ -205,7 +206,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 	@Override
 	public synchronized boolean hasAdminAccessToOrganization(String orgName){
 		try {
-	    	Set<String> memberships=serviceRegistry.getAuthorityService().getAuthorities();
+			Set<String> memberships=serviceRegistry.getAuthorityService().getAuthorities();
 			if(AuthorityServiceHelper.isAdmin()) {
 				return true;
 			}
@@ -246,8 +247,8 @@ public class AuthorityServiceImpl implements AuthorityService {
 		Set<String> authoritiesForUser = alfAuthorityService
 				.getAuthoritiesForUser(authority);
 
-		
-		
+
+
 		ArrayList<EduGroup> result = new ArrayList<>();
 
 		for (String a : authoritiesForUser) {
@@ -257,9 +258,9 @@ public class AuthorityServiceImpl implements AuthorityService {
 
 		return result;
 	}
-	
-@Override	
-public EduGroup getEduGroup(String authority){
+
+	@Override
+	public EduGroup getEduGroup(String authority){
 		if(!authority.startsWith(PermissionService.GROUP_PREFIX)){
 			authority = PermissionService.GROUP_PREFIX + authority;
 		}
@@ -267,18 +268,18 @@ public EduGroup getEduGroup(String authority){
 		if(nodeRef == null){
 			return null;
 		}
-		
+
 		NodeRef nodeRefEduGroupHomeDir = (NodeRef) nodeService.getProperty(nodeRef,
 				QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
 		if (nodeRefEduGroupHomeDir != null) {
-	
+
 			Map<QName, Serializable> folderProps = nodeService.getProperties(nodeRefEduGroupHomeDir);
 			EduGroup eduGroup = new EduGroup();
 			eduGroup.setFolderId((String) folderProps.get(QName.createQName(CCConstants.SYS_PROP_NODE_UID)));
 			eduGroup.setFolderName((String) folderProps.get(QName.createQName(CCConstants.CM_NAME)));
-	
+
 			Map<QName, Serializable> groupProps = nodeService.getProperties(nodeRef);
-	
+
 			eduGroup.setGroupId((String) groupProps.get(QName.createQName(CCConstants.SYS_PROP_NODE_UID)));
 			eduGroup.setGroupname(
 					(String) groupProps.get(QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME)));
@@ -287,10 +288,10 @@ public EduGroup getEduGroup(String authority){
 			eduGroup.setFolderPath(nodeService.getPath(nodeRefEduGroupHomeDir)
 					.toPrefixString(serviceRegistry.getNamespaceService()));
 			eduGroup.setScope((String) groupProps.get(QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME)));
-			
+
 			return eduGroup;
 		}
-		
+
 		return null;
 	}
 
@@ -360,7 +361,7 @@ public EduGroup getEduGroup(String authority){
 				UserTransaction transaction = serviceRegistry.getTransactionService()
 						.getNonPropagatingUserTransaction(false);
 
-			
+
 				if (!authorityService.getAllAuthorities(AuthorityType.GROUP).contains(eduGroup.getGroupname())) {
 					try {
 						transaction.begin();
@@ -478,114 +479,124 @@ public EduGroup getEduGroup(String authority){
 	}
 
 	@Override
-		public void createOrUpdateUser(Map<String, Serializable> userInfo) throws Exception {
+	public void createOrUpdateUser(Map<String, Serializable> userInfo) throws Exception {
 
-			String currentUser = AuthenticationUtil.getRunAsUser();
+		String currentUser = AuthenticationUtil.getRunAsUser();
 
-			if(userInfo == null){
-				throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_USERNAME);
-			}
-
-			String userName = (String) userInfo.get(CCConstants.CM_PROP_PERSON_USERNAME);
-			String firstName = (String) userInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
-			String lastName = (String) userInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
-			String email = (String) userInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
-
-			if(userName == null || userName.trim().equals("")){
-				throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_USERNAME);
-			}
-
-			if(firstName == null || firstName.trim().equals("")){
-				throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_FIRSTNAME);
-			}
-
-			if(lastName == null || lastName.trim().equals("")){
-				throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_LASTNAME);
-			}
-
-			if(email == null || email.trim().equals("")){
-				throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_EMAIL);
-			}
-
-			if (!currentUser.equals(userName) && !AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
-				throw new NotAnAdminException();
-			}
-			if(!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
-				String personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
-				//if configured initialize with active status
-				if (personActiveStatus != null) {
-					userInfo.put(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS, personActiveStatus);
-				}
-			}
-
-			if(!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
-				String personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
-				//if configured initialize with active status
-				if (personActiveStatus != null && !personActiveStatus.trim().isEmpty()) {
-					userInfo.put(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS, personActiveStatus);
-				}
-			}
-
-			PersonService personService = serviceRegistry.getPersonService();
-
-			serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-
-		        new RetryingTransactionCallback<Void>()
-		        {
-		            public Void execute() throws Throwable
-		            {
-		        		Throwable runAs = AuthenticationUtil.runAs(
-
-		    				new AuthenticationUtil.RunAsWork<Throwable>() {
-
-		    					@Override
-		    					public Throwable doWork() throws Exception {
-
-		    						try {
-
-		    	                    	if (personService.personExists(userName)) {
-
-		    	                			personService.setPersonProperties(userName, transformQName(userInfo));
-
-		    	                		} else {
-
-		    	                			personService.createPerson(transformQName(userInfo));
-		    	                		}
-		    	                    	addUserExtensionAspect(userName);
-
-		    						} catch (Throwable e) {
-		    							logger.error(e.getMessage(), e);
-		    							return e;
-		    						}
-
-		    						return null;
-		    					}
-
-		    				},
-		    				ApplicationInfoList.getHomeRepository().getUsername());
-
-		        		if (runAs != null) {
-		        			throw runAs;
-		        		}
-
-		        		return null;
-		            }
-
-		        },
-		        false);
+		if(userInfo == null){
+			throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_USERNAME);
 		}
-		private void addUserExtensionAspect(String userName) {
-			PersonService personService = serviceRegistry.getPersonService();
-			if(!nodeService.hasAspect(personService.getPerson(userName),QName.createQName(CCConstants.CCM_ASPECT_USER_EXTENSION)))
-					nodeService.addAspect(personService.getPerson(userName),QName.createQName(CCConstants.CCM_ASPECT_USER_EXTENSION),null);
+
+		String userName = (String) userInfo.get(CCConstants.CM_PROP_PERSON_USERNAME);
+		String firstName = (String) userInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
+		String lastName = (String) userInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
+		String email = (String) userInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
+		PersonService personService = serviceRegistry.getPersonService();
+		NodeRef currentUserRef = personService.getPersonOrNull(userName);
+		if(StringUtils.isBlank(userName)){
+			throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_USERNAME);
 		}
-		private Map<QName, Serializable> transformQName(Map<String, Serializable> data) {
-			Map<QName, Serializable> transformed = new HashMap<>();
-			for(String key : data.keySet()) {
-				transformed.put(QName.createQName(key), data.get(key));
+
+		if(StringUtils.isBlank(firstName) &&
+				(
+						currentUserRef == null || !StringUtils.isBlank((String) NodeServiceHelper.getPropertyNative(currentUserRef, CCConstants.CM_PROP_PERSON_FIRSTNAME))
+				)
+		){
+			throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_FIRSTNAME);
+		}
+
+		if(StringUtils.isBlank(lastName) &&
+				(
+						currentUserRef == null || !StringUtils.isBlank((String) NodeServiceHelper.getPropertyNative(currentUserRef, CCConstants.CM_PROP_PERSON_LASTNAME))
+				)){
+			throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_LASTNAME);
+		}
+
+		if(StringUtils.isBlank(email) &&
+				(
+						currentUserRef == null || !StringUtils.isBlank((String) NodeServiceHelper.getPropertyNative(currentUserRef, CCConstants.CM_PROP_PERSON_EMAIL))
+				)){
+			throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_EMAIL);
+		}
+
+		if (!currentUser.equals(userName) && !AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
+			throw new NotAnAdminException();
+		}
+		if(!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
+			String personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
+			//if configured initialize with active status
+			if (personActiveStatus != null) {
+				userInfo.put(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS, personActiveStatus);
 			}
-			return transformed;
 		}
+
+		if(!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
+			String personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
+			//if configured initialize with active status
+			if (personActiveStatus != null && !personActiveStatus.trim().isEmpty()) {
+				userInfo.put(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS, personActiveStatus);
+			}
+		}
+
+
+		serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
+
+				new RetryingTransactionCallback<Void>()
+				{
+					public Void execute() throws Throwable
+					{
+						Throwable runAs = AuthenticationUtil.runAs(
+
+								new AuthenticationUtil.RunAsWork<Throwable>() {
+
+									@Override
+									public Throwable doWork() throws Exception {
+
+										try {
+
+											if (personService.personExists(userName)) {
+
+												personService.setPersonProperties(userName, transformQName(userInfo));
+
+											} else {
+
+												personService.createPerson(transformQName(userInfo));
+											}
+											addUserExtensionAspect(userName);
+
+										} catch (Throwable e) {
+											logger.error(e.getMessage(), e);
+											return e;
+										}
+
+										return null;
+									}
+
+								},
+								ApplicationInfoList.getHomeRepository().getUsername());
+
+						if (runAs != null) {
+							throw runAs;
+						}
+
+						return null;
+					}
+
+				},
+				false);
+	}
+	private void addUserExtensionAspect(String userName) {
+		PersonService personService = serviceRegistry.getPersonService();
+		if(!nodeService.hasAspect(personService.getPerson(userName),QName.createQName(CCConstants.CCM_ASPECT_USER_EXTENSION)))
+			nodeService.addAspect(personService.getPerson(userName),QName.createQName(CCConstants.CCM_ASPECT_USER_EXTENSION),null);
+	}
+	private Map<QName, Serializable> transformQName(Map<String, Serializable> data) {
+		Map<QName, Serializable> transformed = new HashMap<>();
+		for(String key : data.keySet()) {
+			transformed.put(QName.createQName(key), data.get(key));
+		}
+		return transformed;
+	}
 
 	public String[] getMembershipsOfGroup(String groupName) {
 
@@ -605,7 +616,7 @@ public EduGroup getEduGroup(String authority){
 
 	}
 
-    @Override
+	@Override
 	public void addMemberships(String groupName, String[] members) {
 
 		serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
