@@ -27,16 +27,13 @@
  */
 package org.edu_sharing.service.usage;
 
-import java.io.Serializable;
-import java.text.DateFormat;
-import java.util.*;
-
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.OwnableService;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -48,10 +45,19 @@ import org.apache.commons.mail2.core.EmailException;
 import org.edu_sharing.alfresco.HasPermissionsWork;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.Mail;
+import org.edu_sharing.service.search.SearchService;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SearchToken;
 import org.springframework.context.ApplicationContext;
+
+import java.io.Serializable;
+import java.text.DateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 		   This class is used by the webservice and authentication
@@ -69,9 +75,10 @@ public class AlfServicesWrapper implements UsageDAO{
 	NodeService nodeService = null;
 	OwnableService ownableService = null;
 
-	SearchService searchService = null;
 
 	ApplicationContext applicationContext = null;
+
+	SearchService searchService = SearchServiceFactory.getLocalService();
 
 	public static StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
 
@@ -79,7 +86,6 @@ public class AlfServicesWrapper implements UsageDAO{
 		applicationContext = AlfAppContextGate.getApplicationContext();
 		serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		authenticationService = serviceRegistry.getAuthenticationService();
-		searchService = serviceRegistry.getSearchService();
 		ownableService = serviceRegistry.getOwnableService();
 		nodeService = serviceRegistry.getNodeService();
 	}
@@ -102,7 +108,7 @@ public class AlfServicesWrapper implements UsageDAO{
 		Map<String, Map<String, Object>> result = getChildrenByType(nodeId, CCConstants.CCM_TYPE_USAGE);
 		return result;
 	}
-	
+
 	public Map<String,Object> getProperties(NodeRef nodeRef){
 		Map<QName, Serializable> childPropMap = nodeService.getProperties(nodeRef);
 		Map<String, Object> resultProps = new HashMap<>();
@@ -115,7 +121,7 @@ public class AlfServicesWrapper implements UsageDAO{
 
 				// TODO allow multivalues
 				value = (String) ((ArrayList) object).get(0);
-				
+
 			} else if(object instanceof Date) {
 				value = new Long(((Date)object).getTime()).toString();
 			} else if(object != null){
@@ -125,7 +131,7 @@ public class AlfServicesWrapper implements UsageDAO{
 			value = formatData(qname.toString(), value);
 			resultProps.put(qname.toString(), value);
 		}
-		
+
 		return resultProps;
 	}
 
@@ -174,58 +180,73 @@ public class AlfServicesWrapper implements UsageDAO{
 
 	public Map<String, Map<String, Object>> getUsagesByCourse(String lmsId, String courseId) throws Exception {
 		Map<String, Map<String, Object>> result = new HashMap<>();
-
 		// prevent getting all usages by using * as courseId
 		if(courseId.contains("*")){
 			logger.error("courseId:" + courseId + " is not valid");
 			return null;
 		}
-		
-		String queryString = "TYPE:\"{http://www.campuscontent.de/model/1.0}usage\" AND @ccm\\:usagecourseid:" + courseId +" AND @ccm\\:usageappid:" + lmsId;
-		ResultSet resultSet = searchService.query(storeRef, SearchService.LANGUAGE_LUCENE, queryString);
-		for (NodeRef nodeRef : resultSet.getNodeRefs()) {
-			
+
+		SearchToken searchToken = new SearchToken();
+		searchToken.setElasticQuery(QueryBuilders.bool()
+				.must(m -> m.term(t -> t.field("type").value("ccm:usage")))
+				.must(m -> m.term(t -> t.field("properties.ccm:usagecourseid.keyword").value(courseId)))
+				.must(m -> m.term(t -> t.field("properties.ccm:usageappid.keyword").value(lmsId)))
+				.build());
+
+		searchToken.setFrom(0);
+		searchToken.setMaxResult(Integer.MAX_VALUE);
+		SearchResultNodeRef search = searchService.search(searchToken);
+		logger.info("found: " + search.getNodeCount());
+		search.getData().forEach(n -> {
+			NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, n.getNodeId());
 			try{
-				Map<QName, Serializable> tmpprops = nodeService.getProperties(nodeRef);
-				Map<String, Object> props = new HashMap<>();
-				for (QName key : tmpprops.keySet()) {
-					String propName = key.toString();
-					Object propValue = tmpprops.get(key);
-					if(propValue != null) props.put(propName, propValue.toString());
-					ChildAssociationRef childssocRef = nodeService.getPrimaryParent(nodeRef);
-					props.put(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID, childssocRef.getParentRef().getId());
-				}
+				Map<String, Object> props = n.getProperties().entrySet().stream().collect(
+						Collectors.toMap(Map.Entry::getKey, e -> String.valueOf(e.getValue()))
+				);
+				ChildAssociationRef childssocRef = nodeService.getPrimaryParent(nodeRef);
+				props.put(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID, childssocRef.getParentRef().getId());
+
 				result.put(nodeRef.getId(), props);
 			}catch(org.alfresco.service.cmr.repository.InvalidNodeRefException e){
 				logger.error("nodeRef: "+nodeRef+" does not exist. maybe an archived usage node:"+e.getMessage());
 			}
-		}
+		});
+
 		return result;
 	}
 	
 	@Override
 	public Map<String, Map<String, Object>> getUsagesByAppId(String appId) throws Exception {
 		Map<String, Map<String, Object>> result = new HashMap<>();
-		String queryString = "TYPE:\"{http://www.campuscontent.de/model/1.0}usage\" AND @ccm\\:usageappid:" + appId;
-		ResultSet resultSet = searchService.query(storeRef, SearchService.LANGUAGE_LUCENE, queryString);
-		for (NodeRef nodeRef : resultSet.getNodeRefs()) {
-			
+
+
+		SearchToken searchToken = new SearchToken();
+		searchToken.setElasticQuery(QueryBuilders.bool()
+				.must(m -> m.term(t -> t.field("type").value("ccm:usage")))
+				.must(m -> m.term(t -> t.field("properties.ccm:usageappid.keyword").value(appId)))
+				.build());
+
+		searchToken.setFrom(0);
+		searchToken.setMaxResult(Integer.MAX_VALUE);
+		SearchResultNodeRef search = searchService.search(searchToken);
+		search.getData().forEach(n -> {
+			NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, n.getNodeId());
+
 			try{
-				Map<QName, Serializable> tmpprops = nodeService.getProperties(nodeRef);
-				Map<String, Object> props = new HashMap<>();
-				for (QName key : tmpprops.keySet()) {
-					String propName = key.toString();
-					Object propValue = tmpprops.get(key);
-					if(propValue != null) props.put(propName, propValue.toString());
-				}
+
+				Map<String, Object> props = n.getProperties().entrySet().stream().collect(
+						Collectors.toMap(Map.Entry::getKey, e -> String.valueOf(e.getValue()))
+				);
 				ChildAssociationRef childssocRef = nodeService.getPrimaryParent(nodeRef);
 				props.put(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID, childssocRef.getParentRef().getId());
-				
+
 				result.put(nodeRef.getId(), props);
 			}catch(org.alfresco.service.cmr.repository.InvalidNodeRefException e){
 				logger.error("nodeRef: "+nodeRef+" does not exist. maybe an archived usage node:"+e.getMessage());
 			}
-		}
+		});
+
+
 		return result;
 	}
 	
@@ -253,68 +274,81 @@ public class AlfServicesWrapper implements UsageDAO{
             Map<String, Map<String, Object>> result = new HashMap<>();
 
             if(ApplicationInfoList.getHomeRepository().getAppId().equals(appInfo.getAppId())) {
-                String queryString = "TYPE:\"{http://www.campuscontent.de/model/1.0}usage\"";
-                if(nodeId != null && nodeId.trim().length() > 0) {
-                    queryString += " AND @ccm\\:usageparentnodeid:" + nodeId;
-                }
-                if(from != null) {
+				SearchToken searchToken = new SearchToken();
+				searchToken.setFrom(0);
+				searchToken.setMaxResult(Integer.MAX_VALUE);
+				BoolQuery.Builder queryBuilder = QueryBuilders.bool();
+				queryBuilder.must(m -> m.term(t -> t.field("type").value("ccm:usage")));
+				if(nodeId != null && nodeId.trim().length() > 0) {
+					queryBuilder.must(m -> m.term(t -> t.field("properties.ccm:usageparentnodeid.keyword").value(nodeId)));
+				}
+				if(from != null) {
+					Long to2 = (to == null) ? new Date().getTime() : to;
+					queryBuilder.must(m -> m.range(r -> r.number(n -> n
+							.field("properties.cm:created.number")
+							.gte(from.doubleValue())
+							.lte(to2.doubleValue())))
+					);
+				}
+				searchToken.setElasticQuery(queryBuilder.build());
+				SearchResultNodeRef search = searchService.search(searchToken);
+				search.getData().forEach(n -> {
+					NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, n.getNodeId());
+					try{
 
-                    String fromFormated = ISO8601DateFormat.format(new Date(from));
+						Map<String, Object> props = n.getProperties().entrySet().stream().collect(
+								Collectors.toMap(Map.Entry::getKey, e -> String.valueOf(e.getValue()))
+						);
+						ChildAssociationRef childssocRef = nodeService.getPrimaryParent(nodeRef);
+						props.put(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID, childssocRef.getParentRef().getId());
 
-                    Long to2 = (to == null) ? new Date().getTime() : to;
-                    String toFormated = ISO8601DateFormat.format(new Date(to2));
-                    queryString += " AND @cm\\:created:[" + fromFormated + " TO " + toFormated + "]";
-                }
+						result.put(nodeRef.getId(), props);
+					}catch(InvalidNodeRefException e){
+						logger.error("nodeRef: "+nodeRef+" does not exist. maybe an archived usage node:"+e.getMessage());
+					}
+				});
 
-                ResultSet resultSet = searchService.query(storeRef, SearchService.LANGUAGE_LUCENE, queryString);
-                for (NodeRef nodeRef : resultSet.getNodeRefs()) {
-
-                    try{
-
-                        Map<String, Object> props = getProperties(nodeRef);
-                        ChildAssociationRef childssocRef = nodeService.getPrimaryParent(nodeRef);
-                        props.put(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID, childssocRef.getParentRef().getId());
-
-                        result.put(nodeRef.getId(), props);
-                    }catch(InvalidNodeRefException e){
-                        logger.error("nodeRef: "+nodeRef+" does not exist. maybe an archived usage node:"+e.getMessage());
-                    }
-                }
             }else {
-                String queryString = "TYPE:\"{http://www.campuscontent.de/model/1.0}remoteobject\" AND @ccm\\:remoterepositoryid:" + repositoryIdF;
+				SearchToken searchToken = new SearchToken();
+				searchToken.setFrom(0);
+				searchToken.setMaxResult(Integer.MAX_VALUE);
+				BoolQuery.Builder queryBuilder = QueryBuilders.bool();
+				queryBuilder.must(m -> m.term(t -> t.field("type").value("ccm:remoteobject")));
+				queryBuilder.must(m -> m.term(t -> t.field("properties.ccm:remoterepositoryid.keyword").value(repositoryIdF)));
+
                 if(nodeId != null && nodeId.trim().length() > 0) {
-                    queryString += " AND @ccm\\:remotenodeid:" + nodeId;
+					queryBuilder.must(m -> m.term(t -> t.field("properties.ccm:remotenodeid.keyword").value(nodeId)));
                 }
                 if(from != null) {
-
-                    String fromFormated = ISO8601DateFormat.format(new Date(from));
-
-                    Long to2 = (to == null) ? new Date().getTime() : to;
-                    String toFormated = ISO8601DateFormat.format(new Date(to2));
-                    queryString += " AND @cm\\:created:[" + fromFormated + " TO " + toFormated + "]";
+					Long to2 = (to == null) ? new Date().getTime() : to;
+					queryBuilder.must(m -> m.range(r -> r.number(n -> n
+							.field("properties.cm:created.number")
+							.gte(from.doubleValue())
+							.lte(to2.doubleValue())))
+					);
                 }
+				searchToken.setElasticQuery(queryBuilder.build());
+				SearchResultNodeRef search = searchService.search(searchToken);
+				search.getData().forEach(n -> {
+					NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, n.getNodeId());
+					try{
 
-                ResultSet resultSet = searchService.query(storeRef, SearchService.LANGUAGE_LUCENE, queryString);
-                for (NodeRef nodeRef : resultSet.getNodeRefs()) {
+						List<ChildAssociationRef> childAssocs = nodeService.getChildAssocs(nodeRef);
+						for(ChildAssociationRef childRef : childAssocs) {
+							if(QName.createQName(CCConstants.CCM_TYPE_USAGE).equals(nodeService.getType(childRef.getChildRef()))){
 
-                    try{
+								Map<String, Object> props = getProperties(childRef.getChildRef());
+								ChildAssociationRef childssocRef = nodeService.getPrimaryParent(childRef.getChildRef());
+								props.put(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID, childssocRef.getParentRef().getId());
 
-                        List<ChildAssociationRef> childAssocs = nodeService.getChildAssocs(nodeRef);
-                        for(ChildAssociationRef childRef : childAssocs) {
-                            if(QName.createQName(CCConstants.CCM_TYPE_USAGE).equals(nodeService.getType(childRef.getChildRef()))){
+								result.put(childRef.getChildRef().getId(), props);
+							}
+						}
 
-                                Map<String, Object> props = getProperties(childRef.getChildRef());
-                                ChildAssociationRef childssocRef = nodeService.getPrimaryParent(childRef.getChildRef());
-                                props.put(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID, childssocRef.getParentRef().getId());
-
-                                result.put(childRef.getChildRef().getId(), props);
-                            }
-                        }
-
-                    }catch(InvalidNodeRefException e){
-                        logger.error("nodeRef: "+nodeRef+" does not exist. maybe an archived usage node:"+e.getMessage());
-                    }
-                }
+					}catch(InvalidNodeRefException e){
+						logger.error("nodeRef: "+nodeRef+" does not exist. maybe an archived usage node:"+e.getMessage());
+					}
+				});
             }
 
             return result;
