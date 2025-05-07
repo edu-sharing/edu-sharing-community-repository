@@ -49,4 +49,37 @@ scope: provided -> always for all third party libraries
 scope: compile  -> only edu-sharing internals
 
 ![Add dependency decision tree](docs/images/MavenDependencyManagement.jpg)
- 
+
+
+
+# Maven Git Workflow
+
+Maven artifacts, Docker images, Helm charts, etc., are versioned based on the Git branch name or tag.  
+From `maven/fixes/10.0`, the artifact is built with the version `<artifactid>:maven-fixes-10.0-SNAPSHOT`.
+
+## Feature Branch Workflow
+
+Feature branches are treated specially.  
+Feature branches following the pattern `maven/feature/<version>-My-Fancy-Feature` also produce Maven artifacts with the version  
+`<artifactid>:maven-fixes-<version>-SNAPSHOT`.  
+For example, from `maven/feature/10.0-My-Fancy-Feature`, the artifact will be built with the version  
+`<artifactid>:maven-fixes-10.0-SNAPSHOT`.
+
+This allows feature branches to be created without requiring all projects to use the same branch name.
+
+To avoid cross-project artifact conflicts between different feature branches, the environment variable `PROJECT_NAME` can be used  
+to prefix the artifact for each customer project.  
+In this case, the artifact will be generated as `<artifactid>:<PROJECT_NAME>maven-fixes-<version>-SNAPSHOT`.
+
+**Example:**  
+`PROJECT_NAME=community-`  
+From `maven/feature/10.0-My-Fancy-Feature`, the artifact will be built with the version  
+`<artifactid>:community-maven-fixes-10.0-SNAPSHOT`.
+
+It is important that all projects are built using the same `PROJECT_NAME`.
+
+This is handled by edu-dev-tools ij command for you
+
+Additionally, the Maven property `project.version.base` is overridden to always point to the underlying  
+`maven-fixes-<version>-SNAPSHOT` version.  
+This can be handy for external managed projects like `rendering-service-2`.

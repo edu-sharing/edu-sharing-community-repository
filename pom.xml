@@ -28,6 +28,8 @@
   </scm>
 
   <properties>
+    <!-- git extension controlled props -->
+    <project.version.base>git</project.version.base>
 
     <alfresco.pdf-renderer.version>1.2</alfresco.pdf-renderer.version>
     <alfresco.platform.version>23.4.1</alfresco.platform.version>

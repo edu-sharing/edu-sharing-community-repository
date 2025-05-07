@@ -1,17 +1,31 @@
 <configuration xmlns="https://github.com/qoomon/maven-git-versioning-extension"
                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-               xsi:schemaLocation="https://github.com/qoomon/maven-git-versioning-extension https://qoomon.github.io/maven-git-versioning-extension/configuration-7.0.0.xsd">
+               xsi:schemaLocation="https://github.com/qoomon/maven-git-versioning-extension https://qoomon.github.io/maven-git-versioning-extension/configuration-9.4.0.xsd">
 
   <refs considerTagsOnBranches="false">
+
 
     <ref type="tag">
       <pattern>.+</pattern>
       <version>${ref.slug}</version>
     </ref>
 
+    <!-- feature branch -->
+    <ref type="branch">
+      <pattern><![CDATA[maven/feature/(?<version>\d+.\d+)(?=[-_]).+]]></pattern>
+      <version>${env.PROJECT_NAME:-}maven-fixes-${ref.version}-SNAPSHOT</version>
+      <properties>
+        <project.version.base>maven-fixes-${ref.version}-SNAPSHOT</project.version.base>
+      </properties>
+    </ref>
+
+    <!-- other branches -->
     <ref type="branch">
       <pattern>.+</pattern>
-      <version>${ref.slug}-SNAPSHOT</version>
+      <version>${env.PROJECT_NAME:-}${ref.slug}-SNAPSHOT</version>
+      <properties>
+        <project.version.base>${ref.slug}-SNAPSHOT</project.version.base>
+      </properties>
     </ref>
 
   </refs>
