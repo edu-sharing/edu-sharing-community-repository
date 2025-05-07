@@ -1,6 +1,6 @@
 {
   "name": "ngx-edu-sharing-b-api",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "GNU GPL v2",
   "description": "Angular bindings for Edu-Sharing's B-API",
   "repository": {
