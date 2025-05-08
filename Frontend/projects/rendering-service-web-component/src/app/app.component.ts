@@ -1,5 +1,5 @@
 import { Node } from 'ngx-edu-sharing-api';
-import { Component, Input, OnChanges, signal, SimpleChanges } from '@angular/core';
+import { Component, Injector, Input, OnChanges, signal, SimpleChanges } from '@angular/core';
 import { RenderHelperService } from 'ngx-edu-sharing-ui';
 import { RenderDataRequestWithToken } from 'ngx-rendering-service-api';
 
@@ -20,7 +20,14 @@ export class AppComponent implements OnChanges {
     request = signal<RenderDataRequestWithToken>(null);
     serviceWorkerUrl = signal<string>(null);
 
-    constructor(private renderHelperService: RenderHelperService) {}
+    constructor(
+        private renderHelperService: RenderHelperService,
+        private injector: Injector, //private translations: TranslationsService,
+    ) {
+        // this works, but not our own?!
+        //this.injector.get(TranslateService).getTranslation('').subscribe(() => {});
+        //console.log('init 2', this.injector.get(TranslationsService));
+    }
 
     async ngOnChanges(changes: SimpleChanges) {
         if (changes.encoded_node) {
