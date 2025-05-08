@@ -42,6 +42,11 @@
               { "glob": "**/*", "input": "node_modules/ng2-pdfjs-viewer/pdfjs", "output": "/assets/pdfjs" },
               { "glob": "**/*", "input": "node_modules/ngx-rendering-service-lib/assets", "output": "/" }
             ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "projects/edu-sharing-ui/assets/scss"
+              ]
+            },
             "styles": [
               "src/app/core-ui-module/styles/core-base.scss",
               "src/styles/main.scss"
@@ -535,7 +540,7 @@
               "tsConfig": "projects/edu-sharing-ui/tsconfig.lib.json"
             }
           },
-          "defaultConfiguration": "production"
+          "defaultConfiguration": "production",
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",

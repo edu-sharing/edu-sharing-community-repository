@@ -39,6 +39,8 @@ export class TranslationLoader implements TranslateLoader {
         @Inject(ADDITIONAL_I18N_PROVIDER)
         additionalI18nProvider?: (lang: string) => string[],
     ) {
+        console.log('ASSETS_BASE_PATH', assetsBasePath);
+        console.log('ADDITIONAL_I18N_PROVIDER', assetsBasePath);
         return new TranslationLoader(
             assetsBasePath,
             additionalI18nProvider,

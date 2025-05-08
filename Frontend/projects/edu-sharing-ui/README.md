@@ -38,3 +38,6 @@ async ngOnInit() {
 
 In your scss, make sure to include the global variables via
 `@import "node-modules/ngx-edu-sharing-ui/assets/scss/variables";`
+
+and in your `angular.json`, add it to the `"styles"`
+`"node_modules/ngx-edu-sharing-ui/assets/scss/material_theme.scss",`
