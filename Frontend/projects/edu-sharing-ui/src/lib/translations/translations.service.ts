@@ -1,11 +1,10 @@
 import { ApplicationRef, Injectable, Optional } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, from, Observable, of as observableOf } from 'rxjs';
+import { BehaviorSubject, from, Observable, of, of as observableOf } from 'rxjs';
 import { first, map, switchMap, tap } from 'rxjs/operators';
 import { ConfigService, LANGUAGES, SessionStorageService } from 'ngx-edu-sharing-api';
 import { AppService } from '../services/abstract/app.service';
-import moment, { Locale } from 'moment';
 
 // 'none' means that only labels should be shown (for dev)
 const DEFAULT_SUPPORTED_LANGUAGES = [
@@ -25,7 +24,8 @@ export class TranslationsService {
 
     constructor(
         private config: ConfigService,
-        private route: ActivatedRoute,
+        // optional, some web components may don't have it!
+        @Optional() private route: ActivatedRoute,
         private storage: SessionStorageService,
         private translate: TranslateService,
         private sessionStorage: SessionStorageService,
@@ -70,14 +70,14 @@ export class TranslationsService {
                 tap((supportedLanguages: string[]) => this.translate.addLangs(supportedLanguages)),
                 // Select queryParams.locale if set meaningfully
                 switchMap((supportedLanguages: string[]) =>
-                    this.route.queryParams.pipe(
+                    (this.route ? this.route.queryParams : of(null)).pipe(
                         first(),
                         map((params) => {
                             let selectedLanguage: string = null;
-                            if (supportedLanguages.indexOf(params.locale) !== -1) {
-                                selectedLanguage = params.locale;
-                            } else if (params.locale) {
-                                if (params.locale === 'de') {
+                            if (supportedLanguages.indexOf(params?.locale) !== -1) {
+                                selectedLanguage = params?.locale;
+                            } else if (params?.locale) {
+                                if (params?.locale === 'de') {
                                     const deVariants = supportedLanguages.filter((l) =>
                                         l.startsWith('de-'),
                                     );

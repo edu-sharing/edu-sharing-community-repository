@@ -13,7 +13,7 @@ import { environment } from '../environments/environment';
     imports: [
         BrowserModule,
         EduSharingApiModule.forRoot({ rootUrl: environment.eduSharingApiUrl }),
-        EduSharingUiModule.forRoot({ production: environment.production, isEmbedded: true }),
+        EduSharingUiModule.forRoot({ production: true, isEmbedded: true }),
         RenderComponent,
         TranslationsModule,
         RenderingServiceLibModule.forRoot({
