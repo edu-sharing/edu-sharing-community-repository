@@ -10,7 +10,7 @@ import {
 import { TranslateService } from '@ngx-translate/core';
 import { LocalEventsService, UIAnimation } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
-import { forkJoin as observableForkJoin } from 'rxjs';
+import { forkJoin as observableForkJoin, from, of } from 'rxjs';
 import {
     CollectionUsage,
     ConfigurationService,
@@ -42,6 +42,7 @@ import { ShareDialogData, ShareDialogResult } from './share-dialog-data';
 import { trigger } from '@angular/animations';
 import { Ace, Acl, AuthenticationService, Authority, NodeService } from 'ngx-edu-sharing-api';
 import { ShareDialogRestrictedAccessComponent } from './restricted-access/restricted-access.component';
+import { concatMap, toArray } from 'rxjs/operators';
 
 export type ExtendedAcl = {
     inherited: boolean;
@@ -711,22 +712,21 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                     await this.handlePermissionsPerNode(n, permissions, inherit);
                 };
             });
-            observableForkJoin(actions.map((a) => a())).subscribe(
-                () => {
-                    if (!this.data.sendToApi) {
-                        return;
-                    }
-                    this.updateUsages(
-                        RestHelper.copyPermissions(
-                            Helper.deepCopy(this.permissions),
-                            inherit,
-                        ) as ExtendedAcl,
-                    );
-                },
-                (error: any) => {
-                    this.toast.error(error);
-                    this.dialogRef.patchState({ isLoading: false });
-                },
+            for (let a of actions) {
+                try {
+                    await a();
+                } catch (e) {
+                    this.toast.error(e);
+                }
+            }
+            if (!this.data.sendToApi) {
+                return;
+            }
+            this.updateUsages(
+                RestHelper.copyPermissions(
+                    Helper.deepCopy(this.permissions),
+                    inherit,
+                ) as ExtendedAcl,
             );
         }
     }
