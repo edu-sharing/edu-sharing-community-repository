@@ -311,8 +311,13 @@ export class SearchService {
      *
      * Filters are mapped to include translated labels taken from the respective MDS widget.
      */
-    getFilters(): Observable<LabeledValuesDict> {
-        const filterCriteria = this.getFilterCriteria();
+    getFilters(unfoldTress = true): Observable<LabeledValuesDict> {
+        const filterCriteria = this.getFilterCriteria(
+            unfoldTress
+                ? this.searchParamsSubject.value?.body.criteria
+                : this.searchParamsSubject.value?.criteriaFlat ||
+                      this.searchParamsSubject.value?.body.criteria,
+        );
         if (filterCriteria.length === 0) {
             // If we don't have any filters yet, search params might not be available and
             // `getMdsIdentifier` would fail.
