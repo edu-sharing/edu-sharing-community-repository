@@ -33,23 +33,23 @@ import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-@Service
 public class Usage2Service {
 
 
 	public static final String MISSING_PARAM = "MISSING_PARAM";
 	public static final String NO_CCPUBLISH_PERMISSION = "NO_CCPUBLISH_PERMISSION";
 	
-Logger logger = Logger.getLogger(Usage2Service.class);
+	Logger logger = Logger.getLogger(Usage2Service.class);
 	
 	ServiceRegistry serviceRegistry = null;
 	
 
-	UsageDAO usageDao = new AlfServicesWrapper();
+	UsageDAO usageDao;
 	
 	public Usage2Service() {
 		ApplicationContext applicationContext =  AlfAppContextGate.getApplicationContext();
 		serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+		usageDao = new AlfServicesWrapper();
 	}
 	
 	public Usage getUsage(String lmsId, String courseId, String parentNodeId, String resourceId) throws Usage2Exception{

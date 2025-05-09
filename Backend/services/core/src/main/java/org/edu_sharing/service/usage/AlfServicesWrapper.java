@@ -80,7 +80,7 @@ public class AlfServicesWrapper implements UsageDAO{
 
 	ApplicationContext applicationContext = null;
 
-	SearchService searchService = SearchServiceFactory.getLocalService();
+	SearchService searchService;
 
 	public static StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
 
@@ -90,6 +90,7 @@ public class AlfServicesWrapper implements UsageDAO{
 		authenticationService = serviceRegistry.getAuthenticationService();
 		ownableService = serviceRegistry.getOwnableService();
 		nodeService = serviceRegistry.getNodeService();
+		searchService = SearchServiceFactory.getLocalService();
 	}
 
 	public AlfServicesWrapper(Map<String,String> authInfo) {

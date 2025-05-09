@@ -65,7 +65,6 @@ public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
     @JobFieldDescription(description = "Folder id to start from")
     private  String startFolder;
 
-    @Autowired
     @Setter
     private Usage2Service usage2Service;
 
@@ -79,6 +78,7 @@ public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
 
     @Override
     public void executeInternal(JobExecutionContext jobExecutionContext) {
+        usage2Service = new Usage2Service();
         List<NodeRef> nodeRefs = new ArrayList<>();
         NodeRunner runner = new NodeRunner();
         runner.setThreaded(true);
