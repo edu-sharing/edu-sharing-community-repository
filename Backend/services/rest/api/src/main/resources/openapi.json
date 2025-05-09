@@ -531,8 +531,7 @@
           "fromUser",
           "level0",
           "title",
-          "type",
-          "viewtype"
+          "type"
         ],
         "type": "object"
       },

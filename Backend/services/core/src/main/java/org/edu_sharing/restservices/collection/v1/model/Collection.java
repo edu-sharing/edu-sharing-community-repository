@@ -19,7 +19,6 @@ public class Collection implements Serializable {
 	@JsonProperty(required = true)
 	String type;
 
-	@JsonProperty(required = true)
 	String viewtype;
 
 	String orderMode;
