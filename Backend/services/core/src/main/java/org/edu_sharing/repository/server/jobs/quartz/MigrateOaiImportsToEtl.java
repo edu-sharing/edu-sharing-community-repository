@@ -134,15 +134,11 @@ public class MigrateOaiImportsToEtl extends AbstractJob{
 
 	private synchronized void transform(NodeRef nodeRef) {
 		logger.info("Bulk transform node " + nodeRef.getId());
-		nodeService.setProperty(
-				nodeRef,
-				QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE),
-				spiderId
-		);
 		if(propertyId != null && !propertyId.trim().isEmpty()) {
 			Serializable newId = nodeService.getProperty(nodeRef, QName.createQName(CCConstants.getValidGlobalName(propertyId)));
 			if(newId == null) {
-				logger.warn("Node " + nodeRef + " has no data for the new property id in field " + propertyId +", will not override current id " + nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID)));
+				logger.warn("Node " + nodeRef + " has no data for the new property id in field " + propertyId +", will not move this node. Check it and migrate it later");
+				return;
 			} else {
 				nodeService.setProperty(
 						nodeRef,
@@ -151,6 +147,11 @@ public class MigrateOaiImportsToEtl extends AbstractJob{
 				);
 			}
 		}
+		nodeService.setProperty(
+				nodeRef,
+				QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE),
+				spiderId
+		);
 		nodeService.setProperty(
 				nodeRef,
 				QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE),
