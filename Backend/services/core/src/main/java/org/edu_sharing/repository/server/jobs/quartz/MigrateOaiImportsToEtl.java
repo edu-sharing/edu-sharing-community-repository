@@ -29,32 +29,32 @@ package org.edu_sharing.repository.server.jobs.quartz;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.repo.version.VersionModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
-import org.alfresco.service.cmr.version.VersionType;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.importer.PersistentHandlerEdusharing;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.edu_sharing.service.bulk.BulkServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.RecurseMode;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @JobDescription(description = "Migrate nodes previously imported via OAI (IMP_OBJ) to nodes which will should be processed by the etl-framework")
 public class MigrateOaiImportsToEtl extends AbstractJob{
@@ -108,12 +108,33 @@ public class MigrateOaiImportsToEtl extends AbstractJob{
 							props
 					).getChildRef().getId();
 				}
+				/*String migration = NodeServiceFactory.getLocalService().findNodeByName(
+						BulkServiceFactory.getInstance().getPrimaryFolder().getId(),
+						"MIGRATION"
+				);
+				if(migration == null) {
+					props = new HashMap<>() {{
+						put(ContentModel.PROP_NAME, "MIGRATION");
+					}};
+					target = nodeService.createNode(
+							BulkServiceFactory.getInstance().getPrimaryFolder(),
+							ContentModel.ASSOC_CONTAINS,
+							QName.createQName("MIGRATION"),
+							QName.createQName(CCConstants.CCM_TYPE_MAP),
+							props
+					).getChildRef().getId();
+				} else {
+					target = migration;
+				}*/
 			} catch (Throwable e) {
 				logger.error(e.getMessage(), e);
 				throw new RuntimeException(e);
 			}
 			if (testNodeId != null && !testNodeId.trim().isEmpty()) {
-				this.transform(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, testNodeId));
+				serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+					this.transform(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, testNodeId));
+					return null;
+				});
 			} else {
 				NodeRunner runner = new NodeRunner();
 
@@ -133,20 +154,25 @@ public class MigrateOaiImportsToEtl extends AbstractJob{
 	}
 
 	private synchronized void transform(NodeRef nodeRef) {
-		logger.info("Bulk transform node " + nodeRef.getId());
+		logger.debug("Bulk transform node " + nodeRef.getId());
 		if(propertyId != null && !propertyId.trim().isEmpty()) {
 			Serializable newId = nodeService.getProperty(nodeRef, QName.createQName(CCConstants.getValidGlobalName(propertyId)));
 			if(newId == null) {
 				logger.warn("Node " + nodeRef + " has no data for the new property id in field " + propertyId +", will not move this node. Check it and migrate it later");
 				return;
 			} else {
+				if(newId instanceof Collection){
+					newId = (Serializable) ((Collection<?>) newId).iterator().next();
+				}
 				nodeService.setProperty(
 						nodeRef,
 						QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEUUID),
 						newId
 				);
 			}
+			logger.info("Bulk transform node " + nodeRef.getId() + " " + newId + " " + nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID)));
 		}
+
 		nodeService.setProperty(
 				nodeRef,
 				QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE),
@@ -157,7 +183,24 @@ public class MigrateOaiImportsToEtl extends AbstractJob{
 				QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE),
 				spiderId
 		);
-		NodeServiceFactory.getLocalService().moveNode(target, CCConstants.CM_ASSOC_FOLDER_CONTAINS, nodeRef.getId());
+		String parentName = NodeServiceHelper.getProperty(NodeServiceHelper.getPrimaryParent(nodeRef), CCConstants.CM_NAME);
+		String groupedTarget = NodeServiceFactory.getLocalService().findNodeByName(
+				target,
+				parentName
+		);
+		if(groupedTarget == null) {
+			Map<QName, Serializable> props = new HashMap<>() {{
+				put(ContentModel.PROP_NAME, parentName);
+			}};
+			groupedTarget = nodeService.createNode(
+					new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, target),
+					ContentModel.ASSOC_CONTAINS,
+					QName.createQName(parentName),
+					QName.createQName(CCConstants.CCM_TYPE_MAP),
+					props
+			).getChildRef().getId();
+		}
+		NodeServiceFactory.getLocalService().moveNode(groupedTarget, CCConstants.CM_ASSOC_FOLDER_CONTAINS, nodeRef.getId());
 		try {
 			// hold the latest state of the object, i.e. user modificationns
 			nodeService.setProperty(nodeRef,
