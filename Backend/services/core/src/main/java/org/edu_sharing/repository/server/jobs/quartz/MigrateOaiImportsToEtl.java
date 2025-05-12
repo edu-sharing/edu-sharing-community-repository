@@ -67,8 +67,10 @@ public class MigrateOaiImportsToEtl extends AbstractJob{
 
 	@JobFieldDescription(description = "Set Id (folder name) of the IMP_OBJ set to migrate")
 	private String setId;
-	@JobFieldDescription(description = "Id of the spider that this set should now belong to (i.e. oeh_spider, will be set into ccm:replicationsource)")
+	@JobFieldDescription(description = "Id of the spider that this set should now belong to (i.e. oeh_spider, will be used for the crawler folder - defaults to sourceId)")
 	private String spiderId;
+	@JobFieldDescription(description = "Source id to set into ccm:replicationsource")
+	private String sourceId;
 	@JobFieldDescription(description = "If the id should be transformed (copied from an other field into ccm:replicationsourceuuid), enter it here ")
 	private String propertyId;
 	@JobFieldDescription(description = "When set and not empty, only this node will be transformed (for testing)")
@@ -82,7 +84,11 @@ public class MigrateOaiImportsToEtl extends AbstractJob{
 
 
 		setId = prepareParam(context, "setId", true);
-		spiderId = prepareParam(context, "spiderId", true);
+		sourceId = prepareParam(context, "sourceId", true);
+		spiderId = prepareParam(context, "spiderId", false);
+		if(spiderId == null) {
+			spiderId = sourceId;
+		}
 		testNodeId = prepareParam(context, "testNodeId", false);
 		propertyId = prepareParam(context, "propertyId", false);
 		AuthenticationUtil.runAsSystem(() -> {
@@ -176,12 +182,7 @@ public class MigrateOaiImportsToEtl extends AbstractJob{
 		nodeService.setProperty(
 				nodeRef,
 				QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE),
-				spiderId
-		);
-		nodeService.setProperty(
-				nodeRef,
-				QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE),
-				spiderId
+				sourceId
 		);
 		String parentName = NodeServiceHelper.getProperty(NodeServiceHelper.getPrimaryParent(nodeRef), CCConstants.CM_NAME);
 		String groupedTarget = NodeServiceFactory.getLocalService().findNodeByName(
