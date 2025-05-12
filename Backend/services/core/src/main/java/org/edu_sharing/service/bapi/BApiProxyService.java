@@ -83,6 +83,7 @@ public class BApiProxyService {
             Response.ResponseBuilder result = Response.status(response.code());
             if (response.body() != null) {
                 result.entity(response.body().string());
+                result.type(String.valueOf(response.body().contentType()));
             }
             return result.build();
         } catch (IOException e) {
