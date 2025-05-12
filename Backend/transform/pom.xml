@@ -19,7 +19,7 @@
     <name>edu_sharing-community-repository-backend-transform</name>
 
     <properties>
-        <spring.boot.version>3.3.5</spring.boot.version>
+        <spring.boot.version>3.4.3</spring.boot.version>
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
