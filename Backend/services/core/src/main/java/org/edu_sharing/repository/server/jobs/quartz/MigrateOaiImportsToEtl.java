@@ -67,9 +67,9 @@ public class MigrateOaiImportsToEtl extends AbstractJob{
 
 	@JobFieldDescription(description = "Set Id (folder name) of the IMP_OBJ set to migrate")
 	private String setId;
-	@JobFieldDescription(description = "Id of the spider that this set should now belong to (i.e. oeh_spider)")
+	@JobFieldDescription(description = "Id of the spider that this set should now belong to (i.e. oeh_spider, will be set into ccm:replicationsource)")
 	private String spiderId;
-	@JobFieldDescription(description = "If the id should be transformed (copied from an other field into ccm:replicationsourceid), enter it here ")
+	@JobFieldDescription(description = "If the id should be transformed (copied from an other field into ccm:replicationsourceuuid), enter it here ")
 	private String propertyId;
 	@JobFieldDescription(description = "When set and not empty, only this node will be transformed (for testing)")
 	private String testNodeId;
@@ -146,7 +146,7 @@ public class MigrateOaiImportsToEtl extends AbstractJob{
 			} else {
 				nodeService.setProperty(
 						nodeRef,
-						QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID),
+						QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEUUID),
 						newId
 				);
 			}
