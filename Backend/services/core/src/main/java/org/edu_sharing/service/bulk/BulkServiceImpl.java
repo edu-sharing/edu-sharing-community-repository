@@ -317,17 +317,17 @@ public class BulkServiceImpl implements BulkService, ApplicationListener<Refresh
 		for(Version version : versions){
 			Map<String, Serializable> currentProps = version.getVersionProperties();
 			String vname = (String) currentProps.get(CCConstants.CCM_PROP_IO_VERSION_COMMENT);
-			if(vname.equals(CCConstants.VERSION_COMMENT_BULK_CREATE)){
+			if(CCConstants.VERSION_COMMENT_BULK_CREATE.equals(vname)){
 				importerProps = version.getVersionProperties();
 				continue;
 			}
 			if(importerProps != null){
-				if(vname.equals(CCConstants.VERSION_COMMENT_BULK_UPDATE)){
+				if(CCConstants.VERSION_COMMENT_BULK_UPDATE.equals(vname)){
 					Map<String, Object> diffs = getPropDiffs(importerProps, currentProps);
 					for (String diff : diffs.keySet()) {
 						importerProps.put(diff, currentProps.get(diff));
 					}
-				} else if(vname.equals(CCConstants.VERSION_COMMENT_BULK_UPDATE_RESYNC)){
+				} else if(CCConstants.VERSION_COMMENT_BULK_UPDATE_RESYNC.equals(vname)){
 					// we do nothing for these, these are just resynced once from previous changes
 				} else {
 					modifiedProps.putAll(getPropDiffs(importerProps, currentProps));
