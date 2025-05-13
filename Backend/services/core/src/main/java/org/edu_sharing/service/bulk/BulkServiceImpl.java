@@ -46,12 +46,17 @@ public class BulkServiceImpl implements BulkService, ApplicationListener<Refresh
 	/**
 	 * these internal properties will be ignored from the mds and never touched by the bulk service sync method
 	 */
-	private static final List<String> IGNORE_PROPERTIES = Stream.of(
+	private static final List<String> IGNORE_PROPERTIES = Stream.concat(Stream.of(
 			ContentModel.PROP_NODE_UUID,
 			ContentModel.PROP_VERSION_LABEL,
 			ContentModel.PROP_INITIAL_VERSION,
 			ContentModel.PROP_VERSION_TYPE
-	).map(QName::toString).collect(Collectors.toList());
+	).map(QName::toString),
+			Stream.of(
+				CCConstants.CCM_PROP_IO_VERSION_COMMENT,
+				CCConstants.LOM_PROP_LIFECYCLE_VERSION
+			)
+	).collect(Collectors.toList());
 	static NodeService nodeServiceAlfresco = (NodeService) AlfAppContextGate.getApplicationContext().getBean("alfrescoDefaultDbNodeService");
 	static final ServiceRegistry serviceRegistry = (ServiceRegistry) AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
 	static VersionService versionServiceAlfresco = serviceRegistry.getVersionService();
