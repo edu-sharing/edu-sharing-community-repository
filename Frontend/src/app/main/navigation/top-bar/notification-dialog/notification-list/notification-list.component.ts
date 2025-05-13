@@ -4,14 +4,12 @@
 
 import { Component, OnInit, ViewChild } from '@angular/core';
 import {
-    About,
     AboutService,
     AuthenticationService,
     ME,
     Notification,
     NotificationV1Service,
 } from 'ngx-edu-sharing-api';
-import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { DialogsService } from '../../../../../features/dialogs/dialogs.service';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { NodeDataSource, TranslationsService } from 'ngx-edu-sharing-ui';
@@ -29,7 +27,6 @@ export class NotificationListComponent implements OnInit {
     dataSource = new NodeDataSource<any>();
     unreadNotificationsCount: number;
     show = false;
-    private about: About;
     viewRead = false;
     constructor(
         private aboutService: AboutService,
@@ -42,11 +39,8 @@ export class NotificationListComponent implements OnInit {
     async ngOnInit() {
         this.dataSource.isLoading = true;
         await this.translations.waitForInit().toPromise();
-        this.about = await this.aboutService.getAbout().toPromise();
-        this.authenticationService.observeLoginInfo().subscribe((login) => {
-            this.show =
-                login.statusCode === RestConstants.STATUS_CODE_OK &&
-                this.about.plugins?.filter((s) => s.id === 'kafka-notification-plugin').length > 0;
+        this.authenticationService.observeLoginInfo().subscribe(async (login) => {
+            this.show = await this.aboutService.hasPlugin('kafka-notification-plugin');
             if (this.show) {
                 this.loadNotifications();
             }

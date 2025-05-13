@@ -96,7 +96,7 @@
       </div>
 
       <div *ngIf="data.sendMessages && getNewInvitedAuthorities().length" class="groupMessage">
-        <mat-checkbox id="notify" [(ngModel)]="notifyUsers">
+        <mat-checkbox id="notify" [(ngModel)]="notifyUsers" *ngIf="!hasNotificationService">
           <div>{{ 'WORKSPACE.NOTIFY_TITLE' | translate }}</div>
           <div class="notify-info">{{ 'WORKSPACE.NOTIFY_INFO' | translate }}</div>
         </mat-checkbox>
