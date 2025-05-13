@@ -285,9 +285,9 @@ public class BulkServiceImpl implements BulkService, ApplicationListener<Refresh
 		return cleanProps;*/
 		return Stream.concat(MetadataHelper.getWidgetsByNode(nodeRef, false).stream().map((w) -> CCConstants.getValidGlobalName(w.getId())).
 								filter(Objects::nonNull).
-								filter(id -> !IGNORE_PROPERTIES.contains(id)).
 								filter(id -> !id.startsWith("{virtualproperty}")),
 						propsToClean.stream())
+				.filter(id -> !IGNORE_PROPERTIES.contains(id))
 				.collect(Collectors.toList());
 	}
 	/**
