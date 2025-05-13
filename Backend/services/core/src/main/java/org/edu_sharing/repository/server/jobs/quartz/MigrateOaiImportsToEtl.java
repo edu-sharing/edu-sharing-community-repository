@@ -55,7 +55,7 @@ import java.io.Serializable;
 import java.util.*;
 
 @JobDescription(description = "Migrate nodes previously imported via OAI (IMP_OBJ) to nodes which will should be processed by the etl-framework")
-public class MigrateOaiImportsToEtl extends AbstractJob{
+public class MigrateOaiImportsToEtl extends AbstractJobMapAnnotationParams{
 	protected Logger logger = Logger.getLogger(MigrateOaiImportsToEtl.class);
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 
@@ -73,22 +73,23 @@ public class MigrateOaiImportsToEtl extends AbstractJob{
 	private String propertyId;
 	@JobFieldDescription(description = "When set and not empty, only this node will be transformed (for testing)")
 	private String testNodeId;
+	@JobFieldDescription(description = "Skip currently marked deleted elements? (ccm:editorial_state == deleted)", sampleValue = "true")
+	private Boolean skipDeleted;
 
 	NodeRef startFolder;
 	String target;
 
 	@Override
-	public void execute(JobExecutionContext context) throws JobExecutionException {
-
-
-		setId = prepareParam(context, "setId", true);
-		sourceId = prepareParam(context, "sourceId", true);
-		spiderId = prepareParam(context, "spiderId", false);
+	public void executeInternal(JobExecutionContext context) throws JobExecutionException {
+		if(setId == null) {
+			throwMissingParam("setId");
+		}
+		if(sourceId == null) {
+			throwMissingParam("sourceId");
+		}
 		if(spiderId == null) {
 			spiderId = sourceId;
 		}
-		testNodeId = prepareParam(context, "testNodeId", false);
-		propertyId = prepareParam(context, "propertyId", false);
 		AuthenticationUtil.runAsSystem(() -> {
 			try {
 				String importFolder = PersistentHandlerEdusharing.prepareImportFolder();
@@ -158,11 +159,21 @@ public class MigrateOaiImportsToEtl extends AbstractJob{
 	}
 
 	private synchronized void transform(NodeRef nodeRef) {
+		if(isInterrupted()) {
+			return;
+		}
 		logger.debug("Bulk transform node " + nodeRef.getId());
+		if(skipDeleted != null && skipDeleted) {
+			Serializable state = nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_EDITORIAL_STATE));
+			if("deleted".equals(state)) {
+				logger.info("Node " + nodeRef + " is marked as deleted. Will not migrate. " + nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID)));
+				return;
+			}
+		}
 		if(propertyId != null && !propertyId.trim().isEmpty()) {
 			Serializable newId = nodeService.getProperty(nodeRef, QName.createQName(CCConstants.getValidGlobalName(propertyId)));
 			if(newId == null) {
-				logger.warn("Node " + nodeRef + " has no data for the new property id in field " + propertyId +", will not move this node. Check it and migrate it later");
+				logger.warn("Node " + nodeRef + " has no data for the new property id in field " + propertyId +", will not move this node. Check it and migrate it later. " + nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID)));
 				return;
 			} else {
 				if(newId instanceof Collection){
@@ -235,15 +246,6 @@ public class MigrateOaiImportsToEtl extends AbstractJob{
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-
-	}
-
-	private String prepareParam(JobExecutionContext context, String param, boolean required) {
-		String value = (String) context.getJobDetail().getJobDataMap().get(param);
-		if(value==null && required) {
-			throwMissingParam(param);
-		}
-		return value;
 
 	}
 
