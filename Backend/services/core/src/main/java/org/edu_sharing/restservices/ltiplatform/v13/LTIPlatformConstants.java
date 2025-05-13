@@ -20,6 +20,8 @@ public class LTIPlatformConstants {
 
     public static final String CUSTOM_CLAIM_DETAILSSNIPPETURL = "getDetailsSnippetUrl";
 
+    public static final String CUSTOM_CLAIM_RENDERINGURL = "getRenderingUrl";
+
     public static final String CUSTOM_CLAIM_VERSION = "version";
     public static final String CUSTOM_CLAIM_TOKEN = "dataToken";
 

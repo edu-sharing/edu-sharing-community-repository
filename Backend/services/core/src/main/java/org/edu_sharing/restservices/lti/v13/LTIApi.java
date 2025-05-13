@@ -798,4 +798,62 @@ public class LTIApi {
         //TODO maybe destroy session
     }
 
+    @GET
+    @Path("/rendering/{repository}/{node}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json"})
+
+    @Operation(summary = "does a redirect to components/render with appropriate permissions", description = "allows access to rendering view in a lti platform permission context.")
+
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode="303", description="See Other."),
+                    @ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response rendering(
+            @Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+            @Parameter(description = "ID of node",required=true ) @PathParam("node") String node,
+            @Parameter(description = "version of node",required=false) @QueryParam("version") String nodeVersion,
+            @Parameter(description = "Rendering displayMode", required=false) @QueryParam("displayMode") String displayMode,
+            @Parameter(description = "jwt containing the claims aud (clientId of platform), deploymentId and a token. must be signed by platform", required=true ) @QueryParam("jwt")  String jwt,
+            @Context HttpServletRequest req){
+
+        try{
+            Jws<Claims> claims = new LTIJWTUtil().validateForInitialToolSession(jwt);
+            String token = claims.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_TOKEN, String.class);
+            Map<String, String> tokenData = (Map<String,String>)new Gson().fromJson(ApiTool.decrpt(token), Map.class);
+            String user = tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_USER);
+            //context is the embedding node
+            String contextId = tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_NODEID);
+            if(contextId == null){
+                throw new ValidationException("missing " +LTIConstants.CONTEXT);
+            }
+            //don't use this: it is the appId of the tool
+            //String appId = tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID);
+            String deploymentId = claims.getBody().get(LTIConstants.LTI_DEPLOYMENT_ID,String.class);
+            String iss = claims.getBody().getIssuer();
+            String clientId = claims.getBody().getAudience();
+            String appId = new RepoTools().getAppId(iss,clientId,deploymentId);
+
+            return AuthenticationUtil.runAs(() -> {
+                ApiTool.handleUsagePermissions(node, req.getSession(), appId, contextId, usageService);
+                return Response.seeOther(new URI("/edu-sharing/components/render/"+node)).build();
+            },user);
+        }catch(ValidationException e){
+            logger.warn(e.getMessage(),e);
+            return Response.status(Response.Status.FORBIDDEN).entity(e.getMessage()).build();
+        }catch (Throwable t) {
+
+            logger.error(t.getMessage(), t);
+            return ErrorResponse.createResponse(t);
+        }
+    }
+
+
+
 }
