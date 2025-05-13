@@ -209,7 +209,7 @@ public class EduVersion2ServiceImpl extends org.alfresco.repo.version.Version2Se
 			    if(oldProps.containsKey(prop))
 			    {
 			        newProps.put(prop, oldProps.get(prop));
-			        System.out.println("keeping propery:" + prop.getLocalName() + " " + oldProps.get(prop));
+			        logger.debug("keeping property:" + prop.getLocalName() + " " + oldProps.get(prop));
 			    }
 		    }
             
