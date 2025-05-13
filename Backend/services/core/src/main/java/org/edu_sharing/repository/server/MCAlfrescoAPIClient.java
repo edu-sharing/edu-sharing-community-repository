@@ -2159,7 +2159,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         }
     }
 
-    public synchronized void createVersion(String nodeId) throws Exception {
+    public synchronized Version createVersion(String nodeId) throws Exception {
 
         VersionService versionService = serviceRegistry.getVersionService();
         NodeRef nodeRef = new NodeRef(storeRef, nodeId);
@@ -2173,7 +2173,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         } else {
             NodeCustomizationPolicies.repairNodeVersion(nodeService, history, transFormedProps, nodeRef);
         }
-        versionService.createVersion(nodeRef, transFormedProps);
+        return versionService.createVersion(nodeRef, transFormedProps);
 
 
     }

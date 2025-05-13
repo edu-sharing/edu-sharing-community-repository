@@ -33,6 +33,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
@@ -51,10 +52,7 @@ import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @JobDescription(description = "Migrate nodes previously imported via OAI (IMP_OBJ) to nodes which will should be processed by the etl-framework")
 public class MigrateOaiImportsToEtl extends AbstractJob{
@@ -201,6 +199,7 @@ public class MigrateOaiImportsToEtl extends AbstractJob{
 					props
 			).getChildRef().getId();
 		}
+
 		NodeServiceFactory.getLocalService().moveNode(groupedTarget, CCConstants.CM_ASSOC_FOLDER_CONTAINS, nodeRef.getId());
 		try {
 			// hold the latest state of the object, i.e. user modificationns
@@ -208,23 +207,31 @@ public class MigrateOaiImportsToEtl extends AbstractJob{
 					QName.createQName(CCConstants.CCM_PROP_IO_VERSION_COMMENT),
 					CCConstants.VERSION_COMMENT_BULK_MIGRATION
 			);
-			NodeServiceFactory.getLocalService().createVersion(nodeRef.getId());
+			org.edu_sharing.service.nodeservice.NodeService service = NodeServiceFactory.getLocalService();
+			service.createVersion(nodeRef.getId());
 			VersionHistory history = serviceRegistry.getVersionService().getVersionHistory(nodeRef);
 			// revert to the initial version of the import
-			NodeServiceFactory.getLocalService().revertVersion(nodeRef.getId(), history.getRootVersion().getVersionLabel());
+			service.revertVersionNoRollback(nodeRef.getId(), history.getRootVersion().getVersionLabel());
 			// tag it as it was the bulk_create event so the crawler can detect modifications
 			nodeService.setProperty(nodeRef,
 					QName.createQName(CCConstants.CCM_PROP_IO_VERSION_COMMENT),
 					CCConstants.VERSION_COMMENT_BULK_CREATE
 			);
-			NodeServiceFactory.getLocalService().createVersion(nodeRef.getId());
+			String oldVersion = service.createVersion(nodeRef.getId());
 			// finally, rollback the version with all changes and at it on top
-			NodeServiceFactory.getLocalService().revertVersion(nodeRef.getId(), history.getHeadVersion().getVersionLabel());
+			service.revertVersionNoRollback(nodeRef.getId(), history.getHeadVersion().getVersionLabel());
 			nodeService.setProperty(nodeRef,
 					QName.createQName(CCConstants.CCM_PROP_IO_VERSION_COMMENT),
 					CCConstants.VERSION_COMMENT_BULK_MIGRATION
 			);
-			NodeServiceFactory.getLocalService().createVersion(nodeRef.getId());
+			String newVersion = service.createVersion(nodeRef.getId());
+			// finally, delete all other versions
+			Collection<Version> newHistory = serviceRegistry.getVersionService().getVersionHistory(nodeRef).getAllVersions();
+			for (Version version : newHistory) {
+				if(!Arrays.asList(oldVersion, newVersion).contains(version.getVersionLabel())) {
+					serviceRegistry.getVersionService().deleteVersion(nodeRef, version);
+				}
+			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

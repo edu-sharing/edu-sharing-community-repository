@@ -1150,8 +1150,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         return parentNodeRef;
     }
 
-    public void createVersion(String nodeId) throws Exception {
-        apiClient.createVersion(nodeId);
+    public String createVersion(String nodeId) throws Exception {
+        return apiClient.createVersion(nodeId).getVersionLabel();
     }
 
     @Override
@@ -1652,6 +1652,22 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * same as regular revert version, but no custom transaction and no rollback
+     */
+    @Override
+    public void revertVersionNoRollback(String nodeId, String verLbl) throws Exception {
+            VersionService versionService = serviceRegistry.getVersionService();
+            VersionHistory versionHistory = versionService.getVersionHistory(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
+            if (versionHistory != null && versionHistory.getAllVersions() != null && !versionHistory.getAllVersions().isEmpty()) {
+                NodeRef ioNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+                    Version version = versionHistory.getVersion(verLbl);
+                    versionService.revert(ioNodeRef, version, true);
+            } else {
+                throw new IllegalArgumentException("The node " + nodeId + "as no version history");
+            }
     }
 
     @Override
