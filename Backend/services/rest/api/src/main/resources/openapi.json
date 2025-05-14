@@ -2503,7 +2503,7 @@
       },
       "JobDetail": {
         "properties": {
-          "concurrentExectionDisallowed": {
+          "concurrentExecutionDisallowed": {
             "type": "boolean"
           },
           "description": {
