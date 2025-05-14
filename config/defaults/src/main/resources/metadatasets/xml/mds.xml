@@ -23,6 +23,20 @@
         }
       </chatCompletion>
     </aiConfig>
+    <aiConfig>
+      <id>image_ai</id>
+      <provider>openai</provider>
+      <useCaching>false</useCaching>
+      <createImage>
+        {
+          "model": "dall-e-2",
+          "size": "256x256",
+          "n": 3,
+          "response_format": "b64_json",
+          "prompt": "Ich benötige ein Bild für dieses Material. Es hat die folgenden Eigenschaften \nTitel: {{var.cclom:title|-}}\nDateiname: {{var.cm:name|-}}\nLink: {{var.ccm:wwwwurl|-}}\nMaterialart: {{var.ccm:educationallearningresourcetype|-}}\nSchlagworte: {{var.cclom:general_keyword|-}}\nBeschreibung: {{var.cclom:general_description|-}}. Erstelle das Bild im Stil {{var.preview.drawingStyle}}"
+        }
+      </createImage>
+    </aiConfig>
   </aiConfigs>
   <widgets>
     <defaults>
@@ -104,6 +118,16 @@
           </chatCompletion>
         </aiConfig>
       </aiConfigs>
+    </widget>
+    <widget>
+      <id>preview.drawingStyle</id>
+      <valuespace_i18n_prefix>drawingStyle_</valuespace_i18n_prefix>
+      <values>
+        <entry>default</entry>
+        <entry>realistic</entry>
+        <entry>drawing</entry>
+        <entry>comic</entry>
+      </values>
     </widget>
     <widget>
       <id>cm:description</id>
