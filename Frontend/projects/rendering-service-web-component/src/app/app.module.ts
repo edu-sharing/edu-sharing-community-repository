@@ -23,7 +23,9 @@ import { environment } from '../environments/environment';
         RenderComponent,
         TranslationsModule,
         RenderingServiceLibModule.forRoot({
-            assetsUrl: 'node_modules/ngx-edu-sharing-rendering-web-component/assets',
+            assetsUrl:
+                (window as any).__env?.EDU_SHARING_API_URL +
+                '/web-components/rendering-service/assets',
         }),
     ],
     providers: [
