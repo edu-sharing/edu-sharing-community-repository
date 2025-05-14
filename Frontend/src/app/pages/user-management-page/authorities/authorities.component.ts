@@ -1688,7 +1688,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     private async confirm2Fa(authority: Authority) {
         this.faConfirm.reset();
         const dialog = await this.dialogs.openGenericDialog({
-            closable: Closable.Disabled,
+            closable: Closable.Confirm,
             buttons: OK,
             minWidth: 500,
             avatar: { kind: 'icon', icon: 'flag' },
@@ -1708,26 +1708,28 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 buttons: [button],
             });
         });
-        await firstValueFrom(dialog.afterClosed());
-        try {
-            this.toast.showProgressSpinner();
-            await firstValueFrom(
-                this.iamService.activate2Fa({
-                    repository: HOME_REPOSITORY,
-                    person: authority.authorityName,
-                    'X-2FA-Token': parseInt(this.faConfirm.get('code').value),
-                }),
-            );
-            this.toast.closeProgressSpinner();
-            this.toast.show({
-                message: 'PERMISSIONS.2FA.ACTIVATED',
-                type: 'info',
-                subtype: ToastType.InfoData,
-            });
-        } catch (e) {
-            this.toast.closeProgressSpinner();
-            this.toast.error(e);
-            void this.confirm2Fa(authority);
+        const closed = await firstValueFrom(dialog.afterClosed());
+        if (closed === 'OK') {
+            try {
+                this.toast.showProgressSpinner();
+                await firstValueFrom(
+                    this.iamService.activate2Fa({
+                        repository: HOME_REPOSITORY,
+                        person: authority.authorityName,
+                        'X-2FA-Token': parseInt(this.faConfirm.get('code').value),
+                    }),
+                );
+                this.toast.closeProgressSpinner();
+                this.toast.show({
+                    message: 'PERMISSIONS.2FA.ACTIVATED',
+                    type: 'info',
+                    subtype: ToastType.InfoData,
+                });
+            } catch (e) {
+                this.toast.closeProgressSpinner();
+                this.toast.error(e);
+                void this.confirm2Fa(authority);
+            }
         }
     }
 }
