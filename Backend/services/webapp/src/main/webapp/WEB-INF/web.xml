@@ -149,9 +149,18 @@
         <filter-class>org.edu_sharing.repository.server.SecurityHeadersFilter</filter-class>
     </filter>
 
+    <filter>
+        <filter-name>WebComponentsFilter</filter-name>
+        <filter-class>org.edu_sharing.repository.server.WebComponentsFilter</filter-class>
+    </filter>
+
     <filter-mapping>
         <filter-name>SecurityHeadersFilter</filter-name>
         <url-pattern>/index.html</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>WebComponentsFilter</filter-name>
+        <url-pattern>/web-components/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
         <filter-name>SecurityHeadersFilter</filter-name>
