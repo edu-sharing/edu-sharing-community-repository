@@ -25,7 +25,7 @@ import { environment } from '../environments/environment';
         RenderingServiceLibModule.forRoot({
             assetsUrl:
                 (window as any).__env?.EDU_SHARING_API_URL +
-                '/web-components/rendering-service/assets',
+                '/../web-components/rendering-service/assets',
         }),
     ],
     providers: [
