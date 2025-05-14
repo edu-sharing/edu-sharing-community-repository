@@ -1,6 +1,6 @@
 {
   "name": "ngx-edu-sharing-b-api",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "license": "GNU GPL v2",
   "description": "Angular bindings for Edu-Sharing's B-API",
   "repository": {
@@ -15,7 +15,7 @@
     "generate-api": "npm run generate-api:generate-code && npm run generate-api:prettify-code",
     "update": "npm i && npm run generate-api",
     "fetch-api": "curl -sL https://b-api.staging.openeduhub.net/v3/api-docs/api | jq '.' > build/openapi.json",
-    "publish": "ng build && cd ../../dist/b-api && npm publish"
+    "publish": "npm run update && ng build && cd ../../dist/b-api && npm publish"
   },
   "peerDependencies": {
     "@angular/common": "^17.0.0 || ^18.0.0",
