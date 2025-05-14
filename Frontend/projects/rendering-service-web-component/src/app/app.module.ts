@@ -4,7 +4,13 @@ import { AppComponent } from './app.component';
 import { BrowserModule } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
 import { EduSharingApiModule } from 'ngx-edu-sharing-api';
-import { EduSharingUiModule, TranslationsModule, RenderHelperService } from 'ngx-edu-sharing-ui';
+import {
+    EduSharingUiModule,
+    TranslationsModule,
+    RenderHelperService,
+    I18N_CONFIG,
+    I18nConfig,
+} from 'ngx-edu-sharing-ui';
 import { RenderComponent, RenderingServiceLibModule } from 'ngx-rendering-service-lib';
 import { environment } from '../environments/environment';
 
@@ -20,7 +26,12 @@ import { environment } from '../environments/environment';
             assetsUrl: 'node_modules/ngx-edu-sharing-rendering-web-component/assets',
         }),
     ],
-    providers: [provideHttpClient(), RenderHelperService],
+    providers: [
+        provideHttpClient(),
+        // we do not read the user profile since we don't have a repository user present in lms contexts
+        { provide: I18N_CONFIG, useValue: { readUserProfile: false } as I18nConfig },
+        RenderHelperService,
+    ],
 })
 export class AppModule implements DoBootstrap {
     constructor(injector: Injector) {

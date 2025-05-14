@@ -7,6 +7,19 @@ import { InjectionToken } from '@angular/core';
  * is the case when it is embedded as a web component into another website.
  */
 export const ASSETS_BASE_PATH = new InjectionToken<string>('ASSETS_BASE_PATH');
+
+export class I18nConfig {
+    /**
+     * shall the user profile be read
+     * If not set, defaults to true
+     */
+    obeyUserProfile?: boolean = true;
+}
+
+/**
+ * additional configuration options
+ */
+export const I18N_CONFIG = new InjectionToken<I18nConfig>('I18N_CONFIG');
 /**
  * custom additional uris to fetch language files from
  *

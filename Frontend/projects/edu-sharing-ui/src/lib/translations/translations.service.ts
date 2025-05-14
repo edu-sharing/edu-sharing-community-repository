@@ -1,10 +1,11 @@
-import { ApplicationRef, Injectable, Optional } from '@angular/core';
+import { ApplicationRef, Inject, Injectable, Injector, Optional } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, from, Observable, of, of as observableOf } from 'rxjs';
 import { first, map, switchMap, tap } from 'rxjs/operators';
 import { ConfigService, LANGUAGES, SessionStorageService } from 'ngx-edu-sharing-api';
 import { AppService } from '../services/abstract/app.service';
+import { I18N_CONFIG, I18nConfig } from '../types/injection-tokens';
 
 // 'none' means that only labels should be shown (for dev)
 const DEFAULT_SUPPORTED_LANGUAGES = [
@@ -24,22 +25,30 @@ export class TranslationsService {
 
     constructor(
         private config: ConfigService,
+        private injector: Injector,
         // optional, some web components may don't have it!
         @Optional() private route: ActivatedRoute,
-        private storage: SessionStorageService,
+        @Optional() @Inject(I18N_CONFIG) private i18nConfig: I18nConfig,
         private translate: TranslateService,
-        private sessionStorage: SessionStorageService,
         private ref: ApplicationRef,
         @Optional() private appService: AppService,
     ) {
-        this.sessionStorage?.observe('language').subscribe((lang) => {
-            // language has changed, i.e. user has different preference
-            if (this.translate.currentLang && this.translate.currentLang !== lang) {
-                this.initialize().subscribe(() => {
-                    this.ref.tick();
+        if (!this.i18nConfig) {
+            this.i18nConfig = new I18nConfig();
+        }
+        if (this.i18nConfig.obeyUserProfile) {
+            this.injector
+                .get(SessionStorageService)
+                ?.observe('language')
+                .subscribe((lang) => {
+                    // language has changed, i.e. user has different preference
+                    if (this.translate.currentLang && this.translate.currentLang !== lang) {
+                        this.initialize().subscribe(() => {
+                            this.ref.tick();
+                        });
+                    }
                 });
-            }
-        });
+        }
     }
 
     /**
@@ -114,20 +123,34 @@ export class TranslationsService {
                             useStored: false,
                         });
                     } else {
-                        return this.storage.get('language').pipe(
-                            map((storageLanguage) => {
-                                let useStored = false;
-                                if (supportedLanguages.indexOf(storageLanguage) !== -1) {
-                                    selectedLanguage = storageLanguage;
-                                    useStored = true;
-                                }
-                                return {
-                                    supportedLanguages,
-                                    selectedLanguage,
-                                    useStored,
-                                };
-                            }),
-                        );
+                        if (!this.i18nConfig.obeyUserProfile) {
+                            console.info(
+                                'obeyUserProfile is disabled, using default language ' +
+                                    supportedLanguages[0],
+                            );
+                            return of({
+                                supportedLanguages,
+                                selectedLanguage,
+                                useStored: false,
+                            });
+                        }
+                        return this.injector
+                            .get(SessionStorageService)
+                            .get('language')
+                            .pipe(
+                                map((storageLanguage) => {
+                                    let useStored = false;
+                                    if (supportedLanguages.indexOf(storageLanguage) !== -1) {
+                                        selectedLanguage = storageLanguage;
+                                        useStored = true;
+                                    }
+                                    return {
+                                        supportedLanguages,
+                                        selectedLanguage,
+                                        useStored,
+                                    };
+                                }),
+                            );
                     }
                 }),
                 // Use browser language if available, otherwise fall back to the first supported
@@ -159,8 +182,10 @@ export class TranslationsService {
                 }),
                 // Set fallback language
                 tap(({ supportedLanguages, selectedLanguage, useStored }) => {
-                    if (!useStored) {
-                        void this.storage.set('language', selectedLanguage);
+                    if (!useStored && this.i18nConfig.obeyUserProfile) {
+                        void this.injector
+                            .get(SessionStorageService)
+                            .set('language', selectedLanguage);
                     }
                     if (selectedLanguage === 'none') {
                         this.translate.setDefaultLang('none');
