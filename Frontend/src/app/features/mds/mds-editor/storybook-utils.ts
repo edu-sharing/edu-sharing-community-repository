@@ -10,6 +10,8 @@ import { Toast } from '../../../services/toast';
 import { InputStatus, MdsWidgetValue } from '../types/types';
 import { InitialValues, MdsEditorInstanceService } from './mds-editor-instance.service';
 import { ViewInstanceService } from './mds-editor-view/view-instance.service';
+import { UserSimple } from 'ngx-edu-sharing-b-api';
+import { CardDialogService } from '../../dialogs/card-dialog/card-dialog.service';
 
 export const translateProvider = {
     instant: (v: string) => v,
@@ -73,22 +75,23 @@ export class WidgetDummy {
 
     setValue() {}
 
-    getSuggestions(): SuggestionResponseDto[] {
-        return [
+    getSuggestions(): BehaviorSubject<SuggestionResponseDto[]> {
+        return new BehaviorSubject([
             {
                 value: 'hello world',
+                propertyId: this.definition.id,
+                type: 'AI',
+                confidence: 1,
+                description: 'description',
+                version: '1',
                 createdBy: {
-                    authorityName: 'Superschlauer Duper KI',
+                    authorityName: 'use',
                 },
                 status: 'PENDING',
+                created: '',
+                id: 'id',
+                nodeId: 'nodeid',
             },
-            {
-                value: 'AB\nDEF',
-                createdBy: {
-                    authorityName: 'Noch schlauerer Redakteur',
-                },
-                status: 'PENDING',
-            },
-        ];
+        ]);
     }
 }

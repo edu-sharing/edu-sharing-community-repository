@@ -6,7 +6,7 @@ import {
     Injectable,
     Injector,
     NgZone,
-    OnDestroy,
+    OnDestroy, Optional,
     Type,
     ViewContainerRef,
 } from '@angular/core';
@@ -761,7 +761,8 @@ export class MdsEditorInstanceService implements OnDestroy {
         private aboutService: AboutService,
         private factoryResolver: ComponentFactoryResolver,
         private injector: Injector,
-        private containerRef: ViewContainerRef,
+        // not supported/available in storybook
+        @Optional() private containerRef: ViewContainerRef,
         private ngZone: NgZone,
         private restMdsService: RestMdsService,
         private configService: ConfigurationService,

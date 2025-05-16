@@ -21,7 +21,7 @@ const slideToggle: Meta<MatSlideToggleExtended> = {
             options: ['primary', 'accent', 'warn'],
         },
     },
-    render: ({ label, ...args }: MatSlideToggleExtended) => ({
+    render: ({ label, ...args }) => ({
         props: { label, ...args },
         template: `<mat-slide-toggle ${argsToTemplate(args)}>{{ label }}</mat-slide-toggle>`,
     }),
