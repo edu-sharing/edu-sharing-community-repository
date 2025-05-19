@@ -262,6 +262,17 @@
       "simple_DETAILS": "Users can register independently in the organization/group and become members immediately.",
       "password_DETAILS": "Users can enroll in the organization/group independently and become members at once if they know the correct password.",
       "list_DETAILS": "Users can enroll in the organization/group on their own and are placed on a waiting list. An administrator must then confirm the registration."
+    },
+    "2FA": {
+      "TITLE": "Set Up Two-Factor Authentication",
+      "DESCRIPTION": "With two-factor authentication, users must verify a second factor using a time-based token during each login. This increases access security.",
+      "REGENERATE": "This will generate a new key in the next step.",
+      "STATUS": "Enable Two-Factor Authentication",
+      "GENERATE_NEW_SECRET": "Generate a New Secret Key",
+      "ACTIVATED": "Two-Factor Authentication has been enabled",
+      "DEACTIVATED": "Two-Factor Authentication has been disabled",
+      "CODES": "Confirm Two-Factor Code",
+      "CONFIRM_CODE": "Enter Two-Factor Code"
     }
   }
 }

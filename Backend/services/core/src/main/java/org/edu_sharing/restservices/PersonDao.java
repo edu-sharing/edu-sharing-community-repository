@@ -10,7 +10,6 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.rpc.EduGroup;
@@ -28,6 +27,7 @@ import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.authority.QRCode2Fa;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -766,5 +766,40 @@ public class PersonDao {
 							oldStatus,
 							status.name());
 		}
+	}
+
+	public String generate2FaCode() {
+		if(Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")){
+			throw new AccessDeniedException("External managed users can't activate 2fa. Please contact your system administrator.");
+		}
+
+		return authorityService.generate2FaCode(getUserName());
+	}
+	public boolean get2FaStatus() {
+		return authorityService.is2FaActive(getUserName());
+	}
+
+	public void activate2Fa(int code) {
+		if(Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")){
+			throw new AccessDeniedException("External managed users can't activate 2fa. Please contact your system administrator.");
+		}
+
+		authorityService.activate2Fa(getUserName(), code);
+	}
+
+	public void deactivate2Fa() {
+		if(Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")){
+			throw new AccessDeniedException("External managed users can't deactivate 2fa. Please contact your system administrator.");
+		}
+
+		authorityService.deactivate2Fa(getUserName());
+	}
+
+	public QRCode2Fa getQRCode() {
+		if(Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")){
+			throw new AccessDeniedException("External managed users can't get a QR code. Please contact your system administrator.");
+		}
+
+		return authorityService.generate2FaQRCode(getUserName());
 	}
 }

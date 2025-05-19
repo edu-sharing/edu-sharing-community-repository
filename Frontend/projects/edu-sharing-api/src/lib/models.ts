@@ -1,11 +1,18 @@
 // Reexport API models that are exposed by wrappers.
 
-import { SearchV1Service } from './api/services/search-v-1.service';
 import {
+    Acl,
+    Group,
     GroupProfile,
+    MdsView,
     Mediacenter as MediacenterApi,
     MediacenterProfileExtension,
+    Organization,
+    Person,
+    User,
 } from './api/models';
+import { HttpErrorResponse } from '@angular/common/http';
+import { SuggestionsV1Service } from './api/services/suggestions-v-1.service';
 
 export {
     About,
@@ -18,6 +25,7 @@ export {
     Acl,
     Ace,
     Authority,
+    QrCode2Fa,
     LicenseAgreement,
     ManualRegistrationData,
     HandleParam,
@@ -74,9 +82,6 @@ export {
     WebsiteInformation,
     RegisterInformation,
 } from './api/models';
-import { HttpErrorResponse } from '@angular/common/http';
-import { Acl, Group, MdsView, Organization, Person, User } from './api/models';
-import { SuggestionsV1Service } from './api/services/suggestions-v-1.service';
 export type Mediacenter = MediacenterApi & {
     profile: GroupProfile & {
         mediacenter: MediacenterProfileExtension;

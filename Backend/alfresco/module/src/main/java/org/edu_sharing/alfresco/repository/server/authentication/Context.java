@@ -219,6 +219,15 @@ public class Context {
         return getSessionAttribute(CCConstants.AUTH_ACCESS_TOKEN);
     }
 
+    @Nullable
+    public String getAuthErrorStatus(){
+        Object attribute = request.getAttribute(CCConstants.AUTH_ERROR_STATUS);
+        if(attribute == null) {
+            return null;
+        }
+        return attribute.toString();
+    }
+
     public interface B3 {
 
         @Nullable

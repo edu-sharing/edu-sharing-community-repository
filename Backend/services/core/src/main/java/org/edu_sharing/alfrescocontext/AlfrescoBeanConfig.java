@@ -3,6 +3,7 @@ package org.edu_sharing.alfrescocontext;
 import org.alfresco.repo.domain.qname.QNameDAO;
 import org.alfresco.repo.i18n.MessageService;
 import org.alfresco.repo.lock.JobLockService;
+import org.alfresco.repo.management.subsystems.ChildApplicationContextManager;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.nodelocator.NodeLocatorService;
 import org.alfresco.repo.policy.BehaviourFilter;
@@ -10,6 +11,7 @@ import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.repo.search.SearchTrackingComponent;
 import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.MutableAuthenticationDao;
+import org.alfresco.repo.security.authentication.RepositoryAuthenticationDao;
 import org.alfresco.repo.tenant.TenantService;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.repo.web.filter.beans.DependencyInjectedFilter;
@@ -26,10 +28,7 @@ import org.alfresco.service.cmr.rendition.RenditionService;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.search.CategoryService;
 import org.alfresco.service.cmr.search.SearchService;
-import org.alfresco.service.cmr.security.AuthorityService;
-import org.alfresco.service.cmr.security.MutableAuthenticationService;
-import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.cmr.security.PersonService;
+import org.alfresco.service.cmr.security.*;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.cmr.tagging.TaggingService;
 import org.alfresco.service.cmr.version.VersionService;
@@ -42,6 +41,8 @@ import org.edu_sharing.alfresco.policy.HomeFolderTool;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.repository.server.tools.cache.UserCache;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -279,6 +280,12 @@ public class AlfrescoBeanConfig {
         return applicationContext.getBean("WebDavAuthenticationFilter", DependencyInjectedFilter.class);
     }
 
+    @Primary
+    @Bean(name = "OwnableService")
+    public OwnableService ownableService() {
+        return serviceRegistry.getOwnableService();
+    }
+
     @Bean
     public NodeService alfrescoDefaultDbNodeService() {
         return applicationContext.getBean("alfrescoDefaultDbNodeService", NodeService.class);
@@ -329,8 +336,33 @@ public class AlfrescoBeanConfig {
     public LightbendConfigLoader lightbendConfigLoader() {
         return applicationContext.getBean(LightbendConfigLoader.class);
     }
+
     @Bean
-    public SqlSessionFactory sqlSessionFactoryBean(){
+    public SqlSessionFactory sqlSessionFactoryBean() {
         return applicationContext.getBean("repoSqlSessionFactory", SqlSessionFactory.class);
+    }
+
+    @Bean
+    public UserCache userCache() {
+        return applicationContext.getBean(UserCache.class);
+    }
+
+    @Bean
+    public org.edu_sharing.alfresco.service.AuthorityService eduAuthorityService() {
+        return (org.edu_sharing.alfresco.service.AuthorityService) applicationContext.getBean("eduAuthorityService");
+    }
+
+    @Bean
+    public RepositoryAuthenticationDao repositoryAuthenticationDao() {
+        ChildApplicationContextManager authenticationContextManager = applicationContext.getBean(ChildApplicationContextManager.class);
+        for (String contextName : authenticationContextManager.getInstanceIds()) {
+            ApplicationContext ctx = authenticationContextManager.getApplicationContext(contextName);
+            try {
+                return ctx.getBean(RepositoryAuthenticationDao.class);
+            } catch (NoSuchBeanDefinitionException ignore) {
+            }
+        }
+
+        throw new NoSuchBeanDefinitionException(RepositoryAuthenticationDao.class);
     }
 }

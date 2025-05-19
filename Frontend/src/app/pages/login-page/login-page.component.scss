@@ -115,6 +115,12 @@ es-powered-by {
         }
     }
 }
+.fa-confirm {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
 @media screen and (max-height: $mobileHeight) {
     es-powered-by {
         display: none;

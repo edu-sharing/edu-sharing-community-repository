@@ -132,6 +132,10 @@ public class CCConstants {
 
 	public final static String AUTH_HEADER_EDU_TICKET = "EDU-TICKET";
 
+	public final static String AUTH_ERROR_STATUS = "AUTH_ERROR_STATUS";
+
+	public final static String AUTH_ERROR_STATUS_2FA = "2FA";
+
 	/**
 	 * access on nodes that was validated by lms
 	 */
@@ -349,6 +353,11 @@ public class CCConstants {
 	public final static String CM_PROP_PERSON_ESPERSONSTATUSDATE = "{http://www.alfresco.org/model/content/1.0}espersonstatusdate";
 
 	public final static String CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION = "{http://www.alfresco.org/model/content/1.0}eduSchoolPrimaryAffiliation";
+
+	public final static String CCM_PROP_PERSON_2FA_SECRET = "{http://www.campuscontent.de/model/1.0}2faSecret";
+
+	public final static String CCM_PROP_PERSON_2FA_ACTIVATED = "{http://www.campuscontent.de/model/1.0}2faActivated";
+
 
 	public final static String CM_PROP_OWNER = "{http://www.alfresco.org/model/content/1.0}owner";
 

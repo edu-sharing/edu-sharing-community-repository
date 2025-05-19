@@ -39,10 +39,7 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.spring.security.openid.SilentLoginModeRedirect;
 import org.springframework.context.ApplicationContext;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Path("/authentication/v1")
 @Tag(name = "AUTHENTICATION v1")
@@ -73,6 +70,7 @@ public class LoginApi {
         if (!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
             personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
         }
+
         String status = null;
         if (authenticated && personActiveStatus != null && !personActiveStatus.trim().equals("")) {
             String username = (String) req.getSession().getAttribute(CCConstants.AUTH_USERNAME);
@@ -90,12 +88,25 @@ public class LoginApi {
                 req.getSession().invalidate();
             }
         }
-
-        if (status != null) {
-            return Response.ok(new Login(authenticated, authTool.getScope(), null, req.getSession(), status)).build();
-        } else {
-            return Response.ok(new Login(authenticated, authTool.getScope(), req.getSession())).build();
+        if (status == null) {
+            org.edu_sharing.alfresco.repository.server.authentication.Context authContext = org.edu_sharing.alfresco.repository.server.authentication.Context.getCurrentInstance();
+            Optional<String> authErrorStatus = Optional.ofNullable(authContext)
+                    .map(org.edu_sharing.alfresco.repository.server.authentication.Context::getAuthErrorStatus);
+            if (authErrorStatus.isPresent()) {
+                switch (authErrorStatus.get()) {
+                    case CCConstants.AUTH_ERROR_STATUS_2FA:
+                        status = Login.STATUS_CODE_2FA;
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
+
+        Login login = new Login(authenticated, authTool.getScope(), null, req.getSession(), status);
+        return Response.ok(login).
+
+                build();
     }
 
     @GET

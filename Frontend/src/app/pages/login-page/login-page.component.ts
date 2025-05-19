@@ -1,8 +1,16 @@
 import { trigger } from '@angular/animations';
 import { PlatformLocation } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { UntypedFormControl } from '@angular/forms';
+import {
+    AfterViewInit,
+    Component,
+    ElementRef,
+    OnDestroy,
+    OnInit,
+    TemplateRef,
+    ViewChild,
+} from '@angular/core';
+import { FormControl, FormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { delay, first, map, startWith, switchMap } from 'rxjs/operators';
 import { BridgeService } from '../../services/bridge.service';
@@ -23,8 +31,16 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
 import { AuthenticationService, LoginInfo } from 'ngx-edu-sharing-api';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
-import { Subject } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import { ThemeService } from '../../services/theme.service';
+import { DialogsService } from '../../features/dialogs/dialogs.service';
+import { Closable } from '../../features/dialogs/card-dialog/card-dialog-config';
+import {
+    GenericDialogData,
+    NEXT,
+    OK,
+} from '../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
+import { CardDialogRef } from '../../features/dialogs/card-dialog/card-dialog-ref';
 
 @Component({
     selector: 'es-login-page',
@@ -35,6 +51,8 @@ import { ThemeService } from '../../services/theme.service';
 export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     @ViewChild('loginForm') loginForm: ElementRef;
+    @ViewChild('faConfirmRef') faConfirmRef: TemplateRef<unknown>;
+
     @ViewChild('passwordInput') passwordInput: InputPasswordComponent;
     @ViewChild('usernameInput') usernameInput: ElementRef;
 
@@ -51,7 +69,10 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     providerControl = new UntypedFormControl();
     showProviders = false;
     username = '';
-
+    show2FaDialog: CardDialogRef<GenericDialogData<'NEXT'>, 'NEXT'>;
+    faConfirm = new FormGroup({
+        code: new FormControl('', [Validators.required, Validators.pattern(/^\d{6}$/)]),
+    });
     private next = '';
     private providers: any;
     private scope = '';
@@ -60,6 +81,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     constructor(
         private connector: RestConnectorService,
         private toast: Toast,
+        private dialogs: DialogsService,
         private platformLocation: PlatformLocation,
         private router: Router,
         private http: HttpClient,
@@ -242,9 +264,11 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
         UIHelper.openUrl(url, this.bridge, OPEN_URL_MODE.Current);
     }
 
-    login() {
+    login(password = this.password, code2Fa?: string) {
+        console.log('login', password, code2Fa);
+
         this.isLoading = true;
-        this.connector.login(this.username, this.password, this.scope).subscribe(
+        this.connector.login(this.username, password, this.scope, code2Fa).subscribe(
             (data) => {
                 if (data.statusCode === RestConstants.STATUS_CODE_OK) {
                     this.goToNext(data);
@@ -261,6 +285,11 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                         );
                     } else if (data.statusCode === RestConstants.STATUS_CODE_PERSON_BLOCKED) {
                         this.toast.error(null, 'LOGIN.PERSON_BLOCKED');
+                    } else if (data.statusCode === RestConstants.STATUS_CODE_2FA) {
+                        if (code2Fa) {
+                            this.toast.error(null, 'LOGIN.2FA.WRONG_CODE');
+                        }
+                        void this.show2Fa(password);
                     } else {
                         this.toast.error(null, 'LOGIN.ERROR' + (this.isSafeLogin ? '_SAFE' : ''));
                     }
@@ -378,5 +407,41 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
             login = loginFound;
         }
         login.disabled = this.disabled;
+    }
+
+    private async show2Fa(password: string) {
+        this.faConfirm.reset();
+        this.show2FaDialog = await this.dialogs.openGenericDialog({
+            title: 'LOGIN.2FA.TITLE',
+            subtitle: 'LOGIN.2FA.SUBTITLE',
+            minWidth: 500,
+            closable: Closable.Casual,
+            contentTemplate: this.faConfirmRef,
+            buttons: NEXT,
+            avatar: { kind: 'icon', icon: 'flag' },
+        });
+        let button = new DialogButton('NEXT', DialogButton.TYPE_PRIMARY, () =>
+            this.show2FaDialog.close('NEXT'),
+        );
+        button.disabled = true;
+        setTimeout(() => {
+            this.show2FaDialog.patchConfig({
+                buttons: [button],
+            });
+        });
+        this.faConfirm.statusChanges.subscribe((status) => {
+            button.disabled = status !== 'VALID';
+            this.show2FaDialog.patchConfig({
+                buttons: [button],
+            });
+        });
+        const result = await firstValueFrom(this.show2FaDialog.afterClosed());
+        this.show2FaDialog = null;
+        if (result === 'NEXT' && this.faConfirm.status === 'VALID') {
+            console.log(this.faConfirm, this.faConfirm.get('code').value);
+            // do login
+            this.isLoading = true;
+            this.login(password, this.faConfirm.get('code').value);
+        }
     }
 }
