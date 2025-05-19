@@ -8,7 +8,6 @@ import {
     ListItem,
     NodeHelperService as NodeHelperServiceBase,
     NodePersonNamePipe,
-    NodesRightMode,
     OptionGroup,
     OptionItem,
     RepoUrlService,
@@ -119,46 +118,6 @@ export class NodeHelperService extends NodeHelperServiceBase {
     }
     setViewContainerRef(viewContainerRef: ViewContainerRef) {
         this.viewContainerRef = viewContainerRef;
-    }
-    /**
-     * returns true if all nodes have the requested right
-     * mode (only works for collection refs):
-     *   Local: check only rights of the node itself
-     Original: check only rights of the original node this refers to (collection ref). If it is not a collection ref, fallback to local
-     Both: check both rights of node + original combined via or
-     *
-     */
-    public getNodesRight(nodes: any[], right: string, mode = NodesRightMode.Local) {
-        if (nodes == null) return true;
-        for (const node of nodes) {
-            let currentMode = mode;
-            // if no access effective present and not a collection ref. use the local data
-            if (
-                !node.aspects?.includes(RestConstants.CCM_ASPECT_IO_REFERENCE) &&
-                !node.accessEffective?.length
-            ) {
-                currentMode = NodesRightMode.Local;
-            }
-            if (currentMode === NodesRightMode.Effective) {
-                if (!node.aspects?.includes(RestConstants.CCM_ASPECT_IO_REFERENCE)) {
-                    if (node.accessEffective && node.accessEffective.indexOf(right) !== -1) {
-                        continue;
-                    }
-                }
-                if (node.accessEffective && node.accessEffective.indexOf(right) !== -1) {
-                    continue;
-                }
-                if (RestConstants.IMPLICIT_COLLECTION_PERMISSIONS.indexOf(right) === -1) {
-                    // permission not matched on original -> implicit permissions from collection may apply
-                    return false;
-                }
-            }
-            // check regular node rights
-            if (!node.access || node.access.indexOf(right) === -1) {
-                return false;
-            }
-        }
-        return true;
     }
     public handleNodeError(name: string, error: any): number {
         if (error.status === RestConstants.DUPLICATE_NODE_RESPONSE) {

@@ -2,11 +2,11 @@ import { Inject, Injectable, Optional } from '@angular/core';
 import {
     ApiHelpersService,
     ConfigService,
-    User,
     NetworkService,
     Node,
     ProposalNode,
     RestConstants,
+    User,
 } from 'ngx-edu-sharing-api';
 import { TranslateService } from '@ngx-translate/core';
 import * as Workflow from '../types/workflow';
@@ -15,6 +15,8 @@ import { Params } from '@angular/router';
 import { UIConstants } from '../util/ui-constants';
 import { ASSETS_BASE_PATH } from '../types/injection-tokens';
 import { map } from 'rxjs/operators';
+import { NodesRightMode } from '../types/option-item';
+
 @Injectable({
     providedIn: 'root',
 })
@@ -292,5 +294,43 @@ export class NodeHelperService {
      */
     isNodeRevoked(node: Node) {
         return node?.aspects?.includes(RestConstants.CCM_ASPECT_REVOKED);
+    }
+    /**
+     * returns true if all nodes have the requested right
+     * mode (only works for collection refs):
+     *   Local: check only rights of the node itself
+     *   Effective: check only rights of the original node this refers to (collection ref). If it is not a collection ref, fallback to local
+     */
+    public getNodesRight(nodes: Node[], right: string, mode = NodesRightMode.Local) {
+        if (nodes == null) return true;
+        for (const node of nodes) {
+            let currentMode = mode;
+            // if no access effective present and not a collection ref. use the local data
+            if (
+                !node.aspects?.includes(RestConstants.CCM_ASPECT_IO_REFERENCE) &&
+                !node.accessEffective?.length
+            ) {
+                currentMode = NodesRightMode.Local;
+            }
+            if (currentMode === NodesRightMode.Effective) {
+                if (!node.aspects?.includes(RestConstants.CCM_ASPECT_IO_REFERENCE)) {
+                    if (node.accessEffective && node.accessEffective.indexOf(right) !== -1) {
+                        continue;
+                    }
+                }
+                if (node.accessEffective && node.accessEffective.indexOf(right) !== -1) {
+                    continue;
+                }
+                if (RestConstants.IMPLICIT_COLLECTION_PERMISSIONS.indexOf(right) === -1) {
+                    // permission not matched on original -> implicit permissions from collection may apply
+                    return false;
+                }
+            }
+            // check regular node rights
+            if (!node.access || node.access.indexOf(right) === -1) {
+                return false;
+            }
+        }
+        return true;
     }
 }

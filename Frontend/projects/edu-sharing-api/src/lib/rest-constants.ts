@@ -124,6 +124,14 @@ export class RestConstants {
     public static CCM_PROP_PUBLISHED_ORIGINAL = 'ccm:published_original';
     public static CCM_PROP_MAPTYPE = 'ccm:maptype';
     public static NODE_VERSION_CURRENT = '-1';
+    public static ACCESS_ADD_CHILDREN = 'AddChildren';
+    public static ACCESS_WRITE = 'Write';
+    public static ACCESS_DELETE = 'Delete';
+    public static ACCESS_CHANGE_PERMISSIONS = 'ChangePermissions';
+    public static ACCESS_CONSUMER = 'Consumer';
+    public static ACCESS_CC_PUBLISH = 'CCPublish';
+    public static ACCESS_COMMENT = 'Comment';
+    public static IMPLICIT_COLLECTION_PERMISSIONS = [RestConstants.ACCESS_CONSUMER];
 
     public static AUTHORITY_NAME = 'authorityName';
     public static AUTHORITY_DISPLAYNAME = 'displayName';
