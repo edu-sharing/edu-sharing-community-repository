@@ -270,7 +270,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/EduSharingSuggestionLlmRequest"
+                "$ref": "#/components/schemas/EduSharingLlmWidgetAiConfigRequest"
               }
             }
           },
@@ -318,7 +318,7 @@
         "tags": [
           "edu-sharing LLM"
         ],
-        "summary": " \n            Generate create image requests based on bapi configuration nodes. \n            Template substitution allows prompts to be enriched with node, user, and value space data\n            Mainly used to restrict use of chat completion usage by edu-sharing repository specifications.\n        ",
+        "summary": " \n            Generate create image requests based on bapi configuration nodes. \n            Template substitution allows prompts to be enriched with node and user data as well as passed input properties.\n        ",
         "operationId": "imageGeneration_1",
         "requestBody": {
           "content": {
@@ -364,18 +364,120 @@
         }
       }
     },
+    "/api/v1/edu-sharing/images/generations/limited": {
+      "post": {
+        "tags": [
+          "edu-sharing LLM"
+        ],
+        "summary": " \n            Generate create image requests based on bapi configuration nodes. \n            Template substitution allows prompts to be enriched with node, user, and value space data\n            Mainly used to restrict use of chat completion usage by edu-sharing repository specifications.\n        ",
+        "operationId": "imageGenerationLimited",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EduSharingLlmLimitedRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway Timeout",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImageResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/edu-sharing/chat/completion": {
       "post": {
         "tags": [
           "edu-sharing LLM"
         ],
-        "summary": " \n            Generate chat completions requests based on bapi configuration nodes. \n            Template substitution allows prompts to be enriched with node, user, and value space data\n            Mainly used to restrict use of chat completion usage by edu-sharing repository specifications.\n        ",
+        "summary": " \n            Generate chat completions requests based on bapi configuration nodes. \n            Template substitution allows prompts to be enriched with node and user data as well as passed input properties.\n        ",
         "operationId": "chatCompletions",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/EduSharingLlmRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway Timeout",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatCompletionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/edu-sharing/chat/completion/limited": {
+      "post": {
+        "tags": [
+          "edu-sharing LLM"
+        ],
+        "summary": " \n            Generate chat completions requests based on bapi configuration nodes. \n            Template substitution allows prompts to be enriched with node, user, and value space data\n            Mainly used to restrict use of chat completion usage by edu-sharing repository specifications.\n        ",
+        "operationId": "chatCompletionsLimited",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EduSharingLlmLimitedRequest"
               }
             }
           },
@@ -1823,7 +1925,7 @@
           }
         }
       },
-      "EduSharingSuggestionLlmRequest": {
+      "EduSharingLlmWidgetAiConfigRequest": {
         "type": "object",
         "description": "Request object for LLM chat completion, containing the necessary configuration for suggestions.",
         "properties": {
@@ -1831,9 +1933,9 @@
             "type": "string",
             "description": "The name of the metadata set to be used for the request"
           },
-          "mdsAiConfigIds": {
+          "configIds": {
             "type": "array",
-            "description": "\n        A list of aiConfig id's those stored in the metadata set provided by the metadataSet property. \n        Note: Within the list, each subsequent element takes precedence over the previous one.        \n        ",
+            "description": "\n        A list of aiConfig id's those stored in the metadata set provided by the metadataSet property or\n        nodesId those objects are storing the LLM request configuration or parts of it in the ccm:bapi_config property. \n        Note: Within the list, each subsequent element takes precedence over the previous one. \n        Schema of bapi_config: \n        {\n            \"provider\": \"provider name\", -> Required, provider of the chat completions model e.g. openai \n            \"useCaching\": \"true/false\", -> Optional, should the result be cached in the Database, default: false \n            \"chatCompletion\": { ... } -> required only for chat completion requests, see ChatCompletionRequest schema\n            \"createImage\": { ... } -> required only for create image requests, see CreateImageRequest schema\n        }\n        ",
             "items": {
               "type": "string"
             }
@@ -1865,8 +1967,8 @@
           }
         },
         "required": [
+          "configIds",
           "contextNodeId",
-          "mdsAiConfigIds",
           "metadataSet",
           "user",
           "variables",
@@ -2150,11 +2252,57 @@
       },
       "EduSharingLlmRequest": {
         "type": "object",
+        "description": "Request object for LLM requests",
+        "properties": {
+          "metadataSet": {
+            "type": "string",
+            "description": "The name of the metadata set to be used for the request"
+          },
+          "configIds": {
+            "type": "array",
+            "description": "\n        A list of aiConfig id's those stored in the metadata set provided by the metadataSet property or\n        nodesId those objects are storing the LLM request configuration or parts of it in the ccm:bapi_config property. \n        Note: Within the list, each subsequent element takes precedence over the previous one. \n        Schema of bapi_config: \n        {\n            \"provider\": \"provider name\", -> Required, provider of the chat completions model e.g. openai \n            \"useCaching\": \"true/false\", -> Optional, should the result be cached in the Database, default: false \n            \"chatCompletion\": { ... } -> required only for chat completion requests, see ChatCompletionRequest schema\n            \"createImage\": { ... } -> required only for create image requests, see CreateImageRequest schema\n        }\n        ",
+            "items": {
+              "type": "string"
+            }
+          },
+          "user": {
+            "type": "string",
+            "description": "\n            The user account to be used  for prompt substitution. \n            Template: {{user.<profilePropertyName>}} \n            e.g. {{user.firstName}}\n        "
+          },
+          "contextNodeId": {
+            "type": "string",
+            "description": "\n            The context Node Id to be used for prompt substitution.\n            Template: {{node.<propertyNameInShortFormat>}}\n            e.g. {{node.cclom:general_description}}\n        "
+          },
+          "variables": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "\n            A key-value map containing non persistent properties for prompt substitution.\n            example: {\n                \"cclom:general_description\": [\"lorem ipsum\", \"dolor sit amet\"]\n            }\n        "
+          }
+        },
+        "required": [
+          "configIds",
+          "contextNodeId",
+          "metadataSet",
+          "user",
+          "variables"
+        ]
+      },
+      "EduSharingLlmLimitedRequest": {
+        "type": "object",
         "description": "Request object for LLM chat completion, containing the necessary configuration for generating chat responses.",
         "properties": {
-          "configNodeIds": {
+          "metadataSet": {
+            "type": "string",
+            "description": "The name of the metadata set to be used for the request"
+          },
+          "configIds": {
             "type": "array",
-            "description": "\n        A list of config nodesId those objects are storing the LLM request configuration or parts of it in the ccm:bapi_config property. \n        Note: Within the list, each subsequent element takes precedence over the previous one.\n        Schema of bapi_config: \n        {\n            \"provider\": \"provider name\", -> Required, provider of the chat completions model e.g. openai \n            \"useCaching\": \"true/false\", -> Optional, should the result be cached in the Database, default: false \n            \"metadataSet\": \"used metadata set for variables\", -> Optional, default: mds \n            \"chatCompletion\": { ... } -> required only for chat completion requests, see ChatCompletionRequest schema\n            \"createImage\": { ... } -> required only for create image requests, see CreateImageRequest schema\n        }\n        ",
+            "description": "\n        A list of aiConfig id's those stored in the metadata set provided by the metadataSet property or\n        nodesId those objects are storing the LLM request configuration or parts of it in the ccm:bapi_config property. \n        Note: Within the list, each subsequent element takes precedence over the previous one. \n        Schema of bapi_config: \n        {\n            \"provider\": \"provider name\", -> Required, provider of the chat completions model e.g. openai \n            \"useCaching\": \"true/false\", -> Optional, should the result be cached in the Database, default: false \n            \"chatCompletion\": { ... } -> required only for chat completion requests, see ChatCompletionRequest schema\n            \"createImage\": { ... } -> required only for create image requests, see CreateImageRequest schema\n        }\n        ",
             "items": {
               "type": "string"
             }
@@ -2176,8 +2324,9 @@
           }
         },
         "required": [
-          "configNodeIds",
+          "configIds",
           "contextNodeId",
+          "metadataSet",
           "user",
           "variables"
         ]
