@@ -2,7 +2,13 @@ import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
-import { LabeledValue, MdsIdentifier, NetworkService, SearchResults } from '../../public-api';
+import {
+    LabeledValue,
+    MdsIdentifier,
+    MdsQueryCriteria,
+    NetworkService,
+    SearchResults,
+} from '../../public-api';
 import * as apiModels from '../api/models';
 import { SearchV1Service } from '../api/services';
 import { onSubscription } from '../utils/rxjs-operators/on-subscription';
@@ -41,7 +47,14 @@ export type FacetsDict = {
 export type DidYouMeanSuggestion = Pick<apiModels.Suggest, 'highlighted' | 'text'>;
 
 /** Parameters to be provided to `search`. */
-export type SearchRequestParams = Parameters<SearchV1Service['search']>[0];
+export type SearchRequestParams = Parameters<SearchV1Service['search']>[0] & {
+    /**
+     * holds the non-unfolded trees criteria
+     * used for storing only the necessary data for saved search
+     * If not set, the regular criteria are expected to have no unfolded data
+     */
+    criteriaFlat?: MdsQueryCriteria[];
+};
 
 interface CompletedRequest {
     /** Parameters sent with the API request. */
@@ -298,8 +311,13 @@ export class SearchService {
      *
      * Filters are mapped to include translated labels taken from the respective MDS widget.
      */
-    getFilters(): Observable<LabeledValuesDict> {
-        const filterCriteria = this.getFilterCriteria();
+    getFilters(unfoldTress = true): Observable<LabeledValuesDict> {
+        const filterCriteria = this.getFilterCriteria(
+            unfoldTress
+                ? this.searchParamsSubject.value?.body.criteria
+                : this.searchParamsSubject.value?.criteriaFlat ||
+                      this.searchParamsSubject.value?.body.criteria,
+        );
         if (filterCriteria.length === 0) {
             // If we don't have any filters yet, search params might not be available and
             // `getMdsIdentifier` would fail.

@@ -46,7 +46,8 @@ public class GuestFilter implements jakarta.servlet.Filter {
 
         logger.debug("starting");
         HttpServletRequest httpRequest = (HttpServletRequest) req;
-        if (httpRequest != null && httpRequest.getPathInfo() != null && httpRequest.getPathInfo().startsWith("/_about/")) {
+        if (httpRequest != null && httpRequest.getPathInfo() != null &&
+                (httpRequest.getPathInfo().startsWith("/_about/") || httpRequest.getPathInfo().startsWith("/ltiplatform/"))) {
             chain.doFilter(req, res);
             return;
         }

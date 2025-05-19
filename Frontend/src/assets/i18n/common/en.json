@@ -548,6 +548,9 @@
     "CURRICULUM": {
       "NAME": "Kanban"
     },
+    "GEOGEBRA": {
+      "NAME": "Geogebra"
+    },
     "MIMETYPE": {
       "imsqti_xmlv2p1_questionnaire": "Questionnaire",
       "imsqti_xmlv2p1_test": "Test",

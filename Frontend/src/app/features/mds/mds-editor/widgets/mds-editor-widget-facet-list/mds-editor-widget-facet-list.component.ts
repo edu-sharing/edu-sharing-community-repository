@@ -52,7 +52,7 @@ export class MdsEditorWidgetFacetListComponent
      * return true if values/facettes are available, false otherwise
      */
     hasValues = () => {
-        return !this.filter.value && this.facetAggregationSubject.value?.values?.length > 0;
+        return this.filter.value || this.facetAggregationSubject.value?.values?.length > 0;
     };
 
     constructor(

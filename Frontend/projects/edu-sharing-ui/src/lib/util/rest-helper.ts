@@ -23,8 +23,12 @@ export class RestHelper {
         return '';
     }
     public static getTitleFromProperties(properties: any): string {
-        return properties[RestConstants.LOM_PROP_TITLE]
-            ? properties[RestConstants.LOM_PROP_TITLE]?.join()
-            : properties[RestConstants.CM_NAME]?.join();
+        const value = properties[RestConstants.LOM_PROP_TITLE]
+            ? properties[RestConstants.LOM_PROP_TITLE]
+            : properties[RestConstants.CM_NAME];
+        if (Array.isArray(value)) {
+            return value.join(', ');
+        }
+        return value;
     }
 }

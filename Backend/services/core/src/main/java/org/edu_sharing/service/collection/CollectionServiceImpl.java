@@ -123,6 +123,9 @@ public class CollectionServiceImpl implements CollectionService {
 
             GuestService guestService = applicationContext.getBean(GuestService.class);
 
+            // @TODO check if the following code is necessary any longer.
+            // this.authTool.validateAuthentication destroys runAs code
+
             //fix for running in runas user mode
             if ((AuthenticationUtil.isRunAsUserTheSystemUser()
                     || "admin".equals(AuthenticationUtil.getRunAsUser()))

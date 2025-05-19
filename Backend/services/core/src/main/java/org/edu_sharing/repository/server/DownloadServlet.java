@@ -69,7 +69,7 @@ public class DownloadServlet extends HttpServlet {
 		String fileName = req.getParameter("fileName");
 		Mode mode = req.getParameter("mode")!=null ? Mode.valueOf(req.getParameter("mode")) : Mode.redirect;
 		if(nodeIds!=null) {
-			downloadZip(resp, nodeIds.split(","), null, null, null, fileName);
+			downloadZip(req, resp, nodeIds.split(","), null, null, null, fileName);
 			return;
 		}
 		try {
@@ -243,7 +243,10 @@ public class DownloadServlet extends HttpServlet {
 		return null;
 	}
 
-	public static void downloadZip(HttpServletResponse resp, String[] nodeIds, String parentNodeId, String token, String password, String zipName) throws Exception {
+	public static void downloadZip(HttpServletRequest req, HttpServletResponse resp, String[] nodeIds, String parentNodeId, String token, String password, String zipName) throws Exception {
+		if(permissionChecking == null) {
+			permissionChecking = RequestContextUtils.findWebApplicationContext(req).getBean("permissionChecking", PermissionChecking.class);
+		}
 		if(zipName==null || zipName.isEmpty())
 			zipName="Download.zip";
 

@@ -104,10 +104,10 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
         if (this.searchPage.searchString.getValue()) {
             components.push(`"${this.searchPage.searchString.getValue()}"`);
         }
-        const filters = await this.searchService.getFilters().toPromise();
+        const filters = await this.searchService.getFilters(false).toPromise();
         const filterLabels = Object.values(filters)
             // limit the amount of labels to at most 3 per widget to prevent too long names
-            .map((v) => v.filter((v) => v.mdsValue?.parent == null && v.label.trim()).slice(0, 3))
+            .map((v) => v.filter((v) => v.label.trim()).slice(0, 3))
             .flat()
             .map(({ label }) => label);
         components = [...components, ...filterLabels];

@@ -10,7 +10,7 @@ import {
 import { TranslateService } from '@ngx-translate/core';
 import { LocalEventsService, UIAnimation } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
-import { forkJoin as observableForkJoin } from 'rxjs';
+import { forkJoin as observableForkJoin, from, of } from 'rxjs';
 import {
     CollectionUsage,
     ConfigurationService,
@@ -40,8 +40,16 @@ import { DialogsService } from '../../dialogs.service';
 import { ShareDialogPublishComponent } from './publish/publish.component';
 import { ShareDialogData, ShareDialogResult } from './share-dialog-data';
 import { trigger } from '@angular/animations';
-import { Ace, Acl, AuthenticationService, Authority, NodeService } from 'ngx-edu-sharing-api';
+import {
+    AboutService,
+    Ace,
+    Acl,
+    AuthenticationService,
+    Authority,
+    NodeService,
+} from 'ngx-edu-sharing-api';
 import { ShareDialogRestrictedAccessComponent } from './restricted-access/restricted-access.component';
+import { concatMap, toArray } from 'rxjs/operators';
 
 export type ExtendedAcl = {
     inherited: boolean;
@@ -123,6 +131,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
 
     initialState: string;
     _tab = 0;
+    hasNotificationService: boolean;
     set tab(tab: number) {
         this._tab = tab;
         this.updateButtons();
@@ -181,6 +190,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         private connector: RestConnectorService,
         private localEvents: LocalEventsService,
         private dialogs: DialogsService,
+        private aboutService: AboutService,
         private iam: RestIamService,
         private nodeApiLegacy: RestNodeService,
         private nodeApi: NodeService,
@@ -189,7 +199,6 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         private usageApi: RestUsageService,
     ) {
         //this.dataService=new SearchData(iam);
-
         this.linkEnabled = {
             authority: {
                 authorityName: this.translate.instant('WORKSPACE.SHARE.LINK_ENABLED_INFO'),
@@ -220,8 +229,11 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         this.initNodes();
     }
 
-    ngOnInit(): void {
+    async ngOnInit() {
         this.initButtons();
+        this.hasNotificationService = await this.aboutService.hasPlugin(
+            'kafka-notification-plugin',
+        );
     }
 
     ngAfterViewInit(): void {
@@ -711,22 +723,21 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                     await this.handlePermissionsPerNode(n, permissions, inherit);
                 };
             });
-            observableForkJoin(actions.map((a) => a())).subscribe(
-                () => {
-                    if (!this.data.sendToApi) {
-                        return;
-                    }
-                    this.updateUsages(
-                        RestHelper.copyPermissions(
-                            Helper.deepCopy(this.permissions),
-                            inherit,
-                        ) as ExtendedAcl,
-                    );
-                },
-                (error: any) => {
-                    this.toast.error(error);
-                    this.dialogRef.patchState({ isLoading: false });
-                },
+            for (let a of actions) {
+                try {
+                    await a();
+                } catch (e) {
+                    this.toast.error(e);
+                }
+            }
+            if (!this.data.sendToApi) {
+                return;
+            }
+            this.updateUsages(
+                RestHelper.copyPermissions(
+                    Helper.deepCopy(this.permissions),
+                    inherit,
+                ) as ExtendedAcl,
             );
         }
     }
@@ -891,7 +902,8 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         }
         await this.nodeApi
             .setPermissions(n.ref.id, permissionsCopy as unknown as Acl, {
-                sendMail: this.notifyUsers && this.data.sendMessages,
+                sendMail:
+                    (this.notifyUsers || this.hasNotificationService) && this.data.sendMessages,
                 mailText: this.notifyMessage,
                 sendCopy: false,
             })
