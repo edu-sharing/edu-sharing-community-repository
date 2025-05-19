@@ -100,7 +100,7 @@ export class MdsEditorCoreComponent {
                     body: {
                         user: (await firstValueFrom(this.auth.observeLoginInfo())).authorityName,
                         metadataSet: this.mdsEditorInstance.mdsId,
-                        mdsAiConfigIds: ['suggestion_ai'], // [this.mdsEditorInstance.mdsDefinition$.value.aiConfigs.find(a => a.id === 'suggestion_ai').id],
+                        configIds: ['suggestion_ai'], // [this.mdsEditorInstance.mdsDefinition$.value.aiConfigs.find(a => a.id === 'suggestion_ai').id],
                         widgetAiConfigs: widgets,
                         contextNodeId: this.mdsEditorInstance.nodes$.value[0].ref.id,
                         variables: values,
