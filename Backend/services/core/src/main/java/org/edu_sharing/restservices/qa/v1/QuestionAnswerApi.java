@@ -6,20 +6,22 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Response;
-import org.edu_sharing.restservices.ApiService;
-import org.edu_sharing.restservices.RestConstants;
-import org.edu_sharing.restservices.qa.v1.domain.CreateQANodeRequestDTO;
-import org.edu_sharing.restservices.qa.v1.domain.UpdateQAEntriesRequestDTO;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.edu_sharing.restservices.*;
+import org.edu_sharing.restservices.qa.v1.domain.CreateOrUpdateQAEntryDTO;
+import org.edu_sharing.restservices.qa.v1.domain.QAEntryResponseDTO;
 import org.edu_sharing.restservices.shared.ErrorResponse;
+import org.edu_sharing.restservices.shared.UserSimple;
 import org.edu_sharing.service.qa.QAService;
 import org.edu_sharing.service.qa.domain.QAEntry;
-import org.edu_sharing.service.qa.domain.QANode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Path("/qa/v1")
 @Tag(name = "QUESTION ANSWER v1", description = "Question answers storage endpoint")
@@ -31,27 +33,9 @@ public class QuestionAnswerApi {
     @Autowired
     private QAService qaService;
 
-    @POST
-    @Path("/{sourceId}/{nodeId}")
-    @Operation(summary = "Create a new QANode",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200),
-                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-
-            })
-    public Response createQANode(@PathParam("sourceId") String sourceId, @PathParam("nodeId") String nodeId, CreateQANodeRequestDTO requestData) {
-        qaService.createQANode(sourceId, nodeId, requestData);
-        return Response.ok().build();
-    }
-
-
     @PUT
-    @Path("/{sourceId}/{nodeId}")
-    @Operation(summary = "Update QA Entries of a specific sourceId and nodeId",
+    @Path("/{nodeId}")
+    @Operation(summary = "Create or Update QA Entries of a specific sourceId and nodeId",
             responses = {
                     @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200),
                     @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -60,61 +44,16 @@ public class QuestionAnswerApi {
                     @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
-    public ResponseEntity<Void> updateQAEntries(@PathParam("sourceId") String sourceId, @PathParam("nodeId") String nodeId, UpdateQAEntriesRequestDTO requestData) {
-        qaService.updateQANode(sourceId, nodeId, requestData);
+    public ResponseEntity<Void> createOrUpdateQAEntries(@Valid @PathParam("nodeId") String nodeId, List<CreateOrUpdateQAEntryDTO> qaEntries) {
+        qaService.createOrUpdateQAEntries(nodeId, qaEntries);
         return ResponseEntity.ok().build();
     }
 
-    @GET
-    @Path("/{sourceId}/{nodeId}/node")
-    @Operation(summary = "Get QA Node of a specific sourceId and nodeId",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = QANode.class))),
-                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-            })
-    public ResponseEntity<QANode> getQANodes(@PathParam("sourceId") String sourceId, @PathParam("nodeId") String nodeId) {
-        return ResponseEntity.ok(qaService.getQANode(sourceId, nodeId));
-    }
-
-    @GET
-    @Path("/nodes/{nodeId}")
-    @Operation(summary = "Get all QA Nodes of a specific nodeId",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = QANode[].class))),
-                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-            })
-    public ResponseEntity<List<QANode>> getAllQANodes(@PathParam("nodeId") String nodeId) {
-        return ResponseEntity.ok(qaService.getAllQANode(nodeId));
-    }
-
-
-    @GET
-    @Path("/{sourceId}/{nodeId}")
-    @Operation(summary = "Get QA Entries of a specific sourceId and nodeId",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = QAEntry[].class))),
-                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-            })
-    public ResponseEntity<List<QAEntry>> getQAEntries(@PathParam("sourceId") String sourceId, @PathParam("nodeId") String nodeId) {
-        return ResponseEntity.ok(qaService.getAllQAEntriesOf(sourceId, nodeId));
-    }
 
 
     @GET
     @Path("/{nodeId}")
-    @Operation(summary = "Get all QA Entries of a specific nodeId",
+    @Operation(summary = "Get all QA Entries of a specific nodeId or nodeId and creator",
             responses = {
                     @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = QAEntry[].class))),
                     @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -123,13 +62,14 @@ public class QuestionAnswerApi {
                     @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
-    public ResponseEntity<List<QAEntry>> getQAEntriesOf(@PathParam("nodeId") String nodeId) {
-        return ResponseEntity.ok(qaService.getAllQAEntriesOf(nodeId));
+    public ResponseEntity<List<QAEntryResponseDTO>> getQAEntries(@PathParam("nodeId") String nodeId, @QueryParam("creator") String creator) {
+        Mapper mapper = new Mapper(RepositoryDao.getHomeRepository());
+        return ResponseEntity.ok(qaService.getAllQAEntriesOf(nodeId, creator).stream().map(mapper::map).collect(Collectors.toList()));
     }
 
     @DELETE
     @Path("/{nodeId}/node")
-    @Operation(summary = "Delete all QA Nodes by nodeId",
+    @Operation(summary = "Delete all QA entries by nodeId or nodeId and creator",
             responses = {
                     @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200),
                     @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -138,14 +78,14 @@ public class QuestionAnswerApi {
                     @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
-    public ResponseEntity<Void> deleteAllQANodes(@PathParam("nodeId") String nodeId) {
-        qaService.delete(nodeId);
+    public ResponseEntity<Void> deleteAllQANodes(@PathParam("nodeId") String nodeId, @QueryParam("creator") String creator) {
+        qaService.delete(nodeId, creator);
         return ResponseEntity.ok().build();
     }
 
     @DELETE
-    @Path("/{sourceId}/{nodeId}")
-    @Operation(summary = "Delete QA Node by sourceId and nodeId",
+    @Path("/")
+    @Operation(summary = "Delete QA entry by id",
             responses = {
                     @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200),
                     @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -154,9 +94,45 @@ public class QuestionAnswerApi {
                     @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
-    public ResponseEntity<Void> deleteQANodes(@PathParam("sourceId") String sourceId, @PathParam("nodeId") String nodeId) {
-        qaService.delete(sourceId, nodeId);
+    public ResponseEntity<Void> deleteQANodes(@QueryParam("id") List<String> ids) {
+        qaService.delete(ids);
         return ResponseEntity.ok().build();
+    }
+
+
+    @Slf4j
+    @RequiredArgsConstructor
+    private static class Mapper {
+        private final RepositoryDao repositoryDao;
+
+        private UserSimple getPerson(String user) {
+            try {
+                return PersonDao.getPerson(repositoryDao, user).asPersonSimple(false);
+            } catch (DAOException daoException) {
+                log.error(daoException.getMessage());
+                return null;
+            }
+        }
+
+        public QAEntryResponseDTO map(QAEntry entry) {
+
+            UserSimple createBy = getPerson(entry.getCreatedBy());
+            UserSimple reviewedBy = getPerson(entry.getReviewedBy());
+
+            return new QAEntryResponseDTO(
+                    entry.getId(),
+                    entry.getNodeId(),
+                    entry.getQuestion(),
+                    entry.getAnswer(),
+                    entry.getUsedText(),
+                    entry.getEducationalLevel(),
+                    entry.getCreated(),
+                    createBy,
+                    entry.getLastReviewed(),
+                    reviewedBy,
+                    entry.isEdited()
+            );
+        }
     }
 
 }

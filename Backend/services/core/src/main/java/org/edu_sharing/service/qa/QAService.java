@@ -1,26 +1,19 @@
 package org.edu_sharing.service.qa;
 
-import org.edu_sharing.restservices.qa.v1.domain.CreateQANodeRequestDTO;
-import org.edu_sharing.restservices.qa.v1.domain.UpdateQAEntriesRequestDTO;
+import org.edu_sharing.restservices.qa.v1.domain.CreateOrUpdateQAEntryDTO;
 import org.edu_sharing.service.qa.domain.QAEntry;
-import org.edu_sharing.service.qa.domain.QANode;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public interface QAService {
-    void createQANode(String sourceId, String nodeId, CreateQANodeRequestDTO requestData);
 
-    void updateQANode(String sourceId, String nodeId, UpdateQAEntriesRequestDTO requestData);
+    void createOrUpdateQAEntries(@NotNull String nodeId, List<CreateOrUpdateQAEntryDTO> qaEntries);
 
-    QANode getQANode(String sourceId, String nodeId);
+    @NotNull List<QAEntry> getAllQAEntriesOf(@NotNull String nodeId, @Nullable String creator);
 
-    List<QANode> getAllQANode(String nodeId);
+    void delete(@NotNull String nodeId, @Nullable String creator);
 
-    List<QAEntry> getAllQAEntriesOf(String nodeId);
-
-    List<QAEntry> getAllQAEntriesOf(String sourceId, String nodeId);
-
-    void delete(String nodeId);
-
-    void delete(String sourceId, String nodeId);
+    void delete(@NotNull List<String> ids);
 }
