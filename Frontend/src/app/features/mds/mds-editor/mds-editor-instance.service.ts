@@ -6,7 +6,8 @@ import {
     Injectable,
     Injector,
     NgZone,
-    OnDestroy, Optional,
+    OnDestroy,
+    Optional,
     Type,
     ViewContainerRef,
 } from '@angular/core';
