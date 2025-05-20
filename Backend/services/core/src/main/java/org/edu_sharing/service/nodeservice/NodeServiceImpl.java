@@ -951,6 +951,21 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 }
             }
 
+            // to prevent of IllegalArgumentException("Comparison method violates its general contract!")
+            // this happens in the following case:
+            // A = null
+            // B = 1
+            // C = 2
+            // 1. compare(A,B) => 0
+            // 2. compare(A,C) => 0
+            // 3. compare(B,C) => 1
+            // Because auf the first two comparisons, compare(B,C) breaks the transitivity and antisymmetry rule!
+            if (prop1 == null) {
+                compare = 1;
+            } else if (prop2 == null) {
+                compare = -1;
+            }
+
             // some int fields are parsed as string. make sure to compare them correctly
             // e.g. for collection sorting
             String fieldType = (String) cache.computeIfAbsent(prop + "_TYPE", (key) -> dictionaryService.getProperty(prop).getDataType().getJavaClassName());
