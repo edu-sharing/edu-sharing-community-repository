@@ -203,6 +203,9 @@ public class SSOAuthorityMapper {
 		}
 
 		String tmpUserName = ssoAttributes.get(getSSOUsernameProp());
+		if(mappingConfig != null && mappingConfig.getUsernameMapper() != null) {
+			tmpUserName = mappingConfig.getUsernameMapper().apply(tmpUserName);
+		}
 		if (StringUtils.isBlank(tmpUserName)) {
 			logErrorParams("userName", ssoAttributes);
 			throw new AuthenticationException(AuthenticationExceptionMessages.MISSING_PARAM);
