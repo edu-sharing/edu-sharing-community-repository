@@ -913,95 +913,85 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     }
 
     private int sortNodes(HashMap<String, Object> cache, NodeRef n1, NodeRef n2, SortDefinition sortDefinition) {
-        String keyType1 = n1.toString() + "_TYPE";
-        String keyType2 = n2.toString() + "_TYPE";
 
-        String type1, type2;
-        if (cache.containsKey(keyType1)) {
-            type1 = (String) cache.get(keyType1);
-        } else {
-            type1 = nodeServiceAlfresco.getType(n1).toString();
-            cache.put(keyType1, type1);
-        }
-        if (cache.containsKey(keyType2)) {
-            type2 = (String) cache.get(keyType2);
-        } else {
-            type2 = nodeServiceAlfresco.getType(n2).toString();
-            cache.put(keyType2, type2);
-        }
+        String type1 = (String) cache.computeIfAbsent(n1 + "_TYPE", (k) -> nodeServiceAlfresco.getType(n1).toString());
+        String type2 = (String) cache.computeIfAbsent(n2 + "_TYPE", (k) -> nodeServiceAlfresco.getType(n2).toString());
+
         if (EduSharingNodeHelper.typeIsDirectory(type1) != EduSharingNodeHelper.typeIsDirectory(type2)) {
             return EduSharingNodeHelper.typeIsDirectory(type1) ? -1 : 1;
         }
-        if (!sortDefinition.hasContent())
+
+        if (!sortDefinition.hasContent()) {
             return 0;
+        }
+
+
         for (SortDefinition.SortDefinitionEntry entry : sortDefinition.getSortDefinitionEntries()) {
             QName prop = QName.createQName(CCConstants.getValidGlobalName(entry.getProperty()));
-            Object prop1, prop2;
-            String key1 = n1 + prop.toString();
-            String key2 = n2 + prop.toString();
-            if (cache.containsKey(key1)) {
-                prop1 = cache.get(key1);
-            } else {
-                prop1 = getSortPropertyValue(n1, prop);
-                cache.put(key1, prop1);
+
+            Object prop1 = cache.computeIfAbsent(n1 + prop.toString(), (k) -> getSortPropertyValue(n1, prop));
+            Object prop2 = cache.computeIfAbsent(n2 + prop.toString(), (k) -> getSortPropertyValue(n2, prop));
+
+            logger.info("N1: " + n1 + " " + prop1);
+            logger.info("N2: " + n2 + " " + prop2);
+            if (prop1 == null && prop2 == null) {
+                continue;
             }
-            if (cache.containsKey(key2)) {
-                prop2 = cache.get(key2);
-            } else {
-                prop2 = getSortPropertyValue(n2, prop);
-                cache.put(key2, prop2);
-            }
+
             int compare = 0;
-            if (prop1 == null && prop2 != null) {
+            if (prop1 == null) {
                 try {
                     prop1 = prop2.getClass().getConstructor().newInstance();
                 } catch (Throwable ignored) {
                 }
-
-            } else if (prop1 != null && prop2 == null) {
+            } else if (prop2 == null) {
                 try {
                     prop2 = prop1.getClass().getConstructor().newInstance();
                 } catch (Throwable ignored) {
                 }
             }
-            if (prop1 == null && prop2 == null) {
-                continue;
-            } else {
-                // some int fields are parsed as string. make sure to compare them correctly
-                // e.g. for collection sorting
 
-                String fieldType = dictionaryService.getProperty(prop).getDataType().getJavaClassName();
-                if (fieldType.equals(Integer.class.getName())) {
-                    if (prop1 instanceof String && prop2 instanceof String) {
-                        compare = Integer.compare(Integer.parseInt((String) prop1), Integer.parseInt((String) prop2));
-                    }
-                }
-
-                if (compare == 0) {
-                    // cast ml text to string
-                    if (prop1 instanceof MLText) {
-                        prop1 = ((MLText) prop1).getDefaultValue();
-                    }
-                    if (prop2 instanceof MLText) {
-                        prop2 = ((MLText) prop2).getDefaultValue();
-                    }
-                    if (prop1 instanceof String && prop2 instanceof String) {
-                        // normalize umlauts
-                        prop1 = StringUtils.stripAccents((String) prop1);
-                        prop2 = StringUtils.stripAccents((String) prop2);
-                        compare = ((String) prop1).compareToIgnoreCase((String) prop2);
-                    } else if (prop1 instanceof Date && prop2 instanceof Date) {
-                        compare = ((Date) prop1).compareTo((Date) prop2);
-                    } else if (prop1 instanceof Comparable && prop2 instanceof Comparable) {
-                        compare = ((Comparable) prop1).compareTo(prop2);
-                    }
+            // some int fields are parsed as string. make sure to compare them correctly
+            // e.g. for collection sorting
+            String fieldType = (String) cache.computeIfAbsent(prop + "_TYPE", (key) -> dictionaryService.getProperty(prop).getDataType().getJavaClassName());
+            if (fieldType.equals(Integer.class.getName())) {
+                if (prop1 instanceof String && prop2 instanceof String) {
+                    compare = Integer.compare(Integer.parseInt((String) prop1), Integer.parseInt((String) prop2));
                 }
             }
-            if (!entry.isAscending())
+
+            if (compare == 0) {
+                // cast ml text to string
+                if (prop1 instanceof MLText) {
+                    prop1 = ((MLText) prop1).getDefaultValue();
+                }
+
+                if (prop2 instanceof MLText) {
+                    prop2 = ((MLText) prop2).getDefaultValue();
+                }
+
+                if (prop1 instanceof String && prop2 instanceof String) {
+                    // normalize umlauts
+                    prop1 = StringUtils.stripAccents((String) prop1);
+                    prop2 = StringUtils.stripAccents((String) prop2);
+                    compare = ((String) prop1).compareToIgnoreCase((String) prop2);
+                } else if (prop1 instanceof Date && prop2 instanceof Date) {
+                    compare = ((Date) prop1).compareTo((Date) prop2);
+                } else if (prop1 instanceof Comparable && prop2 instanceof Comparable) {
+                    compare = ((Comparable) prop1).compareTo(prop2);
+                }
+            }
+
+            if (!entry.isAscending()) {
                 compare *= -1;
-            if (compare != 0)
+            }
+
+            logger.info("Result: " + compare);
+            if (compare != 0) {
                 return compare;
+            }
         }
+
         return 0;
     }
 
