@@ -71,5 +71,14 @@ describe('NodeTitlePipe', () => {
             { type: 'title' },
         );
         expect(result).toBe('Test Title');
+        result = pipe.transform(
+            {
+                properties: {
+                    [RestConstants.CM_NAME]: 'Test Title',
+                },
+            } as unknown as Node,
+            { type: 'title' },
+        );
+        expect(result).toBe('Test Title');
     });
 });

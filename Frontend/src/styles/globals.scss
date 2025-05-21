@@ -33,7 +33,7 @@ body:not(.sb-show-main) {
     background-color: $backgroundColor;
 }
 a {
-    color: $primary;
+    color: var(--primary);
     &.cdk-keyboard-focused {
         @include setGlobalKeyboardFocus();
     }
@@ -45,7 +45,7 @@ a {
     pointer-events: none;
 }
 .blue-label {
-    color: $primary;
+    color: var(--primary);
     font-weight: bold;
     font-size: 80%;
 }
@@ -94,13 +94,13 @@ button.cdk-keyboard-focused {
     text-align: center;
 }
 .completer-row {
-    color: $textPrimary !important;
+    color: var(--palette-foreground-text) !important;
     background: #fff !important;
 }
 .completer-selected-row,
 .completer-row:hover {
-    color: $textOnPrimary !important;
-    background: $primary !important;
+    color: var(--palette-primary-900) !important;
+    background: var(--primary) !important;
 }
 .completer-dropdown {
     @include materialShadow();
@@ -141,7 +141,7 @@ button.cdk-keyboard-focused {
 .btn-circle {
     padding: 10px;
     height: 44px;
-    color: $primary;
+    color: var(--primary);
     background-color: #fff;
     border-radius: 50%;
     @include clickable();

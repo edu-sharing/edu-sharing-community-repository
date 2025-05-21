@@ -56,7 +56,10 @@ export class SavedSearchesService {
                 repository: searchParams.repository,
                 metadataset: searchParams.metadataset,
                 query: searchParams.query,
-                body: searchParams.body.criteria,
+                /**
+                 * prefer unfolded to prevent huge lists after loading trees
+                 */
+                body: searchParams.criteriaFlat || searchParams.body.criteria,
             })
             .pipe(
                 tap(() => this.updateMySavedSearchesTrigger.next()),

@@ -10,8 +10,8 @@
     padding: 0 17px;
     border-radius: 50px 50px 0 0;
     font-size: $fontSizeXSmall;
-    background-color: $primary;
-    color: $textOnPrimary;
+    background-color: var(--primary);
+    color: var(--palette-primary-900);
     &:focus {
         // Draw above custom footers and the mobile slide-in menubar when focused.
         z-index: 200;

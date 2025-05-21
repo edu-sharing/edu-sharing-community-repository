@@ -278,6 +278,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
                         resolveCollections: false,
                         resolveUsernames: true,
                     },
+                    criteriaFlat: criteria,
                     skipCount: offset,
                     propertyFilter: [PROPERTY_FILTER_ALL],
                     sortProperties: [this.sort.active],

@@ -2,7 +2,7 @@
 
 .noElementsInfo {
     > div.clickable {
-        color: $primary;
+        color: var(--primary);
         text-transform: uppercase;
         margin-top: 5px;
     }

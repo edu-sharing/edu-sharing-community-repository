@@ -225,18 +225,20 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
             this.saveAvatar();
         }
     }
-    public saveEdits() {
-        if (!this.userEdit.profile.firstName?.trim()) {
-            this.toast.error(null, 'PROFILES.ERROR.FIRST_NAME');
-            return;
-        }
-        if (!this.userEdit.profile.lastName?.trim()) {
-            this.toast.error(null, 'PROFILES.ERROR.LAST_NAME');
-            return;
-        }
-        if (!this.userEdit.profile.email?.trim()) {
-            this.toast.error(null, 'PROFILES.ERROR.EMAIL');
-            return;
+    public saveEdits(validate = true) {
+        if (validate) {
+            if (!this.userEdit.profile.firstName?.trim()) {
+                this.toast.error(null, 'PROFILES.ERROR.FIRST_NAME');
+                return;
+            }
+            if (!this.userEdit.profile.lastName?.trim()) {
+                this.toast.error(null, 'PROFILES.ERROR.LAST_NAME');
+                return;
+            }
+            if (!this.userEdit.profile.email?.trim()) {
+                this.toast.error(null, 'PROFILES.ERROR.EMAIL');
+                return;
+            }
         }
         this.toast.showProgressSpinner();
         this.iamService.editUser(this.user.authorityName, this.userEdit.profile).subscribe(
@@ -319,6 +321,6 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     }
 
     savePersistentIds() {
-        this.saveEdits();
+        this.saveEdits(false);
     }
 }

@@ -95,23 +95,23 @@ ngx-slider.ngx-slider {
         border-radius: 2px;
     }
     .ngx-slider-selection {
-        background-color: $primary;
+        background-color: var(--primary);
     }
     .ngx-slider-pointer {
-        background-color: $primary;
+        background-color: var(--primary);
     }
     .ngx-slider-pointer.ngx-slider-active:after {
-        background-color: $primaryDark;
+        background-color: var(--palette-primary-900);
     }
     .ngx-slider-tick.ngx-slider-selected {
-        background-color: $primaryMediumLight;
+        background-color: var(--palette-primary-200);
     }
     .ngx-slider-bubble {
-        color: $primaryDark;
+        color: var(--palette-primary-900);
     }
     .ngx-slider-bubble.ngx-slider-limit {
         display: none;
-        color: $primaryDark;
+        color: var(--palette-primary-900);
     }
 }
 ngx-slider.ngx-slider-small {

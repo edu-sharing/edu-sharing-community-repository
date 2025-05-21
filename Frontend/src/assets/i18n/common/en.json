@@ -253,6 +253,7 @@
     "cm:title": "title",
     "ccm:replicationsource": "source",
     "score": "relevance",
+    "random": "Random",
     "description": "description",
     "mimetype": "file type",
     "size": "size",
@@ -549,6 +550,9 @@
     },
     "CURRICULUM": {
       "NAME": "Kanban"
+    },
+    "GEOGEBRA": {
+      "NAME": "Geogebra"
     },
     "MIMETYPE": {
       "imsqti_xmlv2p1_questionnaire": "Questionnaire",

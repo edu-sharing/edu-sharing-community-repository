@@ -129,7 +129,7 @@ es-mds .mdsGroup {
     }
     .suggestHighlight {
         font-weight: bold;
-        color: $primary;
+        color: var(--primary);
     }
     .suggestionMoreItems {
         font-weight: bold;
@@ -275,7 +275,7 @@ es-mds .mdsGroup {
     }
     .license {
         .caption {
-            color: $textPrimary;
+            color: var(--palette-foreground-text);
             font-weight: bold;
         }
         img {
@@ -407,7 +407,7 @@ es-mds .mdsGroup {
                 .edit,
                 .remove {
                     margin: 0 5px;
-                    color: $primary;
+                    color: var(--primary);
                     position: relative;
                     top: 2px;
                 }
@@ -508,12 +508,12 @@ es-mds .mdsEmbedded {
 es-mds-editor-widget-facet-list {
     mark {
         font-weight: bold;
-        color: $primary;
+        color: var(--primary);
         background-color: transparent;
     }
 }
 .mat-mdc-autocomplete-panel {
     span {
-        color: $primary;
+        color: var(--primary);
     }
 }

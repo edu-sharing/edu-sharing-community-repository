@@ -58,7 +58,7 @@ $dark-secondary-text: rgba(black, 0.54);
 /** custom project specifics */
 [matripplecolor='primary'] {
     > .mat-ripple-element {
-        background-color: $primary;
+        background-color: var(--primary);
         opacity: 0.1;
     }
 }
@@ -67,11 +67,11 @@ $dark-secondary-text: rgba(black, 0.54);
  */
 mat-button-toggle-group {
     .mat-button-toggle-checked.mat-button-toggle-appearance-standard {
-        color: $textOnPrimary;
-        background-color: $primary;
+        color: var(--palette-primary-900);
+        background-color: var(--primary);
     }
     .mat-button-toggle-appearance-standard .mat-button-toggle-focus-overlay {
-        background-color: $primary;
+        background-color: var(--primary);
     }
     /*
       bugfix: overlay is not big enough
@@ -122,7 +122,7 @@ mat-tab-group {
         }
     }
     .mat-ink-bar {
-        background-color: $primaryLight;
+        background-color: var(--palette-primary-100);
     }
 }
 // a mat table with clickable columns
@@ -138,7 +138,7 @@ mat-tab-group {
 .mat-mdc-fab.mat-white,
 .mat-mini-fab.mat-white {
     // white background, primary as content color
-    color: $primary;
+    color: var(--primary);
 }
 .mat-mdc-unelevated-button:not(:disabled),
 .mat-mdc-raised-button:not(:disabled),
@@ -195,7 +195,7 @@ mat-tab-group {
 .mat-form-field-dark {
     input,
     textarea {
-        caret-color: $primaryDark;
+        caret-color: var(--palette-primary-900);
     }
     .mat-form-field-outline,
     .mat-form-field-label {
@@ -211,7 +211,7 @@ mat-tab-group {
 .mat-mdc-form-field.mat-form-field-bright {
     input,
     textarea {
-        --mdc-outlined-text-field-caret-color: #{$primaryLight};
+        --mdc-outlined-text-field-caret-color: var(--primaryLight);
     }
     --mdc-outlined-text-field-label-text-color: rgba(255, 255, 255, 0.87);
     --mdc-outlined-text-field-outline-color: rgba(255, 255, 255, 0.6);
@@ -224,15 +224,15 @@ mat-tab-group {
 }
 mat-slide-toggle.mat-mdc-slide-toggle.mat-primary-bright {
     --mdc-switch-unselected-handle-color: #fff;
-    --mdc-switch-unselected-hover-handle-color: #{$primaryVeryLight};
-    --mdc-switch-unselected-focus-handle-color: #{$primaryVeryLight};
-    --mdc-switch-unselected-pressed-handle-color: #{$primaryVeryLight};
-    --mdc-switch-unselected-icon-color: #{$textLight};
+    --mdc-switch-unselected-hover-handle-color: var(--palette-primary-50);
+    --mdc-switch-unselected-focus-handle-color: var(--palette-primary-50);
+    --mdc-switch-unselected-pressed-handle-color: var(--palette-primary-50);
+    --mdc-switch-unselected-icon-color: var(--textLight);
     --mdc-switch-selected-handle-color: #fff;
-    --mdc-switch-selected-hover-handle-color: #{$primaryVeryLight};
-    --mdc-switch-selected-focus-handle-color: #{$primaryVeryLight};
-    --mdc-switch-selected-pressed-handle-color: #{$primaryVeryLight};
-    --mdc-switch-selected-icon-color: #{$primary};
+    --mdc-switch-selected-hover-handle-color: var(--palette-primary-50);
+    --mdc-switch-selected-focus-handle-color: var(--palette-primary-50);
+    --mdc-switch-selected-pressed-handle-color: var(--palette-primary-50);
+    --mdc-switch-selected-icon-color: var(--primary);
     .mdc-form-field label {
         color: #fff;
     }
@@ -279,9 +279,9 @@ mat-label,
 .mat-flat-button {
     padding: 0 15px !important;
     .mdc-button__label {
-        color: $textOnPrimary !important;
+        color: var(--palette-primary-900) !important;
     }
-    background-color: $primary !important;
+    background-color: var(--primary) !important;
 }
 body {
     // Background for raised button
@@ -296,7 +296,7 @@ body {
 }
 .mat-mdc-checkbox {
     .mdc-checkbox__background {
-        border-color: $primary !important;
+        border-color: var(--primary) !important;
 
         background-color: #fff !important;
 
@@ -306,19 +306,19 @@ body {
     }
     &.mdc-checkbox--disabled {
         .mdc-checkbox__background {
-            border-color: $primaryLight !important;
+            border-color: var(--palette-primary-100) !important;
         }
         &.mat-mdc-checkbox-checked,
         &.mat-mdc-checkbox-indeterminate {
             .mdc-checkbox__background {
-                background-color: $primaryLight !important;
+                background-color: var(--palette-primary-100) !important;
             }
         }
     }
     &.mat-mdc-checkbox-checked,
     &.mat-mdc-checkbox-indeterminate {
         .mdc-checkbox__background {
-            background-color: $primary !important;
+            background-color: var(--primary) !important;
             .mdc-checkbox__checkmark,
             .mdc-checkbox__mixedmark {
                 color: #fff !important;
@@ -329,7 +329,7 @@ body {
 }
 .mat-radio-container {
     .mat-radio-outer-circle {
-        border-color: $primary;
+        border-color: var(--primary);
     }
 }
 .mat-mdc-checkbox-label {
@@ -359,10 +359,10 @@ body {
 }
 .mat-mdc-raised-button {
     &:not(.mat-primary) {
-        color: $primary !important;
+        color: var(--primary) !important;
     }
     &.mat-primary {
-        color: $textOnPrimary !important;
+        color: var(--palette-primary-900) !important;
     }
     &.mat-warn {
         color: $textOnPrimary !important;
@@ -371,7 +371,7 @@ body {
 .mat-mdc-button.mat-cancel {
     color: $textMediumLight;
     &:hover {
-        color: $primary;
+        color: var(--primary);
     }
 }
 // Undo default style of mat-icon.
@@ -447,7 +447,7 @@ label .label-secondary {
     position: absolute;
     right: -3px;
     top: -3px;
-    color: $textOnPrimary;
+    color: var(--palette-primary-900);
     background-color: $colorStatusNegative;
     border-radius: 50%;
     width: 16px;
@@ -527,7 +527,7 @@ mat-select.mat-select-icon {
 .mat-select-panel,
 .mat-autocomplete-panel {
     .mat-option:not(.mat-option-disabled) {
-        color: $primary;
+        color: var(--primary);
     }
     .mat-option.mat-selected:not(.mat-option-multiple) {
         background-color: $cardLightBackground;
@@ -537,20 +537,20 @@ mat-select.mat-select-icon {
 .mat-mdc-standard-chip:not(.mdc-evolution-chip--disabled) {
     background-color: var(--palette-primary-100) !important;
     .mat-mdc-chip-remove {
-        color: $primary !important;
+        color: var(--primary) !important;
         opacity: 1 !important;
     }
 }
 .mat-chip-list {
     .mat-chip.mat-standard-chip {
         height: unset; // Override height: 1px
-        background-color: $primaryLight;
+        background-color: var(--palette-primary-100);
         overflow: hidden;
         &.indeterminate {
             background: repeating-linear-gradient(
                 -45deg,
-                $primaryLight,
-                $primaryLight 5px,
+                var(--palette-primary-100),
+                var(--palette-primary-100) 5px,
                 rgba(0, 0, 0, 0.04) 5px,
                 rgba(0, 0, 0, 0.04) 10px
             );
@@ -562,7 +562,7 @@ mat-select.mat-select-icon {
         .mat-chip-remove {
             // align somewhat townwards for better centering
             line-height: 1.05;
-            color: $primary;
+            color: var(--primary);
             opacity: 1;
         }
     }

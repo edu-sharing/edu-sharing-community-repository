@@ -3,7 +3,7 @@ import { ApplicationRef, Component, EventEmitter, Input, Output, ViewChild } fro
 import { MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { Ace, Acl, AuthenticationService, Node, NodeService } from 'ngx-edu-sharing-api';
 import { UIAnimation } from 'ngx-edu-sharing-ui';
-import { forkJoin, Observable } from 'rxjs';
+import { forkJoin, from, Observable } from 'rxjs';
 import {
     AuthorityProfile,
     ConfigurationService,
@@ -19,6 +19,7 @@ import {
 import { Helper } from '../../../../../core-module/rest/helper';
 import { Toast } from '../../../../../services/toast';
 import { UIHelper } from '../../../../../core-ui-module/ui-helper';
+import { concatMap, toArray } from 'rxjs/operators';
 
 type Org = { organization: Organization; groups?: any };
 
@@ -140,7 +141,7 @@ export class SimpleEditInviteComponent {
                     ];
                 }
             }
-            forkJoin(
+            from(
                 this._nodes.map((n, i) => {
                     let permissions = this.nodesPermissions[i].permissions;
                     // if currentPermissions available (single node mode), we will check the state and override if possible
@@ -178,16 +179,21 @@ export class SimpleEditInviteComponent {
                         sendMail: false,
                     });
                 }),
-            ).subscribe(
-                () => {
-                    observer.next(null);
-                    observer.complete();
-                },
-                (error) => {
-                    observer.error(error);
-                    observer.complete();
-                },
-            );
+            )
+                .pipe(
+                    concatMap((req) => req),
+                    toArray(),
+                )
+                .subscribe(
+                    () => {
+                        observer.next(null);
+                        observer.complete();
+                    },
+                    (error) => {
+                        observer.error(error);
+                        observer.complete();
+                    },
+                );
         });
     }
 

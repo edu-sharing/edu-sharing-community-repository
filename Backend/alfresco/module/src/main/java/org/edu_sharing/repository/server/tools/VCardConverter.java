@@ -138,7 +138,7 @@ public class VCardConverter {
                     .map(Object::toString)
                     .map(String::trim)
                     .filter(StringUtils::isNotBlank)
-                    .collect(Collectors.joining(", "));
+                    .collect(Collectors.joining(" "));
         }
 
         if(data.containsKey(prefix+CCConstants.VCARD_ORG)) {

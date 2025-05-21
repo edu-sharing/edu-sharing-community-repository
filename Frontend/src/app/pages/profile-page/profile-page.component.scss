@@ -54,12 +54,12 @@ $path: '../../../assets/images/';
             padding-left: 20px;
             padding-right: 20px;
             text-align: center;
-            color: $textOnPrimary;
+            color: var(--palette-primary-900);
             z-index: 2;
             overflow: hidden;
 
             a {
-                color: $textOnPrimary;
+                color: var(--palette-primary-900);
             }
 
             a,
@@ -156,7 +156,7 @@ $path: '../../../assets/images/';
             padding-top: 40px;
 
             .toggle {
-                color: $primary;
+                color: var(--primary);
                 text-transform: uppercase;
                 float: left;
                 margin-bottom: 20px;

@@ -1,5 +1,6 @@
 package org.edu_sharing.repository.server;
 
+import org.alfresco.service.cmr.version.Version;
 import org.edu_sharing.repository.client.rpc.*;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 
@@ -344,8 +345,9 @@ public class MCAlfrescoClientAdapter extends MCAlfrescoBaseClient {
 	}
 
 	@Override
-	public void createVersion(String nodeId) throws Exception {
-	}
+	public Version createVersion(String nodeId) throws Exception {
+        return null;
+    }
 
 	@Override
 	public List<String> getAssociationNodeIds(String nodeID, String association) throws Exception {

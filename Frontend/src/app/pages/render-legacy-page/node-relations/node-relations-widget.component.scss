@@ -19,7 +19,7 @@
             }
         }
         .current-version {
-            border-left: 2px solid $primaryMediumLight;
+            border-left: 2px solid var(--palette-primary-200);
         }
         .current-version-text {
             font-size: $fontSizeXSmall;

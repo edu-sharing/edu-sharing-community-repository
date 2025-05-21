@@ -205,7 +205,7 @@ button.user {
         background-color: white;
     }
     &[disabled] {
-        color: $textOnPrimaryLight;
+        color: rgba(var(--light-primary-text), 0.75);
     }
 }
 

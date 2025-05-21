@@ -24,6 +24,10 @@ export class AboutService {
         return this.about$;
     }
 
+    async hasPlugin(plugin: string) {
+        return (await this.getAbout().toPromise()).plugins?.some((s) => s.id === plugin);
+    }
+
     /**
      * get the full openapi.json file as a json structure
      */

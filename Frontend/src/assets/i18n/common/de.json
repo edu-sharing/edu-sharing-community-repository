@@ -273,6 +273,7 @@
     "cm:title": "Titel",
     "ccm:replicationsource": "Herkunft",
     "score": "Relevanz",
+    "random": "Zufällig",
     "description": "Beschreibung",
     "mimetype": "Dateityp",
     "size": "Größe",
@@ -643,6 +644,9 @@
     },
     "CURRICULUM": {
       "NAME": "Pinnwannd"
+    },
+    "GEOGEBRA": {
+      "NAME": "Geogebra"
     },
     "MIMETYPE": {
       "imsqti_xmlv2p1_questionnaire": "Fragebogen",

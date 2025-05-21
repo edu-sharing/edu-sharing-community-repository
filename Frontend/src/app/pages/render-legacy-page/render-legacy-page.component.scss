@@ -40,7 +40,7 @@ a:active {
 }
 :host ::ng-deep {
     a.edusharing_rendering_content {
-        background-color: $primary;
+        background-color: var(--primary);
         // `&.cdk-keyboard-focused` would be better, but we cannot trivially apply the
         // `cdkMonitorElementFocus` directive here.
         &:focus {
@@ -64,8 +64,8 @@ a:active {
     .edusharing_rendering_metadata_body {
         .mdsWidgetMultivalue .mdsValueClickable {
             background-color: $buttonHoverBackground;
-            border: 1px solid $primary;
-            color: $primary;
+            border: 1px solid var(--primary);
+            color: var(--primary);
             font-weight: 400;
         }
         .mdsWidget_vcard,
@@ -74,7 +74,7 @@ a:active {
                 flex-direction: column;
                 align-items: flex-start;
                 a {
-                    color: $primary;
+                    color: var(--primary);
                     text-decoration: underline;
                 }
 
@@ -191,7 +191,7 @@ a:active {
         }
         .wrapper.selected {
             margin: 0;
-            border: 3px solid $primaryMediumLight;
+            border: 3px solid var(--palette-primary-200);
             @include materialShadowMediumLarge();
         }
         .wrapper.selected:after {
@@ -203,7 +203,7 @@ a:active {
             height: 0;
             border-left: 10px solid transparent;
             border-right: 10px solid transparent;
-            border-top: 10px solid $primaryMediumLight;
+            border-top: 10px solid var(--palette-primary-200);
             clear: both;
         }
     }
@@ -238,12 +238,12 @@ a:active {
     padding: 20px;
 }
 #edusharing_rendering_metadata_top_toggle {
-    color: $primary;
+    color: var(--primary);
     top: 10px;
     position: relative;
 }
 a.edusharing_rendering_content {
-    background-color: $primary;
+    background-color: var(--primary);
 }
 .edusharing_rendering_wrapper {
     text-transform: uppercase;
@@ -262,7 +262,7 @@ a.edusharing_rendering_content {
     }
     .node-comments {
         margin: 15px;
-        color: $primary;
+        color: var(--primary);
         display: flex;
         align-items: center;
         min-width: 160px;

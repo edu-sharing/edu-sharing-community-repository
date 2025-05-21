@@ -6,7 +6,7 @@
     background-color: #fff;
     @include materialShadowBottom();
     .switch label {
-        color: $textPrimary;
+        color: var(--palette-foreground-text);
     }
     .switch label span {
         position: relative;
@@ -52,7 +52,7 @@
     div {
         display: flex;
         align-items: center;
-        color: $primary;
+        color: var(--primary);
         font-weight: bold;
 
         i {

@@ -90,7 +90,7 @@ export class OptionsHelperDataService implements OnDestroy {
             list,
             dropdown,
         };
-        if ((await this.userService.getUser(ME).pipe(take(1)).toPromise()).person.authorityName) {
+        if ((await this.userService.getUser(ME).pipe(take(1)).toPromise())?.person?.authorityName) {
             await this.networkService.getRepositories().pipe(take(1)).toPromise();
         }
     }

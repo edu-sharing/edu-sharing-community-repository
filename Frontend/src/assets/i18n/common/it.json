@@ -523,6 +523,9 @@
       "FILENAME": "viene creato il seguente file",
       "NAME": "MOODELLO",
       "PLACEHOLDER": "Nome del contenuto"
+    },
+    "GEOGEBRA": {
+      "NAME": "Geogebra"
     }
   },
   "LICENSE": {

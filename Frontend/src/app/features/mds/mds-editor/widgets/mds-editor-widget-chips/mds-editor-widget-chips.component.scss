@@ -50,6 +50,24 @@ mat-chip {
     .mds-chip-autocomplete {
         mat-option {
             color: var(--primary);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-top: 4px;
+            padding-bottom: 4px;
+            > span {
+                display: flex;
+                width: 100%;
+            }
+            &:not(:last-child):after {
+                content: '';
+                position: absolute;
+                width: 75%;
+                height: 1px;
+                bottom: 0;
+                background-color: $chipsSeperatorLineColor;
+            }
         }
     }
 }

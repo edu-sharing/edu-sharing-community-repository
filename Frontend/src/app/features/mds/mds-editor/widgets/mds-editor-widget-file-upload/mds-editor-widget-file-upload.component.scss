@@ -25,11 +25,11 @@
     }
 
     &.dropActive {
-        border-color: $primaryMediumLight;
-        background: $primaryLight;
+        border-color: var(--palette-primary-200);
+        background: var(--palette-primary-100);
 
         i {
-            color: $primary;
+            color: var(--primary);
         }
 
         .object-message {

@@ -81,10 +81,9 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
             this.resultsDataSource,
         );
     }
-
-    getCountClass() {
+    getContainerClass() {
         if (this.searchPage.searchString.getValue()) {
-            return 'count-ngsearchword';
+            return '-ngsearchword';
         }
         return '';
     }

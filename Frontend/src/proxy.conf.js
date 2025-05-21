@@ -35,6 +35,7 @@ const PROXY_CONFIG = [
                         .replace('; Path=/edu-sharing', '; Path=/')
                         // We serve on a non-HTTPS connection, so 'Secure' cookies won't work.
                         .replace('; Secure', '')
+                        .replace('; Partitioned', '')
                         // 'SameSite=None' is only allowed on 'Secure' cookies.
                         .replace('; SameSite=None', ''),
                 );

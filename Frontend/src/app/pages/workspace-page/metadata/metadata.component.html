@@ -51,6 +51,10 @@
             <i class="material-icons">{{ stats.pointsIcons[i] }}</i> {{ point }}
           </li>
         </ul>
+        <p class="description start-time">
+          {{ 'WORKSPACE.METADATA.STATISTICS_START' | translate }}
+          <span class="start-time-value">{{ data.createDate }}</span>
+        </p>
         <p class="description usage-count">
           {{ 'WORKSPACE.METADATA.USAGE_COUNT' | translate }}
           <span class="usage-counter">{{ statsTotalPoints }}</span>

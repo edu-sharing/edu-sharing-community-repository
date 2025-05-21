@@ -42,7 +42,7 @@
             > mat-form-field {
                 flex-grow: 1;
                 .prefix {
-                    color: $primary;
+                    color: var(--primary);
                 }
             }
             es-spinner-small,

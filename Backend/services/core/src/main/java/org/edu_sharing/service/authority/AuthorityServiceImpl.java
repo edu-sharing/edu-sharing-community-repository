@@ -23,6 +23,8 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
+import org.apache.log4j.Logger;
+import org.apache.tika.utils.StringUtils;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
@@ -498,20 +500,31 @@ public class AuthorityServiceImpl implements AuthorityService {
         String firstName = (String) userInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
         String lastName = (String) userInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
         String email = (String) userInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
-
-        if (userName == null || userName.trim().equals("")) {
+		PersonService personService = serviceRegistry.getPersonService();
+		NodeRef currentUserRef = personService.getPersonOrNull(userName);
+		if(StringUtils.isBlank(userName)){
             throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_USERNAME);
         }
 
-        if (firstName == null || firstName.trim().equals("")) {
+		if(StringUtils.isBlank(firstName) &&
+				(
+						currentUserRef == null || !StringUtils.isBlank((String) NodeServiceHelper.getPropertyNative(currentUserRef, CCConstants.CM_PROP_PERSON_FIRSTNAME))
+				)
+		){
             throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_FIRSTNAME);
         }
 
-        if (lastName == null || lastName.trim().equals("")) {
+		if(StringUtils.isBlank(lastName) &&
+				(
+						currentUserRef == null || !StringUtils.isBlank((String) NodeServiceHelper.getPropertyNative(currentUserRef, CCConstants.CM_PROP_PERSON_LASTNAME))
+				)){
             throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_LASTNAME);
         }
 
-        if (email == null || email.trim().equals("")) {
+		if(StringUtils.isBlank(email) &&
+				(
+						currentUserRef == null || !StringUtils.isBlank((String) NodeServiceHelper.getPropertyNative(currentUserRef, CCConstants.CM_PROP_PERSON_EMAIL))
+				)){
             throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_EMAIL);
         }
 

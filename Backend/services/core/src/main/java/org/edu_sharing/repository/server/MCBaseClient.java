@@ -30,6 +30,7 @@ package org.edu_sharing.repository.server;
 import java.util.List;
 import java.util.Map;
 
+import org.alfresco.service.cmr.version.Version;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.repository.server.tools.URLTool;
@@ -147,11 +148,13 @@ public abstract class MCBaseClient {
 	public abstract String getHomeFolderID(String username) throws Exception;
 	
 	/**
-	 * create a new version for an node with the given metadata (_properties)
-	 * @param nodeId the nodeId of the node
-	 * @throws Exception
-	 */
-	public abstract void createVersion(String nodeId) throws Exception;
+     * create a new version for an node with the given metadata (_properties)
+     *
+     * @param nodeId the nodeId of the node
+     * @return
+     * @throws Exception
+     */
+	public abstract Version createVersion(String nodeId) throws Exception;
 	
 	/**
 	 * get the nodeIds that are referenced by the specified association of the given node

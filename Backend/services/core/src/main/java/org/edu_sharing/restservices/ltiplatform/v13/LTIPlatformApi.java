@@ -268,6 +268,7 @@ public class LTIPlatformApi {
                 }
                 custom.put(LTIPlatformConstants.CUSTOM_CLAIM_GET_CONTENTAPIURL, homeApp.getClientBaseUrl() + "/rest/ltiplatform/v13/content");
                 custom.put(LTIPlatformConstants.CUSTOM_CLAIM_DETAILSSNIPPETURL, homeApp.getClientBaseUrl() + "/rest/lti/v13/details");
+                custom.put(LTIPlatformConstants.CUSTOM_CLAIM_RENDERINGURL, homeApp.getClientBaseUrl() + "/rest/lti/v13/rendering");
                 if (accessStatus != null && accessStatus.equals(AccessStatus.ALLOWED)
                         && loginInitiationSessionObject.isResourceLinkEditMode()
                         && (loginInitiationSessionObject.getVersion() == null || "".equals(loginInitiationSessionObject.getVersion()))) {

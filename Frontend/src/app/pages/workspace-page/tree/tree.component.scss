@@ -22,9 +22,9 @@
 }
 
 .rootNodeSelected {
-    color: $primary;
+    color: var(--primary);
     font-weight: bold;
 }
 .rootNodeSelected i {
-    color: $primary;
+    color: var(--primary);
 }
