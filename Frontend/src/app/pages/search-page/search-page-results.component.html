@@ -39,8 +39,7 @@
 
 <es-node-entries-wrapper
   #nodeEntriesResults
-  class="entries-wrapper"
-  t
+  class="entries-wrapper entries-wrapper{{ getContainerClass() }}"
   [dataSource]="resultsDataSource"
   [scope]="Scope.Search"
   [columns]="resultColumns.value"

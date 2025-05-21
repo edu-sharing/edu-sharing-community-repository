@@ -253,6 +253,7 @@
     "cm:title": "title",
     "ccm:replicationsource": "source",
     "score": "relevance",
+    "random": "Random",
     "description": "description",
     "mimetype": "file type",
     "size": "size",
