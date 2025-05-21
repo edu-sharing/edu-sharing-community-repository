@@ -500,7 +500,6 @@ public class AuthorityServiceImpl implements AuthorityService {
         String firstName = (String) userInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
         String lastName = (String) userInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
         String email = (String) userInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
-		PersonService personService = serviceRegistry.getPersonService();
 		NodeRef currentUserRef = personService.getPersonOrNull(userName);
 		if(StringUtils.isBlank(userName)){
             throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_USERNAME);
