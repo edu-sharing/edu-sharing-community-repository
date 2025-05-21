@@ -41,6 +41,12 @@ export class ErrorHandlerService {
             if (error.status === RestConstants.HTTP_UNAUTHORIZED) {
                 await this.injector.get(CordovaService).handleAppReAuthentication(true);
             }
+        } else if (
+            req.method === 'GET' &&
+            error.status === RestConstants.HTTP_FORBIDDEN &&
+            req.url.endsWith('/ltiplatform/v13/tools')
+        ) {
+            // ignore requests in case the API is disabled
         } else {
             console.warn('handleError has triggered', error);
             this.toast.error(error);
