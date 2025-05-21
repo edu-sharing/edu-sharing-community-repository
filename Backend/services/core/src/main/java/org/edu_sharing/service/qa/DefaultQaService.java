@@ -1,6 +1,7 @@
 package org.edu_sharing.service.qa;
 
-import org.edu_sharing.restservices.qa.v1.domain.CreateOrUpdateQAEntryDTO;
+import org.edu_sharing.restservices.qa.v1.domain.CreateQAEntryDTO;
+import org.edu_sharing.restservices.qa.v1.domain.UpdateQAEntryDTO;
 import org.edu_sharing.service.qa.domain.QAEntry;
 import org.jetbrains.annotations.NotNull;
 
@@ -9,12 +10,12 @@ import java.util.List;
 public class DefaultQaService implements QAService {
 
     @Override
-    public List<QAEntry> createQAEntries(@NotNull String nodeId, List<CreateOrUpdateQAEntryDTO> qaEntries) {
+    public List<QAEntry> createQAEntries(@NotNull String nodeId, List<CreateQAEntryDTO> qaEntries) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public List<QAEntry> updateQAEntries(@NotNull String nodeId, List<CreateOrUpdateQAEntryDTO> qaEntries) {
+    public List<QAEntry> updateQAEntries(@NotNull String nodeId, List<UpdateQAEntryDTO> qaEntries) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

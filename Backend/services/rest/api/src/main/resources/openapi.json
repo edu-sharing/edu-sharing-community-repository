@@ -1362,16 +1362,13 @@
         },
         "type": "object"
       },
-      "CreateOrUpdateQAEntryDTO": {
+      "CreateQAEntryDTO": {
         "properties": {
           "answer": {
             "minLength": 1,
             "type": "string"
           },
           "educationalLevel": {
-            "type": "string"
-          },
-          "id": {
             "type": "string"
           },
           "question": {
@@ -8047,6 +8044,34 @@
             "$ref": "#/components/schemas/Node"
           }
         },
+        "type": "object"
+      },
+      "UpdateQAEntryDTO": {
+        "properties": {
+          "answer": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "educationalLevel": {
+            "type": "string"
+          },
+          "id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "question": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "usedText": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "answer",
+          "id",
+          "question"
+        ],
         "type": "object"
       },
       "UploadResult": {
@@ -34572,7 +34597,7 @@
             "application/json": {
               "schema": {
                 "items": {
-                  "$ref": "#/components/schemas/CreateOrUpdateQAEntryDTO"
+                  "$ref": "#/components/schemas/UpdateQAEntryDTO"
                 },
                 "type": "array"
               }
@@ -34666,7 +34691,7 @@
             "application/json": {
               "schema": {
                 "items": {
-                  "$ref": "#/components/schemas/CreateOrUpdateQAEntryDTO"
+                  "$ref": "#/components/schemas/CreateQAEntryDTO"
                 },
                 "type": "array"
               }

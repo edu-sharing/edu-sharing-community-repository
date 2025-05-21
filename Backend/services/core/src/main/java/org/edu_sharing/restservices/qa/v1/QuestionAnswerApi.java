@@ -11,8 +11,9 @@ import jakarta.ws.rs.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.edu_sharing.restservices.*;
-import org.edu_sharing.restservices.qa.v1.domain.CreateOrUpdateQAEntryDTO;
+import org.edu_sharing.restservices.qa.v1.domain.CreateQAEntryDTO;
 import org.edu_sharing.restservices.qa.v1.domain.QAEntryResponseDTO;
+import org.edu_sharing.restservices.qa.v1.domain.UpdateQAEntryDTO;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.UserSimple;
 import org.edu_sharing.service.qa.QAService;
@@ -44,7 +45,7 @@ public class QuestionAnswerApi {
                     @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
-    public ResponseEntity<List<QAEntry>> createQAEntries(@Valid @PathParam("nodeId") String nodeId, List<CreateOrUpdateQAEntryDTO> qaEntries) {
+    public ResponseEntity<List<QAEntry>> createQAEntries(@Valid @PathParam("nodeId") String nodeId, List<CreateQAEntryDTO> qaEntries) {
         List<QAEntry> result = qaService.createQAEntries(nodeId, qaEntries);
         return ResponseEntity.ok(result);
     }
@@ -61,7 +62,7 @@ public class QuestionAnswerApi {
                     @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
-    public ResponseEntity<List<QAEntry>> updateQAEntries(@Valid @PathParam("nodeId") String nodeId, List<CreateOrUpdateQAEntryDTO> qaEntries) {
+    public ResponseEntity<List<QAEntry>> updateQAEntries(@Valid @PathParam("nodeId") String nodeId, List<UpdateQAEntryDTO> qaEntries) {
         List<QAEntry> result = qaService.updateQAEntries(nodeId, qaEntries);
         return ResponseEntity.ok(result);
     }

@@ -11,8 +11,10 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateOrUpdateQAEntryDTO {
+public class UpdateQAEntryDTO {
 
+    @NotEmpty
+    @JsonProperty(required = true)
     String id;
 
     @NotEmpty
