@@ -595,6 +595,11 @@
             "styles": [
               "src/app/core-ui-module/styles/fonts.scss"
             ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "projects/edu-sharing-ui/assets/scss"
+              ]
+            },
             "customWebpackConfig": {
               "path": "projects/rendering-service-web-component/webpack.extra.js"
             },
@@ -655,6 +660,11 @@
             "styles": [
               "src/app/core-ui-module/styles/fonts.scss"
             ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "projects/edu-sharing-ui/assets/scss"
+              ]
+            },
             "assets": [
               { "glob": "**/*", "input": "node_modules/ng2-pdfjs-viewer/pdfjs", "output": "/assets/pdfjs" },
               { "glob": "**/*", "input": "node_modules/ngx-rendering-service-lib/assets", "output": "/" }
