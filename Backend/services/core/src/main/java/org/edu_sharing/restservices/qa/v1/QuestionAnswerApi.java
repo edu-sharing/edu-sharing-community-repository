@@ -33,20 +33,37 @@ public class QuestionAnswerApi {
     @Autowired
     private QAService qaService;
 
-    @PUT
+    @POST
     @Path("/{nodeId}")
-    @Operation(summary = "Create or Update QA Entries of a specific sourceId and nodeId",
+    @Operation(summary = "Create QA Entries of a specific sourceId and nodeId",
             responses = {
-                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200),
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = QAEntry[].class))),
                     @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
-    public ResponseEntity<Void> createOrUpdateQAEntries(@Valid @PathParam("nodeId") String nodeId, List<CreateOrUpdateQAEntryDTO> qaEntries) {
-        qaService.createOrUpdateQAEntries(nodeId, qaEntries);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<List<QAEntry>> createQAEntries(@Valid @PathParam("nodeId") String nodeId, List<CreateOrUpdateQAEntryDTO> qaEntries) {
+        List<QAEntry> result = qaService.createQAEntries(nodeId, qaEntries);
+        return ResponseEntity.ok(result);
+    }
+
+
+    @PATCH
+    @Path("/{nodeId}")
+    @Operation(summary = "Update QA Entries of a specific sourceId and nodeId",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = QAEntry[].class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+    public ResponseEntity<List<QAEntry>> updateQAEntries(@Valid @PathParam("nodeId") String nodeId, List<CreateOrUpdateQAEntryDTO> qaEntries) {
+        List<QAEntry> result = qaService.updateQAEntries(nodeId, qaEntries);
+        return ResponseEntity.ok(result);
     }
 
 

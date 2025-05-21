@@ -9,7 +9,8 @@ import java.util.List;
 
 public interface QAService {
 
-    void createOrUpdateQAEntries(@NotNull String nodeId, List<CreateOrUpdateQAEntryDTO> qaEntries);
+    List<QAEntry> createQAEntries(@NotNull String nodeId, List<CreateOrUpdateQAEntryDTO> qaEntries);
+    List<QAEntry> updateQAEntries(@NotNull String nodeId, List<CreateOrUpdateQAEntryDTO> qaEntries);
 
     @NotNull List<QAEntry> getAllQAEntriesOf(@NotNull String nodeId, @Nullable String creator);
 

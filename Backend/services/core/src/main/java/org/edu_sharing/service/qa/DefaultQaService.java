@@ -9,7 +9,12 @@ import java.util.List;
 public class DefaultQaService implements QAService {
 
     @Override
-    public void createOrUpdateQAEntries(@NotNull String nodeId, List<CreateOrUpdateQAEntryDTO> qaEntries) {
+    public List<QAEntry> createQAEntries(@NotNull String nodeId, List<CreateOrUpdateQAEntryDTO> qaEntries) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public List<QAEntry> updateQAEntries(@NotNull String nodeId, List<CreateOrUpdateQAEntryDTO> qaEntries) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
