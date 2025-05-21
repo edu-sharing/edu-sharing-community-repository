@@ -137,7 +137,7 @@ es-user-quota {
     gap: 8px;
 }
 .rootSelected {
-    color: $primary !important;
+    color: var(--primary) !important;
     font-weight: bold;
     background: $workspaceTreeSelectedBackgroundEffect;
     background-color: #fff;

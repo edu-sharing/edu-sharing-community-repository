@@ -26,7 +26,7 @@ $imagePath: '../../../../assets/images/collections/';
             top: 20px;
         }
         > div.finished {
-            color: $primary;
+            color: var(--primary);
             @include clickable();
             .circle {
                 background-image: url($imagePath + 'checked-circle.svg');
@@ -39,7 +39,7 @@ $imagePath: '../../../../assets/images/collections/';
             }
         }
         > div.current {
-            color: $textPrimary;
+            color: var(--palette-foreground-text);
             .circle {
                 background-image: url($imagePath + 'active-circle.svg');
             }
@@ -131,7 +131,7 @@ $imagePath: '../../../../assets/images/collections/';
         line-height: 2em;
         white-space: normal;
         .title {
-            color: $primary;
+            color: var(--primary);
             font-weight: bold;
             margin-bottom: 3px;
         }
@@ -159,7 +159,7 @@ $imagePath: '../../../../assets/images/collections/';
             }
         }
         .next {
-            color: $primary;
+            color: var(--primary);
             vertical-align: middle;
             padding-right: 15px;
         }

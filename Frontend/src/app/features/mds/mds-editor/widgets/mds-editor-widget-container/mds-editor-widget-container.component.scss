@@ -46,7 +46,7 @@
     margin: -10px calc(0px - var(--horizontal-total-padding));
     padding: 10px var(--horizontal-total-padding);
     & > ::ng-deep .mat-ripple-element {
-        background-color: $primaryLight;
+        background-color: var(--palette-primary-100);
         z-index: -1;
     }
 }
@@ -79,7 +79,7 @@
         flex-grow: 1;
     }
     .changes-notice {
-        color: $primary;
+        color: var(--primary);
     }
     > *:not(:last-child) {
         margin-right: 10px;

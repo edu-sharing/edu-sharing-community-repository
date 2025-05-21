@@ -61,10 +61,10 @@ es-collection-proposals {
     }
     > div i {
         font-size: 26pt;
-        color: $textPrimary;
+        color: var(--palette-foreground-text);
     }
     .headline {
-        color: $textPrimary;
+        color: var(--palette-foreground-text);
         font-size: 120%;
     }
     .subline {

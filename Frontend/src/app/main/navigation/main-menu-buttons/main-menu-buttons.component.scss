@@ -21,7 +21,7 @@
         color: $textVeryLight;
     }
     &.selected {
-        color: $primary;
+        color: var(--primary);
         font-weight: bold;
         background: $workspaceTreeSelectedBackgroundEffect !important;
     }

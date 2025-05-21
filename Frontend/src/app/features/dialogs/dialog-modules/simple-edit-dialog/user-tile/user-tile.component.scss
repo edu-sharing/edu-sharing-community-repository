@@ -27,8 +27,8 @@
         @include limitLineCount(2, 1.25);
     }
     &.active {
-        color: $textOnPrimary;
-        background-color: $primary;
+        color: var(--palette-primary-900);
+        background-color: var(--primary);
         &:hover {
             background-color: rgb(var(--palette-primary-50));
         }
