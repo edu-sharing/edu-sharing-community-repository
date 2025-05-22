@@ -1,5 +1,11 @@
 @import 'projects/edu-sharing-ui/assets/scss/mixins';
 
+// fix Firefox does not center component properly
+:host {
+    display: flex;
+    justify-content: center;
+}
+
 .preview-wrapper {
     position: relative;
     display: flex;
@@ -67,6 +73,8 @@
         bottom: -10px;
         margin-left: 90px;
         display: flex;
+        flex-direction: column;
+        gap: 8px;
         // fix for safari
         left: 50%;
         > button {

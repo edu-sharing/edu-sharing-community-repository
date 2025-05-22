@@ -1,0 +1,118 @@
+@import 'projects/edu-sharing-ui/assets/scss/mixins';
+@import 'projects/edu-sharing-ui/assets/scss/variables-scss';
+
+.preview-overlay-container {
+    width: 240px;
+    min-height: 140px;
+    max-height: 90vh;
+    border-radius: 4px;
+    background: $backgroundColor;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+
+    .loading {
+        @include overlay();
+        backdrop-filter: blur(5px);
+        background-color: rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .preview-overlay-header {
+        padding: 0 10px;
+        height: 64px;
+        font-size: $fontSizeLarge;
+        display: flex;
+        align-items: center;
+        background: $actionDialogBackground;
+        color: $textMain;
+        border-bottom: 1px solid $cardSeparatorLineColor;
+    }
+
+    .preview-overlay-content {
+        padding: 10px;
+        overflow-y: auto;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .preview-overlay-actions {
+        padding: 10px;
+        border-top: 1px solid $cardSeparatorLineColor;
+
+        button {
+            width: 100%;
+        }
+    }
+
+    .close {
+        margin-left: auto;
+    }
+}
+
+.preview-image-style-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    img {
+        width: 40px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+}
+
+.preview-image {
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    min-height: 80px;
+    max-height: 100px;
+
+    &.selected {
+        border: 3px solid var(--primary);
+    }
+
+    img {
+        width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+        cursor: pointer;
+    }
+}
+
+// on mobile devices, place the overlay on top of the remaining contents
+@media screen and (max-width: ($mobileWidth - $mobileStage * 1)) {
+    // it is necessary to adjust the parent element of out panelClass
+    // !important is required to overwrite inline added styles
+    ::ng-deep .cdk-overlay-connected-position-bounding-box:has(.ai-preview-images-overlay) {
+        top: 10px !important;
+        left: 10px !important;
+        width: calc(100vw - 20px) !important;
+        height: calc(100vh - 20px) !important;
+        position: absolute;
+        align-items: normal !important;
+        justify-content: normal !important;
+
+        .ai-preview-images-overlay {
+            width: 100%;
+            height: 100%;
+            transform: none !important;
+
+            .preview-overlay-container {
+                width: 100%;
+                max-height: 100%;
+
+                .preview-image {
+                    min-height: 100px;
+                }
+            }
+        }
+    }
+}

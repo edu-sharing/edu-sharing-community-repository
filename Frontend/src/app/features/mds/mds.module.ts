@@ -29,6 +29,7 @@ import { MdsEditorWidgetFileUploadComponent } from './mds-editor/widgets/mds-edi
 import { LicenseDetailsComponent } from './mds-editor/widgets/mds-editor-widget-license/license-details/license-details.component';
 import { MdsEditorWidgetLicenseComponent } from './mds-editor/widgets/mds-editor-widget-license/mds-editor-widget-license.component';
 import { MdsEditorWidgetLinkComponent } from './mds-editor/widgets/mds-editor-widget-link/mds-editor-widget-link.component';
+import { AiPreviewImagesOverlayComponent } from './mds-editor/widgets/mds-editor-widget-preview/ai-preview-images-overlay/ai-preview-images-overlay.component';
 import { MdsEditorWidgetPreviewComponent } from './mds-editor/widgets/mds-editor-widget-preview/mds-editor-widget-preview.component';
 import { MdsEditorWidgetRadioButtonComponent } from './mds-editor/widgets/mds-editor-widget-radio-button/mds-editor-widget-radio-button.component';
 import { MdsEditorWidgetSearchSuggestionsComponent } from './mds-editor/widgets/mds-editor-widget-search-suggestions/mds-editor-widget-search-suggestions.component';
@@ -54,6 +55,7 @@ import { MdsEditorSingleWidgetComponent } from './mds-editor/mds-editor-single-w
 
 @NgModule({
     declarations: [
+        AiPreviewImagesOverlayComponent,
         HighlightPipe,
         LabelPipe,
         LicenseAiPipe,
@@ -100,6 +102,7 @@ import { MdsEditorSingleWidgetComponent } from './mds-editor/mds-editor-single-w
     ],
     imports: [SharedModule, NgxSliderModule, EditorModule, MatFormFieldModule, EduSharingUiModule],
     exports: [
+        AiPreviewImagesOverlayComponent,
         LicenseDetailsComponent,
         LicenseAiPipe,
         MdsEditorWidgetAuthorComponent,

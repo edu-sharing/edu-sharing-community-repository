@@ -1,15 +1,15 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { RepoUrlService } from 'ngx-edu-sharing-ui';
-import * as rxjs from 'rxjs';
-import { BehaviorSubject, forkJoin, forkJoin as observableForkJoin, of } from 'rxjs';
-import { catchError, map, take, takeWhile } from 'rxjs/operators';
 import { Node } from 'ngx-edu-sharing-api';
+import { RepoUrlService } from 'ngx-edu-sharing-ui';
+import { BehaviorSubject, forkJoin, interval, of } from 'rxjs';
+import { catchError, map, take, takeWhile } from 'rxjs/operators';
 import { RestNodeService } from '../../../../../core-module/rest/services/rest-node.service';
 import { Toast } from '../../../../../services/toast';
 import { Constraints, NativeWidgetComponent } from '../../../types/types';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
+import { AiPreviewImagesOverlayComponent } from './ai-preview-images-overlay/ai-preview-images-overlay.component';
 
 @Component({
     selector: 'es-mds-editor-widget-preview',
@@ -17,6 +17,9 @@ import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
     styleUrls: ['./mds-editor-widget-preview.component.scss'],
 })
 export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent {
+    @ViewChild('overlayRef') overlayRef: ElementRef<HTMLElement>;
+    @ViewChild('aiPreviewImagesOverlay') aiPreviewImagesOverlay: AiPreviewImagesOverlayComponent;
+
     static readonly constraints: Constraints = {
         requiresNode: true,
         supportsBulk: false,
@@ -31,30 +34,29 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent {
     node: Node;
     delete = false;
     loading$ = new BehaviorSubject(false);
+    overlayVisible$ = new BehaviorSubject(false);
 
     constructor(
-        public mdsEditorValues: MdsEditorInstanceService,
-        private nodeService: RestNodeService,
-        private toast: Toast,
-        private repoUrlService: RepoUrlService,
         private changeDetectorRef: ChangeDetectorRef,
+        public mdsEditorInstance: MdsEditorInstanceService,
+        private nodeService: RestNodeService,
+        private repoUrlService: RepoUrlService,
         private sanitizer: DomSanitizer,
+        private toast: Toast,
     ) {
-        forkJoin([this.mdsEditorValues.nodes$.pipe(take(1))])
+        forkJoin([this.mdsEditorInstance.nodes$.pipe(take(1))])
             .pipe(takeUntilDestroyed())
             .subscribe(([nodes]) => {
                 if (nodes?.length === 1) {
                     this.node = nodes[0];
                     this.nodeSrc =
                         this.node.preview.url + '&crop=true&width=400&height=300&dontcache=:cache';
-                }
-                if (nodes?.length === 1) {
                     void this.updateSrc();
                     // we need to reload the image since we don't know if the image (e.g. video file) is still being processed
-                    rxjs.interval(5000)
+                    interval(5000)
                         .pipe(
                             takeUntilDestroyed(),
-                            takeWhile(() => !this.file),
+                            takeWhile(() => !this.file && !this.overlayVisible$.getValue()),
                         )
                         .subscribe(() => this.updateSrc());
                 }
@@ -90,7 +92,7 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent {
         this.loading$.next(true);
 
         try {
-            this.node = (await this.onSaveNode(this.mdsEditorValues.nodes$.value))[0];
+            this.node = (await this.onSaveNode(this.mdsEditorInstance.nodes$.value))[0];
             this.file = null;
             this.delete = false;
             void this.updateSrc();
@@ -101,18 +103,22 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent {
         }
     }
 
+    showOverlay() {
+        if (this.aiPreviewImagesOverlay && this.overlayRef) {
+            this.aiPreviewImagesOverlay.open(this.overlayRef.nativeElement);
+        }
+    }
+
     onSaveNode(nodes: Node[]) {
         if (this.delete) {
-            return observableForkJoin(
-                nodes.map((n) => this.nodeService.deleteNodePreview(n.ref.id)),
-            )
+            return forkJoin(nodes.map((n) => this.nodeService.deleteNodePreview(n.ref.id)))
                 .pipe(map(() => nodes))
                 .toPromise();
         }
         if (this.file == null) {
             return null;
         }
-        return observableForkJoin(
+        return forkJoin(
             nodes.map((n) =>
                 this.nodeService
                     .uploadNodePreview(n.ref.id, this.file, false)

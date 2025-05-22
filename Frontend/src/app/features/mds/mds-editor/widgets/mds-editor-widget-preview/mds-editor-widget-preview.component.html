@@ -1,13 +1,13 @@
 <input
   type="file"
   #fileInput
-  style="display: none"
+  class="display-none"
   accept="image/*"
   (change)="setPreview($event)"
   (cancel)="$event.stopPropagation()"
 />
 <div class="preview-wrapper">
-  <mat-label *ngIf="mdsEditorValues.editorMode === 'inline'">{{
+  <mat-label *ngIf="mdsEditorInstance.editorMode === 'inline'">{{
     'WORKSPACE.EDITOR.PREVIEW' | translate
   }}</mat-label>
   <div class="loading" *ngIf="loading$ | async">
@@ -24,6 +24,21 @@
     </div>
     <div class="button-group">
       <button
+        *ngIf="mdsEditorInstance.hasAi | async"
+        esElementRef
+        #overlayRef="esElementRef"
+        mat-fab
+        [color]="$any('white')"
+        (click)="showOverlay()"
+      >
+        <i esIcon="brush"></i>
+      </button>
+
+      <button mat-fab [color]="$any('white')" (click)="fileInput.click()">
+        <i esIcon="file_upload"></i>
+      </button>
+
+      <button
         mat-fab
         [color]="$any('white')"
         (click)="file ? (file = null) : (delete = true); updateSrc()"
@@ -31,12 +46,20 @@
       >
         <i esIcon="delete"></i>
       </button>
-      <button mat-fab [color]="$any('white')" (click)="fileInput.click()">
-        <i esIcon="file_upload"></i>
-      </button>
     </div>
+    <!-- Overlay template -->
+    <es-ai-preview-images-overlay
+      *ngIf="mdsEditorInstance.hasAi | async"
+      #aiPreviewImagesOverlay
+      [file]="file"
+      [node]="node"
+      (triggerUpdateSrc)="updateSrc()"
+      (updateFile)="file = $event"
+      (updateShowOverlay)="overlayVisible$.next($event)"
+      (updateSrcAttribute)="src$.next($event)"
+    ></es-ai-preview-images-overlay>
   </div>
-  <div class="save" *ngIf="(hasChanges | async) && mdsEditorValues.editorMode === 'inline'">
+  <div class="save" *ngIf="(hasChanges | async) && mdsEditorInstance.editorMode === 'inline'">
     <button mat-flat-button color="primary" (click)="foreSave()">{{ 'SAVE' | translate }}</button>
   </div>
 </div>
