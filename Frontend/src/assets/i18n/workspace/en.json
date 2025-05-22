@@ -211,6 +211,7 @@
         "REPUBLISH_DESCRIPTION": "A new version of this material is published, all existing versions remain as predecessors.",
         "UPDATE_METADATA": "Update latest version",
         "UPDATE_METADATA_DESCRIPTION": "The metadata of the existing, most recently published version is updated with the current metadata of the original.",
+        "UPDATE_LAST_NON_REVOKED": "The update will affect the last, non revoked version. Please check the list below",
         "MODE_OFF": "Unpublished",
         "MODE_OFF_INFO": "The element is not publicly accessible and can be accessed only by invited users",
         "MODE_DIRECT": "Share publicly",

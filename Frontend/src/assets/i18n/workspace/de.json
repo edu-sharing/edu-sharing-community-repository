@@ -210,6 +210,7 @@
         "REPUBLISH_DESCRIPTION": "Es wird eine neue Version dieses Materials veröffentlicht, alle bestehenden Versionen bleiben als Vorgänger bestehen.",
         "UPDATE_METADATA": "Letzte Version aktualisieren",
         "UPDATE_METADATA_DESCRIPTION": "Die Metadaten der bestehenden, zuletzt veröffentlichten Version werden mit den aktuellen Metadaten des Originals aktualisiert.",
+        "UPDATE_LAST_NON_REVOKED": "Die Aktualisierung der Metadaten wirkt sich auf die letzte, nicht zurückgezogene Version aus. Beachten Sie bitte die Liste unten",
         "MODE_OFF": "Unveröffentlicht",
         "MODE_OFF_INFO": "Das Element ist nicht öffentlich zugänglich und kann nur von eingelandenen Nutzenen abgerufen werden",
         "MODE_DIRECT": "Öffentlich freigeben",
