@@ -43,6 +43,7 @@ public class HandleServiceImpl implements HandleService {
             handleServiceAvailable();
             return true;
         } catch (Exception e) {
+            log.info(e.getMessage(), e);
             return false;
         }
     }
