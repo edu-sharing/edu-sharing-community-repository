@@ -84,7 +84,7 @@ public class HandleServiceImpl implements HandleService {
         if(!handleConfig.isEnabled()){
             return null;
         }
-        return "O.NA/" + handleConfig.getPrefix();
+        return "0.NA/" + handleConfig.getPrefix();
     }
 
     @EventListener
