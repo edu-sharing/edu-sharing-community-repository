@@ -16,6 +16,7 @@ import {
     AuthenticationService,
     ConfigService,
     FacetsDict,
+    FeaturesHelperService,
     HOME_REPOSITORY,
     LoginInfo,
     MdsService,
@@ -653,6 +654,7 @@ export class MdsEditorInstanceService implements OnDestroy {
      * Currently NOT supported in bulk!
      */
     suggestionMetadata$ = new BehaviorSubject<NodeSuggestionResponseDto[]>(null);
+    hasAi = new BehaviorSubject<boolean>(false);
 
     /** Current values (if not in node mode) */
     values$ = new BehaviorSubject<Values>(null);
@@ -768,6 +770,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         private restMdsService: RestMdsService,
         private configService: ConfigurationService,
         private authenticationService: AuthenticationService,
+        private featuresHelperService: FeaturesHelperService,
         public searchHelperService: SearchHelperService,
         private suggestionsService: SuggestionsV1Service,
         private restConnector: RestConnectorService,
@@ -977,6 +980,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         if (!wasInitialized) {
             return null;
         }
+        await this.updateHasAi();
         for (const widget of this.widgets.value) {
             widget.initWithNodes(this.nodes$.value);
             await this.fetchDisplayValues(widget);
@@ -2147,6 +2151,16 @@ export class MdsEditorInstanceService implements OnDestroy {
             .observeLoginInfo()
             .pipe(takeUntil(this.destroyed$))
             .subscribe((info) => (this.loginInfo = info));
+    }
+
+    private async updateHasAi(): Promise<void> {
+        const aiSupport = await this.featuresHelperService.hasUserAISupport();
+        this.hasAi.next(
+            aiSupport &&
+                this.suggestionsSupported &&
+                this.editorMode === 'nodes' &&
+                this.groupId === 'io',
+        );
     }
 }
 

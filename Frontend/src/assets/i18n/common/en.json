@@ -766,7 +766,12 @@
       "GENERATE_ALL_INFO": "Auto-generate suggestions for all fields which can be handled by ai",
       "GENERATE_ALL_BUTTON": "Generate ai suggestions",
       "GENERATE_ASYNC_STARTED": "Suggestions will be generated. The form will automatically display them",
-      "GENERATE_ASYNC_FINISHED": "Suggestions are now available"
+      "GENERATE_ASYNC_FINISHED": "Suggestions are now available",
+      "DRAWING_STYLES": {
+        "HEADING": "AI image generation",
+        "LABEL": "Select style",
+        "REGENERATE": "Generate again"
+      }
     },
     "SUGGESTIONS": {
       "LIST_TITLE": "Suggestions for this field",
