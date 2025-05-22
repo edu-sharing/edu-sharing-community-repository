@@ -49,7 +49,7 @@
         width: 80px;
     }
     .done {
-        color: $primary;
+        color: var(--primary);
     }
     .success {
         color: $colorStatusPositive;

@@ -43,6 +43,7 @@ public class HandleServiceImpl implements HandleService {
             handleServiceAvailable();
             return true;
         } catch (Exception e) {
+            log.info(e.getMessage(), e);
             return false;
         }
     }
@@ -83,7 +84,7 @@ public class HandleServiceImpl implements HandleService {
         if(!handleConfig.isEnabled()){
             return null;
         }
-        return "O.NA/" + handleConfig.getPrefix();
+        return "0.NA/" + handleConfig.getPrefix();
     }
 
     @EventListener

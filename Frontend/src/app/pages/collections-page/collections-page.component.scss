@@ -59,8 +59,8 @@ mat-tab-group {
     padding-bottom: 3px;
     border-bottom-width: 1px;
     border-bottom-style: solid;
-    border-bottom-color: $primary;
-    color: $primary;
+    border-bottom-color: var(--primary);
+    color: var(--primary);
     cursor: pointer;
 }
 
@@ -71,7 +71,7 @@ mat-tab-group {
     background-color: white;
     border-bottom-width: 3px;
     border-bottom-style: solid;
-    border-bottom-color: $primary;
+    border-bottom-color: var(--primary);
 }
 
 section {
@@ -85,7 +85,7 @@ section {
 }
 
 .coll-breadcrumb-clickable {
-    color: $primary;
+    color: var(--primary);
     cursor: pointer;
 }
 

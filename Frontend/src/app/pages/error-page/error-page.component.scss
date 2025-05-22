@@ -29,7 +29,7 @@
         padding-top: 20px;
     }
     a {
-        color: $primaryLight;
+        color: var(--palette-primary-100);
         text-transform: uppercase;
         font-weight: bold;
         margin-left: 10px;

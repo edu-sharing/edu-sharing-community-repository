@@ -10,7 +10,7 @@ $primaryMediumDark: var(--palette-primary-700) !default;
 
 $tabColor: var(--primary) !default;
 $tabColorDark: var(--primary) !default;
-$tabColorLight: $primaryMediumLight !default;
+$tabColorLight: var(--palette-primary-200) !default;
 $warning: #cd2457 !default;
 $warningMedium: #e98c1b !default;
 $toastLeftError: #c15d5d !default;

@@ -1,8 +1,8 @@
 @import '../../../core-ui-module/styles/variables';
 
 .infobar {
-    background: $primary;
-    color: $textOnPrimary;
+    background: var(--primary);
+    color: var(--palette-primary-900);
     width: 100%;
     position: fixed;
     left: 0;
@@ -28,7 +28,7 @@
             font-weight: bold;
         }
         .message {
-            color: $textOnPrimaryLight;
+            color: rgba(var(--light-primary-text), 0.75);
         }
     }
     .infobar-cancel {
@@ -37,11 +37,11 @@
     .infobar-buttons {
         padding: 0 20px;
         .btn {
-            color: $primary !important;
+            color: var(--primary) !important;
             background: #fff !important;
         }
         .btn-flat {
-            color: $textOnPrimary !important;
+            color: var(--palette-primary-900) !important;
         }
     }
 }

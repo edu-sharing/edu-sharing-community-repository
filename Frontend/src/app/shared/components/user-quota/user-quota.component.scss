@@ -24,15 +24,15 @@
 }
 .quota-progress {
     height: 8px;
-    background-color: $primaryLight;
+    background-color: var(--palette-primary-100);
 }
 .quota-used {
     height: 8px;
-    background-color: $primary;
+    background-color: var(--primary);
 }
 .quota-free {
     font-weight: bold;
-    color: $primary;
+    color: var(--primary);
 }
 .quota-health-medium {
     .quota-free {

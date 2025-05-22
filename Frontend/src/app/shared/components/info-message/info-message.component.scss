@@ -23,7 +23,7 @@
     }
     &.info {
         background-color: var(--palette-primary-50);
-        border: 1px solid $primary;
+        border: 1px solid var(--primary);
         color: var(--palette-primary-900);
     }
     > div:first-child {
@@ -35,7 +35,7 @@
         white-space: pre-line;
     }
     > .link {
-        color: $primary;
+        color: var(--primary);
         text-transform: uppercase;
     }
 }

@@ -9,7 +9,7 @@
     align-items: center;
     .info {
         flex-grow: 1;
-        color: $textPrimary;
+        color: var(--palette-foreground-text);
         font-weight: bold;
         margin: 0 20px;
         a {
@@ -160,7 +160,7 @@
     margin-bottom: 1.5em;
 }
 .folderLocation {
-    color: $primary;
+    color: var(--primary);
 }
 
 $addToWidth: 450px;

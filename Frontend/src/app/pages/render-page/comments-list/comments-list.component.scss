@@ -49,7 +49,7 @@ form {
     button {
         margin: 0 10px;
         i {
-            color: $primary;
+            color: var(--primary);
         }
     }
 }
@@ -108,7 +108,7 @@ mat-form-field {
                         flex-grow: 1;
                     }
                     .dropdown {
-                        color: $primary;
+                        color: var(--primary);
                         @include clickable();
                     }
                 }
