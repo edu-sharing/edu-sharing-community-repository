@@ -11,7 +11,11 @@ import {
     I18N_CONFIG,
     I18nConfig,
 } from 'ngx-edu-sharing-ui';
-import { RenderComponent, RenderingServiceLibModule } from 'ngx-rendering-service-lib';
+import {
+    PdfComponent,
+    RenderComponent,
+    RenderingServiceLibModule,
+} from 'ngx-rendering-service-lib';
 import { environment } from '../environments/environment';
 
 @NgModule({
@@ -23,10 +27,12 @@ import { environment } from '../environments/environment';
         RenderComponent,
         TranslationsModule,
         RenderingServiceLibModule.forRoot({
-            assetsUrl:
-                (window as any).__env?.EDU_SHARING_API_URL +
-                '/../web-components/rendering-service/assets',
+            assetsUrl: environment.production
+                ? (window as any).__env?.EDU_SHARING_API_URL +
+                  '/../web-components/rendering-service/assets'
+                : '/vendor/assets',
         }),
+        PdfComponent,
     ],
     providers: [
         provideHttpClient(),

@@ -1,14 +1,24 @@
 import { Node } from 'ngx-edu-sharing-api';
-import { Component, Input, OnChanges, signal, SimpleChanges } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    Input,
+    OnChanges,
+    signal,
+    SimpleChanges,
+    ViewChild,
+} from '@angular/core';
 import { RenderHelperService, TranslationsService } from 'ngx-edu-sharing-ui';
 import { RenderDataRequestWithToken } from 'ngx-rendering-service-api';
+import { PdfComponent } from 'ngx-rendering-service-lib';
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],
 })
-export class AppComponent implements OnChanges {
+export class AppComponent implements OnChanges, AfterViewInit {
+    @ViewChild(PdfComponent) pdfComponent: PdfComponent;
     @Input() encoded_node: string;
     @Input() signature: string;
     @Input() jwt: string;
@@ -25,6 +35,12 @@ export class AppComponent implements OnChanges {
         private translations: TranslationsService,
     ) {
         this.translations.initialize().subscribe(() => {});
+    }
+
+    ngAfterViewInit(): void {
+        if (this.pdfComponent) {
+            this.pdfComponent.fileData = 'test';
+        }
     }
 
     async ngOnChanges(changes: SimpleChanges) {
