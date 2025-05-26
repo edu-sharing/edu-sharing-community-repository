@@ -871,6 +871,17 @@
       "MESSAGE": "Es wurden bereits Änderungen am Dialog vorgenommen. Diese müssen vor dem Dialogwechsel gespeichert werden.\n\nMöchten Sie die bereits vorgenommen Änderungen jetzt speichern?"
     }
   },
+  "PDF_EDITOR": {
+    "HEADING": "ID des Inhalts eingeben oder Inhalt über Suche auswählen{{suffix}}",
+    "EDIT_MODE": "Editier-Modus",
+    "SAVE_ID": "ID übernehmen",
+    "OPEN_SEARCH": "Suche öffnen",
+    "SAVE_CHANGES": "Änderungen speichern",
+    "LOAD_CONTENT_TITLE": "Inhalt laden",
+    "LOAD_CONTENT_MESSAGE": "Wollen Sie wirklich die bereits geladene PDF überschreiben? Änderungen gehen dadurch verloren.",
+    "WRONG_FILE_FORMAT": "Bei dem ausgewählten Inhalt handelt es sich nicht um eine PDF-Datei. Bitte wählen Sie einen anderen Inhalt aus.",
+    "CHANGES_SAVED_SUCCESSFULLY": "Ihre Änderungen wurden erfolgreich gespeichert."
+  },
   "SHARE_APP": {
     "TEXT_SNIPPET": "Notiz",
     "IMAGE": "Bild",

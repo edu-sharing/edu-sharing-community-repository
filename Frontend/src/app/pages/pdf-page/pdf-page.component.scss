@@ -1,0 +1,65 @@
+@import 'projects/edu-sharing-ui/assets/scss/variables-scss';
+
+.pdf-editor {
+    position: relative;
+
+    .save {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background: $darkenLightColor;
+        z-index: 2;
+    }
+
+    .pdf-form {
+        padding: 16px 8px;
+
+        .form-content {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+
+            .node-buttons {
+                display: inline-flex;
+                align-items: center;
+                min-height: 100%;
+
+                .separator-line {
+                    margin-left: 12px;
+                    margin-right: 12px;
+                    width: 2px;
+                    height: 100%;
+                    background: $searchInputBorderColor;
+                }
+            }
+
+            button {
+                min-height: 100%;
+            }
+
+            .change-node {
+                margin-left: auto;
+            }
+        }
+
+        mat-form-field {
+            width: 300px;
+            max-width: 100%;
+        }
+    }
+}
+
+::ng-deep ngx-extended-pdf-viewer #editorUndoBar {
+    // fix: icons in editor undo bar are not displayed properly
+    // TODO: find better option to overwrite the assets path in the styles
+    // note: * pdfDefaultOptions.assetsFolder does also change existing (correct) paths
+    //       * !important is necessary to get is working
+    --closing-button-icon: url('/edu-sharing/assets/images/messageBar_closingButton.svg') !important;
+    --message-bar-icon: url('/edu-sharing/assets/images/secondaryToolbarButton-documentProperties.svg') !important;
+
+    // fix: navbar overlaps undo bar / toast
+    // TODO: check for options to place the toast at the bottom
+    top: var(--mainnavHeight, 70px) !important;
+}

@@ -829,7 +829,17 @@
       "MESSAGE": "Changes have already been made to the dialog. They must be saved before changing the dialog.\n\nDo you want to save or discard the changes already made??"
     }
   },
-
+  "PDF_EDITOR": {
+    "HEADING": "Enter content ID or select content via search{{suffix}}",
+    "EDIT_MODE": "Edit mode",
+    "SAVE_ID": "Save ID",
+    "OPEN_SEARCH": "Open search",
+    "SAVE_CHANGES": "Save changes",
+    "LOAD_CONTENT_TITLE": "Load content",
+    "LOAD_CONTENT_MESSAGE": "Do you really want to overwrite the already loaded PDF? Changes will be lost.",
+    "WRONG_FILE_FORMAT": "The selected content is not a PDF file. Please select a different content.",
+    "CHANGES_SAVED_SUCCESSFULLY": "Your changes have been saved successfully."
+  },
   "SHARE_APP": {
     "TEXT_SNIPPET": "Note",
     "IMAGE": "Image",
