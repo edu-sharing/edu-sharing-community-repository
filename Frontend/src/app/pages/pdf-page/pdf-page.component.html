@@ -1,0 +1,80 @@
+<div class="pdf-editor">
+  <div *ngIf="isSaving()" class="save">
+    <es-spinner></es-spinner>
+  </div>
+  <div class="pdf-form">
+    <h2>
+      {{ 'PDF_EDITOR.HEADING' | translate : { suffix: !!renderNodeId ? ':' : '' } }}
+      <ng-container *ngIf="!!renderNodeId">
+        <mat-checkbox [(ngModel)]="editMode" (ngModelChange)="triggerReload()">
+          {{ 'PDF_EDITOR.EDIT_MODE' | translate }}
+        </mat-checkbox>
+      </ng-container>
+    </h2>
+    <div class="form-content">
+      <mat-form-field subscriptSizing="dynamic">
+        <mat-label>{{ 'ID' | translate }}</mat-label>
+        <input
+          matInput
+          name="nodeId"
+          type="text"
+          placeholder="20130ce3-b641-42d7-930c-e3b641a2d7c6"
+          [(ngModel)]="nodeId"
+          autofocus
+        />
+      </mat-form-field>
+      <div class="node-buttons">
+        <button
+          *ngIf="!isLoading(); else loadingSpinner"
+          mat-flat-button
+          color="primary"
+          (click)="updateNodeId(nodeId)"
+          [matTooltip]="'PDF_EDITOR.SAVE_ID' | translate"
+        >
+          <i esIcon="refresh"></i>
+        </button>
+        <div class="separator-line"></div>
+        <button
+          *ngIf="!isLoading(); else loadingSpinner"
+          mat-flat-button
+          color="primary"
+          (click)="openReurlLink()"
+          [matTooltip]="'PDF_EDITOR.OPEN_SEARCH' | translate"
+        >
+          <i esIcon="open_in_new"></i>
+        </button>
+        <ng-template #loadingSpinner>
+          <es-spinner-small></es-spinner-small>
+        </ng-template>
+      </div>
+      <div *ngIf="renderNodeId && hasChanges()" class="change-node">
+        <button mat-flat-button color="primary" (click)="saveChanges(nodeId)">
+          <i esIcon="save"></i>
+          {{ 'PDF_EDITOR.SAVE_CHANGES' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- button options can be found here: https://pdfviewer.net/extended-pdf-viewer/hiding-buttons -->
+  <ngx-extended-pdf-viewer
+    *ngIf="initialized()"
+    [(src)]="renderNodeId"
+    [height]="'auto'"
+    [language]="language"
+    [textLayer]="true"
+    [showHandToolButton]="true"
+    [showOpenFileButton]="false"
+    [showPrintButton]="false"
+    [showPropertiesButton]="false"
+    [showRotateButton]="false"
+    [showScrollingButtons]="false"
+    [showSpreadButton]="false"
+    [showDrawEditor]="editMode"
+    [showHighlightEditor]="editMode"
+    [showStampEditor]="editMode"
+    [showTextEditor]="editMode"
+    [zoom]="'page-fit'"
+    (annotationEditorEvent)="changeAnnotation()"
+  ></ngx-extended-pdf-viewer>
+</div>
