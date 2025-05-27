@@ -1,3 +1,4 @@
+import { PlatformLocation } from '@angular/common';
 import { AfterViewInit, Component, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
 import { HOME_REPOSITORY, Node, NodeService } from 'ngx-edu-sharing-api';
 import { TranslationsService, Values } from 'ngx-edu-sharing-ui';
@@ -26,6 +27,7 @@ export class PdfPageComponent implements AfterViewInit, OnDestroy, OnInit {
     isSaving: WritableSignal<boolean> = signal(false);
     language: string = 'de-DE';
     nodeId: string;
+    private pdfPrefix: string = PdfPageComponent.DEFAULT_PDF_PREFIX;
     renderNodeId: string;
     private windowRef: any;
 
@@ -33,6 +35,7 @@ export class PdfPageComponent implements AfterViewInit, OnDestroy, OnInit {
         private dialogsService: DialogsService,
         private nodeApi: NodeService,
         private pdfViewerService: NgxExtendedPdfViewerService,
+        private platformLocation: PlatformLocation,
         private toast: Toast,
         private translations: TranslationsService,
     ) {}
@@ -41,6 +44,12 @@ export class PdfPageComponent implements AfterViewInit, OnDestroy, OnInit {
      * Initializes the component by defining the language.
      */
     async ngOnInit(): Promise<void> {
+        if (this.platformLocation.getBaseHrefFromDOM()) {
+            // replace '/' at the end of the base href by '', if existing
+            this.pdfPrefix =
+                this.platformLocation.getBaseHrefFromDOM()?.replace(/\/$/, '') +
+                PdfPageComponent.DEFAULT_PDF_PREFIX;
+        }
         await firstValueFrom(this.translations.waitForInit());
         if (this.translations.getLocale()) {
             this.language = this.translations.getLocale();
@@ -112,13 +121,13 @@ export class PdfPageComponent implements AfterViewInit, OnDestroy, OnInit {
                     });
                     dialogRef.afterClosed().subscribe(async (response) => {
                         if (response === 'YES') {
-                            this.renderNodeId = PdfPageComponent.DEFAULT_PDF_PREFIX + nodeId;
+                            this.renderNodeId = this.pdfPrefix + nodeId;
                         } else {
                             return;
                         }
                     });
                 } else {
-                    this.renderNodeId = PdfPageComponent.DEFAULT_PDF_PREFIX + nodeId;
+                    this.renderNodeId = this.pdfPrefix + nodeId;
                     this.initialized.set(true);
                 }
             } else {
