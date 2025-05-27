@@ -64,7 +64,7 @@ const PROXY_CONFIG = [
     },
     {
         context: ['/rendering2'],
-        target: process.env.RS2_URL,
+        target: process.env.RS2_URL || 'http://127.0.0.1.nip.io:8080',
         secure: false,
         changeOrigin: true,
         pathRewrite: { '^/rendering2': '/' },
