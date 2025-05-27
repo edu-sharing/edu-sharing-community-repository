@@ -1,7 +1,7 @@
 import { PlatformLocation } from '@angular/common';
 import { AfterViewInit, Component, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
 import { HOME_REPOSITORY, Node, NodeService } from 'ngx-edu-sharing-api';
-import { TranslationsService, Values } from 'ngx-edu-sharing-ui';
+import { TranslationsService } from 'ngx-edu-sharing-ui';
 import { NgxExtendedPdfViewerService } from 'ngx-extended-pdf-viewer';
 import { firstValueFrom } from 'rxjs';
 import { RestConstants } from '../../core-module/rest/rest-constants';
@@ -141,15 +141,9 @@ export class PdfPageComponent implements AfterViewInit, OnDestroy, OnInit {
      * Opens a new window with the Re-URL parameter set.
      */
     openReurlLink(): void {
-        // set virtual:audit_filter to ['search'] in order to open search buffet
-        const propertyFilters: Values = {
-            'virtual:audit_filter': ['search'],
-        };
         const params = {
-            mode: 'audit',
-            filters: propertyFilters,
-            q: '.pdf',
             reurl: 'IFRAME',
+            q: '.pdf',
         };
         this.windowRef = window.open(
             '/edu-sharing/components/search?' + this.buildQueryParams(params),
