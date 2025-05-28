@@ -110,7 +110,7 @@ $light-theme-foreground-palette: (
  */
 mat-button-toggle-group {
     .mat-button-toggle-checked.mat-button-toggle-appearance-standard {
-        color: var(--palette-primary-900);
+        color: var(--light-primary-text);
         background-color: var(--primary);
     }
     .mat-button-toggle-appearance-standard .mat-button-toggle-focus-overlay {
