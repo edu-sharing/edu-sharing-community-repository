@@ -12,7 +12,7 @@ import {
     ToastDuration,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { RestConnectorService } from '../core-module/core.module';
 import { RestConstants } from '../core-module/rest/rest-constants';
@@ -64,7 +64,7 @@ export class Toast extends ToastAbstract implements OnDestroy {
     private lastToastError: string;
     private lastToastErrorTime: number;
     private translate: TranslateService;
-    private destroyed = new Subject<void>();
+    private destroyed = new BehaviorSubject<boolean>(false);
     mode: 'important' | 'all' = null;
     duration: ToastDuration = null;
     static convertDuration(duration: ToastDuration) {
@@ -102,11 +102,13 @@ export class Toast extends ToastAbstract implements OnDestroy {
             });
         // Avoid cyclic-dependency error at runtime.
         setTimeout(() => {
-            this.translate = this.injector.get(TranslateService);
+            if (!this.destroyed.value) {
+                this.translate = this.injector.get(TranslateService);
+            }
         });
     }
     ngOnDestroy() {
-        this.destroyed.next();
+        this.destroyed.next(true);
         this.destroyed.complete();
     }
     show(message: ToastMessage) {
