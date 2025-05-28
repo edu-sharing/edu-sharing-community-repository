@@ -195,7 +195,7 @@ export class MdsEditorWidgetContainerComponent
         }
         this.wrapInFormField = this.wrapInFormField ?? !!this.control;
         if (this.widget) {
-            if(this.widget.definition?.expandable) {
+            if (this.widget.definition?.expandable) {
                 this.expandedState$.next(this.widget.definition?.expandable);
             }
             this.widget.focusTrigger
