@@ -11,6 +11,7 @@ import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { Constraints, MdsWidgetValue, NativeWidgetComponent, Values } from '../../../types/types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { DialogsService } from '../../../../dialogs/dialogs.service';
+import { Toast } from '../../../../../services/toast';
 
 @Component({
     selector: 'es-mds-editor-widget-license',
@@ -36,6 +37,7 @@ export class MdsEditorWidgetLicenseComponent
     checked: string[] = [];
 
     constructor(
+        toast: Toast,
         private connector: RestConnectorService,
         private mainnav: MainNavService,
         private sanitizer: DomSanitizer,
@@ -44,7 +46,7 @@ export class MdsEditorWidgetLicenseComponent
         public mdsEditorValues: MdsEditorInstanceService,
         private dialogs: DialogsService,
     ) {
-        super(mdsEditorValues, translate);
+        super(toast, mdsEditorValues, translate);
         this.isSafe = this.connector.getCurrentLogin()?.currentScope === RestConstants.SAFE_SCOPE;
     }
 

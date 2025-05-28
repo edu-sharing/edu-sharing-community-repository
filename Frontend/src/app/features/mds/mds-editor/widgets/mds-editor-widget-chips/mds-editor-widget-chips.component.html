@@ -1,3 +1,6 @@
+<div *ngIf="(chipsSuggestionsSubject | async)?.length as count" class="suggestion-badge">
+  {{count}}
+</div>
 <es-mds-editor-widget-container
   #container
   [injectedView]="this"

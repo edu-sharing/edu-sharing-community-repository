@@ -32,7 +32,7 @@ export class Tree {
     ): Tree {
         const tree = new Tree();
         let remainingValues = definedValues;
-        while (remainingValues.length > 0) {
+        while (remainingValues?.length > 0) {
             const newRemainingValues = [];
             for (const value of remainingValues) {
                 if (value.id in tree.nodesMap) {

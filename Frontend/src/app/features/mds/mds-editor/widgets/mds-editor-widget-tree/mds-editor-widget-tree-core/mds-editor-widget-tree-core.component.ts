@@ -13,16 +13,16 @@ import {
     ViewChild,
 } from '@angular/core';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
-import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { distinctUntilChanged, map, takeUntil } from 'rxjs/operators';
 import { MdsEditorInstanceService, Widget } from '../../../mds-editor-instance.service';
-import { MdsWidgetType } from '../../../../types/types';
 import { DisplayValue } from '../../DisplayValues';
 import { Tree, TreeNode } from '../tree';
 import { Toast } from '../../../../../../services/toast';
 import { Helper } from '../../../../../../core-module/rest/helper';
 import { RestConstants } from '../../../../../../core-module/rest/rest-constants';
-import { MdsV1Service } from 'ngx-edu-sharing-api';
+import { MdsV1Service, SuggestionResponseDto } from 'ngx-edu-sharing-api';
+import { MdsEditorWidgetTreeComponent } from '../mds-editor-widget-tree.component';
 
 let nextUniqueId = 0;
 
@@ -38,6 +38,10 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     @Input() tree: Tree;
     @Input() values: DisplayValue[];
     @Input() indeterminateValues: string[];
+    @Input() component: MdsEditorWidgetTreeComponent;
+    @Input() set filter(filter: string) {
+        this.filterString$.next(filter);
+    }
     suggesting: boolean;
     get filterString() {
         return this.filterString$.value;
@@ -54,28 +58,34 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
      */
     @Input() parentImpliesChildren = false;
 
+    @Input() suggestions: Observable<SuggestionResponseDto[]>;
     @Output() closeTree = new EventEmitter<void>();
     @Output() valuesChange = new EventEmitter<DisplayValue[]>();
-    @Output() indeterminateValuesChange = new EventEmitter<string[]>();
 
+    @Output() indeterminateValuesChange = new EventEmitter<string[]>();
     treeControl = new NestedTreeControl<TreeNode>((node) => node.children);
     dataSource = new MatTreeNestedDataSource<TreeNode>();
     selectedNode: TreeNode;
-    isMultiValue: boolean;
 
+    @Input() isMultiValue: boolean;
     private filterString$ = new BehaviorSubject<string>(null);
     private destroyed$: ReplaySubject<void> = new ReplaySubject(1);
+    isTree: boolean;
+    treeOpen: boolean;
     constructor(
         private toast: Toast,
         public changeDetectorRef: ChangeDetectorRef,
         private mdsEditorInstanceService: MdsEditorInstanceService,
         private mdsService: MdsV1Service,
     ) {}
+
     ngOnInit(): void {
-        this.isMultiValue = this.widget.definition.type === MdsWidgetType.MultiValueTree;
         this.clearFilter();
         // deep copy for modifications
-        this.dataSource.data = this.tree.rootNodes;
+        this.filterDataSource();
+        this.isTree =
+            this.widget.definition.type === 'multivalueTree' ||
+            this.widget.definition.type === 'singleValueTree';
         if (
             this.widget.definition.allowValuespaceSuggestions &&
             this.mdsEditorInstanceService.editorMode === 'nodes'
@@ -90,7 +100,16 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
                 distinctUntilChanged(),
                 takeUntil(this.destroyed$),
             )
-            .subscribe((filterString) => {
+            .subscribe(async (filterString) => {
+                if (this.widget.definition.type === 'multivalueSuggestBadges') {
+                    // fetch suggestions from api / async
+                    const suggestedValues = await this.widget.getSuggestedValues(filterString);
+                    suggestedValues.map((suggestedValue) =>
+                        this.component.toDisplayValue(suggestedValue),
+                    );
+                    this.tree = Tree.generateTree(suggestedValues, [], []);
+                    this.filterDataSource();
+                }
                 this.filterNodes(filterString);
             });
         this.treeControl.expansionModel.changed.subscribe((change) => {
@@ -160,7 +179,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
         return !!node.children && node.children.length > 0;
     }
 
-    toggleNode(node: TreeNode, checked?: boolean, byUser = true): void {
+    toggleNode(node: TreeNode, checked?: boolean, byUser = true, closeDialog = false): void {
         checked = checked ?? !node.isChecked;
         if (checked && !this.isMultiValue) {
             this.clearAll();
@@ -185,7 +204,10 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
         if (byUser) {
             document
                 .getElementById(this.getCheckboxId(node) + '-state')
-                .setAttribute('role', 'alert');
+                ?.setAttribute('role', 'alert');
+        }
+        if (closeDialog) {
+            this.closeTree.emit();
         }
         this.changeDetectorRef.detectChanges();
     }
@@ -224,6 +246,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     private add(node: TreeNode): void {
         if (!this.values.find((value) => node.id === value.key)) {
             this.values.push(this.tree.nodeToDisplayValue(node));
+            this.filterDataSource();
         }
     }
 
@@ -232,6 +255,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
         const index = this.values.findIndex((value) => node.id === value.key);
         if (index >= 0) {
             this.values.splice(index, 1);
+            this.filterDataSource();
         }
     }
 
@@ -309,7 +333,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     private scrollIntoView(node: TreeNode, options: ScrollIntoViewOptions = {}): void {
         document
             .getElementById(this.getCheckboxId(node))
-            .scrollIntoView({ behavior: 'smooth', block: 'center', ...options });
+            ?.scrollIntoView({ behavior: 'smooth', block: 'center', ...options });
     }
 
     private findNextVisibleNode(node?: TreeNode): TreeNode | null {
@@ -419,5 +443,27 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
             // Do nothing
         }
         this.suggesting = false;
+    }
+    // in case of non tree view, hide already present elements
+    private filterDataSource() {
+        if (this.isTree) {
+            return;
+        }
+        this.dataSource.data = this.tree.rootNodes.filter(
+            (n) => !this.values?.find((v) => v.key === n.id),
+        );
+    }
+    addSuggestion(toBeAdded: SuggestionResponseDto): void {
+        this.component.updateSuggestionState(toBeAdded, 'ACCEPTED');
+        const id = this.tree.findById(toBeAdded.value as string);
+        if (id) {
+            this.toggleNode(id, true, true, false);
+        } else {
+            console.warn('invalid suggestion value', id, this.tree);
+            this.toast.error(null, 'MDS.SUGGESTIONS.TOAST.INVALID_VALUE');
+        }
+    }
+    removeSuggestion(toBeRemoved: SuggestionResponseDto): void {
+        this.component.updateSuggestionState(toBeRemoved, 'DECLINED');
     }
 }

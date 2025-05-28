@@ -30,14 +30,6 @@ export class MdsEditorWidgetVCardComponent extends MdsEditorWidgetBase implement
     formControl: UntypedFormGroup;
     editType: number;
 
-    constructor(
-        mdsEditorInstance: MdsEditorInstanceService,
-        translate: TranslateService,
-        private toast: Toast,
-    ) {
-        super(mdsEditorInstance, translate);
-    }
-
     ngOnInit(): void {
         let initialValue = this.widget.getInitialValues().jointValues;
         if (!initialValue) {

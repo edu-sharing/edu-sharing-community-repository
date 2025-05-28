@@ -17,10 +17,7 @@ import { MdsEditorWidgetVCardComponent } from '../mds-editor/widgets/mds-editor-
 import { MdsEditorWidgetCheckboxComponent } from '../mds-editor/widgets/mds-editor-widget-checkbox/mds-editor-widget-checkbox.component';
 import { MdsEditorWidgetRadioButtonComponent } from '../mds-editor/widgets/mds-editor-widget-radio-button/mds-editor-widget-radio-button.component';
 import { MdsEditorWidgetCheckboxesComponent } from '../mds-editor/widgets/mds-editor-widget-checkboxes/mds-editor-widget-checkboxes.component';
-import {
-    MdsEditorWidgetChipsComponent,
-    MdsEditorWidgetChipsRangedValueComponent,
-} from '../mds-editor/widgets/mds-editor-widget-chips/mds-editor-widget-chips.component';
+import { MdsEditorWidgetChipsComponent } from '../mds-editor/widgets/mds-editor-widget-chips/mds-editor-widget-chips.component';
 import { MdsEditorWidgetAuthorityComponent } from '../mds-editor/widgets/mds-editor-widget-authority/mds-editor-widget-authority.component';
 import { MdsEditorWidgetSelectComponent } from '../mds-editor/widgets/mds-editor-widget-select/mds-editor-widget-select.component';
 import {
@@ -89,8 +86,8 @@ export const WidgetComponents: {
     [MdsWidgetType.CheckboxVertical]: MdsEditorWidgetCheckboxesComponent,
     [MdsWidgetType.MultiValueBadges]: MdsEditorWidgetChipsComponent,
     [MdsWidgetType.SingleValueSuggestBadges]: MdsEditorWidgetChipsComponent,
-    [MdsWidgetType.MultiValueSuggestBadges]: MdsEditorWidgetChipsComponent,
-    [MdsWidgetType.MultiValueFixedBadges]: MdsEditorWidgetChipsRangedValueComponent,
+    [MdsWidgetType.MultiValueSuggestBadges]: MdsEditorWidgetTreeComponent,
+    [MdsWidgetType.MultiValueFixedBadges]: MdsEditorWidgetTreeComponent,
     [MdsWidgetType.MultiValueAuthorityBadges]: MdsEditorWidgetAuthorityComponent,
     [MdsWidgetType.Singleoption]: MdsEditorWidgetSelectComponent,
     [MdsWidgetType.Slider]: MdsEditorWidgetSliderComponent,

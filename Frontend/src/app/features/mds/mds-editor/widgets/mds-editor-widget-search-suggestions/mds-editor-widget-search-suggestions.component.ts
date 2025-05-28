@@ -20,8 +20,6 @@ export class MdsEditorWidgetSearchSuggestionsComponent
 {
     readonly valueType: ValueType = ValueType.MultiValue;
 
-    @Input() widget: Widget;
-
     /** Suggestions for this widget, excluding current values. */
     filteredSuggestions$: Observable<FacetValue[]>;
     /** Suggestions for this widget. */

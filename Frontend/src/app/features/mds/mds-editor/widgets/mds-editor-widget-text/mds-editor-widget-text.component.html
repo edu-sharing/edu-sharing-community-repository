@@ -84,9 +84,9 @@
 </es-mds-editor-widget-container>
 
 <ng-template #suggestions let-container="container">
-  <div class="suggestions" *ngIf="(getSuggestions() | async)?.length && !container.isHidden">
+  <div class="suggestions" *ngIf="(widget.getSuggestions() | async)?.length && !container.isHidden">
     <h5 class="mat-heading-5">{{ 'MDS.SUGGESTIONS.LIST_TITLE' | translate }}</h5>
-    <div class="suggestion" *ngFor="let suggestion of getSuggestions() | async">
+    <div class="suggestion" *ngFor="let suggestion of widget.getSuggestions() | async">
       <div class="info">
         <es-user-avatar [user]="suggestion.createdBy" size="xxsmall"></es-user-avatar>
         {{ suggestion.createdBy | authorityName }}

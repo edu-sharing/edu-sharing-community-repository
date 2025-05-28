@@ -811,8 +811,15 @@
       "LIST_TITLE": "Vorschläge für dieses Feld",
       "TYPE_AI": "KI",
       "TYPE_USER": "Person",
+      "TOP_LABEL": "Vorschläge",
+      "TOOLTIP": "Vorschlag von {{author}} am {{date}}",
+      "SHOW_ALL_VALUES": "Alle Werte anzeigen",
       "APPLY": "Annehmen",
-      "DECLINE": "Ablehnen"
+      "DECLINE": "Ablehnen",
+      "TOAST": {
+        "DECLINED": "Der Vorschlag wurde abgelehnt",
+        "INVALID_VALUE": "Der Vorschlagswert war ungültig und konnte nicht verwendet werden"
+      }
     }
   },
   "FEEDBACK": {

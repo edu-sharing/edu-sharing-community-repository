@@ -1,3 +1,6 @@
+<div *ngIf="(chipsSuggestionsSubject | async)?.length as count" class="suggestion-badge">
+  {{ count }}
+</div>
 <div
   cdkOverlayOrigin
   #trigger="cdkOverlayOrigin"
@@ -41,45 +44,25 @@
         matTooltipPosition="above"
         [class.indeterminate]="(this.indeterminateValues$ | async)?.includes(value.key)"
         [class.mat-chip-selected]="false"
+        [class.chip-is-suggestion]="isSuggestion(value) | async"
+        [class.chip-is-suggestion-ai]="(isSuggestion(value) | async) === 'AI'"
         (click)="revealInTree(value)"
         (keydown.enter)="revealInTree(value)"
         (removed)="remove(value)"
       >
+        <i matChipAvatar esIcon="settings" *ngIf="(isSuggestion(value) | async) === 'AI'"></i>
         <span class="mat-chip-label">{{ value.label }}</span>
         <mat-icon matChipRemove>cancel</mat-icon>
       </mat-chip-row>
-      <ng-container *ngIf="(getSuggestions() | async)?.length">
-        <mat-chip-set class="mat-chip-suggestions">
-          <mat-chip
-            class="mat-chip-suggestion"
-            *ngFor="let suggestion of chipsSuggestionsSubject | async"
-            (click)="revealInTree(toDisplayValue($any(suggestion.value)))"
-            [value]="suggestion"
-            [removable]="true"
-            (removed)="removeSuggestion(suggestion)"
-            [class.mat-chip-selected]="false"
-            [matTooltip]="getSuggestionTooltip(suggestion)"
-          >
-            <span class="mat-chip-label">{{ toDisplayValue($any(suggestion.value)).label }}</span>
-            <button
-              mat-icon-button
-              matChipTrailingIcon
-              class="accept"
-              (click)="addSuggestion(suggestion)"
-            >
-              <mat-icon matChipTrailingIcon>check_circle</mat-icon>
-            </button>
-            <mat-icon matChipRemove class="decline">cancel</mat-icon>
-          </mat-chip>
-        </mat-chip-set>
-      </ng-container>
       <div class="input-wrapper">
         <input
           autocomplete="off"
-          readonly
+          [readonly]="isTree"
+          [formControl]="inputControl"
           #inputElement
           [placeholder]="chipsControl?.value?.length ? null : widget.definition.placeholder"
           [matChipInputFor]="chipList"
+          (keyup.enter)="addSelectedTreeNode()"
           (focus)="openOverlay($event)"
           (blur)="onBlurInput($event)"
         />
@@ -89,6 +72,7 @@
           class="mat-button-select-arrow"
           cdkMonitorElementFocus
           #openButton
+          *ngIf="showDropdownArrow"
           (click)="openOverlay()"
           [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
           [disabled]="chipsControl.disabled"
@@ -126,9 +110,13 @@
       [cdkTrapFocusAutoCapture]="false"
       #treeRef
       [widget]="widget"
+      [component]="this"
+      [filter]="isTree ? null : inputControl.value"
       [tree]="tree"
+      [isMultiValue]="valueType === ValueType.MultiValue"
       [values]="chipsControl?.value"
       [indeterminateValues]="indeterminateValues$ | async"
+      [suggestions]="chipsSuggestionsSubject"
       [parentImpliesChildren]="editorMode === 'search'"
       (closeTree)="closeOverlay()"
       (valuesChange)="onValuesChange($event)"

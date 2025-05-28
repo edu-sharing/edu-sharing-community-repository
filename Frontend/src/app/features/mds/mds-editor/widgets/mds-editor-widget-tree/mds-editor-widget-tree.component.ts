@@ -10,12 +10,12 @@ import {
     ViewChild,
     ViewChildren,
 } from '@angular/core';
-import { UntypedFormControl } from '@angular/forms';
+import { FormControl, UntypedFormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
-import { startWith } from 'rxjs/operators';
+import { debounceTime, filter, map, startWith, takeUntil } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
-import { MdsWidget, MdsWidgetType } from '../../../types/types';
+import { MdsWidget, MdsWidgetType, MdsWidgetValue } from '../../../types/types';
 import { DisplayValue } from '../DisplayValues';
 import {
     MdsEditorWidgetBase,
@@ -24,12 +24,12 @@ import {
 } from '../mds-editor-widget-base';
 import { MdsEditorWidgetTreeCoreComponent } from './mds-editor-widget-tree-core/mds-editor-widget-tree-core.component';
 import { Tree } from './tree';
-import { MatChip, MatChipOption, MatChipRow } from '@angular/material/chips';
+import { MatChipOption, MatChipRow } from '@angular/material/chips';
 import { UIService } from '../../../../../core-module/rest/services/ui.service';
 import { MatButton } from '@angular/material/button';
 import { UIHelper } from '../../../../../core-ui-module/ui-helper';
-import { MdsService } from 'ngx-edu-sharing-api';
 import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
+import { Toast } from '../../../../../services/toast';
 
 @Component({
     selector: 'es-mds-editor-widget-tree',
@@ -40,7 +40,11 @@ export class MdsEditorWidgetTreeComponent
     extends MdsEditorWidgetChipsSuggestionBase
     implements OnInit, AfterViewInit, OnDestroy
 {
+    inputControl = new FormControl('');
     private hasFocus = true;
+    isTree: boolean;
+    showDropdownArrow: boolean;
+    private ignoreNextFocusEvent = false;
     add(value: DisplayValue): void {
         const treeNode = this.tree.findById(value.key);
         // old values are may not available in tree, so check for null
@@ -55,8 +59,14 @@ export class MdsEditorWidgetTreeComponent
             this.preventOverlayOpen = false;
         });
     }
-    toDisplayValue(value: string): DisplayValue {
-        return this.tree.toDisplayValue(value);
+    toDisplayValue(value: MdsWidgetValue | string): DisplayValue {
+        if (typeof value === 'string') {
+            return this.tree.toDisplayValue(value);
+        }
+        return {
+            key: value.id,
+            label: value.caption,
+        };
     }
     @ViewChild(CdkConnectedOverlay) overlay: CdkConnectedOverlay;
     @ViewChild('container') container: MdsEditorWidgetContainerComponent;
@@ -102,10 +112,11 @@ export class MdsEditorWidgetTreeComponent
     constructor(
         mdsEditorInstance: MdsEditorInstanceService,
         translate: TranslateService,
+        toast: Toast,
         private changeDetectorRef: ChangeDetectorRef,
         public uiService: UIService,
     ) {
-        super(mdsEditorInstance, translate);
+        super(toast, mdsEditorInstance, translate);
     }
 
     async ngOnInit() {
@@ -126,11 +137,32 @@ export class MdsEditorWidgetTreeComponent
         this.chipsControl = new UntypedFormControl(null, this.getStandardValidators());
         if (this.widget.definition.type === MdsWidgetType.SingleValueTree) {
             this.valueType = ValueType.String;
-        } else if (this.widget.definition.type === MdsWidgetType.MultiValueTree) {
+        } else if (
+            [
+                MdsWidgetType.MultiValueTree,
+                MdsWidgetType.MultiValueFixedBadges,
+                MdsWidgetType.MultiValueSuggestBadges,
+            ].includes(this.widget.definition.type as MdsWidgetType)
+        ) {
             this.valueType = ValueType.MultiValue;
         } else {
             throw new Error('Unexpected widget type: ' + this.widget.definition.type);
         }
+        this.isTree = [MdsWidgetType.MultiValueTree, MdsWidgetType.SingleValueTree].includes(
+            this.widget.definition.type as MdsWidgetType,
+        );
+        this.showDropdownArrow =
+            this.isTree ||
+            (this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges &&
+                !!this.widget.definition.values);
+
+        this.inputControl.valueChanges
+            .pipe(
+                takeUntil(this.destroyed$),
+                debounceTime(100),
+                filter((v) => v?.length >= 2 && !this.overlayIsVisible),
+            )
+            .subscribe(() => this.openOverlay());
         this.tree = Tree.generateTree(
             this.widget.definition.values,
             (await this.widget.getInitalValuesAsync()).jointValues ?? [],
@@ -183,6 +215,10 @@ export class MdsEditorWidgetTreeComponent
         this.openOverlay();
     }
     openOverlay(event?: FocusEvent): void {
+        if (this.ignoreNextFocusEvent) {
+            this.ignoreNextFocusEvent = false;
+            return;
+        }
         if (this.chipsControl.disabled) {
             return;
         }
@@ -194,13 +230,15 @@ export class MdsEditorWidgetTreeComponent
                 return;
             }
         }
-        if (this.overlayIsVisible) {
-            this.treeRef.input.nativeElement.focus();
+        if (this.isTree && this.overlayIsVisible) {
+            this.treeRef?.input?.nativeElement.focus();
             return;
         }
         this.overlayIsVisible = true;
         this.changeDetectorRef.detectChanges();
-        setTimeout(() => this.treeRef.input.nativeElement.focus());
+        if (this.isTree) {
+            setTimeout(() => this.treeRef?.input?.nativeElement.focus());
+        }
     }
 
     closeOverlay(event?: FocusEvent): void {
@@ -214,7 +252,14 @@ export class MdsEditorWidgetTreeComponent
             return;
         }
         this.overlayIsVisible = false;
-        this.openButtonRef.focus();
+        if (!this.isTree) {
+            //this.inputControl.setValue('');
+            this.ignoreNextFocusEvent = true;
+            this.inputControl.setValue('');
+            this.inputElement.nativeElement.focus();
+        } else {
+            this.openButtonRef.focus();
+        }
         this.onBlur.emit();
     }
 
@@ -258,7 +303,7 @@ export class MdsEditorWidgetTreeComponent
     }
 
     onBlurInput(event: FocusEvent) {
-        if (event.relatedTarget === this.treeRef.input.nativeElement) {
+        if (event.relatedTarget === this.treeRef?.input?.nativeElement) {
             return;
         }
         if (
@@ -274,5 +319,25 @@ export class MdsEditorWidgetTreeComponent
     public static mapGraphqlId(definition: MdsWidget) {
         // attach the "RangedValue" graphql Attributes
         return MdsEditorWidgetBase.attachGraphqlSelection(definition, ['id', 'value']);
+    }
+
+    protected readonly ValueType = ValueType;
+
+    addSelectedTreeNode() {
+        if (this.treeRef?.selectedNode) {
+            this.treeRef.toggleNode(this.treeRef.selectedNode, true, true, true);
+            this.inputElement.nativeElement.focus();
+        }
+    }
+
+    isSuggestion(value: DisplayValue) {
+        return this.widget.getSuggestions().pipe(
+            map((suggestions) => {
+                const s = suggestions?.find(
+                    (s) => s.value === value.key && s.status === 'ACCEPTED',
+                );
+                return s?.type;
+            }),
+        );
     }
 }

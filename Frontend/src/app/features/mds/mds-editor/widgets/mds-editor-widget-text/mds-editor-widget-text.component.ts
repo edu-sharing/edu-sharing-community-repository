@@ -27,14 +27,6 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
     fileNameChecker: FileNameChecker;
     suggestions: SuggestionResponseDto[];
 
-    constructor(
-        mdsEditorInstance: MdsEditorInstanceService,
-        translate: TranslateService,
-        private toast: Toast,
-    ) {
-        super(mdsEditorInstance, translate);
-    }
-
     async ngOnInit() {
         this.formControl = new UntypedFormControl(null, this.getValidators());
         let initialValue = (await this.widget.getInitalValuesAsync()).jointValues;
@@ -58,12 +50,6 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
             );
         }
         this.registerValueChanges(this.formControl);
-    }
-
-    getSuggestions() {
-        return this.widget
-            .getSuggestions()
-            .pipe(map((suggestions) => suggestions?.filter((s) => s.status === 'PENDING')));
     }
 
     focus(): void {

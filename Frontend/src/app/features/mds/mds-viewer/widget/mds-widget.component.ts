@@ -23,6 +23,7 @@ import { filter, first, map } from 'rxjs/operators';
 import { MdsValue } from 'ngx-edu-sharing-api';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { MdsEditInterface } from '../../mds-editor/mds-editor-single-widget/mds-editor-single-widget.component';
+import { Toast } from '../../../../services/toast';
 
 @Component({
     selector: 'es-mds-widget',
@@ -48,7 +49,6 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
 
     readonly valueType = ValueType.String;
 
-    @Input() widget: Widget;
     @Input() showCaption = true;
     /**
      * allow inline editing
@@ -72,9 +72,10 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
         public mdsEditorInstance: MdsEditorInstanceService,
         translate: TranslateService,
         private ui: UIService,
+        toast: Toast,
         private viewInstance: ViewInstanceService,
     ) {
-        super(mdsEditorInstance, translate);
+        super(toast, mdsEditorInstance, translate);
     }
 
     ngOnChanges(changes: SimpleChanges): void {

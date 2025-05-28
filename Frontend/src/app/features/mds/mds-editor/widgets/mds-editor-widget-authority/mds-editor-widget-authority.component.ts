@@ -29,6 +29,7 @@ import { waitForAsync } from '@angular/core/testing';
 import { RestConnectorService } from '../../../../../core-module/rest/services/rest-connector.service';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { AuthoritySearchInputComponent } from '../../../../../shared/components/authority-search-input/authority-search-input.component';
+import { Toast } from '../../../../../services/toast';
 
 @Component({
     selector: 'es-mds-editor-widget-authority',
@@ -63,12 +64,13 @@ export class MdsEditorWidgetAuthorityComponent extends MdsEditorWidgetBase imple
     globalSearchAllowed: boolean;
 
     constructor(
+        toast: Toast,
         mdsEditorInstance: MdsEditorInstanceService,
         translate: TranslateService,
         private conntector: RestConnectorService,
         private changeDetectorRef: ChangeDetectorRef,
     ) {
-        super(mdsEditorInstance, translate);
+        super(toast, mdsEditorInstance, translate);
     }
 
     ngOnInit(): void {

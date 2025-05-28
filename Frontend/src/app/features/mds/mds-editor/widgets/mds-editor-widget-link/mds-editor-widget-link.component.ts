@@ -8,6 +8,7 @@ import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import { MdsEditorWidgetAuthorComponent } from '../mds-editor-widget-author/mds-editor-widget-author.component';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import { Toast } from '../../../../../services/toast';
 
 @Component({
     selector: 'es-mds-editor-widget-link',
@@ -32,12 +33,13 @@ export class MdsEditorWidgetLinkComponent
     linkLabel: string;
 
     constructor(
+        public toast: Toast,
         public translate: TranslateService,
         public mdsEditorValues: MdsEditorInstanceService,
         private dialogs: DialogsService,
         private localEvents: LocalEventsService,
     ) {
-        super(mdsEditorValues, translate);
+        super(toast, mdsEditorValues, translate);
     }
     ngOnInit(): void {
         switch (this.widgetName) {

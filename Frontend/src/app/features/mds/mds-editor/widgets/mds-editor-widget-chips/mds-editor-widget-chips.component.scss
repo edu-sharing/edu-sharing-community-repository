@@ -3,6 +3,26 @@
 mat-form-field {
     width: 100%;
 }
+.suggestion-badge {
+    position: absolute;
+    top: 5px;
+    right: 36px;
+    border-radius: 50%;
+    background-color: var(--aiColor);
+    color: var(--aiColorText);
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+.suggestions {
+    color: var(--textLight);
+    .suggestion {
+        background-color: red!important;
+    }
+}
 /**
        prevent to long text from overflow the widget
 */
