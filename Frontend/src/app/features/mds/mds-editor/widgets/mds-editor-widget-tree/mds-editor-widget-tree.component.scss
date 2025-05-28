@@ -7,10 +7,13 @@ mat-form-field {
 .mat-chip-label {
     @include limitLineLength(200px);
 }
+:host {
+    position: relative;
+}
 .suggestion-badge {
     position: absolute;
-    top: 5px;
-    right: 52px;
+    top: -9px;
+    right: 40px;
     border-radius: 50%;
     background-color: var(--aiColor);
     color: var(--aiColorText);
