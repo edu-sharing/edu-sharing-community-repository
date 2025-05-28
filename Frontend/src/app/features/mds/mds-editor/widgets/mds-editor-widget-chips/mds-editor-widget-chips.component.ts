@@ -48,6 +48,7 @@ import { SuggestionResponseDto, SuggestionStatus } from 'ngx-edu-sharing-api';
 import { AuthorityNamePipe } from '../../../../../shared/pipes/authority-name.pipe';
 
 @Component({
+    selector: 'es-mds-editor-widget-chips',
     templateUrl: './mds-editor-widget-chips.component.html',
     styleUrls: ['./mds-editor-widget-chips.component.scss'],
 })
@@ -81,14 +82,6 @@ export class MdsEditorWidgetChipsComponent
             previousTooltip = tooltip;
         };
     })();
-
-    constructor(
-        mdsEditorInstance: MdsEditorInstanceService,
-        translate: TranslateService,
-        private toast: Toast,
-    ) {
-        super(mdsEditorInstance, translate);
-    }
 
     async ngOnInit() {
         if (this.mdsEditorInstance.editorMode === 'inline') {

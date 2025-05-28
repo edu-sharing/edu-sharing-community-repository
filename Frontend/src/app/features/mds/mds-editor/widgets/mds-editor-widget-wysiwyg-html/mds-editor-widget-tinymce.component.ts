@@ -7,6 +7,7 @@ import { EditorComponent, TINYMCE_SCRIPT_SRC } from '@tinymce/tinymce-angular';
 import { PlatformLocation } from '@angular/common';
 import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
 import { CardDialogService } from '../../../../dialogs/card-dialog/card-dialog.service';
+import { Toast } from '../../../../../services/toast';
 
 @Component({
     selector: 'es-mds-editor-widget-checkbox',
@@ -50,12 +51,13 @@ export class MdsEditorWidgetTinyMCEComponent extends MdsEditorWidgetBase impleme
         this.setValue([html]);
     }
     constructor(
+        toast: Toast,
         private platformLocation: PlatformLocation,
         public mdsEditorInstance: MdsEditorInstanceService,
         public cardService: CardDialogService,
         protected translate: TranslateService,
     ) {
-        super(mdsEditorInstance, translate);
+        super(toast, mdsEditorInstance, translate);
     }
 
     onIndeterminateChange(isIndeterminate: boolean): void {

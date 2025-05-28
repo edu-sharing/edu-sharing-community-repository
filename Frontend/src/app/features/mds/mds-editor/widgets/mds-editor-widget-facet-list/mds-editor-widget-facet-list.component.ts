@@ -17,6 +17,7 @@ import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
 import { Helper } from '../../../../../core-module/rest/helper';
+import { Toast } from '../../../../../services/toast';
 
 @Component({
     selector: 'es-mds-editor-widget-facet-list',
@@ -56,13 +57,14 @@ export class MdsEditorWidgetFacetListComponent
     };
 
     constructor(
+        toast: Toast,
         mdsEditorInstance: MdsEditorInstanceService,
         translate: TranslateService,
         private search: SearchService,
         private ref: ChangeDetectorRef,
         private changeDetectorRef: ChangeDetectorRef,
     ) {
-        super(mdsEditorInstance, translate);
+        super(toast, mdsEditorInstance, translate);
 
         this.filter.valueChanges
             .pipe(debounceTime(200))

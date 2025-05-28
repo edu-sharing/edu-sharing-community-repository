@@ -1,5 +1,4 @@
 import {
-    ApplicationRef,
     ComponentFactoryResolver,
     ElementRef,
     EventEmitter,
@@ -15,6 +14,7 @@ import {
     AboutService,
     AuthenticationService,
     ConfigService,
+    DEFAULT,
     FacetsDict,
     FeaturesHelperService,
     HOME_REPOSITORY,
@@ -25,7 +25,6 @@ import {
     NodeSuggestionResponseDto,
     SuggestionResponseDto,
     SuggestionsV1Service,
-    DEFAULT,
 } from 'ngx-edu-sharing-api';
 import {
     BehaviorSubject,
@@ -163,7 +162,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         private showMissingRequiredFunction: (shouldScrollIntoView: boolean) => boolean;
         private readonly ready = new Subject<void>();
         readonly initialValuesSubject = new BehaviorSubject<InitialValues>(null);
-        private readonly suggestionValuesSubject = new BehaviorSubject<SuggestionResponseDto[]>(
+        protected readonly suggestionValuesSubject = new BehaviorSubject<SuggestionResponseDto[]>(
             null,
         );
 
@@ -234,7 +233,6 @@ export class MdsEditorInstanceService implements OnDestroy {
                     }
                 }),
                 map((result) => {
-                    console.log(condition, this.definition.id, result);
                     return result !== condition.negate;
                 }),
             );
@@ -316,7 +314,6 @@ export class MdsEditorInstanceService implements OnDestroy {
                     this.definition.id
                 ],
             );
-            console.log(this.suggestionValuesSubject.value, this.definition.id);
         }
         initWithValues(values?: Values): void {
             if (this.relation === 'suggestions') {
@@ -392,7 +389,6 @@ export class MdsEditorInstanceService implements OnDestroy {
 
         markSuggestionChanged() {
             this.suggestionsChanged = true;
-            this.mdsEditorInstanceService.updateHasChanges();
         }
 
         async getSuggestedValues(searchString?: string): Promise<MdsWidgetValue[]> {
@@ -1263,6 +1259,9 @@ export class MdsEditorInstanceService implements OnDestroy {
             (widget) => widget.definition.id === propertyName && widget.relation === null,
         );
     }
+    getAllWidgetsByName(propertyName: string): Widget[] {
+        return this.widgets.value?.filter((widget) => widget.definition.id === propertyName);
+    }
 
     getHasUserChanges(): boolean {
         return this.hasUserChanges$.value;
@@ -1595,7 +1594,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         return nodes?.length > 1;
     }
 
-    private updateHasChanges(): void {
+    updateHasChanges(): void {
         if (this.widgets.value === null) {
             return;
         }
@@ -2038,7 +2037,7 @@ export class MdsEditorInstanceService implements OnDestroy {
      * this method does currently NOT work in bulk!
      */
     updateSuggestionState(widgetId: string, modified: SuggestionResponseDto) {
-        if (this.editorBulkMode.isBulk) {
+        if (this.editorBulkMode?.isBulk) {
             throw new Error('Not supported in bulk');
         }
         const nodeId = this.nodes$.value[0].ref.id;
@@ -2050,6 +2049,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                 suggestions: {},
             });
         }
+        console.log(suggestionData);
         let suggestionWidget = this.suggestions.filter((s) => s.nodeId === nodeId)?.[0].suggestions[
             widgetId
         ];
@@ -2064,6 +2064,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             const suggestionCopy = Helper.deepCopy(modified);
             suggestionWidget.push(suggestionCopy);
         }
+        return suggestionWidget;
     }
 
     /**

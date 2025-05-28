@@ -1,78 +1,127 @@
 <div class="tree">
-  <div class="tree-header">
-    <mat-form-field floatLabel="always">
-      <mat-label>{{ 'MDS.FILTER_TREE' | translate }}</mat-label>
-      <mat-icon matPrefix>search</mat-icon>
-      <input
-        matInput
-        #input
-        autocomplete="off"
-        [(ngModel)]="filterString"
-        attr.aria-owns="{{ uid }}-mat-tree"
-        [attr.aria-activedescendant]="selectedNode?.uid"
-        aria-haspopup="tree"
-      />
-    </mat-form-field>
-    <button mat-button (click)="closeTree.emit()" [attr.aria-label]="'CLOSE' | translate">
-      <i esIcon="close"></i>
+  <div class="suggestions" *ngIf="(suggestions | async)?.length">
+    <label>{{ 'MDS.SUGGESTIONS.TOP_LABEL' | translate }}</label>
+    <div *ngIf="suggestions | async as s" #chipList>
+      <!-- @TODO removed in angular 15
+          [multiple]="true"
+    -->
+      <!-- We mark all chips as selected because NVDA will announce "not selected" for each item
+      otherwise. It announces nothing (!) for selected items. Same as MdsEditorWidgetChips. -->
+      <mat-chip
+        #chip
+        *ngFor="let value of s"
+        [value]="value"
+        [removable]="true"
+        [class.mat-chip-selected]="false"
+        tabindex="0"
+        class="suggestion-chip"
+        [class.suggestion-ai-chip]="value.type === 'AI'"
+        matTooltip="{{
+          'MDS.SUGGESTIONS.TOOLTIP'
+            | translate
+              : {
+                  author: value.createdBy | authorityName,
+                  date: value.created | formatDate : { relative: false }
+                }
+        }}"
+        matTooltipPosition="above"
+        (click)="addSuggestion(value)"
+        (removed)="removeSuggestion(value)"
+      >
+        <i matChipAvatar [esIcon]="'settings'" *ngIf="value.type === 'AI'" [aria]="false"></i>
+        <span class="mat-chip-label">{{
+          tree.findById($any(value.value))?.caption || value.value
+        }}</span>
+        <mat-icon matChipRemove>cancel</mat-icon>
+      </mat-chip>
+    </div>
+    <button
+      *ngIf="isTree"
+      mat-flat-button
+      color="primary"
+      (click)="treeOpen = !treeOpen"
+      class="toggle-all"
+    >
+      {{ 'MDS.SUGGESTIONS.SHOW_ALL_VALUES' | translate
+      }}<i [esIcon]="'keyboard_arrow_' + (treeOpen ? 'up' : 'down')"></i>
     </button>
   </div>
-  <mat-tree id="{{ uid }}-mat-tree" [dataSource]="dataSource" [treeControl]="treeControl">
-    <!-- Leaf nodes -->
-    <mat-tree-node
-      *matTreeNodeDef="let node"
-      matTreeNodeToggle
-      [hidden]="node.isHidden"
-      [id]="node.uid"
-      [attr.aria-selected]="selectedNode === node"
-      [attr.aria-expanded]="null"
-    >
-      <div class="item" [class.selected]="selectedNode === node">
-        <!-- use a disabled button to provide padding for tree leaf -->
-        <button mat-icon-button disabled aria-hidden="true"></button>
-        <ng-container
-          [ngTemplateOutlet]="isMultiValue ? checkBox : radioButton"
-          [ngTemplateOutletContext]="{ node: node }"
-        ></ng-container>
-      </div>
-    </mat-tree-node>
-    <!-- Nodes with children -->
-    <mat-nested-tree-node
-      *matTreeNodeDef="let node; when: hasChild"
-      [hidden]="node.isHidden"
-      [id]="node.uid"
-      [attr.aria-expanded]="treeControl.isExpanded(node)"
-      [attr.aria-selected]="selectedNode === node"
-      attr.aria-label="{{ node.caption }}
+  <ng-container *ngIf="!isTree || !(suggestions | async)?.length || treeOpen">
+    <div class="tree-header" *ngIf="isTree">
+      <mat-form-field floatLabel="always">
+        <mat-label>{{ 'MDS.FILTER_TREE' | translate }}</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input
+          matInput
+          #input
+          autocomplete="off"
+          [(ngModel)]="filterString"
+          attr.aria-owns="{{ uid }}-mat-tree"
+          [attr.aria-activedescendant]="selectedNode?.uid"
+          aria-haspopup="tree"
+        />
+      </mat-form-field>
+      <button mat-button (click)="closeTree.emit()" [attr.aria-label]="'CLOSE' | translate">
+        <i esIcon="close"></i>
+      </button>
+    </div>
+    <mat-tree id="{{ uid }}-mat-tree" [dataSource]="dataSource" [treeControl]="treeControl">
+      <!-- Leaf nodes -->
+      <mat-tree-node
+        [class.tree-node]="isTree"
+        *matTreeNodeDef="let node"
+        matTreeNodeToggle
+        [hidden]="node.isHidden"
+        [id]="node.uid"
+        [attr.aria-selected]="selectedNode === node"
+        [attr.aria-expanded]="null"
+      >
+        <div class="item" [class.selected]="selectedNode === node" [class.item-tree]="isTree">
+          <!-- use a disabled button to provide padding for tree leaf -->
+          <button mat-icon-button disabled aria-hidden="true" *ngIf="isTree"></button>
+          <ng-container
+            [ngTemplateOutlet]="isTree ? (isMultiValue ? checkBox : radioButton) : button"
+            [ngTemplateOutletContext]="{ node: node }"
+          ></ng-container>
+        </div>
+      </mat-tree-node>
+      <!-- Nodes with children -->
+      <mat-nested-tree-node
+        *matTreeNodeDef="let node; when: hasChild"
+        [hidden]="node.isHidden"
+        [id]="node.uid"
+        [attr.aria-expanded]="treeControl.isExpanded(node)"
+        [attr.aria-selected]="selectedNode === node"
+        attr.aria-label="{{ node.caption }}
           {{ (getIsChecked(node) ? 'CHECKBOX_CHECKED' : 'CHECKBOX_NOT_CHECKED') | translate }}
           {{ getIsDisabled(node) ? ('DISABLED' | translate) : '' }}
         "
-    >
-      <div class="item" [class.selected]="selectedNode === node">
-        <button
-          mat-icon-button
-          matTreeNodeToggle
-          (click)="changeDetectorRef.detectChanges()"
-          [attr.aria-label]="
-            (treeControl.isExpanded(node) ? 'COLLAPSE' : 'EXPAND')
-              | translate : { element: node.caption }
-          "
-        >
-          <mat-icon class="mat-icon-rtl-mirror">
-            {{ treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
-          </mat-icon>
-        </button>
-        <ng-container
-          [ngTemplateOutlet]="isMultiValue ? checkBox : radioButton"
-          [ngTemplateOutletContext]="{ node: node }"
-        ></ng-container>
-      </div>
-      <div class="children-group" role="group">
-        <ng-container *ngIf="treeControl.isExpanded(node)" matTreeNodeOutlet></ng-container>
-      </div>
-    </mat-nested-tree-node>
-  </mat-tree>
-
+      >
+        <div class="item" [class.selected]="selectedNode === node">
+          <button
+            mat-icon-button
+            matTreeNodeToggle
+            (click)="changeDetectorRef.detectChanges()"
+            [attr.aria-label]="
+              (treeControl.isExpanded(node) ? 'COLLAPSE' : 'EXPAND')
+                | translate : { element: node.caption }
+            "
+          >
+            <mat-icon class="mat-icon-rtl-mirror">
+              {{ treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
+            </mat-icon>
+          </button>
+          <ng-container
+            [ngTemplateOutlet]="isMultiValue ? checkBox : radioButton"
+            [ngTemplateOutletContext]="{ node: node }"
+          ></ng-container>
+        </div>
+        <div class="children-group" role="group">
+          <ng-container *ngIf="treeControl.isExpanded(node)" matTreeNodeOutlet></ng-container>
+        </div>
+      </mat-nested-tree-node>
+    </mat-tree>
+  </ng-container>
   <ng-template #checkBox let-node="node">
     <ng-container *ngIf="node.type === 'suggestionInput'">
       <ng-container *ngTemplateOutlet="inputTemplate; context: { node: node }"></ng-container>
@@ -113,6 +162,15 @@
         }}
       </span>
     </ng-container>
+  </ng-template>
+  <ng-template #button let-node="node">
+    <div
+      (click)="toggleNode(node, true, true, true)"
+      (keyup.enter)="toggleNode(node, true, true, true)"
+      class="option"
+    >
+      <span [innerHTML]="node.caption | escapeHtml | highlight : filterString"></span>
+    </div>
   </ng-template>
   <ng-template #inputTemplate let-node="node">
     <div class="suggest-input">

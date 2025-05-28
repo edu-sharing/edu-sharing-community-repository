@@ -5,7 +5,10 @@ import { MdsEditorWidgetCore } from '../mds-editor-widget-core.directive';
 import { SuggestionResponseDto, SuggestionStatus } from 'ngx-edu-sharing-api';
 import { DisplayValue } from './DisplayValues';
 import { AuthorityNamePipe } from '../../../../shared/pipes/authority-name.pipe';
-import { Observable, map } from 'rxjs';
+import { map, Observable } from 'rxjs';
+import { Toast, ToastType } from '../../../../services/toast';
+import { MdsEditorInstanceService } from '../mds-editor-instance.service';
+import { TranslateService } from '@ngx-translate/core';
 
 export enum ValueType {
     String,
@@ -28,7 +31,13 @@ export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {
     focus(): void {
         // default implementation will do nothing
     }
-
+    constructor(
+        protected toast: Toast,
+        public mdsEditorInstance: MdsEditorInstanceService,
+        protected translate: TranslateService,
+    ) {
+        super(mdsEditorInstance, translate);
+    }
     protected setValue(value: string[], dirty?: boolean): void {
         this.widget.setValue(value, dirty);
     }
@@ -115,11 +124,21 @@ export abstract class MdsEditorWidgetChipsSuggestionBase extends MdsEditorWidget
             creator: new AuthorityNamePipe(this.translate).transform(suggestion.createdBy),
         })}`;
     }
-    updateSuggestionState(suggestion: SuggestionResponseDto, status: SuggestionStatus) {
-        suggestion.status = status;
-        this.mdsEditorInstance.updateSuggestionState(this.widget.definition.id, suggestion);
+    updateSuggestionState(modified: SuggestionResponseDto, status: SuggestionStatus) {
+        modified.status = status;
+        this.mdsEditorInstance.updateSuggestionState(this.widget.definition.id, modified);
         //this.chipsSuggestions.splice(this.chipsSuggestions.indexOf(suggestion), 1);
+        this.widget.getSuggestions();
         this.widget.markSuggestionChanged();
+        this.mdsEditorInstance.updateHasChanges();
+        const suggestion = this.widget.getSuggestions().value.find((s) => s.id === modified.id);
+        suggestion.status = status;
+        this.widget.getSuggestions().next(this.widget.getSuggestions().value);
+        this.toast.show({
+            type: 'info',
+            subtype: ToastType.InfoSimple,
+            message: 'AI.TOAST.' + status,
+        });
     }
 
     getSuggestions(): Observable<SuggestionResponseDto[]> {
