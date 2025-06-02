@@ -10,8 +10,8 @@ import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
-import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.*;
+import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.version.Version;
@@ -1317,7 +1317,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
             return AuthenticationUtil.runAsSystem(() -> {
                 String currentVersion = getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.LOM_PROP_LIFECYCLE_VERSION);
                 List<String> currentCopies = getPublishedCopies(nodeId);
-                if (currentCopies.stream().anyMatch((c) -> currentVersion.equals(getProperty(
+                if (currentCopies.stream()
+                        .filter(c -> getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), c, CCConstants.CCM_PROP_IO_REVOKED_DATE) == null)
+                        .anyMatch((c) -> currentVersion.equals(getProperty(
                         StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), c, CCConstants.LOM_PROP_LIFECYCLE_VERSION
                 )))) {
                     throw new IllegalArgumentException("The version " + currentVersion + " is already published!");

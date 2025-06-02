@@ -852,9 +852,13 @@ export class MdsEditorInstanceService implements OnDestroy {
             )
             .subscribe((c) => {
                 this.completionStatus$.next(c);
-                // disable required fields validation in bulk since they might be filled with individual values
                 if (this.editorBulkMode.isBulk) {
-                    this.isValid$.next(true);
+                    // disable required fields validation in bulk since they might be filled with individual values
+                    this.isValid$.next(
+                        c.mandatory.fields.every(
+                            (f) => f.isCompleted || f.widget.getBulkMode() !== 'replace',
+                        ),
+                    );
                 } else {
                     this.isValid$.next(c.mandatory.total === c.mandatory.completed);
                 }

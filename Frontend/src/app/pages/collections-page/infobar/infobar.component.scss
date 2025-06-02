@@ -2,7 +2,7 @@
 
 .infobar {
     background: var(--primary);
-    color: var(--palette-primary-900);
+    color: var(--light-primary-text);
     width: 100%;
     position: fixed;
     left: 0;
@@ -41,7 +41,7 @@
             background: #fff !important;
         }
         .btn-flat {
-            color: var(--palette-primary-900) !important;
+            color: var(--light-primary-text) !important;
         }
     }
 }

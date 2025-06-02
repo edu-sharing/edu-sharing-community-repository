@@ -11,7 +11,6 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
@@ -236,11 +235,13 @@ public class MetadataTemplateRenderer {
 							wasEmpty = false;
 							String licenseName = properties.containsKey(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY)) ?
 									properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY))[0] : null;
+							String licenseLocale = properties.containsKey(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE)) ?
+									properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE))[0] : null;
 							String licenseVersion = properties.containsKey(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION)) ?
 									properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION))[0] : null;
 
 							LicenseService license = new LicenseService();
-							String link = license.getLicenseUrl(licenseName, Context.getCurrentInstance().getLocale(), licenseVersion);
+							String link = license.getLicenseUrl(licenseName, licenseLocale, licenseVersion);
 							value = "";
 							if (renderingMode.equals(RenderingMode.HTML)) {
 								if (link != null)

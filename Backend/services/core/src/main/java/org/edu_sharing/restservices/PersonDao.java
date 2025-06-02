@@ -2,6 +2,7 @@ package org.edu_sharing.restservices;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
+import jakarta.servlet.http.HttpSession;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
@@ -11,18 +12,19 @@ import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
-import org.edu_sharing.alfresco.repository.server.authentication.Context;
-import org.edu_sharing.repository.server.tools.EduSharingLockHelper;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.EduSharingLockHelper;
 import org.edu_sharing.repository.server.tools.ImageTool;
 import org.edu_sharing.repository.server.tools.cache.PersonCache;
 import org.edu_sharing.restservices.iam.v1.model.GroupEntries;
+import org.edu_sharing.restservices.iam.v1.model.ProfileSettings;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authority.AuthorityService;
@@ -38,11 +40,9 @@ import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
-import org.edu_sharing.restservices.iam.v1.model.ProfileSettings;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import jakarta.servlet.http.HttpSession;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.*;
@@ -667,7 +667,7 @@ public class PersonDao {
 		json.put(list,new JSONArray(nodes));
 				updateNodeList(json);
 			} catch(Exception e) {
-				throw new RuntimeException(e);
+				throw e;
 	}
 			return null;
 		});

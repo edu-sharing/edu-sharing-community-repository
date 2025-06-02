@@ -4,9 +4,9 @@ import { MAT_FORM_FIELD } from '@angular/material/form-field';
 import { TranslateService } from '@ngx-translate/core';
 import { SuggestionResponseDto, SuggestionStatus } from 'ngx-edu-sharing-api';
 import { DateHelper } from 'ngx-edu-sharing-ui';
-import { filter, map } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 import { Toast } from '../../../../../services/toast';
-import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
+import { Widget } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 @Component({
@@ -41,6 +41,19 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
             .subscribe((value) => {
                 this.setValue([value]);
             });
+        this.widget.observeBulkMode().subscribe(() => {
+            console.log(
+                'bulk',
+                this.widget.definition.id,
+                this.widget.getBulkMode(),
+                this.showBulkMixedValues(),
+            );
+            if (this.showBulkMixedValues()) {
+                this.formControl.disable();
+            } else {
+                this.formControl.enable();
+            }
+        });
         if (this.widget.definition.id === 'cm:name') {
             this.fileNameChecker = new FileNameChecker(
                 this.formControl,

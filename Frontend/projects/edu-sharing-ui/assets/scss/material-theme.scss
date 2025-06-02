@@ -67,7 +67,7 @@ $dark-secondary-text: rgba(black, 0.54);
  */
 mat-button-toggle-group {
     .mat-button-toggle-checked.mat-button-toggle-appearance-standard {
-        color: var(--palette-primary-900);
+        color: var(--light-primary-text);
         background-color: var(--primary);
     }
     .mat-button-toggle-appearance-standard .mat-button-toggle-focus-overlay {
@@ -362,7 +362,7 @@ body {
         color: var(--primary) !important;
     }
     &.mat-primary {
-        color: var(--palette-primary-900) !important;
+        color: var(--light-primary-text) !important;
     }
     &.mat-warn {
         color: var(--light-primary-text) !important;
@@ -447,7 +447,7 @@ label .label-secondary {
     position: absolute;
     right: -3px;
     top: -3px;
-    color: var(--palette-primary-900);
+    color: var(--light-primary-text);
     background-color: $colorStatusNegative;
     border-radius: 50%;
     width: 16px;

@@ -14,13 +14,29 @@ import { RepoUrlService } from './repo-url.service';
 import { Params } from '@angular/router';
 import { UIConstants } from '../util/ui-constants';
 import { ASSETS_BASE_PATH } from '../types/injection-tokens';
-import { map } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { NodesRightMode } from '../types/option-item';
 
 @Injectable({
     providedIn: 'root',
 })
 export class NodeHelperService {
+    readonly LICENSE_URLS = {
+        CC_BY_ABOUT: 'https://creativecommons.org/licenses/list.{{language}}',
+        CC_BY: 'https://creativecommons.org/licenses/by/{{version}}/{{locale}}deed.{{language}}',
+        CC_BY_ND:
+            'https://creativecommons.org/licenses/by-nd/{{version}}/{{locale}}deed.{{language}}',
+        CC_BY_SA:
+            'https://creativecommons.org/licenses/by-sa/{{version}}/{{locale}}deed.{{language}}',
+        CC_BY_NC:
+            'https://creativecommons.org/licenses/by-nc/{{version}}/{{locale}}deed.{{language}}',
+        CC_BY_NC_ND:
+            'https://creativecommons.org/licenses/by-nc-nd/{{version}}/{{locale}}deed.{{language}}',
+        CC_BY_NC_SA:
+            'https://creativecommons.org/licenses/by-nc-sa/{{version}}/{{locale}}deed.{{language}}',
+        CC_0: 'https://creativecommons.org/publicdomain/zero/1.0/legalcode.{{language}}',
+        PDM: 'https://creativecommons.org/public-domain/pdm/',
+    } as { [key: string]: string };
     constructor(
         protected translate: TranslateService,
         protected apiHelpersService: ApiHelpersService,
@@ -146,23 +162,16 @@ export class NodeHelperService {
     ) {
         const isV4 = licenseVersion === '4.0';
         const locale = isV4 || !licenseLocale ? '' : licenseLocale.toLowerCase() + '/';
-        return this.translate
-            .get(`LICENSE.URLS.${licenseProperty}`, {
-                version: licenseVersion,
-                locale: locale,
-            })
-            .pipe(
-                map((url: string) => {
-                    // when the translation fails it might return something like 'LICENSE.URLS.undefined'
-                    if (!url || url.startsWith('LICENSE.URLS')) return null;
-                    if (!isV4) {
-                        // only the international 4.0 version supports different languages
-                        // so this part needs to be removed for all other versions
-                        url = url.replace('.de', '');
-                    }
-                    return url;
-                }),
-            );
+        const url = this.LICENSE_URLS[licenseProperty];
+        if (!url) {
+            return of(null);
+        }
+        return of(
+            url
+                .replace('{{version}}', licenseVersion)
+                .replace('{{locale}}', locale)
+                .replace('{{language}}', this.translate.currentLang || 'en'),
+        );
     }
 
     public getWorkflowStatusById(id: string) {
