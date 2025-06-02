@@ -5,6 +5,7 @@
 | Name                                        | Description                                    | Value                                  |
 | ------------------------------------------- | ---------------------------------------------- | -------------------------------------- |
 | `global.annotations`                        | Define global annotations                      | `{}`                                   |
+| `global.backup.velero.enabled`              | Enable velero backup                           | `false`                                |
 | `global.cluster.cert.annotations`           | Set custom global cert annotations             | `{}`                                   |
 | `global.cluster.domain`                     | Set global domain for the cluster              | `cluster.local`                        |
 | `global.cluster.ingress.ingressClassName`   | Set global ingress class name                  | `nginx`                                |

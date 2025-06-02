@@ -8,6 +8,12 @@ global:
   ## @param global.annotations Define global annotations
   annotations: {}
 
+  backup:
+
+    velero:
+      ## @param global.backup.velero.enabled Enable velero backup
+      enabled: false
+
   cluster:
 
     istio:
@@ -24,6 +30,12 @@ global:
         ## @param global.cluster.storage.data.permission Enable global custom data storage permissions
         permission: false
         ## @param global.cluster.storage.data.spec Set data storage spec
+        spec: {}
+
+      share:
+        ## @param global.cluster.storage.share.permission Enable global custom share storage permissions
+        permission: false
+        ## @param global.cluster.storage.share.spec Set share storage spec
         spec: {}
 
   ## @param global.debug Enable global debugging
@@ -194,6 +206,21 @@ persistence:
         requests:
           ## @param persistence.data.spec.resources.requests.storage Set storage request for persistent data
           storage: 5Gi
+  share:
+    data:
+      ## @param persistence.share.data.create Create persistent data share
+      create: true
+      ## @param persistence.share.data.type Set volume type of persistent data share
+      type: |
+        persistentVolumeClaim:
+          claimName: {{ include "edusharing_repository_search_solr.pvc.share.data" . }}
+      spec:
+        ## @param persistence.share.data.spec.accessModes Set access modes for persistent data share
+        accessModes: [ "ReadWriteMany" ]
+        resources:
+          requests:
+            ## @param persistence.share.data.spec.resources.requests.storage Set storage request for persistent data share
+            storage: 5Gi
 
 ########################################################################################################################
 
