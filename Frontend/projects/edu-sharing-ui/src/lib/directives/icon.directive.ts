@@ -3,6 +3,7 @@
  */
 
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
+import { HttpClient } from '@angular/common/http';
 import {
     Directive,
     ElementRef,
@@ -15,7 +16,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfigService } from 'ngx-edu-sharing-api';
-import { BehaviorSubject, combineLatest } from 'rxjs';
+import { BehaviorSubject, combineLatest, firstValueFrom } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { notNull } from '../util/functions';
 
@@ -42,7 +43,7 @@ export class IconDirective implements OnInit, OnDestroy {
     private _aria: boolean;
     private altTextSpan: HTMLElement;
     private isReady = false;
-    private svg: HTMLImageElement;
+    private svg: SVGSVGElement;
 
     /**
      * An alt text to show to screen readers.
@@ -72,6 +73,7 @@ export class IconDirective implements OnInit, OnDestroy {
 
     constructor(
         private element: ElementRef<HTMLElement>,
+        private http: HttpClient,
         private translate: TranslateService,
         private renderer: Renderer2,
         @Optional() private config: ConfigService,
@@ -96,7 +98,7 @@ export class IconDirective implements OnInit, OnDestroy {
         }
     }
 
-    private setIcon(id: string, iconsConfig: IconsConfig) {
+    private async setIcon(id: string, iconsConfig: IconsConfig) {
         if (this._id) {
             this.element.nativeElement.classList.remove(
                 'edu-icons',
@@ -108,14 +110,38 @@ export class IconDirective implements OnInit, OnDestroy {
             }
         }
         if (id.startsWith('svg-')) {
-            this.svg = document.createElement('img');
-            this.svg.classList.add('svg-icons');
-            this.svg.src = 'assets/images/icons/' + id.substring(4);
-            this.renderer.appendChild(this.element.nativeElement, this.svg);
-            if (this._aria) {
-                this.updateAria();
+            try {
+                const iconName = id.slice(4);
+                const fileName = iconName.endsWith('.svg') ? iconName : `${iconName}.svg`;
+                const path = `assets/images/icons/${fileName}`;
+
+                const svgText = await firstValueFrom(this.http.get(path, { responseType: 'text' }));
+
+                if (!svgText) return;
+
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(svgText, 'image/svg+xml');
+                const svgElement = doc.querySelector('svg');
+
+                if (!svgElement) {
+                    console.error('No SVG element found in the file');
+                    return;
+                }
+
+                svgElement.classList.add('svg-icons');
+                this.svg = svgElement;
+
+                this.renderer.appendChild(this.element.nativeElement, this.svg);
+
+                if (this._aria) {
+                    this.updateAria();
+                }
+
+                return;
+            } catch (error) {
+                console.error('Error loading SVG:', error);
+                return;
             }
-            return;
         }
         let customClass: string = null;
         const mapping = iconsConfig?.filter((i) => i.original === id);
@@ -158,7 +184,8 @@ export class IconDirective implements OnInit, OnDestroy {
 
     private setAltText(altText: string): void {
         if (this.svg) {
-            this.svg.alt = altText;
+            // for SVG elements, add aria-label instead
+            this.svg.setAttribute('aria-label', altText);
         }
         if (altText && !this.altTextSpan) {
             this.insertAltTextSpan();
