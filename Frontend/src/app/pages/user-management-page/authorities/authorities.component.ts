@@ -898,6 +898,10 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             }
         } else if (this._mode == 'USER' && !this.org) {
             sort = this.sortConfig.active;
+            if (sort === RestConstants.AUTHORITY_NAME) {
+                console.log('sort:' + sort);
+                sort = RestConstants.USER_NAME;
+            }
             if (sort === RestConstants.AUTHORITY_STATUS) {
                 sort = RestConstants.CM_ESPERSONSTATUS;
             }

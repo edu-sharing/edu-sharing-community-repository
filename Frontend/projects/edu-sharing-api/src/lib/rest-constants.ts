@@ -134,6 +134,7 @@ export class RestConstants {
     public static ACCESS_COMMENT = 'Comment';
     public static IMPLICIT_COLLECTION_PERMISSIONS = [RestConstants.ACCESS_CONSUMER];
 
+    public static USER_NAME = 'userName';
     public static AUTHORITY_NAME = 'authorityName';
     public static AUTHORITY_DISPLAYNAME = 'displayName';
     public static AUTHORITY_GROUPTYPE = 'groupType';
