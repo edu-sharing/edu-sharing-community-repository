@@ -1707,7 +1707,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         try {
 
 
-            SearchResultNodeRef searchResultNodeRef = this.searchByQuery(finalQuery.build(), from, nrOfResults, null, AUTHORITIES_INDEX,null);
+            SearchResultNodeRef searchResultNodeRef = this.searchByQuery(finalQuery.build(), from, nrOfResults, sort, AUTHORITIES_INDEX,null);
 
             searchResultNodeRef.getData().stream().forEach(c -> {
                 String authorityName = (String) c.getProperties().get(CCConstants.CM_PROP_AUTHORITY_NAME);
