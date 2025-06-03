@@ -169,6 +169,7 @@ export class UIService {
         targetElement: Element,
         bindings: { [key: string]: any } = null,
         { delay = 0, replace = true } = {},
+        injector?: Injector,
     ): ComponentRef<T> {
         if (targetElement == null) {
             return null;
@@ -177,7 +178,7 @@ export class UIService {
         const component: ComponentRef<T> = viewContainerRef.createComponent(
             factory,
             undefined,
-            this.injector,
+            injector || this.injector,
         );
         if (bindings) {
             const instance: { [key: string]: any } = component.instance;
@@ -206,5 +207,169 @@ export class UIService {
             domElem.style.display = null;
         }, delay);
         return component;
+    }
+
+    /**
+     * dynamically inject an angular component into a regular html dom element
+     * @param componentFactoryResolver The resolver service
+     * @param viewContainerRef The viewContainerRef service
+     * @param componentName The name of the angular component (e.g. SpinnerComponent)
+     * @param targetElement The target element of the dom. If the element is null (not found), nothing is done
+     * @param bindings Optional bindings (inputs & outputs) to the given component
+     * @param delay Optional inflating delay in ms(some components may need some time to "init" the layout)
+     * @param replace Whether to replace to previous `innerHTML` of `targetElement`
+     * @param injector (to fetch templates for the component)
+     */
+    public static injectAngularComponent<T>(
+        componentFactoryResolver: ComponentFactoryResolver,
+        viewContainerRef: ViewContainerRef,
+        componentName: Type<T>,
+        targetElement: Element,
+        bindings: { [key: string]: any } = null,
+        { delay = 0, replace = true } = {},
+        injector?: Injector,
+    ): ComponentRef<T> {
+        if (targetElement == null) {
+            return null;
+        }
+        const factory = componentFactoryResolver.resolveComponentFactory(componentName);
+        const component: ComponentRef<T> = viewContainerRef.createComponent(
+            factory,
+            undefined,
+            injector,
+        );
+        if (bindings) {
+            const instance: { [key: string]: any } = component.instance;
+            for (const key in bindings) {
+                const binding = bindings[key];
+                if (binding instanceof Function) {
+                    // subscribe so callback can properly invoked
+                    instance[key].subscribe((value: any) => binding(value));
+                } else {
+                    instance[key] = binding;
+                    // `ngOnChanges` won't be called on the component like this. Consider doing
+                    // something like this:
+                    // https://scm.edu-sharing.com/edu-sharing/projects/oeh-redaktion/ng-meta-widgets/-/blob/1603fb2dedadd3952401385bcbd91a4bd8407643/src/app/app.module.ts#L66-79
+                }
+            }
+        }
+
+        // 3. Get DOM element from component
+        const domElem = (component.hostView as EmbeddedViewRef<any>).rootNodes[0] as HTMLElement;
+        domElem.style.display = 'none';
+        if (replace) {
+            targetElement.innerHTML = null;
+        }
+        targetElement.appendChild(domElem);
+        setTimeout(() => {
+            domElem.style.display = null;
+        }, delay);
+        return component;
+    }
+
+    /**
+     * smoothly scroll to the given child inside an element (The child will be placed around the first 1/3 of the parent's top)
+     * @param child
+     * @param element
+     * @param smoothness
+     */
+    scrollSmoothElementToChild(child: Element, element: Element | 'auto' = 'auto', smoothness = 1) {
+        let target: Element;
+        if (element === 'auto') {
+            let parent = child.parentElement;
+            while (parent) {
+                if (['scroll', 'auto'].includes(window.getComputedStyle(parent).overflowY)) {
+                    target = parent;
+                    break;
+                }
+                parent = parent.parentElement;
+            }
+        } else {
+            target = element;
+        }
+        // y equals to the top of the child + any scrolling of the parent - the top of the parent
+        let y =
+            child.getBoundingClientRect().top +
+            target.scrollTop -
+            target.getBoundingClientRect().top;
+        // move the focused element to 1/3 at the top of the container
+        y += child.getBoundingClientRect().height / 2 - target.getBoundingClientRect().height / 3;
+        return this.scrollSmoothElement(y, target, smoothness);
+    }
+    /**
+     * Smoothly scrolls to the given y offset inside an element (use offsetTop on the child to
+     * determine this position).
+     *
+     * @param smoothness lower numbers indicate less smoothness, higher more smoothness
+     */
+    scrollSmoothElement(pos: number = 0, element: Element, smoothness = 1, axis = 'y') {
+        return new Promise<void>((resolve) => {
+            this.ngZone.runOutsideAngular(() => {
+                const currentPos = axis == 'x' ? element.scrollLeft : element.scrollTop;
+                if (element.getAttribute('data-is-scrolling') == 'true') {
+                    return;
+                }
+                const mode = currentPos > pos;
+                let lastPos = pos;
+                const maxPos =
+                    axis == 'x'
+                        ? element.scrollWidth - element.clientWidth
+                        : element.scrollHeight - element.clientHeight;
+                let limitReached = false;
+                if (mode && pos <= 0) {
+                    pos = 0;
+                    limitReached = true;
+                }
+                if (!mode && pos >= maxPos) {
+                    pos = maxPos;
+                    limitReached = true;
+                }
+                let speed = 16;
+                let last = new Date().getTime();
+                const callback = () => {
+                    let currentPos = axis == 'x' ? element.scrollLeft : element.scrollTop;
+                    const posDiff = currentPos - lastPos;
+                    const speedFactor = speed / 16;
+                    const divider = (3 / speedFactor) * smoothness;
+                    const minSpeed = (5 * speedFactor) / smoothness;
+                    const maxSpeed = (50 * speedFactor) / smoothness;
+                    lastPos = currentPos;
+                    let finished = true;
+                    if (currentPos > pos) {
+                        currentPos -= Math.min(
+                            maxSpeed,
+                            Math.max((currentPos - pos) / divider, minSpeed),
+                        );
+                        finished = currentPos <= pos;
+                    } else if (currentPos < pos && !mode) {
+                        currentPos += Math.min(
+                            maxSpeed,
+                            Math.max((pos - currentPos) / divider, minSpeed),
+                        );
+                        finished = currentPos >= pos;
+                    }
+                    if (finished) {
+                        currentPos = pos;
+                    }
+
+                    if (axis == 'x') {
+                        element.scrollLeft = currentPos;
+                    } else {
+                        element.scrollTop = currentPos;
+                    }
+                    if (finished) {
+                        element.removeAttribute('data-is-scrolling');
+                        resolve();
+                    } else {
+                        speed = new Date().getTime() - last;
+                        last = new Date().getTime();
+                        window.requestAnimationFrame(callback);
+                    }
+                };
+                window.requestAnimationFrame(callback);
+
+                element.setAttribute('data-is-scrolling', 'true');
+            });
+        });
     }
 }

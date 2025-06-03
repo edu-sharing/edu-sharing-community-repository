@@ -9,9 +9,10 @@ import { NodeHelperService } from '../../../../../services/node-helper.service';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { Constraints, MdsWidgetValue, NativeWidgetComponent, Values } from '../../../types/types';
-import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { DialogsService } from '../../../../dialogs/dialogs.service';
 import { Toast } from '../../../../../services/toast';
+import { ValueType } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-mds-editor-widget-license',

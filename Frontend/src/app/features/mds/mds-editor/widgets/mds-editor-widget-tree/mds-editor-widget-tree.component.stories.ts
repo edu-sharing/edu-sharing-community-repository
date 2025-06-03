@@ -4,11 +4,12 @@ import { Widget } from '../../mds-editor-instance.service';
 import { mdsStorybookProviders, WidgetDummy } from '../../storybook-utils';
 import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
 import { RegisterFormFieldDirective } from '../mds-editor-widget-container/register-form-field.directive';
-import { MdsWidgetType, RequiredMode } from '../../../types/types';
+import { RequiredMode } from '../../../types/types';
 import { MdsEditorWidgetTreeComponent } from './mds-editor-widget-tree.component';
 import { HighlightPipe } from './mds-editor-widget-tree-core/highlight.pipe';
 import { MdsEditorWidgetTreeCoreComponent } from './mds-editor-widget-tree-core/mds-editor-widget-tree-core.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MdsWidgetType } from 'ngx-edu-sharing-ui';
 
 const meta: Meta<Widget['definition']> = {
     title: 'Mds/Widget/Tree',

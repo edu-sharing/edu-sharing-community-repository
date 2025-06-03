@@ -53,7 +53,6 @@ import {
 import {
     ConfigurationHelper,
     ConfigurationService,
-    MdsValueList,
     RestConnectorService,
     RestConstants,
     RestMdsService,
@@ -71,7 +70,6 @@ import {
     MdsView,
     MdsWidget,
     MdsWidgetCondition,
-    MdsWidgetType,
     MdsWidgetValue,
     NativeWidget,
     NativeWidgetType,
@@ -89,11 +87,17 @@ import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-ver
 import { Helper } from '../../../core-module/rest/helper';
 import { MdsEditorWidgetCore } from './mds-editor-widget-core.directive';
 import { MdsWidgetTree } from './widgets/mds-editor-widget-tree/tree';
-import { SearchHelperService } from 'ngx-edu-sharing-ui';
 import { MdsEditorWidgetBase } from './widgets/mds-editor-widget-base';
-import { replaceElementWithDiv } from './util/replace-element-with-div';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { MdsEditorWidgetErrorComponent } from './widgets/mds-editor-widget-error/mds-editor-widget-error.component';
+import {
+    InitialValues,
+    MdsValueList,
+    MdsViewerWidget,
+    MdsWidgetType,
+    replaceElementWithDiv,
+    SearchHelperService,
+    UIService,
+} from 'ngx-edu-sharing-ui';
 
 export interface CompletionStatusField {
     widget: Widget;
@@ -112,17 +116,6 @@ export type Widget = InstanceType<typeof MdsEditorInstanceService.Widget>;
 
 export type CompletionStatus = { [key in RequiredMode]: CompletionStatusEntry };
 
-export interface InitialValues {
-    /** Values that are initially present in all nodes. */
-    readonly jointValues: string[];
-    /**
-     * Values that are initially present in some but not all nodes.
-     *
-     * Can be null but will never be set to an empty array.
-     */
-    readonly individualValues?: string[];
-}
-
 export class UnauthoritzedException implements Error {
     message: string;
     name: string;
@@ -135,7 +128,7 @@ export class UnauthoritzedException implements Error {
  */
 @Injectable()
 export class MdsEditorInstanceService implements OnDestroy {
-    static Widget = class implements GeneralWidget {
+    static Widget = class implements GeneralWidget, MdsViewerWidget {
         readonly addValue = new EventEmitter<MdsWidgetValue>();
         readonly status = new BehaviorSubject<InputStatus>(null);
         readonly meetsDynamicCondition = new BehaviorSubject<boolean>(true);
@@ -765,6 +758,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         private ngZone: NgZone,
         private restMdsService: RestMdsService,
         private configService: ConfigurationService,
+        private uiService: UIService,
         private authenticationService: AuthenticationService,
         private featuresHelperService: FeaturesHelperService,
         public searchHelperService: SearchHelperService,
@@ -2118,8 +2112,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                 widget.definition.id.replace(':', '\\:'),
             );
             if (widgetComponent === undefined) {
-                return UIHelper.injectAngularComponent(
-                    this.factoryResolver,
+                return this.uiService.injectAngularComponent(
                     this.containerRef,
                     MdsEditorWidgetErrorComponent,
                     element,
@@ -2128,15 +2121,14 @@ export class MdsEditorInstanceService implements OnDestroy {
                         reason: `Widget for type ${widget.definition.type} is not implemented`,
                     },
                     { replace: false },
-                    view?.injector || this.injector,
+                    view?.injector,
                 ).instance;
             } else if (widgetComponent === null) {
                 return null;
             }
             return {
                 htmlElement: element,
-                instance: UIHelper.injectAngularComponent(
-                    this.factoryResolver,
+                instance: this.uiService.injectAngularComponent(
                     this.containerRef,
                     widgetComponent,
                     element,
@@ -2145,7 +2137,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                         view,
                     },
                     { replace: false },
-                    view?.injector || this.injector,
+                    view?.injector,
                 ).instance,
             };
         });

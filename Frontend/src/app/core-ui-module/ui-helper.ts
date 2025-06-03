@@ -1,19 +1,10 @@
 import { PlatformLocation } from '@angular/common';
-import {
-    ComponentFactoryResolver,
-    ComponentRef,
-    ElementRef,
-    EmbeddedViewRef,
-    Injector,
-    NgZone,
-    Type,
-    ViewContainerRef,
-} from '@angular/core';
+import { ElementRef, NgZone } from '@angular/core';
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Ace, LoginInfo, Node } from 'ngx-edu-sharing-api';
 import { ListItem, OPEN_URL_MODE, UIConstants } from 'ngx-edu-sharing-ui';
-import { concatMap, forkJoin as observableForkJoin, from, Observable, Observer, of } from 'rxjs';
+import { concatMap, from, Observable, Observer, of } from 'rxjs';
 import { catchError, first, take, toArray } from 'rxjs/operators';
 import { BridgeService } from '../services/bridge.service';
 import {
@@ -669,64 +660,6 @@ export class UIHelper {
     public static getNewWindow(connector: RestConnectorService) {
         if (connector.getBridgeService().isRunningCordova()) return null;
         return window.open('');
-    }
-
-    /**
-     * dynamically inject an angular component into a regular html dom element
-     * @param componentFactoryResolver The resolver service
-     * @param viewContainerRef The viewContainerRef service
-     * @param componentName The name of the angular component (e.g. SpinnerComponent)
-     * @param targetElement The target element of the dom. If the element is null (not found), nothing is done
-     * @param bindings Optional bindings (inputs & outputs) to the given component
-     * @param delay Optional inflating delay in ms(some components may need some time to "init" the layout)
-     * @param replace Whether to replace to previous `innerHTML` of `targetElement`
-     * @param injector (to fetch templates for the component)
-     */
-    public static injectAngularComponent<T>(
-        componentFactoryResolver: ComponentFactoryResolver,
-        viewContainerRef: ViewContainerRef,
-        componentName: Type<T>,
-        targetElement: Element,
-        bindings: { [key: string]: any } = null,
-        { delay = 0, replace = true } = {},
-        injector?: Injector,
-    ): ComponentRef<T> {
-        if (targetElement == null) {
-            return null;
-        }
-        const factory = componentFactoryResolver.resolveComponentFactory(componentName);
-        const component: ComponentRef<T> = viewContainerRef.createComponent(
-            factory,
-            undefined,
-            injector,
-        );
-        if (bindings) {
-            const instance: { [key: string]: any } = component.instance;
-            for (const key in bindings) {
-                const binding = bindings[key];
-                if (binding instanceof Function) {
-                    // subscribe so callback can properly invoked
-                    instance[key].subscribe((value: any) => binding(value));
-                } else {
-                    instance[key] = binding;
-                    // `ngOnChanges` won't be called on the component like this. Consider doing
-                    // something like this:
-                    // https://scm.edu-sharing.com/edu-sharing/projects/oeh-redaktion/ng-meta-widgets/-/blob/1603fb2dedadd3952401385bcbd91a4bd8407643/src/app/app.module.ts#L66-79
-                }
-            }
-        }
-
-        // 3. Get DOM element from component
-        const domElem = (component.hostView as EmbeddedViewRef<any>).rootNodes[0] as HTMLElement;
-        domElem.style.display = 'none';
-        if (replace) {
-            targetElement.innerHTML = null;
-        }
-        targetElement.appendChild(domElem);
-        setTimeout(() => {
-            domElem.style.display = null;
-        }, delay);
-        return component;
     }
 
     /**

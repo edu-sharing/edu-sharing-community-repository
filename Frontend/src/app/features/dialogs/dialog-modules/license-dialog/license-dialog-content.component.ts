@@ -26,13 +26,11 @@ import {
 import { NodeHelperService } from '../../../../services/node-helper.service';
 import { Toast } from '../../../../services/toast';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
-import { UserPresentableError } from '../../../../features/mds/mds-editor/mds-editor-common.service';
-import { MdsEditorInstanceService } from '../../../../features/mds/mds-editor/mds-editor-instance.service';
-import { ViewInstanceService } from '../../../../features/mds/mds-editor/mds-editor-view/view-instance.service';
-import { MdsEditorWidgetAuthorComponent } from '../../../../features/mds/mds-editor/widgets/mds-editor-widget-author/mds-editor-widget-author.component';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from 'ngx-edu-sharing-ui';
-import { MdsWidgetValue } from '../../../mds/types/types';
+import { UIAnimation, ViewInstanceService } from 'ngx-edu-sharing-ui';
+import { MdsWidgetValue, UserPresentableError } from '../../../mds/types/types';
+import { MdsEditorInstanceService } from '../../../mds/mds-editor/mds-editor-instance.service';
+import { MdsEditorWidgetAuthorComponent } from '../../../mds/mds-editor/widgets/mds-editor-widget-author/mds-editor-widget-author.component';
 
 const ALL_LICENSE_TYPES = [
     'NONE',

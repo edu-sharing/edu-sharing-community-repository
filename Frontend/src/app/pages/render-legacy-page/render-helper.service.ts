@@ -12,9 +12,11 @@ import {
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
     OptionsHelperDataService,
+    replaceElementWithDiv,
     Scope,
     SpinnerComponent,
     Target,
+    UIService,
 } from 'ngx-edu-sharing-ui';
 import { Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -22,9 +24,7 @@ import { EventType } from '../../core-module/rest/data-object';
 import { RestConstants } from '../../core-module/rest/rest-constants';
 import { RestTrackingService } from '../../core-module/rest/services/rest-tracking.service';
 import { RestUsageService } from '../../core-module/rest/services/rest-usage.service';
-import { UIHelper } from '../../core-ui-module/ui-helper';
 import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
-import { replaceElementWithDiv } from '../../features/mds/mds-editor/util/replace-element-with-div';
 import { CommentsListComponent } from './comments-list/comments-list.component';
 import { MdsNodeRelationsWidgetComponent } from './node-relations/node-relations-widget.component';
 import { VideoControlsComponent } from './video-controls/video-controls.component';
@@ -41,6 +41,7 @@ export class RenderHelperService {
     constructor(
         private componentFactoryResolver: ComponentFactoryResolver,
         private usageApi: RestUsageService,
+        private uiService: UIService,
         private optionsHelperService: OptionsHelperDataService,
         private networkService: NetworkService,
         private tracking: RestTrackingService,
@@ -54,8 +55,7 @@ export class RenderHelperService {
         const data = {
             node,
         };
-        UIHelper.injectAngularComponent(
-            this.componentFactoryResolver,
+        this.uiService.injectAngularComponent(
             this.viewContainerRef,
             CommentsListComponent,
             document.getElementsByTagName('comments')[0],
@@ -82,8 +82,7 @@ export class RenderHelperService {
         }
 
         domCollections = replaceElementWithDiv(domCollections);
-        UIHelper.injectAngularComponent(
-            this.componentFactoryResolver,
+        this.uiService.injectAngularComponent(
             this.viewContainerRef,
             SpinnerComponent,
             domCollections,
@@ -117,8 +116,7 @@ export class RenderHelperService {
                     columns: ListItem.getCollectionDefaults(),
                     displayType: NodeEntriesDisplayType.SmallGrid,
                 };
-                const entriesComponentRef = UIHelper.injectAngularComponent(
-                    this.componentFactoryResolver,
+                const entriesComponentRef = this.uiService.injectAngularComponent(
                     this.viewContainerRef,
                     NodeEntriesWrapperComponent,
                     domCollections,
@@ -147,8 +145,7 @@ export class RenderHelperService {
         } catch (e) {}
         if (domRelations) {
             domRelations = replaceElementWithDiv(domRelations);
-            const component = UIHelper.injectAngularComponent(
-                this.componentFactoryResolver,
+            const component = this.uiService.injectAngularComponent(
                 this.viewContainerRef,
                 MdsNodeRelationsWidgetComponent,
                 domRelations,
@@ -166,8 +163,7 @@ export class RenderHelperService {
         const metadata = document.querySelector('.edusharing_rendering_metadata_body');
         const parent = metadata.parentElement;
         parent.removeChild(metadata);
-        const component = UIHelper.injectAngularComponent(
-            this.componentFactoryResolver,
+        const component = this.uiService.injectAngularComponent(
             this.viewContainerRef,
             MdsEditorWrapperComponent,
             parent,
@@ -295,8 +291,7 @@ export class RenderHelperService {
             video: videoElement,
             node,
         };
-        this.videoControlsRef = UIHelper.injectAngularComponent(
-            this.componentFactoryResolver,
+        this.videoControlsRef = this.uiService.injectAngularComponent(
             this.viewContainerRef,
             VideoControlsComponent,
             target,

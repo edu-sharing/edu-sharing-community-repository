@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ViewChild } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
-import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { TranslateService } from '@ngx-translate/core';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { EditorComponent, TINYMCE_SCRIPT_SRC } from '@tinymce/tinymce-angular';
@@ -8,6 +8,7 @@ import { PlatformLocation } from '@angular/common';
 import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
 import { CardDialogService } from '../../../../dialogs/card-dialog/card-dialog.service';
 import { Toast } from '../../../../../services/toast';
+import { ValueType } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-mds-editor-widget-checkbox',

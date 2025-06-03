@@ -1,5 +1,6 @@
 <rs-root
   *ngIf="request() && node() && serviceWorkerUrl()"
+  [displayMode]="display_mode"
   [node]="node()"
   [request]="request()"
   [serviceWorkerUrl]="serviceWorkerUrl()"

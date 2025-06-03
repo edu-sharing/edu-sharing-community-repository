@@ -21,13 +21,13 @@ import {
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap, takeUntil } from 'rxjs/operators';
-import { MdsHelperService } from 'ngx-edu-sharing-ui';
+import { MdsHelperService, MdsWidgetType } from 'ngx-edu-sharing-ui';
 import { SearchFieldFacetsComponent } from '../../../features/mds/mds-editor/search-field-facets/search-field-facets.component';
 import {
     MdsWidgetTree,
     Tree,
 } from '../../../features/mds/mds-editor/widgets/mds-editor-widget-tree/tree';
-import { MdsWidgetType, Values } from '../../../features/mds/types/types';
+import { Values } from '../../../features/mds/types/types';
 import { LoadingScreenService } from '../../loading-screen/loading-screen.service';
 import { SearchFieldInternalService } from './search-field-internal.service';
 import { SearchFieldConfig } from './search-field.service';

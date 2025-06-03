@@ -2,9 +2,13 @@
  * Public API Surface of edu-sharing-ui
  */
 
+export * from './mds-viewer/mds-viewer.component';
+export * from './mds-viewer/mds-viewer.service';
+export * from './mds-viewer/widget/mds-widget.component';
 export * from './actionbar/actionbar.component';
 export * from './common/edu-sharing-ui-common.module';
 export * from './mds/mds.module';
+export * from './mds-viewer/view-instance.service';
 export * from './directives/border-box-observer.directive';
 export * from './directives/check-text-overflow.directive';
 export * from './directives/drag-nodes/drag-nodes';
@@ -34,10 +38,13 @@ export * from './node-entries/node-data-source-remote';
 export * from './node-entries/node-entries-global.service';
 export * from './node-entries/node-entries-wrapper.component';
 export * from './node-entries/node-entries.module';
+export * from './mds-viewer/mds-viewer.component';
+export * from './mds-viewer/replace-element-with-div';
 export * from './node-url/node-url.component';
 export * from './pipes/property-slug.pipe';
 export * from './pipes/file-size.pipe';
 export * from './pipes/format-date.pipe';
+export * from './pipes/mds-duration.pipe';
 export * from './pipes/node-icon.pipe';
 export * from './pipes/node-image-size.pipe';
 export * from './pipes/node-image.pipe';
@@ -62,6 +69,7 @@ export * from './services/ui.service';
 export * from './services/render-helper.service';
 export * from './sort-dropdown/sort-dropdown.component';
 export * from './spinner/spinner.component';
+export * from './spinner-small/spinner-small.component';
 export * from './translations/fallback-translation-handler';
 export * from './translations/translation-loader';
 export * from './translations/translations.module';

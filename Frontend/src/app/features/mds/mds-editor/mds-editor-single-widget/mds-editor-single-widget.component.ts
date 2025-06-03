@@ -15,15 +15,18 @@ import {
 } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { MdsEditorInstanceService, Widget } from '../mds-editor-instance.service';
-import { EditorMode, MdsWidget, MdsWidgetType } from '../../types/types';
+import { EditorMode, MdsWidget } from '../../types/types';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { WidgetComponents } from '../../types/mds-types';
 import { MdsService } from 'ngx-edu-sharing-api';
-import { ViewInstanceService } from '../mds-editor-view/view-instance.service';
 import { first } from 'rxjs/operators';
-import { UIHelper } from '../../../../core-ui-module/ui-helper';
-import { MdsWidgetComponent } from '../../mds-viewer/widget/mds-widget.component';
 import { MdsEditorWidgetBase } from '../widgets/mds-editor-widget-base';
+import {
+    MdsWidgetComponent,
+    MdsWidgetType,
+    UIService,
+    ViewInstanceService,
+} from 'ngx-edu-sharing-ui';
 
 export interface MdsEditInterface {
     injectEditField(
@@ -92,7 +95,7 @@ export class MdsEditorSingleWidgetComponent implements OnChanges, OnDestroy, Mds
              */
             this.mdsEditorInstance.editorMode = 'inline';
             this.mdsEditorInstance.values$.next({ [this.widgetId]: this.ngModel });
-            UIHelper.injectAngularComponent(
+            UIService.injectAngularComponent(
                 this.factoryResolver,
                 this.containerRef,
                 MdsWidgetComponent,

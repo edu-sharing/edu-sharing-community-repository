@@ -56,48 +56,6 @@ export type EditorBulkMode =
 
 export type InputStatus = 'VALID' | 'INVALID' | 'DISABLED' | 'PENDING';
 
-export enum MdsType {
-    Io = 'io',
-    IoBulk = 'io_bulk',
-    Map = 'map',
-    MapRef = 'map_ref',
-    IoChildObject = 'io_childobject',
-    Collection = 'collection',
-    ToolDefinition = 'tool_definition',
-    ToolInstance = 'tool_instance',
-    SavedSearch = 'saved_search',
-}
-
-export enum MdsWidgetType {
-    Text = 'text',
-    Number = 'number',
-    Email = 'email',
-    Date = 'date',
-    Month = 'month',
-    Color = 'color',
-    Textarea = 'textarea',
-    TinyMCE = 'tinyMCE',
-    VCard = 'vcard',
-    Checkbox = 'checkbox',
-    RadioHorizontal = 'radioHorizontal',
-    RadioVertical = 'radioVertical',
-    CheckboxHorizontal = 'checkboxHorizontal',
-    CheckboxVertical = 'checkboxVertical',
-    MultiValueBadges = 'multivalueBadges',
-    MultiValueFixedBadges = 'multivalueFixedBadges',
-    MultiValueSuggestBadges = 'multivalueSuggestBadges',
-    MultiValueAuthorityBadges = 'multivalueAuthorityBadges',
-    Singleoption = 'singleoption',
-    Slider = 'slider',
-    Range = 'range',
-    Duration = 'duration',
-    SingleValueTree = 'singlevalueTree',
-    SingleValueSuggestBadges = 'singlevalueSuggestBadges',
-    MultiValueTree = 'multivalueTree',
-    DefaultValue = 'defaultvalue',
-    FacetList = 'facetList',
-}
-
 // Entries must be lowercase only.
 export enum NativeWidgetType {
     Preview = 'preview',

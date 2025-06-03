@@ -34,6 +34,7 @@ import {
     ListItem,
     LocalEventsService,
     MdsHelperService,
+    MdsWidgetComponent,
     NodeDataSource,
     NodeEntriesDisplayType,
     OptionItem,
@@ -44,6 +45,7 @@ import {
     TranslationsService,
     UIAnimation,
     UIConstants,
+    ViewInstanceService,
 } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import { AppComponent } from '../../app.component';
@@ -79,9 +81,7 @@ import { CardComponent } from '../../shared/components/card/card.component';
 import { RenderHelperService } from './render-helper.service';
 import { CardDialogService } from '../../features/dialogs/card-dialog/card-dialog.service';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
-import { MdsWidgetComponent } from '../../features/mds/mds-viewer/widget/mds-widget.component';
 import { MdsEditorInstanceService } from '../../features/mds/mds-editor/mds-editor-instance.service';
-import { ViewInstanceService } from '../../features/mds/mds-editor/mds-editor-view/view-instance.service';
 import { RouterHelper } from '../../util/router.helper';
 import { SharedModule } from '../../shared/shared.module';
 
@@ -857,8 +857,7 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
                             const parent = v.parentElement;
                             // we remove the caption since it is already present
                             w.definition.caption = null;
-                            UIHelper.injectAngularComponent(
-                                this.componentFactoryResolver,
+                            this.uiService.injectAngularComponent(
                                 this.viewContainerRef,
                                 MdsWidgetComponent,
                                 v,

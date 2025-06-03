@@ -1,13 +1,13 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject } from 'rxjs';
-import { LocalEventsService } from 'ngx-edu-sharing-ui';
+import { LocalEventsService, ValueType } from 'ngx-edu-sharing-ui';
 import { DialogsService } from '../../../../dialogs/dialogs.service';
 import { Constraints, NativeWidgetType } from '../../../types/types';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import { MdsEditorWidgetAuthorComponent } from '../mds-editor-widget-author/mds-editor-widget-author.component';
-import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { Toast } from '../../../../../services/toast';
 
 @Component({

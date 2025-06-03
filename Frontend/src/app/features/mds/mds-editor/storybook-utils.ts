@@ -3,14 +3,24 @@ import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { TranslateService } from '@ngx-translate/core';
-import { HOME_REPOSITORY, MdsWidget, Node, SuggestionResponseDto } from 'ngx-edu-sharing-api';
+import {
+    HOME_REPOSITORY,
+    MdsWidget,
+    Node,
+    RestConstants,
+    SuggestionResponseDto,
+} from 'ngx-edu-sharing-api';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import { CordovaService } from '../../../services/cordova.service';
 import { Toast } from '../../../services/toast';
 import { InputStatus, MdsWidgetValue } from '../types/types';
-import { InitialValues, MdsEditorInstanceService } from './mds-editor-instance.service';
-import { ViewInstanceService } from './mds-editor-view/view-instance.service';
-import { MdsValueList } from '../../../core-module/rest/data-object';
+import { MdsEditorInstanceService } from './mds-editor-instance.service';
+import {
+    InitialValues,
+    MdsValueList,
+    MdsViewerService,
+    ViewInstanceService,
+} from 'ngx-edu-sharing-ui';
 
 export const translateProvider = {
     instant: (v: string) => v,
@@ -29,12 +39,17 @@ export class MdsEditorInstanceServiceMock extends MdsEditorInstanceService {
             },
         },
     ] as Node[]);
-
     widgets = new BehaviorSubject([(window as any).widget]);
+}
+export class MdsViewerServiceMock extends MdsViewerService {
+    values$ = new BehaviorSubject({
+        [RestConstants.CCM_PROP_LICENSE]: ['CC_0'],
+    });
 }
 export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
     { provide: MdsEditorInstanceService, useClass: MdsEditorInstanceServiceMock },
+    { provide: MdsViewerService, useClass: MdsViewerServiceMock },
     ViewInstanceService,
     CordovaService,
     Toast,

@@ -21,6 +21,7 @@ export class AppComponent implements OnChanges, AfterViewInit {
     @ViewChild(PdfComponent) pdfComponent: PdfComponent;
     @Input() encoded_node: string;
     @Input() signature: string;
+    @Input() display_mode: 'inline' | 'full' = 'inline';
     @Input() jwt: string;
     @Input() render_url: string;
     @Input() encoded_user: string;

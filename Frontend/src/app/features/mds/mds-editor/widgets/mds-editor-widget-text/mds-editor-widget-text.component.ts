@@ -3,11 +3,11 @@ import { UntypedFormControl, ValidatorFn, Validators } from '@angular/forms';
 import { MAT_FORM_FIELD } from '@angular/material/form-field';
 import { TranslateService } from '@ngx-translate/core';
 import { SuggestionResponseDto, SuggestionStatus } from 'ngx-edu-sharing-api';
-import { DateHelper } from 'ngx-edu-sharing-ui';
+import { DateHelper, ValueType } from 'ngx-edu-sharing-ui';
 import { filter } from 'rxjs/operators';
 import { Toast } from '../../../../../services/toast';
 import { Widget } from '../../mds-editor-instance.service';
-import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 
 @Component({
     selector: 'es-mds-editor-widget-text',

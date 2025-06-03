@@ -1,35 +1,23 @@
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
-import {
-    MatAutocomplete,
-    MatAutocompleteSelectedEvent,
-    MatAutocompleteTrigger,
-} from '@angular/material/autocomplete';
-import { MatChipInputEvent } from '@angular/material/chips';
+import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { MatTooltip } from '@angular/material/tooltip';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, combineLatest, from, Observable } from 'rxjs';
-import {
-    debounceTime,
-    distinctUntilChanged,
-    filter,
-    map,
-    startWith,
-    switchMap,
-} from 'rxjs/operators';
+import { BehaviorSubject, from, Observable } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
-import { MdsWidgetType, MdsWidgetValue } from '../../../types/types';
-import { DisplayValue, DisplayValues } from '../DisplayValues';
-import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
-import { Authority, AuthorityProfile, Group } from '../../../../../core-module/rest/data-object';
+import { MdsWidgetValue } from '../../../types/types';
+import { DisplayValue } from '../DisplayValues';
+import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
+import { Authority } from '../../../../../core-module/rest/data-object';
 import { AuthorityNamePipe } from '../../../../../shared/pipes/authority-name.pipe';
 import { AuthorityAffiliationPipe } from '../../../../../shared/pipes/authority-affiliation.pipe';
-import { waitForAsync } from '@angular/core/testing';
 import { RestConnectorService } from '../../../../../core-module/rest/services/rest-connector.service';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { AuthoritySearchInputComponent } from '../../../../../shared/components/authority-search-input/authority-search-input.component';
 import { Toast } from '../../../../../services/toast';
+import { ValueType } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-mds-editor-widget-authority',

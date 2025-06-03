@@ -11,24 +11,36 @@ import {
     ViewContainerRef,
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { RestConstants } from '../../../core-module/core.module';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { MdsEditorInstanceService } from '../mds-editor/mds-editor-instance.service';
-import { ViewInstanceService } from '../mds-editor/mds-editor-view/view-instance.service';
-import { replaceElementWithDiv } from '../mds-editor/util/replace-element-with-div';
-import { Values } from '../types/types';
-import { MdsWidgetComponent } from './widget/mds-widget.component';
-import { MdsDefinition, MdsService, MdsView } from 'ngx-edu-sharing-api';
+import {
+    InitialValues,
+    MdsValueList,
+    MdsViewerWidget,
+    MdsWidgetComponent,
+} from './widget/mds-widget.component';
+import {
+    HOME_REPOSITORY,
+    MdsDefinition,
+    MdsService,
+    MdsView,
+    RestConstants,
+} from 'ngx-edu-sharing-api';
+import { Values } from '../services/search-helper.service';
+import { replaceElementWithDiv } from './replace-element-with-div';
+import { UIService } from '../services/ui.service';
+import { MdsViewerService } from './mds-viewer.service';
+import { ViewInstanceService } from './view-instance.service';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
     selector: 'es-mds-viewer',
     templateUrl: 'mds-viewer.component.html',
     styleUrls: ['mds-viewer.component.scss'],
-    providers: [MdsEditorInstanceService, ViewInstanceService],
+    providers: [MdsViewerService, ViewInstanceService],
 })
 export class MdsViewerComponent implements OnChanges {
     @ViewChildren('container') container: QueryList<ElementRef>;
 
+    @Input() mdsEditorInstanceService: any;
     @Input() groupId: string;
     @Input() setId: string;
     @Input() data: Values;
@@ -59,7 +71,7 @@ export class MdsViewerComponent implements OnChanges {
 
     constructor(
         private mdsService: MdsService,
-        private mdsEditorInstanceService: MdsEditorInstanceService,
+        private mdsViewerService: MdsViewerService,
         private factoryResolver: ComponentFactoryResolver,
         private injector: Injector,
         private containerRef: ViewContainerRef,
@@ -80,17 +92,21 @@ export class MdsViewerComponent implements OnChanges {
             return;
         }
         try {
-            const editor = await this.mdsEditorInstanceService.initWithoutNodes(
-                this.groupId,
-                this.setId,
-                RestConstants.HOME_REPOSITORY,
-                'viewer',
-                this.data,
-            );
-            if (!editor) {
-                // Initialization was interrupted. Probably, this method was called again before it
-                // could finish.
-                return;
+            this.mdsViewerService.values$.next(this.data);
+            this.mdsViewerService.mds$.next(this.mds);
+            if (this.mdsEditorInstanceService) {
+                const editor = await this.mdsEditorInstanceService.initWithoutNodes(
+                    this.groupId,
+                    this.setId,
+                    HOME_REPOSITORY,
+                    'viewer',
+                    this.data,
+                );
+                if (!editor) {
+                    // Initialization was interrupted. Probably, this method was called again before it
+                    // could finish.
+                    return;
+                }
             }
         } catch (e) {
             return;
@@ -105,7 +121,18 @@ export class MdsViewerComponent implements OnChanges {
         }
         // wait for angular to inflate the new binding
         setTimeout(() => {
-            for (const widget of this.mdsEditorInstanceService.widgets.value) {
+            for (const widget of (this.mdsEditorInstanceService?.widgets.value ||
+                this.mds.widgets.map((definition) => {
+                    return {
+                        definition,
+                        getInitalValuesAsync: async () => {
+                            return {
+                                individualValues: this.data[definition.id!!],
+                            } as InitialValues;
+                        },
+                        getInitialDisplayValues: () => new BehaviorSubject<MdsValueList>(null),
+                    } as MdsViewerWidget;
+                })) as MdsViewerWidget[]) {
                 // @TODO: it would be better to filter by widgets based on template and condition, should be implemented in 5.1
                 this.container.toArray().forEach((c) => {
                     let element: HTMLElement = c.nativeElement.getElementsByTagName(
@@ -115,7 +142,7 @@ export class MdsViewerComponent implements OnChanges {
                         // MdsEditorViewComponent.updateWidgetWithHTMLAttributes(element, w);
                         element = replaceElementWithDiv(element);
 
-                        UIHelper.injectAngularComponent(
+                        UIService.injectAngularComponent(
                             this.factoryResolver,
                             this.containerRef,
                             MdsWidgetComponent,
