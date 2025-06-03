@@ -1,5 +1,5 @@
 import { NodeHelperService } from './node-helper.service';
-import { TranslateService } from '@ngx-translate/core/lib/translate.service';
+import { TranslateService } from '@ngx-translate/core';
 
 const translateServiceMock = {
     currentLang: 'de',
