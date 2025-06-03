@@ -1,13 +1,12 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { MatChip } from '@angular/material/chips';
 import { FacetAggregation, FacetValue } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Widget } from '../../mds-editor-instance.service';
-import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
-import { MdsWidgetType } from '../../../types/types';
+import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { Tree } from '../mds-editor-widget-tree/tree';
+import { MdsWidgetType, ValueType } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-mds-editor-widget-search-suggestions',

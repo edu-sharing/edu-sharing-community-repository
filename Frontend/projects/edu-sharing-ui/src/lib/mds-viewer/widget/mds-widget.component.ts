@@ -9,28 +9,93 @@ import {
     ViewChild,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { DateHelper, FormatSizePipe, UIConstants } from 'ngx-edu-sharing-ui';
-import { MdsEditorInstanceService, Widget } from '../../mds-editor/mds-editor-instance.service';
-import { MdsEditorViewComponent } from '../../mds-editor/mds-editor-view/mds-editor-view.component';
-import { ViewInstanceService } from '../../mds-editor/mds-editor-view/view-instance.service';
-import { MdsEditorWidgetBase, ValueType } from '../../mds-editor/widgets/mds-editor-widget-base';
-import { RestHelper } from '../../../../core-module/rest/rest-helper';
-import { RestConstants } from '../../../../core-module/rest/rest-constants';
-import { MdsWidgetType } from '../../types/types';
-import { UIService } from '../../../../core-module/rest/services/ui.service';
 import { MatRipple } from '@angular/material/core';
 import { filter, first, map } from 'rxjs/operators';
-import { MdsValue } from 'ngx-edu-sharing-api';
-import { UIHelper } from '../../../../core-ui-module/ui-helper';
-import { MdsEditInterface } from '../../mds-editor/mds-editor-single-widget/mds-editor-single-widget.component';
-import { Toast } from '../../../../services/toast';
+import { MdsValue, MdsWidget, Node, RestConstants, Suggestion } from 'ngx-edu-sharing-api';
+import { UIConstants } from '../../util/ui-constants';
+import { DateHelper } from '../../util/DateHelper';
+import { UIService } from '../../services/ui.service';
+import { ViewInstanceService } from '../view-instance.service';
+import { RestHelper } from '../../util/rest-helper';
+import { FormatSizePipe } from '../../pipes/file-size.pipe';
+import { BehaviorSubject, of } from 'rxjs';
+import { MdsViewerService } from '../mds-viewer.service';
+import { Values } from '../../services/search-helper.service';
+import { NodeHelperService } from '../../services/node-helper.service';
+
+export enum MdsType {
+    Io = 'io',
+    IoBulk = 'io_bulk',
+    Map = 'map',
+    MapRef = 'map_ref',
+    IoChildObject = 'io_childobject',
+    Collection = 'collection',
+    ToolDefinition = 'tool_definition',
+    ToolInstance = 'tool_instance',
+    SavedSearch = 'saved_search',
+}
+
+export interface MdsValueList {
+    values: Suggestion[];
+}
+export interface MdsViewerWidget {
+    definition: MdsWidget;
+    getInitalValuesAsync(): Promise<InitialValues>;
+    getInitialDisplayValues(): BehaviorSubject<MdsValueList>;
+}
+export enum MdsWidgetType {
+    Text = 'text',
+    Number = 'number',
+    Email = 'email',
+    Date = 'date',
+    Month = 'month',
+    Color = 'color',
+    Textarea = 'textarea',
+    TinyMCE = 'tinyMCE',
+    VCard = 'vcard',
+    Checkbox = 'checkbox',
+    RadioHorizontal = 'radioHorizontal',
+    RadioVertical = 'radioVertical',
+    CheckboxHorizontal = 'checkboxHorizontal',
+    CheckboxVertical = 'checkboxVertical',
+    MultiValueBadges = 'multivalueBadges',
+    MultiValueFixedBadges = 'multivalueFixedBadges',
+    MultiValueSuggestBadges = 'multivalueSuggestBadges',
+    MultiValueAuthorityBadges = 'multivalueAuthorityBadges',
+    Singleoption = 'singleoption',
+    Slider = 'slider',
+    Range = 'range',
+    Duration = 'duration',
+    SingleValueTree = 'singlevalueTree',
+    SingleValueSuggestBadges = 'singlevalueSuggestBadges',
+    MultiValueTree = 'multivalueTree',
+    DefaultValue = 'defaultvalue',
+    FacetList = 'facetList',
+}
+
+export interface InitialValues {
+    /** Values that are initially present in all nodes. */
+    readonly jointValues: string[];
+    /**
+     * Values that are initially present in some but not all nodes.
+     *
+     * Can be null but will never be set to an empty array.
+     */
+    readonly individualValues?: string[];
+}
+export enum ValueType {
+    String,
+    MultiValue,
+    Range,
+}
 
 @Component({
     selector: 'es-mds-widget',
     templateUrl: 'mds-widget.component.html',
     styleUrls: ['mds-widget.component.scss'],
+    // required for external editor injection
 })
-export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, OnChanges {
+export class MdsWidgetComponent implements OnInit, OnChanges {
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     private static readonly inlineEditing: MdsWidgetType[] = [
         MdsWidgetType.Text,
@@ -49,17 +114,24 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
 
     readonly valueType = ValueType.String;
 
+    // use any instead of `Widget` cause of external type
+    @Input() widget: MdsViewerWidget;
     @Input() showCaption = true;
     /**
      * allow inline editing
      */
     @Input() inlineEditing: 'auto' | 'always' = 'auto';
-    @Input() view: MdsEditInterface;
+    @Input() definition: MdsWidget;
+    // use any instead of MdsEditorViewComponent cause of external type
+    @Input() view: any;
 
     @ViewChild('editWrapper') editWrapper: ElementRef;
     @ViewChild(MatRipple) matRipple: MatRipple;
     basicType: string;
     rawValue: { path: MdsValue[]; id: string }[];
+
+    private mdsEditorInstance: any;
+    license$ = new BehaviorSubject<{ name: string; icon: string }>(null);
 
     get headingLevel() {
         return this.viewInstance.headingLevel;
@@ -69,33 +141,42 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
     private temporaryValue: string[] = undefined;
 
     constructor(
-        public mdsEditorInstance: MdsEditorInstanceService,
-        translate: TranslateService,
+        // public mdsEditorInstance: MdsEditorInstanceService,
+        public translate: TranslateService,
         private ui: UIService,
-        toast: Toast,
         private viewInstance: ViewInstanceService,
+        private mdsViewerService: MdsViewerService,
+        private nodeHelper: NodeHelperService,
     ) {
-        super(toast, mdsEditorInstance, translate);
+        // super(toast, null, translate);
     }
 
-    ngOnChanges(changes: SimpleChanges): void {
-        this.value = this.getNodeValue();
+    async ngOnChanges(changes: SimpleChanges) {
+        this.value = await this.getNodeValue();
     }
 
     async ngOnInit() {
-        this.value = this.getNodeValue();
+        this.value = await this.getNodeValue();
         this.widget
             .getInitialDisplayValues()
-            .pipe(filter((v) => !!v))
-            .subscribe(async (value) => {
+            .pipe(filter((v: MdsValueList) => !!v))
+            .subscribe(async (value: MdsValueList) => {
                 this.value = value.values.map((v) => v.displayString);
             });
         this.basicType = this.getBasicType();
         this.rawValue = await this.getRawValue().toPromise();
     }
 
-    private getBasicType() {
-        switch (this.widget.definition.type) {
+    getDefinition(): MdsWidget {
+        return this.widget?.definition || this.definition;
+    }
+
+    getBasicType() {
+        switch (this.getDefinition().id) {
+            case 'license':
+                return 'license';
+        }
+        switch (this.getDefinition().type) {
             case 'text':
             case 'email':
             case 'month':
@@ -128,26 +209,44 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
 
     supportsInlineEditing() {
         return MdsWidgetComponent.inlineEditing.includes(
-            this.widget.definition.type as MdsWidgetType,
+            this.widget?.definition.type as MdsWidgetType,
         );
     }
-
-    private getNodeValue() {
+    private getNodeValues() {
+        console.log(this.mdsViewerService);
+        if (this.mdsEditorInstance) {
+            return (
+                (this.mdsEditorInstance.values$.value as Values) ||
+                this.mdsEditorInstance.nodes$.value.map((n: Node) => n.properties)
+            );
+        } else {
+            return this.mdsViewerService.values$.value;
+        }
+    }
+    private async getNodeValue() {
         if (this.temporaryValue !== undefined) {
             return this.getValue(this.temporaryValue);
         }
-        const id = this.widget.definition.id;
-        if (this.widget.definition.type === 'range') {
-            const values = this.mdsEditorInstance.values$.value;
+        const id = this.getDefinition().id;
+        const values = this.getNodeValues();
+        if (this.getBasicType() === 'license') {
+            this.license$.next({
+                icon: await this.nodeHelper.getLicenseIcon({
+                    properties: this.getNodeValues(),
+                } as Node),
+                name: this.nodeHelper.getLicenseName({ properties: this.getNodeValues() } as Node),
+            });
+        }
+        if (this.getDefinition().type === 'range') {
             if (values) {
                 return [values[id + '_from']?.[0], values[id + '_to']?.[0]];
             }
             return null;
-        } else if (this.mdsEditorInstance.values$.value?.[id]) {
+        } else if (values?.[id]) {
             // support on the fly changes+updates of the values
-            return this.getValue(this.mdsEditorInstance.values$.value[id]);
-        } else if (this.widget.getInitialValues()?.jointValues) {
-            return this.getValue(this.widget.getInitialValues().jointValues);
+            return this.getValue(values[id]);
+        } else if ((await this.widget.getInitalValuesAsync())?.jointValues) {
+            return (await this.widget.getInitalValuesAsync()).jointValues;
         } else {
             return null;
         }
@@ -159,10 +258,10 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
             return null;
         }
 
-        if (this.widget.definition.values) {
+        if (this.getDefinition().values) {
             const mapping = this.widget.definition.values
                 .filter((v: any) => data.filter((d) => d === v.id).length > 0)
-                .map((v) => v.caption);
+                .map((v: any) => v.caption);
             if (mapping) {
                 return mapping;
             }
@@ -172,26 +271,29 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
     }
 
     click() {
-        if (this.widget.definition.link === '_BLANK') {
+        if (this.getDefinition().link === '_BLANK') {
             window.open(this.formatText()[0]);
-        } else if (this.widget.definition.link === '_SELF') {
+        } else if (this.getDefinition().link === '_SELF') {
             window.location.href = this.formatText()[0];
         } else {
-            console.warn('Unsupported link type ' + this.widget.definition.link);
+            console.warn('Unsupported link type ' + this.getDefinition().link);
         }
     }
 
     isEmpty() {
+        if (this.basicType === 'license') {
+            return false;
+        }
         return this.value?.every((v) => !v) || this.value?.length === 0 || !this.value;
     }
 
     formatDate() {
         return this.value.map((v) => {
-            if (this.widget.definition.format) {
+            if (this.getDefinition().format) {
                 try {
-                    return new DatePipe('en').transform(v, this.widget.definition.format);
+                    return new DatePipe('en').transform(v, this.getDefinition().format);
                 } catch (e) {
-                    console.warn('Could not format date', e, this.widget.definition);
+                    console.warn('Could not format date', e, this.getDefinition());
                     return DateHelper.formatDate(this.translate, v, {
                         showAlwaysTime: true,
                     });
@@ -221,18 +323,21 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
             return v;
         });
     }
-
-    async finishEdit(instance: MdsEditorWidgetBase, store = false) {
+    // instance: MdsEditorWidgetBase
+    async finishEdit(instance: any, store = false) {
         if (store) {
             await this.mdsEditorInstance.saveWidgetValue(instance.widget);
         }
         this.temporaryValue = instance.widget.getValue();
-        this.value = this.getNodeValue();
+        this.value = await this.getNodeValue();
         this.editWrapper.nativeElement.children[0].innerHTML = null;
         await this.mdsEditorInstance.fetchDisplayValues(this.widget);
     }
 
     isEditable() {
+        if (!this.mdsEditorInstance) {
+            return false;
+        }
         if (this.inlineEditing === 'always') {
             return this.supportsInlineEditing();
         }
@@ -258,7 +363,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
      * return the path for a given value in a tree
      */
     private getPath(v: string) {
-        if (!this.widget.definition.values) {
+        if (!this.getDefinition().values) {
             return [
                 {
                     id: v,
@@ -269,7 +374,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
         const path: MdsValue[] = [];
         let pointer: string = v;
         for (let i = 0; i < 100; i++) {
-            const mapped = this.widget.definition.values.find((w) => w.id === pointer);
+            const mapped = this.getDefinition().values.find((w) => w.id === pointer);
             if (mapped) {
                 path.push(mapped);
                 pointer = mapped.parent;
@@ -285,20 +390,20 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
      * Note: Will not work in a bulk state!
      */
     private getRawValue() {
-        return this.mdsEditorInstance.nodes$.pipe(
-            first(),
-            map((v) =>
-                (v?.[0]?.properties[this.widget.definition.id] as string[])?.map((id) => {
-                    return {
-                        id,
-                        path: this.getPath(id),
-                    };
-                }),
-            ),
+        return (
+            this.mdsEditorInstance?.nodes$.pipe(
+                first(),
+                map((v: Node[]) =>
+                    (v?.[0]?.properties[this.widget.definition.id] as string[])?.map((id) => {
+                        return {
+                            id,
+                            path: this.getPath(id),
+                        };
+                    }),
+                ),
+            ) || of(null)
         );
     }
-
-    protected readonly UIHelper = UIHelper;
 
     getSearchParams(key: MdsValue) {
         const params: any = {};

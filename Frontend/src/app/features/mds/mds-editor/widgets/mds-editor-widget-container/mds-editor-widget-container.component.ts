@@ -21,7 +21,6 @@ import { MdsWidget } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, startWith, takeUntil } from 'rxjs/operators';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
-import { ViewInstanceService } from '../../mds-editor-view/view-instance.service';
 import {
     BulkBehavior,
     BulkMode,
@@ -29,10 +28,10 @@ import {
     InputStatus,
     NativeWidgetComponent,
 } from '../../../types/types';
-import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { FormFieldRegistrationService } from './form-field-registration.service';
 import { UIService } from '../../../../../core-module/rest/services/ui.service';
-import { UIAnimation } from 'ngx-edu-sharing-ui';
+import { UIAnimation, ValueType, ViewInstanceService } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-mds-editor-widget-container',

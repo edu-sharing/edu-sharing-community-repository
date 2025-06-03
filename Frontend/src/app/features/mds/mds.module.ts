@@ -10,7 +10,6 @@ import { MdsEditorWrapperComponent } from './mds-editor/mds-editor-wrapper/mds-e
 import { MdsEditorComponent } from './mds-editor/mds-editor.component';
 import { SearchFieldFacetsComponent } from './mds-editor/search-field-facets/search-field-facets.component';
 import { LabelPipe } from './mds-editor/shared/label.pipe';
-import { MdsDurationPipe } from './mds-editor/shared/mds-duration.pipe';
 import { MdsEditorWidgetAuthorComponent } from './mds-editor/widgets/mds-editor-widget-author/mds-editor-widget-author.component';
 import { MdsEditorWidgetAuthorityComponent } from './mds-editor/widgets/mds-editor-widget-authority/mds-editor-widget-authority.component';
 import { MdsEditorWidgetCheckboxComponent } from './mds-editor/widgets/mds-editor-widget-checkbox/mds-editor-widget-checkbox.component';
@@ -46,8 +45,6 @@ import { MdsEditorWidgetTreeComponent } from './mds-editor/widgets/mds-editor-wi
 import { MdsEditorWidgetVCardComponent } from './mds-editor/widgets/mds-editor-widget-vcard/mds-editor-widget-vcard.component';
 import { MdsEditorWidgetVersionComponent } from './mds-editor/widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 import { MdsEditorWidgetTinyMCEComponent } from './mds-editor/widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-tinymce.component';
-import { MdsViewerComponent } from './mds-viewer/mds-viewer.component';
-import { MdsWidgetComponent } from './mds-viewer/widget/mds-widget.component';
 import { EduSharingUiModule } from 'ngx-edu-sharing-ui';
 import { MdsEditorWidgetChildobjectsComponent } from './mds-editor/widgets/mds-editor-widget-childobjects/mds-editor-widget-childobjects.component';
 import { LicenseAiPipe } from './mds-editor/widgets/mds-editor-widget-license/license-details/license-ai.pipe';
@@ -94,11 +91,8 @@ import { MdsEditorSingleWidgetComponent } from './mds-editor/mds-editor-single-w
         MdsEditorWidgetVersionComponent,
         MdsEditorWrapperComponent,
         MdsEditorSingleWidgetComponent,
-        MdsViewerComponent,
-        MdsWidgetComponent,
         RegisterFormFieldDirective,
         SearchFieldFacetsComponent,
-        MdsDurationPipe,
     ],
     imports: [SharedModule, NgxSliderModule, EditorModule, MatFormFieldModule, EduSharingUiModule],
     exports: [
@@ -108,7 +102,6 @@ import { MdsEditorSingleWidgetComponent } from './mds-editor/mds-editor-single-w
         MdsEditorWidgetAuthorComponent,
         MdsEditorWidgetCollectionsComponent,
         MdsEditorWrapperComponent,
-        MdsViewerComponent,
         MdsEditorCoreComponent,
         MdsEditorSingleWidgetComponent,
         SearchFieldFacetsComponent,

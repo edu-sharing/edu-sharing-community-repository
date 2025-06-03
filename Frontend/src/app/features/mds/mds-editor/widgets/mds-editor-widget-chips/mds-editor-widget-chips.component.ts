@@ -16,9 +16,8 @@ import {
 } from '@angular/material/autocomplete';
 import { MatChipInputEvent, MatChipOption, MatChipRow } from '@angular/material/chips';
 import { MatTooltip } from '@angular/material/tooltip';
-import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject, combineLatest, EMPTY, from, Observable, Subject, timer } from 'rxjs';
+import { BehaviorSubject, combineLatest, from, Observable, Subject, timer } from 'rxjs';
 import {
     debounce,
     debounceTime,
@@ -29,23 +28,16 @@ import {
     shareReplay,
     startWith,
     switchMap,
-    tap,
     throttleTime,
 } from 'rxjs/operators';
-import { Toast, ToastType } from '../../../../../services/toast';
+import { ToastType } from '../../../../../services/toast';
 import { UIHelper } from '../../../../../core-ui-module/ui-helper';
-import { MdsWidget, MdsWidgetType, MdsWidgetValue } from '../../../types/types';
-import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
+import { MdsWidgetValue } from '../../../types/types';
 import { DisplayValue } from '../DisplayValues';
-import {
-    MdsEditorWidgetBase,
-    MdsEditorWidgetChipsSuggestionBase,
-    ValueType,
-} from '../mds-editor-widget-base';
+import { MdsEditorWidgetChipsSuggestionBase } from '../mds-editor-widget-base';
 import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
 import { Helper } from '../../../../../core-module/rest/helper';
-import { SuggestionResponseDto, SuggestionStatus } from 'ngx-edu-sharing-api';
-import { AuthorityNamePipe } from '../../../../../shared/pipes/authority-name.pipe';
+import { MdsWidgetType, ValueType } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-mds-editor-widget-chips',

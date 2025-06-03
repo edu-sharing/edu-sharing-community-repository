@@ -5,8 +5,9 @@ import { mdsStorybookProviders, WidgetDummy } from '../../storybook-utils';
 import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
 import { RegisterFormFieldDirective } from '../mds-editor-widget-container/register-form-field.directive';
 import { MdsEditorWidgetChipsComponent } from './mds-editor-widget-chips.component';
-import { MdsWidgetType, RequiredMode } from '../../../types/types';
+import { RequiredMode } from '../../../types/types';
 import { HighlightPipe } from '../mds-editor-widget-tree/mds-editor-widget-tree-core/highlight.pipe';
+import { MdsWidgetType } from 'ngx-edu-sharing-ui';
 
 const meta: Meta<Widget['definition']> = {
     title: 'Mds/Widget/Chips',

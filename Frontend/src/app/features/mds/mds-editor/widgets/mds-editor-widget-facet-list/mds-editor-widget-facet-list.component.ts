@@ -1,5 +1,4 @@
 import {
-    ApplicationRef,
     ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
@@ -13,11 +12,12 @@ import { FacetAggregation, FacetValue, SearchService } from 'ngx-edu-sharing-api
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { debounceTime, filter, finalize, first, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
-import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
 import { Helper } from '../../../../../core-module/rest/helper';
 import { Toast } from '../../../../../services/toast';
+import { ValueType } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-mds-editor-widget-facet-list',

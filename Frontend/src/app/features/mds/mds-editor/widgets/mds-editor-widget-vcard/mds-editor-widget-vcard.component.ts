@@ -1,11 +1,8 @@
 import { filter } from 'rxjs/operators';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { VCard } from 'ngx-edu-sharing-ui';
-import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
-import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import { ValueType, VCard } from 'ngx-edu-sharing-ui';
+import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
-import { TranslateService } from '@ngx-translate/core';
-import { Toast } from '../../../../../services/toast';
 import { MatTabGroup } from '@angular/material/tabs';
 import { MdsWidget } from '../../../types/types';
 

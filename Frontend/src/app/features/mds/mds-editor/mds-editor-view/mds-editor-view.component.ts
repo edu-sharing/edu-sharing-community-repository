@@ -21,9 +21,7 @@ import {
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { BehaviorSubject, Observable, ReplaySubject, Subject } from 'rxjs';
 import { filter, first, map, take, takeUntil } from 'rxjs/operators';
-import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { JUMP_MARK_POSTFIX } from '../../../dialogs/card-dialog/card-dialog-container/jump-marks-handler.directive';
-import { MdsWidgetComponent } from '../../mds-viewer/widget/mds-widget.component';
 import { NativeWidgets, WidgetComponents } from '../../types/mds-types';
 import {
     Constraints,
@@ -31,7 +29,6 @@ import {
     GeneralWidget,
     InputStatus,
     MdsView,
-    MdsWidgetType,
     NativeWidgetType,
     Values,
 } from '../../types/types';
@@ -39,14 +36,18 @@ import { Node } from 'ngx-edu-sharing-api';
 import { MdsEditorCoreComponent } from '../mds-editor-core/mds-editor-core.component';
 import { MdsEditorInstanceService, Widget } from '../mds-editor-instance.service';
 import { Attributes, getAttributesArray } from '../util/parse-attributes';
-import { replaceElementWithDiv } from '../util/replace-element-with-div';
-import { MdsEditorWidgetBase } from '../widgets/mds-editor-widget-base';
 import { MdsEditorWidgetErrorComponent } from '../widgets/mds-editor-widget-error/mds-editor-widget-error.component';
 import { MdsEditorWidgetSuggestionChipsComponent } from '../widgets/mds-editor-widget-suggestion-chips/mds-editor-widget-suggestion-chips.component';
-import { ViewInstanceService } from './view-instance.service';
 import { JumpMark, JumpMarksService } from '../../../../services/jump-marks.service';
-import { UIAnimation } from 'ngx-edu-sharing-ui';
 import { MdsEditInterface } from '../mds-editor-single-widget/mds-editor-single-widget.component';
+import {
+    MdsWidgetComponent,
+    MdsWidgetType,
+    replaceElementWithDiv,
+    UIAnimation,
+    UIService,
+    ViewInstanceService,
+} from 'ngx-edu-sharing-ui';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;
@@ -113,6 +114,7 @@ export class MdsEditorViewComponent
         private mdsEditorInstance: MdsEditorInstanceService,
         private ngZone: NgZone,
         private viewInstance: ViewInstanceService,
+        private uiService: UIService,
         public injector: Injector,
         @Optional() private jumpMarks: JumpMarksService,
     ) {
@@ -257,7 +259,7 @@ export class MdsEditorViewComponent
             this.mdsEditorInstance.widgets.value.map((w) => w.definition),
         );
         element = replaceElementWithDiv(element);
-        UIHelper.injectAngularComponent(
+        UIService.injectAngularComponent(
             this.factoryResolver,
             this.containerRef,
             MdsEditorWidgetErrorComponent,
@@ -280,8 +282,7 @@ export class MdsEditorViewComponent
         element = replaceElementWithDiv(element);
         const WidgetComponent = NativeWidgets[widgetName];
         if (!WidgetComponent) {
-            UIHelper.injectAngularComponent(
-                this.factoryResolver,
+            this.uiService.injectAngularComponent(
                 this.containerRef,
                 MdsEditorWidgetErrorComponent,
                 element,
@@ -300,8 +301,7 @@ export class MdsEditorViewComponent
                 !WidgetComponent.constraints.onConstraintFailed ||
                 WidgetComponent.constraints.onConstraintFailed === 'showError'
             ) {
-                UIHelper.injectAngularComponent(
-                    this.factoryResolver,
+                this.uiService.injectAngularComponent(
                     this.containerRef,
                     MdsEditorWidgetErrorComponent,
                     element,
@@ -320,8 +320,7 @@ export class MdsEditorViewComponent
             return;
         }
         this.ngZone.runOutsideAngular(() => {
-            const nativeWidget = UIHelper.injectAngularComponent(
-                this.factoryResolver,
+            const nativeWidget = this.uiService.injectAngularComponent(
                 this.containerRef,
                 WidgetComponent,
                 element,

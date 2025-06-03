@@ -74,6 +74,7 @@ export {
     Tool,
     NodeSuggestionResponseDto,
     SuggestionResponseDto,
+    Suggestion,
     Tools,
     User,
     UserProfile,

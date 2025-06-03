@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { NgModule } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatRippleModule } from '@angular/material/core';
 import { MatMenuModule } from '@angular/material/menu';
@@ -28,9 +28,16 @@ import { SortDropdownComponent } from '../sort-dropdown/sort-dropdown.component'
 import { SpinnerComponent } from '../spinner/spinner.component';
 import { PropertySlugPipe } from '../pipes/property-slug.pipe';
 import { NodeLicensePipe } from '../pipes/node-license.pipe';
+import { MdsWidgetComponent } from '../mds-viewer/widget/mds-widget.component';
+import { MdsDurationPipe } from '../pipes/mds-duration.pipe';
+import { MdsViewerComponent } from '../mds-viewer/mds-viewer.component';
+import { SpinnerSmallComponent } from '../spinner-small/spinner-small.component';
 
 @NgModule({
+    schemas: [CUSTOM_ELEMENTS_SCHEMA],
     declarations: [
+        MdsViewerComponent,
+        MdsWidgetComponent,
         ActionbarComponent,
         BorderBoxObserverDirective,
         CheckTextOverflowDirective,
@@ -39,6 +46,7 @@ import { NodeLicensePipe } from '../pipes/node-license.pipe';
         FormatDatePipe,
         FormatSizePipe,
         IconDirective,
+        MdsDurationPipe,
         InfiniteScrollDirective,
         PropertySlugPipe,
         NodeIconPipe,
@@ -57,6 +65,7 @@ import { NodeLicensePipe } from '../pipes/node-license.pipe';
         CommonModule,
         MatMenuModule,
         SpinnerComponent,
+        SpinnerSmallComponent,
         MatButtonModule,
         MatTooltipModule,
         MatRippleModule,
@@ -64,6 +73,8 @@ import { NodeLicensePipe } from '../pipes/node-license.pipe';
         RouterModule,
     ],
     exports: [
+        MdsViewerComponent,
+        MdsWidgetComponent,
         ActionbarComponent,
         BorderBoxObserverDirective,
         CheckTextOverflowDirective,
@@ -71,6 +82,7 @@ import { NodeLicensePipe } from '../pipes/node-license.pipe';
         FocusStateDirective,
         FormatDatePipe,
         FormatSizePipe,
+        MdsDurationPipe,
         IconDirective,
         InfiniteScrollDirective,
         PropertySlugPipe,
@@ -82,6 +94,7 @@ import { NodeLicensePipe } from '../pipes/node-license.pipe';
         NodeUrlComponent,
         SortDropdownComponent,
         SpinnerComponent,
+        SpinnerSmallComponent,
         VCardNamePipe,
     ],
 })

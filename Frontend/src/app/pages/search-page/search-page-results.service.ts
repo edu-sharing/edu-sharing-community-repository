@@ -28,6 +28,7 @@ import {
     ListItemSort,
     ListSortConfig,
     MdsHelperService,
+    MdsWidgetType,
     NodeEntriesDisplayType,
     notNull,
     SearchHelperService,
@@ -41,7 +42,6 @@ import {
 import { SearchPageRestoreService } from './search-page-restore.service';
 import { SearchPageService, SearchRequestParams } from './search-page.service';
 import { RestConstants } from '../../core-module/rest/rest-constants';
-import { MdsWidgetType } from 'src/app/features/mds/types/types';
 import { ActivatedRoute } from '@angular/router';
 import { UserModifiableValuesService } from './user-modifiable-values';
 import { Sort } from '@angular/material/sort';

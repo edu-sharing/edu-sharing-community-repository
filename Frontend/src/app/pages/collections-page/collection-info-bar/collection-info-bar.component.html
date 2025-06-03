@@ -104,6 +104,7 @@
       <es-mds-viewer
         #mds
         *ngIf="collection?.properties"
+        [mdsEditorInstanceService]="mdsEditorInstanceService"
         groupId="collection_sidebar"
         [data]="collection.properties"
         [headingLevel]="2"

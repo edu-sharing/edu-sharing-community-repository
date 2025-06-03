@@ -48,7 +48,6 @@ import { LicenseSourceComponent } from './components/license-source/license-sour
 import { LinkComponent } from './components/link/link.component';
 import { MultiLineLabelComponent } from './components/multi-line-label/multi-line-label.component';
 import { PoweredByComponent } from './components/powered-by/powered-by.component';
-import { SpinnerSmallComponent } from './components/spinner-small/spinner-small.component';
 import { TutorialComponent } from './components/tutorial/tutorial.component';
 import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
 import { UserQuotaComponent } from './components/user-quota/user-quota.component';
@@ -106,7 +105,6 @@ import { extensionSchemas } from '../extension/extension-schemas';
         SafeHtmlPipe,
         SkipTargetDirective,
         SmallCollectionComponent,
-        SpinnerSmallComponent,
         SplitNewLinesPipe,
         TitleDirective,
         ToolpermissionCheckDirective,
@@ -209,7 +207,6 @@ import { extensionSchemas } from '../extension/extension-schemas';
         SafeHtmlPipe,
         SkipTargetDirective,
         SmallCollectionComponent,
-        SpinnerSmallComponent,
         SplitNewLinesPipe,
         TitleDirective,
         ToolpermissionCheckDirective,

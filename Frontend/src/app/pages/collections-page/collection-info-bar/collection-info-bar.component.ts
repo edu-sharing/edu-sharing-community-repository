@@ -12,13 +12,19 @@ import { RestHelper } from '../../../core-module/rest/rest-helper';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { Permission } from '../../../core-module/rest/data-object';
 import { NodeHelperService } from '../../../services/node-helper.service';
-import { ActionbarComponent, ColorHelper, PreferredColor } from 'ngx-edu-sharing-ui';
-import { MdsViewerComponent } from '../../../features/mds/mds-viewer/mds-viewer.component';
+import {
+    ActionbarComponent,
+    ColorHelper,
+    MdsViewerComponent,
+    PreferredColor,
+} from 'ngx-edu-sharing-ui';
+import { MdsEditorInstanceService } from '../../../features/mds/mds-editor/mds-editor-instance.service';
 
 @Component({
     selector: 'es-collection-info-bar',
     templateUrl: 'collection-info-bar.component.html',
     styleUrls: ['collection-info-bar.component.scss'],
+    providers: [MdsEditorInstanceService],
 })
 export class CollectionInfoBarComponent implements OnChanges {
     @ViewChild('actionbar') actionbar: ActionbarComponent;
@@ -28,7 +34,11 @@ export class CollectionInfoBarComponent implements OnChanges {
     @Output() edit = new EventEmitter<void>();
     stats: NodeStats;
 
-    constructor(private nodeHelper: NodeHelperService, private nodeService: NodeService) {}
+    constructor(
+        private nodeHelper: NodeHelperService,
+        private nodeService: NodeService,
+        public mdsEditorInstanceService: MdsEditorInstanceService,
+    ) {}
 
     async ngOnChanges(changes: SimpleChanges) {
         if (changes.collection?.currentValue) {

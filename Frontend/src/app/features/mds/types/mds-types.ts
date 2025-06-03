@@ -1,9 +1,4 @@
-import {
-    MdsEditorWidgetComponent,
-    MdsWidgetType,
-    NativeWidgetClass,
-    NativeWidgetType,
-} from './types';
+import { MdsEditorWidgetComponent, NativeWidgetClass, NativeWidgetType } from './types';
 import { MdsEditorWidgetPreviewComponent } from '../mds-editor/widgets/mds-editor-widget-preview/mds-editor-widget-preview.component';
 import { MdsEditorWidgetAuthorComponent } from '../mds-editor/widgets/mds-editor-widget-author/mds-editor-widget-author.component';
 import { MdsEditorWidgetVersionComponent } from '../mds-editor/widgets/mds-editor-widget-version/mds-editor-widget-version.component';
@@ -28,6 +23,7 @@ import { MdsEditorWidgetDurationComponent } from '../mds-editor/widgets/mds-edit
 import { MdsEditorWidgetTreeComponent } from '../mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetFacetListComponent } from '../mds-editor/widgets/mds-editor-widget-facet-list/mds-editor-widget-facet-list.component';
 import { MdsEditorWidgetCollectionsComponent } from '../mds-editor/widgets/mds-editor-widget-collections/mds-editor-widget-collections.component';
+import { MdsWidgetType } from 'ngx-edu-sharing-ui';
 
 /**
  * - `nodes`:

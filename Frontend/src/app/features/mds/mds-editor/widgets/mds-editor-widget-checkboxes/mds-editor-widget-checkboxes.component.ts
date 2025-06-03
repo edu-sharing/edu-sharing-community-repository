@@ -1,10 +1,11 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { UntypedFormArray, UntypedFormControl, ValidatorFn } from '@angular/forms';
 import { filter } from 'rxjs/operators';
-import { MdsWidgetType } from '../../../types/types';
 import { DisplayValues } from '../DisplayValues';
-import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
+import { MdsWidgetType, ValueType } from 'ngx-edu-sharing-ui';
+
 @Component({
     selector: 'es-mds-editor-widget-checkboxes',
     templateUrl: './mds-editor-widget-checkboxes.component.html',

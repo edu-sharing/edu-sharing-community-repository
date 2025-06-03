@@ -9,12 +9,7 @@ import { map, Observable } from 'rxjs';
 import { Toast, ToastType } from '../../../../services/toast';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 import { TranslateService } from '@ngx-translate/core';
-
-export enum ValueType {
-    String,
-    MultiValue,
-    Range,
-}
+import { ValueType } from 'ngx-edu-sharing-ui';
 
 @Directive()
 export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {

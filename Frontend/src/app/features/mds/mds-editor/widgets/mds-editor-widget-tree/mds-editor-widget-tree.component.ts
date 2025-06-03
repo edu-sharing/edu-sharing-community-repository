@@ -15,13 +15,10 @@ import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { debounceTime, filter, map, startWith, takeUntil } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
-import { MdsWidget, MdsWidgetType, MdsWidgetValue } from '../../../types/types';
+import { MdsWidget, MdsWidgetValue } from '../../../types/types';
+import { MdsWidgetType, ValueType } from 'ngx-edu-sharing-ui';
 import { DisplayValue } from '../DisplayValues';
-import {
-    MdsEditorWidgetBase,
-    MdsEditorWidgetChipsSuggestionBase,
-    ValueType,
-} from '../mds-editor-widget-base';
+import { MdsEditorWidgetBase, MdsEditorWidgetChipsSuggestionBase } from '../mds-editor-widget-base';
 import { MdsEditorWidgetTreeCoreComponent } from './mds-editor-widget-tree-core/mds-editor-widget-tree-core.component';
 import { Tree } from './tree';
 import { MatChipOption, MatChipRow } from '@angular/material/chips';

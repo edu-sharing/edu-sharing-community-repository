@@ -31,4 +31,8 @@ export class RestHelper {
         }
         return value;
     }
+
+    public static hasAccessPermission(node: Node, permission: string): boolean {
+        return node.access && node.access.indexOf(permission) != -1;
+    }
 }

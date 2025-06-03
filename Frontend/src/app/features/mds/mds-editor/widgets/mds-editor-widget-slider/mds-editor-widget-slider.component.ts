@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { Options } from '@angular-slider/ngx-slider';
-import { MdsWidget, MdsWidgetType, MdsWidgetValue } from '../../../types/types';
-import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import { MdsWidget, MdsWidgetValue } from '../../../types/types';
+import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
+import { MdsWidgetType, ValueType } from 'ngx-edu-sharing-ui';
 
 @Component({
     templateUrl: './mds-editor-widget-slider.component.html',

@@ -1,11 +1,12 @@
-import { applicationConfig, moduleMetadata, type Meta, type StoryObj } from '@storybook/angular';
+import { applicationConfig, type Meta, moduleMetadata, type StoryObj } from '@storybook/angular';
 import { SharedModule } from '../../../../../shared/shared.module';
-import { MdsWidgetType, RequiredMode } from '../../../types/types';
+import { RequiredMode } from '../../../types/types';
 import { Widget } from '../../mds-editor-instance.service';
-import { WidgetDummy, mdsStorybookProviders } from '../../storybook-utils';
+import { mdsStorybookProviders, WidgetDummy } from '../../storybook-utils';
 import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
 import { RegisterFormFieldDirective } from '../mds-editor-widget-container/register-form-field.directive';
 import { MdsEditorWidgetTextComponent } from './mds-editor-widget-text.component';
+import { MdsWidgetType } from 'ngx-edu-sharing-ui';
 
 // More on how to set up stories at: https://storybook.js.org/docs/angular/writing-stories/introduction
 const meta: Meta<Widget['definition']> = {
