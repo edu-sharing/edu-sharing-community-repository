@@ -13,7 +13,7 @@ import {
     UIConstants,
 } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { filter, takeUntil } from 'rxjs/operators';
 import { RestConnectorService } from '../core-module/core.module';
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { CardDialogRef } from '../features/dialogs/card-dialog/card-dialog-ref';
@@ -84,12 +84,14 @@ export class Toast extends ToastAbstract implements OnDestroy {
         private snackBar: MatSnackBar,
     ) {
         super();
-        this.messageQueue.pipe(takeUntil(this.destroyed)).subscribe((message) => {
-            if (this.isInstanceVisible) {
-                return;
-            }
-            this.showNext();
-        });
+        this.messageQueue
+            .pipe(takeUntil(this.destroyed.pipe(filter((d) => d === true))))
+            .subscribe((message) => {
+                if (this.isInstanceVisible) {
+                    return;
+                }
+                this.showNext();
+            });
         this.accessibility
             .observe(['toastDuration', 'toastMode'])
             .pipe(takeUntil(this.destroyed))
