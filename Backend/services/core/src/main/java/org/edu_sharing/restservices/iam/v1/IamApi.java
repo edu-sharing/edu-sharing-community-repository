@@ -88,12 +88,16 @@ public class IamApi {
             if (status != null)
                 filter.put(CCConstants.getValidLocalName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS), status.name());
 
+            sortProperties = (sortProperties != null && !sortProperties.isEmpty())
+                    ? sortProperties.stream().map(p -> CCConstants.getValidGlobalName(p) == null ? "cm:"+p : p).collect(Collectors.toList())
+                    : sortProperties;
+
             SearchResult<String> search = SearchServiceFactory.getSearchService(repoDao.getId()).searchUsers(
                     pattern,
                     global == null ? true : global,
                     skipCount != null ? skipCount : 0,
                     maxItems != null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS,
-                    new SortDefinition(CCConstants.NAMESPACE_CM, sortProperties, sortAscending),
+                    new SortDefinition(sortProperties, sortAscending),
                     filter
             );
 
