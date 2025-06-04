@@ -4,6 +4,7 @@ import {
     Component,
     Input,
     OnChanges,
+    OnInit,
     signal,
     SimpleChanges,
     ViewChild,
@@ -17,7 +18,7 @@ import { PdfComponent } from 'ngx-rendering-service-lib';
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],
 })
-export class AppComponent implements OnChanges, AfterViewInit {
+export class AppComponent implements OnChanges, AfterViewInit, OnInit {
     @ViewChild(PdfComponent) pdfComponent: PdfComponent;
     @Input() encoded_node: string;
     @Input() signature: string;
@@ -26,10 +27,17 @@ export class AppComponent implements OnChanges, AfterViewInit {
     @Input() render_url: string;
     @Input() encoded_user: string;
     @Input() service_worker_url: string;
+    @Input() activate_service_worker: boolean;
+    @Input() assets_url: string = '';
+    @Input() resource_url: string = '';
 
     node = signal<Node>(null);
     request = signal<RenderDataRequestWithToken>(null);
-    serviceWorkerUrl = signal<string>(null);
+
+    serviceWorkerUrl: string;
+    activateServiceWorker: boolean;
+    assetUrl: string;
+    resourceUrl: string;
 
     constructor(
         private renderHelperService: RenderHelperService,
@@ -44,6 +52,13 @@ export class AppComponent implements OnChanges, AfterViewInit {
         }
     }
 
+    ngOnInit() {
+        this.serviceWorkerUrl = this.service_worker_url;
+        this.activateServiceWorker = this.activate_service_worker;
+        this.assetUrl = this.assets_url;
+        this.resourceUrl = this.resource_url;
+    }
+
     async ngOnChanges(changes: SimpleChanges) {
         if (changes.encoded_node) {
             const data = await this.renderHelperService.getRenderDataForLms(
@@ -55,7 +70,6 @@ export class AppComponent implements OnChanges, AfterViewInit {
             );
             this.node.set(data.node);
             this.request.set(data.request);
-            this.serviceWorkerUrl.set(this.service_worker_url);
         }
     }
 }

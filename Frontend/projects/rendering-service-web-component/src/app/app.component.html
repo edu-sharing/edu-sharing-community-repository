@@ -1,9 +1,12 @@
 <rs-root
-  *ngIf="request() && node() && serviceWorkerUrl()"
+  *ngIf="request() && node()"
   [displayMode]="display_mode"
   [node]="node()"
   [request]="request()"
-  [serviceWorkerUrl]="serviceWorkerUrl()"
+  [serviceWorkerUrl]="serviceWorkerUrl"
+  [activateServiceWorker]="activateServiceWorker"
+  [assetUrl]="assetUrl"
 >
 </rs-root>
+
 <!-- <rs-module-pdf #pdf></rs-module-pdf> -->
