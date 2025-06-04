@@ -630,7 +630,8 @@
       "FILENAME": "Folgende Datei wird erstellt"
     },
     "CURRICULUM": {
-      "NAME": "Pinnwannd"
+      "NAME": "Pinnwand",
+      "TITLE": "Neue Pinnwand"
     },
     "GEOGEBRA": {
       "NAME": "Geogebra"
