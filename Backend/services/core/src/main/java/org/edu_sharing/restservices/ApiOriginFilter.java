@@ -1,26 +1,30 @@
 package org.edu_sharing.restservices;
 
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
 import java.io.IOException;
 import java.util.Arrays;
-
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.FilterConfig;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.util.List;
 
 public class ApiOriginFilter implements jakarta.servlet.Filter {
 	public static Logger logger=Logger.getLogger(ApiOriginFilter.class);
-
+	/**
+	 Endpoints that are allowed to be fetched with CORS wildcard
+	 Note: Only OPTIONS + GET methods are allowed
+	 */
+	List<String> CORS_ALLOWED_ENDPOINTS = Arrays.asList(
+			"/config/v1/values",
+			"/config/v1/language",
+			"/mds/v1/metadatasets"
+	);
 	public void doFilter(ServletRequest request, ServletResponse response,
-			FilterChain chain) throws IOException, ServletException {
-		
+						 FilterChain chain) throws IOException, ServletException {
+
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse res = (HttpServletResponse) response;
 		String origin = req.getHeader("Origin");
@@ -57,6 +61,19 @@ public class ApiOriginFilter implements jakarta.servlet.Filter {
 			res.addHeader(
 					"Access-Control-Allow-Credentials",
 					"true");
+		} else {
+			String pathInfo = req.getPathInfo();
+			// allow cors access for GET requests on uncritical endpoints
+			// required for (external) web component usage
+			if(Arrays.asList("OPTIONS", "GET").contains(req.getMethod()) &&
+					CORS_ALLOWED_ENDPOINTS.stream().anyMatch(c -> pathInfo != null && pathInfo.startsWith(c))
+			) {
+				res.addHeader(
+						"Access-Control-Allow-Credentials",
+						"false");
+				res.addHeader(
+						"Access-Control-Allow-Origin", "*");
+			}
 		}
 		chain.doFilter(request, response);
 	}
