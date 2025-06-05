@@ -189,18 +189,17 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     _root: NodeRoot;
     @Input() set root(root: NodeRoot) {
         this._root = root;
-        this.storage
-            .get(SessionStorageService.KEY_WORKSPACE_SORT + root, null)
-            .subscribe((data) => {
-                if (data?.active != null) {
-                    this.sort.active = data.active;
-                    this.sort.direction = data.direction;
-                } else {
-                    this.sort.active = RestConstants.CM_NAME;
-                    this.sort.direction = 'asc';
-                }
-            });
+        this.storage.get(this.getSortConfigKey(), null).subscribe((data) => {
+            if (data?.active != null) {
+                this.sort.active = data.active;
+                this.sort.direction = data.direction;
+            } else {
+                this.sort.active = RestConstants.CM_NAME;
+                this.sort.direction = 'asc';
+            }
+        });
     }
+
     @Input() set current(current: Node) {
         this.setNode(current);
     }
@@ -394,7 +393,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     }
     public async setSorting(config: ListSortConfig) {
         this.sort = config;
-        await this.storage.set(SessionStorageService.KEY_WORKSPACE_SORT + this._root, {
+        await this.storage.set(this.getSortConfigKey(), {
             active: config.active,
             direction: config.direction,
         });
@@ -510,5 +509,11 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         if (nodes.filter((n) => n.virtual && n.isDirectory).length) {
             this.refreshTree.emit();
         }
+    }
+    getSortConfigKey() {
+        return (
+            SessionStorageService.KEY_WORKSPACE_SORT +
+            (this._root === 'ALL_FILES' ? 'MY_FILES' : this._root)
+        );
     }
 }
