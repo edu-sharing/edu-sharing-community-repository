@@ -643,7 +643,7 @@
     <widget>
       <id>curriculum_editable</id>
       <caption>Zugriffsrechte</caption>
-      <bottomCaption>Welche Zugriffsrechte sollen Personen auf das Kanban erhalten, für die dieses Objekt in edu-sharing freigegeben wird. (Dieser Wert kann später im Curriculum für das Objekt geändert werden)</bottomCaption>
+      <bottomCaption>Welche Zugriffsrechte sollen Personen, für die dieses Objekt in edu-sharing freigegeben wird, auf die Pinnwand erhalten? Dieser Wert kann später in Curriculum für das Objekt geändert werden.</bottomCaption>
       <defaultvalue>0</defaultvalue>
       <type>singleoption</type>
       <values>

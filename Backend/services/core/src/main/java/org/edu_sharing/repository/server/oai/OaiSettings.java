@@ -12,7 +12,7 @@ import java.util.List;
 public class OaiSettings {
     private boolean enabled;
     private OaiIdentifier identify;
-    private String identiferPrefix;
+    private String identifierPrefix;
     private int itemsPerPage;
     private List<String> sets;
 }

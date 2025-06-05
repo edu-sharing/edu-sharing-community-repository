@@ -549,7 +549,8 @@
       "PLACEHOLDER": "Name of content"
     },
     "CURRICULUM": {
-      "NAME": "Kanban"
+      "NAME": "Kanban",
+      "TITLE": "New Kanban"
     },
     "GEOGEBRA": {
       "NAME": "Geogebra"
