@@ -422,7 +422,7 @@ public class NodeApi  {
 		try {
 			RepoProxy.RemoteRepoDetails remote = RepoProxyFactory.getRepoProxy().myTurn(repository, node);
 			if(remote != null) {
-				return RepoProxyFactory.getRepoProxy().getMetadata(remote.getRepository(), remote.getNodeId(), Filter.createShowAllFilter(), req);
+				return RepoProxyFactory.getRepoProxy().getMetadata(remote.getRepository(), remote.getNodeId(), Arrays.asList("-all-"), req);
 			}
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			node=NodeDao.mapNodeConstants(repoDao,node);
