@@ -38,7 +38,6 @@ import { Closable } from '../../features/dialogs/card-dialog/card-dialog-config'
 import {
     GenericDialogData,
     NEXT,
-    OK,
 } from '../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { CardDialogRef } from '../../features/dialogs/card-dialog/card-dialog-ref';
 
@@ -265,8 +264,6 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     login(password = this.password, code2Fa?: string) {
-        console.log('login', password, code2Fa);
-
         this.isLoading = true;
         this.connector.login(this.username, password, this.scope, code2Fa).subscribe(
             (data) => {
@@ -438,7 +435,6 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
         const result = await firstValueFrom(this.show2FaDialog.afterClosed());
         this.show2FaDialog = null;
         if (result === 'NEXT' && this.faConfirm.status === 'VALID') {
-            console.log(this.faConfirm, this.faConfirm.get('code').value);
             // do login
             this.isLoading = true;
             this.login(password, this.faConfirm.get('code').value);
