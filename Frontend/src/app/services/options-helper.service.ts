@@ -25,13 +25,12 @@ import {
     BehaviorSubject,
     forkJoin,
     forkJoin as observableForkJoin,
-    fromEvent,
     Observable,
     of,
     Subject,
     Subscription,
 } from 'rxjs';
-import { catchError, filter, first, map, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { catchError, filter, first, map, switchMap, tap } from 'rxjs/operators';
 import {
     ConfigurationService,
     FrameEventsService,
@@ -62,7 +61,7 @@ import { WorkspaceManagementDialogsComponent } from '../features/management-dial
 import { MainNavService } from '../main/navigation/main-nav.service';
 import { WorkspaceService } from '../pages/workspace-page/workspace.service';
 import { BridgeService } from './bridge.service';
-import { KeyboardShortcutsService, matchesShortcutCondition } from './keyboard-shortcuts.service';
+import { KeyboardShortcutsService } from './keyboard-shortcuts.service';
 import { MessageType } from '../util/message-type';
 import { forkJoinWithErrors } from '../util/rxjs/forkJoinWithErrors';
 import { ConfigOptionItem, NodeHelperService } from './node-helper.service';
@@ -613,6 +612,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         revokeNode.elementType = [ElementType.NodePublishedCopy];
         revokeNode.group = DefaultGroups.Delete;
         revokeNode.priority = 10;
+        revokeNode.permissions = [RestConstants.ACCESS_DELETE];
+        revokeNode.permissionsRightMode = NodesRightMode.Effective;
+        revokeNode.permissionsMode = HideMode.Hide;
 
         const editRevocation = new OptionItem('OPTIONS.EDIT_REVOCATION', 'edit', async (object) => {
             await this.revokeNode(object, data);
@@ -627,6 +629,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         editRevocation.elementType = [ElementType.NodeRevoked];
         editRevocation.group = DefaultGroups.Edit;
         editRevocation.priority = 10;
+        revokeNode.permissions = [RestConstants.ACCESS_WRITE];
+        revokeNode.permissionsRightMode = NodesRightMode.Effective;
+        revokeNode.permissionsMode = HideMode.Hide;
 
         const openOriginalNode = new OptionItem(
             'OPTIONS.OPEN_ORIGINAL_NODE',
