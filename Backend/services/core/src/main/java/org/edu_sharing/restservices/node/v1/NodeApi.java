@@ -1,6 +1,5 @@
 package org.edu_sharing.restservices.node.v1;
 
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -26,8 +25,8 @@ import org.edu_sharing.repository.server.NodeRefVersion;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LRMITool;
 import org.edu_sharing.restservices.*;
-import org.edu_sharing.restservices.node.v1.model.SearchResult;
 import org.edu_sharing.restservices.node.v1.model.*;
+import org.edu_sharing.restservices.node.v1.model.SearchResult;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.clientutils.ClientUtilsService;
 import org.edu_sharing.service.clientutils.WebsiteInformation;
@@ -418,7 +417,6 @@ public class NodeApi  {
 	public Response getMetadataSigned(
 			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
 			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-")) ) @QueryParam("propertyFilter") List<String> propertyFilter,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -426,12 +424,10 @@ public class NodeApi  {
 			if(remote != null) {
 				return RepoProxyFactory.getRepoProxy().getMetadata(remote.getRepository(), remote.getNodeId(), propertyFilter, req);
 			}
-			Filter filter = new Filter(propertyFilter);
-
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			node=NodeDao.mapNodeConstants(repoDao,node);
 
-			NodeDao nodeDao = NodeDao.getNode(repoDao, node, filter);
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node, Filter.createShowAllFilter());
 
 			Base64.Encoder encoder = Base64.getEncoder();
 			SignedNode signedNode = nodeDao.getSignedNode();
