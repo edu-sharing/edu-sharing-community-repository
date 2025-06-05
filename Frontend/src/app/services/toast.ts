@@ -94,7 +94,7 @@ export class Toast extends ToastAbstract implements OnDestroy {
             });
         this.accessibility
             .observe(['toastDuration', 'toastMode'])
-            .pipe(takeUntil(this.destroyed))
+            .pipe(takeUntil(this.destroyed.pipe(filter((d) => d === true))))
             .subscribe(({ toastDuration, toastMode }) => {
                 // TODO(Christopher, 2022-03-01): Do we need to clear existing toasts here?
                 this.messageQueue.next([]);
