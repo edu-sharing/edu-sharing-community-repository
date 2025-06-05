@@ -629,9 +629,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         editRevocation.elementType = [ElementType.NodeRevoked];
         editRevocation.group = DefaultGroups.Edit;
         editRevocation.priority = 10;
-        revokeNode.permissions = [RestConstants.ACCESS_WRITE];
-        revokeNode.permissionsRightMode = NodesRightMode.Effective;
-        revokeNode.permissionsMode = HideMode.Hide;
+        editRevocation.permissions = [RestConstants.ACCESS_WRITE];
+        editRevocation.permissionsRightMode = NodesRightMode.Effective;
+        editRevocation.permissionsMode = HideMode.Hide;
 
         const openOriginalNode = new OptionItem(
             'OPTIONS.OPEN_ORIGINAL_NODE',
