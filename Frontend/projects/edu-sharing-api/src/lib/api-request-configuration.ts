@@ -1,7 +1,7 @@
 import { HttpRequest } from '@angular/common/http';
 import { EventEmitter, Injectable } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
-import { ApiConfiguration } from './api/api-configuration';
+import { EduSharingApiConfiguration } from './edu-sharing-api-configuration';
 
 /**
  * Configuration for the performed HTTP requests
@@ -18,7 +18,7 @@ export class ApiRequestConfiguration {
     /** Emits each time, an API request is performed. */
     readonly apiRequest = new EventEmitter<void>();
 
-    constructor(private apiConfiguration: ApiConfiguration) {}
+    constructor(private apiConfiguration: EduSharingApiConfiguration) {}
 
     setLocale(locale: string): void {
         this._locale = locale;
@@ -86,7 +86,7 @@ export class ApiRequestConfiguration {
         }
         return req.clone({
             setHeaders: headers,
-            withCredentials: true,
+            withCredentials: this.apiConfiguration.withCredentials,
         });
     }
 

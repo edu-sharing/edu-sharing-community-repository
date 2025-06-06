@@ -30,7 +30,7 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
     @Input() activate_service_worker: boolean;
     @Input() assets_url: string = '';
     @Input() resource_url: string = '';
-
+    showInlineMetadata = false;
     node = signal<Node>(null);
     request = signal<RenderDataRequestWithToken>(null);
 
@@ -70,6 +70,7 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
             );
             this.node.set(data.node);
             this.request.set(data.request);
+            console.log(data);
         }
     }
 }

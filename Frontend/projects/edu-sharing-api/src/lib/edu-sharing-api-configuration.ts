@@ -1,5 +1,5 @@
 import { HttpRequest } from '@angular/common/http';
-import { Injectable, InjectionToken, Optional, Provider } from '@angular/core';
+import { Injectable, InjectionToken, Provider } from '@angular/core';
 import { ApiConfiguration } from './api/api-configuration';
 import { ApiErrorResponse } from './models';
 
@@ -11,6 +11,7 @@ export const EDU_SHARING_API_CONFIG = new InjectionToken<EduSharingApiConfigurat
     providedIn: 'root',
 })
 export class EduSharingApiConfiguration extends ApiConfiguration {
+    withCredentials = true;
     static create(params: EduSharingApiConfigurationParams = {}): EduSharingApiConfiguration {
         return { ...new EduSharingApiConfiguration(), ...params };
     }

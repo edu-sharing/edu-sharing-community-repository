@@ -593,6 +593,7 @@
             "main": "projects/rendering-service-web-component/src/main.ts",
             "tsConfig": "projects/rendering-service-web-component/tsconfig.app.json",
             "styles": [
+              "projects/rendering-service-web-component/src/styles.scss",
               "src/app/core-ui-module/styles/fonts.scss"
             ],
             "stylePreprocessorOptions": {
@@ -658,6 +659,7 @@
             "main": "projects/rendering-service-web-component/src/main.ts",
             "tsConfig": "projects/rendering-service-web-component/tsconfig.app.json",
             "styles": [
+              "projects/rendering-service-web-component/src/styles.scss",
               "src/app/core-ui-module/styles/fonts.scss"
             ],
             "stylePreprocessorOptions": {

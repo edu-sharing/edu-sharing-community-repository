@@ -6,6 +6,7 @@ import {
     Input,
     OnChanges,
     QueryList,
+    signal,
     SimpleChanges,
     ViewChildren,
     ViewContainerRef,
@@ -45,10 +46,12 @@ export class MdsViewerComponent implements OnChanges {
     @Input() setId: string;
     @Input() data: Values;
     mds: MdsDefinition;
-    templates: {
-        view: MdsView;
-        html: SafeHtml;
-    }[];
+    templates = signal<
+        {
+            view: MdsView;
+            html: SafeHtml;
+        }[]
+    >(null);
 
     /**
      * show group headings (+ icons) for the individual templates
@@ -111,14 +114,15 @@ export class MdsViewerComponent implements OnChanges {
         } catch (e) {
             return;
         }
-        this.templates = [];
+        const templates = [];
         for (const view of this.getGroup().views) {
             const v = this.getView(view);
-            this.templates.push({
+            templates.push({
                 view: v,
                 html: this.sanitizer.bypassSecurityTrustHtml(this.prepareHTML(v.html)),
             });
         }
+        this.templates.set(templates);
         // wait for angular to inflate the new binding
         setTimeout(() => {
             for (const widget of (this.mdsEditorInstanceService?.widgets.value ||
@@ -127,13 +131,12 @@ export class MdsViewerComponent implements OnChanges {
                         definition,
                         getInitalValuesAsync: async () => {
                             return {
-                                individualValues: this.data[definition.id!!],
+                                jointValues: this.data[definition.id!!],
                             } as InitialValues;
                         },
                         getInitialDisplayValues: () => new BehaviorSubject<MdsValueList>(null),
                     } as MdsViewerWidget;
                 })) as MdsViewerWidget[]) {
-                // @TODO: it would be better to filter by widgets based on template and condition, should be implemented in 5.1
                 this.container.toArray().forEach((c) => {
                     let element: HTMLElement = c.nativeElement.getElementsByTagName(
                         widget.definition.id,

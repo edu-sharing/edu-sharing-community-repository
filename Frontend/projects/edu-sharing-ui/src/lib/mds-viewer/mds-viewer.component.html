@@ -1,5 +1,5 @@
-<es-spinner-small *ngIf="!templates"></es-spinner-small>
-<div *ngFor="let t of templates" #container class="mds-viewer">
+<es-spinner-small *ngIf="!templates()"></es-spinner-small>
+<div *ngFor="let t of templates()" #container class="mds-viewer">
   <div *ngIf="showGroupHeadings && t.view.caption" class="card-title-element group-heading">
     <i [esIcon]="t.view.icon" *ngIf="t.view.icon"></i><span>{{ t.view.caption }}</span>
   </div>

@@ -1,10 +1,13 @@
 import { DatePipe } from '@angular/common';
 import {
+    ChangeDetectionStrategy,
     Component,
+    computed,
     ElementRef,
     Input,
     OnChanges,
     OnInit,
+    signal,
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
@@ -93,6 +96,7 @@ export enum ValueType {
     selector: 'es-mds-widget',
     templateUrl: 'mds-widget.component.html',
     styleUrls: ['mds-widget.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Default,
     // required for external editor injection
 })
 export class MdsWidgetComponent implements OnInit, OnChanges {
@@ -127,9 +131,15 @@ export class MdsWidgetComponent implements OnInit, OnChanges {
 
     @ViewChild('editWrapper') editWrapper: ElementRef;
     @ViewChild(MatRipple) matRipple: MatRipple;
-    basicType: string;
+    basicType = signal<string>(null);
     rawValue: { path: MdsValue[]; id: string }[];
 
+    isEmpty = computed(() => {
+        if (this.basicType() === 'license') {
+            return false;
+        }
+        return this.value()?.every((v) => !v) || this.value()?.length === 0 || !this.value();
+    });
     private mdsEditorInstance: any;
     license$ = new BehaviorSubject<{ name: string; icon: string }>(null);
 
@@ -137,7 +147,7 @@ export class MdsWidgetComponent implements OnInit, OnChanges {
         return this.viewInstance.headingLevel;
     }
 
-    value: string[] = undefined;
+    value = signal<string[]>(undefined);
     private temporaryValue: string[] = undefined;
 
     constructor(
@@ -152,18 +162,18 @@ export class MdsWidgetComponent implements OnInit, OnChanges {
     }
 
     async ngOnChanges(changes: SimpleChanges) {
-        this.value = await this.getNodeValue();
+        this.value.set(await this.getNodeValue());
     }
 
     async ngOnInit() {
-        this.value = await this.getNodeValue();
+        this.value.set(await this.getNodeValue());
         this.widget
             .getInitialDisplayValues()
             .pipe(filter((v: MdsValueList) => !!v))
             .subscribe(async (value: MdsValueList) => {
-                this.value = value.values.map((v) => v.displayString);
+                this.value.set(value.values.map((v) => v.displayString));
             });
-        this.basicType = this.getBasicType();
+        this.basicType.set(this.getBasicType());
         this.rawValue = await this.getRawValue().toPromise();
     }
 
@@ -213,7 +223,6 @@ export class MdsWidgetComponent implements OnInit, OnChanges {
         );
     }
     private getNodeValues() {
-        console.log(this.mdsViewerService);
         if (this.mdsEditorInstance) {
             return (
                 (this.mdsEditorInstance.values$.value as Values) ||
@@ -280,15 +289,8 @@ export class MdsWidgetComponent implements OnInit, OnChanges {
         }
     }
 
-    isEmpty() {
-        if (this.basicType === 'license') {
-            return false;
-        }
-        return this.value?.every((v) => !v) || this.value?.length === 0 || !this.value;
-    }
-
     formatDate() {
-        return this.value.map((v) => {
+        return this.value().map((v) => {
             if (this.getDefinition().format) {
                 try {
                     return new DatePipe('en').transform(v, this.getDefinition().format);
@@ -307,7 +309,7 @@ export class MdsWidgetComponent implements OnInit, OnChanges {
     }
 
     formatNumber() {
-        return this.value.map((v) => {
+        return this.value().map((v) => {
             if (this.widget.definition.format === 'bytes') {
                 return new FormatSizePipe(this.translate).transform(v);
             }
@@ -316,7 +318,7 @@ export class MdsWidgetComponent implements OnInit, OnChanges {
     }
 
     formatText() {
-        return this.value.map((v) => {
+        return this.value().map((v) => {
             if (this.widget.definition.format) {
                 return this.widget.definition.format.replace('${value}', v);
             }
@@ -329,7 +331,7 @@ export class MdsWidgetComponent implements OnInit, OnChanges {
             await this.mdsEditorInstance.saveWidgetValue(instance.widget);
         }
         this.temporaryValue = instance.widget.getValue();
-        this.value = await this.getNodeValue();
+        this.value.set(await this.getNodeValue());
         this.editWrapper.nativeElement.children[0].innerHTML = null;
         await this.mdsEditorInstance.fetchDisplayValues(this.widget);
     }

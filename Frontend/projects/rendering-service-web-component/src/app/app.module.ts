@@ -6,10 +6,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { EduSharingApiModule } from 'ngx-edu-sharing-api';
 import {
     EduSharingUiModule,
-    TranslationsModule,
-    RenderHelperService,
     I18N_CONFIG,
     I18nConfig,
+    RenderHelperService,
+    TranslationsModule,
 } from 'ngx-edu-sharing-ui';
 import {
     PdfComponent,
@@ -17,14 +17,23 @@ import {
     RenderingServiceLibModule,
 } from 'ngx-rendering-service-lib';
 import { environment } from '../environments/environment';
+import { CdkConnectedOverlay, CdkOverlayOrigin } from '@angular/cdk/overlay';
+import { MatButtonModule } from '@angular/material/button';
 
 @NgModule({
     declarations: [AppComponent],
     imports: [
         BrowserModule,
-        EduSharingApiModule.forRoot({ rootUrl: environment.eduSharingApiUrl }),
+        // no credentials mode since we're fetching only public data from the repository
+        EduSharingApiModule.forRoot({
+            rootUrl: environment.eduSharingApiUrl,
+            withCredentials: false,
+        }),
         EduSharingUiModule.forRoot({ production: true, isEmbedded: true }),
         RenderComponent,
+        MatButtonModule,
+        CdkConnectedOverlay,
+        CdkOverlayOrigin,
         TranslationsModule,
         RenderingServiceLibModule.forRoot({
             assetsUrl: environment.production

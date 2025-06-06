@@ -1,6 +1,5 @@
 <rs-root
   *ngIf="request() && node()"
-  [displayMode]="display_mode"
   [node]="node()"
   [request]="request()"
   [serviceWorkerUrl]="serviceWorkerUrl"
@@ -8,5 +7,31 @@
   [assetUrl]="assetUrl"
 >
 </rs-root>
-
+<div class="inline-metadata" *ngIf="display_mode === 'inline' && node()">
+  <div>TODO INLINE</div>
+  <button
+    mat-icon-button
+    color="primary"
+    (click)="showInlineMetadata = !showInlineMetadata"
+    cdkOverlayOrigin
+    #trigger="cdkOverlayOrigin"
+  >
+    <i esIcon="info_outline"></i>
+  </button>
+  <ng-template
+    cdkConnectedOverlay
+    [cdkConnectedOverlayOrigin]="trigger"
+    [cdkConnectedOverlayOpen]="showInlineMetadata"
+    [cdkConnectedOverlayMinWidth]="300"
+    [cdkConnectedOverlayHasBackdrop]="true"
+    [cdkConnectedOverlayBackdropClass]="'mds-inline-backdrop'"
+    [cdkConnectedOverlayHeight]="300"
+    (backdropClick)="showInlineMetadata = false"
+    (detach)="showInlineMetadata = false"
+  >
+    <div class="inline-metadata-panel">
+      <es-mds-viewer groupId="io_render_inline" [data]="node().properties!!"></es-mds-viewer>
+    </div>
+  </ng-template>
+</div>
 <!-- <rs-module-pdf #pdf></rs-module-pdf> -->
