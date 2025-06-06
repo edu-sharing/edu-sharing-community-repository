@@ -1,5 +1,5 @@
 import { isNumeric } from './isNumeric';
-import { isArray } from 'lodash';
+import { isArray } from 'lodash-es';
 
 export class Helper {
     public static deepCopy(data: any) {

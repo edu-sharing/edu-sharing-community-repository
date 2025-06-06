@@ -1,9 +1,9 @@
-import { PipeTransform, Pipe } from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
 import { RestHelper } from '../util/rest-helper';
 import { NodeRoot } from '../node-entries/entries-model';
-import { isString } from 'lodash';
+import { isString } from 'lodash-es';
 
 @Pipe({ name: 'nodeTitle' })
 export class NodeTitlePipe implements PipeTransform {
