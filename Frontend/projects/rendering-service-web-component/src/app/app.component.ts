@@ -73,4 +73,20 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
             console.log(data);
         }
     }
+
+    getAuthors(): string {
+        if (this.node()?.properties !== undefined) {
+            const freeText = (this.node().properties['ccm:author_freetext'] ?? [])
+                .join(', ')
+                .trim();
+            const authors = (this.node().properties['ccm:lifecyclecontributer_authorFN'] ?? [])
+                .join(', ')
+                .trim();
+            const orgs = (this.node().properties['ccm:lifecyclecontributer_authorVCARD_ORG'] ?? [])
+                .join(', ')
+                .trim();
+            return authors + (orgs ? ', ' + orgs : '') + (freeText ? ', ' + freeText : '');
+        }
+        return '';
+    }
 }
