@@ -913,6 +913,7 @@
     "SAVED": "Änderungen wurden gespeichert."
   },
   "RENDERING": {
+    "AUTHORED_BY": "von",
     "CONVERTING": "Konvertierung",
     "QUEUED": "Warteschlange",
     "REVOKED": {

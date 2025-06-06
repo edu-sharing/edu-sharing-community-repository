@@ -864,6 +864,7 @@
     "SAVED": "Saved changes"
   },
   "RENDERING": {
+    "AUTHORED_BY": "by",
     "CONVERTING": "Converting",
     "QUEUED": "Queued",
     "REVOKED": {
