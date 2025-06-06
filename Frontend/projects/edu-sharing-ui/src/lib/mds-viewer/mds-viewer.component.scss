@@ -2,6 +2,23 @@
     es-mds-editor-widget-container {
         margin-bottom: 0;
     }
+    .mdsContributorGroup {
+        padding: 5px 5px;
+        .mdsContributorTitle {
+            font-weight: bold;
+            padding-bottom: 3px;
+        }
+    }
+}
+:host {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(450px, max(200px, 100%)), 1fr));
+    grid-gap: 10px;
+}
+.mds-viewer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 es-spinner-small {
     display: flex;
@@ -9,4 +26,21 @@ es-spinner-small {
     align-items: center;
     width: 100%;
     height: 100%;
+}
+
+.card-title-element {
+    font-size: 140%;
+    font-weight: bold;
+    border-bottom: 1px solid #888;
+    padding: 10px;
+    float: left;
+    width: 100%;
+    background-color: #f7f7f7;
+}
+.card-title-element i {
+    margin-left: 10px;
+    margin-right: 10px;
+    color: #666;
+    position: relative;
+    top: 5px;
 }
