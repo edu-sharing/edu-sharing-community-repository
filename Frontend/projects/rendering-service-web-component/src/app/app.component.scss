@@ -27,6 +27,9 @@
     }
     background-color: #f8f8f8;
     padding: 5px 20px;
+    .license-img {
+        height: 1.4em;
+    }
 }
 .inline-metadata-panel {
     @include materialShadowBottom();
