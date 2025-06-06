@@ -1,10 +1,17 @@
 @import 'mixins';
+@import 'variables-scss';
 
 :host {
+    font-family: $primaryFontFamily;
     display: flex;
     flex-direction: column;
     min-height: 0;
     contain: content;
+}
+::ng-deep {
+    .cdk-overlay-container {
+        font-family: $primaryFontFamily;
+    }
 }
 
 .app-container {
