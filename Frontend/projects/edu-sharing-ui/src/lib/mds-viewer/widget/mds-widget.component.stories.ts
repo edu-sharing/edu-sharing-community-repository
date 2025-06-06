@@ -10,7 +10,7 @@ import { mdsStorybookProviders } from '../../../../../../src/app/features/mds/md
 import { BehaviorSubject } from 'rxjs';
 import { MdsWidget } from 'ngx-edu-sharing-api';
 
-class DefaultWidget implements MdsViewerWidget {
+export class DefaultWidget implements MdsViewerWidget {
     constructor(public definition: MdsWidget, private values: string[]) {}
     async getInitalValuesAsync(): Promise<InitialValues> {
         return {
@@ -22,7 +22,7 @@ class DefaultWidget implements MdsViewerWidget {
     }
 }
 
-const button: Meta<MdsWidgetComponent> = {
+const widget: Meta<MdsWidgetComponent> = {
     title: 'Mds/Viewer/Widget',
     component: MdsWidgetComponent,
     decorators: [
@@ -38,7 +38,7 @@ const button: Meta<MdsWidgetComponent> = {
     tags: ['autodocs'],
 };
 
-export default button;
+export default widget;
 type Story = StoryObj<MdsWidgetComponent>;
 export const Text: Story = {
     args: {
