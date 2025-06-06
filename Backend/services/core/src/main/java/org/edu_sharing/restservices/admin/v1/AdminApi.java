@@ -5,10 +5,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.StringToClassMapItem;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -70,12 +68,10 @@ import org.edu_sharing.spring.security.SSORegistrationService;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jetbrains.annotations.NotNull;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response;
-
-import java.io.*;
+import java.io.FileWriter;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.io.Writer;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -261,19 +257,7 @@ public class AdminApi {
     @NotNull
     private static Application mapToApplications(ApplicationInfo appInfo) {
         Application entry = new Application();
-        entry.setId(appInfo.getAppId());
-        entry.setTitle(appInfo.getAppCaption());
-        entry.setWebserverUrl(appInfo.getWebServerUrl());
-        entry.setContentUrl(appInfo.getContentUrl());
-        entry.setClientBaseUrl(appInfo.getClientBaseUrl());
-        entry.setType(appInfo.getType());
-        entry.setRepositoryType(appInfo.getRepositoryType());
-        entry.setSubtype(appInfo.getSubtype());
-        entry.setXml(appInfo.getXml());
-        entry.setFile(appInfo.getAppFileName());
-        if (ApplicationInfo.TYPE_RENDERSERVICE.equals(entry.getType()) && entry.getContentUrl() != null) {
-            entry.setConfigUrl(appInfo.getContentUrl().replace("/application/esmain/index.php", "/admin"));
-        }
+        entry.fill(appInfo);
         return entry;
     }
 

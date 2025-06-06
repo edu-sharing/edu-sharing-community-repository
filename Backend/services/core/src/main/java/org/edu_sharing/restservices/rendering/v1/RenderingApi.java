@@ -2,6 +2,7 @@ package org.edu_sharing.restservices.rendering.v1;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,13 +12,17 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
-import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tracking.TrackingTool;
 import org.edu_sharing.restservices.*;
+import org.edu_sharing.restservices.admin.v1.ApplicationSimple;
 import org.edu_sharing.restservices.rendering.v1.model.RenderingDetailsEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.rendering.RenderingDetails;
 import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.service.repoproxy.RepoProxy;
@@ -27,6 +32,7 @@ import org.edu_sharing.service.tracking.TrackingService;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Path("/rendering/v1")
@@ -148,4 +154,42 @@ public class RenderingApi {
 		}
 
 	}
+
+	@GET
+	@Path("/applications")
+
+
+	@Operation(summary = "Provides application infos for a connected renderer", description = "Note: Requires admin rights or an application signature header for the rendering service")
+
+	@ApiResponses(
+			value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200,  content = @Content(
+					array = @ArraySchema(schema = @Schema(implementation = ApplicationSimple.class))
+			)),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+	public Response getApplications(
+			@Context HttpServletRequest req){
+		try {
+			if(
+					(
+
+							ContextManagementFilter.accessTool.get() == null ||
+							!ApplicationInfo.TYPE_RENDERSERVICE_2.equals(ContextManagementFilter.accessTool.get().getApplicationInfo().getType())
+					) &&
+							!AuthorityServiceHelper.isAdmin()) {
+				throw new DAOSecurityException(new SecurityException());
+			}
+			return Response.ok(ApplicationInfoList.getRepositoryInfosOrdered().stream().map(a -> {
+				ApplicationSimple entry = new ApplicationSimple();
+				entry.fill(a);
+				return entry;
+			}).collect(Collectors.toList())).build();
+		}catch(Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
 }

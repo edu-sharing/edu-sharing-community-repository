@@ -7,7 +7,7 @@ public class DAOSecurityException extends DAOException {
 	DAOSecurityException(Throwable t, String nodeId) {
 		super(t,nodeId);
 	}
-	DAOSecurityException(Throwable t) {
+	public DAOSecurityException(Throwable t) {
 		super(t,null);
 	}
 }
