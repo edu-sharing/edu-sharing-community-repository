@@ -38,11 +38,10 @@
     overflow-y: auto;
     display: flex;
     justify-content: center;
-    background-color: #f8f8f8;
-    padding: 10px;
+    background-color: #fff;
     > es-mds-viewer ::ng-deep {
         .mds-viewer {
-            width: 260px;
+            width: 340px;
         }
     }
 }

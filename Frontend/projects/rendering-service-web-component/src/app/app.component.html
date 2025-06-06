@@ -35,10 +35,18 @@
     cdkConnectedOverlay
     [cdkConnectedOverlayOrigin]="trigger"
     [cdkConnectedOverlayOpen]="showInlineMetadata"
-    [cdkConnectedOverlayMinWidth]="300"
+    [cdkConnectedOverlayMinWidth]="350"
     [cdkConnectedOverlayHasBackdrop]="true"
     [cdkConnectedOverlayBackdropClass]="'mds-inline-backdrop'"
     [cdkConnectedOverlayHeight]="300"
+    [cdkConnectedOverlayPositions]="[
+    {
+      originX: 'start',
+      originY: 'bottom',
+      overlayX: 'start',
+      overlayY: 'top',
+    },
+  ]"
     (backdropClick)="showInlineMetadata = false"
     (detach)="showInlineMetadata = false"
   >

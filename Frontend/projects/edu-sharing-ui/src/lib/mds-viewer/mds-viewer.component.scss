@@ -33,14 +33,12 @@ es-spinner-small {
     font-weight: bold;
     border-bottom: 1px solid #888;
     padding: 10px;
-    float: left;
-    width: 100%;
     background-color: #f7f7f7;
-}
-.card-title-element i {
-    margin-left: 10px;
-    margin-right: 10px;
-    color: #666;
-    position: relative;
-    top: 5px;
+    i {
+        margin-left: 10px;
+        margin-right: 10px;
+        color: #666;
+        position: relative;
+        top: 5px;
+    }
 }
