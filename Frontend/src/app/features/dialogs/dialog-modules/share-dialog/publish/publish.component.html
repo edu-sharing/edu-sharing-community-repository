@@ -141,7 +141,9 @@
               -->
             </mat-radio-button>
             <mat-radio-button
-              [disabled]="currentVersionPublished(true) || !isCopy"
+              [disabled]="
+                getLastNonRevokedVersion() == null || currentVersionPublished(true) || !isCopy
+              "
               [value]="'update'"
             >
               <es-multi-line-label>

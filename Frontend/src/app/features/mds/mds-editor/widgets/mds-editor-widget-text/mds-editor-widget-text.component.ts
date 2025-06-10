@@ -50,6 +50,19 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
             .subscribe((value) => {
                 this.setValue([value]);
             });
+        this.widget.observeBulkMode().subscribe(() => {
+            console.log(
+                'bulk',
+                this.widget.definition.id,
+                this.widget.getBulkMode(),
+                this.showBulkMixedValues(),
+            );
+            if (this.showBulkMixedValues()) {
+                this.formControl.disable();
+            } else {
+                this.formControl.enable();
+            }
+        });
         if (this.widget.definition.id === 'cm:name') {
             this.fileNameChecker = new FileNameChecker(
                 this.formControl,
