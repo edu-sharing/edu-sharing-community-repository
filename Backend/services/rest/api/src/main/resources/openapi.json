@@ -197,6 +197,12 @@
       },
       "Application": {
         "properties": {
+          "allowedOrigins": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
           "clientBaseUrl": {
             "type": "string"
           },
@@ -207,6 +213,9 @@
             "type": "string"
           },
           "file": {
+            "type": "string"
+          },
+          "host": {
             "type": "string"
           },
           "id": {
@@ -228,6 +237,32 @@
             "type": "string"
           },
           "xml": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApplicationSimple": {
+        "properties": {
+          "allowedOrigins": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "host": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "subtype": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
             "type": "string"
           }
         },
@@ -30275,18 +30310,6 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "description": "property filter for result nodes (or \"-all-\" for all properties)",
-            "in": "query",
-            "name": "propertyFilter",
-            "schema": {
-              "items": {
-                "default": "-all-",
-                "type": "string"
-              },
-              "type": "array"
-            }
           }
         ],
         "responses": {
@@ -35912,6 +35935,81 @@
         "summary": "create a relation between nodes",
         "tags": [
           "RELATION v1"
+        ]
+      }
+    },
+    "/rendering/v1/applications": {
+      "get": {
+        "description": "Note: Requires admin rights or an application signature header for the rendering service",
+        "operationId": "getApplications_1",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ApplicationSimple"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Provides application infos for a connected renderer",
+        "tags": [
+          "RENDERING v1"
         ]
       }
     },
