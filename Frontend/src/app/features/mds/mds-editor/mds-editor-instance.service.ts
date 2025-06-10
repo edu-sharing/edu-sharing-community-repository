@@ -91,6 +91,7 @@ import { MdsEditorWidgetBase } from './widgets/mds-editor-widget-base';
 import { MdsEditorWidgetErrorComponent } from './widgets/mds-editor-widget-error/mds-editor-widget-error.component';
 import {
     InitialValues,
+    MdsEditorInstanceServiceAbstract,
     MdsValueList,
     MdsViewerWidget,
     MdsWidgetType,
@@ -127,7 +128,10 @@ export class UnauthoritzedException implements Error {
  * Do _not_ use in legacy `<mds>` component.
  */
 @Injectable()
-export class MdsEditorInstanceService implements OnDestroy {
+export class MdsEditorInstanceService
+    extends MdsEditorInstanceServiceAbstract
+    implements OnDestroy
+{
     static Widget = class implements GeneralWidget, MdsViewerWidget {
         readonly addValue = new EventEmitter<MdsWidgetValue>();
         readonly status = new BehaviorSubject<InputStatus>(null);
@@ -631,13 +635,10 @@ export class MdsEditorInstanceService implements OnDestroy {
     };
 
     // Fixed after initialization
-    mdsId: string;
     repository: string;
     groupId: string;
     /** Complete MDS definition. */
     mdsDefinition$ = new BehaviorSubject<MdsDefinition>(null);
-    /** Nodes with updated and complete metadata. */
-    nodes$ = new BehaviorSubject<Node[]>(null);
     /**
      * behaviour subject representing the current available suggestions for the node
      * Currently NOT supported in bulk!
@@ -645,13 +646,10 @@ export class MdsEditorInstanceService implements OnDestroy {
     suggestionMetadata$ = new BehaviorSubject<NodeSuggestionResponseDto[]>(null);
     hasAi = new BehaviorSubject<boolean>(false);
 
-    /** Current values (if not in node mode) */
-    values$ = new BehaviorSubject<Values>(null);
     /** MDS Views of the relevant group (in order). */
     views: MdsView[];
     /** Whether the editor is in bulk mode to edit multiple nodes at once. */
     editorBulkMode: EditorBulkMode;
-    editorMode: EditorMode;
     isEmbedded: boolean;
     // Not used any more?
     // valueChanged = new EventEmitter<{ property: string; newValue: string[] }>();
@@ -766,6 +764,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         private restConnector: RestConnectorService,
         private config: ConfigService,
     ) {
+        super();
         this.registerInitMds();
         this.registerLoginInfo();
         this.register_new_valuesChange();

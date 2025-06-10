@@ -94,3 +94,4 @@ export * from './util/ui-animation';
 export * from './util/ui-constants';
 export * from './mds/mds-helper.service';
 export * from './services/search-helper.service';
+export * from './mds-viewer/mds-editor-instance-service.abstract';

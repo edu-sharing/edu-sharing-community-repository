@@ -4,9 +4,11 @@ import {
     Component,
     computed,
     ElementRef,
+    Injector,
     Input,
     OnChanges,
     OnInit,
+    Optional,
     signal,
     SimpleChanges,
     ViewChild,
@@ -25,6 +27,7 @@ import { BehaviorSubject, of } from 'rxjs';
 import { MdsViewerService } from '../mds-viewer.service';
 import { Values } from '../../services/search-helper.service';
 import { NodeHelperService } from '../../services/node-helper.service';
+import { MdsEditorInstanceServiceAbstract } from '../mds-editor-instance-service.abstract';
 
 export enum MdsType {
     Io = 'io',
@@ -140,7 +143,6 @@ export class MdsWidgetComponent implements OnInit, OnChanges {
         }
         return this.value()?.every((v) => !v) || this.value()?.length === 0 || !this.value();
     });
-    private mdsEditorInstance: any;
     license$ = new BehaviorSubject<{ name: string; icon: string }>(null);
 
     get headingLevel() {
@@ -151,11 +153,12 @@ export class MdsWidgetComponent implements OnInit, OnChanges {
     private temporaryValue: string[] = undefined;
 
     constructor(
-        // public mdsEditorInstance: MdsEditorInstanceService,
+        @Optional() private mdsEditorInstance: MdsEditorInstanceServiceAbstract,
         public translate: TranslateService,
         private ui: UIService,
         private viewInstance: ViewInstanceService,
         private mdsViewerService: MdsViewerService,
+        private injector: Injector,
         private nodeHelper: NodeHelperService,
     ) {
         // super(toast, null, translate);
@@ -223,10 +226,11 @@ export class MdsWidgetComponent implements OnInit, OnChanges {
         );
     }
     private getNodeValues() {
+        console.log(this.mdsEditorInstance, 'editor present?');
         if (this.mdsEditorInstance) {
             return (
                 (this.mdsEditorInstance.values$.value as Values) ||
-                this.mdsEditorInstance.nodes$.value.map((n: Node) => n.properties)
+                this.mdsEditorInstance.nodes$.value.map((n: Node) => n.properties)?.[0]
             );
         } else {
             return this.mdsViewerService.values$.value;

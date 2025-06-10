@@ -14,6 +14,7 @@ import {
     Values,
 } from '../../types/types';
 import { valuesDictIsEquivalent } from './values-dict-is-equivalent';
+import { MdsEditorInstanceServiceAbstract } from 'ngx-edu-sharing-ui';
 
 /**
  * Wrapper component to select between the legacy `<es-mds>` component and the Angular-native
@@ -27,7 +28,10 @@ import { valuesDictIsEquivalent } from './values-dict-is-equivalent';
     selector: 'es-mds-editor-wrapper',
     templateUrl: './mds-editor-wrapper.component.html',
     styleUrls: ['./mds-editor-wrapper.component.scss'],
-    providers: [MdsEditorInstanceService],
+    providers: [
+        MdsEditorInstanceService,
+        { provide: MdsEditorInstanceServiceAbstract, useExisting: MdsEditorInstanceService },
+    ],
 })
 export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
     // tslint:disable: no-output-on-prefix  // Keep API compatibility.

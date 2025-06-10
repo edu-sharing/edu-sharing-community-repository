@@ -41,6 +41,7 @@ import { MdsEditorWidgetSuggestionChipsComponent } from '../widgets/mds-editor-w
 import { JumpMark, JumpMarksService } from '../../../../services/jump-marks.service';
 import { MdsEditInterface } from '../mds-editor-single-widget/mds-editor-single-widget.component';
 import {
+    MdsViewerService,
     MdsWidgetComponent,
     MdsWidgetType,
     replaceElementWithDiv,
@@ -77,7 +78,7 @@ type NativeWidgetClass = {
             ]),
         ]),
     ],
-    providers: [ViewInstanceService],
+    providers: [ViewInstanceService, MdsViewerService],
 })
 export class MdsEditorViewComponent
     implements OnInit, AfterViewInit, OnChanges, OnDestroy, MdsEditInterface

@@ -46,7 +46,6 @@ import { MdsWidgetType } from 'ngx-edu-sharing-ui';
  *   - Read only
  *   - Triggered via mds-viewer
  */
-export type EditorMode = 'nodes' | 'search' | 'form' | 'inline' | 'viewer';
 export const NativeWidgets: {
     [widgetType in NativeWidgetType]: NativeWidgetClass;
 } = {
