@@ -212,6 +212,9 @@
           "contentUrl": {
             "type": "string"
           },
+          "domain": {
+            "type": "string"
+          },
           "file": {
             "type": "string"
           },
@@ -249,6 +252,9 @@
               "type": "string"
             },
             "type": "array"
+          },
+          "domain": {
+            "type": "string"
           },
           "host": {
             "type": "string"
