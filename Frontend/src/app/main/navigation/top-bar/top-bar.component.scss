@@ -22,9 +22,9 @@ es-imprint-privacy ::ng-deep {
     font-size: 7pt;
     a {
         color: rgba(
-            red($workspaceTopBarFontColor),
-            green($workspaceTopBarFontColor),
-            blue($workspaceTopBarFontColor),
+            color.channel($workspaceTopBarFontColor, 'red', $space: rgb),
+            color.channel($workspaceTopBarFontColor, 'green', $space: rgb),
+            color.channel($workspaceTopBarFontColor, 'blue', $space: rgb),
             0.7
         ) !important;
     }
@@ -181,9 +181,9 @@ button.user {
         align-items: center;
         color: $workspaceTopBarFontColor;
         background-color: rgba(
-            red($workspaceTopBarFontColor),
-            green($workspaceTopBarFontColor),
-            blue($workspaceTopBarFontColor),
+            color.channel($workspaceTopBarFontColor, 'red', $space: rgb),
+            color.channel($workspaceTopBarFontColor, 'green', $space: rgb),
+            color.channel($workspaceTopBarFontColor, 'blue', $space: rgb),
             0.1
         );
         border-radius: 0;

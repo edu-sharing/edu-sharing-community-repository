@@ -1,4 +1,6 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'sass:color';
+
 .wrapper {
     display: flex;
     flex-direction: column;
@@ -45,10 +47,10 @@
         font-size: $fontSizeSmall;
         text-align: center;
         &.status-mandatory {
-            color: darken($colorStatusNegative, 20%);
+            color: color.adjust($colorStatusNegative, $lightness: -20%);
         }
         &.status-mandatoryForPublish {
-            color: darken($colorStatusWarning, 20%);
+            color: color.adjust($colorStatusWarning, $lightness: -20%);
         }
         .show-missing-button {
             font-weight: bold;

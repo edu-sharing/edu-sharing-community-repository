@@ -1,5 +1,6 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 @use '../../../../../shared/components/card/variables' as *;
+@use 'sass:map';
 
 .authorities {
     &:not(:last-child):after {
@@ -64,7 +65,7 @@ mat-button-toggle-group {
         }
     }
 }
-@media screen and (max-width: (map-get($widths,'normal'))) {
+@media screen and (max-width: (map.get($widths,'normal'))) {
     .tiles {
         justify-content: center;
     }

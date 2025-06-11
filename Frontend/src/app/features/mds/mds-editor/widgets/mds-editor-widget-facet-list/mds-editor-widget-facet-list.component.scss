@@ -1,6 +1,7 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'sass:color';
 
-$countBackgroundColor: scale-color($backgroundColor, $lightness: -15%);
+$countBackgroundColor: color.scale($backgroundColor, $lightness: -15%);
 
 :host ::ng-deep {
     .mdc-form-field {

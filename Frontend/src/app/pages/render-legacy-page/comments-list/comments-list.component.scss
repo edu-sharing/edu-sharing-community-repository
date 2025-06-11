@@ -1,5 +1,6 @@
 @use 'sass:math';
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'sass:color';
 
 :host ::ng-deep {
     es-actionbar {
@@ -140,11 +141,11 @@ mat-form-field {
             }
             .btn-negative {
                 color: $colorStatusNegative;
-                background-color: lighten($colorStatusNegative, 62%);
+                background-color: color.adjust($colorStatusNegative, $lightness: 62%);
             }
             .btn-positive {
                 color: $colorStatusPositive;
-                background-color: lighten($colorStatusPositive, 45%);
+                background-color: color.adjust($colorStatusPositive, $lightness: 45%);
             }
         }
         .actions {

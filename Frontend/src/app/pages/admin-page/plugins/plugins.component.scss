@@ -1,4 +1,6 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'sass:color';
+
 .plugins {
     display: flex;
     align-items: center;
@@ -18,10 +20,10 @@
             }
             .state {
                 font-weight: bold;
-                color: darken($colorStatusNegative, 20%);
+                color: color.adjust($colorStatusNegative, $lightness: -20%);
                 padding-bottom: 2px;
                 &.state-enabled {
-                    color: darken($colorStatusPositive, 20%);
+                    color: color.adjust($colorStatusPositive, $lightness: -20%);
                 }
             }
             .name-wrapper {

@@ -1,5 +1,6 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
-@use 'admin.variables' as *;
+@use 'admin.variables' as admin;
+@use 'sass:color';
 
 .main {
     display: flex;
@@ -12,7 +13,7 @@
         background-color: #fff;
         height: calc(100% - var(--mainnavHeight));
         overflow-y: auto;
-        width: $sidenavWidth;
+        width: admin.$sidenavWidth;
         > div {
             height: 100%;
             .button {
@@ -38,7 +39,7 @@
         padding: 20px;
         width: 100%;
         min-width: 0;
-        margin-left: $sidenavWidth;
+        margin-left: admin.$sidenavWidth;
         flex-grow: 1;
         .btn-flat {
             min-height: 36px;
@@ -123,7 +124,7 @@
         .check {
             display: flex;
             flex-direction: row;
-            background-color: lighten($colorStatusPositive, 40%);
+            background-color: color.adjust($colorStatusPositive, $lightness: 40%);
             padding: 10px 10px;
             margin: 2px 0;
             .data {
@@ -161,13 +162,13 @@
                 margin-bottom: 5px;
             }
             &.check-fail {
-                background-color: lighten($warning, 35%);
+                background-color: color.adjust($warning, $lightness: 35%);
             }
             &.check-info {
-                background-color: lighten($colorStatusNeutral, 45%);
+                background-color: color.adjust($colorStatusNeutral, $lightness: 45%);
             }
             &.check-warn {
-                background-color: lighten($warningMedium, 50%);
+                background-color: color.adjust($warningMedium, $lightness: 50%);
             }
         }
     }
@@ -325,7 +326,7 @@
 }
 .tableRow {
     display: table-row;
-    background-color: lighten($colorStatusPositive, 50%);
+    background-color: color.adjust($colorStatusPositive, $lightness: 50%);
     div {
         display: table-cell;
         padding: 5px 10px;
@@ -337,7 +338,7 @@
         }
     }
     &.table-not-executed {
-        background-color: lighten($warningMedium, 50%);
+        background-color: color.adjust($warningMedium, $lightness: 50%);
     }
 }
 .header {
@@ -738,10 +739,10 @@
             .button > span {
                 display: none;
             }
-            width: $sidenavWidthMobile;
+            width: admin.$sidenavWidthMobile;
         }
         .main-content {
-            margin-left: $sidenavWidthMobile;
+            margin-left: admin.$sidenavWidthMobile;
         }
     }
 }

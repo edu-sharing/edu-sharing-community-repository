@@ -1,4 +1,5 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'sass:color';
 
 .container {
     display: flex;
@@ -78,7 +79,11 @@
         color: $textLight;
     }
     .timebased-active {
-        color: mix(darken($colorStatusWarning, 10%), $colorStatusNeutral, 30%);
+        color: color.mix(
+            color.adjust($colorStatusWarning, $lightness: -10%),
+            $colorStatusNeutral,
+            30%
+        );
     }
 }
 .permission {
@@ -126,7 +131,7 @@
     }
 }
 .timebased-active {
-    color: darken($colorStatusWarning, 10%);
+    color: color.adjust($colorStatusWarning, $lightness: -10%);
 }
 .timebased-invalid {
     color: $colorStatusNegative;

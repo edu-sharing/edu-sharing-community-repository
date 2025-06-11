@@ -1,5 +1,6 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 @use 'variables' as *;
+@use 'sass:color';
 
 @mixin content {
     overflow-y: auto;
@@ -13,11 +14,11 @@
 // order to maintain a consistent look, i.e., the dialog should not go edge-to-edge horizontally but
 // have borders vertically.
 @mixin maximize {
-    padding: 0px;
+    padding: 0;
     // When we show the mobile (bottom) nav bar, we can draw over the top bar since all important
     // functions are accessible via the bottom bar.
     @media screen and (max-width: $mobileTabSwitchWidth) {
-        top: 0px;
+        top: 0;
     }
     .mat-card {
         height: 100%;
@@ -63,8 +64,8 @@
 }
 
 :host ::ng-deep .card-dialog {
-    top: 0px;
-    bottom: 0px;
+    top: 0;
+    bottom: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -128,9 +129,9 @@
                 background: linear-gradient(
                     to right,
                     rgba(
-                            red($actionDialogBackground),
-                            green($actionDialogBackground),
-                            blue($actionDialogBackground),
+                            color.channel($actionDialogBackground, 'red', $space: rgb),
+                            color.channel($actionDialogBackground, 'green', $space: rgb),
+                            color.channel($actionDialogBackground, 'blue', $space: rgb),
                             0.0001
                         )
                         0,

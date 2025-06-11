@@ -1,4 +1,5 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'sass:color';
 
 es-info-message {
     display: flex;
@@ -95,11 +96,11 @@ es-info-message {
                 font-size: $fontSizeSmall;
             }
             &.version-virtual {
-                background: lighten($workspaceInheritColor, 40%);
+                background: color.adjust($workspaceInheritColor, $lightness: 40%);
                 border: 2px dashed $workspaceInheritColor;
             }
             &.version-update {
-                background: lighten($warningMedium, 40%);
+                background: color.adjust($warningMedium, $lightness: 40%);
                 border: 2px dashed $warningMedium;
             }
             .version-actions {
@@ -119,7 +120,7 @@ es-info-message {
                     justify-content: center;
                 }
                 .revoked {
-                    color: darken($warningMedium, 10%);
+                    color: color.adjust($warningMedium, $lightness: -10%);
                 }
             }
         }

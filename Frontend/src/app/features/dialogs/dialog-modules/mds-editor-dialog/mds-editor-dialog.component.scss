@@ -1,4 +1,5 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'sass:color';
 
 $expandToggleWidthThreshold: 400px;
 
@@ -28,9 +29,9 @@ es-input-fill-progress {
             background: linear-gradient(
                 to right,
                 rgba(
-                        red($workspaceMetadataBackground),
-                        green($workspaceMetadataBackground),
-                        blue($workspaceMetadataBackground),
+                        color.channel($workspaceMetadataBackground, 'red', $space: rgb),
+                        color.channel($workspaceMetadataBackground, 'green', $space: rgb),
+                        color.channel($workspaceMetadataBackground, 'blue', $space: rgb),
                         0.0001
                     )
                     0,

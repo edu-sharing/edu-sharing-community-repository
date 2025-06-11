@@ -1,5 +1,6 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 @use '../../../../shared/components/card/variables' as *;
+@use 'sass:map';
 
 :host ::ng-deep {
     .mat-tab-body-wrapper {
@@ -8,7 +9,7 @@
 }
 
 :host ::ng-deep .mat-autocomplete-panel.mat-autocomplete-person {
-    @media screen and (min-width: map-get($widths, 'normal')) {
+    @media screen and (min-width: map.get($widths, 'normal')) {
         position: fixed;
         left: calc(50% - 124px);
         width: 340px;

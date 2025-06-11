@@ -1,4 +1,5 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'sass:meta';
 
 $mainMenuHoverBackgroundColor: $itemSelectedBackground !default;
 $mainMenuAccentColor: var(--primary) !default;
@@ -19,15 +20,15 @@ $mainMenuSelectedBackground: linear-gradient(
     .mat-mdc-menu-content {
         min-width: 250px;
 
-        @if variable-exists(mainMenuBackgroundColor) {
+        @if meta.global-variable-exists(mainMenuBackgroundColor) {
             background-color: $mainMenuBackgroundColor;
         }
         .mat-mdc-menu-item {
-            @if variable-exists(mainMenuForegroundColor) {
+            @if meta.global-variable-exists(mainMenuForegroundColor) {
                 &:not(:disabled) {
                     > span {
                         color: $mainMenuForegroundColor;
-                        @if variable-exists(mainMenuForegroundColorIcon) {
+                        @if meta.global-variable-exists(mainMenuForegroundColorIcon) {
                             > i {
                                 color: $mainMenuForegroundColorIcon;
                             }
@@ -39,17 +40,17 @@ $mainMenuSelectedBackground: linear-gradient(
                 background: $mainMenuSelectedBackground;
             }
             &.cdk-focused {
-                @if variable-exists(mainMenuBackgroundColor) {
+                @if meta.global-variable-exists(mainMenuBackgroundColor) {
                     background-color: $mainMenuBackgroundColor;
                 }
             }
             &:hover:not([disabled]),
             &.cdk-key-focused {
                 background-color: $mainMenuHoverBackgroundColor;
-                @if variable-exists(mainMenuBackgroundColor) {
+                @if meta.global-variable-exists(mainMenuBackgroundColor) {
                     > span {
                         color: $mainMenuHoverForegroundColor;
-                        @if variable-exists(mainMenuHoverForegroundColorIcon) {
+                        @if meta.global-variable-exists(mainMenuHoverForegroundColorIcon) {
                             > i {
                                 color: $mainMenuHoverForegroundColorIcon;
                             }

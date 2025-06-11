@@ -1,5 +1,5 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
-@use '../admin.variables' as *;
+@use '../admin.variables' as admin;
 :host ::ng-deep {
     .mat-tab-body-wrapper {
         padding: 20px;
@@ -114,7 +114,7 @@
 }
 
 .nodes {
-    max-width: calc(100vw - #{$sidenavWidth} - 100px);
+    max-width: calc(100vw - #{admin.$sidenavWidth} - 100px);
     .export {
         display: flex;
         justify-content: flex-end;

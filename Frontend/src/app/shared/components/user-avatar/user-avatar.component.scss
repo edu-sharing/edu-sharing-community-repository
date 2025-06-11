@@ -1,4 +1,6 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'sass:math';
+
 .avatar {
     display: flex;
     align-items: center;
@@ -35,7 +37,7 @@
 @for $i from 1 through 3 {
     .avatarCircleGroup:nth-child(#{$i}) {
         left: $i * 3px;
-        opacity: percentage((4 - $i) * 0.2);
+        opacity: math.percentage((4 - $i) * 0.2);
     }
 }
 .avatarOuter {
