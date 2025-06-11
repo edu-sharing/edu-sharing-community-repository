@@ -20,8 +20,11 @@ import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { WidgetComponents } from '../../types/mds-types';
 import { MdsService } from 'ngx-edu-sharing-api';
 import { first } from 'rxjs/operators';
+import { MdsEditorViewComponent } from '../mds-editor-view/mds-editor-view.component';
 import { MdsEditorWidgetBase } from '../widgets/mds-editor-widget-base';
 import {
+    MdsEditorInstanceServiceAbstract,
+    MdsViewerService,
     MdsWidgetComponent,
     MdsWidgetType,
     UIService,
@@ -42,7 +45,12 @@ export interface MdsEditInterface {
     selector: 'es-mds-editor-single-widget',
     templateUrl: './mds-editor-single-widget.component.html',
     styleUrls: ['./mds-editor-single-widget.component.scss'],
-    providers: [MdsEditorInstanceService, ViewInstanceService],
+    providers: [
+        MdsEditorInstanceService,
+        { provide: MdsEditorInstanceServiceAbstract, useExisting: MdsEditorInstanceService },
+        MdsViewerService,
+        ViewInstanceService,
+    ],
 })
 export class MdsEditorSingleWidgetComponent implements OnChanges, OnDestroy, MdsEditInterface {
     @ViewChild('widget') ref: ElementRef<HTMLDivElement>;
@@ -114,7 +122,13 @@ export class MdsEditorSingleWidgetComponent implements OnChanges, OnDestroy, Mds
     }
     async injectEditField(mdsWidgetComponent: MdsWidgetComponent, targetElement: Element) {
         const component = WidgetComponents[this.widget.definition.type as MdsWidgetType];
-        const injected = this.mdsEditorInstance.injectWidget(this.widget, targetElement, component);
+        const injected = this.mdsEditorInstance.injectWidget(
+            this.widget,
+            targetElement,
+            component,
+            'replace',
+            { injector: this.injector } as MdsEditorViewComponent,
+        );
         this.widget.initWithValues({ [this.widgetId]: this.ngModel });
         /*combineLatest([
             this.widget.instance.widget.observeValue(),
