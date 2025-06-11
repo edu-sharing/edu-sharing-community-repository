@@ -226,7 +226,6 @@ export class MdsWidgetComponent implements OnInit, OnChanges {
         );
     }
     private getNodeValues() {
-        console.log(this.mdsEditorInstance, 'editor present?');
         if (this.mdsEditorInstance) {
             return (
                 (this.mdsEditorInstance.values$.value as Values) ||
