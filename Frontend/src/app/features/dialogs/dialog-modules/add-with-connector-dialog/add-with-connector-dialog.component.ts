@@ -18,6 +18,7 @@ import { CordovaService } from '../../../../services/cordova.service';
     selector: 'es-add-with-connector-dialog',
     templateUrl: './add-with-connector-dialog.component.html',
     styleUrls: ['./add-with-connector-dialog.component.scss'],
+    standalone: false,
 })
 export class AddWithConnectorDialogComponent {
     @ViewChild(MdsEditorWrapperComponent) mdsEditorRef: MdsEditorWrapperComponent;

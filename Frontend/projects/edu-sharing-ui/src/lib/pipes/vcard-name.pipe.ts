@@ -2,7 +2,10 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { VCard } from '../util/VCard';
 
-@Pipe({ name: 'vcardName' })
+@Pipe({
+    name: 'vcardName',
+    standalone: false,
+})
 export class VCardNamePipe implements PipeTransform {
     constructor(private translate: TranslateService) {}
     transform(authority: string | string[], args: string[] = null): string {

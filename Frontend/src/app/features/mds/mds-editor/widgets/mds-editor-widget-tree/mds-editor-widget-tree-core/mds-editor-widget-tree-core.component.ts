@@ -30,6 +30,7 @@ let nextUniqueId = 0;
     selector: 'es-mds-editor-widget-tree-core',
     templateUrl: './mds-editor-widget-tree-core.component.html',
     styleUrls: ['./mds-editor-widget-tree-core.component.scss'],
+    standalone: false,
 })
 export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDestroy {
     readonly uid = `app-mds-editor-widget-tree-core-${nextUniqueId++}`;

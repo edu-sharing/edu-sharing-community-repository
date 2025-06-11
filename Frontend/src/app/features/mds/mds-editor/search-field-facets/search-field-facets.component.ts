@@ -30,6 +30,7 @@ interface InitInfo {
     styleUrls: ['./search-field-facets.component.scss'],
     providers: [MdsEditorInstanceService],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class SearchFieldFacetsComponent implements OnInit, OnDestroy {
     @ViewChild('suggestionsPanel', { static: true }) suggestionsPanel: TemplateRef<any>;

@@ -9,12 +9,15 @@
       "projectType": "application",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist",
+            "outputPath": {
+              "base": "dist"
+            },
             "index": "src/index.html",
-            "main": "src/main.ts",
-            "polyfills": "src/polyfills.ts",
+            "polyfills": [
+              "src/polyfills.ts"
+            ],
             "tsConfig": "tsconfig.app.json",
             "baseHref": "/edu-sharing/",
             "assets": [
@@ -44,7 +47,8 @@
             ],
             "stylePreprocessorOptions": {
               "includePaths": [
-                "projects/edu-sharing-ui/assets/scss"
+                "projects/edu-sharing-ui/assets/scss",
+                "."
               ]
             },
             "styles": [
@@ -58,9 +62,7 @@
               "node_modules/chart.js/dist/chart.umd.js",
               "node_modules/tinymce/tinymce.min.js"
             ],
-            "vendorChunk": true,
             "extractLicenses": false,
-            "buildOptimizer": false,
             "sourceMap": true,
             "optimization": false,
             "namedChunks": true,
@@ -69,7 +71,8 @@
               "uuid",
               "lodash",
               "moment"
-            ]
+            ],
+            "browser": "src/main.ts"
           },
           "configurations": {
             "production": {
@@ -92,8 +95,6 @@
               "sourceMap": false,
               "namedChunks": false,
               "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -286,12 +287,15 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/embed",
+            "outputPath": {
+              "base": "dist/embed"
+            },
             "index": "projects/embed/src/index.html",
-            "main": "projects/embed/src/main.ts",
-            "polyfills": "projects/embed/src/polyfills.ts",
+            "polyfills": [
+              "projects/embed/src/polyfills.ts"
+            ],
             "tsConfig": "projects/embed/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
@@ -303,7 +307,8 @@
             ],
             "scripts": [
               "node_modules/jquery/dist/jquery.js"
-            ]
+            ],
+            "browser": "projects/embed/src/main.ts"
           },
           "configurations": {
             "production": {
@@ -328,9 +333,7 @@
               "outputHashing": "all"
             },
             "development": {
-              "buildOptimizer": false,
               "optimization": false,
-              "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true
@@ -399,14 +402,17 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
             "deployUrl": "vendor/edu-sharing/",
             "outputHashing": "none",
-            "outputPath": "dist/app-as-web-component",
+            "outputPath": {
+              "base": "dist/app-as-web-component"
+            },
             "index": "projects/app-as-web-component/src/index.html",
-            "main": "projects/app-as-web-component/src/main.ts",
-            "polyfills": "projects/app-as-web-component/src/polyfills.ts",
+            "polyfills": [
+              "projects/app-as-web-component/src/polyfills.ts"
+            ],
             "tsConfig": "projects/app-as-web-component/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
@@ -444,7 +450,8 @@
               "node_modules/moment/min/moment-with-locales.min.js",
               "node_modules/chart.js/dist/chart.umd.js",
               "node_modules/tinymce/tinymce.min.js"
-            ]
+            ],
+            "browser": "projects/app-as-web-component/src/main.ts"
           },
           "configurations": {
             "production": {
@@ -467,9 +474,7 @@
               ]
             },
             "development": {
-              "buildOptimizer": false,
               "optimization": false,
-              "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true
@@ -650,13 +655,14 @@
       "prefix": "edu",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser-esbuild",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
             "deployUrl": "",
             "outputHashing": "none",
-            "outputPath": "dist/rendering-service-web-component",
+            "outputPath": {
+              "base": "dist/rendering-service-web-component"
+            },
             "index": "projects/rendering-service-web-component/src/index.html",
-            "main": "projects/rendering-service-web-component/src/main.ts",
             "tsConfig": "projects/rendering-service-web-component/tsconfig.app.json",
             "styles": [
               "projects/rendering-service-web-component/src/styles.scss",
@@ -670,15 +676,14 @@
             "assets": [
               { "glob": "**/*", "input": "node_modules/ngx-extended-pdf-viewer/assets", "output": "/assets/ngx-extended-pdf-viewer" },
               { "glob": "**/*", "input": "node_modules/ngx-rendering-service-lib/assets", "output": "/" }
-            ]
+            ],
+            "browser": "projects/rendering-service-web-component/src/main.ts"
           },
           "configurations": {
             "production": {
             },
             "development": {
-              "buildOptimizer": false,
               "optimization": false,
-              "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true

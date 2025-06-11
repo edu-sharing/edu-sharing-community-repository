@@ -89,6 +89,7 @@ type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITO
     templateUrl: 'collection-new.component.html',
     styleUrls: ['collection-new.component.scss'],
     providers: [OptionsHelperService, OptionsHelperDataService],
+    standalone: false,
 })
 export class CollectionNewComponent implements EventListener, OnInit, OnDestroy {
     @ViewChild('mds') mds: MdsEditorWrapperComponent;

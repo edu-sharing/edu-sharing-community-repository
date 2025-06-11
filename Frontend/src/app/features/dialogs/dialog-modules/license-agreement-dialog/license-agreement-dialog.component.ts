@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { DialogButton } from '../../../../core-module/core.module';
-import { CardDialogConfig, CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
+import { CARD_DIALOG_DATA, CardDialogConfig } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import {
     LicenseAgreementDialogData,
@@ -11,6 +11,7 @@ import {
     selector: 'es-license-agreement-dialog',
     templateUrl: './license-agreement-dialog.component.html',
     styleUrls: ['./license-agreement-dialog.component.scss'],
+    standalone: false,
 })
 export class LicenseAgreementDialogComponent implements OnInit {
     licenseAgreementHTML: string;

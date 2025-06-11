@@ -10,6 +10,7 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
     selector: 'es-lti-admin',
     templateUrl: './lti-admin.component.html',
     styleUrls: ['./lti-admin.component.scss'],
+    standalone: false,
 })
 export class LtiAdminComponent implements OnInit {
     @Output() refreshAppList = new EventEmitter<void>();

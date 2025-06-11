@@ -25,6 +25,7 @@ import { MdsEditorInstanceService } from '../../../features/mds/mds-editor/mds-e
     templateUrl: 'collection-info-bar.component.html',
     styleUrls: ['collection-info-bar.component.scss'],
     providers: [MdsEditorInstanceService],
+    standalone: false,
 })
 export class CollectionInfoBarComponent implements OnChanges {
     @ViewChild('actionbar') actionbar: ActionbarComponent;

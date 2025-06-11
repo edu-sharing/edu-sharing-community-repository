@@ -5,7 +5,10 @@ import { RestHelper } from '../util/rest-helper';
 import { NodeRoot } from '../node-entries/entries-model';
 import { isString } from 'lodash-es';
 
-@Pipe({ name: 'nodeTitle' })
+@Pipe({
+    name: 'nodeTitle',
+    standalone: false,
+})
 export class NodeTitlePipe implements PipeTransform {
     transform(node: Node | NodeRoot | 'HOME', args?: { type: 'name' | 'title' }): string {
         if (!(node as Node)?.name && isString(node)) {

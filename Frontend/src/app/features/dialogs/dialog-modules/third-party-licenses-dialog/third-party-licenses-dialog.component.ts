@@ -7,6 +7,7 @@ import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
     selector: 'es-third-party-licenses-dialog',
     templateUrl: './third-party-licenses-dialog.component.html',
     styleUrls: ['./third-party-licenses-dialog.component.scss'],
+    standalone: false,
 })
 export class ThirdPartyLicensesDialogComponent implements OnInit {
     licenseDetails: { component: string; plugin: string; details: string }[] = [];

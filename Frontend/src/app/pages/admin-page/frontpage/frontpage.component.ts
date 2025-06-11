@@ -27,6 +27,7 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
     selector: 'es-admin-frontpage',
     templateUrl: 'frontpage.component.html',
     styleUrls: ['frontpage.component.scss'],
+    standalone: false,
 })
 export class AdminFrontpageComponent implements AfterViewInit {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;

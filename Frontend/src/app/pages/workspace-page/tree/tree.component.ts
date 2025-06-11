@@ -21,6 +21,7 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
     templateUrl: 'tree.component.html',
     styleUrls: ['tree.component.scss'],
     providers: [NodeEntriesService, OptionsHelperDataService],
+    standalone: false,
 })
 export class WorkspaceTreeComponent {
     @Input() root: NodeRoot;

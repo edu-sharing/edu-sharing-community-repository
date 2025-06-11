@@ -36,6 +36,7 @@ const MULTI_COLUMN_WIDTH = 900;
     templateUrl: './file-chooser-dialog.component.html',
     styleUrls: ['./file-chooser-dialog.component.scss'],
     providers: [BreadcrumbsService],
+    standalone: false,
 })
 export class FileChooserDialogComponent implements OnInit, AfterViewInit {
     @ViewChild('bottomBarContent') bottomBarContent: TemplateRef<HTMLElement>;

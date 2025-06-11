@@ -35,6 +35,7 @@ type WorkflowReceiver = Authority;
     selector: 'es-workflow-dialog',
     templateUrl: './workflow-dialog.component.html',
     styleUrls: ['./workflow-dialog.component.scss'],
+    standalone: false,
 })
 export class WorkflowDialogComponent {
     @ViewChild('statusSelect') statusSelectRef: MatSelect;

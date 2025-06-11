@@ -21,6 +21,7 @@ const NODE_URL_TAG_NAME = 'es-node-url';
     selector: NODE_URL_TAG_NAME,
     templateUrl: 'node-url.component.html',
     styleUrls: ['node-url.component.scss'],
+    standalone: false,
 })
 export class NodeUrlComponent implements AfterViewInit {
     @ViewChild('link') link: ElementRef<HTMLAnchorElement>;

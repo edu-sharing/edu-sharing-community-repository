@@ -5,7 +5,10 @@ import { RestConnectorService } from '../../core-module/core.module';
 /**
  * Directive to automatically disable buttons if a required toolpermission is missing for the action
  */
-@Directive({ selector: '[esToolpermissionCheck]' })
+@Directive({
+    selector: '[esToolpermissionCheck]',
+    standalone: false,
+})
 export class ToolpermissionCheckDirective implements OnChanges {
     @Input() toolpermission: string;
     @Input() toolpermissionDisplayHint = true;

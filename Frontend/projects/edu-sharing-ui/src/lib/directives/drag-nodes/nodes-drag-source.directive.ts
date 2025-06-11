@@ -1,11 +1,11 @@
 import {
     Directive,
+    ElementRef,
     EventEmitter,
     HostListener,
     Input,
-    Output,
-    ElementRef,
     OnChanges,
+    Output,
     SimpleChanges,
 } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
@@ -21,6 +21,7 @@ import { clearDraggedNodes, dragNodesTransferType, saveDraggedNodes } from './dr
  */
 @Directive({
     selector: '[esNodesDragSource]',
+    standalone: false,
 })
 export class NodesDragSourceDirective implements OnChanges {
     /**

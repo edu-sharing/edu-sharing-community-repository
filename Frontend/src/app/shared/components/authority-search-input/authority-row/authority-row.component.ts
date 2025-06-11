@@ -5,6 +5,7 @@ import { Group, User } from '../../../../core-module/rest/data-object';
     selector: 'es-authority-row',
     templateUrl: 'authority-row.component.html',
     styleUrls: ['authority-row.component.scss'],
+    standalone: false,
 })
 export class AuthorityRowComponent {
     @Input() authority: User | Group | any;

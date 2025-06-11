@@ -12,6 +12,7 @@ import { LicenseDialogData, LicenseDialogResult } from './license-dialog-data';
     selector: 'es-license-dialog',
     templateUrl: './license-dialog.component.html',
     styleUrls: ['./license-dialog.component.scss'],
+    standalone: false,
 })
 export class LicenseDialogComponent implements OnInit {
     @ViewChild(LicenseDialogContentComponent) content: LicenseDialogContentComponent;

@@ -4,6 +4,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
     selector: 'es-search-page-toolbar',
     templateUrl: './search-page-toolbar.component.html',
     styleUrls: ['./search-page-toolbar.component.scss'],
+    standalone: false,
 })
 export class SearchPageToolbarComponent {
     @Input() filterBarIsVisible: boolean;

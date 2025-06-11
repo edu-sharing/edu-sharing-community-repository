@@ -4,6 +4,7 @@ import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/co
     selector: 'es-mat-link',
     templateUrl: 'link.component.html',
     styleUrls: ['link.component.scss'],
+    standalone: false,
 })
 /**
  * A basic link that should be used whenever a button is not the best solution but rather a link is preferable

@@ -7,6 +7,7 @@ import { NodeHelperService } from '../../../../../services/node-helper.service';
     selector: 'es-workflow-list',
     templateUrl: 'workflow-history.component.html',
     styleUrls: ['workflow-history.component.scss'],
+    standalone: false,
 })
 export class WorkflowListComponent {
     @Input() history: WorkflowEntry[];

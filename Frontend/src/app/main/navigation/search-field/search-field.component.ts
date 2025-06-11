@@ -36,6 +36,7 @@ import { SearchFieldConfig } from './search-field.service';
     selector: 'es-search-field',
     templateUrl: './search-field.component.html',
     styleUrls: ['./search-field.component.scss'],
+    standalone: false,
 })
 export class SearchFieldComponent implements OnInit, OnDestroy, AfterViewInit {
     /** The number of filters visible on the facets overlay. */

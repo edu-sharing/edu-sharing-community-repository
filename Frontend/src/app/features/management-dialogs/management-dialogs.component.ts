@@ -53,6 +53,7 @@ export interface ManagementEvent {
         trigger('fromLeft', UIAnimation.fromLeft()),
         trigger('fromRight', UIAnimation.fromRight()),
     ],
+    standalone: false,
 })
 export class WorkspaceManagementDialogsComponent {
     @ContentChild('collectionChooserBeforeRecent')

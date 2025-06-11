@@ -23,6 +23,7 @@ interface Dimensions {
     templateUrl: 'tutorial.component.html',
     styleUrls: ['tutorial.component.scss'],
     animations: [trigger('fade', UIAnimation.fade())],
+    standalone: false,
 })
 export class TutorialComponent {
     private static activeTutorial: ElementRef = null;

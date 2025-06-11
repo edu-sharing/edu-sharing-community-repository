@@ -20,6 +20,7 @@ import { filter, first } from 'rxjs/operators';
     selector: 'es-share-link-dialog',
     templateUrl: './share-link-dialog.component.html',
     styleUrls: ['./share-link-dialog.component.scss'],
+    standalone: false,
 })
 export class ShareLinkDialogComponent implements OnInit {
     private loading$ = new BehaviorSubject<boolean>(false);

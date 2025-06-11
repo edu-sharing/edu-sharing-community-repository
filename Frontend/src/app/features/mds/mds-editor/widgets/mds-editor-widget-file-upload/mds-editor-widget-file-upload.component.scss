@@ -1,4 +1,4 @@
-@import 'projects/edu-sharing-ui/assets/scss/variables-scss';
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 
 .dropArea {
     border-radius: 5px;

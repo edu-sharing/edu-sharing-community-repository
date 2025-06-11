@@ -10,6 +10,7 @@ import {
 
 @Directive({
     selector: '[esOnAttributeChange]',
+    standalone: false,
 })
 export class OnAttributeChangeDirective implements OnInit, OnDestroy {
     @Input('esOnAttributeChange') attribute: string;

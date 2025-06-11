@@ -6,7 +6,10 @@ import { isNumeric } from 'ngx-edu-sharing-ui';
  * Format a given value of time in seconds to a readable time span
  * e.g. 2m 5s
  */
-@Pipe({ name: 'formatTime' })
+@Pipe({
+    name: 'formatTime',
+    standalone: false,
+})
 export class TimePipe implements PipeTransform {
     transform(value: number): string {
         if (!isNumeric(value)) return 'invalid value';

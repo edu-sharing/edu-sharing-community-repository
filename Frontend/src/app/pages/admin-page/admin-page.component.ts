@@ -79,6 +79,7 @@ type Job = {
     templateUrl: 'admin-page.component.html',
     styleUrls: ['admin-page.component.scss'],
     animations: [trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
+    standalone: false,
 })
 export class AdminPageComponent implements OnInit, OnDestroy {
     readonly AuthoritySearchMode = AuthoritySearchMode;

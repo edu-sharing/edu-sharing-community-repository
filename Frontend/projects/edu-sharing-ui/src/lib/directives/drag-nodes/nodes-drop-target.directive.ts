@@ -18,6 +18,7 @@ const ACTIVE_DROP_TARGET_DENY_CLASS = 'es-nodes-active-drop-target-deny';
 @Directive({
     selector: '[esNodesDropTarget]',
     exportAs: 'esNodesDropTarget',
+    standalone: false,
 })
 export class NodesDropTargetDirective<T = unknown> implements OnDestroy {
     @Input('esNodesDropTarget') target: T;

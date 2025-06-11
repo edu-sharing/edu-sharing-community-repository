@@ -28,6 +28,7 @@ import { SearchPageService } from './search-page.service';
             transition('visible => hidden', [animate(UIAnimation.ANIMATION_TIME_NORMAL)]),
         ]),
     ],
+    standalone: false,
 })
 export class SearchPageComponent implements OnInit, OnDestroy {
     readonly Scope = Scope;

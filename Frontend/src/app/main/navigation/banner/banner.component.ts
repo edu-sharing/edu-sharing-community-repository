@@ -11,6 +11,7 @@ import { take } from 'rxjs/operators';
     selector: 'es-banner',
     templateUrl: 'banner.component.html',
     styleUrls: ['banner.component.scss'],
+    standalone: false,
 })
 export class BannerComponent {
     @Input() scope: string;

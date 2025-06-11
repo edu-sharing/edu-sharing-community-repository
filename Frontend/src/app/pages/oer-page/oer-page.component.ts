@@ -29,6 +29,7 @@ import { Node } from 'ngx-edu-sharing-api';
     selector: 'es-oer-page',
     templateUrl: 'oer-page.component.html',
     styleUrls: ['oer-page.component.scss'],
+    standalone: false,
 })
 export class OerPageComponent implements OnInit, OnDestroy {
     readonly SCOPES = Scope;

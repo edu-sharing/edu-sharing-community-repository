@@ -18,6 +18,7 @@ import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
         { provide: MAT_FORM_FIELD, useValue: true },
     ],
     animations: [],
+    standalone: false,
 })
 export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements OnInit {
     @ViewChild('inputElement') inputElement: ElementRef;

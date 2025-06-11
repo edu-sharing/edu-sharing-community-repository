@@ -11,7 +11,7 @@
 </ng-container>
 <ng-container *ngIf="!isCollection">
   <ng-container *ngIf="getCustomTemplate() as ref">
-    <ng-container *ngTemplateOutlet="ref; context: { node: this.node }"></ng-container>
+    <ng-container *ngTemplateOutlet="ref; context: { node: node }"></ng-container>
   </ng-container>
   <ng-container *ngIf="!getCustomTemplate()">
     <img

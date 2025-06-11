@@ -9,7 +9,7 @@ import {
     RestNodeService,
 } from '../../../../core-module/core.module';
 import { UploadProgress } from '../../../../core-module/rest/services/rest-connector.service';
-import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
+import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import {
     FileUploadProgressDialogData,
@@ -28,6 +28,7 @@ import { Node, NodeService } from 'ngx-edu-sharing-api';
     selector: 'es-file-upload-progress-dialog',
     templateUrl: './file-upload-progress-dialog.component.html',
     styleUrls: ['./file-upload-progress-dialog.component.scss'],
+    standalone: false,
 })
 export class FileUploadProgressDialogComponent implements OnInit {
     progress: {

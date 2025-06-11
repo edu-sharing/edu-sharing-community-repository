@@ -9,6 +9,7 @@ import { Helper, Toast } from 'ngx-edu-sharing-ui';
     selector: 'es-share-dialog-permission',
     templateUrl: 'permission.component.html',
     styleUrls: ['permission.component.scss'],
+    standalone: false,
 })
 export class ShareDialogPermissionComponent implements OnInit {
     public _permission: ExtendedAce = null;

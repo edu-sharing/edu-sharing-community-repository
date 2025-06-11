@@ -28,6 +28,7 @@ enum StateUI {
     selector: 'es-app-login-page',
     templateUrl: 'app-login-page.component.html',
     styleUrls: ['app-login-page.component.scss'],
+    standalone: false,
 })
 // tslint:disable:no-console
 export class AppLoginPageComponent {

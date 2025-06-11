@@ -1,7 +1,7 @@
-@import 'globals';
-@import 'variables-root';
-@import 'material-theme';
-@import 'dialogs';
-@import 'mds';
-@import 'ng2-calendar';
-@import 'fonts';
+@forward 'globals';
+@forward 'variables-root';
+@forward 'material-theme';
+@forward 'dialogs';
+@forward 'mds';
+@forward 'ng2-calendar';
+@forward 'fonts';

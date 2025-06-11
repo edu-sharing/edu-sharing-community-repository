@@ -8,6 +8,7 @@ import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.serv
     selector: 'es-mds-editor-widget-suggestion-chips',
     templateUrl: './mds-editor-widget-suggestion-chips.component.html',
     styleUrls: ['./mds-editor-widget-suggestion-chips.component.scss'],
+    standalone: false,
 })
 export class MdsEditorWidgetSuggestionChipsComponent implements OnInit, OnDestroy {
     @Input() widget: Widget;

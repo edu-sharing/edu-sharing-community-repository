@@ -8,6 +8,7 @@ import { JumpMark } from '../../../../../services/jump-marks.service';
     selector: 'es-card-jump-marks',
     templateUrl: './card-jump-marks.component.html',
     styleUrls: ['./card-jump-marks.component.scss'],
+    standalone: false,
 })
 export class CardJumpMarksComponent {
     @Input() jumpMarks: JumpMark[];

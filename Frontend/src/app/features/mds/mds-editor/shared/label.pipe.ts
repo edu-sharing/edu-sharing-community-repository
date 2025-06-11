@@ -3,6 +3,7 @@ import { Widget } from '../mds-editor-instance.service';
 
 @Pipe({
     name: 'label',
+    standalone: false,
 })
 export class LabelPipe implements PipeTransform {
     transform(value: string, widget: Widget): string {

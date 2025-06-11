@@ -5,6 +5,7 @@ import { ImprintPrivacyService } from './imprint-privacy-service';
     selector: 'es-imprint-privacy',
     templateUrl: './imprint-privacy.component.html',
     styleUrls: ['./imprint-privacy.component.scss'],
+    standalone: false,
 })
 export class ImprintPrivacyComponent {
     @Input() separator: string = '';

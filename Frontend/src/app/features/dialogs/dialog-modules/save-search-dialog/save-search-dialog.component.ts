@@ -18,6 +18,7 @@ import { SaveSearchDialogData, SaveSearchDialogResult } from './save-search-dial
     selector: 'es-save-search-dialog',
     templateUrl: './save-search-dialog.component.html',
     styleUrls: ['./save-search-dialog.component.scss'],
+    standalone: false,
 })
 export class SaveSearchDialogComponent implements OnInit {
     readonly nameControl = new UntypedFormControl();

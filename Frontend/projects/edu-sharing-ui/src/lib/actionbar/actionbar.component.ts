@@ -14,6 +14,7 @@ import { BehaviorSubject } from 'rxjs';
     templateUrl: 'actionbar.component.html',
     styleUrls: ['actionbar.component.scss'],
     animations: [trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
+    standalone: false,
 })
 /**
  * The action bar provides several icons, usually at the top right, with actions for a current context

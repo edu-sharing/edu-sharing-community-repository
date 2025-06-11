@@ -2,6 +2,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
     name: 'appMdsDuration',
+    standalone: false,
 })
 export class MdsDurationPipe implements PipeTransform {
     transform(value: string): string {

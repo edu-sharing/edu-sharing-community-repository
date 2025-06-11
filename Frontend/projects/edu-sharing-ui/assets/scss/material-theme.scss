@@ -1,9 +1,9 @@
 @use '@angular/material' as mat;
 @use 'angular-material-css-vars' as mat-css-vars;
 
-@import 'variables';
-@import 'variables-scss';
-@import 'branding';
+@use 'variables' as *;
+@use 'variables-scss' as *;
+@use 'branding' as *;
 
 // optional
 $mat-css-dark-theme-selector: '.isDarkTheme';
@@ -69,6 +69,7 @@ mat-button-toggle-group {
     .mat-button-toggle-checked.mat-button-toggle-appearance-standard {
         color: var(--light-primary-text);
         background-color: var(--primary);
+        --mat-standard-button-toggle-selected-state-text-color: var(--light-primary-text);
     }
     .mat-button-toggle-appearance-standard .mat-button-toggle-focus-overlay {
         background-color: var(--primary);

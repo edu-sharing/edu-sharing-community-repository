@@ -1,7 +1,10 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 
-@Pipe({ name: 'replaceChars' })
+@Pipe({
+    name: 'replaceChars',
+    standalone: false,
+})
 export class ReplaceCharsPipe implements PipeTransform {
     transform(value: string, args: any): string {
         let i = 0;

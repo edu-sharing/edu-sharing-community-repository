@@ -23,6 +23,7 @@ import { MdsEditorInstanceService } from '../../../mds-editor-instance.service';
     selector: 'es-ai-preview-images-overlay',
     templateUrl: './ai-preview-images-overlay.component.html',
     styleUrls: ['./ai-preview-images-overlay.component.scss'],
+    standalone: false,
 })
 export class AiPreviewImagesOverlayComponent implements OnInit {
     protected readonly IMAGES_PREFIX: string = 'assets/images/ai/previews/';

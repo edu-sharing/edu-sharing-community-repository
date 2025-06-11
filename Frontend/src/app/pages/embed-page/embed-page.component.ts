@@ -33,6 +33,7 @@ import { Subject } from 'rxjs';
         ></es-license-dialog-content>
     `,
     styleUrls: ['embed-page.component.scss'],
+    standalone: false,
 })
 export class EmbedPageComponent implements EventListener, OnDestroy {
     @ViewChild('mdsRef') mdsRef: MdsEditorWrapperComponent;

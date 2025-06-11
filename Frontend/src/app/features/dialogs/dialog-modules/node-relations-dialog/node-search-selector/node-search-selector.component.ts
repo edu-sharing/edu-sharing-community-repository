@@ -39,6 +39,7 @@ type Status = {
     templateUrl: 'node-search-selector.component.html',
     styleUrls: ['node-search-selector.component.scss'],
     animations: [trigger('switchDialog', UIAnimation.switchDialogBoolean())],
+    standalone: false,
 })
 export class NodeSearchSelectorComponent implements AfterViewInit {
     @ContentChild('noPermissions') noPermissionsRef: TemplateRef<any>;

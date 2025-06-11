@@ -14,6 +14,7 @@ const MULTILINE_PROPERTIES = ['custom_html_headers', 'public_key'];
     selector: 'es-xml-app-properties-dialog',
     templateUrl: './xml-app-properties-dialog.component.html',
     styleUrls: ['./xml-app-properties-dialog.component.scss'],
+    standalone: false,
 })
 export class XmlAppPropertiesDialogComponent implements OnInit {
     xmlAppAdditionalPropertyName: string;

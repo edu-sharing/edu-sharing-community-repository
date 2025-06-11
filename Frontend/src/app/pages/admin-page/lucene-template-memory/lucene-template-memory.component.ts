@@ -16,6 +16,7 @@ type LuceneTemplates = { [key: string]: LuceneTemplate };
     selector: 'es-lucene-template-memory',
     templateUrl: './lucene-template-memory.component.html',
     styleUrls: ['./lucene-template-memory.component.scss'],
+    standalone: false,
 })
 export class LuceneTemplateMemoryComponent {
     private static readonly STORAGE_KEY = 'admin_lucene_templates';

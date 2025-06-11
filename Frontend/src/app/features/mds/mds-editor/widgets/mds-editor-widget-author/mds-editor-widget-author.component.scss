@@ -1,4 +1,4 @@
-@import '../mds-editor-widget-vcard/vcard';
+@use '../mds-editor-widget-vcard/vcard' as *;
 
 :host ::ng-deep .mat-tab-labels {
     background-color: transparent;

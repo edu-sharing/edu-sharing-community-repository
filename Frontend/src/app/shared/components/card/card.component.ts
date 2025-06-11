@@ -37,6 +37,7 @@ import { AuthorityNamePipe } from '../../pipes/authority-name.pipe';
     styleUrls: ['card.component.scss'],
     providers: [JumpMarksService],
     animations: [trigger('cardAnimation', UIAnimation.cardAnimation())],
+    standalone: false,
 })
 export class CardComponent implements AfterContentInit, OnDestroy {
     @ViewChild('cardContainer') cardContainer: ElementRef<HTMLElement>;

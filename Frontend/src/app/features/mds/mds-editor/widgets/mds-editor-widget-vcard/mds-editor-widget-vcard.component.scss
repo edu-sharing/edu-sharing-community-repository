@@ -1,4 +1,4 @@
-@import 'vcard';
+@use 'vcard' as *;
 
 :host ::ng-deep .mat-tab-labels {
     background-color: transparent;

@@ -40,6 +40,7 @@ import { OptionsHelperService } from '../../services/options-helper.service';
     templateUrl: 'sharing-page.component.html',
     styleUrls: ['sharing-page.component.scss'],
     providers: [OptionsHelperService],
+    standalone: false,
 })
 export class SharingPageComponent {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;

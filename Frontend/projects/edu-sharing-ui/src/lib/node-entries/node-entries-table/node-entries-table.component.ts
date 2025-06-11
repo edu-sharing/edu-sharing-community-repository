@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
+import { MatSort, Sort } from '@angular/material/sort';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import {
@@ -52,6 +52,7 @@ import { NodeHelperService } from '../../services/node-helper.service';
     templateUrl: './node-entries-table.component.html',
     styleUrls: ['./node-entries-table.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     implements OnChanges, AfterViewInit, OnDestroy
@@ -160,14 +161,6 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
             id: this.entriesService.sort?.active,
             start: this.entriesService.sort?.direction as 'asc' | 'desc',
             disableClear: false,
-        });
-        // Fix missing sorting indicators. See
-        // https://github.com/angular/components/issues/10242#issuecomment-470726829. Seems
-        // to be fixed upstream with Angular 11.
-        (
-            this.sort.sortables.get(this.entriesService.sort?.active) as MatSortHeader
-        )._setAnimationTransitionState({
-            toState: 'active',
         });
         /*
         this.route.queryParams.pipe(first()).subscribe((queryParams: Params) => {

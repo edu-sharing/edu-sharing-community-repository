@@ -7,6 +7,7 @@ import { InputStatus, Values } from '../../../types/types';
     selector: 'es-mds-editor-widget-file-upload',
     templateUrl: './mds-editor-widget-file-upload.component.html',
     styleUrls: ['./mds-editor-widget-file-upload.component.scss'],
+    standalone: false,
 })
 export class MdsEditorWidgetFileUploadComponent implements NativeWidgetComponent {
     static readonly constraints = {

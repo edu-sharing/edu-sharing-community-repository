@@ -22,7 +22,7 @@ describe('handleError', () => {
             .throwError({ message: 'foo' })
             .pipe(handleError(defaultErrorHandler));
         observable.subscribe({
-            error: () => void 0,
+            error: () => undefined as void,
         });
         tick();
         expect(defaultErrorHandler).toHaveBeenCalled();
@@ -53,7 +53,7 @@ describe('handleError', () => {
             .throwError({ message: 'foo' })
             .pipe(handleError(defaultErrorHandler), handleError(defaultErrorHandler));
         observable.subscribe({
-            error: () => void 0,
+            error: () => undefined as void,
         });
         tick();
         expect(defaultErrorHandler).toHaveBeenCalledTimes(2);
@@ -75,7 +75,7 @@ describe('handleError', () => {
         const trigger = rxjs.of(void 0);
         const observable = trigger.pipe(switchReplay(() => source));
         observable.subscribe({
-            error: () => void 0,
+            error: () => undefined as void,
         });
         tick();
         expect(defaultErrorHandler).toHaveBeenCalled();
@@ -106,7 +106,7 @@ describe('handleError', () => {
             },
         });
         observable.subscribe({
-            error: () => void 0,
+            error: () => undefined as void,
         });
         tick();
         expect(defaultErrorHandler).not.toHaveBeenCalled();

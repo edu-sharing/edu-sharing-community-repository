@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { Observable, Subject } from 'rxjs';
-import { catchError, filter, finalize, map, startWith, switchMap, toArray } from 'rxjs/operators';
+import { catchError, filter, finalize, map, startWith, switchMap } from 'rxjs/operators';
 import { NodeEntries } from '../api/models';
 import { IamV1Service } from '../api/services';
 import { HOME_REPOSITORY, ME } from '../constants';
@@ -138,7 +138,7 @@ export class NodeListService {
             }),
         );
         return rxjs.forkJoin(observables).pipe(
-            map(() => void 0),
+            map(() => undefined as void),
             finalize(() => this.nodeListChangesSubject.next(listId)),
         );
     }

@@ -70,6 +70,7 @@ interface Stats {
     selector: 'es-workspace-metadata',
     templateUrl: 'metadata.component.html',
     styleUrls: ['metadata.component.scss'],
+    standalone: false,
 })
 export class WorkspaceMetadataComponent implements OnInit {
     private _canvas: ElementRef<HTMLCanvasElement>;

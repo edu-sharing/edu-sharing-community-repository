@@ -26,6 +26,7 @@ export type TypeResult = {
     selector: 'es-share-dialog-choose-type',
     templateUrl: 'choose-type.component.html',
     styleUrls: ['choose-type.component.scss'],
+    standalone: false,
 })
 export class ShareDialogChooseTypeComponent implements AfterViewInit, OnDestroy {
     @ViewChildren(FocusableOptionDirective)

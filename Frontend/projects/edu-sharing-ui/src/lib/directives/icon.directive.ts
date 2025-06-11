@@ -36,6 +36,7 @@ type IconsConfig = Array<{ original: string; replace?: string; cssClass?: string
  */
 @Directive({
     selector: 'i[esIcon], i.material-icons',
+    standalone: false,
 })
 export class IconDirective implements OnInit, OnDestroy {
     private originalId$ = new BehaviorSubject<string>(null);

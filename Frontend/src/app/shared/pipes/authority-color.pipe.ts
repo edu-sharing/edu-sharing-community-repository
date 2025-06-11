@@ -2,7 +2,10 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { Helper } from '../../core-module/rest/helper';
 import { ColorHelper } from 'ngx-edu-sharing-ui';
 
-@Pipe({ name: 'authorityColor' })
+@Pipe({
+    name: 'authorityColor',
+    standalone: false,
+})
 export class AuthorityColorPipe implements PipeTransform {
     static COLORS = ['#4584B3', '#9B393C', '#84B97C', '#71B0A4', '#7A79D5', '#AE9957'];
 

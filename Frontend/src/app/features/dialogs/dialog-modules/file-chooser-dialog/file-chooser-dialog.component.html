@@ -1,8 +1,5 @@
 <ng-template #bottomBarContent>
-  <div
-    *ngIf="!data.collections && !this.path$.value.length && !this.canSelectHome"
-    class="no-permissions"
-  >
+  <div *ngIf="!data.collections && !path$.value.length && !canSelectHome" class="no-permissions">
     {{ 'WORKSPACE.FILE_CHOOSER.HOME_FOLDER_NO_PERMISSIONS' | translate }}
   </div>
   <div *ngIf="!folderIsWritable()" class="no-permissions">

@@ -6,7 +6,10 @@ import { ListItem } from '../types/list-item';
 import { TranslationsService } from '../translations/translations.service';
 import { delay, startWith, switchMap } from 'rxjs/operators';
 
-@Pipe({ name: 'esListItemLabel' })
+@Pipe({
+    name: 'esListItemLabel',
+    standalone: false,
+})
 export class ListItemLabelPipe implements PipeTransform {
     constructor(private translate: TranslateService, private translations: TranslationsService) {}
 
@@ -23,7 +26,7 @@ export class ListItemLabelPipe implements PipeTransform {
             return rxjs.of(item.label);
         } else {
             return this.translations.waitForInit().pipe(
-                startWith(null as void),
+                startWith(undefined as void),
                 delay(1),
                 switchMap(() =>
                     this.translate.get(mapping[item.type] + '.' + item.name, {

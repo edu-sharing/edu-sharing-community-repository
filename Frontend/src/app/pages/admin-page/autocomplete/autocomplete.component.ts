@@ -1,13 +1,4 @@
-import {
-    Component,
-    Input,
-    Output,
-    EventEmitter,
-    OnInit,
-    SimpleChanges,
-    ContentChild,
-    TemplateRef,
-} from '@angular/core';
+import { Component, ContentChild, EventEmitter, Input, Output, TemplateRef } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -15,6 +6,7 @@ import { TranslateService } from '@ngx-translate/core';
     templateUrl: 'autocomplete.component.html',
     styleUrls: ['autocomplete.component.scss'],
     host: { '(keydown)': 'handleKeyDown($event)' },
+    standalone: false,
 })
 export class AutocompleteComponent {
     @ContentChild('icon') iconRef: TemplateRef<any>;

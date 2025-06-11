@@ -1,4 +1,4 @@
-@import '../../../../assets/scss/variables-scss';
+@use '../../../../assets/scss/variables-scss' as *;
 
 .widget-label {
     font-size: 90%;
@@ -52,6 +52,10 @@
         }
         .tree-entry {
             display: inline-block;
+            border-radius: 5px;
+            padding: 5px 10px;
+            // max-width: 250px;
+            background-color: $cardLightBackground;
             > a {
                 color: var(--palette-primary-800);
                 text-decoration: none;
@@ -62,10 +66,6 @@
             > i {
                 font-size: 18px;
             }
-            border-radius: 5px;
-            padding: 5px 10px;
-            // max-width: 250px;
-            background-color: $cardLightBackground;
         }
     }
     &.widget-link {

@@ -10,6 +10,7 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
     selector: 'es-admin-config',
     templateUrl: 'config.component.html',
     styleUrls: ['config.component.scss'],
+    standalone: false,
 })
 export class AdminConfigComponent {
     public static CONFIG_FILE_REFERENCE = 'edu-sharing.reference.conf';

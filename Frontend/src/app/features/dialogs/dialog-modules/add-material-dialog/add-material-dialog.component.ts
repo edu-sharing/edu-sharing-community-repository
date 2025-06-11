@@ -10,8 +10,9 @@ import {
     UserService,
     WebsiteInformation,
 } from 'ngx-edu-sharing-api';
-import { ListItem, UIAnimation, notNull } from 'ngx-edu-sharing-ui';
+import { ListItem, notNull, UIAnimation } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { catchError, debounce, filter, finalize, map, switchMap, tap } from 'rxjs/operators';
 import {
     ConfigurationService,
@@ -24,9 +25,8 @@ import { Toast } from '../../../../services/toast';
 import { BreadcrumbsService } from '../../../../shared/components/breadcrumbs/breadcrumbs.service';
 import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
-import { DialogTemplate, DialogsService } from '../../dialogs.service';
+import { DialogsService, DialogTemplate } from '../../dialogs.service';
 import { AddMaterialDialogData, AddMaterialDialogResult } from './add-material-dialog-data';
-import { BehaviorSubject } from 'rxjs';
 import { TemplateSlot } from '../../../../main/navigation/main-nav.service';
 
 @Component({
@@ -39,6 +39,7 @@ import { TemplateSlot } from '../../../../main/navigation/main-nav.service';
         trigger('openOverlay', UIAnimation.openOverlay()),
     ],
     providers: [BreadcrumbsService],
+    standalone: false,
 })
 export class AddMaterialDialogComponent implements OnInit {
     readonly DialogTemplate = DialogTemplate;

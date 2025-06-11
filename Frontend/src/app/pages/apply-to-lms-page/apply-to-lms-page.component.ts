@@ -14,7 +14,6 @@ import {
 import { Toast } from '../../services/toast';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { TranslationsService } from 'ngx-edu-sharing-ui';
-import { RouterHelper } from '../../util/router.helper';
 import { PlatformLocation } from '@angular/common';
 
 export class NodeLMS extends Node {
@@ -25,6 +24,7 @@ export class NodeLMS extends Node {
 @Component({
     selector: 'es-apply-to-lms-page',
     templateUrl: 'apply-to-lms-page.component.html',
+    standalone: false,
 })
 export class ApplyToLmsPageComponent {
     constructor(

@@ -1,5 +1,5 @@
 @use '@angular/material' as mat;
-@import 'projects/edu-sharing-ui/assets/scss/variables-scss';
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 
 mat-form-field {
     width: 100%;

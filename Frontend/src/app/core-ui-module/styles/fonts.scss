@@ -1,7 +1,7 @@
-@import 'fonts/material-design-icons/material-icons.css';
-@import 'fonts/edu-icons/edu-icons.css';
-@import 'fonts/opensans_regular/stylesheet.css';
-@import 'fonts/opensans_bold/stylesheet.css';
+@use 'fonts/material-design-icons/material-icons.css' as *;
+@use 'fonts/edu-icons/edu-icons.css' as *;
+@use 'fonts/opensans_regular/stylesheet.css' as *;
+@use 'fonts/opensans_bold/stylesheet.css' as *;
 
-@import 'branding';
-@import 'fonts/custom-icons/custom-icons.scss';
+@use 'branding' as *;
+@use 'fonts/custom-icons/custom-icons.scss' as *;

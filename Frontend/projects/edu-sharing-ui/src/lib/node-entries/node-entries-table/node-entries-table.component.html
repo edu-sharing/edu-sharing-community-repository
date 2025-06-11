@@ -57,7 +57,7 @@
       <ng-container
         *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
       >
-        <ng-container *ngTemplateOutlet="icon; context: { node: this.node }"></ng-container>
+        <ng-container *ngTemplateOutlet="icon; context: { node: node }"></ng-container>
       </ng-container>
       <div
         *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink"
@@ -67,7 +67,7 @@
         (dblclick)="entriesService.dblClickItem.emit({ element: node, source: ClickSource.Icon })"
       >
         <ng-container
-          *ngTemplateOutlet="icon; context: { node: this.node }"
+          *ngTemplateOutlet="icon; context: { node: node }"
           (click)="
             entriesService.onClicked({ event: $event, element: node, source: ClickSource.Icon })
           "

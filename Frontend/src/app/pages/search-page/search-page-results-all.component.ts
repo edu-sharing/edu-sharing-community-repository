@@ -9,6 +9,7 @@ import { NodeEntriesDisplayType, Scope } from 'ngx-edu-sharing-ui';
     templateUrl: './search-page-results-all.component.html',
     styleUrls: ['./search-page-results-all.component.scss'],
     providers: [SearchPageResultsAllService],
+    standalone: false,
 })
 export class SearchPageResultsAllComponent implements OnInit {
     readonly Scope = Scope;

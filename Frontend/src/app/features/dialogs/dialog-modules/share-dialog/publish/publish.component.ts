@@ -42,6 +42,7 @@ type PublishedNode = Node & {
     templateUrl: 'publish.component.html',
     styleUrls: ['publish.component.scss'],
     providers: [MdsEditorInstanceService],
+    standalone: false,
 })
 export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy {
     @Input() node: Node;

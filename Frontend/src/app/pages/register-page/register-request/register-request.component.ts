@@ -1,6 +1,4 @@
 import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
-import { Router } from '@angular/router';
-import { RestConnectorService, RestRegisterService } from '../../../core-module/core.module';
 import { Toast } from '../../../services/toast';
 import { UntypedFormControl, Validators } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
@@ -11,6 +9,7 @@ import { RegisterService } from 'ngx-edu-sharing-api';
     selector: 'es-register-request',
     templateUrl: 'register-request.component.html',
     styleUrls: ['register-request.component.scss'],
+    standalone: false,
 })
 export class RegisterRequestComponent implements OnDestroy {
     @Output() done = new EventEmitter<void>();

@@ -23,6 +23,7 @@ import { ConfigurationService } from '../../core-module/core.module';
  */
 @Directive({
     selector: '[esTitle]',
+    standalone: false,
 })
 export class TitleDirective implements OnInit, OnChanges, OnDestroy {
     /**

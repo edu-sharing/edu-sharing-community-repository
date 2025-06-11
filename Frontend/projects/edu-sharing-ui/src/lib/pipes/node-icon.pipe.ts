@@ -2,7 +2,10 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { RepoUrlService } from '../services/repo-url.service';
 
-@Pipe({ name: 'esNodeIcon' })
+@Pipe({
+    name: 'esNodeIcon',
+    standalone: false,
+})
 export class NodeIconPipe implements PipeTransform {
     constructor(private repoUrlService: RepoUrlService) {}
     transform(node: Node) {

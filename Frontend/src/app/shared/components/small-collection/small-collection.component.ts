@@ -7,6 +7,7 @@ import { Node } from 'ngx-edu-sharing-api';
     selector: 'es-small-collection',
     templateUrl: 'small-collection.component.html',
     styleUrls: ['small-collection.component.scss'],
+    standalone: false,
 })
 /**
  * This component ~~uses the same height as the secondary bar height and~~ can be used to display a

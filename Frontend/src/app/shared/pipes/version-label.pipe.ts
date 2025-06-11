@@ -6,7 +6,10 @@ import { Version } from '../../core-module/rest/data-object';
 /**
  * Format the version label and checking constants if required
  */
-@Pipe({ name: 'versionComment' })
+@Pipe({
+    name: 'versionComment',
+    standalone: false,
+})
 export class VersionLabelPipe implements PipeTransform {
     transform(node: Node | Version | any, args: any = null): string {
         let comment: string;

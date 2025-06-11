@@ -18,7 +18,6 @@ import { SharedModule } from '../../../shared/shared.module';
     selector: 'es-mds-node-relations-widget',
     templateUrl: 'node-relations-widget.component.html',
     styleUrls: ['node-relations-widget.component.scss'],
-    standalone: true,
     imports: [SharedModule],
 })
 export class MdsNodeRelationsWidgetComponent implements OnChanges {

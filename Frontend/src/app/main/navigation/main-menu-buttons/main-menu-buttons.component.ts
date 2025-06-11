@@ -5,6 +5,7 @@ import { MainMenuEntriesService } from '../main-menu-entries.service';
     selector: 'es-main-menu-buttons',
     templateUrl: './main-menu-buttons.component.html',
     styleUrls: ['./main-menu-buttons.component.scss'],
+    standalone: false,
 })
 export class MainMenuButtonsComponent {
     @Input() currentScope: string;

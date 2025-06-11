@@ -32,6 +32,7 @@ import { MdsEditorInstanceServiceAbstract } from 'ngx-edu-sharing-ui';
         MdsEditorInstanceService,
         { provide: MdsEditorInstanceServiceAbstract, useExisting: MdsEditorInstanceService },
     ],
+    standalone: false,
 })
 export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
     // tslint:disable: no-output-on-prefix  // Keep API compatibility.

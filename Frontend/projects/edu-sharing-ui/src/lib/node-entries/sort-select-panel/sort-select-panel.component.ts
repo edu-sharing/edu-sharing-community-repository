@@ -6,6 +6,7 @@ import { ListItemSort, SortEvent, SortPanel } from '../../types/list-item';
     selector: 'es-sort-select-panel',
     templateUrl: './sort-select-panel.component.html',
     styleUrls: ['./sort-select-panel.component.scss'],
+    standalone: false,
 })
 export class SortSelectPanelComponent implements SortPanel {
     @Input() active: string;

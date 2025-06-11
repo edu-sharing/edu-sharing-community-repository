@@ -1,4 +1,4 @@
-@import 'projects/edu-sharing-ui/assets/scss/variables-scss';
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 
 $mainMenuHoverBackgroundColor: $itemSelectedBackground !default;
 $mainMenuAccentColor: var(--primary) !default;

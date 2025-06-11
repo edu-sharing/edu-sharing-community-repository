@@ -7,6 +7,7 @@ import { NodeEntriesDataType } from '../entries-model';
     selector: 'es-drag-preview',
     templateUrl: './drag-preview.component.html',
     styleUrls: ['./drag-preview.component.scss'],
+    standalone: false,
 })
 export class DragPreviewComponent<T extends NodeEntriesDataType> {
     @Input() node: Node;

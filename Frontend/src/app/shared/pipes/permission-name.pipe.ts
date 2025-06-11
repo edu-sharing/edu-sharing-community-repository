@@ -2,7 +2,10 @@ import { PipeTransform, Pipe } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfigurationService } from '../../core-module/core.module';
 
-@Pipe({ name: 'permissionName' })
+@Pipe({
+    name: 'permissionName',
+    standalone: false,
+})
 export class PermissionNamePipe implements PipeTransform {
     constructor(private translate: TranslateService, private config: ConfigurationService) {}
 

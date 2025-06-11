@@ -11,6 +11,7 @@ import { Node } from 'ngx-edu-sharing-api';
     selector: 'es-node-entries-card-small',
     templateUrl: 'node-entries-card-small.component.html',
     styleUrls: ['node-entries-card-small.component.scss'],
+    standalone: false,
 })
 export class NodeEntriesCardSmallComponent<T extends Node> {
     readonly ClickSource = ClickSource;

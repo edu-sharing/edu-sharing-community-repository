@@ -9,6 +9,7 @@ declare var Chart: any;
     selector: 'es-admin-plugins',
     templateUrl: 'plugins.component.html',
     styleUrls: ['plugins.component.scss'],
+    standalone: false,
 })
 export class AdminPluginsComponent {
     plugins: PluginStatus[];

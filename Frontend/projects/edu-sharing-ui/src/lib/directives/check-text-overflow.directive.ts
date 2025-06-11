@@ -9,6 +9,7 @@ import { Directive, ElementRef, Input, OnInit } from '@angular/core';
 @Directive({
     selector: '[esCheckTextOverflow]',
     exportAs: 'esCheckTextOverflow',
+    standalone: false,
 })
 export class CheckTextOverflowDirective implements OnInit {
     @Input('esCheckTextOverflow') selector?: string;

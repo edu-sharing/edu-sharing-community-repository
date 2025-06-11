@@ -2,9 +2,13 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 import { CardDialogRef } from '../../../../features/dialogs/card-dialog/card-dialog-ref';
 import { DialogButton } from '../../../../util/dialog-button';
-import { ClientConfig, NotificationConfig, NotificationV1Service } from 'ngx-edu-sharing-api';
+import {
+    ClientConfig,
+    ConfigService,
+    NotificationConfig,
+    NotificationV1Service,
+} from 'ngx-edu-sharing-api';
 import { FormControl, FormGroup } from '@angular/forms';
-import { ConfigService } from 'ngx-edu-sharing-api';
 import { Toast } from '../../../../services/toast';
 import { first } from 'rxjs/operators';
 
@@ -23,6 +27,7 @@ enum NotificationEvents {
     selector: 'es-notification-dialog',
     templateUrl: './notification-dialog.component.html',
     styleUrls: ['./notification-dialog.component.scss'],
+    standalone: false,
 })
 export class NotificationDialogComponent implements OnInit, OnDestroy {
     readonly destroyed$ = new Subject<void>();

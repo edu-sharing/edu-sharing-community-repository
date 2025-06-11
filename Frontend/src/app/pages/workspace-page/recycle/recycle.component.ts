@@ -55,6 +55,7 @@ type RestoreResults = {
     selector: 'es-recycle',
     templateUrl: 'recycle.component.html',
     styleUrls: ['recycle.component.scss'],
+    standalone: false,
 })
 export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;

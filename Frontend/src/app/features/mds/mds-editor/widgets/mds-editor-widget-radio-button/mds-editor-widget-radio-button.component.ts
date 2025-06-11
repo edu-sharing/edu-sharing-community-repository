@@ -9,6 +9,7 @@ import { MdsWidgetType, ValueType } from 'ngx-edu-sharing-ui';
     selector: 'es-mds-editor-widget-radio-button',
     templateUrl: './mds-editor-widget-radio-button.component.html',
     styleUrls: ['./mds-editor-widget-radio-button.component.scss'],
+    standalone: false,
 })
 export class MdsEditorWidgetRadioButtonComponent extends MdsEditorWidgetBase implements OnInit {
     readonly valueType: ValueType = ValueType.String;

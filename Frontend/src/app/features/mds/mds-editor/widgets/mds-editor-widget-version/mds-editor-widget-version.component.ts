@@ -4,13 +4,13 @@ import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { filter } from 'rxjs/operators';
 import { Constraints, NativeWidgetComponent } from '../../../types/types';
-import { MdsEditorCommonService } from '../../mds-editor-common.service';
 import { Toast } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-mds-editor-widget-version',
     templateUrl: './mds-editor-widget-version.component.html',
     styleUrls: ['./mds-editor-widget-version.component.scss'],
+    standalone: false,
 })
 export class MdsEditorWidgetVersionComponent implements OnInit, NativeWidgetComponent {
     static readonly constraints: Constraints = {

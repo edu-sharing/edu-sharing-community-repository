@@ -14,6 +14,7 @@ import { MdsEditorCommonService } from '../mds-editor-common.service';
     selector: 'es-mds-editor-core',
     templateUrl: './mds-editor-core.component.html',
     styleUrls: ['./mds-editor-core.component.scss'],
+    standalone: false,
 })
 export class MdsEditorCoreComponent {
     @ViewChildren('view') viewRef: QueryList<MdsEditorViewComponent>;

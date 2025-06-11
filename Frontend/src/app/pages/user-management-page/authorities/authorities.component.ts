@@ -97,6 +97,7 @@ import { DomSanitizer } from '@angular/platform-browser';
         trigger('cardAnimation', UIAnimation.cardAnimation()),
     ],
     providers: [BreadcrumbsService, OptionsHelperDataService],
+    standalone: false,
 })
 export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit {
     readonly DisplayType = NodeEntriesDisplayType;

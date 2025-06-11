@@ -12,6 +12,7 @@ import { InputDialogData, InputDialogResult } from './input-dialog-data';
     selector: 'es-input-dialog',
     templateUrl: './input-dialog.component.html',
     styleUrls: ['./input-dialog.component.scss'],
+    standalone: false,
 })
 export class InputDialogComponent {
     control = new FormControl('');

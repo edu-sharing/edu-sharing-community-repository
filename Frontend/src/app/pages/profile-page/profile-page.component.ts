@@ -36,6 +36,7 @@ import { take, takeUntil } from 'rxjs/operators';
     styleUrls: ['profile-page.component.scss'],
     animations: [trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
     providers: [OptionsHelperDataService],
+    standalone: false,
 })
 export class ProfilePageComponent implements OnInit, OnDestroy {
     private destroyed = new Subject<void>();

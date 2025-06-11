@@ -1,7 +1,10 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { ConfigService, Person } from 'ngx-edu-sharing-api';
 
-@Pipe({ name: 'nodePersonName' })
+@Pipe({
+    name: 'nodePersonName',
+    standalone: false,
+})
 export class NodePersonNamePipe implements PipeTransform {
     constructor(private config: ConfigService) {}
     transform(person: Person | any, args: any = null): string {

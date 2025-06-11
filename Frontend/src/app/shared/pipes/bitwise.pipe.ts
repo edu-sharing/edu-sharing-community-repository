@@ -6,7 +6,10 @@ import { PipeTransform, Pipe } from '@angular/core';
  * 3 | bitwise:{operator: 1} === true
  * 4 | bitwise:{operator: 1} === false
  */
-@Pipe({ name: 'bitwise' })
+@Pipe({
+    name: 'bitwise',
+    standalone: false,
+})
 export class BitwisePipe implements PipeTransform {
     transform(value: number, args: { operator: number }): boolean {
         // tslint:disable-next-line:no-bitwise

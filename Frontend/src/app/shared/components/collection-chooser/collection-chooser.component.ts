@@ -41,6 +41,7 @@ import {
     selector: 'es-collection-chooser',
     templateUrl: 'collection-chooser.component.html',
     styleUrls: ['collection-chooser.component.scss'],
+    standalone: false,
 })
 export class CollectionChooserComponent implements OnInit {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;

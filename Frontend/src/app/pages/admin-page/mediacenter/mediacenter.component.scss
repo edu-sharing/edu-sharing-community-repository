@@ -1,5 +1,5 @@
-@import 'projects/edu-sharing-ui/assets/scss/variables-scss';
-@import '../admin.variables';
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use '../admin.variables' as *;
 :host ::ng-deep {
     .mat-tab-body-wrapper {
         padding: 20px;

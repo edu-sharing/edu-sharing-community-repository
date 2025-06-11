@@ -12,7 +12,7 @@
     class="global-option-btn"
     attr.data-test="card-button-{{ option.name }}"
   >
-    <ng-container *ngTemplateOutlet="globalOption; context: { option: this.option }"></ng-container>
+    <ng-container *ngTemplateOutlet="globalOption; context: { option: option }"></ng-container>
   </button>
 </div>
 <ng-template #globalOption let-option="option">

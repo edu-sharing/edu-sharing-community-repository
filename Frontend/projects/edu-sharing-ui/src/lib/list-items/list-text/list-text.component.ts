@@ -12,6 +12,7 @@ import { MdsHelperService } from '../../mds/mds-helper.service';
     selector: 'es-list-text',
     templateUrl: './list-text.component.html',
     styleUrls: ['./list-text.component.scss'],
+    standalone: false,
 })
 export class ListTextComponent extends ListWidget implements OnInit {
     static supportedItems = [

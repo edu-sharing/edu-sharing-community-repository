@@ -9,6 +9,7 @@ import { RegisterService } from 'ngx-edu-sharing-api';
     selector: 'es-register-reset-password',
     templateUrl: 'register-reset-password.component.html',
     styleUrls: ['register-reset-password.component.scss'],
+    standalone: false,
 })
 export class RegisterResetPasswordComponent {
     @Output() stateChanged = new EventEmitter<void>();

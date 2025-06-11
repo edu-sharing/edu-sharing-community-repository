@@ -4,12 +4,12 @@ import { Node } from 'ngx-edu-sharing-api';
 import { RestConnectorService, RestConstants } from '../../../../../../core-module/core.module';
 import { NodeHelperService } from '../../../../../../services/node-helper.service';
 import { Values } from '../../../../types/types';
-import { Helper } from '../../../../../../core-module/rest/helper';
 
 @Component({
     selector: 'es-license-details',
     templateUrl: 'license-details.component.html',
     styleUrls: ['license-details.component.scss'],
+    standalone: false,
 })
 export class LicenseDetailsComponent implements OnChanges {
     static PROPERTIES_MAPPING_GRAPHQL: { [key: string]: string } = {

@@ -1,9 +1,9 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { DurationFormat } from '../util/duration-helper';
-import { DurationHelper } from '../util/duration-helper';
+import { DurationFormat, DurationHelper } from '../util/duration-helper';
 
 @Pipe({
     name: 'formatDuration',
+    standalone: false,
 })
 export class FormatDurationPipe implements PipeTransform {
     transform(

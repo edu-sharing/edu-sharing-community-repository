@@ -40,6 +40,7 @@ export interface NodeReportDialogData {
         trigger('cardAnimation', UIAnimation.cardAnimation()),
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class NodeReportDialogComponent implements OnInit {
     readonly reasons = ['UNAVAILABLE', 'INAPPROPRIATE_CONTENT', 'INVALID_METADATA', 'OTHER'];

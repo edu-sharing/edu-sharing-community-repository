@@ -314,10 +314,6 @@ export class UIHelper {
         return result;
     }
 
-    static materializeSelect() {
-        eval("$('select').css('display','none');$('select').material_select()");
-    }
-
     static showAddedToCollectionInfo(
         bridge: BridgeService,
         router: Router,

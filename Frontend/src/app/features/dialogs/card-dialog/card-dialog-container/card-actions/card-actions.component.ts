@@ -13,6 +13,7 @@ import { DialogButton } from '../../../../../util/dialog-button';
     selector: 'es-card-actions',
     templateUrl: './card-actions.component.html',
     styleUrls: ['./card-actions.component.scss'],
+    standalone: false,
 })
 export class CardActionsComponent {
     @Input() additionalContent: TemplateRef<any>;

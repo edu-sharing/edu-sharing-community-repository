@@ -1,6 +1,6 @@
 import { Component, EventEmitter, NgZone, Output, ViewChild } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { Group, HOME_REPOSITORY, MediacenterService, Mediacenter, Node } from 'ngx-edu-sharing-api';
+import { Group, HOME_REPOSITORY, Mediacenter, MediacenterService, Node } from 'ngx-edu-sharing-api';
 import {
     DefaultGroups,
     ElementType,
@@ -41,6 +41,7 @@ import { firstValueFrom } from 'rxjs';
     templateUrl: 'mediacenter.component.html',
     styleUrls: ['mediacenter.component.scss'],
     providers: [OptionsHelperService],
+    standalone: false,
 })
 export class AdminMediacenterComponent {
     readonly AuthoritySearchMode = AuthoritySearchMode;

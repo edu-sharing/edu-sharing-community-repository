@@ -35,6 +35,7 @@ import { CordovaService, OnBackBehaviour } from '../../services/cordova.service'
     templateUrl: 'app-share-page.component.html',
     styleUrls: ['app-share-page.component.scss'],
     animations: [],
+    standalone: false,
 })
 export class AppSharePageComponent {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;

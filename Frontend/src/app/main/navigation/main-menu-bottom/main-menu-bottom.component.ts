@@ -7,6 +7,7 @@ import { MainMenuEntriesService } from '../main-menu-entries.service';
     selector: 'es-main-menu-bottom',
     templateUrl: './main-menu-bottom.component.html',
     styleUrls: ['./main-menu-bottom.component.scss'],
+    standalone: false,
 })
 export class MainMenuBottomComponent {
     @Input() currentScope: string;

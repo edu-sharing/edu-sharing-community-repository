@@ -1,7 +1,7 @@
 import { Component, EventEmitter, forwardRef, Input, Output } from '@angular/core';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import { NgxMonacoEditorConfig } from 'ngx-monaco-editor-v2';
-import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 @Component({
     selector: 'es-code-editor',
@@ -14,6 +14,7 @@ import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR } from '@angular/f
             multi: true,
         },
     ],
+    standalone: false,
 })
 export class CodeEditorComponent implements ControlValueAccessor {
     @Input() options: NgxMonacoEditorConfig | any;

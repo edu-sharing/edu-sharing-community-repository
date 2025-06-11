@@ -1,5 +1,5 @@
-@import '../assets/css/nouislider.min.css';
+@forward '../assets/css/nouislider.min.css';
 
-@import 'globals.scss';
-@import 'override-core.scss';
-@import 'override.scss';
+@forward 'globals';
+@forward 'override-core';
+@forward 'override';

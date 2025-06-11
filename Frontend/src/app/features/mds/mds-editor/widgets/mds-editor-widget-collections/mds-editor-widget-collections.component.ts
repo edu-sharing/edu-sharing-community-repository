@@ -15,6 +15,7 @@ import {
     selector: 'es-mds-editor-widget-collections',
     templateUrl: './mds-editor-widget-collections.component.html',
     styleUrls: ['./mds-editor-widget-collections.component.scss'],
+    standalone: false,
 })
 export class MdsEditorWidgetCollectionsComponent implements OnInit, NativeWidgetComponent {
     readonly DisplayType = NodeEntriesDisplayType;

@@ -13,6 +13,7 @@ import { Subject } from 'rxjs';
     templateUrl: './scroll-to-top-button.component.html',
     styleUrls: ['./scroll-to-top-button.component.scss'],
     animations: [trigger('fade', UIAnimation.fade())],
+    standalone: false,
 })
 export class ScrollToTopButtonComponent implements OnInit, OnDestroy {
     showScrollToTop = false;

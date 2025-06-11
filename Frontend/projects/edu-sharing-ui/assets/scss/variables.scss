@@ -1,4 +1,4 @@
-@import './variables-scss';
+@forward './variables-scss';
 /**
     declarations of dynamic css variables
     will only be included once via angular to prevent duplicate :root entries

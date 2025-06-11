@@ -10,7 +10,6 @@ import { HOME_REPOSITORY, NodeServiceUnwrapped } from 'ngx-edu-sharing-api';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 
 @Component({
-    standalone: true,
     imports: [SharedModule],
     selector: 'es-revocation-dialog',
     templateUrl: './revocation-dialog.component.html',

@@ -23,6 +23,7 @@ import { RocketChatService } from './rocket-chat.service';
     templateUrl: 'rocketchat.component.html',
     styleUrls: ['rocketchat.component.scss'],
     animations: [trigger('toggle', UIAnimation.openOverlayBottom())],
+    standalone: false,
 })
 /**
  * An edu-sharing file-picker modal dialog

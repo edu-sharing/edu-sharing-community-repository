@@ -10,7 +10,7 @@ import {
 import { TranslateService } from '@ngx-translate/core';
 import { LocalEventsService, UIAnimation } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
-import { forkJoin as observableForkJoin, from, of } from 'rxjs';
+import { forkJoin as observableForkJoin } from 'rxjs';
 import {
     CollectionUsage,
     ConfigurationService,
@@ -42,13 +42,12 @@ import {
     AboutService,
     Ace,
     Acl,
-    Node,
     AuthenticationService,
     Authority,
+    Node,
     NodeService,
 } from 'ngx-edu-sharing-api';
 import { ShareDialogRestrictedAccessComponent } from './restricted-access/restricted-access.component';
-import { concatMap, toArray } from 'rxjs/operators';
 
 export type ExtendedAcl = {
     inherited: boolean;
@@ -67,6 +66,7 @@ export type ExtendedAce = Omit<Ace, 'authority'> & {
     templateUrl: './share-dialog.component.html',
     styleUrls: ['./share-dialog.component.scss'],
     animations: [trigger('overlay', UIAnimation.openOverlay())],
+    standalone: false,
 })
 export class ShareDialogComponent implements OnInit, AfterViewInit {
     @ViewChild('publish') publishComponent: ShareDialogPublishComponent;

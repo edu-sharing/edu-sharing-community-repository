@@ -36,6 +36,7 @@ class SimpleEditGroupConfig {
         trigger('fade', UIAnimation.fade()),
         trigger('cardAnimation', UIAnimation.cardAnimation()),
     ],
+    standalone: false,
 })
 export class SimpleEditInviteComponent {
     @ViewChild('orgGroup') orgGroup: MatButtonToggleGroup;

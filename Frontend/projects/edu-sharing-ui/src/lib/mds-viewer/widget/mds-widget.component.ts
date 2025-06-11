@@ -100,7 +100,7 @@ export enum ValueType {
     templateUrl: 'mds-widget.component.html',
     styleUrls: ['mds-widget.component.scss'],
     changeDetection: ChangeDetectionStrategy.Default,
-    // required for external editor injection
+    standalone: false,
 })
 export class MdsWidgetComponent implements OnInit, OnChanges {
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;

@@ -9,7 +9,6 @@ import { SharedModule } from '../../../../shared/shared.module';
  * A generic dialog with an input form field and configurable title, message, label and icon.
  */
 @Component({
-    standalone: true,
     imports: [SharedModule],
     templateUrl: './checkbox-dialog.component.html',
     styleUrls: ['./checkbox-dialog.component.scss'],

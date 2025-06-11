@@ -11,6 +11,7 @@ import { environment } from '../../environments/environment';
 @Component({
     selector: 'es-startup',
     template: '',
+    standalone: false,
 })
 export class StartupComponent implements OnInit {
     constructor(

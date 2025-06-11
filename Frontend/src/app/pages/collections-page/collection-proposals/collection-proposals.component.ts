@@ -32,6 +32,7 @@ import { MainNavService } from '../../../main/navigation/main-nav.service';
     templateUrl: 'collection-proposals.component.html',
     styleUrls: ['collection-proposals.component.scss'],
     providers: [OptionsHelperDataService],
+    standalone: false,
 })
 export class CollectionProposalsComponent implements OnChanges {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;

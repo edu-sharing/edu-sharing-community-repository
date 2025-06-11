@@ -1,5 +1,5 @@
-@import '../../../assets/scss/mixins';
-@import '../../../assets/scss/variables-scss';
+@use '../../../assets/scss/mixins' as *;
+@use '../../../assets/scss/variables-scss' as *;
 
 .actionbar {
     display: flex;

@@ -8,6 +8,7 @@ import { SkipNavService, SkipTarget } from '../../main/navigation/skip-nav/skip-
  */
 @Directive({
     selector: '[esSkipTarget]',
+    standalone: false,
 })
 export class SkipTargetDirective implements OnInit, OnDestroy {
     // Use an alias for a property input that is equal to the component selector.

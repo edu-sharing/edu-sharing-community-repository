@@ -14,6 +14,7 @@ import { UploadDialogService } from '../../services/upload-dialog.service';
     selector: 'es-upload-page',
     templateUrl: 'upload-page.component.html',
     styleUrls: ['upload-page.component.scss'],
+    standalone: false,
 })
 export class UploadPageComponent {
     loading = true;

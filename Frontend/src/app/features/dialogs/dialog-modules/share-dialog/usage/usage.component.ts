@@ -8,6 +8,7 @@ import { TranslateService } from '@ngx-translate/core';
     templateUrl: 'usage.component.html',
     styleUrls: ['usage.component.scss'],
     animations: [trigger('cardAnimation', UIAnimation.cardAnimation())],
+    standalone: false,
 })
 export class ShareDialogUsageComponent {
     static ICON_MAP: any = {

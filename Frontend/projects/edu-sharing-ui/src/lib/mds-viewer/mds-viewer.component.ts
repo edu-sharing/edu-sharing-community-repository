@@ -37,6 +37,7 @@ import { BehaviorSubject } from 'rxjs';
     templateUrl: 'mds-viewer.component.html',
     styleUrls: ['mds-viewer.component.scss'],
     providers: [MdsViewerService, ViewInstanceService],
+    standalone: false,
 })
 export class MdsViewerComponent implements OnChanges {
     @ViewChildren('container') container: QueryList<ElementRef>;

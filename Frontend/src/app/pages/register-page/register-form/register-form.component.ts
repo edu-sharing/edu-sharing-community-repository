@@ -2,7 +2,7 @@ import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
 import { Toast } from '../../../services/toast';
 import { Router } from '@angular/router';
 import { ConfigurationService, RegisterInformation } from '../../../core-module/core.module';
-import { TranslationsService } from 'ngx-edu-sharing-ui';
+import { TranslationsService, VCard } from 'ngx-edu-sharing-ui';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { PlatformLocation } from '@angular/common';
 import {
@@ -13,13 +13,13 @@ import {
 } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { VCard } from 'ngx-edu-sharing-ui';
 import { RegisterService } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-register-form',
     templateUrl: 'register-form.component.html',
     styleUrls: ['register-form.component.scss'],
+    standalone: false,
 })
 export class RegisterFormComponent implements OnDestroy {
     @Output() registerDone = new EventEmitter<void>();

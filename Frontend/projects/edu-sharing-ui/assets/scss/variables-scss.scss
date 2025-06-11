@@ -1,5 +1,6 @@
 @use 'sass:map';
-@import 'branding';
+@forward 'variables-root';
+@forward 'branding';
 
 /**
     declarations of static scss variables
@@ -75,8 +76,6 @@ $chipsSeperatorLineColor: #e2e2e2 !default;
 $inputBorderColor: #9e9e9e !default;
 $commentsActionsSeperatorLineColor: $backgroundColor !default;
 $noResultsColor: rgba(black, 0.54) !default;
-$darkenColor: rgba(0, 0, 0, 0.75) !default;
-$darkenLightColor: rgba(0, 0, 0, 0.25) !default;
 // prefer using var(--$colorStatusPositive)
 $colorStatusPositive: #40bf8e !default;
 // prefer using var(--colorStatusNegative)
@@ -121,4 +120,4 @@ $default-chip-colors: (
 $custom-chip-colors: () !default;
 $chip-colors: map.merge($default-chip-colors, $custom-chip-colors);
 
-@import 'mixins';
+@forward 'mixins';

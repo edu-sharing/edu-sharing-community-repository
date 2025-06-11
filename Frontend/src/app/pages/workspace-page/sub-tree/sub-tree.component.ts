@@ -43,6 +43,7 @@ import { canDropOnNode } from '../workspace-utils';
         trigger('open', UIAnimation.openOverlay()),
     ],
     providers: [OptionsHelperDataService, NodeEntriesService],
+    standalone: false,
 })
 export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
     readonly Target = Target;

@@ -51,6 +51,7 @@ export interface MdsEditInterface {
         MdsViewerService,
         ViewInstanceService,
     ],
+    standalone: false,
 })
 export class MdsEditorSingleWidgetComponent implements OnChanges, OnDestroy, MdsEditInterface {
     @ViewChild('widget') ref: ElementRef<HTMLDivElement>;

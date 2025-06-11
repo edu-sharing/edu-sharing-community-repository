@@ -23,6 +23,7 @@ import { ValueType } from 'ngx-edu-sharing-ui';
     selector: 'es-mds-editor-widget-authority',
     templateUrl: './mds-editor-widget-authority.component.html',
     styleUrls: ['./mds-editor-widget-authority.component.scss'],
+    standalone: false,
 })
 export class MdsEditorWidgetAuthorityComponent extends MdsEditorWidgetBase implements OnInit {
     @ViewChild('authoritySearchInputComponent')

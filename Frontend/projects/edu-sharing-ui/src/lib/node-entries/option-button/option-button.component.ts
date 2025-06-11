@@ -21,6 +21,7 @@ import { OptionItem } from '../../types/option-item';
             <i esIcon="{{ option.icon }}" [aria]="false"></i>
         </button>
     `,
+    standalone: false,
 })
 export class OptionButtonComponent implements OnChanges {
     @Input() option: OptionItem;

@@ -18,6 +18,7 @@ import { NodeDataSource, TranslationsService } from 'ngx-edu-sharing-ui';
     selector: 'es-notification-list',
     templateUrl: 'notification-list.component.html',
     styleUrls: ['notification-list.component.scss'],
+    standalone: false,
 })
 export class NotificationListComponent implements OnInit {
     static readonly NOTIFICATION_REFRESH_INTERVAL = 30 * 1000;

@@ -24,6 +24,7 @@ import { ValueType } from 'ngx-edu-sharing-ui';
     templateUrl: './mds-editor-widget-facet-list.component.html',
     styleUrls: ['./mds-editor-widget-facet-list.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class MdsEditorWidgetFacetListComponent
     extends MdsEditorWidgetBase

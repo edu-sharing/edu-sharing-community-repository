@@ -1,5 +1,5 @@
-@import 'projects/edu-sharing-ui/assets/scss/mixins';
-@import 'projects/edu-sharing-ui/assets/scss/variables-scss';
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as *;
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 
 .preview-overlay-container {
     width: 240px;

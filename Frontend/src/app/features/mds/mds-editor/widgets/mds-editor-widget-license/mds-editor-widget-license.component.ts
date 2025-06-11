@@ -18,6 +18,7 @@ import { ValueType } from 'ngx-edu-sharing-ui';
     selector: 'es-mds-editor-widget-license',
     templateUrl: './mds-editor-widget-license.component.html',
     styleUrls: ['./mds-editor-widget-license.component.scss'],
+    standalone: false,
 })
 export class MdsEditorWidgetLicenseComponent
     extends MdsEditorWidgetBase

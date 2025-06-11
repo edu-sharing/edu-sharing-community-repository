@@ -17,7 +17,6 @@ import { SharedModule } from '../../../shared/shared.module';
     selector: 'es-render-wrapper-component',
     templateUrl: 'render-wrapper.component.html',
     styleUrls: ['render-wrapper.component.scss'],
-    standalone: true,
     imports: [
         CommonModule,
         EduSharingUiModule,

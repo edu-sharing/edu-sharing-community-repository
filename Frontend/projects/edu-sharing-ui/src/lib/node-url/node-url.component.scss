@@ -1,4 +1,4 @@
-@import '../../../assets/scss/mixins';
+@use '../../../assets/scss/mixins' as *;
 
 :host {
     // Draw focus highlight above content background

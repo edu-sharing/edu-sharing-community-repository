@@ -12,6 +12,7 @@ import { RestConstants } from '../../../../../core-module/rest/rest-constants';
     selector: 'es-notification-list-entry',
     templateUrl: 'notification-list-entry.component.html',
     styleUrls: ['notification-list-entry.component.scss'],
+    standalone: false,
 })
 export class NotificationListEntryComponent {
     static readonly icons = {

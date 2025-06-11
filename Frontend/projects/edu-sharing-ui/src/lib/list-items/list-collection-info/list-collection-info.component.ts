@@ -8,6 +8,7 @@ import { AccessibilityService } from '../../services/accessibility.service';
     selector: 'es-list-collection-info',
     templateUrl: './list-collection-info.component.html',
     styleUrls: ['./list-collection-info.component.scss'],
+    standalone: false,
 })
 export class ListCollectionInfoComponent extends ListWidget {
     static supportedItems = [

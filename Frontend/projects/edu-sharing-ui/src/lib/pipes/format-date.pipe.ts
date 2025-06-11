@@ -5,7 +5,10 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DateHelper, FormatOptions } from '../util/DateHelper';
 
-@Pipe({ name: 'formatDate' })
+@Pipe({
+    name: 'formatDate',
+    standalone: false,
+})
 export class FormatDatePipe implements PipeTransform {
     constructor(private translate: TranslateService) {}
 

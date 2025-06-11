@@ -5,6 +5,7 @@ import { MdsEditorInstanceService } from '../mds-editor-instance.service';
     selector: 'es-mds-editor-embedded',
     templateUrl: './mds-editor-embedded.component.html',
     styleUrls: ['./mds-editor-embedded.component.scss'],
+    standalone: false,
 })
 export class MdsEditorEmbeddedComponent {
     constructor(private mdsEditorInstance: MdsEditorInstanceService) {

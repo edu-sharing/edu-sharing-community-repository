@@ -8,6 +8,7 @@ import { ASSETS_BASE_PATH } from 'ngx-edu-sharing-ui';
  */
 @Pipe({
     name: 'esAssetsPath',
+    standalone: false,
 })
 export class AssetsPathPipe implements PipeTransform {
     constructor(@Optional() @Inject(ASSETS_BASE_PATH) private assetsBasePath: string) {}

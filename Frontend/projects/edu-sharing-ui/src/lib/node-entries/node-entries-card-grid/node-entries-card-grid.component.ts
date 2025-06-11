@@ -40,6 +40,7 @@ let displayedWarnings: string[] = [];
     templateUrl: 'node-entries-card-grid.component.html',
     styleUrls: ['node-entries-card-grid.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnDestroy {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;

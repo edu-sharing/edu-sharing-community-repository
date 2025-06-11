@@ -1,4 +1,4 @@
-@import 'variables-root';
+@use 'variables-root' as *;
 
 @mixin clickable() {
     cursor: pointer;

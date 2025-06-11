@@ -1,4 +1,4 @@
-@import 'projects/edu-sharing-ui/assets/scss/variables-scss';
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 .wrapper {
     padding: 10px 30px;
     .info-wrapper {

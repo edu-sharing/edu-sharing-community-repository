@@ -6,6 +6,7 @@ import { ListItem } from '../../types/list-item';
     selector: 'es-node-row',
     templateUrl: 'node-row.component.html',
     styleUrls: ['node-row.component.scss'],
+    standalone: false,
 })
 export class NodeRowComponent {
     @ContentChild('customMetadata') customMetadataRef: TemplateRef<any>;

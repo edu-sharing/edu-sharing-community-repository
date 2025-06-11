@@ -19,7 +19,6 @@ import {
     SortPanel,
 } from 'ngx-edu-sharing-ui';
 import { UserModifiableValuesService } from './user-modifiable-values';
-import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 
 type Range = NodeCacheRange;
@@ -295,7 +294,7 @@ export class NodeDataSourceRemote<
                     this._cache.add(this._getCacheSlice(missingRange, response.data)),
                 ),
 
-                map(() => void 0),
+                map(() => undefined as void),
             );
         } else {
             return rxjs.of(null);

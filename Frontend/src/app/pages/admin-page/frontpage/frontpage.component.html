@@ -202,8 +202,8 @@
       [checkbox]="false"
       [displayType]="NodeEntriesDisplayType.Grid"
       [elementInteractionType]="InteractionType.Emitter"
-      (clickItem)="this.openNode.emit($any($event.element))"
-      (dblClickItem)="this.openNode.emit($any($event.element))"
+      (clickItem)="openNode.emit($any($event.element))"
+      (dblClickItem)="openNode.emit($any($event.element))"
       [scope]="$any('dummy')"
     ></es-node-entries-wrapper>
   </div>

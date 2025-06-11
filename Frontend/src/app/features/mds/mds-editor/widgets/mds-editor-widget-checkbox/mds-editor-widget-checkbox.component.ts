@@ -7,6 +7,7 @@ import { ValueType } from 'ngx-edu-sharing-ui';
     selector: 'es-mds-editor-widget-checkbox',
     templateUrl: './mds-editor-widget-checkbox.component.html',
     styleUrls: ['./mds-editor-widget-checkbox.component.scss'],
+    standalone: false,
 })
 export class MdsEditorWidgetCheckboxComponent extends MdsEditorWidgetBase implements OnInit {
     readonly valueType: ValueType = ValueType.String;

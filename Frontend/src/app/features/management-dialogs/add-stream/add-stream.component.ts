@@ -24,6 +24,7 @@ import { UIAnimation } from 'ngx-edu-sharing-ui';
         trigger('fade', UIAnimation.fade()),
         trigger('cardAnimation', UIAnimation.cardAnimation()),
     ],
+    standalone: false,
 })
 export class AddStreamComponent {
     private streamEntry: any = {};

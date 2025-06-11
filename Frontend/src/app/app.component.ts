@@ -37,6 +37,7 @@ import { PlatformLocation } from '@angular/common';
     selector: 'es-app',
     templateUrl: 'app.component.html',
     providers: [],
+    standalone: false,
 })
 export class AppComponent implements OnInit, DoCheck, AfterViewInit {
     private static readonly CHECKS_PER_SECOND_WARNING_THRESHOLD = 0;

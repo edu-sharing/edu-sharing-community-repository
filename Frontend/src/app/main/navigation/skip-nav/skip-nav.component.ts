@@ -13,6 +13,7 @@ import { SkipNavService, SkipTarget } from './skip-nav.service';
     selector: 'es-skip-nav',
     templateUrl: './skip-nav.component.html',
     styleUrls: ['./skip-nav.component.scss'],
+    standalone: false,
 })
 export class SkipNavComponent implements OnInit {
     availableTargets: Observable<SkipTarget[]>;

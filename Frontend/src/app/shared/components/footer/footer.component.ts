@@ -13,7 +13,6 @@ import { CommonModule } from '@angular/common';
     templateUrl: 'footer.component.html',
     styleUrls: ['footer.component.scss'],
     imports: [CommonModule],
-    standalone: true,
 })
 export class FooterComponent {
     banner: any;

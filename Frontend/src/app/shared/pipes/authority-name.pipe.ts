@@ -3,7 +3,10 @@ import { TranslateService } from '@ngx-translate/core';
 import { Group, Permission, RestConstants, User } from '../../core-module/core.module';
 import { VCard } from 'ngx-edu-sharing-ui';
 
-@Pipe({ name: 'authorityName' })
+@Pipe({
+    name: 'authorityName',
+    standalone: false,
+})
 export class AuthorityNamePipe implements PipeTransform {
     constructor(private translate: TranslateService) {}
 

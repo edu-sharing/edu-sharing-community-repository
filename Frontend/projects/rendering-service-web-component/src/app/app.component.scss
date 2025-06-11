@@ -1,5 +1,5 @@
-@import 'mixins';
-@import 'variables-scss';
+@use 'mixins' as *;
+@use 'variables-scss' as *;
 
 :host {
     font-family: $primaryFontFamily;

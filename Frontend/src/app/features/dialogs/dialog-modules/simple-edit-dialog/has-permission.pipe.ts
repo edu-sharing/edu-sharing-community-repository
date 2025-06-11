@@ -4,6 +4,7 @@ import { Node } from 'ngx-edu-sharing-api';
 
 @Pipe({
     name: 'hasPermission',
+    standalone: false,
 })
 export class HasPermissionPipe implements PipeTransform {
     transform(nodes: Node[], permission: string): boolean {

@@ -67,7 +67,7 @@ import { ImprintPrivacyService } from '../../../shared/components/imprint-privac
         trigger('cardAnimation', UIAnimation.cardAnimation()),
         trigger('fade', UIAnimation.fade()),
     ],
-    // changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     // FIXME: This component contains a lot of business logic, that does not need to be exposed to

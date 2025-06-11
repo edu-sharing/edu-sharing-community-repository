@@ -31,6 +31,7 @@ import { NodeDataSourceRemote } from 'src/app/pages/search-page/node-data-source
     selector: 'es-saved-searches-dialog',
     templateUrl: './saved-searches-dialog.component.html',
     styleUrls: ['./saved-searches-dialog.component.scss'],
+    standalone: false,
 })
 export class SavedSearchesDialogComponent implements OnInit, OnDestroy {
     /** Template that includes the "Save current search" button. */

@@ -87,6 +87,7 @@ type NodeWrapper = { node: Node };
         trigger('fromLeft', UIAnimation.fromLeft()),
         trigger('fromRight', UIAnimation.fromRight()),
     ],
+    standalone: false,
 })
 export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy {
     private static VALID_ROOTS = [

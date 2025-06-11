@@ -24,6 +24,7 @@ import { SimpleEditMetadataComponent } from './simple-edit-metadata/simple-edit-
     selector: 'es-simple-edit-dialog',
     templateUrl: './simple-edit-dialog.component.html',
     styleUrls: ['./simple-edit-dialog.component.scss'],
+    standalone: false,
 })
 export class SimpleEditDialogComponent {
     @ViewChild('metadata') metadata: SimpleEditMetadataComponent;

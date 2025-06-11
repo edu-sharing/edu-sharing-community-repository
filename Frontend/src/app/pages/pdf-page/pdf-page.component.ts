@@ -14,6 +14,7 @@ import { Toast } from '../../services/toast';
     selector: 'es-pdf-page',
     templateUrl: 'pdf-page.component.html',
     styleUrls: ['pdf-page.component.scss'],
+    standalone: false,
 })
 export class PdfPageComponent implements AfterViewInit, OnDestroy, OnInit {
     static readonly DEFAULT_PDF_MIMETYPE: string = 'application/pdf';

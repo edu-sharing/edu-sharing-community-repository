@@ -8,6 +8,7 @@ import { Component } from '@angular/core';
     selector: 'es-global-progress',
     templateUrl: 'global-progress.component.html',
     styleUrls: ['global-progress.component.scss'],
+    standalone: false,
 })
 export class GlobalProgressComponent {
     constructor() {}

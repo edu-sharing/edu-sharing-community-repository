@@ -1,5 +1,4 @@
 import {
-    AfterViewInit,
     Component,
     EventEmitter,
     Input,
@@ -20,6 +19,7 @@ import { DateAdapter } from '@angular/material/core';
     selector: 'es-share-dialog-choose-date',
     templateUrl: 'choose-date.component.html',
     styleUrls: ['choose-date.component.scss'],
+    standalone: false,
 })
 export class ShareDialogChooseDateComponent implements OnInit, OnChanges {
     @ViewChild(MatDatepicker) matDatepicker: MatDatepicker<any>;

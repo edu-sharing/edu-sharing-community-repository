@@ -7,6 +7,7 @@ import { ConfigurationService } from '../../core-module/core.module';
 
 @Directive({
     selector: '[esImageConfig]',
+    standalone: false,
 })
 export class ImageConfigDirective {
     private element: ElementRef;

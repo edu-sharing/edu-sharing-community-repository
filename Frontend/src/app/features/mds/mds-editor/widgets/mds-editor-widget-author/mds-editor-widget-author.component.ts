@@ -26,6 +26,7 @@ enum DefaultTab {
     selector: 'es-mds-editor-widget-author',
     templateUrl: './mds-editor-widget-author.component.html',
     styleUrls: ['./mds-editor-widget-author.component.scss'],
+    standalone: false,
 })
 export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetComponent {
     static readonly constraints = {

@@ -1,13 +1,11 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { NetworkService } from 'ngx-edu-sharing-api';
+import { NetworkService, Node, RestConstants } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { NodeHelperService } from '../services/node-helper.service';
-import { Node } from 'ngx-edu-sharing-api';
 import { RepoUrlService } from '../services/repo-url.service';
-import { RestConstants } from 'ngx-edu-sharing-api';
 
 interface NodeImagePreferences {
     crop?: boolean;
@@ -17,7 +15,10 @@ interface NodeImagePreferences {
     height?: number;
 }
 
-@Pipe({ name: 'esNodeImage' })
+@Pipe({
+    name: 'esNodeImage',
+    standalone: false,
+})
 export class NodeImagePipe implements PipeTransform {
     constructor(
         private nodeHelper: NodeHelperService,

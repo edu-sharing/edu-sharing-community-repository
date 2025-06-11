@@ -11,6 +11,7 @@ import { AccessibilityService } from '../../services/accessibility.service';
 @Component({
     selector: 'es-list-node-license',
     templateUrl: './list-node-license.component.html',
+    standalone: false,
 })
 export class ListNodeLicenseComponent extends ListWidget {
     static supportedItems = [new ListItem('NODE', RestConstants.CCM_PROP_LICENSE)];

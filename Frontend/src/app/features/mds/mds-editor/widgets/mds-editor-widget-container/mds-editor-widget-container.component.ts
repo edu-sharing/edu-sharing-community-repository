@@ -66,6 +66,7 @@ import { UIAnimation, ValueType, ViewInstanceService } from 'ngx-edu-sharing-ui'
             ]),
         ]),
     ],
+    standalone: false,
 })
 export class MdsEditorWidgetContainerComponent
     implements OnInit, OnChanges, AfterContentInit, OnDestroy

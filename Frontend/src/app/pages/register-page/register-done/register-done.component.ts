@@ -12,6 +12,7 @@ import { RegisterService } from 'ngx-edu-sharing-api';
     selector: 'es-register-done',
     templateUrl: 'register-done.component.html',
     styleUrls: ['register-done.component.scss'],
+    standalone: false,
 })
 export class RegisterDoneComponent {
     @Output() modify = new EventEmitter<void>();

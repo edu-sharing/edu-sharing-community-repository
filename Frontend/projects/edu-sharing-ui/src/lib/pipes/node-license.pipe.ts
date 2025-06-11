@@ -4,7 +4,10 @@ import { TranslateService } from '@ngx-translate/core';
 
 export type LicenseType = 'name';
 
-@Pipe({ name: 'esNodeLicense' })
+@Pipe({
+    name: 'esNodeLicense',
+    standalone: false,
+})
 export class NodeLicensePipe implements PipeTransform {
     constructor(private translate: TranslateService) {}
     transform(node: Node, args: { type: LicenseType }) {

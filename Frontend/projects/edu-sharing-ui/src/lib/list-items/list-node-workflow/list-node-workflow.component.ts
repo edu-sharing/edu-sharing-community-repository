@@ -7,6 +7,7 @@ import { Node, RestConstants } from 'ngx-edu-sharing-api';
 @Component({
     selector: 'es-list-node-workflow',
     templateUrl: './list-node-workflow.component.html',
+    standalone: false,
 })
 export class ListNodeWorkflowComponent extends ListWidget {
     static supportedItems = [new ListItem('NODE', RestConstants.CCM_PROP_WF_STATUS)];

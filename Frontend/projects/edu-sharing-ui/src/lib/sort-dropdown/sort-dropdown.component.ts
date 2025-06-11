@@ -9,6 +9,7 @@ import { ListItem, SortEvent } from '../types/list-item';
     templateUrl: 'sort-dropdown.component.html',
     styleUrls: ['sort-dropdown.component.scss'],
     animations: [trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
+    standalone: false,
 })
 export class SortDropdownComponent {
     @ViewChild('menu', { static: true }) menu: MatMenu;

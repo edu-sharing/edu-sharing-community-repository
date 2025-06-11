@@ -30,6 +30,7 @@ import { Subject } from 'rxjs';
     templateUrl: 'register-page.component.html',
     styleUrls: ['register-page.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class RegisterPageComponent implements OnInit, OnDestroy {
     @ViewChild('registerForm') registerForm: RegisterFormComponent;

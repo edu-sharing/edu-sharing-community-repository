@@ -57,7 +57,7 @@ export class LicenseAgreementService {
     waitForAgreementCleared(): Observable<void> {
         return this.agreementClearedSubject.pipe(
             first((result) => result === 'accepted' || result === 'dialog-not-shown'),
-            map(() => void 0),
+            map(() => undefined as void),
         );
     }
 

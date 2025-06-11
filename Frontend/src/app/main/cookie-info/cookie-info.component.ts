@@ -12,6 +12,7 @@ import { CordovaService } from '../../services/cordova.service';
         trigger('fromBottom', UIAnimation.fromBottom(UIAnimation.ANIMATION_TIME_SLOW)),
         trigger('overlay', UIAnimation.openOverlay()),
     ],
+    standalone: false,
 })
 export class CookieInfoComponent implements OnInit {
     readonly buttons = [

@@ -12,6 +12,7 @@ import { NodeHelperService } from '../../services/node-helper.service';
     selector: 'es-node-type-badge',
     templateUrl: './node-type-badge.component.html',
     styleUrls: ['./node-type-badge.component.scss'],
+    standalone: false,
 })
 export class NodeTypeBadgeComponent implements OnChanges {
     @Input() node: Node;

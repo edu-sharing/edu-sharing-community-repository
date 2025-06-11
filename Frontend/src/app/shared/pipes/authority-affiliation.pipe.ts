@@ -2,7 +2,10 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { User } from '../../core-module/rest/data-object';
 
-@Pipe({ name: 'authorityAffiliation' })
+@Pipe({
+    name: 'authorityAffiliation',
+    standalone: false,
+})
 export class AuthorityAffiliationPipe implements PipeTransform {
     constructor(private translate: TranslateService) {}
     transform(authority: any | User, args: string[] = null): string {

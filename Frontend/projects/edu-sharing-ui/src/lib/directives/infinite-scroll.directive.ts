@@ -13,6 +13,7 @@ import { AppContainerService } from '../services/app-container.service';
 
 @Directive({
     selector: '[esInfiniteScroll], [infinite-scroll], [data-infinite-scroll]',
+    standalone: false,
 })
 export class InfiniteScrollDirective implements OnInit, OnDestroy {
     @Output() scrolled = new EventEmitter<void>();

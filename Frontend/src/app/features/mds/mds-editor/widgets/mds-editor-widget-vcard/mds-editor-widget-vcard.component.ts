@@ -15,6 +15,7 @@ export interface AuthorData {
     selector: 'es-mds-editor-widget-vcard',
     templateUrl: './mds-editor-widget-vcard.component.html',
     styleUrls: ['./mds-editor-widget-vcard.component.scss'],
+    standalone: false,
 })
 export class MdsEditorWidgetVCardComponent extends MdsEditorWidgetBase implements OnInit {
     static readonly constraints = {

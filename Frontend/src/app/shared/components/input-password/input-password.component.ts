@@ -6,6 +6,7 @@ import { FloatLabelType } from '@angular/material/form-field';
     selector: 'es-input-password',
     templateUrl: 'input-password.component.html',
     styleUrls: ['input-password.component.scss'],
+    standalone: false,
 })
 export class InputPasswordComponent {
     @Input() inputId = 'passwordInput';

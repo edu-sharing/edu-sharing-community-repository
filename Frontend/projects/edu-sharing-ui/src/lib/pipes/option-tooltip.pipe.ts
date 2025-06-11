@@ -2,7 +2,10 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { OptionItem } from '../types/option-item';
 
-@Pipe({ name: 'optionTooltip' })
+@Pipe({
+    name: 'optionTooltip',
+    standalone: false,
+})
 export class OptionTooltipPipe implements PipeTransform {
     constructor(private translate: TranslateService) {}
 

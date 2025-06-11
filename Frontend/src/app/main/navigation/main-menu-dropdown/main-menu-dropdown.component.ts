@@ -19,6 +19,7 @@ import { DropdownComponent, OptionItem } from 'ngx-edu-sharing-ui';
     selector: 'es-main-menu-dropdown',
     templateUrl: './main-menu-dropdown.component.html',
     styleUrls: ['./main-menu-dropdown.component.scss'],
+    standalone: false,
 })
 export class MainMenuDropdownComponent implements OnChanges, AfterViewInit, OnDestroy {
     @ViewChild('dropdown', { static: true }) dropdown: DropdownComponent;

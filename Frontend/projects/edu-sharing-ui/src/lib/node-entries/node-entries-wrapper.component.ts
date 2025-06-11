@@ -51,8 +51,7 @@ import {
 import { VirtualNode } from '../types/api-models';
 import { OptionsHelperDataService } from '../services/options-helper-data.service';
 import { UIService } from '../services/ui.service';
-import { switchMap, take, takeUntil } from 'rxjs/operators';
-import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
+import { filter, switchMap, take, takeUntil } from 'rxjs/operators';
 
 @Component({
     selector: 'es-node-entries-wrapper',
@@ -61,6 +60,7 @@ import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
         *ngIf="!customNodeListComponent"
     ></es-node-entries>`,
     providers: [NodeEntriesService, OptionsHelperDataService, NodeEntriesTemplatesService],
+    standalone: false,
 })
 export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     implements AfterViewInit, OnInit, OnChanges, OnDestroy, ListEventInterface<T>

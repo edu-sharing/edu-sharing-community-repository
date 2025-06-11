@@ -1,5 +1,5 @@
-@import '../../../../assets/scss/mixins';
-@import '../mixins';
+@use '../../../../assets/scss/mixins' as *;
+@use '../mixins' as *;
 
 $optionBarHeight: 50px;
 $cardLineHeight: 1.4;

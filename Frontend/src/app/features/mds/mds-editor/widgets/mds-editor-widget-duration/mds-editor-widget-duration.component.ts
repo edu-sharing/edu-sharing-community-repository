@@ -7,6 +7,7 @@ import { ValueType } from 'ngx-edu-sharing-ui';
     selector: 'es-mds-editor-widget-duration',
     templateUrl: './mds-editor-widget-duration.component.html',
     styleUrls: ['./mds-editor-widget-duration.component.scss'],
+    standalone: false,
 })
 export class MdsEditorWidgetDurationComponent extends MdsEditorWidgetBase implements OnInit {
     readonly valueType: ValueType = ValueType.String;

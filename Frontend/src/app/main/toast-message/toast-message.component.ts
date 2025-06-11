@@ -6,6 +6,7 @@ import { ToastMessage } from '../../services/toast';
     selector: 'es-toast-message',
     templateUrl: 'toast-message.component.html',
     styleUrls: ['toast-message.component.scss'],
+    standalone: false,
 })
 /**
  * A basic link that should be used whenever a button is not the best solution but rather a link is preferable

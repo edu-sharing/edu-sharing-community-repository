@@ -9,6 +9,7 @@ import { DateAdapter } from '@angular/material/core';
     templateUrl: 'calendar.component.html',
     styleUrls: ['calendar.component.scss'],
     animations: [trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
+    standalone: false,
 })
 /**
  * An edu-sharing sidebar dialog for adding data to a collection

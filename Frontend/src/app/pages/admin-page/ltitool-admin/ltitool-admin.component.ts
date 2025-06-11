@@ -7,6 +7,7 @@ import { Toast } from '../../../services/toast';
     selector: 'es-ltitool-admin',
     templateUrl: './ltitool-admin.component.html',
     styleUrls: ['./ltitool-admin.component.scss'],
+    standalone: false,
 })
 export class LtitoolAdminComponent implements OnInit {
     @Output() refreshAppList = new EventEmitter<void>();

@@ -18,6 +18,7 @@ import { SearchPageRestoreService } from './search-page-restore.service';
     selector: 'es-search-page-filter-bar',
     templateUrl: './search-page-filter-bar.component.html',
     styleUrls: ['./search-page-filter-bar.component.scss'],
+    standalone: false,
 })
 export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
     @ViewChild(MdsEditorWrapperComponent) mdsEditor: MdsEditorWrapperComponent;

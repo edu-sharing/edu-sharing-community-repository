@@ -1,6 +1,9 @@
-import { PipeTransform, Pipe } from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 
-@Pipe({ name: 'esUrl' })
+@Pipe({
+    name: 'esUrl',
+    standalone: false,
+})
 export class UrlPipe implements PipeTransform {
     transform(value: any, args: any): any {
         let url = new URL(value);

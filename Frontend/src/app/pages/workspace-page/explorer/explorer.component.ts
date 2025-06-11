@@ -65,6 +65,7 @@ import {
     selector: 'es-workspace-explorer',
     templateUrl: 'explorer.component.html',
     styleUrls: ['explorer.component.scss'],
+    standalone: false,
 })
 export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterViewInit {
     public readonly SCOPES = Scope;

@@ -28,6 +28,7 @@ import { Observable } from 'rxjs';
     selector: 'es-create-variant-dialog',
     templateUrl: './create-variant-dialog.component.html',
     styleUrls: ['./create-variant-dialog.component.scss'],
+    standalone: false,
 })
 export class CreateVariantDialogComponent {
     variantName: string;

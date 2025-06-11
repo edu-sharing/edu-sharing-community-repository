@@ -93,6 +93,7 @@ type GroupTemplate = {
         ]),
         trigger('dialog', UIAnimation.switchDialog()),
     ],
+    standalone: false,
 })
 export class AdminStatisticsComponent implements OnInit {
     readonly Scope = Scope;

@@ -26,6 +26,7 @@ import { WorkspaceService } from '../workspace.service';
     templateUrl: './metadata-sidebar.component.html',
     styleUrls: ['./metadata-sidebar.component.scss'],
     animations: [trigger('fromRight', UIAnimation.fromRight())],
+    standalone: false,
 })
 export class MetadataSidebarComponent {
     get nodeSidebar() {

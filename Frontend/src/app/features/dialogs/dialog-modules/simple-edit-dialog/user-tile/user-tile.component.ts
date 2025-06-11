@@ -12,6 +12,7 @@ import { TranslateService } from '@ngx-translate/core';
     selector: 'es-user-tile',
     templateUrl: 'user-tile.component.html',
     styleUrls: ['user-tile.component.scss'],
+    standalone: false,
 })
 export class UserTileComponent {
     @Input() user: AuthorityProfile;

@@ -37,6 +37,7 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
     selector: 'es-multi-line-label',
     templateUrl: './multi-line-label.component.html',
     styleUrls: ['./multi-line-label.component.scss'],
+    standalone: false,
 })
 export class MultiLineLabelComponent implements OnInit, AfterViewInit {
     @ViewChild('label') label: ElementRef;

@@ -5,6 +5,7 @@ import { RequiredMode } from '../../../../mds/types/types';
     selector: 'es-input-fill-progress',
     templateUrl: 'input-fill-progress.component.html',
     styleUrls: ['input-fill-progress.component.scss'],
+    standalone: false,
 })
 export class InputFillProgressComponent {
     readonly RequiredMode = RequiredMode;

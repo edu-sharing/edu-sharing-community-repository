@@ -1,7 +1,7 @@
 import { fakeAsync, tick } from '@angular/core/testing';
 import * as rxjs from 'rxjs';
 import { Observable, Subject } from 'rxjs';
-import { first, startWith, switchMap, take, tap } from 'rxjs/operators';
+import { first, startWith, switchMap, take } from 'rxjs/operators';
 import { switchReplay } from './switch-replay';
 
 describe('switchReplay', () => {
@@ -64,7 +64,7 @@ describe('switchReplay', () => {
         trigger$.next();
         observable$.subscribe({
             next: () => fail('expected error'),
-            error: () => void 0,
+            error: () => undefined as void,
         });
         tick();
         expect(spy).toHaveBeenCalledTimes(1);

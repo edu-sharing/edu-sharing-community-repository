@@ -79,6 +79,7 @@ type NativeWidgetClass = {
         ]),
     ],
     providers: [ViewInstanceService, MdsViewerService],
+    standalone: false,
 })
 export class MdsEditorViewComponent
     implements OnInit, AfterViewInit, OnChanges, OnDestroy, MdsEditInterface

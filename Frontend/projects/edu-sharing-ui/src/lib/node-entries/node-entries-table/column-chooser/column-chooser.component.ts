@@ -7,6 +7,7 @@ import { ListItem } from '../../../types/list-item';
     selector: 'es-column-chooser',
     templateUrl: './column-chooser.component.html',
     styleUrls: ['./column-chooser.component.scss'],
+    standalone: false,
 })
 export class ColumnChooserComponent {
     @Input() origin: CdkOverlayOrigin;

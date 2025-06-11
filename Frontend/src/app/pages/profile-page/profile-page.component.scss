@@ -1,5 +1,5 @@
-@import 'projects/edu-sharing-ui/assets/scss/variables-scss';
-@import '../../features/mds/mds-editor/widgets/mds-editor-widget-vcard/vcard';
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use '../../features/mds/mds-editor/widgets/mds-editor-widget-vcard/vcard' as *;
 
 $path: '../../../assets/images/';
 

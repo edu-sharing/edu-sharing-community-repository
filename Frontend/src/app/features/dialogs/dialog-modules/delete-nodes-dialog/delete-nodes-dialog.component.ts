@@ -28,6 +28,7 @@ import { DeleteNodesDialogData, DeleteNodesDialogResult } from './delete-nodes-d
     selector: 'es-delete-nodes-dialog',
     templateUrl: './delete-nodes-dialog.component.html',
     styleUrls: ['./delete-nodes-dialog.component.scss'],
+    standalone: false,
 })
 export class DeleteNodesDialogComponent implements OnInit {
     /** Message shown to the user in the dialog body. */

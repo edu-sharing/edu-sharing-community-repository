@@ -8,6 +8,7 @@ import { Component, HostBinding, Input } from '@angular/core';
     selector: 'es-powered-by',
     templateUrl: 'powered-by.component.html',
     styleUrls: ['powered-by.component.scss'],
+    standalone: false,
 })
 export class PoweredByComponent {
     /**

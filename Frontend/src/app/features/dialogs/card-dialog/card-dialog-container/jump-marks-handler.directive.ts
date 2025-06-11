@@ -24,6 +24,7 @@ export const JUMP_MARK_POSTFIX = '_header';
 @Directive({
     selector: '[esJumpMarksHandler]',
     exportAs: 'esJumpMarksHandler',
+    standalone: false,
 })
 export class JumpMarksHandlerDirective implements OnDestroy {
     private jumpMarksSubject = new BehaviorSubject<JumpMark[]>(null);

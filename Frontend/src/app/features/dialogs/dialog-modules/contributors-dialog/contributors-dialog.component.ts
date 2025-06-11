@@ -20,6 +20,7 @@ import { CardDialogUtilsService } from '../../card-dialog/card-dialog-utils.serv
     selector: 'es-contributors-dialog',
     templateUrl: './contributors-dialog.component.html',
     styleUrls: ['./contributors-dialog.component.scss'],
+    standalone: false,
 })
 export class ContributorsDialogComponent implements OnInit {
     readonly rolesLifecycle = RestConstants.CONTRIBUTOR_ROLES_LIFECYCLE;

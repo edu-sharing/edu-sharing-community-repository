@@ -1,7 +1,7 @@
-import { Injector, importProvidersFrom } from '@angular/core';
+import { importProvidersFrom, Injector } from '@angular/core';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { applicationConfig, moduleMetadata, type Meta, type StoryObj } from '@storybook/angular';
+import { applicationConfig, type Meta, moduleMetadata, type StoryObj } from '@storybook/angular';
 import { injectInjectorToProps } from '../../../storybook/custom-decorators';
 import { Toast } from '../../services/toast';
 import { SharedModule } from '../../shared/shared.module';
@@ -48,7 +48,7 @@ const meta: Meta<ToastStories> = {
                         message: props.message,
                         type: props.type,
                         action: props.action
-                            ? { label: props.action, callback: () => void 0 }
+                            ? { label: props.action, callback: () => undefined as void }
                             : null,
                     },
                     duration: Toast.convertDuration(props.duration * 1000),

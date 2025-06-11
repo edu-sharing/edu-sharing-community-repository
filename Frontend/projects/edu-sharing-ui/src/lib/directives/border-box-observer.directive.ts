@@ -16,6 +16,7 @@ interface BorderBox {
 @Directive({
     selector: '[esBorderBoxObserver]',
     exportAs: 'borderBoxObserver',
+    standalone: false,
 })
 export class BorderBoxObserverDirective implements OnInit, OnDestroy {
     static observeElement(elementRef: ElementRef<HTMLElement>): Observable<BorderBox> {

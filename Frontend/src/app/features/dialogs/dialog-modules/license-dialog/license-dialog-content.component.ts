@@ -143,6 +143,7 @@ const ALL_COUNTRIES = [
     styleUrls: ['./license-dialog-content.component.scss'],
     providers: [MdsEditorInstanceService, ViewInstanceService],
     animations: [trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
+    standalone: false,
 })
 export class LicenseDialogContentComponent implements OnInit {
     @ViewChild('selectLicense') selectLicense: ElementRef;

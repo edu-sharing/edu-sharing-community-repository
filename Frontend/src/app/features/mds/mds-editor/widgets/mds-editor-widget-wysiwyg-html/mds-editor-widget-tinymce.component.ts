@@ -23,6 +23,7 @@ import { ValueType } from 'ngx-edu-sharing-ui';
             deps: [PlatformLocation],
         },
     ],
+    standalone: false,
 })
 export class MdsEditorWidgetTinyMCEComponent extends MdsEditorWidgetBase implements AfterViewInit {
     @ViewChild(EditorComponent) editorComponent: EditorComponent;

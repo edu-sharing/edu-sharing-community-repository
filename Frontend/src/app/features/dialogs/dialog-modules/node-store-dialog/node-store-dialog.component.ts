@@ -28,6 +28,7 @@ import { CardDialogUtilsService } from '../../card-dialog/card-dialog-utils.serv
     selector: 'es-search-node-store-dialog',
     templateUrl: 'node-store-dialog.component.html',
     styleUrls: ['node-store-dialog.component.scss'],
+    standalone: false,
 })
 export class SearchNodeStoreDialogComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;

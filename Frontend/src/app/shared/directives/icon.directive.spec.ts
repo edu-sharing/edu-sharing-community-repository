@@ -9,6 +9,7 @@ import { By } from '@angular/platform-browser';
         <i icon="foo" [aria]="false"></i>
         <i icon="foo" aria-label="bar"></i>
     `,
+    standalone: false,
 })
 class TestComponent {}
 

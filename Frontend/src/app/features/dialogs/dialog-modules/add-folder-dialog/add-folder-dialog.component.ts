@@ -19,6 +19,7 @@ import { AddFolderDialogData, AddFolderDialogResult } from './add-folder-dialog-
     selector: 'es-add-folder-dialog',
     templateUrl: './add-folder-dialog.component.html',
     styleUrls: ['./add-folder-dialog.component.scss'],
+    standalone: false,
 })
 export class AddFolderDialogComponent implements OnInit {
     folderName = '';

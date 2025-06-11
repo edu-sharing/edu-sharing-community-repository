@@ -37,6 +37,7 @@ type SuggestionResult = SuggestionGroup[] | 'NO_RECENT' | 'NO_MATCHES';
     templateUrl: 'authority-search-input.component.html',
     styleUrls: ['authority-search-input.component.scss'],
     providers: [PermissionNamePipe],
+    standalone: false,
 })
 export class AuthoritySearchInputComponent {
     @ViewChild('inputElement') inputElement: ElementRef<HTMLInputElement>;

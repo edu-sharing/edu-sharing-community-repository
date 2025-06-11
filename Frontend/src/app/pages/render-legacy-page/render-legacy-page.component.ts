@@ -75,7 +75,7 @@ import { CardService } from '../../services/card.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { OptionsHelperService } from '../../services/options-helper.service';
 import { Toast } from '../../services/toast';
-import * as jQuery from 'jquery';
+import $ from 'jquery';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
 import { CardComponent } from '../../shared/components/card/card.component';
 import { RenderHelperService } from './render-helper.service';
@@ -89,7 +89,6 @@ import { SharedModule } from '../../shared/shared.module';
     selector: 'es-render-legacy-page',
     templateUrl: 'render-legacy-page.component.html',
     styleUrls: ['render-legacy-page.component.scss'],
-    standalone: true,
     imports: [SharedModule],
     providers: [
         OptionsHelperDataService,
@@ -105,7 +104,7 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
     specialTemplate: 'revoked' | null;
     @Input() set node(node: Node | string) {
         const id = (node as Node).ref ? (node as Node).ref.id : (node as string);
-        jQuery('#nodeRenderContent').html('');
+        $('#nodeRenderContent').html('');
         this._nodeId = id;
         void this.loadRenderData();
     }
@@ -580,7 +579,7 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
                             });
                         const finish = () => {
                             this.isLoading = false;
-                            const nodeRenderContent = jQuery('#nodeRenderContent');
+                            const nodeRenderContent = $('#nodeRenderContent');
                             nodeRenderContent.html(data.detailsSnippet);
                             this.moveInnerStyleToHead(nodeRenderContent);
                             this.postprocessHtml();
@@ -626,13 +625,13 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
     }
     private postprocessHtml() {
         if (!this.configLegacy.instant('rendering.showPreview', true)) {
-            jQuery('.edusharing_rendering_content_wrapper').hide();
-            jQuery('.showDetails').hide();
+            $('.edusharing_rendering_content_wrapper').hide();
+            $('.showDetails').hide();
         }
         if (this.isOpenable) {
-            jQuery('#edusharing_downloadadvice').hide();
+            $('#edusharing_downloadadvice').hide();
         }
-        const element = jQuery('#edusharing_rendering_content_href');
+        const element = $('#edusharing_rendering_content_href');
         element.click((event: any) => {
             if (this.connector.getBridgeService().isRunningCordova()) {
                 const href = element.attr('href');
@@ -945,12 +944,12 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
      *
      * The style element will be removed from document head on `ngDestroy`.
      */
-    private moveInnerStyleToHead(element: JQuery<HTMLElement>): void {
+    private moveInnerStyleToHead(element: any): void {
         const styleAttr = 'data-render-content-style';
-        jQuery('[' + styleAttr + ']').remove();
+        $('[' + styleAttr + ']').remove();
         const style = element.find('style');
         style.attr(styleAttr, '');
-        jQuery(document.head).append(style);
+        $(document.head).append(style);
         this.destroyed$.subscribe(() => style.remove());
     }
 

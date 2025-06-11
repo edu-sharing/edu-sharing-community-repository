@@ -7,6 +7,7 @@ import { MdsEditorInstanceService } from '../../../mds-editor-instance.service';
 
 @Pipe({
     name: 'esLicenseAiInfo',
+    standalone: false,
 })
 export class LicenseAiPipe implements PipeTransform {
     constructor(

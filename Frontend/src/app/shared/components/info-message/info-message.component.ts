@@ -4,6 +4,7 @@ import { Component, Input } from '@angular/core';
     selector: 'es-info-message',
     templateUrl: 'info-message.component.html',
     styleUrls: ['info-message.component.scss'],
+    standalone: false,
 })
 export class InfoMessageComponent {
     /**

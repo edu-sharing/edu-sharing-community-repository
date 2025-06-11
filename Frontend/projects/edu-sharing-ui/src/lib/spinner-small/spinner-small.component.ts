@@ -5,7 +5,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     selector: 'es-spinner-small',
     templateUrl: 'spinner-small.component.html',
     styleUrls: ['spinner-small.component.scss'],
-    standalone: true,
     imports: [MatProgressSpinnerModule],
 })
 export class SpinnerSmallComponent {

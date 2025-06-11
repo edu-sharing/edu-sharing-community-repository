@@ -14,6 +14,7 @@ import { Toast } from '../../../../../services/toast';
     selector: 'es-mds-editor-widget-link',
     templateUrl: './mds-editor-widget-link.component.html',
     styleUrls: ['./mds-editor-widget-link.component.scss'],
+    standalone: false,
 })
 export class MdsEditorWidgetLinkComponent
     extends MdsEditorWidgetBase

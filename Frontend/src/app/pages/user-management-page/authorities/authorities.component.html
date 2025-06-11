@@ -419,7 +419,7 @@
 <div *ngIf="embedded" class="searchEmbedded">
   <form (ngSubmit)="searchQuery = embeddedQuery">
     <mat-form-field>
-      <mat-label>{{ 'PERMISSIONS.SEARCH_' + this._mode | translate }}</mat-label>
+      <mat-label>{{ 'PERMISSIONS.SEARCH_' + _mode | translate }}</mat-label>
       <input matInput type="search" [(ngModel)]="embeddedQuery" name="embeddedSearch" />
     </mat-form-field>
   </form>

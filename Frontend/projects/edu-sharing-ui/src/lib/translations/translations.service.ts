@@ -66,7 +66,7 @@ export class TranslationsService {
                 switchMap((supportedLanguages: string[]) =>
                     this.initializeCordova(supportedLanguages),
                 ),
-                map(() => void 0),
+                map(() => undefined as void),
             );
         }
         supportedLanguages$
@@ -200,7 +200,7 @@ export class TranslationsService {
                 switchMap(({ selectedLanguage }) => {
                     // console.log('language used: ' + selectedLanguage);
                     this.language = selectedLanguage;
-                    return this.translate.use(selectedLanguage).pipe(map(() => void 0));
+                    return this.translate.use(selectedLanguage).pipe(map(() => null as void));
                 }),
             )
             .subscribe(() => {
@@ -232,7 +232,7 @@ export class TranslationsService {
     waitForInit(): Observable<void> {
         return this.languageLoaded.pipe(
             first((languageLoaded) => languageLoaded),
-            map(() => void 0),
+            map(() => undefined as void),
         );
     }
 

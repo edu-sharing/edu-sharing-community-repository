@@ -4,6 +4,7 @@ import { NodeHelperService } from '../../services/node-helper.service';
 
 @Pipe({
     name: 'repositoryIcon',
+    standalone: false,
 })
 export class RepositoryIconPipe implements PipeTransform {
     constructor(private nodeHelper: NodeHelperService) {}

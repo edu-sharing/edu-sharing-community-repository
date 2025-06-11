@@ -1,20 +1,21 @@
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import {
-    Node,
-    ConfigService,
     AuthenticationService,
-    RestConstants,
+    ConfigService,
     NetworkService,
+    Node,
     RatingV1Service,
+    RestConstants,
 } from 'ngx-edu-sharing-api';
 import { Toast } from '../../services/abstract/toast.service';
-import { take, takeUntil } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { RestHelper } from '../../util/rest-helper';
 
 @Component({
     selector: 'es-node-rating',
     templateUrl: 'node-rating.component.html',
     styleUrls: ['node-rating.component.scss'],
+    standalone: false,
 })
 export class NodeRatingComponent<T extends Node> implements OnInit {
     @Input() node: T;

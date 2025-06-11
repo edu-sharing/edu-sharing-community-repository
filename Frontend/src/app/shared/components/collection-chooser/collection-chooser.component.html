@@ -47,7 +47,7 @@
       </ng-template>
       <ng-template #overlay let-element="element">
         <ng-container
-          *ngTemplateOutlet="overlayTemplate; context: { element: this.element }"
+          *ngTemplateOutlet="overlayTemplate; context: { element: element }"
         ></ng-container>
       </ng-template>
     </es-node-entries-wrapper>

@@ -18,6 +18,7 @@ import { ShareHistoryDialogData, ShareHistoryDialogResult } from './share-histor
     selector: 'es-share-history-dialog',
     templateUrl: './share-history-dialog.component.html',
     styleUrls: ['./share-history-dialog.component.scss'],
+    standalone: false,
 })
 export class ShareHistoryDialogComponent {
     private STATUS_SAME = 0;

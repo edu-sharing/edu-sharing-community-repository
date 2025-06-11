@@ -24,6 +24,7 @@ import {
     selector: 'es-pinned-collections-dialog',
     templateUrl: './pinned-collections-dialog.component.html',
     styleUrls: ['./pinned-collections-dialog.component.scss'],
+    standalone: false,
 })
 export class PinnedCollectionsDialogComponent {
     pinnedCollections: Node[];

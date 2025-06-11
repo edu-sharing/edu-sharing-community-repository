@@ -1,5 +1,5 @@
 @use 'sass:math';
-@import '../../../../assets/scss/mixins';
+@use '../../../../assets/scss/mixins' as *;
 
 $horizontalScrollPadding: 1.5em;
 

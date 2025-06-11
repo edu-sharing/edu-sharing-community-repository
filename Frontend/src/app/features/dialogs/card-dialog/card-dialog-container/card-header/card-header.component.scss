@@ -1,5 +1,5 @@
-@import 'projects/edu-sharing-ui/assets/scss/variables-scss';
-@import '../../../../../shared/components/card/variables';
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use '../../../../../shared/components/card/variables' as *;
 
 :host {
     flex-shrink: 0;

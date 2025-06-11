@@ -10,6 +10,7 @@ import { Directive, ElementRef } from '@angular/core';
 @Directive({
     selector: '[esElementRef]',
     exportAs: 'esElementRef',
+    standalone: false,
 })
 export class ElementRefDirective<T> extends ElementRef<T> {
     constructor(elementRef: ElementRef<T>) {

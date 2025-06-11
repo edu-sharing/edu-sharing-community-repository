@@ -13,6 +13,7 @@ import { CardAvatar } from './card-avatar';
     templateUrl: './card-header.component.html',
     styleUrls: ['./card-header.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class CardHeaderComponent {
     /** DOM-ID suffix for elements of this dialog. */

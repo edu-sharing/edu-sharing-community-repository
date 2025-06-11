@@ -1,5 +1,5 @@
 @use 'sass:color';
-@import '../../../../assets/scss/mixins';
+@use '../../../../assets/scss/mixins' as *;
 
 .drag-preview {
     display: flex;

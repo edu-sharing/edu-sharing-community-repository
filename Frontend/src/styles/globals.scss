@@ -1,5 +1,6 @@
-@import 'projects/edu-sharing-ui/assets/scss/variables-scss';
-@import 'projects/edu-sharing-ui/assets/scss/branding';
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'projects/edu-sharing-ui/assets/scss/branding' as *;
+@use 'sass:color';
 
 *,
 ::after,
@@ -164,7 +165,7 @@ button.cdk-keyboard-focused {
     border: 1px solid rgba(0, 0, 0, 0.25);
 }
 mat-label .required-marker {
-    color: darken($colorStatusNegative, 20%);
+    color: color.adjust($colorStatusNegative, $lightness: -20%);
 }
 ::placeholder {
     color: $placeholderColor;

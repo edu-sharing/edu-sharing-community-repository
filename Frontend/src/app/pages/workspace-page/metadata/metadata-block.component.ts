@@ -19,6 +19,7 @@ declare var Chart: any;
     selector: 'es-workspace-metadata-block',
     templateUrl: 'metadata-block.component.html',
     styleUrls: ['metadata-block.component.scss'],
+    standalone: false,
 })
 export class WorkspaceMetadataBlockComponent {
     @Input() set node(node: Node) {

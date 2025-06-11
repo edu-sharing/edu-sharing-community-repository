@@ -7,6 +7,7 @@ import { StatisticsGroup } from 'ngx-edu-sharing-api';
     selector: 'es-list-counts',
     templateUrl: './list-counts.component.html',
     styleUrls: ['./list-counts.component.scss'],
+    standalone: false,
 })
 export class ListCountsComponent extends ListWidget {
     static supportedItems = [

@@ -24,6 +24,7 @@ import {
     templateUrl: './mds-editor-dialog.component.html',
     styleUrls: ['./mds-editor-dialog.component.scss'],
     providers: [MdsEditorInstanceService],
+    standalone: false,
 })
 export class MdsEditorDialogComponent implements OnInit, AfterViewInit {
     @ViewChild('customBottomBarContent') customBottomBarContent: TemplateRef<HTMLElement>;

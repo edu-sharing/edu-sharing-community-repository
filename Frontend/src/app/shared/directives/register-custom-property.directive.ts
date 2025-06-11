@@ -5,6 +5,7 @@ import { Directive, Input } from '@angular/core';
  */
 @Directive({
     selector: '[esRegisterCustomProperty]',
+    standalone: false,
 })
 export class RegisterCustomPropertyDirective {
     @Input('esRegisterCustomProperty') set property(p: { key: string; value: any; object: any }) {

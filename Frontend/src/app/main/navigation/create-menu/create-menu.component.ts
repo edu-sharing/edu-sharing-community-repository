@@ -25,7 +25,7 @@ import {
     UIAnimation,
     VirtualNode,
 } from 'ngx-edu-sharing-ui';
-import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { delay, map, startWith, takeUntil } from 'rxjs/operators';
 import {
     Connector,
@@ -64,6 +64,7 @@ import { BridgeService } from '../../../services/bridge.service';
     styleUrls: ['create-menu.component.scss'],
     animations: [trigger('dialog', UIAnimation.switchDialog(UIAnimation.ANIMATION_TIME_FAST))],
     providers: [OptionsHelperDataService],
+    standalone: false,
 })
 export class CreateMenuComponent implements OnInit, OnDestroy {
     @ViewChild('dropdown', { static: true }) dropdown: DropdownComponent;

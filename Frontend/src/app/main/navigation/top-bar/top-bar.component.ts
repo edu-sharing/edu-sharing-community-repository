@@ -22,6 +22,7 @@ import { MainNavCreateConfig, MainNavService, TemplateSlot } from '../main-nav.s
     selector: 'es-top-bar',
     templateUrl: './top-bar.component.html',
     styleUrls: ['./top-bar.component.scss'],
+    standalone: false,
 })
 export class TopBarComponent {
     readonly TemplateSlot = TemplateSlot;

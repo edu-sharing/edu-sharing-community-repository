@@ -1,5 +1,5 @@
-@import '../../../assets/scss/mixins';
-@import '../../../assets/scss/variables-scss';
+@use '../../../assets/scss/mixins' as *;
+@use '../../../assets/scss/variables-scss' as *;
 
 // We cannot use `:host` here, since the `mat-menu` elements are rearranged
 // outside of the original container. Hence we rely on the `.mat-dropdown-menu`

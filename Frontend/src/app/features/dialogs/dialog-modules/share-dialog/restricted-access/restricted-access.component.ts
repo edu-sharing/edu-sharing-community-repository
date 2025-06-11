@@ -6,6 +6,7 @@ import { RestConstants } from '../../../../../core-module/rest/rest-constants';
     selector: 'es-share-dialog-restricted-access',
     templateUrl: 'restricted-access.component.html',
     styleUrls: ['restricted-access.component.scss'],
+    standalone: false,
 })
 export class ShareDialogRestrictedAccessComponent implements OnChanges {
     constructor(private nodeService: NodeService) {}

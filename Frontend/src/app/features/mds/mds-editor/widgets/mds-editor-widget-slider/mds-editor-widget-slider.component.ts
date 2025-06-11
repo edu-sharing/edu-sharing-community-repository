@@ -8,6 +8,7 @@ import { MdsWidgetType, ValueType } from 'ngx-edu-sharing-ui';
 @Component({
     templateUrl: './mds-editor-widget-slider.component.html',
     styleUrls: ['./mds-editor-widget-slider.component.scss'],
+    standalone: false,
 })
 export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implements OnInit {
     readonly valueType: ValueType = ValueType.String;
@@ -126,6 +127,7 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
 @Component({
     templateUrl: './mds-editor-widget-slider.component.html',
     styleUrls: ['./mds-editor-widget-slider.component.scss'],
+    standalone: false,
 })
 export class MdsEditorWidgetSliderRangeComponent extends MdsEditorWidgetSliderComponent {
     public static mapGraphqlId(definition: MdsWidget) {

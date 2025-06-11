@@ -27,7 +27,6 @@ interface VideoControlsValues {
     templateUrl: 'video-controls.component.html',
     styleUrls: ['video-controls.component.scss'],
     animations: [trigger('fromRight', UIAnimation.fromRight())],
-    standalone: true,
     imports: [DurationPipe, SharedModule, NgxSliderModule],
 })
 export class VideoControlsComponent implements OnInit, OnDestroy {

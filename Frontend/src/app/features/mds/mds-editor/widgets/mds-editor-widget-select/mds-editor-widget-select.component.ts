@@ -10,6 +10,7 @@ import { ValueType } from 'ngx-edu-sharing-ui';
     selector: 'es-mds-editor-widget-select',
     templateUrl: './mds-editor-widget-select.component.html',
     styleUrls: ['./mds-editor-widget-select.component.scss'],
+    standalone: false,
 })
 export class MdsEditorWidgetSelectComponent extends MdsEditorWidgetBase implements OnInit {
     readonly valueType: ValueType = ValueType.String;

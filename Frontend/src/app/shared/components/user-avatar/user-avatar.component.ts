@@ -15,6 +15,7 @@ import { AuthorityNamePipe } from '../../pipes/authority-name.pipe';
     selector: 'es-user-avatar',
     templateUrl: 'user-avatar.component.html',
     styleUrls: ['user-avatar.component.scss'],
+    standalone: false,
 })
 export class UserAvatarComponent {
     /**

@@ -1,5 +1,7 @@
+@use 'sass:meta';
+
 /* Enable it via your custom variable '$customIcons' */
-@if variable-exists(customIcons) {
+@if meta.global-variable-exists(customIcons) {
     @if $customIcons == true {
         @font-face {
             font-family: 'Custom-Icons';

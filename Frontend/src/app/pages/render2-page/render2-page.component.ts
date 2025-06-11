@@ -10,7 +10,6 @@ import { RenderWrapperComponent } from './render-wrapper-component/render-wrappe
     selector: 'es-render2-page',
     templateUrl: 'render2-page.component.html',
     styleUrls: ['render2-page.component.scss'],
-    standalone: true,
     imports: [CommonModule, RenderWrapperComponent],
     providers: [OptionsHelperDataService],
 })

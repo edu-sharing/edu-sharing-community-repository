@@ -12,6 +12,7 @@ import { MdsWidgetType, ValueType } from 'ngx-edu-sharing-ui';
     selector: 'es-mds-editor-widget-search-suggestions',
     templateUrl: './mds-editor-widget-search-suggestions.component.html',
     styleUrls: ['./mds-editor-widget-search-suggestions.component.scss'],
+    standalone: false,
 })
 export class MdsEditorWidgetSearchSuggestionsComponent
     extends MdsEditorWidgetBase

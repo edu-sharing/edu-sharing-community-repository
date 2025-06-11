@@ -15,6 +15,7 @@ import { NodeTemplateDialogData, NodeTemplateDialogResult } from './node-templat
     selector: 'es-node-template-dialog',
     templateUrl: './node-template-dialog.component.html',
     styleUrls: ['./node-template-dialog.component.scss'],
+    standalone: false,
 })
 export class NodeTemplateDialogComponent implements OnInit {
     @ViewChild('mds') mdsRef: MdsEditorWrapperComponent;

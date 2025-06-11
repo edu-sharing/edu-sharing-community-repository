@@ -8,6 +8,7 @@ import { MainNavService } from '../../main/navigation/main-nav.service';
 @Component({
     selector: 'es-lti-page',
     template: '',
+    standalone: false,
 })
 export class LtiPageComponent implements OnInit {
     constructor(

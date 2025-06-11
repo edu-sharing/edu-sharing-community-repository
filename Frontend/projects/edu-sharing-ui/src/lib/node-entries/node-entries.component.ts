@@ -11,7 +11,7 @@ import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
-import { filter, first, takeUntil } from 'rxjs/operators';
+import { first, takeUntil } from 'rxjs/operators';
 import { NodeEntriesDataType, NodeEntriesDisplayType } from './entries-model';
 import { NodeEntriesGlobalService } from './node-entries-global.service';
 import { NodeEntriesTemplatesService } from './node-entries-templates.service';
@@ -23,6 +23,7 @@ import { NodeDataSourceRemote } from './node-data-source-remote';
     selector: 'es-node-entries',
     templateUrl: 'node-entries.component.html',
     styleUrls: ['node-entries.component.scss'],
+    standalone: false,
 })
 export class NodeEntriesComponent<T extends NodeEntriesDataType>
     implements OnInit, AfterViewInit, OnDestroy

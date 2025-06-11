@@ -24,6 +24,7 @@ enum Step {
     selector: 'es-join-group-dialog',
     templateUrl: './join-group-dialog.component.html',
     styleUrls: ['./join-group-dialog.component.scss'],
+    standalone: false,
 })
 export class JoinGroupDialogComponent implements OnInit {
     @ViewChild('searchControl') searchControl: ElementRef<HTMLInputElement>;

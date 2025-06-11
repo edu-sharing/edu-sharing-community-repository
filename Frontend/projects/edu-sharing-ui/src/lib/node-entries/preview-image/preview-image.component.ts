@@ -11,6 +11,7 @@ import { Node } from 'ngx-edu-sharing-api';
     selector: 'es-preview-image',
     templateUrl: './preview-image.component.html',
     styleUrls: ['./preview-image.component.scss'],
+    standalone: false,
 })
 export class PreviewImageComponent<T extends Node> {
     @Input() node: T;

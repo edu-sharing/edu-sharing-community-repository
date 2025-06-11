@@ -15,6 +15,7 @@ import { AiPreviewImagesOverlayComponent } from './ai-preview-images-overlay/ai-
     selector: 'es-mds-editor-widget-preview',
     templateUrl: './mds-editor-widget-preview.component.html',
     styleUrls: ['./mds-editor-widget-preview.component.scss'],
+    standalone: false,
 })
 export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent {
     @ViewChild('overlayRef') overlayRef: ElementRef<HTMLElement>;

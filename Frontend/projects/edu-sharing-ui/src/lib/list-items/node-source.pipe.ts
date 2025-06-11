@@ -2,7 +2,10 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { NetworkService, Repository } from 'ngx-edu-sharing-api';
 import { NodeHelperService } from '../services/node-helper.service';
 
-@Pipe({ name: 'appNodeSource' })
+@Pipe({
+    name: 'appNodeSource',
+    standalone: false,
+})
 export class NodeSourcePipe implements PipeTransform {
     private homeRepository: Repository;
 

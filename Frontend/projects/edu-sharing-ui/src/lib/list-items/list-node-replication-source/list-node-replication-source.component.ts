@@ -12,6 +12,7 @@ import { ListItem } from '../../types/list-item';
     selector: 'es-list-node-replication-source',
     templateUrl: './list-node-replication-source.component.html',
     providers: [NodeSourcePipe],
+    standalone: false,
 })
 export class ListNodeReplicationSourceComponent extends ListWidget {
     static supportedItems = [new ListItem('NODE', RestConstants.CCM_PROP_REPLICATIONSOURCE)];

@@ -17,6 +17,7 @@ import { PdfComponent } from 'ngx-rendering-service-lib';
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],
+    standalone: false,
 })
 export class AppComponent implements OnChanges, AfterViewInit, OnInit {
     @ViewChild(PdfComponent) pdfComponent: PdfComponent;

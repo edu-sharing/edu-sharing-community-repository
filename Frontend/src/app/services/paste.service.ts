@@ -53,7 +53,7 @@ export class PasteService {
         return this.pasteSubjectOutsideZone.pipe(
             filter((event) => !targetIsInputOrTextarea(event)),
             filter((event) => !hasPlainTextString(event)),
-            map(() => void 0),
+            map(() => undefined as void),
             runInZone(this.ngZone),
         );
     }

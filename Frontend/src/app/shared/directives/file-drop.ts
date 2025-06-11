@@ -15,7 +15,10 @@ export interface Options {
     readAs?: string;
 }
 
-@Directive({ selector: '[esFileDrop]' })
+@Directive({
+    selector: '[esFileDrop]',
+    standalone: false,
+})
 export class FileDropDirective implements OnInit, OnDestroy {
     @Input() options: Options;
     /**

@@ -46,6 +46,7 @@ import { CardDialogRef } from '../../features/dialogs/card-dialog/card-dialog-re
     templateUrl: 'login-page.component.html',
     styleUrls: ['login-page.component.scss'],
     animations: [trigger('dialog', UIAnimation.switchDialog(UIAnimation.ANIMATION_TIME_FAST))],
+    standalone: false,
 })
 export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;

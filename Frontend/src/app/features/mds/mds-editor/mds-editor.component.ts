@@ -21,6 +21,7 @@ interface InitInfo {
     selector: 'es-mds-editor',
     templateUrl: './mds-editor.component.html',
     providers: [MdsEditorInstanceService],
+    standalone: false,
 })
 export class MdsEditorComponent implements OnInit {
     /** The repository to which the metadata set to be used belongs. */

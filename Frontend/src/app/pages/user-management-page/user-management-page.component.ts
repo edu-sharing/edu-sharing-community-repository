@@ -23,6 +23,7 @@ import { PlatformLocation } from '@angular/common';
     templateUrl: 'user-management-page.component.html',
     styleUrls: ['user-management-page.component.scss'],
     animations: [],
+    standalone: false,
 })
 export class UserManagementPageComponent implements OnInit, OnDestroy {
     public tab: number = 0;

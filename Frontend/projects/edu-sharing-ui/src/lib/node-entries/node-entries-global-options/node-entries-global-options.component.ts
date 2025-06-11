@@ -9,6 +9,7 @@ import { map } from 'rxjs/operators';
     templateUrl: './node-entries-global-options.component.html',
     styleUrls: ['./node-entries-global-options.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class NodeEntriesGlobalOptionsComponent<T extends Node> {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;

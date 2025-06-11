@@ -15,6 +15,7 @@ import { SendFeedbackDialogData, SendFeedbackDialogResult } from './send-feedbac
     templateUrl: './send-feedback-dialog.component.html',
     styleUrls: ['./send-feedback-dialog.component.scss'],
     providers: [MdsEditorInstanceService],
+    standalone: false,
 })
 export class SendFeedbackDialogComponent implements OnInit {
     constructor(

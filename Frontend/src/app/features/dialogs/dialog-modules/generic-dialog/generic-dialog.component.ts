@@ -8,6 +8,7 @@ import { GenericDialogData } from './generic-dialog-data';
     selector: 'es-generic-dialog',
     templateUrl: './generic-dialog.component.html',
     styleUrls: ['./generic-dialog.component.scss'],
+    standalone: false,
 })
 export class GenericDialogComponent<R extends string> implements OnInit {
     constructor(

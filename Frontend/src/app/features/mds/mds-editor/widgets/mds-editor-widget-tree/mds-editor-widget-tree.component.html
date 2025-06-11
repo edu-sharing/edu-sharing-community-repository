@@ -42,7 +42,7 @@
         [removable]="true"
         [matTooltip]="value.label + ' (' + ('MDS.DELETE_KEY_NOTICE' | translate) + ')'"
         matTooltipPosition="above"
-        [class.indeterminate]="(this.indeterminateValues$ | async)?.includes(value.key)"
+        [class.indeterminate]="(indeterminateValues$ | async)?.includes(value.key)"
         [class.mat-chip-selected]="false"
         [class.chip-is-suggestion]="isSuggestion(value) | async"
         [class.chip-is-suggestion-ai]="(isSuggestion(value) | async) === 'AI'"

@@ -1,4 +1,4 @@
-@import './common';
+@use './common' as *;
 
 .add-to-collection-banner {
     @include addToCollectionBanner;

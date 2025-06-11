@@ -41,6 +41,7 @@ type RawPermissions = {
     templateUrl: 'node-info-dialog.component.html',
     styleUrls: ['node-info-dialog.component.scss'],
     providers: [BreadcrumbsService, OptionsHelperDataService],
+    standalone: false,
 })
 /**
  * A node info dialog (useful primary for admin stuff)

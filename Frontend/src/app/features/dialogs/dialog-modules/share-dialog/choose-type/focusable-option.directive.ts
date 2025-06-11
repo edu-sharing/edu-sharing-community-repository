@@ -4,6 +4,7 @@ import { Subject } from 'rxjs';
 
 @Directive({
     selector: '[esWorkspaceShareFocusableOption]',
+    standalone: false,
 })
 export class FocusableOptionDirective implements FocusableOption, OnInit, OnDestroy {
     @Input() disabled?: boolean;

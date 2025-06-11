@@ -8,6 +8,7 @@ import { NodeHelperService } from '../../../services/node-helper.service';
     selector: 'es-create-ltitool',
     templateUrl: './create-ltitool.component.html',
     styleUrls: ['./create-ltitool.component.scss'],
+    standalone: false,
 })
 export class CreateLtitoolComponent implements OnInit {
     public _tool: Tool;

@@ -1,7 +1,10 @@
-import { PipeTransform, Pipe } from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
 
-@Pipe({ name: 'NodeImageSize' })
+@Pipe({
+    name: 'NodeImageSize',
+    standalone: false,
+})
 export class NodeImageSizePipe implements PipeTransform {
     transform(node: Node, args: any = null): string {
         const width = parseFloat(node.properties[RestConstants.CCM_PROP_WIDTH]?.[0]);

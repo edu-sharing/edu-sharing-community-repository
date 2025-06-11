@@ -25,6 +25,7 @@ import { Values } from '../../../../mds/types/types';
         trigger('fade', UIAnimation.fade()),
         trigger('cardAnimation', UIAnimation.cardAnimation()),
     ],
+    standalone: false,
 })
 export class SimpleEditLicenseComponent implements OnInit {
     @ViewChild('modeGroup') modeGroup: MatButtonToggleGroup;

@@ -116,6 +116,7 @@ type CardState = 'void' | 'enter' | 'exit';
             transition(':enter, :leave', [animate(UIAnimation.ANIMATION_TIME_SLOW + 'ms ease')]),
         ]),
     ],
+    standalone: false,
 })
 export class CardDialogContainerComponent implements OnInit, OnDestroy {
     readonly id = idCounter++;

@@ -79,6 +79,7 @@ import { InfobarService } from '../infobar/infobar.service';
     selector: 'es-collection-content',
     templateUrl: 'collection-content.component.html',
     styleUrls: ['collection-content.component.scss'],
+    standalone: false,
 })
 export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy {
     private static DEFAULT_REQUEST = {

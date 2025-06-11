@@ -32,6 +32,7 @@ import { Toast } from '../../../../../services/toast';
     selector: 'es-mds-editor-widget-tree',
     templateUrl: './mds-editor-widget-tree.component.html',
     styleUrls: ['./mds-editor-widget-tree.component.scss'],
+    standalone: false,
 })
 export class MdsEditorWidgetTreeComponent
     extends MdsEditorWidgetChipsSuggestionBase

@@ -22,6 +22,7 @@ import { UIAnimation } from 'ngx-edu-sharing-ui';
     templateUrl: 'user-profile.component.html',
     styleUrls: ['user-profile.component.scss'],
     animations: [trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
+    standalone: false,
 })
 export class UserProfileComponent {
     @ViewChild('form') form: ElementRef;

@@ -27,6 +27,7 @@ import {
     templateUrl: './contributor-edit-dialog.component.html',
     styleUrls: ['./contributor-edit-dialog.component.scss'],
     animations: [trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
+    standalone: false,
 })
 export class ContributorEditDialogComponent implements OnInit {
     readonly roles = this.getAvailableRoles();

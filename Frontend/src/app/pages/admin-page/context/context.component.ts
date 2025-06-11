@@ -25,6 +25,7 @@ type variants = 'variables' | 'Language' | '';
     templateUrl: 'context.component.html',
     styleUrls: ['context.component.scss'],
     animations: [trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
+    standalone: false,
 })
 export class AdminContextComponent implements OnInit {
     readonly ConfigVarians = ['values', 'language', 'variables'];

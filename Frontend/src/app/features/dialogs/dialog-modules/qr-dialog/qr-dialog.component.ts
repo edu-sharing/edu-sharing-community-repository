@@ -11,6 +11,7 @@ export interface QrDialogData {
     selector: 'es-qr-dialog',
     templateUrl: './qr-dialog.component.html',
     styleUrls: ['./qr-dialog.component.scss'],
+    standalone: false,
 })
 export class QrDialogComponent implements OnInit {
     url: string;

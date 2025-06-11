@@ -11,6 +11,7 @@ import { UIAnimation } from 'ngx-edu-sharing-ui';
         trigger('cardAnimation', UIAnimation.cardAnimation()),
         trigger('dialog', UIAnimation.switchDialog()),
     ],
+    standalone: false,
 })
 export class LicenseSourceComponent {
     showCcAuthor: boolean;

@@ -10,6 +10,7 @@ import { UIAnimation } from 'ngx-edu-sharing-ui';
     animations: [
         trigger('infobarBottom', UIAnimation.infobarBottom(UIAnimation.ANIMATION_TIME_SLOW)),
     ],
+    standalone: false,
 })
 /**
  * A Infobar (usually at the bottom) which features action buttons

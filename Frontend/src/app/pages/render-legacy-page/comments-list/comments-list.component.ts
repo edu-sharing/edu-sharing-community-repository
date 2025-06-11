@@ -22,7 +22,6 @@ import { SharedModule } from '../../../shared/shared.module';
     selector: 'es-comments-list',
     templateUrl: 'comments-list.component.html',
     styleUrls: ['comments-list.component.scss'],
-    standalone: true,
     imports: [SharedModule],
     animations: [
         trigger('fade', UIAnimation.fade()),

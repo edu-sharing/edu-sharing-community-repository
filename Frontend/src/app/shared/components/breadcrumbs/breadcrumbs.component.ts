@@ -13,6 +13,7 @@ import { BreadcrumbsService } from './breadcrumbs.service';
     selector: 'es-breadcrumbs',
     templateUrl: 'breadcrumbs.component.html',
     styleUrls: ['breadcrumbs.component.scss'],
+    standalone: false,
 })
 export class BreadcrumbsComponent {
     /**

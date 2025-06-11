@@ -7,6 +7,7 @@ import { NodeEntriesService } from '../../services/node-entries.service';
     selector: 'es-node-stats-badges',
     templateUrl: './node-stats-badges.component.html',
     styleUrls: ['./node-stats-badges.component.scss'],
+    standalone: false,
 })
 export class NodeStatsBadgesComponent {
     readonly ClickSource = ClickSource;

@@ -1,3 +1,4 @@
+@forward 'projects/edu-sharing-ui/assets/scss/variables';
 /**
     declarations of dynamic css variabled
     will only be included once via angular to prevent duplicate :root entries
@@ -12,5 +13,3 @@
     // prevent stuttering when the navigation bar is expanded or collapsed.
     --mainnavCurrentHeight: var(--mainnavHeight);
 }
-
-@import 'projects/edu-sharing-ui/assets/scss/variables';

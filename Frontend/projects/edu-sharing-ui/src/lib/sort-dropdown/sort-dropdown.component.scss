@@ -1,4 +1,4 @@
-@import '../../../assets/scss/mixins';
+@use '../../../assets/scss/mixins' as *;
 ::ng-deep .sort-dropdown-menu {
     width: 240px;
 }

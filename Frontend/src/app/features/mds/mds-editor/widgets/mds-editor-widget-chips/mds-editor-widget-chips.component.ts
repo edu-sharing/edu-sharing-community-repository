@@ -43,6 +43,7 @@ import { MdsWidgetType, ValueType } from 'ngx-edu-sharing-ui';
     selector: 'es-mds-editor-widget-chips',
     templateUrl: './mds-editor-widget-chips.component.html',
     styleUrls: ['./mds-editor-widget-chips.component.scss'],
+    standalone: false,
 })
 export class MdsEditorWidgetChipsComponent
     extends MdsEditorWidgetChipsSuggestionBase
@@ -424,5 +425,6 @@ export class MdsEditorWidgetChipsComponent
 @Component({
     templateUrl: './mds-editor-widget-chips.component.html',
     styleUrls: ['./mds-editor-widget-chips.component.scss'],
+    standalone: false,
 })
 export class MdsEditorWidgetChipsRangedValueComponent extends MdsEditorWidgetChipsComponent {}

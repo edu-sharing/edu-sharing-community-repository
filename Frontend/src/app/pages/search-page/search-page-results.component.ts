@@ -19,6 +19,7 @@ import { switchMap, takeUntil } from 'rxjs/operators';
     templateUrl: './search-page-results.component.html',
     styleUrls: ['./search-page-results.component.scss'],
     providers: [SearchPageResultsService],
+    standalone: false,
 })
 export class SearchPageResultsComponent implements OnInit, OnDestroy {
     readonly Scope = Scope;

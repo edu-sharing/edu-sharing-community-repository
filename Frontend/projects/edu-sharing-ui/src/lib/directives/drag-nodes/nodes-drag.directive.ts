@@ -10,6 +10,7 @@ import { NodesDragDropService } from '../../services/nodes-drag-drop.service';
  */
 @Directive({
     selector: '[esNodesDrag]',
+    standalone: false,
 })
 export class NodesDragDirective {
     constructor(private cdkDrag: CdkDrag<Node[]>, private nodesDragDrop: NodesDragDropService) {

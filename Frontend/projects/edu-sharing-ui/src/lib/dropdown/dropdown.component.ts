@@ -14,6 +14,7 @@ import { Node } from 'ngx-edu-sharing-api';
     selector: 'es-dropdown',
     templateUrl: 'dropdown.component.html',
     styleUrls: ['dropdown.component.scss'],
+    standalone: false,
 })
 export class DropdownComponent implements OnChanges {
     @ViewChild('dropdown', { static: true }) menu: MatMenu;

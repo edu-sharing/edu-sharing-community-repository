@@ -7,7 +7,10 @@ import { VCard } from 'ngx-edu-sharing-ui';
 /**
  * Format the version label and checking constants if required
  */
-@Pipe({ name: 'nodeAuthorName' })
+@Pipe({
+    name: 'nodeAuthorName',
+    standalone: false,
+})
 export class NodeAuthorNamePipe implements PipeTransform {
     transform(node: Node, args: any = null): string {
         const data = [];

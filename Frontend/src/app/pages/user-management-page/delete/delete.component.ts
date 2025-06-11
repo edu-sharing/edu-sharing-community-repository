@@ -31,6 +31,7 @@ import { BehaviorSubject } from 'rxjs';
     selector: 'es-permissions-delete',
     templateUrl: 'delete.component.html',
     styleUrls: ['delete.component.scss'],
+    standalone: false,
 })
 export class PermissionsDeleteComponent implements OnInit {
     readonly DisplayType = NodeEntriesDisplayType;

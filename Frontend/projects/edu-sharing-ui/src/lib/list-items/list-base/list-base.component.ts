@@ -7,6 +7,7 @@ import { Node } from 'ngx-edu-sharing-api';
 @Component({
     selector: 'es-list-base',
     templateUrl: './list-base.component.html',
+    standalone: false,
 })
 export class ListBaseComponent extends ListWidget implements OnChanges {
     /**

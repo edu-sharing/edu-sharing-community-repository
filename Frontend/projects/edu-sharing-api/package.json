@@ -1,6 +1,6 @@
 {
   "name": "ngx-edu-sharing-api",
-  "version": "10.0.5",
+  "version": "10.0.7",
   "license": "GNU GPL v2",
   "description": "Angular bindings for Edu-Sharing's API",
   "repository": {
@@ -22,8 +22,8 @@
     "publish": "ng build && cd ../../dist/edu-sharing-api && npm publish --tag next"
   },
   "peerDependencies": {
-    "@angular/common": "^14.0.0 || ^15.0.0 || ^16.0.00 || ^17.0.0 || ^18.0.0",
-    "@angular/core": "^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0",
+    "@angular/common": ">=18.0.0",
+    "@angular/core": ">=18.0.0",
     "rxjs": "^6.0.0 || ^7.0.0",
     "uuid": "^11.1.0"
   },

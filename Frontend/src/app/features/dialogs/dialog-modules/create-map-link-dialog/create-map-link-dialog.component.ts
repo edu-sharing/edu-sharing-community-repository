@@ -20,6 +20,7 @@ import { CreateMapLinkDialogData, CreateMapLinkDialogResult } from './create-map
     selector: 'es-create-map-link-dialog',
     templateUrl: './create-map-link-dialog.component.html',
     styleUrls: ['./create-map-link-dialog.component.scss'],
+    standalone: false,
 })
 export class CreateMapLinkDialogComponent implements OnInit {
     name: string;

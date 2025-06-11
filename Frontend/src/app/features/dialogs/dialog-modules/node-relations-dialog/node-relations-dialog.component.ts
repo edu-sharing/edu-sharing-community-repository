@@ -30,6 +30,7 @@ import { ListItem, LocalEventsService, NodesRightMode, OPEN_URL_MODE } from 'ngx
     templateUrl: './node-relations-dialog.component.html',
     styleUrls: ['./node-relations-dialog.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class NodeRelationsDialogComponent implements OnInit {
     readonly Relations = Object.values(Relations);

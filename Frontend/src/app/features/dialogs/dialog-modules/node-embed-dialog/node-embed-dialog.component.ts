@@ -35,6 +35,7 @@ export interface NodeEmbedDialogData {
     templateUrl: './node-embed-dialog.component.html',
     styleUrls: ['./node-embed-dialog.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
     @ViewChild('textarea') textareaRef: ElementRef<HTMLTextAreaElement>;

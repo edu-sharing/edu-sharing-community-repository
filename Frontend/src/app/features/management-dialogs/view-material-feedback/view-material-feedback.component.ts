@@ -7,6 +7,7 @@ import { FeedbackData, FeedbackV1Service, Node } from 'ngx-edu-sharing-api';
     selector: 'es-view-material-feedback',
     templateUrl: 'view-material-feedback.component.html',
     styleUrls: ['view-material-feedback.component.scss'],
+    standalone: false,
 })
 export class ViewMaterialFeedbackComponent {
     @Input()

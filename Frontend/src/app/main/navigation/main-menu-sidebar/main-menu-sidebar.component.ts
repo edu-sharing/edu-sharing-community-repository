@@ -19,6 +19,7 @@ import { Subject } from 'rxjs';
     templateUrl: './main-menu-sidebar.component.html',
     styleUrls: ['./main-menu-sidebar.component.scss'],
     animations: [trigger('fade', UIAnimation.fade()), trigger('fromLeft', UIAnimation.fromLeft())],
+    standalone: false,
 })
 export class MainMenuSidebarComponent implements OnInit, OnDestroy {
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;

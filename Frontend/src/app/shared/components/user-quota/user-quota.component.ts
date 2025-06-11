@@ -5,6 +5,7 @@ import { UserQuota } from '../../../core-module/core.module';
     selector: 'es-user-quota',
     templateUrl: 'user-quota.component.html',
     styleUrls: ['user-quota.component.scss'],
+    standalone: false,
 })
 /**
  * A quota info component
