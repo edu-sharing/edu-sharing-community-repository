@@ -18,7 +18,7 @@
     "build:components": "npm run build:components:default & npm run build:components:amd",
     "build:components:default": "cd projects/rendering-service-web-component && npm run build && rm -rf ../../dist/web-components && mkdir -p ../../dist/web-components && mv ../../dist/rendering-service-web-component/browser ../../dist/web-components/rendering-service",
     "build:components:amd": "cd projects/rendering-service-web-component  && npm run build-amd && mv ../../dist/rendering-service-web-component ../../dist/web-components/rendering-service-amd",
-    "build:storybook": "npm run build-storybook && mv dist/storybook/angular-edusharing/* dist/storybook && rm -rf dist/storybook/angular-edusharing",
+    "build:storybook": "rm -rf dist/storybook && npm run build-storybook && mv dist/storybook/angular-edusharing/* dist/storybook && rm -rf dist/storybook/angular-edusharing",
     "copy-build-to-kubernetes": "kubectl  --kubeconfig=${npm_config_kubeconfig} --namespace=${npm_config_namespace} cp ./dist/. edusharing-repository-service-0:/opt/bitnami/tomcat/temp/0-edu-sharing/",
     "copy-build-to-docker": "docker container cp ./dist/. $(docker ps --filter name=^repository-service --quiet):/opt/bitnami/tomcat/temp/0-edu-sharing/",
     "build-and-copy-to-docker": "npm run build && npm run copy-build-to-docker",
