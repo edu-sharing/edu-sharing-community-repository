@@ -19,6 +19,7 @@
         <include>tests/**</include>
         <include>playwright/**</include>
         <include>.angular/**</include>
+        <include>.storybook/**</include>
         <include>node_modules/**</include>
         <include>dist/**</include>
         <include>.browserslistrc</include>
