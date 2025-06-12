@@ -46,7 +46,7 @@ export class MdsViewerComponent implements OnChanges {
     @Input() groupId: string;
     @Input() setId: string;
     @Input() data: Values;
-    mds: MdsDefinition;
+    @Input() mds: MdsDefinition;
     templates = signal<
         {
             view: MdsView;
