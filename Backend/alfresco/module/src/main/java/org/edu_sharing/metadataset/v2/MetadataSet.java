@@ -1,15 +1,15 @@
 package org.edu_sharing.metadataset.v2;
 
-import java.io.Serializable;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import lombok.Data;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionBaseService;
 import org.edu_sharing.metadataset.v2.MetadataWidget.Subwidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
+
+import java.io.Serializable;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Data
 public class MetadataSet implements Serializable {
@@ -61,6 +61,15 @@ public class MetadataSet implements Serializable {
 			}
 			else{
 				widgets.add(0,widget);
+			}
+		}
+		for(AiConfig aiConfig : mdsOverride.getAiConfigs()){
+			if(aiConfigs.contains(aiConfig)){
+				aiConfigs.remove(aiConfig);
+				aiConfigs.add(0,aiConfig);
+			}
+			else{
+				aiConfigs.add(0,aiConfig);
 			}
 		}
 		for(MetadataTemplate template : mdsOverride.getTemplates()){
