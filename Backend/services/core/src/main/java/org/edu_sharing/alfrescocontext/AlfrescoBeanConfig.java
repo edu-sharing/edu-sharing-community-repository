@@ -8,6 +8,9 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.nodelocator.NodeLocatorService;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.policy.PolicyComponent;
+import org.alfresco.repo.rendition2.LocalTransformClient;
+import org.alfresco.repo.rendition2.RenditionDefinitionRegistry2;
+import org.alfresco.repo.rendition2.RenditionDefinitionRegistry2Impl;
 import org.alfresco.repo.search.SearchTrackingComponent;
 import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.MutableAuthenticationDao;
@@ -49,6 +52,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
+
+import java.util.Properties;
 
 /**
  * This will register all Alfresco beans in the edu sharing spring context. All Beans are in form of
@@ -326,6 +331,27 @@ public class AlfrescoBeanConfig {
     public OrganisationService organisationService() {
         return (OrganisationService) applicationContext.getBean("eduOrganisationService");
     }
+
+    @Bean(name = "globalProperties")
+    public Properties globalProperties() {
+        return (Properties)applicationContext.getBean("global-properties");
+    }
+
+
+    /*
+    LocalTransformClient localTransformClient = (LocalTransformClient) AlfAppContextGate.getApplicationContext().getBean("localTransformClient");
+    RenditionDefinitionRegistry2Impl renditionRegistry = (RenditionDefinitionRegistry2Impl)AlfAppContextGate.getApplicationContext().getBean("renditionDefinitionRegistry2");
+     */
+    @Bean(name = "localTransformClient")
+    public LocalTransformClient localTransformClient(){
+        return applicationContext.getBean("localTransformClient", LocalTransformClient.class);
+    }
+
+    @Bean(name = "renditionRegistry")
+    public RenditionDefinitionRegistry2Impl renditionRegistry(){
+        return applicationContext.getBean("renditionDefinitionRegistry2", RenditionDefinitionRegistry2Impl.class);
+    }
+
 
     @Bean
     public GuestService guestService() {
