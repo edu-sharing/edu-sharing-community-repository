@@ -151,8 +151,11 @@ public class OaiDublinCoreMetadataFormatWriter extends AbstractMetadataFormatWri
 
         String commonLicenceKey = propertyMapper.getString(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
         if (StringUtils.isBlank(commonLicenceKey)) {
-            context.createAndAppendElement("dc:rights", root, propertyMapper.getBoolean(CCConstants.LOM_PROP_RIGHTS_COPY_RIGHT) ? "info:eu-repo/semantics/restrictedAccess" : "info:eu-repo/semantics/openAccess");
-            context.createAndAppendElement("dc:rights", root, propertyMapper.getBoolean(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION));
+            Boolean copyRight = propertyMapper.getBoolean(CCConstants.LOM_PROP_RIGHTS_COPY_RIGHT);
+            if(copyRight != null) {
+                context.createAndAppendElement("dc:rights", root, copyRight ? "info:eu-repo/semantics/restrictedAccess" : "info:eu-repo/semantics/openAccess");
+            }
+            context.createAndAppendElement("dc:rights", root, propertyMapper.getString(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION));
         } else {
             String commonLicenseLocale = propertyMapper.getString(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE, Locale.getDefault().getLanguage());
             String commonLicenseVersion = propertyMapper.getString(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION);
