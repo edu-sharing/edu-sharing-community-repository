@@ -52,7 +52,6 @@ export class EduSharingApiModule {
             providers: [
                 ApiRequestConfiguration,
                 ApiInterceptor,
-                ApiHelpersService,
                 API_INTERCEPTOR_PROVIDER,
                 // ...[TimingInterceptor, TIMING_INTERCEPTOR_PROVIDER],
                 getConfigProvider(params),

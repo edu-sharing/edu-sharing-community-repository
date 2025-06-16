@@ -35,7 +35,7 @@ export class AppModule {}
     ```
 -   In the project directory where you want to use Ngx Edu-Sharing Api, run
     ```sh
-    npm link npx-edu-sharing-api
+    npm link ngx-edu-sharing-api
     ```
 
 You might need to add the following paths to the `tsconfig.json` of your project:

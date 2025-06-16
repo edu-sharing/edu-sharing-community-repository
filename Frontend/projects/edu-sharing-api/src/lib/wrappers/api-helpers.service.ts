@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 import { EduSharingApiConfiguration } from '../edu-sharing-api-configuration';
 import { ApiInterceptor } from '../api.interceptor';
 
-@Injectable()
+@Injectable({
+    providedIn: 'root',
+})
 export class ApiHelpersService {
     constructor(private configuration: EduSharingApiConfiguration) {}
     /**

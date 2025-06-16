@@ -100,7 +100,7 @@ export class OptionsHelperDataService implements OnDestroy {
     }
 
     setData(data: OptionData) {
-        this.data = this.optionsHelperService.wrapOptionCallbacks(data);
+        this.data = this.optionsHelperService?.wrapOptionCallbacks(data) || data;
     }
 
     async refreshComponents() {
@@ -166,7 +166,9 @@ export class OptionsHelperDataService implements OnDestroy {
         }
     }
     filterOptions(options: OptionItem[], target: Target, objects: Node[] | any = null) {
-        return this.optionsHelperService.filterOptions(options, target, this.data, objects);
+        return (
+            this.optionsHelperService?.filterOptions(options, target, this.data, objects) || options
+        );
     }
     /**
      * shortcut to simply disable all options on the given compoennts
