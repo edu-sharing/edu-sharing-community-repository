@@ -4,7 +4,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { CustomOptions, OptionItem, Target } from '../types/option-item';
 import { ListItem, ListItemSort } from '../types/list-item';
 import { CanDrop, DragData, DropAction } from '../types/drag-drop';
-import { Node, GenericAuthority } from 'ngx-edu-sharing-api';
+import { GenericAuthority, Node } from 'ngx-edu-sharing-api';
 import { ActionbarComponent } from '../actionbar/actionbar.component';
 import { Observable } from 'rxjs';
 

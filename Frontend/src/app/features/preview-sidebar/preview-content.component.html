@@ -1,0 +1,55 @@
+<es-render-wrapper-component
+  *ngIf="renderNode()"
+  [showTopbar]="false"
+  [showMetadata]="false"
+  [nodeId]="renderNode().ref.id"
+  [repository]="renderNode().ref.repo"
+></es-render-wrapper-component>
+
+<div class="preview-sidebar-image-container" *ngIf="!renderNode()">
+  <img
+    class="preview-sidebar-image"
+    [src]="node | esNodeImage | async"
+    alt=""
+    draggable="false"
+    (mousedown)="showContentButton.launch({ centered: true })"
+    (click)="onShowContentClick()"
+  />
+  <button
+    matRipple
+    #showContentButton="matRipple"
+    class="show-content-button"
+    mat-flat-button
+    color="primary"
+    (click)="onShowContentClick()"
+  >
+    <i esIcon="play_arrow"></i>
+    <span>{{ 'SHOW' | translate }}</span>
+  </button>
+</div>
+<div class="preview-sidebar-body">
+  <div class="top-h-box">
+    <div class="stats-and-rating">
+      <es-node-stats-badges [node]="node" backgroundStyle="darken"></es-node-stats-badges>
+      <es-node-rating [node]="node"></es-node-rating>
+    </div>
+    <es-actionbar appearance="icon-button"></es-actionbar>
+  </div>
+  <es-mds-viewer
+    #mds
+    *ngIf="node?.properties"
+    groupId="preview_sidebar"
+    [data]="node.properties"
+    [headingLevel]="2"
+  ></es-mds-viewer>
+  <!-- h2 class="title">
+    {{ node.title ?? node.name }}
+  </h2>
+  <p class="description">
+    {{ node.properties['cclom:general_description'] }}
+  </p -->
+  <a mat-flat-button [routerLink]="allDetailsLink" class="all-details-link">
+    <span>{{ 'ALL_DETAILS' | translate }}</span>
+    <i esIcon="arrow_forward"></i>
+  </a>
+</div>

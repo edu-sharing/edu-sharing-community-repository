@@ -2,6 +2,7 @@ import { TemplateRef } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { ButtonConfig } from '../../../../util/dialog-button';
 import { CardDialogConfig } from '../../card-dialog/card-dialog-config';
+import { CardAvatar } from '../../card-dialog/card-dialog-container/card-header/card-avatar';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 
 export class GenericDialogData<R extends string, P extends string = string> {
@@ -44,6 +45,7 @@ export class GenericDialogConfig<R extends string> extends GenericDialogData<R> 
     closable?: CardDialogConfig['closable'] = new CardDialogConfig().closable;
     minWidth?: CardDialogConfig['minWidth'];
     maxWidth?: CardDialogConfig['maxWidth'] = 750;
+    contentPadding? = new CardDialogConfig().contentPadding;
     customHeaderBarContent?: TemplateRef<HTMLElement>;
 }
 

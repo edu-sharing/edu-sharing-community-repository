@@ -74,8 +74,9 @@
     ></ng-container>
     <ng-container *ngTemplateOutlet="meta"></ng-container>
   </es-node-url>
-  <div
-    *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink"
+  <button
+    *ngIf="entriesService.elementInteractionType === InteractionType.Emitter"
+    class="card-body"
     matRipple
     (click)="
       entriesService.onClicked({
@@ -90,6 +91,19 @@
         source: ClickSource.Metadata,
       })
     "
+    esFocusState
+    #cardFocusState="esFocusState"
+  >
+    <ng-container
+      *ngTemplateOutlet="
+        image;
+        context: { playAnimation: cardFocusState.hovering || cardFocusState.hasFocus }
+      "
+    ></ng-container>
+    <ng-container *ngTemplateOutlet="meta"></ng-container>
+  </button>
+  <div
+    *ngIf="entriesService.elementInteractionType === InteractionType.None"
     esFocusState
     #cardFocusState="esFocusState"
   >

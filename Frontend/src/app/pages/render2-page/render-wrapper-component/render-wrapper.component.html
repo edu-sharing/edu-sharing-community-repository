@@ -1,4 +1,4 @@
-<div class="render-before">
+<div class="render-before" *ngIf="showTopbar">
   <div class="back">
     <button mat-button color="primary" (click)="goBack()">
       <i esIcon="keyboard_arrow_left"></i>
@@ -29,7 +29,7 @@
 ></rs-root>
 <div class="meta" #meta>
   <es-mds-editor-wrapper
-    *ngIf="data()?.node"
+    *ngIf="data()?.node && showMetadata"
     [embedded]="true"
     [editorMode]="'viewer'"
     [groupId]="'io_render'"

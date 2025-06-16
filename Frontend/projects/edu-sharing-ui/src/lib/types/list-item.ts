@@ -1,5 +1,4 @@
 import { Sort, SortDirection } from '@angular/material/sort';
-import { Observable } from 'rxjs';
 import { EventEmitter } from '@angular/core';
 
 export type ListItemType = 'NODE' | 'NODE_PROPOSAL' | 'COLLECTION' | 'ORG' | 'GROUP' | 'USER';

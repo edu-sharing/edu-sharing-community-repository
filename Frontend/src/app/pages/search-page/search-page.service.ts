@@ -62,7 +62,10 @@ export class SearchPageService implements OnDestroy {
     readonly showingAllRepositories = new BehaviorSubject<boolean>(null);
     readonly availableMetadataSets = new BehaviorSubject<MetadataSetInfo[]>(null);
     readonly activeMetadataSet = this.userModifiableValues.createString();
+    // Whether filters are visible---either as sidebar or dialog on mobile.
     readonly filterBarIsVisible = this.userModifiableValues.createBoolean(false);
+    // Current preview element, visible either as sidebar or dialog on mobile.
+    readonly previewNode = new BehaviorSubject<Node>(null);
     readonly searchFilters = this.userModifiableValues.createDict();
     readonly searchString = this.userModifiableValues.createString();
     readonly loadingProgress = new BehaviorSubject<number>(null);
@@ -157,7 +160,7 @@ export class SearchPageService implements OnDestroy {
         this.activeMetadataSet.registerQueryParameter('mds', this.route);
         this.searchFilters.registerQueryParameter('filters', this.route);
         this.searchString.registerQueryParameter('q', this.route);
-        this.filterBarIsVisible.registerSessionStorage('search-page-filter-bar');
+        this.filterBarIsVisible.registerSessionStorage('search-page-filters');
         this.route.queryParams.pipe(map((params) => params.reurl || false)).subscribe(this.reUrl);
     }
 

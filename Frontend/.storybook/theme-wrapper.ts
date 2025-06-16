@@ -1,4 +1,4 @@
-import { Component, Input, importProvidersFrom } from '@angular/core';
+import { Component, importProvidersFrom, Input } from '@angular/core';
 import { Decorator } from '@storybook/angular';
 import { MaterialCssVarsModule } from 'angular-material-css-vars';
 import { ThemeService, Variable } from '../src/app/services/theme.service';

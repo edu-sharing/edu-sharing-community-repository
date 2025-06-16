@@ -976,6 +976,18 @@
 				]]></html>
     </template>
     <template>
+			<id>preview_sidebar</id>
+			<html><![CDATA[
+					<cclom:title>
+					<cclom:general_description hideIfEmpty="true">
+					<license>
+					<ccm:educationaltypicalagerange hideIfEmpty="true">
+					<ccm:taxonid hideIfEmpty="true">
+					<ccm:educationalcontext hideIfEmpty="true">
+					<cclom:general_keyword hideIfEmpty="true">
+				]]></html>
+		</template>
+		<template>
       <id>mediacenter_filter</id>
       <html><![CDATA[
 				]]></html>
@@ -1158,6 +1170,13 @@
       <rendering>angular</rendering>
       <views>
         <view>collection_sidebar</view>
+			</views>
+		</group>
+		<group>
+			<id>preview_sidebar</id>
+			<rendering>angular</rendering>
+			<views>
+				<view>preview_sidebar</view>
       </views>
     </group>
     <group>

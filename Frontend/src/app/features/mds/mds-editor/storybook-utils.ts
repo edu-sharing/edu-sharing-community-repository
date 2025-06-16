@@ -1,4 +1,4 @@
-import { ApplicationConfig, EventEmitter, importProvidersFrom } from '@angular/core';
+import { ApplicationConfig, EventEmitter, importProvidersFrom, Injectable } from '@angular/core';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -6,6 +6,8 @@ import { TranslateService } from '@ngx-translate/core';
 import {
     HOME_REPOSITORY,
     MdsDefinition,
+    MdsIdentifier,
+    MdsService,
     MdsWidget,
     Node,
     RestConstants,
@@ -20,8 +22,11 @@ import {
     InitialValues,
     MdsValueList,
     MdsViewerService,
+    Values,
+    VCard,
     ViewInstanceService,
 } from 'ngx-edu-sharing-ui';
+import { Mds } from '../../../core-module/rest/data-object';
 
 export const translateProvider = {
     instant: (v: string) => v,
@@ -42,15 +47,24 @@ export class MdsEditorInstanceServiceMock extends MdsEditorInstanceService {
     ] as Node[]);
     widgets = new BehaviorSubject([(window as any).widget]);
 }
+@Injectable()
 export class MdsViewerServiceMock extends MdsViewerService {
     values$ = new BehaviorSubject({
         [RestConstants.CCM_PROP_LICENSE]: ['CC_0'],
     });
 }
+@Injectable()
+export class MdsServiceMock extends MdsService {
+    getMetadataSet({ repository, metadataSet }: Partial<MdsIdentifier>): Observable<MdsDefinition> {
+        console.log('mock mds');
+        return of(DefaultMds);
+    }
+}
 export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
     { provide: MdsEditorInstanceService, useClass: MdsEditorInstanceServiceMock },
     { provide: MdsViewerService, useClass: MdsViewerServiceMock },
+    { provide: MdsService, useClass: MdsServiceMock },
     ViewInstanceService,
     CordovaService,
     Toast,
@@ -170,6 +184,48 @@ export class WidgetDummy extends MdsEditorInstanceService.Widget {
 
     setValue() {}
 }
+
+const VCardDummy = new VCard();
+VCardDummy.givenname = 'Bob';
+VCardDummy.surname = 'Test';
+export const Data: Values = {
+    [RestConstants.CM_NAME]: ['Test Name'],
+    [RestConstants.LOM_PROP_TITLE]: ['Test Titel'],
+    ['cclom:general_keyword']: ['ABC', 'DEF', '123'],
+    ['cclom:general_description']: [
+        'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.',
+    ],
+    ['cclom:size']: ['1337'],
+    ['cm:created']: [new Date().getTime() + ''],
+    ['cm:modified']: [new Date().getTime() + ''],
+    ['ccm:educationaltypicalagerange_from']: ['1'],
+    ['ccm:educationaltypicalagerange_to']: ['99'],
+    ['ccm:taxonid']: ['0200105', '0200101'],
+    ['ccm:educationalcontext']: ['vocational education'],
+    ['ccm:lifecyclecontributer_author']: [VCardDummy.toVCardString(), VCardDummy.toVCardString()],
+    ['ccm:lifecyclecontributer_publisher']: [
+        VCardDummy.toVCardString(),
+        VCardDummy.toVCardString(),
+    ],
+    ['ccm:metadatacontributer_creator']: [VCardDummy.toVCardString()],
+    ['ccm:commonlicense_key']: ['CC_0'],
+};
+export const DummyNode: Partial<Node> = {
+    ref: {
+        id: 'nodeid',
+        repo: HOME_REPOSITORY,
+        archived: false,
+    },
+    preview: {
+        type: 'default',
+        url: 'https://edu-sharing.com/wp-content/uploads/sites/17/2015/07/hackathon.jpg',
+        isIcon: true,
+    },
+    name: 'Node Name',
+    title: 'Node Title',
+    mediatype: 'file-video',
+    properties: Data,
+} as Node;
 
 export const DefaultMds: MdsDefinition = {
     name: 'Core Metadataset',
@@ -16694,6 +16750,19 @@ export const DefaultMds: MdsDefinition = {
             isExtended: false,
         },
         {
+            id: 'preview_sidebar',
+            html: `<cclom:title>
+\t\t\t\t\t<cclom:general_description hideIfEmpty="true">
+\t\t\t\t\t<license>
+\t\t\t\t\t<ccm:educationaltypicalagerange hideIfEmpty="true">
+\t\t\t\t\t<ccm:taxonid hideIfEmpty="true">
+\t\t\t\t\t<ccm:educationalcontext hideIfEmpty="true">
+\t\t\t\t\t<cclom:general_keyword hideIfEmpty="true">`,
+            rel: null,
+            hideIfEmpty: false,
+            isExtended: false,
+        },
+        {
             id: 'node_general_simple',
             caption: 'Allg. Informationen',
             icon: 'description',
@@ -16960,6 +17029,16 @@ export const DefaultMds: MdsDefinition = {
         {
             id: 'io_simple',
             views: ['node_general_simple'],
+            rendering: 'angular',
+        },
+        {
+            id: 'io_simple',
+            views: ['node_general_simple'],
+            rendering: 'angular',
+        },
+        {
+            id: 'preview_sidebar',
+            views: ['preview_sidebar'],
             rendering: 'angular',
         },
         {

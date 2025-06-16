@@ -3,9 +3,10 @@ $rsPaddingHorizontal: 2vw;
 
 $rsPaddingVertical: 20px;
 $maxHeight: calc(100vh - var(--mainnavHeight) - $rsPaddingVertical);
+$minHeight: calc(100vh - var(--mainnavHeight) - $rsPaddingVertical - 100px);
 rs-root {
     height: 100%;
-    min-height: calc(100vh - 150px);
+    min-height: $minHeight;
     max-height: $maxHeight;
     margin: $rsPaddingVertical $rsPaddingHorizontal;
     padding: 0;
@@ -41,9 +42,12 @@ rs-root {
                 width: 70%;
                 max-height: 100%;
             }
+            &.module-PDF ngx-extended-pdf-viewer .zoom {
+                height: $minHeight !important;
+            }
             // some modules should get 100% of the browser height
             rs-module-pdf {
-                height: $maxHeight;
+                // height: $maxHeight;
             }
         }
     }

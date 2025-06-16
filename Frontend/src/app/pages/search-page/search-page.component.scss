@@ -75,6 +75,24 @@ mat-tab-nav-panel {
     }
 }
 
+main {
+    display: flex;
+    align-items: flex-start;
+}
+
+es-preview-sidebar,
+es-search-page-filters-sidebar {
+    position: sticky;
+    flex-shrink: 0;
+    top: var(--mainnavCurrentHeight);
+    max-height: calc(100vh - var(--mainnavCurrentHeight));
+}
+
+.search-page-body {
+    padding: 0 25px 25px;
+    flex-grow: 1;
+    min-width: 0;
+}
 .filter-bar-body {
     flex-grow: 1;
     overflow: auto;

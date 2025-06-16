@@ -54,6 +54,7 @@ public class Values implements Serializable {
 	@XmlElement	public Boolean searchGroupResults;
 	@XmlElement	public Mainnav mainnav;
 	@XmlElement	public String searchSidenavMode;
+	@XmlElement	public SearchPreviewMode searchPreviewMode;
 	@XmlElement	public Collections collections;
 	@XmlElement	public LicenseAgreement licenseAgreement;
 	@XmlElement	public Services services;

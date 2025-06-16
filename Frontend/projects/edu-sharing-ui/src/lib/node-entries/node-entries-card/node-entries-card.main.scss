@@ -104,6 +104,11 @@ $cardLineHeight: 1.4;
             flex-grow: 1;
         }
     }
+    button.card-body {
+        border: unset;
+        padding: unset;
+        background-color: unset;
+    }
     .card-image-area {
         height: $imageHeight;
         padding: 0;

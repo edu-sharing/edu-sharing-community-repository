@@ -48,7 +48,12 @@
   [sort]="(state | async).sortConfig"
   (sortChange)="updateSort($event)"
   [primaryInstance]="true"
+  [elementInteractionType]="
+    previewMode === 'Sidebar' ? InteractionType.Emitter : InteractionType.DefaultActionLink
+  "
   [initConfig]="{ actionbar, customOptions: addToCollectionMode.value?.customOptions}"
+  (clickItem)="onClick($event.element)"
+  (dblClickItem)="onDblClick($event.element)"
 >
   <ng-template #title>
     <div class="title-container title-container{{ getContainerClass() }}">

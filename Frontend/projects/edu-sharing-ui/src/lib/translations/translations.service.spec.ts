@@ -1,10 +1,10 @@
 import { fakeAsync } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { ConfigService, SessionStorageService } from 'ngx-edu-sharing-api';
+import { ConfigService } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
-import { TranslationsService } from './translations.service';
 import { Observable } from 'rxjs';
+import { TranslationsService } from './translations.service';
 import { Injector, ProviderToken } from '@angular/core';
 
 class BridgeServiceStub {
