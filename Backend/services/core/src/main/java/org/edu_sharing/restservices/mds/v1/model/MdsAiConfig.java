@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class MdsAiConfig {
     private String id;
     private String provider;
-    private boolean useCaching;
+    private Boolean useCaching;
     private String chatCompletion;
     private String createImage;
 }

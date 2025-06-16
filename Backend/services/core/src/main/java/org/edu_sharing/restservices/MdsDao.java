@@ -96,7 +96,7 @@ public class MdsDao {
     private List<MdsAiConfig> getAiConfigs() {
         return this.mds.getAiConfigs()
                 .stream()
-                .map(x -> new MdsAiConfig(x.getId(), x.getProvider(), x.isUseCaching(), x.getChatCompletion(), x.getCreateImage()))
+                .map(x -> new MdsAiConfig(x.getId(), x.getProvider(), x.getUseCaching(), x.getChatCompletion(), x.getCreateImage()))
                 .collect(Collectors.toList());
     }
 
