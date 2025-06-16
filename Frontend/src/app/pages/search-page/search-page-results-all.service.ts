@@ -13,7 +13,7 @@ import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { RestConstants } from '../../core-module/core.module';
-import { MdsHelperService } from 'ngx-edu-sharing-ui';
+import { MdsHelperService, NodeHelperService } from 'ngx-edu-sharing-ui';
 import {
     fromSearchResults,
     NodeDataSourceRemote,
@@ -24,6 +24,7 @@ import { SearchPageRestoreService } from './search-page-restore.service';
 import { SearchPageResults } from './search-page-results.service';
 import { SearchPageService } from './search-page.service';
 import { ListItem } from 'ngx-edu-sharing-ui';
+import { Router } from '@angular/router';
 
 interface RepoData {
     title: string;
@@ -36,7 +37,7 @@ interface RepoData {
 }
 
 @Injectable()
-export class SearchPageResultsAllService implements SearchPageResults, OnDestroy {
+export class SearchPageResultsAllService extends SearchPageResults implements OnDestroy {
     readonly repoData = new BehaviorSubject<RepoData[]>(null);
     readonly loadingProgress = new BehaviorSubject<number>(0);
 
@@ -45,11 +46,14 @@ export class SearchPageResultsAllService implements SearchPageResults, OnDestroy
     constructor(
         private _injector: Injector,
         private _search: SearchService,
-        private _searchPage: SearchPageService,
+        _nodeHelper: NodeHelperService,
+        _router: Router,
+        _searchPage: SearchPageService,
         private _searchPageRestore: SearchPageRestoreService,
         private _mds: MdsService,
         private _translate: TranslateService,
     ) {
+        super(_router, _searchPage, _nodeHelper);
         this._initRepoData();
         this._registerPageRestore();
         this._registerLoadingProgress();

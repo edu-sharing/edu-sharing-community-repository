@@ -7,7 +7,6 @@ import { Node } from '../models';
 import { cachedShareReplay, KeyCache } from '../utils/decorators/cached-share-replay';
 import { ReferenceEntries } from '../api/models/reference-entries';
 import { CollectionEntries } from '../api/models/collection-entries';
-import { CollectionEntry } from '../api/models/collection-entry';
 
 @Injectable({
     providedIn: 'root',

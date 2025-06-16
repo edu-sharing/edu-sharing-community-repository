@@ -31,7 +31,10 @@ import { SharedModule } from '../../../shared/shared.module';
 })
 export class RenderWrapperComponent implements OnChanges {
     @ViewChild(ActionbarComponent) actionbar: ActionbarComponent;
+    @Input() showTopbar = true;
+    @Input() showMetadata = true;
     @Input() nodeId: string;
+    @Input() repository: string;
     @Input() version: string;
 
     data = signal<CombinedRenderData>(null);
@@ -51,9 +54,9 @@ export class RenderWrapperComponent implements OnChanges {
             const data = await this.renderHelperService.getRenderData(
                 changes.nodeId.currentValue,
                 this.version,
+                this.repository,
             );
             setTimeout(async () => {
-                console.log('actions');
                 await this.optionsHelper.initComponents(this.actionbar);
                 await this.optionsHelper.refreshComponents();
             });

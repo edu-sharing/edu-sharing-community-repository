@@ -27,7 +27,7 @@ export class NodeImagePipe implements PipeTransform {
         private networkApi: NetworkService,
     ) {}
 
-    transform(node: Node, preferences: NodeImagePreferences): Observable<SafeResourceUrl> {
+    transform(node: Node, preferences: NodeImagePreferences = {}): Observable<SafeResourceUrl> {
         if (this.nodeHelper.isNodeCollection(node) && node.preview.isIcon) {
             return null;
         } else if (node.preview.data) {

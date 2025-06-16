@@ -83,11 +83,14 @@ import { SortSelectPanelComponent } from './sort-select-panel/sort-select-panel.
         TranslateModule,
     ],
     exports: [
+        ListItemLabelPipe,
         NodeEntriesWrapperComponent,
+        NodeRatingComponent,
         NodesDragDirective,
         NodesDragSourceDirective,
         NodesDropTargetDirective,
-        ListItemLabelPipe,
+        NodeStatsBadgesComponent,
+        NodeTypeBadgeComponent,
     ],
 })
 export class NodeEntriesModule {}

@@ -30,6 +30,7 @@ import {
     MdsHelperService,
     MdsWidgetType,
     NodeEntriesDisplayType,
+    NodeHelperService,
     notNull,
     SearchHelperService,
 } from 'ngx-edu-sharing-ui';
@@ -42,15 +43,31 @@ import {
 import { SearchPageRestoreService } from './search-page-restore.service';
 import { SearchPageService, SearchRequestParams } from './search-page.service';
 import { RestConstants } from '../../core-module/rest/rest-constants';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { UserModifiableValuesService } from './user-modifiable-values';
 import { Sort } from '@angular/material/sort';
 
-export interface SearchPageResults {
+export abstract class SearchPageResults {
     diffCount?: Observable<number>;
     totalResults?: Observable<number>;
     loadingProgress: Observable<number>;
-    addNodes: (nodes: Node[]) => void;
+    abstract addNodes(nodes: Node[]): void;
+
+    constructor(
+        protected _router: Router,
+        protected _searchPage: SearchPageService,
+        protected _nodeHelper: NodeHelperService,
+    ) {}
+    readonly onClick = (node: Node) => {
+        this._searchPage.previewNode.next(node);
+        this._searchPage.filterBarIsVisible.setUserValue(false);
+    };
+
+    readonly onDblClick = (node: Node) => {
+        this._router.navigate([this._nodeHelper.getNodeLink('routerLink', node)], {
+            queryParams: this._nodeHelper.getNodeLink('queryParams', node) as any,
+        });
+    };
 }
 export interface SearchPageState {
     displayType: NodeEntriesDisplayType;
@@ -58,7 +75,7 @@ export interface SearchPageState {
 }
 
 @Injectable()
-export class SearchPageResultsService implements SearchPageResults, OnDestroy {
+export class SearchPageResultsService extends SearchPageResults implements OnDestroy {
     readonly searchSort = this._userModifiableValues.createMapped<Sort>({
         fromString: (v) => JSON.parse(v),
         toString: (v) => JSON.stringify(v),
@@ -84,13 +101,16 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
     constructor(
         private _injector: Injector,
         private _mds: MdsService,
+        _nodeHelper: NodeHelperService,
+        _router: Router,
         private _search: SearchService,
-        private _searchPage: SearchPageService,
+        _searchPage: SearchPageService,
         private _searchPageRestore: SearchPageRestoreService,
         private _translate: TranslateService,
         private _route: ActivatedRoute,
         private _userModifiableValues: UserModifiableValuesService,
     ) {
+        super(_router, _searchPage, _nodeHelper);
         this._registerPageRestore();
         this._registerSearchObservables();
         this._registerColumns();
@@ -107,6 +127,17 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
     addNodes(nodes: Node[]): void {
         this.resultsDataSource.appendData(nodes, 'before');
     }
+
+    readonly onClick = (node: Node) => {
+        this._searchPage.previewNode.next(node);
+        this._searchPage.filterBarIsVisible.setUserValue(false);
+    };
+
+    readonly onDblClick = (node: Node) => {
+        this._router.navigate([this._nodeHelper.getNodeLink('routerLink', node)], {
+            queryParams: this._nodeHelper.getNodeLink('queryParams', node) as any,
+        });
+    };
 
     private _registerPageRestore() {
         // restore last state

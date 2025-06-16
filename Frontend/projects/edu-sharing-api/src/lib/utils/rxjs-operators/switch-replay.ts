@@ -1,6 +1,5 @@
 import {
     BehaviorSubject,
-    Notification,
     Observable,
     ObservableNotification,
     OperatorFunction,

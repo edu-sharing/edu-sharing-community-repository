@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import {
     ActionbarComponent,
+    InteractionType,
     ListSortConfig,
     NodeEntriesDisplayType,
     Scope,
@@ -13,6 +14,7 @@ import { Subject } from 'rxjs';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { TranslateService } from '@ngx-translate/core';
 import { switchMap, takeUntil } from 'rxjs/operators';
+import { ConfigService } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-search-page-results',
@@ -22,9 +24,11 @@ import { switchMap, takeUntil } from 'rxjs/operators';
     standalone: false,
 })
 export class SearchPageResultsComponent implements OnInit, OnDestroy {
+    readonly InteractionType = InteractionType;
     readonly Scope = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     private destroyed = new Subject<void>();
+    previewMode: string | 'Sidebar' | 'RenderingPage';
 
     @ViewChild(ActionbarComponent)
     set _actionbar(value: ActionbarComponent) {
@@ -38,12 +42,15 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
     readonly resultColumns = this.results.resultColumns;
     readonly collectionColumns = this.results.collectionColumns;
     readonly state = this.results.state;
+    readonly onClick = this.results.onClick;
+    readonly onDblClick = this.results.onDblClick;
     readonly addToCollectionMode = this.searchPage.addToCollectionMode;
     readonly customTemplates = this.globalSearchPageInternal.customTemplates;
 
     constructor(
         private globalSearchPageInternal: GlobalSearchPageServiceInternal,
         private results: SearchPageResultsService,
+        private configService: ConfigService,
         private searchPage: SearchPageService,
         private temporaryStorageService: TemporaryStorageService,
         private announcer: LiveAnnouncer,
@@ -62,11 +69,12 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
             });
     }
 
-    ngOnInit(): void {
+    async ngOnInit() {
         setTimeout(() => {
             this.searchPage.results = this.results;
             this.searchPage.showingAllRepositories.next(false);
         });
+        this.previewMode = await this.configService.get('searchPreviewMode', 'Sidebar');
     }
 
     toggleFilters(): void {

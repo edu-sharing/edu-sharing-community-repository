@@ -27,10 +27,15 @@ own OptionsHelperService instance and take exclusive control of the actionbar. -
   [scope]="Scope.Search"
   [columns]="repo.columns | async"
   [disableInfiniteScroll]="true"
+  [elementInteractionType]="
+    previewMode === 'Sidebar' ? InteractionType.Emitter : InteractionType.DefaultActionLink
+  "
   [displayType]="NodeEntriesDisplayType.Grid"
   [gridConfig]="{ layout: 'scroll' }"
   [checkbox]="false"
   [initConfig]="{ customOptions: addToCollectionMode.value?.customOptions }"
+  (clickItem)="onClick($event.element)"
+  (dblClickItem)="onDblClick($event.element)"
 >
   <ng-template #title>
     <div class="title-container">

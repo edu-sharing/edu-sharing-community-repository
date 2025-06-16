@@ -1,7 +1,5 @@
-import { forwardRef, ModuleWithProviders, NgModule, Provider } from '@angular/core';
-import { getConfigProvider, BApiConfigurationParams } from './b-api-configuration';
-import { ApiModule } from './api/api.module';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { ModuleWithProviders, NgModule } from '@angular/core';
+import { BApiConfigurationParams, getConfigProvider } from './b-api-configuration';
 
 @NgModule({
     declarations: [],

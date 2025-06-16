@@ -4,7 +4,7 @@ import { Component, HostBinding, OnDestroy, OnInit, TemplateRef, ViewChild } fro
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfigService, Repository } from 'ngx-edu-sharing-api';
-import { notNull, Scope, UIAnimation } from 'ngx-edu-sharing-ui';
+import { isTrue, notNull, Scope, UIAnimation } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { filter, map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
@@ -27,6 +27,7 @@ import { SearchPageService } from './search-page.service';
             state('hidden', style({ opacity: 0 })),
             transition('visible => hidden', [animate(UIAnimation.ANIMATION_TIME_NORMAL)]),
         ]),
+        trigger('fromRight', UIAnimation.fromRight()),
     ],
     standalone: false,
 })
@@ -45,6 +46,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
     readonly activeRepository = this.searchPage.activeRepository;
     readonly showingAllRepositories = this.searchPage.showingAllRepositories;
     readonly filterBarIsVisible = this.searchPage.filterBarIsVisible;
+    readonly previewNode = this.searchPage.previewNode;
     readonly searchString = this.searchPage.searchString;
     readonly searchFilters = this.searchPage.searchFilters;
     readonly loadingProgress = this.searchPage.loadingProgress;
@@ -76,6 +78,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
             .subscribe((tabBarIsVisible) => (this.tabBarIsVisible = tabBarIsVisible));
         this.registerProgressBarIsVisible();
         this.registerFilterDialog();
+        this.registerSidebars();
         this.registerQueryParamsAllRepositories();
         this.registerConfigBehaviours();
     }
@@ -132,6 +135,17 @@ export class SearchPageComponent implements OnInit, OnDestroy {
                     void dialogRefPromise?.then((dialogRef) => dialogRef.close());
                 }
             });
+    }
+
+    private registerSidebars(): void {
+        // Make filter- and preview bars mutually exclusive.
+        this.filterBarIsVisible
+            .observeValue()
+            .pipe(takeUntil(this.destroyed), filter(isTrue))
+            .subscribe(() => this.previewNode.next(null));
+        this.previewNode
+            .pipe(takeUntil(this.destroyed), filter(notNull))
+            .subscribe(() => this.filterBarIsVisible.setUserValue(false));
     }
 
     private registerQueryParamsAllRepositories(): void {

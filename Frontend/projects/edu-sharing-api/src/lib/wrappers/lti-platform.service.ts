@@ -1,10 +1,10 @@
-import { LtiPlatformV13Service, NodeV1Service, SearchV1Service } from '../api/services';
+import { LtiPlatformV13Service } from '../api/services';
+import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { Tools } from '../api/models/tools';
 import { Injectable } from '@angular/core';
 import { distinctUntilChanged, first, map } from 'rxjs/operators';
 import { switchReplay } from '../utils/rxjs-operators/switch-replay';
-import * as rxjs from 'rxjs';
 import { AuthenticationService } from './authentication.service';
 import { shareReplayReturnValue } from '../utils/decorators/share-replay-return-value';
 import { Node } from '../api/models/node';

@@ -1,0 +1,25 @@
+@use 'variables-scss' as *;
+
+$sidebarWidth: 600px;
+
+:host {
+    display: flex;
+}
+
+.preview-sidebar {
+    display: flex;
+    flex-direction: column;
+    width: $sidebarWidth;
+    overflow: hidden;
+    margin: 10px;
+    border-radius: 10px;
+    @include materialShadow();
+}
+
+.preview-sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 6px;
+    background: $actionDialogBackground;
+}

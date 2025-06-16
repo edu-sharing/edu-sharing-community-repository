@@ -1,4 +1,5 @@
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
+
 /**
  * Different helper functions, may be used globally
  */

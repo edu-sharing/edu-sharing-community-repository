@@ -1,6 +1,5 @@
 import { NodeDataSource } from './node-data-source';
 import { GenericAuthority, Node } from 'ngx-edu-sharing-api';
-import { MatTableDataSource } from '@angular/material/table';
 import { ActivatedRoute } from '@angular/router';
 import { PaginationStrategy } from './node-entries-global.service';
 import { Sort } from '@angular/material/sort';

@@ -3,12 +3,11 @@ import { firstValueFrom } from 'rxjs';
 import { RenderDataRequestWithToken, RSApiConfiguration } from 'ngx-rendering-service-api';
 import {
     AboutService,
+    HOME_REPOSITORY,
     Node,
     NodeServiceUnwrapped,
     RestConstants,
     UserService,
-    PROPERTY_FILTER_ALL,
-    HOME_REPOSITORY,
 } from 'ngx-edu-sharing-api';
 import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
 import { OptionsHelperDataService } from './options-helper-data.service';
@@ -30,11 +29,15 @@ export class RenderHelperService {
         @Optional() private optionsHelperDataService: OptionsHelperDataService,
     ) {}
 
-    async getRenderData(nodeId: string, version: string = null): Promise<CombinedRenderData> {
+    async getRenderData(
+        nodeId: string,
+        version: string = null,
+        repository = HOME_REPOSITORY,
+    ): Promise<CombinedRenderData> {
         const about = await firstValueFrom(this.aboutService.getAbout());
         const securedNode = await firstValueFrom(
             this.nodeApiUnwrapped.getMetadataSigned({
-                repository: HOME_REPOSITORY,
+                repository: repository || HOME_REPOSITORY,
                 node: nodeId,
             }),
         );

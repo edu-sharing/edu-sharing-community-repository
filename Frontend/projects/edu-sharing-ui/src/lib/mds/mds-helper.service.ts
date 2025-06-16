@@ -5,7 +5,6 @@ import {
     MdsSort,
     MdsWidget,
     RestConstants,
-    Sort,
 } from 'ngx-edu-sharing-api';
 import { Injectable } from '@angular/core';
 import { ListItem, ListItemType } from '../types/list-item';

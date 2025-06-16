@@ -138,9 +138,11 @@ import {
     CheckboxDialogData,
     CheckboxDialogResult,
 } from './dialog-modules/checkbox-dialog/checkbox-dialog-data';
-import { BehaviorSubject } from 'rxjs';
-import { TemplateSlot } from '../../main/navigation/main-nav.service';
 import { AddMaterialDialogComponent } from './dialog-modules/add-material-dialog/add-material-dialog.component';
+import {
+    NodePreviewMediaDialogData,
+    NodePreviewMediaDialogResult,
+} from './dialog-modules/node-preview-media-dialog/node-preview-media-dialog-data';
 
 export enum DialogTemplate {
     AddMaterialDialogBelow,
@@ -173,6 +175,7 @@ export class DialogsService {
             nodes,
             minWidth,
             maxWidth,
+            contentPadding,
             customHeaderBarContent,
             closable,
             ...data
@@ -190,6 +193,7 @@ export class DialogsService {
             ...(nodes ? await this.cardDialogUtils.configForNodes(nodes) : {}),
             minWidth,
             maxWidth,
+            contentPadding,
             customHeaderBarContent,
             closable,
             data,
@@ -861,6 +865,25 @@ export class DialogsService {
     }
     getCustomTemplateSlot(slot: DialogTemplate) {
         return this.customTemplates[slot];
+    }
+
+    /**
+     * opens media preview dialog
+     * Note: Requires rendering service 2!
+     * @param data
+     */
+    async openPreviewMediaDialog(
+        data: NodePreviewMediaDialogData,
+    ): Promise<CardDialogRef<NodePreviewMediaDialogData, NodePreviewMediaDialogResult>> {
+        const { NodePreviewMediaDialogComponent } = await import(
+            './dialog-modules/node-preview-media-dialog/node-preview-media-dialog.component'
+        );
+        return this.cardDialog.open(NodePreviewMediaDialogComponent, {
+            ...(await this.cardDialogUtils.configForNode(data.node)),
+            minWidth: 700,
+            minHeight: 600,
+            data,
+        });
     }
 }
 /**

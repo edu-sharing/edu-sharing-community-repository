@@ -3169,6 +3169,9 @@
           "chatCompletion": {
             "type": "string"
           },
+          "clearCache": {
+            "type": "boolean"
+          },
           "createImage": {
             "type": "string"
           },
@@ -8789,6 +8792,13 @@
           },
           "searchGroupResults": {
             "type": "boolean"
+          },
+          "searchPreviewMode": {
+            "enum": [
+              "Sidebar",
+              "RenderingPage"
+            ],
+            "type": "string"
           },
           "searchSidenavMode": {
             "type": "string"
