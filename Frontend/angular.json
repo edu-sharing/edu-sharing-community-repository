@@ -73,6 +73,7 @@
               "lodash",
               "moment"
             ],
+            "preserveSymlinks": false,
             "browser": "src/main.ts"
           },
           "configurations": {
