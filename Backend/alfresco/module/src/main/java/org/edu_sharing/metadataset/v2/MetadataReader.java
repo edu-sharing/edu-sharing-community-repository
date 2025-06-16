@@ -703,6 +703,9 @@ public class MetadataReader {
                     case "useCaching":
                         aiConfig.setUseCaching(Boolean.parseBoolean(innerNode.getTextContent()));
                         break;
+                    case "clearCache":
+                        aiConfig.setClearCache(Boolean.parseBoolean(innerNode.getTextContent()));
+                        break;
                     case "chatCompletion":
                         aiConfig.setChatCompletion(innerNode.getTextContent());
                         break;
