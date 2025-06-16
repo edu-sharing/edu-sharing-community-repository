@@ -25,9 +25,9 @@ import { RestConstants } from '../../core-module/rest/rest-constants';
 import { RestTrackingService } from '../../core-module/rest/services/rest-tracking.service';
 import { RestUsageService } from '../../core-module/rest/services/rest-usage.service';
 import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
-import { MdsNodeRelationsWidgetComponent } from './node-relations/node-relations-widget.component';
 import { VideoControlsComponent } from './video-controls/video-controls.component';
 import { CommentsListComponent } from 'src/app/features/mds/mds-editor/widgets/mds-editor-widget-comments/comments-list/comments-list.component';
+import { MdsNodeRelationsWidgetComponent } from '../../features/mds/mds-editor/widgets/mds-editor-widget-relations/node-relations/node-relations-widget.component';
 
 @Injectable()
 export class RenderHelperService {

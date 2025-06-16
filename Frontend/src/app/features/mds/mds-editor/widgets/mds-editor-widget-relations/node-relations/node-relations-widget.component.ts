@@ -8,11 +8,11 @@ import {
 } from 'ngx-edu-sharing-api';
 import { ListItem } from 'ngx-edu-sharing-ui';
 import { forkJoin as observableForkJoin } from 'rxjs';
-import { RestConstants } from '../../../core-module/rest/rest-constants';
-import { RestHelper } from '../../../core-module/rest/rest-helper';
+import { RestConstants } from '../../../../../../core-module/rest/rest-constants';
+import { RestHelper } from '../../../../../../core-module/rest/rest-helper';
 import { TranslateService } from '@ngx-translate/core';
 import { first } from 'rxjs/operators';
-import { SharedModule } from '../../../shared/shared.module';
+import { SharedModule } from '../../../../../../shared/shared.module';
 
 @Component({
     selector: 'es-mds-node-relations-widget',

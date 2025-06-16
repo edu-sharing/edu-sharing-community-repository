@@ -25,6 +25,7 @@ import { MdsEditorWidgetFacetListComponent } from '../mds-editor/widgets/mds-edi
 import { MdsEditorWidgetCollectionsComponent } from '../mds-editor/widgets/mds-editor-widget-collections/mds-editor-widget-collections.component';
 import { MdsWidgetType } from 'ngx-edu-sharing-ui';
 import { MdsEditorWidgetCommentsComponent } from '../mds-editor/widgets/mds-editor-widget-comments/mds-editor-widget-comments.component';
+import { MdsEditorWidgetRelationsComponent } from '../mds-editor/widgets/mds-editor-widget-relations/mds-editor-widget-relations.component';
 
 /**
  * - `nodes`:
@@ -62,6 +63,7 @@ export const NativeWidgets: {
     // rendering specific
     collections: MdsEditorWidgetCollectionsComponent,
     comments: MdsEditorWidgetCommentsComponent,
+    noderelations: MdsEditorWidgetRelationsComponent,
 };
 
 export const WidgetComponents: {

@@ -69,6 +69,7 @@ export enum NativeWidgetType {
     Contributor = 'contributor',
     Collections = 'collections',
     Comments = 'comments',
+    NodeRelations = 'noderelations',
 }
 
 export type MdsEditorWidgetComponent = {

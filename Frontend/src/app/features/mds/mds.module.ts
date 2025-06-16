@@ -51,6 +51,8 @@ import { LicenseAiPipe } from './mds-editor/widgets/mds-editor-widget-license/li
 import { MdsEditorSingleWidgetComponent } from './mds-editor/mds-editor-single-widget/mds-editor-single-widget.component';
 import { MdsEditorWidgetCommentsComponent } from './mds-editor/widgets/mds-editor-widget-comments/mds-editor-widget-comments.component';
 import { CommentsListComponent } from './mds-editor/widgets/mds-editor-widget-comments/comments-list/comments-list.component';
+import { MdsNodeRelationsWidgetComponent } from './mds-editor/widgets/mds-editor-widget-relations/node-relations/node-relations-widget.component';
+import { MdsEditorWidgetRelationsComponent } from './mds-editor/widgets/mds-editor-widget-relations/mds-editor-widget-relations.component';
 
 @NgModule({
     declarations: [
@@ -65,6 +67,7 @@ import { CommentsListComponent } from './mds-editor/widgets/mds-editor-widget-co
         MdsEditorViewComponent,
         MdsEditorWidgetAuthorComponent,
         MdsEditorWidgetCollectionsComponent,
+        MdsEditorWidgetRelationsComponent,
         MdsEditorWidgetCommentsComponent,
         MdsEditorWidgetAuthorityComponent,
         MdsEditorWidgetCheckboxComponent,
@@ -104,6 +107,7 @@ import { CommentsListComponent } from './mds-editor/widgets/mds-editor-widget-co
         MatFormFieldModule,
         EduSharingUiModule,
         CommentsListComponent,
+        MdsNodeRelationsWidgetComponent,
     ],
     exports: [
         AiPreviewImagesOverlayComponent,
@@ -111,6 +115,7 @@ import { CommentsListComponent } from './mds-editor/widgets/mds-editor-widget-co
         LicenseAiPipe,
         MdsEditorWidgetAuthorComponent,
         MdsEditorWidgetCollectionsComponent,
+        MdsEditorWidgetRelationsComponent,
         MdsEditorWidgetCommentsComponent,
         MdsEditorWrapperComponent,
         MdsEditorCoreComponent,

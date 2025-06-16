@@ -95,12 +95,12 @@ rs-root {
         width: 100%;
         padding: 0 $rsPaddingHorizontal;
         grid-gap: 10px;
-        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
 
         es-mds-editor-view {
             padding: 0;
-            border: 1px solid var(--palette-primary-100);
-            border-radius: 25px;
+            //border: 1px solid var(--palette-primary-100);
+            border-radius: 5px;
             overflow: hidden;
             .view-wrapper {
                 .content {
@@ -108,8 +108,8 @@ rs-root {
                 }
                 .heading-container {
                     > h3 {
-                        background-color: var(--palette-primary-50);
-                        border: none;
+                        background-color: $workspaceMetadataBackground; //var(--palette-primary-50);
+                        border-bottom: 1px solid $cardSeparatorLineColor;
                         margin: 0;
                     }
                 }
