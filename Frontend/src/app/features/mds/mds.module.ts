@@ -49,6 +49,8 @@ import { EduSharingUiModule } from 'ngx-edu-sharing-ui';
 import { MdsEditorWidgetChildobjectsComponent } from './mds-editor/widgets/mds-editor-widget-childobjects/mds-editor-widget-childobjects.component';
 import { LicenseAiPipe } from './mds-editor/widgets/mds-editor-widget-license/license-details/license-ai.pipe';
 import { MdsEditorSingleWidgetComponent } from './mds-editor/mds-editor-single-widget/mds-editor-single-widget.component';
+import { MdsEditorWidgetCommentsComponent } from './mds-editor/widgets/mds-editor-widget-comments/mds-editor-widget-comments.component';
+import { CommentsListComponent } from './mds-editor/widgets/mds-editor-widget-comments/comments-list/comments-list.component';
 
 @NgModule({
     declarations: [
@@ -63,6 +65,7 @@ import { MdsEditorSingleWidgetComponent } from './mds-editor/mds-editor-single-w
         MdsEditorViewComponent,
         MdsEditorWidgetAuthorComponent,
         MdsEditorWidgetCollectionsComponent,
+        MdsEditorWidgetCommentsComponent,
         MdsEditorWidgetAuthorityComponent,
         MdsEditorWidgetCheckboxComponent,
         MdsEditorWidgetCheckboxesComponent,
@@ -94,13 +97,21 @@ import { MdsEditorSingleWidgetComponent } from './mds-editor/mds-editor-single-w
         RegisterFormFieldDirective,
         SearchFieldFacetsComponent,
     ],
-    imports: [SharedModule, NgxSliderModule, EditorModule, MatFormFieldModule, EduSharingUiModule],
+    imports: [
+        SharedModule,
+        NgxSliderModule,
+        EditorModule,
+        MatFormFieldModule,
+        EduSharingUiModule,
+        CommentsListComponent,
+    ],
     exports: [
         AiPreviewImagesOverlayComponent,
         LicenseDetailsComponent,
         LicenseAiPipe,
         MdsEditorWidgetAuthorComponent,
         MdsEditorWidgetCollectionsComponent,
+        MdsEditorWidgetCommentsComponent,
         MdsEditorWrapperComponent,
         MdsEditorCoreComponent,
         MdsEditorSingleWidgetComponent,

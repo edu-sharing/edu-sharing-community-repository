@@ -1,22 +1,21 @@
 import { trigger } from '@angular/animations';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { NetworkService, Node, RestConstants } from 'ngx-edu-sharing-api';
 import { OptionItem, UIAnimation } from 'ngx-edu-sharing-ui';
+import { SharedModule } from 'src/app/shared/shared.module';
+import { RestCommentsService } from '../../../../../../core-module/rest/services/rest-comments.service';
+import { RestConnectorService } from '../../../../../../core-module/rest/services/rest-connector.service';
+import { RestIamService } from '../../../../../../core-module/rest/services/rest-iam.service';
 import {
     Comment,
     Comments,
     LoginResult,
-    RestCommentsService,
-    RestConnectorService,
-    RestConstants,
-    RestIamService,
     User,
-} from '../../../core-module/core.module';
-import { Toast } from '../../../services/toast';
-import { YES_OR_NO } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
-import { DialogsService } from '../../../features/dialogs/dialogs.service';
-import { NetworkService, Node } from 'ngx-edu-sharing-api';
+} from '../../../../../../core-module/rest/data-object';
+import { DialogsService } from '../../../../../dialogs/dialogs.service';
+import { Toast } from '../../../../../../services/toast';
+import { YES_OR_NO } from '../../../../../dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { first } from 'rxjs/operators';
-import { SharedModule } from '../../../shared/shared.module';
 
 @Component({
     selector: 'es-comments-list',

@@ -24,7 +24,7 @@ import { MdsEditorWidgetTreeComponent } from '../mds-editor/widgets/mds-editor-w
 import { MdsEditorWidgetFacetListComponent } from '../mds-editor/widgets/mds-editor-widget-facet-list/mds-editor-widget-facet-list.component';
 import { MdsEditorWidgetCollectionsComponent } from '../mds-editor/widgets/mds-editor-widget-collections/mds-editor-widget-collections.component';
 import { MdsWidgetType } from 'ngx-edu-sharing-ui';
-import { CommentsListComponent } from '../../../pages/render-legacy-page/comments-list/comments-list.component';
+import { MdsEditorWidgetCommentsComponent } from '../mds-editor/widgets/mds-editor-widget-comments/mds-editor-widget-comments.component';
 
 /**
  * - `nodes`:
@@ -61,7 +61,7 @@ export const NativeWidgets: {
     workflow: null as null,
     // rendering specific
     collections: MdsEditorWidgetCollectionsComponent,
-    comments: CommentsListComponent,
+    comments: MdsEditorWidgetCommentsComponent,
 };
 
 export const WidgetComponents: {
