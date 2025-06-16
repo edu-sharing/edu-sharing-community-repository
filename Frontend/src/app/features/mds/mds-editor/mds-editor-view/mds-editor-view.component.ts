@@ -4,6 +4,7 @@ import {
     ApplicationRef,
     Component,
     ComponentFactoryResolver,
+    computed,
     ElementRef,
     HostBinding,
     Injector,
@@ -13,14 +14,24 @@ import {
     OnDestroy,
     OnInit,
     Optional,
+    signal,
     SimpleChanges,
     Type,
     ViewChild,
     ViewContainerRef,
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { BehaviorSubject, Observable, ReplaySubject, Subject } from 'rxjs';
-import { filter, first, map, take, takeUntil } from 'rxjs/operators';
+import {
+    BehaviorSubject,
+    combineLatest,
+    forkJoin,
+    merge,
+    Observable,
+    of,
+    ReplaySubject,
+    Subject,
+} from 'rxjs';
+import { filter, first, map, startWith, take, takeUntil } from 'rxjs/operators';
 import { JUMP_MARK_POSTFIX } from '../../../dialogs/card-dialog/card-dialog-container/jump-marks-handler.directive';
 import { NativeWidgets, WidgetComponents } from '../../types/mds-types';
 import {
@@ -29,6 +40,7 @@ import {
     GeneralWidget,
     InputStatus,
     MdsView,
+    NativeWidget,
     NativeWidgetType,
     Values,
 } from '../../types/types';
@@ -49,12 +61,14 @@ import {
     UIService,
     ViewInstanceService,
 } from 'ngx-edu-sharing-ui';
+import { MdsEditorWidgetBase } from '../widgets/mds-editor-widget-base';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;
     onSaveNode?: (nodes: Node[]) => Promise<Node[]>;
     getValues?: (values: Values, node: Node) => Promise<Values>;
     status?: Observable<InputStatus>;
+    isEmpty?: Observable<boolean>;
     focus?: () => void;
 }
 
@@ -93,7 +107,12 @@ export class MdsEditorViewComponent
         [MdsWidgetType.MultiValueFixedBadges]: MdsEditorWidgetSuggestionChipsComponent,
     };
 
-    @HostBinding('class.hidden') isHidden: boolean;
+    @HostBinding('class.hidden')
+    get isHidden() {
+        return this._isHidden() || this._isEmpty();
+    }
+    _isHidden = signal(false);
+    _isEmpty = signal(false);
     @ViewChild('container') container: ElementRef<HTMLDivElement>;
     @Input() core: MdsEditorCoreComponent;
     @Input() view: MdsView;
@@ -128,7 +147,11 @@ export class MdsEditorViewComponent
     }
 
     getWidgets() {
-        return (this.mdsEditorInstance.widgets.value as GeneralWidget[])
+        return (
+            this.mdsEditorInstance.widgets.value.filter(
+                (w) => !Object.keys(NativeWidgets).includes(w.definition.id),
+            ) as GeneralWidget[]
+        )
             .concat(this.mdsEditorInstance.nativeWidgets.value)
             .filter((w) => w.viewId === this.view.id);
     }
@@ -139,7 +162,7 @@ export class MdsEditorViewComponent
                 takeUntil(this.destroyed),
                 map((activeViews) => activeViews.some((view) => view.id === this.view.id)),
             )
-            .subscribe((isActive) => (this.isHidden = !isActive));
+            .subscribe((isActive) => this._isHidden.set(!isActive));
 
         this.jumpMarks?.beforeScrollToJumpMark
             .pipe(
@@ -164,7 +187,10 @@ export class MdsEditorViewComponent
 
     ngAfterViewInit(): void {
         // Wait for the change-detection cycle to finish.
-        setTimeout(() => this.injectWidgets());
+        setTimeout(() => {
+            this.injectWidgets();
+            this.checkHideState();
+        });
     }
 
     ngOnDestroy(): void {
@@ -412,13 +438,25 @@ export class MdsEditorViewComponent
     }
 
     isInHiddenState() {
-        if (this.isHidden) {
+        if (this._isHidden()) {
             return true;
         }
         if (this.mdsEditorInstance.shouldShowExtendedWidgets$.value) {
             return false;
         }
         return this.getWidgets().filter((w) => !(w as Widget).definition?.isExtended).length === 0;
+    }
+
+    private checkHideState() {
+        if (this.view.hideIfEmpty && this.mdsEditorInstance.editorMode === 'viewer') {
+            combineLatest(
+                this.getWidgets().map((w) => (w as NativeWidget).component?.isEmpty || of(false)),
+            )
+                .pipe(takeUntil(this.destroyed))
+                .subscribe((data) => {
+                    this._isEmpty.set(data.every((d) => !!d));
+                });
+        }
     }
 }
 

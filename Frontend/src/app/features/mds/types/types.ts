@@ -137,6 +137,7 @@ export interface NativeWidgetComponent {
     onSaveNode?: (nodes: Node[]) => Promise<Node[]>;
     getValues?: (values: Values, node: Node) => Promise<Values>;
     status?: Observable<InputStatus>;
+    isEmpty?: Observable<boolean>;
     focus?: () => void;
 }
 

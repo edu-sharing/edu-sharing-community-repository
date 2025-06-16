@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
-import { distinctUntilChanged, filter } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, startWith, tap } from 'rxjs/operators';
 import { Node, RestConstants, UsageV1Service } from 'ngx-edu-sharing-api';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
@@ -25,8 +25,12 @@ export class MdsEditorWidgetCollectionsComponent implements OnInit, NativeWidget
         supportsBulk: false,
     };
     hasChanges = new BehaviorSubject<boolean>(false);
-
     dataSource = new NodeDataSource<Node>();
+
+    isEmpty = this.dataSource.connect().pipe(
+        startWith(this.dataSource.isEmpty()),
+        map((_) => this.dataSource.isEmpty()),
+    );
     columns = ListItem.getCollectionDefaults();
 
     constructor(
