@@ -5,7 +5,7 @@ $rsPaddingVertical: 20px;
 $maxHeight: calc(100vh - var(--mainnavHeight) - $rsPaddingVertical);
 rs-root {
     height: 100%;
-    min-height: 10vh;
+    min-height: calc(100vh - 150px);
     max-height: $maxHeight;
     margin: $rsPaddingVertical $rsPaddingHorizontal;
     padding: 0;
@@ -85,6 +85,10 @@ rs-root {
         flex-grow: 3;
         text-align: center;
         margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
         color: var(--textMain);
         font-size: 110%;
     }

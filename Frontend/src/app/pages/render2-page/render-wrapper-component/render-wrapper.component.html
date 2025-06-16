@@ -7,6 +7,14 @@
   </div>
   <h2 *ngIf="data()?.node">
     {{ data().node | nodeTitle }}
+    <button
+      mat-icon-button
+      title="{{ 'GOTO' | translate }} {{ 'INFO' | translate }}"
+      (click)="meta.scrollIntoView({ behavior: 'smooth' })"
+      color="primary"
+    >
+      <i esIcon="info_outline"></i>
+    </button>
   </h2>
   <es-actionbar
     [numberOfAlwaysVisibleOptions]="1"
@@ -19,11 +27,13 @@
   [node]="data().node"
   [request]="data().request"
 ></rs-root>
-<es-mds-editor-wrapper
-  *ngIf="data()?.node"
-  [embedded]="true"
-  [editorMode]="'viewer'"
-  [groupId]="'io_render'"
-  [nodes]="[data().node]"
->
-</es-mds-editor-wrapper>
+<div class="meta" #meta>
+  <es-mds-editor-wrapper
+    *ngIf="data()?.node"
+    [embedded]="true"
+    [editorMode]="'viewer'"
+    [groupId]="'io_render'"
+    [nodes]="[data().node]"
+  >
+  </es-mds-editor-wrapper>
+</div>

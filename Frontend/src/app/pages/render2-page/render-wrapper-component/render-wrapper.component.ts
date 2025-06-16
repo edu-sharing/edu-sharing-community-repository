@@ -53,6 +53,7 @@ export class RenderWrapperComponent implements OnChanges {
                 this.version,
             );
             setTimeout(async () => {
+                console.log('actions');
                 await this.optionsHelper.initComponents(this.actionbar);
                 await this.optionsHelper.refreshComponents();
             });
