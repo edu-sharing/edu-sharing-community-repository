@@ -9,17 +9,17 @@
       <useCaching>false</useCaching>
       <chatCompletion>
         {
-          "model": "gpt-4.1",
-          "messages": [
-            {
-              "role":"system",
-              "content": "Du bist ein Assistent für edu-sharing.\nDu sollst dem Nutzer helfen die Metadaten der Materialien mit passenden Vorschlägen zu vervollständigen. Gibt nur den Vorschlag als Wert zurück."
-            },
-            {
-              "role": "user",
-              "content": "Ich benötige hilfe bei diesem Material. Es hat die folgenden Eigenschaften \nTitel: {{var.cclom:title|-}}\nDateiname: {{var.cm:name|-}}\nLink: {{var.ccm:wwwwurl|-}}\nMaterialart: {{var.ccm:educationallearningresourcetype|-}}\nSchlagworte: {{var.cclom:general_keyword|-}}\nBeschreibung: {{var.cclom:general_description|-}}\nFormat: {{node.cclom:format|-}}\nMedientyp: {{node.virtual:mediatype|-}}"
-            }
-          ]
+        "model": "gpt-4.1",
+        "messages": [
+        {
+        "role":"system",
+        "content": "Du bist ein Assistent für edu-sharing.\nDu sollst dem Nutzer helfen die Metadaten der Materialien mit passenden Vorschlägen zu vervollständigen. Gibt nur den Vorschlag als Wert zurück."
+        },
+        {
+        "role": "user",
+        "content": "Ich benötige hilfe bei diesem Material. Es hat die folgenden Eigenschaften \nTitel: {{var.cclom:title|-}}\nDateiname: {{var.cm:name|-}}\nLink: {{var.ccm:wwwwurl|-}}\nMaterialart: {{var.ccm:educationallearningresourcetype|-}}\nSchlagworte: {{var.cclom:general_keyword|-}}\nBeschreibung: {{var.cclom:general_description|-}}\nFormat: {{node.cclom:format|-}}\nMedientyp: {{node.virtual:mediatype|-}}"
+        }
+        ]
         }
       </chatCompletion>
     </aiConfig>
@@ -29,11 +29,11 @@
       <useCaching>false</useCaching>
       <createImage>
         {
-          "model": "dall-e-2",
-          "size": "256x256",
-          "n": 3,
-          "response_format": "b64_json",
-          "prompt": "Ich benötige ein Bild für dieses Material. Es hat die folgenden Eigenschaften \nTitel: {{var.cclom:title|{{node.cclom:title|-}}}}\nDateiname: {{var.cm:name|{{node.cm:name|-}}}}\nLink: {{var.ccm:wwwwurl|{{node.ccm:wwwurl|-}}}}\nMaterialart: {{var.ccm:educationallearningresourcetype|{{node.ccm:educationallearningresourcetype||-}}}}\nSchlagworte: {{var.cclom:general_keyword|{{node.cclom:general_keyword|-}}}}\nBeschreibung: {{var.cclom:general_description|{{node.cclom:general_description|-}}}}. Erstelle das Bild im Stil {{var.preview.drawingStyle}}"
+        "model": "dall-e-2",
+        "size": "256x256",
+        "n": 3,
+        "response_format": "b64_json",
+        "prompt": "Ich benötige ein Bild für dieses Material. Es hat die folgenden Eigenschaften \nTitel: {{var.cclom:title|{{node.cclom:title|-}}}}\nDateiname: {{var.cm:name|{{node.cm:name|-}}}}\nLink: {{var.ccm:wwwwurl|{{node.ccm:wwwurl|-}}}}\nMaterialart: {{var.ccm:educationallearningresourcetype|{{node.ccm:educationallearningresourcetype||-}}}}\nSchlagworte: {{var.cclom:general_keyword|{{node.cclom:general_keyword|-}}}}\nBeschreibung: {{var.cclom:general_description|{{node.cclom:general_description|-}}}}. Erstelle das Bild im Stil {{var.preview.drawingStyle}}"
         }
       </createImage>
     </aiConfig>
@@ -65,12 +65,12 @@
           <id>default</id>
           <chatCompletion>
             {
-              "messages": [
-                {
-                  "role": "user",
-                  "content": "Erzeuge einen aussagekräftigen Titel"
-                }
-              ]
+            "messages": [
+            {
+            "role": "user",
+            "content": "Erzeuge einen aussagekräftigen Titel"
+            }
+            ]
             }
           </chatCompletion>
         </aiConfig>
@@ -108,12 +108,12 @@
           <id>default</id>
           <chatCompletion>
             {
-              "messages": [
-                {
-                  "role": "user",
-                  "content": "Erzeuge eine kurze zusammenfassende Beschreibung"
-                }
-              ]
+            "messages": [
+            {
+            "role": "user",
+            "content": "Erzeuge eine kurze zusammenfassende Beschreibung"
+            }
+            ]
             }
           </chatCompletion>
         </aiConfig>
@@ -149,12 +149,12 @@
           <id>default</id>
           <chatCompletion>
             {
-              "messages": [
-                {
-                  "role": "user",
-                  "content": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"
-                }
-              ]
+            "messages": [
+            {
+            "role": "user",
+            "content": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"
+            }
+            ]
             }
           </chatCompletion>
         </aiConfig>
@@ -188,12 +188,12 @@
           <id>default</id>
           <chatCompletion>
             {
-              "messages": [
-                {
-                  "role": "user",
-                  "content": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"
-                }
-              ]
+            "messages": [
+            {
+            "role": "user",
+            "content": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"
+            }
+            ]
             }
           </chatCompletion>
         </aiConfig>
@@ -211,12 +211,12 @@
           <id>default</id>
           <chatCompletion>
             {
-              "messages": [
-                {
-                  "role": "user",
-                  "content": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"
-                }
-              ]
+            "messages": [
+            {
+            "role": "user",
+            "content": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"
+            }
+            ]
             }
           </chatCompletion>
         </aiConfig>
@@ -245,12 +245,12 @@
           <id>default</id>
           <chatCompletion>
             {
-              "messages": [
-                {
-                  "role": "user",
-                  "content": "Ordne das Material in einer der folgende Kategorien ein: {{widget.$.ccm:educationallearningresourcetype.values..caption}}"
-                }
-              ]
+            "messages": [
+            {
+            "role": "user",
+            "content": "Ordne das Material in einer der folgende Kategorien ein: {{widget.$.ccm:educationallearningresourcetype.values..caption}}"
+            }
+            ]
             }
           </chatCompletion>
         </aiConfig>
@@ -1180,6 +1180,15 @@
       </views>
     </group>
     <group>
+      <id>preview_sidebar</id>
+      <rendering>angular</rendering>
+      <views>
+        <view>node_general_render</view>
+        <view>node_contributor_render</view>
+        <view>node_collections_render</view>
+      </views>
+    </group>
+    <group>
       <id>mediacenter_filter</id>
       <rendering>angular</rendering>
       <views>
@@ -1619,17 +1628,17 @@
     <query join="AND" id="archive" applyBasequery="false">
       <property name="ngsearchword">
         <statement>
-        {
-            "bool": {
-              "must":[
-              {"term":{"aspects":"sys:archived"}}
-              ],
-              "should":[
-              {"wildcard":{"properties.cm:name.keyword": {"value": "*${valueRaw}*", "case_insensitive": false}}},
-              {"wildcard":{"properties.cclom:title.keyword": {"value": "*${valueRaw}*", "case_insensitive": false}}}
-              ],
-              "minimum_should_match": 1
-            }
+          {
+          "bool": {
+          "must":[
+          {"term":{"aspects":"sys:archived"}}
+          ],
+          "should":[
+          {"wildcard":{"properties.cm:name.keyword": {"value": "*${valueRaw}*", "case_insensitive": false}}},
+          {"wildcard":{"properties.cclom:title.keyword": {"value": "*${valueRaw}*", "case_insensitive": false}}}
+          ],
+          "minimum_should_match": 1
+          }
           }
         </statement>
       </property>
@@ -1640,7 +1649,7 @@
       </property>
     </query>
     <query join="AND" id="oai">
-<!--      <basequery>ISNULL:@ccm\:tool_category</basequery>-->
+      <!--      <basequery>ISNULL:@ccm\:tool_category</basequery>-->
       <property name="from">
         <statement>{"bool":{"must":[{"range":{"properties.cm:modified":{"gte":"${value}"}}}]}</statement>
       </property>

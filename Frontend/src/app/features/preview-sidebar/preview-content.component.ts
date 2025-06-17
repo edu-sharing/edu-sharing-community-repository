@@ -10,6 +10,7 @@ import { CardDialogRef } from '../dialogs/card-dialog/card-dialog-ref';
 import { Subject } from 'rxjs';
 import { DialogsService } from '../dialogs/dialogs.service';
 import { Router } from '@angular/router';
+import { MdsEditorWrapperComponent } from '../mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 
 /**
  * The inner part of the preview sidebar.
@@ -25,6 +26,7 @@ import { Router } from '@angular/router';
 })
 export class PreviewContentComponent implements AfterViewInit, OnDestroy {
     @ViewChild(ActionbarComponent) actionbar: ActionbarComponent;
+    @ViewChild(MdsEditorWrapperComponent) mdsRef: MdsEditorWrapperComponent;
 
     private readonly destroyed = new Subject<void>();
     private _node: Node;
@@ -38,6 +40,7 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy {
         this._node = node;
         this.renderNode.set(null);
         this.allDetailsLink = this.nodeHelper.getNodeLink('routerLink', node) as string;
+        void this.mdsRef?.reInit();
         if (this.actionbar) {
             void this.updateOptions();
         }

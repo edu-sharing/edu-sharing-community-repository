@@ -35,13 +35,15 @@
     </div>
     <es-actionbar appearance="icon-button"></es-actionbar>
   </div>
-  <es-mds-viewer
+  <es-mds-editor-wrapper
     #mds
     *ngIf="node?.properties"
-    groupId="preview_sidebar"
-    [data]="node.properties"
-    [headingLevel]="2"
-  ></es-mds-viewer>
+    [embedded]="true"
+    [editorMode]="'viewer'"
+    [groupId]="'preview_sidebar'"
+    [nodes]="[node]"
+  >
+  </es-mds-editor-wrapper>
   <!-- h2 class="title">
     {{ node.title ?? node.name }}
   </h2>
