@@ -1131,7 +1131,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     Set<PermissionReference> granteePermissions = permissionModel.getGranteePermissions(pr);
                     eduNodeRef.setPublic(granteePermissions.stream().anyMatch(p -> p.getName().equals(CCConstants.PERMISSION_READ_ALL)));
                 }
-                if (authorities.stream().anyMatch(s -> entry.getValue().contains(s))
+                if (isAdmin || authorities.stream().anyMatch(s -> entry.getValue().contains(s))
                         || entry.getValue().contains(user)) {
                     //get fine grained permissions
                     PermissionReference pr = permissionModel.getPermissionReference(null, entry.getKey());
