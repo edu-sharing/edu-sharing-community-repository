@@ -51,6 +51,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     providerControl = new UntypedFormControl();
     showProviders = false;
     username = '';
+    loginSafeFailed = false;
 
     private next = '';
     private providers: any;
@@ -255,6 +256,9 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                     ) {
                         this.toast.error(null, 'LOGIN.SAFE_PREVIOUS');
                     } else if (data.statusCode === RestConstants.STATUS_CODE_PASSWORD_EXPIRED) {
+                        if (this.isSafeLogin) {
+                            this.loginSafeFailed = true;
+                        }
                         this.toast.error(
                             null,
                             'LOGIN.PASSWORD_EXPIRED' + (this.isSafeLogin ? '_SAFE' : ''),
