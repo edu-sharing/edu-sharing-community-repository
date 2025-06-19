@@ -25,6 +25,7 @@ public class SecurityConfigurationBasic {
     @Bean
     SecurityFilterChain app(HttpSecurity http) throws Exception {
         CSRFConfig.config(http);
+        HeadersConfig.config(http);
         return http.build();
     }
 }
