@@ -173,9 +173,13 @@ public class BulkEditNodesJob extends AbstractJob{
 			searchToken = prepareParam(context, "searchToken", false);
 		}
 
-		elastic = prepareParam(context, "lucene", false);
+		elastic = prepareParam(context, "elastic", false);
 
-		startFolder = prepareParam(context, "startFolder", true);
+		boolean startFolderRequired = true;
+		if(StringUtils.isNotBlank(elastic)){
+			startFolderRequired = false;
+		}
+		startFolder = prepareParam(context, "startFolder", startFolderRequired);
 		archive = prepareParam(context, "archive", false);
 		versionStore = prepareParam(context,"versionStore", false);
 
