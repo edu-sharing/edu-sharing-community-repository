@@ -26,7 +26,6 @@ import {
     VCard,
     ViewInstanceService,
 } from 'ngx-edu-sharing-ui';
-import { Mds } from '../../../core-module/rest/data-object';
 
 export const translateProvider = {
     instant: (v: string) => v,
@@ -35,6 +34,7 @@ export const translateProvider = {
     onDefaultLangChange: of({ lang: 'none' }),
     onLangChange: of({}),
 };
+@Injectable()
 export class MdsEditorInstanceServiceMock extends MdsEditorInstanceService {
     nodes$ = new BehaviorSubject<Node[]>([
         {
@@ -64,7 +64,7 @@ export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
     { provide: MdsEditorInstanceService, useClass: MdsEditorInstanceServiceMock },
     { provide: MdsViewerService, useClass: MdsViewerServiceMock },
-    { provide: MdsService, useClass: MdsServiceMock },
+    { provide: MdsService, useFactory: () => new MdsServiceMock(null) },
     ViewInstanceService,
     CordovaService,
     Toast,
