@@ -130,6 +130,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                                 (params.local !== 'true' || params.redirectFromSSO === 'true')
                             ) {
                                 this.goToNext(data);
+                                return;
                             }
                         }
                         // when there is a request to go into safe mode, first, the user needs to log in regularly
