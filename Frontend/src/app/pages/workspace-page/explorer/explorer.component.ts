@@ -47,6 +47,7 @@ import {
     catchError,
     debounceTime,
     distinctUntilChanged,
+    filter,
     switchMap,
     takeUntil,
     tap,
@@ -169,6 +170,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         direction: 'asc',
         columns: [],
     };
+    sortReady = new BehaviorSubject(false);
 
     public columns: ListItem[] = [];
     @Input() displayType = NodeEntriesDisplayType.Table;
@@ -197,6 +199,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
                 this.sort.active = RestConstants.CM_NAME;
                 this.sort.direction = 'asc';
             }
+            this.sortReady.next(true);
         });
     }
 
@@ -344,8 +347,9 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         // super(temporaryStorage,['_node','_nodes','sortBy','sortAscending','columns','totalCount','hasMoreToLoad']);
         this.initColumns();
         this.registerNodesDeleted();
-        combineLatest([this.node$, this.searchQuery$])
+        combineLatest([this.node$, this.searchQuery$, this.sortReady])
             .pipe(
+                filter((v) => v[2] && (!!v[0] || !!v[1])),
                 distinctUntilChanged((a, b) => {
                     return Helper.objectEquals(a[0], b[0]) && a[1] === b[1];
                 }),
