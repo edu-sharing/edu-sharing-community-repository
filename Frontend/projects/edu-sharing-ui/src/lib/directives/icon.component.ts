@@ -3743,5 +3743,5 @@ export class IconComponent {
         'digit_seven',
         'digit_eight',
         'digit_nine',
-    ].filter((i) => !i.includes('.'));
+    ].filter((i) => !i.includes('.') && i.length > 1);
 }
