@@ -213,6 +213,7 @@ $cardLineHeight: 1.4;
                         span {
                             // fix for firefox to calculate offsetHeight correctly
                             @include limitLineCount(2, $cardLineHeight);
+                            text-align: left;
                         }
                     }
                 }
