@@ -138,10 +138,10 @@ export class CardComponent implements AfterContentInit, OnDestroy {
     @Input() set type(type: CardType) {
         switch (type) {
             case CardType.Question:
-                this.icon = 'help_outline';
+                this.icon = 'help';
                 break;
             case CardType.Info:
-                this.icon = 'info_outline';
+                this.icon = 'info';
                 break;
         }
     }

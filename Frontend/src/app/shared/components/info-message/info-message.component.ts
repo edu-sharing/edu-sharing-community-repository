@@ -14,7 +14,7 @@ export class InfoMessageComponent {
     @Input() mode: 'info' | 'warning' | 'error' = 'info';
 
     ICONS: any = {
-        info: 'info_outline',
+        info: 'info',
         warning: 'warning_outline',
         error: 'error_outline',
     };

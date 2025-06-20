@@ -18,7 +18,7 @@
   </div>
   <div class="mediacenter-actions" *ngIf="mediacenters && currentMediacenterCopy">
     <h4 class="mat-heading-4 mat-heading-underline">
-      <i esIcon="business"></i>{{ currentMediacenterCopy.profile.displayName | translate }}
+      <i esIcon="domain"></i>{{ currentMediacenterCopy.profile.displayName | translate }}
     </h4>
     <mat-tab-group mat-stretch-tabs [(selectedIndex)]="currentTab">
       <mat-tab label="{{ 'ADMIN.MEDIACENTER.DATA.TITLE' | translate }}">
@@ -225,7 +225,7 @@
   </div>
   <div *ngIf="!currentMediacenter && isAdmin">
     <h4 class="mat-heading-4 mat-heading-underline">
-      <i esIcon="business"></i>{{ 'ADMIN.MEDIACENTER.IMPORT.TITLE' | translate }}
+      <i esIcon="domain"></i>{{ 'ADMIN.MEDIACENTER.IMPORT.TITLE' | translate }}
     </h4>
     <div class="import">
       <input
@@ -246,7 +246,7 @@
       </button>
     </div>
     <h4 class="mat-heading-4 mat-heading-underline">
-      <i esIcon="business"></i>{{ 'ADMIN.MEDIACENTER.ORGIMPORT.TITLE' | translate }}
+      <i esIcon="domain"></i>{{ 'ADMIN.MEDIACENTER.ORGIMPORT.TITLE' | translate }}
     </h4>
     <div class="import">
       <input
@@ -268,7 +268,7 @@
     </div>
 
     <h4 class="mat-heading-4 mat-heading-underline">
-      <i esIcon="business"></i>{{ 'ADMIN.MEDIACENTER.ORG_MC_CONNECT.TITLE' | translate }}
+      <i esIcon="domain"></i>{{ 'ADMIN.MEDIACENTER.ORG_MC_CONNECT.TITLE' | translate }}
     </h4>
     <div class="import">
       <input

@@ -16,7 +16,7 @@ add_alarm e193
 add_alert e003
 add_box e146
 add_circle e147
-add_circle_outline e148
+add_circle_outline e14
 add_location e567
 add_shopping_cart e854
 add_to_photos e39d

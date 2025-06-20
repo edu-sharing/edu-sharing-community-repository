@@ -505,7 +505,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         const infoGroup = new OptionGroup('info', 20);
         if (this.config.imprintUrl) {
-            const option = new OptionItem('IMPRINT', 'info_outline', () =>
+            const option = new OptionItem('IMPRINT', 'info', () =>
                 this.imprintPrivacy.openImprint(),
             );
             option.group = infoGroup;

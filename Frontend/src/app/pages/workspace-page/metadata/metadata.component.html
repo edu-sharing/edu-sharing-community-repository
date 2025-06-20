@@ -9,7 +9,7 @@
   <ng-container *ngIf="!loading">
     <mat-tab-group *ngIf="!data.isDirectory; else standaloneInfoTab">
       <mat-tab>
-        <ng-template mat-tab-label><i esIcon="info_outline" [aria]="true"></i></ng-template>
+        <ng-template mat-tab-label><i esIcon="info" [aria]="true"></i></ng-template>
         <ng-content *ngTemplateOutlet="infoTab"></ng-content>
       </mat-tab>
       <mat-tab>

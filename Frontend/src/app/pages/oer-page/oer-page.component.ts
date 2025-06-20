@@ -277,7 +277,7 @@ export class OerPageComponent implements OnInit, OnDestroy {
         this.options[mode] = [];
         if (mode == this.MATERIALS) {
             this.options[mode].push(
-                new OptionItem('INFORMATION', 'info_outline', (node: Node) => this.openNode(node)),
+                new OptionItem('INFORMATION', 'info', (node: Node) => this.openNode(node)),
             );
             const download = new OptionItem('DOWNLOAD', 'cloud_download', (node: Node) =>
                 this.downloadNode(node),

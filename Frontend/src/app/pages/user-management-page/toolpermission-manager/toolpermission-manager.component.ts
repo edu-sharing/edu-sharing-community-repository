@@ -117,7 +117,7 @@ export class ToolpermissionManagerComponent {
         },
         {
             name: 'MEDIACENTER',
-            icon: 'business',
+            icon: 'domain',
             permissions: [RestConstants.TOOLPERMISSION_MEDIACENTER_MANAGE],
         },
         { name: 'CONNECTORS', icon: 'edit' },

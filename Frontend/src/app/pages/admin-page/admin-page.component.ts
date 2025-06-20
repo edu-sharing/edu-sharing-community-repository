@@ -1288,7 +1288,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             this.buttons = [
                 {
                     id: 'INFO',
-                    icon: 'info_outline',
+                    icon: 'info',
                 },
                 {
                     id: 'PLUGINS',
@@ -1351,7 +1351,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         ) {
             this.buttons.splice(1, 0, {
                 id: 'STATISTICS',
-                icon: 'assessment',
+                icon: 'finance',
             });
         }
         if (
@@ -1360,7 +1360,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         ) {
             this.buttons.splice(3, 0, {
                 id: 'MEDIACENTER',
-                icon: 'business',
+                icon: 'domain',
             });
         }
     }

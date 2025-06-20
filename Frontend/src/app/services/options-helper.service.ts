@@ -1215,10 +1215,8 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         unblockNode.group = DefaultGroups.Edit;
         unblockNode.priority = 10;
 
-        const removeNodeRef = new OptionItem(
-            'OPTIONS.REMOVE_REF',
-            'remove_circle_outline',
-            (object) => this.removeFromCollection(this.getObjects(object, data), components, data),
+        const removeNodeRef = new OptionItem('OPTIONS.REMOVE_REF', 'do_not_disturb_on', (object) =>
+            this.removeFromCollection(this.getObjects(object, data), components, data),
         );
         removeNodeRef.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         removeNodeRef.constrains = [
@@ -1417,41 +1415,37 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
 
         /*
 
-            this.infoToggle = new OptionItem('WORKSPACE.OPTION.METADATA', 'info_outline', (node: Node) => this.openMetadata(node));
+            this.infoToggle = new OptionItem('WORKSPACE.OPTION.METADATA', 'info', (node: Node) => this.openMetadata(node));
             this.infoToggle.isToggle = true;
             options.push(this.infoToggle);
          */
         let metadataSidebarSubscription: Subscription;
-        const metadataSidebar = new OptionItem(
-            'OPTIONS.METADATA_SIDEBAR',
-            'info_outline',
-            (object) => {
-                this.workspace.nodeSidebarChange.subscribe((change: Node) => {
-                    metadataSidebar.icon = change ? 'info' : 'info_outline';
-                });
-                this.workspace.nodeSidebar = this.workspace.nodeSidebar
-                    ? null
-                    : this.getObjects(object, data)[0];
-                if (this.workspace.nodeSidebar == null) {
-                    metadataSidebarSubscription?.unsubscribe();
-                } else {
-                    metadataSidebarSubscription = components.list
-                        ?.getSelection()
-                        .changed.subscribe((selection) => {
-                            if (selection.source.selected.length === 0) {
-                                return;
-                            }
-                            if (this.workspace.nodeSidebar == null) {
-                                metadataSidebarSubscription?.unsubscribe();
-                                return;
-                            }
-                            this.workspace.nodeSidebar = selection.source.selected[0] as Node;
-                            this.workspace.nodeSidebarChange.emit(this.workspace.nodeSidebar);
-                        });
-                }
-                this.workspace.nodeSidebarChange.emit(this.workspace.nodeSidebar);
-            },
-        );
+        const metadataSidebar = new OptionItem('OPTIONS.METADATA_SIDEBAR', 'info', (object) => {
+            this.workspace.nodeSidebarChange.subscribe((change: Node) => {
+                metadataSidebar.icon = change ? 'info' : 'info';
+            });
+            this.workspace.nodeSidebar = this.workspace.nodeSidebar
+                ? null
+                : this.getObjects(object, data)[0];
+            if (this.workspace.nodeSidebar == null) {
+                metadataSidebarSubscription?.unsubscribe();
+            } else {
+                metadataSidebarSubscription = components.list
+                    ?.getSelection()
+                    .changed.subscribe((selection) => {
+                        if (selection.source.selected.length === 0) {
+                            return;
+                        }
+                        if (this.workspace.nodeSidebar == null) {
+                            metadataSidebarSubscription?.unsubscribe();
+                            return;
+                        }
+                        this.workspace.nodeSidebar = selection.source.selected[0] as Node;
+                        this.workspace.nodeSidebarChange.emit(this.workspace.nodeSidebar);
+                    });
+            }
+            this.workspace.nodeSidebarChange.emit(this.workspace.nodeSidebar);
+        });
         metadataSidebar.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         metadataSidebar.scopes = [Scope.WorkspaceList];
         metadataSidebar.constrains = [Constrain.NoBulk];

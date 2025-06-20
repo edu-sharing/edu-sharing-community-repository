@@ -143,7 +143,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     readonly STEP_EDITORIAL_GROUPS = 'EDITORIAL_GROUPS';
     STEP_ICONS: { [step in Step]?: string } = {
         GENERAL: 'edit',
-        METADATA: 'info_outline',
+        METADATA: 'info',
         PERMISSIONS: 'group_add',
         SETTINGS: 'settings',
         EDITORIAL_GROUPS: 'star',

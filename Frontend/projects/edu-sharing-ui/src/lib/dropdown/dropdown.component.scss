@@ -16,6 +16,9 @@
             > i {
                 width: 35px;
             }
+            > span {
+                word-break: break-all;
+            }
         }
         &:not(:empty) {
             padding: 0 !important;
