@@ -79,7 +79,10 @@ export class IconDirective implements OnInit, OnDestroy {
         private renderer: Renderer2,
         @Optional() private config: ConfigService,
     ) {
-        combineLatest([this.originalId$.pipe(filter(notNull)), this.config.get('icons', null)])
+        combineLatest([
+            this.originalId$.pipe(filter(notNull)),
+            this.config.get('icons', null).catch((_) => Promise.resolve([])),
+        ])
             .pipe(takeUntilDestroyed())
             .subscribe(([originalId, iconsConfig]) => this.setIcon(originalId, iconsConfig));
     }
