@@ -15,6 +15,8 @@ import { map, takeUntil, tap } from 'rxjs/operators';
 import { RestHelper } from '../../core-module/core.module';
 import { CardDialogRef } from '../dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../dialogs/dialogs.service';
+import { PreviewContentComponent } from './preview-content.component';
+import { GenericDialogData } from '../dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 
 /**
  * Sidebar component that previews an element with preview image and some metadata.
@@ -28,7 +30,8 @@ import { DialogsService } from '../dialogs/dialogs.service';
     standalone: false,
 })
 export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
-    @ViewChild('content') contentRef: TemplateRef<HTMLElement>;
+    @ViewChild('modal') modalRef: TemplateRef<HTMLElement>;
+    @ViewChild('preview') previewRef: PreviewContentComponent;
 
     /** The node to preview. */
     @Input() node: Node;
@@ -38,6 +41,7 @@ export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
     readonly isMobileScreen = this.getIsMobileScreen();
 
     private readonly destroyed = new Subject<void>();
+    private modalDialogRef: CardDialogRef<GenericDialogData<string>, string>;
 
     constructor(private dialogs: DialogsService, private breakpointObserver: BreakpointObserver) {}
 
@@ -60,15 +64,8 @@ export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
                 takeUntil(this.destroyed),
             )
             .subscribe(async () => {
-                if (isMobileScreen && !dialogRefPromise) {
-                    dialogRefPromise = this.openAsDialog();
-                    const dialogRef = await dialogRefPromise;
-                    dialogRef.afterClosed().subscribe(() => {
-                        dialogRefPromise = null;
-                        if (isMobileScreen && !this.destroyed.isStopped) {
-                            this.closed.emit();
-                        }
-                    });
+                if (isMobileScreen && !this.modalDialogRef) {
+                    await this.openAsDialog();
                 } else if (!isMobileScreen) {
                     void dialogRefPromise?.then((dialogRef) => dialogRef.close());
                 }
@@ -78,20 +75,30 @@ export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
         });
     }
 
-    private async openAsDialog(): Promise<CardDialogRef<unknown>> {
-        const dialogRef = await this.dialogs.openGenericDialog({
+    private async openAsDialog() {
+        this.modalDialogRef = await this.dialogs.openGenericDialog({
             title: RestHelper.getTitle(this.node),
             avatar: { kind: 'image', url: this.node.iconURL },
-            contentTemplate: this.contentRef,
-            minWidth: 400,
+            contentTemplate: this.modalRef,
+            minWidth: '100%',
+            minHeight: '100%',
             contentPadding: 0,
         });
-        return dialogRef;
+        this.modalDialogRef.afterClosed().subscribe(() => {
+            this.modalDialogRef = null;
+            if (this.isMobileScreen && !this.destroyed.isStopped) {
+                this.closed.emit();
+            }
+        });
     }
 
     private getIsMobileScreen() {
         return this.breakpointObserver
             .observe(['(max-width: 900px)'])
             .pipe(map(({ matches }) => matches));
+    }
+
+    async openModal() {
+        await this.openAsDialog();
     }
 }

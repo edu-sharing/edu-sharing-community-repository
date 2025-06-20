@@ -97,7 +97,7 @@ rs-root {
         font-size: 110%;
     }
 }
-:host ::ng-deep {
+::ng-deep {
     es-mds-editor-wrapper es-mds-editor-core {
         display: grid;
         width: 100%;

@@ -4,6 +4,7 @@ import {
     ActionbarComponent,
     NodeHelperService,
     OptionsHelperDataService,
+    RenderHelperService,
     Scope,
 } from 'ngx-edu-sharing-ui';
 import { CardDialogRef } from '../dialogs/card-dialog/card-dialog-ref';
@@ -11,6 +12,7 @@ import { Subject } from 'rxjs';
 import { DialogsService } from '../dialogs/dialogs.service';
 import { Router } from '@angular/router';
 import { MdsEditorWrapperComponent } from '../mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import { ModuleInfoService } from 'ngx-rendering-service-lib';
 
 /**
  * The inner part of the preview sidebar.
@@ -25,6 +27,15 @@ import { MdsEditorWrapperComponent } from '../mds/mds-editor/mds-editor-wrapper/
     standalone: false,
 })
 export class PreviewContentComponent implements AfterViewInit, OnDestroy {
+    /**
+     all modules in this list will be automatically rendered without confirmation
+     */
+    readonly AutoRenderModules = ['image', 'video', 'audio', 'document', 'pdf'];
+
+    /**
+     * always render the node, do not wait for click
+     */
+    @Input() autoRender = false;
     @ViewChild(ActionbarComponent) actionbar: ActionbarComponent;
     @ViewChild(MdsEditorWrapperComponent) mdsRef: MdsEditorWrapperComponent;
 
@@ -44,17 +55,29 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy {
         if (this.actionbar) {
             void this.updateOptions();
         }
+        this.about.hasPlugin('rendering-service-2').then(async (has) => {
+            if (has) {
+                const module = await this.moduleInfoService.getModuleName(node);
+                console.info('rs module', module);
+                if (this.autoRender || this.AutoRenderModules.includes(module)) {
+                    void this.onShowContentClick();
+                }
+            }
+        });
     }
-
     allDetailsLink: string;
 
     constructor(
         private nodeHelper: NodeHelperService,
         private dialogs: DialogsService,
         public optionsHelper: OptionsHelperDataService,
+        public moduleInfoService: ModuleInfoService,
+        private renderHelperService: RenderHelperService,
         public router: Router,
         public about: AboutService,
-    ) {}
+    ) {
+        this.renderHelperService.prepareRootUrl();
+    }
 
     ngAfterViewInit(): void {
         if (this.node) {

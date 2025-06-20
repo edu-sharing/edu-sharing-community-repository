@@ -18,7 +18,7 @@ export type CombinedRenderData = {
     request?: RenderDataRequestWithToken;
     error?: string;
 };
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class RenderHelperService {
     constructor(
         private injector: Injector,
@@ -70,14 +70,7 @@ export class RenderHelperService {
             };
         }
         console.info(about.renderingService2?.url);
-        if (this.configuration.production) {
-            this.injector.get(RSApiConfiguration).rootUrl = about.renderingService2.url.replace(
-                /\/$/g,
-                '',
-            );
-        } else {
-            this.injector.get(RSApiConfiguration).rootUrl = '/rendering2';
-        }
+        this.prepareRootUrl();
         console.info(this.injector.get(RSApiConfiguration));
         const token = securedNode.jwt;
         console.info(token, node);
@@ -130,5 +123,19 @@ export class RenderHelperService {
             node,
             request,
         };
+    }
+
+    async prepareRootUrl() {
+        const about = await firstValueFrom(this.aboutService.getAbout());
+        if (this.configuration.production) {
+            this.injector.get(RSApiConfiguration).rootUrl = about.renderingService2.url.replace(
+                /\/$/g,
+                '',
+            );
+        } else {
+            console.info('dev mode active, routing rendering to proxy');
+            this.injector.get(RSApiConfiguration).rootUrl = '/rendering2';
+        }
+        console.info(this.injector.get(RSApiConfiguration));
     }
 }

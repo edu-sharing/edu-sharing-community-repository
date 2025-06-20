@@ -18,8 +18,12 @@ $sidebarWidth: 600px;
 
 .preview-sidebar-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: left;
     align-items: center;
     padding-left: 6px;
     background: $actionDialogBackground;
+    > .empty {
+        width: 0;
+        flex-grow: 1;
+    }
 }

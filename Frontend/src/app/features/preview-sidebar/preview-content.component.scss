@@ -12,18 +12,30 @@ $previewHeight: 400px;
     &::-webkit-scrollbar-thumb {
         background: rgba(0, 0, 0, 0.26);
     }
-    ::ng-deep es-render-wrapper-component rs-root {
-        width: 100%;
-        height: auto;
-        min-height: $previewHeight;
-        max-height: $previewHeight;
-        margin: 0;
-        > div {
-            width: 100% !important;
+    ::ng-deep {
+        es-mds-editor-wrapper es-mds-editor-core {
+            display: grid;
         }
-        .module.module-PDF ngx-extended-pdf-viewer .zoom {
-            height: $previewHeight !important;
+
+        es-render-wrapper-component rs-root {
+            width: 100%;
+            height: auto;
+            min-height: $previewHeight;
+            max-height: $previewHeight;
+            margin: 0;
+            > div {
+                width: 100% !important;
+            }
+
+            .module.module-PDF ngx-extended-pdf-viewer .zoom {
+                height: $previewHeight !important;
+            }
         }
+    }
+}
+::ng-deep {
+    .preview-sidebar-rendering-modal es-render-wrapper-component rs-root {
+        min-height: calc(100vh - 200px);
     }
 }
 es-render-wrapper-component {
