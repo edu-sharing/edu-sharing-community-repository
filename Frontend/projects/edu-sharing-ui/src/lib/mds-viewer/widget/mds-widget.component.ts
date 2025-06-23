@@ -7,6 +7,7 @@ import {
     Injector,
     Input,
     OnChanges,
+    OnDestroy,
     OnInit,
     Optional,
     signal,
@@ -15,7 +16,7 @@ import {
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { MatRipple } from '@angular/material/core';
-import { filter, first, map } from 'rxjs/operators';
+import { filter, first, map, takeUntil } from 'rxjs/operators';
 import { MdsValue, MdsWidget, Node, RestConstants, Suggestion } from 'ngx-edu-sharing-api';
 import { UIConstants } from '../../util/ui-constants';
 import { DateHelper } from '../../util/DateHelper';
@@ -23,11 +24,12 @@ import { UIService } from '../../services/ui.service';
 import { ViewInstanceService } from '../view-instance.service';
 import { RestHelper } from '../../util/rest-helper';
 import { FormatSizePipe } from '../../pipes/file-size.pipe';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import { MdsViewerService } from '../mds-viewer.service';
 import { Values } from '../../services/search-helper.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { MdsEditorInstanceServiceAbstract } from '../mds-editor-instance-service.abstract';
+import { tap } from 'rxjs';
 
 export enum MdsType {
     Io = 'io',
@@ -46,6 +48,7 @@ export interface MdsValueList {
 }
 export interface MdsViewerWidget {
     definition: MdsWidget;
+    focusTrigger: Subject<void>;
     getInitalValuesAsync(): Promise<InitialValues>;
     getInitialDisplayValues(): BehaviorSubject<MdsValueList>;
 }
@@ -102,8 +105,10 @@ export enum ValueType {
     changeDetection: ChangeDetectionStrategy.Default,
     standalone: false,
 })
-export class MdsWidgetComponent implements OnInit, OnChanges {
+export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
+    readonly focusTrigger = new Subject<void>();
+    readonly destroyed$ = new Subject<void>();
     private static readonly inlineEditing: MdsWidgetType[] = [
         MdsWidgetType.Text,
         MdsWidgetType.Number,
@@ -164,11 +169,19 @@ export class MdsWidgetComponent implements OnInit, OnChanges {
         // super(toast, null, translate);
     }
 
+    ngOnDestroy(): void {
+        this.destroyed$.next();
+        this.destroyed$.complete();
+    }
     async ngOnChanges(changes: SimpleChanges) {
         this.value.set(await this.getNodeValue());
     }
 
     async ngOnInit() {
+        this.widget.focusTrigger.pipe(takeUntil(this.destroyed$)).subscribe(async () => {
+            await this.focus();
+            this.startEdit();
+        });
         this.value.set(await this.getNodeValue());
         this.widget
             .getInitialDisplayValues()
@@ -421,8 +434,8 @@ export class MdsWidgetComponent implements OnInit, OnChanges {
         return params;
     }
 
-    startEdit(event: MouseEvent) {
-        event.stopPropagation();
+    startEdit(event?: MouseEvent) {
+        event?.stopPropagation();
         void this.view.injectEditField(this, this.editWrapper.nativeElement.children[0]);
     }
 }
