@@ -6,6 +6,7 @@ import {
     ChangeDetectorRef,
     Component,
     ElementRef,
+    Input,
     NgZone,
     OnChanges,
     OnDestroy,
@@ -201,9 +202,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
             1,
             Math.floor(
                 // Subtract total width of always visible columns like checkboxes and icons.
-                (tableWidth - 187) /
-                    // Divide by with of data columns (including margin).
-                    126,
+                (tableWidth - 187) / this.entriesService.dataColumnWidth,
             ),
         );
     }

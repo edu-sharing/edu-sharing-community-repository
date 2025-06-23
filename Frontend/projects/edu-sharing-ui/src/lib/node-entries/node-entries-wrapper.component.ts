@@ -138,6 +138,10 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
      * Do not load more data on scroll.
      */
     @Input() disableInfiniteScroll = false;
+    /**
+     *  avg. column width for table layouts.
+     */
+    @Input() dataColumnWidth = 126;
 
     @Output() fetchData = new EventEmitter<FetchEvent>();
     @Output() clickItem = new EventEmitter<NodeClickEvent<T>>();
@@ -227,6 +231,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.primaryInstance = this.primaryInstance;
         this.entriesService.singleClickHint = this.singleClickHint;
         this.entriesService.disableInfiniteScroll = this.disableInfiniteScroll;
+        this.entriesService.dataColumnWidth = this.dataColumnWidth;
         this.entriesService.scrollGradientColor.set(this.scrollGradientColor);
 
         if (changes['initConfig']) {
