@@ -57,9 +57,9 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy {
         }
         this.about.hasPlugin('rendering-service-2').then(async (has) => {
             if (has) {
-                const module = await this.moduleInfoService.getModuleName(node);
+                const module = await this.moduleInfoService.getModuleInfo(node);
                 console.info('rs module', module);
-                if (this.autoRender || this.AutoRenderModules.includes(module)) {
+                if (this.autoRender || this.AutoRenderModules.includes(module.module)) {
                     void this.onShowContentClick();
                 }
             }
