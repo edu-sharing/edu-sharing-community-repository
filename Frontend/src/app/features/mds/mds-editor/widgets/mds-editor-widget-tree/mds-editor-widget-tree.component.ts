@@ -304,6 +304,9 @@ export class MdsEditorWidgetTreeComponent
         if (event.relatedTarget === this.treeRef?.input?.nativeElement) {
             return;
         }
+        if (event.target === this.inputElement.nativeElement) {
+            return;
+        }
         if (
             !UIHelper.isParentElementOfElement(
                 event.target as HTMLElement,
