@@ -141,6 +141,8 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     primaryInstance: boolean;
     singleClickHint: 'dynamic' | 'static';
     disableInfiniteScroll: boolean;
+    /* avg. column width for table layouts. */
+    dataColumnWidth = 126;
     scrollGradientColor: WritableSignal<string> = signal('fff');
 
     constructor(
