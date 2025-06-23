@@ -1,5 +1,5 @@
 import { SelectionModel } from '@angular/cdk/collections';
-import { EventEmitter, Injectable, signal, WritableSignal } from '@angular/core';
+import { EventEmitter, Injectable, Input, signal, WritableSignal } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Node } from 'ngx-edu-sharing-api';
 import {
@@ -143,6 +143,7 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     disableInfiniteScroll: boolean;
     /* avg. column width for table layouts. */
     dataColumnWidth = 126;
+    showIconColumn = new BehaviorSubject(true);
     scrollGradientColor: WritableSignal<string> = signal('fff');
 
     constructor(

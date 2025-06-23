@@ -17,7 +17,7 @@ import { MatMenuTrigger } from '@angular/material/menu';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort, Sort } from '@angular/material/sort';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 import {
     debounceTime,
     delay,
@@ -224,13 +224,15 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     }
 
     private getVisibleColumnNames(): Observable<string[]> {
-        return this.visibleDataColumns$.pipe(
-            map((visibleDataColumns) => {
+        return combineLatest([this.visibleDataColumns$, this.entriesService.showIconColumn]).pipe(
+            map(([visibleDataColumns, showIconColumn]) => {
                 const columns = [];
                 if (this.entriesService.checkbox) {
                     columns.push('select');
                 }
-                columns.push('icon');
+                if (showIconColumn) {
+                    columns.push('icon');
+                }
                 return columns.concat(visibleDataColumns.map((c) => c.name)).concat(['actions']);
             }),
             shareReplay(1),

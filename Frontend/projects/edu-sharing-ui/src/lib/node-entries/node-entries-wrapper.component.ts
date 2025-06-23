@@ -142,6 +142,10 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
      *  avg. column width for table layouts.
      */
     @Input() dataColumnWidth = 126;
+    /**
+     *  show the icon column (table view only)
+     */
+    @Input() showIconColumn = true;
 
     @Output() fetchData = new EventEmitter<FetchEvent>();
     @Output() clickItem = new EventEmitter<NodeClickEvent<T>>();
@@ -232,6 +236,9 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.singleClickHint = this.singleClickHint;
         this.entriesService.disableInfiniteScroll = this.disableInfiniteScroll;
         this.entriesService.dataColumnWidth = this.dataColumnWidth;
+        if (changes.showIconColumn) {
+            this.entriesService.showIconColumn.next(this.showIconColumn);
+        }
         this.entriesService.scrollGradientColor.set(this.scrollGradientColor);
 
         if (changes['initConfig']) {
