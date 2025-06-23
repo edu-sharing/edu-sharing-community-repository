@@ -10,10 +10,10 @@
   },
   "homepage": "https://edu-sharing-network.org/",
   "scripts": {
-    "check-if-up-to-date": "(test -d src/lib/api)",
+    "check-if-up-to-date": "(test -d src/lib/api) && (cmp -s build/openapi.json build/openapi.gen.json)",
     "generate-api:generate-code": "ng-openapi-gen --input build/openapi.json --output src/lib/api",
     "generate-api:prettify-code": "prettier -w 'src/lib/api/**/*.ts' --end-of-line auto",
-    "generate-api": "npm run generate-api:generate-code && npm run generate-api:prettify-code",
+    "generate-api": "npm run generate-api:generate-code && npm run generate-api:prettify-code && cp build/openapi.json build/openapi.gen.json",
     "update": "npm i && npm run generate-api",
     "update-if-needed": "npm run check-if-up-to-date || npm run update",
     "fetch-api": "curl -sL https://b-api.staging.openeduhub.net/v3/api-docs/api | jq '.' > build/openapi.json",

@@ -2,3 +2,5 @@ node_modules/
 
 # generated sources
 src/lib/api/
+
+build/openapi.gen.json
