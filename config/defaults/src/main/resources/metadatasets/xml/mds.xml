@@ -1266,6 +1266,10 @@
       {"bool":
       {"must":[
       {"term":{"nodeRef.storeRef.protocol":"workspace"}}
+      ],
+      "must_not":[
+      {"match":{"aspects":"ccm:page"}},
+      {"match":{"aspects":"ccm:widget"}}
       ]
       }}
     </basequery>
