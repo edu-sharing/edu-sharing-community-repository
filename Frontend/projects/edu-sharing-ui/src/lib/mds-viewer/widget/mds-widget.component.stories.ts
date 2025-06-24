@@ -7,10 +7,11 @@ import {
 } from './mds-widget.component';
 import { SharedModule } from '../../../../../../src/app/shared/shared.module';
 import { mdsStorybookProviders } from '../../../../../../src/app/features/mds/mds-editor/storybook-utils';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { MdsWidget } from 'ngx-edu-sharing-api';
 
 export class DefaultWidget implements MdsViewerWidget {
+    focusTrigger: Subject<void>;
     constructor(public definition: MdsWidget, private values: string[]) {}
     async getInitalValuesAsync(): Promise<InitialValues> {
         return {
