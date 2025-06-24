@@ -1458,5 +1458,16 @@
       "isBasedOn": "is based on (isBasedOn)",
       "references": "refers to (references)"
     }
+  },
+  "TILE_ITEMS": {
+    "CHANGE_TITLE": "Change title",
+    "search": "Search",
+    "workspace": "Workspace",
+    "myfiles": "My Files",
+    "mycollections": "My Collections",
+    "invitedcollections": "Shared Collections",
+    "publiccollections": "Public Collections",
+    "aboutme": "My Profile",
+    "documentation": "Go to Documentation"
   }
 }

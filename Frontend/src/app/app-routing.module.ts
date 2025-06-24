@@ -84,6 +84,12 @@ const routes: Routes = [
         path: UIConstants.ROUTER_PREFIX + 'pdf',
         loadChildren: () => import('./pages/pdf-page/pdf-page.module').then((m) => m.PdfPageModule),
     },
+    // landing page test
+    {
+        path: UIConstants.ROUTER_PREFIX + 'landing',
+        loadChildren: () =>
+            import('./pages/landing-page/landing-page.module').then((m) => m.LandingPageModule),
+    },
 
     // Register
     {

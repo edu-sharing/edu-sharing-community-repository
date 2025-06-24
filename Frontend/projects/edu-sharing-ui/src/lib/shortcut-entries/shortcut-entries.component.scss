@@ -1,0 +1,207 @@
+@use '../../../assets/scss/variables-scss' as *;
+
+:host {
+    position: relative;
+}
+
+@keyframes jiggle {
+    0%,
+    100% {
+        transform: rotate(-1deg);
+    }
+    50% {
+        transform: rotate(1deg);
+    }
+}
+
+.tiles-container {
+    padding: 32px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 24px;
+    background: var(--primary);
+}
+
+.entry-card {
+    // CSS variables have to be defined here to be available in drag-and-drop
+    --tile-size: 124px;
+    --icon-container-height: 80px;
+
+    width: var(--tile-size);
+    height: var(--tile-size);
+    position: relative;
+    cursor: grab;
+    background-color: #fff;
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.4);
+
+    // display the entry menu button on hover, in mobile edit mode or when it is the selected entry
+    &:hover,
+    &.mobile-edit-mode,
+    &.selected-entry {
+        .entry-menu-button {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
+    }
+
+    // on hover, change the background color and slightly move the title
+    &:hover {
+        background-color: #f4f4f4;
+
+        .entry-title-wrapper {
+            padding-top: 4px;
+            padding-bottom: 6px;
+        }
+    }
+
+    // jiggle animation in mobile edit mode
+    &.mobile-edit-mode {
+        animation: jiggle 0.3s infinite;
+    }
+
+    // stop animation on drag-preview, as it will break the layout
+    // however, the same behavior is done on iPhone home screen
+    &.cdk-drag-preview {
+        animation: none !important;
+    }
+
+    // apply different styles for the [new] button
+    &.empty {
+        background: unset;
+        border: 2px dashed #fff;
+        box-shadow: none;
+
+        .entry-icon-wrapper {
+            height: 100%;
+            align-items: center;
+
+            .entry-icon {
+                color: #fff;
+            }
+        }
+    }
+
+    // badge for new items
+    .entry-badge {
+        padding: 2px 6px;
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        min-width: 20px;
+        border-radius: 50%;
+        text-align: center;
+        font-size: $fontSizeXSmall;
+        color: #fff;
+        background-color: var(--warning);
+    }
+
+    // wrapper for the main icon of the entry
+    .entry-icon-wrapper {
+        height: var(--icon-container-height);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+
+        .entry-icon {
+            font-size: 48px;
+            color: var(--primary);
+        }
+    }
+
+    // wrapper for the title of the entry
+    .entry-title-wrapper {
+        padding: 6px 8px 4px 8px;
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: calc(var(--tile-size) - var(--icon-container-height));
+        overflow: hidden;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        transition: padding-bottom 0.2s;
+
+        // reset padding top and bottom to properly fit the mat-form-field
+        &.reset-padding {
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+        }
+
+        .entry-title {
+            max-height: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            font-size: $fontSizeSmall;
+            font-weight: 600;
+            line-height: 1.4;
+            text-align: center;
+            color: var(--primary);
+
+            input {
+                max-width: 100px;
+            }
+        }
+    }
+
+    // the menu button of the entry
+    .entry-menu-button {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 2;
+        background-color: rgba(128, 128, 128, 0.5);
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        //transition: opacity 0.2s ease;
+        pointer-events: none; // verhindert versehentliche Klicks im Normalzustand
+
+        .mat-icon {
+            font-size: 20px;
+            color: white;
+        }
+    }
+}
+
+// dummy dropdown element for the contextMenu positioning
+.dropdown-dummy {
+    position: fixed;
+}
+
+// quickfix for now - replace by es-dropdown, if possible
+::ng-deep .add-shortcut-entry-menu {
+    .mat-mdc-menu-item .mat-icon {
+        font-size: 24px;
+    }
+    .mat-mdc-menu-item-text {
+        display: flex;
+        align-items: center;
+    }
+}
+
+// override form-field max-width + add padding-top to properly show label
+::ng-deep .rename-node-title {
+    padding-top: 8px;
+    max-width: 100%;
+
+    // decrease paddings inside input
+    .mat-mdc-text-field-wrapper {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    // decrease size of input field
+    .mat-mdc-form-field-infix {
+        padding-top: 8px !important;
+        padding-bottom: 8px !important;
+    }
+}

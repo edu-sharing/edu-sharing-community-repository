@@ -1,9 +1,17 @@
-import { ApplicationConfig, EventEmitter, importProvidersFrom, Injectable } from '@angular/core';
+import {
+    ApplicationConfig,
+    EventEmitter,
+    importProvidersFrom,
+    Injectable,
+    NgModule,
+} from '@angular/core';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { TranslateService } from '@ngx-translate/core';
 import {
+    ClientConfig,
+    ConfigService,
     HOME_REPOSITORY,
     MdsDefinition,
     MdsIdentifier,
@@ -47,6 +55,13 @@ export class MdsEditorInstanceServiceMock extends MdsEditorInstanceService {
     ] as Node[]);
     widgets = new BehaviorSubject([(window as any).widget]);
 }
+@NgModule()
+export class I18nModule {
+    constructor(translate: TranslateService) {
+        translate.setDefaultLang('de');
+        translate.use('de');
+    }
+}
 @Injectable()
 export class MdsViewerServiceMock extends MdsViewerService {
     values$ = new BehaviorSubject({
@@ -60,7 +75,93 @@ export class MdsServiceMock extends MdsService {
         return of(DefaultMds);
     }
 }
+@Injectable()
+export class ConfigServiceMock extends ConfigService {
+    observeConfig(): Observable<ClientConfig | any> {
+        const DEFAULT_SUPPORTED_LANGUAGES = [
+            'de',
+            'de-informal',
+            'de-no-binnen-i',
+            'en',
+            'fr',
+            'it',
+            'none',
+        ];
+
+        // @ts-ignore
+        const config: ClientConfig | any = {
+            frontpage: {
+                dashboard: {
+                    shortcuts: {
+                        maxEntries: 6,
+                        entries: [
+                            {
+                                id: 'search',
+                                icon: 'search',
+                                url: '/edu-sharing/components/search',
+                                toolpermission: null,
+                                defaultVisibility: 'visible',
+                            },
+                            {
+                                id: 'workspace',
+                                icon: 'cloud',
+                                url: '/edu-sharing/components/workspace',
+                                toolpermission: 'TOOLPERMISSION_WORKSPACE',
+                                defaultVisibility: 'visible',
+                            },
+                            {
+                                id: 'myfiles',
+                                icon: 'svg-myfiles.svg',
+                                url: '/edu-sharing/components/workspace?root=MY_FILES&id=b59d36e0-af5c-4b37-9d36-e0af5ceb378d&mainnav=true&displayType=0',
+                                toolpermission: 'TOOLPERMISSION_WORKSPACE',
+                                defaultVisibility: 'visible',
+                            },
+                            {
+                                id: 'mycollections',
+                                icon: 'layers',
+                                url: '/edu-sharing/components/collections?scope=MY',
+                                toolpermission: null,
+                                defaultVisibility: 'visible',
+                            },
+                            {
+                                id: 'invitedcollections',
+                                icon: 'group',
+                                url: '/edu-sharing/components/collections?scope=EDU_GROUPS',
+                                toolpermission: null,
+                                defaultVisibility: 'visible',
+                            },
+                            {
+                                id: 'publiccollections',
+                                icon: 'language',
+                                url: '/edu-sharing/components/collections?scope=EDU_ALL',
+                                toolpermission: null,
+                                defaultVisibility: 'hidden',
+                            },
+                            {
+                                id: 'aboutme',
+                                icon: 'person',
+                                url: '/edu-sharing/components/profiles/-me-',
+                                toolpermission: null,
+                                defaultVisibility: 'hidden',
+                            },
+                            {
+                                id: 'documentation',
+                                icon: 'book',
+                                url: 'https://docs.edu-sharing.com/de/edu-sharing-documentation',
+                                toolpermission: null,
+                                defaultVisibility: 'hidden',
+                            },
+                        ],
+                    },
+                },
+            },
+            supportedLanguages: DEFAULT_SUPPORTED_LANGUAGES,
+        };
+        return of(config);
+    }
+}
 export const mdsStorybookProviders: ApplicationConfig['providers'] = [
+    { provide: ConfigService, useClass: ConfigServiceMock },
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
     { provide: MdsEditorInstanceService, useClass: MdsEditorInstanceServiceMock },
     { provide: MdsViewerService, useClass: MdsViewerServiceMock },

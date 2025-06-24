@@ -1460,6 +1460,17 @@
       "proposeForCollectionEvent": "Vorschläge für Sammlungen"
     }
   },
+  "TILE_ITEMS": {
+    "CHANGE_TITLE": "Titel ändern",
+    "search": "Suche",
+    "workspace": "Workspace",
+    "myfiles": "Eigene Dateien",
+    "mycollections": "Meine Sammlungen",
+    "invitedcollections": "Freigegebene Sammlungen",
+    "publiccollections": "Öffentliche Sammlungen",
+    "aboutme": "Eigenes Profil",
+    "documentation": "Zur Dokumentation"
+  },
   "API_ERROR": {
     "RELOAD_NOTICE_TITLE": "Seite muss neugeladen werden",
     "RELOAD_NOTICE": "Beim Laden von wichtigen Informationen ist etwas schief gegangen. Bitte laden Sie die Seite neu.",
