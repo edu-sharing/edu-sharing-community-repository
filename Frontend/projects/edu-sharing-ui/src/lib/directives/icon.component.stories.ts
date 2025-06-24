@@ -18,7 +18,14 @@ const icon: Meta<IconComponent> = {
 
 export default icon;
 
-type Story = StoryObj<ButtonComponent>;
-export const DefaultStory: Story = {
-    args: {},
+type Story = StoryObj<IconComponent>;
+export const MaterialStory: Story = {
+    args: {
+        type: 'material',
+    },
+};
+export const EduStory: Story = {
+    args: {
+        type: 'edu',
+    },
 };
