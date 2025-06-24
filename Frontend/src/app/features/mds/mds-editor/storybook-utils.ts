@@ -27,6 +27,7 @@ import { Toast } from '../../../services/toast';
 import { InputStatus, MdsWidgetValue } from '../types/types';
 import { MdsEditorInstanceService } from './mds-editor-instance.service';
 import {
+    Helper,
     InitialValues,
     MdsValueList,
     MdsViewerService,
@@ -34,14 +35,39 @@ import {
     VCard,
     ViewInstanceService,
 } from 'ngx-edu-sharing-ui';
+import { HttpClient } from '@angular/common/http';
+import { catchError, map, shareReplay, tap } from 'rxjs/operators';
 
-export const translateProvider = {
-    instant: (v: string) => v,
-    get: (v: string) => of(v),
-    onTranslationChange: of({ lang: 'none' }),
-    onDefaultLangChange: of({ lang: 'none' }),
-    onLangChange: of({}),
-};
+@Injectable()
+export class translateProvider {
+    private translation$: Observable<any> | null = null;
+    private cache$ = new BehaviorSubject(null);
+
+    constructor(private httpClient: HttpClient) {}
+
+    instant(v: string) {
+        return Helper.getDotPathFromNestedObject(this.cache$?.value, v);
+    }
+
+    get(v: string): Observable<any> {
+        if (!this.translation$) {
+            this.translation$ = this.httpClient.get('/edu-sharing/assets/i18n/common/de.json').pipe(
+                catchError(() =>
+                    this.httpClient.get(
+                        'http://localhost:4200/edu-sharing/assets/i18n/common/de.json',
+                    ),
+                ),
+                tap((v) => this.cache$.next(v)),
+                shareReplay(1),
+            );
+        }
+        return this.translation$.pipe(map((_) => this.instant(v)));
+    }
+
+    onTranslationChange = of({ lang: 'none' });
+    onDefaultLangChange = of({ lang: 'none' });
+    onLangChange = of({});
+}
 @Injectable()
 export class MdsEditorInstanceServiceMock extends MdsEditorInstanceService {
     nodes$ = new BehaviorSubject<Node[]>([
@@ -171,7 +197,7 @@ export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     Toast,
     {
         provide: TranslateService,
-        useValue: translateProvider,
+        useClass: translateProvider,
     },
     MatSnackBar,
     provideAnimations(),
