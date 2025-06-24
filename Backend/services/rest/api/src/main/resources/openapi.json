@@ -1526,11 +1526,15 @@
           {
             "properties": {
               "id": {
+                "minLength": 1,
                 "type": "string"
               }
             },
             "type": "object"
           }
+        ],
+        "required": [
+          "id"
         ],
         "type": "object"
       },
@@ -1547,6 +1551,9 @@
             },
             "type": "object"
           }
+        ],
+        "required": [
+          "id"
         ],
         "type": "object"
       },
@@ -5597,11 +5604,15 @@
           {
             "properties": {
               "ref": {
+                "minLength": 1,
                 "type": "string"
               }
             },
             "type": "object"
           }
+        ],
+        "required": [
+          "ref"
         ],
         "type": "object"
       },
@@ -5618,6 +5629,9 @@
             },
             "type": "object"
           }
+        ],
+        "required": [
+          "node"
         ],
         "type": "object"
       },

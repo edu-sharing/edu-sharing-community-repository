@@ -860,7 +860,7 @@ public class IamApi {
     public Response setDashboardShortcuts(
             @Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
             @Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue = "-me-")) @PathParam("person") String person,
-            @Body List<DashboardShortcut> shortcuts,
+            @Valid @Body List<DashboardShortcut> shortcuts,
             @Context HttpServletRequest req) {
 
         RepositoryDao repoDao = RepositoryDao.getRepository(repository);

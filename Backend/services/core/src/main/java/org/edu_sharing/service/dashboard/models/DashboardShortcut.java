@@ -4,10 +4,12 @@ package org.edu_sharing.service.dashboard.models;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 
 @Data
 @NoArgsConstructor
@@ -22,9 +24,11 @@ public abstract class DashboardShortcut {
     protected String title;
 
     @Data
+    @Validated
     @NoArgsConstructor
     @EqualsAndHashCode(callSuper = true)
     public static class DefaultDashboardShortcut extends DashboardShortcut {
+        @NotEmpty
         private String id;
 
         public DefaultDashboardShortcut(String id, String title) {
@@ -34,10 +38,12 @@ public abstract class DashboardShortcut {
     }
 
     @Data
+    @Validated
     @NoArgsConstructor
     @EqualsAndHashCode(callSuper = true)
     public static class RefDashboardShortcut extends DashboardShortcut {
 
+        @NotEmpty
         private String ref;
         public RefDashboardShortcut(String title, String ref) {
             super(title);

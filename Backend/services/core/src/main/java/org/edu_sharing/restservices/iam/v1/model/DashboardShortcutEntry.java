@@ -2,6 +2,7 @@ package org.edu_sharing.restservices.iam.v1.model;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.*;
@@ -24,6 +25,7 @@ public abstract class DashboardShortcutEntry {
     @NoArgsConstructor
     @EqualsAndHashCode(callSuper = true)
     public static class DefaultDashboardShortcutEntry extends DashboardShortcutEntry {
+        @JsonProperty(required = true)
         private String id;
 
         public DefaultDashboardShortcutEntry(String id, String title) {
@@ -37,6 +39,7 @@ public abstract class DashboardShortcutEntry {
     @NoArgsConstructor
     @EqualsAndHashCode(callSuper = true)
     public static class RefDashboardShortcutEntry extends DashboardShortcutEntry {
+        @JsonProperty(required = true)
         private Node node;
 
         public RefDashboardShortcutEntry(String title, Node node) {
