@@ -184,6 +184,10 @@ $horizontalScrollPadding: 1.5em;
     width: 250px;
 }
 
+.configure-columns {
+    color: var(--textMediumLight);
+}
+
 // Disable animations for rearranging. We misuse `entered` events for doing the rearranging, so the
 // preview animation would go to the wrong position (see
 // https://stackblitz.com/edit/drag-drop-dashboard).
