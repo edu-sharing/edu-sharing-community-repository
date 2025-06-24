@@ -944,8 +944,19 @@
         },
         "type": "object"
       },
+      "ConfigDashboard": {
+        "properties": {
+          "shortcuts": {
+            "$ref": "#/components/schemas/ShortcutConfig"
+          }
+        },
+        "type": "object"
+      },
       "ConfigFrontpage": {
         "properties": {
+          "dashboard": {
+            "$ref": "#/components/schemas/ConfigDashboard"
+          },
           "enabled": {
             "type": "boolean"
           }
@@ -1471,6 +1482,72 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "DashboardShortcut": {
+        "discriminator": {
+          "propertyName": "type"
+        },
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "DashboardShortcutEntry": {
+        "discriminator": {
+          "propertyName": "type"
+        },
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "DefaultDashboardShortcut": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DashboardShortcut"
+          },
+          {
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "type": "object"
+      },
+      "DefaultDashboardShortcutEntry": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DashboardShortcutEntry"
+          },
+          {
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ],
         "type": "object"
       },
       "DeleteOption": {
@@ -5512,6 +5589,38 @@
         },
         "type": "object"
       },
+      "RefDashboardShortcut": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DashboardShortcut"
+          },
+          {
+            "properties": {
+              "ref": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "type": "object"
+      },
+      "RefDashboardShortcutEntry": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DashboardShortcutEntry"
+          },
+          {
+            "properties": {
+              "node": {
+                "$ref": "#/components/schemas/Node"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "type": "object"
+      },
       "ReferenceEntries": {
         "properties": {
           "pagination": {
@@ -7415,6 +7524,48 @@
           },
           "passwordMatches": {
             "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ShortcutConfig": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/ShortcutConfigEntry"
+            },
+            "type": "array",
+            "xml": {
+              "name": "entry"
+            }
+          },
+          "maxEntries": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ShortcutConfigEntry": {
+        "properties": {
+          "defaultVisibility": {
+            "enum": [
+              "visible",
+              "hidden"
+            ],
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "toolPermission": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -21630,6 +21781,279 @@
           }
         },
         "summary": "Fetches the status of the current 2fa of the user",
+        "tags": [
+          "IAM v1"
+        ]
+      }
+    },
+    "/iam/v1/people/{repository}/{person}/dashboard/shortcuts": {
+      "delete": {
+        "operationId": "deleteDashboardShortcuts",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "username (or \"-me-\" for current user)",
+            "in": "path",
+            "name": "person",
+            "required": true,
+            "schema": {
+              "default": "-me-",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "tags": [
+          "IAM v1"
+        ]
+      },
+      "get": {
+        "operationId": "getDashboardShortcuts",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "username (or \"-me-\" for current user)",
+            "in": "path",
+            "name": "person",
+            "required": true,
+            "schema": {
+              "default": "-me-",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DashboardShortcutEntry"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "tags": [
+          "IAM v1"
+        ]
+      },
+      "put": {
+        "operationId": "setDashboardShortcuts",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "username (or \"-me-\" for current user)",
+            "in": "path",
+            "name": "person",
+            "required": true,
+            "schema": {
+              "default": "-me-",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/DashboardShortcut"
+                },
+                "type": "array"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
         "tags": [
           "IAM v1"
         ]

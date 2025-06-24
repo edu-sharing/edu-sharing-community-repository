@@ -10,6 +10,7 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.alfresco.service.namespace.QName;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
@@ -23,6 +24,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.EduSharingLockHelper;
 import org.edu_sharing.repository.server.tools.ImageTool;
 import org.edu_sharing.repository.server.tools.cache.PersonCache;
+import org.edu_sharing.restservices.iam.v1.model.DashboardShortcutEntry;
 import org.edu_sharing.restservices.iam.v1.model.GroupEntries;
 import org.edu_sharing.restservices.iam.v1.model.ProfileSettings;
 import org.edu_sharing.restservices.shared.*;
@@ -30,6 +32,9 @@ import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.QRCode2Fa;
+import org.edu_sharing.service.dashboard.DashboardConfigService;
+import org.edu_sharing.service.dashboard.DashboardConfigServiceFactory;
+import org.edu_sharing.service.dashboard.models.DashboardShortcut;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -40,6 +45,7 @@ import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.edu_sharing.util.CheckedCast;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -49,18 +55,18 @@ import java.util.*;
 
 public class PersonDao {
 
-	Logger logger = Logger.getLogger(PersonDao.class);
-	public static final String ME = "-me-";
+    Logger logger = Logger.getLogger(PersonDao.class);
+    public static final String ME = "-me-";
 
-	public static PersonDao getPerson(RepositoryDao repoDao, String userName) throws DAOException {
+    public static PersonDao getPerson(RepositoryDao repoDao, String userName) throws DAOException {
 
-		try {
-			String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
+        try {
+            String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
 
-			if (ME.equals(userName)) {
+            if (ME.equals(userName)) {
 
-				userName = currentUser;
-			}
+                userName = currentUser;
+            }
 	
 			/*
 			if (   !currentUser.equals(userName)
@@ -72,734 +78,775 @@ public class PersonDao {
 			}
 			*/
 
-			return new PersonDao(repoDao, userName);
+            return new PersonDao(repoDao, userName);
 
-		} catch (Exception e) {
+        } catch (Exception e) {
 
-			throw DAOException.mapping(e);
-		}
-	}
-	private boolean isCurrentUserOrAdmin() {
-		try {
-		String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
-		if (   !currentUser.equals(getUserName())
-				&& !repoDao.getBaseClient().isAdmin(currentUser)
-				&& !AuthenticationUtil.isRunAsUserTheSystemUser()
-					) {
+            throw DAOException.mapping(e);
+        }
+    }
 
-				return false;
-			}
-		}catch(Exception e) {
-			return false;
-		}
-		return true;
-	}
-	public static PersonDao createPerson(RepositoryDao repoDao, String userName,String password, UserProfileEdit profile, boolean returnResult) throws DAOException {
+    private boolean isCurrentUserOrAdmin() {
+        try {
+            String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
+            if (!currentUser.equals(getUserName())
+                    && !repoDao.getBaseClient().isAdmin(currentUser)
+                    && !AuthenticationUtil.isRunAsUserTheSystemUser()
+            ) {
 
-		try {
+                return false;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
 
-			try {
+    public static PersonDao createPerson(RepositoryDao repoDao, String userName, String password, UserProfileEdit profile, boolean returnResult) throws DAOException {
 
-				repoDao.getBaseClient().getUserInfo(userName);
+        try {
 
-				throw new DAOValidationException(
-						new IllegalArgumentException("Username already exists."));
+            try {
 
-			} catch (NoSuchPersonException e) {
+                repoDao.getBaseClient().getUserInfo(userName);
 
-				Map<String, Serializable> userInfo = profileToMap(profile);
-				userInfo.put(CCConstants.PROP_USERNAME, userName);
+                throw new DAOValidationException(
+                        new IllegalArgumentException("Username already exists."));
 
-				AuthorityServiceFactory.getAuthorityService(repoDao.getId()).createOrUpdateUser(userInfo);
-				if(returnResult){
-					PersonDao result=new PersonDao(repoDao, userName);
-					if(password!=null)
-						result.changePassword(null,password);
-					return result;
-				}else return null;
+            } catch (NoSuchPersonException e) {
 
-			}
+                Map<String, Serializable> userInfo = profileToMap(profile);
+                userInfo.put(CCConstants.PROP_USERNAME, userName);
 
-		} catch (Exception e) {
+                AuthorityServiceFactory.getAuthorityService(repoDao.getId()).createOrUpdateUser(userInfo);
+                if (returnResult) {
+                    PersonDao result = new PersonDao(repoDao, userName);
+                    if (password != null)
+                        result.changePassword(null, password);
+                    return result;
+                } else return null;
 
-			throw DAOException.mapping(e);
-		}
-	}
+            }
 
-	private final MCAlfrescoBaseClient baseClient;
+        } catch (Exception e) {
 
-	private final RepositoryDao repoDao;
+            throw DAOException.mapping(e);
+        }
+    }
 
-	private final Map<String, Serializable> userInfo;
-	private String homeFolderId;
-	private List<String> sharedFolderIds = null;
+    private final MCAlfrescoBaseClient baseClient;
 
-	private NodeService nodeService;
-	private SearchService searchService;
+    private final RepositoryDao repoDao;
 
-	private AuthorityService authorityService;
+    private final Map<String, Serializable> userInfo;
+    private String homeFolderId;
+    private List<String> sharedFolderIds = null;
+
+    private final NodeService nodeService;
+    private final SearchService searchService;
+
+    private final AuthorityService authorityService;
+    private final DashboardConfigService dashboardConfigService;
 
 
-	public PersonDao(RepositoryDao repoDao, String userName) throws DAOException  {
+    public PersonDao(RepositoryDao repoDao, String userName) throws DAOException {
 
-		try {
+        try {
 
-			this.baseClient = repoDao.getBaseClient();
-			this.nodeService = NodeServiceFactory.getNodeService(repoDao.getId());
-			this.searchService = SearchServiceFactory.getSearchService(repoDao.getId());
-			this.authorityService = AuthorityServiceFactory.getAuthorityService(repoDao.getId());
+            this.baseClient = repoDao.getBaseClient();
+            this.nodeService = NodeServiceFactory.getNodeService(repoDao.getId());
+            this.searchService = SearchServiceFactory.getSearchService(repoDao.getId());
+            this.authorityService = AuthorityServiceFactory.getAuthorityService(repoDao.getId());
+            this.dashboardConfigService = DashboardConfigServiceFactory.getDashboardConfigService(repoDao.getId());
 
-			this.repoDao = repoDao;
+            this.repoDao = repoDao;
 
-			this.userInfo = authorityService.getUserInfo(userName);
+            this.userInfo = authorityService.getUserInfo(userName);
 
-			if(this.userInfo == null){
-				throw new DAOMissingException(new Exception("user "+ userName + " not found"));
-			}
+            if (this.userInfo == null) {
+                throw new DAOMissingException(new Exception("user " + userName + " not found"));
+            }
 
-			// may causes performance penalties!
+            // may causes performance penalties!
 			/* this.parentOrganizations = AuthenticationUtil.runAsSystem(() ->
 					authorityService.getEduGroups(userName, NodeServiceInterceptor.getEduSharingScope())
 			);*/
 
-		} catch (Throwable t) {
-			throw DAOException.mapping(t);
-		}
-	}
+        } catch (Throwable t) {
+            throw DAOException.mapping(t);
+        }
+    }
 
-	private void initGroupFolders() {
-		if(sharedFolderIds != null) {
-			return;
-		}
-		try{
-			sharedFolderIds = new ArrayList<>();
-			boolean getGroupFolder = true;
-			//don't run into access denied wrapped by Transaction commit failed
-			if(!AuthenticationUtil.isRunAsUserTheSystemUser()
-					&& !AuthenticationUtil.getRunAsUser().equals(ApplicationInfoList.getHomeRepository().getUsername())
-					&& !AuthenticationUtil.getRunAsUser().equals(getUserName())) {
-				getGroupFolder = false;
-			}
-			if(getGroupFolder && getUserName() !=null) {
-				String groupFolderId = ((MCAlfrescoAPIClient)baseClient).getGroupFolderId(getUserName());
-				if (groupFolderId != null) {
+    private void initGroupFolders() {
+        if (sharedFolderIds != null) {
+            return;
+        }
+        try {
+            sharedFolderIds = new ArrayList<>();
+            boolean getGroupFolder = AuthenticationUtil.isRunAsUserTheSystemUser()
+                    || AuthenticationUtil.getRunAsUser().equals(ApplicationInfoList.getHomeRepository().getUsername())
+                    || AuthenticationUtil.getRunAsUser().equals(getUserName());
+            //don't run into access denied wrapped by Transaction commit failed
+            if (getGroupFolder && getUserName() != null) {
+                String groupFolderId = ((MCAlfrescoAPIClient) baseClient).getGroupFolderId(getUserName());
+                if (groupFolderId != null) {
 
-					Map<String, Map<String, Object>> children = baseClient.getChildren(groupFolderId);
+                    Map<String, Map<String, Object>> children = baseClient.getChildren(groupFolderId);
 
-					for (Object key : children.keySet()) {
+                    for (Object key : children.keySet()) {
 
-						sharedFolderIds.add(key.toString());
-					}
-				}
-			}
-		}catch(Throwable e) {
+                        sharedFolderIds.add(key.toString());
+                    }
+                }
+            }
+        } catch (Throwable ignored) {
 
         }
     }
 
-	public void changeProfile(UserProfileEdit profile) throws DAOException {
+    public void changeProfile(UserProfileEdit profile) throws DAOException {
 
-		try {
+        try {
 
-			Map<String, Serializable> newUserInfo = profileToMap(profile);
-			newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());
-			authorityService.createOrUpdateUser(newUserInfo);
-		} catch (Throwable t) {
+            Map<String, Serializable> newUserInfo = profileToMap(profile);
+            newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());
+            authorityService.createOrUpdateUser(newUserInfo);
+        } catch (Throwable t) {
 
-			throw DAOException.mapping(t);
-		}
+            throw DAOException.mapping(t);
+        }
 
-	}
+    }
 
-	private static Map<String, Serializable> profileToMap(UserProfileEdit profile) {
-		Map<String, Serializable> newUserInfo = new HashMap<>();
-		newUserInfo.put(CCConstants.PROP_USER_FIRSTNAME, profile.getFirstName());
-		newUserInfo.put(CCConstants.PROP_USER_LASTNAME, profile.getLastName());
-		newUserInfo.put(CCConstants.PROP_USER_EMAIL, profile.getEmail());
+    private static Map<String, Serializable> profileToMap(UserProfileEdit profile) {
+        Map<String, Serializable> newUserInfo = new HashMap<>();
+        newUserInfo.put(CCConstants.PROP_USER_FIRSTNAME, profile.getFirstName());
+        newUserInfo.put(CCConstants.PROP_USER_LASTNAME, profile.getLastName());
+        newUserInfo.put(CCConstants.PROP_USER_EMAIL, profile.getEmail());
         newUserInfo.put(CCConstants.CM_PROP_PERSON_ABOUT, profile.getAbout());
-		newUserInfo.put(CCConstants.CM_PROP_PERSON_SKILLS, profile.getSkills() != null ? new ArrayList<>(Arrays.asList(profile.getSkills())) : null);
+        newUserInfo.put(CCConstants.CM_PROP_PERSON_SKILLS, profile.getSkills() != null ? new ArrayList<>(Arrays.asList(profile.getSkills())) : null);
         newUserInfo.put(CCConstants.CM_PROP_PERSON_VCARD, profile.getVCard());
-		if(AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
-			newUserInfo.put(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION, profile.getPrimaryAffiliation());
-			if (profile.getSizeQuota() > 0) {
-				newUserInfo.put(CCConstants.CM_PROP_PERSON_SIZE_QUOTA, "" + profile.getSizeQuota());
-			} else {
-				newUserInfo.put(CCConstants.CM_PROP_PERSON_SIZE_QUOTA, null);
-			}
-		}
-		return newUserInfo;
-	}
+        if (AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
+            newUserInfo.put(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION, profile.getPrimaryAffiliation());
+            if (profile.getSizeQuota() > 0) {
+                newUserInfo.put(CCConstants.CM_PROP_PERSON_SIZE_QUOTA, "" + profile.getSizeQuota());
+            } else {
+                newUserInfo.put(CCConstants.CM_PROP_PERSON_SIZE_QUOTA, null);
+            }
+        }
+        return newUserInfo;
+    }
 
-	public GroupEntries getMemberships(String pattern, int skipCount, int maxItems, SortDefinition sort) throws DAOException{
-		if (!AuthenticationUtil.getFullyAuthenticatedUser().equals(getAuthorityName()) && !AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
-			throw new NotAnAdminException();
-		}
-    	SearchResult<String> search=SearchServiceFactory.getSearchService(repoDao.getId()).searchPersonGroups(
-    					getAuthorityName(),
-    					pattern,
-    					skipCount,
-    					maxItems,
-    					sort
+    public GroupEntries getMemberships(String pattern, int skipCount, int maxItems, SortDefinition sort) throws DAOException {
+        if (!AuthenticationUtil.getFullyAuthenticatedUser().equals(getAuthorityName()) && !AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
+            throw new NotAnAdminException();
+        }
+        SearchResult<String> search = SearchServiceFactory.getSearchService(repoDao.getId()).searchPersonGroups(
+                getAuthorityName(),
+                pattern,
+                skipCount,
+                maxItems,
+                sort
 
-    			);
-		List<Group> result = new ArrayList<>();
-    	for (String member: search.getData()) {
-    		result.add(new GroupDao(repoDao,member).asGroup());
-    	}
-    	GroupEntries response = new GroupEntries();
-    	response.setGroups(result);
-    	response.setPagination(new Pagination(search));
-    	return response;
-	}
+        );
+        List<Group> result = new ArrayList<>();
+        for (String member : search.getData()) {
+            result.add(new GroupDao(repoDao, member).asGroup());
+        }
+        GroupEntries response = new GroupEntries();
+        response.setGroups(result);
+        response.setPagination(new Pagination(search));
+        return response;
+    }
 
-	public void changePassword(String oldPassword, String newPassword) throws DAOException {
+    public void changePassword(String oldPassword, String newPassword) throws DAOException {
 
-		try {
-			if(Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")){
-				throw new AccessDeniedException("It's not allowed to change password of external managed users. Please contact your system administrator.");
-			}
+        try {
+            if (Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")) {
+                throw new AccessDeniedException("It's not allowed to change password of external managed users. Please contact your system administrator.");
+            }
 
-			if (oldPassword == null) {
-				((MCAlfrescoAPIClient)this.baseClient).setUserPassword(getUserName(), newPassword);
-			} else {
-				((MCAlfrescoAPIClient)this.baseClient).updateUserPassword(getUserName(), oldPassword, newPassword);
-			}
-		} catch (Throwable t) {
+            if (oldPassword == null) {
+                ((MCAlfrescoAPIClient) this.baseClient).setUserPassword(getUserName(), newPassword);
+            } else {
+                ((MCAlfrescoAPIClient) this.baseClient).updateUserPassword(getUserName(), oldPassword, newPassword);
+            }
+        } catch (Throwable t) {
 
-			throw DAOException.mapping(t);
-		}
+            throw DAOException.mapping(t);
+        }
 
-	}
+    }
 
-	public void delete(boolean force) throws DAOException {
-		try {
-			String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
-			if (currentUser.equals(getUserName())) {
-				throw new DAOValidationException(
-						new IllegalArgumentException("Session user can not be deleted."));
-			}
-			if(!force && !PersonLifecycleService.PersonStatus.todelete.equals(getStatus().getStatus())){
-				throw new IllegalStateException("User status is not yet set " +
-						PersonLifecycleService.PersonStatus.todelete + ", got " + getStatus().getStatus());
-			}
-			((MCAlfrescoAPIClient)this.baseClient).deleteUser(getUserName());
+    public void delete(boolean force) throws DAOException {
+        try {
+            String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
+            if (currentUser.equals(getUserName())) {
+                throw new DAOValidationException(
+                        new IllegalArgumentException("Session user can not be deleted."));
+            }
+            if (!force && !PersonLifecycleService.PersonStatus.todelete.equals(getStatus().getStatus())) {
+                throw new IllegalStateException("User status is not yet set " +
+                        PersonLifecycleService.PersonStatus.todelete + ", got " + getStatus().getStatus());
+            }
+            ((MCAlfrescoAPIClient) this.baseClient).deleteUser(getUserName());
 
-		} catch (Exception e) {
-			throw DAOException.mapping(e);
-		}
-	}
+        } catch (Exception e) {
+            throw DAOException.mapping(e);
+        }
+    }
 
-	private String getNodeId() {
-		return (String) this.userInfo.get(CCConstants.SYS_PROP_NODE_UID);
-	}
-	public User asPerson() throws DAOException {
+    private String getNodeId() {
+        return (String) this.userInfo.get(CCConstants.SYS_PROP_NODE_UID);
+    }
 
-    	User data = new User();
+    public User asPerson() throws DAOException {
 
-    	data.setAuthorityName(getAuthorityName());
-    	data.setAuthorityType(Authority.Type.USER);
+        User data = new User();
 
-    	data.setUserName(getUserName());
+        data.setAuthorityName(getAuthorityName());
+        data.setAuthorityType(Authority.Type.USER);
 
-		data.setOrganizations(OrganizationDao.mapOrganizations(getParentOrganizations()));
+        data.setUserName(getUserName());
+
+        data.setOrganizations(OrganizationDao.mapOrganizations(getParentOrganizations()));
 
 
-		data.setProfile(getProfile());
-    	data.setStatus(getStatus());
+        data.setProfile(getProfile());
+        data.setStatus(getStatus());
 
-    	if(isCurrentUserOrAdmin()) {
-			data.setProperties(getProperties());
+        if (isCurrentUserOrAdmin()) {
+            data.setProperties(getProperties());
 
-			NodeRef homeDir = new NodeRef();
-	    	homeDir.setRepo(repoDao.getId());
-	    	homeDir.setId(getHomeFolder());
-	    	data.setHomeFolder(homeDir);
+            NodeRef homeDir = new NodeRef();
+            homeDir.setRepo(repoDao.getId());
+            homeDir.setId(getHomeFolder());
+            data.setHomeFolder(homeDir);
             data.setQuota(getQuota());
 
-			initGroupFolders();
+            initGroupFolders();
 
-			List<NodeRef> sharedFolderRefs = new ArrayList<>();
-	    	for (String sharedFolderId : sharedFolderIds) {
+            List<NodeRef> sharedFolderRefs = new ArrayList<>();
+            for (String sharedFolderId : sharedFolderIds) {
 
-	        	NodeRef sharedFolderRef = new NodeRef();
-	        	sharedFolderRef.setRepo(repoDao.getId());
-	        	sharedFolderRef.setId(sharedFolderId);
+                NodeRef sharedFolderRef = new NodeRef();
+                sharedFolderRef.setRepo(repoDao.getId());
+                sharedFolderRef.setId(sharedFolderId);
 
-	        	sharedFolderRefs.add(sharedFolderRef);
-	    	}
-	    	data.setSharedFolders(sharedFolderRefs);
-    	}
-    	return data;
-	}
+                sharedFolderRefs.add(sharedFolderRef);
+            }
+            data.setSharedFolders(sharedFolderRefs);
+        }
+        return data;
+    }
 
-	private List<EduGroup> getParentOrganizations() {
-		// may causes performance penalties!
-		return AuthenticationUtil.runAsSystem(() ->
-				authorityService.getEduGroups(this.getUserName(), NodeServiceInterceptor.getEduSharingScope())
-		);
-	}
+    private List<EduGroup> getParentOrganizations() {
+        // may causes performance penalties!
+        return AuthenticationUtil.runAsSystem(() ->
+                authorityService.getEduGroups(this.getUserName(), NodeServiceInterceptor.getEduSharingScope())
+        );
+    }
 
-	private Map<String, String[]> getProperties() {
-		Map<String, Serializable> properties = userInfo;
-		if (!(getProfileSettings().isShowEmail() || isCurrentUserOrAdmin())) // email must be showed only if is admin, or if email ragards to user login
-			properties.replace(CCConstants.CM_PROP_PERSON_EMAIL, null);
+    private Map<String, String[]> getProperties() {
+        Map<String, Serializable> properties = userInfo;
+        if (!(getProfileSettings().isShowEmail() || isCurrentUserOrAdmin())) // email must be showed only if is admin, or if email ragards to user login
+            properties.replace(CCConstants.CM_PROP_PERSON_EMAIL, null);
 
-		return NodeServiceHelper.getPropertiesMultivalue(NodeServiceHelper.transformLongToShortProperties(properties));
-	}
+        return NodeServiceHelper.getPropertiesMultivalue(NodeServiceHelper.transformLongToShortProperties(properties));
+    }
 
-	private UserQuota getQuota() {
-		UserQuota quota=new UserQuota();
-		Long sizeQuota = (Long) userInfo.get(CCConstants.CM_PROP_PERSON_SIZE_QUOTA);
-		if(sizeQuota==null || sizeQuota.equals(-1L)){
-			quota.setEnabled(false);
-			return quota;
-		}
-		Long sizeCurrent = (Long) userInfo.get(CCConstants.CM_PROP_PERSON_SIZE_CURRENT);
-		quota.setEnabled(true);
-		quota.setSizeQuota(sizeQuota);
-		quota.setSizeCurrent(sizeCurrent);
-		return quota;
-	}
+    private UserQuota getQuota() {
+        UserQuota quota = new UserQuota();
+        Long sizeQuota = (Long) userInfo.get(CCConstants.CM_PROP_PERSON_SIZE_QUOTA);
+        if (sizeQuota == null || sizeQuota.equals(-1L)) {
+            quota.setEnabled(false);
+            return quota;
+        }
+        Long sizeCurrent = (Long) userInfo.get(CCConstants.CM_PROP_PERSON_SIZE_CURRENT);
+        quota.setEnabled(true);
+        quota.setSizeQuota(sizeQuota);
+        quota.setSizeCurrent(sizeCurrent);
+        return quota;
+    }
 
-	private UserProfile getProfile() {
-		UserProfile profile = new UserProfile();
-    	profile.setFirstName(getFirstName());
-    	profile.setLastName(getLastName());
-		// Admin user can see all email even if they are not showed
-		// hide only for non admin user and if showEmail is false
-		if (getProfileSettings().isShowEmail() || isCurrentUserOrAdmin()) {
-			profile.setEmail(getEmail());
-		} else {
-			profile.setEmail("");
-		}
-		profile.setPrimaryAffiliation(getPrimaryAffiliation());
-    	profile.setAvatar(getAvatar());
-    	profile.setAbout(getAbout());
-    	profile.setSkills(getSkills());
-    	profile.setVCard(getVCard());
-    	profile.setTypes(getType());
-    	return profile;
-	}
+    private UserProfile getProfile() {
+        UserProfile profile = new UserProfile();
+        profile.setFirstName(getFirstName());
+        profile.setLastName(getLastName());
+        // Admin user can see all email even if they are not showed
+        // hide only for non admin user and if showEmail is false
+        if (getProfileSettings().isShowEmail() || isCurrentUserOrAdmin()) {
+            profile.setEmail(getEmail());
+        } else {
+            profile.setEmail("");
+        }
+        profile.setPrimaryAffiliation(getPrimaryAffiliation());
+        profile.setAvatar(getAvatar());
+        profile.setAbout(getAbout());
+        profile.setSkills(getSkills());
+        profile.setVCard(getVCard());
+        profile.setTypes(getType());
+        return profile;
+    }
 
-	private String getVCard() {
-		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_VCARD);
-	}
+    private String getVCard() {
+        return (String) this.userInfo.get(CCConstants.CM_PROP_PERSON_VCARD);
+    }
 
-	private UserStatus getStatus() {
-		UserStatus status = new UserStatus();
-		if(this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS)!=null) {
-			try {
-				status.setStatus(PersonLifecycleService.PersonStatus.valueOf((String) this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS)));
-			} catch(IllegalArgumentException e) {
-				logger.warn("Person " + getAuthorityName() +" has invalid lifecycle status: " + this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS));
-			}
-		}
-		// cast to long for rest api
-		Date date = (Date) this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE);
-		if(date != null) {
-			status.setDate(date.getTime());
-		}
-		return status;
-	}
-	public UserStats getStats() {
-		if(!LightbendConfigCache.getBoolean("repository.statistics.byUser")){
-			return null;
-		}
-		UserStats stats = new UserStats();
-		// run as admin so solr counts all materials and collections
-		return AuthenticationUtil.runAsSystem(new RunAsWork<UserStats>() {
+    private UserStatus getStatus() {
+        UserStatus status = new UserStatus();
+        if (this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS) != null) {
+            try {
+                status.setStatus(PersonLifecycleService.PersonStatus.valueOf((String) this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS)));
+            } catch (IllegalArgumentException e) {
+                logger.warn("Person " + getAuthorityName() + " has invalid lifecycle status: " + this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS));
+            }
+        }
+        // cast to long for rest api
+        Date date = (Date) this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE);
+        if (date != null) {
+            status.setDate(date.getTime());
+        }
+        return status;
+    }
 
-			@Override
-			public UserStats doWork() throws Exception {
-				BoolQuery.Builder filesQuery = getUserStatsBaseQuery();
-				filesQuery.must(m -> m.term(t -> t.field("type").value("ccm:io")));
+    public UserStats getStats() {
+        if (!LightbendConfigCache.getBoolean("repository.statistics.byUser")) {
+            return null;
+        }
+        UserStats stats = new UserStats();
+        // run as admin so solr counts all materials and collections
+        return AuthenticationUtil.runAsSystem(new RunAsWork<UserStats>() {
 
-				SearchToken token=new SearchToken();
-				token.setMaxResult(0);
-				token.setElasticQuery(filesQuery.build());
-				SearchResultNodeRef result = searchService.search(token);
-		    	stats.setNodeCount(result.getNodeCount());
+            @Override
+            public UserStats doWork() throws Exception {
+                BoolQuery.Builder filesQuery = getUserStatsBaseQuery();
+                filesQuery.must(m -> m.term(t -> t.field("type").value("ccm:io")));
 
-				BoolQuery.Builder ccQuery = getUserStatsBaseQuery();
-				ccQuery.must(m -> m.term(t -> t.field("type").value("ccm:io")));
-				ccQuery.must(m -> m.wildcard(w -> w.field("properties.ccm:commonlicense_key.keyword").value("CC_*")));
-				token.setElasticQuery(ccQuery.build());
-				result = searchService.search(token);
-		    	stats.setNodeCountCC(result.getNodeCount());
+                SearchToken token = new SearchToken();
+                token.setMaxResult(0);
+                token.setElasticQuery(filesQuery.build());
+                SearchResultNodeRef result = searchService.search(token);
+                stats.setNodeCount(result.getNodeCount());
 
-		    	BoolQuery.Builder colQuery = getUserStatsBaseQuery();
-				colQuery.must(m -> m.term(t -> t.field("aspects").value("ccm:collection")));
-				token.setElasticQuery(colQuery.build());
-		    	result = searchService.search(token);
-		    	stats.setCollectionCount(result.getNodeCount());
-				return stats;
-			}
-		});
-	}
+                BoolQuery.Builder ccQuery = getUserStatsBaseQuery();
+                ccQuery.must(m -> m.term(t -> t.field("type").value("ccm:io")));
+                ccQuery.must(m -> m.wildcard(w -> w.field("properties.ccm:commonlicense_key.keyword").value("CC_*")));
+                token.setElasticQuery(ccQuery.build());
+                result = searchService.search(token);
+                stats.setNodeCountCC(result.getNodeCount());
 
-	private BoolQuery.Builder getUserStatsBaseQuery() {
-		BoolQuery.Builder bool = QueryBuilders.bool();
-		bool.must(m -> m.term(t -> t.field("properties.cm:creator").value(getAuthorityName())));
-		bool.mustNot(mn -> mn.term(t -> t.field("aspects").value("ccm:collection_io_reference")));
-		bool.mustNot(mn -> mn.term(t -> t.field("aspects").value("ccm:io_childobject")));
-		return bool;
-	}
+                BoolQuery.Builder colQuery = getUserStatsBaseQuery();
+                colQuery.must(m -> m.term(t -> t.field("aspects").value("ccm:collection")));
+                token.setElasticQuery(colQuery.build());
+                result = searchService.search(token);
+                stats.setCollectionCount(result.getNodeCount());
+                return stats;
+            }
+        });
+    }
 
-	private org.alfresco.service.cmr.repository.NodeRef getAvatarNode() {
-		List<ChildAssociationRef> refs = this.nodeService.getChildrenChildAssociationRef(getNodeId());
-		for(ChildAssociationRef ref : refs) {
-			if(ref.getTypeQName().equals(QName.createQName(CCConstants.ASSOC_USER_PREFERENCEIMAGE))){
-				return ref.getChildRef();
-			}
-		}
-		return null;
-	}
-	private String getAvatar() {
-		org.alfresco.service.cmr.repository.NodeRef avatar=getAvatarNode();
-		if(avatar==null)
-			return null;
-		return NodeServiceHelper.getPreview(avatar).getUrl();
-	}
-	public void removeAvatar() throws DAOException {
-		try {
-			org.alfresco.service.cmr.repository.NodeRef currentAvatar = getAvatarNode();
-			if(currentAvatar!=null) {
-				this.nodeService.removeNode(currentAvatar.getId(), getNodeId(), false);
-			}
-		}catch(Throwable t) {
-			throw DAOException.mapping(t);
-		}
-	}
-	public void changeAvatar(InputStream is) throws DAOException {
-		try {
-		org.alfresco.service.cmr.repository.NodeRef currentAvatar = getAvatarNode();
-		ImageTool.VerifyResult result = ImageTool.verifyAndPreprocessImage(is, ImageTool.MAX_THUMB_SIZE);
-		String nodeId=null;
-		if(currentAvatar==null) {
-			nodeId = this.nodeService.createNode(getNodeId(), CCConstants.CCM_TYPE_IO, new HashMap<>(), CCConstants.ASSOC_USER_PREFERENCEIMAGE);
-			this.baseClient.createAssociation(getNodeId(), nodeId, CCConstants.ASSOC_USER_AVATAR);
-		}
-		else {
-			nodeId=currentAvatar.getId();
-		}
-		NodeServiceHelper.setCreateVersion(nodeId,false);
-		nodeService.writeContent(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId, result.getInputStream(), result.getMediaType().toString(), null, CCConstants.CM_PROP_CONTENT);
-		this.nodeService.setPermissions(nodeId, CCConstants.AUTHORITY_GROUP_EVERYONE,new String[]{CCConstants.PERMISSION_CONSUMER},true);
-		}catch(Throwable t) {
-			throw DAOException.mapping(t);
-		}
-	}
-	public UserSimple asPersonSimple(boolean resolveOrganizations) {
-		UserSimple data = new UserSimple();
-		data.setAuthorityName(getAuthorityName());
-		data.setAuthorityType(Authority.Type.USER);
-		data.setUserName(getUserName());
-		data.setProfile(getProfile());
-		data.setStatus(getStatus());
-		if (isCurrentUserOrAdmin()) {
-			data.setProperties(getProperties());
-		}
-		if (resolveOrganizations) {
-			data.setOrganizations(OrganizationDao.mapOrganizations(getParentOrganizations()));
-		}
-		if(isCurrentUserOrAdmin()) {
-	    	NodeRef homeDir = new NodeRef();
-	    	homeDir.setRepo(repoDao.getId());
-	    	homeDir.setId(getHomeFolder());
-    	}
-    	return data;
-	}
-	public UserRender asPersonRender() {
-		org.edu_sharing.service.authority.AuthorityService service=AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
-		UserRender data = new UserRender();
-		data.setGuest(authorityService.isGuest());
-		data.setAuthorityName(getAuthorityName());
-		data.setAuthorityType(Authority.Type.USER);
-		data.setUserName(getUserName());
-		data.setProfile(getProfile());
-		data.setPrimaryAffiliation((String) userInfo.get(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION));
-		data.setRemoteRoles((List<String>) userInfo.get(CCConstants.PROP_USER_ESREMOTEROLES));
-		return data;
-	}
-	public String getId() {
-		return getNodeId();
-	}
+    private BoolQuery.Builder getUserStatsBaseQuery() {
+        BoolQuery.Builder bool = QueryBuilders.bool();
+        bool.must(m -> m.term(t -> t.field("properties.cm:creator").value(getAuthorityName())));
+        bool.mustNot(mn -> mn.term(t -> t.field("aspects").value("ccm:collection_io_reference")));
+        bool.mustNot(mn -> mn.term(t -> t.field("aspects").value("ccm:io_childobject")));
+        return bool;
+    }
 
-	public String getAuthorityName() {
+    private org.alfresco.service.cmr.repository.NodeRef getAvatarNode() {
+        List<ChildAssociationRef> refs = this.nodeService.getChildrenChildAssociationRef(getNodeId());
+        for (ChildAssociationRef ref : refs) {
+            if (ref.getTypeQName().equals(QName.createQName(CCConstants.ASSOC_USER_PREFERENCEIMAGE))) {
+                return ref.getChildRef();
+            }
+        }
+        return null;
+    }
 
-		return getUserName();
-	}
+    private String getAvatar() {
+        org.alfresco.service.cmr.repository.NodeRef avatar = getAvatarNode();
+        if (avatar == null)
+            return null;
+        return NodeServiceHelper.getPreview(avatar).getUrl();
+    }
 
-	public String getUserName() {
-		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_USERNAME);
-	}
+    public void removeAvatar() throws DAOException {
+        try {
+            org.alfresco.service.cmr.repository.NodeRef currentAvatar = getAvatarNode();
+            if (currentAvatar != null) {
+                this.nodeService.removeNode(currentAvatar.getId(), getNodeId(), false);
+            }
+        } catch (Throwable t) {
+            throw DAOException.mapping(t);
+        }
+    }
 
-	public String getFirstName() {
+    public void changeAvatar(InputStream is) throws DAOException {
+        try {
+            org.alfresco.service.cmr.repository.NodeRef currentAvatar = getAvatarNode();
+            ImageTool.VerifyResult result = ImageTool.verifyAndPreprocessImage(is, ImageTool.MAX_THUMB_SIZE);
+            String nodeId = null;
+            if (currentAvatar == null) {
+                nodeId = this.nodeService.createNode(getNodeId(), CCConstants.CCM_TYPE_IO, new HashMap<>(), CCConstants.ASSOC_USER_PREFERENCEIMAGE);
+                this.baseClient.createAssociation(getNodeId(), nodeId, CCConstants.ASSOC_USER_AVATAR);
+            } else {
+                nodeId = currentAvatar.getId();
+            }
+            NodeServiceHelper.setCreateVersion(nodeId, false);
+            nodeService.writeContent(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId, result.getInputStream(), result.getMediaType().toString(), null, CCConstants.CM_PROP_CONTENT);
+            this.nodeService.setPermissions(nodeId, CCConstants.AUTHORITY_GROUP_EVERYONE, new String[]{CCConstants.PERMISSION_CONSUMER}, true);
+        } catch (Throwable t) {
+            throw DAOException.mapping(t);
+        }
+    }
 
-		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
-	}
+    public UserSimple asPersonSimple(boolean resolveOrganizations) {
+        UserSimple data = new UserSimple();
+        data.setAuthorityName(getAuthorityName());
+        data.setAuthorityType(Authority.Type.USER);
+        data.setUserName(getUserName());
+        data.setProfile(getProfile());
+        data.setStatus(getStatus());
+        if (isCurrentUserOrAdmin()) {
+            data.setProperties(getProperties());
+        }
+        if (resolveOrganizations) {
+            data.setOrganizations(OrganizationDao.mapOrganizations(getParentOrganizations()));
+        }
+        if (isCurrentUserOrAdmin()) {
+            NodeRef homeDir = new NodeRef();
+            homeDir.setRepo(repoDao.getId());
+            homeDir.setId(getHomeFolder());
+        }
+        return data;
+    }
 
-	public String[] getType() {
-		return AuthenticationUtil.runAsSystem(new RunAsWork<String[]>() {
-			@Override
-			public String[] doWork() throws Exception {
-				 PersonCache.get(getAuthorityName(),PersonCache.TYPE);
-				if(PersonCache.contains(getAuthorityName(),PersonCache.TYPE)) {
-					return (String[]) PersonCache.get(getAuthorityName(),PersonCache.TYPE);
-				}
-				Set<String> types=new HashSet<>();
-				Set<String> groups = authorityService.getMemberships(getAuthorityName());
-				for(String group : groups) {
-					try {
-						String type=GroupDao.getGroup(repoDao, group).getGroupType();
-						if(type!=null)
-							types.add(type);
+    public UserRender asPersonRender() {
+        org.edu_sharing.service.authority.AuthorityService service = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+        UserRender data = new UserRender();
+        data.setGuest(authorityService.isGuest());
+        data.setAuthorityName(getAuthorityName());
+        data.setAuthorityType(Authority.Type.USER);
+        data.setUserName(getUserName());
+        data.setProfile(getProfile());
+        data.setPrimaryAffiliation((String) userInfo.get(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION));
+        data.setRemoteRoles(CheckedCast.toListOf(userInfo.get(CCConstants.PROP_USER_ESREMOTEROLES), String.class));
+        return data;
+    }
 
-					}catch(Throwable t) {}
-				}
-				String[] typesArray = types.toArray(new String[0]);
-				PersonCache.put(getAuthorityName(),PersonCache.TYPE, typesArray);
-				return typesArray;
-			}
-		});
-	}
+    public String getId() {
+        return getNodeId();
+    }
 
-	public String getLastName() {
+    public String getAuthorityName() {
 
-		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
-	}
+        return getUserName();
+    }
 
-	public String getEmail() {
+    public String getUserName() {
+        return (String) this.userInfo.get(CCConstants.CM_PROP_PERSON_USERNAME);
+    }
 
-		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
-	}
-	public String getAbout() {
-		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_ABOUT);
-	}
+    public String getFirstName() {
 
-	public String getPrimaryAffiliation() {
-		return (String) this.userInfo.get(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION);
-	}
+        return (String) this.userInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
+    }
 
-	public String[] getSkills() {
-		List<String> skills = (List<String>)this.userInfo.get(CCConstants.CM_PROP_PERSON_SKILLS);
-		if(skills != null){
-			return skills.toArray(new String[0]);
-		}
-		return null;
-	}
-	public String getHomeFolder() {
-		if(this.homeFolderId == null) {
-			try {
-				this.homeFolderId = baseClient.getHomeFolderID(getUserName());
-			}catch(Throwable t) {
-				throw new RuntimeException(t);
-			}
-		}
-		return this.homeFolderId;
-	}
+    public String[] getType() {
+        return AuthenticationUtil.runAsSystem(new RunAsWork<String[]>() {
+            @Override
+            public String[] doWork() throws Exception {
+                PersonCache.get(getAuthorityName(), PersonCache.TYPE);
+                if (PersonCache.contains(getAuthorityName(), PersonCache.TYPE)) {
+                    return (String[]) PersonCache.get(getAuthorityName(), PersonCache.TYPE);
+                }
+                Set<String> types = new HashSet<>();
+                Set<String> groups = authorityService.getMemberships(getAuthorityName());
+                for (String group : groups) {
+                    try {
+                        String type = GroupDao.getGroup(repoDao, group).getGroupType();
+                        if (type != null)
+                            types.add(type);
 
-	public String getPreferences() {
-		return (String)this.userInfo.get(CCConstants.CCM_PROP_PERSON_PREFERENCES);
-	}
-	public void setPreferences(String preferences) throws Exception{
-		// validate json
-		new JSONObject(preferences);
-		Map<String, Object> newUserInfo = new HashMap<>();
-		newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());
-		newUserInfo.put(CCConstants.CCM_PROP_PERSON_PREFERENCES, preferences);
-		((MCAlfrescoAPIClient)this.baseClient).updateUser(newUserInfo);
-	}
+                    } catch (Throwable ignored) {
+                    }
+                }
+                String[] typesArray = types.toArray(new String[0]);
+                PersonCache.put(getAuthorityName(), PersonCache.TYPE, typesArray);
+                return typesArray;
+            }
+        });
+    }
 
-	/**
-	 * retrieve All property for ProfileSetting from alfresco db
-	 *
-	 * @return object of ProfileSettings
-	 */
-	public ProfileSettings getProfileSettings() {
-		ProfileSettings profileSettings = new ProfileSettings();
-		// fallback to true: because otherwise it will break previous behaviour
-		profileSettings.setShowEmail(
-				(!this.userInfo.containsKey(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL) || (boolean) this.userInfo.get(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL))
-		);
-		return profileSettings;
-	}
+    public String getLastName() {
 
-	/**
-	 * set value into alfresco database
-	 * @param  profileSettings (Object)
-	 */
-	public void setProfileSettings(ProfileSettings profileSettings) throws Exception{
-		Map<String, Object> newUserInfo = new HashMap<>();
-		newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());
-		newUserInfo.put(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL, profileSettings.isShowEmail());
-		((MCAlfrescoAPIClient)this.baseClient).updateUser(newUserInfo);
-	}
+        return (String) this.userInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
+    }
 
-	public void addNodeList(String list,String nodeId) throws Exception {
-		EduSharingLockHelper.runSingleton(PersonDao.class, this.getAuthorityName() + "_nodeList", () -> {
-			try {
-		// Simply check if node is valid
-				NodeDao node = NodeDao.getNode(this.repoDao, nodeId);
-		if(node.isDirectory())
-			throw new IllegalArgumentException("The node "+nodeId+" is a directory. Only files are allowed for this list");
-				String data = getCurrentNodeListJson();
-		JSONObject json=new JSONObject();
-		if(data!=null)
-			json=new JSONObject(data);
+    public String getEmail() {
 
-		JSONArray array=null;
-		if(json.has(list))
-			array=json.getJSONArray(list);
-		List<JSONObject> nodes=new ArrayList<>();
-		if(array!=null){
-			for(int i=0;i<array.length();i++){
-				if(array.getJSONObject(i).getString("id").equals(nodeId)) {
-					throw new DAODuplicateNodeException(new Exception("Node is already in list"), nodeId);
-				}
-				nodes.add(array.getJSONObject(i));
-			}
-		}
-		JSONObject object=new JSONObject();
-		object.put("id",nodeId);
-		object.put("dateAdded",System.currentTimeMillis());
-		nodes.add(object);
-		json.put(list,new JSONArray(nodes));
-				updateNodeList(json);
-			} catch(Exception e) {
-				throw e;
-	}
-			return null;
-		});
-	}
-	public List<NodeRef> getNodeList(String list) throws Exception {
-		String data=getCurrentNodeListJson();
-		if(data==null)
-			return null;
-		JSONObject json=new JSONObject(data);
-		if(!json.has(list))
-			return null;
-		JSONArray array=json.getJSONArray(list);
-		List<NodeRef> result=new ArrayList<>();
-		for(int i=0;i<array.length();i++){
-			String nodeId=array.getJSONObject(i).getString("id");
-			try{
-				// causes invalid nodes to fire throwable -> delete them
-				NodeDao.getNode(this.repoDao, nodeId);
-				result.add(new NodeRef(this.repoDao.getId(), nodeId));
-			}
-			catch(Throwable t){
-				removeNodeList(list,nodeId);
-			}
-		}
-		return result;
-	}
-	private String getCurrentNodeListJson() throws Exception {
-		org.edu_sharing.service.authority.AuthorityService service=AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
-		HttpSession session = Context.getCurrentInstance().getRequest().getSession();
-		String data;
-		if(service.isGuest()){
-			data=(String) session.getAttribute(CCConstants.CCM_PROP_PERSON_NODE_LISTS);
-		}
-		else{
-			data=(String) AuthorityServiceFactory.getLocalService().getAuthorityProperty(this.getUserName(), CCConstants.CCM_PROP_PERSON_NODE_LISTS);
-		}
-		return data;
-	}
+        return (String) this.userInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
+    }
 
-	public void removeNodeList(String list, String nodeId) throws Exception {
-		EduSharingLockHelper.runSingleton(PersonDao.class, this.getAuthorityName() + "_nodeList", () -> {
-			try {
-				String data = getCurrentNodeListJson();
-		if(data==null)
-			throw new IllegalArgumentException("Node list not found: "+list);
-		JSONObject json=new JSONObject(data);
-		if(!json.has(list))
-			throw new IllegalArgumentException("Node list not found: "+list);
-		JSONArray array=json.getJSONArray(list);
-		boolean found=false;
-		List<JSONObject> result=new ArrayList<>();
-		for(int i=0;i<array.length();i++){
-			if(array.getJSONObject(i).getString("id").equals(nodeId)){
-				found=true;
-			}
-			else
-				result.add(array.getJSONObject(i));
-		}
-		if(!found)
-			throw new IllegalArgumentException("Node not found in list: "+nodeId);
-		json.put(list, new JSONArray(result));
-				updateNodeList(json);
-			}catch(Exception e) {
-				throw new RuntimeException(e);
-			}
-			return null;
-		});
-}
+    public String getAbout() {
+        return (String) this.userInfo.get(CCConstants.CM_PROP_PERSON_ABOUT);
+    }
 
-	private void updateNodeList(JSONObject json) throws Exception {
-		org.edu_sharing.service.authority.AuthorityService service=AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
-		HttpSession session = Context.getCurrentInstance().getRequest().getSession();
-		if(service.isGuest()){
-			session.setAttribute(CCConstants.CCM_PROP_PERSON_NODE_LISTS,json.toString());
-		}
-		else{
-			AuthorityServiceFactory.getLocalService().setAuthorityProperty(this.getUserName(), CCConstants.CCM_PROP_PERSON_NODE_LISTS, json.toString());
-		}
-	}
+    public String getPrimaryAffiliation() {
+        return (String) this.userInfo.get(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION);
+    }
 
-	public void setStatus(PersonLifecycleService.PersonStatus status,boolean notifyMail) throws DAOValidationException {
-		if(getAuthorityName().equals(ApplicationInfoList.getHomeRepository().getUsername())) {
-			throw new DAOValidationException(
-					new Exception("Method not allowed for the primary admin")
-			);
-		}
-		String oldStatus= (String) userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS);
-		NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),getNodeId(),CCConstants.CM_PROP_PERSON_ESPERSONSTATUS,status.name(), false);
-		NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),getNodeId(),CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE,new Date(), false);
-		if(notifyMail){
-			NotificationServiceFactoryUtility.getLocalService()
-					.notifyPersonStatusChanged(
-							(String) userInfo.get(CCConstants.CM_PROP_PERSON_EMAIL),
-							getFirstName(),
-							getLastName(),
-							oldStatus,
-							status.name());
-		}
-	}
+    public String[] getSkills() {
+        List<String> skills =  CheckedCast.toListOf(this.userInfo.get(CCConstants.CM_PROP_PERSON_SKILLS), String.class);
+        if (skills != null) {
+            return skills.toArray(new String[0]);
+        }
+        return null;
+    }
 
-	public String generate2FaCode() {
-		if(Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")){
-			throw new AccessDeniedException("External managed users can't activate 2fa. Please contact your system administrator.");
-		}
+    public String getHomeFolder() {
+        if (this.homeFolderId == null) {
+            try {
+                this.homeFolderId = baseClient.getHomeFolderID(getUserName());
+            } catch (Throwable t) {
+                throw new RuntimeException(t);
+            }
+        }
+        return this.homeFolderId;
+    }
 
-		return authorityService.generate2FaCode(getUserName());
-	}
-	public boolean get2FaStatus() {
-		return authorityService.is2FaActive(getUserName());
-	}
+    public String getPreferences() {
+        return (String) this.userInfo.get(CCConstants.CCM_PROP_PERSON_PREFERENCES);
+    }
 
-	public void activate2Fa(int code) {
-		if(Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")){
-			throw new AccessDeniedException("External managed users can't activate 2fa. Please contact your system administrator.");
-		}
+    public void setPreferences(String preferences) throws Exception {
+        // validate json
+        new JSONObject(preferences);
+        Map<String, Object> newUserInfo = new HashMap<>();
+        newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());
+        newUserInfo.put(CCConstants.CCM_PROP_PERSON_PREFERENCES, preferences);
+        ((MCAlfrescoAPIClient) this.baseClient).updateUser(newUserInfo);
+    }
 
-		authorityService.activate2Fa(getUserName(), code);
-	}
+    /**
+     * retrieve All property for ProfileSetting from alfresco db
+     *
+     * @return object of ProfileSettings
+     */
+    public ProfileSettings getProfileSettings() {
+        ProfileSettings profileSettings = new ProfileSettings();
+        // fallback to true: because otherwise it will break previous behaviour
+        profileSettings.setShowEmail(
+                (!this.userInfo.containsKey(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL) || (boolean) this.userInfo.get(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL))
+        );
+        return profileSettings;
+    }
 
-	public void deactivate2Fa() {
-		if(Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")){
-			throw new AccessDeniedException("External managed users can't deactivate 2fa. Please contact your system administrator.");
-		}
+    /**
+     * set value into alfresco database
+     *
+     * @param profileSettings (Object)
+     */
+    public void setProfileSettings(ProfileSettings profileSettings) throws Exception {
+        Map<String, Object> newUserInfo = new HashMap<>();
+        newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());
+        newUserInfo.put(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL, profileSettings.isShowEmail());
+        ((MCAlfrescoAPIClient) this.baseClient).updateUser(newUserInfo);
+    }
 
-		authorityService.deactivate2Fa(getUserName());
-	}
+    public void addNodeList(String list, String nodeId) throws Exception {
+        EduSharingLockHelper.runSingleton(PersonDao.class, this.getAuthorityName() + "_nodeList", () -> {
+            // Simply check if node is valid
+            NodeDao node = NodeDao.getNode(this.repoDao, nodeId);
+            if (node.isDirectory())
+                throw new IllegalArgumentException("The node " + nodeId + " is a directory. Only files are allowed for this list");
+            String data = getCurrentNodeListJson();
+            JSONObject json = new JSONObject();
+            if (data != null)
+                json = new JSONObject(data);
 
-	public QRCode2Fa getQRCode() {
-		if(Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")){
-			throw new AccessDeniedException("External managed users can't get a QR code. Please contact your system administrator.");
-		}
+            JSONArray array = null;
+            if (json.has(list))
+                array = json.getJSONArray(list);
+            List<JSONObject> nodes = new ArrayList<>();
+            if (array != null) {
+                for (int i = 0; i < array.length(); i++) {
+                    if (array.getJSONObject(i).getString("id").equals(nodeId)) {
+                        throw new DAODuplicateNodeException(new Exception("Node is already in list"), nodeId);
+                    }
+                    nodes.add(array.getJSONObject(i));
+                }
+            }
+            JSONObject object = new JSONObject();
+            object.put("id", nodeId);
+            object.put("dateAdded", System.currentTimeMillis());
+            nodes.add(object);
+            json.put(list, new JSONArray(nodes));
+            updateNodeList(json);
+            return null;
+        });
+    }
 
-		return authorityService.generate2FaQRCode(getUserName());
-	}
+    public List<NodeRef> getNodeList(String list) throws Exception {
+        String data = getCurrentNodeListJson();
+        if (data == null)
+            return null;
+        JSONObject json = new JSONObject(data);
+        if (!json.has(list))
+            return null;
+        JSONArray array = json.getJSONArray(list);
+        List<NodeRef> result = new ArrayList<>();
+        for (int i = 0; i < array.length(); i++) {
+            String nodeId = array.getJSONObject(i).getString("id");
+            try {
+                // causes invalid nodes to fire throwable -> delete them
+                NodeDao.getNode(this.repoDao, nodeId);
+                result.add(new NodeRef(this.repoDao.getId(), nodeId));
+            } catch (Throwable t) {
+                removeNodeList(list, nodeId);
+            }
+        }
+        return result;
+    }
+
+    private String getCurrentNodeListJson() throws Exception {
+        org.edu_sharing.service.authority.AuthorityService service = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+        HttpSession session = Context.getCurrentInstance().getRequest().getSession();
+        String data;
+        if (service.isGuest()) {
+            data = (String) session.getAttribute(CCConstants.CCM_PROP_PERSON_NODE_LISTS);
+        } else {
+            data = (String) AuthorityServiceFactory.getLocalService().getAuthorityProperty(this.getUserName(), CCConstants.CCM_PROP_PERSON_NODE_LISTS);
+        }
+        return data;
+    }
+
+    public void removeNodeList(String list, String nodeId) throws Exception {
+        EduSharingLockHelper.runSingleton(PersonDao.class, this.getAuthorityName() + "_nodeList", () -> {
+            try {
+                String data = getCurrentNodeListJson();
+                if (data == null)
+                    throw new IllegalArgumentException("Node list not found: " + list);
+                JSONObject json = new JSONObject(data);
+                if (!json.has(list))
+                    throw new IllegalArgumentException("Node list not found: " + list);
+                JSONArray array = json.getJSONArray(list);
+                boolean found = false;
+                List<JSONObject> result = new ArrayList<>();
+                for (int i = 0; i < array.length(); i++) {
+                    if (array.getJSONObject(i).getString("id").equals(nodeId)) {
+                        found = true;
+                    } else
+                        result.add(array.getJSONObject(i));
+                }
+                if (!found)
+                    throw new IllegalArgumentException("Node not found in list: " + nodeId);
+                json.put(list, new JSONArray(result));
+                updateNodeList(json);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            return null;
+        });
+    }
+
+    private void updateNodeList(JSONObject json) throws Exception {
+        org.edu_sharing.service.authority.AuthorityService service = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+        HttpSession session = Context.getCurrentInstance().getRequest().getSession();
+        if (service.isGuest()) {
+            session.setAttribute(CCConstants.CCM_PROP_PERSON_NODE_LISTS, json.toString());
+        } else {
+            AuthorityServiceFactory.getLocalService().setAuthorityProperty(this.getUserName(), CCConstants.CCM_PROP_PERSON_NODE_LISTS, json.toString());
+        }
+    }
+
+    public void setStatus(PersonLifecycleService.PersonStatus status, boolean notifyMail) throws DAOValidationException {
+        if (getAuthorityName().equals(ApplicationInfoList.getHomeRepository().getUsername())) {
+            throw new DAOValidationException(
+                    new Exception("Method not allowed for the primary admin")
+            );
+        }
+        String oldStatus = (String) userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS);
+        NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), getNodeId(), CCConstants.CM_PROP_PERSON_ESPERSONSTATUS, status.name(), false);
+        NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), getNodeId(), CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE, new Date(), false);
+        if (notifyMail) {
+            NotificationServiceFactoryUtility.getLocalService()
+                    .notifyPersonStatusChanged(
+                            (String) userInfo.get(CCConstants.CM_PROP_PERSON_EMAIL),
+                            getFirstName(),
+                            getLastName(),
+                            oldStatus,
+                            status.name());
+        }
+    }
+
+    public String generate2FaCode() {
+        if (Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")) {
+            throw new AccessDeniedException("External managed users can't activate 2fa. Please contact your system administrator.");
+        }
+
+        return authorityService.generate2FaCode(getUserName());
+    }
+
+    public boolean get2FaStatus() {
+        return authorityService.is2FaActive(getUserName());
+    }
+
+    public void activate2Fa(int code) {
+        if (Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")) {
+            throw new AccessDeniedException("External managed users can't activate 2fa. Please contact your system administrator.");
+        }
+
+        authorityService.activate2Fa(getUserName(), code);
+    }
+
+    public void deactivate2Fa() {
+        if (Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")) {
+            throw new AccessDeniedException("External managed users can't deactivate 2fa. Please contact your system administrator.");
+        }
+
+        authorityService.deactivate2Fa(getUserName());
+    }
+
+    public QRCode2Fa getQRCode() {
+        if (Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")) {
+            throw new AccessDeniedException("External managed users can't get a QR code. Please contact your system administrator.");
+        }
+
+        return authorityService.generate2FaQRCode(getUserName());
+    }
+
+    public DashboardShortcutEntry[] getDashboardShortcuts() throws Exception {
+        return dashboardConfigService.getDashboardShortcuts(getUserName())
+                .stream()
+                .map(x -> {
+                    if (x instanceof DashboardShortcut.DefaultDashboardShortcut) {
+                        DashboardShortcut.DefaultDashboardShortcut defaultDashboardShortcut = (DashboardShortcut.DefaultDashboardShortcut) x;
+                        return new DashboardShortcutEntry.DefaultDashboardShortcutEntry(
+                                defaultDashboardShortcut.getId(),
+                                x.getTitle());
+                    } else if (x instanceof DashboardShortcut.RefDashboardShortcut) {
+                        DashboardShortcut.RefDashboardShortcut refDashboardShortcut = (DashboardShortcut.RefDashboardShortcut) x;
+                        return new DashboardShortcutEntry.RefDashboardShortcutEntry(
+                                refDashboardShortcut.getTitle(),
+                                NodeDao.getAsNodeSimple(new org.alfresco.service.cmr.repository.NodeRef(refDashboardShortcut.getRef()))
+                        );
+                    } else {
+                        throw new NotImplementedException("Unknown dashboard shortcut type: " + x.getClass().getName());
+                    }
+                })
+                .toArray(DashboardShortcutEntry[]::new);
+
+
+    }
+
+
+    public void setDashboardShortcuts(List<DashboardShortcut> shortcuts) {
+        dashboardConfigService.setDashboardShortcuts(getUserName(), shortcuts);
+    }
+
+    public void deleteDashboardShortcuts() {
+        dashboardConfigService.setDashboardShortcuts(getUserName(), null);
+    }
 }

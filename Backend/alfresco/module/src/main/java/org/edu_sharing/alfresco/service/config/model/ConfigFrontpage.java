@@ -5,4 +5,5 @@ import java.io.Serializable;
 
 public class ConfigFrontpage implements Serializable {
     @XmlElement public Boolean enabled;
+    @XmlElement public ConfigDashboard dashboard = new ConfigDashboard();
 }

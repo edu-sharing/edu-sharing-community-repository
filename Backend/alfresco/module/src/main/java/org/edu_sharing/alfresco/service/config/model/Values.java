@@ -66,7 +66,7 @@ public class Values implements Serializable {
 	@XmlElement	public Stream stream;
 	@XmlElement	public Admin admin;
 	@XmlElement	public SimpleEdit simpleEdit;
-	@XmlElement	public ConfigFrontpage frontpage;
+	@XmlElement	public ConfigFrontpage frontpage = new ConfigFrontpage();
 	@XmlElement	public ConfigUpload upload;
 	@XmlElement	public ConfigPublish publish;
 	@XmlElement	public ConfigRemote remote;

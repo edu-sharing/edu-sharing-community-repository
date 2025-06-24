@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.apache.camel.Body;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.policy.OnUpdatePersonPropertiesPolicy;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -24,6 +25,7 @@ import org.edu_sharing.restservices.organization.v1.model.GroupSignupDetails;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.QRCode2Fa;
+import org.edu_sharing.service.dashboard.models.DashboardShortcut;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.password.ValidPassword;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
@@ -817,6 +819,81 @@ public class IamApi {
         personDao.deactivate2Fa();
         return Response.status(Response.Status.OK).build();
     }
+
+
+    @GET
+    @Path("/people/{repository}/{person}/dashboard/shortcuts")
+    @Operation(summary = "", description = "")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "OK.", content = @Content(schema = @Schema(implementation = DashboardShortcutEntry[].class))),
+                    @ApiResponse(responseCode = "400", description = "Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = "Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = "Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = "Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+    public Response getDashboardShortcuts(
+            @Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue = "-me-")) @PathParam("person") String person,
+            @Context HttpServletRequest req) throws Exception {
+
+        RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+        PersonDao personDao = PersonDao.getPerson(repoDao, person);
+
+        DashboardShortcutEntry[] shortcuts = personDao.getDashboardShortcuts();
+        return Response.status(Response.Status.OK).entity(shortcuts).build();
+    }
+
+    @PUT
+    @Path("/people/{repository}/{person}/dashboard/shortcuts")
+    @Operation(summary = "", description = "")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "OK."),
+                    @ApiResponse(responseCode = "400", description = "Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = "Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = "Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = "Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+    public Response setDashboardShortcuts(
+            @Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue = "-me-")) @PathParam("person") String person,
+            @Body List<DashboardShortcut> shortcuts,
+            @Context HttpServletRequest req) {
+
+        RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+        PersonDao personDao = PersonDao.getPerson(repoDao, person);
+
+        personDao.setDashboardShortcuts(shortcuts);
+        return Response.status(Response.Status.OK).build();
+    }
+
+    @DELETE
+    @Path("/people/{repository}/{person}/dashboard/shortcuts")
+    @Operation(summary = "", description = "")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "OK."),
+                    @ApiResponse(responseCode = "400", description = "Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = "Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = "Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = "Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+    public Response deleteDashboardShortcuts(
+            @Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue = "-me-")) @PathParam("person") String person,
+            @Context HttpServletRequest req) {
+
+        RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+        PersonDao personDao = PersonDao.getPerson(repoDao, person);
+
+        personDao.deleteDashboardShortcuts();
+        return Response.status(Response.Status.OK).build();
+    }
+
 
     @GET
     @Produces({"application/json"})

@@ -20,6 +20,69 @@
 			<icon>lightbulb_outline</icon>
 			<url>https://docs.edu-sharing.com/de/edu-sharing-documentation/:version/was-ist-neu-in-edu-sharing</url>
 		</helpMenuOptions>
+		<frontpage>
+			<dashboard>
+				<shortcuts>
+					<maxEntries>6</maxEntries>
+					<entry>
+						<id>search</id>
+						<icon>search</icon>
+						<url>/edu-sharing/components/search</url>
+						<toolpermission/>
+						<defaultVisibility>visible</defaultVisibility>
+					</entry>
+					<entry>
+						<id>workspace</id>
+						<icon>cloud</icon>
+						<url>/edu-sharing/components/workspace</url>
+						<toolpermission>TOOLPERMISSION_WORKSPACE</toolpermission>
+						<defaultVisibility>visible</defaultVisibility>
+					</entry>
+					<entry>
+						<id>myfiles</id>
+						<icon>svg-myfiles.svg</icon>
+						<url>/edu-sharing/components/workspace?root=MY_FILES&amp;id=b59d36e0-af5c-4b37-9d36-e0af5ceb378d&amp;mainnav=true&amp;displayType=0</url>
+						<toolpermission>TOOLPERMISSION_WORKSPACE</toolpermission>
+						<defaultVisibility>visible</defaultVisibility>
+					</entry>
+					<entry>
+						<id>mycollections</id>
+						<icon>layers</icon>
+						<url>/edu-sharing/components/collections?scope=MY</url>
+						<toolpermission/>
+						<defaultVisibility>visible</defaultVisibility>
+					</entry>
+					<entry>
+						<id>invitedcollections</id>
+						<icon>group</icon>
+						<url>/edu-sharing/components/collections?scope=EDU_GROUPS</url>
+						<toolpermission/>
+						<defaultVisibility>visible</defaultVisibility>
+					</entry>
+					<entry>
+						<id>publiccollections</id>
+						<icon>language</icon>
+						<url>/edu-sharing/components/collections?scope=EDU_ALL</url>
+						<toolpermission/>
+						<defaultVisibility>hidden</defaultVisibility>
+					</entry>
+					<entry>
+						<id>aboutme</id>
+						<icon>person</icon>
+						<url>/edu-sharing/components/profiles/-me-</url>
+						<toolpermission/>
+						<defaultVisibility>hidden</defaultVisibility>
+					</entry>
+					<entry>
+						<id>documentation</id>
+						<icon>book</icon>
+						<url>https://docs.edu-sharing.com/de/edu-sharing-documentation</url>
+						<toolpermission/>
+						<defaultVisibility>hidden</defaultVisibility>
+					</entry>
+				</shortcuts>
+			</dashboard>
+		</frontpage>
 	</values>
 	<contexts>
 	</contexts>
