@@ -1,24 +1,25 @@
 import { applicationConfig, type Meta, moduleMetadata, type StoryObj } from '@storybook/angular';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { Observable, of } from 'rxjs';
 import {
-    I18nModule,
+    ConfigServiceMock,
     mdsStorybookProviders,
 } from '../../../../../src/app/features/mds/mds-editor/storybook-utils';
 import { SharedModule } from '../../../../../src/app/shared/shared.module';
 import { Toast } from '../services/abstract/toast.service';
 import { ShortcutEntriesComponent } from './shortcut-entries.component';
+import { Injectable } from '@angular/core';
+import { ConfigService } from 'ngx-edu-sharing-api';
 
-// Workaround to get the translations running
-const staticTranslateLoader: TranslateLoader = {
-    getTranslation(lang: string): Observable<any> {
-        return of(require('src/assets/i18n/common/de.json'));
-    },
-};
+@Injectable()
+class ToastMock implements Toast {
+    error(errorObject: any, message?: string): void {}
+
+    toast(message: string, translationParameters?: any): void {}
+}
 
 // Additional providers necessary for selected components
 const additionalProviders = [
-    Toast, // required for NodeEntriesService
+    { provide: Toast, useClass: ToastMock }, // required for NodeEntriesService
+    { provide: ConfigService, useFactory: () => new ConfigServiceMock(null, null) },
 ];
 
 // More on how to set up stories at: https://storybook.js.org/docs/angular/writing-stories/introduction
@@ -27,16 +28,7 @@ const shortcutEntries: Meta<ShortcutEntriesComponent> = {
     component: ShortcutEntriesComponent,
     decorators: [
         moduleMetadata({
-            imports: [
-                I18nModule,
-                TranslateModule.forRoot({
-                    loader: {
-                        provide: TranslateLoader,
-                        useValue: staticTranslateLoader,
-                    },
-                }),
-                SharedModule,
-            ],
+            imports: [SharedModule],
         }),
         applicationConfig({
             providers: mdsStorybookProviders.concat(additionalProviders),
