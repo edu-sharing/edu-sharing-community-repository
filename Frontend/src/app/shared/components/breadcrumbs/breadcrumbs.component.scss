@@ -101,6 +101,21 @@ button {
 .breadcrumb-element-home {
     text-decoration: none;
     @include clickable();
+    .breadcrumb-inner {
+        display: inline-flex;
+        align-items: center;
+    }
+}
+:host ::ng-deep {
+    .breadcrumb-short {
+        es-node-url:first-child {
+            a,
+            .breadcrumb-inner {
+                display: inline-flex;
+                align-items: center;
+            }
+        }
+    }
 }
 
 .breadcrumb-inner {
