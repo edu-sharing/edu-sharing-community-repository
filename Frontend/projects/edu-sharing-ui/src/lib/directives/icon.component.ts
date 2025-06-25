@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { EduSharingUiCommonModule } from '../common/edu-sharing-ui-common.module';
 import { CommonModule } from '@angular/common';
 
@@ -8,9 +8,18 @@ import { CommonModule } from '@angular/common';
  */
 @Component({
     selector: 'es-icon-component',
-    template: `<div *ngFor="let icon of icons">
-        <i [esIcon]="icon"></i> <span>{{ icon }}</span>
-    </div>`,
+    template: `
+        <ng-container *ngIf="type === 'material'">
+            <div *ngFor="let icon of matIcons">
+                <i [esIcon]="icon"></i> <span>{{ icon }}</span>
+            </div>
+        </ng-container>
+        <ng-container *ngIf="type === 'edu'">
+            <div *ngFor="let icon of eduIcons">
+                <i [esIcon]="'edu-' + icon"></i> <span>edu-{{ icon }}</span>
+            </div>
+        </ng-container>
+    `,
     styles: `
         :host {
             display: grid;
@@ -36,7 +45,8 @@ import { CommonModule } from '@angular/common';
     standalone: true,
 })
 export class IconComponent {
-    readonly icons = [
+    @Input() type: 'material' | 'edu' = 'material';
+    readonly matIcons = [
         '.notdef',
         'delete',
         'delete.fill',
@@ -3744,4 +3754,71 @@ export class IconComponent {
         'digit_eight',
         'digit_nine',
     ].filter((i) => !i.includes('.') && i.length > 1);
+    readonly eduIcons = [
+        'folder',
+        'file-word',
+        'book',
+        'Bulle3',
+        'default-type',
+        'file-doc',
+        'active-circle',
+        'Bulle',
+        'file',
+        'favorite',
+        'file-xml',
+        'content_shared_me',
+        'file_upload',
+        'qr-code',
+        'thumb_up_off_alt_black_24dp',
+        'file-moodle',
+        'dashed-line',
+        'quotes',
+        'inherit',
+        'file-zip',
+        'branche',
+        'file-openoffice',
+        'file-txt',
+        'collection',
+        'file-link',
+        'done',
+        'dashed-circle',
+        'language',
+        'checked-circle',
+        'file-scorm',
+        'description',
+        'file-excel',
+        'editorial-badge',
+        'file-audio',
+        'file-script',
+        'line',
+        'save_alt_black_24dp',
+        'all-rights-reserved',
+        'thumb_up_alt_black_24dp',
+        'custom',
+        'shared-content',
+        'group',
+        'formation',
+        'audio',
+        'invited',
+        'file-pdf',
+        'cc-0',
+        'class',
+        'file-event',
+        'file-powerpoint',
+        'content_shared_all',
+        'file-webgl',
+        'file-video',
+        'Bulle2',
+        'pin',
+        'circle',
+        'file-h5p',
+        'app-icon-custom',
+        'file-css',
+        'file-image',
+        'file-libreoffice',
+        'quick-edit',
+        'Vorschlag-sammlung',
+        'file-qti',
+        'file-scenario',
+    ];
 }

@@ -474,6 +474,10 @@ public class CCConstants {
 
 	public final static String CCM_ASPECT_EDUCONTEXT = "{http://www.campuscontent.de/model/1.0}educontext";
 
+
+	public final static String CCM_ASPECT_WIDGET = "{http://www.campuscontent.de/model/1.0}widget";
+	public final static String CCM_ASPECT_PAGE = "{http://www.campuscontent.de/model/1.0}page";
+
 	public final static String CCM_PROP_TOOL_OBJECT_TOOLINSTANCEREF = "{http://www.campuscontent.de/model/1.0}tool_instance_ref";
 
 	public final static String CCM_PROP_IO_REF_TITLE = "{http://www.campuscontent.de/model/1.0}ref_title";

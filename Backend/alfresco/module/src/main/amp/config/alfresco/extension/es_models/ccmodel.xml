@@ -2315,5 +2315,55 @@
         </property>
       </properties>
     </aspect>
+
+    <aspect name="ccm:widget">
+      <title>aspect for extending an io to hold widget related data (for external web components)</title>
+      <properties>
+        <!-- internal configuration storage (json object) of the widget -->
+        <property name="ccm:widget_config">
+          <type>d:text</type>
+          <multiple>false</multiple>
+        </property>
+      </properties>
+    </aspect>
+    <aspect name="ccm:page_variant">
+      <title>aspect for extending an io to hold page related data for individual page variants (referenced by a page) (for external web components)</title>
+      <properties>
+        <!-- internal configuration storage (json object) of the page -->
+        <property name="ccm:page_variant_config">
+          <type>d:text</type>
+          <multiple>false</multiple>
+        </property>
+        <property name="ccm:page_variant_is_template">
+          <type>d:boolean</type>
+          <multiple>false</multiple>
+        </property>
+      </properties>
+    </aspect>
+    <aspect name="ccm:page">
+      <title>aspect for extending an io to hold page related data (for external web components)</title>
+      <properties>
+        <!-- internal configuration storage (json object) of the page -->
+        <property name="ccm:page_config">
+          <type>d:text</type>
+          <multiple>false</multiple>
+        </property>
+      </properties>
+    </aspect>
+    <aspect name="ccm:page_ref">
+      <title>aspect for extending any object to have a ref to a given page</title>
+      <properties>
+        <!-- the node ref of the page data object which is referenced -->
+        <property name="ccm:page_config_ref">
+          <type>d:noderef</type>
+          <multiple>false</multiple>
+        </property>
+        <!-- the node ref of the page data that should be propagated to its children (if unset, no propagation will be done)  -->
+        <property name="ccm:page_config_propagate_ref">
+          <type>d:noderef</type>
+          <multiple>false</multiple>
+        </property>
+      </properties>
+    </aspect>
   </aspects>
 </model>

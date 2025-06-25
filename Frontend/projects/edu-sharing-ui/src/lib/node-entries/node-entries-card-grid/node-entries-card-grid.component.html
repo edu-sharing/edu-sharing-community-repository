@@ -1,6 +1,7 @@
 <ng-template #gridTop>
   <button
     *ngIf="entriesService.configureColumns"
+    class="configure-columns"
     mat-icon-button
     (click)="columnChooserVisible$.next(!columnChooserVisible$.value)"
     cdkOverlayOrigin

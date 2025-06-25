@@ -15,8 +15,8 @@ export class InfoMessageComponent {
 
     ICONS: any = {
         info: 'info',
-        warning: 'warning_outline',
-        error: 'error_outline',
+        warning: 'warning',
+        error: 'error',
     };
     constructor() {}
     getIcon() {

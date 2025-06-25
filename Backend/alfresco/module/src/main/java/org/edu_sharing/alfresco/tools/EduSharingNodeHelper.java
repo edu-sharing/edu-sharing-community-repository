@@ -76,12 +76,18 @@ public class EduSharingNodeHelper {
 						return true;
 					}
 				}
+				if(nodeServiceAlfresco.hasAspect(node, QName.createQName(CCConstants.CCM_ASPECT_PAGE))) {
+					return true;
+				}
 			} else {
 				if (nodeServiceAlfresco.hasAspect(node, QName.createQName(CCConstants.CCM_ASSOC_METADATA_PRESETTING_TEMPLATE))) {
 					return true;
 				}
 				String name = (String) nodeServiceAlfresco.getProperty(node, QName.createQName(CCConstants.CM_NAME));
 				if ((".DS_Store".equals(name) || "._.DS_Store".equals(name))) {
+					return true;
+				}
+				if(nodeServiceAlfresco.hasAspect(node, QName.createQName(CCConstants.CCM_ASPECT_WIDGET))) {
 					return true;
 				}
 			}
