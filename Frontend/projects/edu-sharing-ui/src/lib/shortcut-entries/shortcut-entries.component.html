@@ -48,7 +48,7 @@
             {{
               item.title ||
                 (item.node | nodeTitle) ||
-                (i18nPrefix + item.default | translate) ||
+                (i18nPrefix + item.id | translate) ||
                 'Unnamed ' + (i + 1)
             }}
           </ng-container>
