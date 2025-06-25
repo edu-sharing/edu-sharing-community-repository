@@ -125,56 +125,56 @@ export class ConfigServiceMock extends ConfigService {
                                 id: 'search',
                                 icon: 'search',
                                 url: '/edu-sharing/components/search',
-                                toolpermission: null,
+                                toolPermission: null,
                                 defaultVisibility: 'visible',
                             },
                             {
                                 id: 'workspace',
                                 icon: 'cloud',
                                 url: '/edu-sharing/components/workspace',
-                                toolpermission: 'TOOLPERMISSION_WORKSPACE',
+                                toolPermission: 'TOOLPERMISSION_WORKSPACE',
                                 defaultVisibility: 'visible',
                             },
                             {
                                 id: 'myfiles',
                                 icon: 'svg-myfiles.svg',
                                 url: '/edu-sharing/components/workspace?root=MY_FILES&id=b59d36e0-af5c-4b37-9d36-e0af5ceb378d&mainnav=true&displayType=0',
-                                toolpermission: 'TOOLPERMISSION_WORKSPACE',
+                                toolPermission: 'TOOLPERMISSION_WORKSPACE',
                                 defaultVisibility: 'visible',
                             },
                             {
                                 id: 'mycollections',
                                 icon: 'layers',
                                 url: '/edu-sharing/components/collections?scope=MY',
-                                toolpermission: null,
+                                toolPermission: null,
                                 defaultVisibility: 'visible',
                             },
                             {
                                 id: 'invitedcollections',
                                 icon: 'group',
                                 url: '/edu-sharing/components/collections?scope=EDU_GROUPS',
-                                toolpermission: null,
+                                toolPermission: null,
                                 defaultVisibility: 'visible',
                             },
                             {
                                 id: 'publiccollections',
                                 icon: 'language',
                                 url: '/edu-sharing/components/collections?scope=EDU_ALL',
-                                toolpermission: null,
+                                toolPermission: null,
                                 defaultVisibility: 'hidden',
                             },
                             {
                                 id: 'aboutme',
                                 icon: 'person',
                                 url: '/edu-sharing/components/profiles/-me-',
-                                toolpermission: null,
+                                toolPermission: null,
                                 defaultVisibility: 'hidden',
                             },
                             {
                                 id: 'documentation',
                                 icon: 'book',
                                 url: 'https://docs.edu-sharing.com/de/edu-sharing-documentation',
-                                toolpermission: null,
+                                toolPermission: null,
                                 defaultVisibility: 'hidden',
                             },
                         ],
@@ -186,6 +186,7 @@ export class ConfigServiceMock extends ConfigService {
         return of(config);
     }
 }
+
 export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
     { provide: MdsEditorInstanceService, useClass: MdsEditorInstanceServiceMock },
