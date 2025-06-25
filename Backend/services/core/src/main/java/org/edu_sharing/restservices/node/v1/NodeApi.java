@@ -234,9 +234,10 @@ public class NodeApi  {
 							.build();
 				}
 			}
+			HandleMode handleModeTmp = (handleMode != null) ? handleMode : (handleParam.handleService != null ? handleParam.handleService : handleParam.doiService);
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-			NodeDao published = nodeDao.publishCopy(handleParam);
+			NodeDao published = (handleModeTmp == HandleMode.sync) ? nodeDao.syncCopy(handleParam) : nodeDao.publishCopy(handleParam);
 			NodeEntry response = new NodeEntry();
 			response.setNode(published.asNode());
 

@@ -399,6 +399,15 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
+	public void syncPublished(String nodeId, HandleParam handleParam) throws Throwable{
+	}
+
+	@Override
+	public NodeRef getPublishedCopy(String nodeId) {
+		return null;
+	}
+
+	@Override
 	public String publishCopy(String nodeId, HandleParam handleParam) throws Throwable {
 		throw new NotImplementedException("publishCopy");
 	}

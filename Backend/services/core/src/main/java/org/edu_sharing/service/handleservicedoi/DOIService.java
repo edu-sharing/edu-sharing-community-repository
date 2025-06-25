@@ -126,6 +126,11 @@ public class DOIService implements HandleService {
         return updateDOIWithMetadata(handleId, doi);
     }
 
+    @Override
+    public String sync(String handleId, String nodeId, Map<QName, Serializable> properties) throws Exception {
+        return update(handleId, nodeId, properties);
+    }
+
     private String updateDOIWithMetadata(String handleId, DOI doi) throws DOIServiceException {
         HttpEntity<DOI> entity = new HttpEntity<>(doi, getHttpHeaders());
         doi.getData().getAttributes().setDoi(handleId);
