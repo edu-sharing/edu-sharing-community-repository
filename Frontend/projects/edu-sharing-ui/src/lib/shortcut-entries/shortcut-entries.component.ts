@@ -20,7 +20,7 @@ import { OptionItem } from '../types/option-item';
 
 export interface ShortcutEntry {
     type: 'ref' | 'default';
-    default?: string;
+    id?: string;
     icon?: string;
     title?: string;
     url?: string;
@@ -59,31 +59,31 @@ export class ShortcutEntriesComponent implements OnInit {
     entries: ShortcutEntry[] = [
         {
             type: 'default',
-            default: 'search',
+            id: 'search',
             title: null,
             node: null,
         },
         {
             type: 'default',
-            default: 'workspace',
+            id: 'workspace',
             title: null,
             node: null,
         },
         {
             type: 'default',
-            default: 'myfiles',
+            id: 'myfiles',
             title: null,
             node: null,
         },
         {
             type: 'default',
-            default: 'mycollections',
+            id: 'mycollections',
             title: null,
             node: null,
         },
         {
             type: 'default',
-            default: 'invitedcollections',
+            id: 'invitedcollections',
             title: null,
             node: null,
         },
@@ -167,7 +167,7 @@ export class ShortcutEntriesComponent implements OnInit {
     addEntry(entry: any) {
         const entryToAdd: ShortcutEntry = {
             type: 'default',
-            default: entry.id,
+            id: entry.id,
             title: null,
             node: null,
         };
@@ -297,10 +297,8 @@ export class ShortcutEntriesComponent implements OnInit {
     private syncEntriesAndConfig() {
         // enrich items with default value being set with their icons from the config
         this.entries?.forEach((item: ShortcutEntry) => {
-            if (item.default && !item.icon) {
-                const matchingItem = this.clientConfigEntries.find(
-                    (entry) => entry.id === item.default,
-                );
+            if (item.id && !item.icon) {
+                const matchingItem = this.clientConfigEntries.find((entry) => entry.id === item.id);
                 if (matchingItem) {
                     const prefix: string =
                         matchingItem.icon.includes('.svg') && !matchingItem.icon.includes('svg-')
@@ -314,7 +312,7 @@ export class ShortcutEntriesComponent implements OnInit {
             }
         });
         // calculate the remaining client config entries that can be added
-        const itemDefaults = this.entries.map((item: ShortcutEntry) => item.default);
+        const itemDefaults = this.entries.map((item: ShortcutEntry) => item.id);
         this.remainingClientConfigEntries = this.clientConfigEntries.filter(
             (entry) => !itemDefaults.includes(entry.id),
         );
@@ -333,7 +331,7 @@ export class ShortcutEntriesComponent implements OnInit {
         this.editTitle =
             item.title ||
             this.nodeTitlePipe.transform(item.node) ||
-            this.translate.instant(this.i18nPrefix + item.default) ||
+            this.translate.instant(this.i18nPrefix + item.id) ||
             'Unnamed ' + (index + 1);
     }
 
