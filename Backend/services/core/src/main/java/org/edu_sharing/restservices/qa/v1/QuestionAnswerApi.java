@@ -19,7 +19,6 @@ import org.edu_sharing.restservices.shared.UserSimple;
 import org.edu_sharing.service.qa.QAService;
 import org.edu_sharing.service.qa.domain.QAEntry;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,9 +44,8 @@ public class QuestionAnswerApi {
                     @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
-    public ResponseEntity<List<QAEntry>> createQAEntries(@Valid @PathParam("nodeId") String nodeId, List<CreateQAEntryDTO> qaEntries) {
-        List<QAEntry> result = qaService.createQAEntries(nodeId, qaEntries);
-        return ResponseEntity.ok(result);
+    public List<QAEntry> createQAEntries(@Valid @PathParam("nodeId") String nodeId, List<CreateQAEntryDTO> qaEntries) {
+        return qaService.createQAEntries(nodeId, qaEntries);
     }
 
 
@@ -62,9 +60,8 @@ public class QuestionAnswerApi {
                     @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
-    public ResponseEntity<List<QAEntry>> updateQAEntries(@Valid @PathParam("nodeId") String nodeId, List<UpdateQAEntryDTO> qaEntries) {
-        List<QAEntry> result = qaService.updateQAEntries(nodeId, qaEntries);
-        return ResponseEntity.ok(result);
+    public List<QAEntry> updateQAEntries(@Valid @PathParam("nodeId") String nodeId, List<UpdateQAEntryDTO> qaEntries) {
+        return qaService.updateQAEntries(nodeId, qaEntries);
     }
 
 
@@ -73,16 +70,16 @@ public class QuestionAnswerApi {
     @Path("/{nodeId}")
     @Operation(summary = "Get all QA Entries of a specific nodeId or nodeId and creator",
             responses = {
-                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = QAEntry[].class))),
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = QAEntryResponseDTO[].class))),
                     @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
-    public ResponseEntity<List<QAEntryResponseDTO>> getQAEntries(@PathParam("nodeId") String nodeId, @QueryParam("creator") String creator) {
+    public List<QAEntryResponseDTO> getQAEntries(@PathParam("nodeId") String nodeId, @QueryParam("creator") String creator) {
         Mapper mapper = new Mapper(RepositoryDao.getHomeRepository());
-        return ResponseEntity.ok(qaService.getAllQAEntriesOf(nodeId, creator).stream().map(mapper::map).collect(Collectors.toList()));
+        return qaService.getAllQAEntriesOf(nodeId, creator).stream().map(mapper::map).collect(Collectors.toList());
     }
 
     @DELETE
@@ -96,9 +93,8 @@ public class QuestionAnswerApi {
                     @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
-    public ResponseEntity<Void> deleteAllQANodes(@PathParam("nodeId") String nodeId, @QueryParam("creator") String creator) {
+    public void deleteAllQANodes(@PathParam("nodeId") String nodeId, @QueryParam("creator") String creator) {
         qaService.delete(nodeId, creator);
-        return ResponseEntity.ok().build();
     }
 
     @DELETE
@@ -112,9 +108,8 @@ public class QuestionAnswerApi {
                     @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
-    public ResponseEntity<Void> deleteQANodes(@QueryParam("id") List<String> ids) {
+    public void deleteQANodes(@QueryParam("id") List<String> ids) {
         qaService.delete(ids);
-        return ResponseEntity.ok().build();
     }
 
 
