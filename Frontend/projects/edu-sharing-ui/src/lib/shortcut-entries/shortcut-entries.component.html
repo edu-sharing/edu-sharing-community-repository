@@ -58,6 +58,7 @@
                 {{ i18nPrefix + 'CHANGE_TITLE' | translate }}
               </mat-label>
               <input
+                #editInput
                 matInput
                 [(ngModel)]="editTitle"
                 (keydown.enter)="renameEntry()"

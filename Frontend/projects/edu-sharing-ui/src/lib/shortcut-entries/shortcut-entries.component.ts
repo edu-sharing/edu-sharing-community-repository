@@ -1,6 +1,6 @@
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
 import { FormsModule } from '@angular/forms';
@@ -99,6 +99,7 @@ export class ShortcutEntriesComponent implements OnInit {
     @Input() fakeMobileDevice: boolean = false;
     @ViewChild('dropdown') dropdown: DropdownComponent;
     @ViewChild('dropdownTrigger') dropdownTrigger: MatMenuTrigger;
+    @ViewChild('editInput') editInput!: ElementRef;
 
     // Note: Adding OptionsHelperDataService results in circular dependency
     constructor(
@@ -116,6 +117,10 @@ export class ShortcutEntriesComponent implements OnInit {
         // define options for entries
         const optionRename = new OptionItem('RENAME', 'edit', (node: any, nodes: any[]): void => {
             this.renameEntryVisible = true;
+            // automatically focus the title edit input
+            setTimeout(() => {
+                this.editInput.nativeElement.focus();
+            });
         });
         optionRename.enabledCallback = (nodes?: Node[]) => {
             return new Promise((resolve, reject) => {
