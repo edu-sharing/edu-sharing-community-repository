@@ -213,6 +213,10 @@ public interface NodeService {
 
 	void keepModifiedDate(String storeProtocol, String storeId, String nodeId, Runnable task);
 
+	void syncPublished(String nodeId, HandleParam handleParam) throws Throwable;
+
+	NodeRef getPublishedCopy(String nodeId);
+
 	/**
 	 * create a published copy of the node
 	 * if handle mode is set, a handle and or doi should also be generated

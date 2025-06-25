@@ -2820,7 +2820,21 @@ public class NodeDao {
         } catch (Throwable t) {
             throw DAOException.mapping(t);
         }
+    }
 
+    public NodeDao syncCopy(HandleParam handleParam) throws DAOException {
+        ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+        ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+        return serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+            org.alfresco.service.cmr.repository.NodeRef publishedCopy = nodeService.getPublishedCopy(this.nodeId);
+            if(publishedCopy == null){
+                throw new RuntimeException("Could not find published copy");
+            }
+            NodeDao publishedNodeDao = NodeDao.getNode(this.repoDao,publishedCopy.getId());
+            publishedNodeDao.copyProperties(this);
+            nodeService.syncPublished(publishedCopy.getId(), handleParam);
+            return publishedNodeDao;
+        });
     }
 
     public List<NodeDao> getPublishedCopies() throws DAOException {

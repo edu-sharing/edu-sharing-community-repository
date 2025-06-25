@@ -1292,17 +1292,52 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         });
     }
 
+    @Override
+    public void syncPublished(String nodeId, HandleParam handleParam) throws Throwable{
+        checkPublishPermission(nodeId);
+        if (handleParam != null) {
+            ApplicationContext eduAppContext = ApplicationContextFactory.getApplicationContext();
+            NodeRef toSync = getPublishedCopy(nodeId);
+            if (handleParam.handleService != null) {
+                try {
+                    eduAppContext.getBean(FeatureInfoHandleService.class);
+                    createHandle(toSync, null,
+                            handleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.handle),
+                            handleParam.handleService);
+                } catch (NoSuchBeanDefinitionException e) {
+                    logger.error("handle service not enabled");
+                }
+            }
+            if (handleParam.doiService != null) {
+                try {
+                    eduAppContext.getBean(FeatureInfoDoiService.class);
+                    createHandle(toSync, null,
+                            handleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.doi),
+                            handleParam.doiService);
+                } catch (NoSuchBeanDefinitionException e) {
+                    logger.error("doi service not enabled");
+                }
+            }
+        }
+    }
+
+    @Override
+    public NodeRef getPublishedCopy(String nodeId) {
+        List<String> currentCopies = getPublishedCopies(nodeId);
+        Optional<String> rs = currentCopies.stream()
+                .filter(c -> getProperty(
+                        StoreRef.PROTOCOL_WORKSPACE,
+                        StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+                        c,
+                        CCConstants.CCM_PROP_IO_REVOKED_DATE) == null).reduce((first, second) -> second);
+
+        return rs.map(s -> new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, s)).orElse(null);
+    }
+
 
     @Override
     public String publishCopy(String nodeId, HandleParam handleParam) throws Throwable {
-        ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_PUBLISH_COPY);
-        if (PermissionServiceFactory.getLocalService().hasAllPermissions(StoreRef.PROTOCOL_WORKSPACE,
-                        StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
-                        nodeId,
-                        new String[]{CCConstants.PERMISSION_READ, CCConstants.PERMISSION_CHANGEPERMISSIONS}).
-                values().stream().anyMatch((v) -> !v)) {
-            throw new SecurityException("No " + CCConstants.PERMISSION_CHANGEPERMISSIONS + " on node " + nodeId);
-        }
+        checkPublishPermission(nodeId);
         String parent, pattern, owner;
         try {
             Config config = LightbendConfigLoader.get();
@@ -1387,6 +1422,17 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
     }
 
+    private static void checkPublishPermission(String nodeId) {
+        ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_PUBLISH_COPY);
+        if (PermissionServiceFactory.getLocalService().hasAllPermissions(StoreRef.PROTOCOL_WORKSPACE,
+                        StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+                        nodeId,
+                        new String[]{CCConstants.PERMISSION_READ, CCConstants.PERMISSION_CHANGEPERMISSIONS}).
+                values().stream().anyMatch((v) -> !v)) {
+            throw new SecurityException("No " + CCConstants.PERMISSION_CHANGEPERMISSIONS + " on node " + nodeId);
+        }
+    }
+
 
     @Override
     public void createHandle(NodeRef nodeRef, List<String> publishedCopies, HandleService handleService, HandleMode handleMode) throws Exception {
@@ -1413,6 +1459,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 throw new IllegalStateException("Multiple handles found but handleMode " + handleMode + " was requested");
             }
             currentHandle = handles.iterator().next();
+        }else if(handleMode.equals(HandleMode.sync)){
+            currentHandle = getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeRef.getId(), handleService.getHandleIdProperty());
         }
 
         String generated = null;
@@ -1480,6 +1528,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                     } else {
                         properties.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID), handle);
                     }
+                } else if(handleMode.equals(HandleMode.sync)){
+                    logger.info("Sync handle " + handle + ", " + contentLink);
+                    handleService.sync(handle, nodeRef.getId(), properties);
                 } else {
                     logger.info("Update handle " + handle + ", " + contentLink);
                     handleService.update(handle, nodeRef.getId(), properties);

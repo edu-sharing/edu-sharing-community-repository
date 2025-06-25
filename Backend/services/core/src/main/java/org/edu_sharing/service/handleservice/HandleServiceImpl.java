@@ -303,6 +303,12 @@ public class HandleServiceImpl implements HandleService {
             statement.getConnection().commit();
         }
     }
+
+    @Override
+    public String sync(String handleId, String nodeId, Map<QName, Serializable> properties) throws Exception {
+        // handleservice has no option to manage metadata
+        return handleId;
+    }
 }
 
 

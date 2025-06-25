@@ -177,7 +177,7 @@
     publishCopyPermission &&
     !inherited &&
     shareModeCopy &&
-    republish === 'new' &&
+    (republish === 'new' || republish === 'update') &&
     (hasFeature('handleService') || hasFeature('doiService'))
   "
 >
@@ -219,7 +219,10 @@
           </ng-container>
         </es-multi-line-label>
       </mat-radio-button>
-      <mat-radio-button [disabled]="!hasExactOneHandle()" value="update">
+      <mat-radio-button
+        [disabled]="!hasExactOneHandle()"
+        [value]="republish === 'update' ? 'sync' : 'update'"
+      >
         <es-multi-line-label>
           <ng-container slot="label">
             {{ 'WORKSPACE.SHARE.PUBLISH.DOI_UPDATE' | translate }}
