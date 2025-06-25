@@ -951,7 +951,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         if (!groupId) {
             groupId = this.mdsEditorCommonService.getGroupId(this.nodes$.value);
         }
-        const mdsId = this.mdsEditorCommonService.getMdsId(this.nodes$.value);
+        const mdsId = await this.mdsEditorCommonService.getMdsId(this.nodes$.value);
         const wasInitialized = await this.initMds(groupId, mdsId, undefined, this.nodes$.value);
         if (!wasInitialized) {
             return null;
