@@ -187,7 +187,6 @@ export class ConfigServiceMock extends ConfigService {
     }
 }
 export const mdsStorybookProviders: ApplicationConfig['providers'] = [
-    { provide: ConfigService, useClass: ConfigServiceMock },
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
     { provide: MdsEditorInstanceService, useClass: MdsEditorInstanceServiceMock },
     { provide: MdsViewerService, useClass: MdsViewerServiceMock },
