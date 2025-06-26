@@ -65,7 +65,7 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
     handleActive: HandleState = {};
     handleInitialState: HandleState = {};
     isCopy: boolean;
-    handleMode: 'distinct' | 'update' = 'distinct';
+    handleMode: 'distinct' | 'update' | 'sync' = 'distinct';
     republish: 'update' | 'new' | 'disabled' = 'disabled';
     private publishedVersions: Node[] = [];
     allPublishedVersions: PublishedNode[];
@@ -283,19 +283,35 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
                 // update most recent version
                 this.republish === 'update'
             ) {
-                this.nodeService
-                    .copyMetadata(this.getLastNonRevokedVersion().ref.id, this.node.ref.id, {})
-                    .subscribe(
-                        ({ node }) => {
-                            observer.next(node);
-                            observer.complete();
-                        },
-                        (error) => {
-                            this.handleError(error);
-                            observer.error(error);
-                            observer.complete();
-                        },
-                    );
+                if (this.handleActive && this.handleMode === 'sync') {
+                    this.nodeService
+                        .publishCopy(this.node.ref.id, this.getHandleConfig())
+                        .subscribe(
+                            ({ node }) => {
+                                observer.next(node);
+                                observer.complete();
+                            },
+                            (error) => {
+                                this.handleError(error);
+                                observer.error(error);
+                                observer.complete();
+                            },
+                        );
+                } else {
+                    this.nodeService
+                        .copyMetadata(this.getLastNonRevokedVersion().ref.id, this.node.ref.id, {})
+                        .subscribe(
+                            ({ node }) => {
+                                observer.next(node);
+                                observer.complete();
+                            },
+                            (error) => {
+                                this.handleError(error);
+                                observer.error(error);
+                                observer.complete();
+                            },
+                        );
+                }
             } else {
                 observer.next(null);
                 observer.complete();
@@ -382,26 +398,47 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
                 this.hasFeature('doiService'),
         };
         this.updatePublishedVersions();
+        if (this.republish === 'update' && this.handleMode === 'update') {
+            this.handleMode = 'sync';
+        }
+        if (this.republish === 'new' && this.handleMode === 'sync') {
+            this.handleMode = 'update';
+        }
     }
 
     hasExactOneHandle() {
-        return (
-            new Set(
-                this.allPublishedVersions
-                    .filter(
-                        (v) =>
-                            !v.status && v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID],
-                    )
-                    .map((v) => v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID][0]),
-            ).size === 1 ||
-            new Set(
-                this.allPublishedVersions
-                    .filter(
-                        (v) => !v.status && v.properties[RestConstants.CCM_PROP_PUBLISHED_DOI_ID],
-                    )
-                    .map((v) => v.properties[RestConstants.CCM_PROP_PUBLISHED_DOI_ID][0]),
-            ).size === 1
-        );
+        const hasExactOneHandle: boolean =
+            (this.republish === 'new' &&
+                (new Set(
+                    this.allPublishedVersions
+                        .filter(
+                            (v) =>
+                                !v.status &&
+                                v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID],
+                        )
+                        .map((v) => v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID][0]),
+                ).size === 1 ||
+                    new Set(
+                        this.allPublishedVersions
+                            .filter(
+                                (v) =>
+                                    !v.status &&
+                                    v.properties[RestConstants.CCM_PROP_PUBLISHED_DOI_ID],
+                            )
+                            .map((v) => v.properties[RestConstants.CCM_PROP_PUBLISHED_DOI_ID][0]),
+                    ).size === 1)) ||
+            (this.republish === 'update' &&
+                (new Set(
+                    this.allPublishedVersions
+                        .filter((v) => v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID])
+                        .map((v) => v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID][0]),
+                ).size === 1 ||
+                    new Set(
+                        this.allPublishedVersions
+                            .filter((v) => v.properties[RestConstants.CCM_PROP_PUBLISHED_DOI_ID])
+                            .map((v) => v.properties[RestConstants.CCM_PROP_PUBLISHED_DOI_ID][0]),
+                    ).size === 1));
+        return hasExactOneHandle;
     }
     isLicenseMissing() {
         return !this.getLicense() && this.isLicenseEmpty && !this.node.isDirectory;

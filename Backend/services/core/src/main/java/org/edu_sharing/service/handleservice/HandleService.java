@@ -20,6 +20,8 @@ public interface HandleService {
 
     public String update(String handleId, String nodeId, Map<QName, Serializable> properties) throws Exception;
 
+    public String sync(String handleId, String nodeId, Map<QName, Serializable> properties) throws Exception;
+
     default boolean updateState(String nodeId, String eventState) throws Exception {
         Logger.getLogger(HandleService.class).debug("update state is not implemented for this service");
         return false;

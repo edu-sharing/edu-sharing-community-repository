@@ -1940,14 +1940,16 @@
           "doiService": {
             "enum": [
               "distinct",
-              "update"
+              "update",
+              "sync"
             ],
             "type": "string"
           },
           "handleService": {
             "enum": [
               "distinct",
-              "update"
+              "update",
+              "sync"
             ],
             "type": "string"
           }
@@ -30751,7 +30753,8 @@
             "schema": {
               "enum": [
                 "distinct",
-                "update"
+                "update",
+                "sync"
               ],
               "type": "string"
             }
