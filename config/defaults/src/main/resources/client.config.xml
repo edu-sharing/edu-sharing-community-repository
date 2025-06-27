@@ -23,6 +23,7 @@
 		<frontpage>
 			<dashboard>
 				<shortcuts>
+					<enabled>true</enabled>
 					<maxEntries>6</maxEntries>
 					<entry>
 						<id>search</id>

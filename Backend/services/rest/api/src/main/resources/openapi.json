@@ -5879,6 +5879,9 @@
               "name": "entry"
             }
           },
+          "enabled": {
+            "type": "boolean"
+          },
           "maxEntries": {
             "format": "int32",
             "type": "integer"
