@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ShortcutConfig {
+    @XmlElement public boolean enabled;
     @XmlElement public int maxEntries;
     @JsonProperty("entries")
     @XmlElement(name = "entry") public List<ShortcutConfigEntry> entries = new ArrayList<>();
