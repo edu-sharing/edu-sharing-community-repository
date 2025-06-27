@@ -5870,6 +5870,9 @@
       },
       "ShortcutConfig": {
         "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
           "entries": {
             "items": {
               "$ref": "#/components/schemas/ShortcutConfigEntry"
@@ -5878,9 +5881,6 @@
             "xml": {
               "name": "entry"
             }
-          },
-          "enabled": {
-            "type": "boolean"
           },
           "maxEntries": {
             "format": "int32",
