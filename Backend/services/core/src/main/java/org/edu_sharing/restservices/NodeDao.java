@@ -241,7 +241,25 @@ public class NodeDao {
             }
 
             // fix duplicate child name issues in publishing folder
-            props.remove(CCConstants.getValidLocalName(CCConstants.CM_NAME));
+            String newName = (String) nodeService.getPropertyNative(fromDao.getStoreProtocol(), fromDao.getStoreIdentifier(), fromDao.getId(), CCConstants.CM_NAME);
+            if (!Objects.equals(
+                    nodeService.getPropertyNative(getStoreProtocol(), getStoreIdentifier(), getId(), CCConstants.CM_NAME),
+                    newName
+                    )
+            ) {
+                if(nodeService.findNodeByName(getParentId(), newName) != null) {
+                    props.remove(CCConstants.getValidLocalName(CCConstants.CM_NAME));
+                    for(int i = 1; i < 50; i++) {
+                        String testName = NodeServiceHelper.renameNode(newName, i);
+                        if(nodeService.findNodeByName(getParentId(), testName) == null) {
+                            props.put(CCConstants.getValidLocalName(CCConstants.CM_NAME), new String[]{testName});
+                            break;
+                        }
+                    }
+                } else {
+                    props.put(CCConstants.getValidLocalName(CCConstants.CM_NAME), new String[]{newName});
+                }
+            }
 
             // fix published mode only for original
             props.remove(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_PUBLISHED_MODE));

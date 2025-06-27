@@ -1,6 +1,7 @@
 import { Injectable, Injector, OnDestroy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
+    HOME_REPOSITORY,
     MdsDefinition,
     MdsQueryCriteria,
     MdsService,
@@ -243,7 +244,10 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
         ])
             .pipe(
                 switchMap(([metadataSet, repository]) =>
-                    this._mds.getMetadataSet({ repository, metadataSet }),
+                    this._mds.getMetadataSet({
+                        repository: repository || HOME_REPOSITORY,
+                        metadataSet,
+                    }),
                 ),
                 filter((mds) => !!mds.sorts.find((s) => s.id === 'search')),
             )
