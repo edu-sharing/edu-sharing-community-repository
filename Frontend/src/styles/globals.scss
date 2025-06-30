@@ -135,7 +135,7 @@ button.cdk-keyboard-focused {
         box-shadow: none !important;
         @include removeDefaultFocus();
         padding-bottom: 2px;
-        border-bottom: 1px solid $focusColor;
+        border-bottom: 1px solid var(--focusColor);
     }
 }
 .btn-circle {
