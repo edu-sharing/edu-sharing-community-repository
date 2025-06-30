@@ -44,7 +44,9 @@
   ></button>
   <div class="card-top-bar" [style.background-color]="isCollection ? node.collection.color : null">
     <div class="card-top-bar-collection-color" *ngIf="nodeHelper.isNodeCollection(node)"></div>
-    <es-node-type-badge [node]="node"></es-node-type-badge>
+    <div class="card-top-bar-node-type-badge">
+      <es-node-type-badge [node]="node"></es-node-type-badge>
+    </div>
     <div *ngIf="isCollection && node.collection.pinned" class="card-top-bar-flag">
       <i esIcon="edu-pin"></i>
     </div>
