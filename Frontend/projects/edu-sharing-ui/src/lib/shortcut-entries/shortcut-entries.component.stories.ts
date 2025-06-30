@@ -2,19 +2,13 @@ import { applicationConfig, type Meta, moduleMetadata, type StoryObj } from '@st
 import {
     ConfigServiceMock,
     mdsStorybookProviders,
+    ToastMock,
 } from '../../../../../src/app/features/mds/mds-editor/storybook-utils';
 import { SharedModule } from '../../../../../src/app/shared/shared.module';
 import { Toast } from '../services/abstract/toast.service';
 import { ShortcutEntriesComponent } from './shortcut-entries.component';
 import { Injectable } from '@angular/core';
 import { ConfigService } from 'ngx-edu-sharing-api';
-
-@Injectable()
-class ToastMock implements Toast {
-    error(errorObject: any, message?: string): void {}
-
-    toast(message: string, translationParameters?: any): void {}
-}
 
 // Additional providers necessary for selected components
 const additionalProviders = [

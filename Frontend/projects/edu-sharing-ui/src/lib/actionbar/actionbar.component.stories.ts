@@ -44,7 +44,7 @@ const actionbar: Meta<ActionbarComponent> = {
                 },
                 {
                     provide: TranslateService,
-                    useValue: translateProvider,
+                    useClass: translateProvider,
                 },
             ],
         }),

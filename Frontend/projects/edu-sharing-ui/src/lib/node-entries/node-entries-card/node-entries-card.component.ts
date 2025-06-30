@@ -48,8 +48,8 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
         public applicationRef: ApplicationRef,
         public configService: ConfigService,
         public authenticationService: AuthenticationService,
-        public templatesService: NodeEntriesTemplatesService,
-        public nodeEntriesGlobalService: NodeEntriesGlobalService,
+        @Optional() public templatesService: NodeEntriesTemplatesService,
+        @Optional() public nodeEntriesGlobalService: NodeEntriesGlobalService,
         @Optional() private toast: Toast,
     ) {}
 
@@ -110,7 +110,7 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
     }
 
     getTemplate(name: CustomFieldSpecialType) {
-        return this.nodeEntriesGlobalService.getCustomFieldTemplate(
+        return this.nodeEntriesGlobalService?.getCustomFieldTemplate(
             {
                 type: 'NODE',
                 name,
