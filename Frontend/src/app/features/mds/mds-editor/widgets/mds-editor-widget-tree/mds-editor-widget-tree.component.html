@@ -51,7 +51,7 @@
         (removed)="remove(value)"
       >
         <i matChipAvatar esIcon="settings" *ngIf="(isSuggestion(value) | async) === 'AI'"></i>
-        <span class="mat-chip-label">{{ value.label }}</span>
+        <span class="mat-chip-label">{{ getChipsValue(value).label }}</span>
         <mat-icon matChipRemove>cancel</mat-icon>
       </mat-chip-row>
       <div class="input-wrapper">

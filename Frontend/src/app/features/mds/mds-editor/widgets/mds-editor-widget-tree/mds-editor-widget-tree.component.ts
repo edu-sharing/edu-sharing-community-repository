@@ -57,6 +57,18 @@ export class MdsEditorWidgetTreeComponent
             this.preventOverlayOpen = false;
         });
     }
+    getChipsValue(value: DisplayValue) {
+        if (value.key === value.label || !value.label) {
+            const ds = this.widget
+                .getInitialDisplayValues()
+                .value?.values?.find((v) => v.key === value.key)?.displayString;
+            return {
+                key: value.key,
+                label: ds || value.key,
+            };
+        }
+        return value;
+    }
     toDisplayValue(value: MdsWidgetValue | string): DisplayValue {
         if (typeof value === 'string') {
             return this.tree.toDisplayValue(value);
