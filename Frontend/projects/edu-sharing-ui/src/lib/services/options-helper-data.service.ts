@@ -55,7 +55,7 @@ export class OptionsHelperDataService implements OnDestroy {
 
     constructor(
         private ngZone: NgZone,
-        private route: ActivatedRoute,
+        @Optional() private route: ActivatedRoute,
         private localEvents: LocalEventsService,
         private authenticationService: AuthenticationService,
         private toast: Toast,

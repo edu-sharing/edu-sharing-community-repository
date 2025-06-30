@@ -35,27 +35,28 @@ import { ListItem } from '../../types/list-item';
 import { ListOptions } from '../entries-model';
 
 @Injectable()
-class AuthenticationServiceMock extends AuthenticationService {
+export class AuthenticationServiceMock extends AuthenticationService {
     async hasToolpermission(tp: string) {
         return true;
     }
 }
 
+export const DefaultColumns = [
+    new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
+    new ListItem('NODE', 'cclom:general_keyword'),
+    new ListItem('NODE', 'cclom:general_description'),
+];
 @Injectable()
-class NodeEntriesServiceMock extends NodeEntriesService<any> {
+export class NodeEntriesServiceMock extends NodeEntriesService<any> {
     elementInteractionType = InteractionType.Emitter;
     checkbox = true;
-    _columns = [
-        new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
-        new ListItem('NODE', 'cclom:general_keyword'),
-        new ListItem('NODE', 'cclom:general_description'),
-    ];
+
     get columns(): ListItem[] {
-        return this._columns;
+        return DefaultColumns;
     }
 }
 @Injectable()
-class NodeEntriesServiceMockApply extends NodeEntriesServiceMock {
+export class NodeEntriesServiceMockApply extends NodeEntriesServiceMock {
     private _options: OptionItem[] = [new OptionItem('APPLY', 'redo', () => {})];
     get options(): ListOptions {
         return {
@@ -69,7 +70,7 @@ class NodeEntriesServiceMockApply extends NodeEntriesServiceMock {
 }
 
 @Injectable()
-class ConfigServiceMockRating extends ConfigService {
+export class ConfigServiceMockRating extends ConfigService {
     public instant<T = string>(name: string, defaultValue?: T): T {
         return 'stars' as T;
     }

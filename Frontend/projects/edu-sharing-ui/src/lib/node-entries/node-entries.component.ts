@@ -41,7 +41,7 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType>
         public entriesService: NodeEntriesService<T>,
         public templatesService: NodeEntriesTemplatesService,
         @Optional() private globalKeyboardShortcuts: KeyboardShortcutsService,
-        private route: ActivatedRoute,
+        @Optional() private route: ActivatedRoute,
         private translate: TranslateService,
     ) {}
 
@@ -103,7 +103,7 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType>
             },
             defaultSort: this.entriesService.sort,
         });
-        if (this.entriesService.primaryInstance) {
+        if (this.entriesService.primaryInstance && this.route) {
             // Automatic query-params handling is only supported by node-data-source-remote.
             dataSource.registerQueryParameters(this.route);
         }

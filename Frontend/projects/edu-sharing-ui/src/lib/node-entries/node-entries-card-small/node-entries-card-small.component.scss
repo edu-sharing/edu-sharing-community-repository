@@ -59,6 +59,9 @@ $collectionIconSize: 25px;
             &:nth-child(3) {
                 grid-row: 2;
                 font-size: var(--fontSizeXSmall);
+                ::ng-deep es-list-text {
+                    @include limitLineCount(1);
+                }
             }
         }
     }
