@@ -18,7 +18,7 @@
   (keydown.ContextMenu)="openContextmenu($event, node)"
 >
   <div
-    *ngIf="templatesService.overlay"
+    *ngIf="templatesService?.overlay"
     class="card-overlay"
     (click)="
       entriesService.clickItem.emit({
@@ -28,7 +28,7 @@
     "
   >
     <ng-container
-      *ngTemplateOutlet="templatesService.overlay; context: { element: node }"
+      *ngTemplateOutlet="templatesService?.overlay; context: { element: node }"
     ></ng-container>
   </div>
   <button
@@ -48,7 +48,6 @@
     <div *ngIf="isCollection && node.collection.pinned" class="card-top-bar-flag">
       <i esIcon="edu-pin"></i>
     </div>
-    <div class="card-top-bar-empty"></div>
     <es-node-stats-badges [node]="node"></es-node-stats-badges>
     <div class="card-top-bar-checkbox" *ngIf="entriesService.checkbox">
       <mat-checkbox

@@ -85,6 +85,7 @@ import { SortSelectPanelComponent } from './sort-select-panel/sort-select-panel.
     exports: [
         ListItemLabelPipe,
         NodeEntriesWrapperComponent,
+        NodeEntriesCardComponent,
         NodeRatingComponent,
         NodesDragDirective,
         NodesDragSourceDirective,
