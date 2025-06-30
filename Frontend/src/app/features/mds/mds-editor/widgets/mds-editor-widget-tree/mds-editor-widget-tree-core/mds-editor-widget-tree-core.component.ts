@@ -102,7 +102,11 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
                 takeUntil(this.destroyed$),
             )
             .subscribe(async (filterString) => {
-                if (this.widget.definition.type === 'multivalueSuggestBadges') {
+                if (
+                    ['multivalueSuggestBadges', 'multivalueFixedBadges'].includes(
+                        this.widget.definition.type,
+                    )
+                ) {
                     // fetch suggestions from api / async
                     const suggestedValues = await this.widget.getSuggestedValues(filterString);
                     suggestedValues.map((suggestedValue) =>

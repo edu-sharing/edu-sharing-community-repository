@@ -14,5 +14,5 @@ export abstract class MdsEditorInstanceServiceAbstract {
 
     abstract saveWidgetValue(widget: any): Promise<void>;
 
-    abstract fetchDisplayValues(widget: any): Promise<void>;
+    abstract fetchDisplayValues(widget: any, additionalKeys?: string[]): Promise<void>;
 }

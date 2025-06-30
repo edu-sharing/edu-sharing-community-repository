@@ -5,7 +5,17 @@
     "outDir": "../../out-tsc/spec",
     "types": [
       "jasmine"
-    ]
+    ],
+    "paths": {
+      "ngx-edu-sharing-api": [
+        "dist/edu-sharing-api/edu-sharing-api",
+        "dist/edu-sharing-api"
+      ],
+      "ngx-edu-sharing-ui": [
+        "dist/edu-sharing-ui/edu-sharing-ui",
+        "dist/edu-sharing-ui"
+      ]
+    }
   },
   "files": [
     "src/test.ts",

@@ -6,7 +6,13 @@
     "declaration": true,
     "declarationMap": true,
     "inlineSources": true,
-    "types": []
+    "types": [],
+    "paths": {
+      "ngx-edu-sharing-api": [
+        "dist/edu-sharing-api/edu-sharing-api",
+        "dist/edu-sharing-api"
+      ]
+    }
   },
   "exclude": [
     "src/test.ts",
