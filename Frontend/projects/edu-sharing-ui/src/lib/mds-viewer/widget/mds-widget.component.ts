@@ -349,7 +349,7 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
         this.temporaryValue = instance.widget.getValue();
         this.value.set(await this.getNodeValue());
         this.editWrapper.nativeElement.children[0].innerHTML = null;
-        await this.mdsEditorInstance.fetchDisplayValues(this.widget);
+        await this.mdsEditorInstance.fetchDisplayValues(this.widget, this.value());
     }
 
     isEditable() {
