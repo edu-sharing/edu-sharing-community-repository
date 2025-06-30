@@ -1,4 +1,8 @@
 <div class="landing-page">
   <h2>Landing page</h2>
   <es-shortcut-entries></es-shortcut-entries>
+  <div class="swimlanes">
+    <es-dashboard-swimlane *ngFor="let s of swimlanesVisible()" [type]="s.id">
+    </es-dashboard-swimlane>
+  </div>
 </div>

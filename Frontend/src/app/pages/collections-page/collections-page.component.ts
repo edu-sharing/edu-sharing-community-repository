@@ -21,7 +21,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { combineLatest, Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
-import { Mediacenter, Node } from 'ngx-edu-sharing-api';
+import { ConfigService, Mediacenter, Node } from 'ngx-edu-sharing-api';
 import * as EduData from '../../core-module/core.module';
 import {
     ConfigurationService,
@@ -150,6 +150,7 @@ export class CollectionsPageComponent implements OnDestroy {
         private breadcrumbsService: BreadcrumbsService,
         private collectionService: RestCollectionService,
         private config: ConfigurationService,
+        private configService: ConfigService,
         private connector: RestConnectorService,
         private iamService: RestIamService,
         private localEvents: LocalEventsService,
@@ -199,10 +200,10 @@ export class CollectionsPageComponent implements OnDestroy {
                             });
                         this.initialize();
                     } else {
-                        RestHelper.goToLogin(this.router, this.config);
+                        this.uiService.goToLogin();
                     }
                 },
-                () => RestHelper.goToLogin(this.router, this.config),
+                () => this.uiService.goToLogin(),
             );
         });
         // Navigate to parent collection when the current collection is deleted.
@@ -372,7 +373,7 @@ export class CollectionsPageComponent implements OnDestroy {
                     if (login.statusCode === RestConstants.STATUS_CODE_OK) {
                         this.toast.error(e);
                     } else {
-                        RestHelper.goToLogin(this.router, this.config, null);
+                        this.uiService.goToLogin(null);
                     }
                 }
             }

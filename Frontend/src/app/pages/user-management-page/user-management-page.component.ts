@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { TranslationsService } from 'ngx-edu-sharing-ui';
+import { TranslationsService, UIService } from 'ngx-edu-sharing-ui';
 import {
     ConfigurationService,
     LoginResult,
@@ -46,6 +46,7 @@ export class UserManagementPageComponent implements OnInit, OnDestroy {
         private mainNav: MainNavService,
         private connector: RestConnectorService,
         private searchField: SearchFieldService,
+        private ui: UIService,
     ) {
         const loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
         this.translations.waitForInit().subscribe(() => {
@@ -142,6 +143,6 @@ export class UserManagementPageComponent implements OnInit, OnDestroy {
     }
 
     private goToLogin() {
-        RestHelper.goToLogin(this.router, this.config);
+        this.ui.goToLogin();
     }
 }

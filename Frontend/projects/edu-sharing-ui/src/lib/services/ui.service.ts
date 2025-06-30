@@ -13,7 +13,8 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { UIConstants } from '../util/ui-constants';
 import { OptionItem } from '../types/option-item';
 import { distinctUntilChanged, map } from 'rxjs/operators';
-import { Node } from 'ngx-edu-sharing-api';
+import { ConfigService, Node } from 'ngx-edu-sharing-api';
+import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class UIService {
@@ -371,5 +372,26 @@ export class UIService {
                 element.setAttribute('data-is-scrolling', 'true');
             });
         });
+    }
+    goToLogin(scope: string = null, next = window.location.href) {
+        void this.injector
+            .get(ConfigService)
+            .get('loginUrl')
+            .then((url: string) => {
+                if (
+                    url &&
+                    !scope &&
+                    !this.injector.get(ConfigService).instant('loginAllowLocal', false)
+                ) {
+                    window.location.href = url;
+                    return;
+                }
+                void this.injector.get(Router).navigate([UIConstants.ROUTER_PREFIX + 'login'], {
+                    queryParams: {
+                        scope: scope,
+                        next: next,
+                    },
+                });
+            });
     }
 }

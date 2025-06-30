@@ -385,12 +385,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private login(reurl = false) {
-        RestHelper.goToLogin(
-            this.router,
-            this.configService,
-            '',
-            reurl ? window.location.href : '',
-        );
+        this.uiService.goToLogin('', reurl ? window.location.href : '');
     }
 
     private checkConfig() {
@@ -705,11 +700,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                         closable: Closable.Disabled,
                     });
                     await dialogRef.afterClosed().toPromise();
-                    RestHelper.goToLogin(
-                        this.router,
-                        this.configService,
-                        this.isSafe() ? RestConstants.SAFE_SCOPE : null,
-                    );
+                    this.uiService.goToLogin(this.isSafe() ? RestConstants.SAFE_SCOPE : null);
                 });
         }
     }

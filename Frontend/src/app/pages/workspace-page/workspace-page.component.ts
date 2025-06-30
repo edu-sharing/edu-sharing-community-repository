@@ -476,7 +476,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         this.isSafe = routeParams.mode === 'safe';
         const login = await this.connector.isLoggedIn().toPromise();
         if (login.statusCode !== RestConstants.STATUS_CODE_OK) {
-            RestHelper.goToLogin(this.router, this.config);
+            this.ui.goToLogin();
             return;
         }
         let valid = true;
@@ -942,7 +942,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
     }
 
     private goToLogin() {
-        RestHelper.goToLogin(this.router, this.config, this.isSafe ? RestConstants.SAFE_SCOPE : '');
+        this.ui.goToLogin(this.isSafe ? RestConstants.SAFE_SCOPE : '');
     }
 
     getRootFolderId() {

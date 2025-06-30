@@ -24,6 +24,7 @@ import { RegisterRequestComponent } from './register-request/register-request.co
 import { RegisterResetPasswordComponent } from './register-reset-password/register-reset-password.component';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { Subject } from 'rxjs';
+import { ConfigService } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-register-page',
@@ -43,7 +44,7 @@ export class RegisterPageComponent implements OnInit, OnDestroy {
     private destroyed = new Subject<void>();
 
     public cancel() {
-        RestHelper.goToLogin(this.router, this.configService, null, null);
+        this.uiService.goToLogin(null, null);
     }
 
     public requestDone(email: string) {
@@ -63,7 +64,8 @@ export class RegisterPageComponent implements OnInit, OnDestroy {
         private router: Router,
         private translations: TranslationsService,
         private uiService: UIService,
-        private configService: ConfigurationService,
+        private configService: ConfigService,
+        private configServiceLegacy: ConfigurationService,
         private changes: ChangeDetectorRef,
         private loadingScreen: LoadingScreenService,
         private route: ActivatedRoute,
@@ -100,13 +102,13 @@ export class RegisterPageComponent implements OnInit, OnDestroy {
             this.toast.closeProgressSpinner();
             if (['request', 'reset-password', 'done-reset'].indexOf(this.params.status) !== -1) {
                 if (
-                    this.configService.instant('register.local', true as boolean) === false &&
-                    this.configService.instant('register.recoverPassword', false) === false
+                    this.configServiceLegacy.instant('register.local', true as boolean) === false &&
+                    this.configServiceLegacy.instant('register.recoverPassword', false) === false
                 ) {
-                    RestHelper.goToLogin(this.router, this.configService, null, null);
+                    this.uiService.goToLogin(null, null);
                 }
-            } else if (!this.configService.instant('register.local', true)) {
-                RestHelper.goToLogin(this.router, this.configService, null, null);
+            } else if (!this.configServiceLegacy.instant('register.local', true)) {
+                this.uiService.goToLogin(null, null);
             }
             setTimeout(() => this.setParams());
             this.connector.isLoggedIn().subscribe((data) => {
@@ -114,7 +116,7 @@ export class RegisterPageComponent implements OnInit, OnDestroy {
                     UIHelper.goToDefaultLocation(
                         this.router,
                         this.platformLocation,
-                        this.configService,
+                        this.configServiceLegacy,
                     );
                 }
             });
@@ -207,6 +209,6 @@ export class RegisterPageComponent implements OnInit, OnDestroy {
     }
 
     canRegister() {
-        return this.configService.instant('register.local', true);
+        return this.configServiceLegacy.instant('register.local', true);
     }
 }

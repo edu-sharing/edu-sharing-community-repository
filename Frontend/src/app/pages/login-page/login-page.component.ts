@@ -26,7 +26,13 @@ import { Helper } from '../../core-module/rest/helper';
 import { InputPasswordComponent } from '../../shared/components/input-password/input-password.component';
 import { RouterHelper } from '../../util/router.helper';
 import { Toast } from '../../services/toast';
-import { OPEN_URL_MODE, TranslationsService, UIAnimation, UIConstants } from 'ngx-edu-sharing-ui';
+import {
+    OPEN_URL_MODE,
+    TranslationsService,
+    UIAnimation,
+    UIConstants,
+    UIService,
+} from 'ngx-edu-sharing-ui';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { AuthenticationService, LoginInfo } from 'ngx-edu-sharing-api';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
@@ -83,6 +89,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
         private toast: Toast,
         private dialogs: DialogsService,
         private platformLocation: PlatformLocation,
+        private ui: UIService,
         private router: Router,
         private http: HttpClient,
         private translations: TranslationsService,
@@ -187,7 +194,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                         this.connector.isLoggedIn(true).subscribe(
                             (data: LoginResult) => {
                                 if (data.statusCode !== RestConstants.STATUS_CODE_OK) {
-                                    RestHelper.goToLogin(this.router, this.configService);
+                                    this.ui.goToLogin();
                                 } else {
                                     this.authentication
                                         .observeHasAccessToScope(RestConstants.SAFE_SCOPE)
@@ -205,7 +212,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                                         });
                                 }
                             },
-                            (error: any) => RestHelper.goToLogin(this.router, this.configService),
+                            (error: any) => this.ui.goToLogin(),
                         );
                     }
 

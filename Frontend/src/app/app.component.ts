@@ -16,6 +16,7 @@ import {
     AppContainerService,
     TranslationsService,
     UIConstants,
+    UIService,
 } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
@@ -102,6 +103,7 @@ export class AppComponent implements OnInit, DoCheck, AfterViewInit {
         private bridge: BridgeService,
         private injector: Injector,
         private accessibilityService: AccessibilityService,
+        private ui: UIService,
         private translations: TranslationsService,
         private loadingScreen: LoadingScreenService,
         private licenseAgreement: LicenseAgreementService,
@@ -209,7 +211,7 @@ export class AppComponent implements OnInit, DoCheck, AfterViewInit {
                     route.startsWith('shibboleth')
                 )
             ) {
-                RestHelper.goToLogin(this.injector.get(Router), this.configuration);
+                this.ui.goToLogin();
             } else if (loginInfo.isGuest) {
                 this.configuration.get('loginSilentMode').subscribe((mode: string) => {
                     if ('iframe' === mode) {
@@ -228,10 +230,7 @@ export class AppComponent implements OnInit, DoCheck, AfterViewInit {
                                     var o = JSON.parse(pre_info);
                                     if (o.error && o.error === 'login_required') {
                                     } else {
-                                        RestHelper.goToLogin(
-                                            this.injector.get(Router),
-                                            this.configuration,
-                                        );
+                                        this.ui.goToLogin();
                                     }
                                 } catch (error) {
                                     console.error('check session iframe fails:' + error);

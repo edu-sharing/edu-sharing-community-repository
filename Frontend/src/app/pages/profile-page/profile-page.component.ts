@@ -10,6 +10,7 @@ import {
     Scope,
     TranslationsService,
     UIAnimation,
+    UIService,
     VCard,
 } from 'ngx-edu-sharing-ui';
 import {
@@ -47,6 +48,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
         private toast: Toast,
         private route: ActivatedRoute,
         private mainNav: MainNavService,
+        private ui: UIService,
         private connector: RestConnectorService,
         private translations: TranslationsService,
         private router: Router,
@@ -129,7 +131,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
                     void this.iamService.getCurrentUserAsync().then((me) => {
                         this.isMe = profile.person.authorityName === me.person.authorityName;
                         if (this.isMe && login.isGuest) {
-                            RestHelper.goToLogin(this.router, this.config);
+                            this.ui.goToLogin();
                         }
 
                         setTimeout(() => {
