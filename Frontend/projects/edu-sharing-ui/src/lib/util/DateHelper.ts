@@ -156,7 +156,7 @@ export class DateHelper {
                 //str += DateFormatter.format(dateObject, Translation.getLanguage(), dateFormat).trim();
             }
             if (options.showDate == false) {
-                str = '';
+                str = prefix;
             }
             // ie fixes, timeFormat not working
             if (timeFormat) {
