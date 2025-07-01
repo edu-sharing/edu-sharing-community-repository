@@ -81,7 +81,7 @@ public class DataProtectionService {
 
     public void prepare(String userName){
         try {
-            systemFolder = new UserEnvironmentTool().getEdu_SharingDsvgoFolder();
+            systemFolder = new UserEnvironmentTool().getEdu_SharingGdprFolder();
             getTargetNode(userName);
         } catch (Throwable e) {
             throw new RuntimeException(e);

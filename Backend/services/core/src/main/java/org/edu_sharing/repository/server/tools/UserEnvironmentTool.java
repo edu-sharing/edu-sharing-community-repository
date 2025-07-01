@@ -241,8 +241,8 @@ public class UserEnvironmentTool {
         return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_ORG_DELETE_PROTOCOL, CCConstants.I18n_SYSTEMFOLDER_ORG_DELETE_PROTOCOL);
     }
 
-    public String getEdu_SharingDsvgoFolder() throws Exception {
-        return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_DSVGO, CCConstants.I18n_SYSTEMFOLDER_DSVGO);
+    public String getEdu_SharingGdprFolder() throws Exception {
+        return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_GDPR, CCConstants.I18n_SYSTEMFOLDER_GDPR);
     }
 
     public String getOrCreateSystemFolderByName(String constantName, String i18nId) throws Exception {
