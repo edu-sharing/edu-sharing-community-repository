@@ -1481,6 +1481,15 @@
     "aboutme": "Eigenes Profil",
     "documentation": "Zur Dokumentation"
   },
+  "DASHBOARD_SWIMLANE": {
+    "SHOW_MORE": "zeige mir alle",
+    "featured-media": {
+      "TITLE": "Deine Mediathek"
+    },
+    "collections": {
+      "TITLE": "Deine Sammlungen"
+    }
+  },
   "API_ERROR": {
     "RELOAD_NOTICE_TITLE": "Seite muss neugeladen werden",
     "RELOAD_NOTICE": "Beim Laden von wichtigen Informationen ist etwas schief gegangen. Bitte laden Sie die Seite neu.",

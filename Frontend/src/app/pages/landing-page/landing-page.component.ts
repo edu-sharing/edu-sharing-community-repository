@@ -5,9 +5,10 @@ import { RestConstants } from '../../core-module/rest/rest-constants';
 import { Router } from '@angular/router';
 import { UIService } from 'ngx-edu-sharing-ui';
 
-type SwimlaneEntry = {
-    id: string;
-    defaultVisibility: boolean;
+export type SwimlaneTypes = 'featured-media' | 'collections';
+export type SwimlaneEntry = {
+    id: SwimlaneTypes;
+    defaultExpanded: boolean;
 };
 @Component({
     selector: 'es-landing-page',
@@ -16,8 +17,11 @@ type SwimlaneEntry = {
     standalone: false,
 })
 export class LandingPageComponent implements OnInit {
-    private swimlanes = signal<SwimlaneEntry[]>([]);
-    swimlanesVisible = computed(() => this.swimlanes().filter((s) => s.defaultVisibility));
+    /**
+     * displayed swimlanes (in order)
+     * are be retrieved from the backend client.config
+     */
+    swimlanes = signal<SwimlaneEntry[]>([]);
     constructor(
         private router: Router,
         private configService: ConfigService,
@@ -27,7 +31,6 @@ export class LandingPageComponent implements OnInit {
 
     async ngOnInit(): Promise<void> {
         const login = await firstValueFrom(this.authenticationService.observeLoginInfo());
-        console.log(login);
         if (login.statusCode !== RestConstants.STATUS_CODE_OK) {
             this.ui.goToLogin();
             return;
@@ -35,8 +38,12 @@ export class LandingPageComponent implements OnInit {
         this.swimlanes.set(
             await this.configService.get<SwimlaneEntry[]>('frontpage.dashbaord.swimlanes', [
                 {
-                    id: 'test',
-                    defaultVisibility: true,
+                    id: 'collections',
+                    defaultExpanded: true,
+                },
+                {
+                    id: 'featured-media',
+                    defaultExpanded: true,
                 },
             ]),
         );

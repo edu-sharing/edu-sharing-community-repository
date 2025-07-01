@@ -201,6 +201,7 @@ export enum Scope {
     UserProfile = 'UserProfile',
     Stream = 'Stream',
     CreateMenu = 'CreateMenu',
+    DashboardSwimlane = 'DashboardSwimlane',
 
     MediacenterNodesList = 'MediacenterNodesList',
     Admin = 'Admin', // Admin Tools / Debugging

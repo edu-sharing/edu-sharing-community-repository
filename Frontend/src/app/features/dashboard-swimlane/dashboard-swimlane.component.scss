@@ -1,1 +1,58 @@
 @use 'variables-scss' as vars;
+@use 'mixins' as mixins;
+
+.toggle {
+    @include mixins.clickable();
+    padding: 10px 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    align-items: center;
+    @include mixins.materialShadowBottom();
+    > h2 {
+        color: var(--primary);
+        // flex-grow: 1;
+    }
+}
+.no-results-message {
+    color: var(--textMediumLight);
+    text-align: center;
+    font-size: vars.$fontSizeXLarge;
+}
+.swimlane {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 20px;
+    position: relative;
+    background-color: var(--defaultBackground);
+    @include mixins.materialShadowBottom();
+    z-index: 1;
+    .show-more {
+        padding-top: 10px;
+        display: flex;
+        align-self: flex-end;
+    }
+    .swimlane-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .swimlane-options {
+        ::ng-deep {
+            .card-grid.card-grid-layout-scroll {
+                grid-template-columns: 50px repeat(auto-fit, var(--cardWidth));
+                .global-option .label {
+                    display: none;
+                }
+            }
+        }
+    }
+    // regular card
+    .swimlane-type-1 {
+        min-height: 458px;
+    }
+    // small/collection card
+    .swimlane-type-2 {
+        min-height: 235px;
+    }
+}

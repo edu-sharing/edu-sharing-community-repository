@@ -2,12 +2,15 @@ import { TranslateService } from '@ngx-translate/core';
 import {
     AuthenticationService,
     MdsDefinition,
+    MdsIdentifier,
+    MdsService,
     MdsSort,
     MdsWidget,
     RestConstants,
 } from 'ngx-edu-sharing-api';
 import { Injectable } from '@angular/core';
 import { ListItem, ListItemType } from '../types/list-item';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class MdsHelperService {
@@ -24,6 +27,15 @@ export class MdsHelperService {
         }
         return null;
     }
+
+    /**
+     * Retrieves columns based on the provided MDS set and name.
+     *
+     * @param translate - The TranslateService for translating column names.
+     * @param mdsSet - The MDS Set containing lists of columns.
+     * @param name - The name of the list to retrieve columns from.
+     * @returns An array of ListItem objects representing the columns.
+     */
     static getColumns(translate: TranslateService, mdsSet: any, name: string) {
         let columns: ListItem[] = [];
         if (mdsSet) {
@@ -56,7 +68,15 @@ export class MdsHelperService {
                     'mds does not define columns for ' + name + ', invalid configuration!',
                 );
             }
-            if (name === 'search' || name === 'collectionReferences') {
+            if (name === 'searchCollections' || name === 'swimlane_collections') {
+                columns.push(new ListItem('COLLECTION', 'title'));
+                columns.push(new ListItem('COLLECTION', 'info'));
+                columns.push(new ListItem('COLLECTION', 'scope'));
+            } else if (
+                name === 'search' ||
+                name === 'collectionReferences' ||
+                name.startsWith('swimlane_')
+            ) {
                 columns.push(new ListItem('NODE', RestConstants.LOM_PROP_TITLE));
                 columns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
                 columns.push(new ListItem('NODE', RestConstants.CCM_PROP_LICENSE));
@@ -68,10 +88,6 @@ export class MdsHelperService {
             } else if (name === 'mediacenterGroups') {
                 columns.push(new ListItem('GROUP', RestConstants.AUTHORITY_DISPLAYNAME));
                 columns.push(new ListItem('GROUP', RestConstants.AUTHORITY_GROUPTYPE));
-            } else if (name === 'searchCollections') {
-                columns.push(new ListItem('COLLECTION', 'title'));
-                columns.push(new ListItem('COLLECTION', 'info'));
-                columns.push(new ListItem('COLLECTION', 'scope'));
             }
         }
         columns.map((c) => {
@@ -105,8 +121,19 @@ export class MdsHelperService {
         return null;
     }
 
-    constructor(private authentication: AuthenticationService) {}
+    constructor(
+        private authentication: AuthenticationService,
+        private mdsService: MdsService,
+        private translate: TranslateService,
+    ) {}
 
+    async getColumns(name: string, mds: Partial<MdsIdentifier>) {
+        return MdsHelperService.getColumns(
+            this.translate,
+            await firstValueFrom(this.mdsService.getMetadataSet(mds)),
+            name,
+        );
+    }
     /**
      * Same as getWidget, but will also check the widget conditions
      * @param connector
