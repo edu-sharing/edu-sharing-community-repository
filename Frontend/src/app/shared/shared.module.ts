@@ -42,7 +42,6 @@ import { CalendarComponent } from './components/calendar/calendar.component';
 import { CardComponent } from './components/card/card.component';
 import { CollectionChooserComponent } from './components/collection-chooser/collection-chooser.component';
 import { GlobalProgressComponent } from './components/global-progress/global-progress.component';
-import { InfoMessageComponent } from './components/info-message/info-message.component';
 import { InputPasswordComponent } from './components/input-password/input-password.component';
 import { LicenseSourceComponent } from './components/license-source/license-source.component';
 import { LinkComponent } from './components/link/link.component';
@@ -93,7 +92,6 @@ import { extensionSchemas } from '../extension/extension-schemas';
         FileDropDirective,
         GlobalProgressComponent,
         ImageConfigDirective,
-        InfoMessageComponent,
         InputPasswordComponent,
         LicenseSourceComponent,
         LinkComponent,
@@ -162,7 +160,6 @@ import { extensionSchemas } from '../extension/extension-schemas';
         GlobalProgressComponent,
         ImageConfigDirective,
         ImprintPrivacyComponent,
-        InfoMessageComponent,
         InputPasswordComponent,
         LicenseSourceComponent,
         LinkComponent,

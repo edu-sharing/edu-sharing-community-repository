@@ -21,6 +21,7 @@ export * from './directives/infinite-scroll.directive';
 export * from './dropdown/dropdown.component';
 export * from './edu-sharing-ui-configuration';
 export * from './edu-sharing-ui.module';
+export * from './info-message/info-message.component';
 export * from './list-items/format-duration.pipe';
 export * from './list-items/list-base/list-base.component';
 export * from './list-items/list-counts/list-counts.component';

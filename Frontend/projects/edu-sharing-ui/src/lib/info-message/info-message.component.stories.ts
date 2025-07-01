@@ -1,6 +1,6 @@
 import { TranslateModule } from '@ngx-translate/core';
 import { moduleMetadata, type Meta, type StoryObj } from '@storybook/angular';
-import { SharedModule } from '../../shared.module';
+import { SharedModule } from '../../../../../src/app/shared/shared.module';
 import { InfoMessageComponent } from './info-message.component';
 
 // More on how to set up stories at: https://storybook.js.org/docs/angular/writing-stories/introduction
