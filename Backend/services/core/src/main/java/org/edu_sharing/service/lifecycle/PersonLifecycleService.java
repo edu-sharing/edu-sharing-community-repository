@@ -919,7 +919,7 @@ public class PersonLifecycleService {
 		return false;
 	}
 
-	private NodeRef getHomeFolder(NodeRef personNodeRef) {
+	public NodeRef getHomeFolder(NodeRef personNodeRef) {
 		return (NodeRef)nodeService.getProperty(personNodeRef,
 				QName.createQName(CCConstants.CM_PROP_PERSON_HOME_FOLDER));
 	}

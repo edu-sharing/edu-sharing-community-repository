@@ -607,6 +607,37 @@ public class IamApi {
     }
 
     @PUT
+    @Path("/people/{repository}/{person}/dataprotection")
+    @Operation(summary = "requests General Data Protection Regulation (GDPR) export.", description = "Request General Data Protection Regulation (GDPR) export of the user the user. (To request GDPR export for foreign users, admin rights are required.)")
+
+    @ApiResponses(
+    value = {
+            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+
+    public Response requestDataProtectionExport(
+            @Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue = "-me-")) @PathParam("person") String person,
+            @Context HttpServletRequest req) {
+
+        try {
+
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            PersonDao personDao = PersonDao.getPerson(repoDao, person);
+            personDao.requestDataProtectionExport();
+            return Response.status(Response.Status.OK).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+    }
+
+    @PUT
     @Path("/people/{repository}/{person}/avatar")
     @Operation(summary = "Set avatar of the user.", description = "Set avatar of the user. (To set foreign avatars, admin rights are required.)")
     @Consumes({"multipart/form-data"})

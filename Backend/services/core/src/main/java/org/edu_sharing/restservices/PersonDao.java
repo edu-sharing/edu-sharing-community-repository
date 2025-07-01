@@ -30,6 +30,8 @@ import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.QRCode2Fa;
+import org.edu_sharing.service.dataprotection.FeatureInfoDataProtectionService;
+import org.edu_sharing.service.dataprotection.DataProtectionService;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -40,8 +42,10 @@ import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.edu_sharing.spring.ApplicationContextFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -139,6 +143,8 @@ public class PersonDao {
 
 	private AuthorityService authorityService;
 
+	private DataProtectionService dataProtectionService;
+
 
 	public PersonDao(RepositoryDao repoDao, String userName) throws DAOException  {
 
@@ -161,6 +167,8 @@ public class PersonDao {
 			/* this.parentOrganizations = AuthenticationUtil.runAsSystem(() ->
 					authorityService.getEduGroups(userName, NodeServiceInterceptor.getEduSharingScope())
 			);*/
+
+			dataProtectionService = ApplicationContextFactory.getApplicationContext().getBean(DataProtectionService.class);
 
 		} catch (Throwable t) {
 			throw DAOException.mapping(t);
@@ -801,5 +809,14 @@ public class PersonDao {
 		}
 
 		return authorityService.generate2FaQRCode(getUserName());
+	}
+
+	public void requestDataProtectionExport(){
+		try{
+			ApplicationContextFactory.getApplicationContext().getBean(FeatureInfoDataProtectionService.class);
+			dataProtectionService.requestDataProtectionExport(getUserName());
+		} catch (NoSuchBeanDefinitionException e) {
+			logger.warn("data protection service not enabled");
+		}
 	}
 }
