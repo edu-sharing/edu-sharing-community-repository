@@ -674,6 +674,7 @@
     "METADATA": "Details",
     "COLLECTION": "Add to collection",
     "COLLECTION_OTHER": "Add to other collection",
+    "ADD_SHORTCUT": "Add to shortcuts",
     "STREAM": "Add to stream",
     "LICENSE": "Assign a license",
     "CONTRIBUTOR": "Contributors",
@@ -1459,8 +1460,17 @@
       "references": "refers to (references)"
     }
   },
-  "TILE_ITEMS": {
+  "SHORTCUT_ENTRIES": {
     "CHANGE_TITLE": "Change title",
+    "EXPAND": "Expand tiles",
+    "COLLAPSE": "Collapse tiles",
+    "RENAME": "Rename",
+    "DELETE": "Delete",
+    "MODAL_HINT_REPLACE": "To add a new tile, either delete an existing one or select one to replace.",
+    "MODAL_HINT_ADD_REPLACE": "Add a new tile via [+] or select an existing tile to be replaced.",
+    "MODAL_HINT_INCLUDED": "This element is already included in your shortcut entries and cannot be added again.",
+    "REPLACE_TITLE": "Replace tile",
+    "REPLACE_MESSAGE": "Do you really want to replace the tile with the selected element?",
     "search": "Search",
     "workspace": "Workspace",
     "myfiles": "My Files",

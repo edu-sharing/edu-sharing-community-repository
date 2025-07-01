@@ -1,7 +1,12 @@
-@use '../../../assets/scss/variables-scss' as *;
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+
+$iconContainerHeight: 80px;
+$tileSize: 124px;
 
 :host {
-    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 @keyframes jiggle {
@@ -14,26 +19,64 @@
     }
 }
 
-.tiles-container {
-    padding: 32px 16px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 24px;
+.entries-container {
+    --menu-padding: 16px;
+    margin: 0 auto;
+    position: relative;
+    padding-top: var(--menu-padding);
+    padding-bottom: var(--menu-padding);
+    width: 100%;
     background: var(--primary);
+    // center tiles-wrapper with text-align, as inline-flex is used
+    text-align: center;
+
+    .entries-wrapper {
+        // the padding is important to not be able to scroll at every dimension
+        padding: var(--menu-padding);
+        display: inline-flex;
+        flex-direction: row;
+        // note: avoid adding "align-items: center" and "justify-content: center",
+        //       as it conflicts with the horizontal scrolling
+        gap: 24px;
+        overflow-x: auto;
+        box-sizing: content-box;
+        // hint: use content-box here to prevent the scrollbar from destroying the layout
+        //       manually subtract the padding set
+        max-width: calc(100% - 2 * var(--menu-padding));
+
+        &.flex-wrap {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, $tileSize);
+            justify-content: center;
+        }
+    }
+
+    .scroll-fade {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 24px;
+        height: 100%;
+        background: linear-gradient(to left, var(--primary), rgba(0, 0, 0, 0));
+    }
 }
 
+// place element outside entries-container / wrapper to also apply the style during drag and drop
 .entry-card {
-    // CSS variables have to be defined here to be available in drag-and-drop
-    --tile-size: 124px;
-    --icon-container-height: 80px;
-
-    width: var(--tile-size);
-    height: var(--tile-size);
+    // https://stackoverflow.com/a/68382653
+    flex-shrink: 0 !important;
+    box-sizing: border-box;
+    text-align: center;
+    vertical-align: middle;
     position: relative;
-    cursor: grab;
+    width: $tileSize;
+    height: $tileSize;
     background-color: #fff;
     box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.4);
+
+    &.drag-indicator {
+        cursor: grab;
+    }
 
     // display the entry menu button on hover, in mobile edit mode or when it is the selected entry
     &:hover,
@@ -71,6 +114,17 @@
         background: unset;
         border: 2px dashed #fff;
         box-shadow: none;
+        cursor: pointer;
+        user-select: none;
+
+        &.disabled {
+            cursor: not-allowed;
+            border-color: #ccc;
+
+            .entry-icon-wrapper .entry-icon {
+                color: #ccc;
+            }
+        }
 
         .entry-icon-wrapper {
             height: 100%;
@@ -98,13 +152,16 @@
 
     // wrapper for the main icon of the entry
     .entry-icon-wrapper {
-        height: var(--icon-container-height);
+        height: $iconContainerHeight;
         display: flex;
         align-items: flex-end;
         justify-content: center;
 
         .entry-icon {
             font-size: 48px;
+            // height + width are necessary for img to be resized properly
+            height: 1em;
+            width: 1em;
             color: var(--primary);
         }
     }
@@ -116,7 +173,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        height: calc(var(--tile-size) - var(--icon-container-height));
+        height: calc($tileSize - $iconContainerHeight);
         overflow: hidden;
         display: inline-flex;
         justify-content: center;
@@ -169,6 +226,36 @@
             font-size: 20px;
             color: white;
         }
+    }
+}
+
+.entries-expand-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+
+    .line {
+        flex: 1;
+        height: 1px;
+        background-color: #ccc;
+        margin: 0 8px;
+    }
+
+    .icon-text {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        color: #fff;
+    }
+
+    .icon {
+        font-size: 12px;
+        transform: translateY(1px); // slight alignment tweak
     }
 }
 

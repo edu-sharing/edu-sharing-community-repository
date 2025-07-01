@@ -143,6 +143,10 @@ import {
     NodePreviewMediaDialogData,
     NodePreviewMediaDialogResult,
 } from './dialog-modules/node-preview-media-dialog/node-preview-media-dialog-data';
+import {
+    ShortcutManagementDialogData,
+    ShortcutManagementDialogResult,
+} from './dialog-modules/shortcut-management-dialog/shortcut-management-dialog-data';
 
 export enum DialogTemplate {
     AddMaterialDialogBelow,
@@ -881,6 +885,24 @@ export class DialogsService {
             './dialog-modules/node-preview-media-dialog/node-preview-media-dialog.component'
         );
         return this.cardDialog.open(NodePreviewMediaDialogComponent, {
+            ...(await this.cardDialogUtils.configForNode(data.node)),
+            minWidth: 700,
+            minHeight: 600,
+            data,
+        });
+    }
+
+    /**
+     * opens shortcut management dialog
+     * @param data
+     */
+    async openShortcutManagementDialog(
+        data: ShortcutManagementDialogData,
+    ): Promise<CardDialogRef<ShortcutManagementDialogData, ShortcutManagementDialogResult>> {
+        const { ShortcutManagementDialogComponent } = await import(
+            './dialog-modules/shortcut-management-dialog/shortcut-management-dialog.component'
+        );
+        return this.cardDialog.open(ShortcutManagementDialogComponent, {
             ...(await this.cardDialogUtils.configForNode(data.node)),
             minWidth: 700,
             minHeight: 600,

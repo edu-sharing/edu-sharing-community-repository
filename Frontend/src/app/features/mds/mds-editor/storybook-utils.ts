@@ -12,7 +12,9 @@ import { TranslateService } from '@ngx-translate/core';
 import {
     ClientConfig,
     ConfigService,
+    DashboardShortcutEntry,
     HOME_REPOSITORY,
+    IamV1Service,
     MdsDefinition,
     MdsIdentifier,
     MdsService,
@@ -36,7 +38,7 @@ import {
     VCard,
     ViewInstanceService,
 } from 'ngx-edu-sharing-ui';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { catchError, map, shareReplay, tap } from 'rxjs/operators';
 
 @Injectable()
@@ -193,6 +195,50 @@ export class ConfigServiceMock extends ConfigService {
             supportedLanguages: DEFAULT_SUPPORTED_LANGUAGES,
         };
         return of(config);
+    }
+}
+@Injectable()
+export class IamServiceMock extends IamV1Service {
+    getDashboardShortcuts(
+        params: any,
+        context?: HttpContext,
+    ): Observable<Array<DashboardShortcutEntry>> {
+        return of([
+            {
+                type: 'default',
+                id: 'search',
+                title: null,
+                node: null,
+            },
+            {
+                type: 'default',
+                id: 'workspace',
+                title: null,
+                node: null,
+            },
+            {
+                type: 'default',
+                id: 'myfiles',
+                title: null,
+                node: null,
+            },
+            {
+                type: 'default',
+                id: 'mycollections',
+                title: null,
+                node: null,
+            },
+            {
+                type: 'default',
+                id: 'invitedcollections',
+                title: null,
+                node: null,
+            },
+        ]);
+    }
+
+    setDashboardShortcuts(params: any, context?: HttpContext): Observable<void> {
+        return of(void 0);
     }
 }
 

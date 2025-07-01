@@ -859,6 +859,24 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             return true;
         };
 
+        const shortcutNode = new OptionItem('OPTIONS.ADD_SHORTCUT', 'star', (object) => {
+            const nodes = this.getObjects(object, data);
+            void this.dialogs.openShortcutManagementDialog({ node: nodes[0] });
+        });
+        shortcutNode.elementType = [
+            ElementType.Group,
+            ElementType.MapRef,
+            ElementType.Node,
+            ElementType.NodeChild,
+            ElementType.NodeProposal,
+            ElementType.NodePublishedCopy,
+            ElementType.Person,
+            ElementType.SavedSearch,
+        ];
+        shortcutNode.constrains = [Constrain.User];
+        shortcutNode.group = DefaultGroups.Reuse;
+        shortcutNode.priority = 21;
+
         const createNodeVariant = new OptionItem('OPTIONS.VARIANT', 'call_split', (object) =>
             this.dialogs.openCreateVariantDialog({ node: this.getObjects(object, data)[0] }),
         );
@@ -1497,6 +1515,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         options.push(openNode);
         options.push(editConnectorNode);
         options.push(bookmarkNode);
+        options.push(shortcutNode);
         options.push(editCollection);
         options.push(pinCollection);
         options.push(feedbackMaterial);

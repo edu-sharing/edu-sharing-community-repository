@@ -1,19 +1,20 @@
 import { applicationConfig, type Meta, moduleMetadata, type StoryObj } from '@storybook/angular';
+import { ConfigService, IamV1Service } from 'ngx-edu-sharing-api';
+import { Toast } from 'ngx-edu-sharing-ui';
+import { SharedModule } from '../../shared/shared.module';
 import {
     ConfigServiceMock,
+    IamServiceMock,
     mdsStorybookProviders,
     ToastMock,
-} from '../../../../../src/app/features/mds/mds-editor/storybook-utils';
-import { SharedModule } from '../../../../../src/app/shared/shared.module';
-import { Toast } from '../services/abstract/toast.service';
+} from '../mds/mds-editor/storybook-utils';
 import { ShortcutEntriesComponent } from './shortcut-entries.component';
-import { Injectable } from '@angular/core';
-import { ConfigService } from 'ngx-edu-sharing-api';
 
 // Additional providers necessary for selected components
 const additionalProviders = [
     { provide: Toast, useClass: ToastMock }, // required for NodeEntriesService
     { provide: ConfigService, useFactory: () => new ConfigServiceMock(null, null) },
+    { provide: IamV1Service, useFactory: () => new IamServiceMock(null, null) },
 ];
 
 // More on how to set up stories at: https://storybook.js.org/docs/angular/writing-stories/introduction
@@ -35,15 +36,8 @@ const shortcutEntries: Meta<ShortcutEntriesComponent> = {
 
 export default shortcutEntries;
 
+// simulate a touch device: chrome -> three points -> add device type -> desktop (touch)
 type Story = StoryObj<ShortcutEntriesComponent>;
-export const Desktop_view: Story = {
-    args: {
-        fakeMobileDevice: false,
-    },
-};
-// simulate touch device: chrome -> three points -> add device type -> desktop (touch)
-export const Mobile_view: Story = {
-    args: {
-        fakeMobileDevice: true,
-    },
+export const Landing_page_view: Story = {
+    args: {},
 };

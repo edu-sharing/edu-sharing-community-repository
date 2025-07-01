@@ -707,6 +707,7 @@
     "METADATA": "Details",
     "COLLECTION": "In Sammlung",
     "COLLECTION_OTHER": "In weitere Sammlung",
+    "ADD_SHORTCUT": "Shortcut hinzufügen",
     "STREAM": "Auf Stream",
     "LICENSE": "Lizenz",
     "CONTRIBUTOR": "Beteiligte",
@@ -1460,8 +1461,17 @@
       "proposeForCollectionEvent": "Vorschläge für Sammlungen"
     }
   },
-  "TILE_ITEMS": {
+  "SHORTCUT_ENTRIES": {
     "CHANGE_TITLE": "Titel ändern",
+    "EXPAND": "Kacheln ausklappen",
+    "COLLAPSE": "Kacheln einklappen",
+    "RENAME": "Umbenennen",
+    "DELETE": "Löschen",
+    "MODAL_HINT_REPLACE": "Um eine neue Kachel hinzuzufügen, müssen Sie entweder eine vorhandene Kachel löschen oder eine Kachel auswählen, die Sie ersetzen möchten.",
+    "MODAL_HINT_ADD_REPLACE": "Fügen Sie eine neue Kachel via [+] hinzu oder wählen Sie eine bestehende Kachel zum Ersetzen aus.",
+    "MODAL_HINT_INCLUDED": "Das Element wurde bereits zu Ihrer Schnellstartleiste hinzugefügt und kann nicht erneut hinzugefügt werden.",
+    "REPLACE_TITLE": "Kachel ersetzen",
+    "REPLACE_MESSAGE": "Wollen Sie diese Kachel wirklich durch das ausgewählte Element ersetzen?",
     "search": "Suche",
     "workspace": "Workspace",
     "myfiles": "Eigene Dateien",
