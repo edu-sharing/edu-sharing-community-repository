@@ -17,11 +17,14 @@ import {
     IamV1Service,
     MdsDefinition,
     MdsIdentifier,
+    UserProfile,
     MdsService,
     MdsWidget,
     Node,
+    Person,
     RestConstants,
     SuggestionResponseDto,
+    User,
 } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import { CordovaService } from '../../../services/cordova.service';
@@ -48,8 +51,12 @@ export class translateProvider {
 
     constructor(private httpClient: HttpClient) {}
 
-    instant(v: string) {
-        return Helper.getDotPathFromNestedObject(this.cache$?.value, v);
+    instant(v: string, args: any = {}) {
+        let str = Helper.getDotPathFromNestedObject(this.cache$?.value, v);
+        for (const k of Object.keys(args)) {
+            str = str.replace(new RegExp('{{\\s*' + k + '\\s*}}', 'g'), args[k]);
+        }
+        return str;
     }
 
     get(v: string, args: any = {}): Observable<any> {
@@ -64,7 +71,7 @@ export class translateProvider {
                 shareReplay(1),
             );
         }
-        return this.translation$.pipe(map((_) => this.instant(v)));
+        return this.translation$.pipe(map((_) => this.instant(v, args)));
     }
 
     onTranslationChange = of({ lang: 'none' });
@@ -392,6 +399,15 @@ export const Data: Values = {
     ['ccm:metadatacontributer_creator']: [VCardDummy.toVCardString()],
     ['ccm:commonlicense_key']: ['CC_0'],
 };
+export class DummyUser implements Partial<User> {
+    authorityName = 'User_' + Math.random();
+    authorityType = 'USER' as any;
+    profile = {
+        firstName: ['Bob', 'Max', 'Alice', 'Alex'][Math.floor(Math.random() * 4)],
+        lastName: ['Smith', 'Johnson', 'Williams', 'Miller'][Math.floor(Math.random() * 4)],
+    };
+}
+
 export const DummyNode: Partial<Node> = {
     ref: {
         id: 'nodeid',

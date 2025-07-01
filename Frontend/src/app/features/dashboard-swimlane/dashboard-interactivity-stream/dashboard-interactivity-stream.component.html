@@ -1,0 +1,38 @@
+<div class="time-group" *ngFor="let events of eventsGrouped()">
+  <label>{{ 'DASHBOARD_SWIMLANE.STREAM.TIMEGROUP.' + events.key | translate }}</label>
+  <div class="event" *ngFor="let event of events.events">
+    <div class="details">
+      <div
+        *ngIf="event.type === 'SHARE'"
+        [innerHTML]="
+          'DASHBOARD_SWIMLANE.STREAM.SHARED_INFO'
+            | translate
+              : {
+                  initiator: (event.initiator | authorityName),
+                  receiver: (event.receiver | authorityName),
+                  element:
+                    '<a href=\'' +
+                    event.element?.content?.url +
+                    '\'>' +
+                    (event.element | nodeTitle) +
+                    '</a>'
+                }
+        "
+      ></div>
+    </div>
+    <div class="timestamp">
+      {{
+        event.timestamp
+          | formatDate
+            : {
+                async: true,
+                relative: [TimeGroups.Today, TimeGroups.Yesterday].includes(events.key),
+                time: [TimeGroups.Today, TimeGroups.Yesterday].includes(events.key),
+                date: ![TimeGroups.Today, TimeGroups.Yesterday].includes(events.key)
+              }
+          | async
+      }}
+    </div>
+  </div>
+</div>
+<div class="empty" *ngIf="eventsGrouped().length < 1">TODO: Empty</div>

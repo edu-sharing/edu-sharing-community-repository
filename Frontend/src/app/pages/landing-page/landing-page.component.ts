@@ -5,7 +5,7 @@ import { RestConstants } from '../../core-module/rest/rest-constants';
 import { Router } from '@angular/router';
 import { UIService } from 'ngx-edu-sharing-ui';
 
-export type SwimlaneTypes = 'featured-media' | 'collections';
+export type SwimlaneTypes = 'featured-media' | 'collections' | 'recent-activities';
 export type SwimlaneEntry = {
     id: SwimlaneTypes;
     defaultExpanded: boolean;

@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { ApplicationRef, Component, effect, input, signal, ViewChild } from '@angular/core';
+import {
+    ApplicationRef,
+    Component,
+    computed,
+    effect,
+    input,
+    signal,
+    ViewChild,
+} from '@angular/core';
 import {
     EduSharingUiCommonModule,
     GridConfig,
@@ -35,6 +43,7 @@ import { RestConstants } from '../../core-module/rest/rest-constants';
 import { Params, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, first } from 'rxjs/operators';
+import { DashboardInteractivityStreamComponent } from './dashboard-interactivity-stream/dashboard-interactivity-stream.component';
 
 @Component({
     selector: 'es-dashboard-swimlane',
@@ -45,6 +54,7 @@ import { filter, first } from 'rxjs/operators';
     animations: [trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
     imports: [
         CommonModule,
+        DashboardInteractivityStreamComponent,
         EduSharingUiCommonModule,
         TranslateModule,
         MatButtonModule,
@@ -59,6 +69,9 @@ export class DashboardSwimlaneComponent {
      * Represents a swimlane on the start page
      */
     readonly swimlane = input.required<SwimlaneEntry>();
+    readonly type = computed(() => {
+        return this.swimlane().id === 'recent-activities' ? 'interactivity-stream' : 'nodes';
+    });
     @ViewChild(NodeEntriesWrapperComponent)
     nodeNodeEntriesWrapperComponent: NodeEntriesWrapperComponent<Node>;
     readonly Scope = Scope;

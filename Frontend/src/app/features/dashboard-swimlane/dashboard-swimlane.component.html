@@ -6,6 +6,7 @@
 </div>
 <div class="swimlane" *ngIf="open | async" @openOverlay>
   <es-node-entries-wrapper
+    *ngIf="type() === 'nodes'"
     class="{{
       'swimlane-type-' +
         displayType() +

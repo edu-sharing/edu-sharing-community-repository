@@ -1,0 +1,22 @@
+@use 'variables-scss' as vars;
+@use 'mixins' as mixins;
+
+:host {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.time-group {
+    > label {
+        display: flex;
+        font-weight: bold;
+        padding-bottom: 10px;
+    }
+    .event {
+        padding: 0 10px;
+        .timestamp {
+            color: var(--textLight);
+            font-size: var(--fontSizeXSmall);
+        }
+    }
+}
