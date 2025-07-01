@@ -9,9 +9,15 @@
     gap: 10px;
     align-items: center;
     @include mixins.materialShadowBottom();
+    transition: all vars.$transitionNormal;
     > h2 {
         color: var(--primary);
         // flex-grow: 1;
+    }
+    &:hover,
+    &:focus {
+        background-color: var(--palette-primary-50);
+        @include mixins.materialShadowBottom(0.2);
     }
 }
 .no-results-message {
