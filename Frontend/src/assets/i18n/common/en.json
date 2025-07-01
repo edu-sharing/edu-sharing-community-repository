@@ -1471,6 +1471,8 @@
     "MODAL_HINT_INCLUDED": "This element is already included in your shortcut entries and cannot be added again.",
     "REPLACE_TITLE": "Replace tile",
     "REPLACE_MESSAGE": "Do you really want to replace the tile with the selected element?",
+    "SELECT_ELEMENT": "Select element",
+    "SELECT_ELEMENT_INFO": "Select an element and click on \"apply\" or use the option in the three-dot menu to add a shortcut.",
     "search": "Search",
     "workspace": "Workspace",
     "myfiles": "My Files",

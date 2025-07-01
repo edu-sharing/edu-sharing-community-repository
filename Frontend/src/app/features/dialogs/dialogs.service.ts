@@ -147,6 +147,10 @@ import {
     ShortcutManagementDialogData,
     ShortcutManagementDialogResult,
 } from './dialog-modules/shortcut-management-dialog/shortcut-management-dialog-data';
+import {
+    SelectElementDialogData,
+    SelectElementDialogResult,
+} from './dialog-modules/select-element-dialog/select-element-dialog-data';
 
 export enum DialogTemplate {
     AddMaterialDialogBelow,
@@ -906,6 +910,24 @@ export class DialogsService {
             ...(await this.cardDialogUtils.configForNode(data.node)),
             minWidth: 700,
             minHeight: 600,
+            data,
+        });
+    }
+
+    /**
+     * opens select element dialog
+     */
+    async openSelectElementDialog(
+        data: SelectElementDialogData,
+    ): Promise<CardDialogRef<SelectElementDialogData, SelectElementDialogResult>> {
+        const { SelectElementDialogComponent } = await import(
+            './dialog-modules/select-element-dialog/select-element-dialog.component'
+        );
+        return this.cardDialog.open(SelectElementDialogComponent, {
+            title: 'SHORTCUT_ENTRIES.SELECT_ELEMENT',
+            avatar: { kind: 'icon', icon: 'call_made' },
+            minWidth: 800,
+            minHeight: 800,
             data,
         });
     }

@@ -137,6 +137,11 @@
     <i *ngIf="item.icon" [esIcon]="item.icon"></i>
     {{ i18nPrefix + item.id | translate }}
   </button>
+  <mat-divider></mat-divider>
+  <button mat-menu-item (click)="selectElement()">
+    <i esIcon="call_made"></i>
+    {{ i18nPrefix + 'SELECT_ELEMENT' | translate }}
+  </button>
 </mat-menu>
 
 <!-- dropdown and dummy dropdown trigger to open it on specific positions -->

@@ -14,6 +14,7 @@ import {
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
+import { MatDivider } from '@angular/material/divider';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
@@ -22,14 +23,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import {
     ClientConfig,
     ConfigService,
-    DashboardShortcut,
-    DefaultDashboardShortcut,
     DefaultDashboardShortcutEntry,
-    HOME_REPOSITORY,
-    IamV1Service,
-    ME,
     Node,
-    RefDashboardShortcut,
     RefDashboardShortcutEntry,
     ShortcutConfig,
     ShortcutConfigEntry,
@@ -47,20 +42,9 @@ import { firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { YES_OR_NO } from '../dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../dialogs/dialogs.service';
+import { ExtendedShortcutEntry } from './shortcut-entries-types';
+import { ShortcutEntriesService } from './shortcut-entries.service';
 import { ShortcutEntryTitlePipe } from './shortcut-entry-title.pipe';
-
-// extend existing types by additional attributes used to simplify computation
-type DefaultOrRefShortcutEntry = Partial<DefaultDashboardShortcutEntry> &
-    Partial<RefDashboardShortcutEntry>;
-export type ExtendedShortcutEntry = DefaultOrRefShortcutEntry & {
-    icon?: string;
-    url?: string;
-    updates?: number;
-};
-// TODO: why is "DashboardShortcut &" necessary here?
-type DefaultOrRefShortcut = DashboardShortcut &
-    Partial<DefaultDashboardShortcut> &
-    Partial<RefDashboardShortcut>;
 
 @Component({
     selector: 'es-shortcut-entries',
@@ -74,6 +58,7 @@ type DefaultOrRefShortcut = DashboardShortcut &
         FormsModule,
         MatButtonModule,
         MatCard,
+        MatDivider,
         MatInputModule,
         MatMenuModule,
         ShortcutEntryTitlePipe,
@@ -121,9 +106,9 @@ export class ShortcutEntriesComponent implements OnInit {
         private configService: ConfigService,
         private dialogs: DialogsService,
         private entriesService: NodeEntriesService<Node>,
-        private iamApi: IamV1Service,
         private nodeHelper: NodeHelperService,
         private router: Router,
+        private shortcutEntriesService: ShortcutEntriesService,
         private shortcutEntryTitlePipe: ShortcutEntryTitlePipe,
         private ui: UIService,
     ) {}
@@ -177,25 +162,11 @@ export class ShortcutEntriesComponent implements OnInit {
                 this.clientConfigEntries = shortcuts.entries;
             }
         }
-        // retrieve default or user-specified entries
-        this.entries = await firstValueFrom(
-            this.iamApi.getDashboardShortcuts({
-                repository: HOME_REPOSITORY,
-                person: ME,
-            }),
-        );
-        // check whether the node was already added
-        this.updateNodeIncluded();
-        // ensure that the view is fully initialized and rendered
-        setTimeout(() => {
-            this.checkOverflow();
-        });
-        // sync both entries and client config
-        this.syncEntriesAndConfig();
+        await this.retrieveEntriesAndSync();
     }
 
     /**
-     * On window resize, check the widths of both entries container and wrapper to decide whether an overflow exists.
+     * On window resize, check the widths of both entry container and wrapper to decide whether an overflow exists.
      */
     @HostListener('window:resize')
     onResize() {
@@ -222,7 +193,7 @@ export class ShortcutEntriesComponent implements OnInit {
                 this.entries.push(entryToAdd);
             }
             this.syncEntriesAndConfig();
-            await this.saveEntries();
+            await this.shortcutEntriesService.saveEntries(this.entries);
         } else if ('type' in entry && entry.type === 'ref') {
             if (this.entriesOverflow()) {
                 this.entries.unshift(entry as RefDashboardShortcutEntry);
@@ -231,7 +202,7 @@ export class ShortcutEntriesComponent implements OnInit {
             }
             this.updateNodeIncluded();
             this.syncEntriesAndConfig();
-            await this.saveEntries();
+            await this.shortcutEntriesService.saveEntries(this.entries);
         }
     }
 
@@ -269,7 +240,7 @@ export class ShortcutEntriesComponent implements OnInit {
      */
     renameEntry() {
         this.entries[this.selectedEntryIndex].title = this.editTitle;
-        void this.saveEntries();
+        void this.shortcutEntriesService.saveEntries(this.entries);
         this.renameEntryVisible = false;
         this.selectedEntryIndex = -1;
         this.blockClickEvent = true;
@@ -284,7 +255,7 @@ export class ShortcutEntriesComponent implements OnInit {
     deleteEntry() {
         if (this.selectedEntryIndex > -1) {
             this.entries.splice(this.selectedEntryIndex, 1);
-            void this.saveEntries();
+            void this.shortcutEntriesService.saveEntries(this.entries);
             this.selectedEntryIndex = -1;
             this.syncEntriesAndConfig();
             this.updateNodeIncluded();
@@ -305,7 +276,7 @@ export class ShortcutEntriesComponent implements OnInit {
      */
     drop(event: CdkDragDrop<string[]>) {
         moveItemInArray(this.entries, event.previousIndex, event.currentIndex);
-        void this.saveEntries();
+        void this.shortcutEntriesService.saveEntries(this.entries);
     }
 
     /**
@@ -353,7 +324,7 @@ export class ShortcutEntriesComponent implements OnInit {
                         node: this.node(),
                         type: 'ref',
                     };
-                    void this.saveEntries();
+                    void this.shortcutEntriesService.saveEntries(this.entries);
                 }
             });
             return;
@@ -396,7 +367,36 @@ export class ShortcutEntriesComponent implements OnInit {
         this.nodeIncluded.set(true);
     }
 
+    /**
+     * Opens a modal to select an element.
+     */
+    async selectElement() {
+        const selectElementDialogRef = await this.dialogs.openSelectElementDialog({
+            firstElement: this.entriesOverflow(),
+        });
+        selectElementDialogRef.afterClosed().subscribe(async (response) => {
+            // always reload the entries due to adding also being possible via the three-dot menu
+            await this.retrieveEntriesAndSync();
+        });
+    }
+
     // HELPERS
+    /**
+     * Retrieves the entries, sets different values and sync both entries and config.
+     */
+    private async retrieveEntriesAndSync() {
+        // retrieve default or user-specified entries
+        this.entries = await this.shortcutEntriesService.retrieveEntries();
+        // check whether the node was already added
+        this.updateNodeIncluded();
+        // ensure that the view is fully initialized and rendered
+        setTimeout(() => {
+            this.checkOverflow();
+        });
+        // sync both entries and client config
+        this.syncEntriesAndConfig();
+    }
+
     /**
      * Helper function to check whether the current node is already included in the view.
      */
@@ -448,34 +448,6 @@ export class ShortcutEntriesComponent implements OnInit {
         const entryDefaults: string[] = this.entries.filter((e) => !!e.id).map((e) => e.id);
         this.remainingClientConfigEntries = this.clientConfigEntries.filter(
             (entry) => !entryDefaults.includes(entry.id),
-        );
-    }
-
-    /**
-     * Helper function to save the specified entries for the current user.
-     */
-    private async saveEntries() {
-        const entriesToSave: DefaultOrRefShortcut[] = [];
-        this.entries.forEach((entry) => {
-            const entryToAdd: DefaultOrRefShortcut = {
-                type: !!entry.node ? 'ref' : 'default',
-            };
-            if (!!entry.title) {
-                entryToAdd.title = entry.title;
-            }
-            if (entryToAdd.type === 'ref') {
-                entryToAdd.ref = 'workspace://SpacesStore/' + entry.node.ref.id;
-            } else {
-                entryToAdd.id = entry.id;
-            }
-            entriesToSave.push(entryToAdd);
-        });
-        await firstValueFrom(
-            this.iamApi.setDashboardShortcuts({
-                repository: HOME_REPOSITORY,
-                person: ME,
-                body: entriesToSave,
-            }),
         );
     }
 

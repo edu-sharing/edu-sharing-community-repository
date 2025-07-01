@@ -3,7 +3,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { NodeTitlePipe } from 'ngx-edu-sharing-ui';
 import { Observable, of, timer } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { ExtendedShortcutEntry } from './shortcut-entries.component';
+import { ExtendedShortcutEntry } from './shortcut-entries-types';
 
 @Pipe({
     name: 'shortcutEntryTitle',
