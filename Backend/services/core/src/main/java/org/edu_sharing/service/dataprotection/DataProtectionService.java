@@ -2,6 +2,7 @@ package org.edu_sharing.service.dataprotection;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import jakarta.annotation.PostConstruct;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -29,17 +30,25 @@ import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.lifecycle.Utils;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.RecurseMode;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.springframework.context.event.EventListener;
 
 @Slf4j
 @Component
-public class DataProtectionService {
+public class DataProtectionService{
 
     @Autowired
     NodeService nodeService;
@@ -60,12 +69,48 @@ public class DataProtectionService {
     @Autowired
     DataProtectionQueue queue;
 
+    @Value("${repository.dataprotection.retentionPeriod:PT240H}")
+    private String retentionPeriod;
+
     PersonLifecycleService personLifecycleService = new PersonLifecycleService();
 
     QName propMapType = QName.createQName(CCConstants.CCM_PROP_MAP_TYPE);
 
 
     String systemFolder;
+
+
+    @EventListener(ContextRefreshedEvent.class)
+    public void onContextRefreshed() {
+        log.info("DataProtectionService started");
+        AuthenticationUtil.runAsSystem(() -> {
+            try {
+                systemFolder = new UserEnvironmentTool().getEdu_SharingGdprFolder();
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+            return null;
+        });
+    }
+
+    public void cleanExpired(){
+        AuthenticationUtil.runAsSystem(()->{
+            List<ChildAssociationRef> childAssocs = nodeService.getChildAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, systemFolder));
+            List<NodeRef> toRemove = new ArrayList<>();
+            childAssocs.forEach(childAssocRef -> {
+                NodeRef nodeRef = childAssocRef.getChildRef();
+                Date modified = (Date)nodeService.getProperty(nodeRef, ContentModel.PROP_MODIFIED);
+                if((System.currentTimeMillis() - modified.getTime()) > Duration.parse(this.retentionPeriod).toMillis()){
+                    toRemove.add(nodeRef);
+                }
+            });
+            toRemove.forEach(nodeRef -> {
+                log.info("removing gdpr export {} {}",nodeService.getProperty(nodeRef, ContentModel.PROP_NAME),nodeRef);
+                nodeService.deleteNode(nodeRef);
+            });
+            return null;
+        });
+    }
 
     public void startExport(){
         List<String> allUsers = queue.getAllUsers();
@@ -87,12 +132,7 @@ public class DataProtectionService {
     }
 
     public void prepare(String userName){
-        try {
-            systemFolder = new UserEnvironmentTool().getEdu_SharingGdprFolder();
-            getTargetNode(userName);
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
-        }
+        getTargetNode(userName);
     }
 
     public void exportUserNodes(String userName) throws IOException, ArchiveException {
@@ -180,12 +220,12 @@ public class DataProtectionService {
     private NodeRefResult getUserHomeNodes(String userName, String scope){
         NodeRef userHome = getUserHome(userName, scope);
         if(userHome == null){
-            return NodeRefResult.builder().nodes(new ArrayList<>()).build();
+            return NodeRefResult.builder().nodes(new ArrayList<>()).ignored(new ArrayList<>()).build();
         }
         List<NodeRef> levelOne = nodeService.getChildAssocs(userHome).stream().map(ChildAssociationRef::getChildRef).collect(Collectors.toList());
         // remove shared folder
-        levelOne = levelOne.stream().filter(n -> !CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(nodeService.getProperty(n,propMapType))).collect(Collectors.toList());
         List<NodeRef> ignored = levelOne.stream().filter(n -> CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(nodeService.getProperty(n,propMapType))).collect(Collectors.toList());
+        levelOne = levelOne.stream().filter(n -> !CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(nodeService.getProperty(n,propMapType))).collect(Collectors.toList());
 
         List<NodeRef> result = new ArrayList<>(levelOne);
         levelOne.forEach(n -> {
@@ -314,8 +354,9 @@ public class DataProtectionService {
         replace.put("firstName", firstname);
         replace.put("lastName", lastName);
         replace.put("link", URLHelper.getNgRenderNodeUrl(nodeRef.getId(), null, true));
+        replace.put("retentionPeriod", Duration.parse(retentionPeriod).toDays()+"");
         try {
-            String template = "dsvgo";
+            String template = "gdpr";
             MailTemplate.sendMail(email, template, replace);
         } catch (Exception e) {
             log.warn("Can not send status notify mail to user: " + e.getMessage(), e);

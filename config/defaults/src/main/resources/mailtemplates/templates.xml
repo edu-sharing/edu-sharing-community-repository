@@ -350,14 +350,14 @@
 		]]>
 		</message>
 	</template>
-	<template name="dsvgo">
-		<subject>DSVGO Information</subject>
+	<template name="gdpr">
+		<subject>GDPR Information</subject>
 		<message><![CDATA[
 			<div class="center">
 				<h1>Hello {{firstName}} {{lastName}},</h1>
 				<p>Thank you for general data protection regulation export request!</p>
 				<br><br>
-				<p>click on the link below:</p>
+				<p>The data is available {{retentionPeriod}} days at the following link:</p>
 				<a class="btn" href="{{link}}">Your Data</a>
 			</div>
 		]]>

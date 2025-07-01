@@ -1,6 +1,5 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
-import org.edu_sharing.service.dataprotection.DataProtectionQueue;
 import org.edu_sharing.service.dataprotection.DataProtectionService;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -14,6 +13,7 @@ public class DataProtectionExportJob extends AbstractJobMapAnnotationParams{
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         dataProtectionService.startExport();
+        dataProtectionService.cleanExpired();
     }
 
 
