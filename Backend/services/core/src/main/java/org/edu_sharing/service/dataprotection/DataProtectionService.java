@@ -67,6 +67,13 @@ public class DataProtectionService {
 
     String systemFolder;
 
+    public void startExport(){
+        List<String> allUsers = queue.getAllUsers();
+        for(String user: allUsers) {
+            startExport(user);
+            queue.removeUsers(List.of(user));
+        }
+    }
 
     public void startExport(String userName){
         // be sure systemfolder and target node is created with as admin user so that this files will not be included in export zip
