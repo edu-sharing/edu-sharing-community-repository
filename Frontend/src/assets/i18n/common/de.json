@@ -1484,6 +1484,16 @@
     "documentation": "Zur Dokumentation"
   },
   "DASHBOARD_SWIMLANE": {
+    "STREAM": {
+      "SHARED_INFO": "{{initiator}} gab frei {{element}} für {{receiver}}",
+      "TIMEGROUP": {
+        "Today": "heute",
+        "Yesterday": "gestern",
+        "Last7Days": "letzte 7 Tage",
+        "Last30Days": "letzte 30 Tage",
+        "Older": "älter"
+      }
+    },
     "SHOW_MORE": "zeige mir alle",
     "featured-media": {
       "TITLE": "Deine Mediathek"
