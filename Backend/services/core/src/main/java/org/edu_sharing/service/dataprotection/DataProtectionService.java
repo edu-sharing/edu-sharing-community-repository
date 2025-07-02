@@ -371,7 +371,7 @@ public class DataProtectionService{
     }
 
     public void requestDataProtectionExport(String user){
-        if(!user.equals(AuthenticationUtil.getFullAuthentication())){
+        if(!user.equals(AuthenticationUtil.getFullyAuthenticatedUser())){
             boolean isAdmin = AuthorityServiceHelper.isAdmin();
             if(!isAdmin){
                 throw new SecurityException("admin rights required");
