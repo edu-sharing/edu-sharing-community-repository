@@ -10,8 +10,10 @@ import {
 import {
     ApiRequestConfiguration,
     AuthenticationService,
+    ClientConfig,
     ConfigService,
     EduSharingApiModule,
+    LoginInfo,
     RestConstants,
 } from 'ngx-edu-sharing-api';
 import { NodeEntriesCardComponent } from './node-entries-card.component';
@@ -19,9 +21,11 @@ import {
     DummyNode,
     mdsStorybookProviders,
     ToastMock,
+    DefaultColumns,
     translateProvider,
 } from '../../../../../../src/app/features/mds/mds-editor/storybook-utils';
 import {
+    CustomSelectionModel,
     EduSharingUiCommonModule,
     InteractionType,
     NodeEntriesService,
@@ -33,24 +37,26 @@ import { Injectable } from '@angular/core';
 import { NodeEntriesModule } from '../node-entries.module';
 import { ListItem } from '../../types/list-item';
 import { ListOptions } from '../entries-model';
+import { Observable, of } from 'rxjs';
 
 @Injectable()
-export class AuthenticationServiceMock extends AuthenticationService {
+export class AuthenticationServiceMock implements Partial<AuthenticationService> {
     async hasToolpermission(tp: string) {
         return true;
     }
+    observeLoginInfo(): Observable<LoginInfo> {
+        return of();
+    }
+    observeUserChanges(): Observable<void> {
+        return of();
+    }
 }
 
-export const DefaultColumns = [
-    new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
-    new ListItem('NODE', 'cclom:general_keyword'),
-    new ListItem('NODE', 'cclom:general_description'),
-];
 @Injectable()
-export class NodeEntriesServiceMock extends NodeEntriesService<any> {
+export class NodeEntriesServiceMock implements Partial<NodeEntriesService<any>> {
     elementInteractionType = InteractionType.Emitter;
     checkbox = true;
-
+    selection = new CustomSelectionModel<any>();
     get columns(): ListItem[] {
         return DefaultColumns;
     }
@@ -70,9 +76,12 @@ export class NodeEntriesServiceMockApply extends NodeEntriesServiceMock {
 }
 
 @Injectable()
-export class ConfigServiceMockRating extends ConfigService {
+export class ConfigServiceMockRating implements Partial<ConfigService> {
     public instant<T = string>(name: string, defaultValue?: T): T {
         return 'stars' as T;
+    }
+    observeConfig({ forceUpdate = false } = {}): Observable<ClientConfig | null> {
+        return of({});
     }
 }
 const dummyNode = DummyNode;
