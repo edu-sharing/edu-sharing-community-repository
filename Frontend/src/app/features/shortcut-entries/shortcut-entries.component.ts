@@ -1,4 +1,4 @@
-import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, CdkDragStart, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import {
     Component,
@@ -39,7 +39,6 @@ import {
     UIService,
 } from 'ngx-edu-sharing-ui';
 import { firstValueFrom } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { YES_OR_NO } from '../dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../dialogs/dialogs.service';
 import { ExtendedShortcutEntry } from './shortcut-entries-types';
@@ -67,6 +66,7 @@ import { ShortcutEntryTitlePipe } from './shortcut-entry-title.pipe';
 })
 export class ShortcutEntriesComponent implements OnInit {
     readonly i18nPrefix: string = 'SHORTCUT_ENTRIES.';
+    readonly mobileDragStartDelay: number = 1300;
 
     blockClickEvent: boolean = false;
     clientConfig: ClientConfig | any;
@@ -263,13 +263,6 @@ export class ShortcutEntriesComponent implements OnInit {
     }
 
     /**
-     * Checks whether drag-and-drop is enabled by listening to touch events.
-     */
-    getDragEnabled() {
-        return this.ui.isTouchSubject.pipe(map((touch: boolean) => !touch));
-    }
-
-    /**
      * Handles the drop of an entry by moving it inside the array.
      *
      * @param event
@@ -280,13 +273,37 @@ export class ShortcutEntriesComponent implements OnInit {
     }
 
     /**
+     * Handles the drag starting event by delaying it for mobile devices and resetting the dragging variable.
+     *
+     * @param event
+     */
+    onDragStart(event: CdkDragStart) {
+        if (this.ui.isMobile()) {
+            event.source.dragStartDelay = this.mobileDragStartDelay;
+        } else {
+            this.dragging = true;
+        }
+    }
+
+    /**
+     * Handles the drag end event by resetting the mobile edit mode, the dragging and the select entry variable.
+     */
+    onDragEnd() {
+        this.mobileEditMode = false;
+        this.dragging = false;
+        this.selectedEntryIndex = -1;
+    }
+
+    /**
      * When being on mobile devices, listening for long presses to switch into the mobile edit mode.
      */
     onPressStart() {
         if (this.ui.isMobile()) {
             this.longPressTimeout = setTimeout(() => {
+                this.dropdownTrigger.closeMenu();
                 this.mobileEditMode = true;
-            }, 600); // 600ms long-press threshold
+                this.dragging = true;
+            }, this.mobileDragStartDelay);
         }
     }
 
@@ -295,6 +312,7 @@ export class ShortcutEntriesComponent implements OnInit {
      */
     onPressEnd() {
         clearTimeout(this.longPressTimeout);
+        this.mobileEditMode = false;
     }
 
     /**

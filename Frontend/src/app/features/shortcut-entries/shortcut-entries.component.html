@@ -30,21 +30,13 @@
         *ngIf="i < maxItems"
         role="button"
         class="entry-card"
-        [class.drag-indicator]="
-          !(
-            ((getDragEnabled() | async) === false && !mobileEditMode) ||
-            (entriesOverflow() && !viewExpanded())
-          )
-        "
+        [class.drag-indicator]="!entriesOverflow() || viewExpanded()"
         [class.mobile-edit-mode]="mobileEditMode"
         [class.selected-entry]="i === selectedEntryIndex"
         cdkDrag
-        [cdkDragDisabled]="
-          ((getDragEnabled() | async) === false && !mobileEditMode) ||
-          (entriesOverflow() && !viewExpanded())
-        "
-        (cdkDragEnded)="dragging = false"
-        (cdkDragStarted)="dragging = true"
+        [cdkDragDisabled]="entriesOverflow() && !viewExpanded()"
+        (cdkDragEnded)="onDragEnd()"
+        (cdkDragStarted)="onDragStart($event)"
         (touchstart)="onPressStart()"
         (touchend)="onPressEnd()"
         (mousedown)="onPressStart()"
