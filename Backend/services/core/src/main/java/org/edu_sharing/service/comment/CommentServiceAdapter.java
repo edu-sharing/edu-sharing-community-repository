@@ -40,4 +40,9 @@ public class CommentServiceAdapter implements CommentService{
 		throw new NotImplementedException();
 
 	}
+
+	@Override
+	public List<NodeRef> getUsersComments(String userName) {
+		return List.of();
+	}
 }

@@ -26,10 +26,17 @@ import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.service.authentication.ScopeUserHomeService;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
+import org.edu_sharing.service.comment.CommentService;
+import org.edu_sharing.service.comment.CommentServiceFactory;
+import org.edu_sharing.service.comment.CommentServiceImpl;
+import org.edu_sharing.service.feedback.FeedbackService;
+import org.edu_sharing.service.feedback.FeedbackServiceFactory;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.lifecycle.Utils;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.RecurseMode;
+import org.edu_sharing.service.rating.RatingService;
+import org.edu_sharing.service.rating.RatingServiceFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -79,12 +86,22 @@ public class DataProtectionService{
 
     String systemFolder;
 
+    RatingService ratingService;
+
+    FeedbackService feedbackService;
+
+    CommentService commentService;
+
 
     @EventListener(ContextRefreshedEvent.class)
     public void onContextRefreshed() {
         log.info("DataProtectionService started");
         AuthenticationUtil.runAsSystem(() -> {
             try {
+                ratingService = RatingServiceFactory.getLocalService();
+                feedbackService = FeedbackServiceFactory.getLocalService();
+                commentService = CommentServiceFactory.getLocalService();
+
                 systemFolder = new UserEnvironmentTool().getEdu_SharingGdprFolder();
             } catch (Throwable e) {
                 throw new RuntimeException(e);
@@ -146,6 +163,15 @@ public class DataProtectionService{
 
         List<NodeRef> sharedNodes = getSharedNodes(userName,null, Stream.concat(userHomeResult.getIgnored().stream(),Stream.concat(userHomeResult.nodes.stream(),collectionNodes.stream())).collect(Collectors.toList()));
         createStructure(rootPath,"shared",buildPathMap(createChildParentMap(sharedNodes)));
+
+        List<NodeRef> feedBacks = feedbackService.getUsersFeedback(userName);
+        createStructure(rootPath,"feedback",buildPathMap(createChildParentMap(feedBacks)));
+
+        List<NodeRef> comments = commentService.getUsersComments(userName);
+        createStructure(rootPath,"comment",buildPathMap(createChildParentMap(comments)));
+
+        //List<NodeRef> ratings = ratingService....
+        //createStructure(rootPath,"comment",buildPathMap(createChildParentMap(comments)));
 
         // safe
         NodeServiceInterceptor.setEduSharingScope("safe");
