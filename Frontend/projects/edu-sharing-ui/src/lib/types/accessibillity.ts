@@ -3,6 +3,7 @@ export class AccessibilitySettings {
     toastDuration: ToastDuration = ToastDuration.Seconds_5;
     contrastMode = false;
     indicatorIcons = true;
+    dragAndDropOptions = false;
 }
 export enum ToastDuration {
     Seconds_3 = 3,

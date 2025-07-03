@@ -19,10 +19,10 @@ import {
 import { NodeEntriesWrapperComponent } from './node-entries-wrapper.component';
 import {
     AuthenticationServiceMock,
-    DefaultColumns,
     NodeEntriesServiceMock,
 } from './node-entries-card/node-entries-card.component.stories';
 import {
+    DefaultColumns,
     DummyNode,
     ToastMock,
     translateProvider,

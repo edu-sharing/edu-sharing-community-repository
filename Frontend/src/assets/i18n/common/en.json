@@ -476,6 +476,12 @@
     "CONTRAST_MODE_OPTION": {
       "CONTRAST": "Improved contrast",
       "STANDARD": "Standard contrast"
+    },
+    "DRAG_AND_DROP_TITLE": "Move Content",
+    "DRAG_AND_DROP_MESSAGE": "Content can be moved using drag and drop. For better accessibility, additional actions like \"forward\" and \"back\" buttons can be enabled, allowing movement without using a mouse.",
+    "DRAG_AND_DROP_OPTION": {
+      "STANDARD": "Standard drag and drop",
+      "EXTENDED": "Additional actions for content"
     }
   },
   "AUTHORITY_TYPE_GROUP": "Group",
@@ -1466,6 +1472,8 @@
     "COLLAPSE": "Collapse tiles",
     "RENAME": "Rename",
     "DELETE": "Delete",
+    "BACK": "Move left",
+    "FORWARD": "Move right",
     "MODAL_HINT_REPLACE": "To add a new tile, either delete an existing one or select one to replace.",
     "MODAL_HINT_ADD_REPLACE": "Add a new tile via [+] or select an existing tile to be replaced.",
     "MODAL_HINT_INCLUDED": "This element is already included in your shortcut entries and cannot be added again.",

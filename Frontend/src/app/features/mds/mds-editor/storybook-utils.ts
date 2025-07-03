@@ -34,6 +34,7 @@ import { MdsEditorInstanceService } from './mds-editor-instance.service';
 import {
     Helper,
     InitialValues,
+    ListItem,
     MdsValueList,
     MdsViewerService,
     Toast,
@@ -54,7 +55,7 @@ export class translateProvider {
     instant(v: string, args: any = {}) {
         let str = Helper.getDotPathFromNestedObject(this.cache$?.value, v);
         for (const k of Object.keys(args)) {
-            str = str.replace(new RegExp('{{\\s*' + k + '\\s*}}', 'g'), args[k]);
+            str = (str || v).replace(new RegExp('{{\\s*' + k + '\\s*}}', 'g'), args[k]);
         }
         return str;
     }
@@ -63,9 +64,9 @@ export class translateProvider {
         if (!this.translation$) {
             this.translation$ = this.httpClient.get('/edu-sharing/assets/i18n/common/de.json').pipe(
                 catchError(() =>
-                    this.httpClient.get(
-                        'http://localhost:4200/edu-sharing/assets/i18n/common/de.json',
-                    ),
+                    this.httpClient
+                        .get('http://localhost:4200/edu-sharing/assets/i18n/common/de.json')
+                        .pipe(catchError(() => of({}))),
                 ),
                 tap((v) => this.cache$.next(v)),
                 shareReplay(1),
@@ -248,6 +249,11 @@ export class IamServiceMock extends IamV1Service {
         return of(void 0);
     }
 }
+export const DefaultColumns = [
+    new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
+    new ListItem('NODE', 'cclom:general_keyword'),
+    new ListItem('NODE', 'cclom:general_description'),
+];
 
 export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
