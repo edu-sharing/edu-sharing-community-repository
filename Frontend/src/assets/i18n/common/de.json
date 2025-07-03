@@ -559,7 +559,13 @@
     "TOAST_DURATION_INFINITE_INFO": "Statusmeldungen werden nicht automatisch ausgeblendet und müssen manuell geschlossen werden",
     "TOAST_DURATION_TITLE": "Anzeigedauer",
     "TOAST_DURATION_MESSAGE": "Statusmeldungen können automatisch nach einer festgelegten Zeit verschwinden oder durch klicken manuell geschlossen werden.",
-    "DISMISS_TOAST": "Ausblenden"
+    "DISMISS_TOAST": "Ausblenden",
+    "DRAG_AND_DROP_TITLE": "Inhalte verschieben",
+    "DRAG_AND_DROP_MESSAGE": "Inhalte können per Drag-and-Drop verschoben werden. Für bessere Zugänglichkeit können zusätzliche Aktionen  wie \"Vor\"- und \"Zurück\"-Schaltflächen aktiviert werden, die das Verschieben auch ohne Maus ermöglichen.",
+    "DRAG_AND_DROP_OPTION": {
+      "STANDARD": "Standard Drag-and-Drop",
+      "EXTENDED": "Zusätzliche Aktionen am Inhalt"
+    }
   },
   "AUTHORITY_TYPE_GROUP": "Gruppe",
   "AUTHORITY_TYPE_ORG": "Organisation",
@@ -1467,6 +1473,8 @@
     "COLLAPSE": "Kacheln einklappen",
     "RENAME": "Umbenennen",
     "DELETE": "Löschen",
+    "BACK": "Nach links verschieben",
+    "FORWARD": "Nach rechts verschieben",
     "MODAL_HINT_REPLACE": "Um eine neue Kachel hinzuzufügen, müssen Sie entweder eine vorhandene Kachel löschen oder eine Kachel auswählen, die Sie ersetzen möchten.",
     "MODAL_HINT_ADD_REPLACE": "Fügen Sie eine neue Kachel via [+] hinzu oder wählen Sie eine bestehende Kachel zum Ersetzen aus.",
     "MODAL_HINT_INCLUDED": "Das Element wurde bereits zu Ihren Shortcuts hinzugefügt und kann nicht erneut hinzugefügt werden.",

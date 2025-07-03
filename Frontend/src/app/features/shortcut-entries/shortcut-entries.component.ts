@@ -30,12 +30,14 @@ import {
     ShortcutConfigEntry,
 } from 'ngx-edu-sharing-api';
 import {
+    AccessibilityService,
     DropdownComponent,
     EduSharingUiCommonModule,
     IconDirective,
     NodeEntriesService,
     NodeHelperService,
     OptionItem,
+    TranslationsService,
     UIService,
 } from 'ngx-edu-sharing-ui';
 import { firstValueFrom } from 'rxjs';
@@ -103,6 +105,7 @@ export class ShortcutEntriesComponent implements OnInit {
 
     // Note: Adding OptionsHelperDataService results in a circular dependency
     constructor(
+        private accessibility: AccessibilityService,
         private configService: ConfigService,
         private dialogs: DialogsService,
         private entriesService: NodeEntriesService<Node>,
@@ -110,6 +113,7 @@ export class ShortcutEntriesComponent implements OnInit {
         private router: Router,
         private shortcutEntriesService: ShortcutEntriesService,
         private shortcutEntryTitlePipe: ShortcutEntryTitlePipe,
+        private translations: TranslationsService,
         private ui: UIService,
     ) {}
 
@@ -117,38 +121,14 @@ export class ShortcutEntriesComponent implements OnInit {
      * Initializes the component by defining the shortcut entry options and retrieving the client config.
      */
     async ngOnInit() {
+        // wait for the translations to be ready to show the correct option tooltips
+        await firstValueFrom(this.translations.waitForInit());
         // define options for entries
-        const optionRename = new OptionItem(
-            this.i18nPrefix + 'RENAME',
-            'edit',
-            (node: any, nodes: any[]): void => {
-                this.renameEntryVisible = true;
-                // automatically focus the title edit input
-                setTimeout(() => {
-                    this.editInput.nativeElement.focus();
-                });
-            },
-        );
-        optionRename.enabledCallback = (nodes?: Node[]) => {
-            return new Promise((resolve, reject) => {
-                const result = true;
-                resolve(result);
-            });
-        };
-        const optionDelete = new OptionItem(
-            this.i18nPrefix + 'DELETE',
-            'delete',
-            (node: any, nodes: any[]): void => {
-                this.deleteEntry();
-            },
-        );
-        optionDelete.enabledCallback = (nodes?: Node[]) => {
-            return new Promise((resolve, reject) => {
-                const result = true;
-                resolve(result);
-            });
-        };
-        this.entryOptions.push(optionRename, optionDelete);
+        this.defineOptions();
+        // listening to accessibility changes (as showCustomCallback is not available due to missing OptionsHelper)
+        this.accessibility.observe('dragAndDropOptions').subscribe((dragAndDropOptions) => {
+            this.updateAdditionalEntryOptions(dragAndDropOptions);
+        });
         // retrieve client config
         this.clientConfig = await firstValueFrom(this.configService.observeConfig());
         console.log('clientConfig', this.clientConfig);
@@ -212,11 +192,16 @@ export class ShortcutEntriesComponent implements OnInit {
      * @param index
      * @param event
      */
-    setSelectedMenuIndex(index: number, event: MouseEvent) {
+    async setSelectedMenuIndex(index: number, event: MouseEvent) {
         event.preventDefault();
         // prevents unwanted close
         event.stopPropagation();
-        void this.setCurrentIndexAndEditTitle(index);
+        await this.setCurrentIndexAndEditTitle(index);
+        // workaround to get the three-point menu options updated
+        const additionalOptions: boolean = await firstValueFrom(
+            this.accessibility.observe('dragAndDropOptions'),
+        );
+        this.updateAdditionalEntryOptions(additionalOptions);
     }
 
     /**
@@ -232,7 +217,7 @@ export class ShortcutEntriesComponent implements OnInit {
         if (event instanceof MouseEvent) {
             ({ clientX: this.dropdownLeft, clientY: this.dropdownTop } = event);
         }
-        void this.showDropdown();
+        this.showDropdown();
     }
 
     /**
@@ -400,7 +385,99 @@ export class ShortcutEntriesComponent implements OnInit {
 
     // HELPERS
     /**
-     * Retrieves the entries, sets different values and sync both entries and config.
+     * Helper function to define the initial entry options.
+     */
+    private defineOptions() {
+        const optionRename = new OptionItem(
+            this.i18nPrefix + 'RENAME',
+            'edit',
+            (node: any, nodes: any[]): void => {
+                this.renameEntryVisible = true;
+                // automatically focus the title edit input
+                setTimeout(() => {
+                    this.editInput.nativeElement.focus();
+                });
+            },
+        );
+        optionRename.enabledCallback = (nodes?: Node[]) => {
+            return new Promise((resolve, reject) => {
+                const result = true;
+                resolve(result);
+            });
+        };
+        const optionDelete = new OptionItem(
+            this.i18nPrefix + 'DELETE',
+            'delete',
+            (node: any, nodes: any[]): void => {
+                this.deleteEntry();
+            },
+        );
+        optionDelete.enabledCallback = (nodes?: Node[]) => {
+            return new Promise((resolve, reject) => {
+                const result = true;
+                resolve(result);
+            });
+        };
+        this.entryOptions = [optionRename, optionDelete];
+    }
+
+    /**
+     * Helper function to update the additional entry options based on a given parameter.
+     *
+     * @param addOptions
+     */
+    private updateAdditionalEntryOptions(addOptions: boolean) {
+        // make sure to reduce the options to the first two
+        this.entryOptions = this.entryOptions.slice(0, 2);
+        if (!addOptions) {
+            return;
+        }
+        // define options for entries
+        const optionBack = new OptionItem(this.i18nPrefix + 'BACK', 'arrow_back', (): void => {
+            if (this.selectedEntryIndex > 0) {
+                this.entries.splice(
+                    this.selectedEntryIndex - 1,
+                    0,
+                    ...this.entries.splice(this.selectedEntryIndex, 1),
+                );
+                this.selectedEntryIndex--;
+            }
+        });
+        optionBack.enabledCallback = (nodes?: Node[]) => {
+            return new Promise((resolve, reject) => {
+                const result = this.selectedEntryIndex > 0;
+                resolve(result);
+            });
+        };
+        const optionForward = new OptionItem(
+            this.i18nPrefix + 'FORWARD',
+            'arrow_forward',
+            (): void => {
+                if (this.selectedEntryIndex < this.entries.length - 1) {
+                    this.entries.splice(
+                        this.selectedEntryIndex + 1,
+                        0,
+                        ...this.entries.splice(this.selectedEntryIndex, 1),
+                    );
+                    this.selectedEntryIndex++;
+                }
+            },
+        );
+        optionForward.enabledCallback = (nodes?: Node[]) => {
+            return new Promise((resolve, reject) => {
+                const result = this.selectedEntryIndex < this.entries.length - 1;
+                resolve(result);
+            });
+        };
+        // workaround to get the three-point menu options updated
+        optionBack.isEnabled = this.selectedEntryIndex > 0;
+        optionForward.isEnabled = this.selectedEntryIndex < this.entries.length - 1;
+        // push additional options
+        this.entryOptions.push(optionBack, optionForward);
+    }
+
+    /**
+     * Helper function to retrieve the entries, set different values and sync both entries and config.
      */
     private async retrieveEntriesAndSync() {
         // retrieve default or user-specified entries
@@ -485,7 +562,7 @@ export class ShortcutEntriesComponent implements OnInit {
     /**
      * Helper function to open the dropdown menu.
      */
-    private async showDropdown() {
+    private showDropdown() {
         this.entriesService.openDropdown(this.dropdown, null, () =>
             this.dropdownTrigger.openMenu(),
         );
