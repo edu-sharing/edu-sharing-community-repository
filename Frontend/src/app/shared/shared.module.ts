@@ -73,6 +73,7 @@ import { VersionLabelPipe } from './pipes/version-label.pipe';
 import { SmallCollectionComponent } from './components/small-collection/small-collection.component';
 import { ImprintPrivacyComponent } from './components/imprint-privacy-footer/imprint-privacy.component';
 import { extensionSchemas } from '../extension/extension-schemas';
+import { extensionProviders } from 'edu-sharing-extension-dependencies/extension-providers';
 
 @NgModule({
     declarations: [
@@ -134,9 +135,12 @@ import { extensionSchemas } from '../extension/extension-schemas';
         NgxSliderModule,
         ReactiveFormsModule,
         RouterModule,
-        EduSharingUiModule.forRoot({
-            production: environment.production,
-        }),
+        EduSharingUiModule.forRoot(
+            {
+                production: environment.production,
+            },
+            extensionProviders,
+        ),
     ],
     exports: [
         A11yModule,
