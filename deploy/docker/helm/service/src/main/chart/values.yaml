@@ -175,6 +175,10 @@ ingress:
   paths:
   - /edu-sharing
 
+  exact:
+    ## @param ingress.exact.enabled Enable exact ingress
+    enabled: true
+
 ########################################################################################################################
 
 proxy:

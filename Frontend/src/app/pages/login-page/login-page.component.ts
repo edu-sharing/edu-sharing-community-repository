@@ -267,6 +267,9 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                     } else if (data.statusCode === RestConstants.STATUS_CODE_PERSON_BLOCKED) {
                         this.toast.error(null, 'LOGIN.PERSON_BLOCKED');
                     } else {
+                        if (this.isSafeLogin) {
+                            this.loginSafeFailed = true;
+                        }
                         this.toast.error(null, 'LOGIN.ERROR' + (this.isSafeLogin ? '_SAFE' : ''));
                     }
                     this.password = '';
