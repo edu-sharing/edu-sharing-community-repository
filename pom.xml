@@ -50,7 +50,7 @@
     <postgresql.jdbc.version>42.7.5</postgresql.jdbc.version>
     <tomcat.version>10.1.42</tomcat.version>
     <jackson.version>2.17.2</jackson.version>
-    <mongodb.version>5.1.0</mongodb.version>
+    <mongodb.version>5.5.1</mongodb.version>
     <spring.version>6.2.2</spring.version>
     <!--
       do not update to 6.2.2 cause it breaks openidconnect backchannel logout
@@ -847,13 +847,13 @@
       <dependency>
         <groupId>org.springframework.data</groupId>
         <artifactId>spring-data-commons</artifactId>
-        <version>3.2.1</version>
+        <version>3.5.1</version>
       </dependency>
 
       <dependency>
         <groupId>org.springframework.data</groupId>
         <artifactId>spring-data-mongodb</artifactId>
-        <version>4.1.2</version>
+        <version>4.5.1</version>
       </dependency>
 
       <!-- ... other dependency elements ... -->
