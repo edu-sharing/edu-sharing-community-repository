@@ -88,6 +88,12 @@ $tileSize: 124px;
         }
     }
 
+    // display the entry menu button on focus
+    .entry-menu-button:focus {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+
     // on hover, change the background color and slightly move the title
     &:hover {
         background-color: #f4f4f4;
@@ -113,6 +119,7 @@ $tileSize: 124px;
     &.empty {
         background: unset;
         border: 2px dashed #fff;
+        border-radius: 4px;
         box-shadow: none;
         cursor: pointer;
         user-select: none;

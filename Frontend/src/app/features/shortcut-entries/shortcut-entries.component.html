@@ -71,7 +71,7 @@
           [class.reset-padding]="renameEntryVisible && i === selectedEntryIndex"
           cdkDragHandle
         >
-          <span class="entry-title">
+          <a class="entry-title" tabindex="0">
             <ng-container
               *ngIf="!renameEntryVisible || i !== selectedEntryIndex; else renameNodeTitle"
             >
@@ -93,7 +93,7 @@
                 />
               </mat-form-field>
             </ng-template>
-          </span>
+          </a>
         </div>
       </mat-card>
     </ng-container>
@@ -152,7 +152,7 @@
 <!-- button to add new entries -->
 <ng-template #addNewEntry>
   <!-- when opened within a modal, execute a click event and when not, use the mat menu trigger -->
-  <mat-card
+  <button
     *ngIf="entries.length < maxItems"
     class="entry-card empty"
     [class.disabled]="nodeIncluded()"
@@ -162,5 +162,5 @@
     <div class="entry-icon-wrapper">
       <i esIcon="add" class="entry-icon"></i>
     </div>
-  </mat-card>
+  </button>
 </ng-template>
