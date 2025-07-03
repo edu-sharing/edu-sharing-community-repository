@@ -103,7 +103,7 @@ export class ShortcutEntriesComponent implements OnInit {
     @ViewChild('entriesContainer') entriesContainerRef!: ElementRef;
     @ViewChild('entriesWrapper') entriesWrapperRef!: ElementRef;
 
-    // Note: Adding OptionsHelperDataService results in a circular dependency
+    // Note: Adding OptionsHelperDataService might be a suitable extension to remove workarounds
     constructor(
         private accessibility: AccessibilityService,
         private configService: ConfigService,
