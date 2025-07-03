@@ -212,6 +212,21 @@ public class DataProtectionService{
         }
     }
 
+    public NodeRef getDataProtectionNode(String userName) {
+        return AuthenticationUtil.runAsSystem(() ->{
+            NodeRef nodeRef = null;
+            Utils utils = new Utils();
+            if(utils.exists(systemFolder,userName.concat(".zip"))){
+                try {
+                    nodeRef = utils.getNodeRef(systemFolder,userName.concat(".zip"));
+                } catch (Throwable e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            return nodeRef;
+        });
+    }
+
     private NodeRef getTargetNode(String userName) {
         NodeRef nodeRef = AuthenticationUtil.runAsSystem(()-> {
             try {

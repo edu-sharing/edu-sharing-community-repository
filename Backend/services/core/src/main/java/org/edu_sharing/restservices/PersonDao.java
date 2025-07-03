@@ -819,4 +819,17 @@ public class PersonDao {
 			logger.warn("data protection service not enabled");
 		}
 	}
+
+	public NodeDao getDataProtectionExport(){
+		try{
+			ApplicationContextFactory.getApplicationContext().getBean(FeatureInfoDataProtectionService.class);
+			org.alfresco.service.cmr.repository.NodeRef nodeRef = dataProtectionService.getDataProtectionNode(getUserName());
+			if(nodeRef != null){
+				return NodeDao.getNode(repoDao,nodeRef.getId());
+			}
+		} catch (NoSuchBeanDefinitionException e) {
+			logger.warn("data protection service not enabled");
+		}
+		return null;
+	}
 }
