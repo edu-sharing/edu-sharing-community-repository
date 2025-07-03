@@ -240,4 +240,17 @@
 		]]>
 		</message>
 	</template>
+	<template name="gdpr">
+		<subject>DSVGO Information</subject>
+		<message><![CDATA[
+			<div class="center">
+				<h1>Hallo {{firstName}} {{lastName}},</h1>
+				<p>Vielen Dank für ihre Anfrage eines DSVGO Daten Exports!</p>
+				<br><br>
+				<p>Ihre Daten stehen ihnen jetzt unter folgendem Link {{retentionPeriod}} Tage zur Verfügung:</p>
+				<a class="btn" href="{{link}}">Zu ihren Daten</a>
+			</div>
+		]]>
+		</message>
+	</template>
 </templates>

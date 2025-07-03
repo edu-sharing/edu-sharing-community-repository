@@ -109,19 +109,7 @@ public abstract class OrganisationDeleteProtocolService {
 
     protected NodeRef getProtocolNodeRef(String name) throws Throwable {
         String systemFolderNodeId = new UserEnvironmentTool().getEdu_SharingOrganisatinDeleteProtocolFolder();
-        NodeRef parent = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,systemFolderNodeId);
-        NodeRef protocolNodeRef = NodeServiceFactory.getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parent.getId(), CCConstants.CCM_TYPE_IO,CCConstants.CM_NAME, name);
-        if(protocolNodeRef == null){
-            String assocName = "{" + CCConstants.NAMESPACE_CCM + "}" + name;
-            HashMap<QName, Serializable> props = new HashMap<>();
-            props.put(ContentModel.PROP_NAME, name);
-            return nodeService.createNode(parent,
-                    QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS),
-                    QName.createQName(assocName),
-                    QName.createQName(CCConstants.CCM_TYPE_IO),
-                    props).getChildRef();
-        }
-        return protocolNodeRef;
+        return new Utils().getNodeRef(systemFolderNodeId, name);
     }
 
     public ContentReader getContentReader(){

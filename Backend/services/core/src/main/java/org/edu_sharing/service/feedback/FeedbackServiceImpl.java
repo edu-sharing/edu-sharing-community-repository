@@ -186,8 +186,9 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationListener
         }
     }
 
+    @Override
     @NotNull
-    private List<NodeRef> getUsersFeedback(String userName) {
+    public List<NodeRef> getUsersFeedback(String userName) {
         Map<String, Object> filters = new HashMap<>();
         filters.put(CCConstants.CCM_PROP_MATERIAL_FEEDBACK_AUTHORITY, getHashedAuthority(userName));
         return CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_MATERIAL_FEEDBACK, filters);
