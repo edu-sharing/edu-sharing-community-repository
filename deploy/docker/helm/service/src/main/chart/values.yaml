@@ -150,8 +150,6 @@ ingress:
     kubernetes.io/ingress.class: nginx
     ## @param ingress.annotations.nginx.ingress.kubernetes.io/affinity Set affinity on nginx ingress
     nginx.ingress.kubernetes.io/affinity: cookie
-    ## @param ingress.annotations.nginx.ingress.kubernetes.io/app-root Set app-root on nginx ingress
-    nginx.ingress.kubernetes.io/app-root: /edu-sharing
     ## @param ingress.annotations.nginx.ingress.kubernetes.io/proxy-body-size Set proxy-body-size on nginx ingress
     nginx.ingress.kubernetes.io/proxy-body-size: "5g"
     ## @param ingress.annotations.nginx.ingress.kubernetes.io/proxy-connect-timeout Set proxy-connect-timeout on nginx ingress
@@ -178,6 +176,10 @@ ingress:
   exact:
     ## @param ingress.exact.enabled Enable exact ingress
     enabled: true
+
+    annotations:
+      ## @param ingress.exact.annotations.nginx.ingress.kubernetes.io/app-root Set app-root on nginx exact ingress
+      nginx.ingress.kubernetes.io/app-root: /edu-sharing
 
 ########################################################################################################################
 
