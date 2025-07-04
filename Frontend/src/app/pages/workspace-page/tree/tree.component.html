@@ -8,8 +8,9 @@
   data-test="workspace-tree-my-content"
 >
   <i class="material-icons typeIcon">person</i>{{ 'WORKSPACE.MY_FILES' | translate }}
-  <i class="material-icons" *ngIf="root === MY_FILES">keyboard_arrow_down</i>
-  <i class="arrow" class="material-icons" *ngIf="root !== MY_FILES">keyboard_arrow_right</i>
+  <i class="material-icons">
+    {{ root === MY_FILES ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}
+  </i>
 </div>
 <div class="tree" *ngIf="root === MY_FILES">
   <es-workspace-sub-tree
@@ -27,8 +28,9 @@
   data-test="workspace-tree-shared-common"
 >
   <i class="material-icons typeIcon">group</i>{{ 'WORKSPACE.SHARED_FILES' | translate }}
-  <i class="material-icons" *ngIf="root === SHARED_FILES">keyboard_arrow_down</i>
-  <i class="arrow" class="material-icons" *ngIf="root !== SHARED_FILES">keyboard_arrow_right</i>
+  <i class="material-icons">
+    {{ root === SHARED_FILES ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}
+  </i>
 </div>
 <div class="tree" *ngIf="root === SHARED_FILES">
   <es-workspace-sub-tree
@@ -49,8 +51,9 @@
   data-test="workspace-tree-shared-by-me"
 >
   <i class="material-icons typeIcon">share</i>{{ 'WORKSPACE.MY_SHARED_FILES' | translate }}
-  <i class="material-icons" *ngIf="root === MY_SHARED_FILES">keyboard_arrow_down</i>
-  <i class="arrow" class="material-icons" *ngIf="root !== MY_SHARED_FILES">keyboard_arrow_right</i>
+  <i class="material-icons">
+    {{ root === MY_SHARED_FILES ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}
+  </i>
 </div>
 <div class="tree" *ngIf="root === MY_SHARED_FILES">
   <es-workspace-sub-tree
@@ -68,10 +71,9 @@
   data-test="workspace-tree-share-with-me"
 >
   <i class="material-icons typeIcon">send</i>{{ 'WORKSPACE.TO_ME_SHARED_FILES' | translate }}
-  <i class="material-icons" *ngIf="root === TO_ME_SHARED_FILES">keyboard_arrow_down</i>
-  <i class="arrow" class="material-icons" *ngIf="root !== TO_ME_SHARED_FILES"
-    >keyboard_arrow_right</i
-  >
+  <i class="material-icons">
+    {{ root === TO_ME_SHARED_FILES ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}
+  </i>
 </div>
 <div class="tree" *ngIf="root === TO_ME_SHARED_FILES">
   <es-workspace-sub-tree
