@@ -8,18 +8,18 @@
   <es-spinner *ngIf="loading"></es-spinner>
   <ng-container *ngIf="!loading">
     <mat-tab-group *ngIf="!data.isDirectory; else standaloneInfoTab">
-      <mat-tab>
+      <mat-tab labelClass="data-test-sidebar-details-tab-meta">
         <ng-template mat-tab-label><i esIcon="info" [aria]="true"></i></ng-template>
         <ng-content *ngTemplateOutlet="infoTab"></ng-content>
       </mat-tab>
-      <mat-tab>
+      <mat-tab labelClass="data-test-sidebar-details-tab-stats">
         <ng-template mat-tab-label>
           <i esIcon="equalizer"></i>
           {{ statsTotalPoints }}
         </ng-template>
         <ng-content *ngTemplateOutlet="usageTab"></ng-content>
       </mat-tab>
-      <mat-tab>
+      <mat-tab labelClass="data-test-sidebar-details-tab-versions">
         <ng-template mat-tab-label><i esIcon="restore"></i></ng-template>
         <ng-content *ngTemplateOutlet="versionsTab"></ng-content>
       </mat-tab>
