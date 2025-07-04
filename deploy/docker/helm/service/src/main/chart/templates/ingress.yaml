@@ -6,7 +6,7 @@ kind: Ingress
 metadata:
   name: {{ include "edusharing_common_lib.names.name" . }}-exact
   labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
-  {{- with merge .Values.ingress.annotations .Values.global.cluster.cert.annotations }}
+  {{- with merge .Values.ingress.exact.annotations .Values.ingress.annotations .Values.global.cluster.cert.annotations }}
   annotations: {{ toYaml . | nindent 4 }}
   {{- end }}
 spec:
