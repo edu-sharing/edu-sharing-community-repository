@@ -47,8 +47,15 @@
 
         <canvas #canvas width="320" height="200"></canvas>
         <ul class="statistic-value">
-          <li *ngFor="let point of stats.points; let i = index" class="point">
-            <i class="material-icons">{{ stats.pointsIcons[i] }}</i> {{ point }}
+          <li
+            *ngFor="let point of stats.points; let i = index"
+            class="point"
+            [attr.data-test]="stats.testLabels[i]"
+          >
+            <i class="material-icons" [matTooltip]="stats.labels[i]" matTooltipPosition="above">{{
+              stats.pointsIcons[i]
+            }}</i>
+            {{ point }}
           </li>
         </ul>
         <p class="description start-time">

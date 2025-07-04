@@ -64,6 +64,7 @@ interface Stats {
     colors: string[];
     points: number[];
     pointsIcons: string[];
+    testLabels: string[];
 }
 
 @Component({
@@ -123,6 +124,7 @@ export class WorkspaceMetadataComponent implements OnInit {
             'rgba(27, 102, 49, .8)',
             'rgba(102,167,217,.8)',
         ],
+        testLabels: [],
     };
 
     private usages: Usage[];
@@ -404,24 +406,33 @@ export class WorkspaceMetadataComponent implements OnInit {
     resetStats() {
         this.stats.labels = [];
         this.stats.points = [];
+        this.stats.testLabels = [];
         this.statsTotalPoints = null;
     }
 
     getStats() {
         this.resetStats();
-        this.stats.labels.push(this.translate.instant('WORKSPACE.METADATA.USAGE_TYPE.LMS'));
-        this.stats.labels.push(this.translate.instant('WORKSPACE.METADATA.USAGE_TYPE.COLLECTION'));
-        this.stats.labels.push(this.translate.instant('WORKSPACE.METADATA.USAGE_TYPE.DOWNLOAD'));
-        this.stats.labels.push(this.translate.instant('WORKSPACE.METADATA.USAGE_TYPE.VIEW'));
 
+        this.stats.labels.push(this.translate.instant('WORKSPACE.METADATA.USAGE_TYPE.LMS'));
+        this.stats.testLabels.push('sidebar-details-stats-lms');
         this.stats.points.push(this.usages.length - this.usagesCollection.getData().length);
+
+        this.stats.labels.push(this.translate.instant('WORKSPACE.METADATA.USAGE_TYPE.COLLECTION'));
+        this.stats.testLabels.push('sidebar-details-stats-collections');
         this.stats.points.push(this.usagesCollection.getData().length);
+
+        this.stats.labels.push(this.translate.instant('WORKSPACE.METADATA.USAGE_TYPE.DOWNLOAD'));
+        this.stats.testLabels.push('sidebar-details-stats-downloads');
         this.stats.points.push(
             propertyToNumber(this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_DOWNLOADS]),
         );
+
+        this.stats.labels.push(this.translate.instant('WORKSPACE.METADATA.USAGE_TYPE.VIEW'));
+        this.stats.testLabels.push('sidebar-details-stats-views');
         this.stats.points.push(
             propertyToNumber(this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_VIEWS]),
         );
+
         this.statsTotalPoints = this.stats.points.reduce((a, b) => a + b);
         this.drawBarChart();
     }
