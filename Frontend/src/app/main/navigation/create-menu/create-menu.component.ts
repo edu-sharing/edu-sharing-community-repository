@@ -26,7 +26,7 @@ import {
     VirtualNode,
 } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { delay, map, startWith, takeUntil } from 'rxjs/operators';
+import { delay, filter, map, startWith, takeUntil } from 'rxjs/operators';
 import {
     Connector,
     Filetype,
@@ -111,6 +111,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     showPicker: boolean; // keep public - used by extensions
     private params: Params;
     private destroyed = new BehaviorSubject(false);
+    private destroyed$ = this.destroyed.pipe(filter((d) => d === true));
 
     constructor(
         public bridge: BridgeService,
@@ -142,7 +143,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         });
         this.connectorApi
             .observeConnectorList()
-            .pipe(takeUntil(this.destroyed))
+            .pipe(takeUntil(this.destroyed$))
             .subscribe((list) => {
                 this.connectorList = this.connectors
                     .filterConnectors(list?.connectors)
@@ -162,7 +163,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         );
         this.mainNavService
             .observeMainNavConfig()
-            .pipe(takeUntil(this.destroyed))
+            .pipe(takeUntil(this.destroyed$))
             .subscribe((config) => {
                 this.mainNavConfig = config;
                 void this.updateOptions();
@@ -175,15 +176,15 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.optionsService.virtualNodesAdded
-            .pipe(takeUntil(this.destroyed))
+            .pipe(takeUntil(this.destroyed$))
             .subscribe((nodes) => this.createElement.emit(nodes));
         this.paste
             .observeUrlPasteOnPage()
-            .pipe(takeUntil(this.destroyed))
+            .pipe(takeUntil(this.destroyed$))
             .subscribe((url) => this.onUrlPasteOnPage(url));
         this.paste
             .observeNonTextPageOnPage()
-            .pipe(takeUntil(this.destroyed))
+            .pipe(takeUntil(this.destroyed$))
             .subscribe(() => this.toast.error(null, 'CLIPBOARD_DATA_UNSUPPORTED'));
     }
 
