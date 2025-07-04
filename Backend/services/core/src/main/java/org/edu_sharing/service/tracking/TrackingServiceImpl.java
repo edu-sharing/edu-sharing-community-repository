@@ -187,8 +187,9 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
             JSONObject json = buildJson(authorityName, type);
             PGobject obj = new PGobject();
             obj.setType("json");
-            if (json != null)
+            if (json != null) {
                 obj.setValue(json.toString());
+            }
             statement.setObject(6, obj);
 
             return true;
@@ -201,12 +202,16 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
         super.trackActivityOnNode(nodeRef, details, type, authorityName);
 
         String version;
-        String nodeVersion = details == null ? null : details.getNodeVersion();
-        if (nodeVersion == null || nodeVersion.isEmpty() || nodeVersion.equals("-1")) {
+        String nodeVersion = Optional.ofNullable(details)
+                .map(NodeTrackingDetails::getNodeVersion)
+                .orElse(null);
+
+        if (StringUtils.isBlank(nodeVersion) || nodeVersion.equals("-1")) {
             version = NodeServiceHelper.getProperty(nodeRef, CCConstants.CM_PROP_VERSIONABLELABEL);
         } else {
             version = nodeVersion;
         }
+
         String originalNodeRef = null;
         try {
             if (NodeServiceHelper.hasAspect(nodeRef, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
@@ -214,8 +219,8 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
             } else if (NodeServiceHelper.hasAspect(nodeRef, CCConstants.CCM_ASPECT_PUBLISHED)) {
                 originalNodeRef = ((NodeRef) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL)).getId();
             }
-        } catch (Throwable ignored) {
-        }
+        } catch (Throwable ignored) { }
+
         String finalOriginalNodeRef = originalNodeRef;
         return execDatabaseQuery(TRACKING_INSERT_NODE, statement -> {
             statement.setLong(1, (Long) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.SYS_PROP_NODE_DBID));
@@ -238,8 +243,9 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
             JSONObject json = buildJson(nodeRef, details, type);
             PGobject obj = new PGobject();
             obj.setType("json");
-            if (json != null)
+            if (json != null) {
                 obj.setValue(json.toString());
+            }
             statement.setObject(10, obj);
 
             String license = NodeServiceHelper.getProperty(nodeRef, CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);

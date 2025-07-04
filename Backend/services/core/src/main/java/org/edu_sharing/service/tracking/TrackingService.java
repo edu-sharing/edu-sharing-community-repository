@@ -21,7 +21,7 @@ public interface TrackingService {
         Yearly,
         Node,
     }
-    public enum EventType {
+    enum EventType {
         DOWNLOAD_MATERIAL,
         VIEW_MATERIAL,
         OPEN_EXTERNAL_LINK, // open link in new tab was choosen
