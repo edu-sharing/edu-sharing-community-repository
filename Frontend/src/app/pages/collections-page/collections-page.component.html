@@ -76,6 +76,7 @@
     [class.collectionsContainerTabs]="showTabs()"
     [class.collectionsContainerNoSidebar]="isRootLevelCollection() || isLoading"
     class="collectionsContainer"
+    [attr.data-test]="'collections-grid-' + tabSelected.toLowerCase().replaceAll('_', '-')"
   >
     <es-collection-info-bar
       #infobar
