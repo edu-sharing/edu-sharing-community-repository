@@ -54,6 +54,7 @@
           class="collection-item clickable collection-item-scope-custom"
           *ngIf="canInvite"
           (click)="setCollectionType('CUSTOM')"
+          data-test="create-shared-collection-button"
         >
           <div class="iconLeft"><i esIcon="group" style="color: #4f7899"></i></div>
           <div class="content">
@@ -67,6 +68,7 @@
           class="collection-item clickable collection-item-scope-public"
           *ngIf="shareToAll && canInvite"
           (click)="setCollectionType('EDU_ALL')"
+          data-test="create-public-collection-button"
         >
           <div class="iconLeft"><i esIcon="public" style="color: #5c998f"></i></div>
           <div class="content">
@@ -81,6 +83,7 @@
             class="collection-item clickable collection-item-scope-editorial"
             *ngIf="createEditorial"
             (click)="setCollectionType('EDITORIAL')"
+            data-test="create-editorial-collection-button"
           >
             <div class="iconLeft"><i esIcon="star" style="color: #e9b42a"></i></div>
             <div class="content">
@@ -106,6 +109,7 @@
           class="collection-item clickable"
           *ngIf="createMediacenter"
           (click)="setCollectionType('MEDIA_CENTER')"
+          data-test="create-media-center-button"
         >
           <div class="iconLeft"><i esIcon="domain" style="color: #4e4b99"></i></div>
           <div class="content">
