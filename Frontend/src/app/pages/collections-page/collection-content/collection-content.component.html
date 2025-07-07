@@ -1,5 +1,5 @@
 <div role="main" esSkipTarget="MAIN_CONTENT" class="collections-master-div">
-  <section class="collections-cards-div">
+  <section class="collections-cards-div" data-test="collection-content-subcollections">
     <div
       class="collections-wrapper"
       [class.wrapper-empty]="dataSourceCollections.isEmpty()"
@@ -81,7 +81,7 @@
       [canEdit]="isAllowedToEditCollection()"
       (contentClick)="onContentClick($any($event))"
     ></es-collection-proposals>
-    <section class="collections-cards-div" *ngIf="!isRootLevel">
+    <section class="collections-cards-div" data-test="collection-content-materials">
       <es-actionbar
         #actionbarReferences
         class="actionbarMaterials"
