@@ -285,6 +285,7 @@ $imagePath: '../../../../assets/images/collections/';
     padding: 16px;
     color: #fff;
     transition: $transitionNormal all;
+    --mdc-outlined-text-field-hover-label-text-color: #eee;
     @include placeholder {
         color: #ccc;
     }
@@ -309,6 +310,7 @@ $imagePath: '../../../../assets/images/collections/';
     @include placeholder {
         color: #333;
     }
+    --mdc-outlined-text-field-hover-label-text-color: #222;
 }
 .collection-new-preview-headline {
     font-size: 200%;
