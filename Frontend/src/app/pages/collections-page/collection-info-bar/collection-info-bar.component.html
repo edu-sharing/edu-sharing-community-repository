@@ -117,32 +117,31 @@
       ></es-mds-viewer>
     </div>
 
-    <div
-      *ngIf="collection?.access?.indexOf('ChangePermissions') !== -1 && permissions"
-      data-test="collection-info-permissions"
-    >
-      <h2 class="collection-permissions collection-label">
-        {{ 'COLLECTIONS.PERMISSIONS' | translate }}
-      </h2>
-      <div class="collection-permissions collection-content">
-        <ng-container *ngFor="let permission of permissions">
-          <ng-container
-            *ngIf="
-              permission.authority.authorityType !== 'EVERYONE' &&
-              permission.authority.authorityName !== 'System'
-            "
-          >
-            <div>
-              <es-user-avatar [user]="permission" size="xsmall"></es-user-avatar>
-              <span>{{
-                (permission.authority.authorityType === 'GROUP'
-                  ? permission.group
-                  : permission.user
-                ) | authorityName
-              }}</span>
-            </div>
+    <div *ngIf="collection?.access?.indexOf('ChangePermissions') !== -1 && permissions">
+      <div data-test="collection-info-permissions">
+        <h2 class="collection-permissions collection-label">
+          {{ 'COLLECTIONS.PERMISSIONS' | translate }}
+        </h2>
+        <div class="collection-permissions collection-content">
+          <ng-container *ngFor="let permission of permissions">
+            <ng-container
+              *ngIf="
+                permission.authority.authorityType !== 'EVERYONE' &&
+                permission.authority.authorityName !== 'System'
+              "
+            >
+              <div>
+                <es-user-avatar [user]="permission" size="xsmall"></es-user-avatar>
+                <span>{{
+                  (permission.authority.authorityType === 'GROUP'
+                    ? permission.group
+                    : permission.user
+                  ) | authorityName
+                }}</span>
+              </div>
+            </ng-container>
           </ng-container>
-        </ng-container>
+        </div>
       </div>
       <div *ngIf="stats" data-test="collection-info-stats">
         <h2 class="collection-stats collection-label">
