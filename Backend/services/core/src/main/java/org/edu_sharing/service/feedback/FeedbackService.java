@@ -1,5 +1,6 @@
 package org.edu_sharing.service.feedback;
 
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.feedback.model.FeedbackData;
@@ -34,4 +35,6 @@ public interface FeedbackService {
     void changeUserData(String userName, String deletedName);
 
     void refresh();
+
+    List<NodeRef> getUsersFeedback(String userName);
 }

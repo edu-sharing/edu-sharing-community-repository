@@ -7,6 +7,7 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang.StringUtils;
+import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
@@ -118,5 +119,11 @@ public class CommentServiceImpl implements CommentService{
 		notificationService.notifyComment(node, comment, commentReference, nodeType, aspects, nodeProps, status);
 	}
 
+	@Override
+	public List<NodeRef> getUsersComments(String userName) {
+		Map<String, Object> filters=new HashMap<>();
+		filters.put("cmis:createdBy",userName);
+		return CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_COMMENT,filters);
+	}
 	
 }

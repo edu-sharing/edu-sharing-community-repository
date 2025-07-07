@@ -350,4 +350,18 @@
 		]]>
 		</message>
 	</template>
+	<template name="gdpr">
+		<subject>GDPR Information</subject>
+		<message><![CDATA[
+			<div class="center">
+				<h1>Hello {{firstName}} {{lastName}},</h1>
+				<p>Thank you for general data protection regulation export request!</p>
+				<br><br>
+				<p>The data is available {{retentionPeriod}} days at the following link:</p>
+				<a class="btn" href="{{link}}">Your Data</a>
+			</div>
+		]]>
+		</message>
+	</template>
+
 </templates>

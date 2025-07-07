@@ -1,5 +1,6 @@
 package org.edu_sharing.alfrescocontext;
 
+import org.alfresco.repo.content.ContentStore;
 import org.alfresco.repo.domain.qname.QNameDAO;
 import org.alfresco.repo.i18n.MessageService;
 import org.alfresco.repo.lock.JobLockService;
@@ -371,6 +372,11 @@ public class AlfrescoBeanConfig {
     @Bean
     public UserCache userCache() {
         return applicationContext.getBean(UserCache.class);
+    }
+
+    @Bean
+    public ContentStore fileContentStore(){
+        return (ContentStore)applicationContext.getBean("fileContentStore");
     }
 
     @Bean

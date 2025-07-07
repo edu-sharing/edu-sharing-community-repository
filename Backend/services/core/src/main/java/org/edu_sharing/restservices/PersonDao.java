@@ -35,6 +35,8 @@ import org.edu_sharing.service.authority.QRCode2Fa;
 import org.edu_sharing.service.dashboard.DashboardConfigService;
 import org.edu_sharing.service.dashboard.DashboardConfigServiceFactory;
 import org.edu_sharing.service.dashboard.models.DashboardShortcut;
+import org.edu_sharing.service.dataprotection.FeatureInfoDataProtectionService;
+import org.edu_sharing.service.dataprotection.DataProtectionService;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -45,9 +47,11 @@ import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.edu_sharing.spring.ApplicationContextFactory;
 import org.edu_sharing.util.CheckedCast;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -148,6 +152,8 @@ public class PersonDao {
     private final AuthorityService authorityService;
     private final DashboardConfigService dashboardConfigService;
 
+    private DataProtectionService dataProtectionService;
+
 
     public PersonDao(RepositoryDao repoDao, String userName) throws DAOException {
 
@@ -171,6 +177,8 @@ public class PersonDao {
 			/* this.parentOrganizations = AuthenticationUtil.runAsSystem(() ->
 					authorityService.getEduGroups(userName, NodeServiceInterceptor.getEduSharingScope())
 			);*/
+
+            dataProtectionService = ApplicationContextFactory.getApplicationContext().getBean(DataProtectionService.class);
 
         } catch (Throwable t) {
             throw DAOException.mapping(t);
@@ -598,7 +606,7 @@ public class PersonDao {
     }
 
     public String[] getSkills() {
-        List<String> skills =  CheckedCast.toListOf(this.userInfo.get(CCConstants.CM_PROP_PERSON_SKILLS), String.class);
+        List<String> skills = CheckedCast.toListOf(this.userInfo.get(CCConstants.CM_PROP_PERSON_SKILLS), String.class);
         if (skills != null) {
             return skills.toArray(new String[0]);
         }
@@ -815,6 +823,28 @@ public class PersonDao {
         }
 
         return authorityService.generate2FaQRCode(getUserName());
+    }
+
+    public void requestDataProtectionExport() {
+        try {
+            ApplicationContextFactory.getApplicationContext().getBean(FeatureInfoDataProtectionService.class);
+            dataProtectionService.requestDataProtectionExport(getUserName());
+        } catch (NoSuchBeanDefinitionException e) {
+            logger.warn("data protection service not enabled");
+        }
+    }
+
+    public NodeDao getDataProtectionExport() {
+        try {
+            ApplicationContextFactory.getApplicationContext().getBean(FeatureInfoDataProtectionService.class);
+            org.alfresco.service.cmr.repository.NodeRef nodeRef = dataProtectionService.getDataProtectionNode(getUserName());
+            if (nodeRef != null) {
+                return NodeDao.getNode(repoDao, nodeRef.getId());
+            }
+        } catch (NoSuchBeanDefinitionException e) {
+            logger.warn("data protection service not enabled");
+        }
+        return null;
     }
 
     public DashboardShortcutEntry[] getDashboardShortcuts() throws Exception {

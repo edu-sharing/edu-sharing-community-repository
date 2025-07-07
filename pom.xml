@@ -48,9 +48,9 @@
     <npm.args.build>run build</npm.args.build>
 
     <postgresql.jdbc.version>42.7.5</postgresql.jdbc.version>
-    <tomcat.version>10.1.40</tomcat.version>
+    <tomcat.version>10.1.42</tomcat.version>
     <jackson.version>2.17.2</jackson.version>
-    <mongodb.version>5.1.0</mongodb.version>
+    <mongodb.version>5.5.1</mongodb.version>
     <spring.version>6.2.2</spring.version>
     <!--
       do not update to 6.2.2 cause it breaks openidconnect backchannel logout
@@ -255,7 +255,7 @@
       <dependency>
         <groupId>co.elastic.clients</groupId>
         <artifactId>elasticsearch-java</artifactId>
-        <version>8.15.2</version>
+        <version>8.15.5</version>
       </dependency>
 
       <!-- dependency of elastic client -->
@@ -847,13 +847,13 @@
       <dependency>
         <groupId>org.springframework.data</groupId>
         <artifactId>spring-data-commons</artifactId>
-        <version>3.2.1</version>
+        <version>3.5.1</version>
       </dependency>
 
       <dependency>
         <groupId>org.springframework.data</groupId>
         <artifactId>spring-data-mongodb</artifactId>
-        <version>4.1.2</version>
+        <version>4.5.1</version>
       </dependency>
 
       <!-- ... other dependency elements ... -->

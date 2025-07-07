@@ -21,6 +21,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.iam.v1.model.*;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
+import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.organization.v1.model.GroupSignupDetails;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
@@ -607,6 +608,69 @@ public class IamApi {
             return ErrorResponse.createResponse(t);
         }
     }
+
+    @PUT
+    @Path("/people/{repository}/{person}/dataprotection")
+    @Operation(summary = "requests General Data Protection Regulation (GDPR) export.", description = "Request General Data Protection Regulation (GDPR) export of the user the user. (To request GDPR export for foreign users, admin rights are required.)")
+
+    @ApiResponses(
+    value = {
+            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+
+    public Response requestDataProtectionExport(
+            @Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue = "-me-")) @PathParam("person") String person,
+            @Context HttpServletRequest req) {
+
+        try {
+
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            PersonDao personDao = PersonDao.getPerson(repoDao, person);
+            personDao.requestDataProtectionExport();
+            return Response.status(Response.Status.OK).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+    }
+
+
+    @GET
+    @Path("/people/{repository}/{person}/dataprotection")
+    @Operation(summary = "Fetches the node of general data protection export", description = "Fetches the node of general data protection export.")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+                    @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+    public Response getDataProtectionExport(@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+                                            @Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue = "-me-")) @PathParam("person") String person)
+    {
+        try {
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            PersonDao personDao = PersonDao.getPerson(repoDao, person);
+            NodeDao dataProtectionExport = personDao.getDataProtectionExport();
+            if(dataProtectionExport != null) {
+                NodeEntry response = new NodeEntry();
+                response.setNode(dataProtectionExport.asNode());
+                return Response.status(Response.Status.OK).entity(response).build();
+            }
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
+    }
+
 
     @PUT
     @Path("/people/{repository}/{person}/avatar")
