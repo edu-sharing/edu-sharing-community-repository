@@ -57,13 +57,18 @@
         [dropdownPosition]="'right'"
       ></es-actionbar>
     </div>
-    <h1 esTitle class="collection-new-preview-headline collections-header-texttop">
+    <h1
+      esTitle
+      class="collection-new-preview-headline collections-header-texttop"
+      data-test="collection-info-title"
+    >
       {{ collection?.title }}
     </h1>
 
     <div
       *ngIf="collection?.collection?.childCollectionsCount"
       class="collection-new-preview-subline collections-header-texttop"
+      data-test="collection-info-child-collections-count"
     >
       {{ collection.collection.childCollectionsCount }}
       {{ 'COLLECTION.INFO_REFERENCES_MULTI' | translate }}
@@ -71,12 +76,13 @@
     <div
       *ngIf="collection?.collection?.childReferencesCount"
       class="collection-new-preview-subline collections-header-texttop"
+      data-test="collection-info-child-references-count"
     >
       {{ collection.collection.childReferencesCount }}
       {{ 'COLLECTION.INFO_CHILDS_MULTI' | translate }}
     </div>
 
-    <div class="collection-new-preview-infoline">
+    <div class="collection-new-preview-infoline" data-test="collection-info-creator">
       <i
         esIcon="person"
         class="icon-bottom"
@@ -91,7 +97,7 @@
       }}</span>
     </div>
 
-    <div class="collection-new-preview-infoline">
+    <div class="collection-new-preview-infoline" data-test="collection-info-sharing-state">
       <i
         [esIcon]="getScopeInfo().icon"
         class="icon-bottom"
@@ -100,7 +106,7 @@
       &nbsp;{{ 'COLLECTION.SCOPE.' + getScopeInfo().scopeName | translate }}
     </div>
     <div class="collection-permissions collection-label"></div>
-    <div class="collections-metadata">
+    <div class="collections-metadata" data-test="collection-info-metadata">
       <es-mds-viewer
         #mds
         *ngIf="collection?.properties"
@@ -111,7 +117,10 @@
       ></es-mds-viewer>
     </div>
 
-    <ng-container *ngIf="collection?.access?.indexOf('ChangePermissions') !== -1 && permissions">
+    <div
+      *ngIf="collection?.access?.indexOf('ChangePermissions') !== -1 && permissions"
+      data-test="collection-info-permissions"
+    >
       <h2 class="collection-permissions collection-label">
         {{ 'COLLECTIONS.PERMISSIONS' | translate }}
       </h2>
@@ -135,14 +144,14 @@
           </ng-container>
         </ng-container>
       </div>
-      <ng-container *ngIf="stats">
+      <div *ngIf="stats" data-test="collection-info-stats">
         <h2 class="collection-stats collection-label">
           {{ 'COLLECTIONS.STATS.TOTAL' | translate }}
         </h2>
         <div class="collection-stats collection-content">
           {{ stats.total['VIEW_COLLECTION'] }}
         </div>
-      </ng-container>
-    </ng-container>
+      </div>
+    </div>
   </div>
 </div>
