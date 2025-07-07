@@ -36,7 +36,7 @@
       <div class="createCollection collectionShadow">
         <button
           mat-button
-          class="collection-item clickable"
+          class="collection-item clickable collection-item-scope-my"
           (click)="setCollectionType('MY')"
           data-test="create-private-collection-button"
         >
@@ -51,7 +51,7 @@
         </button>
         <button
           mat-button
-          class="collection-item clickable"
+          class="collection-item clickable collection-item-scope-custom"
           *ngIf="canInvite"
           (click)="setCollectionType('CUSTOM')"
         >
@@ -64,7 +64,7 @@
         </button>
         <button
           mat-button
-          class="collection-item clickable"
+          class="collection-item clickable collection-item-scope-public"
           *ngIf="shareToAll && canInvite"
           (click)="setCollectionType('EDU_ALL')"
         >
@@ -78,7 +78,7 @@
         <div class="group" *ngIf="createEditorial && shareToAll">
           <button
             mat-button
-            class="collection-item clickable"
+            class="collection-item clickable collection-item-scope-editorial"
             *ngIf="createEditorial"
             (click)="setCollectionType('EDITORIAL')"
           >
