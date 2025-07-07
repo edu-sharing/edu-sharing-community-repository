@@ -9,6 +9,7 @@ import { CollectionsPageComponent } from './collections-page.component';
 import { InfobarComponent } from './infobar/infobar.component';
 import { CollectionProposalsComponent } from './collection-proposals/collection-proposals.component';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
+import { ShareDialogModule } from '../../features/dialogs/dialog-modules/share-dialog/share-dialog.module';
 
 @NgModule({
     declarations: [
@@ -19,7 +20,13 @@ import { FooterComponent } from '../../shared/components/footer/footer.component
         CollectionsPageComponent,
         InfobarComponent,
     ],
-    imports: [SharedModule, MdsModule, CollectionsPageRoutingModule, FooterComponent],
+    imports: [
+        SharedModule,
+        ShareDialogModule,
+        MdsModule,
+        CollectionsPageRoutingModule,
+        FooterComponent,
+    ],
     exports: [CollectionInfoBarComponent, CollectionContentComponent],
 })
 export class CollectionsPageModule {}

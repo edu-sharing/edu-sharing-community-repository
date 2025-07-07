@@ -76,11 +76,18 @@ import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { Values } from '../../../features/mds/types/types';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
-import { ShareDialogResult } from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog-data';
-import { ExtendedAcl } from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog.component';
+import {
+    ShareDialogData,
+    ShareDialogResult,
+} from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog-data';
+import {
+    ExtendedAcl,
+    ShareDialogComponent,
+} from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog.component';
 import { OptionsHelperService } from '../../../services/options-helper.service';
 import { filter, first } from 'rxjs/operators';
 import { CollectionsTypeConfig } from '../../../../../dist/edu-sharing-api/lib/api/models/collections-type-config';
+import { CARD_DIALOG_DATA } from '../../../features/dialogs/card-dialog/card-dialog-config';
 
 type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITORIAL_GROUPS';
 
@@ -96,6 +103,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     @ViewChild('mds') mds: MdsEditorWrapperComponent;
     @ViewChild('organizations') organizationsRef: NodeEntriesWrapperComponent<Group>;
     @ViewChild('imageActionbar') imageActionbar: ActionbarComponent;
+    @ViewChild(ShareDialogComponent) shareDialogRef: ShareDialogComponent;
     readonly InteractionType = InteractionType;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     public hasCustomScope: boolean;
@@ -166,6 +174,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     imageWindow: Window;
     editorialGroupsSelected: Group[] = [];
     editorialCollectionsConfig: CollectionsTypeConfig;
+    shareConfig: ShareDialogData;
 
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
@@ -445,7 +454,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
             },
         );
     }
-    private setPermissions(permissions: ShareDialogResult) {
+    setPermissions(permissions: ShareDialogResult) {
         if (permissions) {
             this.permissionsInfo = permissions;
             this.permissions = permissions.permissions;
@@ -460,7 +469,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
             }
         }
     }
-    async editPermissions(): Promise<void> {
+    updatePermissions() {
         if (this.permissions == null && !this.editId) {
             this.permissions = {
                 inherited: false,
@@ -480,13 +489,12 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
             permissionsDummy.isDirectory = true;
             nodes = [permissionsDummy];
         }
-        const dialogRef = await this.dialogs.openShareDialog({
+        this.shareConfig = {
             nodes,
             sendMessages: true,
             sendToApi: false,
             currentPermissions: this.permissions,
-        });
-        dialogRef.afterClosed().subscribe((result) => this.setPermissions(result));
+        };
     }
     isNewCollection(): boolean {
         return this.editId == null;
@@ -691,11 +699,15 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         return pos >= this.availableSteps.length - 1;
     }
     public async goToNextStep() {
+        this.updatePermissions();
         if (this.newCollectionStep == this.STEP_GENERAL) {
             if (!this.currentCollection.title) {
                 this.toast.error(null, 'COLLECTIONS.ENTER_NAME');
                 return;
             }
+        }
+        if (this.newCollectionStep == this.STEP_PERMISSIONS) {
+            await this.shareDialogRef.save();
         }
         if (this.newCollectionStep == this.STEP_METADATA) {
             const props = await this.mds.getValues();

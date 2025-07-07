@@ -407,22 +407,19 @@
       [isCancelable]="true"
       (cancel)="newCollectionCancel()"
       [buttons]="buttons"
-      width="normal"
-      height="large"
+      width="xxlarge"
+      height="xxlarge"
       [subtitle]="currentCollection.title"
       class="collection-permission-container"
     >
       <div class="card-content">
         <div class="title">{{ 'COLLECTIONS.EDIT_PERMISSIONS_SUBTEXT' | translate }}</div>
         <div class="description">{{ 'COLLECTIONS.EDIT_PERMISSIONS_DESCRIPTION' | translate }}</div>
-        <div class="dialog-basic-area permissionsBtn">
-          <button mat-raised-button (click)="editPermissions()">
-            <i esIcon="person_add"></i>{{ 'COLLECTIONS.EXTENDED_PERMISSIONS_BUTTON' | translate }}
-          </button>
-        </div>
-        <div class="status">
-          {{ 'COLLECTIONS.PERMISSIONS_STATUS_' + getShareStatus() | translate }}
-        </div>
+        <es-share-dialog
+          *ngIf="shareConfig"
+          [dataInput]="shareConfig"
+          (permissionsChange)="setPermissions($event)"
+        ></es-share-dialog>
       </div>
     </es-card>
   </div>
