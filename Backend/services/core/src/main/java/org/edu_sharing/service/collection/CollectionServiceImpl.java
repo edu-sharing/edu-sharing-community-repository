@@ -78,6 +78,7 @@ import java.util.stream.Collectors;
 
 public class CollectionServiceImpl implements CollectionService {
 
+    private final RepositoryCache repositoryCache;
     private NotificationService notificationService;
 
     public static CollectionService build(String appId) {
@@ -152,7 +153,8 @@ public class CollectionServiceImpl implements CollectionService {
             this.permissionService = PermissionServiceFactory.getPermissionService(appId);
             this.notificationService = NotificationServiceFactoryUtility.getNotificationService(appId);
             ApplicationContext appContext = AlfAppContextGate.getApplicationContext();
-            policyBehaviourFilter = (BehaviourFilter) appContext.getBean("policyBehaviourFilter");
+            policyBehaviourFilter = appContext.getBean("policyBehaviourFilter", BehaviourFilter.class);
+            repositoryCache = appContext.getBean(RepositoryCache.class);
 
         } catch (Throwable e) {
             logger.error(e.getMessage(), e);
@@ -597,7 +599,7 @@ public class CollectionServiceImpl implements CollectionService {
             // Usage handling is now handled in @BeforeDeleteIOPolicy
 
             try {
-                new RepositoryCache().remove(originalNodeId);
+                repositoryCache.remove(originalNodeId);
             } catch (Throwable t) {
                 // may fail if original has no access, however, this is not an issue
             }

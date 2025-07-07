@@ -30,11 +30,13 @@ public abstract class TrackingServiceDefault implements TrackingService {
 
     private final TransactionService transactionService;
     private final BehaviourFilter policyBehaviourFilter;
+    private final RepositoryCache repositoryCache;
 
 
-    public TrackingServiceDefault(TransactionService transactionService, @Qualifier("policyBehaviourFilter") BehaviourFilter policyBehaviourFilter) {
+    public TrackingServiceDefault(TransactionService transactionService, @Qualifier("policyBehaviourFilter") BehaviourFilter policyBehaviourFilter, RepositoryCache repositoryCache) {
         this.transactionService = transactionService;
         this.policyBehaviourFilter = policyBehaviourFilter;
+        this.repositoryCache = repositoryCache;
     }
 
     @Override
@@ -69,11 +71,10 @@ public abstract class TrackingServiceDefault implements TrackingService {
                 nodeService.setProperty(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(), propertyName, finalValue, false);
                 policyBehaviourFilter.enableBehaviour(nodeRef);
                 // change the value in cache
-                RepositoryCache cacheService = new RepositoryCache();
-                Map<String, Object> cache = cacheService.get(nodeRef.getId());
+                Map<String, Object> cache = repositoryCache.get(nodeRef.getId());
                 if (cache != null) {
                     cache.put(propertyName, finalValue);
-                    new RepositoryCache().put(nodeRef.getId(), cache);
+                    repositoryCache.put(nodeRef.getId(), cache);
                 }
                 return null;
             });

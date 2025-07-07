@@ -88,6 +88,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
     private GuestService guestService = applicationContext.getBean(GuestService.class);
     private PermissionService permissionService;
     private final RetryingTransactionHelper retryingTransactionHelper = serviceRegistry.getRetryingTransactionHelper();
+    private final RepositoryCache repositoryCache = applicationContext.getBean(RepositoryCache.class);
 
     public PermissionServiceImpl(
             ToolPermissionService toolPermissionService,
@@ -327,7 +328,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
             AuthorityType authorityType = AuthorityType.getAuthorityType(authority);
 
-            if(!AuthenticationUtil.isRunAsUserTheSystemUser()) {
+            if (!AuthenticationUtil.isRunAsUserTheSystemUser()) {
                 if (AuthorityType.USER.equals(authorityType)) {
                     addToRecent(personService.getPerson(authority));
                 }
@@ -928,7 +929,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
                 policyBehaviourFilter.enableBehaviour(nodeRef);
             }
             // remove from cache so that the ccm:ph_* properties getting updated
-            new RepositoryCache().remove(nodeRef.getId());
+            repositoryCache.remove(nodeRef.getId());
             return null;
         });
     }

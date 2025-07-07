@@ -5,52 +5,47 @@ import java.util.HashMap;
 import java.util.Map;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.repo.version.VersionModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.SearchParameters;
-import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.cmr.version.VersionType;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
-import org.edu_sharing.repository.server.tools.cache.RepositoryCacheTool;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
 
+@Slf4j
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @JobDescription(description = "create initial version for ccm:io nodes if they don't exist")
 public class FixInitialVersion extends AbstractJobMapAnnotationParams{
 
-	Logger logger = Logger.getLogger(FixInitialVersion.class);
-	
-	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-	
-	VersionService versionService = serviceRegistry.getVersionService();
 
-	org.edu_sharing.service.search.SearchService searchService = SearchServiceFactory.getLocalService();
-	
-	NodeService nodeService = (NodeService)applicationContext.getBean("alfrescoDefaultDbNodeService");
-	
-	BehaviourFilter policyBehaviourFilter = (BehaviourFilter)applicationContext.getBean("policyBehaviourFilter");
+
+	@Autowired private VersionService versionService;
+	@Autowired private org.edu_sharing.service.search.SearchService searchService;
+	@Autowired private NodeService alfrescoDefaultDbNodeService;
+	@Autowired private BehaviourFilter policyBehaviourFilter;
+	@Autowired private RepositoryCache repositoryCache;
+	@Autowired private RetryingTransactionHelper retryingTransactionHelper;
 
 	@JobFieldDescription(description = "if false job just logs which nodes are found and would be updated")
 	boolean persistentMode = false;
@@ -77,22 +72,22 @@ public class FixInitialVersion extends AbstractJobMapAnnotationParams{
 				.build());
 
 		SearchResultNodeRef search = searchService.search(searchToken);
-		logger.info("found: " + search.getNodeCount());
+		log.info("found: " + search.getNodeCount());
 		search.getData().forEach(n -> {
 			NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, n.getNodeId());
 			VersionHistory vh = versionService.getVersionHistory(nodeRef);
 			if(vh == null) {
-				logger.info("creating initial version for:" + nodeRef +"  " + nodeService.getProperty(nodeRef, ContentModel.PROP_NAME));
+				log.info("creating initial version for:" + nodeRef +"  " + alfrescoDefaultDbNodeService.getProperty(nodeRef, ContentModel.PROP_NAME));
 
-				Map<String, Serializable> transFormedProps = transformQNameKeyToString(nodeService.getProperties(nodeRef));
+				Map<String, Serializable> transFormedProps = transformQNameKeyToString(alfrescoDefaultDbNodeService.getProperties(nodeRef));
 				transFormedProps.put(VersionModel.PROP_VERSION_TYPE, VersionType.MAJOR);
 
-				serviceRegistry.getRetryingTransactionHelper().doInTransaction((RetryingTransactionCallback<Void>) () -> {
+				retryingTransactionHelper.doInTransaction((RetryingTransactionCallback<Void>) () -> {
                     if(persistentMode) {
                         policyBehaviourFilter.disableBehaviour(nodeRef);
 						Version version = versionService.createVersion(nodeRef, transFormedProps);
-						this.nodeService.setProperty(nodeRef, QName.createQName(CCConstants.LOM_PROP_LIFECYCLE_VERSION), version.getVersionLabel());
-						new RepositoryCache().remove(nodeRef.getId());
+						this.alfrescoDefaultDbNodeService.setProperty(nodeRef, QName.createQName(CCConstants.LOM_PROP_LIFECYCLE_VERSION), version.getVersionLabel());
+						repositoryCache.remove(nodeRef.getId());
 						policyBehaviourFilter.enableBehaviour(nodeRef);
                         return null;
                     }
@@ -112,7 +107,7 @@ public class FixInitialVersion extends AbstractJobMapAnnotationParams{
 	
 	
 	@Override
-	public Class[] getJobClasses() {
+	public Class<?>[] getJobClasses() {
 		super.addJobClass(FixInitialVersion.class);
 		return allJobs;
 	}

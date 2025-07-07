@@ -1,29 +1,27 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.service.ServiceRegistry;
+import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.AccessStatus;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.edu_sharing.service.handleservice.HandleServiceFactory;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.nodeservice.NodeService;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.HandleMode;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -31,11 +29,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @JobDescription(description = "Migrate previously directly published element to published copies")
 public class MigrateDirectPublishedElements extends AbstractJobMapAnnotationParams{
-
-	protected Logger logger = Logger.getLogger(MigrateDirectPublishedElements.class);
-
 
 	@JobFieldDescription(description = "Single node to migrate")
 	private String nodeId;
@@ -43,19 +40,24 @@ public class MigrateDirectPublishedElements extends AbstractJobMapAnnotationPara
 	private String startFolder;
 	@JobFieldDescription(description = "nodes to explicitly exclude")
 	private List<String> ignoredNodeIds;
+
+	@Autowired
 	private NodeService nodeService;
+	@Autowired
 	private BehaviourFilter policyBehaviourFilter;
-	private ServiceRegistry serviceRegistry;
+	@Autowired
+	private RepositoryCache repositoryCache;
+	@Autowired
+	private PermissionService permissionService;
+
+	@Autowired
+	private RetryingTransactionHelper retryingTransactionHelper;
 
 	@Autowired
 	HandleServiceFactory handleServiceFactory;
 
 	@Override
 	public void executeInternal(JobExecutionContext context) throws JobExecutionException {
-		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-		serviceRegistry = applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY, ServiceRegistry.class);
-		nodeService = NodeServiceFactory.getLocalService();
-		policyBehaviourFilter = (BehaviourFilter)applicationContext.getBean("policyBehaviourFilter");
 		if(!StringUtils.isBlank(nodeId)) {
 			AuthenticationUtil.runAsSystem(() -> {
                 migrate(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
@@ -75,40 +77,40 @@ public class MigrateDirectPublishedElements extends AbstractJobMapAnnotationPara
 		runner.setKeepModifiedDate(false);
 		runner.setTransaction(NodeRunner.TransactionMode.None);
 		int count=runner.run();
-		logger.info("Processed "+count+" nodes");
+        log.info("Processed {} nodes", count);
 	}
 
 	private void migrate(NodeRef ref) {
 		if(ignoredNodeIds != null && ignoredNodeIds.contains(ref.getId())) {
-			logger.warn("Node " + ref + " shall be ignored");
+            log.warn("Node {} shall be ignored", ref);
 			return;
 		}
 		Serializable handleId = NodeServiceHelper.getPropertyNative(ref, CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID);
 		Serializable doiId = NodeServiceHelper.getPropertyNative(ref, CCConstants.CCM_PROP_PUBLISHED_DOI_ID);
 		if(handleId == null && doiId == null) {
-			logger.warn("Can not migrate node " + ref + " since it has no handle id");
+            log.warn("Can not migrate node {} since it has no handle id", ref);
 			return;
 		}
 		if(NodeServiceHelper.hasAspect(ref, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
-			logger.warn("Can not migrate node " + ref + " since it is a ref");
+            log.warn("Can not migrate node {} since it is a ref", ref);
 			return;
 		}
 		if(NodeServiceHelper.getPropertyNative(ref, CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL) != null) {
-			logger.warn("Can not migrate node " + ref + " since it is a published copy");
+            log.warn("Can not migrate node {} since it is a published copy", ref);
 			return;
 		}
 		// copy the old publish date
 		Serializable date = NodeServiceHelper.getPropertyNative(ref, CCConstants.CCM_PROP_IO_PUBLISHED_DATE);
 		if (date != null) {
-			logger.info("Keeping old published date " + date);
+            log.info("Keeping old published date {}", date);
 		} else {
-			logger.warn("Old node had no published date! Will use cm:modified as fallback");
+			log.warn("Old node had no published date! Will use cm:modified as fallback");
 			date = NodeServiceHelper.getPropertyNative(ref, CCConstants.CM_PROP_C_MODIFIED);
 		}
 		try {
 			// do not do anything with the handle for now!
-			logger.info("Creating published copy of " + ref);
-			NodeRef copy = serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(() -> {
+            log.info("Creating published copy of {}", ref);
+			NodeRef copy = retryingTransactionHelper.doInTransaction(() -> {
 				policyBehaviourFilter.disableBehaviour(ref);
 				NodeRef copyInternal = new NodeRef(
 						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
@@ -118,22 +120,22 @@ public class MigrateDirectPublishedElements extends AbstractJobMapAnnotationPara
 			});
 
 			if(!NodeServiceHelper.exists(copy)) {
-				logger.error("Copy failed for node: " + ref + ", missing node id: " + copy);
+                log.error("Copy failed for node: {}, missing node id: {}", ref, copy);
 				return;
 			}
-			logger.info("Created copy: " + copy);
+            log.info("Created copy: {}", copy);
 			Serializable finalDate = date;
-			serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+			retryingTransactionHelper.doInTransaction(() -> {
 				policyBehaviourFilter.disableBehaviour(copy);
 				NodeServiceHelper.setProperty(copy, CCConstants.CM_PROP_C_CREATED, NodeServiceHelper.getPropertyNative(ref, CCConstants.CM_PROP_C_CREATED), true);
 				NodeServiceHelper.setProperty(copy, CCConstants.CM_PROP_C_MODIFIED, NodeServiceHelper.getPropertyNative(ref, CCConstants.CM_PROP_C_MODIFIED), true);
 				// now, fake the current history of copies to the directly published element so its handle id gets the update
 				if(handleId != null) {
-					logger.info("Update old handle " + handleId + " from " + ref + " to " + copy);
+                    log.info("Update old handle {} from {} to {}", handleId, ref, copy);
 					nodeService.createHandle(copy, Collections.singletonList(ref.getId()), handleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.handle), HandleMode.update);
 				}
 				if(doiId != null) {
-					logger.info("Update old handle " + doiId + " from " + ref + " to " + copy);
+                    log.info("Update old handle {} from {} to {}", doiId, ref, copy);
 					nodeService.createHandle(copy, Collections.singletonList(ref.getId()), handleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.doi), HandleMode.update);
 				}
 				// copy the old publish date
@@ -143,23 +145,23 @@ public class MigrateDirectPublishedElements extends AbstractJobMapAnnotationPara
 				policyBehaviourFilter.enableBehaviour(copy);
 				return null;
 			});
-			serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(() -> {
+			retryingTransactionHelper.doInTransaction(() -> {
 						policyBehaviourFilter.disableBehaviour(ref);
-						Set<AccessPermission> perm = serviceRegistry.getPermissionService().getAllSetPermissions(ref).
+						Set<AccessPermission> perm = permissionService.getAllSetPermissions(ref).
 								stream().filter(p -> p.getAccessStatus().equals(AccessStatus.ALLOWED) && p.getAuthority().equals(CCConstants.AUTHORITY_GROUP_EVERYONE)).collect(Collectors.toSet());
-						logger.info("cleaning up permissions");
+						log.info("cleaning up permissions");
 						if (perm.stream().anyMatch(p -> p.getPermission().equals(CCConstants.PERMISSION_CONSUMER))) {
-							serviceRegistry.getPermissionService().deletePermission(ref, CCConstants.AUTHORITY_GROUP_EVERYONE, CCConstants.PERMISSION_CONSUMER);
+							permissionService.deletePermission(ref, CCConstants.AUTHORITY_GROUP_EVERYONE, CCConstants.PERMISSION_CONSUMER);
 						}
 						if (perm.stream().anyMatch(p -> p.getPermission().equals(CCConstants.PERMISSION_CC_PUBLISH))) {
-							serviceRegistry.getPermissionService().deletePermission(ref, CCConstants.AUTHORITY_GROUP_EVERYONE, CCConstants.PERMISSION_CC_PUBLISH);
+							permissionService.deletePermission(ref, CCConstants.AUTHORITY_GROUP_EVERYONE, CCConstants.PERMISSION_CC_PUBLISH);
 						}
 						NodeServiceHelper.removeProperty(ref, CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID);
 						policyBehaviourFilter.enableBehaviour(ref);
 						return null;
 					});
-			logger.info("done for node: " + ref + ", new copy: " + copy);
-			new RepositoryCache().remove(ref.getId());
+            log.info("done for node: {}, new copy: {}", ref, copy);
+			repositoryCache.remove(ref.getId());
 
 		} catch (Throwable e) {
 			throw new RuntimeException(e);

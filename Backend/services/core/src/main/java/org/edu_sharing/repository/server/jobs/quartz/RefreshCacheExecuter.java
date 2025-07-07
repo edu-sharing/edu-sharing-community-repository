@@ -27,11 +27,10 @@
  */
 package org.edu_sharing.repository.server.jobs.quartz;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationTool;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
@@ -41,11 +40,10 @@ import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCacheTool;
 
-
+@Slf4j
 public class RefreshCacheExecuter {
 
-	protected Log logger = LogFactory.getLog(RefreshCacheExecuter.class);
-	
+
 	public void excecute(String rootFolderId, boolean sticky, Map<String, String> authInfo) throws Throwable {
 		if (authInfo == null) {
 			String userName = ApplicationInfoList.getHomeRepository().getUsername();
@@ -54,13 +52,12 @@ public class RefreshCacheExecuter {
 			authInfo = authTool.createNewSession(userName, password);
 		}
 
-		logger.info("rootFolderId:"+rootFolderId);
-		if (rootFolderId == null || rootFolderId.trim().equals("")) {
+        log.info("rootFolderId:{}", rootFolderId);
+		if (StringUtils.isBlank(rootFolderId)) {
 			
 			
 			MCBaseClient mcBaseClient = RepoFactory.getInstance(ApplicationInfoList.getHomeRepository().getAppId(), authInfo);
 			MCAlfrescoBaseClient mcAlfrescoBaseClient = (MCAlfrescoBaseClient) mcBaseClient;
-			String repositoryRoot = mcAlfrescoBaseClient.getRepositoryRoot();
 			String companyHomeId = mcAlfrescoBaseClient.getCompanyHomeNodeId();
 			Map<String, Object> importFolderProps = mcAlfrescoBaseClient.getChild(companyHomeId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME,
 					OAIPMHLOMImporter.FOLDER_NAME_IMPORTED_OBJECTS);

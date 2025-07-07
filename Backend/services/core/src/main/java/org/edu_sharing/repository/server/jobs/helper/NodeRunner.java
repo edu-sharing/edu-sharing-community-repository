@@ -42,6 +42,7 @@ public class NodeRunner {
     private final ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
     private final ServiceRegistry serviceRegistry = applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY, ServiceRegistry.class);
     private final BehaviourFilter policyBehaviourFilter = applicationContext.getBean("policyBehaviourFilter", BehaviourFilter.class);
+    private final RepositoryCache repositoryCache = applicationContext.getBean(RepositoryCache.class);
     /**
      * The task that will be called for each node
      */
@@ -269,12 +270,12 @@ public class NodeRunner {
             if (runAsSystem) {
                 AuthenticationUtil.runAsSystem(() -> {
                     task.accept(ref);
-                    new RepositoryCache().remove(ref.getId());
+                    repositoryCache.remove(ref.getId());
                     return null;
                 });
             } else {
                 task.accept(ref);
-                new RepositoryCache().remove(ref.getId());
+                repositoryCache.remove(ref.getId());
             }
         }finally {
             if(keepModifiedDate || !transaction.equals(TransactionMode.None)) policyBehaviourFilter.enableBehaviour(ref);

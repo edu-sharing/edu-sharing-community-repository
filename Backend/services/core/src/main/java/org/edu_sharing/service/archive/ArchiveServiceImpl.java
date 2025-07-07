@@ -5,17 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
-import org.apache.log4j.Logger;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.metadataset.v2.MetadataQueries;
-import org.edu_sharing.metadataset.v2.MetadataReader;
+import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -35,8 +32,12 @@ import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
 
+@Lazy
+@Slf4j
+@Service("archiveService")
 public class ArchiveServiceImpl implements ArchiveService  {
 	
 	
@@ -50,22 +51,18 @@ public class ArchiveServiceImpl implements ArchiveService  {
 	
 	
 	
-	ApplicationInfo appInfo;
-	MCAlfrescoAPIClient client;
-	
-	SearchService searchService;
-	
-	Logger logger = Logger.getLogger(ArchiveServiceImpl.class);
-	
-	ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
+	private final ApplicationInfo appInfo;
+	private final MCAlfrescoAPIClient client;
+	private final SearchService searchService;
+	private final NodeService nodeService;
+	private final RepositoryCache repositoryCache;
 
-	ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-	NodeService nodeService = serviceRegistry.getNodeService();
-
-	private AuthorityService authorityService;
+	private final AuthorityService authorityService;
 	
-	public ArchiveServiceImpl() {
-		try{
+	public ArchiveServiceImpl(NodeService nodeService, RepositoryCache repositoryCache) {
+        this.nodeService = nodeService;
+        this.repositoryCache = repositoryCache;
+        try{
 			this.appInfo = ApplicationInfoList.getHomeRepository();
 			this.client = new MCAlfrescoAPIClient();
 			this.searchService = SearchServiceFactory.getSearchService(this.appInfo.getAppId());
@@ -81,7 +78,7 @@ public class ArchiveServiceImpl implements ArchiveService  {
 		for(String archivedNodeId : archivedNodeIds){
 			this.client.removeNode(MCAlfrescoAPIClient.archiveStoreRef.getProtocol(), MCAlfrescoAPIClient.archiveStoreRef.getIdentifier(), archivedNodeId);
 			// clear cache so that primary parent etc. gets newly resolved
-			new RepositoryCache().remove(archivedNodeId);
+			repositoryCache.remove(archivedNodeId);
 		}
 	}
 	
@@ -125,7 +122,7 @@ public class ArchiveServiceImpl implements ArchiveService  {
 			}
 			return this.searchService.search(metadataset,"archive",params,searchToken);
 		}catch(Throwable e){
-			logger.error(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 			return null;
 		}
 	}
@@ -140,7 +137,7 @@ public class ArchiveServiceImpl implements ArchiveService  {
 		
 		
 		//try to use original
-		if(destinationParentId == null || destinationParentId.trim().equals("")){
+		if(StringUtils.isBlank(destinationParentId)) {
 			ChildAssociationRef childRef = (ChildAssociationRef)nodeService.getProperty(archivedNodeRef, QName.createQName(CCConstants.SYS_PROP_ARCHIVED_ORIGINAL_PARENT_ASSOC));
 			if(childRef != null){
 				destinationParentId = childRef.getParentRef().getId();
@@ -149,7 +146,7 @@ public class ArchiveServiceImpl implements ArchiveService  {
 					destinationParentId = new UserEnvironmentTool(null,client.getAuthenticationInfo()).getDefaultUserDataFolder();
 					restoreResult.setRestoreStatus(RESTORESTATUS_FALLBACK_PARENT_NOT_EXISTS);
 				}catch(Throwable e){
-					logger.error(e.getMessage(), e);
+					log.error(e.getMessage(), e);
 				}
 			}
 		}
@@ -159,7 +156,7 @@ public class ArchiveServiceImpl implements ArchiveService  {
 				destinationParentId = new UserEnvironmentTool(null,client.getAuthenticationInfo()).getDefaultUserDataFolder();
 				restoreResult.setRestoreStatus(RESTORESTATUS_FALLBACK_PARENT_NOT_EXISTS);
 			}catch(Throwable e){
-				logger.error(e.getMessage(), e);
+				log.error(e.getMessage(), e);
 			}
 		}
 		
@@ -168,7 +165,7 @@ public class ArchiveServiceImpl implements ArchiveService  {
 				destinationParentId = new UserEnvironmentTool(null,client.getAuthenticationInfo()).getDefaultUserDataFolder();
 				restoreResult.setRestoreStatus(RESTORESTATUS_FALLBACK_PARENT_NO_PERMISSION);
 			}catch(Throwable e){
-				logger.error(e.getMessage(), e);
+				log.error(e.getMessage(), e);
 			}
 		}
 		
@@ -192,7 +189,7 @@ public class ArchiveServiceImpl implements ArchiveService  {
 			}
 			
 		}catch(Throwable e){
-			logger.error(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 		}
 		
 		String assocName = QName.createValidLocalName(name);
@@ -205,7 +202,7 @@ public class ArchiveServiceImpl implements ArchiveService  {
 				QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS), 
 				QName.createQName(assocName));
 		// clear cache so that primary parent etc. gets newly resolved
-		new RepositoryCache().remove(restoredNode.getId());
+		repositoryCache.remove(restoredNode.getId());
 		
 		restoreResult.setNodeId(restoredNode.getId());
 		restoreResult.setParent(destinationParentId);
@@ -215,7 +212,7 @@ public class ArchiveServiceImpl implements ArchiveService  {
 		}
 		restoreResult.setName(name);
 
-		new RepositoryCache().remove(restoredNode.getId());
+		repositoryCache.remove(restoredNode.getId());
 		
 		return restoreResult;
 	}

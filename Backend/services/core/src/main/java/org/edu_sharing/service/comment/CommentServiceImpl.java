@@ -2,6 +2,7 @@ package org.edu_sharing.service.comment;
 
 import java.util.*;
 
+import lombok.RequiredArgsConstructor;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -20,18 +21,16 @@ import org.edu_sharing.service.notification.Status;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
+import org.springframework.stereotype.Service;
 
+@Service
+@RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService{
 
-	private NodeService nodeService;
-	private PermissionService permissionService;
-	private NotificationService notificationService;
-
-	public CommentServiceImpl() {
-		this.nodeService=NodeServiceFactory.getLocalService();
-		this.permissionService=PermissionServiceFactory.getLocalService();
-		this.notificationService = NotificationServiceFactoryUtility.getLocalService();
-	}
+	private final NodeService nodeService;
+	private final PermissionService permissionService;
+	private final NotificationService notificationService;
+	private final RepositoryCache repositoryCache;
 	
 	@Override
 	public String addComment(String node,String commentReference, String comment) throws Exception {
@@ -50,7 +49,7 @@ public class CommentServiceImpl implements CommentService{
 		String nodeId = AuthenticationUtil.runAsSystem(() -> {
 			String nodeId1 = nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node, CCConstants.CCM_TYPE_COMMENT, CCConstants.CCM_ASSOC_COMMENT, props);
 			permissionService.setPermissions(nodeId1, null, true);
-			new RepositoryCache().remove(node);
+			repositoryCache.remove(node);
 			return nodeId1;
 		});
 
@@ -97,7 +96,7 @@ public class CommentServiceImpl implements CommentService{
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
 		}
-		new RepositoryCache().remove(parentNode);
+		repositoryCache.remove(parentNode);
 		nodeService.removeNode(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),commentId);
 
 		notify(parentNode, comment, replyTo == null ? null : replyTo.getId(), Status.REMOVED);

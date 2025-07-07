@@ -35,5 +35,5 @@ public interface Cache {
 	
 	public void remove(String nodeId);
 	
-	public void put(String nodeId, Map props);
+	public void put(String nodeId, Map<String, Object> props);
 }

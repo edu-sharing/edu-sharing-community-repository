@@ -61,7 +61,6 @@ import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.*;
-import org.edu_sharing.repository.server.tools.cache.Cache;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.repository.server.tools.cache.UserCache;
 import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
@@ -113,6 +112,8 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
     private final DictionaryService dictionaryService;
     private final GuestService guestService;
+
+    private final RepositoryCache repositoryCache;
 
     org.edu_sharing.alfresco.service.AuthorityService eduAuthorityService;
 
@@ -186,9 +187,9 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         applicationContext = AlfAppContextGate.getApplicationContext();
         userCache = AlfAppContextGate.getApplicationContext().getBean(UserCache.class);
 
-        serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+        serviceRegistry = applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY, ServiceRegistry.class);
 
-        repositoryHelper = (Repository) applicationContext.getBean("repositoryHelper");
+        repositoryHelper = applicationContext.getBean("repositoryHelper", Repository.class);
 
         nodeService = serviceRegistry.getNodeService();
 
@@ -196,7 +197,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
         authorityService = serviceRegistry.getAuthorityService();
 
-        searchService = (SearchService) applicationContext.getBean("scopedSearchService");//serviceRegistry.getSearchService();
+        searchService = applicationContext.getBean("scopedSearchService", SearchService.class);
 
         namespaceService = serviceRegistry.getNamespaceService();
 
@@ -205,10 +206,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         dictionaryService = serviceRegistry.getDictionaryService();
         guestService = applicationContext.getBean(GuestService.class);
 
-        eduAuthorityService = (org.edu_sharing.alfresco.service.AuthorityService) applicationContext.getBean("eduAuthorityService");
+        eduAuthorityService = applicationContext.getBean("eduAuthorityService", org.edu_sharing.alfresco.service.AuthorityService.class);
 
-        eduOrganisationService = (org.edu_sharing.alfresco.service.OrganisationService) applicationContext.getBean("eduOrganisationService");
-
+        eduOrganisationService = applicationContext.getBean("eduOrganisationService", org.edu_sharing.alfresco.service.OrganisationService.class);
+        repositoryCache = applicationContext.getBean(RepositoryCache.class);
 
         if (_authenticationInfo == null) {
             try {
@@ -460,7 +461,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                         .get(CCConstants.VIRT_PROP_REMOTE_OBJECT_NODEID) : (String) properties.get(CCConstants.SYS_PROP_NODE_UID);
 
                 boolean hasPublishPermission = this.hasPermissions(nodeId, new String[]{CCConstants.PERMISSION_CC_PUBLISH});
-                properties.put(CCConstants.PERMISSION_CC_PUBLISH, new Boolean(hasPublishPermission).toString());
+                properties.put(CCConstants.PERMISSION_CC_PUBLISH, Boolean.toString(hasPublishPermission));
 
                 // PrimaryParent?
                 ChildAssociationRef childAssocRef = nodeService.getPrimaryParent(child.getChildRef());
@@ -551,9 +552,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
      * hashmap this hashmap will be modiefied with the data of the current
      * user (i.e. ticket in contenturl, preview url and so on)
      *
-     * @param nodeRef
-     * @return
-     * @throws Exception
      */
     public Map<String, Object> getProperties(NodeRef nodeRef) throws Throwable {
         log.debug("starting");
@@ -845,12 +843,11 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
     public Map<String, Object> getPropertiesCached(NodeRef nodeRef, boolean getFromCache, boolean checkModified, boolean ifNotInCacheReturnNull, NodeService service)
             throws Exception {
 
-        Cache repCache = new RepositoryCache();
         // only get object by cache for one storeRef cause we take only the
         // nodeId as key
         if (getFromCache && nodeRef.getStoreRef().equals(storeRef)) {
 
-            Map<String, Object> propsFromCache = repCache.get(nodeRef.getId());
+            Map<String, Object> propsFromCache = repositoryCache.get(nodeRef.getId());
 
             if (propsFromCache != null) {
 
@@ -878,8 +875,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                     if (cachedModTime != null && orginalModTime != null && cachedModTime.longValue() == orginalModTime.longValue() && !refreshThumbnail) {
                         return propsFromCache;
                     } else {
-                        log.debug("CACHE modified Date changed! refreshing:" + nodeRef.getId() + " cachedModTime:" + cachedModTime + " orginalModTime:"
-                                + orginalModTime + " refreshThumbnail:" + refreshThumbnail);
+                        log.debug("CACHE modified Date changed! refreshing:{} cachedModTime:{} orginalModTime:{} refreshThumbnail:{}", nodeRef.getId(), cachedModTime, orginalModTime, refreshThumbnail);
                     }
 
                 } else {
@@ -918,13 +914,13 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                     try {
 
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:sss");
-                        Date date = sdf.parse((String) value);
+                        Date date = sdf.parse(value);
                         DateFormat df = ServerConstants.DATEFORMAT_WITHOUT_TIME;
                         String formatedDate = df.format(date);
                         properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCETIMESTAMPFORMATED, formatedDate);
 
                     } catch (ParseException e) {
-                        log.error(value + " was no valid date of format " + "yyyy-MM-dd'T'HH:mm:sss");
+                        log.error("{} was no valid date of format yyyy-MM-dd'T'HH:mm:sss", value);
                     }
 
                 }
@@ -958,10 +954,8 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
             List<AssociationRef> relSrcList = nodeService.getTargetAssocs(nodeRef, QName.createQName(CCConstants.CCM_ASSOC_RELSOURCE));
             List<AssociationRef> relTargetList = nodeService.getTargetAssocs(nodeRef, QName.createQName(CCConstants.CCM_ASSOC_RELTARGET));
             if ((relSrcList != null && !relSrcList.isEmpty()) && relTargetList != null && !relTargetList.isEmpty()) {
-                log.debug("relSrcList.get(0).getTargetRef().getId():" + relSrcList.get(0).getTargetRef().getId() + "  "
-                        + nodeService.getType(relSrcList.get(0).getTargetRef()));
-                log.debug("relTargetList.get(0).getTargetRef().getId():" + relTargetList.get(0).getTargetRef().getId() + "  "
-                        + nodeService.getType(relTargetList.get(0).getTargetRef()));
+                log.debug("relSrcList.get(0).getTargetRef().getId():{}  {}", relSrcList.get(0).getTargetRef().getId(), nodeService.getType(relSrcList.get(0).getTargetRef()));
+                log.debug("relTargetList.get(0).getTargetRef().getId():{}  {}", relTargetList.get(0).getTargetRef().getId(), nodeService.getType(relTargetList.get(0).getTargetRef()));
                 properties.put(CCConstants.CCM_ASSOC_RELSOURCE, relSrcList.get(0).getTargetRef().getId());
                 properties.put(CCConstants.CCM_ASSOC_RELTARGET, relTargetList.get(0).getTargetRef().getId());
             }
@@ -1063,12 +1057,12 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         if (nodeRef.getStoreRef().equals(storeRef)) {
             Date mdate = (Date) propMap.get(QName.createQName(CCConstants.CM_PROP_C_MODIFIED));
             if (mdate != null) {
-                propertiesFinal.put(CCConstants.CC_CACHE_MILLISECONDS_KEY, new Long(mdate.getTime()).toString());
+                propertiesFinal.put(CCConstants.CC_CACHE_MILLISECONDS_KEY, Long.toString(mdate.getTime()));
                 for (PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
                     propertiesFinal = new HashMap<>(i.beforeCacheProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef, propertiesFinal,
                             aspects.stream().map(QName::toString).collect(Collectors.toList()), null, null)));
                 }
-                repCache.put(nodeRef.getId(), propertiesFinal);
+                repositoryCache.put(nodeRef.getId(), propertiesFinal);
             }
         }
         return propertiesFinal;
@@ -1096,27 +1090,27 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         Serializable val = nodeService.getProperty(new NodeRef(new StoreRef(storeProtocol, storeIdentifier), nodeId), QName.createQName(property));
         if (val != null) {
 
-            String result = null;
+            StringBuilder result = null;
             if (val instanceof List && !((List) val).isEmpty()) {
 
                 for (Object value : (List) val) {
                     if (result != null)
-                        result += CCConstants.MULTIVALUE_SEPARATOR;
+                        result.append(CCConstants.MULTIVALUE_SEPARATOR);
                     if (value != null) {
                         if (result != null)
-                            result += value.toString(); //getMultiLangCleaned(value.toString());
+                            result.append(value.toString()); //getMultiLangCleaned(value.toString());
                         else
-                            result = value.toString(); //getMultiLangCleaned(value.toString());
+                            result = new StringBuilder(value.toString()); //getMultiLangCleaned(value.toString());
                     }
                 }
 
             } else if (val instanceof NodeRef) {
-                result = ((NodeRef) val).toString();
+                result = new StringBuilder(((NodeRef) val).toString());
             } else {
-                result = val.toString(); //getMultiLangCleaned(val.toString());
+                result = new StringBuilder(val.toString()); //getMultiLangCleaned(val.toString());
             }
 
-            return result;
+            return result.toString();
 
         } else {
             return null;
@@ -1194,7 +1188,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         return result;
     }
 
-    public String getRepositoryRoot() throws Exception {
+    public String getRepositoryRoot() {
         return nodeService.getRootNode(storeRef).getId();
     }
 
@@ -1241,7 +1235,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
         StoreRef storeRef;
         if (store == null) {
-            storeRef = this.storeRef;
+            storeRef = MCAlfrescoAPIClient.storeRef;
         } else {
             storeRef = new StoreRef(store);
         }
@@ -1526,7 +1520,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
             // this occurs sometimes in workspace
             // it seems it is an alfresco bug:
             // https://issues.alfresco.com/jira/browse/ETHREEOH-2461
-            log.error("Thats maybe an alfreco bug: https://issues.alfresco.com/jira/browse/ETHREEOH-2461, node id: " + nodeId, e);
+            log.error("Thats maybe an alfreco bug: https://issues.alfresco.com/jira/browse/ETHREEOH-2461, node id: {}", nodeId, e);
         }
 
     }
@@ -1580,7 +1574,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                              final String property, final Runnable onComplete) throws Exception {
 
         final String encoding = (_encoding == null) ? "UTF-8" : _encoding;
-        log.debug("called nodeID:" + nodeID + " store:" + store + " mimetype:" + mimetype + " property:" + property);
+        log.debug("called nodeID:{} store:{} mimetype:{} property:{}", nodeID, store, mimetype, property);
 
         RetryingTransactionCallback callback = () -> {
 
@@ -1588,10 +1582,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
             final ContentWriter contentWriter = contentService.getWriter(nodeRef, QName.createQName(property), true);
             contentWriter.addListener(() -> {
                 log.debug("Content Stream was closed");
-                log.debug(" size:" + contentWriter.getContentData().getSize() +
-                        ", URL:" + contentWriter.getContentData().getContentUrl() +
-                        ", MimeType:" + contentWriter.getContentData().getMimetype() + "" +
-                        ", ContentData ToString:" + contentWriter.getContentData().toString());
+                log.debug(" size:{}, URL:{}, MimeType:{}, ContentData ToString:{}", contentWriter.getContentData().getSize(), contentWriter.getContentData().getContentUrl(), contentWriter.getContentData().getMimetype(), contentWriter.getContentData().toString());
                         if(onComplete != null) {
                             onComplete.run();
                         }
@@ -2682,8 +2673,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         }
 
         // remove from cache so that the new primary parent will be refreshed
-        Cache repCache = new RepositoryCache();
-        repCache.remove(nodeId);
+        repositoryCache.remove(nodeId);
     }
 
 

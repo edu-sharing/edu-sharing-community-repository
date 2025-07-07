@@ -1,5 +1,7 @@
 package org.edu_sharing.alfresco.policy;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.ContentServicePolicies.OnContentUpdatePolicy;
 import org.alfresco.repo.policy.JavaBehaviour;
@@ -16,40 +18,32 @@ import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
  * @author rudi
  *
  */
+@Slf4j
+@RequiredArgsConstructor
 public class OnThumbnailContentUpdatePolicy  implements OnContentUpdatePolicy {
 
 	
-	PolicyComponent policyComponent;
-
-	NodeService nodeService;
-	
-	Logger logger = Logger.getLogger(OnThumbnailContentUpdatePolicy.class);
+	private final PolicyComponent policyComponent;
+	private final NodeService nodeService;
+	private final RepositoryCache repositoryCache;
 
 	public void init() {
-		logger.info("called!");
+		log.info("called!");
 		policyComponent.bindClassBehaviour(OnContentUpdatePolicy.QNAME, ContentModel.TYPE_THUMBNAIL, new JavaBehaviour(this,
 				"onContentUpdate"));
 	}
 	
 	@Override
 	public void onContentUpdate(NodeRef nodeRef, boolean newContent) {
-		logger.info("called");
+		log.info("called");
 		try{
 			NodeRef parentRef = nodeService.getPrimaryParent(nodeRef).getParentRef();
 			if(nodeService.getType(parentRef).equals(QName.createQName(CCConstants.CCM_TYPE_IO))){
 				//remove from cache so that the gui gets the mimetyp and preview
-				new RepositoryCache().remove(parentRef.getId());
+				repositoryCache.remove(parentRef.getId());
 			}
 		}catch(Throwable e){
-			logger.error(e.getMessage(),e);
+			log.error(e.getMessage(),e);
 		}
-	}
-	
-	public void setNodeService(NodeService nodeService) {
-		this.nodeService = nodeService;
-	}
-	
-	public void setPolicyComponent(PolicyComponent policyComponent) {
-		this.policyComponent = policyComponent;
 	}
 }

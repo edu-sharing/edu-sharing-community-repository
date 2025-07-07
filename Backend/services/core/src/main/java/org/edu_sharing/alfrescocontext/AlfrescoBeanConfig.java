@@ -45,6 +45,7 @@ import org.edu_sharing.alfresco.policy.HomeFolderTool;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.repository.server.tools.cache.UserCache;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -367,6 +368,11 @@ public class AlfrescoBeanConfig {
     @Bean
     public SqlSessionFactory sqlSessionFactoryBean() {
         return applicationContext.getBean("repoSqlSessionFactory", SqlSessionFactory.class);
+    }
+
+    @Bean
+    public RepositoryCache repositoryCache() {
+        return applicationContext.getBean(RepositoryCache.class);
     }
 
     @Bean

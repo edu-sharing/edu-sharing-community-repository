@@ -1,27 +1,54 @@
 package org.edu_sharing.alfresco.policy;
 
-import org.alfresco.service.cmr.repository.ContentReader;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.namespace.QName;
 import org.apache.tika.mime.MediaType;
 import org.edu_sharing.alfresco.action.RessourceInfoExecuter;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.times;
 
+@ExtendWith(MockitoExtension.class)
 class NodeCustomizationPoliciesTest {
 
+    @Mock
+    private NodeService nodeService;
+
+//    private final ActionService actionService;
+//    private final NodeService nodeService;
+//    private final VersionService versionService;
+//    private final PersonService personService;
+//    private final PolicyComponent policyComponent;
+//    private final ContentService contentService;
+//    private final LockService lockService;
+//    private final BehaviourFilter policyBehaviourFilter;
+//    private final TransactionService transactionService;
+//    private final SearchService searchService;
+//    private final RepositoryCache repositoryCache;
+//    private final LightbendConfigLoader lightbendConfigLoader;
+
+
+    @InjectMocks
+    private NodeCustomizationPolicies underTest;
+
+
     @Test
-    void verifyMimetypeByMagicBytes() throws UnsupportedEncodingException {
+    void verifyMimetypeByMagicBytes() {
         Map<String, byte[]> LIST = new HashMap<>() {{
             put("image/jpeg", new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0});
             put("text/plain", "TEST".getBytes(StandardCharsets.UTF_8));
@@ -37,7 +64,6 @@ class NodeCustomizationPoliciesTest {
                     new ByteArrayInputStream(magic)
             );
             String filename = UUID.randomUUID() + "." + mimetype.split("/")[1];
-            Mockito.when(contentReader.getMimetype()).thenReturn(mimetype);
             Map<String, List<String>> allowList = new HashMap<>() {{
                 put(mimetype, Collections.singletonList(mimetype.split("/")[1]));
             }};
@@ -75,15 +101,15 @@ class NodeCustomizationPoliciesTest {
                     false));
         });
     }
+
     @Test
     void verifyMimetypeUnknown() {
         ContentReader contentReader =
                 Mockito.mock(ContentReader.class);
-        Mockito.when(contentReader.getMimetype()).thenReturn("image/jpeg");
         Mockito.when(contentReader.getContentInputStream()).thenReturn(
                 new ByteArrayInputStream(new byte[]{})
         );
-        assertThrows(NodeMimetypeUnknownValidationException.class,() -> NodeCustomizationPolicies.verifyMimetype(
+        assertThrows(NodeMimetypeUnknownValidationException.class, () -> NodeCustomizationPolicies.verifyMimetype(
                 contentReader,
                 "test.dummy",
                 new HashMap<>(),
@@ -98,23 +124,27 @@ class NodeCustomizationPoliciesTest {
                 true));
     }
 
-    @Test
-    void checkGithubDataTest() {
-        checkGithubUri("https://github.com/edu-sharing/edu-sharing-community-repository", RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_DEFAULT);
-        checkGithubUri("https://github.com/edu-sharing/edu-sharing-community-repository/tree/release/6.0", RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_DEFAULT);
-        checkGithubUri("https://github.com/edu-sharing/edu-sharing-community-repository/tree/a27f86e5e923779a17c31a838f4a992d6e05188b", RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_DEFAULT);
-        checkGithubUri("https://github.com/KI-Campus/AMALEA", RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_JUPYTER_BINDER);
-        checkGithubUri("https://github.com/KI-Campus/AMALEA/blob/master/Woche%201/1%20Erste%20Schritte.ipynb", RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_JUPYTER_BINDER);
-        checkGithubUri("https://github.com/KI-Campus/AMALEA/blob/data/Woche%201/1%20Erste%20Schritte.ipynb", RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_JUPYTER_BINDER);
+    static Stream<Arguments> checkGithubDataTestArguments() {
+        return Stream.of(
+                createTestArgs("https://github.com/edu-sharing/edu-sharing-community-repository", RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_DEFAULT),
+                createTestArgs("https://github.com/edu-sharing/edu-sharing-community-repository/tree/release/6.0", RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_DEFAULT),
+                createTestArgs("https://github.com/edu-sharing/edu-sharing-community-repository/tree/a27f86e5e923779a17c31a838f4a992d6e05188b", RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_DEFAULT),
+                createTestArgs("https://github.com/KI-Campus/AMALEA", RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_JUPYTER_BINDER),
+                createTestArgs("https://github.com/KI-Campus/AMALEA/blob/master/Woche%201/1%20Erste%20Schritte.ipynb", RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_JUPYTER_BINDER),
+                createTestArgs("https://github.com/KI-Campus/AMALEA/blob/data/Woche%201/1%20Erste%20Schritte.ipynb", RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_JUPYTER_BINDER)
+        );
+
     }
 
-    void checkGithubUri(String uri, String resourceType) {
-        NodeCustomizationPolicies underTest = new NodeCustomizationPolicies();
+    static Arguments createTestArgs(String uri, String resourceType) {
+        return Arguments.of(uri, resourceType);
+    }
 
-        NodeService mockedNodeService = Mockito.mock(NodeService.class);
-        underTest.setNodeService(mockedNodeService);
+    @ParameterizedTest
+    @MethodSource("checkGithubDataTestArguments")
+    void checkGithubDataTest(String uri, String resourceType) {
         NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, UUID.randomUUID().toString());
         underTest.checkGithubData(nodeRef, uri);
-        Mockito.verify(mockedNodeService, times(1)).setProperty(nodeRef, QName.createQName(RessourceInfoExecuter.CCM_PROP_IO_RESSOURCETYPE), resourceType);
+        Mockito.verify(nodeService, times(1)).setProperty(nodeRef, QName.createQName(RessourceInfoExecuter.CCM_PROP_IO_RESSOURCETYPE), resourceType);
     }
 }

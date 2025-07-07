@@ -80,16 +80,18 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     protected DictionaryService dictionaryService;
     protected final BehaviourFilter policyBehaviourFilter;
     protected String repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
-    protected ServiceRegistry serviceRegistry = null;
-    protected NodeService nodeService = null;
-    protected NodeService nodeServiceAlfresco = null;
+    protected ServiceRegistry serviceRegistry;
+    protected NodeService nodeService;
+    protected NodeService nodeServiceAlfresco;
     protected VersionService versionService;
     @Setter
     protected HandleServiceFactory handleServiceFactory;
+    protected final RepositoryCache repositoryCache;
+    protected final LightbendConfigLoader lightbendConfigLoader;
 
     Logger logger = Logger.getLogger(NodeServiceImpl.class);
 
-    Repository repositoryHelper = null;
+    Repository repositoryHelper;
 
     MCAlfrescoAPIClient apiClient;
 
@@ -103,14 +105,17 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
     public NodeServiceImpl(String appId) {
         ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-        serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+        serviceRegistry = applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY, ServiceRegistry.class);
         nodeService = serviceRegistry.getNodeService();
-        nodeServiceAlfresco = (NodeService) applicationContext.getBean("alfrescoDefaultDbNodeService");
-        policyBehaviourFilter = (BehaviourFilter) applicationContext.getBean("policyBehaviourFilter");
+        nodeServiceAlfresco = applicationContext.getBean("alfrescoDefaultDbNodeService", NodeService.class);
+        policyBehaviourFilter = applicationContext.getBean("policyBehaviourFilter", BehaviourFilter.class);
         contentService = serviceRegistry.getContentService();
         versionService = serviceRegistry.getVersionService();
         dictionaryService = serviceRegistry.getDictionaryService();
-        repositoryHelper = (Repository) applicationContext.getBean("repositoryHelper");
+        repositoryHelper = applicationContext.getBean("repositoryHelper", Repository.class);
+        repositoryCache = applicationContext.getBean(RepositoryCache.class);
+        lightbendConfigLoader = applicationContext.getBean(LightbendConfigLoader.class);
+
         this.appId = appId;
         Map<String, String> homeAuthInfo = null;
         if (!ApplicationInfoList.getRepositoryInfoById(repositoryId).ishomeNode()) {
@@ -251,7 +256,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         runNodePropertiesAfterInterceptors(childRef.getChildRef());
 
         if (childAssociation.equals(CCConstants.CCM_ASSOC_CHILDIO)) {
-            new RepositoryCache().remove(parentID);
+            repositoryCache.remove(parentID);
         }
         return childRef.getChildRef().getId();
     }
@@ -760,7 +765,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 policyBehaviourFilter.enableBehaviour(nodeRef);
                 return null;
             });
-        } catch(DuplicateChildNodeNameException e){
+        } catch (DuplicateChildNodeNameException e) {
             throw e;
         } catch (Exception e) {
             // this occurs sometimes in workspace
@@ -921,12 +926,6 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
      * Supported values for filter:
      * special: show all files which are usually not displayed anyway (usage, share, thumbnail)
      * files: return only files
-     *
-     * @param <T>
-     * @param list
-     * @param filter
-     * @param sortDefinition
-     * @return
      */
     @Override
     public <T> List<T> sortNodeRefList(List<T> list, List<String> filter, SortDefinition sortDefinition) {
@@ -1184,7 +1183,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         List<ChildAssociationRef> assocs = nodeService.getParentAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
         for (ChildAssociationRef assoc : assocs) {
             if (assoc.getTypeQName().toString().equals(CCConstants.CCM_ASSOC_CHILDIO)) {
-                new RepositoryCache().remove(assoc.getParentRef().getId());
+                repositoryCache.remove(assoc.getParentRef().getId());
             }
         }
         apiClient.removeNode(nodeId, parentId, recycle);
@@ -1293,7 +1292,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     }
 
     @Override
-    public void syncPublished(String nodeId, HandleParam handleParam) throws Throwable{
+    public void syncPublished(String nodeId, HandleParam handleParam) throws Throwable {
         checkPublishPermission(nodeId);
         if (handleParam != null) {
             ApplicationContext eduAppContext = ApplicationContextFactory.getApplicationContext();
@@ -1340,7 +1339,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         checkPublishPermission(nodeId);
         String parent, pattern, owner;
         try {
-            Config config = LightbendConfigLoader.get();
+            Config config = lightbendConfigLoader.getConfig();
             parent = config.getString("publish.node");
             pattern = config.getString("publish.nodePattern");
             owner = config.getString("publish.owner");
@@ -1355,8 +1354,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 if (currentCopies.stream()
                         .filter(c -> getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), c, CCConstants.CCM_PROP_IO_REVOKED_DATE) == null)
                         .anyMatch((c) -> currentVersion.equals(getProperty(
-                        StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), c, CCConstants.LOM_PROP_LIFECYCLE_VERSION
-                )))) {
+                                StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), c, CCConstants.LOM_PROP_LIFECYCLE_VERSION
+                        )))) {
                     throw new IllegalArgumentException("The version " + currentVersion + " is already published!");
                 }
                 String container = NodeServiceHelper.getContainerId(parent, pattern);
@@ -1438,7 +1437,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     public void createHandle(NodeRef nodeRef, List<String> publishedCopies, HandleService handleService, HandleMode handleMode) throws Exception {
         ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE);
         try {
-            /**
+            /*
              * test handleservice to prevent property handleid isset but can not be pushed to handleservice cause of configration problems
              */
             if (!handleService.available()) throw new Exception("handleservice unavailable");
@@ -1459,7 +1458,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 throw new IllegalStateException("Multiple handles found but handleMode " + handleMode + " was requested");
             }
             currentHandle = handles.iterator().next();
-        }else if(handleMode.equals(HandleMode.sync)){
+        } else if (handleMode.equals(HandleMode.sync)) {
             currentHandle = getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeRef.getId(), handleService.getHandleIdProperty());
         }
 
@@ -1502,7 +1501,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 }
             }
 
-            /**
+            /*
              * create version for the published node
              * NO: NOT NEEDED ANYMORE!
              * The version is implicitly correct because a copied node has exact ONE version!
@@ -1528,7 +1527,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                     } else {
                         properties.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID), handle);
                     }
-                } else if(handleMode.equals(HandleMode.sync)){
+                } else if (handleMode.equals(HandleMode.sync)) {
                     logger.info("Sync handle " + handle + ", " + contentLink);
                     handleService.sync(handle, nodeRef.getId(), properties);
                 } else {
@@ -1712,15 +1711,15 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
      */
     @Override
     public void revertVersionNoRollback(String nodeId, String verLbl) throws Exception {
-            VersionService versionService = serviceRegistry.getVersionService();
-            VersionHistory versionHistory = versionService.getVersionHistory(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
-            if (versionHistory != null && versionHistory.getAllVersions() != null && !versionHistory.getAllVersions().isEmpty()) {
-                NodeRef ioNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
-                    Version version = versionHistory.getVersion(verLbl);
-                    versionService.revert(ioNodeRef, version, true);
-            } else {
-                throw new IllegalArgumentException("The node " + nodeId + "as no version history");
-            }
+        VersionService versionService = serviceRegistry.getVersionService();
+        VersionHistory versionHistory = versionService.getVersionHistory(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
+        if (versionHistory != null && versionHistory.getAllVersions() != null && !versionHistory.getAllVersions().isEmpty()) {
+            NodeRef ioNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+            Version version = versionHistory.getVersion(verLbl);
+            versionService.revert(ioNodeRef, version, true);
+        } else {
+            throw new IllegalArgumentException("The node " + nodeId + "as no version history");
+        }
     }
 
     @Override

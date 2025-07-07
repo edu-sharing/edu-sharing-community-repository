@@ -18,6 +18,7 @@ import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
+import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.mediacenter.MediacenterService;
 import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -134,8 +135,8 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
     private final TrackingServiceCustomInterface customTrackingService;
     private final GuestService guestService;
 
-    public TrackingServiceImpl(TrackingServiceFactory trackingServiceFactory, TransactionService transactionService, @Qualifier("policyBehaviourFilter") BehaviourFilter policyBehaviourFilter, GuestService guestService) {
-        super(transactionService, policyBehaviourFilter);
+    public TrackingServiceImpl(TrackingServiceFactory trackingServiceFactory, TransactionService transactionService, @Qualifier("policyBehaviourFilter") BehaviourFilter policyBehaviourFilter, GuestService guestService, RepositoryCache repositoryCache) {
+        super(transactionService, policyBehaviourFilter, repositoryCache);
         customTrackingService = trackingServiceFactory.getTrackingServiceCustom();
         this.guestService = guestService;
         try {

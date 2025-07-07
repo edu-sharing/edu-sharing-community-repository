@@ -20,7 +20,6 @@ import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.authentication.ScopeUserHomeService;
@@ -118,7 +117,6 @@ public class PersonLifecycleService {
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
-	SearchService searchService = serviceRegistry.getSearchService();
 
 	NodeService nodeService = serviceRegistry.getNodeService();
 
@@ -132,8 +130,8 @@ public class PersonLifecycleService {
 
 	TransactionService transactionService = serviceRegistry.getTransactionService();
 
-	BehaviourFilter policyBehaviourFilter = (BehaviourFilter)applicationContext.getBean("policyBehaviourFilter");
-
+	BehaviourFilter policyBehaviourFilter = applicationContext.getBean("policyBehaviourFilter", BehaviourFilter.class);
+	RepositoryCache repositoryCache = applicationContext.getBean(RepositoryCache.class);
 
 	int maxItems = 20;
 
@@ -320,7 +318,7 @@ public class PersonLifecycleService {
 			if (username.equals(nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_MODIFIER)))) {
 				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_MODIFIER), newUsername);
 			}
-			new RepositoryCache().remove(nodeRef.getId());
+			repositoryCache.remove(nodeRef.getId());
 			policyBehaviourFilter.enableBehaviour(nodeRef);
 			return null;
 		}));
@@ -787,7 +785,6 @@ public class PersonLifecycleService {
 		setOwnerAndPermissions(children, userName, options, null);
 	}
 	public void setOwnerAndPermissions(List<NodeRef> children, String userName, PersonDeleteOptions options, Function<NodeRef, Void> customCallback) {
-		RepositoryCache cache = new RepositoryCache();
 		String adminGroup = getAdminGroup(options);
 		RetryingTransactionHelper rth = transactionService.getRetryingTransactionHelper();
 		rth.doInTransaction((RetryingTransactionHelper.RetryingTransactionCallback<Void>) () -> {
@@ -801,7 +798,7 @@ public class PersonLifecycleService {
 					customCallback.apply(ref);
 				}
 				policyBehaviourFilter.enableBehaviour(ref);
-				cache.remove(ref.getId());
+				repositoryCache.remove(ref.getId());
 				logger.debug("setOwnerAndPermissions for " + ref);
 			});
 			return null;
@@ -839,7 +836,7 @@ public class PersonLifecycleService {
 			policyBehaviourFilter.enableBehaviour(nodeRef);
 			return null;
 		});
-		new RepositoryCache().remove(nodeRef.getId());
+		repositoryCache.remove(nodeRef.getId());
 	}
 
 	private void updateMetadataCreator(NodeRef nodeRef, String oldOwner, PersonDeleteOptions options) {
@@ -854,7 +851,7 @@ public class PersonLifecycleService {
 			creators = new ArrayList<>();
 			creators.add((String)creator);
 		}
-		if(creators.size()>0) {
+		if(!creators.isEmpty()) {
 			// @TODO: Doing this for multiple calls may be time consuming, may make a cache
 			NodeRef authority = authorityService.getAuthorityNodeRef(oldOwner);
 			String firstName = (String) nodeService.getProperty(authority, QName.createQName(CCConstants.CM_PROP_PERSON_FIRSTNAME));
@@ -863,7 +860,7 @@ public class PersonLifecycleService {
 			creators= creators.stream().filter((c) -> {
 				Map<String, Object> vcard = VCardConverter.
 						getVCardMap(CCConstants.CCM_TYPE_IO, CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR, c);
-				if (vcard != null && vcard.size() > 0) {
+				if (vcard != null && !vcard.isEmpty()) {
 					if (Objects.equals(firstName, vcard.get(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR+CCConstants.VCARD_GIVENNAME)) &&
 							Objects.equals(lastName, vcard.get(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR+CCConstants.VCARD_SURNAME))) {
 						logger.info("vcard creator is same as old username, will clean up vcard entry");
@@ -872,7 +869,7 @@ public class PersonLifecycleService {
 				}
 				return true;
 			}).collect(Collectors.toCollection(ArrayList::new));
-			if(creators.size()==0){
+			if(creators.isEmpty()){
 				nodeService.removeProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR));
 			}else{
 				nodeService.setProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR), creators);
@@ -908,7 +905,7 @@ public class PersonLifecycleService {
 
 	private boolean contains(ArrayList<Map<String, Object>> vcardList, String firstName, String lastName) {
 
-		if(vcardList != null && vcardList.size() > 0) {
+		if(vcardList != null && !vcardList.isEmpty()) {
 			Map<String,Object> vcard = vcardList.iterator().next();
 			String vcFirstName = (String)vcard.get(CCConstants.VCARD_GIVENNAME);
 			String vcLastName = (String)vcard.get(CCConstants.VCARD_SURNAME);
