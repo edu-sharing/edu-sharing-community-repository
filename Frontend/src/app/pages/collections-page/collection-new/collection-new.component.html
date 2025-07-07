@@ -337,7 +337,11 @@
       <div class="card-content">
         <es-mds-editor-wrapper
           #mds
-          [groupId]="'collection_' + newCollectionType.toLowerCase()"
+          [groupId]="
+            newCollectionType === 'EDITORIA'
+              ? editorialCollectionsConfig.metadataGroup
+              : 'collection_' + newCollectionType.toLowerCase()
+          "
           [setId]="mdsSet"
           [editorMode]="'form'"
           [embedded]="true"

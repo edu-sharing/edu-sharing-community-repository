@@ -80,6 +80,7 @@ import { ShareDialogResult } from '../../../features/dialogs/dialog-modules/shar
 import { ExtendedAcl } from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog.component';
 import { OptionsHelperService } from '../../../services/options-helper.service';
 import { filter, first } from 'rxjs/operators';
+import { CollectionsTypeConfig } from '../../../../../dist/edu-sharing-api/lib/api/models/collections-type-config';
 
 type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITORIAL_GROUPS';
 
@@ -164,6 +165,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     mdsSet: string;
     imageWindow: Window;
     editorialGroupsSelected: Group[] = [];
+    editorialCollectionsConfig: CollectionsTypeConfig;
 
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
@@ -264,12 +266,20 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         this.eventService.addListener(this, this.destroyed);
         this.translations.waitForInit().subscribe(() => {
             this.connector.isLoggedIn().subscribe((data) => {
-                this.mdsService.getSets().subscribe((mdsSets) => {
+                this.mdsService.getSets().subscribe(async (mdsSets) => {
                     const sets = ConfigurationHelper.filterValidMds(
                         RestConstants.HOME_REPOSITORY,
                         mdsSets.metadatasets,
                         this.configService,
                     );
+                    this.editorialCollectionsConfig =
+                        await this.configService.get<CollectionsTypeConfig>(
+                            'collections.types.editorial',
+                            {
+                                invitationType: 'EditorialGroups',
+                                metadataGroup: 'collection_editorial',
+                            },
+                        );
                     this.mdsSet = sets[0]?.id;
 
                     this.COLORS = this.configLegacy.instant(
@@ -650,18 +660,28 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         let steps: Step[] = [];
         steps.push(this.STEP_GENERAL);
         if (
-            this.newCollectionType == RestConstants.COLLECTIONTYPE_EDITORIAL ||
+            (this.newCollectionType == RestConstants.COLLECTIONTYPE_EDITORIAL &&
+                !!this.editorialCollectionsConfig.metadataGroup) ||
             this.newCollectionType == RestConstants.COLLECTIONTYPE_MEDIA_CENTER
         ) {
             steps.push(this.STEP_METADATA);
         }
-        if (this.newCollectionType == RestConstants.COLLECTIONSCOPE_CUSTOM && this.canInvite) {
+        if (
+            (this.newCollectionType == RestConstants.COLLECTIONSCOPE_CUSTOM ||
+                (this.newCollectionType == RestConstants.COLLECTIONTYPE_EDITORIAL &&
+                    this.editorialCollectionsConfig.invitationType === 'Default')) &&
+            this.canInvite
+        ) {
             steps.push(this.STEP_PERMISSIONS);
         }
         if (this.newCollectionType == RestConstants.COLLECTIONTYPE_EDITORIAL) {
             //steps.push(this.STEP_SETTINGS);
         }
-        if (this.newCollectionType == RestConstants.COLLECTIONTYPE_EDITORIAL && this.canInvite) {
+        if (
+            this.newCollectionType == RestConstants.COLLECTIONTYPE_EDITORIAL &&
+            this.canInvite &&
+            this.editorialCollectionsConfig.invitationType === 'EditorialGroups'
+        ) {
             steps.push(this.STEP_EDITORIAL_GROUPS);
         }
         return steps;
@@ -782,7 +802,10 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         );
     }
     private save3(collection: EduData.Node) {
-        if (this.newCollectionType == RestConstants.GROUP_TYPE_EDITORIAL) {
+        if (
+            this.newCollectionType == RestConstants.COLLECTIONTYPE_EDITORIAL &&
+            this.editorialCollectionsConfig.invitationType === 'EditorialGroups'
+        ) {
             // user has access to editorial group but can't invite (strange setting but may happens)
             if (!this.canInvite) {
                 void this.save4(collection);
@@ -792,7 +815,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         }
         if (
             (this.newCollectionType == RestConstants.COLLECTIONSCOPE_CUSTOM ||
-                this.newCollectionType == RestConstants.GROUP_TYPE_EDITORIAL) &&
+                this.newCollectionType == RestConstants.COLLECTIONTYPE_EDITORIAL) &&
             this.permissions &&
             this.permissions.permissions
         ) {
