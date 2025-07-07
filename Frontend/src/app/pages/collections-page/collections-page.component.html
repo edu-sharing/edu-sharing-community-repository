@@ -12,31 +12,34 @@
   [(selectedIndex)]="tabSelectedIndex"
   *ngIf="showTabs()"
 >
-  <mat-tab *ngIf="!isGuest" labelClass="mat-tab-my">
+  <mat-tab *ngIf="!isGuest" labelClass="mat-tab-my data-test-collections-tab-my">
     <ng-template mat-tab-label>
       <i esIcon="person" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.MY' | translate }}</span>
     </ng-template>
   </mat-tab>
-  <mat-tab *ngIf="!isGuest" labelClass="mat-tab-groups">
+  <mat-tab *ngIf="!isGuest" labelClass="mat-tab-groups data-test-collections-tab-collaborative">
     <ng-template mat-tab-label>
       <i esIcon="group" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.EDU_GROUPS' | translate }}</span>
     </ng-template>
   </mat-tab>
-  <mat-tab *ngIf="hasEditorial" labelClass="mat-tab-editorial">
+  <mat-tab *ngIf="hasEditorial" labelClass="mat-tab-editorial data-test-collections-tab-editorial">
     <ng-template mat-tab-label>
       <i esIcon="star" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.TYPE_EDITORIAL' | translate }}</span>
     </ng-template>
   </mat-tab>
-  <mat-tab *ngIf="hasMediacenter" labelClass="mat-tab-media-center">
+  <mat-tab
+    *ngIf="hasMediacenter"
+    labelClass="mat-tab-media-center data-test-collections-tab-media-centre"
+  >
     <ng-template mat-tab-label>
       <i esIcon="domain" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.TYPE_MEDIA_CENTER' | translate }}</span>
     </ng-template>
   </mat-tab>
-  <mat-tab labelClass="mat-tab-edu-all">
+  <mat-tab labelClass="mat-tab-edu-all data-test-collections-tab-public">
     <ng-template mat-tab-label>
       <i esIcon="language" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.EDU_ALL' | translate }}</span>
