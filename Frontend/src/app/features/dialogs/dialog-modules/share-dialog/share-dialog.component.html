@@ -365,7 +365,10 @@
       ></es-share-dialog-publish>
     </div>
   </mat-tab>
-  <mat-tab *ngIf="_nodes && restrictedAccessPermission && !isBulk() && !isSafe" class="tabContent">
+  <mat-tab
+    *ngIf="_nodes && restrictedAccessPermission && !isBulk() && !isCollection() && !isSafe"
+    class="tabContent"
+  >
     <ng-template mat-tab-label>
       <i esIcon="lock" class="tab-icon"></i>
       <span class="tab-label">{{ 'WORKSPACE.TAB_RESTRICTED_ACCESS' | translate }}</span>

@@ -8,18 +8,18 @@
   <es-spinner *ngIf="loading"></es-spinner>
   <ng-container *ngIf="!loading">
     <mat-tab-group *ngIf="!data.isDirectory; else standaloneInfoTab">
-      <mat-tab>
+      <mat-tab labelClass="data-test-sidebar-details-tab-meta">
         <ng-template mat-tab-label><i esIcon="info" [aria]="true"></i></ng-template>
         <ng-content *ngTemplateOutlet="infoTab"></ng-content>
       </mat-tab>
-      <mat-tab>
+      <mat-tab labelClass="data-test-sidebar-details-tab-stats">
         <ng-template mat-tab-label>
           <i esIcon="equalizer"></i>
           {{ statsTotalPoints }}
         </ng-template>
         <ng-content *ngTemplateOutlet="usageTab"></ng-content>
       </mat-tab>
-      <mat-tab>
+      <mat-tab labelClass="data-test-sidebar-details-tab-versions">
         <ng-template mat-tab-label><i esIcon="restore"></i></ng-template>
         <ng-content *ngTemplateOutlet="versionsTab"></ng-content>
       </mat-tab>
@@ -47,8 +47,15 @@
 
         <canvas #canvas width="320" height="200"></canvas>
         <ul class="statistic-value">
-          <li *ngFor="let point of stats.points; let i = index" class="point">
-            <i class="material-icons">{{ stats.pointsIcons[i] }}</i> {{ point }}
+          <li
+            *ngFor="let point of stats.points; let i = index"
+            class="point"
+            [attr.data-test]="stats.testLabels[i]"
+          >
+            <i class="material-icons" [matTooltip]="stats.labels[i]" matTooltipPosition="above">{{
+              stats.pointsIcons[i]
+            }}</i>
+            {{ point }}
           </li>
         </ul>
         <p class="description start-time">
