@@ -32,6 +32,7 @@
       *ngIf="indicatorIcons$ | async; else textRepresentation"
       class="collectionScope"
       [esIcon]="nodeHelper.getCollectionScopeInfo($any(node)).icon"
+      esIconContext="collection-scope"
       [matTooltip]="
         'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate
       "
