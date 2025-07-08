@@ -214,7 +214,7 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
             copy: this.shareModeCopy,
             direct: this.shareModeDirect,
         };
-        if (this.node.ref?.id) {
+        if (this.node.ref?.id && !this.nodeHelper.isNodeCollection(this.node)) {
             void this.mdsService.initWithNodes([this.node]);
         }
         this.updatePublishedVersions();
