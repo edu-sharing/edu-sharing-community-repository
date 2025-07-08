@@ -29,6 +29,7 @@ package org.alfresco.repo.version;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.model.ForumModel;
@@ -209,17 +210,25 @@ public class EduVersion2ServiceImpl extends org.alfresco.repo.version.Version2Se
 			    if(oldProps.containsKey(prop))
 			    {
 			        newProps.put(prop, oldProps.get(prop));
-			        System.out.println("keeping propery:" + prop.getLocalName() + " " + oldProps.get(prop));
+			        logger.debug("keeping property:" + prop.getLocalName() + " " + oldProps.get(prop));
 			    }
 		    }
+            Map<QName, Serializable> nonNullProps = newProps.entrySet().stream()
+                    .filter(entry -> entry.getValue() != null)
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue
+                    ));
+
             
-            this.nodeService.setProperties(nodeRef, newProps);
+            this.nodeService.setProperties(nodeRef, nonNullProps);
             /**
              * edu-sharing FIX: many properties with null value after revert
              */
             for(Map.Entry<QName,Serializable> entry : newProps.entrySet()){
                 if(entry.getValue() == null){
-                    this.nodeService.removeProperty(nodeRef,entry.getKey());
+                    // for performance, this is handled via setProperties / nonNullProps
+                    // this.nodeService.removeProperty(nodeRef,entry.getKey());
                 }
             }
                 

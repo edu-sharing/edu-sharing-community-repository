@@ -152,6 +152,7 @@ public class EduSharingItemRepository implements ItemRepository {
             log.error(e.getMessage(), e);
             throw new IdDoesNotExistException(e);
         } catch (Throwable t) {
+            log.error("Error while writing oai result for " + nodeRef.getNodeId() + ": " + t.getMessage());
             log.error(t.getMessage(), t);
             throw new IdDoesNotExistException(new Exception(t));
         }

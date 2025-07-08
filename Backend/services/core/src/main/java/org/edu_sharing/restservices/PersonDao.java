@@ -660,7 +660,7 @@ public class PersonDao {
 		json.put(list,new JSONArray(nodes));
 				updateNodeList(json);
 			} catch(Exception e) {
-				throw new RuntimeException(e);
+				throw e;
 	}
 			return null;
 		});

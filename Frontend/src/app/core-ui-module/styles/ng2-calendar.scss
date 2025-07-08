@@ -10,36 +10,36 @@
         background: $backgroundColor !important;
     }
     .datepicker-calendar-month-section {
-        color: $primary !important;
+        color: var(--primary) !important;
         font-weight: bold;
     }
     .day:hover,
     .year:hover {
         color: #fff !important;
-        background: $primary !important;
+        background: var(--primary) !important;
     }
     .selected {
         background: #fff !important;
     }
     .today {
         color: #fff !important;
-        background: $primary !important;
+        background: var(--primary) !important;
         font-weight: bold;
         border-radius: 4px !important;
     }
 
     #chevron-left,
     #chevron-right {
-        fill: $primary !important;
+        fill: var(--primary) !important;
     }
     .datepicker-buttons {
         .u-is-secondary {
             background: #fff !important;
-            color: $primary !important;
-            border: 1px solid $primary !important;
+            color: var(--primary) !important;
+            border: 1px solid var(--primary) !important;
         }
         .u-is-primary {
-            background: $primary !important;
+            background: var(--primary) !important;
             color: #fff !important;
             border: none !important;
         }

@@ -56,11 +56,16 @@ export class BreadcrumbsComponent {
     @Input()
     short: 'never' | 'always' | 'auto' = 'auto';
     /**
+     * prefer node name or title
+     */
+    @Input() preferredName: 'name' | 'title' = 'name';
+    /**
      * Should automatically be linked via angular routing.
      *
      * If set true, the onClick emitter will only be fired for the "root" element.
      */
     @Input() createLink = true;
+
     /**
      * Set a search query so the breadcrumbs will show this query.
      */
@@ -70,19 +75,19 @@ export class BreadcrumbsComponent {
     }
 
     @Input() canDropNodes: (dragData: DragData<'HOME' | Node>) => CanDrop;
-
     /**
      * A breadcrumb is clicked.
      *
      * Passes the index **starting at 1** of the clicked breadcrumb, or 0 for the root element.
      */
     @Output() onClick = new EventEmitter<number>();
+
     /**
      * Called when an item is dropped on the breadcrumbs.
      */
     @Output() onDrop = new EventEmitter<{ target: Node | 'HOME'; source: DropSource<Node> }>();
-
     readonly HOME = 'HOME' as 'HOME';
+
     nodes: Node[] = [];
 
     private _searchQuery: string;
@@ -134,7 +139,6 @@ export class BreadcrumbsComponent {
             },
         });
     }
-
     // drop(event: CdkDragDrop<Node | any>) {
     //     // this.onDrop.emit({
     //     //     target: event.container.data,
@@ -148,12 +152,12 @@ export class BreadcrumbsComponent {
     // }
     // getDragState() {
     //     return {} as any;
-    // }
 
+    // }
     // dragExit(event: CdkDragExit<any>) {
     //     // DragCursorDirective.dragState.element = null;
-    // }
 
+    // }
     // dragEnter(event: CdkDragEnter<any>) {
     //     // DragCursorDirective.dragState.element = event.container.data;
     //     // DragCursorDirective.dragState.dropAllowed = true;

@@ -36,7 +36,7 @@ export class MdsEditorDialogComponent implements OnInit, AfterViewInit {
     constructor(
         @Inject(CARD_DIALOG_DATA) public data: MdsEditorDialogData,
         private dialogRef: CardDialogRef<MdsEditorDialogData, MdsEditorDialogResult>,
-        private mdsEditorInstance: MdsEditorInstanceService,
+        public mdsEditorInstance: MdsEditorInstanceService,
         private localEvents: LocalEventsService,
         private toast: Toast,
     ) {

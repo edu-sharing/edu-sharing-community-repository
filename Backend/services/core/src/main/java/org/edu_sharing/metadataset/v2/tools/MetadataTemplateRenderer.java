@@ -236,11 +236,13 @@ public class MetadataTemplateRenderer {
 							wasEmpty = false;
 							String licenseName = properties.containsKey(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY)) ?
 									properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY))[0] : null;
+							String licenseLocale = properties.containsKey(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE)) ?
+									properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE))[0] : null;
 							String licenseVersion = properties.containsKey(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION)) ?
 									properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION))[0] : null;
 
 							LicenseService license = new LicenseService();
-							String link = license.getLicenseUrl(licenseName, Context.getCurrentInstance().getLocale(), licenseVersion);
+							String link = license.getLicenseUrl(licenseName, licenseLocale, licenseVersion);
 							value = "";
 							if (renderingMode.equals(RenderingMode.HTML)) {
 								if (link != null)
@@ -760,6 +762,11 @@ public class MetadataTemplateRenderer {
 							.toFactory()
 			);
 			return policy.sanitize(untrustedHTML);
+		} else if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.htmlRestricted)){
+			PolicyFactory policy = new HtmlPolicyBuilder().allowElements("b", "strong", "i", "em", "br", "ul", "ol", "li")
+					.toFactory();
+			return policy.sanitize(untrustedHTML);
+
 		} else if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.all)){
 			return StringEscapeUtils.escapeHtml4(untrustedHTML).replaceAll("[\\u0000-\\u001F\\u007F-\\u009F]","");
 		} else if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.none)){

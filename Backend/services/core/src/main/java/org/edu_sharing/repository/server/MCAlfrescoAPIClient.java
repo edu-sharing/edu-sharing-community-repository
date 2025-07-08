@@ -894,8 +894,9 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
             String commonLicensekey = (String) propsCopy.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
             if (commonLicensekey != null) {
                 if (Context.getCurrentInstance() != null) {
+                    String ccLocale = (String) propsCopy.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE);
                     String ccversion = (String) propsCopy.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION);
-                    String licenseUrl = new LicenseService().getLicenseUrl(commonLicensekey, Context.getCurrentInstance().getLocale(), ccversion);
+                    String licenseUrl = new LicenseService().getLicenseUrl(commonLicensekey, ccLocale, ccversion);
                     if (licenseUrl != null) {
                         propsCopy.put(CCConstants.VIRT_PROP_LICENSE_URL, licenseUrl);
                     }
@@ -2159,7 +2160,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         }
     }
 
-    public synchronized void createVersion(String nodeId) throws Exception {
+    public synchronized Version createVersion(String nodeId) throws Exception {
 
         VersionService versionService = serviceRegistry.getVersionService();
         NodeRef nodeRef = new NodeRef(storeRef, nodeId);
@@ -2173,7 +2174,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         } else {
             NodeCustomizationPolicies.repairNodeVersion(nodeService, history, transFormedProps, nodeRef);
         }
-        versionService.createVersion(nodeRef, transFormedProps);
+        return versionService.createVersion(nodeRef, transFormedProps);
 
 
     }

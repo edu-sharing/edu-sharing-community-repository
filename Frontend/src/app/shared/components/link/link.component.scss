@@ -3,7 +3,7 @@
 button {
     display: inline-flex;
     align-items: center;
-    color: $primary;
+    color: var(--primary);
     background-color: unset;
     border: unset;
     padding: unset;
@@ -13,13 +13,13 @@ button {
     border-bottom: 1px solid transparent; // Take up the same space as when focused
     &:hover,
     :host.highlight & {
-        color: $primaryDark;
+        color: var(--palette-primary-900);
     }
     &:focus,
     :host.highlight & {
         box-shadow: none !important;
         @include removeDefaultFocus();
-        border-bottom: 1px solid $focusColor;
+        border-bottom: 1px solid var(--focusColor);
     }
 }
 

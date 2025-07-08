@@ -61,7 +61,7 @@
         .edit,
         .remove {
             margin: 0 5px;
-            color: $primary;
+            color: var(--primary);
             position: relative;
             top: 2px;
         }

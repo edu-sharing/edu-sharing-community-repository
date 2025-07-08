@@ -1480,6 +1480,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         SearchServiceElastic.getFilesSharedByMeQuery(MetadataHelper.getLocalDefaultMetadataset().getQueries(MetadataReader.QUERY_SYNTAX_DSL))._toQuery()
                 ).must(
                         getContentTypeQuery(contentType)
+                ).must(
+                        must -> must.bool(getGlobalConditions(null, null, null).build())
                 );
         return searchByQuery(query.build(), skipCount, maxItems, sortDefinition);
     }
@@ -1491,6 +1493,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         SearchServiceElastic.getFilesSharedToMeQuery(MetadataHelper.getLocalDefaultMetadataset().getQueries(MetadataReader.QUERY_SYNTAX_DSL), type)._toQuery()
                 ).must(
                         getContentTypeQuery(contentType)
+                ).must(
+                        must -> must.bool(getGlobalConditions(null, null, null).build())
                 );
         return searchByQuery(query.build(), skipCount, maxItems, sortDefinition);
     }
@@ -1505,6 +1509,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
         builder.mustNot(b -> b.exists(e -> e.field(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL))));
         builder.mustNot(b -> b.match(m -> m.field("aspects").query(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))));
         builder.must(getContentTypeQuery(contentType));
+        builder.must(
+                must -> must.bool(getGlobalConditions(null, null, null).build())
+        );
         MetadataQueries queries = MetadataHelper.getLocalDefaultMetadataset().getQueries(MetadataReader.QUERY_SYNTAX_DSL);
         String basequery = queries.findQuery("workflowReceive").getPrimaryBasequery();
         if (StringUtils.isNotBlank(basequery)) {

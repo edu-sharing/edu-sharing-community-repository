@@ -1,7 +1,7 @@
 @import '../../../core-ui-module/styles/variables';
 
 $mainMenuHoverBackgroundColor: $itemSelectedBackground !default;
-$mainMenuAccentColor: $primary !default;
+$mainMenuAccentColor: var(--primary) !default;
 $mainMenuSelectedBackground: linear-gradient(
         to right,
         $mainMenuAccentColor 0,

@@ -60,6 +60,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	public static final String KEY_CLIENTPROTOCOL = "clientprotocol";
 	
 	public static final String KEY_TYPE = "type";
+
+	public static final String KEY_SUBTYPE = "subtype";
 	
 	public static final String KEY_REPOSITORY_TYPE = "repositorytype";
 	
@@ -494,7 +496,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		
 		permissionwebservice = properties.getProperty("permissionwebservice");
 
-		subtype  = properties.getProperty("subtype");
+		subtype  = properties.getProperty(KEY_SUBTYPE);
 
 		repositoryType = properties.getProperty(KEY_REPOSITORY_TYPE);
 		
@@ -1124,6 +1126,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	public boolean isLtiTool(){
 		return ltitoolLoginInitiationsUrl != null && ltitoolRedirectUrls != null;
 	}
+
+	public boolean isLtiPlatform(){return TYPE_LTIPLATFORM.equals(getType());}
 
 	public String getLtitoolDescription() {return ltitoolDescription;}
 

@@ -86,7 +86,7 @@ Short version works only with `short="always"`.
   >
     <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
     <span class="breadcrumb-element" [class.breadcrumb-element-active]="last">{{
-      node ? node.name : ''
+      node ? (node | nodeTitle : { type: preferredName }) : ''
     }}</span>
   </ng-container>
 </div>
@@ -180,13 +180,15 @@ Short version works only with `short="always"`.
         [class.breadcrumb-inner-active]="currentPos"
         esCheckTextOverflow
         #text="esCheckTextOverflow"
-        [matTooltip]="text.hasTextOverflow() ? (node ? node.name : '') : null"
+        [matTooltip]="
+          text.hasTextOverflow() ? (node ? (node | nodeTitle : { type: preferredName }) : '') : null
+        "
       >
         <span *ngIf="currentPos && invisibleDescription" class="cdk-visually-hidden">
           {{ 'BREADCRUMB_LOCATION_PREFIX' | translate }}
         </span>
         <ng-container *ngIf="!inner; else inner">
-          {{ node ? node.name : '' }}
+          {{ node ? (node | nodeTitle : { type: preferredName }) : '' }}
         </ng-container>
       </span>
     </span>

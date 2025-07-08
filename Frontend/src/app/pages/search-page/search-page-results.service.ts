@@ -1,6 +1,7 @@
 import { Injectable, Injector, OnDestroy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
+    HOME_REPOSITORY,
     MdsDefinition,
     MdsQueryCriteria,
     MdsService,
@@ -243,7 +244,10 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
         ])
             .pipe(
                 switchMap(([metadataSet, repository]) =>
-                    this._mds.getMetadataSet({ repository, metadataSet }),
+                    this._mds.getMetadataSet({
+                        repository: repository || HOME_REPOSITORY,
+                        metadataSet,
+                    }),
                 ),
                 filter((mds) => !!mds.sorts.find((s) => s.id === 'search')),
             )
@@ -316,8 +320,9 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
             // console.log('search', request);
             return this._search
                 .search({
+                    criteriaFlat: this._getSearchCriteria(params, false),
                     body: {
-                        criteria: this._getSearchCriteria(params),
+                        criteria: this._getSearchCriteria(params, true),
                         facetLimit: 5,
                         facetMinCount: 1,
                         resolveCollections: false,
@@ -366,8 +371,9 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
         return (request: NodeRequestParams) => {
             return this._search
                 .requestSearch({
+                    criteriaFlat: this._getSearchCriteria(params, false),
                     body: {
-                        criteria: this._getSearchCriteria(params),
+                        criteria: this._getSearchCriteria(params, true),
                         facets: [],
                     },
                     sortProperties: [
@@ -390,11 +396,14 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
         };
     }
 
-    private _getSearchCriteria(params: SearchRequestParams): MdsQueryCriteria[] {
+    private _getSearchCriteria(
+        params: SearchRequestParams,
+        unfoldTrees: boolean,
+    ): MdsQueryCriteria[] {
         let criteria: MdsQueryCriteria[] = Object.entries(params.searchFilters ?? {}).map(
             ([property, values]) => ({ property, values }),
         );
-        this.convertCriteria(criteria);
+        this.convertCriteria(criteria, unfoldTrees);
         if (params.searchString) {
             criteria.push({ property: 'ngsearchword', values: [params.searchString] });
         }
@@ -435,14 +444,14 @@ export class SearchPageResultsService implements SearchPageResults, OnDestroy {
     // TODO: Port `unfoldTrees` methods from 8.0. See
     // https://scm.edu-sharing.com/edu-sharing/community/repository/edu-sharing-angular-core-module/-/blob/5447ea837a99a3dab04395c10464dd417ddb73a1/rest/services/rest-search.service.ts#L34.
     // Also consider a backend solution.
-    private convertCriteria(criteria: MdsQueryCriteria[]): void {
+    private convertCriteria(criteria: MdsQueryCriteria[], unfoldTrees = true): void {
         for (const c of criteria) {
             // We get the widget definition from the MDS editor instance, so overrides with `data-`
             // attributes in the MDS template are reflected.
             const widget = this._searchPage.filtersMdsWidgets.value?.find(
                 (widget) => widget.definition.id === c.property,
             )?.definition;
-            if (widget?.type === MdsWidgetType.MultiValueTree) {
+            if (widget?.type === MdsWidgetType.MultiValueTree && unfoldTrees) {
                 // For multi-value-tree widgets, add all child values of selected values to the
                 // search criteria.
                 let attach = MdsService.unfoldTreeChilds(c.values, widget);

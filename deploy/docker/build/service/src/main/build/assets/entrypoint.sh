@@ -301,7 +301,7 @@ xmlstarlet ed -L \
     --var redis '$prev' \
     -i '$redis' -t attr -n "className" -v "org.redisson.tomcat.RedissonSessionManager" \
     -i '$redis' -t attr -n "configPath" -v "tomcat/conf/redisson.yaml" \
-    -i '$redis' -t attr -n "readMode" -v "REDIS" \
+    -i '$redis' -t attr -n "readMode" -v "MEMORY" \
     -i '$redis' -t attr -n "updateMode" -v "DEFAULT" \
     -i '$redis' -t attr -n "broadcastSessionEvents" -v "false" \
     -i '$redis' -t attr -n "broadcastSessionUpdates" -v "false" \

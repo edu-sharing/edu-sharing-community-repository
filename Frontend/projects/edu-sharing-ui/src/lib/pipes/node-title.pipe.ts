@@ -3,11 +3,12 @@ import { TranslateService } from '@ngx-translate/core';
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
 import { RestHelper } from '../util/rest-helper';
 import { NodeRoot } from '../node-entries/entries-model';
+import { isString } from 'lodash';
 
 @Pipe({ name: 'nodeTitle' })
 export class NodeTitlePipe implements PipeTransform {
     transform(node: Node | NodeRoot | 'HOME', args?: { type: 'name' | 'title' }): string {
-        if (!(node as Node)?.name) {
+        if (!(node as Node)?.name && isString(node)) {
             if (node === 'HOME') {
                 return this.translate.instant('WORKSPACE.' + node);
             }

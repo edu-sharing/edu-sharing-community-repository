@@ -46,12 +46,17 @@ public class BulkServiceImpl implements BulkService, ApplicationListener<Refresh
 	/**
 	 * these internal properties will be ignored from the mds and never touched by the bulk service sync method
 	 */
-	private static final List<String> IGNORE_PROPERTIES = Stream.of(
+	private static final List<String> IGNORE_PROPERTIES = Stream.concat(Stream.of(
 			ContentModel.PROP_NODE_UUID,
 			ContentModel.PROP_VERSION_LABEL,
 			ContentModel.PROP_INITIAL_VERSION,
 			ContentModel.PROP_VERSION_TYPE
-	).map(QName::toString).collect(Collectors.toList());
+	).map(QName::toString),
+			Stream.of(
+				CCConstants.CCM_PROP_IO_VERSION_COMMENT,
+				CCConstants.LOM_PROP_LIFECYCLE_VERSION
+			)
+	).collect(Collectors.toList());
 	static NodeService nodeServiceAlfresco = (NodeService) AlfAppContextGate.getApplicationContext().getBean("alfrescoDefaultDbNodeService");
 	static final ServiceRegistry serviceRegistry = (ServiceRegistry) AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
 	static VersionService versionServiceAlfresco = serviceRegistry.getVersionService();
@@ -280,9 +285,9 @@ public class BulkServiceImpl implements BulkService, ApplicationListener<Refresh
 		return cleanProps;*/
 		return Stream.concat(MetadataHelper.getWidgetsByNode(nodeRef, false).stream().map((w) -> CCConstants.getValidGlobalName(w.getId())).
 								filter(Objects::nonNull).
-								filter(id -> !IGNORE_PROPERTIES.contains(id)).
 								filter(id -> !id.startsWith("{virtualproperty}")),
 						propsToClean.stream())
+				.filter(id -> !IGNORE_PROPERTIES.contains(id))
 				.collect(Collectors.toList());
 	}
 	/**
@@ -317,17 +322,17 @@ public class BulkServiceImpl implements BulkService, ApplicationListener<Refresh
 		for(Version version : versions){
 			Map<String, Serializable> currentProps = version.getVersionProperties();
 			String vname = (String) currentProps.get(CCConstants.CCM_PROP_IO_VERSION_COMMENT);
-			if(vname.equals(CCConstants.VERSION_COMMENT_BULK_CREATE)){
+			if(CCConstants.VERSION_COMMENT_BULK_CREATE.equals(vname)){
 				importerProps = version.getVersionProperties();
 				continue;
 			}
 			if(importerProps != null){
-				if(vname.equals(CCConstants.VERSION_COMMENT_BULK_UPDATE)){
+				if(CCConstants.VERSION_COMMENT_BULK_UPDATE.equals(vname)){
 					Map<String, Object> diffs = getPropDiffs(importerProps, currentProps);
 					for (String diff : diffs.keySet()) {
 						importerProps.put(diff, currentProps.get(diff));
 					}
-				} else if(vname.equals(CCConstants.VERSION_COMMENT_BULK_UPDATE_RESYNC)){
+				} else if(CCConstants.VERSION_COMMENT_BULK_UPDATE_RESYNC.equals(vname)){
 					// we do nothing for these, these are just resynced once from previous changes
 				} else {
 					modifiedProps.putAll(getPropDiffs(importerProps, currentProps));

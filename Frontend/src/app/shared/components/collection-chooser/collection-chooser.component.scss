@@ -25,7 +25,7 @@
     z-index: 101;
     pointer-events: none;
     > button {
-        color: $primary;
+        color: var(--primary);
         background-color: #fff;
     }
 }

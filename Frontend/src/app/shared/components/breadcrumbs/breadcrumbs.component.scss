@@ -104,7 +104,7 @@ button {
 }
 
 .breadcrumb-inner {
-    color: $primary;
+    color: var(--primary);
     display: block;
     padding: 2px 4px;
     gap: 3px;

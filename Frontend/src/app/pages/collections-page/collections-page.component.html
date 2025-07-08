@@ -117,6 +117,7 @@
               queryParams: { scope: tabSelected, id: null },
               queryParamsHandling: 'merge'
             }"
+            preferredName="title"
             [invisibleDescription]="true"
             [canDropNodes]="collectionContentComponent.canDropOnCollectionBreadcrumbs"
             (onDrop)="collectionContentComponent.dropOnCollection($event.target, $event.source)"

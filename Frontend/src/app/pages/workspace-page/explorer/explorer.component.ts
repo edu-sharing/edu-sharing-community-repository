@@ -47,6 +47,8 @@ import {
     catchError,
     debounceTime,
     distinctUntilChanged,
+    filter,
+    first,
     switchMap,
     takeUntil,
     tap,
@@ -58,6 +60,7 @@ import {
     PROPERTY_FILTER_ALL,
     SearchResults,
     SearchService,
+    UserService,
 } from 'ngx-edu-sharing-api';
 
 @Component({
@@ -169,6 +172,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         direction: 'asc',
         columns: [],
     };
+    sortReady = new BehaviorSubject(false);
 
     public columns: ListItem[] = [];
     @Input() displayType = NodeEntriesDisplayType.Table;
@@ -189,18 +193,26 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     _root: NodeRoot;
     @Input() set root(root: NodeRoot) {
         this._root = root;
-        this.storage
-            .get(SessionStorageService.KEY_WORKSPACE_SORT + root, null)
-            .subscribe((data) => {
-                if (data?.active != null) {
-                    this.sort.active = data.active;
-                    this.sort.direction = data.direction;
-                } else {
-                    this.sort.active = RestConstants.CM_NAME;
-                    this.sort.direction = 'asc';
-                }
+        this.userService
+            .observeCurrentUser()
+            .pipe(
+                filter((u) => !!u),
+                first(),
+            )
+            .subscribe(() => {
+                this.storage.get(this.getSortConfigKey(), null).subscribe((data) => {
+                    if (data?.active != null) {
+                        this.sort.active = data.active;
+                        this.sort.direction = data.direction;
+                    } else {
+                        this.sort.active = RestConstants.CM_NAME;
+                        this.sort.direction = 'asc';
+                    }
+                    this.sortReady.next(true);
+                });
             });
     }
+
     @Input() set current(current: Node) {
         this.setNode(current);
     }
@@ -277,6 +289,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
                         resolveCollections: false,
                         resolveUsernames: true,
                     },
+                    criteriaFlat: criteria,
                     skipCount: offset,
                     propertyFilter: [PROPERTY_FILTER_ALL],
                     sortProperties: [this.sort.active],
@@ -333,6 +346,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         private connector: RestConnectorService,
         private translate: TranslateService,
         private storage: SessionStorageService,
+        private userService: UserService,
         private temporaryStorage: TemporaryStorageService,
         private config: ConfigurationService,
         private search: SearchService,
@@ -344,8 +358,9 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         // super(temporaryStorage,['_node','_nodes','sortBy','sortAscending','columns','totalCount','hasMoreToLoad']);
         this.initColumns();
         this.registerNodesDeleted();
-        combineLatest([this.node$, this.searchQuery$])
+        combineLatest([this.node$, this.searchQuery$, this.sortReady])
             .pipe(
+                filter((v) => v[2] && (!!v[0] || !!v[1])),
                 distinctUntilChanged((a, b) => {
                     return Helper.objectEquals(a[0], b[0]) && a[1] === b[1];
                 }),
@@ -393,7 +408,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     }
     public async setSorting(config: ListSortConfig) {
         this.sort = config;
-        await this.storage.set(SessionStorageService.KEY_WORKSPACE_SORT + this._root, {
+        await this.storage.set(this.getSortConfigKey(), {
             active: config.active,
             direction: config.direction,
         });
@@ -509,5 +524,11 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         if (nodes.filter((n) => n.virtual && n.isDirectory).length) {
             this.refreshTree.emit();
         }
+    }
+    getSortConfigKey() {
+        return (
+            SessionStorageService.KEY_WORKSPACE_SORT +
+            (this._root === 'ALL_FILES' ? 'MY_FILES' : this._root)
+        );
     }
 }

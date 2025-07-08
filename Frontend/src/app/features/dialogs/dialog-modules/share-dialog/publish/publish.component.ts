@@ -184,8 +184,8 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
             immediatelyShowMissingRequiredWidgets: true,
         });
         dialogRef.afterClosed().subscribe((nodes) => {
-            if (nodes) {
-                this.node = nodes[0];
+            if (nodes && nodes !== 'CANCEL') {
+                this.node = (nodes as Node[])[0];
                 // this.node = (
                 //     await this.legacyNodeService
                 //         .getNodeMetadata(this.node.ref.id, [RestConstants.ALL])
@@ -276,7 +276,7 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
             if (
                 this.shareModeCopy &&
                 // republish and not yet published, or wasn't published before at all
-                ((this.republish === 'new' && !this.currentVersionPublished()) || !this.isCopy)
+                ((this.republish === 'new' && !this.currentVersionPublished(true)) || !this.isCopy)
             ) {
                 this.nodeService.publishCopy(this.node.ref.id, this.getHandleConfig()).subscribe(
                     ({ node }) => {
@@ -295,7 +295,7 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
                 this.republish === 'update'
             ) {
                 this.nodeService
-                    .copyMetadata(this.publishedVersions[0].ref.id, this.node.ref.id, {})
+                    .copyMetadata(this.getLastNonRevokedVersion().ref.id, this.node.ref.id, {})
                     .subscribe(
                         ({ node }) => {
                             observer.next(node);
@@ -323,12 +323,13 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
         UIHelper.openUrl(url, this.bridge, OPEN_URL_MODE.Blank);
     }
 
-    currentVersionPublished() {
+    currentVersionPublished(filterRevoked = false) {
         return (
             this.publishedVersions?.filter(
                 (p) =>
+                    (filterRevoked ? !this.isRevoked(p) : true) &&
                     p.properties[RestConstants.LOM_PROP_LIFECYCLE_VERSION]?.[0] ===
-                    this.node.properties[RestConstants.LOM_PROP_LIFECYCLE_VERSION]?.[0],
+                        this.node.properties[RestConstants.LOM_PROP_LIFECYCLE_VERSION]?.[0],
             ).length !== 0
         );
     }
@@ -360,7 +361,9 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
             }
         } else if (this.republish === 'update') {
             this.allPublishedVersions = Helper.deepCopy(this.publishedVersions);
-            this.allPublishedVersions[0].status = 'update';
+            if (this.getLastNonRevokedVersion()) {
+                this.getLastNonRevokedVersion().status = 'update';
+            }
         } else {
             this.allPublishedVersions = this.publishedVersions;
         }
@@ -481,6 +484,14 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
 
     isRevoked(v: PublishedNode) {
         return this.nodeHelper.isNodeRevoked(v);
+    }
+
+    getLastNonRevokedVersion() {
+        const nonRevoked = this.allPublishedVersions.filter((v) => !this.isRevoked(v));
+        if (nonRevoked?.length) {
+            return nonRevoked[0];
+        }
+        return null;
     }
 }
 export enum ShareMode {

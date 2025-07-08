@@ -1,11 +1,12 @@
 {{- if not .Values.global.cluster.istio.enabled }}
 {{- if .Values.ingress.enabled }}
+{{- if .Values.ingress.exact.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "edusharing_common_lib.names.name" . }}-exact
   labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
-  {{- with merge .Values.ingress.annotations .Values.global.cluster.cert.annotations }}
+  {{- with merge .Values.ingress.exact.annotations .Values.ingress.annotations .Values.global.cluster.cert.annotations }}
   annotations: {{ toYaml . | nindent 4 }}
   {{- end }}
 spec:
@@ -29,6 +30,7 @@ spec:
               number: {{ $.Values.service.port.api.external }}
   {{- end }}
 ---
+{{- end }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

@@ -71,6 +71,7 @@ public class SecurityConfigurationSaml {
                                 login.loginPage(loginPath);
                             }
                             login.successHandler(eduAuthSuccsessHandler);
+                            login.failureHandler(new EduFailureHandler());
                         }
                         //don't use this cause it uses SavedRequestAwareAuthenticationSuccessHandler
                         //.defaultSuccessUrl("/shibboleth")

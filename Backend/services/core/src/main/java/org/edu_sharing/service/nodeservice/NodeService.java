@@ -76,7 +76,7 @@ public interface NodeService {
 
     public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String asoocName, List<String> filter, SortDefinition sortDefinition);
 
-	public void createVersion(String nodeId) throws Exception;
+	public String createVersion(String nodeId) throws Exception;
 
 	public void deleteVersionHistory(String nodeId) throws Exception;
 
@@ -117,7 +117,11 @@ public interface NodeService {
 	public void moveNode(String newParentId, String childAssocType, String nodeId);
 	
 	public void revertVersion(String nodeId, String verLbl) throws Exception;
-	
+
+	default void revertVersionNoRollback(String nodeId, String verLbl) throws Exception {
+		throw new NotImplementedException();
+	}
+
 	public Map<String, Map<String, Object>> getVersionHistory(String nodeId) throws Throwable;
 
 	@NonNull
@@ -128,15 +132,15 @@ public interface NodeService {
 	 * @param nodeId
 	 * @param localParent
 	 * @return
-	 * @throws Exception 
-	 * @throws Throwable 
+	 * @throws Exception
+	 * @throws Throwable
 	 */
 	public String importNode(String nodeId,String localParent) throws Throwable;
-	
+
 	public User getOwner(String storeId, String storeProtocol, String nodeId);
 
 	public void removeNode(String nodeId, String parentId, boolean recycle);
-	
+
 	public void removeNode(String potocol, String store, String nodeId);
 
 	public void removeNodeForce(String storeProtocol, String storeId, String nodeId, boolean recycle);

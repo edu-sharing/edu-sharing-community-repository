@@ -26,8 +26,8 @@ button {
         outline-offset: -3px;
     }
     &.selected {
-        color: $primary;
-        border-color: $primary;
+        color: var(--primary);
+        border-color: var(--primary);
         > span {
             font-weight: bold;
         }

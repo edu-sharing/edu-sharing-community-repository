@@ -39,7 +39,7 @@
 
 <es-node-entries-wrapper
   #nodeEntriesResults
-  class="entries-wrapper"
+  class="entries-wrapper entries-wrapper{{ getContainerClass() }}"
   [dataSource]="resultsDataSource"
   [scope]="Scope.Search"
   [columns]="resultColumns.value"
@@ -51,12 +51,12 @@
   [initConfig]="{ actionbar, customOptions: addToCollectionMode.value?.customOptions}"
 >
   <ng-template #title>
-    <div class="title-container">
+    <div class="title-container title-container{{ getContainerClass() }}">
       <h2 class="mat-heading-2">
         {{ 'SEARCH.MATERIALS' | translate }}
         <ng-container *ngIf="!resultsDataSource.isLoading; else smallLoadingSpinner">
           <ng-container *ngIf="!resultsDataSource.isEmpty()">
-            <span class="count {{ getCountClass() }}">
+            <span class="count count{{ getContainerClass() }}">
               &nbsp;({{ resultsDataSource.getTotal() }})
             </span>
           </ng-container>

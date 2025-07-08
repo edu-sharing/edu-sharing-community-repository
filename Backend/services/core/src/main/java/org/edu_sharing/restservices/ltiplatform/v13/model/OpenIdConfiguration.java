@@ -1,6 +1,7 @@
 package org.edu_sharing.restservices.ltiplatform.v13.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.edu_sharing.service.lti13.LTIConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +32,7 @@ public class OpenIdConfiguration {
 
     List<String> claims_supported;
 
-    @JsonProperty("https://purl.imsglobal.org/spec/lti-platform-configuration")
+    @JsonProperty(LTIConstants.OPEN_ID_CONFIG_LTIPLATFORM)
     LTIPlatformConfiguration ltiPlatformConfiguration;
 
     public String getIssuer() {

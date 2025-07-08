@@ -119,10 +119,15 @@ export class NodeDataSourceRemote<
     }
 
     hasMore() {
-        return this._paginationHandler.hasMore();
+        return (
+            this._sortHandler.currentSort?.active !== 'random' && this._paginationHandler.hasMore()
+        );
     }
 
     loadMore() {
+        if (this._sortHandler.currentSort?.active === 'random') {
+            return false;
+        }
         return this._paginationHandler.loadMore();
     }
 

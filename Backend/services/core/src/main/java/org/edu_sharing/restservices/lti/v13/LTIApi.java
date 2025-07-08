@@ -23,7 +23,6 @@ import jakarta.ws.rs.core.Response;
 import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -36,6 +35,7 @@ import org.edu_sharing.restservices.lti.v13.model.JWKResult;
 import org.edu_sharing.restservices.lti.v13.model.JWKSResult;
 import org.edu_sharing.restservices.lti.v13.model.RegistrationUrl;
 import org.edu_sharing.restservices.ltiplatform.v13.LTIPlatformConstants;
+import org.edu_sharing.restservices.ltiplatform.v13.model.OpenIdConfiguration;
 import org.edu_sharing.restservices.ltiplatform.v13.model.ValidationException;
 import org.edu_sharing.restservices.rendering.v1.RenderingApi;
 import org.edu_sharing.restservices.rendering.v1.model.RenderingDetailsEntry;
@@ -55,7 +55,6 @@ import org.edu_sharing.service.lti13.uoc.Config;
 import org.edu_sharing.service.lti13.uoc.elc.spring.lti.security.openid.HttpSessionOIDCLaunchSession;
 import org.edu_sharing.service.usage.Usage2Service;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.util.StringUtils;
 
 import java.net.*;
@@ -590,7 +589,7 @@ public class LTIApi {
        try{
             Throwable throwable = AuthenticationUtil.runAsSystem(() -> {
                 try {
-                    registrationService.ltiDynamicRegistration(openidConfiguration, registrationToken, eduSharingRegistrationToken);
+                    registrationService.ltiDynamicPlatformRegistration(openidConfiguration, registrationToken, eduSharingRegistrationToken);
                 } catch (Throwable ex) {
                     return ex;
                 }
@@ -694,7 +693,12 @@ public class LTIApi {
                                  @Context HttpServletRequest req
     ){
         try {
-            registrationService.registerPlatform(platformId,clientId,deploymentId,authenticationRequestUrl,keysetUrl,keyId,authTokenUrl);
+            OpenIdConfiguration openIdConfiguration = new OpenIdConfiguration();
+            openIdConfiguration.setIssuer(platformId);
+            openIdConfiguration.setJwks_uri(keysetUrl);
+            openIdConfiguration.setToken_endpoint(authTokenUrl);
+            openIdConfiguration.setAuthorization_endpoint(authenticationRequestUrl);
+            registrationService.registerPlatform(openIdConfiguration,clientId,deploymentId,keyId);
             return Response.ok().build();
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
@@ -722,11 +726,13 @@ public class LTIApi {
                                    @Context HttpServletRequest req
     ){
         try {
-            registrationService.registerPlatform(baseUrl,clientId,deploymentId,
-                    baseUrl + LTIConstants.MOODLE_AUTHENTICATION_REQUEST_URL_PATH,
-                    baseUrl + LTIConstants.MOODLE_KEYSET_URL_PATH,
-                    null,
-                    baseUrl+LTIConstants.MOODLE_AUTH_TOKEN_URL_PATH);
+            OpenIdConfiguration openIdConfiguration = new OpenIdConfiguration();
+            openIdConfiguration.setIssuer(baseUrl);
+            openIdConfiguration.setJwks_uri(baseUrl + LTIConstants.MOODLE_KEYSET_URL_PATH);
+            openIdConfiguration.setToken_endpoint(baseUrl+LTIConstants.MOODLE_AUTH_TOKEN_URL_PATH);
+            openIdConfiguration.setAuthorization_endpoint(baseUrl + LTIConstants.MOODLE_AUTHENTICATION_REQUEST_URL_PATH);
+            registrationService.registerPlatform(openIdConfiguration,clientId,deploymentId,
+                    null);
             return Response.ok().build();
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
@@ -791,5 +797,63 @@ public class LTIApi {
         }
         //TODO maybe destroy session
     }
+
+    @GET
+    @Path("/rendering/{repository}/{node}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json"})
+
+    @Operation(summary = "does a redirect to components/render with appropriate permissions", description = "allows access to rendering view in a lti platform permission context.")
+
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode="303", description="See Other."),
+                    @ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response rendering(
+            @Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+            @Parameter(description = "ID of node",required=true ) @PathParam("node") String node,
+            @Parameter(description = "version of node",required=false) @QueryParam("version") String nodeVersion,
+            @Parameter(description = "Rendering displayMode", required=false) @QueryParam("displayMode") String displayMode,
+            @Parameter(description = "jwt containing the claims aud (clientId of platform), deploymentId and a token. must be signed by platform", required=true ) @QueryParam("jwt")  String jwt,
+            @Context HttpServletRequest req){
+
+        try{
+            Jws<Claims> claims = new LTIJWTUtil().validateForInitialToolSession(jwt);
+            String token = claims.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_TOKEN, String.class);
+            Map<String, String> tokenData = (Map<String,String>)new Gson().fromJson(ApiTool.decrpt(token), Map.class);
+            String user = tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_USER);
+            //context is the embedding node
+            String contextId = tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_NODEID);
+            if(contextId == null){
+                throw new ValidationException("missing " +LTIConstants.CONTEXT);
+            }
+            //don't use this: it is the appId of the tool
+            //String appId = tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID);
+            String deploymentId = claims.getBody().get(LTIConstants.LTI_DEPLOYMENT_ID,String.class);
+            String iss = claims.getBody().getIssuer();
+            String clientId = claims.getBody().getAudience();
+            String appId = new RepoTools().getAppId(iss,clientId,deploymentId);
+
+            return AuthenticationUtil.runAs(() -> {
+                ApiTool.handleUsagePermissions(node, req.getSession(), appId, contextId, usageService);
+                return Response.seeOther(new URI("/edu-sharing/components/render/"+node)).build();
+            },user);
+        }catch(ValidationException e){
+            logger.warn(e.getMessage(),e);
+            return Response.status(Response.Status.FORBIDDEN).entity(e.getMessage()).build();
+        }catch (Throwable t) {
+
+            logger.error(t.getMessage(), t);
+            return ErrorResponse.createResponse(t);
+        }
+    }
+
+
 
 }

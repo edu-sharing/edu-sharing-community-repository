@@ -2,6 +2,9 @@
   <name>Core Metadataset</name>
   <i18n>mds</i18n>
   <widgets>
+    <defaults>
+      <textEscapingPolicy>htmlBasic</textEscapingPolicy>
+    </defaults>
     <widget>
       <id>cm:name</id>
       <id rel="graphql">info.filename</id>
@@ -513,7 +516,7 @@
     <widget>
       <id>curriculum_editable</id>
       <caption>Zugriffsrechte</caption>
-      <bottomCaption>Welche Zugriffsrechte sollen Personen auf das Kanban erhalten, für die dieses Objekt in edu-sharing freigegeben wird. (Dieser Wert kann später im Curriculum für das Objekt geändert werden)</bottomCaption>
+      <bottomCaption>Welche Zugriffsrechte sollen Personen, für die dieses Objekt in edu-sharing freigegeben wird, auf die Pinnwand erhalten? Dieser Wert kann später in Curriculum für das Objekt geändert werden.</bottomCaption>
       <defaultvalue>0</defaultvalue>
       <type>singleoption</type>
       <values>
@@ -1435,6 +1438,7 @@
           {"wildcard":{"nodeRef.id": {"value": "${value}", "case_insensitive": true}}},
           {"wildcard":{"content.fulltext": {"value": "${value}", "case_insensitive": true}}},
           {"wildcard":{"properties.cm:name.keyword": {"value": "*${value}*", "case_insensitive": true}}},
+          {"wildcard":{"properties.cm:title.keyword": {"value": "*${value}*", "case_insensitive": true}}},
           {"wildcard":{"properties.cclom:title.keyword": {"value": "*${value}*", "case_insensitive": true}}},
           {"wildcard":{"properties.cclom:general_description.keyword": {"value": "*${value}*", "case_insensitive": true}}},
           {"wildcard":{"properties.cclom:general_keyword.keyword": {"value": "*${value}*", "case_insensitive": true}}},
@@ -1497,6 +1501,7 @@
           "fields": [
           "properties.cm:name^2",
           "properties.cm:title^2",
+          "properties.cm:title.keyword^2",
           "properties.cclom:title^5",
           "properties.cclom:general_description^2",
           "properties.cclom:general_keyword^4",
@@ -1522,7 +1527,6 @@
         "must_not":[
         {"term":{"aspects":"ccm:metadataPresettingTemplate"}},
         {"term":{"aspects":"ccm:io_childobject"}},
-        {"term":{"aspects":"ccm:revoked"}},
         {"wildcard":{"properties.cm:name.keyword":"._*"}},
         {"term":{"aspects":"ccm:collection_io_reference"}},
         {"wildcard":{"properties.cm:name.keyword":".DS_Store*"}},
@@ -1569,6 +1573,7 @@
           },
           {"wildcard":{"nodeRef.id": {"value":"*${value}*", "case_insensitive": true }}},
           {"wildcard":{"properties.cm:name.keyword": {"value": "*${value}*", "case_insensitive": true}}},
+          {"wildcard":{"properties.cm:title.keyword": {"value": "*${value}*", "case_insensitive": true}}},
           {"wildcard":{"properties.cclom:title.keyword": {"value": "*${value}*", "case_insensitive": true}}},
           {"wildcard":{"properties.cclom:general_description.keyword": {"value": "*${value}*", "case_insensitive": true}}},
           {"wildcard":{"properties.cclom:general_keyword.keyword": {"value": "*${value}*", "case_insensitive": true}}}
@@ -1639,6 +1644,7 @@
       <property name="ngsearchword">
         <statement>{"bool":{"should":[
           {"wildcard":{"properties.cm:name.keyword":{"value":"*${value}*"}}},
+          {"wildcard":{"properties.cm:title.keyword":{"value":"*${value}*"}}},
           {"wildcard":{"properties.cclom:title":{"value":"*${value}*"}}},
           {"wildcard":{"properties.ccm:replicationsourceid.keyword":{"value":"*${value}*"}}}
           ]}}
@@ -1686,6 +1692,7 @@
           "query": "${value}*",
           "fields": [
           "properties.cm:name^4",
+          "properties.cm:title^4",
           "properties.cclom:title^4",
           "properties.cclom:general_description^2",
           "properties.cclom:general_keyword^2",

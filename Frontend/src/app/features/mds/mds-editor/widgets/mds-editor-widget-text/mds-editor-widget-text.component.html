@@ -14,17 +14,10 @@
     <input
       matInput
       #inputElement
-      *ngIf="showBulkMixedValues()"
       [type]="widget.definition.type"
-      disabled
-      value="{{ 'MDS.DIFFERENT_VALUES' | translate }}"
-    />
-    <input
-      matInput
-      #inputElement
-      *ngIf="!showBulkMixedValues()"
-      [type]="widget.definition.type"
-      [placeholder]="widget.definition.placeholder"
+      [placeholder]="
+        showBulkMixedValues() ? ('MDS.DIFFERENT_VALUES' | translate) : widget.definition.placeholder
+      "
       [formControl]="formControl"
       (blur)="blur()"
       (keydown.enter)="submit()"

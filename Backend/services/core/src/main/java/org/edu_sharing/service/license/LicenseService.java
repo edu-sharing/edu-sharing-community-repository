@@ -1,6 +1,10 @@
 package org.edu_sharing.service.license;
 
+import org.apache.axis.utils.StringUtils;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.generated.repository.backend.services.rest.client.StringUtil;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.tools.URLHelper;
 
 public class LicenseService {
@@ -20,8 +24,11 @@ public class LicenseService {
 	public String getLicenseUrl(String license, String locale){
 		return getLicenseUrl(license, locale, null);
 	}
-	
 	public String getLicenseUrl(String license, String locale, String version){
+		return getLicenseUrl(license, locale, version, new AuthenticationToolAPI().getCurrentLanguage());
+	}
+
+	public String getLicenseUrl(String license, String locale, String version, String userLanguage){
 		if(license==null || license.isEmpty())
 			return null;
 		String result = null;
@@ -59,13 +66,20 @@ public class LicenseService {
 		
 		if(result != null){
 			version = (version == null) ? DEFAULT_LICENSE_VERSION : version;
-			if(result.contains("${version}")){
-				result = result.replace("${version}", version);
+			if(result.contains("{{version}}")){
+				result = result.replace("{{version}}", version);
 			}
 			
-			String country = (locale == null) ? "de" : locale.split("_")[0];
-			if(result.contains("${locale}")){
-				result = result.replace("${locale}", country);
+			String country = (locale == null ? "de" : locale.split("_")[0]).toLowerCase() + "/";
+			if(StringUtils.isEmpty(locale) || "4.0".equals(version)) {
+				country = "";
+			}
+			if(result.contains("{{locale}}")){
+				result = result.replace("{{locale}}", country);
+			}
+
+			if(result.contains("{{language}}")){
+				result = result.replace("{{language}}", (StringUtils.isEmpty(userLanguage) ? "en" : userLanguage));
 			}
 		}
 		

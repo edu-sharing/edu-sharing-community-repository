@@ -25,6 +25,8 @@ public class MetadataSet implements Serializable {
 	private List<MetadataSort> sorts;
 	private Map<String, MetadataQueries> queries;
 	private MetadataCreate create;
+	private MetadataWidgetDefaults widgetDefaults;
+
 	public String getId() {
 		return id;
 	}
@@ -122,6 +124,10 @@ public class MetadataSet implements Serializable {
 			setId(mdsOverride.getId());
 		if(mdsOverride.getName()!=null)
 			setName(mdsOverride.getName());
+		if(mdsOverride.getWidgetDefaults() != null) {
+			setWidgetDefaults(mdsOverride.getWidgetDefaults());
+			widgets.forEach(w -> w.setDefaults(getWidgetDefaults()));
+		}
 		for(MetadataWidget widget : mdsOverride.getWidgets()){
 			if(!widget.isInherit()){
 				List<MetadataWidget> widgetsRemove = findAllWidgets(widget.getId());
@@ -335,5 +341,13 @@ public class MetadataSet implements Serializable {
 		}
 	  }
 		return empty;
+	}
+
+	public void setWidgetDefaults(MetadataWidgetDefaults widgetDefaults) {
+		this.widgetDefaults = widgetDefaults;
+	}
+
+	public MetadataWidgetDefaults getWidgetDefaults() {
+		return widgetDefaults;
 	}
 }

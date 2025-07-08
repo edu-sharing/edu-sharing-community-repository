@@ -212,7 +212,9 @@ public class SSOAuthorityMapper {
 		if(guestService.isGuestUser(tmpUserName)){
 			return tmpUserName;
 		}
-
+		if(mappingConfig != null && mappingConfig.getUsernameMapper() != null) {
+			tmpUserName = mappingConfig.getUsernameMapper().apply(tmpUserName);
+		}
 		String ssoType = ssoAttributes.get(PARAM_SSO_TYPE);
 		if (ssoType == null) {
 			logErrorParams(PARAM_SSO_TYPE, ssoAttributes);

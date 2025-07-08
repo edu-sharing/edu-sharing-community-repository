@@ -6,6 +6,8 @@ export class RestHelper {
     protected static SPACES_STORE_REF = 'workspace://SpacesStore/';
     public static getName(node: Node): string {
         if (node.name) return node.name;
+        if (node.properties?.[RestConstants.CM_NAME])
+            return node.properties[RestConstants.CM_NAME].join();
         if (node.title) return node.title;
         if (node.ref) return node.ref.id;
         return null;
@@ -21,8 +23,12 @@ export class RestHelper {
         return '';
     }
     public static getTitleFromProperties(properties: any): string {
-        return properties[RestConstants.LOM_PROP_TITLE]
+        const value = properties[RestConstants.LOM_PROP_TITLE]
             ? properties[RestConstants.LOM_PROP_TITLE]
             : properties[RestConstants.CM_NAME];
+        if (Array.isArray(value)) {
+            return value.join(', ');
+        }
+        return value;
     }
 }

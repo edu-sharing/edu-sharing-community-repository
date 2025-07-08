@@ -124,7 +124,7 @@
                 </ng-container>
               </es-multi-line-label>
             </mat-radio-button>
-            <mat-radio-button [disabled]="currentVersionPublished()" [value]="'new'">
+            <mat-radio-button [disabled]="currentVersionPublished(true)" [value]="'new'">
               <es-multi-line-label>
                 <ng-container slot="label">
                   {{ 'WORKSPACE.SHARE.PUBLISH.REPUBLISH' | translate }}
@@ -140,7 +140,12 @@
               </h5>
               -->
             </mat-radio-button>
-            <mat-radio-button [disabled]="currentVersionPublished() || !isCopy" [value]="'update'">
+            <mat-radio-button
+              [disabled]="
+                getLastNonRevokedVersion() == null || currentVersionPublished(true) || !isCopy
+              "
+              [value]="'update'"
+            >
               <es-multi-line-label>
                 <ng-container slot="label">
                   {{ 'WORKSPACE.SHARE.PUBLISH.UPDATE_METADATA' | translate }}
@@ -153,6 +158,12 @@
           </mat-radio-group>
           <es-info-message mode="info" *ngIf="!publishCopyPermission">
             {{ 'WORKSPACE.SHARE.PUBLISH.NO_PUBLISH_COPY_PERMISSION' | translate }}
+          </es-info-message>
+          <es-info-message
+            mode="warning"
+            *ngIf="republish === 'update' && getLastNonRevokedVersion() && getLastNonRevokedVersion()?.ref.id !== allPublishedVersions?.[0]?.ref.id"
+          >
+            {{ 'WORKSPACE.SHARE.PUBLISH.UPDATE_LAST_NON_REVOKED' | translate }}
           </es-info-message>
         </div>
       </div>

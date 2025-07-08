@@ -27,7 +27,7 @@
                     background-color: $itemSelectedBackground;
                 }
                 &.active {
-                    color: $primary;
+                    color: var(--primary);
                     font-weight: bold;
                     background: $workspaceSelectedBackgroundEffect;
                 }
@@ -150,7 +150,7 @@
                         margin-right: 5px;
                     }
                     .solution-link {
-                        color: $primaryDark;
+                        color: var(--palette-primary-900);
                         text-transform: uppercase;
                         font-weight: bold;
                     }

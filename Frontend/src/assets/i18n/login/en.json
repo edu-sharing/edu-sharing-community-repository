@@ -10,6 +10,7 @@
     "RECOVER_PASSWORD": "Forgot password?",
     "ERROR": "Invalid credentials",
     "ERROR_SAFE": "invalid safe-password",
+    "ERROR_SAFE_DETAIL": "Login failed. If you don't have a password right now, ask your administrator to create an one-time password.",
     "PERSON_BLOCKED": "Your account is disabled. Please get in touch with a system administrator",
     "PASSWORD_EXPIRED": "The password expired. Please set a new password first",
     "PASSWORD_EXPIRED_SAFE": "The safe-password expired. Please set a new password first",

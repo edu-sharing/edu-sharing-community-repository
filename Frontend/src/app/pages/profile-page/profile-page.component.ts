@@ -2,8 +2,12 @@ import { forkJoin as observableForkJoin, Subject, timer } from 'rxjs';
 
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import {
+    ActionbarComponent,
     DefaultGroups,
+    ElementType,
     OptionItem,
+    OptionsHelperDataService,
+    Scope,
     TranslationsService,
     UIAnimation,
     VCard,
@@ -25,13 +29,13 @@ import { Helper } from '../../core-module/rest/helper';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { take, takeUntil } from 'rxjs/operators';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'es-profile-page',
     templateUrl: 'profile-page.component.html',
     styleUrls: ['profile-page.component.scss'],
     animations: [trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
+    providers: [OptionsHelperDataService],
 })
 export class ProfilePageComponent implements OnInit, OnDestroy {
     private destroyed = new Subject<void>();
@@ -47,6 +51,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
         private router: Router,
         private config: ConfigurationService,
         private sanitizer: DomSanitizer,
+        private optionsHelperDataService: OptionsHelperDataService,
         private loadingScreen: LoadingScreenService,
         private iamService: RestIamService,
     ) {
@@ -60,8 +65,8 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
         });
         this.editAction = new OptionItem('PROFILES.EDIT', 'edit', () => this.beginEdit());
         this.editAction.group = DefaultGroups.Edit;
+        this.editAction.elementType = [ElementType.Unknown];
         this.editAction.showAsAction = true;
-        this.actions = [this.editAction];
     }
     private static PASSWORD_MIN_LENGTH = 5;
     public user: User;
@@ -80,9 +85,9 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     avatarImage: any;
     profileSettings: ProfileSettings;
     @ViewChild('avatar') avatarElement: ElementRef;
+    @ViewChild(ActionbarComponent) actionbarComponent: ActionbarComponent;
     // can the particular user profile (based on the source) be edited?
     userEditProfile: boolean;
-    actions: OptionItem[];
     private editAction: OptionItem;
     showPersistentIds = false;
 
@@ -125,8 +130,22 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
                         if (this.isMe && login.isGuest) {
                             RestHelper.goToLogin(this.router, this.config);
                         }
-                        this.editAction.isEnabled =
-                            this.editProfile && !!(this.userEditProfile || this.editProfileUrl);
+
+                        setTimeout(() => {
+                            this.editAction.customEnabledCallback = async () =>
+                                this.editProfile && !!(this.userEditProfile || this.editProfileUrl);
+                            this.optionsHelperDataService.setData({
+                                scope: Scope.UserProfile,
+                                customOptions: {
+                                    useDefaultOptions: false,
+                                    addOptions: [this.editAction],
+                                },
+                            });
+                            void this.optionsHelperDataService.initComponents(
+                                this.actionbarComponent,
+                            );
+                            void this.optionsHelperDataService.refreshComponents();
+                        });
                     });
                 },
                 (error: any) => {
@@ -206,18 +225,20 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
             this.saveAvatar();
         }
     }
-    public saveEdits() {
-        if (!this.userEdit.profile.firstName?.trim()) {
-            this.toast.error(null, 'PROFILES.ERROR.FIRST_NAME');
-            return;
-        }
-        if (!this.userEdit.profile.lastName?.trim()) {
-            this.toast.error(null, 'PROFILES.ERROR.LAST_NAME');
-            return;
-        }
-        if (!this.userEdit.profile.email?.trim()) {
-            this.toast.error(null, 'PROFILES.ERROR.EMAIL');
-            return;
+    public saveEdits(validate = true) {
+        if (validate) {
+            if (!this.userEdit.profile.firstName?.trim()) {
+                this.toast.error(null, 'PROFILES.ERROR.FIRST_NAME');
+                return;
+            }
+            if (!this.userEdit.profile.lastName?.trim()) {
+                this.toast.error(null, 'PROFILES.ERROR.LAST_NAME');
+                return;
+            }
+            if (!this.userEdit.profile.email?.trim()) {
+                this.toast.error(null, 'PROFILES.ERROR.EMAIL');
+                return;
+            }
         }
         this.toast.showProgressSpinner();
         this.iamService.editUser(this.user.authorityName, this.userEdit.profile).subscribe(
@@ -300,6 +321,6 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     }
 
     savePersistentIds() {
-        this.saveEdits();
+        this.saveEdits(false);
     }
 }

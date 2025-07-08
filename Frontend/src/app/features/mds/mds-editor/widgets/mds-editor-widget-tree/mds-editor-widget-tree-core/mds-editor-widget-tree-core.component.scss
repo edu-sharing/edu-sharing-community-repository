@@ -32,7 +32,7 @@
             &.selected {
                 background-color: rgba(0, 0, 0, 0.04);
                 @include setGlobalKeyboardFocus();
-                outline-offset: -$focusWidth;
+                outline-offset: calc(var(--focusWidth) * -1);
             }
         }
         .suggest-input {
@@ -42,7 +42,7 @@
             > mat-form-field {
                 flex-grow: 1;
                 .prefix {
-                    color: $primary;
+                    color: var(--primary);
                 }
             }
             es-spinner-small,
