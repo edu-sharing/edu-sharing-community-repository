@@ -43,8 +43,9 @@ import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationTool;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
 
-public class LogoutServlet extends HttpServlet{
+public class LogoutServlet extends SpringHttpServlet {
 
 	private static Logger logger = Logger.getLogger(LogoutServlet.class);
 	

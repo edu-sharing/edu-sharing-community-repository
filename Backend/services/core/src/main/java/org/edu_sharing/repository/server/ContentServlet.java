@@ -26,11 +26,12 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.StreamUtils;
 
 
-public class ContentServlet extends HttpServlet{
+public class ContentServlet extends SpringHttpServlet {
 
 	
 	static Logger logger = Logger.getLogger(ContentServlet.class);

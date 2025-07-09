@@ -28,7 +28,6 @@
 package org.edu_sharing.repository.server.authentication;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.alfresco.repo.security.authentication.AuthenticationException;
@@ -43,13 +42,11 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions.SessionInfo;
-import org.edu_sharing.restservices.lti.v13.ApiTool;
-import org.edu_sharing.service.authentication.AuthenticationExceptionMessages;
 import org.edu_sharing.service.authentication.EduAuthentication;
 import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.surf.util.URLDecoder;
@@ -62,11 +59,10 @@ import org.springframework.security.saml2.provider.service.authentication.Saml2A
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ShibbolethServlet extends HttpServlet {
+public class ShibbolethServlet extends SpringHttpServlet {
 
 	private static Logger logger = Logger.getLogger(ShibbolethServlet.class);
 

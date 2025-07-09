@@ -1,11 +1,8 @@
 package org.edu_sharing.service.mediacenter;
 
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.service.nodeservice.NodeService;
-import org.edu_sharing.service.provider.ProviderHelper;
+import org.edu_sharing.spring.ApplicationContextFactory;
 
 public class MediacenterServiceFactory {
 	
@@ -13,10 +10,10 @@ public class MediacenterServiceFactory {
 		if(!AuthorityServiceFactory.getLocalService().isGlobalAdmin()){
 			throw new NotAnAdminException();
 		}
-		return new MediacenterServiceImpl();
+		return getLocalService();
 	}
 	public static MediacenterService getLocalService(){
-		return new MediacenterServiceImpl();
+		return ApplicationContextFactory.getApplicationContext().getBean(MediacenterServiceImpl.class);
 	}
 
 	public static MediacenterService getMediacenterService(String appId){

@@ -31,6 +31,7 @@ import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.StreamUtils;
 
@@ -49,7 +50,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class PreviewServlet extends HttpServlet {
+public class PreviewServlet extends SpringHttpServlet {
 
 	private static Logger logger = Logger.getLogger(PreviewServlet.class);
 

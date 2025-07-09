@@ -1,7 +1,6 @@
 package org.edu_sharing.repository.server.monitoring;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -14,7 +13,6 @@ import javax.management.ObjectName;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -25,10 +23,10 @@ import org.edu_sharing.alfresco.monitoring.Application;
 import org.edu_sharing.alfresco.monitoring.MonitoringDao;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
 import org.springframework.context.ApplicationContext;
 
-public class Monitoring extends HttpServlet {
+public class Monitoring extends SpringHttpServlet {
 
     private transient BasicDataSource dataSource = null;
 

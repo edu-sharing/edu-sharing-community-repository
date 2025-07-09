@@ -46,6 +46,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
@@ -57,7 +58,7 @@ import java.util.List;
  * @author rudolph
  *
  */
-public class RemoveUsersNodes extends HttpServlet{
+public class RemoveUsersNodes extends SpringHttpServlet {
 	
 	private static Log logger = LogFactory.getLog(RemoveUsersNodes.class);
 	static StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");

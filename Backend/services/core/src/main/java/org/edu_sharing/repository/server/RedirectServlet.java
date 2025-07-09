@@ -39,10 +39,11 @@ import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.rendering.RenderingServiceFactory;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
 
 import java.io.IOException;
 
-public class RedirectServlet extends HttpServlet {
+public class RedirectServlet extends SpringHttpServlet {
 
 	private static Log logger = LogFactory.getLog(RedirectServlet.class);
 

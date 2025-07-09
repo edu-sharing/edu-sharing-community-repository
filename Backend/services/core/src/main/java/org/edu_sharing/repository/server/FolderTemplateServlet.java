@@ -10,8 +10,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.foldertemplates.FolderTemplatesImpl;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
 
-public class FolderTemplateServlet extends HttpServlet {
+public class FolderTemplateServlet extends SpringHttpServlet {
 	
 	/**
 	 * 

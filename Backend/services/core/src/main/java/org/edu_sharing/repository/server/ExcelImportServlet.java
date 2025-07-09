@@ -20,8 +20,9 @@ import org.apache.commons.fileupload2.jakarta.JakartaServletFileUpload;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.repository.server.importer.ExcelLOMImporter;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
 
-public class ExcelImportServlet extends HttpServlet{
+public class ExcelImportServlet extends SpringHttpServlet {
 
 	private static Log logger = LogFactory.getLog(ExcelImportServlet.class);
 	

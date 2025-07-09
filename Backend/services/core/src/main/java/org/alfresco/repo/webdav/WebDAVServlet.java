@@ -47,6 +47,7 @@ import org.alfresco.util.FileFilterMode.Client;
 import org.alfresco.util.PropertyCheck;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -60,7 +61,7 @@ import java.util.List;
  * 
  * @author gavinc
  */
-public class WebDAVServlet extends HttpServlet
+public class WebDAVServlet extends SpringHttpServlet
 {
     private static final long serialVersionUID = 6900069445027527165L;
 

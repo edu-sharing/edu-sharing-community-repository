@@ -9,8 +9,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
 
-public class MonitoringServlet extends HttpServlet {
+public class MonitoringServlet extends SpringHttpServlet {
 
 	private static Logger logger = Logger.getLogger(MonitoringServlet.class);
 	/**

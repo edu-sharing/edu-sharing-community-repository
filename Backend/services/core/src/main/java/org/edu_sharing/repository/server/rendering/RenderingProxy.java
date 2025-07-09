@@ -8,7 +8,6 @@ import java.security.GeneralSecurityException;
 import java.util.*;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.Response;
@@ -45,9 +44,11 @@ import org.edu_sharing.service.tracking.TrackingService;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Deprecated
 public class RenderingProxy extends HttpServlet {
+public class RenderingProxy extends SpringHttpServlet {
 
 
 	private static final String[] ALLOWED_GET_PARAMS = new String[]{

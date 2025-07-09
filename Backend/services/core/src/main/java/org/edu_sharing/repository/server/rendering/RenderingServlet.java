@@ -26,68 +26,71 @@ import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.service.tracking.TrackingService;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.springframework.web.servlet.support.RequestContextUtils;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class RenderingServlet extends HttpServlet {
+public class RenderingServlet extends SpringHttpServlet {
     private static final String DEFAULT_DISPLAY_MODE = RenderingTool.DISPLAY_EMBED;
     private static Logger logger = Logger.getLogger(RenderingServlet.class);
+    private static final Logger logger = Logger.getLogger(RenderingServlet.class);
 
-        @Override
-        protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-                throws ServletException, IOException {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
 
-            // new, preferred parameter
-            String node_id = req.getParameter("nodeId");
-            if(node_id == null) {
-                // deprecated parameter
-                node_id = req.getParameter("node_id");
+        // new, preferred parameter
+        String node_id = req.getParameter("nodeId");
+        if (node_id == null) {
+            // deprecated parameter
+            node_id = req.getParameter("node_id");
+        }
+        String version = req.getParameter("version");
+
+        RenderingService renderingService = RenderingServiceFactory.getLocalService();
+        Map<String, String> params = new HashMap<>();
+        for (Object key : req.getParameterMap().keySet()) {
+            params.put((String) key, req.getParameter((String) key));
+        }
+
+        resp.getWriter().write("<html>");
+        resp.getWriter().write("<head>");
+        // hack for renderer
+        resp.getWriter().write("<es-app ngCspNonce=\"" + SecurityHeadersFilter.ngCspNonce.get() + "\"></es-app>");
+        resp.getWriter().write("<style nonce=\"" + SecurityHeadersFilter.ngCspNonce.get() + "\">");
+        resp.getWriter().write("body,html{margin:0; padding:0;}");
+        try {
+            String customCSS = ConfigServiceFactory.getCurrentConfig().values.customCSS;
+            if (!StringUtils.isBlank(customCSS)) {
+                resp.getWriter().write(customCSS);
             }
-            String version = req.getParameter("version");
+        } catch (Exception e) {
+            logger.warn("Could not resolve config", e);
+        }
 
-            RenderingService renderingService = RenderingServiceFactory.getLocalService();
-            Map<String, String> params=new HashMap<>();
-            for(Object key:  req.getParameterMap().keySet()){
-                params.put((String)key,req.getParameter((String)key));
-            }
-
-            resp.getWriter().write("<html>");
-            resp.getWriter().write("<head>");
-            // hack for renderer
-            resp.getWriter().write("<es-app ngCspNonce=\"" + SecurityHeadersFilter.ngCspNonce.get() + "\"></es-app>");
-            resp.getWriter().write("<style nonce=\"" +SecurityHeadersFilter.ngCspNonce.get() + "\">");
-            resp.getWriter().write("body,html{margin:0; padding:0;}");
-            try {
-                String customCSS = ConfigServiceFactory.getCurrentConfig().values.customCSS;
-                if(!StringUtils.isBlank(customCSS)) {
-                    resp.getWriter().write(customCSS);
+        resp.getWriter().write("</style>");
+        resp.getWriter().write("</head>");
+        resp.getWriter().write("<body class= \"eduservlet-render-body\">");
+        String response;
+        try {
+            NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node_id);
+            if (NodeServiceHelper.hasAspect(ref, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
+                try {
+                    NodeServiceHelper.validatePermissionRestrictedAccess(ref, CCConstants.PERMISSION_READ_ALL, CCConstants.PERMISSION_EMBED);
+                } catch (RestrictedAccessException e) {
+                    throw new AccessDeniedException(CCConstants.PERMISSION_EMBED);
                 }
-            } catch (Exception e) {
-                logger.warn("Could not resolve config", e);
-            }
-
-            resp.getWriter().write("</style>");
-            resp.getWriter().write("</head>");
-            resp.getWriter().write("<body class= \"eduservlet-render-body\">");
-            String response;
-            try {
-                NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node_id);
-                if(NodeServiceHelper.hasAspect(ref,CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
-                    try {
-                        NodeServiceHelper.validatePermissionRestrictedAccess(ref, CCConstants.PERMISSION_READ_ALL, CCConstants.PERMISSION_EMBED);
-                    } catch (RestrictedAccessException e) {
-                        throw new AccessDeniedException(CCConstants.PERMISSION_EMBED);
-                    }
-                }else{
-                    if(!PermissionServiceFactory.getLocalService().hasPermission(ref.getStoreRef().getProtocol(),
-                            ref.getStoreRef().getIdentifier(),
-                            node_id,
-                            CCConstants.PERMISSION_EMBED)) {
-                        throw new AccessDeniedException(CCConstants.PERMISSION_EMBED);
-                    }
+            } else {
+                if (!PermissionServiceFactory.getLocalService().hasPermission(ref.getStoreRef().getProtocol(),
+                        ref.getStoreRef().getIdentifier(),
+                        node_id,
+                        CCConstants.PERMISSION_EMBED)) {
+                    throw new AccessDeniedException(CCConstants.PERMISSION_EMBED);
                 }
+            }
 
                 response = renderingService.getDetails(ApplicationInfoList.getHomeRepository().getAppId(), node_id, version,DEFAULT_DISPLAY_MODE, params).getDetails();
                 response = response.replace("{{{LMS_INLINE_HELPER_SCRIPT}}}", URLHelper.getNgRenderNodeUrl(node_id,version,true)+"?");

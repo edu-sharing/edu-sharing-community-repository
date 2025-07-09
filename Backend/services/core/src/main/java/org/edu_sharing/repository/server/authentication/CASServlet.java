@@ -6,20 +6,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.service.authentication.EduAuthentication;
 import org.edu_sharing.service.authentication.SSOAuthorityMapper;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
 import org.springframework.context.ApplicationContext;
 
-public class CASServlet extends HttpServlet {
+public class CASServlet extends SpringHttpServlet {
 
 	private static Logger logger = Logger.getLogger(CASServlet.class);
 	

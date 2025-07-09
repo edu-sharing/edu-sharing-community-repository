@@ -2,7 +2,6 @@ package org.edu_sharing.repository.server;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.alfresco.model.ContentModel;
@@ -29,7 +28,7 @@ import java.util.Date;
 import java.util.stream.Stream;
 import org.edu_sharing.repository.tools.URLHelper;
 
-public class ShareServlet extends HttpServlet {
+public class ShareServlet extends DownloadServlet {
 
 	static Logger logger = Logger.getLogger(ShareServlet.class);
 
@@ -82,7 +81,7 @@ public class ShareServlet extends HttpServlet {
 			NodeRef finalNodeRef = nodeRef;
 			AuthenticationUtil.runAsSystem(() -> {
 				String fileName= (String) serviceRegistry.getNodeService().getProperty(finalNodeRef,QName.createQName(CCConstants.CM_NAME));
-				DownloadServlet.downloadZip(req, resp, childIds,nodeId,token,password,fileName+".zip");
+				downloadZip(resp, childIds,nodeId,token,password,fileName+".zip");
 				return null;
 			});
 			return;

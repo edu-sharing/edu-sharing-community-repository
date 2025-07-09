@@ -8,13 +8,14 @@ import org.edu_sharing.repository.server.tools.HttpException;
 import org.edu_sharing.repository.server.tools.I18nServer;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
+
 import java.io.File;
 import java.io.IOException;
 
-public class RenderingErrorServlet extends HttpServlet {
+public class RenderingErrorServlet extends SpringHttpServlet {
     private static Logger logger = Logger.getLogger(RenderingErrorServlet.class);
 
     @Override

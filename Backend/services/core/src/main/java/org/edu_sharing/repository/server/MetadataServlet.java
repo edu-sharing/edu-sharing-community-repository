@@ -12,8 +12,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
 
-public class MetadataServlet extends HttpServlet {
+public class MetadataServlet extends SpringHttpServlet {
 
 	
 	public static final String FORMAT_REPOSITORY = "repository";

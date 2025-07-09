@@ -10,13 +10,14 @@ import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.spring.ApplicationContextFactory;
 import org.edu_sharing.spring.security.openid.config.OpenIdConfigService;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 
 import java.io.IOException;
 
-public class SSORegistrationsDispatcherServlet extends HttpServlet {
+public class SSORegistrationsDispatcherServlet extends SpringHttpServlet {
 
     Logger logger = Logger.getLogger(SSORegistrationsDispatcherServlet.class);
 

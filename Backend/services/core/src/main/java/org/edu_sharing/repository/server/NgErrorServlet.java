@@ -3,13 +3,13 @@ package org.edu_sharing.repository.server;
 import org.apache.log4j.Logger;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
 
 import java.io.IOException;
 
-public class NgErrorServlet extends HttpServlet {
+public class NgErrorServlet extends SpringHttpServlet {
 	private static final Logger logger = Logger.getLogger(NgErrorServlet.class);
 
 	@Override

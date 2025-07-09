@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.core5.http.ContentType;
 import org.edu_sharing.spring.ApplicationContextFactory;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 
@@ -19,7 +20,7 @@ import java.io.IOException;
 
 
 @Slf4j
-public class OaiServlet extends HttpServlet {
+public class OaiServlet extends SpringHttpServlet {
 
 
     @Override

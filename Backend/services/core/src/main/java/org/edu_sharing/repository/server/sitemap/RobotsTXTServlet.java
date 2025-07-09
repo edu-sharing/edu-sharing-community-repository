@@ -5,13 +5,14 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
+
 import java.io.IOException;
 
 
-public class RobotsTXTServlet extends HttpServlet{
+public class RobotsTXTServlet extends SpringHttpServlet {
 
     private static Logger logger = Logger.getLogger(RobotsTXTServlet.class);
     @Override

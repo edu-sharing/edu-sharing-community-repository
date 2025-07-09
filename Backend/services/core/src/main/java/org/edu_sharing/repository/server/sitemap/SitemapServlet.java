@@ -33,9 +33,10 @@ import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
 
 
-public class SitemapServlet extends HttpServlet{
+public class SitemapServlet extends SpringHttpServlet {
     public final static String NS_SITEMAP="http://www.sitemaps.org/schemas/sitemap/0.9";
     public final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     private static Logger logger = Logger.getLogger(SitemapServlet.class);

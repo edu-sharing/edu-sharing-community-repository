@@ -20,13 +20,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.Marshaller;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-public class oEmbedServlet extends HttpServlet {
+public class oEmbedServlet extends SpringHttpServlet {
     private static Logger logger = Logger.getLogger(oEmbedServlet.class);
         protected void doGet(HttpServletRequest req, HttpServletResponse resp)
                 throws ServletException, IOException {

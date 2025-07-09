@@ -47,13 +47,11 @@ import org.alfresco.util.PropertyCheck;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
 import org.springframework.context.ApplicationContext;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.UserTransaction;
@@ -69,7 +67,7 @@ import java.util.regex.Pattern;
  * 
  * @author gavinc
  */
-public class Edu_SharingWebDAVServlet extends HttpServlet
+public class Edu_SharingWebDAVServlet extends SpringHttpServlet
 {
     private static final long serialVersionUID = 6900069445027527165L;
 

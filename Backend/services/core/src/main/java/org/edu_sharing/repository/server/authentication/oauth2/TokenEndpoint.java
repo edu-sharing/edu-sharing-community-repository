@@ -1,7 +1,6 @@
 package org.edu_sharing.repository.server.authentication.oauth2;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.alfresco.repo.security.authentication.AuthenticationComponent;
@@ -24,17 +23,21 @@ import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
 import org.edu_sharing.service.tracking.TrackingService;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashMap;
 import java.util.Map;
 
 public class TokenEndpoint extends HttpServlet {
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+public class TokenEndpoint extends SpringHttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	private transient TokenService tokenService;
+	@Autowired
+	private transient TokenService oauthTokenService;
+	@Autowired
 	private transient AuthenticationComponent authenticationComponent;
 	private transient EduAuthentication eduAuthenticationService;
 	
@@ -52,6 +55,8 @@ public class TokenEndpoint extends HttpServlet {
 		eduAuthenticationService = (EduAuthentication) eduApplicationContext.getBean("authenticationService");
 		
 	}
+	@Autowired
+	private transient EduAuthentication authenticationService;
 
 	@Override
 	protected void doPost(HttpServletRequest request,
@@ -66,7 +71,7 @@ public class TokenEndpoint extends HttpServlet {
 
 				String clientId = oauthRequest.getClientId();
 	
-				tokenService.validateClient(clientId, oauthRequest.getClientSecret());
+				oauthTokenService.validateClient(clientId, oauthRequest.getClientSecret());
 				
 				String accessToken = oauthIssuerImpl.accessToken();
 				String refreshToken = oauthIssuerImpl.refreshToken();
@@ -87,6 +92,7 @@ public class TokenEndpoint extends HttpServlet {
 
 						tokenService.createToken(username, accessToken, refreshToken, clientId,authInfo.get(CCConstants.AUTH_TICKET));
                         TrackingServiceFactory.getTrackingService().trackActivityOnUser(username,TrackingService.EventType.LOGIN_USER_OAUTH_PASSWORD);
+						oauthTokenService.createToken(username, accessToken, refreshToken, clientId,authInfo.get(CCConstants.AUTH_TICKET));
 						
 					} catch (Throwable e) {
 						
@@ -99,18 +105,19 @@ public class TokenEndpoint extends HttpServlet {
 					
 					try {
 						AuthenticationTool authTool = RepoFactory.getAuthenticationToolInstance(null);
-						Token oldToken = tokenService.getRefreshToken(oauthRequest.getRefreshToken());
+						Token oldToken = oauthTokenService.getRefreshToken(oauthRequest.getRefreshToken());
 						
 						String ticket = null;
 						if(authTool.validateTicket(oldToken.getTicket())){
 							ticket = oldToken.getTicket();
 						}else{
 							authenticationComponent.setCurrentUser(oldToken.getUsername());
-							ticket = eduAuthenticationService.getCurrentTicket();
+							ticket = authenticationService.getCurrentTicket();
 						}
 						
 						Token newToken=tokenService.refreshToken(oauthRequest.getRefreshToken(), accessToken, refreshToken, clientId, ticket);
                         TrackingServiceFactory.getTrackingService().trackActivityOnUser(newToken.getUsername(),TrackingService.EventType.LOGIN_USER_OAUTH_REFRESH_TOKEN);
+						Token newToken= oauthTokenService.refreshToken(oauthRequest.getRefreshToken(), accessToken, refreshToken, clientId, ticket);
 
                     } catch (Throwable e) {
 						Logger.getLogger(TokenEndpoint.class).warn(e.toString());
@@ -128,7 +135,7 @@ public class TokenEndpoint extends HttpServlet {
 						if(request.getSession().getAttribute(CCConstants.AUTH_SCOPE)!=null)
 							throw OAuthProblemException.error("OAuth not allowed for scoped session");
 						Logger.getLogger(TokenEndpoint.class).info("auth via session for "+userName);
-						tokenService.createToken(userName, accessToken, refreshToken, clientId,authInfo.get(CCConstants.AUTH_TICKET));
+						oauthTokenService.createToken(userName, accessToken, refreshToken, clientId,authInfo.get(CCConstants.AUTH_TICKET));
 						
 					} catch (Throwable e) {
 						
@@ -137,7 +144,7 @@ public class TokenEndpoint extends HttpServlet {
 				}
 				OAuthResponse r = OAuthASResponse
 						.tokenResponse(HttpServletResponse.SC_OK)
-						.setAccessToken(accessToken).setExpiresIn(Long.toString(tokenService.getExpiresIn()))
+						.setAccessToken(accessToken).setExpiresIn(Long.toString(oauthTokenService.getExpiresIn()))
 						.setRefreshToken(refreshToken)
 						.buildJSONMessage();
 	

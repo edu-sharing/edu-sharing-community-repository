@@ -1,15 +1,12 @@
 package org.edu_sharing.repository.server;
 
-import com.typesafe.config.Config;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -18,6 +15,7 @@ import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -27,12 +25,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.security.SecureRandom;
-import java.util.Base64;
-import java.util.HashMap;
 import java.util.Map;
 
-public class NgServlet extends HttpServlet {
+public class NgServlet extends SpringHttpServlet {
 	public static final String COMPONENTS_RENDER = "components/render";
 	public static final String COMPONENTS_COLLECTIONS = "components/collections";
 	public static final String COMPONENTS_ERROR = "components/error";

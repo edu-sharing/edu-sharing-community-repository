@@ -43,6 +43,7 @@ import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
@@ -60,7 +61,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 
-public class ConnectorServlet extends HttpServlet  {
+public class ConnectorServlet extends SpringHttpServlet {
 
 	private static Logger logger = Logger.getLogger(ConnectorServlet.class);
 

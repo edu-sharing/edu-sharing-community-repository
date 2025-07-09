@@ -45,10 +45,11 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
 import org.springframework.context.ApplicationContext;
 
 
-public class CCConfirmActivation extends HttpServlet {
+public class CCConfirmActivation extends SpringHttpServlet {
 
 	static Logger log = Logger.getLogger(CCConfirmActivation.class);
 
