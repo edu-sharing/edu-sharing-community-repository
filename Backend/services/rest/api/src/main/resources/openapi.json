@@ -1637,7 +1637,8 @@
           "id": {
             "enum": [
               "handleService",
-              "doiService"
+              "doiService",
+              "dataprotection"
             ],
             "type": "string"
           }
@@ -1714,6 +1715,9 @@
       },
       "FontIcon": {
         "properties": {
+          "context": {
+            "type": "string"
+          },
           "cssClass": {
             "type": "string"
           },
@@ -21658,6 +21662,188 @@
           }
         },
         "summary": "Fetches the status of the current 2fa of the user",
+        "tags": [
+          "IAM v1"
+        ]
+      }
+    },
+    "/iam/v1/people/{repository}/{person}/dataprotection": {
+      "get": {
+        "description": "Fetches the node of general data protection export.",
+        "operationId": "getDataProtectionExport",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "username (or \"-me-\" for current user)",
+            "in": "path",
+            "name": "person",
+            "required": true,
+            "schema": {
+              "default": "-me-",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodeEntry"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Fetches the node of general data protection export",
+        "tags": [
+          "IAM v1"
+        ]
+      },
+      "put": {
+        "description": "Request General Data Protection Regulation (GDPR) export of the user the user. (To request GDPR export for foreign users, admin rights are required.)",
+        "operationId": "requestDataProtectionExport",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "username (or \"-me-\" for current user)",
+            "in": "path",
+            "name": "person",
+            "required": true,
+            "schema": {
+              "default": "-me-",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {}
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "requests General Data Protection Regulation (GDPR) export.",
         "tags": [
           "IAM v1"
         ]
