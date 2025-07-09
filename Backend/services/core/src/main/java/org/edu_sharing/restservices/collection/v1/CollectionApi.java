@@ -1,6 +1,5 @@
 package org.edu_sharing.restservices.collection.v1;
 
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -12,9 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.metadataset.v2.MetadataSet;
-import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.restservices.*;
@@ -30,8 +27,8 @@ import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
-import org.edu_sharing.service.tracking.TrackingService;
-import org.edu_sharing.service.tracking.TrackingServiceFactory;
+import org.edu_sharing.service.tracking.ActivityEventService;
+import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.edu_sharing.service.util.AlfrescoDaoHelper;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -39,6 +36,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.io.InputStream;
 import java.util.*;
 
@@ -50,6 +49,9 @@ import java.util.*;
 public class CollectionApi {
 
 	private static Logger logger = Logger.getLogger(CollectionApi.class);
+
+	@Autowired
+	private ActivityEventService activityEventService;
 
 	@GET
 	@Path("/collections/{repository}/{collectionId}")
@@ -95,7 +97,7 @@ public class CollectionApi {
 			response.setCollection(collection);
 
 			if(track == null || track) {
-				TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, collectionId), null, TrackingService.EventType.VIEW_COLLECTION);
+				activityEventService.trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, collectionId), null, ActivityOnNodeEventType.VIEW_COLLECTION, null);
 			}
 
 			return Response.status(Response.Status.OK).entity(response).build();

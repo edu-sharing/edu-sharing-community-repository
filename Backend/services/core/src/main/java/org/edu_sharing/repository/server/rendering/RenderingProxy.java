@@ -39,16 +39,19 @@ import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.rendering.*;
 import org.edu_sharing.service.repoproxy.RepoProxy;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
-import org.edu_sharing.service.tracking.NodeTrackingDetails;
-import org.edu_sharing.service.tracking.TrackingService;
-import org.edu_sharing.service.tracking.TrackingServiceFactory;
+import org.edu_sharing.service.tracking.*;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Deprecated
-public class RenderingProxy extends HttpServlet {
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class RenderingProxy extends SpringHttpServlet {
+
+
+	@Autowired
+	private transient ActivityEventService activityEventService;
 
 
 	private static final String[] ALLOWED_GET_PARAMS = new String[]{
@@ -365,11 +368,14 @@ public class RenderingProxy extends SpringHttpServlet {
 			// track inline / lms
 			if (Arrays.asList(RenderingTool.DISPLAY_INLINE, RenderingTool.DISPLAY_EMBED).contains(options.displayMode)) {
 				NodeTrackingDetails details = getTrackingDetails(req, usage);
-				AuthenticationUtil.runAs(() ->
-								TrackingServiceFactory.getTrackingService().trackActivityOnNode(
-										new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
-										details,
-										TrackingService.EventType.VIEW_MATERIAL_EMBEDDED)
+				AuthenticationUtil.runAs(() -> {
+							activityEventService.trackActivityOnNode(
+									new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
+									details,
+									ActivityOnNodeEventType.VIEW_MATERIAL_EMBEDDED,
+									null);
+							return null;
+						}
 						,usernameDecrypted);
 			}
 		} catch (HttpException e) {

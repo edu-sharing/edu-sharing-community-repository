@@ -18,7 +18,9 @@ import org.edu_sharing.repository.server.tools.NodeTool;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.service.nodeservice.NodeService;
-import org.edu_sharing.service.tracking.TrackingService;
+import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
+import org.edu_sharing.service.tracking.ActivityStatisticService;
+import org.edu_sharing.service.tracking.GroupingType;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
 import org.jetbrains.annotations.NotNull;
 import org.quartz.JobExecutionContext;
@@ -39,12 +41,12 @@ import java.util.stream.Stream;
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @JobDescription(description = "Creates reports for all NodeObjects on the 1st of each month for the last month")
 public class NodeObjectReportJob extends AbstractJobMapAnnotationParams {
-    private static final List<TrackingService.EventType> STATISTIC_EVENTS = List.of(
-            TrackingService.EventType.VIEW_MATERIAL,
-            TrackingService.EventType.VIEW_MATERIAL_EMBEDDED,
-            TrackingService.EventType.VIEW_MATERIAL_PLAY_MEDIA,
-            TrackingService.EventType.OPEN_EXTERNAL_LINK,
-            TrackingService.EventType.DOWNLOAD_MATERIAL
+    private static final List<ActivityOnNodeEventType> STATISTIC_EVENTS = List.of(
+            ActivityOnNodeEventType.VIEW_MATERIAL,
+            ActivityOnNodeEventType.VIEW_MATERIAL_EMBEDDED,
+            ActivityOnNodeEventType.VIEW_MATERIAL_PLAY_MEDIA,
+            ActivityOnNodeEventType.OPEN_EXTERNAL_LINK,
+            ActivityOnNodeEventType.DOWNLOAD_MATERIAL
     );
 
     @Value
@@ -110,7 +112,7 @@ public class NodeObjectReportJob extends AbstractJobMapAnnotationParams {
     private boolean force = false;
 
     @Autowired
-    private TrackingService trackingService;
+    private ActivityStatisticService activityStatisticService;
 
     @Autowired
     @Qualifier("nodeService")
@@ -150,8 +152,8 @@ public class NodeObjectReportJob extends AbstractJobMapAnnotationParams {
 
         String nodeId = null;
         try {
-            List<StatisticEntryNode> nodeStatisics = trackingService.getNodeStatisics(
-                    TrackingService.GroupingType.Node,
+            List<StatisticEntryNode> nodeStatisics = activityStatisticService.getNodeStatisics(
+                    GroupingType.Node,
                     Date.from(from.atStartOfDay().toInstant(ZoneOffset.UTC)),
                     Date.from(to.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)),
                     "",
@@ -246,7 +248,7 @@ public class NodeObjectReportJob extends AbstractJobMapAnnotationParams {
                     .collect(Collectors.toList());
 
             // add total sum count
-            Map<TrackingService.EventType, Integer> eventCountMapping = entry.getCounts();
+            Map<String, Integer> eventCountMapping = entry.getCounts();
             int totalSum = STATISTIC_EVENTS.stream()
                     .map(event -> eventCountMapping.getOrDefault(event, 0))
                     .reduce(Integer::sum)

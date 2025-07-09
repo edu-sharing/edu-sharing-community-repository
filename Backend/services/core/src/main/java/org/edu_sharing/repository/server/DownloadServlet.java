@@ -32,8 +32,8 @@ import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
-import org.edu_sharing.service.tracking.TrackingService;
-import org.edu_sharing.service.tracking.TrackingServiceFactory;
+import org.edu_sharing.service.tracking.ActivityEventService;
+import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.edu_sharing.spring.servlet.SpringHttpServlet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -50,10 +50,12 @@ import java.util.zip.ZipOutputStream;
 public class DownloadServlet extends SpringHttpServlet {
     static Logger logger = Logger.getLogger(DownloadServlet.class);
 
-	@SneakyThrows
 
     @Autowired
     protected transient PermissionChecking permissionChecking;
+
+    @Autowired
+    protected transient ActivityEventService activityEventService;
 
     @SneakyThrows
     @Override
@@ -80,56 +82,56 @@ public class DownloadServlet extends SpringHttpServlet {
 
     }
 
-	private void downloadNodeInternal(
-			String nodeId,
-			String repositoryId,
-			HttpServletRequest req, HttpServletResponse resp,
-			String fileName, Mode mode) throws ServletException, InsufficientPermissionException {
-		try {
-			// allow signature based auth from connector to bypass the download/content access
-			NodeService nodeService = repositoryId == null ? NodeServiceFactory.getLocalService() : NodeServiceFactory.getNodeService(repositoryId);
-			logger.debug("Access tool: " + ContextManagementFilter.accessTool.get());
-			if (repositoryId == null &&
-					!NodeServiceHelper.downloadAllowed(nodeId) &&
-					!(
-							ContextManagementFilter.accessTool.get() != null &&
-									(
-											ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getApplicationInfo().getType()) ||
-											(
-													ApplicationInfo.TYPE_LMS.equals(ContextManagementFilter.accessTool.get().getApplicationInfo().getType()) &&
-													"curriculum".equals(ContextManagementFilter.accessTool.get().getApplicationInfo().getSubtype())
-											)
-									)
-					)
-			) {
-				logger.info("Download forbidden for node " + nodeId);
-				throw new ErrorFilter.ErrorFilterException(HttpServletResponse.SC_FORBIDDEN);
-			}
-			NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
-			String version=req.getParameter("version");
-			if(version!=null && version.isEmpty()) {
-				version=null;
-			}
-			String name = fileName!=null ? fileName : nodeService.getProperty(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(), CCConstants.CM_NAME);
-			if("true".equalsIgnoreCase(req.getParameter("metadata"))){
-				String metadata = getMetadataRenderer(nodeRef).render("io_text");
-				ByteArrayOutputStream out = new ByteArrayOutputStream();
-				out.write(metadata.getBytes());
-				outputData(resp,name + ".txt", out);
-				return;
-			}
-			String originalNodeId;
-			if(repositoryId == null) {
-				// do only track downloads if it was not accessed by the connector service
-				if(ContextManagementFilter.accessTool.get() == null ||
-						!ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getApplicationInfo().getType())) {
-					TrackingServiceFactory.getTrackingService().trackActivityOnNode(nodeRef, null, TrackingService.EventType.DOWNLOAD_MATERIAL);
-				}
-				originalNodeId = checkAndGetCollectionRef(nodeRef.getId());
-			} else {
-				originalNodeId = nodeRef.getId();
-			}
-			downloadNodeInternal(nodeId, resp, mode, originalNodeId, version, nodeService, nodeRef, name);
+    private void downloadNodeInternal(
+            String nodeId,
+            String repositoryId,
+            HttpServletRequest req, HttpServletResponse resp,
+            String fileName, Mode mode) throws ServletException, InsufficientPermissionException {
+        try {
+            // allow signature based auth from connector to bypass the download/content access
+            NodeService nodeService = repositoryId == null ? NodeServiceFactory.getLocalService() : NodeServiceFactory.getNodeService(repositoryId);
+            logger.debug("Access tool: " + ContextManagementFilter.accessTool.get());
+            if (repositoryId == null &&
+                    !NodeServiceHelper.downloadAllowed(nodeId) &&
+                    !(
+                            ContextManagementFilter.accessTool.get() != null &&
+                                    (
+                                            ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getApplicationInfo().getType()) ||
+                                                    (
+                                                            ApplicationInfo.TYPE_LMS.equals(ContextManagementFilter.accessTool.get().getApplicationInfo().getType()) &&
+                                                                    "curriculum".equals(ContextManagementFilter.accessTool.get().getApplicationInfo().getSubtype())
+                                                    )
+                                    )
+                    )
+            ) {
+                logger.info("Download forbidden for node " + nodeId);
+                throw new ErrorFilter.ErrorFilterException(HttpServletResponse.SC_FORBIDDEN);
+            }
+            NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+            String version = req.getParameter("version");
+            if (version != null && version.isEmpty()) {
+                version = null;
+            }
+            String name = fileName != null ? fileName : nodeService.getProperty(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(), CCConstants.CM_NAME);
+            if ("true".equalsIgnoreCase(req.getParameter("metadata"))) {
+                String metadata = getMetadataRenderer(nodeRef).render("io_text");
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                out.write(metadata.getBytes());
+                outputData(resp, name + ".txt", out);
+                return;
+            }
+            String originalNodeId;
+            if (repositoryId == null) {
+                // do only track downloads if it was not accessed by the connector service
+                if (ContextManagementFilter.accessTool.get() == null ||
+                        !ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getApplicationInfo().getType())) {
+                    activityEventService.trackActivityOnNode(nodeRef, null, ActivityOnNodeEventType.DOWNLOAD_MATERIAL, null);
+                }
+                originalNodeId = checkAndGetCollectionRef(nodeRef.getId());
+            } else {
+                originalNodeId = nodeRef.getId();
+            }
+            downloadNodeInternal(nodeId, resp, mode, originalNodeId, version, nodeService, nodeRef, name);
 
         } catch (Throwable t) {
             logger.error(t);
@@ -313,21 +315,21 @@ public class DownloadServlet extends SpringHttpServlet {
         List<String> filenames = new ArrayList<>();
 
 
-		try{
-			AuthenticationUtil.RunAsWork<Boolean> runAll= () ->{
-				for(String nodeId : nodeIds){
-					try{
-						/**
-						 * Collection change nodeRef to original
-						 */
-						boolean isCollectionRef=false;
-						String originalNodeId = checkAndGetCollectionRef(nodeId);
-						TrackingTool.trackActivityOnNode(nodeId,null,TrackingService.EventType.DOWNLOAD_MATERIAL);
-						if(originalNodeId != null){
-							nodeId = originalNodeId;
-							isCollectionRef = true;
-						}
-						String finalNodeId = nodeId;
+        try {
+            AuthenticationUtil.RunAsWork<Boolean> runAll = () -> {
+                for (String nodeId : nodeIds) {
+                    try {
+                        /**
+                         * Collection change nodeRef to original
+                         */
+                        boolean isCollectionRef = false;
+                        String originalNodeId = checkAndGetCollectionRef(nodeId);
+                        TrackingTool.trackActivityOnNode(nodeId, null, ActivityOnNodeEventType.DOWNLOAD_MATERIAL);
+                        if (originalNodeId != null) {
+                            nodeId = originalNodeId;
+                            isCollectionRef = true;
+                        }
+                        String finalNodeId = nodeId;
 
                         AuthenticationUtil.RunAsWork work = () -> {
                             addNodeToZip(resp, finalNodeId, zos, nodeService, errors, filenames);

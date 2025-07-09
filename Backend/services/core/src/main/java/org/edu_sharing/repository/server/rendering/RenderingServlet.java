@@ -1,10 +1,8 @@
 package org.edu_sharing.repository.server.rendering;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -15,28 +13,28 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SecurityHeadersFilter;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.tools.URLHelper;
-import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
-import org.edu_sharing.service.permission.PermissionChecking;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.rendering.RenderingService;
 import org.edu_sharing.service.rendering.RenderingServiceFactory;
 import org.edu_sharing.service.rendering.RenderingTool;
-import org.edu_sharing.service.tracking.TrackingService;
-import org.edu_sharing.service.tracking.TrackingServiceFactory;
-import org.springframework.web.servlet.support.RequestContextUtils;
+import org.edu_sharing.service.tracking.ActivityEventService;
+import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.edu_sharing.spring.servlet.SpringHttpServlet;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RenderingServlet extends HttpServlet {
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class RenderingServlet extends SpringHttpServlet {
     private static final String DEFAULT_DISPLAY_MODE = RenderingTool.DISPLAY_EMBED;
-    private static Logger logger = Logger.getLogger(RenderingServlet.class);
     private static final Logger logger = Logger.getLogger(RenderingServlet.class);
+
+    @Autowired
+    private transient ActivityEventService activityEventService;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -92,20 +90,20 @@ public class RenderingServlet extends SpringHttpServlet {
                 }
             }
 
-                response = renderingService.getDetails(ApplicationInfoList.getHomeRepository().getAppId(), node_id, version,DEFAULT_DISPLAY_MODE, params).getDetails();
-                response = response.replace("{{{LMS_INLINE_HELPER_SCRIPT}}}", URLHelper.getNgRenderNodeUrl(node_id,version,true)+"?");
-                // add nonce to render styles
-                response = response.replace("<style", "<style nonce=\"" +SecurityHeadersFilter.ngCspNonce.get() + "\"");
-                TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node_id), null, TrackingService.EventType.VIEW_MATERIAL_EMBEDDED);
-            } catch (Throwable t) {
-                RenderingException exception = RenderingException.fromThrowable(t);
-                response = RenderingErrorServlet.errorToHTML(req,
-                        exception);
-                resp.setStatus(exception.getStatusCode());
-            }
-            resp.setContentType("text/html");
-            resp.getWriter().write(response);
-            resp.getWriter().write("</body>");
-            resp.getWriter().write("</html>");
+            response = renderingService.getDetails(ApplicationInfoList.getHomeRepository().getAppId(), node_id, version, DEFAULT_DISPLAY_MODE, params).getDetails();
+            response = response.replace("{{{LMS_INLINE_HELPER_SCRIPT}}}", URLHelper.getNgRenderNodeUrl(node_id, version, true) + "?");
+            // add nonce to render styles
+            response = response.replace("<style", "<style nonce=\"" + SecurityHeadersFilter.ngCspNonce.get() + "\"");
+            activityEventService.trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node_id), null, ActivityOnNodeEventType.VIEW_MATERIAL_EMBEDDED, null);
+        } catch (Throwable t) {
+            RenderingException exception = RenderingException.fromThrowable(t);
+            response = RenderingErrorServlet.errorToHTML(req,
+                    exception);
+            resp.setStatus(exception.getStatusCode());
         }
+        resp.setContentType("text/html");
+        resp.getWriter().write(response);
+        resp.getWriter().write("</body>");
+        resp.getWriter().write("</html>");
+    }
 }

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.edu_sharing.restservices.shared.Group;
 import org.edu_sharing.restservices.shared.Organization;
-import org.edu_sharing.service.tracking.TrackingService;
+import org.edu_sharing.service.tracking.ActivityStatisticService;
 
 import java.io.Serializable;
 import java.util.List;
@@ -12,15 +12,15 @@ import java.util.Map;
 
 @Data
 public class Tracking {
-    private Map<TrackingService.EventType, Integer> counts;
+    private Map<String, Integer> counts;
     private String date;
     @JsonProperty("authority")
     private TrackingAuthority trackingAuthority;
     private Map<String, Serializable> fields;
-    private Map<TrackingService.EventType, Map<String, Map<String, Long>>> groups;
+    private Map<String, Map<String, Map<String, Long>>> groups;
 
     public Tracking(){}
-    public Tracking(String date, TrackingAuthority trackingAuthority, Map<TrackingService.EventType,Integer> counts, Map<String,Serializable> fields, Map<TrackingService.EventType, Map<String, Map<String, Long>>> groups){
+    public Tracking(String date, TrackingAuthority trackingAuthority, Map<String,Integer> counts, Map<String,Serializable> fields, Map<String, Map<String, Map<String, Long>>> groups){
         this.date=date;
         this.trackingAuthority = trackingAuthority;
         this.counts=counts;

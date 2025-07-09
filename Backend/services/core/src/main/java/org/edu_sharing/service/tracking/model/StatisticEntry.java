@@ -1,41 +1,23 @@
 package org.edu_sharing.service.tracking.model;
 
-import org.edu_sharing.service.tracking.TrackingService;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class StatisticEntry implements Comparable<StatisticEntry>{
+@Data
+public class StatisticEntry implements Comparable<StatisticEntry> {
     protected String date;
-    protected Map<String,Serializable> fields=new HashMap<>();
-    protected Map<TrackingService.EventType,Map<String,Map<String,Long>>> groups=new HashMap<>();
+    protected Map<String, Serializable> fields = new HashMap<>();
+    protected Map<String, Map<String, Map<String, Long>>> groups = new HashMap<>();
 
-    protected Map<TrackingService.EventType,Integer> counts=new HashMap<>();
+    protected Map<String, Integer> counts = new HashMap<>();
     private final AuthorityInfo authorityInfo = new AuthorityInfo();
 
-    public Map<TrackingService.EventType, Integer> getCounts() {
-        return counts;
-    }
 
     public StatisticEntry() {
-    }
-
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    public Map<String, Serializable> getFields() {
-        return fields;
-    }
-
-    public Map<TrackingService.EventType, Map<String, Map<String, Long>>> getGroups() {
-        return groups;
     }
 
     @Override
@@ -48,46 +30,18 @@ public class StatisticEntry implements Comparable<StatisticEntry>{
 
     @Override
     public int hashCode() {
-
-        return Objects.hash(date,fields);
-    }
-
-    public AuthorityInfo getAuthorityInfo() {
-        return authorityInfo;
+        return Objects.hash(date, fields);
     }
 
     @Override
     public int compareTo(StatisticEntry o) {
-        return date==null ? 0 : date.compareTo(o.date);
+        return date == null ? 0 : date.compareTo(o.date);
     }
 
+    @Data
     public static class AuthorityInfo {
         private String authority;
         private String[] organizations;
         private String[] mediacenters;
-
-        public String getAuthority() {
-            return authority;
-        }
-
-        public void setAuthority(String authority) {
-            this.authority = authority;
-        }
-
-        public String[] getOrganizations() {
-            return organizations;
-        }
-
-        public void setOrganizations(String[] organizations) {
-            this.organizations = organizations;
-        }
-
-        public String[] getMediacenters() {
-            return mediacenters;
-        }
-
-        public void setMediacenters(String[] mediacenters) {
-            this.mediacenters = mediacenters;
-        }
     }
 }

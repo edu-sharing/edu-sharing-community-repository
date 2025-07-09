@@ -9,17 +9,17 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.apache.log4j.Logger;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.shared.ErrorResponse;
-import org.edu_sharing.service.tracking.TrackingService;
-import org.edu_sharing.service.tracking.TrackingServiceFactory;
+import org.edu_sharing.service.tracking.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.Arrays;
 
 @Path("/tracking/v1")
@@ -28,7 +28,10 @@ import java.util.Arrays;
 @Consumes({ "application/json" })
 @Produces({"application/json"})
 public class TrackingApi {
-	private static Logger logger = Logger.getLogger(TrackingApi.class);
+
+	@Autowired
+	private ActivityEventService activityEventService;
+
 	@PUT
 	@Path("/tracking/{repository}/{event}")
 	@Operation(summary = "Track a user interaction", description = "Currently limited to video / audio play interactions")
@@ -42,15 +45,17 @@ public class TrackingApi {
 	    })
 	public Response trackEvent(
 			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-	    	@Parameter(description = "type of event to track",required=false ) @PathParam("event") TrackingService.EventType event,
-	    	@Parameter(description = "node id for which the event is tracked. For some event, this can be null",required=false ) @QueryParam("node") String node,
+			@Parameter(description = "type of event to track",required=false ) @PathParam("event") ActivityOnNodeEventType event,
+			@Parameter(description = "node id for which the event is tracked. For some event, this can be null",required=false ) @QueryParam("node") String node,
 			@Context HttpServletRequest req) {
     	try {
 	    	if(Arrays.asList(
-					TrackingService.EventType.VIEW_MATERIAL_PLAY_MEDIA, TrackingService.EventType.VIEW_MATERIAL,
-					TrackingService.EventType.DOWNLOAD_MATERIAL, TrackingService.EventType.OPEN_EXTERNAL_LINK
+					ActivityOnNodeEventType.VIEW_MATERIAL_PLAY_MEDIA,
+					ActivityOnNodeEventType.VIEW_MATERIAL,
+					ActivityOnNodeEventType.DOWNLOAD_MATERIAL,
+					ActivityOnNodeEventType.OPEN_EXTERNAL_LINK
 			).contains(event)){
-				TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, event);
+				activityEventService.trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, event, null);
 				return Response.status(Response.Status.OK).build();
 			} else {
 	    		throw new IllegalArgumentException("the given event is currently not supported via api");

@@ -30,7 +30,8 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.SearchServiceFactory;
-import org.edu_sharing.service.tracking.TrackingService;
+import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
+import org.edu_sharing.service.tracking.ActivityStatisticService;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.jetbrains.annotations.NotNull;
@@ -83,12 +84,12 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
     @JobFieldDescription(description = "List of additional (custom) fields to be fetched from the tracking data", sampleValue = "field1")
     private List<String> additionalFields = Collections.emptyList();
 
-    static List<TrackingService.EventType> STAT_FIELDS = Arrays.asList(
-            TrackingService.EventType.VIEW_MATERIAL,
-            TrackingService.EventType.VIEW_MATERIAL_EMBEDDED,
-            TrackingService.EventType.VIEW_MATERIAL_PLAY_MEDIA,
-            TrackingService.EventType.OPEN_EXTERNAL_LINK,
-            TrackingService.EventType.DOWNLOAD_MATERIAL
+    static List<ActivityOnNodeEventType> STAT_FIELDS = Arrays.asList(
+            ActivityOnNodeEventType.VIEW_MATERIAL,
+            ActivityOnNodeEventType.VIEW_MATERIAL_EMBEDDED,
+            ActivityOnNodeEventType.VIEW_MATERIAL_PLAY_MEDIA,
+            ActivityOnNodeEventType.OPEN_EXTERNAL_LINK,
+            ActivityOnNodeEventType.DOWNLOAD_MATERIAL
     );
     @JobFieldDescription(description = "Optional, set a list of mediacenters to apply, otherwise it will run for all", sampleValue = "GROUP_MEDIA_CENTER_1")
     private List<String> mediacenters;
@@ -183,7 +184,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 
     private void generateSchoolReportByTimeRange(String mediacenter, Date startDate, Date endDate, ReportType reportType) throws Throwable {
         if (mode.equals(ReportMode.TrackingMediacenterData)) {
-            Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> dataNodes = trackingService.getListNodeDataByMediacenter(
+            Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> dataNodes = activityStatisticService.getListNodeDataByMediacenter(
                     mediacenter,
                     startDate,
                     endDate,
@@ -192,7 +193,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
             dataNodes = filterNonMediacenterMedia(dataNodes);
 
             // Holds for each event (VIEW, DOWNLOAD...) a list of Org ids + counts
-            Map<TrackingService.EventType, Map<String, Long>> result = new HashMap<>();
+            Map<String, Map<String, Long>> result = new HashMap<>();
             Set<String> organizations = new HashSet<>(Arrays.asList(AuthorityServiceFactory.getLocalService().getMembershipsOfGroup(mediacenter)));
             for (StatisticEntry v : dataNodes.values()) {
                 v.getGroups().forEach((eventType, stats) -> {
@@ -203,7 +204,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
                 });
             }
 
-            List<TrackingService.EventType> eventList = new ArrayList<>(result.keySet());
+            List<String> eventList = new ArrayList<>(result.keySet());
             List<String> header = new ArrayList<>();
             header.add(I18nAngular.getTranslationAngular("admin", "ADMIN.STATISTICS.HEADERS.authority_organization_id"));
             header.add(I18nAngular.getTranslationAngular("admin", "ADMIN.STATISTICS.HEADERS.authority_organization"));
@@ -229,7 +230,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
                 org.alfresco.service.cmr.repository.NodeRef ref = AuthorityServiceHelper.getAuthorityNodeRef(org);
                 resultArray.add(org.substring((PermissionService.GROUP_PREFIX + ORG_GROUP_PREFIX).length()));
                 resultArray.add((String) NodeServiceHelper.getPropertyNative(ref, ContentModel.PROP_AUTHORITY_DISPLAY_NAME.toString()));
-                for (TrackingService.EventType eventType : eventList) {
+                for (String eventType : eventList) {
                     resultArray.add(result.get(eventType).getOrDefault(org, 0L).toString());
                 }
                 return resultArray.toArray(new String[0]);
@@ -246,15 +247,15 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
         }
     }
 
-    TrackingService trackingService = TrackingServiceFactory.getTrackingService();
+    ActivityStatisticService activityStatisticService = TrackingServiceFactory.getTrackingService();
     MediacenterService mediacenterService = MediacenterServiceFactory.getLocalService();
 
     private void generateReportByTimeRange(String mediacenter, Date startDate, Date endDate, ReportType reportType) throws Throwable {
-        TrackingService trackingService = TrackingServiceFactory.getTrackingService();
+        ActivityStatisticService activityStatisticService = TrackingServiceFactory.getTrackingService();
         Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> data = null;
         if (mode.equals(ReportMode.AlfrescoPermissionData)) {
             List<NodeRef> nodes = mediacenterService.getAllLicensedNodes(mediacenter, Collections.emptyMap(), null);
-            data = trackingService.getListNodeData(
+            data = activityStatisticService.getListNodeData(
                     nodes.stream().map(
                             ref -> new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, ref.getNodeId())
                     ).collect(Collectors.toList()),
@@ -264,7 +265,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
                     mediacenter
             );
         } else if (mode.equals(ReportMode.TrackingMediacenterData)) {
-            data = trackingService.getListNodeDataByMediacenter(
+            data = activityStatisticService.getListNodeDataByMediacenter(
                     mediacenter,
                     startDate,
                     endDate,

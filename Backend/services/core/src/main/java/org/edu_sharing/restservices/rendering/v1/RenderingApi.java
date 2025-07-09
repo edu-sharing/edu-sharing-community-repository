@@ -27,8 +27,8 @@ import org.edu_sharing.service.rendering.RenderingDetails;
 import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.service.repoproxy.RepoProxy;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
+import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.edu_sharing.service.tracking.NodeTrackingDetails;
-import org.edu_sharing.service.tracking.TrackingService;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -132,9 +132,9 @@ public class RenderingApi {
 								Context.getCurrentInstance().getRequest().getSession().removeAttribute(CCConstants.SESSION_RENDERING_DETAILS);
 					}
 					if (Arrays.asList(RenderingTool.DISPLAY_DYNAMIC, RenderingTool.DISPLAY_CONTENT).contains(displayMode) || displayMode == null) {
-						TrackingTool.trackActivityOnNode(node, details, TrackingService.EventType.VIEW_MATERIAL);
+						TrackingTool.trackActivityOnNode(node, details, ActivityOnNodeEventType.VIEW_MATERIAL);
 					} else if (RenderingTool.DISPLAY_INLINE.equals(displayMode)) {
-						TrackingTool.trackActivityOnNode(node, details, TrackingService.EventType.VIEW_MATERIAL_EMBEDDED);
+						TrackingTool.trackActivityOnNode(node, details, ActivityOnNodeEventType.VIEW_MATERIAL_EMBEDDED);
 					}
 				}
 

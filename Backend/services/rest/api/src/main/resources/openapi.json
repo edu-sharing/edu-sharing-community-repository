@@ -39203,12 +39203,7 @@
                 "OPEN_EXTERNAL_LINK",
                 "VIEW_COLLECTION",
                 "VIEW_MATERIAL_EMBEDDED",
-                "VIEW_MATERIAL_PLAY_MEDIA",
-                "LOGIN_USER_SESSION",
-                "LOGIN_USER_OAUTH_PASSWORD",
-                "LOGIN_USER_OAUTH_REFRESH_TOKEN",
-                "LOGOUT_USER_TIMEOUT",
-                "LOGOUT_USER_REGULAR"
+                "VIEW_MATERIAL_PLAY_MEDIA"
               ],
               "type": "string"
             }

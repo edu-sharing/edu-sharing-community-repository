@@ -13,23 +13,21 @@ import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
 import org.apache.oltu.oauth2.common.message.types.GrantType;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationTool;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.service.authentication.EduAuthentication;
 import org.edu_sharing.service.authentication.oauth2.TokenService;
 import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
-import org.edu_sharing.service.tracking.TrackingService;
-import org.edu_sharing.service.tracking.TrackingServiceFactory;
-import org.springframework.context.ApplicationContext;
+import org.edu_sharing.service.tracking.ActivityEventService;
+import org.edu_sharing.service.tracking.UserActivityEventType;
+import org.edu_sharing.spring.servlet.SpringHttpServlet;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
 
-public class TokenEndpoint extends HttpServlet {
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class TokenEndpoint extends SpringHttpServlet {
 
@@ -39,24 +37,10 @@ public class TokenEndpoint extends SpringHttpServlet {
 	private transient TokenService oauthTokenService;
 	@Autowired
 	private transient AuthenticationComponent authenticationComponent;
-	private transient EduAuthentication eduAuthenticationService;
-	
-	@Override
-	public void init() throws ServletException {
-		
-		ApplicationContext eduApplicationContext = 
-				org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
-		
-		tokenService = (TokenService) eduApplicationContext.getBean("oauthTokenService");
-		
-		ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
-		authenticationComponent = (AuthenticationComponent) alfApplicationContext.getBean("authenticationComponent");
-		
-		eduAuthenticationService = (EduAuthentication) eduApplicationContext.getBean("authenticationService");
-		
-	}
 	@Autowired
 	private transient EduAuthentication authenticationService;
+	@Autowired
+	private transient ActivityEventService activityEventService;
 
 	@Override
 	protected void doPost(HttpServletRequest request,
@@ -90,9 +74,8 @@ public class TokenEndpoint extends SpringHttpServlet {
 						Map<String, String> authInfo = RepoFactory.getAuthenticationToolInstance(null)
 							.createNewSession(username, oauthRequest.getPassword());
 
-						tokenService.createToken(username, accessToken, refreshToken, clientId,authInfo.get(CCConstants.AUTH_TICKET));
-                        TrackingServiceFactory.getTrackingService().trackActivityOnUser(username,TrackingService.EventType.LOGIN_USER_OAUTH_PASSWORD);
 						oauthTokenService.createToken(username, accessToken, refreshToken, clientId,authInfo.get(CCConstants.AUTH_TICKET));
+						activityEventService.trackActivityOnUser(username,UserActivityEventType.LOGIN_USER_OAUTH_PASSWORD);
 						
 					} catch (Throwable e) {
 						
@@ -115,9 +98,8 @@ public class TokenEndpoint extends SpringHttpServlet {
 							ticket = authenticationService.getCurrentTicket();
 						}
 						
-						Token newToken=tokenService.refreshToken(oauthRequest.getRefreshToken(), accessToken, refreshToken, clientId, ticket);
-                        TrackingServiceFactory.getTrackingService().trackActivityOnUser(newToken.getUsername(),TrackingService.EventType.LOGIN_USER_OAUTH_REFRESH_TOKEN);
 						Token newToken= oauthTokenService.refreshToken(oauthRequest.getRefreshToken(), accessToken, refreshToken, clientId, ticket);
+						activityEventService.trackActivityOnUser(newToken.getUsername(), UserActivityEventType.LOGIN_USER_OAUTH_REFRESH_TOKEN);
 
                     } catch (Throwable e) {
 						Logger.getLogger(TokenEndpoint.class).warn(e.toString());

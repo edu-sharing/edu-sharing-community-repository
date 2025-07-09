@@ -14,18 +14,16 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.cache.ShibbolethSessionsCache;
 import org.edu_sharing.repository.server.tools.security.AllSessions;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions;
-import org.edu_sharing.restservices.ltiplatform.v13.LTIPlatformConstants;
-import org.edu_sharing.restservices.ltiplatform.v13.model.LoginInitiationSessionObject;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
-import org.edu_sharing.service.tracking.TrackingService;
-import org.edu_sharing.service.tracking.TrackingServiceFactory;
+import org.edu_sharing.service.tracking.ActivityEventService;
+import org.edu_sharing.service.tracking.UserActivityEventType;
+import org.edu_sharing.spring.ApplicationContextFactory;
 import org.springframework.context.ApplicationContext;
-
-import java.util.Map;
 
 public class SessionListener implements HttpSessionListener{
 	
 	Logger logger = Logger.getLogger(SessionListener.class);
+
 
 	@Override
 	public void sessionCreated(HttpSessionEvent event) {
@@ -91,8 +89,11 @@ public class SessionListener implements HttpSessionListener{
         boolean possibleSessionTimeout = (System.currentTimeMillis()-event.getSession().getLastAccessedTime()) >= (event.getSession().getMaxInactiveInterval()*1000);
         String username = (String) event.getSession().getAttribute(CCConstants.AUTH_USERNAME);
         if(username!=null){
-            TrackingServiceFactory.getTrackingService().trackActivityOnUser(username,
-                    possibleSessionTimeout ? TrackingService.EventType.LOGOUT_USER_TIMEOUT : TrackingService.EventType.LOGOUT_USER_REGULAR);
+			ApplicationContext applicationContext = ApplicationContextFactory.getApplicationContext();
+			ActivityEventService activityEventService = applicationContext.getBean(ActivityEventService.class);
+			activityEventService.trackActivityOnUser(
+					username,
+					possibleSessionTimeout ? UserActivityEventType.LOGOUT_USER_TIMEOUT : UserActivityEventType.LOGOUT_USER_REGULAR);
         }
     }
 

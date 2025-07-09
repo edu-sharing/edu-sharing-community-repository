@@ -21,8 +21,8 @@ public class TrackingServiceFactory {
     }
 
 
-    public static TrackingService getTrackingService() {
-        return (TrackingService) ApplicationContextFactory.getApplicationContext().getBean("trackingService");
+    public static ActivityStatisticService getTrackingService() {
+        return (ActivityStatisticService) ApplicationContextFactory.getApplicationContext().getBean("activityStatisticService");
     }
 
     public TrackingServiceCustomInterface getTrackingServiceCustom() {
@@ -32,11 +32,11 @@ public class TrackingServiceFactory {
     @Obsolete
     @Nullable private TrackingServiceCustomInterface getTrackingServiceCustomInterfaceByClassName() {
         try {
-            TrackingServiceCustomInterface trackingServiceCustomInterface = (TrackingServiceCustomInterface) Class.forName(TrackingService.class.getName() + "Custom").getDeclaredConstructor().newInstance();
+            TrackingServiceCustomInterface trackingServiceCustomInterface = (TrackingServiceCustomInterface) Class.forName(ActivityStatisticService.class.getName() + "Custom").getDeclaredConstructor().newInstance();
             logger.warn("Instantiating TrackingServiceCustomInterface by class name is obsolete. Please use Spring beans instead (e.g. @Service annotation)");
             return trackingServiceCustomInterface;
         } catch (ClassNotFoundException t) {
-            logger.debug("no class " + TrackingService.class.getName() + "Custom" + " found, will use default implementation for tracking");
+            logger.debug("no class " + ActivityStatisticService.class.getName() + "Custom" + " found, will use default implementation for tracking");
             return null;
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             throw new RuntimeException(e);

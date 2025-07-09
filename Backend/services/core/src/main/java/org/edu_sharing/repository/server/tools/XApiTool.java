@@ -15,7 +15,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
-import org.edu_sharing.service.tracking.TrackingService;
+import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONArray;
@@ -186,7 +186,7 @@ public class XApiTool {
         return xApiData;
     }
 
-    public static String mapActivityVerb(TrackingService.EventType type) {
+    public static String mapActivityVerb(ActivityOnNodeEventType type) {
         switch(type){
             case DOWNLOAD_MATERIAL:
                 return VERB_DOWNLOADED;

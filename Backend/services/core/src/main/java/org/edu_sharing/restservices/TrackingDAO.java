@@ -4,7 +4,8 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.restservices.tracking.v1.model.Tracking;
 import org.edu_sharing.restservices.tracking.v1.model.TrackingNode;
-import org.edu_sharing.service.tracking.TrackingService;
+import org.edu_sharing.service.tracking.ActivityStatisticService;
+import org.edu_sharing.service.tracking.GroupingType;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.edu_sharing.service.tracking.ibatis.NodeData;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
@@ -14,7 +15,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class TrackingDAO {
-    public static List<TrackingNode> getNodeStatistics(TrackingService.GroupingType grouping, Date fromDate, Date toDate,String mediacenter,List<String> additionalFields,List<String> groupFields, Map<String,String> filters) throws DAOException {
+    public static List<TrackingNode> getNodeStatistics(GroupingType grouping, Date fromDate, Date toDate, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String,String> filters) throws DAOException {
 
         try {
             List<StatisticEntryNode> tracks = TrackingServiceFactory.getTrackingService().getNodeStatisics(grouping,fromDate,toDate,mediacenter,additionalFields,groupFields,filters);
@@ -40,7 +41,7 @@ public class TrackingDAO {
             throw DAOException.mapping(t);
         }
     }
-    public static List<Tracking> getUserStatistics(TrackingService.GroupingType grouping, Date fromDate, Date toDate, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String,String> filters) throws DAOException {
+    public static List<Tracking> getUserStatistics(GroupingType grouping, Date fromDate, Date toDate, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String,String> filters) throws DAOException {
 
         try {
             List<StatisticEntry> tracks = TrackingServiceFactory.getTrackingService().getUserStatistics(grouping,fromDate,toDate,mediacenter,additionalFields,groupFields,filters);

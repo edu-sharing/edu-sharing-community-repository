@@ -1,7 +1,7 @@
 package org.edu_sharing.restservices.shared;
 
 import lombok.*;
-import org.edu_sharing.service.tracking.TrackingService;
+import org.edu_sharing.service.tracking.ActivityStatisticService;
 
 import java.util.Map;
 
@@ -12,7 +12,7 @@ public interface NodeStatsEntry {
     @NoArgsConstructor
     @AllArgsConstructor
     class NodeStats {
-        Map<TrackingService.EventType, Integer> total;
+        Map<String, Integer> total;
 
     }
 }

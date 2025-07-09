@@ -19,7 +19,8 @@ import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.statistic.StatisticsGlobal;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
-import org.edu_sharing.service.tracking.TrackingService;
+import org.edu_sharing.service.tracking.ActivityStatisticService;
+import org.edu_sharing.service.tracking.GroupingType;
 import org.edu_sharing.service.tracking.ibatis.NodeData;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -101,7 +102,7 @@ public class StatisticApi {
 			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response getStatisticsNode(@Context HttpServletRequest req,
-									  @Parameter(description = "Grouping type (by date)", required = true) @QueryParam("grouping")TrackingService.GroupingType grouping,
+									  @Parameter(description = "Grouping type (by date)", required = true) @QueryParam("grouping") GroupingType grouping,
 									  @Parameter(description = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom,
 									  @Parameter(description = "date range to", required = true) @QueryParam("dateTo") Long dateTo,
 									  @Parameter(description = "the mediacenter to filter for statistics", required = false) @QueryParam("mediacenter") String mediacenter,
@@ -196,7 +197,7 @@ public class StatisticApi {
 			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response getStatisticsUser(@Context HttpServletRequest req,
-									  @Parameter(description = "Grouping type (by date)", required = true) @QueryParam("grouping")TrackingService.GroupingType grouping,
+									  @Parameter(description = "Grouping type (by date)", required = true) @QueryParam("grouping") GroupingType grouping,
 									  @Parameter(description = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom,
 									  @Parameter(description = "date range to", required = true) @QueryParam("dateTo") Long dateTo,
 									  @Parameter(description = "the mediacenter to filter for statistics", required = false) @QueryParam("mediacenter") String mediacenter,

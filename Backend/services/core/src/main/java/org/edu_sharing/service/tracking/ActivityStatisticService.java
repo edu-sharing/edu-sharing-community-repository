@@ -1,39 +1,24 @@
 package org.edu_sharing.service.tracking;
 
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import lombok.Value;
-import org.alfresco.repo.policy.BehaviourFilter;
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.transaction.TransactionService;
 import org.apache.commons.lang.StringUtils;
-import org.apache.ibatis.binding.BindingException;
 import org.apache.ibatis.session.SqlSession;
-import org.apache.log4j.Logger;
-import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
-import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
-import org.edu_sharing.alfresco.service.guest.GuestService;
-import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
-import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
-import org.edu_sharing.service.mediacenter.MediacenterService;
 import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
-import org.edu_sharing.service.nodeservice.NodeServiceHelper;
-import org.edu_sharing.service.permission.PermissionServiceFactory;
-import org.edu_sharing.service.search.SearchServiceFactory;
-import org.edu_sharing.service.tracking.ibatis.EduTrackingMapper;
-import org.edu_sharing.service.tracking.ibatis.NodeData;
-import org.edu_sharing.service.tracking.ibatis.NodeResult;
+import org.edu_sharing.service.permission.PermissionService;
+import org.edu_sharing.service.tracking.ibatis.*;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
+import org.edu_sharing.service.tracking.statistics.ActivityStatisticsConfig;
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONObject;
-import org.postgresql.util.PGobject;
 import org.postgresql.util.PSQLException;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.InvocationTargetException;
@@ -46,8 +31,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Slf4j
 @Service
-public class TrackingServiceImpl extends TrackingServiceDefault {
+@RequiredArgsConstructor
+public class ActivityStatisticService {
     private static final Map<String, FieldDescription> EXISTING_FIELDS = Stream.of(
             new FieldDescription("node_id", false, false),
             new FieldDescription("node_uuid", false, false),
@@ -71,282 +58,97 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
         boolean json;
     }
 
-    private static final String SESSION_AUTHORITY_MEDIACENTERS = "SESSION_AUTHORITY_MEDIACENTERS";
-    private static final String SESSION_AUTHORITY_ORGANIZATIONS = "SESSION_AUTHORITY_ORGANIZATIONS";
-    public static Logger logger = Logger.getLogger(TrackingServiceImpl.class);
 
     public static String TRACKING_NODE_TABLE_ID = "edu_tracking_node";
     public static String TRACKING_USER_TABLE_ID = "edu_tracking_user";
 
-    public static String TRACKING_DELETE_NODE = "DELETE FROM " + TRACKING_NODE_TABLE_ID + " WHERE authority = ?";
-    public static String TRACKING_DELETE_USER = "DELETE FROM " + TRACKING_USER_TABLE_ID + " WHERE authority = ?";
 
-    public static String TRACKING_UPDATE_NODE = "UPDATE " + TRACKING_NODE_TABLE_ID + " SET authority = ? WHERE authority = ?";
-    public static String TRACKING_UPDATE_USER = "UPDATE " + TRACKING_USER_TABLE_ID + " SET authority = ? WHERE authority = ?";
-
-    public static String TRACKING_INSERT_NODE = "insert into " + TRACKING_NODE_TABLE_ID + " (node_id,node_uuid,original_node_uuid,node_version,authority,authority_organization,authority_mediacenter,time,type,data,license, shared_with_mediacenters) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
-    public static String TRACKING_INSERT_USER = "insert into " + TRACKING_USER_TABLE_ID + " (authority,authority_organization,authority_mediacenter,time,type,data) VALUES (?,?,?,?,?,?)";
+    //language=postgresql
     public static String TRACKING_STATISTICS_CUSTOM_GROUPING = "SELECT type,COUNT(*) :fields from :table as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY type :grouping" +
             " ORDER BY count DESC";
+
+    //language=postgresql
     public static String TRACKING_STATISTICS_USER = "SELECT authority,authority_organization,authority_mediacenter,time as date,type,COUNT(*) :fields from edu_tracking_user as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY authority,authority_organization,authority_mediacenter,time,type :grouping" +
             " ORDER BY date" +
             " LIMIT 100";
-    public static String TRACKING_STATISTICS_NODE = "SELECT node_uuid as node,authority,authority_organization,authority_mediacenter,time as date,type,COUNT(*) :fields from edu_tracking_node as tracking" +
+
+    //language=postgresql
+    public static String TRACKING_STATISTICS_NODE = "SELECT node_uuid as node,authority,authority_organization,authority_mediacenter,time as date,type,COUNT(*) :fields from " + TRACKING_NODE_TABLE_ID + " as tracking" +
             //" LEFT JOIN alf_node_properties as props ON (tracking.node_id=props.node_id and props.qname_id=28)" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY node,authority,authority_organization,authority_mediacenter,time,type :grouping" +
             " ORDER BY date" +
             " LIMIT 100";
-    public static String TRACKING_STATISTICS_NODE_GROUPED = "SELECT COALESCE(original_node_uuid, node_uuid) as node,type,COUNT(*) :fields from edu_tracking_node as tracking" +
+
+    //language=postgresql
+    public static String TRACKING_STATISTICS_NODE_GROUPED = "SELECT COALESCE(original_node_uuid, node_uuid) as node,type,COUNT(*) :fields from "+TRACKING_NODE_TABLE_ID+" as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY node,type :grouping" +
             " ORDER BY count DESC";
-    public static String TRACKING_STATISTICS_NODE_SINGLE = "SELECT type,COUNT(*) from edu_tracking_node as tracking" +
+
+    //language=postgresql
+    public static String TRACKING_STATISTICS_NODE_SINGLE = "SELECT type,COUNT(*) from "+TRACKING_NODE_TABLE_ID+" as tracking" +
             " WHERE node_uuid = ? AND time BETWEEN ? AND ?" +
             " GROUP BY type" +
             " ORDER BY count DESC";
 
-    public static String TRACKING_STATISTICS_NODE_ARRAY = "SELECT COALESCE(original_node_uuid, node_uuid) as node_uuid_final, type,COUNT(*) :fields from edu_tracking_node as tracking" +
+    //language=postgresql
+    public static String TRACKING_STATISTICS_NODE_ARRAY = "SELECT COALESCE(original_node_uuid, node_uuid) as node_uuid_final, type,COUNT(*) :fields from "+TRACKING_NODE_TABLE_ID+" as tracking" +
             " WHERE time BETWEEN ? AND ? AND (ARRAY[?] <@ authority_mediacenter)" +
             " GROUP BY node_uuid_final, type" +
             " HAVING COALESCE(original_node_uuid, node_uuid) = ANY(?) " +
             " ORDER BY count DESC";
 
-    public static String TRACKING_STATISTICS_NODE_MEDIACENTER = "SELECT COALESCE(original_node_uuid, node_uuid) as node_uuid_final, type,COUNT(*) :fields from edu_tracking_node as tracking" +
+    //language=postgresql
+    public static String TRACKING_STATISTICS_NODE_MEDIACENTER = "SELECT COALESCE(original_node_uuid, node_uuid) as node_uuid_final, type,COUNT(*) :fields from "+TRACKING_NODE_TABLE_ID+" as tracking" +
             " WHERE (ARRAY[?] <@ authority_mediacenter) AND time BETWEEN ? AND ? AND ARRAY_LENGTH(authority_mediacenter, 1) = 1" +
             " GROUP BY node_uuid_final, type" +
             " ORDER BY count DESC";
+
+    //language=postgresql
     public static String TRACKING_STATISTICS_DAILY = "SELECT type,COUNT(*),TO_CHAR(time,'yyyy-mm-dd') as date :fields from :table as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY type,date :grouping" +
             " ORDER BY date";
+
+    //language=postgresql
     public static String TRACKING_STATISTICS_MONTHLY = "SELECT type,COUNT(*),TO_CHAR(time,'yyyy-mm') as date :fields from :table as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY type,date :grouping" +
             " ORDER BY date";
+
+    //language=postgresql
     public static String TRACKING_STATISTICS_YEARLY = "SELECT type,COUNT(*),TO_CHAR(time,'yyyy') as date :fields from :table as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY type,date :grouping" +
             " ORDER BY date";
-    private final TrackingServiceCustomInterface customTrackingService;
-    private final GuestService guestService;
 
-    public TrackingServiceImpl(TrackingServiceFactory trackingServiceFactory, TransactionService transactionService, @Qualifier("policyBehaviourFilter") BehaviourFilter policyBehaviourFilter, GuestService guestService, RepositoryCache repositoryCache) {
-        super(transactionService, policyBehaviourFilter, repositoryCache);
-        customTrackingService = trackingServiceFactory.getTrackingServiceCustom();
-        this.guestService = guestService;
-        try {
-            new ConnectionDBAlfresco().getSqlSessionFactoryBean().getConfiguration().addMapper(EduTrackingMapper.class);
-        } catch (BindingException ignored) {
-        }
-    }
 
-    @Override
+    private final ActivityStatisticsConfig config;
+    private final PermissionService permissionService;
+    private final NodeTrackingMapper nodeTrackingMapper;
+    private final UserTrackingMapper userTrackingMapper;
+    private final ActivityStatisticsUtil activityStatisticsUtil;
+
+
     public List<String> getAlteredNodes(java.util.Date from) {
         try (SqlSession session = new ConnectionDBAlfresco().getSqlSessionFactoryBean().openSession()) {
-            return session.getMapper(EduTrackingMapper.class).eduAlteredNodes(from).stream().
+            return session.getMapper(NodeTrackingMapper.class).eduAlteredNodes(from).stream().
                     map(NodeResult::getNodeid).collect(Collectors.toList());
         }
     }
 
-    @Override
     public List<NodeData> getNodeData(String nodeId, java.util.Date from) {
         try (SqlSession session = new ConnectionDBAlfresco().getSqlSessionFactoryBean().openSession()) {
-            return session.getMapper(EduTrackingMapper.class).
+            return session.getMapper(NodeTrackingMapper.class).
                     eduNodeData(nodeId, "YYYY-MM-DD", from);
         }
     }
 
-    @Override
-    public boolean trackActivityOnUser(String authorityName, EventType type) {
-        super.trackActivityOnUser(authorityName, type);
-        if (authorityName == null
-                || guestService.getAllGuestAuthorities().contains(authorityName)
-                || authorityName.equals(AuthenticationUtil.getSystemUserName())) {
-            return false;
-        }
-        return AuthenticationUtil.runAs(() -> execDatabaseQuery(TRACKING_INSERT_USER, statement -> {
-            statement.setString(1, super.getTrackedUsername(authorityName));
-            try {
-                statement.setArray(2, statement.getConnection().createArrayOf("VARCHAR", getAuthorityOrganizations()));
-            } catch (Exception e) {
-                statement.setArray(2, null);
-                logger.info("Failed to track organizations of user", e);
-            }
-            try {
-                statement.setArray(3, statement.getConnection().createArrayOf("VARCHAR", getAuthorityMediacenters()));
-            } catch (Exception e) {
-                statement.setArray(3, null);
-                logger.info("Failed to track mediacenter of user", e);
-            }
-            statement.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
-            statement.setString(5, type.name());
-            JSONObject json = buildJson(authorityName, type);
-            PGobject obj = new PGobject();
-            obj.setType("json");
-            if (json != null) {
-                obj.setValue(json.toString());
-            }
-            statement.setObject(6, obj);
-
-            return true;
-        }), authorityName);
-
-    }
-
-    @Override
-    public boolean trackActivityOnNode(NodeRef nodeRef, NodeTrackingDetails details, EventType type, String authorityName) {
-        super.trackActivityOnNode(nodeRef, details, type, authorityName);
-
-        String version;
-        String nodeVersion = Optional.ofNullable(details)
-                .map(NodeTrackingDetails::getNodeVersion)
-                .orElse(null);
-
-        if (StringUtils.isBlank(nodeVersion) || nodeVersion.equals("-1")) {
-            version = NodeServiceHelper.getProperty(nodeRef, CCConstants.CM_PROP_VERSIONABLELABEL);
-        } else {
-            version = nodeVersion;
-        }
-
-        String originalNodeRef = null;
-        try {
-            if (NodeServiceHelper.hasAspect(nodeRef, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
-                originalNodeRef = NodeServiceHelper.getProperty(nodeRef, CCConstants.CCM_PROP_IO_ORIGINAL);
-            } else if (NodeServiceHelper.hasAspect(nodeRef, CCConstants.CCM_ASPECT_PUBLISHED)) {
-                originalNodeRef = ((NodeRef) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL)).getId();
-            }
-        } catch (Throwable ignored) { }
-
-        String finalOriginalNodeRef = originalNodeRef;
-        return execDatabaseQuery(TRACKING_INSERT_NODE, statement -> {
-            statement.setLong(1, (Long) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.SYS_PROP_NODE_DBID));
-            statement.setString(2, nodeRef.getId());
-            statement.setString(3, finalOriginalNodeRef);
-            statement.setString(4, version);
-            statement.setString(5, super.getTrackedUsername(authorityName));
-            try {
-                statement.setArray(6, statement.getConnection().createArrayOf("VARCHAR", getAuthorityOrganizations()));
-            } catch (Exception e) {
-                logger.info("Failed to track organizations of user", e);
-            }
-            try {
-                statement.setArray(7, statement.getConnection().createArrayOf("VARCHAR", getAuthorityMediacenters()));
-            } catch (Exception e) {
-                logger.info("Failed to track mediacenter of user", e);
-            }
-            statement.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
-            statement.setString(9, type.name());
-            JSONObject json = buildJson(nodeRef, details, type);
-            PGobject obj = new PGobject();
-            obj.setType("json");
-            if (json != null) {
-                obj.setValue(json.toString());
-            }
-            statement.setObject(10, obj);
-
-            String license = NodeServiceHelper.getProperty(nodeRef, CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
-            statement.setString(11, license);
-
-            if (LightbendConfigLoader.get().getBoolean("repository.tracking.sharedWithMediacenter")) {
-                MediacenterService mediacenterService = MediacenterServiceFactory.getLocalService();
-                statement.setArray(12, statement.getConnection().createArrayOf("VARCHAR", mediacenterService.getMediacenterAuthoritiesByNode(nodeRef.getId()).toArray()));
-            } else {
-                statement.setArray(12, null);
-            }
-
-            return true;
-        });
-    }
-
-    private static HttpSession getSession() {
-        if (Context.getCurrentInstance() != null && Context.getCurrentInstance().getRequest() != null) {
-            return Context.getCurrentInstance().getRequest().getSession();
-        }
-        return null;
-    }
-
-    @NotNull
-    private static String[] getAuthorityMediacenters() throws Exception {
-        if (ContextManagementFilter.accessTool.get() == null || ContextManagementFilter.accessTool.get().getUserId() == null) {
-            // use the fully authenticated user since the current runAs user might be system
-            HttpSession session = getSession();
-            String[] result;
-            if (session != null) {
-                result = (String[]) session.getAttribute(SESSION_AUTHORITY_MEDIACENTERS);
-                if (result != null) {
-                    return result;
-                }
-            }
-            result = AuthenticationUtil.runAs(
-                    () -> SearchServiceFactory.getLocalService().getAllMediacenters(true).toArray(String[]::new),
-                    AuthenticationUtil.getFullyAuthenticatedUser()
-            );
-            if (session != null) {
-                session.setAttribute(SESSION_AUTHORITY_MEDIACENTERS, result);
-            }
-            return result;
-        } else {
-            return AuthenticationUtil.runAs(
-                    () -> SearchServiceFactory.getLocalService().getAllMediacenters(true).toArray(String[]::new),
-                    ContextManagementFilter.accessTool.get().getUserId()
-            );
-        }
-    }
-
-    @NotNull
-    public static Object[] getAuthorityOrganizations() throws Exception {
-        if (ContextManagementFilter.accessTool.get() == null || ContextManagementFilter.accessTool.get().getUserId() == null) {
-            // use the fully authenticated user since the current runAs user might be system
-            HttpSession session = getSession();
-            Object[] result;
-            if (session != null) {
-                result = (Object[]) session.getAttribute(SESSION_AUTHORITY_ORGANIZATIONS);
-                if (result != null) {
-                    return result;
-                }
-            }
-            result = AuthenticationUtil.runAs(
-                    () -> SearchServiceFactory.getLocalService().getAllOrganizations(true).getData().stream().map(EduGroup::getGroupname).toArray(),
-                    AuthenticationUtil.getFullyAuthenticatedUser()
-            );
-            if (session != null) {
-                session.setAttribute(SESSION_AUTHORITY_ORGANIZATIONS, result);
-            }
-            return result;
-        } else {
-            return AuthenticationUtil.runAs(
-                    () -> SearchServiceFactory.getLocalService().getAllOrganizations(true).getData().stream().map(EduGroup::getGroupname).toArray(),
-                    ContextManagementFilter.accessTool.get().getUserId()
-            );
-        }
-    }
-
-    /**
-     * overwrite this in a custom method to track additional data
-     */
-    protected JSONObject buildJson(NodeRef nodeRef, NodeTrackingDetails details, EventType type) {
-        if (customTrackingService != null) {
-            return customTrackingService.buildJson(nodeRef, details, type);
-        }
-        return null;
-    }
-
-    /**
-     * overwrite this in a custom method to track additional data
-     */
-    protected JSONObject buildJson(String authorityName, EventType type) {
-        if (customTrackingService != null) {
-            return customTrackingService.buildJson(authorityName, type);
-        }
-        return null;
-    }
-
-    @Override
     public List<StatisticEntry> getUserStatistics(GroupingType type, java.util.Date dateFrom, java.util.Date dateTo, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable {
         ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
         Connection con = null;
@@ -354,7 +156,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
         try {
             con = dbAlf.getConnection();
             List<StatisticEntry> result = initList(StatisticEntry.class, type, dateFrom, dateTo);
-            String query = getQuery(type, "edu_tracking_user", mediacenter, additionalFields, groupFields, filters);
+            String query = getQuery(type, TRACKING_USER_TABLE_ID, mediacenter, additionalFields, groupFields, filters);
             statement = con.prepareStatement(query);
             int index = 1;
             statement.setTimestamp(index++, Timestamp.valueOf(dateFrom.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
@@ -371,12 +173,12 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
             while (resultSet.next()) {
                 StatisticEntry entry = new StatisticEntry();
                 boolean grouping = !type.equals(GroupingType.None);
-                mapResult(EventType.valueOf(resultSet.getString("type")), additionalFields, groupFields, resultSet, entry, mediacenter);
+                mapResult(resultSet.getString("type"), additionalFields, groupFields, resultSet, entry, mediacenter);
 
                 if (result.contains(entry) && grouping) {
                     entry = result.get(result.indexOf(entry));
                 }
-                entry.getCounts().put(EventType.valueOf(resultSet.getString("type")), resultSet.getInt("count"));
+                entry.getCounts().put(resultSet.getString("type"), resultSet.getInt("count"));
                 if (!result.contains(entry) || !grouping) {
                     result.add(entry);
                 }
@@ -388,7 +190,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
         }
     }
 
-    private void mapResult(EventType type, List<String> additionalFields, List<String> groupFields, ResultSet resultSet, StatisticEntry entry, String mediacenter) throws SQLException {
+    private void mapResult(String type, List<String> additionalFields, List<String> groupFields, ResultSet resultSet, StatisticEntry entry, String mediacenter) throws SQLException {
         setAuthorityFromResult(resultSet, entry, mediacenter);
         if (additionalFields != null && !additionalFields.isEmpty()) {
             mapAdditionalFields(type, additionalFields, resultSet, entry, mediacenter);
@@ -405,10 +207,10 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
         }
     }
 
-    private static void mapAdditionalFields(EventType type, List<String> additionalFields, ResultSet resultSet, StatisticEntry entry, String mediacenter) throws SQLException {
+    private static void mapAdditionalFields(String type, List<String> additionalFields, ResultSet resultSet, StatisticEntry entry, String mediacenter) throws SQLException {
         for (String field : additionalFields) {
 
-            Map<EventType, Map<String, Map<String, Long>>> groups = entry.getGroups();
+            Map<String, Map<String, Map<String, Long>>> groups = entry.getGroups();
             Map<String, Map<String, Long>> current = groups.get(type);
             if (current == null) {
                 current = new HashMap<>();
@@ -425,14 +227,13 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
     }
 
     @NotNull
-    private static Map<String, Long> getArrayAggToCounts(String[] arrayAgg) throws SQLException {
+    private static Map<String, Long> getArrayAggToCounts(String[] arrayAgg) {
         // the sql field will add each property to an array like 1,2,1,3
         // we will map it to {1:2,2:1,3:1}
         return new HashMap<>(Arrays.stream(arrayAgg).map((a) -> a == null ? "" : a)
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting())));
     }
 
-    @Override
     public List<StatisticEntryNode> getNodeStatisics(GroupingType type, java.util.Date dateFrom, java.util.Date dateTo, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable {
         ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
         Connection con = null;
@@ -440,7 +241,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
         try {
             con = dbAlf.getConnection();
             List<StatisticEntryNode> result = initList(StatisticEntryNode.class, type, dateFrom, dateTo);
-            String query = getQuery(type, "edu_tracking_node", mediacenter, additionalFields, groupFields, filters);
+            String query = getQuery(type, TRACKING_NODE_TABLE_ID, mediacenter, additionalFields, groupFields, filters);
             statement = con.prepareStatement(query);
             int index = 1;
             statement.setTimestamp(index++, Timestamp.valueOf(dateFrom.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
@@ -471,12 +272,12 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
                     }
                 }
 
-                mapResult(EventType.valueOf(resultSet.getString("type")), additionalFields, groupFields, resultSet, entry, mediacenter);
+                mapResult(resultSet.getString("type"), additionalFields, groupFields, resultSet, entry, mediacenter);
 
                 if (result.contains(entry) && grouping) {
                     entry = result.get(result.indexOf(entry));
                 }
-                entry.getCounts().put(EventType.valueOf(resultSet.getString("type")), resultSet.getInt("count"));
+                entry.getCounts().put(resultSet.getString("type"), resultSet.getInt("count"));
                 if (!result.contains(entry) || !grouping) {
                     result.add(entry);
                 }
@@ -495,9 +296,8 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
                 CCConstants.PERMISSION_CONSUMER
         );
         return AuthenticationUtil.runAsSystem(
-                () -> PermissionServiceFactory.getLocalService().
-                        getExplicitPermissionsForAuthority(nodeId,
-                                MediacenterServiceFactory.getLocalService().getMediacenterProxyGroup(mediacenter))
+                () -> permissionService
+                        .getExplicitPermissionsForAuthority(nodeId, MediacenterServiceFactory.getLocalService().getMediacenterProxyGroup(mediacenter))
                         .stream().anyMatch(readPermissions::contains)
         );
     }
@@ -505,11 +305,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
     /**
      * fechtes the counts for each event type for the given node, while the date must be between the given dates
      * If both dates are null, it will take the values across all dates
-     *
-     * @return
-     * @throws Throwable
      */
-    @Override
     public StatisticEntry getSingleNodeData(NodeRef node, java.util.Date dateFrom, java.util.Date dateTo) throws Throwable {
         ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
         Connection con = null;
@@ -529,7 +325,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
             ResultSet resultSet = statement.executeQuery();
             StatisticEntry entry = new StatisticEntry();
             while (resultSet.next()) {
-                entry.getCounts().put(EventType.valueOf(resultSet.getString("type")), resultSet.getInt("count"));
+                entry.getCounts().put(resultSet.getString("type"), resultSet.getInt("count"));
             }
             return entry;
         } catch (Throwable t) {
@@ -539,7 +335,6 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
         }
     }
 
-    @Override
     public Map<NodeRef, StatisticEntry> getListNodeData(List<NodeRef> nodes, java.util.Date dateFrom, java.util.Date dateTo, List<String> additionalFields, String mediacenter) throws Throwable {
         ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
         Connection con = null;
@@ -572,7 +367,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, resultSet.getString("node_uuid_final"));
-                EventType event = EventType.valueOf(resultSet.getString("type"));
+                String event = resultSet.getString("type");
                 data.get(nodeRef).getCounts().put(event, resultSet.getInt("count"));
                 if (!additionalFields.isEmpty()) {
                     mapAdditionalFields(event, additionalFields, resultSet, data.get(nodeRef), mediacenter);
@@ -584,7 +379,6 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
         }
     }
 
-    @Override
     public Map<NodeRef, StatisticEntry> getListNodeDataByMediacenter(String mediacenter, java.util.Date dateFrom, java.util.Date dateTo, List<String> additionalFields) throws Throwable {
         ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
         Connection con = null;
@@ -613,7 +407,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, resultSet.getString("node_uuid_final"));
-                EventType event = EventType.valueOf(resultSet.getString("type"));
+                String event = resultSet.getString("type");
                 if (!data.containsKey(nodeRef)) {
                     data.put(nodeRef, new StatisticEntry());
                 }
@@ -628,38 +422,36 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
         }
     }
 
-    @Override
-    public void deleteUserData(String username) throws Throwable {
-        if (getUserTrackingMode().equals(UserTrackingMode.none)) {
-            logger.info("User tracking is set to none, deleteUserData will do nothing");
+    /**
+     * delete all tracked data for a given user
+     * This method can do nothing, depending on the configured @UserTrackingMode
+     * It will only do something if the mode is NOT set to "none"
+     */
+    public void deleteUserData(String username) {
+        if (config.getUserMode().equals(UserTrackingMode.none)) {
+            log.info("User tracking is set to none, deleteUserData will do nothing");
             return;
         }
-        execDatabaseQuery(TRACKING_DELETE_NODE, (statement) -> {
-            statement.setString(1, getTrackedUsername(username));
-            return true;
-        });
-        execDatabaseQuery(TRACKING_DELETE_USER, (statement) -> {
-            statement.setString(1, getTrackedUsername(username));
-            return true;
-        });
+        nodeTrackingMapper.deleteNodesByAuthority(activityStatisticsUtil.getTrackedUsername(username));
+        userTrackingMapper.deleteNodesByAuthority(activityStatisticsUtil.getTrackedUsername(username));
     }
 
-    @Override
+    /**
+     * reassign all tracked data for a given user to a new user (usually a dummy)
+     * This method can do nothing, depending on the configured @UserTrackingMode
+     * It will only do something if the mode is NOT set to "none"
+     */
     public void reassignUserData(String oldUsername, String newUsername) {
-        if (getUserTrackingMode().equals(UserTrackingMode.none)) {
-            logger.info("User tracking is set to none, reassignUserData will do nothing");
+        if (config.getUserMode().equals(UserTrackingMode.none)) {
+            log.info("User tracking is set to none, reassignUserData will do nothing");
             return;
         }
-        execDatabaseQuery(TRACKING_UPDATE_NODE, (statement) -> {
-            statement.setString(1, getTrackedUsername(newUsername));
-            statement.setString(2, getTrackedUsername(oldUsername));
-            return true;
-        });
-        execDatabaseQuery(TRACKING_UPDATE_USER, (statement) -> {
-            statement.setString(1, getTrackedUsername(newUsername));
-            statement.setString(2, getTrackedUsername(oldUsername));
-            return true;
-        });
+
+        oldUsername = activityStatisticsUtil.getTrackedUsername(oldUsername);
+        newUsername = activityStatisticsUtil.getTrackedUsername(newUsername);
+
+        nodeTrackingMapper.updateNodesWithAuthority(oldUsername, newUsername);
+        userTrackingMapper.updateNodesWithAuthority(oldUsername, newUsername);
     }
 
     private void setAuthorityFromResult(ResultSet resultSet, StatisticEntry entry, String mediacenter) throws SQLException {
@@ -729,9 +521,9 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
             } else if (type.equals(GroupingType.None)) {
                 if (groupFields != null && !groupFields.isEmpty()) {
                     prepared = TRACKING_STATISTICS_CUSTOM_GROUPING;
-                } else if (table.equals("edu_tracking_node")) {
+                } else if (table.equals(TRACKING_NODE_TABLE_ID)) {
                     prepared = TRACKING_STATISTICS_NODE;
-                } else if (table.equals("edu_tracking_user")) {
+                } else if (table.equals(TRACKING_USER_TABLE_ID)) {
                     prepared = TRACKING_STATISTICS_USER;
                 }
             }
@@ -771,10 +563,10 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
                 }
             }
             prepared = prepared.replace(":fields", fields).replace(":filter", filter).replace(":grouping", grouping);
-            logger.info(prepared);
+            log.info(prepared);
             return prepared;
         } catch (Throwable t) {
-            logger.error(t.getMessage(), t);
+            log.error(t.getMessage(), t);
             throw t;
         }
     }
@@ -793,30 +585,5 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
         }
 
         return field;
-    }
-
-    private static boolean execDatabaseQuery(String statementContent, FillStatement fillStatement) {
-        ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
-        Connection con = null;
-        PreparedStatement statement = null;
-        try {
-            con = dbAlf.getConnection();
-            statement = con.prepareStatement(statementContent);
-            if (fillStatement.onFillStatement(statement)) {
-                statement.executeUpdate();
-            }
-            statement.close();
-            con.commit();
-
-        } catch (Throwable t) {
-            logger.error("Error tracking to database", t);
-        } finally {
-            dbAlf.cleanUp(con, statement);
-        }
-        return true;
-    }
-
-    private interface FillStatement {
-        boolean onFillStatement(PreparedStatement statement) throws Exception;
     }
 }
