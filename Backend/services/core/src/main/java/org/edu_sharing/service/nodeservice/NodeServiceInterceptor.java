@@ -79,6 +79,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
                 methodName.equals("getVersionHistory")) {
             argumentId = 0;
         }
+
         if (methodName.equals("writeContent")) {
             return checkIgnoreQuota(invocation);
         }
@@ -86,6 +87,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
 
         if (argumentId == -1)
             return invocation.proceed();
+
 
 
         String nodeId = (String) invocation.getArguments()[argumentId];
@@ -168,7 +170,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
      * Ignores any user quotas for the given callback context
      * Basically, this temporarily disables the quota for the user
      */
-    public static <T> T ignoreQuota(Callable<T> callable) throws Exception {
+    public static <T> T ignoreQuota(Callable<T> callable) {
         ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
         ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
         RetryingTransactionHelper rth = serviceRegistry.getTransactionService().getRetryingTransactionHelper();

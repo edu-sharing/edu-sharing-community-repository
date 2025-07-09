@@ -16,194 +16,200 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.*;
 
+
 public interface NodeService {
 
-	
-	public void updateNode(String nodeId, Map<String, String[]> props) throws Throwable;
 
-	public void createAssoc(String parentId,String childId,String assocName);
+    void updateNode(String nodeId, Map<String, String[]> props) throws Throwable;
 
-	public String createNode(String parentId, String nodeType, Map<String, String[]> props)throws Throwable;
+    void createAssoc(String parentId, String childId, String assocName);
 
-	default String createNode(String parentId, String nodeType, HashMap<String, String[]> props, String childAssociation)throws Throwable {
-		return createNode(parentId, nodeType, props, childAssociation, true);
-	}
+    String createNode(String parentId, String nodeType, Map<String, String[]> props) throws Throwable;
 
-	public String createNode(String parentId, String nodeType, Map<String, String[]> props, String childAssociation, boolean obeyMds) throws Throwable;
-	
-	public String createNodeBasic(String parentID, String nodeTypeString, Map<String, ?> _props);
+    default String createNode(String parentId, String nodeType, HashMap<String, String[]> props, String childAssociation) throws Throwable {
+        return createNode(parentId, nodeType, props, childAssociation, true);
+    }
 
-	public String createNodeBasic(StoreRef store, String parentID, String nodeTypeString, String childAssociation,
-								  Map<String, ?> _props);
+    String createNode(String parentId, String nodeType, Map<String, String[]> props, String childAssociation, boolean obeyMds) throws Throwable;
 
-	public String findNodeByName(String parentId, String name );
+    String createNodeBasic(String parentID, String nodeTypeString, Map<String, ?> _props);
 
-	public NodeRef copyNode(String sourceId, String nodeId, boolean withChildren) throws Throwable;
+    String createNodeBasic(StoreRef store, String parentID, String nodeTypeString, String childAssociation,
+                           Map<String, ?> _props);
 
-	public String getCompanyHome();
+    String findNodeByName(String parentId, String name);
 
-	public Map<String, String[]> getNameProperty(String name);
+    NodeRef copyNode(String sourceId, String nodeId, boolean withChildren) throws Throwable;
 
-	Map<String, Map<String, Object>> getChildrenPropsByType(StoreRef store, String nodeId, String type);
+    String getCompanyHome();
 
-	List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId, List<String> types, RecurseMode recurseMode);
+    Map<String, String[]> getNameProperty(String name);
 
-    public NodeRef getChild(StoreRef store, String parentId, String type, String property, Serializable value);
+    Map<String, Map<String, Object>> getChildrenPropsByType(StoreRef store, String nodeId, String type);
+
+    List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId, List<String> types, RecurseMode recurseMode);
+
+    NodeRef getChild(StoreRef store, String parentId, String type, String property, Serializable value);
 
     String getType(String storeProtocol, String storeId, String nodeId);
 
-    default String getType(String nodeId){
-    	return getType(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId);
-	}
+    default String getType(String nodeId) {
+        return getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
+    }
 
-    public void setOwner(String nodeId, String username);
-	
-	public void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission) throws Exception;
+    void setOwner(String nodeId, String username);
 
-	public String getUserInbox(boolean createIfNotExists);
+    void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission) throws Exception;
 
-	public String getUserSavedSearch(boolean createIfNotExists);
+    String getUserInbox(boolean createIfNotExists);
 
-	public String getPrimaryParent(String nodeId);
+    String getUserSavedSearch(boolean createIfNotExists);
 
-	default List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID){
-		return getChildrenChildAssociationRefAssoc(parentID,null, null, new SortDefinition());
-	}
+    String getPrimaryParent(String nodeId);
 
-    <T>List<T> sortNodeRefList(List<T> list, List<String> filter, SortDefinition sortDefinition);
+    default List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID) {
+        return getChildrenChildAssociationRefAssoc(parentID, null, null, new SortDefinition());
+    }
 
-    public List<ChildAssociationRef> getChildrenChildAssociationRefType(String parentID, String childType);
+    <T> List<T> sortNodeRefList(List<T> list, List<String> filter, SortDefinition sortDefinition);
 
-    public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String asoocName, List<String> filter, SortDefinition sortDefinition);
+    List<ChildAssociationRef> getChildrenChildAssociationRefType(String parentID, String childType);
 
-	public String createVersion(String nodeId) throws Exception;
+    List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String asoocName, List<String> filter, SortDefinition sortDefinition);
 
-	public void deleteVersionHistory(String nodeId) throws Exception;
+    String createVersion(String nodeId) throws Exception;
 
-	public void writeContent(final StoreRef store, final String nodeID, final InputStream content, final String mimetype, String _encoding,
-			final String property) throws Exception;
-	
-	public void removeNode(String nodeID, String fromID);
+    void deleteVersionHistory(String nodeId) throws Exception;
 
-	public Map<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable;
+    void writeContent(final StoreRef store, final String nodeID, final InputStream content, final String mimetype, String _encoding,
+                      final String property) throws Exception;
 
-	/**
-	 * this method is called when a local object has ccm:remoterepositry aspect, and all local properties will get
-	 * updated on the fly with the properties provided by this method
-	 */
-	public Map<String, Object> getPropertiesDynamic(String storeProtocol, String storeId, String nodeId) throws Throwable;
+    void removeNode(String nodeID, String fromID);
 
-	/**
-	 * this method is called when a local object has ccm:remoterepositry aspect and the node should be stored localy
-	 * You can define which properties should be copied locally and which should be fetched dynamically by skipping them here
-	 */
-	public Map<String, Object> getPropertiesPersisting(String storeProtocol, String storeId, String nodeId) throws Throwable;
+    Map<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable;
 
-	public default boolean hasAspect(String storeProtocol, String storeId, String nodeId, String aspect){
-		return Arrays.asList(getAspects(storeProtocol,storeId,nodeId)).contains(aspect);
-	}
-	public String[] getAspects(String storeProtocol, String storeId, String nodeId);
+    /**
+     * this method is called when a local object has ccm:remoterepositry aspect, and all local properties will get
+     * updated on the fly with the properties provided by this method
+     */
+    Map<String, Object> getPropertiesDynamic(String storeProtocol, String storeId, String nodeId) throws Throwable;
+
+    /**
+     * this method is called when a local object has ccm:remoterepositry aspect and the node should be stored localy
+     * You can define which properties should be copied locally and which should be fetched dynamically by skipping them here
+     */
+    Map<String, Object> getPropertiesPersisting(String storeProtocol, String storeId, String nodeId) throws Throwable;
+
+    default boolean hasAspect(String storeProtocol, String storeId, String nodeId, String aspect) {
+        return Arrays.asList(getAspects(storeProtocol, storeId, nodeId)).contains(aspect);
+    }
+
+    String[] getAspects(String storeProtocol, String storeId, String nodeId);
 
     ContentReader getContentReader(String storeProtocol, String storeId, String nodeId, String version, String contentProp);
 
     InputStream getContent(String storeProtocol, String storeId, String nodeId, String version, String contentProp) throws Throwable;
 
-	Long getContentLength(String storeProtocol, String storeId, String nodeId, String version, String contentProp) throws Throwable;
+    Long getContentLength(String storeProtocol, String storeId, String nodeId, String version, String contentProp) throws Throwable;
 
-	String getContentHash(String storeProtocol, String storeId, String nodeId, String version, String contentProp);
+    String getContentHash(String storeProtocol, String storeId, String nodeId, String version, String contentProp);
 
-	public void addAspect(String nodeId, String aspect);
-	
-	public void moveNode(String newParentId, String childAssocType, String nodeId);
-	
-	public void revertVersion(String nodeId, String verLbl) throws Exception;
+    void addAspect(String nodeId, String aspect);
 
-	default void revertVersionNoRollback(String nodeId, String verLbl) throws Exception {
-		throw new NotImplementedException();
-	}
+    void moveNode(String newParentId, String childAssocType, String nodeId);
 
-	public Map<String, Map<String, Object>> getVersionHistory(String nodeId) throws Throwable;
+    void revertVersion(String nodeId, String verLbl) throws Exception;
 
-	@NonNull
-	List<String> getVersionLabelsHistory(String nodeId);
+    default void revertVersionNoRollback(String nodeId, String verLbl) throws Exception {
+        throw new NotImplementedException();
+    }
 
-	/**
-	 * Import the node from a foreign repository to the local one, and return the local node Ref
-	 * @param nodeId
-	 * @param localParent
-	 * @return
-	 * @throws Exception
-	 * @throws Throwable
-	 */
-	public String importNode(String nodeId,String localParent) throws Throwable;
+    Map<String, Map<String, Object>> getVersionHistory(String nodeId) throws Throwable;
 
-	public User getOwner(String storeId, String storeProtocol, String nodeId);
+    @NonNull
+    List<String> getVersionLabelsHistory(String nodeId);
 
-	public void removeNode(String nodeId, String parentId, boolean recycle);
+    /**
+     * Import the node from a foreign repository to the local one, and return the local node Ref
+     *
+     * @param nodeId
+     * @param localParent
+     * @return
+     * @throws Exception
+     * @throws Throwable
+     */
+    String importNode(String nodeId, String localParent) throws Throwable;
 
-	public void removeNode(String potocol, String store, String nodeId);
+    User getOwner(String storeId, String storeProtocol, String nodeId);
 
-	public void removeNodeForce(String storeProtocol, String storeId, String nodeId, boolean recycle);
+    void removeNode(String nodeId, String parentId, boolean recycle);
 
-	public void removeAspect(String nodeId, String aspect);
+    void removeNode(String potocol, String store, String nodeId);
 
-    public void updateNodeNative(String nodeId, Map<String, ?> _props);
+    void removeNodeForce(String storeProtocol, String storeId, String nodeId, boolean recycle);
 
-	public void removeProperty(String storeProtocol, String storeId, String nodeId, String property);
+    void removeAspect(String nodeId, String aspect);
 
-	public boolean exists(String protocol, String store, String nodeId);
+    void updateNodeNative(String nodeId, Map<String, ?> _props);
 
-	default boolean exists(StoreRef storeRef, String id){
-		return exists(storeRef.getProtocol(), storeRef.getIdentifier(), id);
-	}
+    void removeProperty(String storeProtocol, String storeId, String nodeId, String property);
 
-	default boolean exists(String id){
-		return exists(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, id);
-	}
+    boolean exists(String protocol, String store, String nodeId);
 
-	default String getProperty(String storeProtocol, String storeId, String nodeId, String property) {
-	    try {
-            return (String)getProperties(storeProtocol, storeId, nodeId).get(property);
-        }catch(Throwable t){
-			Logger.getLogger(NodeService.class).warn(t);
-	        return null;
+    default boolean exists(StoreRef storeRef, String id) {
+        return exists(storeRef.getProtocol(), storeRef.getIdentifier(), id);
+    }
+
+    default boolean exists(String id) {
+        return exists(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, id);
+    }
+
+    default String getProperty(String storeProtocol, String storeId, String nodeId, String property) {
+        try {
+            return (String) getProperties(storeProtocol, storeId, nodeId).get(property);
+        } catch (Throwable t) {
+            Logger.getLogger(NodeService.class).warn(t);
+            return null;
         }
-    };
+    }
 
 
-	String getPreviewUrl(String storeProtocol, String storeId, String nodeId, String version);
+    String getPreviewUrl(String storeProtocol, String storeId, String nodeId, String version);
 
-	String getTemplateNode(String nodeId, boolean createIfNotExists) throws Throwable;
+    String getTemplateNode(String nodeId, boolean createIfNotExists) throws Throwable;
 
-	/**
-	 * Sets the properties for this node's template (inherit metadata to child nodes)
-	 * Should only be supported for folder types
-	 *
-	 * @param nodeId
-	 * @param properties
-	 */
-	void setTemplateProperties(String nodeId, Map<String, String[]> properties) throws Throwable;
+    /**
+     * Sets the properties for this node's template (inherit metadata to child nodes)
+     * Should only be supported for folder types
+     *
+     * @param nodeId
+     * @param properties
+     */
+    void setTemplateProperties(String nodeId, Map<String, String[]> properties) throws Throwable;
 
-	/**
-	 * Set if the inherition of properties is enabled for this folder
-	 * @param nodeId
-	 * @param enable
-	 */
-	void setTemplateStatus(String nodeId, Boolean enable) throws Throwable;
+    /**
+     * Set if the inherition of properties is enabled for this folder
+     *
+     * @param nodeId
+     * @param enable
+     */
+    void setTemplateStatus(String nodeId, Boolean enable) throws Throwable;
 
     String getPrimaryParent(String protocol, String store, String nodeId);
 
-	String getContentMimetype(String protocol, String storeId, String nodeId);
+    String getContentMimetype(String protocol, String storeId, String nodeId);
 
-	List<AssociationRef> getNodesByAssoc(String nodeId, AssocInfo assoc);
+    List<AssociationRef> getNodesByAssoc(String nodeId, AssocInfo assoc);
 
-	void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value, boolean skipDefinitionChecks);
-	default void setProperty(StoreRef storeRef, String nodeId, String property, Serializable value, boolean skipDefinitionChecks) {
-		setProperty(storeRef.getProtocol(), storeRef.getIdentifier(), nodeId, property, value, skipDefinitionChecks);
-	}
-	default void setProperty(String nodeId, String property, Serializable value, boolean skipDefinitionChecks) {
-		setProperty(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId, property, value, skipDefinitionChecks);
-	}
+    void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value, boolean skipDefinitionChecks);
+
+    default void setProperty(StoreRef storeRef, String nodeId, String property, Serializable value, boolean skipDefinitionChecks) {
+        setProperty(storeRef.getProtocol(), storeRef.getIdentifier(), nodeId, property, value, skipDefinitionChecks);
+    }
+
+    default void setProperty(String nodeId, String property, Serializable value, boolean skipDefinitionChecks) {
+        setProperty(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId, property, value, skipDefinitionChecks);
+    }
 
     GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId, Map<String, Object> nodeProps, String version);
 
@@ -211,42 +217,45 @@ public interface NodeService {
 
     Serializable getPropertyNative(String storeProtocol, String storeId, String nodeId, String property) throws Throwable;
 
-	void keepModifiedDate(String storeProtocol, String storeId, String nodeId, Runnable task);
+    void keepModifiedDate(String storeProtocol, String storeId, String nodeId, Runnable task);
 
-	void syncPublished(String nodeId, HandleParam handleParam) throws Throwable;
+    void syncPublished(String nodeId, HandleParam handleParam) throws Throwable;
 
-	NodeRef getPublishedCopy(String nodeId);
+    NodeRef getPublishedCopy(String nodeId);
 
-	/**
-	 * create a published copy of the node
-	 * if handle mode is set, a handle and or doi should also be generated
-	 */
-	String publishCopy(String nodeId, HandleParam handleParam) throws Throwable;
+    /**
+     * create a published copy of the node
+     * if handle mode is set, a handle and or doi should also be generated
+     */
+    String publishCopy(String nodeId, HandleParam handleParam) throws Throwable;
 
-	default void createHandle(NodeRef nodeRef, List<String> publishedCopies, HandleService service, HandleMode handleMode) throws Exception {
-		throw new NotImplementedException();
-	}
-	/**
-	 * Get all published copies of this node
-	 * @return
-	 */
-	List<String> getPublishedCopies(String nodeId);
+    default void createHandle(NodeRef nodeRef, List<String> publishedCopies, HandleService service, HandleMode handleMode) throws Exception {
+        throw new NotImplementedException();
+    }
+
+    /**
+     * Get all published copies of this node
+     *
+     * @return
+     */
+    List<String> getPublishedCopies(String nodeId);
 
 
-	/**
-	 * Returns the original NodeRef of the given node id
-	 * This is used to return the original node of a linked node
-	 * @param nodeId
-	 * @return
-	 */
+    /**
+     * Returns the original NodeRef of the given node id
+     * This is used to return the original node of a linked node
+     *
+     * @param nodeId
+     * @return
+     */
     NodeRef getOriginalNode(String nodeId);
 
-	/**
-	 * revoke a published copy
-	 *
-	 * @param id
-	 * @param details
-	 */
+    /**
+     * revoke a published copy
+     *
+     * @param id
+     * @param details
+     */
     void revokeNode(String storeProtocol, String storeId, String id, RevokeDetails details) throws Throwable;
 
 }
