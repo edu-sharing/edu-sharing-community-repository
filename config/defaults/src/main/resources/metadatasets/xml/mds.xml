@@ -1723,5 +1723,22 @@
         </statement>
       </property>
     </query>
+    <query join="AND" id="page_variant">
+      <basequery>{"bool":{"must":[
+        {"term":{"aspects":"ccm:page_variant"}}
+        ],
+        "must_not":[
+        {"term":{"aspects":"ccm:collection_io_reference"}}
+        ]}}
+      </basequery>
+      <specialFilter>exclude_sites_folder</specialFilter>
+      <specialFilter>exclude_people_folder</specialFilter>
+      <property name="ccm:page_variant_is_template">
+        <statement>
+          {"match":{"properties.ccm:page_variant_is_template.keyword":"${value}"}}
+        </statement>
+      </property>
+    </query>
+
   </queries>
 </metadataset>

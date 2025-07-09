@@ -20,7 +20,12 @@ import { BehaviorSubject, combineLatest, firstValueFrom } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { notNull } from '../util/functions';
 
-type IconsConfig = Array<{ original: string; replace?: string; cssClass?: string }>;
+type IconsConfig = Array<{
+    original: string;
+    context?: string;
+    replace?: string;
+    cssClass?: string;
+}>;
 
 /**
  * Replaces the element's content with an icon.
@@ -40,6 +45,7 @@ type IconsConfig = Array<{ original: string; replace?: string; cssClass?: string
 })
 export class IconDirective implements OnInit, OnDestroy {
     private originalId$ = new BehaviorSubject<string>(null);
+    private iconContext$ = new BehaviorSubject<string>(null);
     private _id: string;
     private _aria: boolean;
     private altTextSpan: HTMLElement;
@@ -71,6 +77,9 @@ export class IconDirective implements OnInit, OnDestroy {
     @Input() set esIcon(id: string) {
         this.originalId$.next(id);
     }
+    @Input() set esIconContext(context: string) {
+        this.iconContext$.next(context);
+    }
 
     constructor(
         private element: ElementRef<HTMLElement>,
@@ -81,10 +90,13 @@ export class IconDirective implements OnInit, OnDestroy {
     ) {
         combineLatest([
             this.originalId$.pipe(filter(notNull)),
+            this.iconContext$,
             this.config.get('icons', null).catch((_) => Promise.resolve([])),
         ])
             .pipe(takeUntilDestroyed())
-            .subscribe(([originalId, iconsConfig]) => this.setIcon(originalId, iconsConfig));
+            .subscribe(([originalId, iconContext, iconsConfig]) =>
+                this.setIcon(originalId, iconContext, iconsConfig),
+            );
     }
 
     async ngOnInit() {
@@ -102,7 +114,7 @@ export class IconDirective implements OnInit, OnDestroy {
         }
     }
 
-    private async setIcon(id: string, iconsConfig: IconsConfig) {
+    private async setIcon(id: string, context: string, iconsConfig: IconsConfig) {
         if (this._id) {
             this.element.nativeElement.classList.remove(
                 'edu-icons',
@@ -148,7 +160,9 @@ export class IconDirective implements OnInit, OnDestroy {
             }
         }
         let customClass: string = null;
-        const mapping = iconsConfig?.filter((i) => i.original === id);
+        const mapping = iconsConfig?.filter(
+            (i) => i.original === id && (!i.context || i.context === context),
+        );
         if (mapping?.length === 1) {
             id = mapping[0].replace || '';
             customClass = mapping[0].cssClass;

@@ -26,7 +26,7 @@
   </mat-tab>
   <mat-tab *ngIf="hasEditorial" labelClass="mat-tab-editorial data-test-collections-tab-editorial">
     <ng-template mat-tab-label>
-      <i esIcon="star" class="tab-icon"></i>
+      <i esIcon="star" esIconContext="collection-scope" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.TYPE_EDITORIAL' | translate }}</span>
     </ng-template>
   </mat-tab>
