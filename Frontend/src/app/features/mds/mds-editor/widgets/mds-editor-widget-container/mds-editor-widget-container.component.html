@@ -8,7 +8,7 @@
 >
   <mat-expansion-panel-header>
     <mat-panel-title>
-      <i *ngIf="widget.definition.icon" [esIcon]="widget.definition.icon"></i>
+      <i *ngIf="widget.definition.icon" [esIcon]="widget.definition.icon" esIconContext="mds"></i>
       {{ label }}
     </mat-panel-title>
     <es-spinner-small *ngIf="showSpinner"></es-spinner-small>
