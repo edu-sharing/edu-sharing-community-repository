@@ -7,19 +7,23 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
-import org.edu_sharing.service.rating.Rating;
-import org.edu_sharing.service.rating.RatingDetails;
 import org.edu_sharing.service.rating.RatingHistory;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
+import org.edu_sharing.service.tracking.ActivityEventService;
+import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.Date;
 import java.util.List;
 
@@ -30,6 +34,10 @@ import java.util.List;
 @Produces({"application/json"})
 public class RatingApi {
 	private static Logger logger = Logger.getLogger(RatingApi.class);
+
+	@Autowired
+	private ActivityEventService activityEventService;
+
 	@PUT
 	@Path("/ratings/{repository}/{node}")
 	@Operation(summary = "create or update a rating", description = "Adds the rating. If the current user already rated that element, the rating will be altered")
@@ -50,6 +58,8 @@ public class RatingApi {
     	try {
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	new RatingDao(repoDao).addOrUpdateRating(node, rating, comment);
+
+			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.RATE_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
 	    	return Response.status(Response.Status.OK).build();
     	} catch (Throwable t) {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
@@ -73,6 +83,8 @@ public class RatingApi {
     	try {
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	new RatingDao(repoDao).deleteRating(node);
+
+			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.UNRATE_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
 	    	return Response.status(Response.Status.OK).build();
     	} catch (Throwable t) {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();

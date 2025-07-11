@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.CommentDao;
@@ -19,6 +21,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
+import org.edu_sharing.service.tracking.ActivityEventService;
+import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Path("/comment/v1")
 @Tag(name= "COMMENT v1" )
@@ -27,6 +32,7 @@ import jakarta.ws.rs.core.Response;
 @Produces({"application/json"})
 public class CommentApi {
 	private static Logger logger = Logger.getLogger(CommentApi.class);
+
 	@PUT
 	@Path("/comments/{repository}/{node}")
 	@Operation(summary = "create a new comment", description = "Adds a comment to the given node")

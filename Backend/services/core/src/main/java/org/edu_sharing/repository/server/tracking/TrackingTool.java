@@ -1,5 +1,6 @@
 package org.edu_sharing.repository.server.tracking;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.repository.server.tools.XApiTool;
@@ -20,7 +21,7 @@ public class TrackingTool {
     public static void trackActivityOnNode(NodeRef nodeRef, NodeTrackingDetails details, ActivityOnNodeEventType type){
         ApplicationContext applicationContext = ApplicationContextFactory.getApplicationContext();
         ActivityEventService activityEventService = applicationContext.getBean(ActivityEventService.class);
-        activityEventService.trackActivityOnNode(nodeRef,details,type, null);
+        activityEventService.trackActivityOnNode(nodeRef,details,type, AuthenticationUtil.getFullyAuthenticatedUser());
         XApiTool.trackActivity(XApiTool.mapActivityVerb(type),nodeRef.getId(),details!=null ? details.getNodeVersion() : null);
     }
 }

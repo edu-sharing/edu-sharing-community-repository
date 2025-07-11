@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.DAOException;
@@ -22,6 +24,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
+import org.edu_sharing.service.tracking.ActivityEventService;
+import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +39,10 @@ import java.util.Map;
 @Produces({"application/json"})
 public class FeedbackApi {
 	private static Logger logger = Logger.getLogger(FeedbackApi.class);
+
+	@Autowired
+	private ActivityEventService activityEventService;
+
 	@PUT
 	@Path("/feedback/{repository}/{node}/add")
 	@Operation(summary = "Give feedback on a node", description = "Adds feedback to the given node. Depending on the internal config, the current user will be obscured to prevent back-tracing to the original id")
@@ -55,6 +65,7 @@ public class FeedbackApi {
 					nodeId,
 					feedbackData
 			);
+			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), null, ActivityOnNodeEventType.FEEDBACK_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
 	    	return Response.status(Response.Status.OK).entity(result).build();
     	} catch (Throwable t) {
 			return ErrorResponse.createResponse(DAOException.mapping(t));

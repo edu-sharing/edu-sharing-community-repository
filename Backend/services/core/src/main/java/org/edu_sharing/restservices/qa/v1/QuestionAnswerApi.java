@@ -10,6 +10,8 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.qa.v1.domain.CreateQAEntryDTO;
 import org.edu_sharing.restservices.qa.v1.domain.QAEntryResponseDTO;
@@ -18,6 +20,7 @@ import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.UserSimple;
 import org.edu_sharing.service.qa.QAService;
 import org.edu_sharing.service.qa.domain.QAEntry;
+import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;

@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.restservices.ApiService;
@@ -55,7 +56,7 @@ public class TrackingApi {
 					ActivityOnNodeEventType.DOWNLOAD_MATERIAL,
 					ActivityOnNodeEventType.OPEN_EXTERNAL_LINK
 			).contains(event)){
-				activityEventService.trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, event, null);
+				activityEventService.trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, event, AuthenticationUtil.getFullyAuthenticatedUser());
 				return Response.status(Response.Status.OK).build();
 			} else {
 	    		throw new IllegalArgumentException("the given event is currently not supported via api");

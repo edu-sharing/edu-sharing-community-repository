@@ -373,7 +373,7 @@ public class RenderingProxy extends SpringHttpServlet {
 									new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
 									details,
 									ActivityOnNodeEventType.VIEW_MATERIAL_EMBEDDED,
-									null);
+									AuthenticationUtil.getFullyAuthenticatedUser());
 							return null;
 						}
 						,usernameDecrypted);

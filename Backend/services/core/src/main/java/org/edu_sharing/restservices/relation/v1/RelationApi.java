@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.RelationDao;
 import org.edu_sharing.restservices.RepositoryDao;
@@ -18,6 +20,10 @@ import org.edu_sharing.service.relations.InputRelationType;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
+import org.edu_sharing.service.tracking.ActivityEventService;
+import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
+import org.edu_sharing.service.tracking.NodeTrackingDetails;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Path("/relation/v1")
 @Tag(name="RELATION v1")
@@ -26,6 +32,10 @@ import jakarta.ws.rs.core.Response;
 @Produces({"application/json"})
 @Slf4j
 public class RelationApi {
+
+    @Autowired
+    private ActivityEventService activityEventService;
+
     @PUT
     @Path("/relation/{repository}/{source}/{type}/{target}")
     @Operation(summary = "create a relation between nodes", description = "Creates a relation between two nodes of the given type.")
@@ -47,6 +57,8 @@ public class RelationApi {
             RepositoryDao repoDao = RepositoryDao.getRepository(repository);
             RelationDao relationDao = new RelationDao(repoDao);
             relationDao.createRelation(source, target, type);
+
+            createActivityEvent(source, target);
             return Response.status(Response.Status.OK).build();
         }catch (Throwable t) {
             return ErrorResponse.createResponse(t);
@@ -74,10 +86,17 @@ public class RelationApi {
             RepositoryDao repoDao = RepositoryDao.getRepository(repository);
             RelationDao relationDao = new RelationDao(repoDao);
             relationDao.deleteRelation(source, target, type);
+
+            createActivityEvent(source, target);
             return Response.status(Response.Status.OK).build();
         }catch (Throwable t) {
             return ErrorResponse.createResponse(t);
         }
+    }
+
+    private void createActivityEvent(String source, String target) {
+        activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, source), null, ActivityOnNodeEventType.EDIT_MATERIAL_RELATION, AuthenticationUtil.getFullyAuthenticatedUser());
+        activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, target), null, ActivityOnNodeEventType.EDIT_MATERIAL_RELATION, AuthenticationUtil.getFullyAuthenticatedUser());
     }
 
     @GET

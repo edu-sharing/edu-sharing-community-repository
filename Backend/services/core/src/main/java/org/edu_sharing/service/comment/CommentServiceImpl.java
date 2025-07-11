@@ -10,17 +10,15 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang.StringUtils;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.nodeservice.NodeService;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.notification.NotificationService;
-import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
 import org.edu_sharing.service.notification.Status;
 import org.edu_sharing.service.permission.PermissionService;
-import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
+import org.edu_sharing.service.tracking.ActivityEventService;
+import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -31,9 +29,10 @@ public class CommentServiceImpl implements CommentService{
 	private final PermissionService permissionService;
 	private final NotificationService notificationService;
 	private final RepositoryCache repositoryCache;
-	
+	private final ActivityEventService activityEventService;
+
 	@Override
-	public String addComment(String node,String commentReference, String comment) throws Exception {
+	public String addComment(String node,String commentReference, String comment) {
 		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_COMMENT_WRITE);
 		Map<String, Object> props = new HashMap<>();
 		if(StringUtils.isNotBlank(commentReference)) {
@@ -76,6 +75,7 @@ public class CommentServiceImpl implements CommentService{
         nodeService.updateNodeNative(commentId, props);
 		String parentNode = nodeService.getPrimaryParent(commentId);
 
+
 		notify(parentNode, comment, replyTo == null ? null : replyTo.getId(), Status.CHANGED);
 	}
 
@@ -99,6 +99,7 @@ public class CommentServiceImpl implements CommentService{
 		repositoryCache.remove(parentNode);
 		nodeService.removeNode(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),commentId);
 
+
 		notify(parentNode, comment, replyTo == null ? null : replyTo.getId(), Status.REMOVED);
 	}
 
@@ -115,6 +116,7 @@ public class CommentServiceImpl implements CommentService{
 			aspects = new ArrayList<>();
 		}
 
+		activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.COMMENT_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
 		notificationService.notifyComment(node, comment, commentReference, nodeType, aspects, nodeProps, status);
 	}
 

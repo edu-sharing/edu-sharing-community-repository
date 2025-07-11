@@ -3,6 +3,7 @@ package org.edu_sharing.repository.server.rendering;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -94,7 +95,7 @@ public class RenderingServlet extends SpringHttpServlet {
             response = response.replace("{{{LMS_INLINE_HELPER_SCRIPT}}}", URLHelper.getNgRenderNodeUrl(node_id, version, true) + "?");
             // add nonce to render styles
             response = response.replace("<style", "<style nonce=\"" + SecurityHeadersFilter.ngCspNonce.get() + "\"");
-            activityEventService.trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node_id), null, ActivityOnNodeEventType.VIEW_MATERIAL_EMBEDDED, null);
+            activityEventService.trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node_id), null, ActivityOnNodeEventType.VIEW_MATERIAL_EMBEDDED, AuthenticationUtil.getFullyAuthenticatedUser());
         } catch (Throwable t) {
             RenderingException exception = RenderingException.fromThrowable(t);
             response = RenderingErrorServlet.errorToHTML(req,

@@ -125,7 +125,7 @@ public class DownloadServlet extends SpringHttpServlet {
                 // do only track downloads if it was not accessed by the connector service
                 if (ContextManagementFilter.accessTool.get() == null ||
                         !ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getApplicationInfo().getType())) {
-                    activityEventService.trackActivityOnNode(nodeRef, null, ActivityOnNodeEventType.DOWNLOAD_MATERIAL, null);
+                    activityEventService.trackActivityOnNode(nodeRef, null, ActivityOnNodeEventType.DOWNLOAD_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
                 }
                 originalNodeId = checkAndGetCollectionRef(nodeRef.getId());
             } else {
