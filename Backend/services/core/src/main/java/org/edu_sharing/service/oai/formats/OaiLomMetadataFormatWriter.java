@@ -289,12 +289,23 @@ public class OaiLomMetadataFormatWriter extends AbstractMetadataFormatWriter {
 
         context.createAndAppendElement("value", context.createAndAppendElement("intendedEndUserRole", educational), propertyMapper.getStringList(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_INTENDEDENDUSERROLE));
 
-        Integer tarFrom = propertyMapper.getInteger(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGEFROM);
-        Integer tarTo = propertyMapper.getInteger(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGETO);
-
+        Integer tarFrom;
+        try {
+            tarFrom = propertyMapper.getInteger(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGEFROM);
+        } catch(ClassCastException e) {
+            tarFrom = Integer.parseInt(propertyMapper.getString(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGEFROM));
+        }
         if (tarFrom == null) {
             return;
         }
+
+        Integer tarTo;
+        try {
+            tarTo = propertyMapper.getInteger(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGETO);
+        } catch(ClassCastException e) {
+            tarTo = Integer.parseInt(propertyMapper.getString(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGETO));
+        }
+
         if (tarTo == null) {
             return;
         }
