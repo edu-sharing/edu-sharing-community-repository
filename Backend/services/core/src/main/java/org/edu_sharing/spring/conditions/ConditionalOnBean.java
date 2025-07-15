@@ -1,0 +1,116 @@
+package org.edu_sharing.spring.conditions;
+
+import java.lang.annotation.Annotation;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
+
+/**
+ * {@link Conditional @Conditional} that only matches when beans meeting all the specified
+ * requirements are already contained in the {@link BeanFactory}. All the requirements
+ * must be met for the condition to match, but they do not have to be met by the same
+ * bean.
+ * <p>
+ * When placed on a {@link Bean @Bean} method and none of {@link #value}, {@link #type},
+ * {@link #name}, or {@link #annotation} has been specified, the bean type to match
+ * defaults to the return type of the {@code @Bean} method:
+ *
+ * <pre class="code">
+ * &#064;Configuration
+ * public class MyAutoConfiguration {
+ *
+ *     &#064;ConditionalOnBean
+ *     &#064;Bean
+ *     public MyService myService() {
+ *         ...
+ *     }
+ *
+ * }</pre>
+ * <p>
+ * In the sample above the condition will match if a bean of type {@code MyService} is
+ * already contained in the {@link BeanFactory}.
+ * <p>
+ * The condition can only match the bean definitions that have been processed by the
+ * application context so far and, as such, it is strongly recommended to use this
+ * condition on auto-configuration classes only. If a candidate bean may be created by
+ * another auto-configuration, make sure that the one using this condition runs after.
+ *
+ * @author Phillip Webb
+ * @since 1.0.0
+ */
+@Target({ ElementType.TYPE, ElementType.METHOD })
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Conditional(OnBeanCondition.class)
+public @interface ConditionalOnBean {
+
+    /**
+     * The class types of beans that should be checked. The condition matches when beans
+     * of all classes specified are contained in the {@link BeanFactory}. Beans that are
+     * not autowire candidates or that are not default candidates are ignored.
+     * @return the class types of beans to check
+     * @see Bean#autowireCandidate()
+     * @see BeanDefinition#isAutowireCandidate
+     * @see Bean#defaultCandidate()
+     * @see AbstractBeanDefinition#isDefaultCandidate
+     */
+    Class<?>[] value() default {};
+
+    /**
+     * The class type names of beans that should be checked. The condition matches when
+     * beans of all classes specified are contained in the {@link BeanFactory}. Beans that
+     * are not autowire candidates or that are not default candidates are ignored.
+     * @return the class type names of beans to check
+     * @see Bean#autowireCandidate()
+     * @see BeanDefinition#isAutowireCandidate
+     * @see Bean#defaultCandidate()
+     * @see AbstractBeanDefinition#isDefaultCandidate
+     */
+    String[] type() default {};
+
+    /**
+     * The annotation type decorating a bean that should be checked. The condition matches
+     * when all the annotations specified are defined on beans in the {@link BeanFactory}.
+     * Beans that are not autowire candidates or that are not default candidates are
+     * ignored.
+     * @return the class-level annotation types to check
+     * @see Bean#autowireCandidate()
+     * @see BeanDefinition#isAutowireCandidate
+     * @see Bean#defaultCandidate()
+     * @see AbstractBeanDefinition#isDefaultCandidate
+     */
+    Class<? extends Annotation>[] annotation() default {};
+
+    /**
+     * The names of beans to check. The condition matches when all the bean names
+     * specified are contained in the {@link BeanFactory}.
+     * @return the names of beans to check
+     */
+    String[] name() default {};
+
+    /**
+     * Strategy to decide if the application context hierarchy (parent contexts) should be
+     * considered.
+     * @return the search strategy
+     */
+    SearchStrategy search() default SearchStrategy.ALL;
+
+    /**
+     * Additional classes that may contain the specified bean types within their generic
+     * parameters. For example, an annotation declaring {@code value=Name.class} and
+     * {@code parameterizedContainer=NameRegistration.class} would detect both
+     * {@code Name} and {@code NameRegistration<Name>}.
+     * @return the container types
+     * @since 2.1.0
+     */
+    Class<?>[] parameterizedContainer() default {};
+
+}
