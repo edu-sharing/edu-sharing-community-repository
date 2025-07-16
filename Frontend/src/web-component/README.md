@@ -31,32 +31,6 @@ npm run preview
 npm run build
 ```
 
-## Installation
-
-1. Add it in your package.json
-
-```json
-  "dependencies": {
-    "ngx-edu-sharing-app-as-web-component": "^9.1.0"
-  },
-```
-
-2. Copy the files into your assets/vendor part via `angular.json`
-
-```json
- "assets": [
-    {
-      "glob": "**/*",
-      "input": "node_modules/ngx-edu-sharing-app-as-web-component/",
-      "output": "./vendor/edu-sharing"
-    }
-]
-```
-
-3. Make an html file that looks like this
-
-(Vendor refers to the location where the `ngx-edu-sharing-app-as-web-component` was fetched to, usually in `node_modules`).
-
 ```html
 <html class="no-js" lang="">
     <base href="/" />
