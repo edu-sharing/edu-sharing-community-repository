@@ -10,5 +10,5 @@ export const environment = {
     // in `polyfills.ts` after the import of `zone.js`.
     traceChangeDetection: false,
     webComponentMode: false,
-    eduSharingApiUrl: null as string,
+    eduSharingApiUrl: '/edu-sharing/rest',
 };
