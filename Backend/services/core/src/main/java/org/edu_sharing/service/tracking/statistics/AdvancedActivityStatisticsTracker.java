@@ -39,10 +39,23 @@ public class AdvancedActivityStatisticsTracker {
     private final ActivityStatisticsUtil activityStatisticsUtil;
     private final ActivityStatisticsConfig config;
 
+
+    private final Set<ActivityOnNodeEventType> eventsToListenTo = new HashSet<>(Arrays.asList(
+            ActivityOnNodeEventType.DOWNLOAD_MATERIAL,
+            ActivityOnNodeEventType.OPEN_EXTERNAL_LINK,
+            ActivityOnNodeEventType.VIEW_MATERIAL,
+            ActivityOnNodeEventType.VIEW_COLLECTION,
+            ActivityOnNodeEventType.VIEW_MATERIAL_EMBEDDED
+    ));
+
     @Async
     @RunAsSystem
     @EventListener
     public void handleActivityOnNodeEvent(ActivityOnNodeEvent event) {
+        if(!eventsToListenTo.contains(event.getType())) {
+            return;
+        }
+
         String nodeVersion = Optional.ofNullable(event.getDetails())
                 .map(NodeTrackingDetails::getNodeVersion)
                 .orElse(null);
@@ -112,7 +125,7 @@ public class AdvancedActivityStatisticsTracker {
     }
 
     private String getOriginalNodeRef(ActivityOnNodeEvent event, Map<QName, Serializable> nativeProps) {
-        String originalNodeRef = null;
+        String originalNodeRef = event.getNodeRef().getId();
         try {
             if (nodeService.hasAspect(event.getNodeRef().getStoreRef().getProtocol(), event.getNodeRef().getStoreRef().getIdentifier(), event.getNodeRef().getId(), CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
                 originalNodeRef = nodeService.getProperty(event.getNodeRef().getStoreRef().getProtocol(), event.getNodeRef().getStoreRef().getIdentifier(), event.getNodeRef().getId(), CCConstants.CCM_PROP_IO_ORIGINAL);

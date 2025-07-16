@@ -11,6 +11,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.version.VersionServicePolicies;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.namespace.QName;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -23,7 +24,8 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-public class ActivityOnNodeInterceptor implements NodeServicePolicies.OnUpdatePropertiesPolicy,
+public class ActivityOnNodeInterceptor implements
+        NodeServicePolicies.OnUpdatePropertiesPolicy,
         NodeServicePolicies.OnCreateNodePolicy,
         NodeServicePolicies.OnDeleteNodePolicy,
         NodeServicePolicies.OnMoveNodePolicy,
@@ -80,7 +82,7 @@ public class ActivityOnNodeInterceptor implements NodeServicePolicies.OnUpdatePr
     @Override
     public void onDeleteNode(ChildAssociationRef childAssocRef, boolean isNodeArchived) {
         if (isNodeArchived) {
-            activityEventService.trackActivityOnNode(childAssocRef.getChildRef(), null, ActivityOnNodeEventType.ARCHIVE_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
+            activityEventService.trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE, childAssocRef.getChildRef().getId()), null, ActivityOnNodeEventType.ARCHIVE_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
         } else {
             activityEventService.trackActivityOnNode(childAssocRef.getChildRef(), null, ActivityOnNodeEventType.DELETE_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
         }
