@@ -671,9 +671,6 @@ public class NodeApi  {
 	    	NodeEntry response = new NodeEntry();
 	    	response.setNode(newNode.asNode());
 
-			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.EDIT_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
-
-
 	    	return Response.status(Response.Status.OK).entity(response).build();
 
     	} catch (Throwable t) {
@@ -712,8 +709,6 @@ public class NodeApi  {
 
 			NodeEntry response = new NodeEntry();
 			response.setNode(newNode.asNode());
-
-			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.EDIT_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
 
 			return Response.status(Response.Status.OK).entity(response).build();
 
@@ -797,8 +792,6 @@ public class NodeApi  {
 				response.setNode(templateNode.asNode());
 			response.setEnabled(nodeDao.getTemplateStatus());
 
-			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.EDIT_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
-
 			return Response.status(Response.Status.OK).entity(response).build();
 
 		} catch (Throwable t) {
@@ -840,8 +833,6 @@ public class NodeApi  {
 	    	
 	    	NodeEntry response = new NodeEntry();
 	    	response.setNode(newNode.asNode());
-
-			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.EDIT_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
 
 	    	return Response.status(Response.Status.OK).entity(response).build();
 	    	
@@ -895,8 +886,6 @@ public class NodeApi  {
 	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 	    	
 	    	nodeDao.delete(recycle==null ? true : recycle);
-
-			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.DELETE_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
 
 	    	return Response.status(Response.Status.OK).build();
 
@@ -1098,7 +1087,7 @@ public class NodeApi  {
 	    	
 	    	nodeDao.removeShare(shareId);
 
-			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.UNSHARE_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
+			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.LINK_UNSHARE_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
 
 	    	return Response.status(Response.Status.OK).build();
     	}
@@ -1179,8 +1168,6 @@ public class NodeApi  {
 	    	NodeEntry response=new NodeEntry();
 	    	response.setNode(nodeDao.asNode());
 
-			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeDao.asNode().getRef().getId()), null, ActivityOnNodeEventType.CREATE_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
-
 	    	return Response.status(Response.Status.OK).entity(response).build();
 
     	}
@@ -1251,7 +1238,7 @@ public class NodeApi  {
 	    	NodeDao nodeDao=NodeDao.getNode(repoDao, node);
 	    	NodeShare response=nodeDao.createShare(expiryDate==null ? ShareService.EXPIRY_DATE_UNLIMITED : expiryDate,password);
 
-			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.SHARE_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
+			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.LINK_SHARE_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
 
 	    	return Response.status(Response.Status.OK).entity(response).build();
 
@@ -1330,8 +1317,6 @@ public class NodeApi  {
 	    	
 	    	NodeEntry response = new NodeEntry();
 	    	response.setNode(child.asNode());
-
-			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, child.asNode().getRef().getId()), null, ActivityOnNodeEventType.CREATE_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
 
 			return Response.status(Response.Status.OK).entity(response).build();
 
@@ -1505,8 +1490,6 @@ public class NodeApi  {
 	    	NodeEntry response = new NodeEntry();
 	    	response.setNode(child.asNode());
 
-			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, child.asNode().getRef().getId()), null, ActivityOnNodeEventType.COPY_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
-
 	    	return Response.status(Response.Status.OK).entity(response).build();
 
     	} catch (Throwable t) {	
@@ -1547,8 +1530,6 @@ public class NodeApi  {
 	    			
 	    	NodeEntry response = new NodeEntry();
 	    	response.setNode(child.asNode());
-
-			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, child.asNode().getRef().getId()), null, ActivityOnNodeEventType.MOVE_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
 
 	    	return Response.status(Response.Status.OK).entity(response).build();
 
@@ -1591,8 +1572,6 @@ public class NodeApi  {
 	    	
 	    	NodeEntry response = new NodeEntry();
 	    	response.setNode(newNode.asNode());
-
-			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.EDIT_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
 
 	    	return Response.status(Response.Status.OK).entity(response).build();
 
@@ -1648,8 +1627,6 @@ public class NodeApi  {
 			NodeEntry response = new NodeEntry();
 			response.setNode(newNode.asNode());
 
-			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.EDIT_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
-
 			return Response.status(Response.Status.OK).entity(response).build();
 
 		} catch (Throwable t) {
@@ -1692,8 +1669,6 @@ public class NodeApi  {
 	    	NodeEntry response = new NodeEntry();
 	    	response.setNode(newNode.asNode());
 
-			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.CHANGE_MATERIAL_CONTENT, AuthenticationUtil.getFullyAuthenticatedUser());
-
 			return Response.status(Response.Status.OK).entity(response).build();
 
     	} catch (Throwable t) {
@@ -1734,8 +1709,6 @@ public class NodeApi  {
 	    	
 	    	NodeEntry response = new NodeEntry();
 	    	response.setNode(newNode.asNode());
-
-			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.CHANGE_MATERIAL_CONTENT, AuthenticationUtil.getFullyAuthenticatedUser());
 
 	    	return Response.status(Response.Status.OK).entity(response).build();
 
@@ -1888,9 +1861,6 @@ public class NodeApi  {
 	    	
 	    	NodeEntry response = new NodeEntry();
 	    	response.setNode(revert.asNode());
-
-			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, response.getNode().getRef().getId()), null, ActivityOnNodeEventType.REVERT_MATERIAL_VERSION, AuthenticationUtil.getFullyAuthenticatedUser());
-
 
 	    	return Response.status(Response.Status.OK).entity(response).build();
 	
@@ -2297,8 +2267,6 @@ public class NodeApi  {
 						value == null || value.size() != 1? (Serializable) value : value.get(0),
 						keepModifiedDate != null && keepModifiedDate
 				);
-
-				activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.EDIT_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
 
 		    	return Response.status(Response.Status.OK).build();
 		

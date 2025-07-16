@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpSession;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.NoSuchPersonException;
@@ -15,6 +16,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -83,6 +85,23 @@ public class PersonDao {
 			*/
 
             return new PersonDao(repoDao, userName);
+
+        } catch (Exception e) {
+
+            throw DAOException.mapping(e);
+        }
+    }
+
+    public static PersonDao getPersonByUserId(RepositoryDao repoDao, String userId) throws DAOException {
+
+        try {
+            String username = NodeServiceFactory.getNodeService(repoDao.getId()).getProperty(
+                    StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(),
+                    StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+                    userId,
+                    CCConstants.PROP_USERNAME);
+
+            return new PersonDao(repoDao, username);
 
         } catch (Exception e) {
 

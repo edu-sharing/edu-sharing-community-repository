@@ -5,6 +5,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.springframework.data.domain.Page;
 
 @Data
 public class Pagination  {
@@ -27,9 +28,25 @@ public class Pagination  {
     total=result.getNodeCount();
     count=result.getData().size();
   }
-  public <T extends Node>  Pagination(List<T> result) {
+
+  public Pagination(List<?> result) {
     from=0;
     total=result.size();
     count=result.size();
   }
+
+  public Pagination(int from, int total, int count) {
+      this.from = from;
+      this.total = total;
+      this.count = count;
+  }
+
+  public Pagination(Page<?> page) {
+    this.from = (int)page.getPageable().getOffset();
+    this.total = (int)page.getTotalElements();
+    this.count = page.getContent().size();
+  }
+
+
+
 }
