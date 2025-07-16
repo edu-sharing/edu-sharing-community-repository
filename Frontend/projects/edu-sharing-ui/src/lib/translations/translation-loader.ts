@@ -82,7 +82,7 @@ export class TranslationLoader implements TranslateLoader {
                     return this.applyOverrides(originalTranslations, translationOverrides);
                 }),
                 switchMap((translations) => {
-                    if (!this.i18nConfig.additionalI18nProvider) {
+                    if (!this.i18nConfig?.additionalI18nProvider) {
                         return of(translations);
                     }
                     const files = this.i18nConfig.additionalI18nProvider(lang);
