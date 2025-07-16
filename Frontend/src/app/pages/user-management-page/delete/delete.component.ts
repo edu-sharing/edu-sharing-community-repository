@@ -147,14 +147,14 @@ export class PermissionsDeleteComponent implements OnInit, DoCheck, AfterViewIni
 
     private anyModeMatches(mode: DeleteMode) {
         return (
-            this.options.homeFolder.folders === mode ||
-            this.options.homeFolder.privateFiles === mode ||
-            this.options.homeFolder.ccFiles === mode ||
-            this.options.sharedFolders.folders === mode ||
-            this.options.sharedFolders.privateFiles === mode ||
-            this.options.sharedFolders.ccFiles === mode ||
-            this.options.collections.privateCollections === mode ||
-            this.options.collections.publicCollections === mode
+            this.options?.homeFolder?.folders === mode ||
+            this.options?.homeFolder?.privateFiles === mode ||
+            this.options?.homeFolder?.ccFiles === mode ||
+            this.options?.sharedFolders?.folders === mode ||
+            this.options?.sharedFolders?.privateFiles === mode ||
+            this.options?.sharedFolders?.ccFiles === mode ||
+            this.options?.collections?.privateCollections === mode ||
+            this.options?.collections?.publicCollections === mode
         );
     }
 
