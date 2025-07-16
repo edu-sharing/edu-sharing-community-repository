@@ -147,7 +147,10 @@ export class UIService {
     ) {
         let result: OptionItem[] = [];
         for (let option of options) {
-            if (option.isToggle === toggle && (!toggle || togglePosition === option.togglePosition))
+            if (
+                (option.isToggle === toggle || (!toggle && !option.isToggle)) &&
+                (!toggle || togglePosition === option.togglePosition)
+            )
                 result.push(option);
         }
         return result;

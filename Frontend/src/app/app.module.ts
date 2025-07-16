@@ -1,7 +1,7 @@
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { LocationStrategy } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
-import { NgModule } from '@angular/core';
+import { ApplicationRef, DoBootstrap, Injector, NgModule } from '@angular/core';
 import { MAT_CHECKBOX_DEFAULT_OPTIONS } from '@angular/material/checkbox';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MAT_RADIO_DEFAULT_OPTIONS } from '@angular/material/radio';
@@ -17,10 +17,12 @@ import {
     EduSharingApiModule,
 } from 'ngx-edu-sharing-api';
 import {
+    ActionbarComponent,
     AppService as AppServiceAbstract,
     EduSharingUiModule,
     KeyboardShortcutsService as KeyboardShortcutsServiceAbstract,
     OptionsHelperService as OptionsHelperServiceAbstract,
+    SpinnerComponent,
     Toast as ToastAbstract,
     TranslationsModule,
 } from 'ngx-edu-sharing-ui';
@@ -45,6 +47,9 @@ import { OptionsHelperService } from './services/options-helper.service';
 import { Toast } from './services/toast';
 import { SharedModule } from './shared/shared.module';
 import { BApiModule } from 'ngx-edu-sharing-b-api';
+import { createCustomElement } from '@angular/elements';
+import { WrapperComponent } from './web-components/wrapper/app/wrapper.component';
+import { MockLocationStrategy } from '@angular/common/testing';
 
 const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     showDelay: 500,
@@ -53,7 +58,12 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
 };
 
 @NgModule({
-    declarations: [AppComponent, CustomGlobalExtensionsComponent, extensionDeclarations],
+    declarations: [
+        AppComponent,
+        CustomGlobalExtensionsComponent,
+        WrapperComponent,
+        extensionDeclarations,
+    ],
     imports: [
         AppRoutingModule,
         BrowserAnimationsModule,
@@ -61,6 +71,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         CoreModule,
         DialogsModule,
         DragDropModule,
+        // forRoot is empty; It is initalized via useFactory!
         EduSharingApiModule.forRoot({}),
         EduSharingUiModule.forRoot({ production: environment.production }, extensionProviders),
         BApiModule.forRoot({ rootUrl: '/edu-sharing/rest/bapi' }),
@@ -84,6 +95,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
             deps: [ErrorHandlerService],
             useFactory: (errorHandler: ErrorHandlerService) =>
                 ({
+                    rootUrl: environment.eduSharingApiUrl,
                     onError: (err, req) => errorHandler.handleError(err, req),
                 } as EduSharingApiConfigurationParams),
         },
@@ -95,9 +107,40 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         { provide: MAT_SLIDE_TOGGLE_DEFAULT_OPTIONS, useValue: { color: 'primary' } },
         extensionProviders,
         ErrorHandlerService,
-    ],
+    ].concat(
+        environment.webComponentMode
+            ? [
+                  {
+                      provide: LocationStrategy,
+                      useClass: MockLocationStrategy,
+                  },
+              ]
+            : [],
+    ),
     exports: [AppComponent],
     schemas: [].concat(extensionSchemas),
-    bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule implements DoBootstrap {
+    constructor(private injector: Injector) {}
+
+    ngDoBootstrap(appRef: ApplicationRef): void {
+        if (environment.webComponentMode) {
+            console.info('web component __env', (window as any).__env);
+            customElements.define(
+                'edu-sharing-app',
+                createCustomElement(WrapperComponent, { injector: this.injector }),
+            );
+            console.info('web component __env', (window as any).__env);
+            customElements.define(
+                'edu-sharing-spinner',
+                createCustomElement(SpinnerComponent, { injector: this.injector }),
+            );
+            customElements.define(
+                'edu-sharing-actionbar',
+                createCustomElement(ActionbarComponent, { injector: this.injector }),
+            );
+        } else {
+            appRef.bootstrap(AppComponent);
+        }
+    }
+}

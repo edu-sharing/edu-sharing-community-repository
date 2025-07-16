@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="de" xml:lang="de" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <base href="/" />
+    <link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png" />
+    <meta name="theme-color" content="#48708e" />
+    <meta charset="utf-8" />
+    <title>edu-sharing</title>
+    <script>
+      // Provide the backend URL for edu-sharing.
+      //
+      // For testing with development builds use '/edu-sharing/rest' for a proxy to the URL
+      // configured the `.env` file.
+      //
+      window.__env = {
+        EDU_SHARING_API_URL:
+          'https://repository.10-0.enterprise.edu.edu-sharing.de/edu-sharing/rest',
+      };
+    </script>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico" />
+    <link rel="stylesheet" href="styles.css" />
+    <script>
+      function onSubmit(event) {
+        event.preventDefault();
+        const data = new FormData(event.target);
+        const searchString = data.get('searchString');
+        console.log('submit', searchString);
+        const eduSharingApp = document.getElementsByTagName('edu-sharing-app')[0];
+        eduSharingApp.setAttribute('search-string', searchString);
+      }
+    </script>
+    <style>
+      body {
+        padding: 20px 100px;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .main-container {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      .search-form {
+        flex-shrink: 0;
+      }
+      edu-sharing-app {
+        flex-grow: 1;
+      }
+    </style>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <h1>Web Components Example</h1>
+    <main class="main-container">
+      <h2>Search/App Example</h2>
+      <form class="search-form" onsubmit="onSubmit(event)">
+        <input name="searchString" class="search-input" type="text" placeholder="Search" "=""/>
+      </form>
+      <edu-sharing-app></edu-sharing-app>
+    </main>
+    <main class="main-container">
+      <h2>Spinner Example</h2>
+      <edu-sharing-spinner></edu-sharing-spinner>
+    </main>
+    <main class="main-container">
+      <h2>Actionbar Example</h2>
+      <edu-sharing-actionbar></edu-sharing-actionbar>
+      <script>
+        setTimeout(() => {
+          document.getElementsByTagName('edu-sharing-actionbar')[0].options = [
+            { name: 'HELP', icon: 'help_outline', callback: () => alert('HELP') },
+            { name: 'INFO', icon: 'info', callback: () => alert('INFO') },
+            { name: 'HOME', icon: 'home', callback: () => alert('HOME') },
+          ];
+          console.log(document.getElementsByTagName('edu-sharing-actionbar')[0]);
+        }, 1000);
+      </script>
+    </main>
+  </body>
+</html>

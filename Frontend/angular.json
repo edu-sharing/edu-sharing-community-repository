@@ -103,6 +103,38 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ]
+            },
+            "web-component": {
+              "budgets": [
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "15kb",
+                  "maximumError": "100kb"
+                }
+              ],
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
+              "outputPath": {
+                "base": "dist/web-components/app",
+                "browser": ""
+              },
+              "outputHashing": "none",
+              "sourceMap": false,
+              "namedChunks": true,
+              "extractLicenses": true,
+              "index": "src/web-component/index.html",
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.web-component.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": ""
@@ -406,6 +438,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
+            "preserveSymlinks": true,
             "deployUrl": "vendor/edu-sharing/",
             "outputHashing": "none",
             "outputPath": {
@@ -415,6 +448,12 @@
             "polyfills": [
               "projects/app-as-web-component/src/polyfills.ts"
             ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "projects/edu-sharing-ui/assets/scss",
+                "."
+              ]
+            },
             "tsConfig": "projects/app-as-web-component/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
@@ -552,7 +591,7 @@
               "tsConfig": "projects/edu-sharing-ui/tsconfig.lib.json"
             }
           },
-          "defaultConfiguration": "production",
+          "defaultConfiguration": "production"
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
@@ -595,7 +634,7 @@
           "options": {
             "deployUrl": "",
             "outputHashing": "none",
-            "outputPath": "dist/rendering-service-web-component",
+            "outputPath": "dist/web-components/rendering-service-amd",
             "index": "projects/rendering-service-web-component/src/index.html",
             "main": "projects/rendering-service-web-component/src/main.ts",
             "tsConfig": "projects/rendering-service-web-component/tsconfig.app.json",
@@ -662,7 +701,8 @@
             "deployUrl": "",
             "outputHashing": "none",
             "outputPath": {
-              "base": "dist/rendering-service-web-component"
+              "base": "dist/web-components/rendering-service",
+              "browser": ""
             },
             "index": "projects/rendering-service-web-component/src/index.html",
             "tsConfig": "projects/rendering-service-web-component/tsconfig.app.json",
