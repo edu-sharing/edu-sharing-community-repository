@@ -161,13 +161,15 @@ export class DashboardSwimlaneComponent {
             this.routerQueryParams.set({ scope: 'MY' });
             void this.fetch(
                 this.searchService.search({
-                    query: 'collections_scope_my',
+                    query: 'dashboard_my_collections',
                     repository: HOME_REPOSITORY,
                     metadataset: DEFAULT,
                     contentType: 'ALL',
                     body: {
                         criteria: [],
                     },
+                    sortProperties: [RestConstants.LUCENE_SCORE, RestConstants.CM_MODIFIED_DATE],
+                    sortAscending: [false, false],
                     maxItems: this.maxItems,
                 }),
             );
