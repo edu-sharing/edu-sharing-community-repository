@@ -47,7 +47,7 @@ const stream: Meta<DashboardInteractivityStreamComponent> = {
         }),
     ],
     args: {
-        events: Array.from({ length: 20 }, () => {
+        events: Array.from({ length: 6 }, () => {
             return {
                 type: 'SHARE',
                 element: DummyNode,

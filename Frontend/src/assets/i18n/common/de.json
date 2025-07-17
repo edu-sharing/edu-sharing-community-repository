@@ -1493,7 +1493,7 @@
   },
   "DASHBOARD_SWIMLANE": {
     "STREAM": {
-      "SHARED_INFO": "{{initiator}} gab frei {{element}} für {{receiver}}",
+      "SHARED_INFO": "{{initiator}} gab dir {{element}} frei",
       "TIMEGROUP": {
         "Today": "heute",
         "Yesterday": "gestern",
