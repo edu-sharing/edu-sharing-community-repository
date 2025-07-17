@@ -1,9 +1,10 @@
 package org.edu_sharing.metadataset.v2;
 
 
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.SerializationUtils;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,11 @@ public class MetadataQuery extends MetadataQueryBase implements Serializable {
 	protected String id;
 	protected String join;
 	protected Boolean applyBasequery;
+	/**
+	 * function score for elastic/dsl
+	 */
+	@Getter
+	protected List <MetadataQueryFunction> functions = new ArrayList<>();
 	protected boolean basequeryAsFilter = true;
 	private List<MetadataQueryParameter> parameters;
 	private List<SpecialFilter> specialFilter = new ArrayList<>();
@@ -119,5 +125,12 @@ public class MetadataQuery extends MetadataQueryBase implements Serializable {
 		exclude_system_folder,
 		exclude_sites_folder,
 		exclude_people_folder,
+	}
+
+	@Getter
+	@Setter
+	public static class MetadataQueryFunction {
+		private String filter;
+		private double weight;
 	}
 }

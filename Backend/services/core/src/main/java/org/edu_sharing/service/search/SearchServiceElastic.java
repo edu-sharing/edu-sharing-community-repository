@@ -33,6 +33,7 @@ import org.apache.http.HttpHost;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.guest.GuestConfig;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
@@ -45,7 +46,6 @@ import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
@@ -295,7 +295,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                         )))
                                 )
                         )
-        );
+                );
     }
 
     @NotNull
@@ -700,14 +700,30 @@ public class SearchServiceElastic extends SearchServiceImpl {
             }
 
 
-            searchRequestBuilder.query(q -> q
-                    .bool(b -> b
-                            .filter(filter -> filter
-                                    .bool(bool -> bool
-                                            .must(must -> must.bool(metadataQueryBuilderFilter))
-                                            .must(must -> must.bool(queryBuilderGlobalConditions))))
-                            .must(must -> must.bool(metadataQueryBuilderAsQuery))));
-
+            searchRequestBuilder.query(q -> {
+                BoolQuery boolQuery = BoolQuery.of(b -> b
+                        .filter(filter -> filter
+                                .bool(bool -> bool
+                                        .must(must -> must.bool(metadataQueryBuilderFilter))
+                                        .must(must -> must.bool(queryBuilderGlobalConditions))))
+                        .must(must -> must.bool(metadataQueryBuilderAsQuery)));
+                if(!queryData.getFunctions().isEmpty()) {
+                    return q.functionScore(f ->
+                            f.query(q2 -> q2.bool(boolQuery)).
+                            functions(queryData.getFunctions().stream().map(f2 -> FunctionScore.of(
+                                    f3 -> f3
+                                            .filter(f4 -> f4.wrapper(new ReadableWrapperQueryBuilder(
+                                                            QueryUtils.replaceCommonQueryParams(f2.getFilter(), QueryUtils.replacerFromSyntax(MetadataReader.QUERY_SYNTAX_DSL, true))
+                                                    ).build()
+                                            ))
+                                            .weight(f2.getWeight()))
+                            ).collect(Collectors.toList()))
+                    );
+                } else {
+                    return q
+                            .bool(boolQuery);
+                }
+            });
             searchRequestBuilder.from(searchToken.getFrom());
             searchRequestBuilder.size(searchToken.getMaxResult());
             searchRequestBuilder.trackTotalHits(new TrackHits.Builder().enabled(true).build());

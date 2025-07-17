@@ -265,6 +265,9 @@ public class MetadataReader {
                                                 parameterNode.getAttributes().getNamedItem("propertyNull").getTextContent(),
                                 parameterNode.getTextContent());
                     }
+                    if (parameterNode.getNodeName().equals("function")) {
+                        query.getFunctions().add(getMetadataQueryFunction(parameterNode));
+                    }
                     if (parameterNode.getNodeName().equals("condition")) {
                         handleQueryCondition(parameterNode, query);
                     }
@@ -323,6 +326,20 @@ public class MetadataReader {
             result.put(syntaxName, entry);
         }
         return result;
+    }
+
+    private static MetadataQuery.MetadataQueryFunction getMetadataQueryFunction(Node node) {
+        MetadataQuery.MetadataQueryFunction function = new MetadataQuery.MetadataQueryFunction();
+        NodeList list = node.getChildNodes();
+        for (int i = 0; i < list.getLength(); i++) {
+            Node functionNode = list.item(i);
+            if (functionNode.getNodeName().equals("filter")) {
+                function.setFilter(functionNode.getTextContent());
+            } else if (functionNode.getNodeName().equals("weight")) {
+                function.setWeight(Double.parseDouble(functionNode.getTextContent()));
+            }
+        }
+        return function;
     }
 
     private static MetadataQueryParameter.MetadataQueryFacet getMetadataQueryFacet(Node data) {

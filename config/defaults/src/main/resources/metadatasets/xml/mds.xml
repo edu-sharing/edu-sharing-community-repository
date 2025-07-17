@@ -975,7 +975,7 @@
 					<cm:description>
 				]]></html>
     </template>
-		<template>
+    <template>
       <id>mediacenter_filter</id>
       <html><![CDATA[
 				]]></html>
@@ -1158,8 +1158,8 @@
       <rendering>angular</rendering>
       <views>
         <view>collection_sidebar</view>
-			</views>
-		</group>
+      </views>
+    </group>
     <group>
       <id>preview_sidebar</id>
       <rendering>angular</rendering>
@@ -1273,6 +1273,38 @@
       ]
       }}
     </basequery>
+    <query join="AND" id="dashboard_my_collections">
+      <basequery>
+        {"bool":
+        {"must":[
+        {"match":{"nodeRef.storeRef.protocol":"workspace"}},
+        {"match":{"aspects":"ccm:collection"}}
+        ]}
+        }
+      </basequery>
+      <function>
+        <filter>
+          {
+          "regexp": {
+          "permissions.Write": {
+          "value": "(${authorities})"
+          }
+          }
+          }
+        </filter>
+        <weight>2</weight>
+      </function>
+      <function>
+        <filter>
+          {
+          "match": {
+          "permissions.Write": "${user.cm:userName}"
+          }
+          }
+        </filter>
+        <weight>2</weight>
+      </function>
+    </query>
     <query join="AND" id="collections_scope_my">
       <basequery>
         {"bool":
