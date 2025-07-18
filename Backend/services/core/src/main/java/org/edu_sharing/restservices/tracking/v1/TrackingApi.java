@@ -14,9 +14,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Pagination;
-import org.edu_sharing.restservices.shared.User;
-import org.edu_sharing.restservices.tracking.v1.model.UserNodeActivityNode;
-import org.edu_sharing.restservices.tracking.v1.model.UserNodeActivityNodePageResult;
+import org.edu_sharing.restservices.tracking.v1.model.UserNodeActivityPageResult;
 import org.edu_sharing.service.tracking.*;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,7 +30,6 @@ import org.springframework.data.domain.PageRequest;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Path("/tracking/v1")
 @Tag(name = "TRACKING v1")
@@ -85,46 +82,40 @@ public class TrackingApi {
     @Path("/tracking/{repository}/userNodeActivities/{user}")
     @Operation(summary = "Track a user interaction", description = "Currently limited to video / audio play interactions")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserNodeActivityNode.class)))),
+            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserNodeActivity.class)))),
             @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    })    
+    })
     public Response getUserNodeActivity(
             @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repId,
             @Parameter(description = "user", required = true, schema = @Schema(defaultValue = "-me-")) @PathParam("user") String user,
             @Parameter(description = "after", required = true, schema = @Schema(defaultValue = "-me-"))
             @QueryParam("after")
             Date after,
-            @Context HttpServletRequest req){
+            @Context HttpServletRequest req) {
 
-        if(user.equals("-me-")) {
+
+        if (!RepositoryDao.getRepository(repId).isHomeRepo()) {
+            throw new IllegalArgumentException("The given repository is not the home repository");
+        }
+
+        if (user.equals("-me-")) {
             user = AuthenticationUtil.getFullyAuthenticatedUser();
         }
 
-        RepositoryDao repository = RepositoryDao.getRepository(repId);
-        User person = PersonDao.getPerson(repository, user).asPerson();
-
         List<UserNodeActivity> trackedActivities = userNodeActivityDataService.getDataForUser(user, after);
-        List<UserNodeActivityNode> result = trackedActivities.stream().map(trackedActivity ->
-                        new UserNodeActivityNode(
-                                NodeDao.getNode(repository, trackedActivity.getNodeId()).asNode(),
-                                person,
-                                trackedActivity.getType(),
-                                trackedActivity.getTimestamp()))
-                .toList();
-
-        return Response.status(Response.Status.OK).entity(result).build();
+        return Response.status(Response.Status.OK).entity(trackedActivities).build();
 
     }
-    
+
     @GET
     @Path("/tracking/{repository}/allUserNodeActivities")
     @Operation(summary = "Get all user activities", description = "Returns a paginated list of all user activities after a specific date")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = UserNodeActivityNodePageResult.class))),
+            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = UserNodeActivityPageResult.class))),
             @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -134,23 +125,16 @@ public class TrackingApi {
     public Response getAllUserNodeActivities(
             @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repId,
             @Parameter(description = "Date to filter activities from", required = true) @QueryParam("after") Date after,
-            @Parameter(description = "maximum items per page", schema = @Schema(defaultValue="10")) @QueryParam("maxItems") Integer maxItems,
-            @Parameter(description = "skip a number of items", schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
+            @Parameter(description = "maximum items per page", schema = @Schema(defaultValue = "10")) @QueryParam("maxItems") Integer maxItems,
+            @Parameter(description = "skip a number of items", schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount,
             @Context HttpServletRequest req) {
 
-        RepositoryDao repository = RepositoryDao.getRepository(repId);
-        Page<UserNodeActivity> trackedActivities = userNodeActivityDataService.getDataForAllUsers(after, PageRequest.of(skipCount/maxItems, maxItems));
-        List<UserNodeActivityNode> items = trackedActivities.stream().map(trackedActivity -> {
-                    User person = PersonDao.getPersonByUserId(repository, trackedActivity.getUserId()).asPerson();
-                    return new UserNodeActivityNode(
-                            NodeDao.getNode(repository, trackedActivity.getNodeId()).asNode(),
-                            person,
-                            trackedActivity.getType(),
-                            trackedActivity.getTimestamp());
-                })
-                .toList();
+        if (!RepositoryDao.getRepository(repId).isHomeRepo()) {
+            throw new IllegalArgumentException("The given repository is not the home repository");
+        }
 
-        UserNodeActivityNodePageResult result = new UserNodeActivityNodePageResult(items, new Pagination(trackedActivities));
+        Page<UserNodeActivity> trackedActivities = userNodeActivityDataService.getDataForAllUsers(after, skipCount, maxItems);
+        UserNodeActivityPageResult result = new UserNodeActivityPageResult(trackedActivities.getContent(), new Pagination(trackedActivities));
         return Response.status(Response.Status.OK).entity(result).build();
     }
 

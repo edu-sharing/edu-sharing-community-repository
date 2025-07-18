@@ -6836,29 +6836,39 @@
         ],
         "type": "object"
       },
-      "UserNodeActivityNode": {
+      "UserNodeActivity": {
         "properties": {
-          "activity": {
+          "id": {
             "type": "string"
           },
-          "node": {
-            "$ref": "#/components/schemas/Node"
+          "nodeId": {
+            "type": "string"
           },
           "timestamp": {
             "format": "date-time",
             "type": "string"
           },
-          "user": {
-            "$ref": "#/components/schemas/User"
+          "type": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
           }
         },
+        "required": [
+          "id",
+          "nodeId",
+          "timestamp",
+          "type",
+          "username"
+        ],
         "type": "object"
       },
-      "UserNodeActivityNodePageResult": {
+      "UserNodeActivityPageResult": {
         "properties": {
           "activities": {
             "items": {
-              "$ref": "#/components/schemas/UserNodeActivityNode"
+              "$ref": "#/components/schemas/UserNodeActivity"
             },
             "type": "array"
           },
@@ -39263,7 +39273,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserNodeActivityNodePageResult"
+                  "$ref": "#/components/schemas/UserNodeActivityPageResult"
                 }
               }
             },
@@ -39368,7 +39378,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/UserNodeActivityNode"
+                    "$ref": "#/components/schemas/UserNodeActivity"
                   },
                   "type": "array"
                 }

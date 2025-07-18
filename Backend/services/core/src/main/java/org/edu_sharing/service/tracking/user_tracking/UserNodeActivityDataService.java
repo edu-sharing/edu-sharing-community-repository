@@ -11,7 +11,7 @@ import java.util.List;
  * Service interface for retrieving data related to user activities on nodes.
  */
 public interface UserNodeActivityDataService {
-    @NotNull Page<UserNodeActivity> getDataForAllUsers(@NotNull Date after, Pageable pageable);
+    @NotNull Page<UserNodeActivity> getDataForAllUsers(@NotNull Date after, int skip, int limit);
 
     /**
      * Retrieves a list of user node activity records associated with the specified username

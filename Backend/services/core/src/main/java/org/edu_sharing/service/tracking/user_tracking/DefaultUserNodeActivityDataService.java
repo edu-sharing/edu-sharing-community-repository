@@ -24,7 +24,7 @@ public class DefaultUserNodeActivityDataService implements UserNodeActivityDataS
 
     @NotNull
     @Override
-    public Page<UserNodeActivity> getDataForAllUsers(@NotNull Date after, Pageable pageable) {
+    public Page<UserNodeActivity> getDataForAllUsers(@NotNull Date after, int skip, int limit) {
         return Page.empty();
     }
 
