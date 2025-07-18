@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 
 
 public class SortDefinition implements Serializable {
+	public static SortDefinition SORT_DEFINITION_SCORE = new SortDefinition(new SortDefinitionEntry("score", false));
 	static Logger logger = Logger.getLogger(SortDefinition.class);
 
 	private static final List<String> ALLOWED_SORT_MAIN_PROPERTIES = Collections.singletonList(
@@ -59,6 +60,9 @@ public class SortDefinition implements Serializable {
 		}
 	}
 	public SortDefinition(){}
+	public SortDefinition(SortDefinitionEntry sortDefinitionEntry){
+		this.sortDefinitionEntries = Collections.singletonList(sortDefinitionEntry);
+	}
 	/**
 	 * Fills this SortDefinition with a string list of properties
 	 * @param sortProperties the names to sort by

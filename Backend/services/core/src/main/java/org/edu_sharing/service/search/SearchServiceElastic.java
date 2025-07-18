@@ -6,6 +6,7 @@ import co.elastic.clients.elasticsearch._types.aggregations.*;
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
 import co.elastic.clients.elasticsearch.core.*;
 import co.elastic.clients.elasticsearch.core.search.*;
+import co.elastic.clients.json.JsonData;
 import co.elastic.clients.json.JsonpUtils;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
@@ -1546,6 +1547,62 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     @Override
+    public org.edu_sharing.repository.client.rpc.Result<List<SearchUserEvent>> getRecentUserEvents(List<String> filterByEvent, ContentType contentType, int skipCount, int maxItems) throws Exception {
+        String username = AuthenticationUtil.getFullyAuthenticatedUser();
+        MetadataQueries queries = MetadataHelper.getLocalDefaultMetadataset().getQueries(MetadataReader.QUERY_SYNTAX_DSL);
+        String basequery = queries.findQuery("recentUserEvents").getPrimaryBasequery();
+        BoolQuery.Builder builder = QueryBuilders.bool()
+                .must(
+                        b -> b.wrapper(new ReadableWrapperQueryBuilder(basequery).build())
+                ).must(
+                        must -> must.bool(getGlobalConditions(null, null, null).build())
+                ).must(
+                        Query.of(q2 -> q2.hasChild(hc -> hc
+                                .type("userEvent")
+                                .scoreMode(ChildScoreMode.Max)
+                                .query(childQuery -> childQuery.functionScore(fs -> fs
+                                        .query(q3 -> q3.term(t -> t
+                                                .field("userEvent.initiator")
+                                                .value(username)
+                                        ))
+                                        // TODO: Filter by event if present!
+                                        .functions(f -> f.scriptScore(ss -> ss
+                                                        .script(script -> script
+                                                                .source("decayDateLinear(params.originDate, '1m', '0', 1.5, doc['userEvent.timestamp'].value)")
+                                                                .params(Map.of("originDate", JsonData.of(new Date())
+                                                        )
+                                                )
+                                        )))
+                                        .boostMode(FunctionBoostMode.Replace)
+                                ))
+                                .innerHits(ih -> ih
+                                        .name("userEvent")
+                                        .size(1)
+                                        .sort(so -> so
+                                                .field(sf -> sf
+                                                        .field("userEvent.timestamp")
+                                                        .order(SortOrder.Desc)
+                                                )
+                                        )
+                                )
+                        ))
+                );
+        SearchResultNodeRef queryResult = searchByQuery(builder.build(), skipCount, maxItems, SortDefinition.SORT_DEFINITION_SCORE);
+        org.edu_sharing.repository.client.rpc.Result<List<SearchUserEvent>> result = new org.edu_sharing.repository.client.rpc.Result<>();
+        ArrayList<SearchUserEvent> list = new ArrayList<>();
+        int i = 0;
+        for (Hit<Map> elasticHit : queryResult.getElasticHits()) {
+            Hit<JsonData> userEvent = elasticHit.innerHits().get("userEvent").hits().hits().get(0);
+            list.add(new SearchUserEvent(
+                    queryResult.getData().get(i++))
+            );
+        }
+        result.setData(list);
+        result.setStartIDX(queryResult.getStartIDX());
+        result.setNodeCount(queryResult.getNodeCount());
+        return result;
+    }
+    @Override
     public SearchResultNodeRef getFilesSharedByMe(SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception {
         BoolQuery.Builder query = QueryBuilders.bool()
                 .must(
@@ -1641,6 +1698,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
         boolean isAdmin = AuthorityServiceHelper.isAdmin();
         SearchResultNodeRef sr = new SearchResultNodeRef();
+        sr.setElasticHits(hits.hits());
         sr.setData(hits.hits().stream().map(h -> transformSearchHit(isAdmin, authorities, user, h.source(), false)).collect(Collectors.toList()));
         sr.setStartIDX(skipCount);
         sr.setNodeCount((int) hits.total().value());

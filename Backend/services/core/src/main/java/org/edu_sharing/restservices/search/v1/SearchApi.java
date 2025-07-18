@@ -1,6 +1,5 @@
 package org.edu_sharing.restservices.search.v1;
 
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -16,11 +15,11 @@ import jakarta.ws.rs.core.Response;
 import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.repository.server.NodeRefVersion;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.LRMITool;
 import org.edu_sharing.restservices.*;
+import org.edu_sharing.restservices.node.v1.NodeApi;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.search.v1.model.SearchParameters;
@@ -28,7 +27,6 @@ import org.edu_sharing.restservices.search.v1.model.SearchParametersFacets;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.search.SearchService;
-import org.edu_sharing.service.search.SearchService.CombineMode;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SearchVCard;
@@ -50,34 +48,34 @@ public class SearchApi {
 
 	@POST
 	@Path("/queries/{repository}/{metadataset}/{query}")
-	@Consumes({ "application/json" })
+	@Consumes({"application/json"})
 
 	@Operation(operationId = "search", summary = "Perform queries based on metadata sets.", description = "Perform queries based on metadata sets.")
 
-	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResultNode.class))),
-			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResultNode.class))),
+			@ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
 
 	public Response search(
-			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
-			@Parameter(description = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, schema = @Schema(defaultValue="-default-")) @PathParam("metadataset") String mdsId,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, schema = @Schema(defaultValue = "-default-")) @PathParam("metadataset") String mdsId,
 			@Parameter(description = "ID of query", required = true) @PathParam("query") String query,
 			@Parameter(description = "Type of element", required = false) @QueryParam("contentType") SearchService.ContentType contentType,
-			@Parameter(description = "maximum items per page", schema = @Schema(defaultValue="10")) @QueryParam("maxItems") Integer maxItems,
-			@Parameter(description = "skip a number of items", schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
+			@Parameter(description = "maximum items per page", schema = @Schema(defaultValue = "10")) @QueryParam("maxItems") Integer maxItems,
+			@Parameter(description = "skip a number of items", schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount,
 			@Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
 			@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
 			@Parameter(description = "search parameters", required = true) SearchParameters parameters,
-			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue = "-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
 			@Context HttpServletRequest req) {
 
 		try {
 
 
-			if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
+			if (RepoProxyFactory.getRepoProxy().myTurn(repository)) {
 				return RepoProxyFactory.getRepoProxy().searchV2(repository, mdsId, query, contentType, maxItems, skipCount, sortProperties, sortAscending, parameters, propertyFilter, req);
 			}
 
@@ -90,8 +88,8 @@ public class SearchApi {
 			token.setFacets(parameters.getFacets());
 			token.setFacetLimit((parameters.getFacetLimit() != null && parameters.getFacetLimit() > 0)
 					? parameters.getFacetLimit() : 10);
-			token.setFacetsMinCount((parameters.getFacetMinCount() != null && parameters.getFacetMinCount() >= 0 )
-					? parameters.getFacetMinCount(): 5);
+			token.setFacetsMinCount((parameters.getFacetMinCount() != null && parameters.getFacetMinCount() >= 0)
+					? parameters.getFacetMinCount() : 5);
 			token.setQueryString(parameters.getFacetSuggest());
 			token.setPermissions(parameters.getPermissions());
 			token.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
@@ -104,10 +102,10 @@ public class SearchApi {
 			NodeSearch search = NodeDao.search(repoDao, mdsDao, query, parameters.getCriteria(), token, filter, parametersToDaoTransformer(parameters));
 
 			List<Node> data = null;//new ArrayList<>();
-			if(search.getNodes().isEmpty()){
+			if (search.getNodes().isEmpty()) {
 				//searched repo deliveres only nodeRefs by query time
 				data = NodeDao.convertToRest(repoDao, search.getResult(), filter, parametersToDaoTransformer(parameters));
-			}else{
+			} else {
 				//searched repo delivered properties by query time
 				data = search.getNodes();
 				// @TODO: we may need to still call convertToRest to make sure we've latest data from remote repos
@@ -129,7 +127,7 @@ public class SearchApi {
 
 			return Response.status(Response.Status.OK).entity(response).build();
 
-		}  catch (Throwable t) {
+		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}
 
@@ -144,33 +142,33 @@ public class SearchApi {
 
 	@POST
 	@Path("/queries/{repository}/{metadataset}/{query}/lrmi")
-	@Consumes({ "application/json" })
+	@Consumes({"application/json"})
 
 	@Operation(operationId = "search-lrmi", summary = "Perform queries based on metadata sets.", description = "Perform queries based on metadata sets.")
-	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResultLrmi.class))),
-			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResultLrmi.class))),
+			@ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
 
 	public Response searchLrmi(
-			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
-			@Parameter(description = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, schema = @Schema(defaultValue="-default-")) @PathParam("metadataset") String mdsId,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, schema = @Schema(defaultValue = "-default-")) @PathParam("metadataset") String mdsId,
 			@Parameter(description = "ID of query", required = true) @PathParam("query") String query,
 			@Parameter(description = "Type of element", required = false) @QueryParam("contentType") SearchService.ContentType contentType,
-			@Parameter(description = "maximum items per page", schema = @Schema(defaultValue="10")) @QueryParam("maxItems") Integer maxItems,
-			@Parameter(description = "skip a number of items", schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
+			@Parameter(description = "maximum items per page", schema = @Schema(defaultValue = "10")) @QueryParam("maxItems") Integer maxItems,
+			@Parameter(description = "skip a number of items", schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount,
 			@Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
 			@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
 			@Parameter(description = "search parameters", required = true) SearchParameters parameters,
-			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue = "-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
 			@Context HttpServletRequest req) {
 
 		try {
 
 
-			if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
+			if (RepoProxyFactory.getRepoProxy().myTurn(repository)) {
 				return RepoProxyFactory.getRepoProxy().searchV2(repository, mdsId, query, contentType, maxItems, skipCount, sortProperties, sortAscending, parameters, propertyFilter, req);
 			}
 
@@ -183,8 +181,8 @@ public class SearchApi {
 			token.setFacets(parameters.getFacets());
 			token.setFacetLimit((parameters.getFacetLimit() != null && parameters.getFacetLimit() > 0)
 					? parameters.getFacetLimit() : 10);
-			token.setFacetsMinCount((parameters.getFacetMinCount() != null && parameters.getFacetMinCount() >= 0 )
-					? parameters.getFacetMinCount(): 5);
+			token.setFacetsMinCount((parameters.getFacetMinCount() != null && parameters.getFacetMinCount() >= 0)
+					? parameters.getFacetMinCount() : 5);
 			token.setQueryString(parameters.getFacetSuggest());
 			token.setPermissions(parameters.getPermissions());
 			token.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
@@ -197,10 +195,10 @@ public class SearchApi {
 			NodeSearch search = NodeDao.search(repoDao, mdsDao, query, parameters.getCriteria(), token, filter, parametersToDaoTransformer(parameters));
 
 			List<Node> nodes = null;//new ArrayList<>();
-			if(search.getNodes().size() == 0){
+			if (search.getNodes().size() == 0) {
 				//searched repo deliveres only nodeRefs by query time
 				nodes = NodeDao.convertToRest(repoDao, search.getResult(), filter, null);
-			}else{
+			} else {
 				//searched repo delivered properties by query time
 				nodes = search.getNodes();
 				// @TODO: we may need to still call convertToRest to make sure we've latest data from remote repos
@@ -208,7 +206,7 @@ public class SearchApi {
 
 
 			List<String> data = new ArrayList<>(nodes.size());
-			for (Node node: nodes) {
+			for (Node node : nodes) {
 				org.alfresco.service.cmr.repository.NodeRef nodeRef = new org.alfresco.service.cmr.repository.NodeRef(
 						node.getRef().isArchived()
 								? StoreRef.STORE_REF_ARCHIVE_SPACESSTORE
@@ -234,7 +232,7 @@ public class SearchApi {
 
 			return Response.status(Response.Status.OK).entity(response).build();
 
-		}  catch (Throwable t) {
+		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}
 
@@ -243,21 +241,21 @@ public class SearchApi {
 
 	@POST
 	@Path("/queries/{repository}/{metadataset}/{query}/facets")
-	@Consumes({ "application/json" })
+	@Consumes({"application/json"})
 
 	@Operation(summary = "Search in facets.", description = "Perform queries based on metadata sets.")
 
-	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResultNode.class))),
-			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResultNode.class))),
+			@ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 
 	public Response searchFacets(
 
-			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
-			@Parameter(description = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, schema = @Schema(defaultValue="-default-")) @PathParam("metadataset") String mdsId,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, schema = @Schema(defaultValue = "-default-")) @PathParam("metadataset") String mdsId,
 			@Parameter(description = "ID of query", required = true) @PathParam("query") String query,
 			@Parameter(description = "facet parameters", required = true) SearchParametersFacets parameters,
 			@Context HttpServletRequest req) {
@@ -273,7 +271,7 @@ public class SearchApi {
 			token.setMaxResult(0);
 			token.setFacetLimit((parameters.getFacetLimit() != null && parameters.getFacetLimit() > 0)
 					? parameters.getFacetLimit() : 10);
-			token.setFacetsMinCount((parameters.getFacetMinCount()  != null && parameters.getFacetMinCount() >= 0 )
+			token.setFacetsMinCount((parameters.getFacetMinCount() != null && parameters.getFacetMinCount() >= 0)
 					? parameters.getFacetMinCount() : 5);
 			token.setQueryString(parameters.getFacetSuggest());
 
@@ -284,7 +282,7 @@ public class SearchApi {
 			response.setFacets(search.getFacets());
 			return Response.status(Response.Status.OK).entity(search).build();
 
-		}  catch (Throwable t) {
+		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}
 
@@ -292,23 +290,23 @@ public class SearchApi {
 
 	@POST
 	@Path("/queries/{repository}/{metadataset}/{query}/save")
-	@Consumes({ "application/json" })
+	@Consumes({"application/json"})
 
 	@Operation(summary = "Save a search query.", description = "Save a search query.")
 
-	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
-			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+			@ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
 
 	public Response saveSearch(
-			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
-			@Parameter(description = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, schema = @Schema(defaultValue="-default-")) @PathParam("metadataset") String mdsId,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, schema = @Schema(defaultValue = "-default-")) @PathParam("metadataset") String mdsId,
 			@Parameter(description = "ID of query", required = true) @PathParam("query") String query,
 			@Parameter(description = "Name of the new search item", required = true) @QueryParam("name") String name,
-			@Parameter(description = "Replace if search with the same name exists", required = false, schema = @Schema(defaultValue="false")) @QueryParam("replace") Boolean replace,
+			@Parameter(description = "Replace if search with the same name exists", required = false, schema = @Schema(defaultValue = "false")) @QueryParam("replace") Boolean replace,
 			@Parameter(description = "search parameters", required = true) List<MdsQueryCriteria> parameters,
 			@Context HttpServletRequest req) {
 
@@ -331,26 +329,26 @@ public class SearchApi {
 
 	@GET
 	@Path("/queries/load/{nodeId}")
-	@Consumes({ "application/json" })
+	@Consumes({"application/json"})
 
 	@Operation(summary = "Load a saved search query.", description = "Load a saved search query.")
 
-	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Node.class))),
-			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Node.class))),
+			@ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
 
 	public Response loadSaveSearch(
 			@Parameter(description = "Node id of the search item", required = true) @PathParam("nodeId") String nodeId,
 			@Parameter(description = "Type of element", required = false) @QueryParam("contentType") SearchService.ContentType contentType,
-			@Parameter(description = "maximum items per page", schema = @Schema(defaultValue="10")) @QueryParam("maxItems") Integer maxItems,
-			@Parameter(description = "skip a number of items", schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
+			@Parameter(description = "maximum items per page", schema = @Schema(defaultValue = "10")) @QueryParam("maxItems") Integer maxItems,
+			@Parameter(description = "skip a number of items", schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount,
 			@Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
 			@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
 			@Parameter(description = "facets", required = false) List<String> facets,
-			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue = "-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
 
 			@Context HttpServletRequest req) {
 
@@ -362,11 +360,11 @@ public class SearchApi {
 					runSavedSearch(skipCount != null ? skipCount : 0,
 							maxItems != null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS,
 							contentType,
-							new SortDefinition(sortProperties,sortAscending),
+							new SortDefinition(sortProperties, sortAscending),
 							facets
 					);
 			return Response.status(Response.Status.OK).entity(result).build();
-		}  catch (Throwable t) {
+		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}
 
@@ -374,25 +372,25 @@ public class SearchApi {
 
 	@POST
 	@Path("/queries/{repository}/fingerprint/{nodeid}")
-	@Consumes({ "application/json" })
+	@Consumes({"application/json"})
 
 	@Operation(summary = "Perform queries based on metadata sets.", description = "Perform queries based on metadata sets.")
 
-	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResultNode.class))),
-			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResultNode.class))),
+			@ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
 
 	public Response searchFingerprint(
-			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
 			@Parameter(description = "nodeid", required = true) @PathParam("nodeid") String nodeId,
-			@Parameter(description = "maximum items per page", schema = @Schema(defaultValue="10")) @QueryParam("maxItems") Integer maxItems,
-			@Parameter(description = "skip a number of items", schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
+			@Parameter(description = "maximum items per page", schema = @Schema(defaultValue = "10")) @QueryParam("maxItems") Integer maxItems,
+			@Parameter(description = "skip a number of items", schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount,
 			@Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
 			@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue = "-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -426,29 +424,29 @@ public class SearchApi {
 
 	@GET
 	@Path("/custom/{repository}")
-	@Consumes({ "application/json" })
+	@Consumes({"application/json"})
 
 	@Operation(summary = "Search for custom properties with custom values", description = "e.g. property=cm:name, value:*Test*")
 
-	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResultNode.class))),
-			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResultNode.class))),
+			@ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
 
 	public Response searchByProperty(
-			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
 			@Parameter(description = "Type of element", required = false) @QueryParam("contentType") SearchService.ContentType contentType,
 			@Parameter(description = "Combine mode, AND or OR, defaults to AND", required = false) @QueryParam("combineMode") SearchService.CombineMode combineMode,
 			@Parameter(description = "One (or more) properties to search for, will be combined by specified combine mode", required = false) @QueryParam("property") List<String> property,
 			@Parameter(description = "One (or more) values to search for, matching the properties defined before", required = false) @QueryParam("value") List<String> value,
 			@Parameter(description = "(Optional) comparator, only relevant for date or numerical fields, currently allowed =, <=, >=", required = false) @QueryParam("comparator") List<String> comparator,
-			@Parameter(description = "maximum items per page", schema = @Schema(defaultValue="10")) @QueryParam("maxItems") Integer maxItems,
-			@Parameter(description = "skip a number of items", schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
+			@Parameter(description = "maximum items per page", schema = @Schema(defaultValue = "10")) @QueryParam("maxItems") Integer maxItems,
+			@Parameter(description = "skip a number of items", schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount,
 			@Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
 			@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue = "-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -473,7 +471,7 @@ public class SearchApi {
 			SearchService localService = SearchServiceFactory.getLocalService();
 			SearchResultNodeRef searchResultNodeRef = localService.searchByProperty(token, combineMode, property, value, comparator);
 
-			List<Node> data = NodeDao.transform(repoDao,searchResultNodeRef,filter,null).getNodes();
+			List<Node> data = NodeDao.transform(repoDao, searchResultNodeRef, filter, null).getNodes();
 
 			Pagination pagination = new Pagination();
 			pagination.setFrom(searchResultNodeRef.getStartIDX());
@@ -486,7 +484,7 @@ public class SearchApi {
 			response.setPagination(pagination);
 			return Response.status(Response.Status.OK).entity(response).build();
 
-		}  catch (Throwable t) {
+		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}
 
@@ -494,24 +492,24 @@ public class SearchApi {
 
 	@GET
 	@Path("/relevant/{repository}")
-	@Consumes({ "application/json" })
+	@Consumes({"application/json"})
 	@Operation(summary = "Get relevant nodes for the current user")
-	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResultNode.class))),
-			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResultNode.class))),
+			@ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
 	public Response getRelevantNodes(
-			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-")) ) @QueryParam("propertyFilter") List<String> propertyFilter,
-			@Parameter(description = "maximum items per page", schema = @Schema(defaultValue="10")) @QueryParam("maxItems") Integer maxItems,
-			@Parameter(description = "skip a number of items", schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue = "-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Parameter(description = "maximum items per page", schema = @Schema(defaultValue = "10")) @QueryParam("maxItems") Integer maxItems,
+			@Parameter(description = "skip a number of items", schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount,
 			@Context HttpServletRequest req) {
 		try {
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			Filter filter = new Filter(propertyFilter);
-			NodeSearch nodeSearch = NodeDao.getRelevantNodes(repoDao,skipCount!=null ? skipCount : 0,maxItems!=null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS);
+			NodeSearch nodeSearch = NodeDao.getRelevantNodes(repoDao, skipCount != null ? skipCount : 0, maxItems != null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS);
 			SearchResultNode response = new SearchResultNode();
 
 			List<Node> data = new ArrayList<>();
@@ -526,28 +524,28 @@ public class SearchApi {
 			response.setPagination(pagination);
 			return Response.status(Response.Status.OK).entity(response).build();
 
-		}   catch (Throwable t) {
+		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}
 	}
 
 	@GET
 	@Path("/queries/{repository}/contributor")
-	@Consumes({ "application/json" })
+	@Consumes({"application/json"})
 
 	@Operation(summary = "Search for contributors", description = "")
 
-	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchVCard[].class))),
-			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchVCard[].class))),
+			@ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
 
 	public Response searchContributor(
-			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
 			@Parameter(description = "search word", required = true) @QueryParam("searchWord") String searchWord,
-			@Parameter(description = "contributor kind", required = true, schema = @Schema(defaultValue="PERSON")) @QueryParam("contributorKind") SearchService.ContributorKind contributorKind,
+			@Parameter(description = "contributor kind", required = true, schema = @Schema(defaultValue = "PERSON")) @QueryParam("contributorKind") SearchService.ContributorKind contributorKind,
 			@Parameter(description = "define which authority fields should be searched: ['firstname', 'lastname', 'email', 'uuid', 'url']") @QueryParam("fields") List<String> fields,
 			@Parameter(description = "define which contributor props should be searched: ['ccm:lifecyclecontributer_author', 'ccm:lifecyclecontributer_publisher', ..., 'ccm:metadatacontributer_creator', 'ccm:metadatacontributer_validator']") @QueryParam("contributorProperties") List<String> contributorProperties,
 			@Context HttpServletRequest req) {
@@ -558,7 +556,7 @@ public class SearchApi {
 			Set<SearchVCard> result = SearchServiceFactory.getSearchService(repoDao.getId()).searchContributors(searchWord, fields, contributorProperties, contributorKind);
 			return Response.status(Response.Status.OK).entity(result).build();
 
-		}  catch (Throwable t) {
+		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}
 
@@ -566,18 +564,18 @@ public class SearchApi {
 
 	@GET
 	@Path("/metadata/{repository}")
-	@Consumes({ "application/json" })
+	@Consumes({"application/json"})
 	@Operation(summary = "get nodes with metadata and collections")
-	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntries.class))),
-			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntries.class))),
+			@ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
 	public Response getMetdata(
-			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
 			@Parameter(description = "nodeIds") @QueryParam("nodeIds") List<String> nodeIds,
-			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue = "-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -587,10 +585,10 @@ public class SearchApi {
 			NodeSearch search = NodeDao.getMetadata(repoDao, nodeIds, filter);
 
 			List<Node> data = null;//new ArrayList<>();
-			if(search.getNodes().size() < search.getResult().size()){
+			if (search.getNodes().size() < search.getResult().size()) {
 				//searched repo deliveres only nodeRefs by query time
 				data = NodeDao.convertToRest(repoDao, search.getResult(), null, null);
-			}else{
+			} else {
 				//searched repo delivered properties by query time
 				data = search.getNodes();
 				// @TODO: we may need to still call convertToRest to make sure we've latest data from remote repos
@@ -606,4 +604,37 @@ public class SearchApi {
 
 	}
 
+	@GET
+	@Path("/user/recent/{repository}/{node}")
+
+	@Operation(summary = "Get nodes with recent events for current user")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntries.class))),
+					@ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+			})
+
+	public Response getRecentUserEvents(
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "Event types to search for", required = false) @QueryParam("contentType") List<String> eventType,
+			@Parameter(description = "Type of element", required = false) @QueryParam("contentType") SearchService.ContentType contentType,
+			@Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue = "25")) @QueryParam("maxItems") Integer maxItems,
+			@Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount,
+
+			@Context HttpServletRequest req) {
+
+		try {
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			NodeDao.getRecentUserEvents(repoDao, eventType, contentType, skipCount, maxItems);
+			return Response.status(Response.Status.OK).entity(null).build();
+		} catch (DAOException e) {
+			return ErrorResponse.createResponse(e);
+		}
+
+	}
 }

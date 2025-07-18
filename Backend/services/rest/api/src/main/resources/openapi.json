@@ -36730,6 +36730,137 @@
         ]
       }
     },
+    "/search/v1/user/recent/{repository}/{node}": {
+      "get": {
+        "operationId": "getRecentUserEvents",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Event types to search for",
+            "in": "query",
+            "name": "contentType",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Type of element",
+            "in": "query",
+            "name": "contentType",
+            "schema": {
+              "enum": [
+                "FILES",
+                "FOLDERS",
+                "FILES_AND_FOLDERS",
+                "COLLECTIONS",
+                "TOOLPERMISSIONS",
+                "COLLECTION_PROPOSALS",
+                "ALL"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "maximum items per page",
+            "in": "query",
+            "name": "maxItems",
+            "schema": {
+              "default": 500,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "skip a number of items",
+            "in": "query",
+            "name": "skipCount",
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodeEntries"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Get nodes with recent events for current user",
+        "tags": [
+          "SEARCH v1"
+        ]
+      }
+    },
     "/sharing/v1/sharing/{repository}/{node}/{share}": {
       "get": {
         "operationId": "getInfo",

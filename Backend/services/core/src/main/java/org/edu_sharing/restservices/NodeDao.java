@@ -25,6 +25,7 @@ import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.rpc.Notify;
+import org.edu_sharing.repository.client.rpc.Result;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -67,6 +68,7 @@ import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.service.search.model.SearchUserEvent;
 import org.edu_sharing.service.search.model.SharedToMeType;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.share.ShareService;
@@ -2418,7 +2420,20 @@ public class NodeDao {
             throw new DAOSecurityException(new SecurityException("Current user has no " + permission + " on node " + nodeId));
         }
     }
-
+    public static SearchResult<NodeDao> getRecentUserEvents(RepositoryDao repoDao, List<String> filter, SearchService.ContentType contentType, Integer skipCount, Integer maxItems) throws DAOException {
+        ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+        ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+        return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(() -> {
+            SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
+            try {
+                Result<List<SearchUserEvent>> result = searchService.getRecentUserEvents(null, contentType, skipCount.intValue(), maxItems == null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems.intValue());
+                //return NodeDao.convertResultSet(repoDao, propertyFilter, result);
+                return null;
+            } catch (Exception e) {
+                throw DAOException.mapping(e);
+            }
+        });
+    }
     public static SearchResult<NodeDao> getFilesSharedByMe(RepositoryDao repoDao, List<String> filter, Filter propertyFilter, SortDefinition sortDefinition, Integer skipCount, Integer maxItems) throws DAOException {
         ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
         ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);

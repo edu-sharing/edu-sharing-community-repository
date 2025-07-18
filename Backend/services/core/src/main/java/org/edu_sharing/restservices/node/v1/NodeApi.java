@@ -997,7 +997,7 @@ public class NodeApi  {
        
     }
 
-	public NodeEntries searchResultToResponse(org.edu_sharing.restservices.shared.SearchResult<NodeDao> data) throws DAOException {
+	public static NodeEntries searchResultToResponse(org.edu_sharing.restservices.shared.SearchResult<NodeDao> data) throws DAOException {
 		NodeEntries response;
 		response=new NodeEntries();
 		response.setPagination(data.getPagination());

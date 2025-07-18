@@ -1413,6 +1413,16 @@
         }}
       </basequery>
     </query>
+    <query join="AND" id="recentUserEvents">
+      <basequery>{"bool":{
+        "should":[
+        {"match":{"type":"ccm:io"}},
+        {"match":{"type":"ccm:map"}}
+        ],
+        "minimum_should_match": 1
+        }}
+      </basequery>
+    </query>
     <query join="AND" id="workflowReceive">
       <basequery>
         {"bool":{

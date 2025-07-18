@@ -17,7 +17,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public interface SearchService {
-	enum ContentType{
+	enum ContentType {
 		FILES,
 		FOLDERS,
 		FILES_AND_FOLDERS,
@@ -26,21 +26,25 @@ public interface SearchService {
 		COLLECTION_PROPOSALS,
 		ALL
 	}
-	enum CombineMode{
+
+	enum CombineMode {
 		AND,
 		OR
-	};
+	}
+
+	;
 
 	enum ContributorKind {
 		PERSON,
 		ORGANIZATION
 	}
 
-	SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort,boolean scoped,boolean onlyMemberShips) throws Throwable;
+	SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort, boolean scoped, boolean onlyMemberShips) throws Throwable;
 
 	default List<String> getAllMediacenters() throws Exception {
 		return getAllMediacenters(false);
 	}
+
 	default List<String> getAllMediacenters(boolean membershipsOnly) throws Exception {
 		return getAllMediacentersNodeRef(membershipsOnly).stream().map(ref -> ref.getProperties().get(CCConstants.CM_PROP_AUTHORITY_NAME).toString()).collect(Collectors.toList());
 	}
@@ -51,15 +55,15 @@ public interface SearchService {
 	SearchResultNodeRef getFilesSharedByMe(SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception;
 
 	SearchResultNodeRef getFilesSharedToMe(SharedToMeType type, SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception;
-	
+
 	SearchResultNodeRef getWorkflowReceive(String fullyAuthenticatedUser, SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception;
 
 	SearchResult<String> searchGroupMembers(String groupName, String pattern,
-			String authorityType, int skipCount, int maxValues, SortDefinition sort);
+											String authorityType, int skipCount, int maxValues, SortDefinition sort);
 
 	SearchResultNodeRef search(SearchToken searchToken, boolean scoped);
-	SearchResultNodeRef search(SearchToken searchToken);
 
+	SearchResultNodeRef search(SearchToken searchToken);
 
 
 	SearchResult<EduGroup> getAllOrganizations(boolean scoped) throws Exception;
@@ -70,21 +74,21 @@ public interface SearchService {
 							   SearchToken searchToken) throws Throwable;
 
 
- 	/**
-      * find Authorities and Users plain solr
-      */
+	/**
+	 * find Authorities and Users plain solr
+	 */
 	SearchResult<String> findAuthorities(AuthorityType user, String searchWord, boolean globalContext, int from, int nrOfResults, SortDefinition sort, Map<String, String> customProperties) throws Exception;
 
 	SearchResult<String> searchUsers(String _pattern, boolean globalSearch, int _skipCount, int _maxValues,
-			SortDefinition sort, Map<String, String> customProperties) throws Exception;
+									 SortDefinition sort, Map<String, String> customProperties) throws Exception;
 
 	SearchResult<String> searchPersonGroups(String authorityName, String pattern, int skipCount, int maxValues,
-			SortDefinition sort);
+											SortDefinition sort);
 
-	Map<ContentType,SearchToken> getLastSearchTokens() throws Throwable;
-	
-	default List<? extends  Suggestion> getSuggestions(MetadataSet mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
-		return null;	
+	Map<ContentType, SearchToken> getLastSearchTokens() throws Throwable;
+
+	default List<? extends Suggestion> getSuggestions(MetadataSet mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
+		return null;
 	}
 
 	SearchResultNodeRef searchFingerPrint(String nodeId);
@@ -100,4 +104,8 @@ public interface SearchService {
 	SearchResultNodeRef searchByProperty(SearchToken searchToken, SearchService.CombineMode combineMode, List<String> properties, List<String> value, List<String> comparator) throws IOException;
 
 	SearchResultNodeRef searchByDisplayPath(String path, String index) throws IOException;
+
+	default org.edu_sharing.repository.client.rpc.Result<List<SearchUserEvent>> getRecentUserEvents(List<String> filterByEvent, ContentType contentType, int skipCount, int maxItems) throws Exception {
+		return null;
+	}
 }
