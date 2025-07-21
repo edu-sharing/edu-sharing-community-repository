@@ -9,6 +9,7 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.search.model.*;
+import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 
 import java.io.IOException;
 import java.util.List;
@@ -105,7 +106,7 @@ public interface SearchService {
 
 	SearchResultNodeRef searchByDisplayPath(String path, String index) throws IOException;
 
-	default org.edu_sharing.repository.client.rpc.Result<List<SearchUserEvent>> getRecentUserEvents(List<String> filterByEvent, ContentType contentType, int skipCount, int maxItems) throws Exception {
+	default org.edu_sharing.repository.client.rpc.Result<List<SearchUserEvent>> getRecentUserEvents(List<ActivityOnNodeEventType> filterByEvent, ContentType contentType, int skipCount, int maxItems) throws Exception {
 		return null;
 	}
 }

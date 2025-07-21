@@ -31,6 +31,8 @@ import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SearchVCard;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.edu_sharing.service.tracking.ActivityOnNodeEvent;
+import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -611,7 +613,7 @@ public class SearchApi {
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntries.class))),
+					@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResultEvent.class))),
 					@ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 					@ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 					@ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -621,17 +623,22 @@ public class SearchApi {
 
 	public Response getRecentUserEvents(
 			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
-			@Parameter(description = "Event types to search for", required = false) @QueryParam("eventType") List<String> eventType,
+			@Parameter(description = "Event types to search for", required = false) @QueryParam("eventType") List<ActivityOnNodeEventType> eventType,
 			@Parameter(description = "Type of element", required = false) @QueryParam("contentType") SearchService.ContentType contentType,
 			@Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue = "25")) @QueryParam("maxItems") Integer maxItems,
 			@Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount,
-
 			@Context HttpServletRequest req) {
 
 		try {
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			NodeDao.getRecentUserEvents(repoDao, eventType, contentType, skipCount, maxItems);
-			return Response.status(Response.Status.OK).entity(null).build();
+			SearchResult<UserEventDao> events = UserEventDao.getRecentUserEvents(repoDao, eventType, contentType, skipCount, maxItems);
+
+			SearchResultEvent response = new SearchResultEvent();
+
+			response.setNodes(events.getNodes().stream().map(UserEventDao::asUserEvent).toList());
+			response.setPagination(events.getPagination());
+
+			return Response.status(Response.Status.OK).entity(response).build();
 		} catch (DAOException e) {
 			return ErrorResponse.createResponse(e);
 		}

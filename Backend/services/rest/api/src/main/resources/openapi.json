@@ -5608,6 +5608,43 @@
         ],
         "type": "object"
       },
+      "SearchResultEvent": {
+        "properties": {
+          "facets": {
+            "items": {
+              "$ref": "#/components/schemas/Facet"
+            },
+            "type": "array"
+          },
+          "ignored": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/UserEvent"
+            },
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          },
+          "suggests": {
+            "items": {
+              "$ref": "#/components/schemas/Suggest"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "facets",
+          "nodes",
+          "pagination"
+        ],
+        "type": "object"
+      },
       "SearchResultLrmi": {
         "properties": {
           "facets": {
@@ -6834,6 +6871,50 @@
         "required": [
           "person"
         ],
+        "type": "object"
+      },
+      "UserEvent": {
+        "properties": {
+          "eventType": {
+            "enum": [
+              "DOWNLOAD_MATERIAL",
+              "OPEN_EXTERNAL_LINK",
+              "VIEW_MATERIAL",
+              "VIEW_COLLECTION",
+              "VIEW_MATERIAL_EMBEDDED",
+              "VIEW_MATERIAL_PLAY_MEDIA",
+              "EDIT_MATERIAL",
+              "CREATE_MATERIAL",
+              "ARCHIVE_MATERIAL",
+              "DELETE_MATERIAL",
+              "MOVE_MATERIAL",
+              "COPY_MATERIAL",
+              "REVERT_MATERIAL_VERSION",
+              "CHANGE_MATERIAL_CONTENT",
+              "CHANGE_MATERIAL_OWNER",
+              "FORK_MATERIAL",
+              "COMMENT_MATERIAL",
+              "RATE_MATERIAL",
+              "UNRATE_MATERIAL",
+              "LINK_SHARE_MATERIAL",
+              "LINK_UNSHARE_MATERIAL",
+              "FEEDBACK_MATERIAL",
+              "REPORT_MATERIAL",
+              "EDIT_MATERIAL_RELATION"
+            ],
+            "type": "string"
+          },
+          "initiator": {
+            "$ref": "#/components/schemas/UserSimple"
+          },
+          "node": {
+            "$ref": "#/components/schemas/Node"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "UserNodeActivity": {
@@ -36750,6 +36831,32 @@
             "name": "eventType",
             "schema": {
               "items": {
+                "enum": [
+                  "DOWNLOAD_MATERIAL",
+                  "OPEN_EXTERNAL_LINK",
+                  "VIEW_MATERIAL",
+                  "VIEW_COLLECTION",
+                  "VIEW_MATERIAL_EMBEDDED",
+                  "VIEW_MATERIAL_PLAY_MEDIA",
+                  "EDIT_MATERIAL",
+                  "CREATE_MATERIAL",
+                  "ARCHIVE_MATERIAL",
+                  "DELETE_MATERIAL",
+                  "MOVE_MATERIAL",
+                  "COPY_MATERIAL",
+                  "REVERT_MATERIAL_VERSION",
+                  "CHANGE_MATERIAL_CONTENT",
+                  "CHANGE_MATERIAL_OWNER",
+                  "FORK_MATERIAL",
+                  "COMMENT_MATERIAL",
+                  "RATE_MATERIAL",
+                  "UNRATE_MATERIAL",
+                  "LINK_SHARE_MATERIAL",
+                  "LINK_UNSHARE_MATERIAL",
+                  "FEEDBACK_MATERIAL",
+                  "REPORT_MATERIAL",
+                  "EDIT_MATERIAL_RELATION"
+                ],
                 "type": "string"
               },
               "type": "array"
@@ -36777,7 +36884,7 @@
             "in": "query",
             "name": "maxItems",
             "schema": {
-              "default": 500,
+              "default": 25,
               "format": "int32",
               "type": "integer"
             }
@@ -36798,7 +36905,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/NodeEntries"
+                  "$ref": "#/components/schemas/SearchResultEvent"
                 }
               }
             },

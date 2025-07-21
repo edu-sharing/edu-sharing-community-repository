@@ -74,6 +74,7 @@ import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.search.model.*;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.elasticsearch.client.HttpAsyncResponseConsumerFactory;
 import org.elasticsearch.client.Request;
 import org.elasticsearch.client.RequestOptions;
@@ -85,6 +86,7 @@ import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -1547,7 +1549,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     @Override
-    public org.edu_sharing.repository.client.rpc.Result<List<SearchUserEvent>> getRecentUserEvents(List<String> filterByEvent, ContentType contentType, int skipCount, int maxItems) throws Exception {
+    public org.edu_sharing.repository.client.rpc.Result<List<SearchUserEvent>> getRecentUserEvents(List<ActivityOnNodeEventType> filterByEvent, ContentType contentType, int skipCount, int maxItems) throws Exception {
         String username = AuthenticationUtil.getFullyAuthenticatedUser();
         MetadataQueries queries = MetadataHelper.getLocalDefaultMetadataset().getQueries(MetadataReader.QUERY_SYNTAX_DSL);
         String basequery = queries.findQuery("recentUserEvents").getPrimaryBasequery();
@@ -1569,7 +1571,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                         .functions(f -> f.scriptScore(ss -> ss
                                                         .script(script -> script
                                                                 .source("decayDateLinear(params.originDate, '1m', '0', 1.5, doc['userEvent.timestamp'].value)")
-                                                                .params(Map.of("originDate", JsonData.of(new Date())
+                                                                .params(Map.of("originDate", JsonData.of(Instant.now().toString())
                                                         )
                                                 )
                                         )))
@@ -1592,9 +1594,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
         ArrayList<SearchUserEvent> list = new ArrayList<>();
         int i = 0;
         for (Hit<Map> elasticHit : queryResult.getElasticHits()) {
-            Hit<JsonData> userEvent = elasticHit.innerHits().get("userEvent").hits().hits().get(0);
+            Map userEvent = (Map) elasticHit.innerHits().get("userEvent").hits().hits().get(0).source().to(Map.class).get("userEvent");
             list.add(new SearchUserEvent(
-                    queryResult.getData().get(i++))
+                    queryResult.getData().get(i++),
+                    userEvent.get("initiator").toString(),
+                    new Date((Long)userEvent.get("timestamp")),
+                    ActivityOnNodeEventType.valueOf(userEvent.get("type").toString())
+                )
             );
         }
         result.setData(list);
