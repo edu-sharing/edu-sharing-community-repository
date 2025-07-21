@@ -81,5 +81,17 @@
   },
   "BREADCRUMBS": {
     "YOU_ARE_HOME": "Du befindest dich im Stammverzeichnis"
+  },
+  "DASHBOARD_SWIMLANE": {
+    "STREAM": {
+      "SHARED_INFO": "{{initiator}} gab dir {{element}} frei",
+      "EVENT_INFO_PERSONAL": "Du hast {{element}} {{event}}"
+    },
+    "featured-media": {
+      "TITLE": "Deine Mediathek"
+    },
+    "collections": {
+      "TITLE": "Deine Sammlungen"
+    }
   }
 }

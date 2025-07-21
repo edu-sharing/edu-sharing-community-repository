@@ -1493,7 +1493,7 @@
   },
   "DASHBOARD_SWIMLANE": {
     "STREAM": {
-      "SHARED_INFO": "{{initiator}} gab dir {{element}} frei",
+      "SHARED_INFO": "{{initiator}} gab Ihnen {{element}} frei",
       "EVENT_INFO_PERSONAL": "Sie haben {{element}} {{event}}",
       "EVENT_TYPES": {
         "EDIT_MATERIAL": "bearbeitet",
@@ -1526,10 +1526,10 @@
     "SHOW_MORE": "zeige mir alle",
     "NO_RESULTS": "Keine Inhalte verfügbar",
     "featured-media": {
-      "TITLE": "Deine Mediathek"
+      "TITLE": "Ihre Mediathek"
     },
     "collections": {
-      "TITLE": "Deine Sammlungen"
+      "TITLE": "Ihre Sammlungen"
     },
     "recent-activities": {
       "TITLE": "Letzte Aktivitäten",
