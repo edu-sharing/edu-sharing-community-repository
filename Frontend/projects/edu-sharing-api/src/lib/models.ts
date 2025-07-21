@@ -42,6 +42,8 @@ export {
     MdsSortDefault,
     MdsValue,
     MdsView,
+    UserEvent,
+    SearchResultEvent,
     FeatureInfo,
     MdsWidget,
     MdsWidgetCondition,

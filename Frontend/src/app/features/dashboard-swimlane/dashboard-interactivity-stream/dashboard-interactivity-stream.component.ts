@@ -6,19 +6,12 @@ import {
     NodeEntriesService,
     UIAnimation,
 } from 'ngx-edu-sharing-ui';
+import { UserEvent } from 'ngx-edu-sharing-api';
 import { MatButtonModule } from '@angular/material/button';
 import { trigger } from '@angular/animations';
 import { TranslateModule } from '@ngx-translate/core';
-import { Node, User } from 'ngx-edu-sharing-api';
 import { SharedModule } from '../../../shared/shared.module';
 
-export type Event = {
-    type: 'VIEW' | 'EDIT' | 'SHARE';
-    initiator: User;
-    receiver?: User;
-    element?: Node;
-    timestamp?: number;
-};
 enum TimeGroups {
     Today = 'Today',
     Yesterday = 'Yesterday',
@@ -33,7 +26,7 @@ const TimeGroupsSort = [
     TimeGroups.Last30Days,
     TimeGroups.Older,
 ];
-type EventsGrouped = { [key in TimeGroups]?: Event[] };
+type EventsGrouped = { [key in TimeGroups]?: UserEvent[] };
 
 @Component({
     selector: 'es-dashboard-interactivity-stream',
@@ -53,10 +46,10 @@ type EventsGrouped = { [key in TimeGroups]?: Event[] };
 })
 export class DashboardInteractivityStreamComponent {
     readonly TimeGroups = TimeGroups;
-    readonly events = input.required<Event[]>();
+    readonly events = input.required<UserEvent[]>();
     readonly eventsGrouped = computed(() => {
         const result: EventsGrouped = {};
-        this.events().forEach((e) => {
+        this.events()?.forEach((e) => {
             const group = this.getTimeGroup(e);
             if (result[group] == null) {
                 result[group] = [];
@@ -70,7 +63,7 @@ export class DashboardInteractivityStreamComponent {
         );
         const sorted: {
             key: TimeGroups;
-            events: Event[];
+            events: UserEvent[];
         }[] = [];
         for (let key of keys) {
             sorted.push({
@@ -80,7 +73,7 @@ export class DashboardInteractivityStreamComponent {
         }
         return sorted;
     });
-    getTimeGroup(e: Event) {
+    getTimeGroup(e: UserEvent) {
         const today = new Date();
         const yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
         const last7Days = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7);

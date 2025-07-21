@@ -2,6 +2,7 @@
   <label>{{ 'DASHBOARD_SWIMLANE.STREAM.TIMEGROUP.' + events.key | translate }}</label>
   <div class="event" *ngFor="let event of events.events">
     <div class="details">
+      <!--
       <div
         *ngIf="event.type === 'SHARE'"
         [innerHTML]="
@@ -9,12 +10,30 @@
             | translate
               : {
                   initiator: (event.initiator | authorityName),
-                  receiver: (event.receiver | authorityName),
                   element:
                     '<a href=\'' +
-                    event.element?.content?.url +
+                    event.node?.content?.url +
                     '\'>' +
-                    (event.element | nodeTitle) +
+                    (event.node | nodeTitle) +
+                    '</a>'
+                }
+        "
+      ></div>
+      -->
+      <div
+        [innerHTML]="
+          'DASHBOARD_SWIMLANE.STREAM.EVENT_INFO_PERSONAL'
+            | translate
+              : {
+                  initiator: (event.initiator | authorityName),
+                  event:
+                    ('DASHBOARD_SWIMLANE.STREAM.EVENT_TYPES.' + event.eventType
+                    | translate : { fallback: event.eventType }),
+                  element:
+                    '<a href=\'' +
+                    (event.node | esNodeUrl) +
+                    '\'>' +
+                    (event.node | nodeTitle) +
                     '</a>'
                 }
         "

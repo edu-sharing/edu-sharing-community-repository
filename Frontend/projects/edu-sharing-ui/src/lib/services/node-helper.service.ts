@@ -11,11 +11,12 @@ import {
 import { TranslateService } from '@ngx-translate/core';
 import * as Workflow from '../types/workflow';
 import { RepoUrlService } from './repo-url.service';
-import { Params } from '@angular/router';
+import { Params, Router } from '@angular/router';
 import { UIConstants } from '../util/ui-constants';
 import { ASSETS_BASE_PATH } from '../types/injection-tokens';
 import { of } from 'rxjs';
 import { NodesRightMode } from '../types/option-item';
+import { PlatformLocation } from '@angular/common';
 
 @Injectable({
     providedIn: 'root',
@@ -43,6 +44,8 @@ export class NodeHelperService {
         protected networkService: NetworkService,
         protected configService: ConfigService,
         protected repoUrlService: RepoUrlService,
+        protected platformLocation: PlatformLocation,
+        @Optional() protected router: Router,
         @Optional() @Inject(ASSETS_BASE_PATH) private assetsBasePath: string,
     ) {}
 
@@ -230,7 +233,7 @@ export class NodeHelperService {
         return (this.assetsBasePath ?? '') + 'assets/images/sources/' + src.toLowerCase() + '.png';
     }
 
-    getNodeLink(mode: 'routerLink' | 'queryParams', node: Node) {
+    getNodeLink(mode: 'routerLink' | 'queryParams' | 'plain', node: Node) {
         if (!node?.ref) {
             return null;
         }
@@ -284,6 +287,13 @@ export class NodeHelperService {
         }
         if (mode === 'routerLink') {
             return '/' + data.routerLink;
+        } else if (mode === 'plain') {
+            const urlTree = this.router?.createUrlTree([data.routerLink], data);
+
+            return (
+                (this.platformLocation.getBaseHrefFromDOM() ?? '') +
+                this.router?.serializeUrl(urlTree).substring(1)
+            );
         }
         // enforce clearing of parameters which should only be consumed once
         data.queryParams.redirectFromSSO = null;

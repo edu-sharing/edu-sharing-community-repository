@@ -1,7 +1,7 @@
 import { TranslateService } from '@ngx-translate/core';
 import { forkJoin, Observable } from 'rxjs';
 import { Params, Router } from '@angular/router';
-import { Location } from '@angular/common';
+import { Location, PlatformLocation } from '@angular/common';
 import {
     ASSETS_BASE_PATH,
     DefaultGroups,
@@ -101,7 +101,8 @@ export class NodeHelperService extends NodeHelperServiceBase {
         private connector: RestConnectorService,
         private nodeService: RestNodeService,
         private toast: Toast,
-        private router: Router,
+        router: Router,
+        platformLocation: PlatformLocation,
         private sessionStorage: SessionStorageService,
         private storage: TemporaryStorageService,
         private trackingV1Service: TrackingV1Service,
@@ -113,6 +114,8 @@ export class NodeHelperService extends NodeHelperServiceBase {
             networkService,
             configService,
             repoUrlService,
+            platformLocation,
+            router,
             assetsBasePath,
         );
     }

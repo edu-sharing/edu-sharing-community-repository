@@ -50,6 +50,7 @@ export * from './pipes/property-slug.pipe';
 export * from './pipes/file-size.pipe';
 export * from './pipes/format-date.pipe';
 export * from './pipes/mds-duration.pipe';
+export * from './pipes/node-url.pipe';
 export * from './pipes/node-icon.pipe';
 export * from './pipes/node-image-size.pipe';
 export * from './pipes/node-image.pipe';

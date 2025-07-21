@@ -45,6 +45,10 @@ export class LandingPageComponent implements OnInit {
                     id: 'featured-media',
                     defaultExpanded: true,
                 },
+                {
+                    id: 'recent-activities',
+                    defaultExpanded: true,
+                },
             ]),
         );
     }

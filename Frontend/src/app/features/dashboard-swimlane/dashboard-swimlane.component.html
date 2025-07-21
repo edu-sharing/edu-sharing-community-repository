@@ -5,6 +5,11 @@
   </button>
 </div>
 <div class="swimlane" *ngIf="open | async" @openOverlay>
+  <es-dashboard-interactivity-stream
+    *ngIf="type() === 'interactivity-stream'"
+    [events]="streamEvents()?.nodes"
+  >
+  </es-dashboard-interactivity-stream>
   <es-node-entries-wrapper
     *ngIf="type() === 'nodes'"
     class="{{

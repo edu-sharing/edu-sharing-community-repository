@@ -33,9 +33,12 @@ import {
     NodeEntries,
     NodeService,
     ROOT,
+    SearchResultEvent,
     SearchResultNode,
     SearchService,
+    SearchServiceUnwrapped,
     SessionStorageService,
+    UserEvent,
 } from 'ngx-edu-sharing-api';
 import { trigger } from '@angular/animations';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -82,7 +85,9 @@ export class DashboardSwimlaneComponent {
      * max items per swimlane
      */
     readonly maxItems = 25;
+    readonly maxItemsEvents = 6;
     columns = signal([]);
+    streamEvents = signal(null as SearchResultEvent);
     displayType = signal(NodeEntriesDisplayType.Grid);
     globalOptions = signal<OptionItem[]>([]);
     routerLink = signal('');
@@ -99,6 +104,7 @@ export class DashboardSwimlaneComponent {
         private ref: ApplicationRef,
         private router: Router,
         private searchService: SearchService,
+        private searchServiceUnwrapped: SearchServiceUnwrapped,
         private nodeService: NodeService,
         private mdsHelperService: MdsHelperService,
     ) {
@@ -182,6 +188,15 @@ export class DashboardSwimlaneComponent {
                     ]);
                 }),
             ]);
+        } else if (this.swimlane().id === 'recent-activities') {
+            this.streamEvents.set(
+                await firstValueFrom(
+                    this.searchServiceUnwrapped.getRecentUserEvents({
+                        repository: HOME_REPOSITORY,
+                        maxItems: this.maxItemsEvents,
+                    }),
+                ),
+            );
         }
     }
 

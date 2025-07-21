@@ -53,6 +53,7 @@ export {
     OrganizationV1Service,
     NodeV1Service as NodeServiceUnwrapped,
     CollectionV1Service as CollectionServiceUnwrapped,
+    SearchV1Service as SearchServiceUnwrapped,
     SuggestionsV1Service,
     LtiPlatformV13Service,
     RatingV1Service,

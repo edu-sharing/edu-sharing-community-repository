@@ -33,6 +33,7 @@ import { MdsWidgetComponent } from '../mds-viewer/widget/mds-widget.component';
 import { MdsDurationPipe } from '../pipes/mds-duration.pipe';
 import { MdsViewerComponent } from '../mds-viewer/mds-viewer.component';
 import { SpinnerSmallComponent } from '../spinner-small/spinner-small.component';
+import { NodeUrlPipe } from '../pipes/node-url.pipe';
 
 @NgModule({
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -52,6 +53,7 @@ import { SpinnerSmallComponent } from '../spinner-small/spinner-small.component'
         InfiniteScrollDirective,
         PropertySlugPipe,
         NodeIconPipe,
+        NodeUrlPipe,
         NodeImagePipe,
         NodeImageSizePipe,
         NodeLicensePipe,
@@ -90,6 +92,7 @@ import { SpinnerSmallComponent } from '../spinner-small/spinner-small.component'
         InfoMessageComponent,
         PropertySlugPipe,
         NodeIconPipe,
+        NodeUrlPipe,
         NodeImagePipe,
         NodeImageSizePipe,
         NodePersonNamePipe,

@@ -1494,6 +1494,27 @@
   "DASHBOARD_SWIMLANE": {
     "STREAM": {
       "SHARED_INFO": "{{initiator}} gab dir {{element}} frei",
+      "EVENT_INFO_PERSONAL": "Sie haben {{element}} {{event}}",
+      "EVENT_TYPES": {
+        "EDIT_MATERIAL": "bearbeitet",
+        "VIEW_COLLECTION": "angesehen",
+        "ARCHIVE_MATERIAL": "archiviert/gelöscht",
+        "DELETE_MATERIAL": "gelöscht",
+        "MOVE_MATERIAL": "verschoben",
+        "COPY_MATERIAL": "kopiert",
+        "REVERT_MATERIAL_VERSION": "Version zurückgesetzt",
+        "CHANGE_MATERIAL_CONTENT": "bearbeitet (Inhalt)",
+        "CHANGE_MATERIAL_OWNER": "bearbeitet (Besitzer geändert)",
+        "FORK_MATERIAL": "als Variante erzeugt",
+        "COMMENT_MATERIAL": "kommentiert",
+        "RATE_MATERIAL": "bewertet",
+        "UNRATE_MATERIAL": "bewertung entfernt",
+        "LINK_SHARE_MATERIAL": "als Link geteilt",
+        "LINK_UNSHARE_MATERIAL": "die Linkfreigabe entfernt",
+        "FEEDBACK_MATERIAL": "feedback abgegeben",
+        "REPORT_MATERIAL": "gemeldet",
+        "EDIT_MATERIAL_RELATION": "Beziehungen geändert"
+      },
       "TIMEGROUP": {
         "Today": "heute",
         "Yesterday": "gestern",
@@ -1503,11 +1524,15 @@
       }
     },
     "SHOW_MORE": "zeige mir alle",
+    "NO_RESULTS": "Keine Inhalte verfügbar",
     "featured-media": {
       "TITLE": "Deine Mediathek"
     },
     "collections": {
       "TITLE": "Deine Sammlungen"
+    },
+    "recent-activities": {
+      "TITLE": "Letzte Aktivitäten"
     }
   },
   "API_ERROR": {
