@@ -605,7 +605,7 @@ public class SearchApi {
 	}
 
 	@GET
-	@Path("/user/recent/{repository}/{node}")
+	@Path("/user/recent/{repository}")
 
 	@Operation(summary = "Get nodes with recent events for current user")
 

@@ -36730,7 +36730,7 @@
         ]
       }
     },
-    "/search/v1/user/recent/{repository}/{node}": {
+    "/search/v1/user/recent/{repository}": {
       "get": {
         "operationId": "getRecentUserEvents",
         "parameters": [
