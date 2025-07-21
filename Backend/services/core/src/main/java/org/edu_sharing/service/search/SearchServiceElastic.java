@@ -1416,9 +1416,31 @@ public class SearchServiceElastic extends SearchServiceImpl {
 //        return client;
 //    }
 
+
+    // TODO should we generalize this? Just a dirty hack
+    public void deleteUserActivitiesByUsername(String username) {
+        try {
+            deleteByQuery(DeleteByQueryRequest.of(x -> x
+                    .query(q -> q
+                            .bool(b -> b
+                                    .should(s -> s.match(m -> m.field("userEvent.initiator").query(username)))
+                                    .should(s -> s.match(m -> m.field("userEvent.receiver").query(username)))
+                            ))));
+        } catch (IOException e) {
+            logger.error("Could not delete activities for user " + username, e);
+            throw new RuntimeException(e);
+        }
+
+    }
+
     public DeleteResponse deleteNative(DeleteRequest deleteRequest) throws IOException {
         checkClient();
         return client.withTransportOptions(this::getRequestOptions).delete(deleteRequest);
+    }
+
+    public DeleteByQueryResponse deleteByQuery(DeleteByQueryRequest deleteByQueryRequest) throws IOException {
+        checkClient();
+        return client.withTransportOptions(this::getRequestOptions).deleteByQuery(deleteByQueryRequest);
     }
 
     public SearchResponse<Map> searchNative(SearchRequest searchRequest) throws IOException {
