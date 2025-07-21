@@ -7,7 +7,16 @@ const translateServiceMock = {
 
 describe('Test NodeHelper', () => {
     describe('Test cc license links', () => {
-        const underTest = new NodeHelperService(translateServiceMock, null, null, null, null, null);
+        const underTest = new NodeHelperService(
+            translateServiceMock,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+        );
         it('cc by 4.0', async () => {
             translateServiceMock.currentLang = 'de';
             expect(await underTest.getLicenseUrlByString('CC_BY', '4.0', '').toPromise()).toBe(
