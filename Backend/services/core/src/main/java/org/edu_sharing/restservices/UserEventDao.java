@@ -36,7 +36,7 @@ public class UserEventDao {
         return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(() -> {
             SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
             try {
-                Result<List<SearchUserEvent>> result = searchService.getRecentUserEvents(filter, contentType, skipCount.intValue(), maxItems == null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems.intValue());
+                Result<List<SearchUserEvent>> result = searchService.getRecentUserEvents(filter, contentType, skipCount == null ? 0 : skipCount.intValue(), maxItems == null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems.intValue());
 
                 SearchResult<UserEventDao> converted = new SearchResult<>();
                 Pagination pagination = new Pagination();
@@ -47,7 +47,8 @@ public class UserEventDao {
                 converted.setNodes(result.getData().stream().map((ref) -> {
                     try {
                         return new UserEventDao(
-                                repoDao, ref);
+                                repoDao, ref
+                        );
                     } catch (DAOException e) {
                         log.warn(e.getMessage(), e);
                     }

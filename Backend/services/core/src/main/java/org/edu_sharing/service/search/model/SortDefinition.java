@@ -3,6 +3,8 @@ package org.edu_sharing.service.search.model;
 import co.elastic.clients.elasticsearch._types.ScriptSortType;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.mapping.FieldType;
+import lombok.Getter;
+import lombok.Setter;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
@@ -23,7 +25,7 @@ import java.util.stream.Stream;
 
 
 public class SortDefinition implements Serializable {
-	public static SortDefinition SORT_DEFINITION_SCORE = new SortDefinition(new SortDefinitionEntry("score", false));
+	public static SortDefinition SORT_DEFINITION_SCORE_ASC = new SortDefinition(new SortDefinitionEntry("score", true), false);
 	static Logger logger = Logger.getLogger(SortDefinition.class);
 
 	private static final List<String> ALLOWED_SORT_MAIN_PROPERTIES = Collections.singletonList(
@@ -33,8 +35,14 @@ public class SortDefinition implements Serializable {
 	transient ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 	
 	List<SortDefinitionEntry> sortDefinitionEntries = new ArrayList<>();
+	/**
+	 * enable or disable grouping by file/folder type
+	 */
+	@Getter
+	@Setter
+	private boolean groupBy = true;
 
-    public static class SortDefinitionEntry implements Serializable{
+	public static class SortDefinitionEntry implements Serializable{
 		String property;
 		boolean ascending;
 		
@@ -60,8 +68,9 @@ public class SortDefinition implements Serializable {
 		}
 	}
 	public SortDefinition(){}
-	public SortDefinition(SortDefinitionEntry sortDefinitionEntry){
+	public SortDefinition(SortDefinitionEntry sortDefinitionEntry, boolean groupBy) {
 		this.sortDefinitionEntries = Collections.singletonList(sortDefinitionEntry);
+		this.groupBy = groupBy;
 	}
 	/**
 	 * Fills this SortDefinition with a string list of properties
@@ -125,7 +134,9 @@ public class SortDefinition implements Serializable {
 	}
 	public void applyToSearchParameters(SearchParameters searchParameters) {
 		// Group by Folders & Files
-		sortDefinitionEntries.add(0, new SortDefinitionEntry("TYPE",false));
+		if(groupBy) {
+			sortDefinitionEntries.add(0, new SortDefinitionEntry("TYPE", false));
+		}
 		for (SortDefinitionEntry sortDefintionEntry : getSortDefinitionEntries()) {
 			searchParameters.addSort(sortDefintionEntry.getProperty(), sortDefintionEntry.isAscending());
 		}
@@ -133,7 +144,9 @@ public class SortDefinition implements Serializable {
 
 	public void applyToSearchSourceBuilder(co.elastic.clients.elasticsearch.core.SearchRequest.Builder builder) {
 		// Group by Folders & Files
-		builder.sort(sort -> sort.field(field -> field.field("type").order(SortOrder.Desc)));
+		if(groupBy) {
+			builder.sort(sort -> sort.field(field -> field.field("type").order(SortOrder.Desc)));
+		}
 		for (SortDefinitionEntry sortDefintionEntry : getSortDefinitionEntries()) {
 			SortOrder sortOrder = sortDefintionEntry.ascending ? SortOrder.Asc : SortOrder.Desc;
 			if(sortDefintionEntry.getProperty().equalsIgnoreCase("score")) {

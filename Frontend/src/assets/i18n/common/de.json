@@ -1532,7 +1532,12 @@
       "TITLE": "Deine Sammlungen"
     },
     "recent-activities": {
-      "TITLE": "Letzte Aktivitäten"
+      "TITLE": "Letzte Aktivitäten",
+      "SUBTITLE": {
+        "collections": "Sammlungen",
+        "files": "Dateien",
+        "folders": "Ordner"
+      }
     }
   },
   "API_ERROR": {

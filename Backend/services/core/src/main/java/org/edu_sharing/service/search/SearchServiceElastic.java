@@ -1579,16 +1579,30 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 .must(
                         b -> b.wrapper(new ReadableWrapperQueryBuilder(basequery).build())
                 ).must(
+                        getContentTypeQuery(contentType)
+                ).must(
                         must -> must.bool(getGlobalConditions(null, null, null).build())
                 ).must(
                         Query.of(q2 -> q2.hasChild(hc -> hc
                                 .type("userEvent")
                                 .scoreMode(ChildScoreMode.Max)
                                 .query(childQuery -> childQuery.functionScore(fs -> fs
-                                        .query(q3 -> q3.term(t -> t
-                                                .field("userEvent.initiator")
-                                                .value(username)
-                                        ))
+                                        .query(q3 -> q3.bool(b -> {
+                                            b = b.must(m -> m.term(t -> t
+                                                    .field("userEvent.initiator")
+                                                    .value(username)
+                                            ));
+                                            if(filterByEvent != null && !filterByEvent.isEmpty()) {
+                                                b.minimumShouldMatch("1");
+                                                for (ActivityOnNodeEventType activityOnNodeEventType : filterByEvent) {
+                                                    b = b.should(s -> s.term(t -> t
+                                                            .field("userEvent.type")
+                                                            .value(activityOnNodeEventType.name())
+                                                    ));
+                                                }
+                                            }
+                                            return b;
+                                        }))
                                         // TODO: Filter by event if present!
                                         .functions(f -> f.scriptScore(ss -> ss
                                                         .script(script -> script
@@ -1611,7 +1625,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                 )
                         ))
                 );
-        SearchResultNodeRef queryResult = searchByQuery(builder.build(), skipCount, maxItems, SortDefinition.SORT_DEFINITION_SCORE);
+
+        SearchResultNodeRef queryResult = searchByQuery(builder.build(), skipCount, maxItems, SortDefinition.SORT_DEFINITION_SCORE_ASC);
         org.edu_sharing.repository.client.rpc.Result<List<SearchUserEvent>> result = new org.edu_sharing.repository.client.rpc.Result<>();
         ArrayList<SearchUserEvent> list = new ArrayList<>();
         int i = 0;

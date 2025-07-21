@@ -48,6 +48,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, first } from 'rxjs/operators';
 import { DashboardInteractivityStreamComponent } from './dashboard-interactivity-stream/dashboard-interactivity-stream.component';
 
+type StreamDetails = { key: string; result: SearchResultEvent; params: Params };
 @Component({
     selector: 'es-dashboard-swimlane',
     providers: [NodeEntriesService],
@@ -87,7 +88,7 @@ export class DashboardSwimlaneComponent {
     readonly maxItems = 25;
     readonly maxItemsEvents = 6;
     columns = signal([]);
-    streamEvents = signal(null as SearchResultEvent);
+    streamEvents = signal(null as StreamDetails[]);
     displayType = signal(NodeEntriesDisplayType.Grid);
     globalOptions = signal<OptionItem[]>([]);
     routerLink = signal('');
@@ -189,14 +190,42 @@ export class DashboardSwimlaneComponent {
                 }),
             ]);
         } else if (this.swimlane().id === 'recent-activities') {
-            this.streamEvents.set(
-                await firstValueFrom(
+            const events = [];
+            events.push({
+                key: 'files',
+                result: await firstValueFrom(
                     this.searchServiceUnwrapped.getRecentUserEvents({
                         repository: HOME_REPOSITORY,
+                        contentType: 'FILES',
                         maxItems: this.maxItemsEvents,
                     }),
                 ),
-            );
+                params: { contentType: 'FILES' },
+            });
+
+            events.push({
+                key: 'collections',
+                result: await firstValueFrom(
+                    this.searchServiceUnwrapped.getRecentUserEvents({
+                        repository: HOME_REPOSITORY,
+                        contentType: 'COLLECTIONS',
+                        maxItems: this.maxItemsEvents,
+                    }),
+                ),
+                params: { contentType: 'COLLECTIONS' },
+            });
+            events.push({
+                key: 'folders',
+                result: await firstValueFrom(
+                    this.searchServiceUnwrapped.getRecentUserEvents({
+                        repository: HOME_REPOSITORY,
+                        contentType: 'FOLDERS',
+                        maxItems: this.maxItemsEvents,
+                    }),
+                ),
+                params: { contentType: 'FOLDERS' },
+            });
+            this.streamEvents.set(events);
         }
     }
 
