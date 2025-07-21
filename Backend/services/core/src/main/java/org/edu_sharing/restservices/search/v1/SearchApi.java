@@ -621,7 +621,7 @@ public class SearchApi {
 
 	public Response getRecentUserEvents(
 			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
-			@Parameter(description = "Event types to search for", required = false) @QueryParam("contentType") List<String> eventType,
+			@Parameter(description = "Event types to search for", required = false) @QueryParam("eventType") List<String> eventType,
 			@Parameter(description = "Type of element", required = false) @QueryParam("contentType") SearchService.ContentType contentType,
 			@Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue = "25")) @QueryParam("maxItems") Integer maxItems,
 			@Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount,

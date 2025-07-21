@@ -36747,7 +36747,7 @@
           {
             "description": "Event types to search for",
             "in": "query",
-            "name": "contentType",
+            "name": "eventType",
             "schema": {
               "items": {
                 "type": "string"
