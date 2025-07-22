@@ -1299,7 +1299,7 @@
       "FIXED": "this version",
       "NEWEST": "always the newest version"
     },
-    "NOT_PUBLIC_WARNING": "This material is not publicly available.",
+    "NOT_PUBLIC_WARNING": "This material is not publicly available. Only users with permissions will be able to see it",
     "VERSION": "Version",
     "WIDTH": "Width",
     "CODE_LABEL": "Embed code",

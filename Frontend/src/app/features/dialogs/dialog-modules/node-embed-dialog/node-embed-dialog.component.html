@@ -5,12 +5,12 @@
   <div class="preferences-container">
     <es-info-message *ngIf="showNotPublicWarning" mode="warning">
       <p class="not-public-warning-message">{{ 'EMBED.NOT_PUBLIC_WARNING' | translate }}</p>
-      <div>
+      <!--<div>
         <button mat-button (click)="openInviteDialog()">
           <i esIcon="arrow_forward"></i>
           {{ 'OPTIONS.INVITE' | translate }}
         </button>
-      </div>
+      </div>-->
     </es-info-message>
     <div class="not-public-warning-container"></div>
     <mat-form-field class="embed-code-field" appearance="fill">
