@@ -553,7 +553,7 @@ public class MediacenterServiceImpl implements MediacenterService {
             return false;
         }
 
-        Set<String> containedAuthorities = authorityService.getContainedAuthorities(AuthorityType.GROUP, proxyGroup, false);
+        Set<String> containedAuthorities = authorityService.getContainedAuthorities(AuthorityType.GROUP, proxyGroup, true);
         if (containedAuthorities == null) {
             return false;
         }

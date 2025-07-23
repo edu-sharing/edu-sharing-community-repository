@@ -141,7 +141,7 @@ public class MediacenterDao extends AbstractDao{
 			nodeRef=authorityService.getAuthorityNodeRef(group);
 			if(nodeRef==null)
 				throw new DAOMissingException(new Exception("Authority not found: "+group));
-			String property = nodeService.getProperty(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(), CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
+			String property = (String) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
 			if(property==null || !property.equals(AuthorityService.MEDIA_CENTER_GROUP_TYPE))
 				throw new java.lang.IllegalArgumentException("The given authority is not of type "+AuthorityService.MEDIA_CENTER_GROUP_TYPE);
 
