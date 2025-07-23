@@ -47,6 +47,7 @@ class SearchServiceElasticTest {
     private NodeService nodeService;
     private MockedStatic<AuthenticationUtil> authenticationUtilMockedStatic;
     private Repository repositoryHelper;
+    private MockedStatic<PermissionServiceFactory> permissionServiceFactoryMockedStatic;
 
     @BeforeEach() void beforeEach() {
         toolPermissionService = Mockito.mock(ToolPermissionService.class);
@@ -55,7 +56,7 @@ class SearchServiceElasticTest {
         authenticationService = Mockito.mock(MutableAuthenticationService.class);
         repositoryHelper = Mockito.mock(Repository.class);
         when(authenticationService.getCurrentUserName()).thenReturn("tester");
-        MockedStatic<PermissionServiceFactory> permissionServiceFactoryMockedStatic = Mockito.mockStatic(PermissionServiceFactory.class);
+        permissionServiceFactoryMockedStatic = Mockito.mockStatic(PermissionServiceFactory.class);
         permissionServiceFactoryMockedStatic.when(() -> PermissionServiceFactory.getLocalService()).thenReturn(permissionService);
         authorityService = Mockito.mock(AuthorityService.class);
         when(authorityService.getAuthorities()).thenReturn(new HashSet<>(Set.of("test_group1", "test_group2")));
@@ -96,6 +97,7 @@ class SearchServiceElasticTest {
         mcAlfrescoApiClientMockedStatic.close();
         toolPermissionServiceMockedStatic.close();
         authenticationUtilMockedStatic.close();
+        permissionServiceFactoryMockedStatic.close();
     }
 
 
