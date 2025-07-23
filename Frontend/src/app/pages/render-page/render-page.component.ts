@@ -702,32 +702,41 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
     }
 
     private addDownloadButton(download: OptionItem) {
+        const addButton = (data: NodeList = null) => {
+            this.downloadButton = download;
+            const options: OptionItem[] = [];
+            options.splice(0, 0, download);
+            if (
+                data?.nodes.length > 0 ||
+                this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1
+            ) {
+                const downloadAll = new OptionItem('OPTIONS.DOWNLOAD_ALL', 'archive', () => {
+                    this.downloadSequence();
+                });
+                downloadAll.elementType = [
+                    ElementType.Node,
+                    ElementType.NodeChild,
+                    ElementType.NodePublishedCopy,
+                ];
+                downloadAll.group = DefaultGroups.View;
+                downloadAll.priority = 35;
+                options.splice(1, 0, downloadAll);
+                this.currentOptions = options;
+            }
+            this.initOptions();
+        };
+
         this.nodeApi
             .getNodeChildobjects(this.sequenceParent.ref.id, this.sequenceParent.ref.repo)
-            .subscribe((data: NodeList) => {
-                console.log('add', 'download', download);
-                this.downloadButton = download;
-                const options: OptionItem[] = [];
-                options.splice(0, 0, download);
-                if (
-                    data.nodes.length > 0 ||
-                    this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1
-                ) {
-                    const downloadAll = new OptionItem('OPTIONS.DOWNLOAD_ALL', 'archive', () => {
-                        this.downloadSequence();
-                    });
-                    downloadAll.elementType = [
-                        ElementType.Node,
-                        ElementType.NodeChild,
-                        ElementType.NodePublishedCopy,
-                    ];
-                    downloadAll.group = DefaultGroups.View;
-                    downloadAll.priority = 35;
-                    options.splice(1, 0, downloadAll);
-                }
-                this.currentOptions = options;
-                this.initOptions();
-            });
+            .subscribe(
+                (data: NodeList) => {
+                    addButton(data);
+                },
+                (error) => {
+                    console.warn(error);
+                    addButton();
+                },
+            );
     }
 
     async setDownloadUrl(url: string) {
@@ -772,8 +781,7 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
                         onFinish();
                     },
                     (error) => {
-                        console.error('failed sequence fetching');
-                        console.error(error);
+                        console.error('failed sequence fetching', error);
                         onFinish();
                     },
                 );
