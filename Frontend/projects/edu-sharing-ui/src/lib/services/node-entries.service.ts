@@ -143,6 +143,12 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     disableInfiniteScroll: boolean;
     /* avg. column width for table layouts. */
     dataColumnWidth = 126;
+    /**
+     * how the columns should be shown (in table mode)
+     * limit: limits the max amount based on the avgColumnWidth
+     * scroll: horizontal scrolling
+     */
+    dataColumnLayout: 'scroll' | 'limit' = 'limit';
     showIconColumn = new BehaviorSubject(true);
     scrollGradientColor: WritableSignal<string> = signal('fff');
 

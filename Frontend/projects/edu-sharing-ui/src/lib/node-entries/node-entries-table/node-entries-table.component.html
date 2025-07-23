@@ -24,7 +24,7 @@
   (scrolled)="loadData('scroll')"
 >
   <!-- Checkbox Column -->
-  <ng-container matColumnDef="select">
+  <ng-container matColumnDef="select" sticky>
     <mat-header-cell *matHeaderCellDef>
       <mat-checkbox
         [ngModel]="entriesService.selection.selected.length > 0"
@@ -37,7 +37,7 @@
         aria-label="{{ 'LIST_TABLE.TOGGLE_ALL' | translate }}"
       ></mat-checkbox>
     </mat-header-cell>
-    <mat-cell *matCellDef="let node">
+    <mat-cell *matCellDef="let node" sticky>
       <mat-checkbox
         [checked]="entriesService.selection.isSelected(node)"
         (change)="entriesService.onCheckboxChanged(node, $event.checked)"
@@ -46,7 +46,7 @@
       ></mat-checkbox>
     </mat-cell>
   </ng-container>
-  <div matColumnDef="icon">
+  <div matColumnDef="icon" sticky>
     <mat-header-cell *matHeaderCellDef class="cell-icon cell-count">
       ({{ entriesService.selection.selected.length
       }}<ng-container *ngIf="entriesService.dataSource?.getTotal() !== undefined">
@@ -76,7 +76,7 @@
       </div>
     </mat-cell>
   </div>
-  <ng-container matColumnDef="actions">
+  <ng-container matColumnDef="actions" stickyEnd>
     <mat-header-cell *matHeaderCellDef>
       <button
         *ngIf="entriesService.configureColumns"
@@ -106,6 +106,7 @@
   <ng-container
     *ngFor="let column of visibleDataColumns$ | async; let first = first"
     [matColumnDef]="column.name"
+    [sticky]="first"
   >
     <ng-container>
       <mat-header-cell
