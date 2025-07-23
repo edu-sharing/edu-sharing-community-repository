@@ -713,14 +713,14 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 if(!queryData.getFunctions().isEmpty()) {
                     return q.functionScore(f ->
                             f.query(q2 -> q2.bool(boolQuery)).
-                            functions(queryData.getFunctions().stream().map(f2 -> FunctionScore.of(
-                                    f3 -> f3
-                                            .filter(f4 -> f4.wrapper(new ReadableWrapperQueryBuilder(
-                                                            QueryUtils.replaceCommonQueryParams(f2.getFilter(), QueryUtils.replacerFromSyntax(MetadataReader.QUERY_SYNTAX_DSL, true))
-                                                    ).build()
-                                            ))
-                                            .weight(f2.getWeight()))
-                            ).collect(Collectors.toList()))
+                                    functions(queryData.getFunctions().stream().map(f2 -> FunctionScore.of(
+                                            f3 -> f3
+                                                    .filter(f4 -> f4.wrapper(new ReadableWrapperQueryBuilder(
+                                                                    QueryUtils.replaceCommonQueryParams(f2.getFilter(), QueryUtils.replacerFromSyntax(MetadataReader.QUERY_SYNTAX_DSL, true))
+                                                            ).build()
+                                                    ))
+                                                    .weight(f2.getWeight()))
+                                    ).collect(Collectors.toList()))
                     );
                 } else {
                     return q
@@ -1605,12 +1605,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                         }))
                                         // TODO: Filter by event if present!
                                         .functions(f -> f.scriptScore(ss -> ss
-                                                        .script(script -> script
-                                                                .source("decayDateLinear(params.originDate, '1m', '0', 1.5, doc['userEvent.timestamp'].value)")
-                                                                .params(Map.of("originDate", JsonData.of(Instant.now().toString())
+                                                .script(script -> script
+                                                        .source("decayDateLinear(params.originDate, '1m', '0', 1.5, doc['userEvent.timestamp'].value)")
+                                                        .params(Map.of("originDate", JsonData.of(Instant.now().toString())
+                                                                )
                                                         )
-                                                )
-                                        )))
+                                                )))
                                         .boostMode(FunctionBoostMode.Replace)
                                 ))
                                 .innerHits(ih -> ih
@@ -1633,11 +1633,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
         for (Hit<Map> elasticHit : queryResult.getElasticHits()) {
             Map userEvent = (Map) elasticHit.innerHits().get("userEvent").hits().hits().get(0).source().to(Map.class).get("userEvent");
             list.add(new SearchUserEvent(
-                    queryResult.getData().get(i++),
-                    userEvent.get("initiator").toString(),
-                    new Date((Long)userEvent.get("timestamp")),
-                    ActivityOnNodeEventType.valueOf(userEvent.get("type").toString())
-                )
+                            queryResult.getData().get(i++),
+                            userEvent.get("initiator").toString(),
+                            new Date((Long)userEvent.get("timestamp")),
+                            ActivityOnNodeEventType.valueOf(userEvent.get("type").toString())
+                    )
             );
         }
         result.setData(list);
@@ -1692,20 +1692,36 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return searchByQuery(builder.build(), skipCount, maxItems, sortDefinition);
     }
 
-    private Query getContentTypeQuery(ContentType contentType) {
+    Query getContentTypeQuery(ContentType contentType) {
         if (contentType == null || contentType.equals(ContentType.ALL)) {
             return QueryBuilders.matchAll().build()._toQuery();
         }
         SearchToken token = new SearchToken();
         token.setContentType(contentType);
         BoolQuery.Builder builder = QueryBuilders.bool();
-
-        builder.minimumShouldMatch("1");
-        Arrays.stream(token.getSearchCriterias().getContentkind()).forEach(
-                type -> builder.should(s -> s.match(m -> m.field("type").query(CCConstants.getValidLocalName(
-                                type
-                        )
-                ))));
+        if(contentType.equals(ContentType.FILES)) {
+            builder.must(m -> m.match(match -> match.field("type").query(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO))));
+        } else if(contentType.equals(ContentType.FOLDERS)) {
+            builder.must(m -> m.match(match -> match.field("type").query(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_MAP))));
+            builder.mustNot(m -> m.match(match -> match.field("aspects").query(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION))));
+        } else if(contentType.equals(ContentType.COLLECTIONS)) {
+            builder.must(m -> m.match(match -> match.field("type").query(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_MAP))));
+            builder.must(m -> m.match(match -> match.field("aspects").query(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION))));
+        } else if(contentType.equals(ContentType.FILES_AND_FOLDERS)) {
+            builder.minimumShouldMatch("1");
+            builder.should(
+                    s -> s.bool(
+                            b -> b.must(m -> m.match(match -> match.field("type").query(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_MAP)))).
+                                    mustNot(m -> m.match(match -> match.field("aspects").query(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION))))
+                    )).should(s -> s.match(match -> match.field("type").query(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO)))
+            );
+        } else if(contentType.equals(ContentType.COLLECTION_PROPOSALS)) {
+            builder.must(m -> m.match(match -> match.field("type").query(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_COLLECTION_PROPOSAL))));
+        } else if(contentType.equals(ContentType.TOOLPERMISSIONS)) {
+            builder.must(m -> m.match(match -> match.field("type").query(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_TOOLPERMISSION))));
+        } else {
+            logger.warn("Unsupported/Unknown content type: " + contentType);
+        }
         return builder.build()._toQuery();
     }
 

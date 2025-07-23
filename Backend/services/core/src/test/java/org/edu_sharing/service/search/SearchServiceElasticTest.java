@@ -19,6 +19,7 @@ import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
@@ -193,5 +194,16 @@ class SearchServiceElasticTest {
                         "}",
                 conditions
         );
+    }
+
+    @Test
+    void getContentTypeQuery() {
+        Assertions.assertEquals("{\"match_all\":{}}",underTest.getContentTypeQuery(SearchService.ContentType.ALL).toString().substring("Query: ".length()));
+        Assertions.assertEquals("{\"bool\":{\"must\":[{\"match\":{\"type\":{\"query\":\"ccm:io\"}}}]}}",underTest.getContentTypeQuery(SearchService.ContentType.FILES).toString().substring("Query: ".length()));
+        Assertions.assertEquals("{\"bool\":{\"must\":[{\"match\":{\"type\":{\"query\":\"ccm:map\"}}}],\"must_not\":[{\"match\":{\"aspects\":{\"query\":\"ccm:collection\"}}}]}}",underTest.getContentTypeQuery(SearchService.ContentType.FOLDERS).toString().substring("Query: ".length()));
+        Assertions.assertEquals("{\"bool\":{\"must\":[{\"match\":{\"type\":{\"query\":\"ccm:map\"}}},{\"match\":{\"aspects\":{\"query\":\"ccm:collection\"}}}]}}",underTest.getContentTypeQuery(SearchService.ContentType.COLLECTIONS).toString().substring("Query: ".length()));
+        Assertions.assertEquals("{\"bool\":{\"must\":[{\"match\":{\"type\":{\"query\":\"ccm:collection_proposal\"}}}]}}",underTest.getContentTypeQuery(SearchService.ContentType.COLLECTION_PROPOSALS).toString().substring("Query: ".length()));
+        Assertions.assertEquals("{\"bool\":{\"must\":[{\"match\":{\"type\":{\"query\":\"ccm:toolpermission\"}}}]}}",underTest.getContentTypeQuery(SearchService.ContentType.TOOLPERMISSIONS).toString().substring("Query: ".length()));
+        Assertions.assertEquals("{\"bool\":{\"minimum_should_match\":\"1\",\"should\":[{\"bool\":{\"must\":[{\"match\":{\"type\":{\"query\":\"ccm:map\"}}}],\"must_not\":[{\"match\":{\"aspects\":{\"query\":\"ccm:collection\"}}}]}},{\"match\":{\"type\":{\"query\":\"ccm:io\"}}}]}}",underTest.getContentTypeQuery(SearchService.ContentType.FILES_AND_FOLDERS).toString().substring("Query: ".length()));
     }
 }
