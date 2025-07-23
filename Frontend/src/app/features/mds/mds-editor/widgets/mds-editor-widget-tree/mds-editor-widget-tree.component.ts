@@ -340,6 +340,21 @@ export class MdsEditorWidgetTreeComponent
         if (this.treeRef?.selectedNode) {
             this.treeRef.toggleNode(this.treeRef.selectedNode, true, true, true);
             this.inputElement.nativeElement.focus();
+        } else {
+            const selected = this.treeRef?.findNodeByKeyOrCaption(this.inputControl.value);
+            if (selected) {
+                this.treeRef?.toggleNode(selected, true, true, true);
+            } else if (
+                [MdsWidgetType.MultiValueSuggestBadges, MdsWidgetType.MultiValueBadges].includes(
+                    this.widget.definition.type as MdsWidgetType,
+                )
+            ) {
+                this.add({
+                    key: this.inputControl.value,
+                    label: this.inputControl.value,
+                });
+                this.inputControl.reset();
+            }
         }
     }
 
