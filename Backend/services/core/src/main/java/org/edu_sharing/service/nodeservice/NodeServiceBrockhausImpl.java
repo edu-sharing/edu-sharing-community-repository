@@ -12,15 +12,14 @@ import java.util.Map;
 
 public class NodeServiceBrockhausImpl extends NodeServiceAdapterCached{
 
+	private final ApplicationInfo appInfo;
 	private String repositoryId;
 	private Logger logger= Logger.getLogger(NodeServiceBrockhausImpl.class);
-	private String apiKey;
 
 	public NodeServiceBrockhausImpl(String appId) {
 		super(appId);
-		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
+		this.appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
 		this.repositoryId = appInfo.getAppId();		
-		this.apiKey = appInfo.getApiKey();
 	}
 
 	@Override
@@ -29,7 +28,7 @@ public class NodeServiceBrockhausImpl extends NodeServiceAdapterCached{
 		if (props == null) {
 			props = new HashMap<>();
 		}
-		String url=SearchServiceBrockhausImpl.buildUrl(apiKey,nodeId);
+		String url=SearchServiceBrockhausImpl.buildUrl(appInfo, nodeId);
 		props.put(CCConstants.CONTENTURL,url);
 		props.put(CCConstants.CCM_PROP_IO_WWWURL,url);
 
