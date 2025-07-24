@@ -1285,10 +1285,16 @@
       <function>
         <filter>
           {
-          "regexp": {
-          "permissions.Write": {
-          "value": "(${authorities})"
-          }
+          "bool":
+          {
+          "must":[
+          {"regexp": {"permissions.Write": {"value": "(${authorities})"}}}
+          ],
+          "minimum_should_match": 1,
+          "should":[
+            {"match": {"permissions.Write": "${user.cm:userName}" }},
+            {"match": {"permissions.Coordinator": "${user.cm:userName}" }}
+          ]
           }
           }
         </filter>
@@ -1296,13 +1302,9 @@
       </function>
       <function>
         <filter>
-          {
-          "match": {
-          "permissions.Write": "${user.cm:userName}"
-          }
-          }
+          {"match":{"properties.cm:owner.keyword":"${user.cm:userName}"}}
         </filter>
-        <weight>2</weight>
+        <weight>3</weight>
       </function>
     </query>
     <query join="AND" id="collections_scope_my">

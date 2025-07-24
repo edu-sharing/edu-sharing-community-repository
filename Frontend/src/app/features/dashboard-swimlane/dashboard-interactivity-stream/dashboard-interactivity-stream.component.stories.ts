@@ -7,12 +7,9 @@ import {
     moduleMetadata,
     type StoryObj,
 } from '@storybook/angular';
-import { ApiRequestConfiguration } from 'ngx-edu-sharing-api';
+import { ApiRequestConfiguration, UserEvent } from 'ngx-edu-sharing-api';
 import { Toast } from 'ngx-edu-sharing-ui';
-import {
-    DashboardInteractivityStreamComponent,
-    Event,
-} from './dashboard-interactivity-stream.component';
+import { DashboardInteractivityStreamComponent } from './dashboard-interactivity-stream.component';
 import {
     DummyNode,
     DummyUser,
@@ -49,14 +46,12 @@ const stream: Meta<DashboardInteractivityStreamComponent> = {
     args: {
         events: Array.from({ length: 6 }, () => {
             return {
-                type: 'SHARE',
-                element: DummyNode,
+                eventType: 'EDIT_MATERIAL',
                 initiator: new DummyUser(),
-                receiver: new DummyUser(),
-                timestamp:
-                    new Date().getTime() -
-                    Math.floor(Math.pow(Math.random(), 3) * 1000 * 3600 * 24 * 40),
-            } as Event;
+                node: DummyNode,
+                timestamp: (new Date().getTime() -
+                    Math.floor(Math.pow(Math.random(), 3) * 1000 * 3600 * 24 * 40)) as unknown,
+            } as UserEvent;
         }),
     },
     argTypes: {},

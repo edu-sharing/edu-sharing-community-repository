@@ -1,8 +1,11 @@
 package org.edu_sharing.service.search.model;
 
+import co.elastic.clients.elasticsearch._types.Script;
 import co.elastic.clients.elasticsearch._types.ScriptSortType;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.mapping.FieldType;
+import co.elastic.clients.json.JsonData;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.alfresco.service.ServiceRegistry;
@@ -11,16 +14,14 @@ import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.Pair;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.springframework.context.ApplicationContext;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 
@@ -33,7 +34,7 @@ public class SortDefinition implements Serializable {
 	);
 	transient ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 	transient ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-	
+
 	List<SortDefinitionEntry> sortDefinitionEntries = new ArrayList<>();
 	/**
 	 * enable or disable grouping by file/folder type
@@ -42,29 +43,38 @@ public class SortDefinition implements Serializable {
 	@Setter
 	private boolean groupBy = true;
 
+	/**
+	 * Modifier to customize the sort behaviour of the property
+	 * you can provide it by using "|" behind the property, i.e.
+	 * cm:modified|GranularityDate
+	 */
+	enum SortModifier {
+		None,
+		/**
+		 * when using a date/number field, convert the date value so that sort will end at the level of day,
+		 * equaling like sorting for YYYY-MM-DD
+		 * This can be used if you want to use secondary sort parameters for elements from the same day
+		 */
+		GranularityDate
+	}
 	public static class SortDefinitionEntry implements Serializable{
-		String property;
+		@Getter
+		private String property;
+		@Getter
+		private SortModifier modifierOrOptions;
+		@Getter
+		@Setter
 		boolean ascending;
-		
-		public String getProperty() {
-			return property;
-		}
-		
-		public void setProperty(String property) {
-			this.property = property;
-		}
-		
-		public boolean isAscending() {
-			return ascending;
-		}
-		
-		public void setAscending(boolean ascending) {
-			this.ascending = ascending;
-		}
 		public SortDefinitionEntry(){}
 		public SortDefinitionEntry(String property,boolean ascending){
-			this.property=property;
+			this.setProperty(property);
 			this.ascending=ascending;
+		}
+
+		public void setProperty(String property) {
+			this.property=property.split("\\|")[0];
+			String modifier = property.split("\\|").length > 1 ? property.split("\\|")[1] : null;
+			this.modifierOrOptions= StringUtils.isEmpty(modifier)?SortModifier.None : SortModifier.valueOf(modifier);
 		}
 	}
 	public SortDefinition(){}
@@ -78,24 +88,24 @@ public class SortDefinition implements Serializable {
 	 * @param sortAscending sort ascending or descending
 	 */
 	public SortDefinition(Iterable<String> sortProperties,List<Boolean> sortAscending){
-		this(null,sortProperties,sortAscending);		
+		this(null,sortProperties,sortAscending);
 	}
 	public SortDefinition(String namespace, Iterable<String> sortProperties, List<Boolean> sortAscending) {
 		if(sortProperties == null)
-			return;			
+			return;
 		if(sortAscending==null) {
 			sortAscending= new ArrayList<>();
 			sortAscending.add(true);
 		}
 		int i=0;
 		for(String sortProp : sortProperties){
-				SortDefinitionEntry entry = new SortDefinitionEntry();
-				Boolean sortAsc=sortAscending.size()==1 ? sortAscending.get(0) : sortAscending.get(i);
-				entry.setAscending(sortAsc);
-				entry.setProperty(namespace!=null && sortProp.split(":").length == 1 ? "{"+namespace+"}"+sortProp : sortProp);
-				addSortDefinitionEntry(entry);
-				i++;
-			}
+			SortDefinitionEntry entry = new SortDefinitionEntry();
+			Boolean sortAsc=sortAscending.size()==1 ? sortAscending.get(0) : sortAscending.get(i);
+			entry.setAscending(sortAsc);
+			entry.setProperty(namespace!=null && sortProp.split(":").length == 1 ? "{"+namespace+"}"+sortProp : sortProp);
+			addSortDefinitionEntry(entry);
+			i++;
+		}
 	}
 	public List<SortDefinitionEntry> getSortDefinitionEntries() {
 		return sortDefinitionEntries;
@@ -106,8 +116,8 @@ public class SortDefinition implements Serializable {
 	public void addSortDefinitionEntry(SortDefinitionEntry sortDefinitionEntry){
 		sortDefinitionEntries.add(sortDefinitionEntry);
 	}
-	/** 
-	 * 
+	/**
+	 *
 	 * @return true if this SortDefinition has entries
 	 */
 	public boolean hasContent() {
@@ -165,6 +175,7 @@ public class SortDefinition implements Serializable {
 				} else if(Arrays.asList("cm:created", "cm:modified").contains(sortDefintionEntry.getProperty())) {
 					// use numeric
 					addSuffix = "number";
+
 				} else if(List.of("ccm:replicationsourcetimestamp","sys:archivedDate").contains(sortDefintionEntry.getProperty())) {
 					// use date
 					addSuffix = "date";
@@ -184,13 +195,39 @@ public class SortDefinition implements Serializable {
 					}
 				}
 				String name = "properties." + sortDefintionEntry.getProperty() + ((!addSuffix.isEmpty()) ? ("." + addSuffix) :"" );
-				// currently, we use a dynamic model which might cause that fields not yet exists. We want to ignore this errors to let the request
-				builder.sort(sort->sort.field(field->field.field(name).order(sortOrder).unmappedType(FieldType.Keyword)));
-				if(addSuffix.equals("sort") || addSuffix.equals("number")) {
-					// we can't assume that the field exists, so for security, we always sort for a keyword field as a second option
-					builder.sort(sort->sort.field(field->field
-							.field("properties." + sortDefintionEntry.getProperty() + ".keyword")
-							.order(sortOrder).unmappedType(FieldType.Keyword)));
+				if(SortModifier.GranularityDate.equals(sortDefintionEntry.modifierOrOptions)) {
+					if(!addSuffix.equals("number")) {
+						throw new IllegalArgumentException("granularityDate is not supported for this field type");
+					}
+					builder.sort(sort -> sort
+							.script(scriptSort -> scriptSort
+									.script(Script.of(sc -> sc
+													.lang("painless")
+													.source("""
+															if (doc[params.field].size() != 0) {
+															  ZonedDateTime zdt = Instant.ofEpochMilli(doc[params.field].value)
+																.atZone(ZoneId.of('UTC'))
+																.truncatedTo(ChronoUnit.DAYS);
+															  return zdt.toInstant().toEpochMilli();
+															} else {
+															  return 0;
+															}
+														""")
+													.params(Map.of("field", JsonData.of(name)))
+													))
+											.type(ScriptSortType.Number)
+											.order(sortOrder)
+									)
+							);
+				} else {
+					// currently, we use a dynamic model which might cause that fields not yet exists. We want to ignore this errors to let the request
+					builder.sort(sort -> sort.field(field -> field.field(name).order(sortOrder).unmappedType(FieldType.Keyword)));
+					if (addSuffix.equals("sort") || addSuffix.equals("number")) {
+						// we can't assume that the field exists, so for security, we always sort for a keyword field as a second option
+						builder.sort(sort -> sort.field(field -> field
+								.field("properties." + sortDefintionEntry.getProperty() + ".keyword")
+								.order(sortOrder).unmappedType(FieldType.Keyword)));
+					}
 				}
 			}
 		}

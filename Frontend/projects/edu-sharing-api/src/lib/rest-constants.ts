@@ -183,3 +183,7 @@ export class RestConstants {
         return list;
     }
 }
+export enum SearchSortModifiers {
+    None = 'None',
+    GranularityDate = 'GranularityDate',
+}

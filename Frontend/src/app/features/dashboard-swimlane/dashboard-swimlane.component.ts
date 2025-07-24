@@ -37,6 +37,7 @@ import {
     SearchResultNode,
     SearchService,
     SearchServiceUnwrapped,
+    SearchSortModifiers,
     SessionStorageService,
     UserEvent,
 } from 'ngx-edu-sharing-api';
@@ -175,8 +176,15 @@ export class DashboardSwimlaneComponent {
                     body: {
                         criteria: [],
                     },
-                    sortProperties: [RestConstants.LUCENE_SCORE, RestConstants.CM_MODIFIED_DATE],
-                    sortAscending: [false, false],
+                    sortProperties: [
+                        // sort grouped by current day
+                        RestConstants.CM_MODIFIED_DATE + '|' + SearchSortModifiers.GranularityDate,
+                        // then, sort based on permissions
+                        RestConstants.LUCENE_SCORE,
+                        // then again, sort by date including time
+                        RestConstants.CM_MODIFIED_DATE,
+                    ],
+                    sortAscending: [false, false, false],
                     maxItems: this.maxItems,
                 }),
             );
