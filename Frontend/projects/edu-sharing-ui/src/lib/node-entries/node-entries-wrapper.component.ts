@@ -6,6 +6,7 @@ import {
     ContentChild,
     ElementRef,
     EventEmitter,
+    HostBinding,
     Input,
     NgZone,
     OnChanges,
@@ -19,6 +20,15 @@ import {
     ViewContainerRef,
 } from '@angular/core';
 import { interval, Subject } from 'rxjs';
+import {
+    debounceTime,
+    distinctUntilChanged,
+    filter,
+    skip,
+    switchMap,
+    take,
+    takeUntil,
+} from 'rxjs/operators';
 import { NodeEntriesTemplatesService } from './node-entries-templates.service';
 import { NodeEntriesComponent } from './node-entries.component';
 import {
@@ -33,6 +43,7 @@ import {
     NodeClickEvent,
     NodeEntriesDataType,
     NodeEntriesDisplayType,
+    TableConfig,
 } from './entries-model';
 import { NodeDataSource } from './node-data-source';
 import { Helper } from '../util/helper';
@@ -51,7 +62,6 @@ import {
 import { VirtualNode } from '../types/api-models';
 import { OptionsHelperDataService } from '../services/options-helper-data.service';
 import { UIService } from '../services/ui.service';
-import { filter, switchMap, take, takeUntil } from 'rxjs/operators';
 
 @Component({
     selector: 'es-node-entries-wrapper',
@@ -99,6 +109,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @Input() sort: ListSortConfig;
     @Input() dragDrop: ListDragGropConfig<T>;
     @Input() gridConfig: GridConfig;
+    @Input() tableConfig: TableConfig;
 
     /**
      * This color defines the base color of gradients visually limiting a grid in scroll direction.
@@ -139,10 +150,6 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
      */
     @Input() disableInfiniteScroll = false;
     /**
-     *  avg. column width for table layouts.
-     */
-    @Input() dataColumnWidth = 126;
-    /**
      *  show the icon column (table view only)
      */
     @Input() showIconColumn = true;
@@ -156,7 +163,9 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
 
     customNodeListComponent: Type<NodeEntriesComponent<T>>;
     private componentRef: ComponentRef<NodeEntriesComponent<T>>;
+    @HostBinding('attr.data-last-loading-completed') lastLoadingCompleted: number = -1;
     private options: ListOptions;
+    private dataSourceDestroy$ = new Subject<void>();
     private destroyed = new Subject<void>();
 
     constructor(
@@ -212,6 +221,21 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         }
         this.entriesService.list = this;
         this.entriesService.dataSource = this.dataSource;
+        if (
+            changes.dataSource &&
+            changes.dataSource.currentValue !== changes.dataSource.previousValue
+        ) {
+            this.dataSourceDestroy$.next();
+            this.entriesService.dataSource.isLoadingSubject
+                .pipe(
+                    distinctUntilChanged(),
+                    skip(1),
+                    filter((l) => l === false),
+                    debounceTime(10),
+                    takeUntil(this.dataSourceDestroy$),
+                )
+                .subscribe(() => (this.lastLoadingCompleted = Date.now()));
+        }
         this.entriesService.scope = this.scope;
         if (changes.columns) {
             this.entriesService.columnsSubject.next({
@@ -224,6 +248,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.displayType = this.displayType;
         this.entriesService.elementInteractionType = this.elementInteractionType;
         this.entriesService.gridConfig = this.gridConfig;
+        this.entriesService.tableConfig = this.tableConfig;
         this.entriesService.options = this.options;
         this.entriesService.globalOptions = this.globalOptions;
         this.entriesService.sort = this.sort;
@@ -235,7 +260,6 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.primaryInstance = this.primaryInstance;
         this.entriesService.singleClickHint = this.singleClickHint;
         this.entriesService.disableInfiniteScroll = this.disableInfiniteScroll;
-        this.entriesService.dataColumnWidth = this.dataColumnWidth;
         if (changes.showIconColumn) {
             this.entriesService.showIconColumn.next(this.showIconColumn);
         }
@@ -252,6 +276,8 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     }
 
     ngOnDestroy(): void {
+        this.dataSourceDestroy$.next();
+        this.dataSourceDestroy$.complete();
         this.destroyed.next();
         this.destroyed.complete();
     }

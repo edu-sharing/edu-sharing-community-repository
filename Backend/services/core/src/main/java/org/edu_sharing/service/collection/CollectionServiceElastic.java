@@ -53,7 +53,10 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
                                     .must(m -> readPermissionsQuery != null ? m.bool(readPermissionsQuery) : m.bool(searchServiceElastic::getReadPermissionsQuery))
                                     .must(m -> m.match(match -> match.field("nodeRef.storeRef.protocol").query("workspace")))
                                     .must(m -> m.wildcard(w -> w.field("fullpath").wildcard("*/" + nodeRef.getId() + "*")))
-                                    .mustNot(m -> m.match(match -> match.field("aspects").query(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT)))))));
+                                    .mustNot(m -> m.match(match -> match.field("aspects").query(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT))))
+                                    .mustNot(m -> m.match(match -> match.field("aspects").query(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_PAGE))))
+                                    .mustNot(m -> m.match(match -> match.field("aspects").query(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_WIDGET))))
+                            )));
 
             SearchResponse<Map> result = searchServiceElastic.searchNative(searchRequest);
             StringTermsAggregate types = result.aggregations().get("type").sterms();

@@ -1,13 +1,13 @@
 import { HttpClient } from '@angular/common/http';
-import { Inject, Optional } from '@angular/core';
 import { TranslateLoader } from '@ngx-translate/core';
 import { ConfigService, LANGUAGES } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { concat, forkJoin, Observable, of } from 'rxjs';
 import { catchError, filter, first, map, reduce, switchMap } from 'rxjs/operators';
 import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
-import { ADDITIONAL_I18N_PROVIDER, ASSETS_BASE_PATH } from '../types/injection-tokens';
 import { TranslationSource } from './translation-source';
+import { Inject, Optional } from '@angular/core';
+import { I18N_CONFIG, I18nConfig } from '../types/injection-tokens';
 
 export const TRANSLATION_LIST = [
     'common',
@@ -34,29 +34,17 @@ export class TranslationLoader implements TranslateLoader {
         http: HttpClient,
         configService: ConfigService,
         configuration: EduSharingUiConfiguration,
-        @Optional() @Inject(ASSETS_BASE_PATH) assetsBasePath?: string,
-        @Optional()
-        @Inject(ADDITIONAL_I18N_PROVIDER)
-        additionalI18nProvider?: (lang: string) => string[],
+        @Inject(I18N_CONFIG) i18nConfig: I18nConfig,
     ) {
-        return new TranslationLoader(
-            assetsBasePath,
-            additionalI18nProvider,
-            http,
-            configService,
-            configuration,
-        );
+        return new TranslationLoader(http, configService, configuration, i18nConfig);
     }
 
     private constructor(
-        @Optional() @Inject(ASSETS_BASE_PATH) private assetsBasePath: string,
-        @Optional()
-        @Inject(ADDITIONAL_I18N_PROVIDER)
-        private additionalI18nProvider: (lang: string) => string[],
         private http: HttpClient,
         private configService: ConfigService,
         private configuration: EduSharingUiConfiguration,
-        private prefix: string = (assetsBasePath ?? '') + 'assets/i18n',
+        @Optional() @Inject(I18N_CONFIG) private i18nConfig: I18nConfig,
+        private prefix: string = (configuration.assetsBasePath ?? '') + 'assets/i18n',
         private suffix: string = '.json',
     ) {}
 
@@ -94,10 +82,10 @@ export class TranslationLoader implements TranslateLoader {
                     return this.applyOverrides(originalTranslations, translationOverrides);
                 }),
                 switchMap((translations) => {
-                    if (!this.additionalI18nProvider) {
+                    if (!this.i18nConfig?.additionalI18nProvider) {
                         return of(translations);
                     }
-                    const files = this.additionalI18nProvider(lang);
+                    const files = this.i18nConfig.additionalI18nProvider(lang);
                     console.info('additional i18n provided', files);
                     return forkJoin(
                         files.map((f) => this.http.get(f) as Observable<Dictionary>),

@@ -132,6 +132,24 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
         }
     }
 
+    findNodeByKeyOrCaption(keyOrCaption: string, treeRoot = this.dataSource.data): TreeNode {
+        for (let leaf of treeRoot) {
+            if (
+                leaf.caption.toLowerCase() === keyOrCaption.toLowerCase() ||
+                leaf.id.toLowerCase() === keyOrCaption.toLowerCase()
+            ) {
+                return leaf;
+            }
+            if (leaf.children) {
+                const hit = this.findNodeByKeyOrCaption(keyOrCaption, leaf.children);
+                if (hit) {
+                    return hit;
+                }
+            }
+        }
+        return null;
+    }
+
     ngOnDestroy() {
         this.destroyed$.next();
         this.destroyed$.complete();

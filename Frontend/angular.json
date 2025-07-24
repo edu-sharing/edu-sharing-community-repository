@@ -103,6 +103,38 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ]
+            },
+            "web-component": {
+              "budgets": [
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "15kb",
+                  "maximumError": "100kb"
+                }
+              ],
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
+              "outputPath": {
+                "base": "dist/web-components/app",
+                "browser": ""
+              },
+              "outputHashing": "none",
+              "sourceMap": false,
+              "namedChunks": true,
+              "extractLicenses": true,
+              "index": "src/web-component/index.html",
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.web-component.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": ""
@@ -389,150 +421,6 @@
         }
       }
     },
-    "app-as-web-component": {
-      "projectType": "application",
-      "schematics": {
-        "@schematics/angular:component": {
-          "style": "scss"
-        },
-        "@schematics/angular:application": {
-          "strict": true
-        }
-      },
-      "root": "projects/app-as-web-component",
-      "sourceRoot": "projects/app-as-web-component/src",
-      "prefix": "app",
-      "architect": {
-        "build": {
-          "builder": "@angular-devkit/build-angular:application",
-          "options": {
-            "deployUrl": "vendor/edu-sharing/",
-            "outputHashing": "none",
-            "outputPath": {
-              "base": "dist/app-as-web-component"
-            },
-            "index": "projects/app-as-web-component/src/index.html",
-            "polyfills": [
-              "projects/app-as-web-component/src/polyfills.ts"
-            ],
-            "tsConfig": "projects/app-as-web-component/tsconfig.app.json",
-            "inlineStyleLanguage": "scss",
-            "assets": [
-              {
-                "glob": "**/*",
-                "input": "src/assets/",
-                "output": "/assets/"
-              },
-              {
-                "glob": "**/*",
-                "input": "node_modules/monaco-editor/min",
-                "output": "/assets/monaco/min/"
-              },
-              {
-                "glob": "**/*",
-                "input": "node_modules/tinymce",
-                "output": "/tinymce/"
-              },
-              {
-                "glob": "**/*",
-                "input": "node_modules/tinymce-i18n/langs5",
-                "output": "/tinymce/langs/"
-              },
-              "projects/app-as-web-component/src/favicon.ico",
-              "projects/app-as-web-component/src/assets"
-            ],
-            "styles": [
-              "src/app/core-ui-module/styles/core-base.scss",
-              "src/styles/main.scss",
-              "projects/app-as-web-component/src/styles.scss"
-            ],
-            "scripts": [
-              "node_modules/jquery/dist/jquery.js",
-              "src/assets/js/nouislider.min.js",
-              "node_modules/moment/min/moment-with-locales.min.js",
-              "node_modules/chart.js/dist/chart.umd.js",
-              "node_modules/tinymce/tinymce.min.js"
-            ],
-            "browser": "projects/app-as-web-component/src/main.ts"
-          },
-          "configurations": {
-            "production": {
-              "budgets": [
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "15kb",
-                  "maximumError": "100kb"
-                }
-              ],
-              "fileReplacements": [
-                {
-                  "replace": "projects/app-as-web-component/src/environments/environment.ts",
-                  "with": "projects/app-as-web-component/src/environments/environment.prod.ts"
-                },
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
-                }
-              ]
-            },
-            "development": {
-              "optimization": false,
-              "extractLicenses": false,
-              "sourceMap": true,
-              "namedChunks": true
-            }
-          },
-          "defaultConfiguration": "production"
-        },
-        "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
-          "options": {
-            "proxyConfig": "src/proxy.conf.js"
-          },
-          "configurations": {
-            "production": {
-              "buildTarget": "app-as-web-component:build:production"
-            },
-            "development": {
-              "buildTarget": "app-as-web-component:build:development"
-            }
-          },
-          "defaultConfiguration": "development"
-        },
-        "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n",
-          "options": {
-            "buildTarget": "app-as-web-component:build"
-          }
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "polyfills": "projects/app-as-web-component/src/polyfills.ts",
-            "tsConfig": "projects/app-as-web-component/tsconfig.spec.json",
-            "inlineStyleLanguage": "scss",
-            "assets": [
-              "projects/app-as-web-component/src/favicon.ico",
-              "projects/app-as-web-component/src/assets"
-            ],
-            "styles": [
-              "projects/app-as-web-component/src/styles.scss"
-            ],
-            "scripts": [],
-            "karmaConfig": "projects/app-as-web-component/karma.conf.js"
-          }
-        },
-        "lint": {
-          "builder": "@angular-eslint/builder:lint",
-          "options": {
-            "lintFilePatterns": [
-              "projects/app-as-web-component/**/*.ts",
-              "projects/app-as-web-component/**/*.html"
-            ]
-          }
-        }
-      }
-    },
     "edu-sharing-ui": {
       "projectType": "library",
       "root": "projects/edu-sharing-ui",
@@ -552,7 +440,7 @@
               "tsConfig": "projects/edu-sharing-ui/tsconfig.lib.json"
             }
           },
-          "defaultConfiguration": "production",
+          "defaultConfiguration": "production"
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
@@ -595,7 +483,7 @@
           "options": {
             "deployUrl": "",
             "outputHashing": "none",
-            "outputPath": "dist/rendering-service-web-component",
+            "outputPath": "dist/web-components/rendering-service-amd",
             "index": "projects/rendering-service-web-component/src/index.html",
             "main": "projects/rendering-service-web-component/src/main.ts",
             "tsConfig": "projects/rendering-service-web-component/tsconfig.app.json",
@@ -662,7 +550,8 @@
             "deployUrl": "",
             "outputHashing": "none",
             "outputPath": {
-              "base": "dist/rendering-service-web-component"
+              "base": "dist/web-components/rendering-service",
+              "browser": ""
             },
             "index": "projects/rendering-service-web-component/src/index.html",
             "tsConfig": "projects/rendering-service-web-component/tsconfig.app.json",

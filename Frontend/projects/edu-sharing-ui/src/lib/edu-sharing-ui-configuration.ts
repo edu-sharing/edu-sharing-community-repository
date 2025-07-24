@@ -15,6 +15,14 @@ export class EduSharingUiConfiguration {
      */
     isEmbedded = false;
 
+    /**
+     * A custom base path for the assets directory.
+     *
+     * This is useful when the application cannot be served from the base HREF set in index.html. This
+     * is the case when it is embedded as a web component into another website.
+     */
+    assetsBasePath?: string;
+
     static create(params: EduSharingUiConfigurationParams = {}): EduSharingUiConfiguration {
         return { ...new EduSharingUiConfiguration(), ...params };
     }
