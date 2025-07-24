@@ -43,6 +43,7 @@ describe('TranslationLoader', () => {
             httpClient as HttpClient,
             config as unknown as ConfigService,
             uiConfig as unknown as EduSharingUiConfiguration,
+            {},
         );
     });
 

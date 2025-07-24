@@ -36,7 +36,7 @@
       <div class="createCollection collectionShadow">
         <button
           mat-button
-          class="collection-item clickable"
+          class="collection-item clickable collection-item-scope-my"
           (click)="setCollectionType('MY')"
           data-test="create-private-collection-button"
         >
@@ -51,9 +51,10 @@
         </button>
         <button
           mat-button
-          class="collection-item clickable"
+          class="collection-item clickable collection-item-scope-custom"
           *ngIf="canInvite"
           (click)="setCollectionType('CUSTOM')"
+          data-test="create-shared-collection-button"
         >
           <div class="iconLeft"><i esIcon="group" style="color: #4f7899"></i></div>
           <div class="content">
@@ -64,9 +65,10 @@
         </button>
         <button
           mat-button
-          class="collection-item clickable"
+          class="collection-item clickable collection-item-scope-public"
           *ngIf="shareToAll && canInvite"
           (click)="setCollectionType('EDU_ALL')"
+          data-test="create-public-collection-button"
         >
           <div class="iconLeft"><i esIcon="public" style="color: #5c998f"></i></div>
           <div class="content">
@@ -78,9 +80,10 @@
         <div class="group" *ngIf="createEditorial && shareToAll">
           <button
             mat-button
-            class="collection-item clickable"
+            class="collection-item clickable collection-item-scope-editorial"
             *ngIf="createEditorial"
             (click)="setCollectionType('EDITORIAL')"
+            data-test="create-editorial-collection-button"
           >
             <div class="iconLeft"><i esIcon="star" style="color: #e9b42a"></i></div>
             <div class="content">
@@ -106,6 +109,7 @@
           class="collection-item clickable"
           *ngIf="createMediacenter"
           (click)="setCollectionType('MEDIA_CENTER')"
+          data-test="create-media-center-button"
         >
           <div class="iconLeft"><i esIcon="domain" style="color: #4e4b99"></i></div>
           <div class="content">
@@ -333,7 +337,11 @@
       <div class="card-content">
         <es-mds-editor-wrapper
           #mds
-          [groupId]="'collection_' + newCollectionType.toLowerCase()"
+          [groupId]="
+            newCollectionType === 'EDITORIAL'
+              ? editorialCollectionsConfig.metadataGroup
+              : 'collection_' + newCollectionType.toLowerCase()
+          "
           [setId]="mdsSet"
           [editorMode]="'form'"
           [embedded]="true"
@@ -399,22 +407,19 @@
       [isCancelable]="true"
       (cancel)="newCollectionCancel()"
       [buttons]="buttons"
-      width="normal"
-      height="large"
+      width="xxlarge"
+      height="xxlarge"
       [subtitle]="currentCollection.title"
       class="collection-permission-container"
     >
       <div class="card-content">
         <div class="title">{{ 'COLLECTIONS.EDIT_PERMISSIONS_SUBTEXT' | translate }}</div>
         <div class="description">{{ 'COLLECTIONS.EDIT_PERMISSIONS_DESCRIPTION' | translate }}</div>
-        <div class="dialog-basic-area permissionsBtn">
-          <button mat-raised-button (click)="editPermissions()">
-            <i esIcon="person_add"></i>{{ 'COLLECTIONS.EXTENDED_PERMISSIONS_BUTTON' | translate }}
-          </button>
-        </div>
-        <div class="status">
-          {{ 'COLLECTIONS.PERMISSIONS_STATUS_' + getShareStatus() | translate }}
-        </div>
+        <es-share-dialog
+          *ngIf="shareConfig"
+          [dataInput]="shareConfig"
+          (permissionsChange)="setPermissions($event)"
+        ></es-share-dialog>
       </div>
     </es-card>
   </div>

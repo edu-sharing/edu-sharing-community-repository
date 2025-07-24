@@ -76,10 +76,18 @@ import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { Values } from '../../../features/mds/types/types';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
-import { ShareDialogResult } from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog-data';
-import { ExtendedAcl } from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog.component';
+import {
+    ShareDialogData,
+    ShareDialogResult,
+} from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog-data';
+import {
+    ExtendedAcl,
+    ShareDialogComponent,
+} from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog.component';
 import { OptionsHelperService } from '../../../services/options-helper.service';
 import { filter, first } from 'rxjs/operators';
+import { CollectionsTypeConfig } from '../../../../../dist/edu-sharing-api/lib/api/models/collections-type-config';
+import { CARD_DIALOG_DATA } from '../../../features/dialogs/card-dialog/card-dialog-config';
 
 type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITORIAL_GROUPS';
 
@@ -95,6 +103,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     @ViewChild('mds') mds: MdsEditorWrapperComponent;
     @ViewChild('organizations') organizationsRef: NodeEntriesWrapperComponent<Group>;
     @ViewChild('imageActionbar') imageActionbar: ActionbarComponent;
+    @ViewChild(ShareDialogComponent) shareDialogRef: ShareDialogComponent;
     readonly InteractionType = InteractionType;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     public hasCustomScope: boolean;
@@ -164,6 +173,8 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     mdsSet: string;
     imageWindow: Window;
     editorialGroupsSelected: Group[] = [];
+    editorialCollectionsConfig: CollectionsTypeConfig;
+    shareConfig: ShareDialogData;
 
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
@@ -264,12 +275,20 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         this.eventService.addListener(this, this.destroyed);
         this.translations.waitForInit().subscribe(() => {
             this.connector.isLoggedIn().subscribe((data) => {
-                this.mdsService.getSets().subscribe((mdsSets) => {
+                this.mdsService.getSets().subscribe(async (mdsSets) => {
                     const sets = ConfigurationHelper.filterValidMds(
                         RestConstants.HOME_REPOSITORY,
                         mdsSets.metadatasets,
                         this.configService,
                     );
+                    this.editorialCollectionsConfig =
+                        await this.configService.get<CollectionsTypeConfig>(
+                            'collections.types.editorial',
+                            {
+                                invitationType: 'EditorialGroups',
+                                metadataGroup: 'collection_editorial',
+                            },
+                        );
                     this.mdsSet = sets[0]?.id;
 
                     this.COLORS = this.configLegacy.instant(
@@ -435,7 +454,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
             },
         );
     }
-    private setPermissions(permissions: ShareDialogResult) {
+    setPermissions(permissions: ShareDialogResult) {
         if (permissions) {
             this.permissionsInfo = permissions;
             this.permissions = permissions.permissions;
@@ -450,7 +469,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
             }
         }
     }
-    async editPermissions(): Promise<void> {
+    updatePermissions() {
         if (this.permissions == null && !this.editId) {
             this.permissions = {
                 inherited: false,
@@ -470,13 +489,12 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
             permissionsDummy.isDirectory = true;
             nodes = [permissionsDummy];
         }
-        const dialogRef = await this.dialogs.openShareDialog({
+        this.shareConfig = {
             nodes,
             sendMessages: true,
             sendToApi: false,
             currentPermissions: this.permissions,
-        });
-        dialogRef.afterClosed().subscribe((result) => this.setPermissions(result));
+        };
     }
     isNewCollection(): boolean {
         return this.editId == null;
@@ -650,18 +668,28 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         let steps: Step[] = [];
         steps.push(this.STEP_GENERAL);
         if (
-            this.newCollectionType == RestConstants.COLLECTIONTYPE_EDITORIAL ||
+            (this.newCollectionType == RestConstants.COLLECTIONTYPE_EDITORIAL &&
+                !!this.editorialCollectionsConfig.metadataGroup) ||
             this.newCollectionType == RestConstants.COLLECTIONTYPE_MEDIA_CENTER
         ) {
             steps.push(this.STEP_METADATA);
         }
-        if (this.newCollectionType == RestConstants.COLLECTIONSCOPE_CUSTOM && this.canInvite) {
+        if (
+            (this.newCollectionType == RestConstants.COLLECTIONSCOPE_CUSTOM ||
+                (this.newCollectionType == RestConstants.COLLECTIONTYPE_EDITORIAL &&
+                    this.editorialCollectionsConfig.invitationType === 'Default')) &&
+            this.canInvite
+        ) {
             steps.push(this.STEP_PERMISSIONS);
         }
         if (this.newCollectionType == RestConstants.COLLECTIONTYPE_EDITORIAL) {
             //steps.push(this.STEP_SETTINGS);
         }
-        if (this.newCollectionType == RestConstants.COLLECTIONTYPE_EDITORIAL && this.canInvite) {
+        if (
+            this.newCollectionType == RestConstants.COLLECTIONTYPE_EDITORIAL &&
+            this.canInvite &&
+            this.editorialCollectionsConfig.invitationType === 'EditorialGroups'
+        ) {
             steps.push(this.STEP_EDITORIAL_GROUPS);
         }
         return steps;
@@ -671,11 +699,15 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         return pos >= this.availableSteps.length - 1;
     }
     public async goToNextStep() {
+        this.updatePermissions();
         if (this.newCollectionStep == this.STEP_GENERAL) {
             if (!this.currentCollection.title) {
                 this.toast.error(null, 'COLLECTIONS.ENTER_NAME');
                 return;
             }
+        }
+        if (this.newCollectionStep == this.STEP_PERMISSIONS) {
+            await this.shareDialogRef.save();
         }
         if (this.newCollectionStep == this.STEP_METADATA) {
             const props = await this.mds.getValues();
@@ -782,7 +814,10 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         );
     }
     private save3(collection: EduData.Node) {
-        if (this.newCollectionType == RestConstants.GROUP_TYPE_EDITORIAL) {
+        if (
+            this.newCollectionType == RestConstants.COLLECTIONTYPE_EDITORIAL &&
+            this.editorialCollectionsConfig.invitationType === 'EditorialGroups'
+        ) {
             // user has access to editorial group but can't invite (strange setting but may happens)
             if (!this.canInvite) {
                 void this.save4(collection);
@@ -792,7 +827,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         }
         if (
             (this.newCollectionType == RestConstants.COLLECTIONSCOPE_CUSTOM ||
-                this.newCollectionType == RestConstants.GROUP_TYPE_EDITORIAL) &&
+                this.newCollectionType == RestConstants.COLLECTIONTYPE_EDITORIAL) &&
             this.permissions &&
             this.permissions.permissions
         ) {

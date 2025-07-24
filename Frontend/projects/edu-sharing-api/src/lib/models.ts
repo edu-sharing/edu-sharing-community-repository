@@ -21,6 +21,8 @@ export {
     ConnectorList,
     CollectionReference,
     Context,
+    CollectionsType,
+    CollectionsTypeConfig,
     DashboardShortcut,
     DashboardShortcutEntry,
     DefaultDashboardShortcut,

@@ -3,8 +3,8 @@ import { forkJoin, Observable } from 'rxjs';
 import { Params, Router } from '@angular/router';
 import { Location, PlatformLocation } from '@angular/common';
 import {
-    ASSETS_BASE_PATH,
     DefaultGroups,
+    EduSharingUiConfiguration,
     ListItem,
     NodeHelperService as NodeHelperServiceBase,
     NodePersonNamePipe,
@@ -90,10 +90,10 @@ export class NodeHelperService extends NodeHelperServiceBase {
         networkService: NetworkService,
         configService: ConfigService,
         repoUrlService: RepoUrlService,
-        @Optional() @Inject(ASSETS_BASE_PATH) assetsBasePath: string,
         private componentFactoryResolver: ComponentFactoryResolver,
         private authenticationService: AuthenticationService,
         private config: ConfigService,
+        configuration: EduSharingUiConfiguration,
         private dialogsService: DialogsService,
         private rest: RestConnectorService,
         private bridge: BridgeService,
@@ -113,10 +113,10 @@ export class NodeHelperService extends NodeHelperServiceBase {
             apiHelpersService,
             networkService,
             configService,
+            configuration,
             repoUrlService,
             platformLocation,
             router,
-            assetsBasePath,
         );
     }
     setViewContainerRef(viewContainerRef: ViewContainerRef) {

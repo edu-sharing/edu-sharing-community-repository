@@ -170,6 +170,13 @@ $imagePath: '../../../../assets/images/collections/';
     }
 }
 .collection-permission-container {
+    display: flex;
+    flex-direction: column;
+    .card-content {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
     .title {
         font-size: 140%;
         font-weight: bold;
@@ -179,6 +186,9 @@ $imagePath: '../../../../assets/images/collections/';
         color: $textLight;
         font-size: 110%;
         padding-bottom: 20px;
+    }
+    es-share-dialog {
+        flex-grow: 1;
     }
     .status {
         margin: $cardPadding * -1;
@@ -285,6 +295,7 @@ $imagePath: '../../../../assets/images/collections/';
     padding: 16px;
     color: #fff;
     transition: $transitionNormal all;
+    --mdc-outlined-text-field-hover-label-text-color: #eee;
     @include placeholder {
         color: #ccc;
     }
@@ -309,6 +320,7 @@ $imagePath: '../../../../assets/images/collections/';
     @include placeholder {
         color: #333;
     }
+    --mdc-outlined-text-field-hover-label-text-color: #222;
 }
 .collection-new-preview-headline {
     font-size: 200%;

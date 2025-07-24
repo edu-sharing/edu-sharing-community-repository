@@ -8,7 +8,11 @@
       [selectedIndex]="tab"
       (selectedIndexChange)="setTab($event)"
     >
-      <mat-tab label="{{ 'PERMISSIONS.TAB.ORG' | translate }}">
+      <mat-tab
+        label="{{ 'PERMISSIONS.TAB.ORG' | translate }}"
+        labelClass="data-test-permissions-tab-orgs"
+        bodyClass="data-test-permissions-body-orgs"
+      >
         <ng-template matTabContent>
           <es-permissions-authorities
             [mode]="'ORG'"
@@ -18,10 +22,12 @@
         </ng-template>
       </mat-tab>
       <mat-tab
+        *ngIf="selected || isAdmin"
         label="{{ 'PERMISSIONS.TAB.GROUP' | translate }}{{
           selected ? ' (' + selected.profile?.displayName + ')' : ''
         }}"
-        *ngIf="selected || isAdmin"
+        labelClass="data-test-permissions-tab-groups"
+        bodyClass="data-test-permissions-body-groups"
       >
         <ng-template matTabContent>
           <es-permissions-authorities
@@ -34,10 +40,12 @@
         </ng-template>
       </mat-tab>
       <mat-tab
+        *ngIf="selected || isAdmin"
         label="{{ 'PERMISSIONS.TAB.USER' | translate }}{{
           selected ? ' (' + selected.profile?.displayName + ')' : ''
         }}"
-        *ngIf="selected || isAdmin"
+        labelClass="data-test-permissions-tab-users"
+        bodyClass="data-test-permissions-body-users"
       >
         <ng-template matTabContent>
           <es-permissions-authorities
@@ -49,7 +57,12 @@
           ></es-permissions-authorities>
         </ng-template>
       </mat-tab>
-      <mat-tab label="{{ 'PERMISSIONS.TAB.DELETE' | translate }}" *ngIf="!selected && isAdmin">
+      <mat-tab
+        *ngIf="!selected && isAdmin"
+        label="{{ 'PERMISSIONS.TAB.DELETE' | translate }}"
+        labelClass="data-test-permissions-tab-deletion"
+        bodyClass="data-test-permissions-body-deletion"
+      >
         <es-permissions-delete></es-permissions-delete>
       </mat-tab>
     </mat-tab-group>

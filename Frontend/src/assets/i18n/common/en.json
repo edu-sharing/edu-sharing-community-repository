@@ -647,7 +647,7 @@
     "COLLECTION_PROPSE": "Submit a proposal?",
     "COLLECTION_PROPSE_INFO": "You do not have sufficient rights to the collection \"{{collection}}\". However, you can submit the material as a proposal. Would you like to continue?"
   },
-  "OPTIONS_FOR": "Aktions for {{element}}",
+  "OPTIONS_FOR": "Actions for {{element}}",
   "NO_AVAILABLE_OPTIONS": "No actions are available for the selected items",
   "OPTIONS": {
     "SHOW_ALL_OPTIONS": "More actions",

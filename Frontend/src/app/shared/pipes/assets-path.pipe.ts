@@ -1,5 +1,5 @@
 import { Inject, Optional, Pipe, PipeTransform } from '@angular/core';
-import { ASSETS_BASE_PATH } from 'ngx-edu-sharing-ui';
+import { EduSharingUiConfiguration } from 'ngx-edu-sharing-ui';
 
 /**
  * Prefixes a path to an asset with the assets base path, if configured.
@@ -11,11 +11,11 @@ import { ASSETS_BASE_PATH } from 'ngx-edu-sharing-ui';
     standalone: false,
 })
 export class AssetsPathPipe implements PipeTransform {
-    constructor(@Optional() @Inject(ASSETS_BASE_PATH) private assetsBasePath: string) {}
+    constructor(private configuration: EduSharingUiConfiguration) {}
 
     transform(path: string): string {
-        if (this.assetsBasePath && path.startsWith('assets/')) {
-            return this.assetsBasePath + path;
+        if (this.configuration.assetsBasePath && path.startsWith('assets/')) {
+            return this.configuration.assetsBasePath + path;
         } else {
             return path;
         }

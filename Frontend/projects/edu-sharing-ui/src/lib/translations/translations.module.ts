@@ -3,9 +3,9 @@ import { ModuleWithProviders, NgModule, Optional, SkipSelf } from '@angular/core
 import { MissingTranslationHandler, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
-import { ADDITIONAL_I18N_PROVIDER, ASSETS_BASE_PATH, I18N_CONFIG } from '../types/injection-tokens';
 import { FallbackTranslationHandler } from './fallback-translation-handler';
 import { TranslationLoader } from './translation-loader';
+import { I18N_CONFIG } from '../types/injection-tokens';
 
 /**
  * Import this module once in the app module to provide the `TranslateService`.
@@ -24,8 +24,6 @@ import { TranslationLoader } from './translation-loader';
                     ConfigService,
                     EduSharingUiConfiguration,
                     [new Optional(), I18N_CONFIG],
-                    [new Optional(), ASSETS_BASE_PATH],
-                    [new Optional(), ADDITIONAL_I18N_PROVIDER],
                 ],
             },
             missingTranslationHandler: {

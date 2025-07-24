@@ -2,8 +2,12 @@ import {
     AfterViewInit,
     ApplicationRef,
     Component,
+    EventEmitter,
     Inject,
+    Input,
     OnInit,
+    Optional,
+    Output,
     TemplateRef,
     ViewChild,
 } from '@angular/core';
@@ -75,6 +79,8 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     @ViewChild('inheritRef') inheritRef: any;
     @ViewChild('state') stateRef: TemplateRef<HTMLElement>;
     @ViewChild('shareLink') shareLinkRef: TemplateRef<HTMLElement>;
+    @Input() dataInput: ShareDialogData;
+    @Output() permissionsChange = new EventEmitter<ShareDialogResult>();
     readonly RestConstants = RestConstants;
     readonly ALL_PERMISSIONS = [
         'All',
@@ -138,6 +144,9 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     get tab() {
         return this._tab;
     }
+    get data() {
+        return this.dataCard || this.dataInput;
+    }
     permissionsUser: ExtendedAce[];
     permissionsGroup: ExtendedAce[];
     newPermissions: ExtendedAce[] = [];
@@ -179,8 +188,8 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     private showChooseTypeList: Permission;
 
     constructor(
-        @Inject(CARD_DIALOG_DATA) public data: ShareDialogData,
-        private dialogRef: CardDialogRef<ShareDialogData, ShareDialogResult>,
+        @Optional() @Inject(CARD_DIALOG_DATA) public dataCard: ShareDialogData,
+        @Optional() private dialogRef: CardDialogRef<ShareDialogData, ShareDialogResult>,
         private applicationRef: ApplicationRef,
         private authenticationService: AuthenticationService,
         private cardDialogUtils: CardDialogUtilsService,
@@ -248,26 +257,28 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                 () => this.save(),
             ),
         ];
-        this.dialogRef.patchConfig({ buttons });
+        this.dialogRef?.patchConfig({ buttons });
     }
 
     private initNodes() {
-        const isStringArray = (a: string[] | Node[]): a is string[] => typeof a[0] === 'string';
-        if (isStringArray(this.data.nodes)) {
-            this.dialogRef.patchState({ isLoading: true });
-            rxjs.forkJoin(this.data.nodes.map((nodeId) => this.nodeApi.getNode(nodeId))).subscribe(
-                (nodes) => {
-                    this.dialogRef.patchState({ isLoading: false });
+        setTimeout(() => {
+            const isStringArray = (a: string[] | Node[]): a is string[] => typeof a[0] === 'string';
+            if (isStringArray(this.data.nodes)) {
+                this.dialogRef?.patchState({ isLoading: true });
+                rxjs.forkJoin(
+                    this.data.nodes.map((nodeId) => this.nodeApi.getNode(nodeId)),
+                ).subscribe((nodes) => {
+                    this.dialogRef?.patchState({ isLoading: false });
                     this.setNodes(nodes);
-                },
-            );
-        } else {
-            this.setNodes(this.data.nodes);
-        }
+                });
+            } else {
+                this.setNodes(this.data.nodes);
+            }
+        });
     }
 
     private initCardRefs(): void {
-        this.dialogRef.patchConfig({
+        this.dialogRef?.patchConfig({
             customHeaderBarContent: this.shareLinkRef,
             customBottomBarContent: this.stateRef,
         });
@@ -294,7 +305,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         void this.cardDialogUtils
             .configForNodes(nodes)
             .then((config: Partial<CardDialogConfig<ShareDialogData>>) =>
-                this.dialogRef.patchConfig(config),
+                this.dialogRef?.patchConfig(config),
             );
         this._nodes = nodes;
         this.initialize();
@@ -319,7 +330,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         } else {
             this.showLink = true;
             this.updateNodeLink();
-            this.dialogRef.patchState({ isLoading: true });
+            this.dialogRef?.patchState({ isLoading: true });
             observableForkJoin(
                 this._nodes.map((n) => this.nodeApi.getPermissions(n.ref.id)),
             ).subscribe((permissions) => {
@@ -336,7 +347,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                 } else {
                     this.setPermissions([]);
                 }
-                this.dialogRef.patchState({ isLoading: false });
+                this.dialogRef?.patchState({ isLoading: false });
             });
             this.reloadUsages();
         }
@@ -431,7 +442,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     }
 
     cancel() {
-        this.dialogRef.close(null);
+        this.dialogRef?.close(null);
     }
 
     hasUsages() {
@@ -648,7 +659,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                 });
                 return;
             }
-            this.dialogRef.patchState({ isLoading: true });
+            this.dialogRef?.patchState({ isLoading: true });
             let inherit = this.inherited && this.inheritAllowed && !this.isCollection();
             const actions = this._nodes.map((n, i) => {
                 return async () => {
@@ -702,7 +713,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                             if (!error.defaultPrevented) {
                                 this.toast.error(error);
                             }
-                            this.dialogRef.patchState({ isLoading: false });
+                            this.dialogRef?.patchState({ isLoading: false });
                             return;
                         }
                     }
@@ -713,7 +724,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                             }
                         } catch (error) {
                             this.toast.error(error);
-                            this.dialogRef.patchState({ isLoading: false });
+                            this.dialogRef?.patchState({ isLoading: false });
                             return;
                         }
                     }
@@ -844,7 +855,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
             if (this.data.sendToApi) {
                 this.localEvents.nodesChanged.emit(this.data.nodes as Node[]);
             }
-            this.dialogRef.close(this.getEmitObject(permissions));
+            this.dialogRef?.close(this.getEmitObject(permissions));
             if (!error) {
                 this.toast.toast('WORKSPACE.PERMISSIONS_UPDATED');
             }
@@ -892,7 +903,10 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     ): Promise<void> {
         const permissionsCopy = RestHelper.copyAndCleanPermissions(permissions, inherit);
         if (!this.data.sendToApi) {
-            this.dialogRef.close(
+            this.permissionsChange.emit(
+                this.getEmitObject(RestHelper.copyPermissions(permissions, inherit) as ExtendedAcl),
+            );
+            this.dialogRef?.close(
                 this.getEmitObject(RestHelper.copyPermissions(permissions, inherit) as ExtendedAcl),
             );
             return null;

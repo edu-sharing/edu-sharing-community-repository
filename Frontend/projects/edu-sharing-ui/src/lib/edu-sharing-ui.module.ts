@@ -1,4 +1,4 @@
-import { ModuleWithProviders, NgModule } from '@angular/core';
+import { ModuleWithProviders, NgModule, Provider } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule } from '@ngx-translate/core';
 import { CommonModule } from '@angular/common';
@@ -11,6 +11,7 @@ import { FormatDatePipe } from './pipes/format-date.pipe';
 import { ListItemLabelPipe } from './node-entries/list-item-label.pipe';
 import { SortDropdownComponent } from './sort-dropdown/sort-dropdown.component';
 import { MdsModule } from './mds/mds.module';
+import { I18N_CONFIG } from '../public-api';
 
 @NgModule({
     declarations: [],
@@ -42,10 +43,11 @@ import { MdsModule } from './mds/mds.module';
 export class EduSharingUiModule {
     public static forRoot(
         config: EduSharingUiConfigurationParams,
+        providers: Provider[] = [],
     ): ModuleWithProviders<EduSharingUiModule> {
         return {
             ngModule: EduSharingUiModule,
-            providers: [getConfigProvider(config)],
+            providers: [getConfigProvider(config), ...providers],
         };
     }
 }

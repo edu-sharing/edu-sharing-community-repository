@@ -12,5 +12,6 @@ if (environment.production) {
 if (environment.traceChangeDetection) {
     (Error as any).stackTraceLimit = Infinity;
 }
-
-void platformBrowserDynamic().bootstrapModule(AppModule);
+platformBrowserDynamic()
+    .bootstrapModule(AppModule)
+    .catch((err) => console.error(err));

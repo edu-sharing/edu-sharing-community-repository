@@ -14,6 +14,7 @@ import {
     NodeClickEvent,
     NodeEntriesDataType,
     NodeEntriesDisplayType,
+    TableConfig,
 } from '../node-entries/entries-model';
 import { NodeDataSource } from '../node-entries/node-data-source';
 import {
@@ -132,17 +133,25 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     dblClickItem: EventEmitter<NodeClickEvent<T>>;
     fetchData: EventEmitter<FetchEvent>;
     readonly gridConfig$ = new BehaviorSubject<GridConfig | null>(null);
-    get gridConfig(): GridConfig {
+    readonly tableConfig$ = new BehaviorSubject<TableConfig>({
+        dataColumnWidth: 126,
+        dataColumnLayout: 'limit',
+    });
+    get gridConfig() {
         return this.gridConfig$.value;
     }
     set gridConfig(value: GridConfig) {
         this.gridConfig$.next(value);
     }
+    get tableConfig() {
+        return this.tableConfig$.value;
+    }
+    set tableConfig(value: TableConfig) {
+        this.tableConfig$.next(value);
+    }
     primaryInstance: boolean;
     singleClickHint: 'dynamic' | 'static';
     disableInfiniteScroll: boolean;
-    /* avg. column width for table layouts. */
-    dataColumnWidth = 126;
     showIconColumn = new BehaviorSubject(true);
     scrollGradientColor: WritableSignal<string> = signal('fff');
 

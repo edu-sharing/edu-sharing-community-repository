@@ -24,6 +24,7 @@
   [disableInfiniteScroll]="true"
   [displayType]="NodeEntriesDisplayType.SmallGrid"
   [gridConfig]="{ layout: 'scroll' }"
+  data-test="search-result-grid-collections"
 >
   <ng-template #title>
     <div class="title-container">
@@ -54,6 +55,7 @@
   [initConfig]="{ actionbar, customOptions: addToCollectionMode.value?.customOptions}"
   (clickItem)="onClick($event.element)"
   (dblClickItem)="onDblClick($event.element)"
+  data-test="search-result-grid-material"
 >
   <ng-template #title>
     <div class="title-container title-container{{ getContainerClass() }}">

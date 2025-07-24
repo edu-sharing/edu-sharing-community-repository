@@ -6,6 +6,7 @@ import {
     ChangeDetectorRef,
     Component,
     ElementRef,
+    HostBinding,
     Input,
     NgZone,
     OnChanges,
@@ -27,6 +28,7 @@ import {
     shareReplay,
     startWith,
     takeUntil,
+    tap,
 } from 'rxjs/operators';
 import {
     ClickSource,
@@ -68,6 +70,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     @ViewChild('columnChooserTrigger') columnChooserTrigger: CdkOverlayOrigin;
     @ViewChild(DropdownComponent) dropdown: DropdownComponent;
     @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
+    @HostBinding('class.scroll') isScroll = false;
 
     dropdownLeft: number;
     dropdownTop: number;
@@ -86,6 +89,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     readonly visibleColumnNames$;
 
     private destroyed = new Subject<void>();
+    containerWidth$ = new BehaviorSubject<number>(null);
 
     constructor(
         public entriesService: NodeEntriesService<T>,
@@ -108,6 +112,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     }
 
     ngAfterViewInit(): void {
+        this.isScroll = this.entriesService.tableConfig.dataColumnLayout === 'scroll';
         void Promise.resolve().then(() => {
             this.registerSortChanges();
             if (this.entriesService.dataSource instanceof NodeDataSourceRemote) {
@@ -189,6 +194,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         BorderBoxObserverDirective.observeElement(this.elementRef)
             .pipe(
                 takeUntil(this.destroyed),
+                tap((box) => this.containerWidth$.next(box.width)),
                 map((box) => this.getMaximumColumnsNumber(box.width)),
                 distinctUntilChanged(),
             )
@@ -198,11 +204,14 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     }
 
     private getMaximumColumnsNumber(tableWidth: number): number {
+        if (this.entriesService.tableConfig.dataColumnLayout === 'scroll') {
+            return 0xffffffff;
+        }
         return Math.max(
             1,
             Math.floor(
                 // Subtract total width of always visible columns like checkboxes and icons.
-                (tableWidth - 187) / this.entriesService.dataColumnWidth,
+                (tableWidth - 187) / this.entriesService.tableConfig.dataColumnWidth,
             ),
         );
     }

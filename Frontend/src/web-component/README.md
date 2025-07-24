@@ -1,5 +1,25 @@
 # Edu-Sharing as Web Component
 
+## Usage
+
+This component is located in the repository under the path
+`<url>/edu-sharing/web-components/app/index.html`.
+Check the html file for a sample usage. Include the scripts inside your js application.
+
+## Configuration
+
+Set the backend URL for edu-sharing with a global config object on `window`:
+
+(Set this in a script block in your app before including the main+script.js elements)
+
+```js
+window.__env = {
+    EDU_SHARING_API_URL: 'http://repository.127.0.0.1.nip.io:8100/edu-sharing/rest',
+};
+```
+
+For testing (local development), you can proxy requests to the URL given in the file `.env` by setting `EDU_SHARING_API_URL` to `/edu-sharing/rest`.
+
 ## Build
 
 ```sh
@@ -10,44 +30,6 @@ npm run preview
 # Build for production.
 npm run build
 ```
-
-## Configuration
-
-Set the backend URL for edu-sharing with a global config object on `window`:
-
-```js
-window.__env = {
-    EDU_SHARING_API_URL: 'http://repository.127.0.0.1.nip.io:8100/edu-sharing/rest',
-};
-```
-
-For testing, you can proxy requests to the URL given in the file `.env` by setting `EDU_SHARING_API_URL` to `/edu-sharing/rest`.
-
-## Installation
-
-1. Add it in your package.json
-
-```json
-  "dependencies": {
-    "ngx-edu-sharing-app-as-web-component": "^9.1.0"
-  },
-```
-
-2. Copy the files into your assets/vendor part via `angular.json`
-
-```json
- "assets": [
-    {
-      "glob": "**/*",
-      "input": "node_modules/ngx-edu-sharing-app-as-web-component/",
-      "output": "./vendor/edu-sharing"
-    }
-]
-```
-
-3. Make an html file that looks like this
-
-(Vendor refers to the location where the `ngx-edu-sharing-app-as-web-component` was fetched to, usually in `node_modules`).
 
 ```html
 <html class="no-js" lang="">

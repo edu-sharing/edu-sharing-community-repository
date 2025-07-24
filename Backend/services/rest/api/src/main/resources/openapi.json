@@ -840,6 +840,9 @@
               "type": "string"
             },
             "type": "array"
+          },
+          "types": {
+            "$ref": "#/components/schemas/CollectionsType"
           }
         },
         "type": "object"
@@ -849,6 +852,29 @@
           "count": {
             "format": "int32",
             "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CollectionsType": {
+        "properties": {
+          "editorial": {
+            "$ref": "#/components/schemas/CollectionsTypeConfig"
+          }
+        },
+        "type": "object"
+      },
+      "CollectionsTypeConfig": {
+        "properties": {
+          "invitationType": {
+            "enum": [
+              "Default",
+              "EditorialGroups"
+            ],
+            "type": "string"
+          },
+          "metadataGroup": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -1726,6 +1752,9 @@
       },
       "FontIcon": {
         "properties": {
+          "context": {
+            "type": "string"
+          },
           "cssClass": {
             "type": "string"
           },

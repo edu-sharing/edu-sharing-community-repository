@@ -6,7 +6,7 @@
   <ng-container
     *ngTemplateOutlet="beforeRecentRef; context: { $implicit: currentRoot }"
   ></ng-container>
-  <div *ngIf="!currentRoot">
+  <div *ngIf="!currentRoot" data-test="add-to-recent-collection">
     <h5 class="mat-heading-5">{{ 'COLLECTION_CHOOSER.ADD_TO_RECENT_COLLECTION' | translate }}</h5>
     <div class="search">
       <form (ngSubmit)="loadLatest(true)" autocomplete="off">
@@ -62,45 +62,49 @@
       {{ (showMore ? 'HIDE_MORE' : 'SHOW_MORE') | translate }}
     </button>
   </div>
-  <h5 class="mat-heading-5">{{ 'COLLECTION_CHOOSER.ADD_TO_MY_COLLECTION' | translate }}</h5>
-  <div class="breadcrumbs" *ngIf="currentRoot">
-    <button mat-button color="primary" (click)="navigateBack()"><i esIcon="arrow_back"></i></button>
-    <h5 class="mat-heading-5">{{ currentRoot.title ? currentRoot.title : currentRoot.name }}</h5>
-  </div>
-  <div class="list-my">
-    <es-node-entries-wrapper
-      [displayType]="NodeEntriesDisplayType.SmallGrid"
-      [elementInteractionType]="InteractionType.Emitter"
-      [dataSource]="dataSourceTree"
-      [columns]="columns"
-      [globalOptions]="canCreate ? [createCollectionOptionItem] : []"
-      (clickItem)="goIntoCollection($event.element)"
-      (dblClickItem)="goIntoCollection($event.element)"
+  <div data-test="add-to-my-collection">
+    <h5 class="mat-heading-5">{{ 'COLLECTION_CHOOSER.ADD_TO_MY_COLLECTION' | translate }}</h5>
+    <div class="breadcrumbs" *ngIf="currentRoot">
+      <button mat-button color="primary" (click)="navigateBack()">
+        <i esIcon="arrow_back"></i>
+      </button>
+      <h5 class="mat-heading-5">{{ currentRoot.title ? currentRoot.title : currentRoot.name }}</h5>
+    </div>
+    <div class="list-my">
+      <es-node-entries-wrapper
+        [displayType]="NodeEntriesDisplayType.SmallGrid"
+        [elementInteractionType]="InteractionType.Emitter"
+        [dataSource]="dataSourceTree"
+        [columns]="columns"
+        [globalOptions]="canCreate ? [createCollectionOptionItem] : []"
+        (clickItem)="goIntoCollection($event.element)"
+        (dblClickItem)="goIntoCollection($event.element)"
+      >
+        <ng-template #overlay>
+          <div class="go-into">
+            <button mat-mini-fab [color]="$any('white')"><i esIcon="arrow_forward"></i></button>
+          </div>
+        </ng-template>
+        <ng-template #empty>
+          <h5 class="noElements" *ngIf="!currentRoot">
+            {{ 'COLLECTION_CHOOSER.NO_PERSONAL_COLLECTIONS' | translate }}
+          </h5>
+          <h5 class="noElements" *ngIf="currentRoot">
+            {{ 'COLLECTION_CHOOSER.NO_SUB_COLLECTIONS' | translate }}
+          </h5>
+        </ng-template>
+      </es-node-entries-wrapper>
+    </div>
+    <button
+      *ngIf="currentRoot"
+      class="add-to-personal"
+      mat-raised-button
+      color="primary"
+      (click)="clickCollection(currentRoot)"
     >
-      <ng-template #overlay>
-        <div class="go-into">
-          <button mat-mini-fab [color]="$any('white')"><i esIcon="arrow_forward"></i></button>
-        </div>
-      </ng-template>
-      <ng-template #empty>
-        <h5 class="noElements" *ngIf="!currentRoot">
-          {{ 'COLLECTION_CHOOSER.NO_PERSONAL_COLLECTIONS' | translate }}
-        </h5>
-        <h5 class="noElements" *ngIf="currentRoot">
-          {{ 'COLLECTION_CHOOSER.NO_SUB_COLLECTIONS' | translate }}
-        </h5>
-      </ng-template>
-    </es-node-entries-wrapper>
+      {{ 'COLLECTION_CHOOSER.ADD_TO_SELECTED_COLLECTION' | translate }}
+    </button>
   </div>
-  <button
-    *ngIf="currentRoot"
-    class="add-to-personal"
-    mat-raised-button
-    color="primary"
-    (click)="clickCollection(currentRoot)"
-  >
-    {{ 'COLLECTION_CHOOSER.ADD_TO_SELECTED_COLLECTION' | translate }}
-  </button>
 </div>
 <ng-template #overlayTemplate let-element="element">
   <div *ngIf="!hasWritePermissions(element)" class="no-permissions-overlay">

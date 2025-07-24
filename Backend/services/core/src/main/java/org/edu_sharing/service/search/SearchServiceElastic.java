@@ -80,6 +80,7 @@ import org.elasticsearch.client.Request;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
@@ -1805,32 +1806,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
             findGroupsQuery.mustNot(mn -> mn.exists(e -> e.field("properties.ccm:eduscopename")));
         }
 
-        BoolQuery.Builder finalQuery = QueryBuilders.bool().minimumShouldMatch("1");
-        if (type == null) {
-            if (findUsersQuery != null)
-                finalQuery.should(s -> s.bool(findUsersQuery.build()));
-            if (findGroupsQuery != null) {
-                finalQuery.should(s -> s.bool(findGroupsQuery.build()));
-            }
-        } else if (type.equals(AuthorityType.USER)) {
-            finalQuery = findUsersQuery;
-        } else if (type.equals(AuthorityType.GROUP)) {
-            if (findGroupsQuery != null)
-                finalQuery = findGroupsQuery;
-        } else {
-            throw new IllegalArgumentException("Unsupported authority type " + type);
-        }
+        BoolQuery.Builder finalQuery = getAuthorityCombinedQuery(type, customProperties, findUsersQuery, findGroupsQuery);
         if (!finalQuery.hasClauses())
             return new SearchResult<String>();
 
-        if (customProperties != null) {
-            for (Map.Entry<String, String> entry : customProperties.entrySet()) {
-                finalQuery.must(m -> m.wildcard(t -> t
-                        .field("properties." + entry.getKey() + ".keyword")
-                        .value(entry.getValue())
-                ));
-            }
-        }
 
         //logger.debug("finalQuery:" + finalQuery.build().toString());
 
@@ -1853,6 +1832,44 @@ public class SearchServiceElastic extends SearchServiceImpl {
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
+    }
+
+    static BoolQuery.Builder getAuthorityCombinedQuery(AuthorityType type, Map<String, String> customProperties, BoolQuery.Builder findUsersQuery, BoolQuery.Builder findGroupsQuery) {
+        BoolQuery.Builder finalQuery = QueryBuilders.bool().minimumShouldMatch("1");
+        if (findUsersQuery != null && customProperties != null) {
+            for(Map.Entry<String, String> entry : customProperties.entrySet().stream().filter(k -> Objects.equals(CCConstants.getValidGlobalName(k.getKey()), CCConstants.CM_PROP_PERSON_ESPERSONSTATUS)).collect(Collectors.toList())){
+                findUsersQuery.must(m -> m.wildcard(t -> t
+                        .field("properties." + entry.getKey() + ".keyword")
+                        .value(entry.getValue())
+                ));
+            }
+        }
+        if (findGroupsQuery != null && customProperties !=null) {
+            for(Map.Entry<String, String> entry : customProperties.entrySet()){
+                findGroupsQuery.must(m -> m.wildcard(t -> t
+                        .field("properties." + entry.getKey() + ".keyword")
+                        .value(entry.getValue())
+                ));
+            }
+        }
+
+        if (type == null) {
+            if (findUsersQuery != null) {
+                finalQuery.should(s -> s.bool(findUsersQuery.build()));
+            }
+            if (findGroupsQuery != null) {
+                finalQuery.should(s -> s.bool(findGroupsQuery.build()));
+            }
+        } else if (type.equals(AuthorityType.USER)) {
+            finalQuery = findUsersQuery;
+
+        } else if (type.equals(AuthorityType.GROUP)) {
+            if (findGroupsQuery != null)
+                finalQuery = findGroupsQuery;
+        } else {
+            throw new IllegalArgumentException("Unsupported authority type " + type);
+        }
+        return finalQuery;
     }
 
 

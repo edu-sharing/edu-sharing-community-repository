@@ -4,11 +4,11 @@ import { AuthenticationService } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'app-root',
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.component.scss'],
+    templateUrl: './wrapper.component.html',
+    styleUrls: ['./wrapper.component.scss'],
     standalone: false,
 })
-export class AppComponent implements OnInit {
+export class WrapperComponent implements OnInit {
     @Input()
     get searchString(): string {
         return this._searchString;
