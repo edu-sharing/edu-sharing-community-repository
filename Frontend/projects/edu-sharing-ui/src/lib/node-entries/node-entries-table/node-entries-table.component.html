@@ -114,6 +114,7 @@
         mat-sort-header
         [disabled]="!(entriesService.sort?.allowed && isSortable(column))"
         [class.mat-column-primary]="first"
+        [style.min-width]="first ? (containerWidth$ | async) / 3 + 'px' : null"
         >{{ column | esListItemLabel | async }}</mat-header-cell
       >
     </ng-container>
@@ -121,6 +122,7 @@
       *matCellDef="let node"
       #cell
       [class.mat-column-primary]="first"
+      [style.min-width]="first ? (containerWidth$ | async) / 3 + 'px' : null"
       attr.data-test="table-cell-{{ column.name }}"
     >
       <ng-container
@@ -179,6 +181,7 @@
   <mat-row
     mat-row
     matRipple
+    [matRippleDisabled]="isScroll"
     cdkDrag
     esNodesDrag
     [cdkDragDisabled]="!entriesService.dragDrop?.dragAllowed || (ui.isTouchSubject | async)"

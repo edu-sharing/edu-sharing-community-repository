@@ -95,6 +95,16 @@ export type GridConfig = {
      */
     layout?: GridLayout;
 };
+export type TableConfig = {
+    /* avg. column width for table layouts. */
+    dataColumnWidth?: number;
+    /**
+     * how the columns should be shown (in table mode)
+     * limit: limits the max amount based on the avgColumnWidth
+     * scroll: horizontal scrolling
+     */
+    dataColumnLayout: 'scroll' | 'limit';
+};
 
 export interface ListEventInterface<T extends NodeEntriesDataType> {
     updateNodes(nodes: void | T[]): void;

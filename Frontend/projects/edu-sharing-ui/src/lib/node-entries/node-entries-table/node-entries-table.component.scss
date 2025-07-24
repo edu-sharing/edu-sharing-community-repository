@@ -3,7 +3,6 @@
 
 $defaultColumnWidth: 145px;
 $minColumnWidth: 30%;
-$minColumnWidthSticky: 25%;
 $rowHeight: 58px;
 
 :host {
@@ -22,7 +21,6 @@ $rowHeight: 58px;
                     min-width: 150px;
                 }
                 &.mat-column-primary {
-                    min-width: $minColumnWidthSticky;
                     box-shadow: 4px 0 8px -4px rgba(0, 0, 0, 0.15);
                 }
                 &.mat-mdc-table-sticky-border-elem-right {
@@ -116,7 +114,7 @@ mat-cell {
     &.mat-row-selected {
         background: var(--listItemSelectedBackgroundEffect);
         .mat-mdc-cell {
-            background: transparent;
+            background: var(--listItemSelectedBackground);
         }
     }
     // Overrides `.mat-row-selected` background by order
