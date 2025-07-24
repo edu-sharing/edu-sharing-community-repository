@@ -504,15 +504,18 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         applyNode.showAlways = true;
         applyNode.group = DefaultGroups.Primary;
         applyNode.priority = 10;
+        applyNode.customShowCallback = async (nodes) => {
+            return !this.nodeHelper.isNodeCollection(nodes?.[0]);
+        };
         applyNode.customEnabledCallback = (nodes) => {
             // either apply directories is true or it is an file
-            return (
-                (nodes?.[0].isDirectory ? this.queryParams.applyDirectories === 'true' : true) &&
-                // and either onlyDownloadable is explicitly required or the node has a download url
-                ((this.queryParams.onlyDownloadable ?? 'false') === 'false' ||
-                    !!nodes?.[0].downloadUrl ||
-                    nodes?.[0].isDirectory)
-            );
+            return this.nodeHelper.isNodeCollection(nodes?.[0])
+                ? false
+                : (nodes?.[0].isDirectory ? this.queryParams.applyDirectories === 'true' : true) &&
+                      // and either onlyDownloadable is explicitly required or the node has a download url
+                      ((this.queryParams.onlyDownloadable ?? 'false') === 'false' ||
+                          !!nodes?.[0].downloadUrl ||
+                          nodes?.[0].isDirectory);
         };
 
         /*

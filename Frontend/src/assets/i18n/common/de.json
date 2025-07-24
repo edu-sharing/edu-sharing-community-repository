@@ -1330,7 +1330,7 @@
     "IN_HOME": "Im Stammverzeichnis"
   },
   "EMBED": {
-    "NOT_PUBLIC_WARNING": "Dieses Material ist nicht öffentlich zugänglich.",
+    "NOT_PUBLIC_WARNING": "Dieses Material ist nicht öffentlich zugänglich. Es können nur angemeldete Nutzende mit entsprechenden Rechten ansehen",
     "CODE_LABEL": "Einbettungscode",
     "HEIGHT": "Höhe",
     "WIDTH": "Breite",

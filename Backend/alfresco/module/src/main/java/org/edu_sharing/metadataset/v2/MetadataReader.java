@@ -8,6 +8,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataCondition.CONDITION_TYPE;
 import org.edu_sharing.metadataset.v2.valuespace_reader.ValuespaceReader;
@@ -729,6 +730,10 @@ public class MetadataReader {
 
 
     private ValuespaceData getValuespaceExternal(ValuespaceInfo value) throws Exception {
+        if(LightbendConfigLoader.get().getBoolean("repository.communication.metadatasets.externalValuespaces") == false) {
+            log.info("Will not resolve external valuespace " + value.getValue() + " since it is not allowed by config");
+            return new ValuespaceData(new MetadataKey(), Collections.emptyList());
+        }
         ValuespaceReader reader = ValuespaceReader.getSupportedReader(value);
         if (reader != null) {
             try {
