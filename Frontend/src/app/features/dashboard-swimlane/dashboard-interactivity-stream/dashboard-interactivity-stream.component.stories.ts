@@ -60,6 +60,11 @@ const stream: Meta<DashboardInteractivityStreamComponent> = {
 
 export default stream;
 type Story = StoryObj<DashboardInteractivityStreamComponent>;
-export const StreamSharing: Story = {
+export const StreamEdit: Story = {
     args: {},
+};
+export const StreamEmpty: Story = {
+    args: {
+        events: [],
+    },
 };

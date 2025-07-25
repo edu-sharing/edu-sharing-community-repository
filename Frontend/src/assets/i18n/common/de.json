@@ -1495,6 +1495,7 @@
     "STREAM": {
       "SHARED_INFO": "{{initiator}} gab Ihnen {{element}} frei",
       "EVENT_INFO_PERSONAL": "Sie haben {{element}} {{event}}",
+      "EMPTY": "Keine kürzlichen Aktivitäten",
       "EVENT_TYPES": {
         "EDIT_MATERIAL": "bearbeitet",
         "VIEW_COLLECTION": "angesehen",

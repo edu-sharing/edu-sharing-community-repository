@@ -54,4 +54,6 @@
     </div>
   </div>
 </div>
-<div class="empty" *ngIf="eventsGrouped().length < 1">TODO: Empty</div>
+<div class="empty" *ngIf="eventsGrouped().length < 1">
+  {{ 'DASHBOARD_SWIMLANE.STREAM.EMPTY' | translate }}
+</div>
