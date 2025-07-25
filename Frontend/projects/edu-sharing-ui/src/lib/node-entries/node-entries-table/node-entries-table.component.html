@@ -24,7 +24,7 @@
   (scrolled)="loadData('scroll')"
 >
   <!-- Checkbox Column -->
-  <ng-container matColumnDef="select">
+  <ng-container matColumnDef="select" [sticky]="isScroll">
     <mat-header-cell *matHeaderCellDef>
       <mat-checkbox
         [ngModel]="entriesService.selection.selected.length > 0"
@@ -46,7 +46,7 @@
       ></mat-checkbox>
     </mat-cell>
   </ng-container>
-  <div matColumnDef="icon">
+  <div matColumnDef="icon" [sticky]="isScroll">
     <mat-header-cell *matHeaderCellDef class="cell-icon cell-count">
       ({{ entriesService.selection.selected.length
       }}<ng-container *ngIf="entriesService.dataSource?.getTotal() !== undefined">
@@ -76,7 +76,7 @@
       </div>
     </mat-cell>
   </div>
-  <ng-container matColumnDef="actions">
+  <ng-container matColumnDef="actions" [stickyEnd]="isScroll">
     <mat-header-cell *matHeaderCellDef>
       <button
         *ngIf="entriesService.configureColumns"
@@ -106,6 +106,7 @@
   <ng-container
     *ngFor="let column of visibleDataColumns$ | async; let first = first"
     [matColumnDef]="column.name"
+    [sticky]="first && isScroll"
   >
     <ng-container>
       <mat-header-cell
@@ -113,6 +114,7 @@
         mat-sort-header
         [disabled]="!(entriesService.sort?.allowed && isSortable(column))"
         [class.mat-column-primary]="first"
+        [style.min-width]="first ? (containerWidth$ | async) / 3 + 'px' : null"
         >{{ column | esListItemLabel | async }}</mat-header-cell
       >
     </ng-container>
@@ -120,6 +122,7 @@
       *matCellDef="let node"
       #cell
       [class.mat-column-primary]="first"
+      [style.min-width]="first ? (containerWidth$ | async) / 3 + 'px' : null"
       attr.data-test="table-cell-{{ column.name }}"
     >
       <ng-container
@@ -178,6 +181,7 @@
   <mat-row
     mat-row
     matRipple
+    [matRippleDisabled]="isScroll"
     cdkDrag
     esNodesDrag
     [cdkDragDisabled]="!entriesService.dragDrop?.dragAllowed || (ui.isTouchSubject | async)"

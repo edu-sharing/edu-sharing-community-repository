@@ -1,6 +1,7 @@
 package org.edu_sharing.service.search;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -9,6 +10,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AuthorityService;
+import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.MutableAuthenticationService;
 import org.alfresco.service.namespace.QName;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -19,6 +21,7 @@ import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
@@ -44,6 +47,7 @@ class SearchServiceElasticTest {
     private NodeService nodeService;
     private MockedStatic<AuthenticationUtil> authenticationUtilMockedStatic;
     private Repository repositoryHelper;
+    private MockedStatic<PermissionServiceFactory> permissionServiceFactoryMockedStatic;
 
     @BeforeEach() void beforeEach() {
         toolPermissionService = Mockito.mock(ToolPermissionService.class);
@@ -52,7 +56,7 @@ class SearchServiceElasticTest {
         authenticationService = Mockito.mock(MutableAuthenticationService.class);
         repositoryHelper = Mockito.mock(Repository.class);
         when(authenticationService.getCurrentUserName()).thenReturn("tester");
-        MockedStatic<PermissionServiceFactory> permissionServiceFactoryMockedStatic = Mockito.mockStatic(PermissionServiceFactory.class);
+        permissionServiceFactoryMockedStatic = Mockito.mockStatic(PermissionServiceFactory.class);
         permissionServiceFactoryMockedStatic.when(() -> PermissionServiceFactory.getLocalService()).thenReturn(permissionService);
         authorityService = Mockito.mock(AuthorityService.class);
         when(authorityService.getAuthorities()).thenReturn(new HashSet<>(Set.of("test_group1", "test_group2")));
@@ -93,6 +97,7 @@ class SearchServiceElasticTest {
         mcAlfrescoApiClientMockedStatic.close();
         toolPermissionServiceMockedStatic.close();
         authenticationUtilMockedStatic.close();
+        permissionServiceFactoryMockedStatic.close();
     }
 
 
@@ -193,5 +198,22 @@ class SearchServiceElasticTest {
                         "}",
                 conditions
         );
+    }
+
+    @Test
+    void getAuthorityCombinedQuery() {
+        Assertions.assertEquals("{\"bool\":{}}", underTest.getAuthorityCombinedQuery(AuthorityType.USER, null, QueryBuilders.bool(),QueryBuilders.bool()).build()._toQuery().toString().substring("Query: ".length()));
+        Map<String, String> groupType = new HashMap<>() {{
+            put("groupType", "TEST");
+        }};
+
+        Map<String, String> personStatus = new HashMap<>() {{
+            put("cm:espersonstatus", "TEST");
+        }};
+        Assertions.assertEquals("{\"bool\":{\"must\":[{\"wildcard\":{\"properties.cm:espersonstatus.keyword\":{\"value\":\"TEST\"}}}]}}", underTest.getAuthorityCombinedQuery(AuthorityType.USER, personStatus, QueryBuilders.bool(),QueryBuilders.bool()).build()._toQuery().toString().substring("Query: ".length()));
+        Assertions.assertEquals("{\"bool\":{}}", underTest.getAuthorityCombinedQuery(AuthorityType.USER, groupType, QueryBuilders.bool(),QueryBuilders.bool()).build()._toQuery().toString().substring("Query: ".length()));
+        Assertions.assertEquals("{\"bool\":{\"must\":[{\"wildcard\":{\"properties.groupType.keyword\":{\"value\":\"TEST\"}}}]}}", underTest.getAuthorityCombinedQuery(AuthorityType.GROUP, groupType, QueryBuilders.bool(),QueryBuilders.bool()).build()._toQuery().toString().substring("Query: ".length()));
+        Assertions.assertEquals("{\"bool\":{\"must\":[{\"wildcard\":{\"properties.groupType.keyword\":{\"value\":\"TEST\"}}}]}}", underTest.getAuthorityCombinedQuery(AuthorityType.GROUP, groupType, QueryBuilders.bool(),QueryBuilders.bool()).build()._toQuery().toString().substring("Query: ".length()));
+        Assertions.assertEquals("{\"bool\":{\"minimum_should_match\":\"1\",\"should\":[{\"bool\":{}},{\"bool\":{\"must\":[{\"wildcard\":{\"properties.groupType.keyword\":{\"value\":\"TEST\"}}}]}}]}}", underTest.getAuthorityCombinedQuery(null, groupType, QueryBuilders.bool(),QueryBuilders.bool()).build()._toQuery().toString().substring("Query: ".length()));
     }
 }

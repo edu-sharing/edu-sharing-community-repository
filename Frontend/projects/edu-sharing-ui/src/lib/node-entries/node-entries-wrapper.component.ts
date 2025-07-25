@@ -43,6 +43,7 @@ import {
     NodeClickEvent,
     NodeEntriesDataType,
     NodeEntriesDisplayType,
+    TableConfig,
 } from './entries-model';
 import { NodeDataSource } from './node-data-source';
 import { Helper } from '../util/helper';
@@ -108,6 +109,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @Input() sort: ListSortConfig;
     @Input() dragDrop: ListDragGropConfig<T>;
     @Input() gridConfig: GridConfig;
+    @Input() tableConfig: TableConfig;
 
     /**
      * This color defines the base color of gradients visually limiting a grid in scroll direction.
@@ -147,10 +149,6 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
      * Do not load more data on scroll.
      */
     @Input() disableInfiniteScroll = false;
-    /**
-     *  avg. column width for table layouts.
-     */
-    @Input() dataColumnWidth = 126;
     /**
      *  show the icon column (table view only)
      */
@@ -250,6 +248,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.displayType = this.displayType;
         this.entriesService.elementInteractionType = this.elementInteractionType;
         this.entriesService.gridConfig = this.gridConfig;
+        this.entriesService.tableConfig = this.tableConfig;
         this.entriesService.options = this.options;
         this.entriesService.globalOptions = this.globalOptions;
         this.entriesService.sort = this.sort;
@@ -261,7 +260,6 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.primaryInstance = this.primaryInstance;
         this.entriesService.singleClickHint = this.singleClickHint;
         this.entriesService.disableInfiniteScroll = this.disableInfiniteScroll;
-        this.entriesService.dataColumnWidth = this.dataColumnWidth;
         if (changes.showIconColumn) {
             this.entriesService.showIconColumn.next(this.showIconColumn);
         }

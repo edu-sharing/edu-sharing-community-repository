@@ -160,9 +160,13 @@ export class IconDirective implements OnInit, OnDestroy {
             }
         }
         let customClass: string = null;
-        const mapping = iconsConfig?.filter(
-            (i) => i.original === id && (!i.context || i.context === context),
-        );
+        let mapping = null;
+        if (context) {
+            mapping = iconsConfig?.filter((i) => i.original === id && i.context === context);
+        }
+        if (!mapping?.length) {
+            mapping = iconsConfig?.filter((i) => i.original === id && !i.context);
+        }
         if (mapping?.length === 1) {
             id = mapping[0].replace || '';
             customClass = mapping[0].cssClass;
