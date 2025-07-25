@@ -1626,16 +1626,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         } else if (node.aspects?.includes('ccm:ltitool_node') || ltiTool) {
             UIHelper.openLTIResourceLink(win, node);
         } else {
-            UIHelper.openConnector(
-                this.connectors,
-                this.iamService,
-                this.eventService,
-                this.toast,
-                node,
-                type,
-                win,
-                connectorType,
-            );
+            this.uiService.openConnector(node, type, win, connectorType);
         }
     }
 
