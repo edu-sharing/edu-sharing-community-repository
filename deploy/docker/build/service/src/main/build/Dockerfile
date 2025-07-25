@@ -73,6 +73,20 @@ RUN set -eux \
 
 ########################################################################################################################
 
+
+# TODO: this must be done conditionally for dev container only!
+# use the dcevm runtime for better hot swapping capabilities
+RUN curl -L -o dcevm.tar.gz https://cache-redirector.jetbrains.com/intellij-jbr/jbr_dcevm-17_0_1-linux-x64-b164.4.tar.gz \
+    && tar -xzf dcevm.tar.gz -C /opt/bitnami/java --strip-components=1 \
+    && rm dcevm.tar.gz \
+    && mkdir -p /opt/bitnami/java/lib/dcevm \
+    && ln -s /opt/bitnami/java/lib/server/libjvm.so /opt/bitnami/java/lib/dcevm/libjvm.so
+    ## hotswap agent is not supported in spring > 5
+    #&& mkdir -p /opt/bitnami/java/lib/hotswap \
+    #&& curl -L -o /opt/bitnami/java/lib/hotswap/hotswap-agent.jar https://github.com/HotswapProjects/HotswapAgent/releases/download/RELEASE-2.0.0/hotswap-agent-2.0.0.jar
+
+########################################################################################################################
+
 USER worker
 
 EXPOSE 8009 8080 8081
