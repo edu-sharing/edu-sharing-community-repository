@@ -133,10 +133,7 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     dblClickItem: EventEmitter<NodeClickEvent<T>>;
     fetchData: EventEmitter<FetchEvent>;
     readonly gridConfig$ = new BehaviorSubject<GridConfig | null>(null);
-    readonly tableConfig$ = new BehaviorSubject<TableConfig>({
-        dataColumnWidth: 126,
-        dataColumnLayout: 'limit',
-    });
+    readonly tableConfig$ = new BehaviorSubject<TableConfig>(null);
     get gridConfig() {
         return this.gridConfig$.value;
     }
