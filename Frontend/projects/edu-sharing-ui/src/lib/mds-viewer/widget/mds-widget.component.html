@@ -38,9 +38,7 @@
           }}"
           (click)="click()"
         >
-          <div *ngIf="basicType() === 'text'">{{ formatText() }}</div>
-          <div *ngIf="basicType() === 'number'">{{ formatNumber() }}</div>
-          <div *ngIf="basicType() === 'date'">{{ formatDate() }}</div>
+          <div *ngIf="['text', 'number', 'date'].includes(basicType())">{{ formatValue() }}</div>
           <div *ngIf="basicType() === 'license' && (license$ | async) as license">
             <img alt="" [src]="license.icon" /> {{ license.name }}
           </div>

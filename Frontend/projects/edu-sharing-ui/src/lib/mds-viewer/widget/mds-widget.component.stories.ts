@@ -9,10 +9,16 @@ import { SharedModule } from '../../../../../../src/app/shared/shared.module';
 import { mdsStorybookProviders } from '../../../../../../src/app/features/mds/mds-editor/storybook-utils';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { MdsWidget } from 'ngx-edu-sharing-api';
+import { TranslateService } from '@ngx-translate/core';
 
 export class DefaultWidget implements MdsViewerWidget {
     focusTrigger: Subject<void>;
+
     constructor(public definition: MdsWidget, private values: string[]) {}
+
+    getFormattedValue(value: string[], basicType: string, translation: TranslateService): string[] {
+        return [''];
+    }
     async getInitalValuesAsync(): Promise<InitialValues> {
         return {
             jointValues: this.values,
@@ -20,6 +26,10 @@ export class DefaultWidget implements MdsViewerWidget {
     }
     getInitialDisplayValues() {
         return new BehaviorSubject<MdsValueList>(null);
+    }
+
+    getBasicType(flat?: boolean): string {
+        return '';
     }
 }
 

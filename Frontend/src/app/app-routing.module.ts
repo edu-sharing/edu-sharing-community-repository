@@ -85,6 +85,15 @@ const routes: Routes = [
         loadChildren: () => import('./pages/pdf-page/pdf-page.module').then((m) => m.PdfPageModule),
     },
 
+    // Pdf metadata download
+    {
+        path: UIConstants.ROUTER_PREFIX + 'pdf-metadata',
+        loadChildren: () =>
+            import('./pages/pdf-metadata-page/pdf-metadata-page.module').then(
+                (m) => m.PdfMetadataPageModule,
+            ),
+    },
+
     // Register
     {
         path: UIConstants.ROUTER_PREFIX + 'register',

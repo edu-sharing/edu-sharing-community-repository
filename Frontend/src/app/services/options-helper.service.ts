@@ -25,6 +25,7 @@ import {
     Scope,
     Target,
     TemporaryStorageService,
+    UIConstants,
 } from 'ngx-edu-sharing-ui';
 import {
     BehaviorSubject,
@@ -38,6 +39,7 @@ import {
 import { catchError, filter, first, map, switchMap, tap } from 'rxjs/operators';
 import {
     ConfigurationService,
+    DialogButton,
     FrameEventsService,
     RestCollectionService,
     RestConnectorService,
@@ -1006,11 +1008,38 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             'OPTIONS.DOWNLOAD_METADATA',
             'format_align_left',
             (object) =>
-                this.nodeHelper.downloadNode(
-                    this.getObjects(object, data)[0],
-                    RestConstants.NODE_VERSION_CURRENT,
-                    true,
-                ),
+                this.dialogs.openGenericDialog({
+                    title: 'OPTIONS.DOWNLOAD_METADATA',
+                    message: 'OPTIONS.DOWNLOAD_METADATA_DIALOG',
+                    buttons: [
+                        {
+                            label: 'Pdf',
+                            config: DialogButton.TYPE_PRIMARY,
+                            callback: (ref) => {
+                                ref.close();
+                                const node = this.getObjects(object, data)[0];
+                                this.router.navigate([
+                                    UIConstants.ROUTER_PREFIX + 'pdf-metadata',
+                                    node.ref.id,
+                                ]);
+                                return null;
+                            },
+                        },
+                        {
+                            label: 'Txt',
+                            config: DialogButton.TYPE_PRIMARY,
+                            callback: (ref) => {
+                                ref.close();
+                                this.nodeHelper.downloadNode(
+                                    this.getObjects(object, data)[0],
+                                    RestConstants.NODE_VERSION_CURRENT,
+                                    true,
+                                );
+                                return null;
+                            },
+                        },
+                    ],
+                }),
         );
         downloadMetadataNode.elementType = [
             ElementType.Node,
