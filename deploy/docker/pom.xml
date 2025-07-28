@@ -82,6 +82,14 @@
       11
     </docker.edu_sharing.community.common.minideb.tag>
 
+    <docker.edu_sharing.community.common.kubectl.name>
+      edu_sharing-community-common-docker-kubectl
+    </docker.edu_sharing.community.common.kubectl.name>
+
+    <docker.edu_sharing.community.common.kubectl.tag>
+      1.32.4
+    </docker.edu_sharing.community.common.kubectl.tag>
+
     <docker.edu_sharing.community.common.redis.name>
       edu_sharing-community-common-docker-redis
     </docker.edu_sharing.community.common.redis.name>
