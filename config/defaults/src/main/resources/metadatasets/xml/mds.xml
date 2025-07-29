@@ -358,6 +358,11 @@
       <type>date</type>
     </widget>
     <widget>
+      <id>ccm:ref_video_vtt</id>
+      <textEscapingPolicy>none</textEscapingPolicy>
+      <type>text</type>
+    </widget>
+    <widget>
       <id>license</id>
       <caption>ccm_prop_io_license</caption>
       <type>license</type>
