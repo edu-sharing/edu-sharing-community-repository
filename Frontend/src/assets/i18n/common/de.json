@@ -237,6 +237,7 @@
     "ALL_ACTIONS": "Alle Aktionen (ggf. nicht mit diesen Typ kompatibel!)"
   },
   "SIDEBAR": {
+    "LANDING": "Startseite",
     "WORKSPACE": "Workspace",
     "SEARCH": "Suchumgebung",
     "COLLECTIONS": "Sammlungen",

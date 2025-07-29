@@ -63,6 +63,13 @@ export class MainMenuEntriesService {
 
     private readonly defaultEntryDefinitions: EntryDefinition[] = [
         {
+            name: 'SIDEBAR.LANDING',
+            icon: 'home',
+            target: { type: 'path', path: 'landing' },
+            scope: 'landing',
+            isVisible: () => !this.loginInfo.isGuest,
+        },
+        {
             name: 'SIDEBAR.WORKSPACE',
             icon: 'cloud',
             target: { type: 'path', path: 'workspace/files' },

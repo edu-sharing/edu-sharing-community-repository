@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { RestConstants } from '../../core-module/rest/rest-constants';
 import { Router } from '@angular/router';
 import { UIService } from 'ngx-edu-sharing-ui';
+import { MainNavService } from '../../main/navigation/main-nav.service';
 
 export type SwimlaneTypes = 'featured-media' | 'collections' | 'recent-activities';
 export type SwimlaneEntry = {
@@ -24,10 +25,24 @@ export class LandingPageComponent implements OnInit {
     swimlanes = signal<SwimlaneEntry[]>([]);
     constructor(
         private router: Router,
+        private mainNav: MainNavService,
         private configService: ConfigService,
         private ui: UIService,
         private authenticationService: AuthenticationService,
-    ) {}
+    ) {
+        this.mainNav.setMainNavConfig({
+            showUser: true,
+            showScope: true,
+            currentScope: 'LANDING',
+            title: 'SIDEBAR.LANDING',
+            show: true,
+            create: {
+                allowed: true,
+                allowBinary: true,
+            },
+            showNavigation: true,
+        });
+    }
 
     async ngOnInit(): Promise<void> {
         const login = await firstValueFrom(this.authenticationService.observeLoginInfo());
