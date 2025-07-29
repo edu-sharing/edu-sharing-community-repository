@@ -37,6 +37,7 @@ import {
     RestSearchService,
     STREAM_STATUS,
     TemporaryStorageService,
+    UIService,
 } from '../../core-module/core.module'; //
 import { NodeHelperService } from '../../services/node-helper.service';
 import { Toast } from '../../services/toast'; //
@@ -130,6 +131,7 @@ export class StreamPageComponent implements OnInit, AfterViewInit, OnDestroy {
         private iam: RestIamService,
         private storage: TemporaryStorageService,
         private toast: Toast,
+        private uiService: UIService,
         private bridge: BridgeService,
         private nodeHelper: NodeHelperService,
         private collectionService: RestCollectionService,
@@ -440,16 +442,7 @@ export class StreamPageComponent implements OnInit, AfterViewInit, OnDestroy {
         win: any = null,
         connectorType: Connector = null,
     ) {
-        UIHelper.openConnector(
-            this.connectors,
-            this.iam,
-            this.event,
-            this.toast,
-            node,
-            type,
-            win,
-            connectorType,
-        );
+        this.uiService.openConnector(node, type, win, connectorType);
     }
 
     private searchRelevant() {
