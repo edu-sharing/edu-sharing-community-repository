@@ -157,6 +157,14 @@
         "metadataOptions",
         "eduResourceType"
       ]
+    },
+    {
+      "transformerName": "EduSharingHTML2PDFExecutor",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "text/html", "priority": 49, "targetMediaType": "application/pdf"}
+      ],
+      "transformOptions": [
+      ]
     }
   ]
 }
