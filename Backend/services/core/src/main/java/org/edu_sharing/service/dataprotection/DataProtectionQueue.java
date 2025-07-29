@@ -37,17 +37,22 @@ public class DataProtectionQueue {
         }
     }
 
-    // Add a user to the file
-    public void addUser(String username) {
-        if(getAllUsers().contains(username)) return;
+    /**
+     * Add a user to the file
+     * @param username
+     * @return true when entry was added false when entry already exists
+     */
+    public boolean addUser(String username) {
+        if(getAllUsers().contains(username)) return false;
         synchronized (FILE_LOCK) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) {
                 writer.write(username);
                 writer.newLine();
             } catch (IOException e) {
-                System.err.println("Error adding user: " + e.getMessage());
+                throw new RuntimeException("Error adding user",e);
             }
         }
+        return true;
     }
 
     // Read all users from the file
