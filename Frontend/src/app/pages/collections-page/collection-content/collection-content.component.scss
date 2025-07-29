@@ -39,6 +39,7 @@ es-collection-proposals {
     padding-top: 0px;
     padding-left: 0px;
     color: $textLight;
+    text-wrap: wrap;
 }
 
 .actionbarMaterials {
@@ -84,7 +85,7 @@ es-collection-proposals {
 .collections-wrapper {
     &.wrapper-empty.wrapper-edit {
         display: grid;
-        grid-template-columns: max-content auto;
+        // grid-template-columns: max-content auto;
         grid-gap: 50px;
         align-items: center;
         &.wrapper-table {
@@ -95,9 +96,14 @@ es-collection-proposals {
         @media only screen and (max-width: $mobileWidth+$mobileStage*1) {
             grid-gap: 0;
             grid-template-columns: auto;
-            .collection-nocontent-container {
-                padding: 0 20px;
-            }
         }
+    }
+}
+:host ::ng-deep {
+    es-node-entries.node-entries-empty es-node-entries-card-grid {
+        justify-content: flex-start !important;
+    }
+    es-node-entries.node-entries-empty .empty-container {
+        flex-grow: 0 !important;
     }
 }

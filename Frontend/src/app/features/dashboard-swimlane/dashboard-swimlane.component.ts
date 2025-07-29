@@ -239,6 +239,7 @@ export class DashboardSwimlaneComponent {
 
     private async fetch(observable: Observable<NodeEntries>) {
         this.nodes.set(await firstValueFrom(observable));
+        // this.nodes.set({nodes: [], pagination: {} as any});
         void this.nodeNodeEntriesWrapperComponent?.initOptionsGenerator({});
     }
 }

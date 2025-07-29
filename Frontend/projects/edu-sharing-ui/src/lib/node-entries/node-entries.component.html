@@ -4,7 +4,11 @@
   </div>
   <ng-container *ngTemplateOutlet="templatesService.entriesTopMatter"></ng-container>
 </div>
-<ng-container *ngIf="entriesService.dataSource">
+<div
+  *ngIf="entriesService.dataSource"
+  class="node-entries-content"
+  [class.node-entries-content-table]="entriesService.displayType === NodeEntriesDisplayType.Table"
+>
   <ng-container *ngIf="entriesService.displayType === NodeEntriesDisplayType.Table">
     <es-node-entries-table></es-node-entries-table>
   </ng-container>
@@ -17,10 +21,18 @@
     <es-node-entries-card-grid [displayType]="entriesService.displayType">
     </es-node-entries-card-grid>
   </ng-container>
-  <ng-container *ngIf="entriesService.dataSource.isEmpty() && !entriesService.dataSource.isLoading">
-    <ng-container *ngTemplateOutlet="templatesService.empty"></ng-container>
+  <ng-container
+    *ngIf="
+      entriesService.dataSource.isEmpty() &&
+      !entriesService.dataSource.isLoading &&
+      templatesService.empty
+    "
+  >
+    <div class="empty-container">
+      <ng-container *ngTemplateOutlet="templatesService.empty"></ng-container>
+    </div>
   </ng-container>
-</ng-container>
+</div>
 <mat-paginator
   #paginator
   [pageSizeOptions]="entriesGlobalService.getPaginatorSizeOptions(entriesService.scope)"

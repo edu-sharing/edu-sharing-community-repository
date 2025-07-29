@@ -30,6 +30,12 @@ $horizontalScrollPadding: 1.5em;
 .card-grid-wrapper {
     position: relative;
     z-index: 0;
+    &.card-grid-wrapper-empty {
+        max-width: fit-content;
+        .card-grid {
+            margin-right: 20px;
+        }
+    }
     .scroll-helper-left,
     .scroll-helper-right {
         position: absolute;

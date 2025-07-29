@@ -2,6 +2,7 @@ import {
     AfterViewInit,
     ChangeDetectorRef,
     Component,
+    HostBinding,
     OnDestroy,
     OnInit,
     Optional,
@@ -31,6 +32,10 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType>
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
 
     @ViewChild(MatPaginator) paginator: MatPaginator;
+    @HostBinding('class.node-entries-empty')
+    get isEmpty() {
+        return this.entriesService.dataSource?.isEmpty();
+    }
 
     private readonly destroyed = new Subject<void>();
     private readonly updateKeyboardShortcuts = new Subject<void>();

@@ -1,13 +1,35 @@
+@use 'variables-scss' as *;
+
 .top-matter {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 12px 10px;
+    width: 100%;
     position: relative;
     // Don't draw the vertical scroll buttons over the top matter
     z-index: 1;
     .title {
         display: flex;
         flex-grow: 1;
+    }
+}
+es-node-entries-table {
+    width: 100%;
+}
+:host(.node-entries-empty) {
+    display: flex;
+    flex-wrap: wrap;
+    > .node-entries-content {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        flex-grow: 1;
+        @media screen and (max-width: ($mobileWidth - $mobileStage*1)) {
+            flex-wrap: wrap;
+        }
+        &.node-entries-content-table {
+            flex-direction: column;
+        }
     }
 }

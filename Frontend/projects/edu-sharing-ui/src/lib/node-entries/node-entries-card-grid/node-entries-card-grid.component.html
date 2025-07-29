@@ -87,7 +87,11 @@
       </div>
     </ng-container>
   </div>
-  <div class="card-grid-wrapper" *ngIf="!entriesService.sort?.customSortingInProgress">
+  <div
+    class="card-grid-wrapper"
+    [class.card-grid-wrapper-empty]="entriesService.dataSource?.isEmpty()"
+    *ngIf="!entriesService.sort?.customSortingInProgress"
+  >
     <ng-container *ngTemplateOutlet="scrollHelper"></ng-container>
     <div
       role="list"
