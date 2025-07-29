@@ -1,0 +1,59 @@
+<th:block th:fragment="style">
+    <style>
+        body {
+            background: #ffffff;
+            font-size: 12px;
+            min-width: 300px;
+        }
+
+        .content img {
+            max-width: 100%;
+        }
+
+        h1, h2, h3, div, body {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        .logo img {
+            width: 30%;
+            min-width: 100px;
+            max-width: 250px;
+            height: auto;
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            color: #888;
+            font-size: 20px;
+            font-weight: normal;
+            padding-bottom: 15px;
+        }
+
+        h2 {
+            font-size: 14px;
+            font-weight: bold;
+            padding-bottom: 5px;
+        }
+
+        p {
+            line-height: 20px;
+        }
+
+        a {
+            color: #48708e;
+            text-decoration: none;
+        }
+
+        @media only screen and (max-width: 400px) {
+            body {
+                padding: 20px 0;
+            }
+
+            content {
+                width: 100%;
+            }
+
+        }
+    </style>
+</th:block>
