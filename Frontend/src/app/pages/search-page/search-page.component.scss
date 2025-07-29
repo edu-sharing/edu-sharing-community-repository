@@ -78,6 +78,7 @@ mat-tab-nav-panel {
 main {
     display: flex;
     align-items: flex-start;
+    padding: 0;
 }
 
 es-preview-sidebar,
@@ -102,10 +103,6 @@ es-search-page-filters-sidebar {
 
 .filters-dialog-content {
     flex-grow: 1;
-}
-
-main {
-    padding: 0 25px 25px;
 }
 
 .entries-wrapper {
