@@ -482,6 +482,7 @@ public class DataProtectionService{
         String firstname = (String)nodeService.getProperty(personRef, ContentModel.PROP_FIRSTNAME);
         String lastName = (String)nodeService.getProperty(personRef,ContentModel.PROP_LASTNAME);
         String email = (String)nodeService.getProperty(personRef, ContentModel.PROP_EMAIL);
+        if(email == null) return;
         Map<String, String> replace = new HashMap<>();
         replace.put("firstName", firstname);
         replace.put("lastName", lastName);
