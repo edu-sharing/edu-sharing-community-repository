@@ -25,6 +25,7 @@ import {
     Scope,
     Target,
     TemporaryStorageService,
+    UIConstants,
 } from 'ngx-edu-sharing-ui';
 import {
     BehaviorSubject,
@@ -38,6 +39,7 @@ import {
 import { catchError, filter, first, map, switchMap, tap } from 'rxjs/operators';
 import {
     ConfigurationService,
+    DialogButton,
     FrameEventsService,
     RestCollectionService,
     RestConnectorService,
@@ -73,6 +75,7 @@ import { Toast } from './toast';
 import { UIHelper } from '../core-ui-module/ui-helper';
 import { GlobalOptionsService } from './global-options.service';
 import { SelectionModel } from '@angular/cdk/collections';
+import { Closable } from '../features/dialogs/card-dialog/card-dialog-config';
 
 @Injectable()
 export class OptionsHelperService extends OptionsHelperServiceAbstract implements OnDestroy {
@@ -1006,11 +1009,42 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             'OPTIONS.DOWNLOAD_METADATA',
             'format_align_left',
             (object) =>
-                this.nodeHelper.downloadNode(
-                    this.getObjects(object, data)[0],
-                    RestConstants.NODE_VERSION_CURRENT,
-                    true,
-                ),
+                this.dialogs.openGenericDialog({
+                    title: 'DOWNLOAD_METADATA.TITLE',
+                    message: 'DOWNLOAD_METADATA.MESSAGE',
+                    closable: Closable.Casual,
+                    avatar: {
+                        icon: 'format_align_left',
+                        kind: 'icon',
+                    },
+                    buttons: [
+                        {
+                            label: 'DOWNLOAD_METADATA.TYPE_TEXT',
+                            config: DialogButton.TYPE_CANCEL,
+                            callback: (ref) => {
+                                ref.close();
+                                void this.nodeHelper.downloadNode(
+                                    this.getObjects(object, data)[0],
+                                    RestConstants.NODE_VERSION_CURRENT,
+                                    true,
+                                );
+                                return null;
+                            },
+                        },
+                        {
+                            label: 'DOWNLOAD_METADATA.TYPE_PDF',
+                            config: DialogButton.TYPE_PRIMARY,
+                            callback: async (ref) => {
+                                const node = this.getObjects(object, data)[0];
+                                void this.router.navigate([
+                                    UIConstants.ROUTER_PREFIX + 'pdf-metadata',
+                                    node.ref.id,
+                                ]);
+                                return true;
+                            },
+                        },
+                    ],
+                }),
         );
         downloadMetadataNode.elementType = [
             ElementType.Node,

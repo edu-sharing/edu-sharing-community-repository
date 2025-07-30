@@ -1,5 +1,5 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
-@use 'projects/edu-sharing-ui/assets/scss/branding' as *;
+@use 'projects/edu-sharing-ui/assets/scss/branding' as branding;
 @use 'sass:color';
 
 *,
@@ -24,8 +24,16 @@
 
 html,
 body {
-    font-family: $primaryFontFamily !important;
-    font-size: $primaryFontSize;
+    font-family: if(
+        map-has-key(branding.$tokens, primaryFontFamily),
+        unquote(map-get(branding.$tokens, primaryFontFamily)),
+        unquote($primaryFontFamily)
+    ) !important;
+    font-size: if(
+        map-has-key(branding.$tokens, primaryFontSize),
+        map-get(branding.$tokens, primaryFontSize),
+        $primaryFontSize
+    );
     -webkit-font-smoothing: antialiased;
     margin: 0;
 }

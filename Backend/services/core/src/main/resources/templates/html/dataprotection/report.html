@@ -1,0 +1,75 @@
+<div th:fragment="content">
+    <h2 th:text="#{dataprotection_header}"></h2>
+    <h2 th:text="#{dataprotection_general_header}"></h2>
+    <div th:text="#{dataprotection_general_content}"></div>
+    <br/>
+    <table class="dataprotectionTable">
+        <colgroup>
+            <col class="first-col"/>
+            <col/>
+        </colgroup>
+        <tr><td th:text="#{dataprotection_general_firstname}"></td><td th:text="${data.firstName}"></td></tr>
+        <tr><td th:text="#{dataprotection_general_lastname}"></td><td th:text="${data.lastName}"></td></tr>
+        <tr><td th:text="#{dataprotection_general_username}"></td><td th:text="${data.userName}"></td></tr>
+        <tr th:if="${data.email}"><td th:text="#{dataprotection_general_email}"></td><td th:text="${data.email}"></td></tr>
+        <tr th:if="${data.roles}"><td th:text="#{dataprotection_general_role}"></td><td th:text="${data.roles}"></td></tr>
+        <tr th:if="${data.schoolDisplayName}"><td th:text="#{dataprotection_general_schoolname}"></td><td th:text="${data.schoolDisplayName}"></td></tr>
+        <tr th:if="${data.schoolName}"><td th:text="#{dataprotection_general_schoolnumber}"></td><td th:text="${data.schoolName}"></td></tr>
+        <tr th:if="${!#lists.isEmpty(data.groupList)}"><td th:text="#{dataprotection_general_group_list}"></td>
+            <td>
+                <ul>
+                    <li th:each="group, iterStat : ${data.groupList}" th:text="${group}"></li>
+                </ul>
+            </td>
+        </tr>
+        <tr th:if="${data.roles}"><td th:text="#{dataprotection_general_role}"></td><td th:text="${data.roles}"></td></tr>
+
+    </table>
+    <br/>
+    <h2 th:text="#{dataprotection_content_header}"></h2>
+    <div th:text="#{dataprotection_content_content}"></div>
+    <br/>
+    <table class="dataprotectionTable">
+        <colgroup>
+            <col class="first-col"/>
+            <col/>
+        </colgroup>
+        <tr><td th:text="#{dataprotection_content_first_login}"></td><td th:text="${data.firstLogin}"></td></tr>
+        <tr><td th:text="#{dataprotection_content_last_login}"></td><td th:text="${data.lastLogin}"></td></tr>
+        <tr th:if="${!#lists.isEmpty(data.privateCollections)}">
+            <td th:text="#{dataprotection_content_private_collections}"></td>
+            <td>
+                <ul>
+                    <li th:each="col, iterStat : ${data.privateCollections}" th:text="${col}"></li>
+                </ul>
+            </td>
+        </tr>
+        <tr th:if="${!#lists.isEmpty(data.sharedCollections)}">
+            <td th:text="#{dataprotection_content_shared_collections}"></td>
+            <td>
+                <ul>
+                    <li th:each="col, iterStat : ${data.sharedCollections}" th:text="${col}"></li>
+                </ul>
+            </td>
+        </tr>
+        <tr th:if="${!#lists.isEmpty(data.ratings)}">
+            <td th:text="#{dataprotection_content_ratings}"></td>
+            <td>
+                <ul>
+                    <li th:each="rating, iterStat : ${data.ratings}" th:text="${rating}"></li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+    <br/>
+    <h2 th:text="#{dataprotection_further_header}"></h2>
+    <div th:text="#{dataprotection_further_content(${link})}"></div>
+    <br/>
+    <table class="dataprotectionTable">
+        <colgroup>
+            <col class="first-col"/>
+            <col/>
+        </colgroup>
+        <tr><td th:text="#{dataprotection_further_date}"></td><td th:text="${data.currentDate}"></td></tr>
+    </table>
+</div>

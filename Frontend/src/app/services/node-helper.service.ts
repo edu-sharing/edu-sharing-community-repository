@@ -200,7 +200,7 @@ export class NodeHelperService extends NodeHelperServiceBase {
      * Download (a single) node
      */
     public async downloadNode(
-        node: any,
+        node: Node,
         version = RestConstants.NODE_VERSION_CURRENT,
         metadata = false,
     ) {

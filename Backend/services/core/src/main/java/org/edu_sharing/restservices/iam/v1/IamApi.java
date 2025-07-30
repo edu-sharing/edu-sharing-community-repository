@@ -630,8 +630,9 @@ public class IamApi {
 
             RepositoryDao repoDao = RepositoryDao.getRepository(repository);
             PersonDao personDao = PersonDao.getPerson(repoDao, person);
-            personDao.requestDataProtectionExport();
-            return Response.status(Response.Status.OK).build();
+            boolean created = personDao.requestDataProtectionExport();
+            if(created) return Response.status(Response.Status.OK).build();
+            else return Response.status(Response.Status.CONFLICT).build();
 
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);

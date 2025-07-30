@@ -811,12 +811,14 @@ public class PersonDao {
 		return authorityService.generate2FaQRCode(getUserName());
 	}
 
-	public void requestDataProtectionExport(){
+	public boolean requestDataProtectionExport(){
 		try{
 			ApplicationContextFactory.getApplicationContext().getBean(FeatureInfoDataProtectionService.class);
-			dataProtectionService.requestDataProtectionExport(getUserName());
+			return dataProtectionService.requestDataProtectionExport(getUserName());
 		} catch (NoSuchBeanDefinitionException e) {
-			logger.warn("data protection service not enabled");
+			String msg = "data protection service not enabled";
+			logger.warn(msg);
+			throw new RuntimeException(msg, e);
 		}
 	}
 

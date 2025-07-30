@@ -19,12 +19,16 @@ import org.apache.commons.compress.utils.FileNameUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
+import org.edu_sharing.repository.client.rpc.EduGroup;
+import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.service.authentication.ScopeUserHomeService;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
+import org.edu_sharing.service.authority.AuthorityService;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.comment.CommentService;
 import org.edu_sharing.service.comment.CommentServiceFactory;
@@ -48,6 +52,10 @@ import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.time.Duration;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -76,8 +84,20 @@ public class DataProtectionService{
     @Autowired
     DataProtectionQueue queue;
 
+    @Autowired
+    PDFReport report;
+
     @Value("${repository.dataprotection.retentionPeriod:PT240H}")
     private String retentionPeriod;
+
+    @Value("${repository.dataprotection.binaryExport:true}")
+    private boolean binaryExport;
+
+    @Value("${repository.dataprotection.metadataExport:true}")
+    private boolean metadataExport;
+
+    @Value("${repository.dataprotection.summaryExport:true}")
+    private boolean summaryExport;
 
     PersonLifecycleService personLifecycleService = new PersonLifecycleService();
 
@@ -182,18 +202,86 @@ public class DataProtectionService{
         createStructure(rootPath,"safe/shared",buildPathMap(createChildParentMap(sharedNodesSafe)));
         NodeServiceInterceptor.setEduSharingScope(null);
 
+        summmaryReport(userName, collectionNodes, feedBacks, comments, rootPath);
+
+
         File target = new File(rootPath+".zip");
         archive(new File(rootPath), target);
 
-        NodeRef nodeRef = AuthenticationUtil.runAsSystem(() ->
-                persistAndCleanup(userName, target, rootPath)
-        );
+        AuthenticationUtil.runAsSystem(() -> persistAndCleanup(userName, target, rootPath));
+    }
+
+    private void summmaryReport(String userName, List<NodeRef> collectionNodes, List<NodeRef> feedBacks, List<NodeRef> comments, String rootPath) {
+        if(!summaryExport) return;
+        List<NodeRef> privateCollections = collectionNodes.stream().filter(n -> "MY".equals(nodeService.getProperty(n, QName.createQName(CCConstants.CCM_PROP_MAP_COLLECTIONSCOPE)))).collect(Collectors.toList());
+        List<NodeRef> sharedCollections =  collectionNodes.stream().filter(n -> {
+            String scope = (String)nodeService.getProperty(n, QName.createQName(CCConstants.CCM_PROP_MAP_COLLECTIONSCOPE));
+            return "MY".equals(scope) || "CUSTOM".equals(scope);
+        }).collect(Collectors.toList());
+
+
+        AuthorityService authorityService = AuthorityServiceFactory.getLocalService();
+        Set<String> groupSet = authorityService.getMemberships(userName);
+        ArrayList<EduGroup> allEduGroups = AuthenticationUtil.runAsSystem(() -> authorityService.getAllEduGroups(userName));
+        List<String> groupList = groupSet.stream().map(g ->  (String)authorityService.getAuthorityProperty(g,CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME)).collect(Collectors.toList());
+        User user = authorityService.getUser(userName);
+
+        /**
+         * @TODO use profile data or something dynamic determine locale and timezone
+         */
+        ZoneId zone = ZoneId.of("Europe/Berlin");
+        Locale locale = Locale.GERMANY;
+
+        Date firstLogin = (Date)user.getProperties().get(CCConstants.PROP_USER_ESFIRSTLOGIN);
+        Date lastLogin = (Date)user.getProperties().get(CCConstants.PROP_USER_ESLASTLOGIN);
+        String role = (String)user.getProperties().get(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION);
+        List<String> roles = role == null ? null : List.of(role);
+        EduGroup eduGroup = allEduGroups != null && !allEduGroups.isEmpty() ? allEduGroups.get(0) : null;
+        PDFReport.Data.DataBuilder reportData = PDFReport.Data.builder()
+                .userName(userName)
+                .firstName(user.getGivenName())
+                .lastName(user.getSurname())
+                .firstLogin(formatDate(firstLogin,zone,locale,FormatStyle.MEDIUM,true))
+                .lastLogin(formatDate(lastLogin,zone,locale,FormatStyle.MEDIUM, true))
+                .currentDate(formatDate(new Date(),zone,locale,FormatStyle.MEDIUM,false))
+                .email(user.getEmail())
+                .roles(roles)
+                .privateCollections(getNameList(privateCollections))
+                .sharedCollections(getNameList(sharedCollections))
+        //todo
+                .ratings(List.of())
+                .feedbacks(getNameList(feedBacks))
+                .comments(getNameList(comments))
+                .groupList(groupList);
+
+        if(eduGroup != null) {
+            reportData.schoolName(eduGroup.getGroupId());
+            reportData.schoolDisplayName(eduGroup.getGroupDisplayName());
+        }
+
+        String reportDirectory = rootPath.concat("/report");
+        File dir = new File(reportDirectory);
+        if (!dir.exists()) {
+            boolean mkdirs = dir.mkdirs();// creates parent folders as needed
+            if (!mkdirs) {
+                throw new RuntimeException("Unable to create directory " + dir.getAbsolutePath());
+            }
+        }
+
+        report.report(reportData.build(), dir );
+    }
+
+    private List<String> getNameList(List<NodeRef> nodes){
+        return nodes.stream()
+                .map(n -> (String)nodeService.getProperty(n, ContentModel.PROP_NAME))
+                .collect(Collectors.toList());
     }
 
     private NodeRef persistAndCleanup(String userName, File target, String rootPath) {
         try {
             NodeRef nodeRef = getTargetNode(userName);
             permissionService.setPermission(nodeRef,userName,PermissionService.CONSUMER,true);
+            nodeService.removeAspect(nodeRef,ContentModel.ASPECT_VERSIONABLE);
             ContentWriter writer = contentService.getWriter(nodeRef, ContentModel.PROP_CONTENT, true);
             writer.addListener(() -> {
                 try {
@@ -239,7 +327,7 @@ public class DataProtectionService{
     }
 
     private void createStructure(String rootPath, String subPath, HashMap<NodeRef, String> pathMap) throws IOException {
-
+        if(!metadataExport) return;
         for(Map.Entry<NodeRef,String> e : pathMap.entrySet()){
             NodeRef nodeRef = e.getKey();
             String path = e.getValue();
@@ -270,7 +358,8 @@ public class DataProtectionService{
 
         List<NodeRef> result = new ArrayList<>(levelOne);
         levelOne.forEach(n -> {
-                if(nodeService.getType(n).equals(QName.createQName(CCConstants.CCM_TYPE_MAP))){
+            QName type = nodeService.getType(n);
+                if(QName.createQName(CCConstants.CCM_TYPE_MAP).equals(type) || QName.createQName(CCConstants.CM_TYPE_FOLDER).equals(type) ){
                     result.addAll(NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, n.getId(), null, RecurseMode.All));
                 }
         });
@@ -376,7 +465,9 @@ public class DataProtectionService{
     }
 
     private void writeContent(NodeRef nodeRef, QName contentProperty, File outputFile) throws IOException {
-        if(nodeService.getType(nodeRef).equals(QName.createQName(CCConstants.CCM_TYPE_IO))){
+        if(!binaryExport) return;
+        if(nodeService.getType(nodeRef).equals(QName.createQName(CCConstants.CCM_TYPE_IO))
+                && !nodeService.hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
             ContentReader reader = contentService.getReader(nodeRef, contentProperty);
             if(reader != null && reader.exists()){
                 try (InputStream in = reader.getContentInputStream(); OutputStream out = new FileOutputStream(outputFile)) {
@@ -391,6 +482,7 @@ public class DataProtectionService{
         String firstname = (String)nodeService.getProperty(personRef, ContentModel.PROP_FIRSTNAME);
         String lastName = (String)nodeService.getProperty(personRef,ContentModel.PROP_LASTNAME);
         String email = (String)nodeService.getProperty(personRef, ContentModel.PROP_EMAIL);
+        if(email == null) return;
         Map<String, String> replace = new HashMap<>();
         replace.put("firstName", firstname);
         replace.put("lastName", lastName);
@@ -411,14 +503,25 @@ public class DataProtectionService{
         new Archiver().create(format, destination, directory);
     }
 
-    public void requestDataProtectionExport(String user){
+    public boolean requestDataProtectionExport(String user){
         if(!user.equals(AuthenticationUtil.getFullyAuthenticatedUser())){
             boolean isAdmin = AuthorityServiceHelper.isAdmin();
             if(!isAdmin){
                 throw new SecurityException("admin rights required");
             }
         }
-        queue.addUser(user);
+        return queue.addUser(user);
+    }
+
+    private String formatDate(Date date, ZoneId zone, Locale locale, FormatStyle style, boolean includeTime) {
+        if(date == null) return null;
+        ZonedDateTime zonedDateTime = date.toInstant().atZone(zone);
+
+        DateTimeFormatter formatter = (includeTime) ? DateTimeFormatter.ofLocalizedDateTime(style) : DateTimeFormatter.ofLocalizedDate(style);
+        formatter = formatter.withLocale(locale)
+                .withZone(zone);
+
+        return formatter.format(zonedDateTime);
     }
 
     @Data

@@ -1,6 +1,7 @@
 /**
     branding is deprecated. Use the "themeColors" in the client.config
  */
-$workspaceTopBarBackground: #383838;
-$workspaceTopBarFontColor: #fff;
-$customIcons: false;
+$tokens: (/*
+     primaryFontFamily,
+     primaryFontSize,
+     */ customIcons: false);

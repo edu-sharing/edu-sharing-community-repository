@@ -3,7 +3,7 @@
 
 @use 'variables' as *;
 @use 'variables-scss' as *;
-@use 'branding' as *;
+@use 'branding' as branding;
 
 // optional
 $mat-css-dark-theme-selector: '.isDarkTheme';
@@ -16,7 +16,12 @@ $mat-css-light-theme-selector: '.isLightTheme';
 // hue. Available color palettes: https://material.io/design/color/
 
 $custom-typography: mat.m2-define-typography-config(
-    $font-family: $primaryFontFamily,
+    $font-family:
+        if(
+            map-has-key(branding.$tokens, primaryFontFamily),
+            map-get(branding.$tokens, primaryFontFamily),
+            $primaryFontFamily
+        ),
     $body-1: mat.m2-define-typography-level(100%, normal, 400),
     $body-2: mat.m2-define-typography-level(100%, normal, 400),
     // mat-optgroups labels, input placeholder
