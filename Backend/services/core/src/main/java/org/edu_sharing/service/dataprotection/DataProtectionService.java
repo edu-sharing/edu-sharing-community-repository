@@ -513,6 +513,7 @@ public class DataProtectionService{
     }
 
     private String formatDate(Date date, ZoneId zone, Locale locale, FormatStyle style, boolean includeTime) {
+        if(date == null) return null;
         ZonedDateTime zonedDateTime = date.toInstant().atZone(zone);
 
         DateTimeFormatter formatter = (includeTime) ? DateTimeFormatter.ofLocalizedDateTime(style) : DateTimeFormatter.ofLocalizedDate(style);
