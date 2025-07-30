@@ -11,7 +11,7 @@
         <tr><td th:text="#{dataprotection_general_firstname}"></td><td th:text="${data.firstName}"></td></tr>
         <tr><td th:text="#{dataprotection_general_lastname}"></td><td th:text="${data.lastName}"></td></tr>
         <tr><td th:text="#{dataprotection_general_username}"></td><td th:text="${data.userName}"></td></tr>
-        <tr><td th:text="#{dataprotection_general_email}"></td><td th:text="${data.email}"></td></tr>
+        <tr th:if="${data.email}"><td th:text="#{dataprotection_general_email}"></td><td th:text="${data.email}"></td></tr>
         <tr th:if="${data.roles}"><td th:text="#{dataprotection_general_role}"></td><td th:text="${data.roles}"></td></tr>
         <tr th:if="${data.schoolDisplayName}"><td th:text="#{dataprotection_general_schoolname}"></td><td th:text="${data.schoolDisplayName}"></td></tr>
         <tr th:if="${data.schoolName}"><td th:text="#{dataprotection_general_schoolnumber}"></td><td th:text="${data.schoolName}"></td></tr>
