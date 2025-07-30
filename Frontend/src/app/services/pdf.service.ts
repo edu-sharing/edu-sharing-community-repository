@@ -230,7 +230,7 @@ export class PdfService {
 
     private async getMetadataTableContent(node: Node): Promise<string[][]> {
         const content = [];
-        await this.mdsEditorInstanceService.initWithNodes([node], { groupId: 'io_text' });
+        await this.mdsEditorInstanceService.initWithNodes([node], { groupId: 'io_text_pdf' });
         const widgets = this.mdsEditorInstanceService.widgets.value;
         for (const widget of widgets) {
             if (widget.getValue && widget.getValue().length > 0) {
