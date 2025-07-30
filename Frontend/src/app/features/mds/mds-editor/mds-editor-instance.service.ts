@@ -23,6 +23,7 @@ import {
     MdsViewRelation,
     Node,
     NodeSuggestionResponseDto,
+    Suggestion,
     SuggestionResponseDto,
     SuggestionsV1Service,
 } from 'ngx-edu-sharing-api';
@@ -1328,8 +1329,19 @@ export class MdsEditorInstanceService
             }
             if (mdsValueList) {
                 widget.setInitialDisplayValues(mdsValueList);
+                return;
             }
         }
+        widget.setInitialDisplayValues({
+            values: (await widget.getInitalValuesAsync()).jointValues?.map((v) => {
+                return {
+                    key: v,
+                    displayString:
+                        widget.definition.values?.find((value) => value.id === v)?.caption || v,
+                    replacementString: null,
+                } as Suggestion;
+            }),
+        });
     }
     async clearValues(): Promise<void> {
         // At the moment, widget components don't support changing or resetting the value from

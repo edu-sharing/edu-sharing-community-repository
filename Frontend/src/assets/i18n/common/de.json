@@ -1460,6 +1460,12 @@
       "proposeForCollectionEvent": "Vorschläge für Sammlungen"
     }
   },
+  "DOWNLOAD_METADATA": {
+    "TITLE": "Metadaten herunterladen",
+    "MESSAGE": "In welchen Format möchten Sie die Metadaten herunterladen?",
+    "TYPE_PDF": "PDF-Datei",
+    "TYPE_TEXT": "Textdatei"
+  },
   "API_ERROR": {
     "RELOAD_NOTICE_TITLE": "Seite muss neugeladen werden",
     "RELOAD_NOTICE": "Beim Laden von wichtigen Informationen ist etwas schief gegangen. Bitte laden Sie die Seite neu.",

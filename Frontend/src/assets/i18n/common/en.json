@@ -1416,6 +1416,12 @@
       "proposeForCollectionEvent": "Suggestions for collections"
     }
   },
+  "DOWNLOAD_METADATA": {
+    "TITLE": "Download metadata",
+    "MESSAGE": "In which format would you like to download the metadata?",
+    "TYPE_PDF": "pdf file",
+    "TYPE_TEXT": "text file"
+  },
   "LTI": {
     "REGISTERED": {
       "TITLE": "LTI platform registered",

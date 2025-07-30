@@ -11,6 +11,7 @@ import { MdsEditorInstanceService } from '../features/mds/mds-editor/mds-editor-
 import { firstValueFrom } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { NodeLicensePipe } from 'ngx-edu-sharing-ui';
+import { filter } from 'rxjs/operators';
 
 pdfMake.vfs = pdfFonts.vfs;
 
@@ -234,10 +235,14 @@ export class PdfService {
         for (const widget of widgets) {
             if (widget.getValue && widget.getValue().length > 0) {
                 const initialValues = await widget.getInitalValuesAsync();
+                const displayValues = await firstValueFrom(
+                    widget.getInitialDisplayValues().pipe(filter((v) => !!v)),
+                );
                 content.push([
                     widget.definition.caption,
                     widget.getFormattedValue(
-                        initialValues.jointValues,
+                        displayValues.values?.map((v) => v.displayString || v.key) ||
+                            initialValues.jointValues,
                         widget.getBasicType(true),
                         this.translate,
                     )[0],

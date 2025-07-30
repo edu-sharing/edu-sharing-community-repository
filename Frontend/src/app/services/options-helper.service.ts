@@ -75,6 +75,7 @@ import { Toast } from './toast';
 import { UIHelper } from '../core-ui-module/ui-helper';
 import { GlobalOptionsService } from './global-options.service';
 import { SelectionModel } from '@angular/cdk/collections';
+import { Closable } from '../features/dialogs/card-dialog/card-dialog-config';
 
 @Injectable()
 export class OptionsHelperService extends OptionsHelperServiceAbstract implements OnDestroy {
@@ -1009,33 +1010,37 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             'format_align_left',
             (object) =>
                 this.dialogs.openGenericDialog({
-                    title: 'OPTIONS.DOWNLOAD_METADATA',
-                    message: 'OPTIONS.DOWNLOAD_METADATA_DIALOG',
+                    title: 'DOWNLOAD_METADATA.TITLE',
+                    message: 'DOWNLOAD_METADATA.MESSAGE',
+                    closable: Closable.Casual,
+                    avatar: {
+                        icon: 'format_align_left',
+                        kind: 'icon',
+                    },
                     buttons: [
                         {
-                            label: 'Pdf',
-                            config: DialogButton.TYPE_PRIMARY,
+                            label: 'DOWNLOAD_METADATA.TYPE_TEXT',
+                            config: DialogButton.TYPE_CANCEL,
                             callback: (ref) => {
                                 ref.close();
-                                const node = this.getObjects(object, data)[0];
-                                this.router.navigate([
-                                    UIConstants.ROUTER_PREFIX + 'pdf-metadata',
-                                    node.ref.id,
-                                ]);
-                                return null;
-                            },
-                        },
-                        {
-                            label: 'Txt',
-                            config: DialogButton.TYPE_PRIMARY,
-                            callback: (ref) => {
-                                ref.close();
-                                this.nodeHelper.downloadNode(
+                                void this.nodeHelper.downloadNode(
                                     this.getObjects(object, data)[0],
                                     RestConstants.NODE_VERSION_CURRENT,
                                     true,
                                 );
                                 return null;
+                            },
+                        },
+                        {
+                            label: 'DOWNLOAD_METADATA.TYPE_PDF',
+                            config: DialogButton.TYPE_PRIMARY,
+                            callback: async (ref) => {
+                                const node = this.getObjects(object, data)[0];
+                                void this.router.navigate([
+                                    UIConstants.ROUTER_PREFIX + 'pdf-metadata',
+                                    node.ref.id,
+                                ]);
+                                return true;
                             },
                         },
                     ],

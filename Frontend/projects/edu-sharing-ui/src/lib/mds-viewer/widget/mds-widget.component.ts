@@ -187,7 +187,7 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
         this.value.set(await this.getNodeValue());
         this.widget
             .getInitialDisplayValues()
-            .pipe(filter((v: MdsValueList) => !!v))
+            .pipe(filter((v: MdsValueList) => !!v?.values))
             .subscribe(async (value: MdsValueList) => {
                 this.value.set(value.values.map((v) => v.displayString));
             });
