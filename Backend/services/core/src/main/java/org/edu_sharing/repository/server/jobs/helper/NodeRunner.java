@@ -226,7 +226,14 @@ public class NodeRunner {
                 List<Callable<Void>> threads=new ArrayList<>();
                 filteredStream.forEach((ref)->{
                     threads.add(()-> {
-                        callTask.accept(ref);
+                        if(isRunAsSystem()) {
+                            AuthenticationUtil.runAsSystem(() -> {
+                                callTask.accept(ref);
+                                return null;
+                            });
+                        } else {
+                            callTask.accept(ref);
+                        }
                         return null;
                     });
                 });
