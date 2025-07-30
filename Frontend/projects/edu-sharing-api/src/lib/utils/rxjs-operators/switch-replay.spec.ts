@@ -34,7 +34,7 @@ describe('switchReplay', () => {
     }));
 
     it('should trigger source again', fakeAsync(() => {
-        const source$ = new Observable((subscriber) => {
+        const source$ = new Observable<void>((subscriber) => {
             spy();
             subscriber.next();
             subscriber.complete();
@@ -52,7 +52,7 @@ describe('switchReplay', () => {
     }));
 
     it('should forward error', fakeAsync(() => {
-        const source$ = new Observable((subscriber) => {
+        const source$ = new Observable<void>((subscriber) => {
             spy();
             subscriber.error();
         });
@@ -73,7 +73,7 @@ describe('switchReplay', () => {
     it('should forward error to two observables', fakeAsync(() => {
         let isError = false;
         let errorCount = 0;
-        const source$ = new Observable((subscriber) => {
+        const source$ = new Observable<void>((subscriber) => {
             if (isError) {
                 spy();
                 subscriber.error();
@@ -103,7 +103,7 @@ describe('switchReplay', () => {
     }));
 
     it('should unsubscribe from source', fakeAsync(() => {
-        const source$ = new Observable((subscriber) => {
+        const source$ = new Observable<void>((subscriber) => {
             spy();
             subscriber.next();
             subscriber.complete();
@@ -122,7 +122,7 @@ describe('switchReplay', () => {
 
     it('should complete when trigger completes', fakeAsync(() => {
         let completed = false;
-        const source$ = new Observable((subscriber) => {
+        const source$ = new Observable<void>((subscriber) => {
             spy();
             subscriber.next();
             subscriber.complete();
@@ -144,7 +144,7 @@ describe('switchReplay', () => {
 
     it('should share error', fakeAsync(() => {
         let errorCount = 0;
-        const source$ = new Observable((subscriber) => {
+        const source$ = new Observable<void>((subscriber) => {
             spy();
             subscriber.error();
         });
@@ -168,7 +168,7 @@ describe('switchReplay', () => {
         let isError = true;
         let errorCount = 0;
         let successCount = 0;
-        const source$ = new Observable((subscriber) => {
+        const source$ = new Observable<void>((subscriber) => {
             spy();
             if (isError) {
                 subscriber.error();
@@ -197,7 +197,7 @@ describe('switchReplay', () => {
 
     it('should repeat the value after unsubscribe', fakeAsync(() => {
         let successCount = 0;
-        const source$ = new Observable((subscriber) => {
+        const source$ = new Observable<void>((subscriber) => {
             spy();
             subscriber.next();
             subscriber.complete();

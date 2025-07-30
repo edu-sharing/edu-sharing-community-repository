@@ -30,7 +30,6 @@ import {
     BehaviorSubject,
     combineLatest,
     EMPTY,
-    firstValueFrom,
     from,
     Observable,
     of,
@@ -92,6 +91,7 @@ import { MdsEditorWidgetBase } from './widgets/mds-editor-widget-base';
 import { MdsEditorWidgetErrorComponent } from './widgets/mds-editor-widget-error/mds-editor-widget-error.component';
 import {
     DateHelper,
+    FormatSizePipe,
     InitialValues,
     MdsEditorInstanceServiceAbstract,
     MdsValueList,
@@ -104,7 +104,6 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { TranslateService } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
-import { FormatSizePipe } from '../../../../../projects/edu-sharing-ui/src/lib';
 
 export interface CompletionStatusField {
     widget: Widget;
