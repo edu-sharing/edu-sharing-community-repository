@@ -17,7 +17,11 @@ $mat-css-light-theme-selector: '.isLightTheme';
 
 $custom-typography: mat.m2-define-typography-config(
     $font-family:
-        if(branding.$primaryFontFamily != null, branding.$primaryFontFamily, $primaryFontFamily),
+        if(
+            variable-exists(branding.$primaryFontFamily),
+            branding.$primaryFontFamily,
+            $primaryFontFamily
+        ),
     $body-1: mat.m2-define-typography-level(100%, normal, 400),
     $body-2: mat.m2-define-typography-level(100%, normal, 400),
     // mat-optgroups labels, input placeholder

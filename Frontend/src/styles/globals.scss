@@ -25,11 +25,15 @@
 html,
 body {
     font-family: if(
-        branding.$primaryFontFamily != null,
+        variable-exists(branding.$primaryFontFamily),
         branding.$primaryFontFamily,
         $primaryFontFamily
     ) !important;
-    font-size: if(branding.$primaryFontSize != null, branding.$primaryFontSize, $primaryFontSize);
+    font-size: if(
+        variable-exists(branding.$primaryFontSize),
+        branding.$primaryFontSize,
+        $primaryFontSize
+    );
     -webkit-font-smoothing: antialiased;
     margin: 0;
 }
