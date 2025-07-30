@@ -26,8 +26,8 @@ html,
 body {
     font-family: if(
         map-has-key(branding.$tokens, primaryFontFamily),
-        map-get(branding.$tokens, primaryFontFamily),
-        $primaryFontFamily
+        unquote(map-get(branding.$tokens, primaryFontFamily)),
+        unquote($primaryFontFamily)
     ) !important;
     font-size: if(
         map-has-key(branding.$tokens, primaryFontSize),
