@@ -25,13 +25,13 @@
 html,
 body {
     font-family: if(
-        variable-exists(branding.$primaryFontFamily),
-        branding.$primaryFontFamily,
+        map-has-key(branding.$tokens, primaryFontFamily),
+        map-get(branding.$tokens, primaryFontFamily),
         $primaryFontFamily
     ) !important;
     font-size: if(
-        variable-exists(branding.$primaryFontSize),
-        branding.$primaryFontSize,
+        map-has-key(branding.$tokens, primaryFontSize),
+        map-get(branding.$tokens, primaryFontSize),
         $primaryFontSize
     );
     -webkit-font-smoothing: antialiased;
