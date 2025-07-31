@@ -267,6 +267,29 @@
           </div>
         </div>
       </div>
+      <div *ngIf="isMe" class="gdpr-export">
+        <div class="export-result" *ngIf="gdprExport">
+          <a mat-button color="primary" target="_blank" [href]="gdprExport.downloadUrl"
+            ><i esIcon="cloud_download"></i> {{ gdprExport | nodeTitle }}</a
+          >
+          <div class="date">
+            <label>{{ 'PROFILES.GDPR.CREATED' | translate }}</label>
+            {{ gdprExport.createdAt | formatDate : { relative: false } }}
+          </div>
+        </div>
+        <button
+          mat-button
+          color="primary"
+          class="request-export"
+          [disabled]="gdprExportTriggered"
+          (click)="requestGdprExport()"
+        >
+          <i esIcon="archive"></i> {{ 'PROFILES.REQUEST_GDPR_BUTTON' | translate }}
+        </button>
+        <es-info-message mode="info" class="request-fired" *ngIf="gdprExportTriggered">
+          {{ 'PROFILES.GDPR.REQUEST_STARTED' | translate }}
+        </es-info-message>
+      </div>
     </div>
   </div>
 </div>

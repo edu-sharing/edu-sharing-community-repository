@@ -148,7 +148,23 @@ $path: '../../../assets/images/';
             margin: auto;
             padding: 0 25px;
         }
-
+        .gdpr-export {
+            padding: 30px 25px 0 25px;
+            a {
+                display: inline-flex;
+                align-items: center;
+            }
+            .date {
+                color: var(--textLight);
+                padding-left: 44px;
+                padding-bottom: 20px;
+                font-size: $fontSizeSmall;
+            }
+            es-info-message {
+                display: flex;
+                padding-top: 20px;
+            }
+        }
         .changePassword,
         .persistent-id {
             display: flex;

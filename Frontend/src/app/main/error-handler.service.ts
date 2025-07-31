@@ -48,6 +48,7 @@ export class ErrorHandlerService {
         ) {
             // ignore requests in case the API is disabled
         } else {
+            // note: call e.preventDefault() if you don't want the default handler to trigger
             console.warn('handleError has triggered', error);
             this.toast.error(error);
         }
