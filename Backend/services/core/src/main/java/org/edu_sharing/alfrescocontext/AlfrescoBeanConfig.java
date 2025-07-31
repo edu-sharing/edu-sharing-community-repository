@@ -16,6 +16,7 @@ import org.alfresco.repo.search.SearchTrackingComponent;
 import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.MutableAuthenticationDao;
 import org.alfresco.repo.security.authentication.RepositoryAuthenticationDao;
+import org.alfresco.repo.security.person.RegexHomeFolderProvider;
 import org.alfresco.repo.tenant.TenantService;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.repo.web.filter.beans.DependencyInjectedFilter;
@@ -377,6 +378,11 @@ public class AlfrescoBeanConfig {
     @Bean
     public ContentStore fileContentStore(){
         return (ContentStore)applicationContext.getBean("fileContentStore");
+    }
+
+    @Bean
+    public RegexHomeFolderProvider regexHomeFolderProvider() {
+        return applicationContext.getBean("largeHomeFolderProvider", RegexHomeFolderProvider.class);
     }
 
     @Bean

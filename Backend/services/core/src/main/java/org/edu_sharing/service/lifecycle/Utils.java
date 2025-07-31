@@ -11,7 +11,7 @@ import java.util.HashMap;
 public class Utils {
 
     public NodeRef getNodeRef(String parentId, String type, String name) throws Throwable {
-        NodeRef protocolNodeRef = lookup(parentId, name);
+        NodeRef protocolNodeRef = lookup(parentId,type, name);
         if(protocolNodeRef == null){
             HashMap<String, String[]> props = new HashMap<>();
             props.put(CCConstants.CM_NAME, new String[]{name});
@@ -21,16 +21,16 @@ public class Utils {
         return protocolNodeRef;
     }
 
-    public boolean exists(String parentId, String name) {
+    public boolean exists(String parentId, String type, String name) {
         boolean exists = false;
-        if (lookup(parentId, name) != null) {
+        if (lookup(parentId,type, name) != null) {
             exists = true;
         }
         return exists;
     }
 
-    private NodeRef lookup(String parentId, String name) {
-        NodeRef protocolNodeRef = NodeServiceFactory.getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentId, CCConstants.CCM_TYPE_IO,CCConstants.CM_NAME, name);
+    private NodeRef lookup(String parentId, String type, String name) {
+        NodeRef protocolNodeRef = NodeServiceFactory.getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentId, type,CCConstants.CM_NAME, name);
         return protocolNodeRef;
     }
 }

@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.repo.security.person.RegexHomeFolderProvider;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
@@ -49,6 +50,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -74,8 +76,8 @@ public class DataProtectionService{
     @Autowired
     PermissionService permissionService;
 
-    //@Autowired
-    //RegexHomeFolderProvider regexHomeFolderProvider;
+    @Autowired
+    RegexHomeFolderProvider regexHomeFolderProvider;
 
     @Autowired
     DataProtectionConfig config;
@@ -171,9 +173,7 @@ public class DataProtectionService{
         AuthenticationUtil.runAsSystem(()-> {
             prepare(userName);
             return null;});
-        NodeRef nodeRef = AuthenticationUtil.runAs(() -> {
-            return exportUserNodes(userName);
-        }, userName);
+        NodeRef nodeRef = AuthenticationUtil.runAs(() -> exportUserNodes(userName), userName);
         queue.update(userName, nodeRef.getId(), DataProtectionQueue.Status.FINISHED);
     }
 
@@ -310,14 +310,26 @@ public class DataProtectionService{
     }
 
     private NodeRef getTargetNode(String userName) {
-        NodeRef nodeRef = AuthenticationUtil.runAsSystem(()-> {
-            try {
-                return new Utils().getNodeRef(systemFolder, CCConstants.CCM_TYPE_IO, userName.concat(".zip"));
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
+        NodeRef personNodeRef = personService.getPersonOrNull(userName);
+        List<String> homeFolderPath = regexHomeFolderProvider.getHomeFolderPath(personNodeRef);
+        Utils utils = new Utils();
+        String parentId = systemFolder;
+        try {
+            for (String pathElement : homeFolderPath) {
+                NodeRef rs = utils.getNodeRef(parentId, CCConstants.CCM_TYPE_MAP, pathElement);
+                parentId = rs.getId();
             }
-        });
-        return nodeRef;
+            return new Utils().getNodeRef(parentId, CCConstants.CCM_TYPE_IO, getFileName());
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String getFileName(){
+        Date date = new Date(); // or your custom date
+        SimpleDateFormat formatter = new SimpleDateFormat("yyMMdd");
+        String formatted = formatter.format(date);
+        return formatted.concat("_").concat(fileName).concat(".zip");
     }
 
     private void createStructure(String rootPath, String subPath, HashMap<NodeRef, String> pathMap) throws IOException {
