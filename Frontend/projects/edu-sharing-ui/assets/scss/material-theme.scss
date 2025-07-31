@@ -4,6 +4,7 @@
 @use 'variables' as *;
 @use 'variables-scss' as *;
 @use 'branding' as branding;
+@use 'sass:map';
 
 // optional
 $mat-css-dark-theme-selector: '.isDarkTheme';
@@ -18,8 +19,8 @@ $mat-css-light-theme-selector: '.isLightTheme';
 $custom-typography: mat.m2-define-typography-config(
     $font-family:
         if(
-            map-has-key(branding.$tokens, primaryFontFamily),
-            map-get(branding.$tokens, primaryFontFamily),
+            map.get(branding.$tokens, primaryFontFamily) != null,
+            map.get(branding.$tokens, primaryFontFamily),
             $primaryFontFamily
         ),
     $body-1: mat.m2-define-typography-level(100%, normal, 400),

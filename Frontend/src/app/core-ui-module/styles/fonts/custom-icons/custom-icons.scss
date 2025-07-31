@@ -1,7 +1,8 @@
 @use 'branding';
+@use 'sass:map';
 
 /* Enable it via your custom variable '$customIcons' */
-@if map-has-key(branding.$tokens, customIcons) and map-get(branding.$tokens, customIcons) == true {
+@if map.get(branding.$tokens, customIcons) == true {
     @font-face {
         font-family: 'Custom-Icons';
         src: url('custom-icons.eot');
