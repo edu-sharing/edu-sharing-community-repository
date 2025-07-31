@@ -53,9 +53,10 @@ import org.springframework.context.ApplicationContext;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.Semaphore;
 
 @JobDescription(description = "Migrate nodes previously imported via OAI (IMP_OBJ) to nodes which will should be processed by the etl-framework")
-public class MigrateOaiImportsToEtl extends AbstractJobMapAnnotationParams{
+public class MigrateOaiImportsToEtl extends AbstractInterruptableJob{
 	protected Logger logger = Logger.getLogger(MigrateOaiImportsToEtl.class);
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 
@@ -75,12 +76,15 @@ public class MigrateOaiImportsToEtl extends AbstractJobMapAnnotationParams{
 	private String testNodeId;
 	@JobFieldDescription(description = "Skip currently marked deleted elements? (ccm:editorial_state == deleted)", sampleValue = "true")
 	private Boolean skipDeleted;
+	@JobFieldDescription(description = "Run the job threaded", sampleValue = "true")
+	private Boolean threaded;
 
 	NodeRef startFolder;
 	String target;
+	private static final Semaphore semaphore = new Semaphore(1);
 
 	@Override
-	public void executeInternal(JobExecutionContext context) throws JobExecutionException {
+	public void executeInterruptable(JobExecutionContext context) throws JobExecutionException {
 		if(setId == null) {
 			throwMissingParam("setId");
 		}
@@ -146,7 +150,7 @@ public class MigrateOaiImportsToEtl extends AbstractJobMapAnnotationParams{
 				runner.setTask(this::transform);
 				runner.setTypes(Collections.singletonList(CCConstants.CCM_TYPE_IO));
 				runner.setRunAsSystem(true);
-				runner.setThreaded(false);
+				runner.setThreaded(threaded != null && threaded);
 				runner.setRecurseMode(RecurseMode.Folders);
 				runner.setStartFolder(startFolder.getId());
 				runner.setKeepModifiedDate(true);
@@ -162,21 +166,29 @@ public class MigrateOaiImportsToEtl extends AbstractJobMapAnnotationParams{
 		if(isInterrupted()) {
 			return;
 		}
+		AuthenticationUtil.runAsSystem(() -> {
+			transformInternal(nodeRef);
+			return null;
+		});
+
+	}
+
+	private void transformInternal(NodeRef nodeRef) {
 		logger.debug("Bulk transform node " + nodeRef.getId());
-		if(skipDeleted != null && skipDeleted) {
+		if (skipDeleted != null && skipDeleted) {
 			Serializable state = nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_EDITORIAL_STATE));
-			if("deleted".equals(state)) {
+			if ("deleted".equals(state)) {
 				logger.info("Node " + nodeRef + " is marked as deleted. Will not migrate. " + nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID)));
 				return;
 			}
 		}
-		if(propertyId != null && !propertyId.trim().isEmpty()) {
+		if (propertyId != null && !propertyId.trim().isEmpty()) {
 			Serializable newId = nodeService.getProperty(nodeRef, QName.createQName(CCConstants.getValidGlobalName(propertyId)));
-			if(newId == null) {
-				logger.warn("Node " + nodeRef + " has no data for the new property id in field " + propertyId +", will not move this node. Check it and migrate it later. " + nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID)));
+			if (newId == null) {
+				logger.warn("Node " + nodeRef + " has no data for the new property id in field " + propertyId + ", will not move this node. Check it and migrate it later. " + nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID)));
 				return;
 			} else {
-				if(newId instanceof Collection){
+				if (newId instanceof Collection) {
 					newId = (Serializable) ((Collection<?>) newId).iterator().next();
 				}
 				nodeService.setProperty(
@@ -193,12 +205,14 @@ public class MigrateOaiImportsToEtl extends AbstractJobMapAnnotationParams{
 				QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE),
 				sourceId
 		);
+
+		semaphore.acquireUninterruptibly();
 		String parentName = NodeServiceHelper.getProperty(NodeServiceHelper.getPrimaryParent(nodeRef), CCConstants.CM_NAME);
 		String groupedTarget = NodeServiceFactory.getLocalService().findNodeByName(
 				target,
 				parentName
 		);
-		if(groupedTarget == null) {
+		if (groupedTarget == null) {
 			Map<QName, Serializable> props = new HashMap<>() {{
 				put(ContentModel.PROP_NAME, parentName);
 			}};
@@ -210,7 +224,7 @@ public class MigrateOaiImportsToEtl extends AbstractJobMapAnnotationParams{
 					props
 			).getChildRef().getId();
 		}
-
+		semaphore.release();
 		NodeServiceFactory.getLocalService().moveNode(groupedTarget, CCConstants.CM_ASSOC_FOLDER_CONTAINS, nodeRef.getId());
 		try {
 			// hold the latest state of the object, i.e. user modificationns
@@ -239,14 +253,13 @@ public class MigrateOaiImportsToEtl extends AbstractJobMapAnnotationParams{
 			// finally, delete all other versions
 			Collection<Version> newHistory = serviceRegistry.getVersionService().getVersionHistory(nodeRef).getAllVersions();
 			for (Version version : newHistory) {
-				if(!Arrays.asList(oldVersion, newVersion).contains(version.getVersionLabel())) {
+				if (!Arrays.asList(oldVersion, newVersion).contains(version.getVersionLabel())) {
 					serviceRegistry.getVersionService().deleteVersion(nodeRef, version);
 				}
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-
 	}
 
 	private void throwMissingParam(String param) {
