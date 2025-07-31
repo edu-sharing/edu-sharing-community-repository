@@ -10,12 +10,12 @@ import java.util.HashMap;
 
 public class Utils {
 
-    public NodeRef getNodeRef(String parentId, String name) throws Throwable {
+    public NodeRef getNodeRef(String parentId, String type, String name) throws Throwable {
         NodeRef protocolNodeRef = lookup(parentId, name);
         if(protocolNodeRef == null){
             HashMap<String, String[]> props = new HashMap<>();
             props.put(CCConstants.CM_NAME, new String[]{name});
-            String nodeId = NodeServiceFactory.getLocalService().createNode(parentId,CCConstants.CCM_TYPE_IO, props);
+            String nodeId = NodeServiceFactory.getLocalService().createNode(parentId,type, props);
             protocolNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
         }
         return protocolNodeRef;

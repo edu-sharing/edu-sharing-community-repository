@@ -2,7 +2,6 @@ package org.edu_sharing.service.dataprotection;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import jakarta.annotation.PostConstruct;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +12,7 @@ import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.util.Pair;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.examples.Archiver;
 import org.apache.commons.compress.utils.FileNameUtils;
@@ -32,7 +32,8 @@ import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.comment.CommentService;
 import org.edu_sharing.service.comment.CommentServiceFactory;
-import org.edu_sharing.service.comment.CommentServiceImpl;
+import org.edu_sharing.service.dataprotection.queue.DataProtectionQueue;
+import org.edu_sharing.service.dataprotection.queue.DataProtectionQueueEntry;
 import org.edu_sharing.service.feedback.FeedbackService;
 import org.edu_sharing.service.feedback.FeedbackServiceFactory;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
@@ -41,13 +42,10 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.RecurseMode;
 import org.edu_sharing.service.rating.RatingService;
 import org.edu_sharing.service.rating.RatingServiceFactory;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -59,7 +57,6 @@ import java.time.format.FormatStyle;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.springframework.context.event.EventListener;
 
 @Slf4j
 @Component
@@ -74,9 +71,11 @@ public class DataProtectionService{
     @Autowired
     ContentService contentService;
 
-
     @Autowired
     PermissionService permissionService;
+
+    //@Autowired
+    //RegexHomeFolderProvider regexHomeFolderProvider;
 
     @Autowired
     DataProtectionConfig config;
@@ -98,6 +97,9 @@ public class DataProtectionService{
 
     @Value("${repository.dataprotection.summaryExport:true}")
     private boolean summaryExport;
+
+    @Value("${repository.dataprotection.fileName:dataprotectioninfo_edu-sharing}")
+    private String fileName;
 
     PersonLifecycleService personLifecycleService = new PersonLifecycleService();
 
@@ -132,47 +134,54 @@ public class DataProtectionService{
 
     public void cleanExpired(){
         AuthenticationUtil.runAsSystem(()->{
-            List<ChildAssociationRef> childAssocs = nodeService.getChildAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, systemFolder));
-            List<NodeRef> toRemove = new ArrayList<>();
-            childAssocs.forEach(childAssocRef -> {
-                NodeRef nodeRef = childAssocRef.getChildRef();
+            List<DataProtectionQueueEntry> entries = queue.get(DataProtectionQueue.Status.FINISHED);
+            List<Pair<NodeRef,String>> toRemove = new ArrayList<>();
+            entries.forEach(entry -> {
+                NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,entry.getNode_id());
                 Date modified = (Date)nodeService.getProperty(nodeRef, ContentModel.PROP_MODIFIED);
                 if((System.currentTimeMillis() - modified.getTime()) > Duration.parse(this.retentionPeriod).toMillis()){
-                    toRemove.add(nodeRef);
+                    toRemove.add(new Pair<>(nodeRef,entry.getUser()));
                 }
             });
-            toRemove.forEach(nodeRef -> {
-                log.info("removing gdpr export {} {}",nodeService.getProperty(nodeRef, ContentModel.PROP_NAME),nodeRef);
-                nodeService.deleteNode(nodeRef);
+            toRemove.forEach(pair -> {
+                if(DataProtectionQueue.Status.FINISHED.toString().equals(queue.get(pair.getSecond()).getStatus())){
+                    log.info("removing gdpr export {} {}",nodeService.getProperty(pair.getFirst(), ContentModel.PROP_NAME),pair.getFirst());
+                    removeNode(pair.getFirst().getId());
+                    queue.delete(pair.getSecond());
+                }
             });
             return null;
         });
     }
 
     public void startExport(){
-        List<String> allUsers = queue.getAllUsers();
-        for(String user: allUsers) {
-            startExport(user);
-            queue.removeUsers(List.of(user));
+        List<DataProtectionQueueEntry> allUsers = queue.getAll().stream()
+                .filter(e ->
+                        DataProtectionQueue.Status.REQUESTED.toString().equals(e.getStatus()) || DataProtectionQueue.Status.RUNNING.toString().equals(e.getStatus()))
+                .collect(Collectors.toList());
+        for(DataProtectionQueueEntry e: allUsers) {
+            startExport(e);
         }
     }
 
-    public void startExport(String userName){
+    public void startExport(DataProtectionQueueEntry entry){
+        String userName = entry.getUser();
+        queue.update(userName, null, DataProtectionQueue.Status.RUNNING);
         // be sure systemfolder and target node is created with as admin user so that this files will not be included in export zip
         AuthenticationUtil.runAsSystem(()-> {
             prepare(userName);
             return null;});
-        AuthenticationUtil.runAs(() -> {
-            exportUserNodes(userName);
-            return null;
+        NodeRef nodeRef = AuthenticationUtil.runAs(() -> {
+            return exportUserNodes(userName);
         }, userName);
+        queue.update(userName, nodeRef.getId(), DataProtectionQueue.Status.FINISHED);
     }
 
     public void prepare(String userName){
         getTargetNode(userName);
     }
 
-    public void exportUserNodes(String userName) throws IOException, ArchiveException {
+    public NodeRef exportUserNodes(String userName) throws IOException, ArchiveException {
         String rootPath = config.getMainPath().concat("/"+userName);
 
         NodeRefResult userHomeResult = getUserHomeNodes(userName, null);
@@ -208,7 +217,7 @@ public class DataProtectionService{
         File target = new File(rootPath+".zip");
         archive(new File(rootPath), target);
 
-        AuthenticationUtil.runAsSystem(() -> persistAndCleanup(userName, target, rootPath));
+        return AuthenticationUtil.runAsSystem(() -> persistAndCleanup(userName, target, rootPath));
     }
 
     private void summmaryReport(String userName, List<NodeRef> collectionNodes, List<NodeRef> feedBacks, List<NodeRef> comments, String rootPath) {
@@ -300,25 +309,10 @@ public class DataProtectionService{
         }
     }
 
-    public NodeRef getDataProtectionNode(String userName) {
-        return AuthenticationUtil.runAsSystem(() ->{
-            NodeRef nodeRef = null;
-            Utils utils = new Utils();
-            if(utils.exists(systemFolder,userName.concat(".zip"))){
-                try {
-                    nodeRef = utils.getNodeRef(systemFolder,userName.concat(".zip"));
-                } catch (Throwable e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            return nodeRef;
-        });
-    }
-
     private NodeRef getTargetNode(String userName) {
         NodeRef nodeRef = AuthenticationUtil.runAsSystem(()-> {
             try {
-                return new Utils().getNodeRef(systemFolder, userName.concat(".zip"));
+                return new Utils().getNodeRef(systemFolder, CCConstants.CCM_TYPE_IO, userName.concat(".zip"));
             } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
@@ -510,7 +504,29 @@ public class DataProtectionService{
                 throw new SecurityException("admin rights required");
             }
         }
-        return queue.addUser(user);
+        DataProtectionQueueEntry entry = queue.get(user);
+        if(entry == null){
+            queue.add(user);
+            return true;
+        }else if(entry.getStatus().equals(DataProtectionQueue.Status.FINISHED.toString())){
+            removeNode(entry.getNode_id());
+            entry.setRequested(new Date());
+            entry.setStatus(DataProtectionQueue.Status.REQUESTED.toString());
+            entry.setNode_id(null);
+            entry.setFinished(null);
+            queue.update(entry);
+            return true;
+        }
+        return false;
+    }
+
+    private static void removeNode(String nodeId) {
+        org.edu_sharing.service.nodeservice.NodeService eduNodeService = NodeServiceFactory.getLocalService();
+        eduNodeService.removeNode(nodeId,null,false);
+    }
+
+    public DataProtectionQueueEntry getDataProtectionQueueEntry(String user){
+        return queue.get(user);
     }
 
     private String formatDate(Date date, ZoneId zone, Locale locale, FormatStyle style, boolean includeTime) {
