@@ -269,12 +269,12 @@
       </div>
       <div *ngIf="isMe" class="gdpr-export">
         <div class="export-result" *ngIf="gdprExport">
-          <a mat-button color="primary" target="_blank" [href]="gdprExport.downloadUrl"
-            ><i esIcon="cloud_download"></i> {{ gdprExport | nodeTitle }}</a
+          <a mat-button color="primary" target="_blank" [href]="gdprExport.node.downloadUrl"
+            ><i esIcon="cloud_download"></i> {{ gdprExport.node | nodeTitle }}</a
           >
           <div class="date">
             <label>{{ 'PROFILES.GDPR.CREATED' | translate }}</label>
-            {{ gdprExport.createdAt | formatDate : { relative: false } }}
+            {{ gdprExport.node.createdAt | formatDate : { relative: false } }}
           </div>
         </div>
         <button

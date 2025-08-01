@@ -30,7 +30,14 @@ import { Helper } from '../../core-module/rest/helper';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { catchError, take, takeUntil } from 'rxjs/operators';
-import { ConfigService, HOME_REPOSITORY, IamV1Service, ME, Node } from 'ngx-edu-sharing-api';
+import {
+    ConfigService,
+    HOME_REPOSITORY,
+    IamV1Service,
+    ME,
+    Node,
+    NodeEntry,
+} from 'ngx-edu-sharing-api';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { Closable } from '../../features/dialogs/card-dialog/card-dialog-config';
 import { TranslateService } from '@ngx-translate/core';
@@ -48,7 +55,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
     // dummy parameter to refetch the avatar
     avatarCache = '';
-    gdprExport: Node;
+    gdprExport: NodeEntry;
     constructor(
         private toast: Toast,
         private route: ActivatedRoute,
@@ -154,7 +161,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
                                         return of(null);
                                     }),
                                 )
-                                .subscribe((gdpr) => (this.gdprExport = gdpr?.node));
+                                .subscribe((gdpr) => (this.gdprExport = gdpr?.nodeEntry));
                         }
 
                         setTimeout(() => {
