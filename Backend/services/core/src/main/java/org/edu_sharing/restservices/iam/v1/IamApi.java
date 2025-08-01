@@ -663,7 +663,7 @@ public class IamApi {
             DataProtectionExport response = new DataProtectionExport();
             DataProtectionQueueEntry dataProtectionQueueEntry = personDao.getDataProtectionQueueEntry();
             if(dataProtectionQueueEntry != null) {
-                response.setStatusObject(dataProtectionQueueEntry);
+                response.setStatus(dataProtectionQueueEntry);
                 if(dataProtectionQueueEntry.getNode_id() != null) {
                     NodeDao nodeDao = NodeDao.getNode(repoDao, dataProtectionQueueEntry.getNode_id());
                     NodeEntry nodeEntry = new NodeEntry();
