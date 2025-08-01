@@ -238,6 +238,7 @@
   },
   "SIDEBAR": {
     "LANDING": "Startseite",
+    "LANDING_SHORT": "Start",
     "WORKSPACE": "Workspace",
     "SEARCH": "Suchumgebung",
     "COLLECTIONS": "Sammlungen",

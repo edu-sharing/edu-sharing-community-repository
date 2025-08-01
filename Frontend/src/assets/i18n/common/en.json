@@ -211,6 +211,8 @@
   "GOTO_LOGIN": "Go to login",
   "GOTO": "go to",
   "SIDEBAR": {
+    "LANDING": "Landing page",
+    "LANDING_SHORT": "Landing",
     "WORKSPACE": "Workspace",
     "SEARCH": "Search",
     "COLLECTIONS": "Collections",
