@@ -1,10 +1,11 @@
-import { forkJoin as observableForkJoin, Subject, timer } from 'rxjs';
+import { firstValueFrom, forkJoin as observableForkJoin, of, Subject, timer } from 'rxjs';
 
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import {
     ActionbarComponent,
     DefaultGroups,
     ElementType,
+    NodePersonNamePipe,
     OptionItem,
     OptionsHelperDataService,
     Scope,
@@ -23,12 +24,23 @@ import {
 } from '../../core-module/core.module';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Toast } from '../../services/toast';
+import { Toast, ToastType } from '../../services/toast';
 import { trigger } from '@angular/animations';
 import { Helper } from '../../core-module/rest/helper';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
-import { take, takeUntil } from 'rxjs/operators';
+import { catchError, take, takeUntil } from 'rxjs/operators';
+import {
+    ConfigService,
+    HOME_REPOSITORY,
+    IamV1Service,
+    ME,
+    Node,
+    NodeEntry,
+} from 'ngx-edu-sharing-api';
+import { DialogsService } from '../../features/dialogs/dialogs.service';
+import { Closable } from '../../features/dialogs/card-dialog/card-dialog-config';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
     selector: 'es-profile-page',
@@ -43,18 +55,23 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
     // dummy parameter to refetch the avatar
     avatarCache = '';
+    gdprExport: NodeEntry;
     constructor(
         private toast: Toast,
         private route: ActivatedRoute,
+        private dialogs: DialogsService,
         private mainNav: MainNavService,
         private connector: RestConnectorService,
         private translations: TranslationsService,
+        private translate: TranslateService,
         private router: Router,
         private config: ConfigurationService,
+        private configService: ConfigService,
         private sanitizer: DomSanitizer,
         private optionsHelperDataService: OptionsHelperDataService,
         private loadingScreen: LoadingScreenService,
-        private iamService: RestIamService,
+        private iamServiceLegacy: RestIamService,
+        private iamService: IamV1Service,
     ) {
         this.translations.waitForInit().subscribe(() => {
             route.params.subscribe((params) => {
@@ -80,6 +97,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     public editAbout = false;
     public oldPassword = '';
     public password = '';
+    gdprExportTriggered = false;
     // is editing allowed at all (via global config)
     editProfile: boolean;
     private editProfileUrl: string;
@@ -108,8 +126,8 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
         this.toast.showProgressSpinner();
         this.connector.isLoggedIn().subscribe((login) => {
             observableForkJoin(
-                this.iamService.getUser(authority),
-                this.iamService.getUserStats(authority),
+                this.iamServiceLegacy.getUser(authority),
+                this.iamServiceLegacy.getUserStats(authority),
             ).subscribe(
                 ([profile, stats]) => {
                     this.user = profile.person;
@@ -126,10 +144,24 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
                     if (!this.loadingTask.isDone) {
                         this.loadingTask.done();
                     }
-                    void this.iamService.getCurrentUserAsync().then((me) => {
+                    void this.iamServiceLegacy.getCurrentUserAsync().then((me) => {
                         this.isMe = profile.person.authorityName === me.person.authorityName;
                         if (this.isMe && login.isGuest) {
                             RestHelper.goToLogin(this.router, this.config);
+                        }
+                        if (this.isMe) {
+                            this.iamService
+                                .getDataProtectionExport({
+                                    person: ME,
+                                    repository: HOME_REPOSITORY,
+                                })
+                                .pipe(
+                                    catchError((e) => {
+                                        e.preventDefault();
+                                        return of(null);
+                                    }),
+                                )
+                                .subscribe((gdpr) => (this.gdprExport = gdpr?.nodeEntry));
                         }
 
                         setTimeout(() => {
@@ -160,7 +192,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
         });
     }
     private getProfileSetting(authority: string) {
-        this.iamService.getProfileSettings(authority).subscribe(
+        this.iamServiceLegacy.getProfileSettings(authority).subscribe(
             (res: ProfileSettings) => {
                 this.profileSettings = res;
             },
@@ -208,20 +240,22 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
                 return;
             }
             const credentials = { oldPassword: this.oldPassword, newPassword: this.password };
-            this.iamService.editUserCredentials(this.user.authorityName, credentials).subscribe(
-                () => {
-                    this.saveAvatar();
-                },
-                (error: any) => {
-                    if (RestHelper.errorMessageContains(error, 'BadCredentialsException')) {
-                        this.toast.error(null, 'WRONG_PASSWORD');
-                        this.toast.closeProgressSpinner();
-                    } else {
-                        this.toast.error(error);
+            this.iamServiceLegacy
+                .editUserCredentials(this.user.authorityName, credentials)
+                .subscribe(
+                    () => {
                         this.saveAvatar();
-                    }
-                },
-            );
+                    },
+                    (error: any) => {
+                        if (RestHelper.errorMessageContains(error, 'BadCredentialsException')) {
+                            this.toast.error(null, 'WRONG_PASSWORD');
+                            this.toast.closeProgressSpinner();
+                        } else {
+                            this.toast.error(error);
+                            this.saveAvatar();
+                        }
+                    },
+                );
         } else {
             this.saveAvatar();
         }
@@ -242,7 +276,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
             }
         }
         this.toast.showProgressSpinner();
-        this.iamService.editUser(this.user.authorityName, this.userEdit.profile).subscribe(
+        this.iamServiceLegacy.editUser(this.user.authorityName, this.userEdit.profile).subscribe(
             () => {
                 this.saveProfileSettings();
             },
@@ -256,7 +290,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     private saveAvatar() {
         this.user = null;
         if (!this.userEdit.profile.avatar && !this.avatarFile) {
-            this.iamService.removeUserAvatar(this.userEdit.authorityName).subscribe(
+            this.iamServiceLegacy.removeUserAvatar(this.userEdit.authorityName).subscribe(
                 () => {
                     this.edit = false;
                     this.editAbout = false;
@@ -271,24 +305,26 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
                 },
             );
         } else if (this.avatarFile) {
-            this.iamService.setUserAvatar(this.avatarFile, this.userEdit.authorityName).subscribe(
-                () => {
-                    this.edit = false;
-                    this.editAbout = false;
-                    this.toast.toast('PROFILE_UPDATED');
-                    this.loadUser(this.userEdit.authorityName);
-                    // the backend is running an async refresh task
-                    // so we wait here and try to refetch the icon
-                    timer(0, 1000)
-                        .pipe(take(10), takeUntil(this.destroyed))
-                        .subscribe(() => {
-                            this.avatarCache = '&dontcache = ' + Math.random();
-                        });
-                },
-                (error) => {
-                    this.toast.error(error);
-                },
-            );
+            this.iamServiceLegacy
+                .setUserAvatar(this.avatarFile, this.userEdit.authorityName)
+                .subscribe(
+                    () => {
+                        this.edit = false;
+                        this.editAbout = false;
+                        this.toast.toast('PROFILE_UPDATED');
+                        this.loadUser(this.userEdit.authorityName);
+                        // the backend is running an async refresh task
+                        // so we wait here and try to refetch the icon
+                        timer(0, 1000)
+                            .pipe(take(10), takeUntil(this.destroyed))
+                            .subscribe(() => {
+                                this.avatarCache = '&dontcache = ' + Math.random();
+                            });
+                    },
+                    (error) => {
+                        this.toast.error(error);
+                    },
+                );
         } else {
             this.toast.closeProgressSpinner();
             this.edit = false;
@@ -299,15 +335,17 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     }
 
     private saveProfileSettings() {
-        this.iamService.setProfileSettings(this.profileSettings, this.user.authorityName).subscribe(
-            () => {
-                this.saveAvatar();
-            },
-            (error) => {
-                this.toast.closeProgressSpinner();
-                this.toast.error(error);
-            },
-        );
+        this.iamServiceLegacy
+            .setProfileSettings(this.profileSettings, this.user.authorityName)
+            .subscribe(
+                () => {
+                    this.saveAvatar();
+                },
+                (error) => {
+                    this.toast.closeProgressSpinner();
+                    this.toast.error(error);
+                },
+            );
     }
     public aboutEdit() {
         this.userEdit = Helper.deepCopy(this.user);
@@ -321,6 +359,52 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
         this.oldPassword = '';
     }
 
+    async requestGdprExport() {
+        let message = await firstValueFrom(this.translate.get('PROFILES.GDPR.MESSAGE'));
+        if (this.gdprExport) {
+            message +=
+                '\n\n' +
+                (await firstValueFrom(this.translate.get('PROFILES.GDPR.MESSAGE_OVERWRITE')));
+        }
+
+        void this.dialogs.openGenericDialog({
+            title: 'PROFILES.GDPR.TITLE',
+            subtitle: new NodePersonNamePipe(this.configService).transform(this.user),
+            message,
+            avatar: {
+                kind: 'icon',
+                icon: 'archive',
+            },
+            closable: Closable.Casual,
+            buttons: [
+                {
+                    label: 'CANCEL',
+                    config: { color: 'standard' },
+                    callback: async () => true,
+                },
+                {
+                    label: 'PROFILES.GDPR.CONTINUE',
+                    config: { color: 'primary' },
+                    callback: async (ref) => {
+                        ref.patchState({ isLoading: true });
+                        await firstValueFrom(
+                            this.iamService.requestDataProtectionExport({
+                                person: ME,
+                                repository: HOME_REPOSITORY,
+                            }),
+                        );
+                        this.gdprExportTriggered = true;
+                        this.toast.show({
+                            message: 'PROFILES.GDPR.REQUEST_STARTED',
+                            type: 'info',
+                            subtype: ToastType.InfoData,
+                        });
+                        return true;
+                    },
+                },
+            ],
+        });
+    }
     savePersistentIds() {
         this.saveEdits(false);
     }

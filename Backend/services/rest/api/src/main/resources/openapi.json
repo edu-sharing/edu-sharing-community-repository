@@ -1499,6 +1499,39 @@
         },
         "type": "object"
       },
+      "DataProtectionExport": {
+        "properties": {
+          "nodeEntry": {
+            "$ref": "#/components/schemas/NodeEntry"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DataProtectionQueueEntry"
+          }
+        },
+        "type": "object"
+      },
+      "DataProtectionQueueEntry": {
+        "properties": {
+          "finished": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "requested": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "user": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "DeleteOption": {
         "properties": {
           "delete": {
@@ -21698,7 +21731,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/NodeEntry"
+                  "$ref": "#/components/schemas/DataProtectionExport"
                 }
               }
             },
@@ -21788,7 +21821,11 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {}
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataProtectionQueueEntry"
+                }
+              }
             },
             "description": "OK."
           },

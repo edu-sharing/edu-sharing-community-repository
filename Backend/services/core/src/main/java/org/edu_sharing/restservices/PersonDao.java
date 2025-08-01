@@ -32,6 +32,7 @@ import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.QRCode2Fa;
 import org.edu_sharing.service.dataprotection.FeatureInfoDataProtectionService;
 import org.edu_sharing.service.dataprotection.DataProtectionService;
+import org.edu_sharing.service.dataprotection.queue.DataProtectionQueueEntry;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -812,26 +813,12 @@ public class PersonDao {
 	}
 
 	public boolean requestDataProtectionExport(){
-		try{
-			ApplicationContextFactory.getApplicationContext().getBean(FeatureInfoDataProtectionService.class);
-			return dataProtectionService.requestDataProtectionExport(getUserName());
-		} catch (NoSuchBeanDefinitionException e) {
-			String msg = "data protection service not enabled";
-			logger.warn(msg);
-			throw new RuntimeException(msg, e);
-		}
+		ApplicationContextFactory.getApplicationContext().getBean(FeatureInfoDataProtectionService.class);
+		return dataProtectionService.requestDataProtectionExport(getUserName());
 	}
 
-	public NodeDao getDataProtectionExport(){
-		try{
-			ApplicationContextFactory.getApplicationContext().getBean(FeatureInfoDataProtectionService.class);
-			org.alfresco.service.cmr.repository.NodeRef nodeRef = dataProtectionService.getDataProtectionNode(getUserName());
-			if(nodeRef != null){
-				return NodeDao.getNode(repoDao,nodeRef.getId());
-			}
-		} catch (NoSuchBeanDefinitionException e) {
-			logger.warn("data protection service not enabled");
-		}
-		return null;
+	public DataProtectionQueueEntry getDataProtectionQueueEntry(){
+		ApplicationContextFactory.getApplicationContext().getBean(FeatureInfoDataProtectionService.class);
+		return dataProtectionService.getDataProtectionQueueEntry(getUserName());
 	}
 }

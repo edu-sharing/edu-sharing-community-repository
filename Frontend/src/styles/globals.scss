@@ -1,6 +1,7 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 @use 'projects/edu-sharing-ui/assets/scss/branding' as branding;
 @use 'sass:color';
+@use 'sass:map';
 
 *,
 ::after,
@@ -25,13 +26,13 @@
 html,
 body {
     font-family: if(
-        map-has-key(branding.$tokens, primaryFontFamily),
-        unquote(map-get(branding.$tokens, primaryFontFamily)),
-        unquote($primaryFontFamily)
+        map.get(branding.$tokens, primaryFontFamily) != null,
+        #{map.get(branding.$tokens, primaryFontFamily)},
+        #{$primaryFontFamily}
     ) !important;
     font-size: if(
-        map-has-key(branding.$tokens, primaryFontSize),
-        map-get(branding.$tokens, primaryFontSize),
+        map.get(branding.$tokens, primaryFontSize) != null,
+        map.get(branding.$tokens, primaryFontSize),
         $primaryFontSize
     );
     -webkit-font-smoothing: antialiased;

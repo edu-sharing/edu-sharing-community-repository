@@ -210,6 +210,8 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
         searchRequestParams
             .pipe(
                 tap(() => this.loadingContent.next(true)),
+                // debounce so facet list is initialized also on navigation
+                debounceTime(1),
                 map((params) => this._getSearchRemote(params)),
             )
             .subscribe((remote) => this.resultsDataSource.setRemote(remote));
