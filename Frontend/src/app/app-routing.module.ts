@@ -90,6 +90,14 @@ const routes: Routes = [
         loadChildren: () =>
             import('./pages/landing-page/landing-page.module').then((m) => m.LandingPageModule),
     },
+    // editorial page
+    {
+        path: UIConstants.ROUTER_PREFIX + 'editorial',
+        loadChildren: () =>
+            import('./pages/editorial-page/editorial-page.module').then(
+                (m) => m.EditorialPageModule,
+            ),
+    },
 
     // Register
     {

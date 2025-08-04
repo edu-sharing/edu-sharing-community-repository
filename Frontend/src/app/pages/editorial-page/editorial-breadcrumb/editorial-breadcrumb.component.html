@@ -1,0 +1,9 @@
+<a class="home" [routerLink]="'/' + ROUTER_PREFIX + 'editorial'">
+  {{ 'EDITORIAL.BREADCRUMB.HOME' | translate }}
+</a>
+<ng-container *ngIf="mode()">
+  <i esIcon="keyboard_arrow_right"></i>
+  <a class="main-scope">
+    {{ 'EDITORIAL.BREADCRUMB.' + mode().toUpperCase() | translate }}
+  </a>
+</ng-container>

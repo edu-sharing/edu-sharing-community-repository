@@ -1,0 +1,12 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+
+:host {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    > a {
+        font-size: vars.$fontSizeXLarge;
+        font-weight: bold;
+        text-decoration: none;
+    }
+}

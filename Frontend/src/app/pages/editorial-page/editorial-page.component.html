@@ -1,0 +1,68 @@
+<mat-sidenav-container>
+  <!-- Left Sidebar -->
+  <mat-sidenav
+    #leftSidenav
+    [mode]="'side'"
+    [opened]="sidenavLeft()"
+    position="start"
+    storageKey="EDITORIAL_SIDENAV_LEFT_WIDTH"
+    esResizableSidenav
+  >
+    <div class="mat-sidenav-content">
+      <es-mds-editor-wrapper
+        *ngIf="mdsGroup()"
+        [groupId]="mdsGroup()"
+        [embedded]="true"
+        [repository]="HOME_REPOSITORY"
+        [mode]="'search'"
+        [currentValues]="searchValues$ | async"
+        (currentValuesChange)="searchValues$.next($any($event))"
+      ></es-mds-editor-wrapper>
+    </div>
+    <!-- Left content -->
+  </mat-sidenav>
+
+  <!-- Right Sidebar -->
+  <mat-sidenav
+    #rightSidenav
+    [mode]="'side'"
+    [opened]="sidenavRight()"
+    [defaultWidth]="0.3"
+    storageKey="EDITORIAL_SIDENAV_RIGHT_WIDTH"
+    esResizableSidenav
+    position="end"
+  >
+    <div class="mat-sidenav-content">TEST</div>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <!-- <mat-toolbar>
+       <button mat-icon-button (click)="sidenavLeft.set(!sidenavLeft())">
+         <mat-icon>menu</mat-icon>
+       </button>
+       <span>Main Content</span>
+       <button mat-icon-button (click)="sidenavRight.set(!sidenavRight())">
+         <mat-icon>more_vert</mat-icon>
+       </button>
+     </mat-toolbar>
+ -->
+    <div class="main-content">
+      <es-editorial-breadcrumb [mode]="(params$ | async).primaryMode"></es-editorial-breadcrumb>
+      <mat-tab-group
+        *ngIf="(editorialPageService.observeTabs() | async)?.length"
+        [selectedIndex]="tabSelection$ | async"
+        (selectedIndexChange)="tabSelection$.next($event)"
+      >
+        <mat-tab *ngFor="let tab of editorialPageService.observeTabs() | async">
+          <ng-template mat-tab-label>
+            <i [esIcon]="tab.icon"></i>
+            {{ tab.caption ? tab.caption : ('EDITORIAL.TAB.' + tab.id | translate) }}
+          </ng-template>
+        </mat-tab>
+      </mat-tab-group>
+      <ng-container *ngIf="(params$ | async).primaryMode as mode">
+        <ng-container *ngIf="mode === 'activity'"> Activity </ng-container>
+      </ng-container>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

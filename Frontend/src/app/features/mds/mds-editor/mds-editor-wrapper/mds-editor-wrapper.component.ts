@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { Node, SearchService } from 'ngx-edu-sharing-api';
 import { Subject } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { first, tap } from 'rxjs/operators';
 import { RestConstants } from '../../../../core-module/core.module';
 import { Toast } from '../../../../services/toast';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
@@ -42,6 +42,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
     @Input() bulkBehaviour = BulkBehavior.Default;
     @Input() create: string;
     @Input() currentValues: Values;
+    @Output() currentValuesChange = new EventEmitter<Values>();
     @Input() customTitle: string;
     @Input() embedded = false;
     @Input() extended = false;
@@ -294,6 +295,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
                 );
                 this.editorType = 'angular';
             }
+            this.mdsEditorInstance.values.subscribe((v) => this.currentValuesChange.emit(v));
         } catch (error) {
             this.handleError(error);
         } finally {
