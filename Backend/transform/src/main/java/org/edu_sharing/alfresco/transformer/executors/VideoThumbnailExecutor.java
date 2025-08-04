@@ -85,7 +85,6 @@ public class VideoThumbnailExecutor extends AbstractCommandExecutor implements C
                 comandAndArgs = Stream.of("-i","\""+sourceFile.getCanonicalPath()+"\"","-t",TIME_COUNT,"-loop","0","-q",WEBP_QUALITY,"-filter","setpts=0.15*PTS,scale=400:-1","-r",WEBP_FRAMERATE,"-f","webp","-y","\""+targetFile.getCanonicalPath()+"\"")
                         .collect(Collectors.toList());
             }
-            System.out.println("comandAndArgs:" + StringUtils.join(comandAndArgs," "));
 
             Long timeout = stringToLong(transformOptions.get(RequestParamMap.TIMEOUT));
             //this.run(StringUtils.join(comandAndArgs," "),sourceFile,targetFile,timeout);
