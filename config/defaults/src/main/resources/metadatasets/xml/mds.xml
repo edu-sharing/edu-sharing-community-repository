@@ -651,6 +651,15 @@
         <entry cap="Lese- und Bearbeitungsrechte">1</entry>
       </values>
     </widget>
+    <widget>
+      <id>virtual:activityType</id>
+      <caption>cp_virtual_activityType</caption>
+      <valuespace_i18n_prefix>activityType_</valuespace_i18n_prefix>
+      <values>
+        <entry icon="person">yours</entry>
+        <entry icon="place">areas</entry>
+      </values>
+    </widget>
   </widgets>
   <templates>
     <template>
@@ -987,6 +996,12 @@
 				]]></html>
     </template>
     <template>
+      <id>editorial_activity</id>
+      <html><![CDATA[
+              <ccm:educationallearningresourcetype>
+				]]></html>
+    </template>
+    <template>
       <id>connector_curriculum</id>
       <html><![CDATA[
 				<curriculum_title>
@@ -1183,6 +1198,13 @@
         <view>search_relation_node</view>
       </views>
     </group>
+    <group>
+      <id>editorial_activity</id>
+      <rendering>angular</rendering>
+      <views>
+        <view>editorial_activity</view>
+      </views>
+    </group>
   </groups>
   <sorts>
     <sort>
@@ -1292,8 +1314,8 @@
           ],
           "minimum_should_match": 1,
           "should":[
-            {"match": {"permissions.Write": "${user.cm:userName}" }},
-            {"match": {"permissions.Coordinator": "${user.cm:userName}" }}
+          {"match": {"permissions.Write": "${user.cm:userName}" }},
+          {"match": {"permissions.Coordinator": "${user.cm:userName}" }}
           ]
           }
           }
