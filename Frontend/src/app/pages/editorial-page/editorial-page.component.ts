@@ -173,14 +173,15 @@ export class EditorialPageComponent implements OnInit, OnDestroy {
             });
     }
 
-    private fetchResults(params: Params) {
-        const criteria = JSON.parse(params.filters || {});
+    private async fetchResults(params: Params) {
+        const mds = await firstValueFrom(this.mdsDefinition$.pipe(filter((m) => !!m)));
+        const criteria = JSON.parse(params.filters || '{}');
         if (params.q) {
             criteria[RestConstants.PRIMARY_SEARCH_CRITERIA] = [params.q];
         }
         const searchCriteria = this.searchHelperService.convertCritieria(
             criteria,
-            this.mdsDefinition$.value.widgets,
+            mds.widgets,
             true,
         );
 
