@@ -1,19 +1,24 @@
-import { Location } from '@angular/common';
-import { HttpRequest } from '@angular/common/http';
-import { Injectable, Injector, Type } from '@angular/core';
-import { type ApiErrorResponse } from 'ngx-edu-sharing-api';
-import { RestConstants } from '../core-module/core.module';
-import { DialogsService } from '../features/dialogs/dialogs.service';
-import { CordovaService } from '../services/cordova.service';
-import { Toast } from '../services/toast';
+import { Inject, Injectable, InjectionToken, Injector, Optional, Type } from '@angular/core';
 import { createCustomElement } from '@angular/elements';
-import { ActionbarComponent } from 'ngx-edu-sharing-ui';
+
+export type WebComponent = {
+    name: string;
+    component: Type<any>;
+};
+export const EDU_SHARING_WEB_COMPONENTS = new InjectionToken<WebComponent[]>(
+    'EDU_SHARING_WEB_COMPONENTS',
+);
 
 @Injectable({
     providedIn: 'root',
 })
 export class WebComponentService {
-    constructor(private injector: Injector) {}
+    constructor(
+        private injector: Injector,
+        @Optional() @Inject(EDU_SHARING_WEB_COMPONENTS) private components: WebComponent[],
+    ) {
+        this.components?.forEach((c) => this.registerWebComponent(c.name, c.component));
+    }
 
     /**
      * register your component as a web component
