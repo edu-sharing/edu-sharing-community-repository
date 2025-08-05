@@ -116,6 +116,7 @@ public class ExcelLOMImporter {
 							logger.error("no column name found for column:"+colIdxIdx);
 							continue;
 						}
+						columnName = columnName.trim();
 
 						if(columnName.startsWith("collection")){
 							String value = cell.getStringCellValue();
