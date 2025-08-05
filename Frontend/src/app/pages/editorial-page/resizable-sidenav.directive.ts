@@ -63,7 +63,7 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
         this.resizer.addEventListener('mousedown', this.startResize);
         document.addEventListener('mousemove', this.onMouseMove);
         document.addEventListener('mouseup', this.stopResize);
-        document.addEventListener('dblclick', this.resetToDefault);
+        this.resizer.addEventListener('dblclick', this.resetToDefault);
     }
 
     private startResize = (event: MouseEvent) => {
