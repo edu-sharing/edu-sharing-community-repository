@@ -25,6 +25,16 @@
     {{ $any(getNode())[item.name] }}
   </span>
 </ng-container>
+<ng-container [ngSwitch]="item.name" *ngIf="item.type === 'EVENT'">
+  <span *ngSwitchCase="'eventType'">
+    {{ 'EVENT.TYPE.' + $any(getNode()).eventType | translate }}
+  </span>
+  <span *ngSwitchCase="'timestamp'">
+    {{
+      $any(getNode()).timestamp | formatDate : { async: true, time: true, relative: true } | async
+    }}
+  </span>
+</ng-container>
 <ng-container
   [ngSwitch]="item.name"
   *ngIf="item.type === 'NODE' || item.type === 'NODE_PROPOSAL' || item.type === 'COLLECTION'"

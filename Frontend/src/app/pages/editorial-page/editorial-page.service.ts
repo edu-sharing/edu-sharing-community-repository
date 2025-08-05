@@ -1,8 +1,7 @@
-import { Injectable, NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
-import { EditorialPageComponent } from './editorial-page.component';
+import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { MdsWidget } from 'ngx-edu-sharing-api';
+import { Values } from 'ngx-edu-sharing-ui';
 
 export type EditorialTab = {
     id: string;
@@ -19,6 +18,17 @@ export class EditorialPageService {
             return { [this.tabWidgetId$.value]: [this.tabs$.value[tab].id] };
         }
         return {};
+    }
+
+    resolveTabForCriteria(criteria: Values) {
+        if (this.tabWidgetId$.value) {
+            const tab = this.tabs$.value.findIndex(
+                (t) => t.id === criteria[this.tabWidgetId$.value]?.[0],
+            );
+            delete criteria[this.tabWidgetId$.value];
+            return tab;
+        }
+        return 0;
     }
 
     observeTabs() {

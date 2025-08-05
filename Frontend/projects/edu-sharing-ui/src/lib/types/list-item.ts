@@ -1,7 +1,14 @@
 import { Sort, SortDirection } from '@angular/material/sort';
 import { EventEmitter } from '@angular/core';
 
-export type ListItemType = 'NODE' | 'NODE_PROPOSAL' | 'COLLECTION' | 'ORG' | 'GROUP' | 'USER';
+export type ListItemType =
+    | 'NODE'
+    | 'NODE_PROPOSAL'
+    | 'COLLECTION'
+    | 'ORG'
+    | 'GROUP'
+    | 'USER'
+    | 'EVENT';
 
 /**
  * A list item info, which is basically a column

@@ -1,6 +1,13 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import * as Constants from 'ngx-edu-sharing-api';
-import { MdsService, Node, Organization, ProposalNode, RestConstants } from 'ngx-edu-sharing-api';
+import {
+    MdsService,
+    Node,
+    Organization,
+    ProposalNode,
+    RestConstants,
+    UserEvent,
+} from 'ngx-edu-sharing-api';
 import { BehaviorSubject, merge } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { ListItem } from '../../types/list-item';
@@ -22,6 +29,7 @@ export class ListTextComponent extends ListWidget implements OnInit {
         new ListItem('ORG', '*'),
         new ListItem('GROUP', '*'),
         new ListItem('USER', '*'),
+        new ListItem('EVENT', '*'),
     ];
     readonly DATE_FIELDS = RestConstants.DATE_FIELDS;
     readonly VCARD_FIELDS = RestConstants.getAllVCardFields();
@@ -43,6 +51,8 @@ export class ListTextComponent extends ListWidget implements OnInit {
     getNode() {
         if (this.item.type === 'NODE_PROPOSAL') {
             return (this.node as ProposalNode).proposal || this.node;
+        } else if (this.item.type === 'EVENT') {
+            return (this.node as { event: UserEvent }).event;
         } else if ((this.node as Node).type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL) {
             return (this.node as Node).relations?.Original ?? this.node;
         }

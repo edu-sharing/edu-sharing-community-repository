@@ -61,7 +61,15 @@
         </mat-tab>
       </mat-tab-group>
       <ng-container *ngIf="(params$ | async).primaryMode as mode">
-        <ng-container *ngIf="mode === 'activity'"> Activity </ng-container>
+        <ng-container *ngIf="mode === 'activity'">
+          <es-node-entries-wrapper
+            [dataSource]="dataSource"
+            [elementInteractionType]="InteractionType.Emitter"
+            [scope]="Scope.WorkspaceList"
+            [columns]="columns()"
+            [displayType]="displayType()"
+          ></es-node-entries-wrapper>
+        </ng-container>
       </ng-container>
     </div>
   </mat-sidenav-content>
