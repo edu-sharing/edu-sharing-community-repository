@@ -248,7 +248,9 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.displayType = this.displayType;
         this.entriesService.elementInteractionType = this.elementInteractionType;
         this.entriesService.gridConfig = this.gridConfig;
-        this.entriesService.tableConfig = this.tableConfig;
+        if (this.tableConfig) {
+            this.entriesService.tableConfig = this.tableConfig;
+        }
         this.entriesService.options = this.options;
         this.entriesService.globalOptions = this.globalOptions;
         this.entriesService.sort = this.sort;
