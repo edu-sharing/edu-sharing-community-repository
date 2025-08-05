@@ -15,6 +15,9 @@
 .no-search-results-message {
     @include noSearchResultsMessage;
 }
+:host ::ng-deep .empty-container {
+    width: 100%;
+}
 
 .filters-button {
     @media (max-width: 600px) {
