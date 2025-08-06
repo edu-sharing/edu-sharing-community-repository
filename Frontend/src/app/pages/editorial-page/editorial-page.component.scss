@@ -1,4 +1,5 @@
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
 
 mat-sidenav-container {
     min-height: calc(100vh - var(--mainnavCurrentHeight));
@@ -24,6 +25,11 @@ mat-sidenav {
     }
 }
 
+.empty {
+    font-size: vars.$fontSizeXLarge;
+    color: var(--textLight);
+    padding: 20px 0;
+}
 :host ::ng-deep {
     .sidenav-resizer {
         width: 7px;

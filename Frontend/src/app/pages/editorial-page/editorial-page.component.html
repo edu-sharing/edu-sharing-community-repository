@@ -68,7 +68,13 @@
             [scope]="Scope.WorkspaceList"
             [columns]="columns()"
             [displayType]="displayType()"
-          ></es-node-entries-wrapper>
+          >
+            <ng-template #empty>
+              <div class="empty">
+                {{ 'EDITORIAL.ACTIVITY.NO_RECENT_ACTIVITIES' | translate }}
+              </div>
+            </ng-template>
+          </es-node-entries-wrapper>
         </ng-container>
       </ng-container>
     </div>
