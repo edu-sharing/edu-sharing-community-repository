@@ -63,6 +63,7 @@ export class EditorialSidebarComponent implements OnInit, OnDestroy {
                     dialogRef.afterClosed().subscribe(() => {
                         dialogRefPromise = null;
                         this.closeTrigger.emit();
+                        this.destroyed.next();
                     });
                 } else if (!isMobileScreen) {
                     void dialogRefPromise?.then((dialogRef) => dialogRef.close());
