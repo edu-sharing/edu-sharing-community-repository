@@ -1,5 +1,10 @@
 {
   "EDITORIAL": {
+    "TITLE": "Verwalten",
+    "BREADCRUMB": {
+      "HOME": "Startseite",
+      "ACTIVITY": "Aktivitäten"
+    },
     "ACTIVITY": {
       "NO_RECENT_ACTIVITIES": "Keine kürzlichen Aktivitäten gefunden"
     }

@@ -62,6 +62,7 @@ import {
 import { VirtualNode } from '../types/api-models';
 import { OptionsHelperDataService } from '../services/options-helper-data.service';
 import { UIService } from '../services/ui.service';
+import { SelectionChange } from '@angular/cdk/collections';
 
 @Component({
     selector: 'es-node-entries-wrapper',
@@ -105,6 +106,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @Input() globalOptions: OptionItem[];
     @Input() displayType = NodeEntriesDisplayType.Grid;
     @Output() displayTypeChange = new EventEmitter<NodeEntriesDisplayType>();
+    @Output() selectionChange = new EventEmitter<SelectionChange<T>>();
     @Input() elementInteractionType = InteractionType.DefaultActionLink;
     @Input() sort: ListSortConfig;
     @Input() dragDrop: ListDragGropConfig<T>;
@@ -191,7 +193,8 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         */
         this.virtualNodesAdded = this.optionsHelper.virtualNodesAdded;
         this.displayTypeChanged = this.optionsHelper.displayTypeChanged;
-        this.entriesService.selection.changed.subscribe(() => {
+        this.entriesService.selection.changed.subscribe((event) => {
+            this.selectionChange.emit(event);
             if (this.optionsHelper.getData()) {
                 this.optionsHelper.getData().selectedObjects =
                     this.entriesService.selection.selected;

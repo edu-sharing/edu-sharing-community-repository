@@ -1,0 +1,10 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    > div:first-child {
+        font-size: vars.$fontSizeXLarge;
+    }
+}

@@ -32,7 +32,12 @@
     esResizableSidenav
     position="end"
   >
-    <div class="mat-sidenav-content">TEST</div>
+    <div class="mat-sidenav-content">
+      <es-editorial-sidebar
+        [nodes]="selection()"
+        (closeTrigger)="sidenavRight.set(false)"
+      ></es-editorial-sidebar>
+    </div>
   </mat-sidenav>
 
   <mat-sidenav-content>
@@ -66,6 +71,7 @@
             [dataSource]="dataSource"
             [elementInteractionType]="InteractionType.Emitter"
             [scope]="Scope.WorkspaceList"
+            (selectionChange)="selection.set($any($event.source.selected))"
             [columns]="columns()"
             [displayType]="displayType()"
           >

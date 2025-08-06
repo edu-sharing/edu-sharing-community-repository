@@ -7,6 +7,7 @@ import {
     IamV1Service,
     MdsDefinition,
     MdsService,
+    Node,
     NodeServiceUnwrapped,
     SearchService,
     SearchServiceUnwrapped,
@@ -83,6 +84,7 @@ export class EditorialPageComponent implements OnInit, OnDestroy {
     dataSource = new NodeDataSource();
     columns = signal<ListItem[]>(null);
     displayType = signal(NodeEntriesDisplayType.Table);
+    selection = signal<Node[] | null>(null);
 
     constructor(
         private router: Router,
@@ -180,9 +182,11 @@ export class EditorialPageComponent implements OnInit, OnDestroy {
         combineLatest([
             this.queryParams$.pipe(startWith(this.queryParams$.value)),
             this.params$.pipe(startWith(this.params$.value)),
-        ]).subscribe(([params, primary]) => {
-            void this.processCurrentValues(params, primary);
-        });
+        ])
+            .pipe(debounceTime(10))
+            .subscribe(([params, primary]) => {
+                void this.processCurrentValues(params, primary);
+            });
         this.init.pipe(first()).subscribe(() => {
             combineLatest([
                 this.searchEvent$.pipe(
@@ -244,6 +248,12 @@ export class EditorialPageComponent implements OnInit, OnDestroy {
             true,
         );
         this.init.next();
+        // this is the first call. In this case, we wait to get a new event with the default uri parameters before loading
+        if (Object.keys(params).length === 0) {
+            return;
+        }
+        console.log('processCurrentValues', params);
+        this.dataSource.isLoading = true;
         if (routeConfig.primaryMode === 'activity') {
             this.searchServiceUnwrapped
                 .getRecentUserEvents({
@@ -253,6 +263,7 @@ export class EditorialPageComponent implements OnInit, OnDestroy {
                 })
                 .subscribe((events) => {
                     console.log(events);
+                    this.dataSource.isLoading = false;
                     this.dataSource.setData(
                         events.nodes.map((e) => {
                             return {

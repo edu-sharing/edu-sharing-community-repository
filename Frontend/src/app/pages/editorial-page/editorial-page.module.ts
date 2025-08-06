@@ -4,14 +4,16 @@ import { EditorialPageComponent } from './editorial-page.component';
 import { EditorialPageRoutingModule } from './editorial-page-routing.module';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { ResizableSidenavDirective } from './resizable-sidenav.directive';
-import { EditorialBreadcrumb } from './editorial-breadcrumb/editorial-breadcrumb.component';
+import { EditorialBreadcrumbComponent } from './editorial-breadcrumb/editorial-breadcrumb.component';
 import { MdsModule } from '../../features/mds/mds.module';
+import { EditorialSidebarComponent } from './editorial-sidebar/editorial-sidebar.component';
 
 @NgModule({
     declarations: [EditorialPageComponent],
     imports: [
         ResizableSidenavDirective,
-        EditorialBreadcrumb,
+        EditorialBreadcrumbComponent,
+        EditorialSidebarComponent,
         MatToolbarModule,
         EditorialPageRoutingModule,
         SharedModule,

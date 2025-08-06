@@ -16,6 +16,7 @@ export const TRANSLATION_LIST = [
     'workspace',
     'search',
     'collections',
+    'editorial',
     'login',
     'permissions',
     'oer',

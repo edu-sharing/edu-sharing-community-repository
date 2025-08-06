@@ -1,0 +1,9 @@
+<div class="sidebar-header">
+  <div>{{ title() | translate }}</div>
+  <button mat-icon-button color="primary" (click)="closeTrigger.emit()">
+    <i esIcon="close"></i>
+  </button>
+</div>
+<ng-container *ngTemplateOutlet="content"></ng-container>
+
+<ng-template #content> Real content </ng-template>

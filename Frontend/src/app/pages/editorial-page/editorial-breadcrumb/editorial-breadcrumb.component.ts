@@ -10,7 +10,7 @@ import { RouterLink } from '@angular/router';
     styleUrls: ['editorial-breadcrumb.component.scss'],
     imports: [EduSharingUiCommonModule, CommonModule, TranslateModule, RouterLink],
 })
-export class EditorialBreadcrumb {
+export class EditorialBreadcrumbComponent {
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     mode = input.required<string>();
 }
