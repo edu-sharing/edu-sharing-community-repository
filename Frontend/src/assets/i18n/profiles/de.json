@@ -23,9 +23,11 @@
     "REQUEST_GDPR_BUTTON": "Daten-Auskunft / Export anfordern",
     "GDPR": {
       "TITLE": "Auskunft / Export anfordern",
+      "EXPORT_HEADING": "Datenexport:",
       "MESSAGE": "Sie können hier einen Export Ihrer Daten bzw. eine Selbstauskunft anfragen.\n\nBitte beachten Sie, dass dieser Vorgang einige Zeit dauern kann. \nSobald der Vorgang abgeschlossen ist, wird auf dieser Seite der Download angezeigt. Sollten Sie eine E-Mail-Adresse im Profil hinterlegt haben, erhalten Sie eine Benachrichtigung nach Fertigstellung",
       "MESSAGE_OVERWRITE": "Hinweis: Der zuletzt erstellte Export wird hierdurch ersetzt",
       "REQUEST_STARTED": "Die Anfrage wurde angenommen und wird verarbeitet",
+      "REQUEST_ONGOING": "Eine Anfrage läuft bereits. Bitte warten Sie, bis die Anfrage verarbeitet wurde",
       "CREATED": "Erstellt:",
       "CONTINUE": "Anfordern"
     }
