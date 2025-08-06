@@ -415,6 +415,7 @@ public class DataProtectionService{
 
 
     private Map<NodeRef, Optional<NodeRef>>  createChildParentMap(List<NodeRef> nodeRefs){
+        if(!metadataExport) return new HashMap<>();
         return nodeRefs.stream().collect(Collectors.toMap(n -> n, n -> {
             try {
                 NodeRef parent = nodeService.getPrimaryParent(n).getParentRef();
@@ -428,7 +429,6 @@ public class DataProtectionService{
     }
 
     private HashMap<NodeRef, String> buildPathMap(Map<NodeRef, Optional<NodeRef>> childParentMap){
-        if(!metadataExport) return new HashMap<>();
         HashMap<NodeRef, String> pathMap = new HashMap<>();
         childParentMap.forEach((k,v)->{
             String path = pathMap.get(k);
