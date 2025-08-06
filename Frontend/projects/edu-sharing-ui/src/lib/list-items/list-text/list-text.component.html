@@ -27,7 +27,10 @@
 </ng-container>
 <ng-container [ngSwitch]="item.name" *ngIf="item.type === 'EVENT'">
   <span *ngSwitchCase="'eventType'">
-    {{ 'EVENT.TYPE.' + $any(getNode()).eventType | translate }}
+    {{
+      'EVENT.TYPE.' + $any(getNode()).eventType
+        | translate : { fallback: $any(getNode()).eventType }
+    }}
   </span>
   <span *ngSwitchCase="'timestamp'">
     {{

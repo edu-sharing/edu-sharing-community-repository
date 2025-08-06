@@ -26,7 +26,7 @@ export class EditorialPageService {
                 (t) => t.id === criteria[this.tabWidgetId$.value]?.[0],
             );
             delete criteria[this.tabWidgetId$.value];
-            return tab;
+            return tab === -1 ? 0 : tab;
         }
         return 0;
     }
