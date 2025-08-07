@@ -1,4 +1,11 @@
-import { ApplicationRef, Component, OnInit, ViewChild } from '@angular/core';
+import {
+    AfterViewInit,
+    ApplicationRef,
+    Component,
+    DoCheck,
+    OnInit,
+    ViewChild,
+} from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { User } from 'ngx-edu-sharing-api';
 import {
@@ -33,7 +40,7 @@ import { BehaviorSubject } from 'rxjs';
     styleUrls: ['delete.component.scss'],
     standalone: false,
 })
-export class PermissionsDeleteComponent implements OnInit {
+export class PermissionsDeleteComponent implements OnInit, DoCheck {
     readonly DisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     readonly AuthoritySearchMode = AuthoritySearchMode;
@@ -118,6 +125,10 @@ export class PermissionsDeleteComponent implements OnInit {
         this.refresh();
     }
 
+    ngDoCheck(): void {
+        this.canSubmit$.next(this.canSubmit());
+    }
+
     async ngOnInit() {
         this.jobs = (await this.admin.getAllJobs().toPromise()).filter((j) =>
             j.tags?.includes('DeletePersonJob'),
@@ -137,14 +148,14 @@ export class PermissionsDeleteComponent implements OnInit {
 
     private anyModeMatches(mode: DeleteMode) {
         return (
-            this.options.homeFolder.folders === mode ||
-            this.options.homeFolder.privateFiles === mode ||
-            this.options.homeFolder.ccFiles === mode ||
-            this.options.sharedFolders.folders === mode ||
-            this.options.sharedFolders.privateFiles === mode ||
-            this.options.sharedFolders.ccFiles === mode ||
-            this.options.collections.privateCollections === mode ||
-            this.options.collections.publicCollections === mode
+            this.options?.homeFolder?.folders === mode ||
+            this.options?.homeFolder?.privateFiles === mode ||
+            this.options?.homeFolder?.ccFiles === mode ||
+            this.options?.sharedFolders?.folders === mode ||
+            this.options?.sharedFolders?.privateFiles === mode ||
+            this.options?.sharedFolders?.ccFiles === mode ||
+            this.options?.collections?.privateCollections === mode ||
+            this.options?.collections?.publicCollections === mode
         );
     }
 

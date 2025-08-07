@@ -12,6 +12,7 @@ import {
     RestHelper,
     RestIamService,
     RestNodeService,
+    UIService,
 } from '../../../../core-module/core.module';
 import { Node } from 'ngx-edu-sharing-api';
 import { NodeHelperService } from '../../../../services/node-helper.service';
@@ -43,8 +44,7 @@ export class CreateVariantDialogComponent {
         private connector: RestConnectorService,
         private connectors: RestConnectorsService,
         private dialogs: DialogsService,
-        private events: FrameEventsService,
-        private iam: RestIamService,
+        private uiService: UIService,
         private nodeApi: RestNodeService,
         private nodeHelper: NodeHelperService,
         private router: Router,
@@ -109,15 +109,7 @@ export class CreateVariantDialogComponent {
                             (edited) => {
                                 this.dialogRef.patchState({ isLoading: false });
                                 if (this._openViaConnector) {
-                                    UIHelper.openConnector(
-                                        this.connectors,
-                                        this.iam,
-                                        this.events,
-                                        this.toast,
-                                        edited.node,
-                                        null,
-                                        win,
-                                    );
+                                    this.uiService.openConnector(edited.node, null, win);
                                     UIHelper.goToWorkspaceFolder(
                                         this.nodeApi,
                                         this.router,

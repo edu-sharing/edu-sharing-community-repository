@@ -154,7 +154,7 @@ mat-tab-group {
     // `color="warn"`
     &.mat-warn {
         // Red background, same as negative
-        background-color: $warning;
+        background-color: var(--palette-warn-500);
         color: white;
     }
     &.status-negative {

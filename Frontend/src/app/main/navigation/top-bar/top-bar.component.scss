@@ -114,7 +114,7 @@ span {
     }
 }
 .timeout {
-    background-color: rgba(255, 255, 255, 0.25);
+    background-color: rgba(255, 255, 255, var(--workspaceTopBarNewAlpha));
     color: white;
     border-radius: 20pt;
     position: fixed;
@@ -184,7 +184,7 @@ button.user {
             color.channel($workspaceTopBarFontColor, 'red', $space: rgb),
             color.channel($workspaceTopBarFontColor, 'green', $space: rgb),
             color.channel($workspaceTopBarFontColor, 'blue', $space: rgb),
-            0.1
+            var(--workspaceTopBarNewAlpha)
         );
         border-radius: 0;
     }

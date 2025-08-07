@@ -2,7 +2,7 @@ import { Component, Inject, ViewChild } from '@angular/core';
 import { Connector } from 'ngx-edu-sharing-api';
 import { BehaviorSubject } from 'rxjs';
 import { delay, filter, first } from 'rxjs/operators';
-import { DialogButton } from '../../../../core-module/core.module';
+import { DialogButton, UIService } from '../../../../core-module/core.module';
 import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import {
@@ -37,6 +37,7 @@ export class AddWithConnectorDialogComponent {
         private dialogRef: CardDialogRef<AddWithConnectorDialogData, AddWithConnectorDialogResult>,
         private cordova: CordovaService,
         private translate: TranslateService,
+        private uiService: UIService,
     ) {
         void this.initDialogConfig();
     }
@@ -75,7 +76,7 @@ export class AddWithConnectorDialogComponent {
         }
         let win: Window;
         if (!this.cordova.isRunningCordova()) {
-            win = window.open('');
+            win = window.open(this.uiService.getLoadingSpinnerUrl());
         }
         this.dialogRef.close({ name: this.name, type: this.getType(), window: win, data: data });
     }
