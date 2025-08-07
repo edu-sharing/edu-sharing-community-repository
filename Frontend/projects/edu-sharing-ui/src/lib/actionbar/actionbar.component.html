@@ -81,17 +81,32 @@
     <button
       *ngIf="option.isToggleVisible"
       mat-icon-button
-      matTooltip="{{ option.name | translate }}"
+      matTooltip="{{
+        ($any(option).toggleNames
+          ? $any(option).toggleNames[option.toggleState ? 'enabled' : 'disabled']
+          : option.name
+        ) | translate
+      }}"
       [attr.aria-label]="option.ariaLabel || option.name | translate"
       (click)="click(option)"
       [class]="
         'toggle-' +
-        (option.name | replaceChars : { search: '.', replace: '-' }) +
+        (($any(option).toggleNames
+          ? $any(option).toggleNames[option.toggleState ? 'enabled' : 'disabled']
+          : option.name
+        ) | replaceChars : { search: '.', replace: '-' }) +
         (option.isEnabled ? '' : ' disabled')
       "
       attr.data-test="toggle-{{ option.name }}"
     >
-      <i [esIcon]="option.icon" [aria]="false"></i>
+      <i
+        [esIcon]="
+          $any(option).toggleIcons
+            ? $any(option).toggleIcons[option.toggleState ? 'enabled' : 'disabled']
+            : option.icon
+        "
+        [aria]="false"
+      ></i>
     </button>
   </ng-container>
 </ng-template>

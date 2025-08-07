@@ -11,7 +11,7 @@ import {
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { UIConstants } from '../util/ui-constants';
-import { OptionItem } from '../types/option-item';
+import { OptionItem, OptionItemToggle } from '../types/option-item';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 import { ConfigService, Node } from 'ngx-edu-sharing-api';
 import { Router } from '@angular/router';
@@ -149,8 +149,9 @@ export class UIService {
         let result: OptionItem[] = [];
         for (let option of options) {
             if (
-                (option.isToggle === toggle || (!toggle && !option.isToggle)) &&
-                (!toggle || togglePosition === option.togglePosition)
+                ((option as OptionItemToggle).isToggle === toggle ||
+                    (!toggle && !(option as OptionItemToggle).isToggle)) &&
+                (!toggle || togglePosition === (option as OptionItemToggle).togglePosition)
             )
                 result.push(option);
         }

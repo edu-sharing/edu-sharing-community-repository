@@ -1,28 +1,37 @@
-import { Component, computed, OnDestroy, OnInit, signal } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import {
     AuthenticationService,
     ConfigService,
     DEFAULT,
     HOME_REPOSITORY,
-    IamV1Service,
     MdsDefinition,
     MdsService,
     Node,
-    NodeServiceUnwrapped,
     SearchService,
     SearchServiceUnwrapped,
 } from 'ngx-edu-sharing-api';
-import { BehaviorSubject, combineLatest, filter, firstValueFrom, Observable, Subject } from 'rxjs';
+import {
+    BehaviorSubject,
+    combineLatest,
+    filter,
+    firstValueFrom,
+    map,
+    Observable,
+    Subject,
+} from 'rxjs';
 import { RestConstants } from '../../core-module/rest/rest-constants';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
+    ActionbarComponent,
+    ElementType,
     Helper,
     InteractionType,
     ListItem,
     MdsHelperService,
-    MdsViewerService,
     NodeDataSource,
     NodeEntriesDisplayType,
+    OptionItemToggle,
+    OptionsHelperDataService,
     Scope,
     SearchHelperService,
     UIService,
@@ -35,16 +44,8 @@ import {
 } from '../../main/navigation/search-field/search-field.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EditorialPageService } from './editorial-page.service';
-import { MdsHelper } from '../../core-module/rest/mds-helper';
-import {
-    debounce,
-    debounceTime,
-    distinctUntilChanged,
-    first,
-    skip,
-    startWith,
-    tap,
-} from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, first, skip, startWith, tap } from 'rxjs/operators';
+import { BreakpointObserver } from '@angular/cdk/layout';
 
 export type PrimaryMode = 'activity';
 type RouteConfig = {
@@ -56,17 +57,22 @@ type RouteConfig = {
     templateUrl: 'editorial-page.component.html',
     styleUrls: ['editorial-page.component.scss'],
     standalone: false,
+    providers: [OptionsHelperDataService],
 })
-export class EditorialPageComponent implements OnInit, OnDestroy {
+export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly HOME_REPOSITORY = HOME_REPOSITORY;
     readonly PageCount = 25;
     readonly TabWidgetActivities = 'virtual:activityType';
     readonly InteractionType = InteractionType;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Scope = Scope;
+    @ViewChild(ActionbarComponent) actionbarRef: ActionbarComponent;
     private destroyed$ = new Subject<void>();
+    isMobile$ = this.breakpointObserver
+        .observe(['(max-width: 900px)'])
+        .pipe(map(({ matches }) => matches));
     sidenavLeft = signal(true);
-    sidenavRight = signal(true);
+    sidenavRight = signal(false);
     /**
      * mds group, used to fetch the template group AND search query id!
      */
@@ -89,6 +95,7 @@ export class EditorialPageComponent implements OnInit, OnDestroy {
     constructor(
         private router: Router,
         private route: ActivatedRoute,
+        private breakpointObserver: BreakpointObserver,
         private mdsService: MdsService,
         private mainNav: MainNavService,
         private searchFieldService: SearchFieldService,
@@ -98,8 +105,12 @@ export class EditorialPageComponent implements OnInit, OnDestroy {
         private searchHelperService: SearchHelperService,
         private ui: UIService,
         private authenticationService: AuthenticationService,
+        private optionsHelperDataService: OptionsHelperDataService,
         public editorialPageService: EditorialPageService,
     ) {
+        this.isMobile$.pipe(first()).subscribe((mobile) => {
+            this.sidenavRight.set(!mobile);
+        });
         this.mainNav.setMainNavConfig({
             showUser: true,
             showScope: true,
@@ -133,6 +144,31 @@ export class EditorialPageComponent implements OnInit, OnDestroy {
                 this.searchEvent$ = instance.onSearchTriggered();
                 this.initSubscription();
             });
+    }
+
+    ngAfterViewInit(): void {
+        const sidebarOption = new OptionItemToggle(
+            {
+                enabled: 'EDITORIAL.OPTION.TOGGLE_SIDEBAR',
+                disabled: 'EDITORIAL.OPTION.TOGGLE_SIDEBAR',
+            },
+            {
+                enabled: 'splitscreen_right',
+                disabled: 'view_column_2',
+            },
+            this.sidenavRight(),
+            () => this.sidenavRight.set(!this.sidenavRight()),
+        );
+        sidebarOption.elementType = [ElementType.Unknown];
+        void this.optionsHelperDataService.initComponents(this.actionbarRef);
+        void this.optionsHelperDataService.setData({
+            scope: Scope.EditorialPage,
+            customOptions: {
+                useDefaultOptions: false,
+                addOptions: [sidebarOption],
+            },
+        });
+        void this.optionsHelperDataService.refreshComponents();
     }
 
     async ngOnInit(): Promise<void> {

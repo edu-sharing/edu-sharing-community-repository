@@ -20,6 +20,7 @@ import {
     NodesRightMode,
     OptionData,
     OptionItem,
+    OptionItemToggle,
     OptionsHelperComponents,
     OptionsHelperService as OptionsHelperServiceAbstract,
     Scope,
@@ -335,7 +336,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         // do pre-handle callback options for dropdown + actionbar
         options = await this.filterOptions(options, target, data, objects);
         if (target !== Target.Actionbar) {
-            options = options.filter((o) => !o.isToggle);
+            options = options.filter((o) => !(o as OptionItemToggle).isToggle);
             // do not show any actions in the dropdown for no selection, these are reserved for actionbar
             options = options.filter(
                 (o) => !o.constrains || o.constrains.indexOf(Constrain.NoSelection) === -1,
@@ -1396,23 +1397,34 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 this.displayTypeChanged.emit(components.list.getDisplayType());
             }
         };
-        const toggleViewType = new OptionItem('', '', () => {
-            switch (components.list.getDisplayType()) {
-                case NodeEntriesDisplayType.Table:
-                    setDisplayType(NodeEntriesDisplayType.Grid);
-                    break;
-                case NodeEntriesDisplayType.Grid:
-                    setDisplayType(NodeEntriesDisplayType.Table);
-                    break;
-            }
-        });
-        setDisplayType(components?.list?.getDisplayType(), false);
+        // enabled = table
+        // disabled = grid
+        const toggleViewType = new OptionItemToggle(
+            {
+                enabled: 'OPTIONS.SWITCH_TO_CARDS_VIEW',
+                disabled: 'OPTIONS.SWITCH_TO_LIST_VIEW',
+            },
+            {
+                enabled: 'view_module',
+                disabled: 'list',
+            },
+            components?.list?.getDisplayType() === NodeEntriesDisplayType.Table,
+            () => {
+                switch (components.list.getDisplayType()) {
+                    case NodeEntriesDisplayType.Table:
+                        setDisplayType(NodeEntriesDisplayType.Grid);
+                        break;
+                    case NodeEntriesDisplayType.Grid:
+                        setDisplayType(NodeEntriesDisplayType.Table);
+                        break;
+                }
+            },
+        );
         toggleViewType.scopes = [Scope.WorkspaceList, Scope.Search, Scope.CollectionsReferences];
         toggleViewType.constrains = [Constrain.NoSelection];
         toggleViewType.group = DefaultGroups.Toggles;
         toggleViewType.elementType = [ElementType.Unknown];
         toggleViewType.priority = 10;
-        toggleViewType.isToggle = true;
         /*
         const reorder = new OptionItem('OPTIONS.LIST_SETTINGS', 'settings', (node: Node) => this.reorderDialog = true);
         reorder.isToggle = true;
@@ -1438,50 +1450,51 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             options.push(this.infoToggle);
          */
         let metadataSidebarSubscription: Subscription;
-        const metadataSidebar = new OptionItem('OPTIONS.METADATA_SIDEBAR', 'info', (object) => {
-            this.workspace.nodeSidebarChange.subscribe((change: Node) => {
-                metadataSidebar.icon = change ? 'info' : 'info';
-            });
-            this.workspace.nodeSidebar = this.workspace.nodeSidebar
-                ? null
-                : this.getObjects(object, data)[0];
-            if (this.workspace.nodeSidebar == null) {
-                metadataSidebarSubscription?.unsubscribe();
-            } else {
-                metadataSidebarSubscription = components.list
-                    ?.getSelection()
-                    .changed.subscribe((selection) => {
-                        if (selection.source.selected.length === 0) {
-                            return;
-                        }
-                        if (this.workspace.nodeSidebar == null) {
-                            metadataSidebarSubscription?.unsubscribe();
-                            return;
-                        }
-                        this.workspace.nodeSidebar = selection.source.selected[0] as Node;
-                        this.workspace.nodeSidebarChange.emit(this.workspace.nodeSidebar);
-                    });
-            }
-            this.workspace.nodeSidebarChange.emit(this.workspace.nodeSidebar);
-        });
+        const metadataSidebar = new OptionItemToggle(
+            {
+                enabled: 'OPTIONS.METADATA_SIDEBAR',
+                disabled: 'OPTIONS.METADATA_SIDEBAR',
+            },
+            {
+                enabled: 'info',
+                disabled: 'info',
+            },
+            !!this.workspace.nodeSidebar,
+            (object) => {
+                this.workspace.nodeSidebar = this.workspace.nodeSidebar
+                    ? null
+                    : this.getObjects(object, data)[0];
+                if (this.workspace.nodeSidebar == null) {
+                    metadataSidebarSubscription?.unsubscribe();
+                } else {
+                    metadataSidebarSubscription = components.list
+                        ?.getSelection()
+                        .changed.subscribe((selection) => {
+                            if (selection.source.selected.length === 0) {
+                                return;
+                            }
+                            if (this.workspace.nodeSidebar == null) {
+                                metadataSidebarSubscription?.unsubscribe();
+                                return;
+                            }
+                            this.workspace.nodeSidebar = selection.source.selected[0] as Node;
+                            this.workspace.nodeSidebarChange.emit(this.workspace.nodeSidebar);
+                        });
+                }
+                this.workspace.nodeSidebarChange.emit(this.workspace.nodeSidebar);
+            },
+        );
         metadataSidebar.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         metadataSidebar.scopes = [Scope.WorkspaceList];
         metadataSidebar.constrains = [Constrain.NoBulk];
         metadataSidebar.group = DefaultGroups.Toggles;
-        metadataSidebar.isToggle = true;
         const registerSelectionChange = (list: ListEventInterface<any>) => {
             const updateVisibility = () => {
                 toggleSelection.isToggleVisible =
                     list?.getDisplayType() !== NodeEntriesDisplayType.Table;
             };
             const updateSelectionState = (selection: SelectionModel<any>) => {
-                if (selection?.isEmpty()) {
-                    toggleSelection.name = 'OPTIONS.SELECT_ALL';
-                    toggleSelection.icon = 'select_all';
-                } else {
-                    toggleSelection.name = 'OPTIONS.DESELECT';
-                    toggleSelection.icon = 'deselect';
-                }
+                toggleSelection.toggleState = !selection.isEmpty();
             };
             list?.getSelection()
                 .changed.pipe(map((s) => s.source))
@@ -1490,19 +1503,29 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             updateSelectionState(list?.getSelection());
             updateVisibility();
         };
-        const toggleSelection = new OptionItem('', '', () => {
-            if (components.list?.getSelection()?.isEmpty()) {
-                components.list?.selectAll();
-            } else {
-                components.list?.getSelection().clear();
-            }
-        });
+        const toggleSelection = new OptionItemToggle(
+            {
+                enabled: 'OPTIONS.DESELECT',
+                disabled: 'OPTIONS.SELECT_ALL',
+            },
+            {
+                enabled: 'deselect',
+                disabled: 'select_all',
+            },
+            !components.list?.getSelection()?.isEmpty(),
+            () => {
+                if (components.list?.getSelection()?.isEmpty()) {
+                    components.list?.selectAll();
+                } else {
+                    components.list?.getSelection().clear();
+                }
+            },
+        );
         registerSelectionChange(components?.list);
         toggleSelection.scopes = [Scope.WorkspaceList, Scope.Search, Scope.CollectionsReferences];
         toggleSelection.group = DefaultGroups.Toggles;
         toggleSelection.elementType = [];
         toggleSelection.priority = 10;
-        toggleSelection.isToggle = true;
         toggleSelection.togglePosition = 'before';
 
         options.push(applyNode);

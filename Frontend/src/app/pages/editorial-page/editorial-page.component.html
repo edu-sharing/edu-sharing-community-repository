@@ -1,5 +1,4 @@
 <mat-sidenav-container>
-  <!-- Left Sidebar -->
   <mat-sidenav
     #leftSidenav
     [mode]="'side'"
@@ -19,14 +18,13 @@
         (currentValuesChange)="searchValues$.next($any($event))"
       ></es-mds-editor-wrapper>
     </div>
-    <!-- Left content -->
   </mat-sidenav>
 
   <!-- Right Sidebar -->
   <mat-sidenav
     #rightSidenav
     [mode]="'side'"
-    [opened]="sidenavRight()"
+    [opened]="sidenavRight() && (isMobile$ | async) === false"
     [defaultWidth]="0.3"
     storageKey="EDITORIAL_SIDENAV_RIGHT_WIDTH"
     esResizableSidenav
@@ -52,7 +50,10 @@
      </mat-toolbar>
  -->
     <div class="main-content">
-      <es-editorial-breadcrumb [mode]="(params$ | async).primaryMode"></es-editorial-breadcrumb>
+      <div class="top-area">
+        <es-editorial-breadcrumb [mode]="(params$ | async).primaryMode"></es-editorial-breadcrumb>
+        <es-actionbar></es-actionbar>
+      </div>
       <mat-tab-group
         *ngIf="(editorialPageService.observeTabs() | async)?.length"
         [selectedIndex]="tabSelection$ | async"
@@ -86,3 +87,9 @@
     </div>
   </mat-sidenav-content>
 </mat-sidenav-container>
+<es-editorial-sidebar
+  *ngIf="(isMobile$ | async) === true && sidenavRight()"
+  [nodes]="selection()"
+  [isModal]="true"
+  (closeTrigger)="sidenavRight()"
+></es-editorial-sidebar>

@@ -26,20 +26,6 @@ export class OptionItem {
      */
     public showAsAction = false;
     /**
-     * If true, this option will be shown as a toggle on the right side (provide iconToggle as a toggle icon)
-     * @type {boolean}
-     */
-    public isToggle = false;
-    /**
-     * Only when @isToggle. is the toggle currently visible
-     */
-    public isToggleVisible = true;
-    /**
-     * Only when @isToggle. Where to place the toggle, before or after all other actions
-     * @type {boolean}
-     */
-    public togglePosition: 'before' | 'after' = 'after';
-    /**
      * If true, shows a line at the top.
      *
      * This feature is usually handled now by associating an entry to a `group`
@@ -161,6 +147,53 @@ export class OptionItem {
         public callback: (object?: Node | any, objects?: (Node | any)[]) => void,
     ) {}
 }
+type ToogleStates = {
+    /**
+     * icon when the toggle is in enabled state
+     */
+    enabled: string;
+    /**
+     * icon when the toggle is in disabled state
+     */
+    disabled: string;
+};
+export class OptionItemToggle extends OptionItem {
+    public readonly isToggle = true;
+    /**
+     * @Deprecated: please use the @OptionItemToggle class
+     * Only when @isToggle. is the toggle currently visible
+     */
+    public isToggleVisible = true;
+    /**
+     * Where to place the toggle, before or after all other actions
+     * @type {boolean}
+     */
+    public togglePosition: 'before' | 'after' = 'after';
+    constructor(
+        /**
+         * set individual names for a toggle based on its state
+         */
+        public toggleNames: ToogleStates,
+        /**
+         * set individual icons for a toggle based on its state
+         */
+        public toggleIcons: ToogleStates,
+        /**
+         * is toggle enabled or disabled?
+         */
+        public toggleState: boolean,
+        // TODO: Maybe switch to only providing the second parameter.
+        callback?: (object?: Node | any, objects?: (Node | any)[]) => void,
+    ) {
+        const internalCallback = (object?: Node | any, objects?: (Node | any)[]) => {
+            this.toggleState = !this.toggleState;
+            callback?.(object, objects);
+        };
+        super(null, null, internalCallback);
+        this.isToggle = true;
+    }
+}
+
 export class CustomOptions {
     /**
      * If true, all existing or available options for the object stay
@@ -181,6 +214,7 @@ export class CustomOptions {
      */
     public addOptions?: OptionItem[];
 }
+
 export enum HideMode {
     Disable,
     Hide,
@@ -202,6 +236,7 @@ export enum Scope {
     Stream = 'Stream',
     CreateMenu = 'CreateMenu',
     DashboardSwimlane = 'DashboardSwimlane',
+    EditorialPage = 'EditorialPage',
 
     MediacenterNodesList = 'MediacenterNodesList',
     Admin = 'Admin', // Admin Tools / Debugging

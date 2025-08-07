@@ -26,6 +26,7 @@ import {
     NodeEntriesDisplayType,
     NodeRoot,
     OptionItem,
+    OptionItemToggle,
     TemporaryStorageService,
     TranslationsService,
     UIAnimation,
@@ -1042,14 +1043,18 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         this.toMeSharedToggle = await this.session
             .get('toMeSharedGroup', this.config.instant('workspaceSharedToMeDefaultAll', false))
             .toPromise();
-        const toggle = new OptionItem(
-            'OPTIONS.TOGGLE_SHARED_TO_ME',
-            this.toMeSharedToggle ? 'edu-content_shared_me_all' : 'edu-content_shared_me_private',
+        const toggle = new OptionItemToggle(
+            {
+                enabled: 'OPTIONS.TOGGLE_SHARED_TO_ME',
+                disabled: 'OPTIONS.TOGGLE_SHARED_TO_ME',
+            },
+            {
+                enabled: 'edu-content_shared_me_all',
+                disabled: 'edu-content_shared_me_private',
+            },
+            this.toMeSharedToggle,
             () => {
                 this.toMeSharedToggle = !this.toMeSharedToggle;
-                toggle.icon = this.toMeSharedToggle
-                    ? 'edu-content_shared_me_all'
-                    : 'edu-content_shared_me_private';
                 void this.session.set('toMeSharedGroup', this.toMeSharedToggle);
                 this.openDirectoryFromRoute();
                 //this.treeComponent.reload = Boolean(true);
@@ -1058,7 +1063,6 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
                 );
             },
         );
-        toggle.isToggle = true;
         toggle.group = DefaultGroups.Toggles;
         toggle.elementType = [ElementType.Unknown];
         toggle.priority = 5;
