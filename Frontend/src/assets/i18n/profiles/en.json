@@ -23,9 +23,11 @@
     "REQUEST_GDPR_BUTTON": "Request Data Disclosure / Export",
     "GDPR": {
       "TITLE": "Request Disclosure / Export",
+      "EXPORT_HEADING": "data export:",
       "MESSAGE": "You can request an export of your data or a self-disclosure here.\n\nPlease note that this process may take some time. \nOnce completed, the download will be displayed on this page. If your profile has an email address, you will receive a notification upon completion.",
       "MESSAGE_OVERWRITE": "Note: The current export will be replaced with the new one",
       "REQUEST_STARTED": "The request has been received and is being processed",
+      "REQUEST_ONGOING": "There is an ongoing request. Please wait until it is processed",
       "CREATED": "Created:",
       "CONTINUE": "Request"
     }

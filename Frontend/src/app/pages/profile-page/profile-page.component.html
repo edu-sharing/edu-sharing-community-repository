@@ -269,6 +269,7 @@
       </div>
       <div *ngIf="isMe" class="gdpr-export">
         <div class="export-result" *ngIf="gdprExport">
+          <h3 class="mat-heading-6">{{ 'PROFILES.GDPR.EXPORT_HEADING' | translate }}</h3>
           <a mat-button color="primary" target="_blank" [href]="gdprExport.node.downloadUrl"
             ><i esIcon="cloud_download"></i> {{ gdprExport.node | nodeTitle }}</a
           >

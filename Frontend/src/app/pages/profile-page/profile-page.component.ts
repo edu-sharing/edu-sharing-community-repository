@@ -17,6 +17,7 @@ import {
     ConfigurationService,
     ProfileSettings,
     RestConnectorService,
+    RestConstants,
     RestHelper,
     RestIamService,
     User,
@@ -387,18 +388,25 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
                     config: { color: 'primary' },
                     callback: async (ref) => {
                         ref.patchState({ isLoading: true });
-                        await firstValueFrom(
-                            this.iamService.requestDataProtectionExport({
-                                person: ME,
-                                repository: HOME_REPOSITORY,
-                            }),
-                        );
+                        try {
+                            await firstValueFrom(
+                                this.iamService.requestDataProtectionExport({
+                                    person: ME,
+                                    repository: HOME_REPOSITORY,
+                                }),
+                            );
+                            this.toast.show({
+                                message: 'PROFILES.GDPR.REQUEST_STARTED',
+                                type: 'info',
+                                subtype: ToastType.InfoData,
+                            });
+                        } catch (e) {
+                            if (e.status === RestConstants.DUPLICATE_NODE_RESPONSE) {
+                                e.preventDefault();
+                                this.toast.error(null, 'PROFILES.GDPR.REQUEST_ONGOING');
+                            }
+                        }
                         this.gdprExportTriggered = true;
-                        this.toast.show({
-                            message: 'PROFILES.GDPR.REQUEST_STARTED',
-                            type: 'info',
-                            subtype: ToastType.InfoData,
-                        });
                         return true;
                     },
                 },

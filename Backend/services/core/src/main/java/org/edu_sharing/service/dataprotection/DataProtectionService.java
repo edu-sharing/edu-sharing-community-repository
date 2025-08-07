@@ -333,7 +333,6 @@ public class DataProtectionService{
     }
 
     private void createStructure(String rootPath, String subPath, HashMap<NodeRef, String> pathMap) throws IOException {
-        if(!metadataExport) return;
         for(Map.Entry<NodeRef,String> e : pathMap.entrySet()){
             NodeRef nodeRef = e.getKey();
             String path = e.getValue();
@@ -416,6 +415,7 @@ public class DataProtectionService{
 
 
     private Map<NodeRef, Optional<NodeRef>>  createChildParentMap(List<NodeRef> nodeRefs){
+        if(!metadataExport) return new HashMap<>();
         return nodeRefs.stream().collect(Collectors.toMap(n -> n, n -> {
             try {
                 NodeRef parent = nodeService.getPrimaryParent(n).getParentRef();

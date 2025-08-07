@@ -47,9 +47,9 @@ import { OptionsHelperService } from './services/options-helper.service';
 import { Toast } from './services/toast';
 import { SharedModule } from './shared/shared.module';
 import { BApiModule } from 'ngx-edu-sharing-b-api';
-import { createCustomElement } from '@angular/elements';
 import { WrapperComponent } from './web-components/wrapper/app/wrapper.component';
 import { MockLocationStrategy } from '@angular/common/testing';
+import { WebComponentService } from './main/web-component.service';
 
 const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     showDelay: 500,
@@ -106,6 +106,8 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         { provide: MAT_RADIO_DEFAULT_OPTIONS, useValue: { color: 'primary' } },
         { provide: MAT_SLIDE_TOGGLE_DEFAULT_OPTIONS, useValue: { color: 'primary' } },
         extensionProviders,
+
+        WebComponentService,
         ErrorHandlerService,
     ].concat(
         environment.webComponentMode
@@ -126,19 +128,15 @@ export class AppModule implements DoBootstrap {
     ngDoBootstrap(appRef: ApplicationRef): void {
         if (environment.webComponentMode) {
             console.info('web component __env', (window as any).__env);
-            customElements.define(
-                'edu-sharing-app',
-                createCustomElement(WrapperComponent, { injector: this.injector }),
-            );
-            console.info('web component __env', (window as any).__env);
-            customElements.define(
-                'edu-sharing-spinner',
-                createCustomElement(SpinnerComponent, { injector: this.injector }),
-            );
-            customElements.define(
-                'edu-sharing-actionbar',
-                createCustomElement(ActionbarComponent, { injector: this.injector }),
-            );
+            this.injector
+                .get(WebComponentService)
+                .registerWebComponent('edu-sharing-app', WrapperComponent);
+            this.injector
+                .get(WebComponentService)
+                .registerWebComponent('edu-sharing-spinner', SpinnerComponent);
+            this.injector
+                .get(WebComponentService)
+                .registerWebComponent('edu-sharing-actionbar', ActionbarComponent);
         } else {
             appRef.bootstrap(AppComponent);
         }
