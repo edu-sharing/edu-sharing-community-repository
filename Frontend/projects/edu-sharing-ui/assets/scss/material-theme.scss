@@ -289,10 +289,12 @@ body {
     --mdc-protected-button-container-color: white;
 }
 // improve default positioning of outlined fields with label
-.mat-mdc-text-field-wrapper.mdc-text-field--outlined {
-    .mat-mdc-form-field-infix {
-        padding-top: 20px;
-        min-height: unset;
+.mat-mdc-form-field:not(.mat-mdc-paginator-page-size-select) {
+    .mat-mdc-text-field-wrapper.mdc-text-field--outlined {
+        .mat-mdc-form-field-infix {
+            padding-top: 20px;
+            min-height: unset;
+        }
     }
 }
 .mat-mdc-checkbox {
