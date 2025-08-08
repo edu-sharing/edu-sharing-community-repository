@@ -310,5 +310,7 @@ init:
 
       ## @param init.permission.securityContext.runAsUser Set user to run init container under
       runAsUser: 0
+      ## @param init.permission.securityContext.runAsNonRoot Running as Non-root
+      runAsNonRoot: false
 
 ########################################################################################################################
