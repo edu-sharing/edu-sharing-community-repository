@@ -1494,7 +1494,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                     list?.getDisplayType() !== NodeEntriesDisplayType.Table;
             };
             const updateSelectionState = (selection: SelectionModel<any>) => {
-                toggleSelection.toggleState = !selection.isEmpty();
+                toggleSelection.toggleState = !selection?.isEmpty();
             };
             list?.getSelection()
                 .changed.pipe(map((s) => s.source))
