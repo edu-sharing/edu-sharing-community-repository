@@ -25,7 +25,6 @@ import java.util.Map;
 public class SearchServiceBrockhausImpl extends SearchServiceAdapter{
 
 	private static final String BROCKHAUS_API = "https://api2.brockhaus.de/search";
-	private final String apiKey;
 	private final ApplicationInfo appInfo;
 
 	Logger logger = Logger.getLogger(SearchServiceBrockhausImpl.class);
@@ -34,7 +33,6 @@ public class SearchServiceBrockhausImpl extends SearchServiceAdapter{
 	public SearchServiceBrockhausImpl(String appId) {
 		this.appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
 		this.repositoryId = appInfo.getAppId();
-		this.apiKey = appInfo.getApiKey();
 	}
 	public SearchResultNodeRef searchBrockhaus(String path) throws Exception{
 		String url=BROCKHAUS_API+path;
@@ -75,8 +73,8 @@ public class SearchServiceBrockhausImpl extends SearchServiceAdapter{
 			properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,"brockhaus");
 			//String contentUrl=buildUrl(apiKey,document.getString("url"));
 			//properties.put(CCConstants.CONTENTURL,URLTool.getRedirectServletLink(repositoryId, document.getString("url")));
-			properties.put(CCConstants.CONTENTURL,buildUrl(apiKey, (String) properties.get(CCConstants.SYS_PROP_NODE_UID)));
-			properties.put(CCConstants.CCM_PROP_IO_WWWURL,buildUrl(apiKey, (String) properties.get(CCConstants.SYS_PROP_NODE_UID)));
+			properties.put(CCConstants.CONTENTURL,buildUrl(appInfo, (String) properties.get(CCConstants.SYS_PROP_NODE_UID)));
+			properties.put(CCConstants.CCM_PROP_IO_WWWURL,buildUrl(appInfo, (String) properties.get(CCConstants.SYS_PROP_NODE_UID)));
 
 			NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(repositoryId,
 					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(),
@@ -88,12 +86,19 @@ public class SearchServiceBrockhausImpl extends SearchServiceAdapter{
 		}
 		return searchResultNodeRef;
 	}
-	public static String buildUrl(String apiKey,String id){
+	public static String buildUrl(ApplicationInfo appInfo, String id){
 		String prefix = "";
 		if(id.startsWith("%2fkilex")) {
 			prefix = "/junior";
 		}
-		return "https://www.brockhaus.de/portal/user/"+URLEncoder.encodeUriComponent(apiKey)+"?url="+URLEncoder.encodeUriComponent(prefix + "/ecs/" + id.replace("%2f", "/"));
+		String url = prefix + "/ecs/" + id.replace("%2f", "/");
+		if(StringUtils.isNotBlank(appInfo.getString("vidisIdp", ""))) {
+			return "https://brockhaus.de/login?vidis_idp_hint="+
+					URLEncoder.encodeUriComponent(appInfo.getString("vidisIdp", ""))+
+					"&url="+URLEncoder.encodeUriComponent("https://brockhaus.de" + url);
+		}
+		String apiKey = appInfo.getApiKey();
+		return "https://www.brockhaus.de/portal/user/"+URLEncoder.encodeUriComponent(apiKey)+"?url="+URLEncoder.encodeUriComponent(url);
 	}
 	@Override
 	public SearchResultNodeRef search(MetadataSet mds, String query, Map<String, String[]> criterias,

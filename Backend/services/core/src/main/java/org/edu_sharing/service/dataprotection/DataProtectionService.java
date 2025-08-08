@@ -182,38 +182,48 @@ public class DataProtectionService{
     }
 
     public NodeRef exportUserNodes(String userName) throws IOException, ArchiveException {
+        log.info("starting for user {}", userName);
         String rootPath = config.getMainPath().concat("/"+userName);
 
+        log.info("collecting home nodes for {}", userName);
         NodeRefResult userHomeResult = getUserHomeNodes(userName, null);
         createStructure(rootPath,"home",buildPathMap(createChildParentMap(userHomeResult.getNodes())));
 
+        log.info("collecting collection nodes for {}", userName);
         List<NodeRef> collectionNodes = getCollectionNodes(userName);
         createStructure(rootPath,"collection",buildPathMap(createChildParentMap(collectionNodes)));
 
+        log.info("collecting shared nodes for {}", userName);
         List<NodeRef> sharedNodes = getSharedNodes(userName,null, Stream.concat(userHomeResult.getIgnored().stream(),Stream.concat(userHomeResult.nodes.stream(),collectionNodes.stream())).collect(Collectors.toList()));
         createStructure(rootPath,"shared",buildPathMap(createChildParentMap(sharedNodes)));
 
+        log.info("collecting feedbacks for {}", userName);
         List<NodeRef> feedBacks = feedbackService.getUsersFeedback(userName);
         createStructure(rootPath,"feedback",buildPathMap(createChildParentMap(feedBacks)));
 
+        log.info("collecting comments for {}", userName);
         List<NodeRef> comments = commentService.getUsersComments(userName);
         createStructure(rootPath,"comment",buildPathMap(createChildParentMap(comments)));
 
         //List<NodeRef> ratings = ratingService....
         //createStructure(rootPath,"comment",buildPathMap(createChildParentMap(comments)));
 
+        log.info("collecting safe home nodes for {}", userName);
         // safe
         NodeServiceInterceptor.setEduSharingScope("safe");
         NodeRefResult userHomeResultSafe = getUserHomeNodes(userName, "safe");
         createStructure(rootPath,"safe/home",buildPathMap(createChildParentMap(userHomeResultSafe.getNodes())));
 
+        log.info("collecting safe shared nodes for {}", userName);
         List<NodeRef> sharedNodesSafe = getSharedNodes(userName,"safe", Stream.concat(userHomeResultSafe.getIgnored().stream(),Stream.concat(userHomeResultSafe.nodes.stream(),collectionNodes.stream())).collect(Collectors.toList()));
         createStructure(rootPath,"safe/shared",buildPathMap(createChildParentMap(sharedNodesSafe)));
         NodeServiceInterceptor.setEduSharingScope(null);
 
+        log.info("creating report for {}", userName);
         summmaryReport(userName, collectionNodes, feedBacks, comments, rootPath);
 
 
+        log.info("creating archive for {}", userName);
         File target = new File(rootPath+".zip");
         archive(new File(rootPath), target);
 

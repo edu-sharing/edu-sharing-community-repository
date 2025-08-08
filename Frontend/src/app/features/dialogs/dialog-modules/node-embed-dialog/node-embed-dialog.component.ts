@@ -17,7 +17,7 @@ import { startWith, take } from 'rxjs/operators';
 import { DialogButton, RestConstants, RestHelper } from '../../../../core-module/core.module';
 import { Toast, ToastType } from '../../../../services/toast';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
-import { Node } from '../../../../core-module/rest/data-object';
+import { Node } from 'ngx-edu-sharing-api';
 import { MainNavService } from '../../../../main/navigation/main-nav.service';
 import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
@@ -113,11 +113,7 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
     }
 
     private registerNotPublicWarning() {
-        // TODO
-        //
-        // observeIsPublic(node)
-        //     .pipe(takeUntil(this.destroyed$))
-        //     .subscribe((isPublic) => (this.showNotPublicWarning = !isPublic));
+        this.showNotPublicWarning = !this.data.node?.isPublic;
     }
 
     private async copy(): Promise<void> {

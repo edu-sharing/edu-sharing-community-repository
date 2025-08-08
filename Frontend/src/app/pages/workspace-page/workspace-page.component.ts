@@ -1,5 +1,13 @@
 import { trigger } from '@angular/animations';
-import { Component, HostListener, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+    ApplicationRef,
+    Component,
+    HostListener,
+    NgZone,
+    OnDestroy,
+    OnInit,
+    ViewChild,
+} from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -196,6 +204,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         private mainNavService: MainNavService,
         private mds: MdsService,
         private ngZone: NgZone,
+        private applicationRef: ApplicationRef,
         private node: RestNodeService,
         private nodeHelper: NodeHelperService,
         private route: ActivatedRoute,
@@ -324,16 +333,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         win: any = null,
         connectorType: Connector = null,
     ) {
-        UIHelper.openConnector(
-            this.connectors,
-            this.iam,
-            this.event,
-            this.toast,
-            this.getNodeList(node)[0],
-            type,
-            win,
-            connectorType,
-        );
+        this.ui.openConnector(this.getNodeList(node)[0], type, win, connectorType);
     }
 
     async handleDrop(event: { target: DropTarget; source: DropSource<Node> }) {
@@ -892,6 +892,11 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
             this.breadcrumbsService.setNodePath(this.path);
             this.currentFolder = folder;
             this.searchQuery = search;
+            this.applicationRef.tick();
+            this.explorer.load({
+                offset: 0,
+                reset: true,
+            });
         });
     }
 

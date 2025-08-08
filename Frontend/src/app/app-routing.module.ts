@@ -163,7 +163,14 @@ const routes: Routes = [
         path: UIConstants.ROUTER_PREFIX + 'lti',
         loadChildren: () => import('./pages/lti-page/lti-page.module').then((m) => m.LtiPageModule),
     },
-
+    // simple loading spinner (i.e. for connector redirects)
+    {
+        path: UIConstants.ROUTER_PREFIX + 'loading',
+        loadComponent: () =>
+            import('./pages/loading-page/loading-page.component').then(
+                (m) => m.LoadingPageComponent,
+            ),
+    },
     // Error page / 404
     {
         path: '',

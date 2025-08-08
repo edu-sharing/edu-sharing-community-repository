@@ -19,7 +19,7 @@ button {
     :host.highlight & {
         box-shadow: none !important;
         @include removeDefaultFocus();
-        border-bottom: 1px solid $focusColor;
+        border-bottom: 1px solid var(--focusColor);
     }
 }
 

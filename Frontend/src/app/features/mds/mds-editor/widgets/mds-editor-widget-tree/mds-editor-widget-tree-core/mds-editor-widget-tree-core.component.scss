@@ -73,7 +73,7 @@
             &.selected {
                 background-color: rgba(0, 0, 0, 0.04);
                 @include setGlobalKeyboardFocus();
-                outline-offset: -$focusWidth;
+                outline-offset: calc(var(--focusWidth) * -1);
             }
             &:not(.item-tree) {
                 @include clickable();

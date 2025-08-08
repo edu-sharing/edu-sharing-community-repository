@@ -148,8 +148,6 @@ ingress:
   annotations:
     ## @param ingress.annotations.nginx.ingress.kubernetes.io/affinity Set affinity on nginx ingress
     nginx.ingress.kubernetes.io/affinity: cookie
-    ## @param ingress.annotations.nginx.ingress.kubernetes.io/app-root Set app-root on nginx ingress
-    nginx.ingress.kubernetes.io/app-root: /edu-sharing
     ## @param ingress.annotations.nginx.ingress.kubernetes.io/proxy-body-size Set proxy-body-size on nginx ingress
     nginx.ingress.kubernetes.io/proxy-body-size: "5g"
     ## @param ingress.annotations.nginx.ingress.kubernetes.io/proxy-connect-timeout Set proxy-connect-timeout on nginx ingress
@@ -172,6 +170,33 @@ ingress:
   ## @param ingress.paths Set paths for ingress
   paths:
   - /edu-sharing
+
+  admin:
+    ## @param ingress.admin.enabled Enable admin ingress
+    enabled: false
+
+    ## @param ingress.admin.exclusive Set exclusive admin mode
+    exclusive: false
+
+    ## @param ingress.admin.annotations Set additional annotations for admin ingress
+    annotations: {}
+
+    ## @param ingress.admin.hosts Set hosts for admin ingress
+    hosts: []
+
+    ## @param ingress.admin.tls Set TLS for admin ingress
+    #  - secretName: edusharing-repository-tls
+    #    hosts:
+    #    - repository.127.0.0.1.nip.io
+    tls: []
+
+  exact:
+    ## @param ingress.exact.enabled Enable exact ingress
+    enabled: true
+
+    annotations:
+      ## @param ingress.exact.annotations.nginx.ingress.kubernetes.io/app-root Set app-root on nginx exact ingress
+      nginx.ingress.kubernetes.io/app-root: /edu-sharing
 
 ########################################################################################################################
 
@@ -710,6 +735,41 @@ init:
 
       ## @param init.permission.securityContext.runAsUser Set user to run init container under
       runAsUser: 0
+
+  role:
+
+    image:
+      ## @param init.role.image.name Set init container image name
+      name: ${docker.edu_sharing.community.common.kubectl.name}
+      ## @param init.role.image.tag Set init container image tag
+      tag: "${docker.edu_sharing.community.common.kubectl.tag}"
+
+    ## @param init.role.startupProbe Optional specs for startupProbe
+    startupProbe:
+
+    ## @param init.role.livenessProbe Optional specs for livenessProbe
+    livenessProbe:
+
+    ## @param init.role.readinessProbe Optional specs for readinessProbe
+    readinessProbe:
+
+    resources:
+
+      limits:
+        ## @param init.role.resources.limits.cpu Set init container CPU limit on resources
+        cpu: 125m
+        ## @param init.role.resources.limits.memory Set init container memory limit on resources
+        memory: 512Mi
+      requests:
+        ## @param init.role.resources.requests.cpu Set init container CPU for requests on resources
+        cpu: 125m
+        ## @param init.role.resources.requests.memory Set init container memory for requests on resources
+        memory: 512Mi
+
+    securityContext:
+
+      ## @param init.role.securityContext.runAsUser Set user to run init container under
+      runAsUser: 1001
 
 ########################################################################################################################
 
