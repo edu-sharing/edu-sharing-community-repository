@@ -11,7 +11,7 @@ import {
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { Subject } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
 import { NodeEntriesDataType, NodeEntriesDisplayType } from './entries-model';
 import { NodeEntriesGlobalService } from './node-entries-global.service';
@@ -19,6 +19,7 @@ import { NodeEntriesTemplatesService } from './node-entries-templates.service';
 import { NodeEntriesService } from '../services/node-entries.service';
 import { KeyboardShortcutsService } from '../services/abstract/keyboard-shortcuts.service';
 import { NodeDataSourceRemote } from './node-data-source-remote';
+import { TranslationsService } from '../translations/translations.service';
 
 @Component({
     selector: 'es-node-entries',
@@ -47,6 +48,7 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType>
         public templatesService: NodeEntriesTemplatesService,
         @Optional() private globalKeyboardShortcuts: KeyboardShortcutsService,
         @Optional() private route: ActivatedRoute,
+        private translationsService: TranslationsService,
         private translate: TranslateService,
     ) {}
 
@@ -115,15 +117,15 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType>
     }
 
     private async initPaginator(paginator: MatPaginator) {
-        paginator._intl.itemsPerPageLabel = await this.translate
-            .get('PAGINATOR.itemsPerPageLabel')
-            .toPromise();
-        paginator._intl.nextPageLabel = await this.translate
-            .get('PAGINATOR.nextPageLabel')
-            .toPromise();
-        paginator._intl.previousPageLabel = await this.translate
-            .get('PAGINATOR.previousPageLabel')
-            .toPromise();
+        await firstValueFrom(this.translationsService.waitForInit().pipe(first()));
+        this.paginator._intl.itemsPerPageLabel = this.translate.instant(
+            'PAGINATOR.itemsPerPageLabel',
+        );
+        this.paginator._intl.firstPageLabel = this.translate.instant('PAGINATOR.firstPageLabel');
+        this.paginator._intl.nextPageLabel = this.translate.instant('PAGINATOR.nextPageLabel');
+        this.paginator._intl.previousPageLabel = this.translate.instant(
+            'PAGINATOR.previousPageLabel',
+        );
         paginator._intl.getRangeLabel = (page, pageSize, length) =>
             this.translate.instant('PAGINATOR.getRangeLabel', {
                 page: page + 1,

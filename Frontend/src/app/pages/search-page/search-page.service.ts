@@ -335,7 +335,7 @@ export class SearchPageService implements OnDestroy {
             }),
         );
         cancel.group = DefaultGroups.Delete;
-        cancel.elementType = [ElementType.Unknown];
+        cancel.elementType = [ElementType.NoneOrUnknown];
         return {
             useDefaultOptions: false,
             addOptions: [cancel, addTo],

@@ -39,6 +39,7 @@ export class NodeEntriesGlobalService {
     private paginationStrategy: { [key in PaginationScope]?: PaginationStrategy } = {
         [Scope.WorkspaceList]: 'infinite-scroll',
         [Scope.Search]: 'infinite-scroll',
+        [Scope.EditorialPage]: 'paginator',
         DEFAULT: 'infinite-scroll',
     };
     private paginatorSizeOptions: { [key in PaginationScope]?: number[] } = {

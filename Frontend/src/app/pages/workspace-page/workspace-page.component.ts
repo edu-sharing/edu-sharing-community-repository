@@ -1064,7 +1064,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
             },
         );
         toggle.group = DefaultGroups.Toggles;
-        toggle.elementType = [ElementType.Unknown];
+        toggle.elementType = [ElementType.NoneOrUnknown];
         toggle.priority = 5;
         toggle.customShowCallback = async () => {
             return this.root === 'TO_ME_SHARED_FILES';

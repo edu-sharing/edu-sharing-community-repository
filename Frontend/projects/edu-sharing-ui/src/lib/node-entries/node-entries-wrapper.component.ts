@@ -462,6 +462,16 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.nodeEntriesComponentRef?.paginator?.firstPage();
     }
 
+    /**
+     * inform the paginator about the current config set
+     * @param config
+     */
+    setPaginator(config: { skipCount: number; maxItems: number }) {
+        if (this.nodeEntriesComponentRef?.paginator) {
+            this.nodeEntriesComponentRef.paginator.pageIndex = config.skipCount / config.maxItems;
+            this.nodeEntriesComponentRef.paginator.pageSize = config.maxItems;
+        }
+    }
     deleteNodes(objects: T[]): void {
         this.dataSource.removeData(objects);
         this.getSelection().clear();

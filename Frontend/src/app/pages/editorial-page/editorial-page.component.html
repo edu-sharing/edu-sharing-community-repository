@@ -7,7 +7,7 @@
     storageKey="EDITORIAL_SIDENAV_LEFT_WIDTH"
     esResizableSidenav
   >
-    <div class="mat-sidenav-content">
+    <div class="mat-sidenav-content mat-sidenav-padding">
       <es-mds-editor-wrapper
         *ngIf="mdsGroup()"
         [groupId]="mdsGroup()"
@@ -32,7 +32,8 @@
   >
     <div class="mat-sidenav-content">
       <es-editorial-sidebar
-        [nodes]="selection()"
+        [primaryMode]="(params$ | async).primaryMode"
+        [nodes]="selection()?.selected"
         (closeTrigger)="sidenavRight.set(false)"
       ></es-editorial-sidebar>
     </div>
@@ -52,7 +53,7 @@
     <div class="main-content">
       <div class="top-area">
         <es-editorial-breadcrumb [mode]="(params$ | async).primaryMode"></es-editorial-breadcrumb>
-        <es-actionbar></es-actionbar>
+        <es-actionbar [numberOfAlwaysVisibleOptions]="1"></es-actionbar>
       </div>
       <mat-tab-group
         *ngIf="(editorialPageService.observeTabs() | async)?.length"
@@ -69,10 +70,14 @@
       <ng-container *ngIf="(params$ | async).primaryMode as mode">
         <ng-container *ngIf="mode === 'activity'">
           <es-node-entries-wrapper
+            [primaryInstance]="true"
             [dataSource]="dataSource"
             [elementInteractionType]="InteractionType.Emitter"
-            [scope]="Scope.WorkspaceList"
-            (selectionChange)="selection.set($any($event.source.selected))"
+            [scope]="Scope.EditorialPage"
+            singleClickHint="static"
+            (clickItem)="select($event)"
+            (fetchData)="fetchEvent($event)"
+            (selectionChange)="selection.set($any($event.source))"
             [columns]="columns()"
             [displayType]="displayType()"
           >
@@ -89,7 +94,8 @@
 </mat-sidenav-container>
 <es-editorial-sidebar
   *ngIf="(isMobile$ | async) === true && sidenavRight()"
-  [nodes]="selection()"
+  [primaryMode]="(params$ | async).primaryMode"
+  [nodes]="selection()?.selected"
   [isModal]="true"
-  (closeTrigger)="sidenavRight()"
+  (closeTrigger)="sidenavRight.set(false)"
 ></es-editorial-sidebar>

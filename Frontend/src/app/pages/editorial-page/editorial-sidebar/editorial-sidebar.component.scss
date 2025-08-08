@@ -1,9 +1,11 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
 .sidebar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 20px;
     > div:first-child {
         font-size: vars.$fontSizeXLarge;
     }
@@ -16,8 +18,13 @@
     .entry {
         display: flex;
         align-items: center;
-        color: var(--primary);
+        padding: 5px 20px;
+        //color: var(--primary);
         gap: 20px;
+        @include mixins.clickable();
+        &:hover {
+            background-color: var(--palette-primary-50);
+        }
         .icon {
             font-size: 30px;
         }
@@ -31,6 +38,8 @@
                 color: var(--textLight);
                 font-size: var(--fontSizeXSmall);
             }
+        }
+        .navigate {
         }
     }
 }

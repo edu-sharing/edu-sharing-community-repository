@@ -68,7 +68,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
         });
         this.editAction = new OptionItem('PROFILES.EDIT', 'edit', () => this.beginEdit());
         this.editAction.group = DefaultGroups.Edit;
-        this.editAction.elementType = [ElementType.Unknown];
+        this.editAction.elementType = [ElementType.NoneOrUnknown];
         this.editAction.showAsAction = true;
     }
     private static PASSWORD_MIN_LENGTH = 5;

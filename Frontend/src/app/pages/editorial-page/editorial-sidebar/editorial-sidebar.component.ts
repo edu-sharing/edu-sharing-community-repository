@@ -1,21 +1,25 @@
 import {
     Component,
+    computed,
+    effect,
     EventEmitter,
     input,
+    OnChanges,
     OnDestroy,
     OnInit,
     Output,
     signal,
+    SimpleChanges,
     TemplateRef,
     ViewChild,
 } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import {
+    Constrain,
     EduSharingUiCommonModule,
     ElementType,
     OptionItem,
     OptionsHelperDataService,
-    Scope,
     Target,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
@@ -25,6 +29,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { Subject } from 'rxjs';
 import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { PrimaryMode } from '../editorial-page.component';
 
 @Component({
     selector: 'es-editorial-sidebar',
@@ -33,21 +38,27 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
     imports: [EduSharingUiCommonModule, CommonModule, MatButtonModule, TranslateModule],
     providers: [OptionsHelperDataService],
 })
-export class EditorialSidebarComponent implements OnInit, OnDestroy {
+export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     nodes = input<Node[]>();
+    primaryMode = input.required<PrimaryMode>();
     isModal = input<boolean>(false);
-    title = signal('EDITORIAL.SIDEBAR.TITLE');
+
     @Output() closeTrigger = new EventEmitter<void>();
     @ViewChild('content', { static: true }) dialogContent: TemplateRef<unknown>;
 
     private readonly destroyed = new Subject<void>();
+    readonly title = computed(() => 'EDITORIAL.SIDEBAR.TITLE_' + this.primaryMode().toUpperCase());
     options = signal<OptionItem[]>(null);
 
     constructor(
         private dialogs: DialogsService,
         private optionsHelperDataService: OptionsHelperDataService,
     ) {}
+
+    ngOnChanges(changes: SimpleChanges): void {
+        void this.initOptions();
+    }
 
     ngOnInit(): void {
         if (this.isModal()) {
@@ -58,12 +69,20 @@ export class EditorialSidebarComponent implements OnInit, OnDestroy {
 
     private async initOptions() {
         const options = [];
-        const todo = new OptionItem('test', 'home', () => {});
-        options.push(todo);
-
-        options.forEach((o) => (o.elementType = [ElementType.Unknown]));
+        const shareElement = new OptionItem('EDITORIAL.OPTIONS.SHARE_QR', 'share', (nodes) =>
+            this.dialogs.openQrDialog({
+                node: nodes[0],
+            }),
+        );
+        shareElement.elementType = [ElementType.Node];
+        shareElement.constrains = [Constrain.NoBulk];
+        shareElement.scopes = ['activity'];
+        options.push(shareElement);
         this.optionsHelperDataService.setData({
-            scope: Scope.EditorialSidebar,
+            scope: this.primaryMode(),
+            activeObjects: this.nodes(),
+            selectedObjects: this.nodes(),
+            allObjects: this.nodes(),
             customOptions: {
                 useDefaultOptions: false,
                 addOptions: options,
@@ -81,6 +100,7 @@ export class EditorialSidebarComponent implements OnInit, OnDestroy {
         return await this.dialogs.openGenericDialog({
             title: this.title(),
             contentTemplate: this.dialogContent,
+            contentPadding: 0,
             minWidth: 350,
         });
     }

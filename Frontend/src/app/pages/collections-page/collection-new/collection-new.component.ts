@@ -1080,7 +1080,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
             customOptions: {
                 useDefaultOptions: false,
                 addOptions: imageOptions.map((i) => {
-                    i.elementType = [ElementType.Unknown];
+                    i.elementType = [ElementType.NoneOrUnknown];
                     return i;
                 }),
             },

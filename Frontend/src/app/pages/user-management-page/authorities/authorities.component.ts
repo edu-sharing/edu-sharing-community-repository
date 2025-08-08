@@ -430,7 +430,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                     (data: any) =>
                         (this.toolpermissionAuthority = RestConstants.getAuthorityEveryone()),
                 );
-                global.elementType = [ElementType.Unknown];
+                global.elementType = [ElementType.NoneOrUnknown];
                 global.group = DefaultGroups.Primary;
                 global.priority = 10;
                 global.constrains = [Constrain.Admin, Constrain.NoSelection];
@@ -440,7 +440,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 const createGroup = new OptionItem('PERMISSIONS.MENU_CREATE_GROUP', 'add', (data) =>
                     this.createGroup(),
                 );
-                createGroup.elementType = [ElementType.Unknown];
+                createGroup.elementType = [ElementType.NoneOrUnknown];
                 createGroup.group = DefaultGroups.Primary;
                 createGroup.constrains = [Constrain.NoSelection];
                 options.push(createGroup);
@@ -452,7 +452,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                         'person_add',
                         (data: any) => this.addMembersFunction(this.org),
                     );
-                    addUser.elementType = [ElementType.Unknown];
+                    addUser.elementType = [ElementType.NoneOrUnknown];
                     addUser.group = DefaultGroups.Primary;
                     addUser.priority = 10;
                     addUser.constrains = [Constrain.NoSelection];
@@ -464,7 +464,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                         'add',
                         (data: any) => this.createAuthority(),
                     );
-                    createAuthority.elementType = [ElementType.Unknown];
+                    createAuthority.elementType = [ElementType.NoneOrUnknown];
                     createAuthority.group = DefaultGroups.Primary;
                     createAuthority.priority = 10;
                     createAuthority.constrains = [Constrain.Admin, Constrain.NoSelection];
@@ -476,7 +476,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                     (data: any) => this.downloadMembers(),
                 );
                 download.onlyDesktop = true;
-                download.elementType = [ElementType.Unknown];
+                download.elementType = [ElementType.NoneOrUnknown];
                 download.group = DefaultGroups.FileOperations;
                 download.priority = 10;
                 download.constrains = [Constrain.NoSelection];
@@ -487,7 +487,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 const newOrg = new OptionItem('PERMISSIONS.ADD_ORG', 'add', (data) =>
                     this.createOrg(),
                 );
-                newOrg.elementType = [ElementType.Unknown];
+                newOrg.elementType = [ElementType.NoneOrUnknown];
                 newOrg.group = DefaultGroups.Primary;
                 newOrg.priority = 20;
                 newOrg.constrains = [Constrain.Admin, Constrain.NoSelection];

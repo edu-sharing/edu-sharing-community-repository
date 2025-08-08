@@ -130,7 +130,7 @@ export class OptionItem {
     public permissionsRightMode = NodesRightMode.Local;
     public toolpermissions: string[];
     public toolpermissionsMode = HideMode.Disable;
-    public scopes: Scope[];
+    public scopes: (Scope | string)[];
 
     /**
      *
@@ -190,6 +190,7 @@ export class OptionItemToggle extends OptionItem {
             callback?.(object, objects);
         };
         super(null, null, internalCallback);
+        this.group = DefaultGroups.Toggles;
         this.isToggle = true;
     }
 }
@@ -254,7 +255,7 @@ export enum ElementType {
     Person,
     Group,
     SavedSearch,
-    Unknown,
+    NoneOrUnknown,
 }
 export class OptionGroup {
     /**

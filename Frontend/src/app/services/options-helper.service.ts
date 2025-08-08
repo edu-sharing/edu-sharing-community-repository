@@ -424,7 +424,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 return types;
             }
         }
-        return [ElementType.Unknown];
+        return [ElementType.NoneOrUnknown];
     }
 
     private getTypeSingle(object: Node | any) {
@@ -457,7 +457,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 return ElementType.Node;
             }
         }
-        return ElementType.Unknown;
+        return ElementType.NoneOrUnknown;
     }
 
     private validateToolpermissions(option: OptionItem) {
@@ -1150,7 +1150,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         const pasteNodes = new OptionItem('OPTIONS.PASTE', 'content_paste', (node) =>
             this.pasteNode(components, data),
         );
-        pasteNodes.elementType = [ElementType.Unknown];
+        pasteNodes.elementType = [ElementType.NoneOrUnknown];
         pasteNodes.constrains = [
             Constrain.NoSelection,
             Constrain.ClipboardContent,
@@ -1423,7 +1423,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         toggleViewType.scopes = [Scope.WorkspaceList, Scope.Search, Scope.CollectionsReferences];
         toggleViewType.constrains = [Constrain.NoSelection];
         toggleViewType.group = DefaultGroups.Toggles;
-        toggleViewType.elementType = [ElementType.Unknown];
+        toggleViewType.elementType = [ElementType.NoneOrUnknown];
         toggleViewType.priority = 10;
         /*
         const reorder = new OptionItem('OPTIONS.LIST_SETTINGS', 'settings', (node: Node) => this.reorderDialog = true);
@@ -1438,7 +1438,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         configureList.scopes = [Scope.WorkspaceList];
         configureList.constrains = [Constrain.NoSelection, Constrain.User];
         configureList.group = DefaultGroups.Toggles;
-        configureList.elementType = [ElementType.Unknown];
+        configureList.elementType = [ElementType.NoneOrUnknown];
         configureList.priority = 20;
         configureList.isToggle = true;
          */

@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    effect,
+    OnDestroy,
+    OnInit,
+    signal,
+    ViewChild,
+} from '@angular/core';
 import {
     AuthenticationService,
     ConfigService,
@@ -23,13 +31,18 @@ import { RestConstants } from '../../core-module/rest/rest-constants';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
     ActionbarComponent,
+    DefaultGroups,
     ElementType,
+    FetchEvent,
     Helper,
     InteractionType,
     ListItem,
     MdsHelperService,
+    NodeClickEvent,
     NodeDataSource,
+    NodeEntriesDataType,
     NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent,
     OptionItemToggle,
     OptionsHelperDataService,
     Scope,
@@ -46,6 +59,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EditorialPageService } from './editorial-page.service';
 import { debounceTime, distinctUntilChanged, first, skip, startWith, tap } from 'rxjs/operators';
 import { BreakpointObserver } from '@angular/cdk/layout';
+import { SelectionModel } from '@angular/cdk/collections';
 
 export type PrimaryMode = 'activity';
 type RouteConfig = {
@@ -57,16 +71,16 @@ type RouteConfig = {
     templateUrl: 'editorial-page.component.html',
     styleUrls: ['editorial-page.component.scss'],
     standalone: false,
-    providers: [OptionsHelperDataService],
 })
 export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly HOME_REPOSITORY = HOME_REPOSITORY;
-    readonly PageCount = 25;
+    readonly PageCount = 5;
     readonly TabWidgetActivities = 'virtual:activityType';
     readonly InteractionType = InteractionType;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Scope = Scope;
     @ViewChild(ActionbarComponent) actionbarRef: ActionbarComponent;
+    @ViewChild(NodeEntriesWrapperComponent) nodeEntriesRef: NodeEntriesWrapperComponent<Node>;
     private destroyed$ = new Subject<void>();
     isMobile$ = this.breakpointObserver
         .observe(['(max-width: 900px)'])
@@ -90,7 +104,9 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     dataSource = new NodeDataSource();
     columns = signal<ListItem[]>(null);
     displayType = signal(NodeEntriesDisplayType.Table);
-    selection = signal<Node[] | null>(null);
+    selection = signal<SelectionModel<Node | null>>(null);
+    private sidebarOptionToggle: OptionItemToggle;
+    private pagination$ = new BehaviorSubject<FetchEvent>(null);
 
     constructor(
         private router: Router,
@@ -105,7 +121,6 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         private searchHelperService: SearchHelperService,
         private ui: UIService,
         private authenticationService: AuthenticationService,
-        private optionsHelperDataService: OptionsHelperDataService,
         public editorialPageService: EditorialPageService,
     ) {
         this.isMobile$.pipe(first()).subscribe((mobile) => {
@@ -144,10 +159,16 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 this.searchEvent$ = instance.onSearchTriggered();
                 this.initSubscription();
             });
+        effect(() => {
+            const open = this.sidenavRight();
+            if (this.sidebarOptionToggle) {
+                this.sidebarOptionToggle.toggleState = open;
+            }
+        });
     }
 
     ngAfterViewInit(): void {
-        const sidebarOption = new OptionItemToggle(
+        this.sidebarOptionToggle = new OptionItemToggle(
             {
                 enabled: 'EDITORIAL.OPTION.TOGGLE_SIDEBAR',
                 disabled: 'EDITORIAL.OPTION.TOGGLE_SIDEBAR',
@@ -159,16 +180,14 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             this.sidenavRight(),
             () => this.sidenavRight.set(!this.sidenavRight()),
         );
-        sidebarOption.elementType = [ElementType.Unknown];
-        void this.optionsHelperDataService.initComponents(this.actionbarRef);
-        void this.optionsHelperDataService.setData({
-            scope: Scope.EditorialPage,
+        this.sidebarOptionToggle.elementType = [ElementType.NoneOrUnknown];
+        void this.nodeEntriesRef?.initOptionsGenerator({
+            actionbar: this.actionbarRef,
             customOptions: {
-                useDefaultOptions: false,
-                addOptions: [sidebarOption],
+                useDefaultOptions: true,
+                addOptions: [this.sidebarOptionToggle],
             },
         });
-        void this.optionsHelperDataService.refreshComponents();
     }
 
     async ngOnInit(): Promise<void> {
@@ -201,13 +220,13 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                     null,
                     this.mdsDefinition$.value.widgets,
                 );
+                this.mdsGroup.set('editorial_activity');
                 if (widget == null) {
                     console.warn(
                         'Can not register tabs since widget definition was not found',
                         this.TabWidgetActivities,
                     );
                 } else {
-                    this.mdsGroup.set('editorial_activity');
                     this.editorialPageService.registerTabsFromWidget(widget);
                 }
             }
@@ -235,6 +254,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                     distinctUntilChanged(),
                 ),
                 this.tabSelection$.pipe(distinctUntilChanged()),
+                this.pagination$.pipe(distinctUntilChanged()),
                 // first one will be the init of the set
                 this.searchValues$.pipe(
                     skip(1),
@@ -243,10 +263,12 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 ),
             ])
                 .pipe(distinctUntilChanged(), debounceTime(50))
-                .subscribe(([search, tab, values]) => {
-                    console.log('THIS MUST BE SHOWN ONCE', search, tab, values);
+                .subscribe(([search, tab, pagination, values]) => {
+                    console.log('THIS MUST BE SHOWN ONCE', search, tab, pagination, values);
                     const queryParams = {
                         q: search?.searchString,
+                        offset: pagination.offset || null,
+                        size: pagination.amount || null,
                         filters: JSON.stringify({
                             ...values,
                             ...this.editorialPageService.buildSearchCriteria(tab),
@@ -290,15 +312,21 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         }
         console.log('processCurrentValues', params);
         this.dataSource.isLoading = true;
+        this.dataSource.reset();
+
+        const pagination = {
+            skipCount: params.offset || 0,
+            maxItems: params.size || this.PageCount,
+        };
+        this.nodeEntriesRef.setPaginator(pagination);
         if (routeConfig.primaryMode === 'activity') {
             this.searchServiceUnwrapped
                 .getRecentUserEvents({
                     repository: HOME_REPOSITORY,
                     contentType: 'ALL',
-                    maxItems: this.PageCount,
+                    ...pagination,
                 })
                 .subscribe((events) => {
-                    console.log(events);
                     this.dataSource.isLoading = false;
                     this.dataSource.setData(
                         events.nodes.map((e) => {
@@ -330,5 +358,20 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                     this.dataSource.setData(result.nodes, result.pagination);
                 });
         }
+    }
+    select(event: NodeClickEvent<NodeEntriesDataType>) {
+        if (
+            !(
+                this.nodeEntriesRef?.getSelection()?.selected.length === 1 &&
+                this.nodeEntriesRef?.getSelection()?.selected[0] === event.element
+            )
+        ) {
+            this.nodeEntriesRef?.getSelection()?.clear();
+        }
+        this.nodeEntriesRef?.getSelection()?.toggle(event.element as Node);
+    }
+
+    fetchEvent(event: FetchEvent) {
+        this.pagination$.next(event);
     }
 }

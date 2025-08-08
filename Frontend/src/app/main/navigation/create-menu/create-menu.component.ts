@@ -215,7 +215,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             const pasteNodes = new OptionItem('OPTIONS.PASTE', 'content_paste', (node) =>
                 this.optionsService.pasteNode(),
             );
-            pasteNodes.elementType = [ElementType.Unknown];
+            pasteNodes.elementType = [ElementType.NoneOrUnknown];
             pasteNodes.constrains = [
                 Constrain.NoSelection,
                 Constrain.ClipboardContent,
@@ -237,7 +237,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             const newCollection = new OptionItem('OPTIONS.NEW_COLLECTION', 'layers', (node) =>
                 UIHelper.goToCollection(this.router, this._parent, 'new'),
             );
-            newCollection.elementType = [ElementType.Unknown];
+            newCollection.elementType = [ElementType.NoneOrUnknown];
             newCollection.constrains = [Constrain.NoSelection, Constrain.User];
             newCollection.toolpermissions = [
                 RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS,
@@ -251,7 +251,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                 const search = new OptionItem('OPTIONS.SEARCH_OBJECT', 'redo', () =>
                     this.pickMaterialFromSearch(),
                 );
-                search.elementType = [ElementType.Unknown];
+                search.elementType = [ElementType.NoneOrUnknown];
                 search.group = DefaultGroups.Create;
                 search.priority = 7.5;
                 this.options.push(search);
@@ -259,7 +259,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             const upload = new OptionItem('OPTIONS.ADD_OBJECT', 'cloud_upload', () =>
                 this.openUploadSelect(),
             );
-            upload.elementType = [ElementType.Unknown];
+            upload.elementType = [ElementType.NoneOrUnknown];
             upload.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES];
             upload.group = DefaultGroups.Create;
             upload.priority = 10;
@@ -276,7 +276,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                                     connector,
                                 }),
                         );
-                        option.elementType = [ElementType.Unknown];
+                        option.elementType = [ElementType.NoneOrUnknown];
                         option.group = DefaultGroups.CreateConnector;
                         option.priority = i;
                         return option;
@@ -291,7 +291,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                 const camera = new OptionItem('WORKSPACE.ADD_CAMERA', 'camera_alt', () =>
                     this.openCamera(),
                 );
-                camera.elementType = [ElementType.Unknown];
+                camera.elementType = [ElementType.NoneOrUnknown];
                 camera.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES];
                 camera.group = DefaultGroups.Create;
                 camera.priority = 20;
@@ -304,7 +304,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                         const option = new OptionItem(tool.name, 'edit', () =>
                             this.showCreateLtiTool(tool),
                         );
-                        option.elementType = [ElementType.Unknown];
+                        option.elementType = [ElementType.NoneOrUnknown];
                         option.group = DefaultGroups.CreateLtiTools;
                         option.priority = i;
                         return option;
@@ -316,7 +316,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             const addFolder = new OptionItem('WORKSPACE.ADD_FOLDER', 'create_new_folder', () =>
                 this.openAddFolderDialog(),
             );
-            addFolder.elementType = [ElementType.Unknown];
+            addFolder.elementType = [ElementType.NoneOrUnknown];
             addFolder.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS];
             addFolder.group = DefaultGroups.Create;
             addFolder.priority = 30;

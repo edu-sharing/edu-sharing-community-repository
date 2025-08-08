@@ -29,7 +29,7 @@ export interface OptionsHelperComponents {
 }
 
 export interface OptionData {
-    scope: Scope;
+    scope: Scope | string;
     activeObjects?: Node[] | any[];
     selectedObjects?: Node[] | any[];
     allObjects?: Node[] | any[];

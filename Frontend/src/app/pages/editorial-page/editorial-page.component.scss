@@ -13,6 +13,7 @@ mat-sidenav-container {
         .top-area {
             display: flex;
             justify-content: space-between;
+            min-height: 68px;
             padding-bottom: 20px;
             es-editorial-breadcrumb {
             }
@@ -21,11 +22,13 @@ mat-sidenav-container {
 }
 mat-sidenav {
     .mat-sidenav-content {
-        padding: 20px 20px;
         margin: 15px 20px 15px 20px;
         min-height: calc(100vh - 10px - 15px - 15px - var(--mainnavCurrentHeight));
         border-radius: var(--borderRadiusCards);
         @include mixins.materialShadowMedium();
+    }
+    .mat-sidenav-padding {
+        padding: 20px 20px;
     }
 }
 
