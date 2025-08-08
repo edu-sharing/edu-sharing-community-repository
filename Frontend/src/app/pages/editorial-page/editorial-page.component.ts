@@ -74,7 +74,7 @@ type RouteConfig = {
 })
 export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly HOME_REPOSITORY = HOME_REPOSITORY;
-    readonly PageCount = 5;
+    readonly PageCount = 25;
     readonly TabWidgetActivities = 'virtual:activityType';
     readonly InteractionType = InteractionType;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
