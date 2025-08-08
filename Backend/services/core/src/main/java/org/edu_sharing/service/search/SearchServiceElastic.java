@@ -1607,7 +1607,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                         // TODO: Filter by event if present!
                                         .functions(f -> f.scriptScore(ss -> ss
                                                 .script(script -> script
-                                                        .source("decayDateLinear(params.originDate, '1m', '0', 1.5, doc['userEvent.timestamp'].value)")
+                                                        .source("decayDateLinear(params.originDate, '1m', '0', 0.5, doc['userEvent.timestamp'].value)")
                                                         .params(Map.of("originDate", JsonData.of(Instant.now().toString())
                                                                 )
                                                         )
