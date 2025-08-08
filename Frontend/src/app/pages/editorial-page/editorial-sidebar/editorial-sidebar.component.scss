@@ -8,3 +8,29 @@
         font-size: vars.$fontSizeXLarge;
     }
 }
+
+.entries {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    .entry {
+        display: flex;
+        align-items: center;
+        color: var(--primary);
+        gap: 20px;
+        .icon {
+            font-size: 30px;
+        }
+        .text {
+            flex-grow: 1;
+            .title {
+                font-size: vars.$fontSizeXLarge;
+                font-weight: bold;
+            }
+            .description {
+                color: var(--textLight);
+                font-size: var(--fontSizeXSmall);
+            }
+        }
+    }
+}

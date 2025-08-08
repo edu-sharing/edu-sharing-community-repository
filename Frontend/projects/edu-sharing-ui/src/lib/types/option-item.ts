@@ -237,6 +237,7 @@ export enum Scope {
     CreateMenu = 'CreateMenu',
     DashboardSwimlane = 'DashboardSwimlane',
     EditorialPage = 'EditorialPage',
+    EditorialSidebar = 'EditorialSidebar',
 
     MediacenterNodesList = 'MediacenterNodesList',
     Admin = 'Admin', // Admin Tools / Debugging
