@@ -25,12 +25,10 @@ import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.rpc.Notify;
-import org.edu_sharing.repository.client.rpc.Result;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
@@ -68,12 +66,10 @@ import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
-import org.edu_sharing.service.search.model.SearchUserEvent;
 import org.edu_sharing.service.search.model.SharedToMeType;
 import org.edu_sharing.service.search.model.SortDefinition;
-import org.edu_sharing.service.share.ShareService;
-import org.edu_sharing.service.share.ShareServiceImpl;
-import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
+import org.edu_sharing.service.share.GlobalShareService;
+import org.edu_sharing.service.share.GlobalShareServiceImpl;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.jetbrains.annotations.NotNull;
@@ -370,12 +366,12 @@ public class NodeDao {
         return AuthenticationUtil.runAsSystem(new RunAsWork<NodeDao>() {
             @Override
             public NodeDao doWork() throws Exception {
-                ShareServiceImpl service = new ShareServiceImpl(PermissionServiceFactory.getPermissionService(repoDao.getId()));
+                GlobalShareServiceImpl service = new GlobalShareServiceImpl(PermissionServiceFactory.getPermissionService(repoDao.getId()));
                 Share share = service.getShare(nodeId, token);
                 if (share == null) {
                     throw new Exception("No share found for nodeId and token");
                 }
-                if (share.getExpiryDate() != ShareService.EXPIRY_DATE_UNLIMITED) {
+                if (share.getExpiryDate() != GlobalShareService.EXPIRY_DATE_UNLIMITED) {
                     if (new Date(System.currentTimeMillis()).after(new Date(share.getExpiryDate()))) {
                         throw new Exception("Share expired");
                     }
@@ -2527,7 +2523,7 @@ public class NodeDao {
 
     public List<NodeShare> getShares(String email) throws DAOSecurityException {
         throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
-        ShareServiceImpl service = new ShareServiceImpl(PermissionServiceFactory.getPermissionService(repoDao.getId()));
+        GlobalShareServiceImpl service = new GlobalShareServiceImpl(PermissionServiceFactory.getPermissionService(repoDao.getId()));
         List<NodeShare> entries = new ArrayList<>();
         for (Share share : service.getShares(this.nodeId)) {
             if (email == null || email.equals(share.getEmail()))
@@ -2537,7 +2533,7 @@ public class NodeDao {
     }
 
     public NodeShare createShare(long expiryDate, String password) throws DAOException {
-        ShareServiceImpl service = new ShareServiceImpl(PermissionServiceFactory.getPermissionService(repoDao.getId()));
+        GlobalShareServiceImpl service = new GlobalShareServiceImpl(PermissionServiceFactory.getPermissionService(repoDao.getId()));
         try {
             throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
             return new NodeShare(new org.alfresco.service.cmr.repository.NodeRef(NodeDao.storeRef, this.nodeId), service.createShare(nodeId, expiryDate, password));
@@ -2548,7 +2544,7 @@ public class NodeDao {
 
     public void removeShare(String shareId) throws DAOException {
         throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
-        ShareServiceImpl service = new ShareServiceImpl(PermissionServiceFactory.getPermissionService(repoDao.getId()));
+        GlobalShareServiceImpl service = new GlobalShareServiceImpl(PermissionServiceFactory.getPermissionService(repoDao.getId()));
         for (Share share : service.getShares(this.nodeId)) {
             if (share.getNodeId().equals(shareId)) {
                 service.removeShare(this.nodeId, shareId);
@@ -2560,7 +2556,7 @@ public class NodeDao {
 
     public NodeShare updateShare(String shareId, long expiryDate, String password) throws DAOException {
         throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
-        ShareServiceImpl service = new ShareServiceImpl(PermissionServiceFactory.getPermissionService(repoDao.getId()));
+        GlobalShareServiceImpl service = new GlobalShareServiceImpl(PermissionServiceFactory.getPermissionService(repoDao.getId()));
         for (Share share : service.getShares(this.nodeId)) {
             if (share.getNodeId().equals(shareId)) {
                 share.setExpiryDate(expiryDate);

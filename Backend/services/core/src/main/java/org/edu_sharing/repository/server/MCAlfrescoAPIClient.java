@@ -74,8 +74,8 @@ import org.edu_sharing.service.nodeservice.PropertiesGetInterceptor;
 import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
-import org.edu_sharing.service.share.ShareService;
-import org.edu_sharing.service.share.ShareServiceImpl;
+import org.edu_sharing.service.share.GlobalShareService;
+import org.edu_sharing.service.share.GlobalShareServiceImpl;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.surf.util.I18NUtil;
 
@@ -2370,14 +2370,14 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
     @Override
     public void createShare(String nodeId, String[] emails, long expiryDate) throws Exception {
-        ShareService shareService = new ShareServiceImpl(PermissionServiceFactory.getPermissionService(appInfo.getAppId()));
+        GlobalShareService globalShareService = new GlobalShareServiceImpl(PermissionServiceFactory.getPermissionService(appInfo.getAppId()));
         String locale = (String) Context.getCurrentInstance().getRequest().getSession().getAttribute(CCConstants.AUTH_LOCALE);
-        shareService.createShare(nodeId, emails, expiryDate, null, locale);
+        globalShareService.createShare(nodeId, emails, expiryDate, null, locale);
     }
 
     public Share[] getShares(String nodeId) {
-        ShareService shareService = new ShareServiceImpl(PermissionServiceFactory.getPermissionService(appInfo.getAppId()));
-        return shareService.getShares(nodeId);
+        GlobalShareService globalShareService = new GlobalShareServiceImpl(PermissionServiceFactory.getPermissionService(appInfo.getAppId()));
+        return globalShareService.getShares(nodeId);
     }
 
     public boolean removeChildAssociation(String folderId, String nodeId) {

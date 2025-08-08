@@ -6,8 +6,8 @@ import org.edu_sharing.restservices.sharing.v1.model.SharingInfo;
 
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
-import org.edu_sharing.service.share.ShareService;
-import org.edu_sharing.service.share.ShareServiceImpl;
+import org.edu_sharing.service.share.GlobalShareService;
+import org.edu_sharing.service.share.GlobalShareServiceImpl;
 
 import java.util.*;
 
@@ -23,7 +23,7 @@ public class SharingDao {
 	}
 
 	private static Share getShare(RepositoryDao repoDao, String node, String token) {
-		ShareService service = new ShareServiceImpl(PermissionServiceFactory.getPermissionService(repoDao.getId()));
+		GlobalShareService service = new GlobalShareServiceImpl(PermissionServiceFactory.getPermissionService(repoDao.getId()));
 		Share share = service.getShare(node, token);
 		if (share == null)
 			throw new IllegalArgumentException("Share with token " + token + " does not exist");
@@ -33,7 +33,7 @@ public class SharingDao {
 	public static List<NodeRef> getChildren(RepositoryDao repositoryDao, String node, String token, String password) throws DAOException {
 		try {
 			Share share = getShare(repositoryDao, node, token);
-			if(share.getPassword()!=null && !share.getPassword().equals(ShareServiceImpl.encryptPassword(password))){
+			if(share.getPassword()!=null && !share.getPassword().equals(GlobalShareServiceImpl.encryptPassword(password))){
 				throw new InsufficientPermissionException("Invalid password supplied");
 			}
 			NodeDao nodeDao = NodeDao.getNode(repositoryDao, node);

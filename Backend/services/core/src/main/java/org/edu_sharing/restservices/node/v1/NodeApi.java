@@ -43,7 +43,7 @@ import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SharedToMeType;
 import org.edu_sharing.service.search.model.SortDefinition;
-import org.edu_sharing.service.share.ShareService;
+import org.edu_sharing.service.share.GlobalShareService;
 import org.edu_sharing.service.tracking.ActivityEventService;
 import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -1115,7 +1115,7 @@ public class NodeApi  {
     	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
 	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 	    @Parameter(description = "share id",required=true ) @PathParam("shareId") String shareId,
-	    @Parameter(description = "expiry date for this share, leave empty or -1 for unlimited", required = false, schema = @Schema(defaultValue=""+ShareService.EXPIRY_DATE_UNLIMITED )) @QueryParam("expiryDate") Long expiryDate,
+	    @Parameter(description = "expiry date for this share, leave empty or -1 for unlimited", required = false, schema = @Schema(defaultValue=""+ GlobalShareService.EXPIRY_DATE_UNLIMITED )) @QueryParam("expiryDate") Long expiryDate,
 	    @Parameter(description = "new password for share, leave empty if you don't want to change it", required = false, schema = @Schema(defaultValue="")) @QueryParam("password") String password,
 		@Context HttpServletRequest req) {
 
@@ -1124,7 +1124,7 @@ public class NodeApi  {
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	NodeDao nodeDao=NodeDao.getNode(repoDao, node);
 	    	
-	    	NodeShare response=nodeDao.updateShare(shareId,expiryDate==null?ShareService.EXPIRY_DATE_UNLIMITED:expiryDate,password);
+	    	NodeShare response=nodeDao.updateShare(shareId,expiryDate==null? GlobalShareService.EXPIRY_DATE_UNLIMITED:expiryDate,password);
 	    	return Response.status(Response.Status.OK).entity(response).build();
     	}
     	catch (Throwable t) {
@@ -1194,7 +1194,7 @@ public class NodeApi  {
     public Response getShares(
     	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
 	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    @Parameter(description = "Filter for a specific email or use "+ShareService.EMAIL_TYPE_LINK+" for link shares (Optional)",required=false) @QueryParam("email") String email,
+	    @Parameter(description = "Filter for a specific email or use "+ GlobalShareService.EMAIL_TYPE_LINK+" for link shares (Optional)",required=false) @QueryParam("email") String email,
 		@Context HttpServletRequest req) {
 
     	try {
@@ -1228,7 +1228,7 @@ public class NodeApi  {
     public Response createShare(
     	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
 	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    @Parameter(description = "expiry date for this share, leave empty or -1 for unlimited", required = false, schema = @Schema(defaultValue=""+ShareService.EXPIRY_DATE_UNLIMITED )) @QueryParam("expiryDate") Long expiryDate,
+	    @Parameter(description = "expiry date for this share, leave empty or -1 for unlimited", required = false, schema = @Schema(defaultValue=""+ GlobalShareService.EXPIRY_DATE_UNLIMITED )) @QueryParam("expiryDate") Long expiryDate,
 	    @Parameter(description = "password for this share, use none to not use a password", required = false, schema = @Schema(defaultValue="")) @QueryParam("password") String password,
 		@Context HttpServletRequest req) {
 
@@ -1236,7 +1236,7 @@ public class NodeApi  {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	NodeDao nodeDao=NodeDao.getNode(repoDao, node);
-	    	NodeShare response=nodeDao.createShare(expiryDate==null ? ShareService.EXPIRY_DATE_UNLIMITED : expiryDate,password);
+	    	NodeShare response=nodeDao.createShare(expiryDate==null ? GlobalShareService.EXPIRY_DATE_UNLIMITED : expiryDate,password);
 
 			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.LINK_SHARE_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
 

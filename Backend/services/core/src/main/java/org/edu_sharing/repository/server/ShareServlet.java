@@ -18,8 +18,8 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
-import org.edu_sharing.service.share.ShareService;
-import org.edu_sharing.service.share.ShareServiceImpl;
+import org.edu_sharing.service.share.GlobalShareService;
+import org.edu_sharing.service.share.GlobalShareServiceImpl;
 import org.springframework.context.ApplicationContext;
 
 import java.io.DataInputStream;
@@ -97,22 +97,22 @@ public class ShareServlet extends DownloadServlet {
 					return null;
 				}
 
-				ShareService shareService = new ShareServiceImpl(PermissionServiceFactory.getPermissionService(ApplicationInfoList.getHomeRepository().getAppId()));
-				Share share = shareService.getShare(nodeId, token);
+				GlobalShareService globalShareService = new GlobalShareServiceImpl(PermissionServiceFactory.getPermissionService(ApplicationInfoList.getHomeRepository().getAppId()));
+				Share share = globalShareService.getShare(nodeId, token);
 				if (share == null) {
 					resp.sendRedirect(URLTool.getNgMessageUrl("invalid_share"));
 					//op.println("no share found for this nodeid and token!");
 					return null;
 				}
 
-				if (share.getExpiryDate() != ShareService.EXPIRY_DATE_UNLIMITED) {
+				if (share.getExpiryDate() != GlobalShareService.EXPIRY_DATE_UNLIMITED) {
 					if (new Date(System.currentTimeMillis()).after(new Date(share.getExpiryDate()))) {
 						resp.sendRedirect(URLTool.getNgMessageUrl("share_expired"));
 						//op.println("share is expired!");
 						return null;
 					}
 				}
-				if (share.getPassword() != null && (!share.getPassword().equals(ShareServiceImpl.encryptPassword(password)))) {
+				if (share.getPassword() != null && (!share.getPassword().equals(GlobalShareServiceImpl.encryptPassword(password)))) {
 					resp.sendRedirect(URLHelper.getNgComponentsUrl() + "sharing?" + req.getQueryString());
 				}
 				String wwwUrl = (String) serviceRegistry.getNodeService().getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_WWWURL));
@@ -123,7 +123,7 @@ public class ShareServlet extends DownloadServlet {
 				NodeRef mappedNodeRef = nodeRef;
 				// download child object (io) from a map
 				if (childIds != null && serviceRegistry.getNodeService().getType(nodeRef).equals(QName.createQName(CCConstants.CCM_TYPE_MAP))) {
-					if (!shareService.isNodeAccessibleViaShare(nodeRef, childIds[0])) {
+					if (!globalShareService.isNodeAccessibleViaShare(nodeRef, childIds[0])) {
 						resp.sendRedirect(URLTool.getNgMessageUrl("invalid_share"));
 						return null;
 					}
@@ -161,7 +161,7 @@ public class ShareServlet extends DownloadServlet {
 				op.close();
 
 				share.setDownloadCount((share.getDownloadCount() + 1));
-				shareService.updateDownloadCount(share);
+				globalShareService.updateDownloadCount(share);
 
 			} catch (Throwable e) {
 				logger.error(e.getMessage(), e);

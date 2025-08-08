@@ -36,7 +36,7 @@ import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
-public class ShareServiceImpl implements ShareService {
+public class GlobalShareServiceImpl implements GlobalShareService {
 	
 	public static final QName SHARE_TYPE = QName.createQName(CCConstants.CCM_TYPE_SHARE);
 	public static final QName SHARE_ASSOC = QName.createQName(CCConstants.CCM_ASSOC_ASSIGNED_SHARES);
@@ -58,9 +58,9 @@ public class ShareServiceImpl implements ShareService {
 	private final PermissionService permissionService;
 
 	
-	Logger logger = Logger.getLogger(ShareServiceImpl.class);
+	Logger logger = Logger.getLogger(GlobalShareServiceImpl.class);
 	
-	public ShareServiceImpl(PermissionService permissionService) {
+	public GlobalShareServiceImpl(PermissionService permissionService) {
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 
 		this.serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
@@ -73,7 +73,7 @@ public class ShareServiceImpl implements ShareService {
 	
 	@Override
 	public String createShare(String nodeId, String[] emails, long expiryDate, String password, String emailMessageLocale) throws EMailValidationException, EMailSendFailedException, ExpiryDateValidationException,
-			NodeDoesNotExsistException, PermissionFailedException {
+			NodeDoesNotExsistException {
 		if(!ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_LINK)) {
 			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_LINK);
 		}
@@ -192,8 +192,7 @@ public class ShareServiceImpl implements ShareService {
 	}
 
 	@Override
-	public void updateShare(String nodeId, String email, long expiryDate) throws EMailValidationException, ExpiryDateValidationException,
-			NodeDoesNotExsistException, PermissionFailedException {
+	public void updateShare(String nodeId, String email, long expiryDate) {
 	}
 
 	public void updateDownloadCount(Share share){
@@ -223,7 +222,7 @@ public class ShareServiceImpl implements ShareService {
 	@Override
 	public Share[] getShares(String nodeId) {
 		
-		Set<QName> qnameSet = new HashSet<QName>();
+		Set<QName> qnameSet = new HashSet<>();
 		qnameSet.add(SHARE_TYPE);
 		List<ChildAssociationRef> childNodeRefs = serviceRegistry.getNodeService().getChildAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),qnameSet);
 		

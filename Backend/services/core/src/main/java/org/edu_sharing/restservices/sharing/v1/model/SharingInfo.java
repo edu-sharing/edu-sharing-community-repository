@@ -7,8 +7,8 @@ import org.edu_sharing.restservices.DAOException;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.Person;
-import org.edu_sharing.service.share.ShareService;
-import org.edu_sharing.service.share.ShareServiceImpl;
+import org.edu_sharing.service.share.GlobalShareService;
+import org.edu_sharing.service.share.GlobalShareServiceImpl;
 
 import java.util.Date;
 
@@ -24,9 +24,9 @@ public class SharingInfo {
         this.password=share.getPassword()!=null;
         setInvitedBy(convertToPerson(share, nodeDao));
         if(passwordCheck!=null && !passwordCheck.isEmpty()){
-            this.passwordMatches=ShareServiceImpl.encryptPassword(passwordCheck).equals(share.getPassword());
+            this.passwordMatches= GlobalShareServiceImpl.encryptPassword(passwordCheck).equals(share.getPassword());
         }
-        this.expired=share.getExpiryDate() != ShareService.EXPIRY_DATE_UNLIMITED && new Date(System.currentTimeMillis()).after(new Date(share.getExpiryDate()));
+        this.expired=share.getExpiryDate() != GlobalShareService.EXPIRY_DATE_UNLIMITED && new Date(System.currentTimeMillis()).after(new Date(share.getExpiryDate()));
         if(!this.expired)
             this.node=nodeDao.asNode();
     }

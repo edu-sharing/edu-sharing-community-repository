@@ -30,8 +30,8 @@ import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionChecking;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
-import org.edu_sharing.service.share.ShareService;
-import org.edu_sharing.service.share.ShareServiceImpl;
+import org.edu_sharing.service.share.GlobalShareService;
+import org.edu_sharing.service.share.GlobalShareServiceImpl;
 import org.edu_sharing.service.tracking.ActivityEventService;
 import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.edu_sharing.spring.servlet.SpringHttpServlet;
@@ -257,16 +257,16 @@ public class DownloadServlet extends SpringHttpServlet {
         }
 
         Share share = null;
-        ShareService shareService = new ShareServiceImpl(PermissionServiceFactory.getPermissionService(ApplicationInfoList.getHomeRepository().getAppId()));
+        GlobalShareService globalShareService = new GlobalShareServiceImpl(PermissionServiceFactory.getPermissionService(ApplicationInfoList.getHomeRepository().getAppId()));
         if (parentNodeId != null && token != null) {
             try {
-                share = shareService.getShare(parentNodeId, token);
+                share = globalShareService.getShare(parentNodeId, token);
                 if (share == null)
                     throw new Exception();
-                if (share.getPassword() != null && (!share.getPassword().equals(ShareServiceImpl.encryptPassword(password)))) {
+                if (share.getPassword() != null && (!share.getPassword().equals(GlobalShareServiceImpl.encryptPassword(password)))) {
                     throw new Exception();
                 }
-                if (share.getExpiryDate() != ShareService.EXPIRY_DATE_UNLIMITED) {
+                if (share.getExpiryDate() != GlobalShareService.EXPIRY_DATE_UNLIMITED) {
                     if (new Date(System.currentTimeMillis()).after(new Date(share.getExpiryDate()))) {
                         resp.sendRedirect(URLTool.getNgMessageUrl("share_expired"));
                         return;
@@ -278,7 +278,7 @@ public class DownloadServlet extends SpringHttpServlet {
                 return;
             }
             for (String node : nodeIds) {
-                if (!shareService.isNodeAccessibleViaShare(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentNodeId), node)) {
+                if (!globalShareService.isNodeAccessibleViaShare(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentNodeId), node)) {
                     resp.sendRedirect(URLTool.getNgErrorUrl("" + HttpServletResponse.SC_FORBIDDEN));
                     return;
                 }
