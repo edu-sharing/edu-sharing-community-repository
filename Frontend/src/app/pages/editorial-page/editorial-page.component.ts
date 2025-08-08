@@ -267,8 +267,8 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                     console.log('THIS MUST BE SHOWN ONCE', search, tab, pagination, values);
                     const queryParams = {
                         q: search?.searchString,
-                        offset: pagination.offset || null,
-                        size: pagination.amount || null,
+                        offset: pagination?.offset || null,
+                        size: pagination?.amount || null,
                         filters: JSON.stringify({
                             ...values,
                             ...this.editorialPageService.buildSearchCriteria(tab),
