@@ -48,7 +48,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     @ViewChild('content', { static: true }) dialogContent: TemplateRef<unknown>;
 
     private readonly destroyed = new Subject<void>();
-    readonly title = computed(() => 'EDITORIAL.SIDEBAR.TITLE_' + this.primaryMode().toUpperCase());
+    readonly title = computed(() => 'EDITORIAL.SIDEBAR.TITLE_' + this.primaryMode()?.toUpperCase());
     options = signal<OptionItem[]>(null);
 
     constructor(

@@ -31,7 +31,6 @@ import { RestConstants } from '../../core-module/rest/rest-constants';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
     ActionbarComponent,
-    DefaultGroups,
     ElementType,
     FetchEvent,
     Helper,
@@ -44,7 +43,6 @@ import {
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
     OptionItemToggle,
-    OptionsHelperDataService,
     Scope,
     SearchHelperService,
     UIService,
@@ -99,14 +97,17 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     /**
      * called when the first init was done (all fields have been parsed and initalized)
      */
-    init = new Subject<void>();
+    init$ = new BehaviorSubject<boolean>(false);
     mdsDefinition$ = new BehaviorSubject<MdsDefinition>(null);
     dataSource = new NodeDataSource();
     columns = signal<ListItem[]>(null);
     displayType = signal(NodeEntriesDisplayType.Table);
     selection = signal<SelectionModel<Node | null>>(null);
     private sidebarOptionToggle: OptionItemToggle;
-    private pagination$ = new BehaviorSubject<FetchEvent>(null);
+    private pagination$ = new BehaviorSubject<{
+        skipCount: number;
+        maxItems: number;
+    }>(null);
 
     constructor(
         private router: Router,
@@ -242,51 +243,59 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             .subscribe(([params, primary]) => {
                 void this.processCurrentValues(params, primary);
             });
-        this.init.pipe(first()).subscribe(() => {
-            combineLatest([
-                this.searchEvent$.pipe(
-                    startWith({
-                        searchString: this.searchFieldService
-                            .getCurrentInstance()
-                            ?.getSearchString(),
-                        cleared: false,
+        combineLatest([
+            this.init$.pipe(
+                filter((i) => i),
+                first(),
+            ),
+            this.searchEvent$.pipe(
+                startWith({
+                    searchString: this.searchFieldService.getCurrentInstance()?.getSearchString(),
+                    cleared: false,
+                }),
+                distinctUntilChanged(),
+            ),
+            this.tabSelection$.pipe(distinctUntilChanged()),
+            this.pagination$.pipe(distinctUntilChanged((a, b) => Helper.objectEquals(a, b))),
+            // first one will be the init of the set
+            this.searchValues$.pipe(
+                distinctUntilChanged((a, b) => Helper.objectEquals(a, b)),
+                tap((a) => console.log('values', a)),
+            ),
+        ])
+            .pipe(
+                filter(([init]) => init),
+                distinctUntilChanged(),
+                debounceTime(50),
+            )
+            .subscribe(([init, search, tab, pagination, values]) => {
+                console.log('THIS MUST BE SHOWN ONCE', search, tab, pagination, values);
+                const queryParams = {
+                    q: search?.searchString,
+                    offset: pagination?.skipCount || null,
+                    size: pagination?.maxItems || null,
+                    filters: JSON.stringify({
+                        ...values,
+                        ...this.editorialPageService.buildSearchCriteria(tab),
                     }),
-                    distinctUntilChanged(),
-                ),
-                this.tabSelection$.pipe(distinctUntilChanged()),
-                this.pagination$.pipe(distinctUntilChanged()),
-                // first one will be the init of the set
-                this.searchValues$.pipe(
-                    skip(1),
-                    distinctUntilChanged((a, b) => Helper.objectEquals(a, b)),
-                    tap((a) => console.log('values', a)),
-                ),
-            ])
-                .pipe(distinctUntilChanged(), debounceTime(50))
-                .subscribe(([search, tab, pagination, values]) => {
-                    console.log('THIS MUST BE SHOWN ONCE', search, tab, pagination, values);
-                    const queryParams = {
-                        q: search?.searchString,
-                        offset: pagination?.offset || null,
-                        size: pagination?.amount || null,
-                        filters: JSON.stringify({
-                            ...values,
-                            ...this.editorialPageService.buildSearchCriteria(tab),
-                        }),
-                    };
-                    // console.log(this.editorialPageService.buildSearchCriteria(tab));
-                    void this.router.navigate(['./'], {
-                        relativeTo: this.route,
-                        replaceUrl: false,
-                        queryParams,
-                    });
+                };
+                // console.log(this.editorialPageService.buildSearchCriteria(tab));
+                void this.router.navigate(['./'], {
+                    relativeTo: this.route,
+                    replaceUrl: false,
+                    queryParams,
                 });
-        });
+            });
     }
 
     private async processCurrentValues(params: Params, routeConfig: RouteConfig) {
         const mds = await firstValueFrom(this.mdsDefinition$.pipe(filter((m) => !!m)));
         const criteria = JSON.parse(params.filters || '{}');
+        const pagination = {
+            skipCount: parseInt(params.offset) || 0,
+            maxItems: parseInt(params.size) || this.PageCount,
+        };
+        this.pagination$.next(pagination);
         this.tabSelection$.next(this.editorialPageService.resolveTabForCriteria(criteria));
         this.searchValues$.next(criteria);
         let ngsearchword = '';
@@ -305,7 +314,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             mds.widgets,
             true,
         );
-        this.init.next();
+        this.init$.next(true);
         // this is the first call. In this case, we wait to get a new event with the default uri parameters before loading
         if (Object.keys(params).length === 0) {
             return;
@@ -314,10 +323,6 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         this.dataSource.isLoading = true;
         this.dataSource.reset();
 
-        const pagination = {
-            skipCount: params.offset || 0,
-            maxItems: params.size || this.PageCount,
-        };
         this.nodeEntriesRef.setPaginator(pagination);
         if (routeConfig.primaryMode === 'activity') {
             this.searchServiceUnwrapped
@@ -372,6 +377,19 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     fetchEvent(event: FetchEvent) {
-        this.pagination$.next(event);
+        this.pagination$.next({
+            skipCount: event.offset,
+            maxItems: event.amount,
+        });
+    }
+
+    updateMdsFilter(values: Values) {
+        this.searchValues$.next(
+            Object.fromEntries(
+                Object.entries(values).filter(
+                    ([_, value]) => !(Array.isArray(value) && value.length === 0),
+                ),
+            ),
+        );
     }
 }
