@@ -358,6 +358,11 @@
       <type>date</type>
     </widget>
     <widget>
+      <id>ccm:ref_video_vtt</id>
+      <textEscapingPolicy>none</textEscapingPolicy>
+      <type>text</type>
+    </widget>
+    <widget>
       <id>license</id>
       <caption>ccm_prop_io_license</caption>
       <type>license</type>
@@ -1690,7 +1695,19 @@
       </property>
     </query>
     <query join="AND" id="search_relation_query">
-      <basequery>{"term":{"type":"ccm:io"}}</basequery>
+      <basequery>
+        {"bool": {
+        "must":[
+        {"term":{"type":"ccm:io"}}
+        ],
+        "must_not":[
+        {"term":{"aspects":"ccm:metadataPresettingTemplate"}},
+        {"term":{"aspects":"ccm:io_childobject"}},
+        {"term":{"aspects":"ccm:collection_io_reference"}}
+        ]
+        }
+        }
+      </basequery>
       <specialFilter>exclude_system_folder</specialFilter>
       <specialFilter>exclude_sites_folder</specialFilter>
       <specialFilter>exclude_people_folder</specialFilter>

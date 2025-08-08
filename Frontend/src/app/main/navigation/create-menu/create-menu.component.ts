@@ -40,6 +40,7 @@ import {
     RestIamService,
     RestNodeService,
     UIConstants,
+    UIService,
 } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { CardService } from '../../../services/card.service';
@@ -123,6 +124,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         private connectors: RestConnectorsService,
         private dialogs: DialogsService,
         private event: FrameEventsService,
+        private uiService: UIService,
         private iam: RestIamService,
         private iamService: RestIamService,
         private ltiPlatformService: LtiPlatformService, //private paste: PasteService,
@@ -488,18 +490,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         parameters: { [key in string]: string[] } = null,
         connectorType: Connector = null,
     ) {
-        UIHelper.openConnector(
-            this.connectors,
-            this.iam,
-            this.event,
-            this.toast,
-            node,
-            type,
-            win,
-            connectorType,
-            true,
-            parameters,
-        );
+        this.uiService.openConnector(node, type, win, connectorType, true, parameters);
     }
 
     pickMaterialFromSearch() {

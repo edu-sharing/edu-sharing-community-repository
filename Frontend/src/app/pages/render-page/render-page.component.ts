@@ -658,17 +658,7 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
         if (RestToolService.isLtiObject(node)) {
             this.toolService.openLtiObject(node);
         } else {
-            UIHelper.openConnector(
-                this.connectors,
-                this.iam,
-                this.frame,
-                this.toast,
-                node,
-                null,
-                null,
-                null,
-                newWindow,
-            );
+            this.uiService.openConnector(node, null, null, null, newWindow);
         }
     }
 
