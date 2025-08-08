@@ -1512,7 +1512,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 enabled: 'deselect',
                 disabled: 'select_all',
             },
-            !components.list?.getSelection()?.isEmpty(),
+            !components?.list?.getSelection()?.isEmpty(),
             () => {
                 if (components.list?.getSelection()?.isEmpty()) {
                     components.list?.selectAll();
