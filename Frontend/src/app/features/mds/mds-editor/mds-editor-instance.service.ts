@@ -1307,7 +1307,7 @@ export class MdsEditorInstanceService
             groupId,
         ).rendering?.toLowerCase() as EditorType;
     }
-    async fetchDisplayValues(widget: Widget, additionalKeys?: string[]) {
+    async fetchDisplayValues(widget: Widget, additionalKeys: string[] = []) {
         if (
             widget.definition.type === MdsWidgetType.MultiValueFixedBadges &&
             !widget.definition.values &&
@@ -1322,7 +1322,7 @@ export class MdsEditorInstanceService
                         ?.values,
                 );
             }
-            if (additionalKeys) {
+            if (additionalKeys?.length) {
                 mdsValueList.values = mdsValueList.values.concat(
                     (await widget.getValuesForKeys(additionalKeys)).values,
                 );
@@ -1333,7 +1333,10 @@ export class MdsEditorInstanceService
             }
         }
         widget.setInitialDisplayValues({
-            values: (await widget.getInitalValuesAsync()).jointValues?.map((v) => {
+            values: (additionalKeys?.length
+                ? additionalKeys
+                : (await widget.getInitalValuesAsync()).jointValues
+            )?.map((v) => {
                 return {
                     key: v,
                     displayString:
