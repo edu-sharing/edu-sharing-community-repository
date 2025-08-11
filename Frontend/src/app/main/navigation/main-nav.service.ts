@@ -76,6 +76,7 @@ export class MainNavConfig {
 export enum TemplateSlot {
     MainScopeButton,
     BeforeUserMenu,
+    AfterCreateMenu,
     BelowTopBar,
 }
 
