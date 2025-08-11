@@ -106,7 +106,7 @@ public interface SearchService {
 
 	SearchResultNodeRef searchByDisplayPath(String path, String index) throws IOException;
 
-	default org.edu_sharing.repository.client.rpc.Result<List<SearchUserEvent>> getRecentUserEvents(List<ActivityOnNodeEventType> filterByEvent, ContentType contentType, int skipCount, int maxItems) throws Exception {
+	default org.edu_sharing.repository.server.SearchResult<SearchUserEvent> getRecentUserEvents(List<ActivityOnNodeEventType> filterByEvent, Map<String, String[]> searchCriteria, SearchToken searchToken) throws Exception {
 		return null;
 	}
 }

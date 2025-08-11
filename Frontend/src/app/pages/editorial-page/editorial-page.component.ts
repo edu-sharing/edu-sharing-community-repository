@@ -330,6 +330,9 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                     repository: HOME_REPOSITORY,
                     contentType: 'ALL',
                     ...pagination,
+                    body: {
+                        criteria: searchCriteria,
+                    },
                 })
                 .subscribe((events) => {
                     this.dataSource.isLoading = false;

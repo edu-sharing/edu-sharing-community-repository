@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 
 public class SortDefinition implements Serializable {
 	public static SortDefinition SORT_DEFINITION_SCORE_ASC = new SortDefinition(new SortDefinitionEntry("score", true), false);
+	public static SortDefinition SORT_DEFINITION_SCORE_DESC = new SortDefinition(new SortDefinitionEntry("score", false), false);
 	static Logger logger = Logger.getLogger(SortDefinition.class);
 
 	private static final List<String> ALLOWED_SORT_MAIN_PROPERTIES = Collections.singletonList(

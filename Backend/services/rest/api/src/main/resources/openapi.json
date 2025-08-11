@@ -36844,7 +36844,7 @@
       }
     },
     "/search/v1/user/recent/{repository}": {
-      "get": {
+      "post": {
         "operationId": "getRecentUserEvents",
         "parameters": [
           {
@@ -36932,6 +36932,16 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchParameters"
+              }
+            }
+          },
+          "description": "search parameters"
+        },
         "responses": {
           "200": {
             "content": {

@@ -80,7 +80,6 @@ import org.elasticsearch.client.Request;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
@@ -1572,21 +1571,30 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     @Override
-    public org.edu_sharing.repository.client.rpc.Result<List<SearchUserEvent>> getRecentUserEvents(List<ActivityOnNodeEventType> filterByEvent, ContentType contentType, int skipCount, int maxItems) throws Exception {
+    public org.edu_sharing.repository.server.SearchResult<SearchUserEvent> getRecentUserEvents(List<ActivityOnNodeEventType> filterByEvent, Map<String, String[]> searchCriteria, SearchToken searchToken) throws Exception {
         String username = AuthenticationUtil.getFullyAuthenticatedUser();
-        MetadataQueries queries = MetadataHelper.getLocalDefaultMetadataset().getQueries(MetadataReader.QUERY_SYNTAX_DSL);
-        String basequery = queries.findQuery("recentUserEvents").getPrimaryBasequery();
+        MetadataSet mds = MetadataHelper.getLocalDefaultMetadataset();
+        MetadataQueries queries = mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL);
+        MetadataQuery queryData = queries.findQuery("recentUserEvents");
+        String basequery = queryData.getPrimaryBasequery();
         BoolQuery.Builder builder = QueryBuilders.bool()
+                /*.filter(filter -> filter
+                        .bool(fb -> fb
+                                .must(fq -> fq.bool(MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, searchCriteria, true).build()))
+                        )
+                )*/
                 .must(
+                        must -> must.bool(MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, searchCriteria, false).build())
+                ).must(
                         b -> b.wrapper(new ReadableWrapperQueryBuilder(basequery).build())
                 ).must(
-                        getContentTypeQuery(contentType)
+                        getContentTypeQuery(searchToken.getContentType())
                 ).must(
                         must -> must.bool(getGlobalConditions(null, null, null).build())
                 ).must(
                         Query.of(q2 -> q2.hasChild(hc -> hc
                                 .type("userEvent")
-                                .scoreMode(ChildScoreMode.Min)
+                                .scoreMode(ChildScoreMode.Max)
                                 .query(childQuery -> childQuery.functionScore(fs -> fs
                                         .query(q3 -> q3.bool(b -> {
                                             b = b.must(m -> m.term(t -> t
@@ -1626,9 +1634,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                 )
                         ))
                 );
-
-        SearchResultNodeRef queryResult = searchByQuery(builder.build(), skipCount, maxItems, SortDefinition.SORT_DEFINITION_SCORE_ASC);
-        org.edu_sharing.repository.client.rpc.Result<List<SearchUserEvent>> result = new org.edu_sharing.repository.client.rpc.Result<>();
+        searchToken.setElasticQuery(builder.build());
+        searchToken.setSortDefinition(SortDefinition.SORT_DEFINITION_SCORE_DESC);
+        SearchResultNodeRef queryResult = search(searchToken, true);
+        org.edu_sharing.repository.server.SearchResult<SearchUserEvent> result = new org.edu_sharing.repository.server.SearchResult<>();
         ArrayList<SearchUserEvent> list = new ArrayList<>();
         int i = 0;
         for (Hit<Map> elasticHit : queryResult.getElasticHits()) {
@@ -1636,11 +1645,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
             list.add(new SearchUserEvent(
                             queryResult.getData().get(i++),
                             userEvent.get("initiator").toString(),
-                            new Date((Long)userEvent.get("timestamp")),
+                            new Date((Long) userEvent.get("timestamp")),
                             ActivityOnNodeEventType.valueOf(userEvent.get("type").toString())
                     )
             );
         }
+        result.setFacets(queryResult.getFacets());
         result.setData(list);
         result.setStartIDX(queryResult.getStartIDX());
         result.setNodeCount(queryResult.getNodeCount());

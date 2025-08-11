@@ -33,6 +33,7 @@ import org.edu_sharing.service.search.model.SearchVCard;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.tracking.ActivityOnNodeEvent;
 import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,21 +87,7 @@ public class SearchApi {
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			MdsDao mdsDao = MdsDao.getMds(repoDao, mdsId);
 
-			SearchToken token = new SearchToken();
-			token.setFacets(parameters.getFacets());
-			token.setFacetLimit((parameters.getFacetLimit() != null && parameters.getFacetLimit() > 0)
-					? parameters.getFacetLimit() : 10);
-			token.setFacetsMinCount((parameters.getFacetMinCount() != null && parameters.getFacetMinCount() >= 0)
-					? parameters.getFacetMinCount() : 5);
-			token.setQueryString(parameters.getFacetSuggest());
-			token.setPermissions(parameters.getPermissions());
-			token.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
-			token.setFrom(skipCount != null ? skipCount : 0);
-			token.setMaxResult(maxItems != null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS);
-			token.setContentType(contentType);
-			token.setResolveCollections(parameters.isResolveCollections());
-			token.setReturnSuggestion(parameters.isReturnSuggestions());
-			token.setExcludes(parameters.getExcludes());
+			SearchToken token = getSearchToken(contentType, maxItems, skipCount, sortProperties, sortAscending, parameters);
 			NodeSearch search = NodeDao.search(repoDao, mdsDao, query, parameters.getCriteria(), token, filter, parametersToDaoTransformer(parameters));
 
 			List<Node> data = null;//new ArrayList<>();
@@ -133,6 +120,30 @@ public class SearchApi {
 			return ErrorResponse.createResponse(t);
 		}
 
+	}
+
+	@NotNull
+	private static SearchToken getSearchToken(SearchService.ContentType contentType, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, SearchParameters parameters) {
+		SearchToken token = new SearchToken();
+		if(parameters != null) {
+			token.setFacets(parameters.getFacets());
+			token.setFacetLimit((parameters.getFacetLimit() != null && parameters.getFacetLimit() > 0)
+					? parameters.getFacetLimit() : 10);
+			token.setFacetsMinCount((parameters.getFacetMinCount() != null && parameters.getFacetMinCount() >= 0)
+					? parameters.getFacetMinCount() : 5);
+			token.setQueryString(parameters.getFacetSuggest());
+			token.setPermissions(parameters.getPermissions());
+			token.setResolveCollections(parameters.isResolveCollections());
+			token.setReturnSuggestion(parameters.isReturnSuggestions());
+			token.setExcludes(parameters.getExcludes());
+		}
+		if (sortProperties != null) {
+			token.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
+		}
+		token.setFrom(skipCount != null ? skipCount : 0);
+		token.setMaxResult(maxItems != null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS);
+		token.setContentType(contentType);
+		return token;
 	}
 
 	public static Function<NodeDao, NodeDao> parametersToDaoTransformer(SearchParameters parameters) {
@@ -179,21 +190,7 @@ public class SearchApi {
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			MdsDao mdsDao = MdsDao.getMds(repoDao, mdsId);
 
-			SearchToken token = new SearchToken();
-			token.setFacets(parameters.getFacets());
-			token.setFacetLimit((parameters.getFacetLimit() != null && parameters.getFacetLimit() > 0)
-					? parameters.getFacetLimit() : 10);
-			token.setFacetsMinCount((parameters.getFacetMinCount() != null && parameters.getFacetMinCount() >= 0)
-					? parameters.getFacetMinCount() : 5);
-			token.setQueryString(parameters.getFacetSuggest());
-			token.setPermissions(parameters.getPermissions());
-			token.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
-			token.setFrom(skipCount != null ? skipCount : 0);
-			token.setMaxResult(maxItems != null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS);
-			token.setContentType(contentType);
-			token.setResolveCollections(parameters.isResolveCollections());
-			token.setReturnSuggestion(parameters.isReturnSuggestions());
-			token.setExcludes(parameters.getExcludes());
+			SearchToken token = getSearchToken(contentType, maxItems, skipCount, sortProperties, sortAscending, parameters);
 			NodeSearch search = NodeDao.search(repoDao, mdsDao, query, parameters.getCriteria(), token, filter, parametersToDaoTransformer(parameters));
 
 			List<Node> nodes = null;//new ArrayList<>();
@@ -606,7 +603,7 @@ public class SearchApi {
 
 	}
 
-	@GET
+	@POST
 	@Path("/user/recent/{repository}")
 
 	@Operation(summary = "Get nodes with recent events for current user")
@@ -625,17 +622,25 @@ public class SearchApi {
 			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
 			@Parameter(description = "Event types to search for", required = false) @QueryParam("eventType") List<ActivityOnNodeEventType> eventType,
 			@Parameter(description = "Type of element", required = false) @QueryParam("contentType") SearchService.ContentType contentType,
+			@Parameter(description = "search parameters", required = false) SearchParameters parameters,
 			@Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue = "25")) @QueryParam("maxItems") Integer maxItems,
 			@Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount,
 			@Context HttpServletRequest req) {
 
 		try {
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			SearchResult<UserEventDao> events = UserEventDao.getRecentUserEvents(repoDao, eventType, contentType, skipCount, maxItems);
+
+			SearchResult<UserEventDao> events = UserEventDao.getRecentUserEvents(
+					repoDao,
+					eventType,
+					parameters.getCriteria(),
+					getSearchToken(contentType, maxItems, skipCount, null, null, parameters)
+			);
 
 			SearchResultEvent response = new SearchResultEvent();
 
 			response.setNodes(events.getNodes().stream().map(UserEventDao::asUserEvent).toList());
+			response.setFacets(events.getFacets());
 			response.setPagination(events.getPagination());
 
 			return Response.status(Response.Status.OK).entity(response).build();
