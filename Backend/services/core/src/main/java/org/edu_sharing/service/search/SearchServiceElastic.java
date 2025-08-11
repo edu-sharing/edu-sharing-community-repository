@@ -1586,7 +1586,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 ).must(
                         Query.of(q2 -> q2.hasChild(hc -> hc
                                 .type("userEvent")
-                                .scoreMode(ChildScoreMode.Max)
+                                .scoreMode(ChildScoreMode.Min)
                                 .query(childQuery -> childQuery.functionScore(fs -> fs
                                         .query(q3 -> q3.bool(b -> {
                                             b = b.must(m -> m.term(t -> t
