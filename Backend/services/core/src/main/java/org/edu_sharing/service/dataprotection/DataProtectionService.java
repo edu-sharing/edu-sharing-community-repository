@@ -23,6 +23,7 @@ import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.repository.tools.URLHelper;
@@ -254,10 +255,12 @@ public class DataProtectionService{
         Date firstLogin = (Date)user.getProperties().get(CCConstants.PROP_USER_ESFIRSTLOGIN);
         Date lastLogin = (Date)user.getProperties().get(CCConstants.PROP_USER_ESLASTLOGIN);
         String role = (String)user.getProperties().get(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION);
-        List<String> roles = role == null ? null : List.of(role);
+        List<String> roles = role == null ? null : Stream.of(role).map(r -> I18nAngular.getTranslationAngular("common","USER.PRIMARY_AFFILIATION."+r)).collect(Collectors.toList());
         EduGroup eduGroup = allEduGroups != null && !allEduGroups.isEmpty() ? allEduGroups.get(0) : null;
+        String secondaryUserName = (String)user.getProperties().get(CCConstants.PROP_USER_SECONDARY_IDS);
         PDFReport.Data.DataBuilder reportData = PDFReport.Data.builder()
                 .userName(userName)
+                .secondaryUserName(secondaryUserName)
                 .firstName(user.getGivenName())
                 .lastName(user.getSurname())
                 .firstLogin(formatDate(firstLogin,zone,locale,FormatStyle.MEDIUM,true))

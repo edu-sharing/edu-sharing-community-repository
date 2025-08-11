@@ -74,6 +74,7 @@ public class PDFReport {
     @lombok.Builder
     public static class Data{
         String userName;
+        String secondaryUserName;
         String firstName;
         String lastName;
         String email;
