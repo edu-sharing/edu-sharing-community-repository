@@ -9,7 +9,7 @@ import { ManagementDialogsService } from '../../features/management-dialogs/mana
 import { MainNavComponent } from '../../main/navigation/main-nav/main-nav.component';
 import { CookieInfoComponent } from '../cookie-info/cookie-info.component';
 import { SkipNavService } from './skip-nav/skip-nav.service';
-import { OptionItem } from 'ngx-edu-sharing-ui';
+import { CustomOptions, OptionItem } from 'ngx-edu-sharing-ui';
 
 export class MainNavCreateConfig {
     /** allowed / display new material button */
@@ -65,6 +65,10 @@ export class MainNavConfig {
      * Custom options that should be placed in the "New" menu
      */
     customCreateOptions?: OptionItem[];
+    /**
+     * custom options / options configuration for the user dropdown menu on the right
+     */
+    customUserMenuOptions?: CustomOptions;
 
     /**
      * If create is allowed, this event will fire the new nodes

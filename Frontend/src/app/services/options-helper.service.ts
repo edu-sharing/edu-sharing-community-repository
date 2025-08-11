@@ -332,7 +332,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         );
          */
 
-        options = this.applyExternalOptions(options, data);
+        options = this.applyExternalOptions(options, data.customOptions);
         const custom = this.configService.instant<ConfigOptionItem[]>('customOptions');
         void this.nodeHelper.applyCustomNodeOptions(custom, data.allObjects, objects, options);
         // do pre-handle callback options for dropdown + actionbar
@@ -1793,11 +1793,11 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         );
     }
 
-    applyExternalOptions(options: OptionItem[], data: OptionData) {
-        if (!data.customOptions) {
+    applyExternalOptions(options: OptionItem[], customOptionsIn: CustomOptions) {
+        if (!customOptionsIn) {
             return options;
         }
-        const customOptions = { ...new CustomOptions(), ...data.customOptions };
+        const customOptions = { ...new CustomOptions(), ...customOptionsIn };
         if (!customOptions.useDefaultOptions) {
             options = [];
         }
@@ -1863,11 +1863,11 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
 
     private objectsMatchesConstrains(
         constrains: Constrain[],
-        data: OptionData,
-        objects: Node[] | any[],
+        data: OptionData = null,
+        objects: Node[] | any[] = null,
     ) {
         // allow all options in debug scope
-        if (data.scope === Scope.DebugShowAll) {
+        if (data?.scope === Scope.DebugShowAll) {
             return null;
         }
         if (constrains.indexOf(Constrain.NoCollectionReference) !== -1) {
@@ -1941,6 +1941,15 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                     RestConstants.STATUS_CODE_OK
             ) {
                 return Constrain.User;
+            }
+        }
+        if (constrains.indexOf(Constrain.GuestOrNotLoggedIn) !== -1) {
+            if (
+                this.connectors.getRestConnector().getCurrentLogin() &&
+                this.connectors.getRestConnector().getCurrentLogin().statusCode ===
+                    RestConstants.STATUS_CODE_OK
+            ) {
+                return Constrain.GuestOrNotLoggedIn;
             }
         }
         if (constrains.indexOf(Constrain.LTIMode) !== -1) {
@@ -2038,7 +2047,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     async filterOptions(
         options: OptionItem[],
         target: Target,
-        data: OptionData,
+        data: OptionData = null,
         objects: Node[] | any = null,
     ) {
         if (target === Target.List) {
