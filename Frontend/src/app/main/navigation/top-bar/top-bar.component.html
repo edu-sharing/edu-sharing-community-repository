@@ -120,19 +120,16 @@
         aria-hidden="true"
       ></button>
     </ng-container>
-  </div>
-  <div
-    class="custom-template-after-new"
-    *ngIf="mainNavService.getCustomTemplateSlot(TemplateSlot.AfterCreateMenu)"
-  >
-    <ng-container
-      *ngTemplateOutlet="
-        mainNavService.getCustomTemplateSlot(TemplateSlot.AfterCreateMenu);
-        context: {
-          currentScope: currentScope
-        }
-      "
-    ></ng-container>
+    <ng-container *ngIf="mainNavService.getCustomTemplateSlot(TemplateSlot.AfterCreateMenu)">
+      <ng-container
+        *ngTemplateOutlet="
+          mainNavService.getCustomTemplateSlot(TemplateSlot.AfterCreateMenu);
+          context: {
+            currentScope: currentScope
+          }
+        "
+      ></ng-container>
+    </ng-container>
   </div>
   <div class="topBarSearch" [class.noScope]="!showScope">
     <div class="scopeNameMobile" *ngIf="!searchEnabled">{{ title | translate }}</div>
