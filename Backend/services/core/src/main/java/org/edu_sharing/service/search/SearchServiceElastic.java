@@ -1578,11 +1578,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
         MetadataQuery queryData = queries.findQuery("recentUserEvents");
         String basequery = queryData.getPrimaryBasequery();
         BoolQuery.Builder builder = QueryBuilders.bool()
-                /*.filter(filter -> filter
-                        .bool(fb -> fb
-                                .must(fq -> fq.bool(MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, searchCriteria, true).build()))
-                        )
-                )*/
+                .filter(
+                        filter -> filter.bool(MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, searchCriteria, true).build())
+                )
                 .must(
                         must -> must.bool(MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, searchCriteria, false).build())
                 ).must(

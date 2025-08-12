@@ -1477,6 +1477,16 @@
         <multiple>true</multiple>
         <multiplejoin>OR</multiplejoin>
       </property>
+      <property name="virtual:activityType">
+        <statement value="yours">
+          {"match": {"properties.cm:creator.keyword": "${user.cm:userName}" }}
+        </statement>
+        <statement value="areas">
+          {"bool":{"must_not":[
+          {"match": {"properties.cm:creator.keyword": "${user.cm:userName}" }}
+          ]}}
+        </statement>
+      </property>
     </query>
     <query join="AND" id="workflowReceive">
       <basequery>
