@@ -155,6 +155,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             .pipe(
                 takeUntilDestroyed(),
                 filter((i) => !!i),
+                first(),
             )
             .subscribe((instance) => {
                 instance
@@ -292,6 +293,9 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     private async processCurrentValues(params: Params, routeConfig: RouteConfig) {
+        this.searchFieldService.getCurrentInstance().patchConfig({
+            placeholder: 'EDITORIAL.SEARCH_PLACEHOLDER.' + routeConfig.primaryMode.toUpperCase(),
+        });
         const mds = await firstValueFrom(this.mdsDefinition$.pipe(filter((m) => !!m)));
         const criteria = JSON.parse(params.filters || '{}');
         const pagination = {
@@ -327,7 +331,6 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         this.dataSource.isLoading = true;
         this.dataSource.reset();
 
-        this.mdsLoaded$.subscribe((v) => console.log('mds', v));
         this.nodeEntriesRef.setPaginator(pagination);
         // wait for mds and delay to make sure the facets are registered
         await firstValueFrom(

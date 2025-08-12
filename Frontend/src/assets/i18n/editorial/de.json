@@ -1,5 +1,8 @@
 {
   "EDITORIAL": {
+    "SEARCH_PLACEHOLDER": {
+      "ACTIVITY": "Aktivitätenliste durchsuchen..."
+    },
     "TITLE": "Verwalten",
     "BREADCRUMB": {
       "HOME": "Startseite",
