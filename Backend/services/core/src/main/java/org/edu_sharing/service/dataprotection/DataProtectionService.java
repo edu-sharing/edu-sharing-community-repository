@@ -541,7 +541,7 @@ public class DataProtectionService{
             queue.add(user);
             return true;
         }else if(entry.getStatus().equals(DataProtectionQueue.Status.FINISHED.toString())){
-            removeNode(entry.getNode_id());
+            AuthenticationUtil.runAsSystem(() -> { removeNode(entry.getNode_id());return null;});
             entry.setRequested(new Date());
             entry.setStatus(DataProtectionQueue.Status.REQUESTED.toString());
             entry.setNode_id(null);
