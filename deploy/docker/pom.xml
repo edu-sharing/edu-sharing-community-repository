@@ -95,7 +95,7 @@
     </docker.edu_sharing.community.common.redis.name>
 
     <docker.edu_sharing.community.common.redis.tag>
-      8.0.3
+      8.2.0
     </docker.edu_sharing.community.common.redis.tag>
 
     <docker.edu_sharing.community.common.redis>
