@@ -10,6 +10,8 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.repo.security.person.RegexHomeFolderProvider;
 import org.alfresco.service.cmr.repository.*;
+import org.alfresco.service.cmr.security.AccessPermission;
+import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
@@ -231,13 +233,11 @@ public class DataProtectionService{
         return AuthenticationUtil.runAsSystem(() -> persistAndCleanup(userName, target, rootPath));
     }
 
-    private void summmaryReport(String userName, List<NodeRef> collectionNodes, List<NodeRef> feedBacks, List<NodeRef> comments, String rootPath) {
-        if(!summaryExport) return;
-        List<NodeRef> privateCollections = collectionNodes.stream().filter(n -> "MY".equals(nodeService.getProperty(n, QName.createQName(CCConstants.CCM_PROP_MAP_COLLECTIONSCOPE)))).collect(Collectors.toList());
-        List<NodeRef> sharedCollections =  collectionNodes.stream().filter(n -> {
-            String scope = (String)nodeService.getProperty(n, QName.createQName(CCConstants.CCM_PROP_MAP_COLLECTIONSCOPE));
-            return "CUSTOM_PUBLIC".equals(scope) || "CUSTOM".equals(scope);
-        }).collect(Collectors.toList());
+    private File summmaryReport(String userName, List<NodeRef> collectionNodes, List<NodeRef> feedBacks, List<NodeRef> comments, String rootPath) {
+        if(!summaryExport) return null;
+
+        List<NodeRef> privateCollections = collectionNodes.stream().filter(n -> !isSharedNode(n,userName)).collect(Collectors.toList());
+        List<NodeRef> sharedCollections =  collectionNodes.stream().filter(n -> isSharedNode(n,userName)).collect(Collectors.toList());
 
 
         AuthorityService authorityService = AuthorityServiceFactory.getLocalService();
@@ -290,7 +290,14 @@ public class DataProtectionService{
             }
         }
 
-        report.report(reportData.build(), dir );
+        return report.report(reportData.build(), dir );
+    }
+
+    boolean isSharedNode(NodeRef nodeRef, String userName) {
+        Set<AccessPermission> allSetPermissions = permissionService.getAllSetPermissions(nodeRef);
+        List<AccessPermission> perms = allSetPermissions.stream().filter(a -> !userName.equals(a.getAuthority()) && !AuthorityType.OWNER.equals(a.getAuthorityType()))
+                .collect(Collectors.toList());
+        return !perms.isEmpty();
     }
 
     private List<String> getNameList(List<NodeRef> nodes){
