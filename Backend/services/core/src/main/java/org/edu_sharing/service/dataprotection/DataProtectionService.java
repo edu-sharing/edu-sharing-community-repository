@@ -236,7 +236,7 @@ public class DataProtectionService{
         List<NodeRef> privateCollections = collectionNodes.stream().filter(n -> "MY".equals(nodeService.getProperty(n, QName.createQName(CCConstants.CCM_PROP_MAP_COLLECTIONSCOPE)))).collect(Collectors.toList());
         List<NodeRef> sharedCollections =  collectionNodes.stream().filter(n -> {
             String scope = (String)nodeService.getProperty(n, QName.createQName(CCConstants.CCM_PROP_MAP_COLLECTIONSCOPE));
-            return "MY".equals(scope) || "CUSTOM".equals(scope);
+            return "CUSTOM_PUBLIC".equals(scope) || "CUSTOM".equals(scope);
         }).collect(Collectors.toList());
 
 
