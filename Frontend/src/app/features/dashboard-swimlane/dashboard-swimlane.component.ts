@@ -168,7 +168,7 @@ export class DashboardSwimlaneComponent {
             this.routerLink.set('/' + UIConstants.ROUTER_PREFIX + 'collections');
             this.routerQueryParams.set({ scope: 'MY' });
             void this.fetch(
-                this.searchService.search({
+                this.searchService.search<SearchResultNode>({
                     query: 'dashboard_my_collections',
                     repository: HOME_REPOSITORY,
                     metadataset: DEFAULT,

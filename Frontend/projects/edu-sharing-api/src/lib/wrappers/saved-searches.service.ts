@@ -4,7 +4,7 @@ import { map, startWith, switchMap, take, tap } from 'rxjs/operators';
 import { MdsQueryCriteria, Node } from '../api/models';
 import { SearchV1Service } from '../api/services';
 import { CONTENT_TYPE_ALL, DEFAULT, HOME_REPOSITORY, PROPERTY_FILTER_ALL } from '../constants';
-import { Sort } from '../models';
+import { SearchResults, Sort } from '../models';
 import { switchReplay } from '../utils/rxjs-operators/switch-replay';
 import { RawValuesDict } from './mds-label.service';
 import { NodeService } from './node.service';
@@ -134,8 +134,8 @@ export class SavedSearchesService {
         if (searchString) {
             criteria.push({ property: PRIMARY_SEARCH_CRITERIA, values: [searchString] });
         }
-        return this.search
-            .requestSearch({
+        return (
+            this.search.requestSearch({
                 repository: HOME_REPOSITORY,
                 query: 'saved_search',
                 metadataset: DEFAULT,
@@ -149,8 +149,8 @@ export class SavedSearchesService {
                 body: {
                     criteria,
                 },
-            })
-            .pipe(map(({ nodes, pagination }) => ({ data: nodes, total: pagination.total })));
+            }) as Observable<SearchResults>
+        ).pipe(map(({ nodes, pagination }) => ({ data: nodes, total: pagination.total })));
     }
 
     /**

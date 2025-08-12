@@ -22,6 +22,7 @@ import {
     HOME_REPOSITORY,
     Node,
     PROPERTY_FILTER_ALL,
+    SearchResultNode,
     SearchService,
 } from 'ngx-edu-sharing-api';
 import { Toast } from '../../../services/toast';
@@ -149,7 +150,7 @@ export class CollectionChooserComponent implements OnInit {
                 { property: RestConstants.PRIMARY_SEARCH_CRITERIA, values: [this.searchQuery] },
             ];
             this.searchService
-                .search({
+                .search<SearchResultNode>({
                     repository: HOME_REPOSITORY,
                     propertyFilter: [PROPERTY_FILTER_ALL],
                     contentType: 'COLLECTIONS',

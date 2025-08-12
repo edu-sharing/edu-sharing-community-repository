@@ -188,9 +188,6 @@ export class AdminMediacenterComponent {
                     this.mediacenterGroups.isLoading = false;
                 });
             this.mediacenterNodesDataSource.reset();
-            UIHelper.waitForComponent(this.ngZone, this, 'mediacenterMds').subscribe(() =>
-                this.mediacenterMds.loadMds(),
-            );
             // done via mds
             // this.loadMediacenterNodes();
         }

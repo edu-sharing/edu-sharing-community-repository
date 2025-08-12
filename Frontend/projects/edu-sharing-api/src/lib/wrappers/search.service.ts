@@ -7,6 +7,7 @@ import {
     MdsIdentifier,
     MdsQueryCriteria,
     NetworkService,
+    SearchResultEvent,
     SearchResults,
 } from '../../public-api';
 import * as apiModels from '../api/models';
@@ -48,6 +49,12 @@ export type DidYouMeanSuggestion = Pick<apiModels.Suggest, 'highlighted' | 'text
 
 /** Parameters to be provided to `search`. */
 export type SearchRequestParams = Parameters<SearchV1Service['search']>[0] & {
+    type?: 'search' | 'recentActivity';
+    /**
+     * the metadataset id
+     * Note: This will also be used to resolve facet labels!
+     */
+    metadataset: string;
     /**
      * holds the non-unfolded trees criteria
      * used for storing only the necessary data for saved search
@@ -56,11 +63,13 @@ export type SearchRequestParams = Parameters<SearchV1Service['search']>[0] & {
     criteriaFlat?: MdsQueryCriteria[];
 };
 
+export type GenericSearchResults = SearchResults | SearchResultEvent;
+
 interface CompletedRequest {
     /** Parameters sent with the API request. */
     requestParams: SearchRequestParams;
     /** API response. */
-    results: SearchResults;
+    results: GenericSearchResults;
     facetUpdates: FacetUpdates;
 }
 
@@ -105,7 +114,7 @@ export class SearchService {
      * Facets will be updated and search parameters will be kept for future calls to `getPage` and
      * `getAsYouTypeFacetSuggestions`.
      */
-    search(params: SearchRequestParams): Observable<SearchResults> {
+    search<T extends GenericSearchResults>(params: SearchRequestParams): Observable<T> {
         let previousRequest = omitProperty(this.completedRequestSubject.value, 'previousRequest');
         const facetUpdates = this.getFacetUpdates(previousRequest, params);
         this.searchParamsSubject.next(params);
@@ -119,7 +128,7 @@ export class SearchService {
             },
         };
         return this.requestSearch(requestParams).pipe(
-            tap((results) =>
+            tap((results: GenericSearchResults) =>
                 this.completedRequestSubject.next({
                     results,
                     requestParams,
@@ -127,20 +136,25 @@ export class SearchService {
                     previousRequest,
                 }),
             ),
-        );
+        ) as Observable<T>;
     }
 
     /**
      * Sends a plain search request without updating any global state.
      */
-    requestSearch(params: SearchRequestParams): Observable<SearchResults> {
-        return this.searchV1.search(params);
+    requestSearch(params: SearchRequestParams): Observable<GenericSearchResults> {
+        if (!params.type || params.type === 'search') {
+            return this.searchV1.search(params);
+        } else if (params.type === 'recentActivity') {
+            return this.searchV1.getRecentUserEvents(params);
+        }
+        throw new Error('invalid type: ' + params.type);
     }
 
     /**
      * Gets another page of search results with parameters last provided to `search`.
      */
-    getPage(pageIndex: number): Observable<SearchResults> {
+    getPage(pageIndex: number): Observable<GenericSearchResults> {
         const searchParams = this.getSearchParams();
         return this.requestSearch({
             ...searchParams,

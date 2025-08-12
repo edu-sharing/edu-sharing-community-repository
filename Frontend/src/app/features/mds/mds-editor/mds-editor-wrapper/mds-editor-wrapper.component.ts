@@ -296,6 +296,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
                 this.editorType = 'angular';
             }
             this.mdsEditorInstance.values.subscribe((v) => this.currentValuesChange.emit(v));
+            this.mdsLoaded.emit(this.mdsEditorInstance.mdsDefinition$.value);
         } catch (error) {
             this.handleError(error);
         } finally {

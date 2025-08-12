@@ -14,6 +14,7 @@
         [embedded]="true"
         [repository]="HOME_REPOSITORY"
         [mode]="'search'"
+        (mdsLoaded)="mdsLoaded$.next(true)"
         [currentValues]="searchValues$ | async"
         (currentValuesChange)="updateMdsFilter($event)"
       ></es-mds-editor-wrapper>

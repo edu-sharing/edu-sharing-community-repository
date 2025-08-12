@@ -15,6 +15,8 @@ import {
     MdsDefinition,
     MdsService,
     Node,
+    SearchResultEvent,
+    SearchResults,
     SearchService,
     SearchServiceUnwrapped,
 } from 'ngx-edu-sharing-api';
@@ -55,7 +57,7 @@ import {
 } from '../../main/navigation/search-field/search-field.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EditorialPageService } from './editorial-page.service';
-import { debounceTime, distinctUntilChanged, first, skip, startWith, tap } from 'rxjs/operators';
+import { debounceTime, delay, distinctUntilChanged, first, startWith, tap } from 'rxjs/operators';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { SelectionModel } from '@angular/cdk/collections';
 
@@ -93,6 +95,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     queryParams$ = new BehaviorSubject<Params>(null);
     tabSelection$ = new BehaviorSubject<number>(0);
     searchValues$ = new BehaviorSubject<Values>({});
+    mdsLoaded$ = new BehaviorSubject(false);
     searchEvent$: Observable<SearchEvent>;
     /**
      * called when the first init was done (all fields have been parsed and initalized)
@@ -307,6 +310,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         const searchCriteria = this.searchHelperService.convertCritieria(
             {
                 ...criteria,
+                ...this.editorialPageService.buildSearchCriteria(this.tabSelection$.value),
                 ...(ngsearchword
                     ? { [RestConstants.PRIMARY_SEARCH_CRITERIA]: [ngsearchword] }
                     : {}),
@@ -323,18 +327,31 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         this.dataSource.isLoading = true;
         this.dataSource.reset();
 
+        this.mdsLoaded$.subscribe((v) => console.log('mds', v));
         this.nodeEntriesRef.setPaginator(pagination);
+        // wait for mds and delay to make sure the facets are registered
+        await firstValueFrom(
+            this.mdsLoaded$.pipe(
+                filter((v) => !!v),
+                first(),
+                delay(1),
+            ),
+        );
         if (routeConfig.primaryMode === 'activity') {
-            this.searchServiceUnwrapped
-                .getRecentUserEvents({
+            this.searchService
+                .search<SearchResultEvent>({
+                    type: 'recentActivity',
+                    metadataset: DEFAULT,
+                    query: null,
                     repository: HOME_REPOSITORY,
                     contentType: 'ALL',
                     ...pagination,
                     body: {
+                        facetMinCount: 1,
                         criteria: searchCriteria,
                     },
                 })
-                .subscribe((events) => {
+                .subscribe((events: SearchResultEvent) => {
                     this.dataSource.isLoading = false;
                     this.dataSource.setData(
                         events.nodes.map((e) => {
@@ -352,7 +369,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 });
         } else {
             this.searchService
-                .search({
+                .search<SearchResults>({
                     repository: HOME_REPOSITORY,
                     metadataset: DEFAULT,
                     query: this.mdsGroup(),

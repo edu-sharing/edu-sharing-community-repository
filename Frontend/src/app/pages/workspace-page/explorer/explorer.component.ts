@@ -57,6 +57,7 @@ import {
     Node,
     NodeService,
     PROPERTY_FILTER_ALL,
+    SearchResultNode,
     SearchResults,
     SearchService,
 } from 'ngx-edu-sharing-api';
@@ -265,7 +266,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             }
             this.load$.next({
                 reset: event?.reset,
-                nodes: this.search.search({
+                nodes: this.search.search<SearchResultNode>({
                     query: 'workspace',
                     repository: HOME_REPOSITORY,
                     metadataset: DEFAULT,

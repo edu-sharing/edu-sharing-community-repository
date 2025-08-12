@@ -11,7 +11,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { DEFAULT, HOME_REPOSITORY, Node, SearchService } from 'ngx-edu-sharing-api';
+import { DEFAULT, HOME_REPOSITORY, Node, SearchResults, SearchService } from 'ngx-edu-sharing-api';
 import {
     FormatDatePipe,
     InteractionType,
@@ -1031,7 +1031,7 @@ export class AdminStatisticsComponent implements OnInit {
         this.archivedNodesDataSource.reset();
         this.archivedNodesDataSource.isLoading = true;
         const result = await this.searchService
-            .search({
+            .search<SearchResults>({
                 sortProperties: [RestConstants.CM_NAME],
                 sortAscending: [false],
                 repository: HOME_REPOSITORY,
