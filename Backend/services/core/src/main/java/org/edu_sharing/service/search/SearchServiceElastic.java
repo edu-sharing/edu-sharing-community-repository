@@ -1594,7 +1594,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 ).must(
                         Query.of(q2 -> q2.hasChild(hc -> hc
                                 .type("userEvent")
-                                .scoreMode(ChildScoreMode.Max)
+                                .scoreMode(ChildScoreMode.Min)
                                 .query(childQuery -> childQuery.functionScore(fs -> fs
                                         .query(q3 -> q3.bool(b -> {
                                             b = b.must(m -> m.term(t -> t
@@ -1615,7 +1615,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                         // TODO: Filter by event if present!
                                         .functions(f -> f.scriptScore(ss -> ss
                                                 .script(script -> script
-                                                        .source("decayDateLinear(params.originDate, '1m', '0', 0.5, doc['userEvent.timestamp'].value)")
+                                                        .source("decayDateLinear(params.originDate, '1m', '0', 1.5, doc['userEvent.timestamp'].value)")
                                                         .params(Map.of("originDate", JsonData.of(Instant.now().toString())
                                                                 )
                                                         )
@@ -1635,7 +1635,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         ))
                 );
         searchToken.setElasticQuery(builder.build());
-        searchToken.setSortDefinition(SortDefinition.SORT_DEFINITION_SCORE_DESC);
+        searchToken.setSortDefinition(SortDefinition.SORT_DEFINITION_SCORE_ASC);
         SearchResultNodeRef queryResult = search(searchToken, true);
         org.edu_sharing.repository.server.SearchResult<SearchUserEvent> result = new org.edu_sharing.repository.server.SearchResult<>();
         ArrayList<SearchUserEvent> list = new ArrayList<>();
