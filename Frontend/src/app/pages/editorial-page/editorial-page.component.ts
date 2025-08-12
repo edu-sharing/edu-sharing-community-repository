@@ -350,6 +350,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                     contentType: 'ALL',
                     ...pagination,
                     body: {
+                        facetLimit: 5,
                         facetMinCount: 1,
                         criteria: searchCriteria,
                     },

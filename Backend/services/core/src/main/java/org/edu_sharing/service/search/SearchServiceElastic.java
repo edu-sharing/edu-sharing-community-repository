@@ -1577,6 +1577,47 @@ public class SearchServiceElastic extends SearchServiceImpl {
         MetadataQueries queries = mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL);
         MetadataQuery queryData = queries.findQuery("recentUserEvents");
         String basequery = queryData.getPrimaryBasequery();
+        Query childQuery = Query.of(q2 -> q2.hasChild(hc -> hc
+                .type("userEvent")
+                .scoreMode(ChildScoreMode.Min)
+                .query(cq -> cq.functionScore(fs -> fs
+                        .query(q3 -> q3.bool(b -> {
+                            b = b.must(m -> m.term(t -> t
+                                    .field("userEvent.initiator")
+                                    .value(username)
+                            ));
+                            if (filterByEvent != null && !filterByEvent.isEmpty()) {
+                                b.minimumShouldMatch("1");
+                                for (ActivityOnNodeEventType activityOnNodeEventType : filterByEvent) {
+                                    b = b.should(s -> s.term(t -> t
+                                            .field("userEvent.type")
+                                            .value(activityOnNodeEventType.name())
+                                    ));
+                                }
+                            }
+                            return b;
+                        }))
+                        // TODO: Filter by event if present!
+                        .functions(f -> f.scriptScore(ss -> ss
+                                .script(script -> script
+                                        .source("decayDateLinear(params.originDate, '1m', '0', 1.5, doc['userEvent.timestamp'].value)")
+                                        .params(Map.of("originDate", JsonData.of(Instant.now().toString())
+                                                )
+                                        )
+                                )))
+                        .boostMode(FunctionBoostMode.Replace)
+                ))
+                .innerHits(ih -> ih
+                        .name("userEvent")
+                        .size(1)
+                        .sort(so -> so
+                                .field(sf -> sf
+                                        .field("userEvent.timestamp")
+                                        .order(SortOrder.Desc)
+                                )
+                        )
+                )
+        ));
         BoolQuery.Builder builder = QueryBuilders.bool()
                 .filter(
                         filter -> filter.bool(MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, searchCriteria, true).build())
@@ -1590,48 +1631,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 ).must(
                         must -> must.bool(getGlobalConditions(null, null, null).build())
                 ).must(
-                        Query.of(q2 -> q2.hasChild(hc -> hc
-                                .type("userEvent")
-                                .scoreMode(ChildScoreMode.Min)
-                                .query(childQuery -> childQuery.functionScore(fs -> fs
-                                        .query(q3 -> q3.bool(b -> {
-                                            b = b.must(m -> m.term(t -> t
-                                                    .field("userEvent.initiator")
-                                                    .value(username)
-                                            ));
-                                            if(filterByEvent != null && !filterByEvent.isEmpty()) {
-                                                b.minimumShouldMatch("1");
-                                                for (ActivityOnNodeEventType activityOnNodeEventType : filterByEvent) {
-                                                    b = b.should(s -> s.term(t -> t
-                                                            .field("userEvent.type")
-                                                            .value(activityOnNodeEventType.name())
-                                                    ));
-                                                }
-                                            }
-                                            return b;
-                                        }))
-                                        // TODO: Filter by event if present!
-                                        .functions(f -> f.scriptScore(ss -> ss
-                                                .script(script -> script
-                                                        .source("decayDateLinear(params.originDate, '1m', '0', 1.5, doc['userEvent.timestamp'].value)")
-                                                        .params(Map.of("originDate", JsonData.of(Instant.now().toString())
-                                                                )
-                                                        )
-                                                )))
-                                        .boostMode(FunctionBoostMode.Replace)
-                                ))
-                                .innerHits(ih -> ih
-                                        .name("userEvent")
-                                        .size(1)
-                                        .sort(so -> so
-                                                .field(sf -> sf
-                                                        .field("userEvent.timestamp")
-                                                        .order(SortOrder.Desc)
-                                                )
-                                        )
-                                )
-                        ))
+                        childQuery
                 );
+
         searchToken.setElasticQuery(builder.build());
         searchToken.setSortDefinition(SortDefinition.SORT_DEFINITION_SCORE_ASC);
         SearchResultNodeRef queryResult = search(searchToken, true);
@@ -1649,6 +1651,41 @@ public class SearchServiceElastic extends SearchServiceImpl {
             );
         }
         result.setFacets(queryResult.getFacets());
+
+        Map<String, Aggregation> aggregations;
+        if (searchToken.getFacets() != null) {
+            BoolQuery.Builder queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData, null, true);
+            queryBuilderGlobalConditions.must(
+                    childQuery
+            );
+            List<NodeSearch.Facet> facetsResult = null;
+            SearchResponse<Map> searchResponseAggregations = null;
+            Set<MetadataQueryParameter> excludeOwnFacets = MetadataElasticSearchHelper.getExcludeOwnFacets(queryData, searchCriteria, searchToken.getFacets());
+            if (!excludeOwnFacets.isEmpty()) {
+                Map<String, Aggregation> excludedOwnAggregations = MetadataElasticSearchHelper.getAggregations(
+                        mds,
+                        queryData,
+                        searchCriteria,
+                        searchToken.getFacets(),
+                        excludeOwnFacets,
+                        queryBuilderGlobalConditions.build()._toQuery(),
+                        searchToken);
+
+                // remove duplicate facet entries
+                excludedOwnAggregations.entrySet().removeIf(e -> e.getKey().endsWith(MetadataElasticSearchHelper.FACET_SELECTED_POSTFIX));
+
+                SearchRequest searchSourceAggs = SearchRequest.of(req -> req
+                        .index(WORKSPACE_INDEX)
+                        .from(0)
+                        .size(0)
+                        .aggregations(excludedOwnAggregations));
+                searchResponseAggregations = client.search(searchSourceAggs, Map.class);
+                facetsResult = getFacets(mds, queryData, excludedOwnAggregations, searchResponseAggregations);
+                result.setFacets(facetsResult);
+                aggregations = null;
+            }
+        }
+
         result.setData(list);
         result.setStartIDX(queryResult.getStartIDX());
         result.setNodeCount(queryResult.getNodeCount());
