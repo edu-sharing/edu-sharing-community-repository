@@ -184,7 +184,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             this.sidenavRight(),
             () => this.sidenavRight.set(!this.sidenavRight()),
         );
-        this.sidebarOptionToggle.elementType = [ElementType.NoneOrUnknown];
+        this.sidebarOptionToggle.elementType = [];
         void this.nodeEntriesRef?.initOptionsGenerator({
             actionbar: this.actionbarRef,
             customOptions: {

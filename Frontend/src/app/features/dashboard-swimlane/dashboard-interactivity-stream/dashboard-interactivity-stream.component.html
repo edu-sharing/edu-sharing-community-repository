@@ -27,8 +27,7 @@
               : {
                   initiator: (event.initiator | authorityName),
                   event:
-                    ('DASHBOARD_SWIMLANE.STREAM.EVENT_TYPES.' + event.eventType
-                    | translate : { fallback: event.eventType }),
+                    ('EVENT.TYPE.' + event.eventType | translate : { fallback: event.eventType }),
                   element:
                     '<a href=\'' +
                     (event.node | esNodeUrl) +

@@ -322,6 +322,30 @@
       "VIEW_MATERIAL_PLAY_MEDIA": "Wiedergaben"
     }
   },
+  "EVENT": {
+    "eventType": "Aktion",
+    "timestamp": "Zeitpunkt",
+    "TYPE": {
+      "EDIT_MATERIAL": "bearbeitet",
+      "VIEW_COLLECTION": "angesehen",
+      "ARCHIVE_MATERIAL": "archiviert/gelöscht",
+      "DELETE_MATERIAL": "gelöscht",
+      "MOVE_MATERIAL": "verschoben",
+      "COPY_MATERIAL": "kopiert",
+      "REVERT_MATERIAL_VERSION": "Version zurückgesetzt",
+      "CHANGE_MATERIAL_CONTENT": "bearbeitet (Inhalt)",
+      "CHANGE_MATERIAL_OWNER": "bearbeitet (Besitzer geändert)",
+      "FORK_MATERIAL": "als Variante erzeugt",
+      "COMMENT_MATERIAL": "kommentiert",
+      "RATE_MATERIAL": "bewertet",
+      "UNRATE_MATERIAL": "bewertung entfernt",
+      "LINK_SHARE_MATERIAL": "als Link geteilt",
+      "LINK_UNSHARE_MATERIAL": "die Linkfreigabe entfernt",
+      "FEEDBACK_MATERIAL": "feedback abgegeben",
+      "REPORT_MATERIAL": "gemeldet",
+      "EDIT_MATERIAL_RELATION": "Beziehungen geändert"
+    }
+  },
   "PROPOSAL_STATUS": {
     "DECLINED": "abgelehnt",
     "ACCEPTED": "akzeptiert",
@@ -1498,26 +1522,6 @@
       "SHARED_INFO": "{{initiator}} gab Ihnen {{element}} frei",
       "EVENT_INFO_PERSONAL": "Sie haben {{element}} {{event}}",
       "EMPTY": "Keine kürzlichen Aktivitäten",
-      "EVENT_TYPES": {
-        "EDIT_MATERIAL": "bearbeitet",
-        "VIEW_COLLECTION": "angesehen",
-        "ARCHIVE_MATERIAL": "archiviert/gelöscht",
-        "DELETE_MATERIAL": "gelöscht",
-        "MOVE_MATERIAL": "verschoben",
-        "COPY_MATERIAL": "kopiert",
-        "REVERT_MATERIAL_VERSION": "Version zurückgesetzt",
-        "CHANGE_MATERIAL_CONTENT": "bearbeitet (Inhalt)",
-        "CHANGE_MATERIAL_OWNER": "bearbeitet (Besitzer geändert)",
-        "FORK_MATERIAL": "als Variante erzeugt",
-        "COMMENT_MATERIAL": "kommentiert",
-        "RATE_MATERIAL": "bewertet",
-        "UNRATE_MATERIAL": "bewertung entfernt",
-        "LINK_SHARE_MATERIAL": "als Link geteilt",
-        "LINK_UNSHARE_MATERIAL": "die Linkfreigabe entfernt",
-        "FEEDBACK_MATERIAL": "feedback abgegeben",
-        "REPORT_MATERIAL": "gemeldet",
-        "EDIT_MATERIAL_RELATION": "Beziehungen geändert"
-      },
       "TIMEGROUP": {
         "Today": "heute",
         "Yesterday": "gestern",

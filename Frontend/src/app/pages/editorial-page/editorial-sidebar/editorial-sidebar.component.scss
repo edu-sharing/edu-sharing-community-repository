@@ -31,10 +31,14 @@
         .text {
             flex-grow: 1;
             .title {
+                @include mixins.limitLineCount(1);
+                word-break: break-all;
                 font-size: vars.$fontSizeXLarge;
                 font-weight: bold;
+                margin-bottom: 6px;
             }
             .description {
+                @include mixins.limitLineCount(2, 1.25);
                 color: var(--textLight);
                 font-size: var(--fontSizeXSmall);
             }
