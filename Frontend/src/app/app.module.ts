@@ -34,6 +34,7 @@ import { CoreModule } from './core-module/core.module';
 import { extensionDeclarations } from './extension/extension-declarations';
 import { extensionImports } from './extension/extension-imports';
 import { extensionProviders } from './extension/extension-providers';
+import { extensionUiProviders } from './extension/extension-ui-providers';
 import { extensionSchemas } from './extension/extension-schemas';
 import { DialogsModule } from './features/dialogs/dialogs.module';
 import { ManagementDialogsModule } from './features/management-dialogs/management-dialogs.module';
@@ -50,7 +51,6 @@ import { BApiModule } from 'ngx-edu-sharing-b-api';
 import { WrapperComponent } from './web-components/wrapper/app/wrapper.component';
 import { MockLocationStrategy } from '@angular/common/testing';
 import { WebComponentService } from './main/web-component.service';
-import { extensionUiProviders } from 'edu-sharing-extension-dependencies/extension-ui-providers';
 
 const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     showDelay: 500,
