@@ -236,6 +236,9 @@ public class DataProtectionService{
     private File summmaryReport(String userName, List<NodeRef> collectionNodes, List<NodeRef> feedBacks, List<NodeRef> comments, String rootPath) {
         if(!summaryExport) return null;
 
+        // filter collection refs for report
+        collectionNodes = collectionNodes.stream().filter(c -> nodeService.getType(c).equals(QName.createQName(CCConstants.CCM_TYPE_MAP))).collect(Collectors.toList());
+
         List<NodeRef> privateCollections = collectionNodes.stream().filter(n -> !isSharedNode(n,userName)).collect(Collectors.toList());
         List<NodeRef> sharedCollections =  collectionNodes.stream().filter(n -> isSharedNode(n,userName)).collect(Collectors.toList());
 
