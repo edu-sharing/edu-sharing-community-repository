@@ -241,6 +241,9 @@ public class BulkEditNodesJob extends AbstractJob{
 					} catch (Throwable t) {
 						logger.warn("Could not read copy property from source node: "+ t.getMessage());
 					}
+					if(value != null && value instanceof List && ((List<?>) value).size() == 1) {
+						value = (Serializable) ((List<?>) value).get(0);
+					}
 				}
 				if (mode.equals(Mode.Replace)) {
 					setProperty(nodeRef, QName.createQName(property), value);
