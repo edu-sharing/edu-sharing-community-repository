@@ -50,6 +50,7 @@ import { BApiModule } from 'ngx-edu-sharing-b-api';
 import { WrapperComponent } from './web-components/wrapper/app/wrapper.component';
 import { MockLocationStrategy } from '@angular/common/testing';
 import { WebComponentService } from './main/web-component.service';
+import { extensionUiProviders } from 'edu-sharing-extension-dependencies/extension-ui-providers';
 
 const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     showDelay: 500,
@@ -73,7 +74,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DragDropModule,
         // forRoot is empty; It is initalized via useFactory!
         EduSharingApiModule.forRoot({}),
-        EduSharingUiModule.forRoot({ production: environment.production }, extensionProviders),
+        EduSharingUiModule.forRoot({ production: environment.production }, extensionUiProviders),
         BApiModule.forRoot({ rootUrl: '/edu-sharing/rest/bapi' }),
         extensionImports,
         HttpClientModule,
@@ -105,7 +106,8 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         { provide: MAT_CHECKBOX_DEFAULT_OPTIONS, useValue: { color: 'primary' } },
         { provide: MAT_RADIO_DEFAULT_OPTIONS, useValue: { color: 'primary' } },
         { provide: MAT_SLIDE_TOGGLE_DEFAULT_OPTIONS, useValue: { color: 'primary' } },
-        extensionProviders,
+        ...extensionProviders,
+        ...extensionUiProviders,
 
         WebComponentService,
         ErrorHandlerService,

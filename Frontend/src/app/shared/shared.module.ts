@@ -73,7 +73,7 @@ import { VersionLabelPipe } from './pipes/version-label.pipe';
 import { SmallCollectionComponent } from './components/small-collection/small-collection.component';
 import { ImprintPrivacyComponent } from './components/imprint-privacy-footer/imprint-privacy.component';
 import { extensionSchemas } from '../extension/extension-schemas';
-import { extensionProviders } from 'edu-sharing-extension-dependencies/extension-providers';
+import { extensionUiProviders } from 'edu-sharing-extension-dependencies/extension-ui-providers';
 
 @NgModule({
     declarations: [
@@ -139,7 +139,7 @@ import { extensionProviders } from 'edu-sharing-extension-dependencies/extension
             {
                 production: environment.production,
             },
-            extensionProviders,
+            extensionUiProviders,
         ),
     ],
     exports: [
