@@ -11,4 +11,5 @@ export const environment = {
     traceChangeDetection: false,
     webComponentMode: false,
     eduSharingApiUrl: '/edu-sharing/rest',
+    bApiUrl: null as string,
 };

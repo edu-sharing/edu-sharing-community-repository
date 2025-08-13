@@ -8,4 +8,5 @@ export const environment = {
     traceChangeDetection: false,
     webComponentMode: true,
     eduSharingApiUrl: (window as any).__env.EDU_SHARING_API_URL,
+    bApiUrl: (window as any).__env.EDU_SHARING_API_URL + '/bapi',
 };

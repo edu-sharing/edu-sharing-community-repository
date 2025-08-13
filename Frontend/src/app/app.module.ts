@@ -75,7 +75,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         // forRoot is empty; It is initalized via useFactory!
         EduSharingApiModule.forRoot({}),
         EduSharingUiModule.forRoot({ production: environment.production }, extensionUiProviders),
-        BApiModule.forRoot({ rootUrl: '/edu-sharing/rest/bapi' }),
+        BApiModule.forRoot({ rootUrl: environment.bApiUrl || '/edu-sharing/rest/bapi' }),
         extensionImports,
         HttpClientModule,
         MainModule,
