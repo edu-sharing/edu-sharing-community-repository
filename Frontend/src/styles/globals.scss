@@ -1,3 +1,6 @@
+// required for web components
+@forward 'node_modules/@angular/cdk/a11y-prebuilt.css';
+
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 @use 'projects/edu-sharing-ui/assets/scss/branding' as branding;
 @use 'sass:color';
