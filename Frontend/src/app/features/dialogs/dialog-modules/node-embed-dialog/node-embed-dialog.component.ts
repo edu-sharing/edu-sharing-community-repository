@@ -125,12 +125,24 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
         });
     }
 
+    /**
+     * Function getEmbedCode
+     *
+     * CAREFUL: The resulting HTML is parsed in our Moodle TinyMCE-Plugin.
+     * Please refer to its source code (amd/src/eduSubmit.js) before changing this function.
+     *
+     * @param values
+     */
     private getEmbedCode(values: any): string {
         const node = this.data.node;
         // We use `createElement` to have attributes sanitized. Note that occurrences of `&` in the
         // attribute `src` are rightfully escaped to `&amp;`.
         const iFrame = document.createElement('iframe');
         iFrame.src = this.getEmbedLink(node, values.version);
+        iFrame.classList.add('es-embed-iframe');
+        iFrame.setAttribute('data-repo-id', node.ref.repo);
+        iFrame.setAttribute('data-mediatype', node.mediatype);
+        iFrame.setAttribute('data-mimeType', node.mimetype);
         iFrame.title = RestHelper.getTitle(node);
         iFrame.width = values.width;
         iFrame.height = values.height;

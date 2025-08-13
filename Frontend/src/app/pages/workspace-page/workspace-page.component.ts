@@ -41,7 +41,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { delay, first, map, take, takeUntil } from 'rxjs/operators';
+import { delay, filter, first, map, startWith, take, takeUntil } from 'rxjs/operators';
 import {
     ConfigurationService,
     Connector,
@@ -175,7 +175,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         useDefaultOptions: true,
     };
 
-    toMeSharedToggle: boolean;
+    toMeSharedToggle$ = new BehaviorSubject<boolean>(null);
 
     readonly dataSource = new NodeDataSource<Node>();
     private reurl: string;
@@ -729,13 +729,20 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         void this.routeTo('MY_FILES', null, query);
     }
 
-    private openDirectoryFromRoute(params: any = null) {
+    private async openDirectoryFromRoute(params: any = null) {
         let id = params?.id;
         this.closeMetadata();
+
+        this.toMeSharedToggle$.next(
+            await this.session
+                .get('toMeSharedGroup', this.config.instant('workspaceSharedToMeDefaultAll', false))
+                .toPromise(),
+        );
+
         if (!id) {
             this.path = [];
             this.breadcrumbsService.setNodePath(this.path);
-            id = this.getRootFolderInternalId();
+            id = await this.getRootFolderInternalId();
             if (this.root === 'RECYCLE') {
                 this.createAllowed = false;
                 // GlobalContainerComponent.finishPreloading();
@@ -969,9 +976,15 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         return '';
     }
 
-    getRootFolderInternalId() {
+    async getRootFolderInternalId() {
         if (this.root === 'TO_ME_SHARED_FILES') {
-            if (this.toMeSharedToggle) {
+            const toggle = await this.toMeSharedToggle$
+                .pipe(
+                    filter((v) => v !== null),
+                    first(),
+                )
+                .toPromise();
+            if (toggle) {
                 return RestConstants.TO_ME_SHARED_FILES;
             } else {
                 return RestConstants.TO_ME_SHARED_FILES_PERSONAL;
@@ -1044,22 +1057,20 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
     }
 
     async prepareActionbar() {
-        this.toMeSharedToggle = await this.session
-            .get('toMeSharedGroup', this.config.instant('workspaceSharedToMeDefaultAll', false))
-            .toPromise();
         const toggle = new OptionItem(
             'OPTIONS.TOGGLE_SHARED_TO_ME',
-            this.toMeSharedToggle ? 'edu-content_shared_me_all' : 'edu-content_shared_me_private',
+            this.toMeSharedToggle$ ? 'edu-content_shared_me_all' : 'edu-content_shared_me_private',
             () => {
-                this.toMeSharedToggle = !this.toMeSharedToggle;
-                toggle.icon = this.toMeSharedToggle
+                this.toMeSharedToggle$.next(!this.toMeSharedToggle$.value);
+                toggle.icon = this.toMeSharedToggle$
                     ? 'edu-content_shared_me_all'
                     : 'edu-content_shared_me_private';
-                void this.session.set('toMeSharedGroup', this.toMeSharedToggle);
+                void this.session.set('toMeSharedGroup', this.toMeSharedToggle$.value);
                 this.openDirectoryFromRoute();
                 //this.treeComponent.reload = Boolean(true);
                 this.toast.toast(
-                    'WORKSPACE.TOAST.TO_ME_SHARED_' + (this.toMeSharedToggle ? 'ALL' : 'PERSONAL'),
+                    'WORKSPACE.TOAST.TO_ME_SHARED_' +
+                        (this.toMeSharedToggle$.value ? 'ALL' : 'PERSONAL'),
                 );
             },
         );
