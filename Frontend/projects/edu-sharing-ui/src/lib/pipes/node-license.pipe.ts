@@ -1,6 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
 import { TranslateService } from '@ngx-translate/core';
+import { of } from 'rxjs';
 
 export type LicenseType = 'name';
 
@@ -18,6 +19,9 @@ export class NodeLicensePipe implements PipeTransform {
                 );
             }
         }
-        return null;
+        if (args?.type === 'name') {
+            return this.translate.get('LICENSE.NAMES.NONE');
+        }
+        return of(null);
     }
 }

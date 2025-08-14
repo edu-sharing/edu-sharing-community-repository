@@ -99,6 +99,15 @@ const routes: Routes = [
             ),
     },
 
+    // Pdf metadata download
+    {
+        path: UIConstants.ROUTER_PREFIX + 'pdf-metadata',
+        loadChildren: () =>
+            import('./pages/pdf-metadata-page/pdf-metadata-page.module').then(
+                (m) => m.PdfMetadataPageModule,
+            ),
+    },
+
     // Register
     {
         path: UIConstants.ROUTER_PREFIX + 'register',
@@ -168,7 +177,14 @@ const routes: Routes = [
         path: UIConstants.ROUTER_PREFIX + 'lti',
         loadChildren: () => import('./pages/lti-page/lti-page.module').then((m) => m.LtiPageModule),
     },
-
+    // simple loading spinner (i.e. for connector redirects)
+    {
+        path: UIConstants.ROUTER_PREFIX + 'loading',
+        loadComponent: () =>
+            import('./pages/loading-page/loading-page.component').then(
+                (m) => m.LoadingPageComponent,
+            ),
+    },
     // Error page / 404
     {
         path: '',

@@ -26,6 +26,7 @@ import {
     Scope,
     Target,
     TemporaryStorageService,
+    UIConstants,
 } from 'ngx-edu-sharing-ui';
 import {
     BehaviorSubject,
@@ -39,6 +40,7 @@ import {
 import { catchError, filter, first, map, switchMap, tap } from 'rxjs/operators';
 import {
     ConfigurationService,
+    DialogButton,
     FrameEventsService,
     RestCollectionService,
     RestConnectorService,
@@ -74,6 +76,7 @@ import { Toast } from './toast';
 import { UIHelper } from '../core-ui-module/ui-helper';
 import { GlobalOptionsService } from './global-options.service';
 import { SelectionModel } from '@angular/cdk/collections';
+import { Closable } from '../features/dialogs/card-dialog/card-dialog-config';
 
 @Injectable()
 export class OptionsHelperService extends OptionsHelperServiceAbstract implements OnDestroy {
@@ -330,7 +333,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         );
          */
 
-        options = this.applyExternalOptions(options, data);
+        options = this.applyExternalOptions(options, data.customOptions);
         const custom = this.configService.instant<ConfigOptionItem[]>('customOptions');
         void this.nodeHelper.applyCustomNodeOptions(custom, data.allObjects, objects, options);
         // do pre-handle callback options for dropdown + actionbar
@@ -508,15 +511,18 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         applyNode.showAlways = true;
         applyNode.group = DefaultGroups.Primary;
         applyNode.priority = 10;
+        applyNode.customShowCallback = async (nodes) => {
+            return !this.nodeHelper.isNodeCollection(nodes?.[0]);
+        };
         applyNode.customEnabledCallback = (nodes) => {
             // either apply directories is true or it is an file
-            return (
-                (nodes?.[0].isDirectory ? this.queryParams.applyDirectories === 'true' : true) &&
-                // and either onlyDownloadable is explicitly required or the node has a download url
-                ((this.queryParams.onlyDownloadable ?? 'false') === 'false' ||
-                    !!nodes?.[0].downloadUrl ||
-                    nodes?.[0].isDirectory)
-            );
+            return this.nodeHelper.isNodeCollection(nodes?.[0])
+                ? false
+                : (nodes?.[0].isDirectory ? this.queryParams.applyDirectories === 'true' : true) &&
+                      // and either onlyDownloadable is explicitly required or the node has a download url
+                      ((this.queryParams.onlyDownloadable ?? 'false') === 'false' ||
+                          !!nodes?.[0].downloadUrl ||
+                          nodes?.[0].isDirectory);
         };
 
         /*
@@ -1025,11 +1031,42 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             'OPTIONS.DOWNLOAD_METADATA',
             'format_align_left',
             (object) =>
-                this.nodeHelper.downloadNode(
-                    this.getObjects(object, data)[0],
-                    RestConstants.NODE_VERSION_CURRENT,
-                    true,
-                ),
+                this.dialogs.openGenericDialog({
+                    title: 'DOWNLOAD_METADATA.TITLE',
+                    message: 'DOWNLOAD_METADATA.MESSAGE',
+                    closable: Closable.Casual,
+                    avatar: {
+                        icon: 'format_align_left',
+                        kind: 'icon',
+                    },
+                    buttons: [
+                        {
+                            label: 'DOWNLOAD_METADATA.TYPE_TEXT',
+                            config: DialogButton.TYPE_CANCEL,
+                            callback: (ref) => {
+                                ref.close();
+                                void this.nodeHelper.downloadNode(
+                                    this.getObjects(object, data)[0],
+                                    RestConstants.NODE_VERSION_CURRENT,
+                                    true,
+                                );
+                                return null;
+                            },
+                        },
+                        {
+                            label: 'DOWNLOAD_METADATA.TYPE_PDF',
+                            config: DialogButton.TYPE_PRIMARY,
+                            callback: async (ref) => {
+                                const node = this.getObjects(object, data)[0];
+                                void this.router.navigate([
+                                    UIConstants.ROUTER_PREFIX + 'pdf-metadata',
+                                    node.ref.id,
+                                ]);
+                                return true;
+                            },
+                        },
+                    ],
+                }),
         );
         downloadMetadataNode.elementType = [
             ElementType.Node,
@@ -1657,16 +1694,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         } else if (node.aspects?.includes('ccm:ltitool_node') || ltiTool) {
             UIHelper.openLTIResourceLink(win, node);
         } else {
-            UIHelper.openConnector(
-                this.connectors,
-                this.iamService,
-                this.eventService,
-                this.toast,
-                node,
-                type,
-                win,
-                connectorType,
-            );
+            this.uiService.openConnector(node, type, win, connectorType);
         }
     }
 
@@ -1807,11 +1835,11 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         );
     }
 
-    applyExternalOptions(options: OptionItem[], data: OptionData) {
-        if (!data.customOptions) {
+    applyExternalOptions(options: OptionItem[], customOptionsIn: CustomOptions) {
+        if (!customOptionsIn) {
             return options;
         }
-        const customOptions = { ...new CustomOptions(), ...data.customOptions };
+        const customOptions = { ...new CustomOptions(), ...customOptionsIn };
         if (!customOptions.useDefaultOptions) {
             options = [];
         }
@@ -1877,11 +1905,11 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
 
     private objectsMatchesConstrains(
         constrains: Constrain[],
-        data: OptionData,
-        objects: Node[] | any[],
+        data: OptionData = null,
+        objects: Node[] | any[] = null,
     ) {
         // allow all options in debug scope
-        if (data.scope === Scope.DebugShowAll) {
+        if (data?.scope === Scope.DebugShowAll) {
             return null;
         }
         if (constrains.indexOf(Constrain.NoCollectionReference) !== -1) {
@@ -1955,6 +1983,15 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                     RestConstants.STATUS_CODE_OK
             ) {
                 return Constrain.User;
+            }
+        }
+        if (constrains.indexOf(Constrain.GuestOrNotLoggedIn) !== -1) {
+            if (
+                this.connectors.getRestConnector().getCurrentLogin() &&
+                this.connectors.getRestConnector().getCurrentLogin().statusCode ===
+                    RestConstants.STATUS_CODE_OK
+            ) {
+                return Constrain.GuestOrNotLoggedIn;
             }
         }
         if (constrains.indexOf(Constrain.LTIMode) !== -1) {
@@ -2052,7 +2089,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     async filterOptions(
         options: OptionItem[],
         target: Target,
-        data: OptionData,
+        data: OptionData = null,
         objects: Node[] | any = null,
     ) {
         if (target === Target.List) {

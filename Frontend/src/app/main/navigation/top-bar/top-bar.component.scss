@@ -114,12 +114,10 @@ span {
     }
 }
 .timeout {
-    background-color: rgba(255, 255, 255, 0.25);
+    background-color: rgba(255, 255, 255, var(--workspaceTopBarNewAlpha));
     color: white;
     border-radius: 20pt;
-    position: fixed;
-    top: 16px;
-    left: 1000px;
+    position: relative;
     font-size: 1rem;
     padding: 10px 15px;
     padding-left: 40px;
@@ -184,7 +182,7 @@ button.user {
             color.channel($workspaceTopBarFontColor, 'red', $space: rgb),
             color.channel($workspaceTopBarFontColor, 'green', $space: rgb),
             color.channel($workspaceTopBarFontColor, 'blue', $space: rgb),
-            0.1
+            var(--workspaceTopBarNewAlpha)
         );
         border-radius: 0;
     }
@@ -249,7 +247,7 @@ button.user {
     }
 }
 
-@media screen and (max-width: ($mobileTabSwitchWidth + $mobileStage*4)) {
+@media screen and (max-width: ($mobileTabSwitchWidth - $mobileStage*4)) {
     .timeout {
         display: none;
     }

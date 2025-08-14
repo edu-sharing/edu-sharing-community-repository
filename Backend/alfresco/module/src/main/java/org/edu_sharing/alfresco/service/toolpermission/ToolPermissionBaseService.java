@@ -16,6 +16,7 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -36,7 +37,16 @@ public class ToolPermissionBaseService {
     protected Repository repositoryHelper = (Repository) applicationContext.getBean("repositoryHelper");
     protected static Map<String,String> toolPermissionNodeCache = new HashMap<>();
     private NodeRef toolPermissionFolder;
-
+    protected GuestService guestService = AlfAppContextGate.getApplicationContext().getBean(GuestService.class);
+    /**
+     * all toolpermissions which are ALWAYS denied for the guest user
+     */
+    protected static List<String> GUEST_DENIED_TOOLPERMISSIONS = Arrays.asList(
+            CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_MAP_LINK,
+            CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS,
+            CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_FILES,
+            CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS
+    );
     protected boolean isAdmin(){
         try {
             Set<String> testUsetAuthorities = serviceRegistry.getAuthorityService().getAuthorities();
@@ -67,7 +77,16 @@ public class ToolPermissionBaseService {
         }catch(Exception e){
 
         }
+        try{
+            if (guestService.isGuestUser(AuthenticationUtil.getFullyAuthenticatedUser())) {
+                // do not allow any GUEST_DENIED toolpermission when current user is guest
+                if(GUEST_DENIED_TOOLPERMISSIONS.contains(toolPermission)) {
+                    return false;
+                }
+            }
+        }catch(Exception e){
 
+        }
         String toolNodeId = AuthenticationUtil.runAsSystem(workTP);
         if(toolNodeId == null){
             logger.warn("Could not fetch toolpermission " + toolPermission + "in alfresco context, fallback to false");
@@ -273,7 +292,7 @@ public class ToolPermissionBaseService {
             if(createIfNotExists) {
                 return createToolpermission(toolPermission).getId();
             } else {
-                 return null;
+                return null;
             }
         }else{
             String nodeId=sysObject.getId();

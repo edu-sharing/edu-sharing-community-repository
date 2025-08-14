@@ -26,8 +26,12 @@
     --nodeVirtualColor: #42ca8d;
     --nodeVirtualColorLight: #b8fcdd;
     --transitionNormal: 0.2s;
+    --focusColor: var(--palette-primary-300);
     --focusWidth: 2px;
     --fontSizeXSmall: 85%;
+    --topBarSearchFocusColor: var(--palette-primary-300);
+    --workspaceTopBarSafeBackground: #963a3a;
+    --workspaceTopBarNewAlpha: 0.1;
     --itemSelectedTextColor: var(--palette-primary-700);
     --listItemSelectedBackground: var(--palette-primary-50);
     --listItemSelectedBackgroundEffect: linear-gradient(

@@ -27,8 +27,9 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      {{- if (default .Values.global.cluster.storage.share.permission .Values.persistence.share.permission) }}
+      {{- if (or (default .Values.global.cluster.storage.share.permission .Values.persistence.share.permission) .Values.ingress.admin.enabled) }}
       initContainers:
+      {{- if (default .Values.global.cluster.storage.share.permission .Values.persistence.share.permission) }}
       - name: {{ include "edusharing_common_lib.names.name" . }}-init-permission
         image: {{ include "edusharing_common_lib.images.common" . }}{{ .Values.init.permission.image.name }}:{{ .Values.init.permission.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
@@ -105,6 +106,70 @@ spec:
         {{- with .Values.init.permission.securityContext }}
         securityContext: {{ toYaml . | nindent 10 }}
         {{- end }}
+      {{- end }}
+      {{- if .Values.ingress.admin.enabled }}
+      - name: {{ include "edusharing_common_lib.names.name" . }}-init-role
+        image: {{ include "edusharing_common_lib.images.common" . }}{{ .Values.init.role.image.name }}:{{ .Values.init.role.image.tag }}
+        imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+        command:
+          - "/bin/bash"
+          - "-ec"
+          - |
+            if [[ "${POD_NAME##*-}" == "0" ]]; then
+              kubectl label pod ${POD_NAME} role=admin --overwrite
+            else
+              kubectl label pod ${POD_NAME} role=worker --overwrite
+            fi
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        {{- with .Values.init.role.startupProbe }}
+        startupProbe:
+          exec:
+            command:
+              - "/bin/sh"
+              - "-c"
+              - "echo startupProbe > /dev/null"
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
+        {{- with .Values.init.role.livenessProbe }}
+        livenessProbe:
+          exec:
+            command:
+              - "/bin/sh"
+              - "-c"
+              - "echo livenessProbe > /dev/null"
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
+        {{- with .Values.init.role.readinessProbe }}
+        readinessProbe:
+          exec:
+            command:
+              - "/bin/sh"
+              - "-c"
+              - "echo readinessProbe > /dev/null"
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
+        {{- with .Values.init.role.resources }}
+        resources: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.init.role.securityContext }}
+        securityContext: {{ toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       {{- end }}
       containers:
       - name: {{ include "edusharing_common_lib.names.name" . }}-server

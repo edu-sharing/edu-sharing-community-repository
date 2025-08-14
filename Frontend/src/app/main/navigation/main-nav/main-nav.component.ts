@@ -21,9 +21,11 @@ import {
 } from 'ngx-edu-sharing-api';
 import {
     AppContainerService,
+    ElementType,
     OPEN_URL_MODE,
     OptionGroup,
     OptionItem,
+    Target,
     UIAnimation,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
@@ -52,6 +54,7 @@ import { MainNavConfig, MainNavService } from '../main-nav.service';
 import { SearchFieldService } from '../search-field/search-field.service';
 import { TopBarComponent } from '../top-bar/top-bar.component';
 import { ImprintPrivacyService } from '../../../shared/components/imprint-privacy-footer/imprint-privacy-service';
+import { OptionsHelperService } from '../../../services/options-helper.service';
 
 /**
  * The main nav (top bar + menus)
@@ -60,7 +63,7 @@ import { ImprintPrivacyService } from '../../../shared/components/imprint-privac
     selector: 'es-main-nav',
     templateUrl: 'main-nav.component.html',
     styleUrls: ['main-nav.component.scss'],
-    providers: [MainMenuEntriesService],
+    providers: [MainMenuEntriesService, OptionsHelperService],
     animations: [
         trigger('overlay', UIAnimation.openOverlay()),
         trigger('overlayBottom', UIAnimation.openOverlayBottom()),
@@ -122,6 +125,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         private bridge: BridgeService,
         private configService: ConfigurationService,
         private aboutService: AboutService,
+        private optionsHelperService: OptionsHelperService,
         private uiService: UIService,
         private mainNavService: MainNavService,
         private storage: TemporaryStorageService,
@@ -432,7 +436,8 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         });
     }
 
-    private updateUserOptions() {
+    private async updateUserOptions() {
+        const mainGroup = new OptionGroup('main', 15);
         this.userMenuOptions = [];
         if (
             this.connector.getCurrentLogin()?.statusCode === RestConstants.STATUS_CODE_OK &&
@@ -450,30 +455,40 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             !this.connector.getCurrentLogin()?.isGuest &&
             !this.connector.getCurrentLogin()?.currentScope
         ) {
-            this.userMenuOptions.push(
-                new OptionItem('EDIT_ACCOUNT', 'assignment_ind', () => this.openProfile()),
+            const manageProfile = new OptionItem('EDIT_ACCOUNT', 'assignment_ind', () =>
+                this.openProfile(),
             );
+            manageProfile.group = mainGroup;
+            manageProfile.priority = 10;
+            this.userMenuOptions.push(manageProfile);
             if (
                 this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_SIGNUP_GROUP)
             ) {
-                this.userMenuOptions.push(
-                    new OptionItem('SIGNUP_GROUP.TITLE', 'group_add', () => {
-                        void this.dialogs.openJoinGroupDialog();
-                    }),
-                );
+                const signup = new OptionItem('SIGNUP_GROUP.TITLE', 'group_add', () => {
+                    void this.dialogs.openJoinGroupDialog();
+                });
+                signup.group = mainGroup;
+                signup.priority = 20;
+                this.userMenuOptions.push(signup);
             }
         }
         if (this.connector.getCurrentLogin()?.isGuest) {
             if (this.config.loginOptions) {
                 for (const login of this.config.loginOptions) {
-                    this.userMenuOptions.push(
-                        new OptionItem(login.name, '', () => (window.location.href = login.url)),
+                    const loginOption = new OptionItem(
+                        login.name,
+                        '',
+                        () => (window.location.href = login.url),
                     );
+                    loginOption.group = mainGroup;
+                    this.userMenuOptions.push(loginOption);
                 }
             } else {
-                this.userMenuOptions.push(
-                    new OptionItem('SIDEBAR.LOGIN', 'person', () => this.login(true)),
+                const loginOption = new OptionItem('SIDEBAR.LOGIN', 'person', () =>
+                    this.login(true),
                 );
+                loginOption.group = mainGroup;
+                this.userMenuOptions.push(loginOption);
             }
         }
         /*if (
@@ -485,6 +500,8 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         const boomarkOption = new OptionItem('SEARCH.NODE_STORE.TITLE', 'bookmark_border', () =>
             this.setNodeStore(true),
         );
+        boomarkOption.group = mainGroup;
+        boomarkOption.priority = 30;
         this.userMenuOptions.push(boomarkOption);
         // }
         const accessibilityOptions = new OptionItem(
@@ -494,6 +511,8 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                 void this.dialogs.openAccessibilityDialog();
             },
         );
+        accessibilityOptions.group = mainGroup;
+        accessibilityOptions.priority = 40;
         this.userMenuOptions.push(accessibilityOptions);
         for (const option of this.getConfigMenuHelpOptions()) {
             this.userMenuOptions.push(option);
@@ -528,9 +547,23 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.userMenuOptions.push(option);
 
         if (!this.connector.getCurrentLogin()?.isGuest) {
-            this.userMenuOptions.push(new OptionItem('LOGOUT', 'undo', () => this.logout()));
+            const logoutGroup = new OptionGroup('logout', 40);
+            const logout = new OptionItem('LOGOUT', 'undo', () => this.logout());
+            logout.group = logoutGroup;
+            this.userMenuOptions.push(logout);
         }
         this.applyUserMenuOverrides(this.userMenuOptions);
+        this.userMenuOptions = this.optionsHelperService.applyExternalOptions(
+            this.userMenuOptions,
+            this.mainNavConfig.customUserMenuOptions,
+        );
+        this.userMenuOptions.forEach((o) => {
+            o.elementType = [ElementType.Unknown];
+        });
+        this.userMenuOptions = await this.optionsHelperService.filterOptions(
+            this.userMenuOptions,
+            Target.Actionbar,
+        );
     }
 
     private applyUserMenuOverrides(options: OptionItem[]): void {
@@ -548,7 +581,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         const versionParts = this.about.version.repository.split('.');
         const version = versionParts[0] + '.' + versionParts[1];
-        const group = new OptionGroup('help', 10);
+        const group = new OptionGroup('help', 30);
         return this.config.helpMenuOptions.map(
             (entry: { key: string; icon: string; url: string }) => {
                 const option = new OptionItem(entry.key, entry.icon, () =>

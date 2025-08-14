@@ -1,11 +1,43 @@
 {{- if not .Values.global.cluster.istio.enabled }}
 {{- if .Values.ingress.enabled }}
+{{- if .Values.ingress.admin.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "edusharing_common_lib.names.name" . }}-admin
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
+  {{- with merge .Values.ingress.admin.annotations .Values.ingress.annotations .Values.global.cluster.cert.annotations }}
+  annotations: {{ toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.global.cluster.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.global.cluster.ingress.ingressClassName | quote }}
+  {{- end }}
+  {{- with .Values.ingress.admin.tls }}
+  tls: {{ toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+  {{- range .Values.ingress.admin.hosts }}
+  - host: {{ . }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "edusharing_common_lib.names.name" $ }}-role-admin
+            port:
+              number: {{ $.Values.service.port.api.external }}
+  {{- end }}
+---
+{{- end }}
+{{- if .Values.ingress.exact.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "edusharing_common_lib.names.name" . }}-exact
   labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
-  {{- with merge .Values.ingress.annotations .Values.global.cluster.cert.annotations }}
+  {{- with merge .Values.ingress.exact.annotations .Values.ingress.annotations .Values.global.cluster.cert.annotations }}
   annotations: {{ toYaml . | nindent 4 }}
   {{- end }}
 spec:
@@ -24,11 +56,12 @@ spec:
         pathType: Exact
         backend:
           service:
-            name: {{ include "edusharing_common_lib.names.name" $ }}
+            name: {{ include "edusharing_common_lib.names.name" $ }}{{ if and $.Values.ingress.admin.enabled $.Values.ingress.admin.exclusive }}-role-worker{{ end }}
             port:
               number: {{ $.Values.service.port.api.external }}
   {{- end }}
 ---
+{{- end }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -54,7 +87,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: {{ include "edusharing_common_lib.names.name" $ }}
+            name: {{ include "edusharing_common_lib.names.name" $ }}{{ if and $.Values.ingress.admin.enabled $.Values.ingress.admin.exclusive }}-role-worker{{ end }}
             port:
               number: {{ $.Values.service.port.api.external }}
       {{- end }}

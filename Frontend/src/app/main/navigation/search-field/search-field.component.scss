@@ -47,7 +47,7 @@ form {
     }
     &.input-has-focus {
         &:not(.cdk-keyboard-focused) {
-            @include setGlobalFocus();
+            @include setGlobalFocus(var(--topBarSearchFocusColor));
         }
         &.cdk-keyboard-focused {
             transition: none;

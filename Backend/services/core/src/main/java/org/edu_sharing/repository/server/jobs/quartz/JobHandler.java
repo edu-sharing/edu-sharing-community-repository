@@ -18,6 +18,8 @@ import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Component;
 
@@ -186,7 +188,7 @@ public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEven
         }
     }
 
-    public class JobConfig {
+    public static class JobConfig {
 
         Class jobClass = null;
         Trigger trigger = null;
@@ -242,6 +244,9 @@ public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEven
     //static JobHandler instance = null;
 
     List<JobConfig> jobConfigList = new ArrayList<>();
+
+    List<JobConfig> jobConfigListStatic = new ArrayList<>();
+
 
     public static final String TRIGGER_TYPE_DAILY = "Daily";
     public static final String TRIGGER_TYPE_CRON = "Cron";
@@ -438,6 +443,11 @@ public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEven
 
                 for (JobKey jobKey : quartzScheduler.getJobKeys(GroupMatcher.jobGroupEquals(groupName))) {
                     String jobName = jobKey.getName();
+                    if(jobConfigListStatic.stream().map(JobConfig::getJobname).collect(Collectors.toList()).contains(jobName)) {
+                        logger.debug("ignoring static job " + jobName);
+                        continue;
+                    }
+                    logger.debug("deleting job " + jobName);
                     if (!quartzScheduler.deleteJob(jobKey)) {
                         logger.warn("Unable to delete previously scheduled job " + jobName);
                     }
@@ -493,7 +503,7 @@ public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEven
 
     }
 
-    private Trigger getTriggerFromString(String jobName, String triggerConfig) throws ParseException {
+    public Trigger getTriggerFromString(String jobName, String triggerConfig) throws ParseException {
         Trigger trigger = null;
         if (triggerConfig.contains(TRIGGER_TYPE_DAILY)) {
             // default fire at midnight
@@ -717,6 +727,22 @@ public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEven
 
     public List<JobConfig> getJobConfigList() {
         return jobConfigList;
+    }
+
+    public void add(JobConfig jobConfig) {
+        jobConfigListStatic.add(jobConfig);
+    }
+
+    @EventListener(ContextRefreshedEvent.class)
+    private void refreshStatic() throws SchedulerException {
+        logger.info("loading static jobs:" + jobConfigListStatic.size());
+        if (!isPrimaryRepository()) {
+            logger.info("Not primary repository, will not register or handle quartz jobs");
+            return;
+        }
+        for(JobConfig jc : jobConfigListStatic) {
+            this.scheduleJob(jc);
+        }
     }
 
 }

@@ -112,7 +112,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     }
 
     ngAfterViewInit(): void {
-        this.isScroll = this.entriesService.tableConfig.dataColumnLayout === 'scroll';
+        this.isScroll = this.entriesService.tableConfig?.dataColumnLayout === 'scroll';
         void Promise.resolve().then(() => {
             this.registerSortChanges();
             if (this.entriesService.dataSource instanceof NodeDataSourceRemote) {
@@ -204,14 +204,14 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     }
 
     private getMaximumColumnsNumber(tableWidth: number): number {
-        if (this.entriesService.tableConfig.dataColumnLayout === 'scroll') {
+        if (this.entriesService.tableConfig?.dataColumnLayout === 'scroll') {
             return 0xffffffff;
         }
         return Math.max(
             1,
             Math.floor(
                 // Subtract total width of always visible columns like checkboxes and icons.
-                (tableWidth - 187) / this.entriesService.tableConfig.dataColumnWidth,
+                (tableWidth - 187) / (this.entriesService.tableConfig?.dataColumnWidth || 126),
             ),
         );
     }

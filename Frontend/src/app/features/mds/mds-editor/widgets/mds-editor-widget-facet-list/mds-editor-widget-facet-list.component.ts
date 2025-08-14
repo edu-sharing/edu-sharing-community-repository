@@ -54,7 +54,11 @@ export class MdsEditorWidgetFacetListComponent
      * return true if values/facettes are available, false otherwise
      */
     hasValues = () => {
-        return this.filter.value || this.facetAggregationSubject.value?.values?.length > 0;
+        return (
+            this.filter.value ||
+            this.facetValues?.length > 0 ||
+            this.facetAggregationSubject.value?.values?.length > 0
+        );
     };
 
     constructor(
@@ -123,7 +127,7 @@ export class MdsEditorWidgetFacetListComponent
             })
             .pipe(
                 takeUntil(this.destroyed$),
-                tap((result) => this.isInitState$.next(result === null)),
+                tap((result) => this.isInitState$.next(this.isInitState$.value && result === null)),
                 // load all facets if filter mode is active
                 switchMap((facet) => {
                     return (this.filter.value || this.showMore) && facet.hasMore
@@ -170,8 +174,14 @@ export class MdsEditorWidgetFacetListComponent
                 // restore widget state
                 this.mdsEditorInstance
                     .observeWidgetState(this.widget.definition.id)
-                    .pipe(first())
-                    .subscribe((data) => this.updateFacet(data?.facetValues));
+                    .pipe(
+                        first(),
+                        filter((v) => !!v),
+                    )
+                    .subscribe((data) => {
+                        this.isInitState$.next(false);
+                        this.updateFacet(data?.facetValues);
+                    });
             } else {
                 this.mdsEditorInstance.putWidgetState(this.widget.definition.id, { facetValues });
                 this.updateFacet(facetValues);

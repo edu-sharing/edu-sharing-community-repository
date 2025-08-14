@@ -83,10 +83,10 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     ngOnInit(): void {
         this.clearFilter();
         // deep copy for modifications
-        this.filterDataSource();
         this.isTree =
             this.widget.definition.type === 'multivalueTree' ||
             this.widget.definition.type === 'singleValueTree';
+        this.filterDataSource();
         if (
             this.widget.definition.allowValuespaceSuggestions &&
             this.mdsEditorInstanceService.editorMode === 'nodes'
@@ -470,6 +470,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     // in case of non tree view, hide already present elements
     private filterDataSource() {
         if (this.isTree) {
+            this.dataSource.data = this.tree.rootNodes;
             return;
         }
         this.dataSource.data = this.tree.rootNodes.filter(

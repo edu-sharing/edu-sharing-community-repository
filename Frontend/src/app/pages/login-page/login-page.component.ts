@@ -75,6 +75,8 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     providerControl = new UntypedFormControl();
     showProviders = false;
     username = '';
+    loginSafeFailed = false;
+
     show2FaDialog: CardDialogRef<GenericDialogData<'NEXT'>, 'NEXT'>;
     faConfirm = new FormGroup({
         code: new FormControl('', [Validators.required, Validators.pattern(/^\d{6}$/)]),
@@ -158,6 +160,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                                 (params.local !== 'true' || params.redirectFromSSO === 'true')
                             ) {
                                 this.goToNext(data);
+                                return;
                             }
                         }
                         // when there is a request to go into safe mode, first, the user needs to log in regularly
@@ -284,6 +287,9 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                     ) {
                         this.toast.error(null, 'LOGIN.SAFE_PREVIOUS');
                     } else if (data.statusCode === RestConstants.STATUS_CODE_PASSWORD_EXPIRED) {
+                        if (this.isSafeLogin) {
+                            this.loginSafeFailed = true;
+                        }
                         this.toast.error(
                             null,
                             'LOGIN.PASSWORD_EXPIRED' + (this.isSafeLogin ? '_SAFE' : ''),
@@ -296,6 +302,9 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                         }
                         void this.show2Fa(password);
                     } else {
+                        if (this.isSafeLogin) {
+                            this.loginSafeFailed = true;
+                        }
                         this.toast.error(null, 'LOGIN.ERROR' + (this.isSafeLogin ? '_SAFE' : ''));
                     }
                     this.password = '';

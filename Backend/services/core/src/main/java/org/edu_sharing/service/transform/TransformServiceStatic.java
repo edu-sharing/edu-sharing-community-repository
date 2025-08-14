@@ -53,9 +53,11 @@ public class TransformServiceStatic {
     public <T> T callTransformer(NodeRef nodeRef, String targetMimetype, TransformerId transformerId, Class<T> clazz) {
         ContentReader reader = contentService.getReader(nodeRef, ContentModel.PROP_CONTENT);
         String sourceMimetype = reader.getMimetype();
+        return callTransformer(reader.getContentInputStream(),reader.getSize(),sourceMimetype,targetMimetype,transformerId,clazz);
+    }
 
-
-        InputStreamResource resource = getInputStreamResource(reader);
+    public <T> T callTransformer(InputStream inputStream, long contentLength, String sourceMimetype, String targetMimetype, TransformerId transformerId, Class<T> clazz) {
+        InputStreamResource resource = getInputStreamResource(inputStream, contentLength);
 
         RestTemplate restTemplate = new RestTemplate();
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
@@ -79,10 +81,14 @@ public class TransformServiceStatic {
     }
 
 
+    /**
+     *
+     * @param inputStream
+     * @param contentLength: Must be set to avoid chunked uploads
+     * @return
+     */
     @NotNull
-    private static InputStreamResource getInputStreamResource(ContentReader reader) {
-        InputStream inputStream = reader.getContentInputStream();
-        long contentLength = reader.getSize();  // Must be set to avoid chunked uploads
+    private static InputStreamResource getInputStreamResource( InputStream inputStream, long contentLength ) {
 
         // required for multipart/form-data
         return new InputStreamResource(inputStream) {

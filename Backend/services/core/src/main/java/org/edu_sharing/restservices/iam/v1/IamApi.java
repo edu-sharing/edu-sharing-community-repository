@@ -27,6 +27,7 @@ import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.QRCode2Fa;
 import org.edu_sharing.service.dashboard.models.DashboardShortcut;
+import org.edu_sharing.service.dataprotection.queue.DataProtectionQueueEntry;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.password.ValidPassword;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
@@ -615,7 +616,7 @@ public class IamApi {
 
     @ApiResponses(
     value = {
-            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = DataProtectionQueueEntry.class))),
             @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -632,8 +633,10 @@ public class IamApi {
 
             RepositoryDao repoDao = RepositoryDao.getRepository(repository);
             PersonDao personDao = PersonDao.getPerson(repoDao, person);
-            personDao.requestDataProtectionExport();
-            return Response.status(Response.Status.OK).build();
+            boolean created = personDao.requestDataProtectionExport();
+            DataProtectionQueueEntry entry = personDao.getDataProtectionQueueEntry();
+            if(created) return Response.status(Response.Status.OK).entity(entry).build();
+            else return Response.status(Response.Status.CONFLICT).entity(entry).build();
 
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
@@ -646,7 +649,7 @@ public class IamApi {
     @Operation(summary = "Fetches the node of general data protection export", description = "Fetches the node of general data protection export.")
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+                    @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = DataProtectionExport.class))),
                     @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -659,16 +662,22 @@ public class IamApi {
         try {
             RepositoryDao repoDao = RepositoryDao.getRepository(repository);
             PersonDao personDao = PersonDao.getPerson(repoDao, person);
-            NodeDao dataProtectionExport = personDao.getDataProtectionExport();
-            if(dataProtectionExport != null) {
-                NodeEntry response = new NodeEntry();
-                response.setNode(dataProtectionExport.asNode());
-                return Response.status(Response.Status.OK).entity(response).build();
+            DataProtectionExport response = new DataProtectionExport();
+            DataProtectionQueueEntry dataProtectionQueueEntry = personDao.getDataProtectionQueueEntry();
+            if(dataProtectionQueueEntry != null) {
+                response.setStatus(dataProtectionQueueEntry);
+                if(dataProtectionQueueEntry.getNode_id() != null) {
+                    NodeDao nodeDao = NodeDao.getNode(repoDao, dataProtectionQueueEntry.getNode_id());
+                    NodeEntry nodeEntry = new NodeEntry();
+                    nodeEntry.setNode(nodeDao.asNode());
+                    response.setNodeEntry(nodeEntry);
+                    return Response.status(Response.Status.OK).entity(response).build();
+                }
             }
+            return Response.status(Response.Status.NOT_FOUND).entity(response).build();
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
         }
-        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
 

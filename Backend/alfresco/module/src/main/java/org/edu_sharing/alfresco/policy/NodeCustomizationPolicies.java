@@ -404,19 +404,19 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
             }
             String detectedMimeType = mediaType.getType() + "/" + mediaType.getSubtype();
             if (!allowList.containsKey(detectedMimeType)) {
-                logger.warn("Mimetype not allowed: " + detectedMimeType);
+                logger.warn("Mimetype not allowed: " + detectedMimeType + ", filename: " + filename);
                 throw new NodeMimetypeValidationException(detectedMimeType);
             }
             List<String> fileExtensions = allowList.get(detectedMimeType);
             if (filename == null) {
                 if (fileExtensions == null) {
-                    logger.warn("Found no allowed file extension for given mimetype: " + detectedMimeType);
+                    logger.warn("Found no allowed file extension for given mimetype: " + detectedMimeType + ", filename: " + filename);
                     throw new NodeFileExtensionValidationException(fileExtensions, "[NOT_AVAILABLE]");
                 }
             } else {
                 String extension = FilenameUtils.getExtension(filename);
                 if (!(fileExtensions == null || fileExtensions.contains("*") || fileExtensions.stream().anyMatch(e -> e.equalsIgnoreCase(extension)))) {
-                    logger.warn("Found no allowed file extension for given mimetype: " + detectedMimeType);
+                    logger.warn("Found no allowed file extension for given mimetype: " + detectedMimeType + ", filename: " + filename);
                     throw new NodeFileExtensionValidationException(fileExtensions, extension);
                 }
             }

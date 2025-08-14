@@ -38,8 +38,8 @@ public class Kryo5Codec extends org.redisson.codec.Kryo5Codec{
     }
 
     @Override
-    protected Kryo createKryo(ClassLoader classLoader) {
-        Kryo kryo =  super.createKryo(classLoader);
+    protected Kryo createKryo(ClassLoader classLoader, boolean useReferences) throws ClassNotFoundException {
+        Kryo kryo =  super.createKryo(classLoader, useReferences);
         kryo.addDefaultSerializer(Collection.class, CollectionSerializer.class);
         kryo.addDefaultSerializer(Map.class, MapSerializer.class);
         return kryo;

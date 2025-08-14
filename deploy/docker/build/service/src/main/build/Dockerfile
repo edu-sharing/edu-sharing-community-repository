@@ -7,7 +7,15 @@ USER root
 RUN set -eux \
     && apt-get update -y \
     && apt-get install -y --no-install-recommends \
-        dnsutils
+        dnsutils \
+        locales
+
+RUN locale-gen \
+    && sed -i 's/^# en_US.UTF-8/en_US.UTF-8/' /etc/locale.gen \
+    && locale-gen
+
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
 
 RUN set -eux \
     && mkdir -p alf_safe \

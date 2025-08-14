@@ -1352,7 +1352,7 @@
       "FIXED": "this version",
       "NEWEST": "always the newest version"
     },
-    "NOT_PUBLIC_WARNING": "This material is not publicly available.",
+    "NOT_PUBLIC_WARNING": "This material is not publicly available. Only users with permissions will be able to see it",
     "VERSION": "Version",
     "WIDTH": "Width",
     "CODE_LABEL": "Embed code",
@@ -1424,6 +1424,12 @@
       "metadataSuggestionEvent": "Metadata proposal",
       "proposeForCollectionEvent": "Suggestions for collections"
     }
+  },
+  "DOWNLOAD_METADATA": {
+    "TITLE": "Download metadata",
+    "MESSAGE": "In which format would you like to download the metadata?",
+    "TYPE_PDF": "pdf file",
+    "TYPE_TEXT": "text file"
   },
   "LTI": {
     "REGISTERED": {

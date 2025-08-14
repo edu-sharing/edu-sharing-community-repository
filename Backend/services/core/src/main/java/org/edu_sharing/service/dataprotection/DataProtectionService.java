@@ -2,33 +2,42 @@ package org.edu_sharing.service.dataprotection;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import jakarta.annotation.PostConstruct;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.repo.security.person.RegexHomeFolderProvider;
 import org.alfresco.service.cmr.repository.*;
+import org.alfresco.service.cmr.security.AccessPermission;
+import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.util.Pair;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.examples.Archiver;
 import org.apache.commons.compress.utils.FileNameUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
+import org.edu_sharing.repository.client.rpc.EduGroup;
+import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.service.authentication.ScopeUserHomeService;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
+import org.edu_sharing.service.authority.AuthorityService;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.comment.CommentService;
 import org.edu_sharing.service.comment.CommentServiceFactory;
-import org.edu_sharing.service.comment.CommentServiceImpl;
+import org.edu_sharing.service.dataprotection.queue.DataProtectionQueue;
+import org.edu_sharing.service.dataprotection.queue.DataProtectionQueueEntry;
 import org.edu_sharing.service.feedback.FeedbackService;
 import org.edu_sharing.service.feedback.FeedbackServiceFactory;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
@@ -37,21 +46,22 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.RecurseMode;
 import org.edu_sharing.service.rating.RatingService;
 import org.edu_sharing.service.rating.RatingServiceFactory;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.springframework.context.event.EventListener;
 
 @Slf4j
 @Component
@@ -66,9 +76,11 @@ public class DataProtectionService{
     @Autowired
     ContentService contentService;
 
-
     @Autowired
     PermissionService permissionService;
+
+    @Autowired
+    RegexHomeFolderProvider regexHomeFolderProvider;
 
     @Autowired
     DataProtectionConfig config;
@@ -76,8 +88,23 @@ public class DataProtectionService{
     @Autowired
     DataProtectionQueue queue;
 
+    @Autowired
+    PDFReport report;
+
     @Value("${repository.dataprotection.retentionPeriod:PT240H}")
     private String retentionPeriod;
+
+    @Value("${repository.dataprotection.binaryExport:true}")
+    private boolean binaryExport;
+
+    @Value("${repository.dataprotection.metadataExport:true}")
+    private boolean metadataExport;
+
+    @Value("${repository.dataprotection.summaryExport:true}")
+    private boolean summaryExport;
+
+    @Value("${repository.dataprotection.fileName:dataprotectioninfo_edu-sharing}")
+    private String fileName;
 
     PersonLifecycleService personLifecycleService = new PersonLifecycleService();
 
@@ -112,88 +139,181 @@ public class DataProtectionService{
 
     public void cleanExpired(){
         AuthenticationUtil.runAsSystem(()->{
-            List<ChildAssociationRef> childAssocs = nodeService.getChildAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, systemFolder));
-            List<NodeRef> toRemove = new ArrayList<>();
-            childAssocs.forEach(childAssocRef -> {
-                NodeRef nodeRef = childAssocRef.getChildRef();
+            List<DataProtectionQueueEntry> entries = queue.get(DataProtectionQueue.Status.FINISHED);
+            List<Pair<NodeRef,String>> toRemove = new ArrayList<>();
+            entries.forEach(entry -> {
+                NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,entry.getNode_id());
                 Date modified = (Date)nodeService.getProperty(nodeRef, ContentModel.PROP_MODIFIED);
                 if((System.currentTimeMillis() - modified.getTime()) > Duration.parse(this.retentionPeriod).toMillis()){
-                    toRemove.add(nodeRef);
+                    toRemove.add(new Pair<>(nodeRef,entry.getUser()));
                 }
             });
-            toRemove.forEach(nodeRef -> {
-                log.info("removing gdpr export {} {}",nodeService.getProperty(nodeRef, ContentModel.PROP_NAME),nodeRef);
-                nodeService.deleteNode(nodeRef);
+            toRemove.forEach(pair -> {
+                if(DataProtectionQueue.Status.FINISHED.toString().equals(queue.get(pair.getSecond()).getStatus())){
+                    log.info("removing gdpr export {} {}",nodeService.getProperty(pair.getFirst(), ContentModel.PROP_NAME),pair.getFirst());
+                    removeNode(pair.getFirst().getId());
+                    queue.delete(pair.getSecond());
+                }
             });
             return null;
         });
     }
 
     public void startExport(){
-        List<String> allUsers = queue.getAllUsers();
-        for(String user: allUsers) {
-            startExport(user);
-            queue.removeUsers(List.of(user));
+        List<DataProtectionQueueEntry> allUsers = queue.getAll().stream()
+                .filter(e ->
+                        DataProtectionQueue.Status.REQUESTED.toString().equals(e.getStatus()) || DataProtectionQueue.Status.RUNNING.toString().equals(e.getStatus()))
+                .collect(Collectors.toList());
+        for(DataProtectionQueueEntry e: allUsers) {
+            startExport(e);
         }
     }
 
-    public void startExport(String userName){
+    public void startExport(DataProtectionQueueEntry entry){
+        String userName = entry.getUser();
+        queue.update(userName, null, DataProtectionQueue.Status.RUNNING);
         // be sure systemfolder and target node is created with as admin user so that this files will not be included in export zip
         AuthenticationUtil.runAsSystem(()-> {
             prepare(userName);
             return null;});
-        AuthenticationUtil.runAs(() -> {
-            exportUserNodes(userName);
-            return null;
-        }, userName);
+        NodeRef nodeRef = AuthenticationUtil.runAs(() -> exportUserNodes(userName), userName);
+        queue.update(userName, nodeRef.getId(), DataProtectionQueue.Status.FINISHED);
     }
 
     public void prepare(String userName){
         getTargetNode(userName);
     }
 
-    public void exportUserNodes(String userName) throws IOException, ArchiveException {
+    public NodeRef exportUserNodes(String userName) throws IOException, ArchiveException {
+        log.info("starting for user {}", userName);
         String rootPath = config.getMainPath().concat("/"+userName);
 
+        log.info("collecting home nodes for {}", userName);
         NodeRefResult userHomeResult = getUserHomeNodes(userName, null);
         createStructure(rootPath,"home",buildPathMap(createChildParentMap(userHomeResult.getNodes())));
 
+        log.info("collecting collection nodes for {}", userName);
         List<NodeRef> collectionNodes = getCollectionNodes(userName);
         createStructure(rootPath,"collection",buildPathMap(createChildParentMap(collectionNodes)));
 
+        log.info("collecting shared nodes for {}", userName);
         List<NodeRef> sharedNodes = getSharedNodes(userName,null, Stream.concat(userHomeResult.getIgnored().stream(),Stream.concat(userHomeResult.nodes.stream(),collectionNodes.stream())).collect(Collectors.toList()));
         createStructure(rootPath,"shared",buildPathMap(createChildParentMap(sharedNodes)));
 
+        log.info("collecting feedbacks for {}", userName);
         List<NodeRef> feedBacks = feedbackService.getUsersFeedback(userName);
         createStructure(rootPath,"feedback",buildPathMap(createChildParentMap(feedBacks)));
 
+        log.info("collecting comments for {}", userName);
         List<NodeRef> comments = commentService.getUsersComments(userName);
         createStructure(rootPath,"comment",buildPathMap(createChildParentMap(comments)));
 
         //List<NodeRef> ratings = ratingService....
         //createStructure(rootPath,"comment",buildPathMap(createChildParentMap(comments)));
 
+        log.info("collecting safe home nodes for {}", userName);
         // safe
         NodeServiceInterceptor.setEduSharingScope("safe");
         NodeRefResult userHomeResultSafe = getUserHomeNodes(userName, "safe");
         createStructure(rootPath,"safe/home",buildPathMap(createChildParentMap(userHomeResultSafe.getNodes())));
 
+        log.info("collecting safe shared nodes for {}", userName);
         List<NodeRef> sharedNodesSafe = getSharedNodes(userName,"safe", Stream.concat(userHomeResultSafe.getIgnored().stream(),Stream.concat(userHomeResultSafe.nodes.stream(),collectionNodes.stream())).collect(Collectors.toList()));
         createStructure(rootPath,"safe/shared",buildPathMap(createChildParentMap(sharedNodesSafe)));
         NodeServiceInterceptor.setEduSharingScope(null);
 
+        log.info("creating report for {}", userName);
+        summmaryReport(userName, collectionNodes, feedBacks, comments, rootPath);
+
+
+        log.info("creating archive for {}", userName);
         File target = new File(rootPath+".zip");
         archive(new File(rootPath), target);
 
-        NodeRef nodeRef = AuthenticationUtil.runAsSystem(() ->
-                persistAndCleanup(userName, target, rootPath)
-        );
+        return AuthenticationUtil.runAsSystem(() -> persistAndCleanup(userName, target, rootPath));
+    }
+
+    private File summmaryReport(String userName, List<NodeRef> collectionNodes, List<NodeRef> feedBacks, List<NodeRef> comments, String rootPath) {
+        if(!summaryExport) return null;
+
+        // filter collection refs for report
+        collectionNodes = collectionNodes.stream().filter(c -> nodeService.getType(c).equals(QName.createQName(CCConstants.CCM_TYPE_MAP))).collect(Collectors.toList());
+
+        List<NodeRef> privateCollections = collectionNodes.stream().filter(n -> !isSharedNode(n,userName)).collect(Collectors.toList());
+        List<NodeRef> sharedCollections =  collectionNodes.stream().filter(n -> isSharedNode(n,userName)).collect(Collectors.toList());
+
+
+        AuthorityService authorityService = AuthorityServiceFactory.getLocalService();
+        Set<String> groupSet = authorityService.getMemberships(userName);
+        ArrayList<EduGroup> allEduGroups = AuthenticationUtil.runAsSystem(() -> authorityService.getAllEduGroups(userName));
+        List<String> groupList = groupSet.stream().map(g ->  (String)authorityService.getAuthorityProperty(g,CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME)).collect(Collectors.toList());
+        User user = authorityService.getUser(userName);
+
+        /**
+         * @TODO use profile data or something dynamic determine locale and timezone
+         */
+        ZoneId zone = ZoneId.of("Europe/Berlin");
+        Locale locale = Locale.GERMANY;
+
+        Date firstLogin = (Date)user.getProperties().get(CCConstants.PROP_USER_ESFIRSTLOGIN);
+        Date lastLogin = (Date)user.getProperties().get(CCConstants.PROP_USER_ESLASTLOGIN);
+        String role = (String)user.getProperties().get(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION);
+        List<String> roles = role == null ? null : Stream.of(role).map(r -> I18nAngular.getTranslationAngular("common","USER.PRIMARY_AFFILIATION."+r)).collect(Collectors.toList());
+        EduGroup eduGroup = allEduGroups != null && !allEduGroups.isEmpty() ? allEduGroups.get(0) : null;
+        String secondaryUserName = (String)user.getProperties().get(CCConstants.PROP_USER_SECONDARY_IDS);
+        PDFReport.Data.DataBuilder reportData = PDFReport.Data.builder()
+                .userName(userName)
+                .secondaryUserName(secondaryUserName)
+                .firstName(user.getGivenName())
+                .lastName(user.getSurname())
+                .firstLogin(formatDate(firstLogin,zone,locale,FormatStyle.MEDIUM,true))
+                .lastLogin(formatDate(lastLogin,zone,locale,FormatStyle.MEDIUM, true))
+                .currentDate(formatDate(new Date(),zone,locale,FormatStyle.MEDIUM,false))
+                .email(user.getEmail())
+                .roles(roles)
+                .privateCollections(getNameList(privateCollections))
+                .sharedCollections(getNameList(sharedCollections))
+        //todo
+                .ratings(List.of())
+                .feedbacks(getNameList(feedBacks))
+                .comments(getNameList(comments))
+                .groupList(groupList);
+
+        if(eduGroup != null) {
+            reportData.schoolName(eduGroup.getGroupId());
+            reportData.schoolDisplayName(eduGroup.getGroupDisplayName());
+        }
+
+        String reportDirectory = rootPath.concat("/report");
+        File dir = new File(reportDirectory);
+        if (!dir.exists()) {
+            boolean mkdirs = dir.mkdirs();// creates parent folders as needed
+            if (!mkdirs) {
+                throw new RuntimeException("Unable to create directory " + dir.getAbsolutePath());
+            }
+        }
+
+        return report.report(reportData.build(), dir );
+    }
+
+    boolean isSharedNode(NodeRef nodeRef, String userName) {
+        Set<AccessPermission> allSetPermissions = permissionService.getAllSetPermissions(nodeRef);
+        List<AccessPermission> perms = allSetPermissions.stream().filter(a -> !userName.equals(a.getAuthority()) && !AuthorityType.OWNER.equals(a.getAuthorityType()))
+                .collect(Collectors.toList());
+        return !perms.isEmpty();
+    }
+
+    private List<String> getNameList(List<NodeRef> nodes){
+        return nodes.stream()
+                .map(n -> (String)nodeService.getProperty(n, ContentModel.PROP_NAME))
+                .collect(Collectors.toList());
     }
 
     private NodeRef persistAndCleanup(String userName, File target, String rootPath) {
         try {
             NodeRef nodeRef = getTargetNode(userName);
             permissionService.setPermission(nodeRef,userName,PermissionService.CONSUMER,true);
+            nodeService.removeAspect(nodeRef,ContentModel.ASPECT_VERSIONABLE);
             ContentWriter writer = contentService.getWriter(nodeRef, ContentModel.PROP_CONTENT, true);
             writer.addListener(() -> {
                 try {
@@ -212,34 +332,30 @@ public class DataProtectionService{
         }
     }
 
-    public NodeRef getDataProtectionNode(String userName) {
-        return AuthenticationUtil.runAsSystem(() ->{
-            NodeRef nodeRef = null;
-            Utils utils = new Utils();
-            if(utils.exists(systemFolder,userName.concat(".zip"))){
-                try {
-                    nodeRef = utils.getNodeRef(systemFolder,userName.concat(".zip"));
-                } catch (Throwable e) {
-                    throw new RuntimeException(e);
-                }
+    private NodeRef getTargetNode(String userName) {
+        NodeRef personNodeRef = personService.getPersonOrNull(userName);
+        List<String> homeFolderPath = regexHomeFolderProvider.getHomeFolderPath(personNodeRef);
+        Utils utils = new Utils();
+        String parentId = systemFolder;
+        try {
+            for (String pathElement : homeFolderPath) {
+                NodeRef rs = utils.getNodeRef(parentId, CCConstants.CCM_TYPE_MAP, pathElement);
+                parentId = rs.getId();
             }
-            return nodeRef;
-        });
+            return new Utils().getNodeRef(parentId, CCConstants.CCM_TYPE_IO, getFileName());
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private NodeRef getTargetNode(String userName) {
-        NodeRef nodeRef = AuthenticationUtil.runAsSystem(()-> {
-            try {
-                return new Utils().getNodeRef(systemFolder, userName.concat(".zip"));
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
-            }
-        });
-        return nodeRef;
+    private String getFileName(){
+        Date date = new Date(); // or your custom date
+        SimpleDateFormat formatter = new SimpleDateFormat("yyMMdd");
+        String formatted = formatter.format(date);
+        return formatted.concat("_").concat(fileName).concat(".zip");
     }
 
     private void createStructure(String rootPath, String subPath, HashMap<NodeRef, String> pathMap) throws IOException {
-
         for(Map.Entry<NodeRef,String> e : pathMap.entrySet()){
             NodeRef nodeRef = e.getKey();
             String path = e.getValue();
@@ -270,7 +386,8 @@ public class DataProtectionService{
 
         List<NodeRef> result = new ArrayList<>(levelOne);
         levelOne.forEach(n -> {
-                if(nodeService.getType(n).equals(QName.createQName(CCConstants.CCM_TYPE_MAP))){
+            QName type = nodeService.getType(n);
+                if(QName.createQName(CCConstants.CCM_TYPE_MAP).equals(type) || QName.createQName(CCConstants.CM_TYPE_FOLDER).equals(type) ){
                     result.addAll(NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, n.getId(), null, RecurseMode.All));
                 }
         });
@@ -321,6 +438,7 @@ public class DataProtectionService{
 
 
     private Map<NodeRef, Optional<NodeRef>>  createChildParentMap(List<NodeRef> nodeRefs){
+        if(!metadataExport) return new HashMap<>();
         return nodeRefs.stream().collect(Collectors.toMap(n -> n, n -> {
             try {
                 NodeRef parent = nodeService.getPrimaryParent(n).getParentRef();
@@ -376,7 +494,9 @@ public class DataProtectionService{
     }
 
     private void writeContent(NodeRef nodeRef, QName contentProperty, File outputFile) throws IOException {
-        if(nodeService.getType(nodeRef).equals(QName.createQName(CCConstants.CCM_TYPE_IO))){
+        if(!binaryExport) return;
+        if(nodeService.getType(nodeRef).equals(QName.createQName(CCConstants.CCM_TYPE_IO))
+                && !nodeService.hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
             ContentReader reader = contentService.getReader(nodeRef, contentProperty);
             if(reader != null && reader.exists()){
                 try (InputStream in = reader.getContentInputStream(); OutputStream out = new FileOutputStream(outputFile)) {
@@ -391,6 +511,7 @@ public class DataProtectionService{
         String firstname = (String)nodeService.getProperty(personRef, ContentModel.PROP_FIRSTNAME);
         String lastName = (String)nodeService.getProperty(personRef,ContentModel.PROP_LASTNAME);
         String email = (String)nodeService.getProperty(personRef, ContentModel.PROP_EMAIL);
+        if(email == null) return;
         Map<String, String> replace = new HashMap<>();
         replace.put("firstName", firstname);
         replace.put("lastName", lastName);
@@ -411,14 +532,47 @@ public class DataProtectionService{
         new Archiver().create(format, destination, directory);
     }
 
-    public void requestDataProtectionExport(String user){
+    public boolean requestDataProtectionExport(String user){
         if(!user.equals(AuthenticationUtil.getFullyAuthenticatedUser())){
             boolean isAdmin = AuthorityServiceHelper.isAdmin();
             if(!isAdmin){
                 throw new SecurityException("admin rights required");
             }
         }
-        queue.addUser(user);
+        DataProtectionQueueEntry entry = queue.get(user);
+        if(entry == null){
+            queue.add(user);
+            return true;
+        }else if(entry.getStatus().equals(DataProtectionQueue.Status.FINISHED.toString())){
+            AuthenticationUtil.runAsSystem(() -> { removeNode(entry.getNode_id());return null;});
+            entry.setRequested(new Date());
+            entry.setStatus(DataProtectionQueue.Status.REQUESTED.toString());
+            entry.setNode_id(null);
+            entry.setFinished(null);
+            queue.update(entry);
+            return true;
+        }
+        return false;
+    }
+
+    private static void removeNode(String nodeId) {
+        org.edu_sharing.service.nodeservice.NodeService eduNodeService = NodeServiceFactory.getLocalService();
+        eduNodeService.removeNode(nodeId,null,false);
+    }
+
+    public DataProtectionQueueEntry getDataProtectionQueueEntry(String user){
+        return queue.get(user);
+    }
+
+    private String formatDate(Date date, ZoneId zone, Locale locale, FormatStyle style, boolean includeTime) {
+        if(date == null) return null;
+        ZonedDateTime zonedDateTime = date.toInstant().atZone(zone);
+
+        DateTimeFormatter formatter = (includeTime) ? DateTimeFormatter.ofLocalizedDateTime(style) : DateTimeFormatter.ofLocalizedDate(style);
+        formatter = formatter.withLocale(locale)
+                .withZone(zone);
+
+        return formatter.format(zonedDateTime);
     }
 
     @Data

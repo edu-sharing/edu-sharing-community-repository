@@ -1415,7 +1415,7 @@
     "IN_HOME": "Im Stammverzeichnis"
   },
   "EMBED": {
-    "NOT_PUBLIC_WARNING": "Dieses Material ist nicht öffentlich zugänglich.",
+    "NOT_PUBLIC_WARNING": "Dieses Material ist nicht öffentlich zugänglich. Es können nur angemeldete Nutzende mit entsprechenden Rechten ansehen",
     "CODE_LABEL": "Einbettungscode",
     "HEIGHT": "Höhe",
     "WIDTH": "Breite",
@@ -1546,6 +1546,12 @@
         "folders": "Ordner"
       }
     }
+  },
+  "DOWNLOAD_METADATA": {
+    "TITLE": "Metadaten herunterladen",
+    "MESSAGE": "In welchen Format möchten Sie die Metadaten herunterladen?",
+    "TYPE_PDF": "PDF-Datei",
+    "TYPE_TEXT": "Textdatei"
   },
   "API_ERROR": {
     "RELOAD_NOTICE_TITLE": "Seite muss neugeladen werden",

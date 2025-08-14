@@ -31,7 +31,7 @@
     </docker.edu_sharing.community.common.alfresco.transform.core.aio.name>
 
     <docker.edu_sharing.community.common.alfresco.transform.core.aio.tag>
-      5.1.7-1
+      5.2.0
     </docker.edu_sharing.community.common.alfresco.transform.core.aio.tag>
 
     <docker.edu_sharing.community.common.alfresco.search.service.name>
@@ -55,7 +55,7 @@
     </docker.edu_sharing.community.common.postgresql.name>
 
     <docker.edu_sharing.community.common.postgresql.tag>
-      13.15.0
+      16.6.0
     </docker.edu_sharing.community.common.postgresql.tag>
 
     <docker.edu_sharing.community.common.postgresql.exporter.name>
@@ -82,12 +82,20 @@
       12.0.1
     </docker.edu_sharing.community.common.minideb.tag>
 
+    <docker.edu_sharing.community.common.kubectl.name>
+      edu_sharing-community-common-docker-kubectl
+    </docker.edu_sharing.community.common.kubectl.name>
+
+    <docker.edu_sharing.community.common.kubectl.tag>
+      1.32.4
+    </docker.edu_sharing.community.common.kubectl.tag>
+
     <docker.edu_sharing.community.common.redis.name>
       edu_sharing-community-common-docker-redis
     </docker.edu_sharing.community.common.redis.name>
 
     <docker.edu_sharing.community.common.redis.tag>
-      7.4.3
+      8.2.0
     </docker.edu_sharing.community.common.redis.tag>
 
     <docker.edu_sharing.community.common.redis>
@@ -111,11 +119,11 @@
     </docker.edu_sharing.community.common.varnish.exporter.tag>
 
     <docker.from.openjdk.17.liberica.debian>
-      dockerio.mirror.docker.edu-sharing.com/bellsoft/liberica-openjdk-debian:17.0.15
+      dockerio.mirror.docker.edu-sharing.com/bellsoft/liberica-openjdk-debian:17.0.16
     </docker.from.openjdk.17.liberica.debian>
 
     <docker.from.edu_sharing.community.common.alfresco.repository>
-      ${docker.registry}/${docker.common}/edu_sharing-community-common-docker-alfresco-repository:25.1.0-1
+      ${docker.registry}/${docker.common}/edu_sharing-community-common-docker-alfresco-repository:25.2.0-2
     </docker.from.edu_sharing.community.common.alfresco.repository>
 
     <helm.kube.version>&gt;= 1.20.0-0</helm.kube.version>

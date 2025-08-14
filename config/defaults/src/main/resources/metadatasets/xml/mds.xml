@@ -485,6 +485,11 @@
       <type>date</type>
     </widget>
     <widget>
+      <id>ccm:ref_video_vtt</id>
+      <textEscapingPolicy>none</textEscapingPolicy>
+      <type>text</type>
+    </widget>
+    <widget>
       <id>license</id>
       <caption>ccm_prop_io_license</caption>
       <type>license</type>
@@ -1106,6 +1111,13 @@
       </views>
     </group>
     <group>
+      <id>io_text_pdf</id>
+      <views>
+        <view>node_general_render</view>
+        <view>node_contributor_text</view>
+      </views>
+    </group>
+    <group>
       <id>io_render_inline</id>
       <views>
         <view>node_general_render</view>
@@ -1558,7 +1570,16 @@
       </property>
     </query>
     <query join="AND" id="oai">
-      <!--      <basequery>ISNULL:@ccm\:tool_category</basequery>-->
+      <basequery>{"bool":{
+        "must":[
+        {"match":{"type":"ccm:io"}}
+        ],
+        "must_not":[
+        {"match":{"aspects":"ccm:collection_io_reference"}},
+        {"match":{"aspects":"ccm:collection"}}
+        ]
+        }}
+      </basequery>
       <property name="from">
         <statement>{"bool":{"must":[{"range":{"properties.cm:modified":{"gte":"${value}"}}}]}</statement>
       </property>
@@ -1778,7 +1799,19 @@
       </property>
     </query>
     <query join="AND" id="search_relation_query">
-      <basequery>{"term":{"type":"ccm:io"}}</basequery>
+      <basequery>
+        {"bool": {
+        "must":[
+        {"term":{"type":"ccm:io"}}
+        ],
+        "must_not":[
+        {"term":{"aspects":"ccm:metadataPresettingTemplate"}},
+        {"term":{"aspects":"ccm:io_childobject"}},
+        {"term":{"aspects":"ccm:collection_io_reference"}}
+        ]
+        }
+        }
+      </basequery>
       <specialFilter>exclude_system_folder</specialFilter>
       <specialFilter>exclude_sites_folder</specialFilter>
       <specialFilter>exclude_people_folder</specialFilter>

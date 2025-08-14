@@ -102,6 +102,8 @@ public class ExcelLOMImporter {
 					folderProps.put(QName.createQName(CCConstants.CM_NAME), folderName);
 					folderProps.put(QName.createQName(CCConstants.CM_PROP_C_TITLE), folderName);
 					parentFolder = nodeService.createNode(targetFolderNodeRef,assocTypeContains, QName.createQName(folderName),  QName.createQName(CCConstants.CCM_TYPE_MAP),folderProps).getChildRef().getId();
+				}else{
+					parentFolder = currentFolder.getId();
 				}
 				
 				try{
@@ -120,7 +122,7 @@ public class ExcelLOMImporter {
 						
 						int colIdxIdx = cell.getColumnIndex();
 						
-						if(CellType.STRING != cell.getCellType()){
+						if(CellType.NUMERIC != cell.getCellType() && CellType.STRING != cell.getCellType()){
 							continue;
 						}
 
@@ -129,6 +131,7 @@ public class ExcelLOMImporter {
 							logger.error("no column name found for column:"+colIdxIdx);
 							continue;
 						}
+						columnName = columnName.trim();
 
 						if(columnName.startsWith("collection")){
 							String value = cell.getStringCellValue();
@@ -139,14 +142,14 @@ public class ExcelLOMImporter {
 
 						//System.out.println(columnName + " " + toSafe.get(QName.createQName(CCConstants.CM_NAME)) + " " + cell.getStringCellValue() + " colIdx:" + colIdxIdx);
 						String alfrescoProperty = null;
-						String value = cell.getStringCellValue();
+						String value = (CellType.NUMERIC == cell.getCellType() ) ? Double.valueOf(cell.getNumericCellValue()).toString() : cell.getStringCellValue();
 						if(value == null) continue;
 						value = value.trim();
 						if(value.isEmpty()) continue;
 						
-						if(columnName != null){
-							alfrescoProperty = getExcelAlfMap().get(columnName);
-						}
+
+						alfrescoProperty = getExcelAlfMap().get(columnName);
+
 						
 						if(alfrescoProperty != null){
 							if(alfrescoProperty.equals(CCConstants.CM_PROP_CONTENT)){
@@ -164,6 +167,9 @@ public class ExcelLOMImporter {
 										
 										toSafe.put(QName.createQName(alfrescoProperty), multival);
 									}else{
+										if("java.lang.Integer".equals(propDef.getDataType().getJavaClassName())){
+											value = Integer.valueOf( (int)Math.round(Double.parseDouble(value))).toString();
+										}
 										toSafe.put(QName.createQName(alfrescoProperty), value);
 									}
 								}else {

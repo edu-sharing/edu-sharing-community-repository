@@ -16,6 +16,7 @@ public class CallSourceHelper {
         Render,
         Preview,
         Sitemap,
+        Oai,
         Workspace,
         // access from external edu connector tool
         ToolConnector,
@@ -50,6 +51,8 @@ public class CallSourceHelper {
             return CallSource.Search;
         }else if(isRender(requestPath) || (isRender(refererPath))){
             return CallSource.Render;
+        }else if(isOai(requestPath)){
+            return CallSource.Oai;
         }else if(isPreview(requestPath)){
             return CallSource.Preview;
         }else if(isSitemap(requestPath)){
@@ -90,6 +93,9 @@ public class CallSourceHelper {
         return false;
     }
 
+    private static boolean isOai(String path){
+        return path.startsWith(WEBAPP_BASE_PATH + "/eduservlet/oai");
+    }
     private static boolean isPreview(String path){
         if(path.startsWith(WEBAPP_BASE_PATH + "/preview")){
             return true;

@@ -51,6 +51,8 @@ export interface MdsViewerWidget {
     focusTrigger: Subject<void>;
     getInitalValuesAsync(): Promise<InitialValues>;
     getInitialDisplayValues(): BehaviorSubject<MdsValueList>;
+    getBasicType(flat?: boolean): string;
+    getFormattedValue(value: string[], basicType: string, translate: TranslateService): string[];
 }
 export enum MdsWidgetType {
     Text = 'text',
@@ -185,52 +187,16 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
         this.value.set(await this.getNodeValue());
         this.widget
             .getInitialDisplayValues()
-            .pipe(filter((v: MdsValueList) => !!v))
+            .pipe(filter((v: MdsValueList) => !!v?.values))
             .subscribe(async (value: MdsValueList) => {
                 this.value.set(value.values.map((v) => v.displayString));
             });
-        this.basicType.set(this.getBasicType());
+        this.basicType.set(this.widget.getBasicType(this.viewInstance.treeDisplay === 'flat'));
         this.rawValue = await this.getRawValue().toPromise();
     }
 
     getDefinition(): MdsWidget {
         return this.widget?.definition || this.definition;
-    }
-
-    getBasicType() {
-        switch (this.getDefinition().id) {
-            case 'license':
-                return 'license';
-        }
-        switch (this.getDefinition().type) {
-            case 'text':
-            case 'email':
-            case 'month':
-            case 'color':
-            case 'textarea':
-            case 'singleoption':
-                return 'text';
-            case 'number':
-                return 'number';
-            case 'date':
-                return 'date';
-            case 'vcard':
-                return 'vcard';
-            case 'multivalueFixedBadges':
-            case 'multivalueSuggestBadges':
-            case 'singlevalueSuggestBadges':
-            case 'multivalueBadges':
-            case 'singlevalueTree':
-            case 'multivalueTree':
-                return this.viewInstance.treeDisplay === 'flat' ? 'array' : 'tree';
-            case 'slider':
-                return 'slider';
-            case 'duration':
-                return 'duration';
-            case 'range':
-                return 'range';
-        }
-        return 'unknown';
     }
 
     supportsInlineEditing() {
@@ -254,7 +220,7 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
         }
         const id = this.getDefinition().id;
         const values = this.getNodeValues();
-        if (this.getBasicType() === 'license') {
+        if (this.widget.getBasicType(this.viewInstance.treeDisplay === 'flat') === 'license') {
             this.license$.next({
                 icon: await this.nodeHelper.getLicenseIcon({
                     properties: this.getNodeValues(),
@@ -297,50 +263,26 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
 
     click() {
         if (this.getDefinition().link === '_BLANK') {
-            window.open(this.formatText()[0]);
+            window.open(this.widget.getFormattedValue(this.value(), 'text', this.translate)[0]);
         } else if (this.getDefinition().link === '_SELF') {
-            window.location.href = this.formatText()[0];
+            window.location.href = this.widget.getFormattedValue(
+                this.value(),
+                'text',
+                this.translate,
+            )[0];
         } else {
             console.warn('Unsupported link type ' + this.getDefinition().link);
         }
     }
 
-    formatDate() {
-        return this.value().map((v) => {
-            if (this.getDefinition().format) {
-                try {
-                    return new DatePipe('en').transform(v, this.getDefinition().format);
-                } catch (e) {
-                    console.warn('Could not format date', e, this.getDefinition());
-                    return DateHelper.formatDate(this.translate, v, {
-                        showAlwaysTime: true,
-                    });
-                }
-            } else {
-                return DateHelper.formatDate(this.translate, v, {
-                    showAlwaysTime: true,
-                });
-            }
-        });
+    formatValue(): string[] {
+        return this.widget.getFormattedValue(
+            this.value(),
+            this.widget.getBasicType(this.viewInstance.treeDisplay === 'flat'),
+            this.translate,
+        );
     }
 
-    formatNumber() {
-        return this.value().map((v) => {
-            if (this.widget.definition.format === 'bytes') {
-                return new FormatSizePipe(this.translate).transform(v);
-            }
-            return v;
-        });
-    }
-
-    formatText() {
-        return this.value().map((v) => {
-            if (this.widget.definition.format) {
-                return this.widget.definition.format.replace('${value}', v);
-            }
-            return v;
-        });
-    }
     // instance: MdsEditorWidgetBase
     async finishEdit(instance: any, store = false) {
         if (store) {

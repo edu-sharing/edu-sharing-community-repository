@@ -1,5 +1,6 @@
 :host {
     display: flex;
+    border-right: 1px solid var(--mat-sidenav-container-divider-color);
 }
 
 .filter-bar-container {
@@ -19,12 +20,12 @@
     align-items: center;
     padding: 0 20px;
     height: 60px;
-    border-bottom: 1px solid
-        rgba(var(--palette-foreground-divider), var(--palette-foreground-divider-alpha));
+    border-bottom: 1px solid var(--mat-divider-color);
     .filter-bar-title {
         flex-grow: 1;
         font-size: 180%;
         margin: 0;
+        font-weight: 400;
     }
     .filter-bar-close-button {
         margin-right: -10px;

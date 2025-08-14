@@ -43,6 +43,13 @@ mat-form-field {
     color: $textMain;
     font-weight: bold;
 }
+::ng-deep {
+    .node-row-option {
+        .mdc-list-item__primary-text {
+            width: 100%;
+        }
+    }
+}
 :host ::ng-deep {
     .mds-wrapper {
         es-mds-editor-core {

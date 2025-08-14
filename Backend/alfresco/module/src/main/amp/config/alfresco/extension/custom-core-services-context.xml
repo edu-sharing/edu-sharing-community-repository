@@ -662,6 +662,7 @@
     <property name="lightbendConfigLoader">
       <ref bean="lightbendConfigLoader"/>
     </property>
+        <property name="threadPoolSize" value="${local.transform.threadPoolSize}" />
   </bean>
 
   <bean id="thumbnailRegistry" parent="baseThumbnailRegistry"
@@ -687,6 +688,7 @@
     <property name="retryTransformOnDifferentMimeType" value="${content.transformer.retryOn.different.mimetype}"/>
     <property name="shutdownIndicator" ref="shutdownIndicator"/>
     <property name="httpClientConfig" ref="httpClientConfigTransform"/>
+        <property name="nodeService" ref="nodeService" />
   </bean>
 
   <!--

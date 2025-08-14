@@ -1,6 +1,10 @@
+// required for web components
+@forward 'node_modules/@angular/cdk/a11y-prebuilt.css';
+
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
-@use 'projects/edu-sharing-ui/assets/scss/branding' as *;
+@use 'projects/edu-sharing-ui/assets/scss/branding' as branding;
 @use 'sass:color';
+@use 'sass:map';
 
 *,
 ::after,
@@ -24,8 +28,16 @@
 
 html,
 body {
-    font-family: $primaryFontFamily !important;
-    font-size: $primaryFontSize;
+    font-family: if(
+        map.get(branding.$tokens, primaryFontFamily) != null,
+        #{map.get(branding.$tokens, primaryFontFamily)},
+        #{$primaryFontFamily}
+    ) !important;
+    font-size: if(
+        map.get(branding.$tokens, primaryFontSize) != null,
+        map.get(branding.$tokens, primaryFontSize),
+        $primaryFontSize
+    );
     -webkit-font-smoothing: antialiased;
     margin: 0;
 }
@@ -136,7 +148,7 @@ button.cdk-keyboard-focused {
         box-shadow: none !important;
         @include removeDefaultFocus();
         padding-bottom: 2px;
-        border-bottom: 1px solid $focusColor;
+        border-bottom: 1px solid var(--focusColor);
     }
 }
 .btn-circle {

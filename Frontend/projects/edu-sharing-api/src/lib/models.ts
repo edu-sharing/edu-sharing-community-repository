@@ -56,6 +56,7 @@ export {
     ConfigTutorial,
     NotificationConfig,
     Node,
+    NodeEntry,
     NodeEntries,
     NodeVersion,
     NodeVersionEntries,
