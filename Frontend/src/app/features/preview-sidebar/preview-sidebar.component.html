@@ -10,7 +10,7 @@
       <button mat-icon-button *ngIf="previewRef?.renderNode()" (click)="openModal()">
         <i esIcon="fullscreen" [aria]="true"></i>
       </button>
-      <button mat-icon-button (click)="closed.emit()">
+      <button mat-icon-button (click)="node = null; closed.emit()">
         <i esIcon="close" [aria]="true"></i>
       </button>
     </div>
