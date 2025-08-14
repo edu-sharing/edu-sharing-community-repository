@@ -111,15 +111,15 @@ mat-tab-group {
 }
 .mat-tab-group.mat-dark {
     .mat-tab-header {
-        background-color: $workspaceTopBarBackground;
+        background-color: var(--workspaceTopBarBackground);
     }
     .mat-tab-header-pagination .mat-tab-header-pagination-chevron {
-        border-color: $workspaceTopBarFontColor;
+        border-color: var(--workspaceTopBarFontColor);
     }
     .mat-tab-labels {
-        background-color: $workspaceTopBarBackground;
+        background-color: var(--workspaceTopBarBackground);
         .mat-tab-label {
-            color: $workspaceTopBarFontColor;
+            color: var(--workspaceTopBarFontColor);
             &.cdk-keyboard-focused:not(.mat-tab-disabled) {
                 background-color: rgba(255, 255, 255, 0.2);
             }

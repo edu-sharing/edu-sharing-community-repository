@@ -4,8 +4,8 @@
 :host > div {
     width: 100%;
     height: var(--mainnavHeight);
-    background: $workspaceTopBarBackground;
-    color: $workspaceTopBarFontColor;
+    background: var(--workspaceTopBarBackground);
+    color: var(--workspaceTopBarFontColor);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -21,15 +21,10 @@ es-imprint-privacy ::ng-deep {
     top: 5px;
     font-size: 7pt;
     a {
-        color: rgba(
-            color.channel($workspaceTopBarFontColor, 'red', $space: rgb),
-            color.channel($workspaceTopBarFontColor, 'green', $space: rgb),
-            color.channel($workspaceTopBarFontColor, 'blue', $space: rgb),
-            0.7
-        ) !important;
+        color: color-mix(in srgb, var(--workspaceTopBarFontColor), 30% transparent) !important;
     }
     a:hover {
-        color: $workspaceTopBarFontColor !important;
+        color: var(--workspaceTopBarFontColor) !important;
     }
     a:nth-child(2) {
         margin-left: 5px;
@@ -48,9 +43,9 @@ es-imprint-privacy ::ng-deep {
     outline: none;
     background-color: unset;
     font-family: $primaryFontFamily;
-    color: $workspaceTopBarFontColor !important;
+    color: var(--workspaceTopBarFontColor) !important;
     & ::ng-deep .mat-ripple-element {
-        background-color: #{color.change($workspaceTopBarFontColor, $alpha: 0.1)};
+        background-color: color-mix(in srgb, var(--workspaceTopBarFontColor), 90% transparent);
     }
     .barIcon {
         margin-top: 2px;
@@ -69,7 +64,7 @@ es-imprint-privacy ::ng-deep {
         bottom: 0;
         left: 0;
         right: 0;
-        background-color: $workspaceTopBarFontColor;
+        background-color: var(--workspaceTopBarFontColor);
         opacity: 0.04;
     }
 }
@@ -91,8 +86,12 @@ es-imprint-privacy ::ng-deep {
 }
 
 .mat-mdc-button {
-    --mat-mdc-button-ripple-color: #{color.change($workspaceTopBarFontColor, $alpha: 0.1)};
-    --mat-mdc-button-persistent-ripple-color: #{$workspaceTopBarFontColor};
+    --mat-mdc-button-ripple-color: color-mix(
+        in srgb,
+        var(--workspaceTopBarFontColor),
+        90% transparent
+    );
+    --mat-mdc-button-persistent-ripple-color: var(--workspaceTopBarFontColor);
 }
 
 .menuButton img {
@@ -149,7 +148,7 @@ span {
 }
 
 button.user {
-    color: $workspaceTopBarFontColor;
+    color: var(--workspaceTopBarFontColor);
 }
 .user span {
     font-size: 100%;
@@ -177,12 +176,9 @@ button.user {
         height: 39px;
         display: flex;
         align-items: center;
-        color: $workspaceTopBarFontColor;
-        background-color: rgba(
-            color.channel($workspaceTopBarFontColor, 'red', $space: rgb),
-            color.channel($workspaceTopBarFontColor, 'green', $space: rgb),
-            color.channel($workspaceTopBarFontColor, 'blue', $space: rgb),
-            var(--workspaceTopBarNewAlpha)
+        color: var(--workspaceTopBarFontColor);
+        background-color: rgb(
+            from var(--workspaceTopBarFontColor) r g b / var(--workspaceTopBarNewAlpha)
         );
         border-radius: 0;
     }
