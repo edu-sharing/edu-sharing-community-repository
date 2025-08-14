@@ -1073,14 +1073,15 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
                 enabled: 'edu-content_shared_me_all',
                 disabled: 'edu-content_shared_me_private',
             },
-            this.toMeSharedToggle,
+            this.toMeSharedToggle$.value,
             () => {
-                this.toMeSharedToggle = !this.toMeSharedToggle;
-                void this.session.set('toMeSharedGroup', this.toMeSharedToggle);
+                this.toMeSharedToggle$.next(!this.toMeSharedToggle$.value);
+                void this.session.set('toMeSharedGroup', this.toMeSharedToggle$.value);
                 this.openDirectoryFromRoute();
                 //this.treeComponent.reload = Boolean(true);
                 this.toast.toast(
-                    'WORKSPACE.TOAST.TO_ME_SHARED_' + (this.toMeSharedToggle ? 'ALL' : 'PERSONAL'),
+                    'WORKSPACE.TOAST.TO_ME_SHARED_' +
+                        (this.toMeSharedToggle$.value ? 'ALL' : 'PERSONAL'),
                 );
             },
         );
