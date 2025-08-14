@@ -315,6 +315,7 @@ public class DataProtectionService{
             permissionService.setPermission(nodeRef,userName,PermissionService.CONSUMER,true);
             nodeService.removeAspect(nodeRef,ContentModel.ASPECT_VERSIONABLE);
             ContentWriter writer = contentService.getWriter(nodeRef, ContentModel.PROP_CONTENT, true);
+            writer.setMimetype("application/zip");
             writer.addListener(() -> {
                 try {
                     FileUtils.deleteDirectory(new File(rootPath));
