@@ -18,9 +18,12 @@ public class DateParamConverterProvider implements ParamConverterProvider {
     @Override
     public <T> ParamConverter<T> getConverter(Class<T> rawType, Type genericType, Annotation[] annotations) {
         if (rawType.equals(Date.class)) {
-            return new ParamConverter<T>() {
+            return new ParamConverter<>() {
                 @Override
                 public T fromString(String value) {
+                    if (value == null) {
+                        return null;
+                    }
                     try {
                         return rawType.cast(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(value));
                     } catch (ParseException e) {

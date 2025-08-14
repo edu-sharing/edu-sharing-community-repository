@@ -34,6 +34,7 @@ import org.edu_sharing.service.share.GlobalShareService;
 import org.edu_sharing.service.share.GlobalShareServiceImpl;
 import org.edu_sharing.service.tracking.ActivityEventService;
 import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
+import org.edu_sharing.spring.ApplicationContextFactory;
 import org.edu_sharing.spring.servlet.SpringHttpServlet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -257,7 +258,7 @@ public class DownloadServlet extends SpringHttpServlet {
         }
 
         Share share = null;
-        GlobalShareService globalShareService = new GlobalShareServiceImpl(PermissionServiceFactory.getPermissionService(ApplicationInfoList.getHomeRepository().getAppId()));
+        GlobalShareService globalShareService = ApplicationContextFactory.getApplicationContext().getBean(GlobalShareService.class);
         if (parentNodeId != null && token != null) {
             try {
                 share = globalShareService.getShare(parentNodeId, token);

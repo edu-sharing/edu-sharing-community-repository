@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface PermissionService {
-	public static final String[] GUEST_PERMISSIONS = new String[]{
+	String[] GUEST_PERMISSIONS = new String[]{
 			org.alfresco.service.cmr.security.PermissionService.READ,
 			CCConstants.PERMISSION_READ_PREVIEW,
 			CCConstants.PERMISSION_READ_ALL,
@@ -74,15 +74,11 @@ public interface PermissionService {
 
 	 void addPermissions(String nodeId, ACE[] aces) throws Exception;
 	
-	 void removePermissions(String nodeId, ACE[] aces) throws Exception;
+	 void removePermissions(String nodeId, List<ACE> aces);
 
     void removeAllPermissions(String nodeId) throws Exception;
 
-    void addUserToSharedList(String user, NodeRef nodeRef);
-
-	void cleanUpSharedList(NodeRef nodeRef);
-
-	 boolean hasPermission(String storeProtocol, String storeId, String nodeId, String permission);
+    boolean hasPermission(String storeProtocol, String storeId, String nodeId, String permission);
 
 	 boolean hasPermission(String storeProtocol, String storeId, String nodeId, String authority, String permission);
 

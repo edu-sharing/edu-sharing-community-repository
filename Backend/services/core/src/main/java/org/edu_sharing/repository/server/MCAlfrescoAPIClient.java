@@ -76,6 +76,7 @@ import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.share.GlobalShareService;
 import org.edu_sharing.service.share.GlobalShareServiceImpl;
+import org.edu_sharing.spring.ApplicationContextFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.surf.util.I18NUtil;
 
@@ -2370,13 +2371,13 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
     @Override
     public void createShare(String nodeId, String[] emails, long expiryDate) throws Exception {
-        GlobalShareService globalShareService = new GlobalShareServiceImpl(PermissionServiceFactory.getPermissionService(appInfo.getAppId()));
+        GlobalShareService globalShareService = ApplicationContextFactory.getApplicationContext().getBean(GlobalShareService.class);
         String locale = (String) Context.getCurrentInstance().getRequest().getSession().getAttribute(CCConstants.AUTH_LOCALE);
         globalShareService.createShare(nodeId, emails, expiryDate, null, locale);
     }
 
     public Share[] getShares(String nodeId) {
-        GlobalShareService globalShareService = new GlobalShareServiceImpl(PermissionServiceFactory.getPermissionService(appInfo.getAppId()));
+        GlobalShareService globalShareService = ApplicationContextFactory.getApplicationContext().getBean(GlobalShareService.class);
         return globalShareService.getShares(nodeId);
     }
 

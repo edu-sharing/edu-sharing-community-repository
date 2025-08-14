@@ -47,7 +47,7 @@ public class QuestionAnswerApi {
                     @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
-    public List<QAEntry> createQAEntries(@Valid @PathParam("nodeId") String nodeId, List<CreateQAEntryDTO> qaEntries) {
+    public List<QAEntry> createQAEntries(@PathParam("nodeId") String nodeId, @Valid List<CreateQAEntryDTO> qaEntries) {
         return qaService.createQAEntries(nodeId, qaEntries);
     }
 
@@ -63,10 +63,9 @@ public class QuestionAnswerApi {
                     @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
-    public List<QAEntry> updateQAEntries(@Valid @PathParam("nodeId") String nodeId, List<UpdateQAEntryDTO> qaEntries) {
+    public List<QAEntry> updateQAEntries(@PathParam("nodeId") String nodeId, @Valid List<UpdateQAEntryDTO> qaEntries) {
         return qaService.updateQAEntries(nodeId, qaEntries);
     }
-
 
 
     @GET

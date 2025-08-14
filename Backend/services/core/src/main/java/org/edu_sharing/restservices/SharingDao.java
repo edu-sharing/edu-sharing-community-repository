@@ -8,13 +8,14 @@ import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.share.GlobalShareService;
 import org.edu_sharing.service.share.GlobalShareServiceImpl;
+import org.edu_sharing.spring.ApplicationContextFactory;
 
 import java.util.*;
 
 public class SharingDao {
 	public static SharingInfo getInfo(RepositoryDao repositoryDao, String node, String token,String password) throws DAOException{
 		try {
-			Share share = getShare(repositoryDao, node, token);
+			Share share = getShare(node, token);
 			return new SharingInfo(share, NodeDao.getNode(repositoryDao, node),password);
 		}catch(Throwable t){
 			throw DAOException.mapping(t);
@@ -22,8 +23,8 @@ public class SharingDao {
 		}
 	}
 
-	private static Share getShare(RepositoryDao repoDao, String node, String token) {
-		GlobalShareService service = new GlobalShareServiceImpl(PermissionServiceFactory.getPermissionService(repoDao.getId()));
+	private static Share getShare(String node, String token) {
+		GlobalShareService service = ApplicationContextFactory.getApplicationContext().getBean(GlobalShareService.class);
 		Share share = service.getShare(node, token);
 		if (share == null)
 			throw new IllegalArgumentException("Share with token " + token + " does not exist");
@@ -32,7 +33,7 @@ public class SharingDao {
 
 	public static List<NodeRef> getChildren(RepositoryDao repositoryDao, String node, String token, String password) throws DAOException {
 		try {
-			Share share = getShare(repositoryDao, node, token);
+			Share share = getShare(node, token);
 			if(share.getPassword()!=null && !share.getPassword().equals(GlobalShareServiceImpl.encryptPassword(password))){
 				throw new InsufficientPermissionException("Invalid password supplied");
 			}

@@ -57,7 +57,7 @@ public class PermissionServiceAdapter implements PermissionService {
 	}
 
 	@Override
-	public void removePermissions(String nodeId, ACE[] aces) throws Exception {	
+	public void removePermissions(String nodeId, List<ACE> aces) {
 	}
 
 	@Override
@@ -65,17 +65,7 @@ public class PermissionServiceAdapter implements PermissionService {
 
 	}
 
-	@Override
-	public void addUserToSharedList(String user, NodeRef nodeRef) {
-
-	}
-
-	@Override
-	public void cleanUpSharedList(NodeRef nodeRef) {
-
-	}
-
-	@Override
+    @Override
 	public void createNotifyObject(String nodeId, String user, String action) {
 	}
 

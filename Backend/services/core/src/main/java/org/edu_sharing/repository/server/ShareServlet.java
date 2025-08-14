@@ -20,6 +20,7 @@ import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.share.GlobalShareService;
 import org.edu_sharing.service.share.GlobalShareServiceImpl;
+import org.edu_sharing.spring.ApplicationContextFactory;
 import org.springframework.context.ApplicationContext;
 
 import java.io.DataInputStream;
@@ -97,7 +98,7 @@ public class ShareServlet extends DownloadServlet {
 					return null;
 				}
 
-				GlobalShareService globalShareService = new GlobalShareServiceImpl(PermissionServiceFactory.getPermissionService(ApplicationInfoList.getHomeRepository().getAppId()));
+				GlobalShareService globalShareService = ApplicationContextFactory.getApplicationContext().getBean(GlobalShareService.class);
 				Share share = globalShareService.getShare(nodeId, token);
 				if (share == null) {
 					resp.sendRedirect(URLTool.getNgMessageUrl("invalid_share"));
