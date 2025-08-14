@@ -558,7 +558,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             this.mainNavConfig.customUserMenuOptions,
         );
         this.userMenuOptions.forEach((o) => {
-            o.elementType = [ElementType.Unknown];
+            o.elementType = [ElementType.NoneOrUnknown];
         });
         this.userMenuOptions = await this.optionsHelperService.filterOptions(
             this.userMenuOptions,

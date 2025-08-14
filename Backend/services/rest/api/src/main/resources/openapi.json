@@ -970,8 +970,19 @@
         },
         "type": "object"
       },
+      "ConfigDashboard": {
+        "properties": {
+          "shortcuts": {
+            "$ref": "#/components/schemas/ShortcutConfig"
+          }
+        },
+        "type": "object"
+      },
       "ConfigFrontpage": {
         "properties": {
+          "dashboard": {
+            "$ref": "#/components/schemas/ConfigDashboard"
+          },
           "enabled": {
             "type": "boolean"
           }
@@ -1231,53 +1242,6 @@
         },
         "type": "object"
       },
-      "ContentDisposition": {
-        "properties": {
-          "attachment": {
-            "type": "boolean"
-          },
-          "charset": {
-            "properties": {
-              "registered": {
-                "type": "boolean"
-              }
-            },
-            "type": "object"
-          },
-          "creationDate": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "filename": {
-            "type": "string"
-          },
-          "formData": {
-            "type": "boolean"
-          },
-          "inline": {
-            "type": "boolean"
-          },
-          "modificationDate": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "readDate": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "size": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "type": {
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
       "Context": {
         "properties": {
           "domain": {
@@ -1499,6 +1463,40 @@
         },
         "type": "object"
       },
+      "DashboardShortcut": {
+        "discriminator": {
+          "propertyName": "type"
+        },
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "DashboardShortcutEntry": {
+        "discriminator": {
+          "propertyName": "type"
+        },
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
       "DataProtectionExport": {
         "properties": {
           "nodeEntry": {
@@ -1530,6 +1528,45 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "DefaultDashboardShortcut": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DashboardShortcut"
+          },
+          {
+            "properties": {
+              "id": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "DefaultDashboardShortcutEntry": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DashboardShortcutEntry"
+          },
+          {
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "required": [
+          "id"
+        ],
         "type": "object"
       },
       "DeleteOption": {
@@ -2024,412 +2061,6 @@
               "delete"
             ],
             "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "HttpHeaders": {
-        "additionalProperties": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "properties": {
-          "accept": {
-            "items": {
-              "$ref": "#/components/schemas/MediaType"
-            },
-            "type": "array"
-          },
-          "acceptCharset": {
-            "items": {
-              "properties": {
-                "registered": {
-                  "type": "boolean"
-                }
-              },
-              "type": "object"
-            },
-            "type": "array"
-          },
-          "acceptLanguage": {
-            "items": {
-              "properties": {
-                "range": {
-                  "type": "string"
-                },
-                "weight": {
-                  "format": "double",
-                  "type": "number"
-                }
-              },
-              "type": "object"
-            },
-            "type": "array"
-          },
-          "acceptLanguageAsLocales": {
-            "items": {
-              "properties": {
-                "country": {
-                  "type": "string"
-                },
-                "displayCountry": {
-                  "type": "string"
-                },
-                "displayLanguage": {
-                  "type": "string"
-                },
-                "displayName": {
-                  "type": "string"
-                },
-                "displayScript": {
-                  "type": "string"
-                },
-                "displayVariant": {
-                  "type": "string"
-                },
-                "extensionKeys": {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array",
-                  "uniqueItems": true
-                },
-                "iso3Country": {
-                  "type": "string"
-                },
-                "iso3Language": {
-                  "type": "string"
-                },
-                "language": {
-                  "type": "string"
-                },
-                "script": {
-                  "type": "string"
-                },
-                "unicodeLocaleAttributes": {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array",
-                  "uniqueItems": true
-                },
-                "unicodeLocaleKeys": {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array",
-                  "uniqueItems": true
-                },
-                "variant": {
-                  "type": "string"
-                }
-              },
-              "type": "object"
-            },
-            "type": "array"
-          },
-          "acceptPatch": {
-            "items": {
-              "$ref": "#/components/schemas/MediaType"
-            },
-            "type": "array"
-          },
-          "accessControlAllowCredentials": {
-            "type": "boolean"
-          },
-          "accessControlAllowHeaders": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "accessControlAllowMethods": {
-            "items": {
-              "$ref": "#/components/schemas/HttpMethod"
-            },
-            "type": "array"
-          },
-          "accessControlAllowOrigin": {
-            "type": "string"
-          },
-          "accessControlExposeHeaders": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "accessControlMaxAge": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "accessControlRequestHeaders": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "accessControlRequestMethod": {
-            "$ref": "#/components/schemas/HttpMethod"
-          },
-          "all": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "type": "object",
-            "writeOnly": true
-          },
-          "allow": {
-            "items": {
-              "$ref": "#/components/schemas/HttpMethod"
-            },
-            "type": "array",
-            "uniqueItems": true
-          },
-          "basicAuth": {
-            "type": "string",
-            "writeOnly": true
-          },
-          "bearerAuth": {
-            "type": "string",
-            "writeOnly": true
-          },
-          "cacheControl": {
-            "type": "string"
-          },
-          "connection": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "contentDisposition": {
-            "$ref": "#/components/schemas/ContentDisposition"
-          },
-          "contentLanguage": {
-            "properties": {
-              "country": {
-                "type": "string"
-              },
-              "displayCountry": {
-                "type": "string"
-              },
-              "displayLanguage": {
-                "type": "string"
-              },
-              "displayName": {
-                "type": "string"
-              },
-              "displayScript": {
-                "type": "string"
-              },
-              "displayVariant": {
-                "type": "string"
-              },
-              "extensionKeys": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array",
-                "uniqueItems": true
-              },
-              "iso3Country": {
-                "type": "string"
-              },
-              "iso3Language": {
-                "type": "string"
-              },
-              "language": {
-                "type": "string"
-              },
-              "script": {
-                "type": "string"
-              },
-              "unicodeLocaleAttributes": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array",
-                "uniqueItems": true
-              },
-              "unicodeLocaleKeys": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array",
-                "uniqueItems": true
-              },
-              "variant": {
-                "type": "string"
-              }
-            },
-            "type": "object"
-          },
-          "contentLength": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "contentType": {
-            "$ref": "#/components/schemas/MediaType"
-          },
-          "date": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "empty": {
-            "type": "boolean"
-          },
-          "etag": {
-            "type": "string"
-          },
-          "expires": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "host": {
-            "properties": {
-              "address": {
-                "properties": {
-                  "address": {
-                    "format": "byte",
-                    "type": "string"
-                  },
-                  "anyLocalAddress": {
-                    "type": "boolean"
-                  },
-                  "canonicalHostName": {
-                    "type": "string"
-                  },
-                  "hostAddress": {
-                    "type": "string"
-                  },
-                  "hostName": {
-                    "type": "string"
-                  },
-                  "linkLocalAddress": {
-                    "type": "boolean"
-                  },
-                  "loopbackAddress": {
-                    "type": "boolean"
-                  },
-                  "mcglobal": {
-                    "type": "boolean"
-                  },
-                  "mclinkLocal": {
-                    "type": "boolean"
-                  },
-                  "mcnodeLocal": {
-                    "type": "boolean"
-                  },
-                  "mcorgLocal": {
-                    "type": "boolean"
-                  },
-                  "mcsiteLocal": {
-                    "type": "boolean"
-                  },
-                  "multicastAddress": {
-                    "type": "boolean"
-                  },
-                  "siteLocalAddress": {
-                    "type": "boolean"
-                  }
-                },
-                "type": "object"
-              },
-              "hostName": {
-                "type": "string"
-              },
-              "hostString": {
-                "type": "string"
-              },
-              "port": {
-                "format": "int32",
-                "type": "integer"
-              },
-              "unresolved": {
-                "type": "boolean"
-              }
-            },
-            "type": "object"
-          },
-          "ifMatch": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "ifModifiedSince": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "ifNoneMatch": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "ifUnmodifiedSince": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "lastModified": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "location": {
-            "format": "uri",
-            "type": "string"
-          },
-          "origin": {
-            "type": "string"
-          },
-          "pragma": {
-            "type": "string"
-          },
-          "range": {
-            "items": {
-              "$ref": "#/components/schemas/HttpRange"
-            },
-            "type": "array"
-          },
-          "upgrade": {
-            "type": "string"
-          },
-          "vary": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          }
-        },
-        "type": "object"
-      },
-      "HttpMethod": {
-        "type": "object"
-      },
-      "HttpRange": {
-        "type": "object"
-      },
-      "HttpStatusCode": {
-        "properties": {
-          "error": {
-            "type": "boolean"
-          },
-          "is1xxInformational": {
-            "type": "boolean"
-          },
-          "is2xxSuccessful": {
-            "type": "boolean"
-          },
-          "is3xxRedirection": {
-            "type": "boolean"
-          },
-          "is4xxClientError": {
-            "type": "boolean"
-          },
-          "is5xxServerError": {
-            "type": "boolean"
           }
         },
         "type": "object"
@@ -3410,6 +3041,9 @@
           "description": {
             "type": "string"
           },
+          "icon": {
+            "type": "string"
+          },
           "id": {
             "type": "string"
           },
@@ -3629,47 +3263,6 @@
           "type",
           "value"
         ],
-        "type": "object"
-      },
-      "MediaType": {
-        "properties": {
-          "charset": {
-            "properties": {
-              "registered": {
-                "type": "boolean"
-              }
-            },
-            "type": "object"
-          },
-          "concrete": {
-            "type": "boolean"
-          },
-          "parameters": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "type": "object"
-          },
-          "qualityValue": {
-            "format": "double",
-            "type": "number"
-          },
-          "subtype": {
-            "type": "string"
-          },
-          "subtypeSuffix": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string"
-          },
-          "wildcardSubtype": {
-            "type": "boolean"
-          },
-          "wildcardType": {
-            "type": "boolean"
-          }
-        },
         "type": "object"
       },
       "Mediacenter": {
@@ -5577,6 +5170,45 @@
         },
         "type": "object"
       },
+      "RefDashboardShortcut": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DashboardShortcut"
+          },
+          {
+            "properties": {
+              "ref": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "required": [
+          "ref"
+        ],
+        "type": "object"
+      },
+      "RefDashboardShortcutEntry": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DashboardShortcutEntry"
+          },
+          {
+            "properties": {
+              "node": {
+                "$ref": "#/components/schemas/Node"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "required": [
+          "node"
+        ],
+        "type": "object"
+      },
       "ReferenceEntries": {
         "properties": {
           "pagination": {
@@ -5838,1188 +5470,6 @@
         },
         "type": "object"
       },
-      "ResponseEntityListQAEntry": {
-        "properties": {
-          "body": {
-            "items": {
-              "$ref": "#/components/schemas/QAEntry"
-            },
-            "type": "array"
-          },
-          "headers": {
-            "additionalProperties": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            "properties": {
-              "accept": {
-                "items": {
-                  "$ref": "#/components/schemas/MediaType"
-                },
-                "type": "array"
-              },
-              "acceptCharset": {
-                "items": {
-                  "properties": {
-                    "registered": {
-                      "type": "boolean"
-                    }
-                  },
-                  "type": "object"
-                },
-                "type": "array"
-              },
-              "acceptLanguage": {
-                "items": {
-                  "properties": {
-                    "range": {
-                      "type": "string"
-                    },
-                    "weight": {
-                      "format": "double",
-                      "type": "number"
-                    }
-                  },
-                  "type": "object"
-                },
-                "type": "array"
-              },
-              "acceptLanguageAsLocales": {
-                "items": {
-                  "properties": {
-                    "country": {
-                      "type": "string"
-                    },
-                    "displayCountry": {
-                      "type": "string"
-                    },
-                    "displayLanguage": {
-                      "type": "string"
-                    },
-                    "displayName": {
-                      "type": "string"
-                    },
-                    "displayScript": {
-                      "type": "string"
-                    },
-                    "displayVariant": {
-                      "type": "string"
-                    },
-                    "extensionKeys": {
-                      "items": {
-                        "type": "string"
-                      },
-                      "type": "array",
-                      "uniqueItems": true
-                    },
-                    "iso3Country": {
-                      "type": "string"
-                    },
-                    "iso3Language": {
-                      "type": "string"
-                    },
-                    "language": {
-                      "type": "string"
-                    },
-                    "script": {
-                      "type": "string"
-                    },
-                    "unicodeLocaleAttributes": {
-                      "items": {
-                        "type": "string"
-                      },
-                      "type": "array",
-                      "uniqueItems": true
-                    },
-                    "unicodeLocaleKeys": {
-                      "items": {
-                        "type": "string"
-                      },
-                      "type": "array",
-                      "uniqueItems": true
-                    },
-                    "variant": {
-                      "type": "string"
-                    }
-                  },
-                  "type": "object"
-                },
-                "type": "array"
-              },
-              "acceptPatch": {
-                "items": {
-                  "$ref": "#/components/schemas/MediaType"
-                },
-                "type": "array"
-              },
-              "accessControlAllowCredentials": {
-                "type": "boolean"
-              },
-              "accessControlAllowHeaders": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "accessControlAllowMethods": {
-                "items": {
-                  "$ref": "#/components/schemas/HttpMethod"
-                },
-                "type": "array"
-              },
-              "accessControlAllowOrigin": {
-                "type": "string"
-              },
-              "accessControlExposeHeaders": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "accessControlMaxAge": {
-                "format": "int64",
-                "type": "integer"
-              },
-              "accessControlRequestHeaders": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "accessControlRequestMethod": {
-                "$ref": "#/components/schemas/HttpMethod"
-              },
-              "all": {
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "type": "object",
-                "writeOnly": true
-              },
-              "allow": {
-                "items": {
-                  "$ref": "#/components/schemas/HttpMethod"
-                },
-                "type": "array",
-                "uniqueItems": true
-              },
-              "basicAuth": {
-                "type": "string",
-                "writeOnly": true
-              },
-              "bearerAuth": {
-                "type": "string",
-                "writeOnly": true
-              },
-              "cacheControl": {
-                "type": "string"
-              },
-              "connection": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "contentDisposition": {
-                "$ref": "#/components/schemas/ContentDisposition"
-              },
-              "contentLanguage": {
-                "properties": {
-                  "country": {
-                    "type": "string"
-                  },
-                  "displayCountry": {
-                    "type": "string"
-                  },
-                  "displayLanguage": {
-                    "type": "string"
-                  },
-                  "displayName": {
-                    "type": "string"
-                  },
-                  "displayScript": {
-                    "type": "string"
-                  },
-                  "displayVariant": {
-                    "type": "string"
-                  },
-                  "extensionKeys": {
-                    "items": {
-                      "type": "string"
-                    },
-                    "type": "array",
-                    "uniqueItems": true
-                  },
-                  "iso3Country": {
-                    "type": "string"
-                  },
-                  "iso3Language": {
-                    "type": "string"
-                  },
-                  "language": {
-                    "type": "string"
-                  },
-                  "script": {
-                    "type": "string"
-                  },
-                  "unicodeLocaleAttributes": {
-                    "items": {
-                      "type": "string"
-                    },
-                    "type": "array",
-                    "uniqueItems": true
-                  },
-                  "unicodeLocaleKeys": {
-                    "items": {
-                      "type": "string"
-                    },
-                    "type": "array",
-                    "uniqueItems": true
-                  },
-                  "variant": {
-                    "type": "string"
-                  }
-                },
-                "type": "object"
-              },
-              "contentLength": {
-                "format": "int64",
-                "type": "integer"
-              },
-              "contentType": {
-                "$ref": "#/components/schemas/MediaType"
-              },
-              "date": {
-                "format": "int64",
-                "type": "integer"
-              },
-              "empty": {
-                "type": "boolean"
-              },
-              "etag": {
-                "type": "string"
-              },
-              "expires": {
-                "format": "int64",
-                "type": "integer"
-              },
-              "host": {
-                "properties": {
-                  "address": {
-                    "properties": {
-                      "address": {
-                        "format": "byte",
-                        "type": "string"
-                      },
-                      "anyLocalAddress": {
-                        "type": "boolean"
-                      },
-                      "canonicalHostName": {
-                        "type": "string"
-                      },
-                      "hostAddress": {
-                        "type": "string"
-                      },
-                      "hostName": {
-                        "type": "string"
-                      },
-                      "linkLocalAddress": {
-                        "type": "boolean"
-                      },
-                      "loopbackAddress": {
-                        "type": "boolean"
-                      },
-                      "mcglobal": {
-                        "type": "boolean"
-                      },
-                      "mclinkLocal": {
-                        "type": "boolean"
-                      },
-                      "mcnodeLocal": {
-                        "type": "boolean"
-                      },
-                      "mcorgLocal": {
-                        "type": "boolean"
-                      },
-                      "mcsiteLocal": {
-                        "type": "boolean"
-                      },
-                      "multicastAddress": {
-                        "type": "boolean"
-                      },
-                      "siteLocalAddress": {
-                        "type": "boolean"
-                      }
-                    },
-                    "type": "object"
-                  },
-                  "hostName": {
-                    "type": "string"
-                  },
-                  "hostString": {
-                    "type": "string"
-                  },
-                  "port": {
-                    "format": "int32",
-                    "type": "integer"
-                  },
-                  "unresolved": {
-                    "type": "boolean"
-                  }
-                },
-                "type": "object"
-              },
-              "ifMatch": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "ifModifiedSince": {
-                "format": "int64",
-                "type": "integer"
-              },
-              "ifNoneMatch": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "ifUnmodifiedSince": {
-                "format": "int64",
-                "type": "integer"
-              },
-              "lastModified": {
-                "format": "int64",
-                "type": "integer"
-              },
-              "location": {
-                "format": "uri",
-                "type": "string"
-              },
-              "origin": {
-                "type": "string"
-              },
-              "pragma": {
-                "type": "string"
-              },
-              "range": {
-                "items": {
-                  "$ref": "#/components/schemas/HttpRange"
-                },
-                "type": "array"
-              },
-              "upgrade": {
-                "type": "string"
-              },
-              "vary": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              }
-            },
-            "type": "object"
-          },
-          "statusCode": {
-            "$ref": "#/components/schemas/HttpStatusCode"
-          },
-          "statusCodeValue": {
-            "format": "int32",
-            "type": "integer"
-          }
-        },
-        "type": "object"
-      },
-      "ResponseEntityListQAEntryResponseDTO": {
-        "properties": {
-          "body": {
-            "items": {
-              "$ref": "#/components/schemas/QAEntryResponseDTO"
-            },
-            "type": "array"
-          },
-          "headers": {
-            "additionalProperties": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            "properties": {
-              "accept": {
-                "items": {
-                  "$ref": "#/components/schemas/MediaType"
-                },
-                "type": "array"
-              },
-              "acceptCharset": {
-                "items": {
-                  "properties": {
-                    "registered": {
-                      "type": "boolean"
-                    }
-                  },
-                  "type": "object"
-                },
-                "type": "array"
-              },
-              "acceptLanguage": {
-                "items": {
-                  "properties": {
-                    "range": {
-                      "type": "string"
-                    },
-                    "weight": {
-                      "format": "double",
-                      "type": "number"
-                    }
-                  },
-                  "type": "object"
-                },
-                "type": "array"
-              },
-              "acceptLanguageAsLocales": {
-                "items": {
-                  "properties": {
-                    "country": {
-                      "type": "string"
-                    },
-                    "displayCountry": {
-                      "type": "string"
-                    },
-                    "displayLanguage": {
-                      "type": "string"
-                    },
-                    "displayName": {
-                      "type": "string"
-                    },
-                    "displayScript": {
-                      "type": "string"
-                    },
-                    "displayVariant": {
-                      "type": "string"
-                    },
-                    "extensionKeys": {
-                      "items": {
-                        "type": "string"
-                      },
-                      "type": "array",
-                      "uniqueItems": true
-                    },
-                    "iso3Country": {
-                      "type": "string"
-                    },
-                    "iso3Language": {
-                      "type": "string"
-                    },
-                    "language": {
-                      "type": "string"
-                    },
-                    "script": {
-                      "type": "string"
-                    },
-                    "unicodeLocaleAttributes": {
-                      "items": {
-                        "type": "string"
-                      },
-                      "type": "array",
-                      "uniqueItems": true
-                    },
-                    "unicodeLocaleKeys": {
-                      "items": {
-                        "type": "string"
-                      },
-                      "type": "array",
-                      "uniqueItems": true
-                    },
-                    "variant": {
-                      "type": "string"
-                    }
-                  },
-                  "type": "object"
-                },
-                "type": "array"
-              },
-              "acceptPatch": {
-                "items": {
-                  "$ref": "#/components/schemas/MediaType"
-                },
-                "type": "array"
-              },
-              "accessControlAllowCredentials": {
-                "type": "boolean"
-              },
-              "accessControlAllowHeaders": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "accessControlAllowMethods": {
-                "items": {
-                  "$ref": "#/components/schemas/HttpMethod"
-                },
-                "type": "array"
-              },
-              "accessControlAllowOrigin": {
-                "type": "string"
-              },
-              "accessControlExposeHeaders": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "accessControlMaxAge": {
-                "format": "int64",
-                "type": "integer"
-              },
-              "accessControlRequestHeaders": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "accessControlRequestMethod": {
-                "$ref": "#/components/schemas/HttpMethod"
-              },
-              "all": {
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "type": "object",
-                "writeOnly": true
-              },
-              "allow": {
-                "items": {
-                  "$ref": "#/components/schemas/HttpMethod"
-                },
-                "type": "array",
-                "uniqueItems": true
-              },
-              "basicAuth": {
-                "type": "string",
-                "writeOnly": true
-              },
-              "bearerAuth": {
-                "type": "string",
-                "writeOnly": true
-              },
-              "cacheControl": {
-                "type": "string"
-              },
-              "connection": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "contentDisposition": {
-                "$ref": "#/components/schemas/ContentDisposition"
-              },
-              "contentLanguage": {
-                "properties": {
-                  "country": {
-                    "type": "string"
-                  },
-                  "displayCountry": {
-                    "type": "string"
-                  },
-                  "displayLanguage": {
-                    "type": "string"
-                  },
-                  "displayName": {
-                    "type": "string"
-                  },
-                  "displayScript": {
-                    "type": "string"
-                  },
-                  "displayVariant": {
-                    "type": "string"
-                  },
-                  "extensionKeys": {
-                    "items": {
-                      "type": "string"
-                    },
-                    "type": "array",
-                    "uniqueItems": true
-                  },
-                  "iso3Country": {
-                    "type": "string"
-                  },
-                  "iso3Language": {
-                    "type": "string"
-                  },
-                  "language": {
-                    "type": "string"
-                  },
-                  "script": {
-                    "type": "string"
-                  },
-                  "unicodeLocaleAttributes": {
-                    "items": {
-                      "type": "string"
-                    },
-                    "type": "array",
-                    "uniqueItems": true
-                  },
-                  "unicodeLocaleKeys": {
-                    "items": {
-                      "type": "string"
-                    },
-                    "type": "array",
-                    "uniqueItems": true
-                  },
-                  "variant": {
-                    "type": "string"
-                  }
-                },
-                "type": "object"
-              },
-              "contentLength": {
-                "format": "int64",
-                "type": "integer"
-              },
-              "contentType": {
-                "$ref": "#/components/schemas/MediaType"
-              },
-              "date": {
-                "format": "int64",
-                "type": "integer"
-              },
-              "empty": {
-                "type": "boolean"
-              },
-              "etag": {
-                "type": "string"
-              },
-              "expires": {
-                "format": "int64",
-                "type": "integer"
-              },
-              "host": {
-                "properties": {
-                  "address": {
-                    "properties": {
-                      "address": {
-                        "format": "byte",
-                        "type": "string"
-                      },
-                      "anyLocalAddress": {
-                        "type": "boolean"
-                      },
-                      "canonicalHostName": {
-                        "type": "string"
-                      },
-                      "hostAddress": {
-                        "type": "string"
-                      },
-                      "hostName": {
-                        "type": "string"
-                      },
-                      "linkLocalAddress": {
-                        "type": "boolean"
-                      },
-                      "loopbackAddress": {
-                        "type": "boolean"
-                      },
-                      "mcglobal": {
-                        "type": "boolean"
-                      },
-                      "mclinkLocal": {
-                        "type": "boolean"
-                      },
-                      "mcnodeLocal": {
-                        "type": "boolean"
-                      },
-                      "mcorgLocal": {
-                        "type": "boolean"
-                      },
-                      "mcsiteLocal": {
-                        "type": "boolean"
-                      },
-                      "multicastAddress": {
-                        "type": "boolean"
-                      },
-                      "siteLocalAddress": {
-                        "type": "boolean"
-                      }
-                    },
-                    "type": "object"
-                  },
-                  "hostName": {
-                    "type": "string"
-                  },
-                  "hostString": {
-                    "type": "string"
-                  },
-                  "port": {
-                    "format": "int32",
-                    "type": "integer"
-                  },
-                  "unresolved": {
-                    "type": "boolean"
-                  }
-                },
-                "type": "object"
-              },
-              "ifMatch": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "ifModifiedSince": {
-                "format": "int64",
-                "type": "integer"
-              },
-              "ifNoneMatch": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "ifUnmodifiedSince": {
-                "format": "int64",
-                "type": "integer"
-              },
-              "lastModified": {
-                "format": "int64",
-                "type": "integer"
-              },
-              "location": {
-                "format": "uri",
-                "type": "string"
-              },
-              "origin": {
-                "type": "string"
-              },
-              "pragma": {
-                "type": "string"
-              },
-              "range": {
-                "items": {
-                  "$ref": "#/components/schemas/HttpRange"
-                },
-                "type": "array"
-              },
-              "upgrade": {
-                "type": "string"
-              },
-              "vary": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              }
-            },
-            "type": "object"
-          },
-          "statusCode": {
-            "$ref": "#/components/schemas/HttpStatusCode"
-          },
-          "statusCodeValue": {
-            "format": "int32",
-            "type": "integer"
-          }
-        },
-        "type": "object"
-      },
-      "ResponseEntityVoid": {
-        "properties": {
-          "body": {
-            "type": "object"
-          },
-          "headers": {
-            "additionalProperties": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            "properties": {
-              "accept": {
-                "items": {
-                  "$ref": "#/components/schemas/MediaType"
-                },
-                "type": "array"
-              },
-              "acceptCharset": {
-                "items": {
-                  "properties": {
-                    "registered": {
-                      "type": "boolean"
-                    }
-                  },
-                  "type": "object"
-                },
-                "type": "array"
-              },
-              "acceptLanguage": {
-                "items": {
-                  "properties": {
-                    "range": {
-                      "type": "string"
-                    },
-                    "weight": {
-                      "format": "double",
-                      "type": "number"
-                    }
-                  },
-                  "type": "object"
-                },
-                "type": "array"
-              },
-              "acceptLanguageAsLocales": {
-                "items": {
-                  "properties": {
-                    "country": {
-                      "type": "string"
-                    },
-                    "displayCountry": {
-                      "type": "string"
-                    },
-                    "displayLanguage": {
-                      "type": "string"
-                    },
-                    "displayName": {
-                      "type": "string"
-                    },
-                    "displayScript": {
-                      "type": "string"
-                    },
-                    "displayVariant": {
-                      "type": "string"
-                    },
-                    "extensionKeys": {
-                      "items": {
-                        "type": "string"
-                      },
-                      "type": "array",
-                      "uniqueItems": true
-                    },
-                    "iso3Country": {
-                      "type": "string"
-                    },
-                    "iso3Language": {
-                      "type": "string"
-                    },
-                    "language": {
-                      "type": "string"
-                    },
-                    "script": {
-                      "type": "string"
-                    },
-                    "unicodeLocaleAttributes": {
-                      "items": {
-                        "type": "string"
-                      },
-                      "type": "array",
-                      "uniqueItems": true
-                    },
-                    "unicodeLocaleKeys": {
-                      "items": {
-                        "type": "string"
-                      },
-                      "type": "array",
-                      "uniqueItems": true
-                    },
-                    "variant": {
-                      "type": "string"
-                    }
-                  },
-                  "type": "object"
-                },
-                "type": "array"
-              },
-              "acceptPatch": {
-                "items": {
-                  "$ref": "#/components/schemas/MediaType"
-                },
-                "type": "array"
-              },
-              "accessControlAllowCredentials": {
-                "type": "boolean"
-              },
-              "accessControlAllowHeaders": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "accessControlAllowMethods": {
-                "items": {
-                  "$ref": "#/components/schemas/HttpMethod"
-                },
-                "type": "array"
-              },
-              "accessControlAllowOrigin": {
-                "type": "string"
-              },
-              "accessControlExposeHeaders": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "accessControlMaxAge": {
-                "format": "int64",
-                "type": "integer"
-              },
-              "accessControlRequestHeaders": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "accessControlRequestMethod": {
-                "$ref": "#/components/schemas/HttpMethod"
-              },
-              "all": {
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "type": "object",
-                "writeOnly": true
-              },
-              "allow": {
-                "items": {
-                  "$ref": "#/components/schemas/HttpMethod"
-                },
-                "type": "array",
-                "uniqueItems": true
-              },
-              "basicAuth": {
-                "type": "string",
-                "writeOnly": true
-              },
-              "bearerAuth": {
-                "type": "string",
-                "writeOnly": true
-              },
-              "cacheControl": {
-                "type": "string"
-              },
-              "connection": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "contentDisposition": {
-                "$ref": "#/components/schemas/ContentDisposition"
-              },
-              "contentLanguage": {
-                "properties": {
-                  "country": {
-                    "type": "string"
-                  },
-                  "displayCountry": {
-                    "type": "string"
-                  },
-                  "displayLanguage": {
-                    "type": "string"
-                  },
-                  "displayName": {
-                    "type": "string"
-                  },
-                  "displayScript": {
-                    "type": "string"
-                  },
-                  "displayVariant": {
-                    "type": "string"
-                  },
-                  "extensionKeys": {
-                    "items": {
-                      "type": "string"
-                    },
-                    "type": "array",
-                    "uniqueItems": true
-                  },
-                  "iso3Country": {
-                    "type": "string"
-                  },
-                  "iso3Language": {
-                    "type": "string"
-                  },
-                  "language": {
-                    "type": "string"
-                  },
-                  "script": {
-                    "type": "string"
-                  },
-                  "unicodeLocaleAttributes": {
-                    "items": {
-                      "type": "string"
-                    },
-                    "type": "array",
-                    "uniqueItems": true
-                  },
-                  "unicodeLocaleKeys": {
-                    "items": {
-                      "type": "string"
-                    },
-                    "type": "array",
-                    "uniqueItems": true
-                  },
-                  "variant": {
-                    "type": "string"
-                  }
-                },
-                "type": "object"
-              },
-              "contentLength": {
-                "format": "int64",
-                "type": "integer"
-              },
-              "contentType": {
-                "$ref": "#/components/schemas/MediaType"
-              },
-              "date": {
-                "format": "int64",
-                "type": "integer"
-              },
-              "empty": {
-                "type": "boolean"
-              },
-              "etag": {
-                "type": "string"
-              },
-              "expires": {
-                "format": "int64",
-                "type": "integer"
-              },
-              "host": {
-                "properties": {
-                  "address": {
-                    "properties": {
-                      "address": {
-                        "format": "byte",
-                        "type": "string"
-                      },
-                      "anyLocalAddress": {
-                        "type": "boolean"
-                      },
-                      "canonicalHostName": {
-                        "type": "string"
-                      },
-                      "hostAddress": {
-                        "type": "string"
-                      },
-                      "hostName": {
-                        "type": "string"
-                      },
-                      "linkLocalAddress": {
-                        "type": "boolean"
-                      },
-                      "loopbackAddress": {
-                        "type": "boolean"
-                      },
-                      "mcglobal": {
-                        "type": "boolean"
-                      },
-                      "mclinkLocal": {
-                        "type": "boolean"
-                      },
-                      "mcnodeLocal": {
-                        "type": "boolean"
-                      },
-                      "mcorgLocal": {
-                        "type": "boolean"
-                      },
-                      "mcsiteLocal": {
-                        "type": "boolean"
-                      },
-                      "multicastAddress": {
-                        "type": "boolean"
-                      },
-                      "siteLocalAddress": {
-                        "type": "boolean"
-                      }
-                    },
-                    "type": "object"
-                  },
-                  "hostName": {
-                    "type": "string"
-                  },
-                  "hostString": {
-                    "type": "string"
-                  },
-                  "port": {
-                    "format": "int32",
-                    "type": "integer"
-                  },
-                  "unresolved": {
-                    "type": "boolean"
-                  }
-                },
-                "type": "object"
-              },
-              "ifMatch": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "ifModifiedSince": {
-                "format": "int64",
-                "type": "integer"
-              },
-              "ifNoneMatch": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "ifUnmodifiedSince": {
-                "format": "int64",
-                "type": "integer"
-              },
-              "lastModified": {
-                "format": "int64",
-                "type": "integer"
-              },
-              "location": {
-                "format": "uri",
-                "type": "string"
-              },
-              "origin": {
-                "type": "string"
-              },
-              "pragma": {
-                "type": "string"
-              },
-              "range": {
-                "items": {
-                  "$ref": "#/components/schemas/HttpRange"
-                },
-                "type": "array"
-              },
-              "upgrade": {
-                "type": "string"
-              },
-              "vary": {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              }
-            },
-            "type": "object"
-          },
-          "statusCode": {
-            "$ref": "#/components/schemas/HttpStatusCode"
-          },
-          "statusCodeValue": {
-            "format": "int32",
-            "type": "integer"
-          }
-        },
-        "type": "object"
-      },
       "RestoreResult": {
         "properties": {
           "archiveNodeId": {
@@ -7206,6 +5656,43 @@
           "nodes": {
             "items": {
               "type": "object"
+            },
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          },
+          "suggests": {
+            "items": {
+              "$ref": "#/components/schemas/Suggest"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "facets",
+          "nodes",
+          "pagination"
+        ],
+        "type": "object"
+      },
+      "SearchResultEvent": {
+        "properties": {
+          "facets": {
+            "items": {
+              "$ref": "#/components/schemas/Facet"
+            },
+            "type": "array"
+          },
+          "ignored": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/UserEvent"
             },
             "type": "array"
           },
@@ -7483,6 +5970,51 @@
           },
           "passwordMatches": {
             "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ShortcutConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/ShortcutConfigEntry"
+            },
+            "type": "array",
+            "xml": {
+              "name": "entry"
+            }
+          },
+          "maxEntries": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ShortcutConfigEntry": {
+        "properties": {
+          "defaultVisibility": {
+            "enum": [
+              "visible",
+              "hidden"
+            ],
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "toolPermission": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -8406,6 +6938,96 @@
         },
         "required": [
           "person"
+        ],
+        "type": "object"
+      },
+      "UserEvent": {
+        "properties": {
+          "eventType": {
+            "enum": [
+              "DOWNLOAD_MATERIAL",
+              "OPEN_EXTERNAL_LINK",
+              "VIEW_MATERIAL",
+              "VIEW_COLLECTION",
+              "VIEW_MATERIAL_EMBEDDED",
+              "VIEW_MATERIAL_PLAY_MEDIA",
+              "EDIT_MATERIAL",
+              "CREATE_MATERIAL",
+              "ARCHIVE_MATERIAL",
+              "DELETE_MATERIAL",
+              "MOVE_MATERIAL",
+              "COPY_MATERIAL",
+              "REVERT_MATERIAL_VERSION",
+              "CHANGE_MATERIAL_CONTENT",
+              "CHANGE_MATERIAL_OWNER",
+              "FORK_MATERIAL",
+              "COMMENT_MATERIAL",
+              "RATE_MATERIAL",
+              "UNRATE_MATERIAL",
+              "LINK_SHARE_MATERIAL",
+              "LINK_UNSHARE_MATERIAL",
+              "FEEDBACK_MATERIAL",
+              "REPORT_MATERIAL",
+              "EDIT_MATERIAL_RELATION"
+            ],
+            "type": "string"
+          },
+          "initiator": {
+            "$ref": "#/components/schemas/UserSimple"
+          },
+          "node": {
+            "$ref": "#/components/schemas/Node"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UserNodeActivity": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nodeId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "nodeId",
+          "timestamp",
+          "type",
+          "username"
+        ],
+        "type": "object"
+      },
+      "UserNodeActivityPageResult": {
+        "properties": {
+          "activities": {
+            "items": {
+              "$ref": "#/components/schemas/UserNodeActivity"
+            },
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        },
+        "required": [
+          "activities",
+          "pagination"
         ],
         "type": "object"
       },
@@ -21703,6 +20325,279 @@
         ]
       }
     },
+    "/iam/v1/people/{repository}/{person}/dashboard/shortcuts": {
+      "delete": {
+        "operationId": "deleteDashboardShortcuts",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "username (or \"-me-\" for current user)",
+            "in": "path",
+            "name": "person",
+            "required": true,
+            "schema": {
+              "default": "-me-",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "tags": [
+          "IAM v1"
+        ]
+      },
+      "get": {
+        "operationId": "getDashboardShortcuts",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "username (or \"-me-\" for current user)",
+            "in": "path",
+            "name": "person",
+            "required": true,
+            "schema": {
+              "default": "-me-",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DashboardShortcutEntry"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "tags": [
+          "IAM v1"
+        ]
+      },
+      "put": {
+        "operationId": "setDashboardShortcuts",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "username (or \"-me-\" for current user)",
+            "in": "path",
+            "name": "person",
+            "required": true,
+            "schema": {
+              "default": "-me-",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/DashboardShortcut"
+                },
+                "type": "array"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "tags": [
+          "IAM v1"
+        ]
+      }
+    },
     "/iam/v1/people/{repository}/{person}/dataprotection": {
       "get": {
         "description": "Fetches the node of general data protection export.",
@@ -34921,7 +33816,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/QAEntry"
+                    "$ref": "#/components/schemas/QAEntryResponseDTO"
                   },
                   "type": "array"
                 }
@@ -37988,6 +36883,173 @@
         ]
       }
     },
+    "/search/v1/user/recent/{repository}": {
+      "post": {
+        "operationId": "getRecentUserEvents",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Event types to search for",
+            "in": "query",
+            "name": "eventType",
+            "schema": {
+              "items": {
+                "enum": [
+                  "DOWNLOAD_MATERIAL",
+                  "OPEN_EXTERNAL_LINK",
+                  "VIEW_MATERIAL",
+                  "VIEW_COLLECTION",
+                  "VIEW_MATERIAL_EMBEDDED",
+                  "VIEW_MATERIAL_PLAY_MEDIA",
+                  "EDIT_MATERIAL",
+                  "CREATE_MATERIAL",
+                  "ARCHIVE_MATERIAL",
+                  "DELETE_MATERIAL",
+                  "MOVE_MATERIAL",
+                  "COPY_MATERIAL",
+                  "REVERT_MATERIAL_VERSION",
+                  "CHANGE_MATERIAL_CONTENT",
+                  "CHANGE_MATERIAL_OWNER",
+                  "FORK_MATERIAL",
+                  "COMMENT_MATERIAL",
+                  "RATE_MATERIAL",
+                  "UNRATE_MATERIAL",
+                  "LINK_SHARE_MATERIAL",
+                  "LINK_UNSHARE_MATERIAL",
+                  "FEEDBACK_MATERIAL",
+                  "REPORT_MATERIAL",
+                  "EDIT_MATERIAL_RELATION"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Type of element",
+            "in": "query",
+            "name": "contentType",
+            "schema": {
+              "enum": [
+                "FILES",
+                "FOLDERS",
+                "FILES_AND_FOLDERS",
+                "COLLECTIONS",
+                "TOOLPERMISSIONS",
+                "COLLECTION_PROPOSALS",
+                "ALL"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "maximum items per page",
+            "in": "query",
+            "name": "maxItems",
+            "schema": {
+              "default": 25,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "skip a number of items",
+            "in": "query",
+            "name": "skipCount",
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchParameters"
+              }
+            }
+          },
+          "description": "search parameters"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResultEvent"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Get nodes with recent events for current user",
+        "tags": [
+          "SEARCH v1"
+        ]
+      }
+    },
     "/sharing/v1/sharing/{repository}/{node}/{share}": {
       "get": {
         "operationId": "getInfo",
@@ -40480,6 +39542,227 @@
         ]
       }
     },
+    "/tracking/v1/tracking/{repository}/allUserNodeActivities": {
+      "get": {
+        "description": "Returns a paginated list of all user activities after a specific date",
+        "operationId": "getAllUserNodeActivities",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Date to filter activities from",
+            "in": "query",
+            "name": "after",
+            "required": true,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "maximum items per page",
+            "in": "query",
+            "name": "maxItems",
+            "schema": {
+              "default": 10,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "skip a number of items",
+            "in": "query",
+            "name": "skipCount",
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserNodeActivityPageResult"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Get all user activities",
+        "tags": [
+          "TRACKING v1"
+        ]
+      }
+    },
+    "/tracking/v1/tracking/{repository}/userNodeActivities/{user}": {
+      "get": {
+        "description": "Currently limited to video / audio play interactions",
+        "operationId": "getUserNodeActivity",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "user",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "default": "-me-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "after",
+            "in": "query",
+            "name": "after",
+            "required": true,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UserNodeActivity"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Track a user interaction",
+        "tags": [
+          "TRACKING v1"
+        ]
+      }
+    },
     "/tracking/v1/tracking/{repository}/{event}": {
       "put": {
         "description": "Currently limited to video / audio play interactions",
@@ -40503,16 +39786,29 @@
             "schema": {
               "enum": [
                 "DOWNLOAD_MATERIAL",
-                "VIEW_MATERIAL",
                 "OPEN_EXTERNAL_LINK",
+                "VIEW_MATERIAL",
                 "VIEW_COLLECTION",
                 "VIEW_MATERIAL_EMBEDDED",
                 "VIEW_MATERIAL_PLAY_MEDIA",
-                "LOGIN_USER_SESSION",
-                "LOGIN_USER_OAUTH_PASSWORD",
-                "LOGIN_USER_OAUTH_REFRESH_TOKEN",
-                "LOGOUT_USER_TIMEOUT",
-                "LOGOUT_USER_REGULAR"
+                "EDIT_MATERIAL",
+                "CREATE_MATERIAL",
+                "ARCHIVE_MATERIAL",
+                "DELETE_MATERIAL",
+                "MOVE_MATERIAL",
+                "COPY_MATERIAL",
+                "REVERT_MATERIAL_VERSION",
+                "CHANGE_MATERIAL_CONTENT",
+                "CHANGE_MATERIAL_OWNER",
+                "FORK_MATERIAL",
+                "COMMENT_MATERIAL",
+                "RATE_MATERIAL",
+                "UNRATE_MATERIAL",
+                "LINK_SHARE_MATERIAL",
+                "LINK_UNSHARE_MATERIAL",
+                "FEEDBACK_MATERIAL",
+                "REPORT_MATERIAL",
+                "EDIT_MATERIAL_RELATION"
               ],
               "type": "string"
             }
