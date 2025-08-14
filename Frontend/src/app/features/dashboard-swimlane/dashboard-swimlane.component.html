@@ -1,4 +1,4 @@
-<div class="toggle" (click)="toggleVisibility()">
+<div class="toggle" (click)="toggleVisibility()" [class.toggle-open]="open | async">
   <h2 class="mat-heading-3">{{ 'DASHBOARD_SWIMLANE.' + swimlane().id + '.TITLE' | translate }}</h2>
   <button mat-icon-button>
     <i [esIcon]="'keyboard_arrow_' + ((open | async) ? 'up' : 'down')"></i>

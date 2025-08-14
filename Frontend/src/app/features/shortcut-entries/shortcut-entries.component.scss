@@ -26,7 +26,8 @@ $tileSize: 124px;
     padding-top: var(--menu-padding);
     padding-bottom: var(--menu-padding);
     width: 100%;
-    background: var(--primary);
+    background: var(--workspaceTopBarBackground);
+    color: var(--workspaceTopBarFontColor);
     // center tiles-wrapper with text-align, as inline-flex is used
     text-align: center;
 
@@ -231,7 +232,7 @@ $tileSize: 124px;
 
         .mat-icon {
             font-size: 20px;
-            color: white;
+            color: var(--primary);
         }
     }
 }
