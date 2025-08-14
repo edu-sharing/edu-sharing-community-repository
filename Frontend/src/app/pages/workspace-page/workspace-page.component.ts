@@ -33,7 +33,6 @@ import {
     NodeDataSource,
     NodeEntriesDisplayType,
     NodeRoot,
-    OptionItem,
     OptionItemToggle,
     TemporaryStorageService,
     TranslationsService,
@@ -41,8 +40,8 @@ import {
     UIConstants,
 } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { delay, filter, first, map, startWith, take, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, firstValueFrom, Observable, Subject } from 'rxjs';
+import { delay, filter, first, map, take, takeUntil } from 'rxjs/operators';
 import {
     ConfigurationService,
     Connector,
@@ -54,7 +53,6 @@ import {
     RestConnectorService,
     RestConnectorsService,
     RestConstants,
-    RestHelper,
     RestNodeService,
     RestToolService,
     SessionStorageService,
