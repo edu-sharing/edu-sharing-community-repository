@@ -2,24 +2,26 @@
    Use another div, so the sidebar's margin is included in the component's dimensions, which makes
    positioning easier for outer components.
 -->
-<div *ngIf="(isMobileScreen | async) === false" class="preview-sidebar mat-elevation-z3">
-  <div class="preview-sidebar-header">
-    <es-node-type-badge [node]="node"></es-node-type-badge>
-    <div class="empty"></div>
-    <button mat-icon-button *ngIf="previewRef?.renderNode()" (click)="openModal()">
-      <i esIcon="fullscreen" [aria]="true"></i>
-    </button>
-    <button mat-icon-button (click)="closed.emit()">
-      <i esIcon="close" [aria]="true"></i>
-    </button>
+<ng-container *ngIf="node">
+  <div *ngIf="(isMobileScreen | async) === false" class="preview-sidebar mat-elevation-z3">
+    <div class="preview-sidebar-header">
+      <es-node-type-badge [node]="node"></es-node-type-badge>
+      <div class="empty"></div>
+      <button mat-icon-button *ngIf="previewRef?.renderNode()" (click)="openModal()">
+        <i esIcon="fullscreen" [aria]="true"></i>
+      </button>
+      <button mat-icon-button (click)="closed.emit()">
+        <i esIcon="close" [aria]="true"></i>
+      </button>
+    </div>
+    <ng-container *ngTemplateOutlet="content"></ng-container>
   </div>
-  <ng-container *ngTemplateOutlet="content"></ng-container>
-</div>
-<ng-template #content>
-  <es-preview-content #preview [node]="node"></es-preview-content>
-</ng-template>
-<ng-template #modal>
-  <div class="preview-sidebar-rendering-modal">
-    <es-preview-content [node]="node" [autoRender]="true" class="modal"></es-preview-content>
-  </div>
-</ng-template>
+  <ng-template #content>
+    <es-preview-content #preview [node]="node"></es-preview-content>
+  </ng-template>
+  <ng-template #modal>
+    <div class="preview-sidebar-rendering-modal">
+      <es-preview-content [node]="node" [autoRender]="true" class="modal"></es-preview-content>
+    </div>
+  </ng-template>
+</ng-container>
