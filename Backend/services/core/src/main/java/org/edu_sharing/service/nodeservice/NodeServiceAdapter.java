@@ -29,7 +29,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public void updateNode(String nodeId, Map<String, String[]> props) throws Throwable {
+	public void updateNode(String nodeId, Map<String, String[]> props, boolean obeyMds) throws Throwable {
 	}
 
 	@Override

@@ -935,7 +935,7 @@ public class LTIPlatformApi {
 
                 String nodeId = sessionObject.getContentUrlNodeId();
                 if (nodeId != null) {
-                    eduNodeService.updateNode(sessionObject.getContentUrlNodeId(), properties);
+                    eduNodeService.updateNode(sessionObject.getContentUrlNodeId(), properties, true);
                 } else {
                     nodeId = eduNodeService.createNode(sessionObject.getContextId(), CCConstants.CCM_TYPE_IO, properties);
                 }

@@ -30230,6 +30230,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "description": "obey the mds definition, onyl accepting fields defined in the mds",
+            "in": "query",
+            "name": "obeyMds",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
           }
         ],
         "requestBody": {
@@ -30347,6 +30356,15 @@
             "required": true,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "description": "obey the mds definition, onyl accepting fields defined in the mds",
+            "in": "query",
+            "name": "obeyMds",
+            "schema": {
+              "default": true,
+              "type": "boolean"
             }
           }
         ],
