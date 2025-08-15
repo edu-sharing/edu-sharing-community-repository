@@ -313,6 +313,60 @@
         }
       }
     },
+    "/api/v1/edu-sharing/qas": {
+      "post": {
+        "tags": [
+          "edu-sharing LLM"
+        ],
+        "summary": "\n            [EXPERIMENTAL] Generate question and answers based on edu-sharing node content.\n            Uses external compendious-text-generator service to create QA pairs that will be stored in edu-sharing.\n        ",
+        "operationId": "qas",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EduSharingQaRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway Timeout",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/QAEntry"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/edu-sharing/images/generations": {
       "post": {
         "tags": [
@@ -622,7 +676,7 @@
           "Themenbaum API"
         ],
         "summary": "Generiere einen Themenbaum",
-        "description": "Generiert einen strukturierten Themenbaum basierend auf den übergebenen Parametern.\n\n    Der Themenbaum wird in folgender Hierarchie erstellt:\n    1. Hauptthemen (z.B. \"Mechanik\", \"Thermodynamik\")\n    2. Unterthemen (z.B. \"Kinematik\", \"Dynamik\")\n    3. Lehrplanthemen (z.B. \"Gleichförmige Bewegung\", \"Newtonsche Gesetze\")\n\n    Jeder Knoten im Themenbaum enthält:\n    - Titel und Kurztitel\n    - Beschreibung\n    - Schlagworte (Keywords)\n    - Standardisierte Metadaten (Properties)\n\n    Optional können URIs für Fach und Bildungsstufe übergeben werden (via ``discipline_uri`` und ``educational_context_uri``). \n    Die URIs von Fach und Bildungsstufe haben **keinen** Effekt auf die Generierung des Themenbaums!",
+        "description": "Generiert einen strukturierten Themenbaum basierend auf den übergebenen Parametern.\n\n    Der Themenbaum wird in folgender Hierarchie erstellt:\n    1. Hauptthemen (z.B. \"Mechanik\", \"Thermodynamik\")\n    2. Unterthemen (z.B. \"Kinematik\", \"Dynamik\")\n    3. Lehrplanthemen (z.B. \"Gleichförmige Bewegung\", \"Newtonsche Gesetze\")\n\n    Jeder Knoten im Themenbaum enthält:\n    - Titel und Kurztitel\n    - Beschreibung\n    - Schlagworte (Keywords)\n    - Standardisierte Metadaten (Properties)\n\n    Optional können URIs für Fach und Bildungsstufe übergeben werden (via ``discipline_uri`` und ``educational_context_uri``). \n    Die URIs von Fach und Bildungsstufe werden als Metadaten in die Collections eingebettet und fließen als Kontext in die AI-Prompts ein.",
         "operationId": "generate_topic_tree_generate_topic_tree_post",
         "parameters": [
           {
@@ -661,6 +715,7 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "additionalProperties": true,
                   "title": "Response Generate Topic Tree Generate Topic Tree Post"
                 },
                 "example": {
@@ -668,7 +723,7 @@
                     "title": "Physik in Anlehnung an die Lehrpläne der Sekundarstufe 2",
                     "description": "Themenbaum für Physik in der Sekundarstufe II",
                     "created_at": "2025-02-05T11:28:40+01:00",
-                    "version": "1.0",
+                    "version": "1.2.6",
                     "author": "Themenbaum Generator"
                   },
                   "collection": [
@@ -677,22 +732,27 @@
                       "shorttitle": "Allg",
                       "properties": {
                         "cclom:general_keyword": [
-                          "allgemein",
-                          "grundlagen"
+                          "physik",
+                          "grundlagen",
+                          "sekundarstufe"
                         ],
                         "ccm:collectionshorttitle": [
-                          "Allg"
+                          "Mechanik"
                         ],
-                        "ccm:educationalcontext": [],
+                        "ccm:educationalcontext": [
+                          "http://w3id.org/openeduhub/vocabs/educationalContext/sekundarstufe_2"
+                        ],
                         "ccm:educationalintendedenduserrole": [
                           "http://w3id.org/openeduhub/vocabs/intendedEndUserRole/teacher"
                         ],
-                        "ccm:taxonid": [],
+                        "ccm:taxonid": [
+                          "http://w3id.org/openeduhub/vocabs/discipline/460"
+                        ],
                         "cm:description": [
-                          "Einführung in ..."
+                          "Mechanische Bewegungen und Kräfte bilden das Fundament der Physik. Schüler entdecken die Gesetze der Kinematik und Dynamik durch praktische Experimente und mathematische Modelle."
                         ],
                         "cm:title": [
-                          "Allgemeines"
+                          "Mechanik"
                         ]
                       },
                       "subcollections": []
@@ -708,6 +768,69 @@
               "application/json": {
                 "example": {
                   "detail": "OpenAI API Key nicht gefunden"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/topic-tree/generate-collection-description": {
+      "post": {
+        "tags": [
+          "Themenbaum API"
+        ],
+        "summary": "Generate Collection Description",
+        "description": "Generiert eine ansprechende Beschreibung für eine Sammlung von Bildungsressourcen\n    basierend auf gegebenem Text und Kontext.\n    \n    **Parameter:**\n    - `max_description_length`: Maximale Anzahl von Wörtern für Beschreibungstexte (Default: 70, Bereich: 40-200)\n    - `model`: OpenAI-Modell (Default: gpt-4o-mini)\n    - `text_context`: Text und Kontext für die Beschreibung (z.B. Thema, Zielgruppe, Inhalte)",
+        "operationId": "generate_collection_description_generate_collection_description_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DescriptionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "title": "Response Generate Collection Description Generate Collection Description Post"
                 }
               }
             }
@@ -1278,6 +1401,511 @@
           }
         }
       }
+    },
+    "/api/v1/proxy/compendious-text-generator/api/v1/linker": {
+      "post": {
+        "tags": [
+          "Compendious Text Generator"
+        ],
+        "summary": "Linker Endpoint",
+        "description": "Extract or generate entities from text and link them to Wikipedia.\n\nThis endpoint processes text to identify named entities and enriches them with Wikipedia data.\n\n## Processing Modes:\n\n**Extract Mode** (`MODE: \"extract\"`):\n- Extracts entities that are explicitly mentioned in the input text\n- Identifies persons, locations, organizations, concepts, etc. from the given text\n- Best for analyzing existing content and finding referenced entities\n\n**Generate Mode** (`MODE: \"generate\"`):\n- Generates related entities that help understand the topic, even if not explicitly mentioned\n- Creates a comprehensive knowledge map around the input topic\n- Ideal for educational content creation and topic exploration\n\n## Configuration Options:\n\n**MAX_ENTITIES** (1-100, default: 10):\n- Controls the maximum number of entities to extract/generate\n- Higher values provide more comprehensive coverage but may include less relevant entities\n\n**ALLOWED_ENTITY_TYPES** (string, list, or \"auto\"):\n- Restricts entity extraction to specific types (e.g., \"PERSON\", \"LOCATION\", \"ORGANIZATION\", \"CONCEPT\")\n- Can be a single type string, list of types, or \"auto\" for automatic type selection\n- Examples: \"PERSON\", [\"PERSON\", \"LOCATION\"], \"auto\"\n\n**EDUCATIONAL_MODE** (boolean, default: false):\n- **Only available with generate mode**\n- Enables multi-perspective educational entity generation\n- Covers comprehensive aspects: terminology, systematics, historical development,\n  actors/institutions, professions, sources, educational frameworks, legal aspects,\n  sustainability, interdisciplinarity, current research, and practical examples\n- Ideal for creating educational content and comprehensive topic coverage\n\n**LANGUAGE** (\"de\" or \"en\", default: \"de\"):\n- Determines the primary language for Wikipedia data retrieval\n- Affects the language of abstracts and preferred Wikipedia language versions\n- Both German and English labels/URLs are provided when available\n\n## Response Structure:\n\nReturns enhanced entities with:\n- Wikipedia metadata (labels, URLs, abstracts, categories, coordinates)\n- Wikidata IDs for semantic linking\n- DBpedia URIs automatically generated from English Wikipedia titles\n- Entity types and confidence scores\n- Comprehensive statistics about the extraction/generation process\n\n## Example Usage:\n\n```json\n{\n    \"text\": \"Quantenphysik und ihre Anwendungen\",\n    \"config\": {\n        \"MODE\": \"generate\",\n        \"MAX_ENTITIES\": 15,\n        \"ALLOWED_ENTITY_TYPES\": [\"PERSON\", \"CONCEPT\", \"ORGANIZATION\"],\n        \"EDUCATIONAL_MODE\": true,\n        \"LANGUAGE\": \"de\"\n    }\n}\n```",
+        "operationId": "linker_endpoint_api_v1_linker_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkerResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/compendious-text-generator/api/v1/compendium": {
+      "post": {
+        "tags": [
+          "Compendious Text Generator"
+        ],
+        "summary": "Compendium Endpoint",
+        "description": "Generate comprehensive markdown compendium from text or linker output.\n\nThis endpoint creates structured, educational compendium texts in Markdown format\nwith optional numbered citations and bibliography.\n\n## Input Types:\n\n### 1. Text Input (input_type=\"text\")\nDirect text processing for compendium generation:\n```json\n{\n    \"input_type\": \"text\",\n    \"text\": \"Albert Einstein entwickelte die Relativitätstheorie\",\n    \"config\": {\n        \"length\": 6000,\n        \"enable_citations\": false,\n        \"educational_mode\": true,\n        \"language\": \"de\"\n    }\n}\n```\n\n### 2. Linker Output (input_type=\"linker_output\")\nUses complete JSON output from /linker endpoint with entity data:\n```json\n{\n    \"input_type\": \"linker_output\",\n    \"linker_data\": {\n        \"original_text\": \"Einstein und die Physik\",\n        \"entities\": [\n            {\n                \"text\": \"Einstein\",\n                \"label\": \"Albert Einstein\",\n                \"wikipedia_source\": {\n                    \"url\": \"https://de.wikipedia.org/wiki/Albert_Einstein\",\n                    \"extract\": \"Albert Einstein war ein deutscher Physiker...\"\n                }\n            }\n        ]\n    },\n    \"config\": {\n        \"length\": 8000,\n        \"enable_citations\": true,\n        \"educational_mode\": true,\n        \"language\": \"de\"\n    }\n}\n```\n\n## Configuration Options:\n- **length**: Target character count (default: 6000)\n- **enable_citations**: Include numbered citations (1), (2) in text (default: true)\n- **educational_mode**: Enhanced structured content with academic depth (default: true)\n- **language**: Output language \"de\" or \"en\" (default: \"de\")\n\n## Response Format:\n- **markdown**: Generated compendium text in Markdown format\n- **bibliography**: Numbered bibliography from Wikipedia URLs\n- **statistics**: Generation metadata (topic, length, references count, etc.)\n\n## Usage Workflow:\n1. First call `/linker` endpoint with your text\n2. Take the complete JSON response from linker\n3. Pass it as `linker_data` to this endpoint for rich compendium with citations\n\nAlternatively, use direct text input for simple compendium generation.",
+        "operationId": "compendium_endpoint_api_v1_compendium_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompendiumRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompendiumResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/compendious-text-generator/api/v1/qa": {
+      "post": {
+        "tags": [
+          "Compendious Text Generator"
+        ],
+        "summary": "Qa Endpoint",
+        "description": "Generate question-answer pairs from text content with optional educational level distribution.\n\nThis endpoint uses OpenAI to generate educational QA pairs from the provided\ntext content. Supports standard QA generation and advanced educational level\ndistribution across German educational system levels or Bloom's Taxonomy.\n\nFeatures:\n- Standard QA pair generation\n- Educational level distribution (German Bildungsstufen)\n- Bloom's Taxonomy cognitive levels\n- Custom taxonomies and categories\n- Automatic even distribution across specified levels\n- Level-appropriate language and complexity adaptation\n\nParameters\n----------\npayload : QARequest\n    Request containing:\n    - text: Input text (markdown supported)\n    - num_pairs: Number of QA pairs (1-20)\n    - max_answer_length: Maximum answer length (50-1000 chars)\n    - level_property: Optional property name (e.g., 'Bildungsstufe')\n    - level_values: Optional list of educational levels\n\nEducational Levels (German Standard):\n- Elementarbereich, Primarstufe, Sekundarstufe I, Sekundarstufe II,\n  Hochschule, Berufliche Bildung, Erwachsenenbildung, Förderschule\n\nBloom's Taxonomy Levels:\n- Erinnern, Verstehen, Anwenden, Analysieren, Bewerten, Erschaffen\n\nReturns\n-------\nQAResponse\n    Response containing:\n    - original_text: Input text\n    - qa: List of QA pairs with optional level metadata\n\nRaises\n------\nHTTPException\n    400: If text is empty or invalid parameters\n    503: If OpenAI service is unavailable or misconfigured\n    500: If QA generation fails for other reasons\n\nExamples\n--------\nStandard QA generation:\n```json\n{\n  \"text\": \"Einstein developed relativity theory...\",\n  \"num_pairs\": 5\n}\n```\n\nEducational levels distribution:\n```json\n{\n  \"text\": \"Quantum physics content...\",\n  \"num_pairs\": 12,\n  \"level_property\": \"Bildungsstufe\",\n  \"level_values\": [\"Sekundarstufe I\", \"Sekundarstufe II\", \"Hochschule\"]\n}\n```",
+        "operationId": "qa_endpoint_api_v1_qa_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QARequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QAResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/compendious-text-generator/api/v1/utils/split": {
+      "post": {
+        "tags": [
+          "Compendious Text Generator"
+        ],
+        "summary": "Split Text Endpoint",
+        "description": "Split text into chunks with configurable size, overlap, and splitting strategy.\n\nThis endpoint intelligently splits long text into manageable chunks for processing,\nanalysis, or feeding into language models with context preservation options.\n\n## Parameters:\n\n**text** (required):\n- The text content to be split into chunks\n- Can be any length from short paragraphs to long documents\n- Whitespace is automatically trimmed\n\n**chunk_size** (10-5000, default: 1000):\n- Target size of each chunk in characters\n- Actual chunk sizes may vary slightly depending on split_by strategy\n- Larger chunks preserve more context but may exceed model limits\n\n**overlap** (0-500, default: 50):\n- Number of characters to overlap between consecutive chunks\n- Helps maintain context continuity across chunk boundaries\n- Only applies when chunks are created (ignored for very short texts)\n- For sentence mode: overlaps complete sentences up to the specified character count\n\n**split_by** (\"sentence\" or \"char\", default: \"sentence\"):\n- **\"sentence\"**: Splits at sentence boundaries (preserves semantic units)\n  - Builds chunks by adding complete sentences until size limit is reached\n  - More natural for reading and language processing\n  - Recommended for most text analysis tasks\n- **\"char\"**: Splits at exact character positions\n  - Precise character-based chunking regardless of sentence structure\n  - Useful for strict token limit requirements\n  - May break sentences mid-word\n\n## Example Usage:\n\n```json\n{\n    \"text\": \"Long document text here...\",\n    \"chunk_size\": 1500,\n    \"overlap\": 100,\n    \"split_by\": \"sentence\"\n}\n```\n\n```json\n{\n    \"text\": \"Precise chunking needed for token limits\",\n    \"chunk_size\": 512,\n    \"overlap\": 0,\n    \"split_by\": \"char\"\n}\n```\n\n## Response:\n\nReturns an array of text chunks with the specified overlap and splitting strategy applied.",
+        "operationId": "split_text_endpoint_api_v1_utils_split_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SplitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SplitResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/compendious-text-generator/api/v1/utils/synonyms": {
+      "post": {
+        "tags": [
+          "Compendious Text Generator"
+        ],
+        "summary": "Synonym Endpoint",
+        "description": "Generate synonyms for a given word using AI-powered language processing.\n\nThis endpoint generates contextually relevant synonyms for any given word or term.\nIt uses advanced language models to provide high-quality synonym suggestions.\n\n## Parameters:\n\n**word** (required):\n- The word or term for which you want to generate synonyms\n- Can be a single word or a short phrase\n- Examples: \"schnell\", \"Wissenschaft\", \"artificial intelligence\"\n\n**max_synonyms** (1-20, default: 5):\n- Maximum number of synonyms to generate\n- Higher values provide more alternatives but may include less relevant terms\n\n**lang** (default: \"de\"):\n- Target language for synonym generation\n- Supported languages: \"de\" (German), \"en\" (English)\n- Determines the language context for synonym generation\n\n## Example Usage:\n\n```json\n{\n    \"word\": \"Wissenschaft\",\n    \"max_synonyms\": 8,\n    \"lang\": \"de\"\n}\n```\n\n## Response:\n\nReturns a list of synonyms ordered by relevance and contextual appropriateness.",
+        "operationId": "synonym_endpoint_api_v1_utils_synonyms_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SynonymRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SynonymResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/compendious-text-generator/api/v1/utils/translate": {
+      "post": {
+        "tags": [
+          "Compendious Text Generator"
+        ],
+        "summary": "Translate Endpoint",
+        "description": "Translate text between different languages using AI-powered translation.\n\nThis endpoint provides high-quality text translation using advanced language models.\nIt automatically detects the source language and translates to the specified target language.\n\n## Parameters:\n\n**text** (required):\n- The text content to be translated\n- Can be single words, phrases, sentences, or longer text passages\n- Source language is automatically detected\n- Examples: \"Hallo Welt\", \"artificial intelligence\", \"Comment allez-vous?\"\n\n**target_lang** (default: \"en\"):\n- The target language code for translation\n- Supported languages: \"de\" (German), \"en\" (English)\n- Determines the output language of the translation\n\n## Example Usage:\n\n```json\n{\n    \"text\": \"Künstliche Intelligenz revolutioniert die Wissenschaft\",\n    \"target_lang\": \"en\"\n}\n```\n\n```json\n{\n    \"text\": \"Machine learning algorithms are transforming healthcare\",\n    \"target_lang\": \"de\"\n}\n```\n\n## Response:\n\nReturns the translated text maintaining the original meaning and context as accurately as possible.",
+        "operationId": "translate_endpoint_api_v1_utils_translate_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TranslateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TranslateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/compendious-text-generator/api/v1/pipeline": {
+      "post": {
+        "tags": [
+          "Compendious Text Generator"
+        ],
+        "summary": "Pipeline Endpoint",
+        "description": "Run this pipeline to generate a **compendious text and** the according **\"question/answer\"**-pairs",
+        "operationId": "pipeline_endpoint_api_v1_pipeline_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PipelineRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PipelineResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/compendious-text-generator/api/v1/pipeline-compendium-only": {
+      "post": {
+        "tags": [
+          "Compendious Text Generator"
+        ],
+        "summary": "Pipeline Compendium Only Endpoint",
+        "description": "Run this pipeline to generate a **compendious text**.",
+        "operationId": "pipeline_compendium_only_endpoint_api_v1_pipeline_compendium_only_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PipelineCompendiumOnlyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PipelineCompendiumOnlyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid input detected"
+          },
+          "500": {
+            "description": "Internal Server Error (with reason). This error might occur when the 'linker'- or 'compendium'-step fails."
+          },
+          "503": {
+            "description": "Internal pipeline communication failed (with reason)."
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1347,9 +1975,7 @@
           "model": {
             "type": "string"
           },
-          "input": {
-            "type": "object"
-          },
+          "input": {},
           "dimensions": {
             "type": "integer",
             "format": "int32"
@@ -1389,9 +2015,7 @@
           "object": {
             "type": "string"
           },
-          "embedding": {
-            "type": "object"
-          },
+          "embedding": {},
           "index": {
             "type": "integer",
             "format": "int32"
@@ -1569,7 +2193,6 @@
             "type": "array",
             "deprecated": true,
             "items": {
-              "type": "object",
               "deprecated": true
             }
           },
@@ -1693,9 +2316,7 @@
           "type": {
             "type": "string"
           },
-          "function": {
-            "type": "object"
-          }
+          "function": {}
         }
       },
       "ChatToolCall": {
@@ -1740,9 +2361,7 @@
           }
         ]
       },
-      "JsonNode": {
-        "type": "object"
-      },
+      "JsonNode": {},
       "ResponseJsonSchema": {
         "type": "object",
         "properties": {
@@ -1752,9 +2371,7 @@
           "strict": {
             "type": "boolean"
           },
-          "schema": {
-            "type": "object"
-          }
+          "schema": {}
         }
       },
       "StreamOption": {
@@ -1817,9 +2434,7 @@
           {
             "type": "object",
             "properties": {
-              "content": {
-                "type": "object"
-              }
+              "content": {}
             }
           }
         ]
@@ -1995,9 +2610,7 @@
         "properties": {
           "customAttributes": {
             "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "additionalProperties": {}
           },
           "displayName": {
             "type": "string"
@@ -2145,9 +2758,7 @@
               "USER_PROPOSAL"
             ]
           },
-          "value": {
-            "type": "object"
-          },
+          "value": {},
           "version": {
             "type": "string"
           }
@@ -2247,6 +2858,60 @@
               "blocked",
               "todelete"
             ]
+          }
+        }
+      },
+      "EduSharingQaRequest": {
+        "type": "object",
+        "properties": {
+          "nodeIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "nodeIds"
+        ]
+      },
+      "QAEntry": {
+        "type": "object",
+        "properties": {
+          "answer": {
+            "type": "string"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "edited": {
+            "type": "boolean"
+          },
+          "educationalLevel": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "lastReviewed": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nodeId": {
+            "type": "string"
+          },
+          "question": {
+            "type": "string"
+          },
+          "reviewedBy": {
+            "type": "string"
+          },
+          "usedText": {
+            "type": "string"
           }
         }
       },
@@ -2432,6 +3097,61 @@
           "provider"
         ]
       },
+      "DescriptionRequest": {
+        "type": "object",
+        "description": "Request-Model für die Generierung von Sammlungsbeschreibungen.",
+        "example": {
+          "max_description_length": 60,
+          "model": "gpt-4.1-mini",
+          "text_context": "Mathematik für die Grundschule: Zahlenraum bis 100, Grundrechenarten und geometrische Formen für Klasse 1-4"
+        },
+        "properties": {
+          "text_context": {
+            "type": "string",
+            "description": "Text und Kontext für die Beschreibung (z.B. Thema, Zielgruppe, Inhalte)",
+            "examples": [
+              "Physik für die Sekundarstufe I: Mechanik, Optik und Elektrizitätslehre für Schüler der 7.-10. Klasse"
+            ],
+            "title": "Text Context"
+          },
+          "max_description_length": {
+            "type": "integer",
+            "default": 60,
+            "description": "Maximale Wortanzahl für die Beschreibung (Default: 70, Bereich: 40-200)",
+            "examples": [
+              60,
+              40,
+              200
+            ],
+            "maximum": 200.0,
+            "minimum": 40.0,
+            "title": "Max Description Length"
+          },
+          "model": {
+            "$ref": "#/components/schemas/GPTModelEnum",
+            "default": "gpt-4.1-mini",
+            "description": "Das zu nutzende OpenAI-Modell für die Textgenerierung",
+            "examples": [
+              "gpt-4.1-mini",
+              "gpt-4o-mini",
+              "gpt-5-mini"
+            ]
+          }
+        },
+        "required": [
+          "text_context"
+        ],
+        "title": "DescriptionRequest"
+      },
+      "GPTModelEnum": {
+        "type": "string",
+        "enum": [
+          "gpt-4.1-mini",
+          "gpt-4o-mini",
+          "gpt-5-mini"
+        ],
+        "title": "GPTModelEnum"
+      },
       "HTTPValidationError": {
         "type": "object",
         "properties": {
@@ -2450,11 +3170,11 @@
         "properties": {
           "status": {
             "type": "string",
-            "default": "not ok",
+            "default": "ok",
             "description": "Ping response of the server. Should be 'ok' in happy-case.",
             "examples": [
-              "not ok",
-              "ok"
+              "ok",
+              "not ok"
             ],
             "title": "Status"
           }
@@ -2566,14 +3286,28 @@
             ],
             "title": "Educational Context Uri"
           },
+          "max_description_length": {
+            "type": "integer",
+            "default": 60,
+            "description": "Maximale Wortanzahl für Beschreibungstexte der Sammlungen (min. 200, max. 2000)",
+            "examples": [
+              60,
+              40,
+              200
+            ],
+            "maximum": 200.0,
+            "minimum": 40.0,
+            "title": "Max Description Length"
+          },
           "model": {
-            "type": "string",
-            "default": "gpt-4o-mini",
+            "$ref": "#/components/schemas/GPTModelEnum",
+            "default": "gpt-4.1-mini",
             "description": "Das zu verwendende OpenAI-Sprachmodell",
             "examples": [
-              "gpt-4o-mini"
-            ],
-            "title": "Model"
+              "gpt-4.1-mini",
+              "gpt-4o-mini",
+              "gpt-5-mini"
+            ]
           }
         },
         "required": [
@@ -3894,6 +4628,1164 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "CompendiumRequest": {
+        "type": "object",
+        "description": "Request payload for compendium generation endpoint.",
+        "properties": {
+          "input_type": {
+            "$ref": "#/components/schemas/InputType",
+            "description": "Type of input: text or linker_output"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Raw text input (required if input_type=text)",
+            "title": "Text"
+          },
+          "linker_data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Complete JSON response from /linker endpoint - copy the entire response here when using input_type='linker_output'",
+            "title": "Linker Data"
+          },
+          "config": {
+            "$ref": "#/components/schemas/app__api__v1__compendium__CompendiumConfig",
+            "description": "Compendium configuration"
+          }
+        },
+        "required": [
+          "input_type"
+        ],
+        "title": "CompendiumRequest"
+      },
+      "CompendiumResponse": {
+        "type": "object",
+        "description": "Response containing generated compendium content.",
+        "properties": {
+          "markdown": {
+            "type": "string",
+            "description": "Generated compendium in Markdown format",
+            "title": "Markdown"
+          },
+          "bibliography": {
+            "type": "string",
+            "description": "Numbered bibliography from Wikipedia URLs",
+            "title": "Bibliography"
+          },
+          "statistics": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Generation statistics",
+            "title": "Statistics"
+          }
+        },
+        "required": [
+          "bibliography",
+          "markdown",
+          "statistics"
+        ],
+        "title": "CompendiumResponse"
+      },
+      "EnhancedEntity": {
+        "type": "object",
+        "description": "Enhanced entity with details and source information.",
+        "properties": {
+          "entity": {
+            "type": "string",
+            "title": "Entity"
+          },
+          "details": {
+            "$ref": "#/components/schemas/EntityDetails"
+          },
+          "sources": {
+            "$ref": "#/components/schemas/EntitySources"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          }
+        },
+        "required": [
+          "details",
+          "entity",
+          "id",
+          "sources"
+        ],
+        "title": "EnhancedEntity"
+      },
+      "EntityDetails": {
+        "type": "object",
+        "description": "Entity details with type and citation information.",
+        "properties": {
+          "typ": {
+            "type": "string",
+            "title": "Typ"
+          },
+          "citation": {
+            "type": "string",
+            "title": "Citation"
+          }
+        },
+        "required": [
+          "citation",
+          "typ"
+        ],
+        "title": "EntityDetails"
+      },
+      "EntitySources": {
+        "type": "object",
+        "description": "Collection of entity sources from different providers.",
+        "properties": {
+          "wikipedia": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WikipediaSource"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "EntitySources"
+      },
+      "HealthCheckResponse": {
+        "type": "object",
+        "description": "Response model for health check endpoint.",
+        "properties": {
+          "status": {
+            "type": "string",
+            "default": "healthy",
+            "title": "Status"
+          },
+          "service": {
+            "type": "string",
+            "default": "compendious-text-fastapi",
+            "title": "Service"
+          },
+          "version": {
+            "type": "string",
+            "default": "0.1.1",
+            "title": "Version"
+          },
+          "timestamp": {
+            "type": "string",
+            "default": "2025-08-14T18:02:03.542778+02:00",
+            "title": "Timestamp"
+          }
+        },
+        "title": "HealthCheckResponse"
+      },
+      "InputType": {
+        "type": "string",
+        "description": "Input type for compendium generation.",
+        "enum": [
+          "text",
+          "linker_output"
+        ],
+        "title": "InputType"
+      },
+      "LinkerRequest": {
+        "type": "object",
+        "description": "Request payload for entity linking endpoint.",
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "config": {
+            "$ref": "#/components/schemas/app__api__v1__linker__LinkerConfig"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "LinkerRequest"
+      },
+      "LinkerResponse": {
+        "type": "object",
+        "description": "Complete response from entity linking process.",
+        "properties": {
+          "original_text": {
+            "type": "string",
+            "title": "Original Text"
+          },
+          "entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnhancedEntity"
+            },
+            "title": "Entities"
+          },
+          "relationships": {
+            "type": "array",
+            "default": [],
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "title": "Relationships"
+          },
+          "qa_pairs": {
+            "type": "array",
+            "default": [],
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "title": "Qa Pairs"
+          },
+          "statistics": {
+            "$ref": "#/components/schemas/Statistics"
+          }
+        },
+        "required": [
+          "entities",
+          "original_text",
+          "statistics"
+        ],
+        "title": "LinkerResponse"
+      },
+      "PipelineCompendiumOnlyConfig": {
+        "type": "object",
+        "description": "Combined configuration for all pipeline steps.",
+        "properties": {
+          "linker": {
+            "$ref": "#/components/schemas/app__api__v1__pipeline__LinkerConfig"
+          },
+          "compendium": {
+            "$ref": "#/components/schemas/app__api__v1__pipeline__CompendiumConfig"
+          }
+        },
+        "title": "PipelineCompendiumOnlyConfig"
+      },
+      "PipelineCompendiumOnlyRequest": {
+        "type": "object",
+        "description": "Request for the compendium-only variant of the pipeline.",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Text input (to base the compendium on)",
+            "minLength": 1,
+            "title": "Text"
+          },
+          "config": {
+            "$ref": "#/components/schemas/PipelineCompendiumOnlyConfig"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "PipelineCompendiumOnlyRequest"
+      },
+      "PipelineCompendiumOnlyResponse": {
+        "type": "object",
+        "description": "Response containing outputs from the first two pipeline steps.",
+        "properties": {
+          "original_text": {
+            "type": "string",
+            "title": "Original Text"
+          },
+          "linker_output": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "Linker Output"
+          },
+          "compendium_output": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "Compendium Output"
+          },
+          "pipeline_statistics": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "Pipeline Statistics"
+          }
+        },
+        "required": [
+          "compendium_output",
+          "linker_output",
+          "original_text",
+          "pipeline_statistics"
+        ],
+        "title": "PipelineCompendiumOnlyResponse"
+      },
+      "PipelineConfig": {
+        "type": "object",
+        "description": "Combined configuration for all pipeline steps.",
+        "properties": {
+          "linker": {
+            "$ref": "#/components/schemas/app__api__v1__pipeline__LinkerConfig"
+          },
+          "compendium": {
+            "$ref": "#/components/schemas/app__api__v1__pipeline__CompendiumConfig"
+          },
+          "qa": {
+            "$ref": "#/components/schemas/QAConfig"
+          }
+        },
+        "title": "PipelineConfig"
+      },
+      "PipelineRequest": {
+        "type": "object",
+        "description": "Request for the complete pipeline.",
+        "properties": {
+          "level_property": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Name der Bildungsstufen-Eigenschaft (z.B. 'Bildungsstufe')",
+            "title": "Level Property"
+          },
+          "level_values": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Liste der Bildungsstufen-Werte (z.B. ['Schule', 'Hochschule', 'Berufsbildung'])",
+            "title": "Level Values"
+          },
+          "num_pairs": {
+            "type": "integer",
+            "default": 10,
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Num Pairs"
+          },
+          "max_answer_length": {
+            "type": "integer",
+            "default": 250,
+            "maximum": 1000.0,
+            "minimum": 50.0,
+            "title": "Max Answer Length"
+          },
+          "text": {
+            "type": "string",
+            "description": "Input text to process through the complete pipeline",
+            "minLength": 1,
+            "title": "Text"
+          },
+          "config": {
+            "$ref": "#/components/schemas/PipelineConfig"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "PipelineRequest"
+      },
+      "PipelineResponse": {
+        "type": "object",
+        "description": "Response containing outputs from all pipeline steps.",
+        "properties": {
+          "original_text": {
+            "type": "string",
+            "title": "Original Text"
+          },
+          "linker_output": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "Linker Output"
+          },
+          "compendium_output": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "Compendium Output"
+          },
+          "qa_output": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "Qa Output"
+          },
+          "pipeline_statistics": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "Pipeline Statistics"
+          }
+        },
+        "required": [
+          "compendium_output",
+          "linker_output",
+          "original_text",
+          "pipeline_statistics",
+          "qa_output"
+        ],
+        "title": "PipelineResponse"
+      },
+      "QAConfig": {
+        "type": "object",
+        "description": "Configuration for the QA step.",
+        "properties": {
+          "level_property": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Name der Bildungsstufen-Eigenschaft (z.B. 'Bildungsstufe')",
+            "title": "Level Property"
+          },
+          "level_values": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Liste der Bildungsstufen-Werte (z.B. ['Schule', 'Hochschule', 'Berufsbildung'])",
+            "title": "Level Values"
+          },
+          "num_pairs": {
+            "type": "integer",
+            "default": 10,
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Num Pairs"
+          },
+          "max_answer_length": {
+            "type": "integer",
+            "default": 250,
+            "maximum": 1000.0,
+            "minimum": 50.0,
+            "title": "Max Answer Length"
+          }
+        },
+        "title": "QAConfig"
+      },
+      "QAPair": {
+        "type": "object",
+        "description": "Represents a question-answer pair with educational level metadata.",
+        "properties": {
+          "question": {
+            "type": "string",
+            "title": "Question"
+          },
+          "answer": {
+            "type": "string",
+            "title": "Answer"
+          },
+          "level_property": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Name der Bildungsstufen-Eigenschaft",
+            "title": "Level Property"
+          },
+          "level_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Zugewiesene Bildungsstufe für dieses QA-Paar",
+            "title": "Level Value"
+          }
+        },
+        "required": [
+          "answer",
+          "question"
+        ],
+        "title": "QAPair"
+      },
+      "QARequest": {
+        "type": "object",
+        "description": "Request model for QA generation endpoint.",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Text content for QA generation (supports compendium markdown)",
+            "examples": [
+              "Was ist ein Planet im Weltall?"
+            ],
+            "minLength": 1,
+            "title": "Text"
+          },
+          "num_pairs": {
+            "type": "integer",
+            "default": 10,
+            "examples": [
+              5,
+              10,
+              20
+            ],
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Num Pairs"
+          },
+          "max_answer_length": {
+            "type": "integer",
+            "default": 250,
+            "examples": [
+              200,
+              50,
+              1000
+            ],
+            "maximum": 1000.0,
+            "minimum": 50.0,
+            "title": "Max Answer Length"
+          },
+          "level_property": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Name der Bildungsstufen-Eigenschaft (z.B. 'Bildungsstufe')",
+            "title": "Level Property"
+          },
+          "level_values": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Liste der Bildungsstufen-Werte (z.B. ['Schule', 'Hochschule', 'Berufsbildung'])",
+            "title": "Level Values"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "QARequest"
+      },
+      "QAResponse": {
+        "type": "object",
+        "description": "Response containing generated QA pairs.",
+        "properties": {
+          "original_text": {
+            "type": "string",
+            "title": "Original Text"
+          },
+          "qa": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QAPair"
+            },
+            "title": "Qa"
+          }
+        },
+        "required": [
+          "original_text",
+          "qa"
+        ],
+        "title": "QAResponse"
+      },
+      "SplitRequest": {
+        "type": "object",
+        "description": "Request payload for text splitting endpoint.",
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Text"
+          },
+          "chunk_size": {
+            "type": "integer",
+            "default": 1000,
+            "maximum": 5000.0,
+            "minimum": 10.0,
+            "title": "Chunk Size"
+          },
+          "overlap": {
+            "type": "integer",
+            "default": 50,
+            "maximum": 500.0,
+            "minimum": 0.0,
+            "title": "Overlap"
+          },
+          "split_by": {
+            "type": "string",
+            "default": "sentence",
+            "pattern": "^(sentence|char)$",
+            "title": "Split By"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "SplitRequest"
+      },
+      "SplitResponse": {
+        "type": "object",
+        "description": "Response containing text chunks.",
+        "properties": {
+          "chunks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Chunks"
+          }
+        },
+        "required": [
+          "chunks"
+        ],
+        "title": "SplitResponse"
+      },
+      "Statistics": {
+        "type": "object",
+        "description": "Processing statistics for entity linking results.",
+        "properties": {
+          "total_entities": {
+            "type": "integer",
+            "title": "Total Entities"
+          },
+          "total_relationships": {
+            "type": "integer",
+            "default": 0,
+            "title": "Total Relationships"
+          },
+          "top10": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer"
+              }
+            },
+            "title": "Top10"
+          },
+          "types_distribution": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Types Distribution"
+          },
+          "linked": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              }
+            },
+            "title": "Linked"
+          },
+          "relationships": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer"
+              }
+            },
+            "title": "Relationships"
+          },
+          "qa_pairs": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer"
+              }
+            },
+            "title": "Qa Pairs"
+          }
+        },
+        "required": [
+          "total_entities"
+        ],
+        "title": "Statistics"
+      },
+      "SynonymRequest": {
+        "type": "object",
+        "description": "Request payload for synonym generation.",
+        "properties": {
+          "word": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Word"
+          },
+          "max_synonyms": {
+            "type": "integer",
+            "default": 5,
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Max Synonyms"
+          },
+          "lang": {
+            "type": "string",
+            "default": "de",
+            "maxLength": 5,
+            "minLength": 2,
+            "title": "Lang"
+          }
+        },
+        "required": [
+          "word"
+        ],
+        "title": "SynonymRequest"
+      },
+      "SynonymResponse": {
+        "type": "object",
+        "description": "Response containing generated synonyms.",
+        "properties": {
+          "synonyms": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Synonyms"
+          }
+        },
+        "required": [
+          "synonyms"
+        ],
+        "title": "SynonymResponse"
+      },
+      "TranslateRequest": {
+        "type": "object",
+        "description": "Request payload for text translation.",
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Text"
+          },
+          "target_lang": {
+            "type": "string",
+            "default": "en",
+            "maxLength": 5,
+            "minLength": 2,
+            "title": "Target Lang"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "TranslateRequest"
+      },
+      "TranslateResponse": {
+        "type": "object",
+        "description": "Response containing translated text.",
+        "properties": {
+          "translation": {
+            "type": "string",
+            "title": "Translation"
+          }
+        },
+        "required": [
+          "translation"
+        ],
+        "title": "TranslateResponse"
+      },
+      "WikipediaSource": {
+        "type": "object",
+        "description": "Wikipedia source information with multilingual support.",
+        "properties": {
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "label_de": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label De"
+          },
+          "label_en": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label En"
+          },
+          "url_de": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url De"
+          },
+          "url_en": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url En"
+          },
+          "extract": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extract"
+          },
+          "categories": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Categories"
+          },
+          "internal_links": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Internal Links"
+          },
+          "wikidata_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wikidata Id"
+          },
+          "thumbnail_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thumbnail Url"
+          },
+          "geo_lat": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geo Lat"
+          },
+          "geo_lon": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geo Lon"
+          },
+          "infobox_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Infobox Type"
+          },
+          "dbpedia_uri": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dbpedia Uri"
+          },
+          "source": {
+            "type": "string",
+            "default": "api",
+            "title": "Source"
+          },
+          "needs_fallback": {
+            "type": "boolean",
+            "default": false,
+            "title": "Needs Fallback"
+          },
+          "fallback_attempts": {
+            "type": "integer",
+            "default": 0,
+            "title": "Fallback Attempts"
+          }
+        },
+        "title": "WikipediaSource"
+      },
+      "app__api__v1__compendium__CompendiumConfig": {
+        "type": "object",
+        "description": "Configuration options for compendium generation.",
+        "properties": {
+          "length": {
+            "type": "integer",
+            "default": 6000,
+            "description": "Target length in characters",
+            "title": "Length"
+          },
+          "enable_citations": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable numbered citations in text",
+            "title": "Enable Citations"
+          },
+          "educational_mode": {
+            "type": "boolean",
+            "default": true,
+            "description": "Use educational aspects for structuring",
+            "title": "Educational Mode"
+          },
+          "language": {
+            "type": "string",
+            "default": "de",
+            "description": "Output language (de/en)",
+            "title": "Language"
+          }
+        },
+        "title": "CompendiumConfig"
+      },
+      "app__api__v1__linker__LinkerConfig": {
+        "type": "object",
+        "description": "Configuration for entity linking operations.",
+        "properties": {
+          "MODE": {
+            "type": "string",
+            "default": "extract",
+            "description": "Processing mode for entity extraction",
+            "enum": [
+              "extract",
+              "generate"
+            ],
+            "title": "Mode"
+          },
+          "MAX_ENTITIES": {
+            "type": "integer",
+            "default": 10,
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Max Entities"
+          },
+          "ALLOWED_ENTITY_TYPES": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "string",
+                "const": "auto"
+              }
+            ],
+            "default": "auto",
+            "title": "Allowed Entity Types"
+          },
+          "EDUCATIONAL_MODE": {
+            "type": "boolean",
+            "default": false,
+            "title": "Educational Mode"
+          },
+          "LANGUAGE": {
+            "type": "string",
+            "default": "de",
+            "enum": [
+              "de",
+              "en"
+            ],
+            "title": "Language"
+          }
+        },
+        "title": "LinkerConfig"
+      },
+      "app__api__v1__pipeline__CompendiumConfig": {
+        "type": "object",
+        "description": "Configuration for the compendium step.",
+        "properties": {
+          "length": {
+            "type": "integer",
+            "default": 6000,
+            "maximum": 20000.0,
+            "minimum": 1000.0,
+            "title": "Length"
+          },
+          "enable_citations": {
+            "type": "boolean",
+            "default": true,
+            "title": "Enable Citations"
+          },
+          "educational_mode": {
+            "type": "boolean",
+            "default": true,
+            "title": "Educational Mode"
+          },
+          "language": {
+            "type": "string",
+            "default": "de",
+            "enum": [
+              "de",
+              "en"
+            ],
+            "title": "Language"
+          }
+        },
+        "title": "CompendiumConfig"
+      },
+      "app__api__v1__pipeline__LinkerConfig": {
+        "type": "object",
+        "description": "Configuration for the linker step.",
+        "properties": {
+          "MODE": {
+            "type": "string",
+            "default": "generate",
+            "enum": [
+              "extract",
+              "generate"
+            ],
+            "title": "Mode"
+          },
+          "MAX_ENTITIES": {
+            "type": "integer",
+            "default": 10,
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Max Entities"
+          },
+          "ALLOWED_ENTITY_TYPES": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "string",
+                "const": "auto"
+              }
+            ],
+            "default": "auto",
+            "title": "Allowed Entity Types"
+          },
+          "EDUCATIONAL_MODE": {
+            "type": "boolean",
+            "default": false,
+            "title": "Educational Mode"
+          },
+          "LANGUAGE": {
+            "type": "string",
+            "default": "de",
+            "enum": [
+              "de",
+              "en"
+            ],
+            "title": "Language"
+          }
+        },
+        "title": "LinkerConfig"
       }
     },
     "securitySchemes": {
