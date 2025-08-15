@@ -27,12 +27,12 @@ public class QAEntryResponseDTO {
     String educationalLevel;
 
     @JsonProperty(required = true)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssX")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     Date created;
     @JsonProperty(required = true)
     UserSimple createdBy;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssX")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     Date lastReviewed;
     UserSimple reviewedBy;
 

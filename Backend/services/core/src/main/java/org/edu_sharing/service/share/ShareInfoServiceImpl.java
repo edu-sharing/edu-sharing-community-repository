@@ -8,21 +8,21 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.node.NodeServicePolicies;
 import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AccessPermission;
+import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.namespace.QName;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.permission.events.AddedPermissionsEvent;
 import org.edu_sharing.service.permission.events.RemovedPermissionEvent;
 import org.edu_sharing.service.share.ibatis.ShareInfoMapper;
 import org.edu_sharing.service.share.ibatis.ShareInfoOpLogMapper;
 import org.springframework.context.event.EventListener;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +41,7 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
     private final PolicyComponent policyComponent;
     private final NodeService nodeService;
     private final RetryingTransactionHelper retryingTransactionHelper;
+    private final AuthorityService authorityService;
 
     @PostConstruct
     void init() {
@@ -58,17 +59,6 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
 
         log.info("ShareInfoService initialized");
     }
-
-
-//    @NotNull Page<ShareInfo> getDataForAllUsers(@NotNull Date after, int skip, int limit) {
-//        long total = shareInfoMapper.count();
-//        List<ShareInfoData> dataForAllUsers = shareInfoMapper.getDataForAllUsers(after, skip, limit);
-//        return new PageImpl<>(dataForAllUsers.stream().map(ShareInfo.class::cast).toList(), Pageable.ofSize(limit).withPage(skip / limit), total);
-//    }
-//
-//    @NotNull List<ShareInfo> getDataForUser(@NotNull String username, @NotNull Date after) {
-//        return shareInfoMapper.getDataForUser(username, after).stream().map(ShareInfo.class::cast).toList();
-//    }
 
     @Override
     public void onDeleteNode(ChildAssociationRef childAssocRef, boolean isNodeArchived) {
@@ -175,50 +165,27 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
     }
 
     @Override
-    public void rejectShare(@NonNull List<Long> shareIds) {
-        if (shareIds.isEmpty()) {
-            return;
+    public void rejectShare(@NonNull String nodeId) {
+        if (AuthenticationUtil.isRunAsUserTheSystemUser()) {
+            throw new IllegalStateException("System user cannot reject shares");
         }
 
         retryingTransactionHelper.doInTransaction(() -> {
-            List<ShareInfoData> shares = shareInfoMapper.getAllSharesByIdIn(shareIds);
-            List<ShareInfoData> rejectShares = shares.stream()
-                    .filter(x -> x.getShareStatus() == ShareStatus.SHARED)
-                    .map(x -> new ShareInfoData(null, x.getNodeId(), x.getSharedBy(), x.getSharedWith(), ShareStatus.REJECTED, x.getShareType(), new Date()))
-                    .toList();
-
-            if (rejectShares.isEmpty()) {
-                return null;
-            }
-
-            shareInfoMapper.createAll(rejectShares);
-            List<ShareInfoOplogData> oplogs = rejectShares.stream()
-                    .map(x -> new ShareInfoOplogData(null, x.getId(), OpLogAction.CREATE, new Date()))
-                    .toList();
-            shareInfoOpLogMapper.createAll(oplogs);
+            ShareInfoData shareInfoData = new ShareInfoData(null, nodeId, null, AuthenticationUtil.getRunAsUser(), ShareStatus.REJECTED, ShareType.AUTHORITY, new Date());
+            shareInfoMapper.create(shareInfoData);
+            shareInfoOpLogMapper.create(new ShareInfoOplogData(null, shareInfoData.getId(), OpLogAction.CREATE, new Date()));
             return null;
         });
     }
 
     @Override
-    public void unrejectShare(@NonNull List<Long> shareIds) {
-        if (shareIds.isEmpty()) {
-            return;
+    public void unrejectShare(@NonNull String nodeId) {
+        if (AuthenticationUtil.isRunAsUserTheSystemUser()) {
+            throw new IllegalStateException("System user cannot reject shares");
         }
-
         retryingTransactionHelper.doInTransaction(() -> {
-            List<ShareInfoData> shares = shareInfoMapper.getAllSharesByIdIn(shareIds);
-            List<Long> rejectShares = shares.stream()
-                    .filter(x -> x.getShareStatus() == ShareStatus.REJECTED)
-                    .map(x -> x.id)
-                    .toList();
-
-            if (rejectShares.isEmpty()) {
-                return null;
-            }
-
-            shareInfoMapper.deleteAll(rejectShares);
-            List<ShareInfoOplogData> oplogs = rejectShares.stream()
+            List<Long> ids = shareInfoMapper.deleteAllByNodeIdAndSharedByAndShareStatusAndSharedWithIn(nodeId, null, ShareStatus.REJECTED, List.of(AuthenticationUtil.getRunAsUser()));
+            List<ShareInfoOplogData> oplogs = ids.stream()
                     .map(x -> new ShareInfoOplogData(null, x, OpLogAction.DELETE, new Date()))
                     .toList();
             shareInfoOpLogMapper.createAll(oplogs);
@@ -262,12 +229,21 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
 
     @Override
     public List<ShareInfo> getShares(@NonNull NodeRef nodeRef) {
+        if (!AuthenticationUtil.isRunAsUserTheSystemUser()
+                && !authorityService.isAdminAuthority(AuthenticationUtil.getRunAsUser())) {
+            throw new InsufficientPermissionException("You are not allowed to access all shares of this node");
+        }
         return shareInfoMapper.getAllSharesByNodeId(nodeRef.getId()).stream().map(ShareInfo.class::cast).toList();
     }
 
     @Override
     public List<ShareInfo> getShares(@NonNull List<Long> shareIds) {
-        if(shareIds.isEmpty()){
+        if (!AuthenticationUtil.isRunAsUserTheSystemUser()
+                && !authorityService.isAdminAuthority(AuthenticationUtil.getRunAsUser())) {
+            throw new InsufficientPermissionException("You are not allowed to access shares of this node");
+        }
+
+        if (shareIds.isEmpty()) {
             return List.of();
         }
         return shareInfoMapper.getAllSharesByIdIn(shareIds).stream().map(ShareInfo.class::cast).toList();
@@ -276,6 +252,11 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
 
     @Override
     public List<ShareInfoOplog> getOplogs(Long afterTxId, Date afterDate, int limit) {
+        if (!AuthenticationUtil.isRunAsUserTheSystemUser()
+                && !authorityService.isAdminAuthority(AuthenticationUtil.getRunAsUser())) {
+            throw new InsufficientPermissionException("You are not allowed to access oplogs");
+        }
+
         List<ShareInfoOplogData> oplogs;
         if (afterTxId != null) {
             oplogs = shareInfoOpLogMapper.getAllAfterId(afterTxId, limit);

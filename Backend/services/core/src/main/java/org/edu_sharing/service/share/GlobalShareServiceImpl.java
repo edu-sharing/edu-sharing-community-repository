@@ -57,7 +57,7 @@ public class GlobalShareServiceImpl implements GlobalShareService {
     public static String I18n_MailText = "dialog_share_mailtext_file";
     public static String I18n_MailTextLink = "dialog_share_mailtext_link";
 
-    private final ShareInfoServiceImpl shareInfoService;
+    private final ShareInfoService shareInfoService;
 
     private final NodeService nodeService;
     private final AuthenticationService authService;

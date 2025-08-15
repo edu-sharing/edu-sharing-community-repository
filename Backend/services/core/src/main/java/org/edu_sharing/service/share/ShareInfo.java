@@ -19,6 +19,6 @@ public interface ShareInfo {
     @JsonProperty(required = true)
     ShareType getShareType();
     @JsonProperty(required = true)
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssX")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     Date getTimestamp();
 }

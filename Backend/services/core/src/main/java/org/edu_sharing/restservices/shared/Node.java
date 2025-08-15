@@ -32,13 +32,13 @@ public class Node implements Serializable {
 	private String repositoryType = null;
 
 	@JsonProperty(required = true)
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssX")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
 	private Date createdAt = null;
 
 	@JsonProperty(required = true)
 	private Person createdBy = null;
 
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssX")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
 	private Date modifiedAt = null;
 
 	private Person modifiedBy = null;

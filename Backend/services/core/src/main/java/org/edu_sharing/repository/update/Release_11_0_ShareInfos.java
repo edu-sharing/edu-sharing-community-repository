@@ -60,10 +60,17 @@ public class Release_11_0_ShareInfos {
             if (rawUsers == null) rawUsers = new ArrayList<>();
             if (rawInvited == null) rawInvited = new ArrayList<>();
 
-            Set<String> users =  new HashSet<>(rawUsers);
+            Set<String> users = new HashSet<>(rawUsers);
             Set<String> invited = new HashSet<>(rawInvited);
-            Share[] shares = globalShareService.getShares(nodeRef.getId());
 
+            // we don't really know who shared all materials. So by default, we use the creator of the node for the sharedBy user.
+            // Except he doesn't share the material at all (not in the list of users) otherwise we take the first user in the list.
+            String sharedBy = creator;
+            if (!rawUsers.isEmpty() && !users.contains(creator)) {
+                sharedBy = rawUsers.get(0);
+            }
+
+            Share[] shares = globalShareService.getShares(nodeRef.getId());
             for (Share share : shares) {
                 String shareNodeId = share.getNodeId();
                 NodeRef nodeRefShare = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, shareNodeId);
@@ -74,14 +81,14 @@ public class Release_11_0_ShareInfos {
                 log.info("Created link share for {}: by: {} - with: {}", nodeRef.getId(), shareCreator, share.getNodeId());
             }
 
-            users.remove(creator);
+            users.remove(sharedBy);
             for (String authority : invited) {
-                shareInfoService.createShare(nodeRef.getId(), creator, authority, ShareType.AUTHORITY);
+                shareInfoService.createShare(nodeRef.getId(), sharedBy, authority, ShareType.AUTHORITY);
                 log.info("Created authority share for {}: by: {} - with: {}", nodeRef.getId(), creator, authority);
             }
 
-            if(!users.isEmpty()){
-                log.warn("ShareInfos for {} are not complete. Missing users: {}", nodeRef.getId(), users);
+            if (!users.isEmpty()) {
+                log.warn("ShareInfos for {} are not complete. Missing users: {}", nodeRef.getId(), String.join(",", users));
             }
 
             nodeService.removeProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS));

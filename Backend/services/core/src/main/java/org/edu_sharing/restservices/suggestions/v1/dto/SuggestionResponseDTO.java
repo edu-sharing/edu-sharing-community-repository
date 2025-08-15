@@ -15,40 +15,40 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SuggestionResponseDTO {
-   @JsonProperty(required = true)
-   private String id;
+    @JsonProperty(required = true)
+    private String id;
 
-   @JsonProperty(required = true)
-   private String nodeId;
+    @JsonProperty(required = true)
+    private String nodeId;
 
-   @JsonProperty(required = true)
-   private String version;
+    @JsonProperty(required = true)
+    private String version;
 
-   @JsonProperty(required = true)
-   private String propertyId;
+    @JsonProperty(required = true)
+    private String propertyId;
 
-   @JsonProperty(required = true)
-   private Object value;
+    @JsonProperty(required = true)
+    private Object value;
 
-   @JsonProperty(required = true)
-   private SuggestionType type;
+    @JsonProperty(required = true)
+    private SuggestionType type;
 
-   @JsonProperty(required = true)
-   private SuggestionStatus status;
+    @JsonProperty(required = true)
+    private SuggestionStatus status;
 
-   private String description;
+    private String description;
 
-   @JsonProperty(required = true)
-   private double confidence = 0;
+    @JsonProperty(required = true)
+    private double confidence = 0;
 
-   @JsonProperty(required = true)
-   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssX")
-   private Date created;
+    @JsonProperty(required = true)
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+    private Date created;
 
-   @JsonProperty(required = true)
-   private UserSimple createdBy;
+    @JsonProperty(required = true)
+    private UserSimple createdBy;
 
-   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssX")
-   private Date modified;
-   private UserSimple modifiedBy;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+    private Date modified;
+    private UserSimple modifiedBy;
 }

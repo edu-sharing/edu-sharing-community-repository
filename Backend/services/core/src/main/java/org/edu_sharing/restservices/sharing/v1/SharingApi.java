@@ -115,7 +115,7 @@ public class SharingApi {
 
 
     @POST
-    @Path("/share/{repository}/reject")
+    @Path("/share/{repository}/{node}/reject")
     @Operation(summary = "Return share info objects.")
     @ApiResponses(
             value = {
@@ -128,17 +128,17 @@ public class SharingApi {
             })
     public void rejectShare(
             @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repId,
-            List<Long> shareIds
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node
     ) {
         if (!RepositoryDao.getRepository(repId).isHomeRepo()) {
             throw new IllegalArgumentException("The given repository is not the home repository");
         }
 
-        shareInfoService.rejectShare(shareIds);
+        shareInfoService.rejectShare(node);
     }
 
     @POST
-    @Path("/share/{repository}/unreject")
+    @Path("/share/{repository}/{node}/unreject")
     @Operation(summary = "Return share info objects.")
     @ApiResponses(
             value = {
@@ -151,13 +151,13 @@ public class SharingApi {
             })
     public void unrejectShare(
             @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repId,
-            List<Long> shareIds) {
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node) {
 
         if (!RepositoryDao.getRepository(repId).isHomeRepo()) {
             throw new IllegalArgumentException("The given repository is not the home repository");
         }
 
-        shareInfoService.unrejectShare(shareIds);
+        shareInfoService.unrejectShare(node);
     }
 
     @POST

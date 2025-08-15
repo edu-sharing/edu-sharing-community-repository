@@ -11,6 +11,6 @@ public interface ShareInfoOplog {
     @JsonProperty(required = true)
     OpLogAction getAction();
     @JsonProperty(required = true)
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssX")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     java.util.Date getTimestamp();
 }

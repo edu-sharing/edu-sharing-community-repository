@@ -15,6 +15,6 @@ public interface UserNodeActivity {
     @JsonProperty(required = true)
     String getType();
     @JsonProperty(required = true)
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssX")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     Date getTimestamp();
 }

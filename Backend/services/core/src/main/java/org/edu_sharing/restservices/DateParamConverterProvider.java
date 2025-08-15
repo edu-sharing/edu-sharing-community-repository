@@ -8,8 +8,10 @@ import jakarta.ws.rs.ext.Provider;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 
 @Provider
@@ -25,15 +27,18 @@ public class DateParamConverterProvider implements ParamConverterProvider {
                         return null;
                     }
                     try {
-                        return rawType.cast(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(value));
-                    } catch (ParseException e) {
+                        OffsetDateTime odt = OffsetDateTime.parse(value, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                        return rawType.cast(Date.from(odt.toInstant()));
+                    } catch (DateTimeParseException e) {
                         throw new WebApplicationException("Invalid date format", Response.Status.BAD_REQUEST);
                     }
                 }
 
                 @Override
                 public String toString(T value) {
-                    return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format((Date) value);
+                    Date date = (Date) value;
+                    return date.toInstant().atOffset(ZoneId.systemDefault().getRules().getOffset(date.toInstant()))
+                            .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
                 }
             };
         }
