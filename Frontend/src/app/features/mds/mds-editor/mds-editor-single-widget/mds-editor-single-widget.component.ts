@@ -55,6 +55,7 @@ export interface MdsEditInterface {
 })
 export class MdsEditorSingleWidgetComponent implements OnChanges, OnDestroy, MdsEditInterface {
     @ViewChild('widget') ref: ElementRef<HTMLDivElement>;
+    @Input() editorMode = 'inline' as EditorMode;
     @Input() ngModel: string[];
     @Output() ngModelChange = new EventEmitter<string[]>();
     @Input() repository = RestConstants.HOME_REPOSITORY;
@@ -67,7 +68,7 @@ export class MdsEditorSingleWidgetComponent implements OnChanges, OnDestroy, Mds
      * */
     @Input() customAttributes: Partial<MdsWidget>;
     hasExtendedWidgets$: Observable<boolean>;
-    readonly editorMode: EditorMode;
+    readonly EditorMode: EditorMode;
     readonly shouldShowExtendedWidgets$: BehaviorSubject<boolean>;
     private value$: BehaviorSubject<string[]>;
     private destroyed = new Subject<void>();
@@ -102,22 +103,32 @@ export class MdsEditorSingleWidgetComponent implements OnChanges, OnDestroy, Mds
             this.widget = this.mdsEditorInstance.createWidget(definition, null, this.repository);
             /*
              */
-            this.mdsEditorInstance.editorMode = 'inline';
+            this.mdsEditorInstance.editorMode = this.editorMode;
             this.mdsEditorInstance.values$.next({ [this.widgetId]: this.ngModel });
-            UIService.injectAngularComponent(
-                this.factoryResolver,
-                this.containerRef,
-                MdsWidgetComponent,
-                this.ref.nativeElement,
-                {
-                    widget: this.widget,
-                    inlineEditing: 'always',
-                    showCaption: false,
-                    view: this,
-                },
-                {},
-                this.injector,
-            );
+            if (this.editorMode === 'inline') {
+                UIService.injectAngularComponent(
+                    this.factoryResolver,
+                    this.containerRef,
+                    MdsWidgetComponent,
+                    this.ref.nativeElement,
+                    {
+                        widget: this.widget,
+                        inlineEditing: 'always',
+                        showCaption: false,
+                        view: this,
+                    },
+                    {},
+                    this.injector,
+                );
+            } else {
+                setTimeout(
+                    () =>
+                        void this.injectEditField(
+                            this.widget as unknown as MdsWidgetComponent,
+                            this.ref.nativeElement,
+                        ),
+                );
+            }
             this.instanceExists = true;
         }
     }
@@ -143,11 +154,15 @@ export class MdsEditorSingleWidgetComponent implements OnChanges, OnDestroy, Mds
         await this.applicationRef.tick();
         setTimeout(() => {
             injected.instance.focus();
-            injected.instance.onBlur.pipe(first()).subscribe(() => {
-                this.ngModelChange.emit(injected.instance.widget.getValue());
-                this.instanceExists = false;
-                void mdsWidgetComponent.finishEdit(injected.instance, false);
-            });
+            if (this.editorMode === 'inline') {
+                injected.instance.onBlur.pipe(first()).subscribe(() => {
+                    this.ngModelChange.emit(injected.instance.widget.getValue());
+                    this.instanceExists = false;
+                    void mdsWidgetComponent.finishEdit(injected.instance, false);
+                });
+            } else {
+                this.widget.observeValue().subscribe((v) => this.ngModelChange.emit(v));
+            }
         });
         return injected;
     }
