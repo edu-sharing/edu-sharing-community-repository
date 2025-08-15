@@ -106,7 +106,6 @@ export class DashboardSwimlaneComponent {
         private ref: ApplicationRef,
         private router: Router,
         private searchService: SearchService,
-        private searchServiceUnwrapped: SearchServiceUnwrapped,
         private nodeService: NodeService,
         private mdsHelperService: MdsHelperService,
     ) {
@@ -198,40 +197,29 @@ export class DashboardSwimlaneComponent {
                 }),
             ]);
         } else if (this.swimlane().id === 'recent-activities') {
-            const events = [];
-            events.push({
-                key: 'files',
-                result: await firstValueFrom(
-                    this.searchServiceUnwrapped.getRecentUserEvents({
-                        repository: HOME_REPOSITORY,
-                        contentType: 'FILES',
-                        maxItems: this.maxItemsEvents,
-                    }),
-                ),
-                params: { contentType: 'FILES' },
-            });
-
-            events.push({
-                key: 'collections',
-                result: await firstValueFrom(
-                    this.searchServiceUnwrapped.getRecentUserEvents({
-                        repository: HOME_REPOSITORY,
-                        contentType: 'COLLECTIONS',
-                        maxItems: this.maxItemsEvents,
-                    }),
-                ),
-                params: { contentType: 'COLLECTIONS' },
-            });
-            events.push({
-                key: 'folders',
-                result: await firstValueFrom(
-                    this.searchServiceUnwrapped.getRecentUserEvents({
-                        repository: HOME_REPOSITORY,
-                        contentType: 'FOLDERS',
-                        maxItems: this.maxItemsEvents,
-                    }),
-                ),
-                params: { contentType: 'FOLDERS' },
+            const events = [] as StreamDetails[];
+            [
+                ['files', 'FILES'],
+                ['collections', 'COLLECTIONS'],
+                ['folders', 'FOLDERS'],
+            ].forEach(async (k) => {
+                events.push({
+                    key: k[0],
+                    result: await firstValueFrom(
+                        this.searchService.search({
+                            metadataset: DEFAULT,
+                            query: null,
+                            type: 'recentActivity',
+                            repository: HOME_REPOSITORY,
+                            contentType: k[1] as any,
+                            maxItems: this.maxItemsEvents,
+                            body: {
+                                criteria: [],
+                            },
+                        }),
+                    ),
+                    params: { contentType: 'COLLECTIONS' },
+                });
             });
             this.streamEvents.set(events);
         }
