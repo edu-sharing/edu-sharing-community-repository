@@ -27,4 +27,6 @@ public class UpdateQAEntryDTO {
 
     String usedText;
     String educationalLevel;
+
+    Boolean reviewed;
 }
