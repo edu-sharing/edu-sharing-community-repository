@@ -12,7 +12,7 @@ public interface ShareInfoOpLogMapper {
     @Insert("INSERT INTO edu_share_info_oplog(share_id, action, timestamp) VALUES (#{shareId}, #{action}, #{timestamp})")
     void create(ShareInfoOplogData shareInfoOplogData);
 
-    @Insert("<script> INSERT INTO edu_share_info_oplog(share_id, action, timestamp) VALUES <foreach collection='shareInfoOplogs' item='item' separator=','> (#{item.shareId}, #{item.action}, #{item.timestamp})</foreach> </script>")
+    @Insert("<script> INSERT INTO edu_share_info_oplog(share_id, action, timestamp) VALUES <foreach collection='shareInfoOplogData' item='item' separator=','> (#{item.shareId}, #{item.action}, #{item.timestamp})</foreach> </script>")
     void createAll(List<ShareInfoOplogData> shareInfoOplogData);
 
     @Select("SELECT * FROM edu_share_info_oplog WHERE id > #{id} ORDER BY id FETCH NEXT #{limit} ROWS ONLY")
