@@ -26,6 +26,8 @@ import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
+import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.repository.tools.URLHelper;
@@ -512,11 +514,13 @@ public class DataProtectionService{
         String firstname = (String)nodeService.getProperty(personRef, ContentModel.PROP_FIRSTNAME);
         String lastName = (String)nodeService.getProperty(personRef,ContentModel.PROP_LASTNAME);
         String email = (String)nodeService.getProperty(personRef, ContentModel.PROP_EMAIL);
+        String downloadUrl = URLTool.getDownloadServletUrl(nodeRef.getId(), null, true);
+
         if(email == null) return;
         Map<String, String> replace = new HashMap<>();
         replace.put("firstName", firstname);
         replace.put("lastName", lastName);
-        replace.put("link", URLHelper.getNgRenderNodeUrl(nodeRef.getId(), null, true));
+        replace.put("link", downloadUrl);
         replace.put("retentionPeriod", Duration.parse(retentionPeriod).toDays()+"");
         try {
             String template = "gdpr";
