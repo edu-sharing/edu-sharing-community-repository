@@ -83,6 +83,7 @@ export {
     Suggestion,
     Tools,
     CreateQaEntryDto,
+    UpdateQaEntryDto,
     QaEntry,
     User,
     UserProfile,
