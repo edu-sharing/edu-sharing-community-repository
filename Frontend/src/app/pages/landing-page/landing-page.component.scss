@@ -2,4 +2,12 @@
     display: flex;
     flex-direction: column;
     padding: 10px 10px;
+    es-dashboard-swimlane {
+        &:nth-child(even) {
+            background-color: color-mix(in srgb, var(--workspaceTopBarBackground), 95% transparent);
+        }
+        &:nth-child(odd) {
+            background-color: color-mix(in srgb, var(--workspaceTopBarBackground), 85% transparent);
+        }
+    }
 }

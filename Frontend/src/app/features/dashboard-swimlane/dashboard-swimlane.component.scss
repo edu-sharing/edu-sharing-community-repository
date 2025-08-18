@@ -8,7 +8,6 @@
     justify-content: center;
     gap: 10px;
     align-items: center;
-    background-color: color-mix(in srgb, var(--workspaceTopBarBackground), 90% transparent);
     transition: all vars.$transitionNormal;
     > h2 {
         color: var(--primary);
@@ -36,7 +35,6 @@
     flex-direction: column;
     padding: 10px 20px;
     position: relative;
-    background-color: color-mix(in srgb, var(--workspaceTopBarBackground), 90% transparent);
     @include mixins.materialShadowBottom();
     z-index: 1;
     .show-more {
