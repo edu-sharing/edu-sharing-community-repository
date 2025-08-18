@@ -82,6 +82,8 @@ export {
     SuggestionResponseDto,
     Suggestion,
     Tools,
+    CreateQaEntryDto,
+    QaEntry,
     User,
     UserProfile,
     UserQuota,

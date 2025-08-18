@@ -271,7 +271,8 @@ export class NodeService {
         {
             versionComment,
             repository = HOME_REPOSITORY,
-        }: { versionComment?: string; repository?: string } = {},
+            obeyMds = true,
+        }: { versionComment?: string; repository?: string; obeyMds?: boolean } = {},
     ): Observable<Node> {
         if (versionComment) {
             return this.nodeV1
@@ -280,16 +281,24 @@ export class NodeService {
                     node: id,
                     versionComment,
                     body: properties,
+                    obeyMds: obeyMds ?? true,
                 })
                 .pipe(
                     tap(() => this._nodesChanged.next()),
                     map(({ node }) => node),
                 );
         } else {
-            return this.nodeV1.changeMetadata({ repository, node: id, body: properties }).pipe(
-                tap(() => this._nodesChanged.next()),
-                map(({ node }) => node),
-            );
+            return this.nodeV1
+                .changeMetadata({
+                    repository,
+                    node: id,
+                    body: properties,
+                    obeyMds: obeyMds ?? true,
+                })
+                .pipe(
+                    tap(() => this._nodesChanged.next()),
+                    map(({ node }) => node),
+                );
         }
     }
 
