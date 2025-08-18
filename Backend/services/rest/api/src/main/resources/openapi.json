@@ -2119,6 +2119,31 @@
         },
         "type": "object"
       },
+      "InviteEvent": {
+        "properties": {
+          "node": {
+            "$ref": "#/components/schemas/Node"
+          },
+          "shareStatus": {
+            "enum": [
+              "SHARED",
+              "REJECTED"
+            ],
+            "type": "string"
+          },
+          "sharedBy": {
+            "$ref": "#/components/schemas/UserSimple"
+          },
+          "sharedWidth": {
+            "$ref": "#/components/schemas/UserSimple"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "InviteEventDTO": {
         "allOf": [
           {
@@ -5693,6 +5718,43 @@
           "nodes": {
             "items": {
               "$ref": "#/components/schemas/UserEvent"
+            },
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          },
+          "suggests": {
+            "items": {
+              "$ref": "#/components/schemas/Suggest"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "facets",
+          "nodes",
+          "pagination"
+        ],
+        "type": "object"
+      },
+      "SearchResultInvite": {
+        "properties": {
+          "facets": {
+            "items": {
+              "$ref": "#/components/schemas/Facet"
+            },
+            "type": "array"
+          },
+          "ignored": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/InviteEvent"
             },
             "type": "array"
           },
@@ -37126,6 +37188,149 @@
         ]
       }
     },
+    "/search/v1/user/shares/{repository}": {
+      "post": {
+        "operationId": "getRecentUserShares",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Share direction",
+            "in": "query",
+            "name": "direction",
+            "schema": {
+              "enum": [
+                "fromUser",
+                "toUser",
+                "toUserOrGroups"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Type of element",
+            "in": "query",
+            "name": "contentType",
+            "schema": {
+              "enum": [
+                "FILES",
+                "FOLDERS",
+                "FILES_AND_FOLDERS",
+                "COLLECTIONS",
+                "TOOLPERMISSIONS",
+                "COLLECTION_PROPOSALS",
+                "ALL"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "maximum items per page",
+            "in": "query",
+            "name": "maxItems",
+            "schema": {
+              "default": 25,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "skip a number of items",
+            "in": "query",
+            "name": "skipCount",
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchParameters"
+              }
+            }
+          },
+          "description": "search parameters"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResultInvite"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Get nodes with shares from or for the current user",
+        "tags": [
+          "SEARCH v1"
+        ]
+      }
+    },
     "/sharing/v1/share/{repository}/info": {
       "post": {
         "operationId": "getShares_1",
@@ -37341,7 +37546,7 @@
         ]
       }
     },
-    "/sharing/v1/share/{repository}/reject": {
+    "/sharing/v1/share/{repository}/{node}/reject": {
       "post": {
         "operationId": "rejectShare",
         "parameters": [
@@ -37354,21 +37559,17 @@
               "default": "-home-",
               "type": "string"
             }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "items": {
-                  "format": "int64",
-                  "type": "integer"
-                },
-                "type": "array"
-              }
+          },
+          {
+            "description": "ID of node",
+            "in": "path",
+            "name": "node",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           }
-        },
+        ],
         "responses": {
           "200": {
             "description": "OK."
@@ -37431,7 +37632,7 @@
         ]
       }
     },
-    "/sharing/v1/share/{repository}/unreject": {
+    "/sharing/v1/share/{repository}/{node}/unreject": {
       "post": {
         "operationId": "unrejectShare",
         "parameters": [
@@ -37444,21 +37645,17 @@
               "default": "-home-",
               "type": "string"
             }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "items": {
-                  "format": "int64",
-                  "type": "integer"
-                },
-                "type": "array"
-              }
+          },
+          {
+            "description": "ID of node",
+            "in": "path",
+            "name": "node",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           }
-        },
+        ],
         "responses": {
           "200": {
             "description": "OK."

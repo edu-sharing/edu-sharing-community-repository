@@ -28,6 +28,7 @@ import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.UserShareDirection;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SearchVCard;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -605,9 +606,7 @@ public class SearchApi {
 
 	@POST
 	@Path("/user/recent/{repository}")
-
 	@Operation(summary = "Get nodes with recent events for current user")
-
 	@ApiResponses(
 			value = {
 					@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResultEvent.class))),
@@ -617,7 +616,6 @@ public class SearchApi {
 					@ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 					@ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
-
 	public Response getRecentUserEvents(
 			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
 			@Parameter(description = "Event types to search for", required = false) @QueryParam("eventType") List<ActivityOnNodeEventType> eventType,
@@ -643,6 +641,46 @@ public class SearchApi {
 			response.setFacets(events.getFacets());
 			response.setPagination(events.getPagination());
 
+			return Response.status(Response.Status.OK).entity(response).build();
+		} catch (DAOException e) {
+			return ErrorResponse.createResponse(e);
+		}
+	}
+
+	@POST
+	@Path("/user/shares/{repository}")
+	@Operation(summary = "Get nodes with shares from or for the current user")
+	@ApiResponses(
+			value = {
+					@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResultInvite.class))),
+					@ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+			})
+	public Response getRecentUserShares(
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "Share direction", required = false) @QueryParam("direction")UserShareDirection direction,
+			@Parameter(description = "Type of element", required = false) @QueryParam("contentType") SearchService.ContentType contentType,
+			@Parameter(description = "search parameters", required = false) SearchParameters parameters,
+			@Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue = "25")) @QueryParam("maxItems") Integer maxItems,
+			@Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount,
+			@Context HttpServletRequest req) {
+
+		try {
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+
+			SearchResult<UserShareDao> events = UserShareDao.getUserShares(
+					repoDao,
+					direction,
+					parameters.getCriteria(),
+					getSearchToken(contentType, maxItems, skipCount, null, null, parameters)
+			);
+			SearchResultInvite response = new SearchResultInvite();
+			response.setNodes(events.getNodes().stream().map(UserShareDao::asUserEvent).toList());
+			response.setFacets(events.getFacets());
+			response.setPagination(events.getPagination());
 			return Response.status(Response.Status.OK).entity(response).build();
 		} catch (DAOException e) {
 			return ErrorResponse.createResponse(e);

@@ -34,6 +34,7 @@ import {
     NodeService,
     ROOT,
     SearchResultEvent,
+    SearchResultInvite,
     SearchResultNode,
     SearchService,
     SearchServiceUnwrapped,
@@ -50,6 +51,7 @@ import { filter, first } from 'rxjs/operators';
 import { DashboardInteractivityStreamComponent } from './dashboard-interactivity-stream/dashboard-interactivity-stream.component';
 
 type StreamDetails = { key: string; result: SearchResultEvent; params: Params };
+type ShareDetails = { key: string; result: SearchResultInvite; params: Params };
 @Component({
     selector: 'es-dashboard-swimlane',
     providers: [NodeEntriesService],
@@ -75,7 +77,11 @@ export class DashboardSwimlaneComponent {
      */
     readonly swimlane = input.required<SwimlaneEntry>();
     readonly type = computed(() => {
-        return this.swimlane().id === 'recent-activities' ? 'interactivity-stream' : 'nodes';
+        return 'recent-activities' === this.swimlane().id
+            ? 'interactivity-stream-activities'
+            : 'shares' === this.swimlane().id
+            ? 'interactivity-stream-shares'
+            : 'nodes';
     });
     @ViewChild(NodeEntriesWrapperComponent)
     nodeNodeEntriesWrapperComponent: NodeEntriesWrapperComponent<Node>;
@@ -90,6 +96,7 @@ export class DashboardSwimlaneComponent {
     readonly maxItemsEvents = 6;
     columns = signal([]);
     streamEvents = signal(null as StreamDetails[]);
+    sharesEvents = signal(null as ShareDetails[]);
     displayType = signal(NodeEntriesDisplayType.Grid);
     globalOptions = signal<OptionItem[]>([]);
     routerLink = signal('');
@@ -218,10 +225,37 @@ export class DashboardSwimlaneComponent {
                             },
                         }),
                     ),
-                    params: { contentType: 'COLLECTIONS' },
+                    params: { contentType: k[1] as any },
                 });
             });
             this.streamEvents.set(events);
+        } else if (this.swimlane().id === 'shares') {
+            const events = [] as ShareDetails[];
+            [
+                ['fromUser', 'fromUser'],
+                ['toUser', 'toUser'],
+                ['toUserOrGroups', 'toUserOrGroups'],
+            ].forEach(async (k) => {
+                events.push({
+                    key: k[0],
+                    result: await firstValueFrom(
+                        this.searchService.search({
+                            metadataset: DEFAULT,
+                            query: null,
+                            type: 'shares',
+                            direction: k[1] as any,
+                            repository: HOME_REPOSITORY,
+                            contentType: 'ALL',
+                            maxItems: this.maxItemsEvents,
+                            body: {
+                                criteria: [],
+                            },
+                        }),
+                    ),
+                    params: { direction: k[1] as any },
+                });
+            });
+            this.sharesEvents.set(events);
         }
     }
 

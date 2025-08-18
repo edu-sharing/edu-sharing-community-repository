@@ -1480,7 +1480,38 @@
           }}
         </statement>
       </property>
-
+    </query>
+    <query join="AND" id="shared">
+      <basequery>{"bool":{
+        "should":[
+        {"match":{"type":"ccm:io"}},
+        {"match":{"type":"ccm:map"}}
+        ],
+        "minimum_should_match": 1
+        }}
+      </basequery>
+      <property name="ngsearchword">
+        <statement>
+          {"bool": {
+          "must_not": [
+          {"match":{"type":"ccm:notify"}},
+          {"match":{"aspects":"ccm:collection_io_reference"}}
+          ],
+          "should":[
+          {"wildcard":{"nodeRef.id": {"value": "${value}", "case_insensitive": true}}},
+          {"wildcard":{"content.fulltext": {"value": "${value}", "case_insensitive": true}}},
+          {"wildcard":{"properties.cm:name.keyword": {"value": "*${value}*", "case_insensitive": true}}},
+          {"wildcard":{"properties.cm:title.keyword": {"value": "*${value}*", "case_insensitive": true}}},
+          {"wildcard":{"properties.cclom:title.keyword": {"value": "*${value}*", "case_insensitive": true}}},
+          {"wildcard":{"properties.cclom:general_description.keyword": {"value": "*${value}*", "case_insensitive": true}}},
+          {"wildcard":{"properties.cclom:general_keyword.keyword": {"value": "*${value}*", "case_insensitive": true}}},
+          {"wildcard":{"i18n.de_DE.ccm:educationallearningresourcetype": {"value": "*${value}*", "case_insensitive": true}}},
+          {"wildcard":{"i18n.de_DE.ccm:educationalcontext": {"value": "*${value}*", "case_insensitive": true}}}
+          ],
+          "minimum_should_match": 1
+          }}
+        </statement>
+      </property>
       <property name="cclom:general_keyword">
         <multiple>true</multiple>
         <multiplejoin>OR</multiplejoin>
@@ -1488,16 +1519,6 @@
       <property name="ccm:educationallearningresourcetype">
         <multiple>true</multiple>
         <multiplejoin>OR</multiplejoin>
-      </property>
-      <property name="virtual:activityType">
-        <statement value="yours">
-          {"match": {"properties.cm:creator.keyword": "${user.cm:userName}" }}
-        </statement>
-        <statement value="areas">
-          {"bool":{"must_not":[
-          {"match": {"properties.cm:creator.keyword": "${user.cm:userName}" }}
-          ]}}
-        </statement>
       </property>
     </query>
     <query join="AND" id="workflowReceive">

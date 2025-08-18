@@ -109,4 +109,8 @@ public interface SearchService {
 	default org.edu_sharing.repository.server.SearchResult<SearchUserEvent> getRecentUserEvents(List<ActivityOnNodeEventType> filterByEvent, Map<String, String[]> searchCriteria, SearchToken searchToken) throws Exception {
 		return null;
 	}
+
+	default org.edu_sharing.repository.server.SearchResult<SearchInviteEvent> getUserShares(UserShareDirection direction, Map<String, String[]> searchCriteria, SearchToken searchToken) throws Exception {
+		return null;
+	}
 }

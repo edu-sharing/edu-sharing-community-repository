@@ -6,18 +6,20 @@
 </div>
 <div
   class="swimlane"
-  [class.swimlane-stream]="type() === 'interactivity-stream'"
+  [class.swimlane-stream]="
+    ['interactivity-stream-shares', 'interactivity-stream-activities'].includes(type())
+  "
   *ngIf="open | async"
   @openOverlay
 >
-  <ng-container class="swimlane-stream" *ngIf="type() === 'interactivity-stream'">
+  <ng-container class="swimlane-stream" *ngIf="type() === 'interactivity-stream-activities'">
     <div class="stream-lane" *ngFor="let event of streamEvents()">
       <h3 class="mat-heading-4">
         {{ 'DASHBOARD_SWIMLANE.' + swimlane().id + '.SUBTITLE.' + event.key | translate }}
       </h3>
       <es-dashboard-interactivity-stream
-        *ngIf="type() === 'interactivity-stream'"
         [events]="event.result.nodes"
+        [noResultsPlaceholder]="'DASHBOARD_SWIMLANE.NO_RESULTS'"
       >
       </es-dashboard-interactivity-stream>
       <div class="show-more">
@@ -27,6 +29,24 @@
       </div>
     </div>
   </ng-container>
+  <ng-container class="swimlane-stream" *ngIf="type() === 'interactivity-stream-shares'">
+    <div class="stream-lane" *ngFor="let event of sharesEvents()">
+      <h3 class="mat-heading-4">
+        {{ 'DASHBOARD_SWIMLANE.' + swimlane().id + '.SUBTITLE.' + event.key | translate }}
+      </h3>
+      <es-dashboard-interactivity-stream
+        [events]="event.result.nodes"
+        [noResultsPlaceholder]="'DASHBOARD_SWIMLANE_SHARES.NO_RESULTS'"
+      >
+      </es-dashboard-interactivity-stream>
+      <div class="show-more">
+        <a mat-button color="primary" [routerLink]="routerLink()" [queryParams]="event.params">
+          {{ 'DASHBOARD_SWIMLANE.SHOW_MORE' | translate }} <i esIcon="arrow_forward"></i>
+        </a>
+      </div>
+    </div>
+  </ng-container>
+
   <ng-container *ngIf="type() === 'nodes'">
     <es-node-entries-wrapper
       class="{{

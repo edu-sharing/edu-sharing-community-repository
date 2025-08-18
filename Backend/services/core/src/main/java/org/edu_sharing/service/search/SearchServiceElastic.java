@@ -15,6 +15,8 @@ import co.elastic.clients.transport.rest_client.RestClientOptions;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.vcard.VCard;
 import net.sourceforge.cardme.vcard.types.ExtendedType;
@@ -39,6 +41,7 @@ import org.edu_sharing.alfresco.service.guest.GuestConfig;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.generated.repository.backend.services.rest.client.model.ShareInfo;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
@@ -1573,10 +1576,6 @@ public class SearchServiceElastic extends SearchServiceImpl {
     @Override
     public org.edu_sharing.repository.server.SearchResult<SearchUserEvent> getRecentUserEvents(List<ActivityOnNodeEventType> filterByEvent, Map<String, String[]> searchCriteria, SearchToken searchToken) throws Exception {
         String username = AuthenticationUtil.getFullyAuthenticatedUser();
-        MetadataSet mds = MetadataHelper.getLocalDefaultMetadataset();
-        MetadataQueries queries = mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL);
-        MetadataQuery queryData = queries.findQuery("recentUserEvents");
-        String basequery = queryData.getPrimaryBasequery();
         Query childQuery = Query.of(q2 -> q2.hasChild(hc -> hc
                 .type("userEvent")
                 .scoreMode(ChildScoreMode.Min)
@@ -1618,6 +1617,111 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         )
                 )
         ));
+        return searchInternalWithChildQuery("recentUserEvents", searchCriteria, searchToken, childQuery, (data) -> {
+            Map userEvent = (Map) data.getInnerHits().get("userEvent").hits().hits().get(0).source().to(Map.class).get("userEvent");
+            return new SearchUserEvent(
+                    data.getNodeRef(),
+                    userEvent.get("initiator").toString(),
+                    new Date((Long) userEvent.get("timestamp")),
+                    ActivityOnNodeEventType.valueOf(userEvent.get("type").toString())
+            );
+        });
+    }
+    @Override
+    public org.edu_sharing.repository.server.SearchResult<SearchInviteEvent> getUserShares(UserShareDirection direction, Map<String, String[]> searchCriteria, SearchToken searchToken) throws Exception {
+        String username = AuthenticationUtil.getFullyAuthenticatedUser();
+        Query childQuery = BoolQuery.of(bool -> bool.must(
+                Query.of(q2 -> q2.hasChild(hc -> hc
+                        .type("share")
+                        .scoreMode(ChildScoreMode.Min)
+                        .query(cq -> cq.functionScore(fs -> fs
+                                .query(q3 -> q3.bool(b -> {
+                                    b = b.must(m -> m.term(t -> t
+                                            .field("share.shareStatus")
+                                            .value("SHARED")
+                                    ));
+                                    if (direction.equals(UserShareDirection.fromUser)) {
+                                        b = b.must(m -> m.term(t -> t
+                                                .field("share.sharedBy")
+                                                .value(username)
+                                        ));
+                                    } else if(direction.equals(UserShareDirection.toUser)) {
+                                        b = b.must(m -> m.term(t -> t
+                                                .field("share.sharedWith")
+                                                .value(username)
+                                        ));
+                                    } else if(direction.equals(UserShareDirection.toUserOrGroups)) {
+                                        b.minimumShouldMatch("1");
+                                        for(String group: getAllMemberships(username)) {
+                                            b = b.should(m -> m.term(t -> t
+                                                    .field("share.sharedWith")
+                                                    .value(group)
+                                            ));
+                                        }
+                                    }
+                                    return b;
+                                }))
+                                // TODO: Filter by event if present!
+                                .functions(f -> f.scriptScore(ss -> ss
+                                        .script(script -> script
+                                                .source("decayDateLinear(params.originDate, '1m', '0', 1.5, doc['userEvent.timestamp'].value)")
+                                                .params(Map.of("originDate", JsonData.of(Instant.now().toString())
+                                                        )
+                                                )
+                                        )))
+                                .boostMode(FunctionBoostMode.Replace)
+                        ))
+                        .innerHits(ih -> ih
+                                .name("userEvent")
+                                .size(1)
+                                .sort(so -> so
+                                        .field(sf -> sf
+                                                .field("userEvent.timestamp")
+                                                .order(SortOrder.Desc)
+                                        )
+                                )
+                        )
+                ))).must(
+                // filter rejected
+                Query.of(q2 -> q2.hasChild(hc -> hc
+                        .type("share")
+                        .query(cq -> cq.bool(qcb -> qcb.mustNot(
+                                        mn -> mn.bool(mnb -> mnb.must(
+                                                mnbm -> mnbm.term(t -> t
+                                                        .field("share.sharedWidth")
+                                                        .value(username)
+                                                )).must(
+                                                mnbm -> mnbm.term(t -> t
+                                                        .field("share.shareStatus")
+                                                        .value("REJECTED")
+                                                )
+                                        ))
+                                ))
+                        )
+                ))
+        ))._toQuery();
+        return searchInternalWithChildQuery("shared", searchCriteria, searchToken, childQuery, (data) -> {
+            Map share = (Map) data.getInnerHits().get("share").hits().hits().get(0).source().to(Map.class).get("share");
+            return new SearchInviteEvent(
+                    data.getNodeRef(),
+                    share.get("sharedBy").toString(),
+                    share.get("sharedWidth").toString(),
+                    new Date((Long) share.get("timestamp")),
+                    ShareInfo.ShareStatusEnum.valueOf(share.get("shareType").toString())
+            );
+        });
+    }
+    private<T> org.edu_sharing.repository.server.SearchResult<T> searchInternalWithChildQuery(
+            String queryId,
+            Map<String, String[]> searchCriteria,
+            SearchToken searchToken,
+            Query childQuery,
+            Function<ResultData,T> mapResult
+    ) throws Exception {
+        MetadataSet mds = MetadataHelper.getLocalDefaultMetadataset();
+        MetadataQueries queries = mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL);
+        MetadataQuery queryData = queries.findQuery(queryId);
+        String basequery = queryData.getPrimaryBasequery();
         BoolQuery.Builder builder = QueryBuilders.bool()
                 .filter(
                         filter -> filter.bool(MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, searchCriteria, true).build())
@@ -1637,18 +1741,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
         searchToken.setElasticQuery(builder.build());
         searchToken.setSortDefinition(SortDefinition.SORT_DEFINITION_SCORE_ASC);
         SearchResultNodeRef queryResult = search(searchToken, true);
-        org.edu_sharing.repository.server.SearchResult<SearchUserEvent> result = new org.edu_sharing.repository.server.SearchResult<>();
-        ArrayList<SearchUserEvent> list = new ArrayList<>();
+        org.edu_sharing.repository.server.SearchResult<T> result = new org.edu_sharing.repository.server.SearchResult<>();
+        ArrayList<T> list = new ArrayList<>();
         int i = 0;
         for (Hit<Map> elasticHit : queryResult.getElasticHits()) {
-            Map userEvent = (Map) elasticHit.innerHits().get("userEvent").hits().hits().get(0).source().to(Map.class).get("userEvent");
-            list.add(new SearchUserEvent(
-                            queryResult.getData().get(i++),
-                            userEvent.get("initiator").toString(),
-                            new Date((Long) userEvent.get("timestamp")),
-                            ActivityOnNodeEventType.valueOf(userEvent.get("type").toString())
-                    )
-            );
+            Map<String, InnerHitsResult> innerHits = elasticHit.innerHits();
+            NodeRef data = queryResult.getData().get(i++);
+            list.add(mapResult.apply(new ResultData(innerHits, data)));
         }
         result.setFacets(queryResult.getFacets());
 
@@ -1691,6 +1790,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         result.setNodeCount(queryResult.getNodeCount());
         return result;
     }
+
     @Override
     public SearchResultNodeRef getFilesSharedByMe(SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception {
         BoolQuery.Builder query = QueryBuilders.bool()
@@ -2607,5 +2707,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 .build()
         ));
         return searchAllByQuery(globalConditions.build(),null,index,null);
+    }
+
+    @Data
+    @AllArgsConstructor
+    private static class ResultData {
+        private Map<String, InnerHitsResult> innerHits;
+        private NodeRef nodeRef;
     }
 }

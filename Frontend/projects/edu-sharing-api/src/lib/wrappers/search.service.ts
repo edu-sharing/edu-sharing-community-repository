@@ -14,6 +14,7 @@ import * as apiModels from '../api/models';
 import { SearchV1Service } from '../api/services';
 import { onSubscription } from '../utils/rxjs-operators/on-subscription';
 import { LabeledValuesDict, MdsLabelService, RawValuesDict } from './mds-label.service';
+import { SearchResultInvite } from '../api/models';
 
 /** Configuration for `SearchService`. */
 export class SearchConfig {
@@ -48,8 +49,9 @@ export type FacetsDict = {
 export type DidYouMeanSuggestion = Pick<apiModels.Suggest, 'highlighted' | 'text'>;
 
 /** Parameters to be provided to `search`. */
-export type SearchRequestParams = Parameters<SearchV1Service['search']>[0] & {
-    type?: 'search' | 'recentActivity';
+export type SearchRequestParams = (Parameters<SearchV1Service['search']>[0] &
+    Partial<Parameters<SearchV1Service['getRecentUserShares']>[0]>) & {
+    type?: 'search' | 'shares' | 'recentActivity';
     /**
      * the metadataset id
      * Note: This will also be used to resolve facet labels!
@@ -63,7 +65,7 @@ export type SearchRequestParams = Parameters<SearchV1Service['search']>[0] & {
     criteriaFlat?: MdsQueryCriteria[];
 };
 
-export type GenericSearchResults = SearchResults | SearchResultEvent;
+export type GenericSearchResults = SearchResults | SearchResultEvent | SearchResultInvite;
 
 interface CompletedRequest {
     /** Parameters sent with the API request. */
@@ -147,6 +149,8 @@ export class SearchService {
             return this.searchV1.search(params);
         } else if (params.type === 'recentActivity') {
             return this.searchV1.getRecentUserEvents(params);
+        } else if (params.type === 'shares') {
+            return this.searchV1.getRecentUserShares(params);
         }
         throw new Error('invalid type: ' + params.type);
     }

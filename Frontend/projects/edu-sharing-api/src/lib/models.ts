@@ -75,6 +75,7 @@ export {
     RelationData,
     ReferenceEntries,
     SearchResultNode as SearchResults,
+    SearchResultInvite,
     SearchParameters,
     Repo as Repository,
     RefDashboardShortcutEntry,

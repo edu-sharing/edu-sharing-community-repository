@@ -47,6 +47,7 @@ type EventsGrouped = { [key in TimeGroups]?: UserEvent[] };
 export class DashboardInteractivityStreamComponent {
     readonly TimeGroups = TimeGroups;
     readonly events = input.required<UserEvent[]>();
+    readonly noResultsPlaceholder = input.required<string>();
     readonly eventsGrouped = computed(() => {
         const result: EventsGrouped = {};
         this.events()?.forEach((e) => {

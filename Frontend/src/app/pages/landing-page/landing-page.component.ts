@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { UIService } from 'ngx-edu-sharing-ui';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 
-export type SwimlaneTypes = 'featured-media' | 'collections' | 'recent-activities';
+export type SwimlaneTypes = 'featured-media' | 'collections' | 'recent-activities' | 'shares';
 export type SwimlaneEntry = {
     id: SwimlaneTypes;
     defaultExpanded: boolean;
@@ -53,6 +53,10 @@ export class LandingPageComponent implements OnInit {
         this.swimlanes.set(
             await this.configService.get<SwimlaneEntry[]>('frontpage.dashbaord.swimlanes', [
                 {
+                    id: 'recent-activities',
+                    defaultExpanded: true,
+                },
+                {
                     id: 'collections',
                     defaultExpanded: true,
                 },
@@ -61,7 +65,7 @@ export class LandingPageComponent implements OnInit {
                     defaultExpanded: true,
                 },
                 {
-                    id: 'recent-activities',
+                    id: 'shares',
                     defaultExpanded: true,
                 },
             ]),
