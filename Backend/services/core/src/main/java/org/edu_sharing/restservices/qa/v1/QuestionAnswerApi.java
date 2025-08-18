@@ -45,9 +45,8 @@ public class QuestionAnswerApi {
                     @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
-    public ResponseEntity<List<QAEntry>> createQAEntries(@Valid @PathParam("nodeId") String nodeId, List<CreateQAEntryDTO> qaEntries) {
-        List<QAEntry> result = qaService.createQAEntries(nodeId, qaEntries);
-        return ResponseEntity.ok(result);
+    public List<QAEntry> createQAEntries(@Valid @PathParam("nodeId") String nodeId, List<CreateQAEntryDTO> qaEntries) {
+        return qaService.createQAEntries(nodeId, qaEntries);
     }
 
 
@@ -62,9 +61,8 @@ public class QuestionAnswerApi {
                     @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
-    public ResponseEntity<List<QAEntry>> updateQAEntries(@Valid @PathParam("nodeId") String nodeId, List<UpdateQAEntryDTO> qaEntries) {
-        List<QAEntry> result = qaService.updateQAEntries(nodeId, qaEntries);
-        return ResponseEntity.ok(result);
+    public List<QAEntry> updateQAEntries(@Valid @PathParam("nodeId") String nodeId, List<UpdateQAEntryDTO> qaEntries) {
+        return qaService.updateQAEntries(nodeId, qaEntries);
     }
 
 
@@ -80,9 +78,9 @@ public class QuestionAnswerApi {
                     @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
-    public ResponseEntity<List<QAEntryResponseDTO>> getQAEntries(@PathParam("nodeId") String nodeId, @QueryParam("creator") String creator) {
+    public List<QAEntryResponseDTO> getQAEntries(@PathParam("nodeId") String nodeId, @QueryParam("creator") String creator) {
         Mapper mapper = new Mapper(RepositoryDao.getHomeRepository());
-        return ResponseEntity.ok(qaService.getAllQAEntriesOf(nodeId, creator).stream().map(mapper::map).collect(Collectors.toList()));
+        return qaService.getAllQAEntriesOf(nodeId, creator).stream().map(mapper::map).collect(Collectors.toList());
     }
 
     @DELETE
