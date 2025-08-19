@@ -2131,6 +2131,13 @@
             ],
             "type": "string"
           },
+          "shareType": {
+            "enum": [
+              "AUTHORITY",
+              "LINK"
+            ],
+            "type": "string"
+          },
           "sharedBy": {
             "$ref": "#/components/schemas/UserSimple"
           },
