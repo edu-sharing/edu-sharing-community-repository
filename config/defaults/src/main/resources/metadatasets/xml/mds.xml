@@ -665,6 +665,16 @@
         <entry icon="place">areas</entry>
       </values>
     </widget>
+    <widget>
+      <id>virtual:shareDirection</id>
+      <caption>cp_virtual_shareDirection</caption>
+      <valuespace_i18n_prefix>shareDirection_</valuespace_i18n_prefix>
+      <values>
+        <entry icon="send">fromUser</entry>
+        <entry icon="person">toUser</entry>
+        <entry icon="group">toUserOrGroups</entry>
+      </values>
+    </widget>
   </widgets>
   <templates>
     <template>
@@ -1007,6 +1017,12 @@
 				]]></html>
     </template>
     <template>
+      <id>editorial_share</id>
+      <html><![CDATA[
+              <ccm:educationallearningresourcetype type="facetList">
+				]]></html>
+    </template>
+    <template>
       <id>connector_curriculum</id>
       <html><![CDATA[
 				<curriculum_title>
@@ -1215,6 +1231,13 @@
       <rendering>angular</rendering>
       <views>
         <view>editorial_activity</view>
+      </views>
+    </group>
+    <group>
+      <id>editorial_share</id>
+      <rendering>angular</rendering>
+      <views>
+        <view>editorial_share</view>
       </views>
     </group>
   </groups>
