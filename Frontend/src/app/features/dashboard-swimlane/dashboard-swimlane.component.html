@@ -17,10 +17,7 @@
       <h3 class="mat-heading-4">
         {{ 'DASHBOARD_SWIMLANE.' + swimlane().id + '.SUBTITLE.' + event.key | translate }}
       </h3>
-      <es-dashboard-interactivity-stream
-        [events]="event.result.nodes"
-        [noResultsPlaceholder]="'DASHBOARD_SWIMLANE.NO_RESULTS'"
-      >
+      <es-dashboard-interactivity-stream [events]="event.result.nodes" [type]="'activity'">
       </es-dashboard-interactivity-stream>
       <div class="show-more">
         <a mat-button color="primary" [routerLink]="routerLink()" [queryParams]="event.params">
@@ -34,10 +31,7 @@
       <h3 class="mat-heading-4">
         {{ 'DASHBOARD_SWIMLANE.' + swimlane().id + '.SUBTITLE.' + event.key | translate }}
       </h3>
-      <es-dashboard-interactivity-stream
-        [events]="event.result.nodes"
-        [noResultsPlaceholder]="'DASHBOARD_SWIMLANE_SHARES.NO_RESULTS'"
-      >
+      <es-dashboard-interactivity-stream [events]="event.result.nodes" [type]="'share'">
       </es-dashboard-interactivity-stream>
       <div class="show-more">
         <a mat-button color="primary" [routerLink]="routerLink()" [queryParams]="event.params">

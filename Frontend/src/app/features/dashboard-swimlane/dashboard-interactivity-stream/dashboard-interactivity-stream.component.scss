@@ -6,7 +6,7 @@
     flex-direction: column;
     gap: 10px;
 }
-.time-group {
+.time-wrapper {
     > label {
         display: flex;
         font-weight: bold;
@@ -17,6 +17,13 @@
         .timestamp {
             color: var(--textLight);
             font-size: var(--fontSizeXSmall);
+        }
+        .info-group {
+            display: flex;
+            gap: 5px;
+        }
+        .action {
+            font-weight: bold;
         }
     }
 }

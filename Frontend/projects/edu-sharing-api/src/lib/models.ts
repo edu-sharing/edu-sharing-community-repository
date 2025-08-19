@@ -76,6 +76,7 @@ export {
     ReferenceEntries,
     SearchResultNode as SearchResults,
     SearchResultInvite,
+    InviteEvent,
     SearchParameters,
     Repo as Repository,
     RefDashboardShortcutEntry,

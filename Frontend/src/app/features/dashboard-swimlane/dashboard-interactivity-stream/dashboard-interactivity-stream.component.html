@@ -1,6 +1,5 @@
-<div class="time-group" *ngFor="let events of eventsGrouped()">
-  <label>{{ 'DASHBOARD_SWIMLANE.STREAM.TIMEGROUP.' + events.key | translate }}</label>
-  <div class="event" *ngFor="let event of events.events">
+<div class="time-wrapper">
+  <div class="event" *ngFor="let event of events()">
     <div class="details">
       <!--
       <div
@@ -20,39 +19,37 @@
         "
       ></div>
       -->
-      <div
-        [innerHTML]="
-          'DASHBOARD_SWIMLANE.STREAM.EVENT_INFO_PERSONAL'
-            | translate
-              : {
-                  initiator: (event.initiator | authorityName),
-                  event:
-                    ('EVENT.TYPE.' + event.eventType | translate : { fallback: event.eventType }),
-                  element:
-                    '<a href=\'' +
-                    (event.node | esNodeUrl) +
-                    '\'>' +
-                    (event.node | nodeTitle) +
-                    '</a>'
-                }
-        "
-      ></div>
+      <div class="info-group">
+        <es-node-url [node]="event.node">
+          {{ event.node | nodeTitle }}
+        </es-node-url>
+        <div class="action">
+          <ng-container *ngIf="type() === 'activity'">
+            {{
+              'EVENT.TYPE.' + $any(event).eventType
+                | translate : { fallback: $any(event).eventType }
+            }}
+          </ng-container>
+
+          <ng-container *ngIf="type() === 'share'">
+            {{ 'DASHBOARD_SWIMLANE.SHARE.INFO_MESSAGE' | translate }}
+          </ng-container>
+        </div>
+      </div>
     </div>
     <div class="timestamp">
       {{
         event.timestamp
           | formatDate
-            : {
-                async: true,
-                relative: [TimeGroups.Today, TimeGroups.Yesterday].includes(events.key),
-                time: [TimeGroups.Today, TimeGroups.Yesterday].includes(events.key),
-                date: ![TimeGroups.Today, TimeGroups.Yesterday].includes(events.key)
-              }
+          : {
+            async: true,
+            relative: true,
+          }
           | async
       }}
     </div>
   </div>
 </div>
-<div class="empty" *ngIf="eventsGrouped().length < 1">
-  {{ noResultsPlaceholder() | translate }}
+<div class="empty" *ngIf="events().length < 1">
+  {{ 'DASHBOARD_SWIMLANE.' + type().toUpperCase() + '.EMPTY' | translate }}
 </div>

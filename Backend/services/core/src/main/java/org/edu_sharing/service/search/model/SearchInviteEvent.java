@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.edu_sharing.generated.repository.backend.services.rest.client.model.ShareInfo;
 import org.edu_sharing.service.model.NodeRef;
-import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 
 import java.util.Date;
 
@@ -15,5 +14,6 @@ public class SearchInviteEvent {
     String sharedBy;
     String sharedWith;
     Date timestamp;
+    ShareInfo.ShareTypeEnum shareType;
     ShareInfo.ShareStatusEnum shareStatus;
 }

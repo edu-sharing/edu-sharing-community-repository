@@ -1518,9 +1518,7 @@
     "documentation": "Zur Dokumentation"
   },
   "DASHBOARD_SWIMLANE": {
-    "STREAM": {
-      "SHARED_INFO": "{{initiator}} gab Ihnen {{element}} frei",
-      "EVENT_INFO_PERSONAL": "Sie haben {{element}} {{event}}",
+    "ACTIVITY": {
       "EMPTY": "Keine kürzlichen Aktivitäten",
       "TIMEGROUP": {
         "Today": "heute",
@@ -1530,13 +1528,25 @@
         "Older": "älter"
       }
     },
+    "SHARE": {
+      "EMPTY": "Keine Freigaben",
+      "INFO_MESSAGE": "freigegeben"
+    },
     "SHOW_MORE": "zeige mir alle",
-    "NO_RESULTS": "Keine Inhalte verfügbar",
+    "NO_RESULTS": "Keine Elemente verfügbar",
     "featured-media": {
       "TITLE": "Ihre Mediathek"
     },
     "collections": {
       "TITLE": "Ihre Sammlungen"
+    },
+    "shares": {
+      "TITLE": "Letzte Freigaben für Sie",
+      "SUBTITLE": {
+        "fromUser": "von Mir",
+        "toUser": "an Mich",
+        "toUserOrGroups": "an Mich oder meine Gruppen"
+      }
     },
     "recent-activities": {
       "TITLE": "Letzte Aktivitäten",

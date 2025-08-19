@@ -1664,7 +1664,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                 // TODO: Filter by event if present!
                                 .functions(f -> f.scriptScore(ss -> ss
                                         .script(script -> script
-                                                .source("decayDateLinear(params.originDate, '1m', '0', 1.5, doc['userEvent.timestamp'].value)")
+                                                .source("decayDateLinear(params.originDate, '1m', '0', 1.5, doc['share.timestamp'].value)")
                                                 .params(Map.of("originDate", JsonData.of(Instant.now().toString())
                                                         )
                                                 )
@@ -1672,11 +1672,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                 .boostMode(FunctionBoostMode.Replace)
                         ))
                         .innerHits(ih -> ih
-                                .name("userEvent")
+                                .name("share")
                                 .size(1)
                                 .sort(so -> so
                                         .field(sf -> sf
-                                                .field("userEvent.timestamp")
+                                                .field("share.timestamp")
                                                 .order(SortOrder.Desc)
                                         )
                                 )
@@ -1705,9 +1705,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
             return new SearchInviteEvent(
                     data.getNodeRef(),
                     share.get("sharedBy").toString(),
-                    share.get("sharedWidth").toString(),
+                    share.get("sharedWith").toString(),
                     new Date((Long) share.get("timestamp")),
-                    ShareInfo.ShareStatusEnum.valueOf(share.get("shareType").toString())
+                    ShareInfo.ShareTypeEnum.valueOf(share.get("shareType").toString()),
+                    ShareInfo.ShareStatusEnum.valueOf(share.get("shareStatus").toString())
             );
         });
     }

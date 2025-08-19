@@ -13,8 +13,6 @@ import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.UserShareDirection;
 import org.edu_sharing.service.search.model.SearchInviteEvent;
 import org.edu_sharing.service.search.model.SearchToken;
-import org.edu_sharing.service.search.model.SearchUserEvent;
-import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Date;
@@ -75,6 +73,7 @@ public class UserShareDao {
                 PersonDao.getPerson(this.repoDao, this.event.getSharedBy()).asPersonSimple(false),
                 PersonDao.getPerson(this.repoDao, this.event.getSharedWith()).asPersonSimple(false),
                 this.event.getTimestamp(),
+                this.event.getShareType(),
                 this.event.getShareStatus()
         );
     }
@@ -86,6 +85,7 @@ public class UserShareDao {
         private UserSimple sharedBy;
         private UserSimple sharedWidth;
         private Date timestamp;
+        private ShareInfo.ShareTypeEnum shareType;
         private ShareInfo.ShareStatusEnum shareStatus;
     }
 }
