@@ -43,8 +43,6 @@ public class PDFReport {
 
     public File report(Data reportData, File dir){
 
-        String userName = reportData.getUserName();
-
         // @TODO get locale for exported user
         final Context ctx = new Context(LocaleUtils.toLocale(Locale.GERMANY));
         ctx.setVariable("data",reportData);
