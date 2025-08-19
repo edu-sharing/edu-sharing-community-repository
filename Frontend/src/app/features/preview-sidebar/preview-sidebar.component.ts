@@ -10,7 +10,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
-import { Subject } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import { map, takeUntil, tap } from 'rxjs/operators';
 import { RestHelper } from '../../core-module/core.module';
 import { CardDialogRef } from '../dialogs/card-dialog/card-dialog-ref';
@@ -63,6 +63,17 @@ export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
         this.previewSidebarService.unregisterInstance(this);
     }
 
+    async updateNode(node: Node): Promise<void> {
+        this.node = node;
+        const isMobileScreen: boolean = await firstValueFrom(this.getIsMobileScreen());
+        if (isMobileScreen && !this.modalDialogRef) {
+            // setTimeout is currently necessary to wait for the view being rendered
+            setTimeout(async (): Promise<void> => {
+                await this.openAsDialog();
+            });
+        }
+    }
+
     private registerDialogOnMobile(): void {
         let dialogRefPromise: Promise<CardDialogRef<unknown>>;
         let isMobileScreen: boolean;
@@ -84,6 +95,10 @@ export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
     }
 
     private async openAsDialog() {
+        if (!this.node) {
+            this.modalDialogRef = null;
+            return;
+        }
         this.modalDialogRef = await this.dialogs.openGenericDialog({
             title: RestHelper.getTitle(this.node),
             avatar: { kind: 'image', url: this.node.iconURL },
