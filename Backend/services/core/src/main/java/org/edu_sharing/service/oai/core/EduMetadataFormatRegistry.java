@@ -1,11 +1,9 @@
 package org.edu_sharing.service.oai.core;
 
 import io.gdcc.xoai.dataprovider.model.MetadataFormat;
-import org.bouncycastle.util.Arrays;
 import org.edu_sharing.service.oai.formats.OaiMetadataFormatWriter;
 import org.edu_sharing.spring.scope.refresh.annotations.RefreshScope;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -34,12 +32,8 @@ public class EduMetadataFormatRegistry {
 
     private final Map<String, OaiMetadataFormatWriter> formatWriterMap;
 
-    public EduMetadataFormatRegistry( @Value("${exporter.oai.formats}") String[] supportedFormats,  List<OaiMetadataFormatWriter> metadataFormatWriterList) {
+    public EduMetadataFormatRegistry(List<OaiMetadataFormatWriter> metadataFormatWriterList) {
         Stream<OaiMetadataFormatWriter> stream = metadataFormatWriterList.stream();
-        if(!Arrays.isNullOrEmpty(supportedFormats)) {
-            List<String> formats = List.of(supportedFormats);
-            stream = stream.filter(x -> formats.contains(x.getFormat().getPrefix()));
-        }
         formatWriterMap = stream.collect(Collectors.toMap(x -> x.getFormat().getPrefix(), x -> x));
     }
 
