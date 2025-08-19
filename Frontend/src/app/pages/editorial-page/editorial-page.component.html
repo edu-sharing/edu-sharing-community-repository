@@ -69,7 +69,7 @@
         </mat-tab>
       </mat-tab-group>
       <ng-container *ngIf="(params$ | async).primaryMode as mode">
-        <ng-container *ngIf="mode === 'activity'">
+        <ng-container *ngIf="mode === 'activity' || mode === 'share'">
           <es-node-entries-wrapper
             [primaryInstance]="true"
             [dataSource]="dataSource"
@@ -84,7 +84,7 @@
           >
             <ng-template #empty>
               <div class="empty">
-                {{ 'EDITORIAL.ACTIVITY.NO_RECENT_ACTIVITIES' | translate }}
+                {{ 'EDITORIAL.' + mode.toUpperCase() + '.EMPTY' | translate }}
               </div>
             </ng-template>
           </es-node-entries-wrapper>

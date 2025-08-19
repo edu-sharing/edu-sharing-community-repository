@@ -322,6 +322,9 @@
       "VIEW_MATERIAL_PLAY_MEDIA": "Wiedergaben"
     }
   },
+  "SHARE": {
+    "timestamp": "Zeitpunkt"
+  },
   "EVENT": {
     "eventType": "Aktion",
     "timestamp": "Zeitpunkt",

@@ -25,7 +25,7 @@
     {{ $any(getNode())[item.name] }}
   </span>
 </ng-container>
-<ng-container [ngSwitch]="item.name" *ngIf="item.type === 'EVENT'">
+<ng-container [ngSwitch]="item.name" *ngIf="item.type === 'EVENT' || item.type === 'SHARE'">
   <span *ngSwitchCase="'eventType'">
     {{
       'EVENT.TYPE.' + $any(getNode()).eventType

@@ -8,7 +8,8 @@ export type ListItemType =
     | 'ORG'
     | 'GROUP'
     | 'USER'
-    | 'EVENT';
+    | 'EVENT'
+    | 'SHARE';
 
 /**
  * A list item info, which is basically a column

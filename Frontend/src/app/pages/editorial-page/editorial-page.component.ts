@@ -12,10 +12,13 @@ import {
     ConfigService,
     DEFAULT,
     HOME_REPOSITORY,
+    InviteEvent,
+    LoginInfo,
     MdsDefinition,
     MdsService,
     Node,
     SearchResultEvent,
+    SearchResultInvite,
     SearchResults,
     SearchService,
     SearchServiceUnwrapped,
@@ -33,6 +36,8 @@ import { RestConstants } from '../../core-module/rest/rest-constants';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
     ActionbarComponent,
+    Constrain,
+    DefaultGroups,
     ElementType,
     FetchEvent,
     Helper,
@@ -44,6 +49,7 @@ import {
     NodeEntriesDataType,
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
+    OptionItem,
     OptionItemToggle,
     Scope,
     SearchHelperService,
@@ -60,8 +66,9 @@ import { EditorialPageService } from './editorial-page.service';
 import { debounceTime, delay, distinctUntilChanged, first, startWith, tap } from 'rxjs/operators';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { SelectionModel } from '@angular/cdk/collections';
+import { DialogsService } from '../../features/dialogs/dialogs.service';
 
-export type PrimaryMode = 'activity';
+export type PrimaryMode = 'activity' | 'share';
 type RouteConfig = {
     primaryMode: PrimaryMode;
 };
@@ -76,6 +83,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     readonly HOME_REPOSITORY = HOME_REPOSITORY;
     readonly PageCount = 25;
     readonly TabWidgetActivities = 'virtual:activityType';
+    readonly TabWidgetShares = 'virtual:shareDirection';
     readonly InteractionType = InteractionType;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Scope = Scope;
@@ -92,6 +100,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
      */
     mdsGroup = signal<string>(null);
     params$ = new BehaviorSubject<RouteConfig>(null);
+    loginInfo$ = new BehaviorSubject<LoginInfo>(null);
     queryParams$ = new BehaviorSubject<Params>(null);
     tabSelection$ = new BehaviorSubject<number>(0);
     searchValues$ = new BehaviorSubject<Values>({});
@@ -116,6 +125,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         private router: Router,
         private route: ActivatedRoute,
         private breakpointObserver: BreakpointObserver,
+        private dialogs: DialogsService,
         private mdsService: MdsService,
         private mainNav: MainNavService,
         private searchFieldService: SearchFieldService,
@@ -130,6 +140,9 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         this.isMobile$.pipe(first()).subscribe((mobile) => {
             this.sidenavRight.set(!mobile);
         });
+        this.authenticationService
+            .observeLoginInfo()
+            .subscribe((loginInfo) => this.loginInfo$.next(loginInfo));
         this.mainNav.setMainNavConfig({
             showUser: true,
             showScope: true,
@@ -173,6 +186,10 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     ngAfterViewInit(): void {
+        this.prepareOptions();
+    }
+
+    private prepareOptions() {
         this.sidebarOptionToggle = new OptionItemToggle(
             {
                 enabled: 'EDITORIAL.OPTION.TOGGLE_SIDEBAR',
@@ -186,11 +203,30 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             () => this.sidenavRight.set(!this.sidenavRight()),
         );
         this.sidebarOptionToggle.elementType = [];
+        const reject = new OptionItem('EDITORIAL.OPTION.REJECT_SHARE', 'cancel', () => {
+            void this.dialogs.openRejectShareDialog({
+                shareId: null,
+            });
+        });
+        reject.elementType = [ElementType.Node, ElementType.SavedSearch];
+        reject.constrains = [Constrain.User];
+        reject.group = DefaultGroups.Delete;
+        reject.showAsAction = true;
+        reject.customShowCallback = async (nodes) => {
+            return (
+                this.params$.value.primaryMode === 'share' &&
+                nodes.every(
+                    (n) =>
+                        (n as unknown as { share: InviteEvent }).share.sharedBy.authorityName !==
+                        this.loginInfo$.value?.authorityName,
+                )
+            );
+        };
         void this.nodeEntriesRef?.initOptionsGenerator({
             actionbar: this.actionbarRef,
             customOptions: {
                 useDefaultOptions: true,
-                addOptions: [this.sidebarOptionToggle],
+                addOptions: [this.sidebarOptionToggle, reject],
             },
         });
     }
@@ -230,6 +266,30 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                     console.warn(
                         'Can not register tabs since widget definition was not found',
                         this.TabWidgetActivities,
+                    );
+                } else {
+                    this.editorialPageService.registerTabsFromWidget(widget);
+                }
+            } else if (p.primaryMode === 'share') {
+                this.columns.set([
+                    new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
+                    new ListItem('SHARE', 'timestamp'),
+                ]);
+                this.mdsDefinition$.next(
+                    await firstValueFrom(
+                        this.mdsService.getMetadataSet({ repository: HOME_REPOSITORY }),
+                    ),
+                );
+                const widget = MdsHelperService.getWidget(
+                    this.TabWidgetShares,
+                    null,
+                    this.mdsDefinition$.value.widgets,
+                );
+                this.mdsGroup.set('editorial_share');
+                if (widget == null) {
+                    console.warn(
+                        'Can not register tabs since widget definition was not found',
+                        this.TabWidgetShares,
                     );
                 } else {
                     this.editorialPageService.registerTabsFromWidget(widget);
@@ -355,7 +415,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                         criteria: searchCriteria,
                     },
                 })
-                .subscribe((events: SearchResultEvent) => {
+                .subscribe((events) => {
                     this.dataSource.isLoading = false;
                     this.dataSource.setData(
                         events.nodes.map((e) => {
@@ -364,6 +424,50 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                                 event: {
                                     eventType: e.eventType,
                                     initiator: e.initiator,
+                                    timestamp: e.timestamp,
+                                },
+                            };
+                        }),
+                        events.pagination,
+                    );
+                });
+        } else if (routeConfig.primaryMode === 'share') {
+            const searchCriteria = this.searchHelperService.convertCritieria(
+                {
+                    ...criteria,
+                    ...(ngsearchword
+                        ? { [RestConstants.PRIMARY_SEARCH_CRITERIA]: [ngsearchword] }
+                        : {}),
+                },
+                mds.widgets,
+                true,
+            );
+            this.searchService
+                .search<SearchResultInvite>({
+                    type: 'shares',
+                    metadataset: DEFAULT,
+                    query: null,
+                    repository: HOME_REPOSITORY,
+                    contentType: 'ALL',
+                    direction: this.editorialPageService.buildSearchCriteria(
+                        this.tabSelection$.value,
+                    )[this.TabWidgetShares] as any,
+                    ...pagination,
+                    body: {
+                        facetLimit: 5,
+                        facetMinCount: 1,
+                        criteria: searchCriteria,
+                    },
+                })
+                .subscribe((events) => {
+                    this.dataSource.isLoading = false;
+                    this.dataSource.setData(
+                        events.nodes.map((e) => {
+                            return {
+                                ...e.node,
+                                share: {
+                                    sharedWith: e.sharedWith,
+                                    sharedBy: e.sharedBy,
                                     timestamp: e.timestamp,
                                 },
                             };

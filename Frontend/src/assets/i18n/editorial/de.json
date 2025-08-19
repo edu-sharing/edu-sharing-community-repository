@@ -3,13 +3,20 @@
     "SEARCH_PLACEHOLDER": {
       "ACTIVITY": "Aktivitätenliste durchsuchen..."
     },
+    "OPTION": {
+      "REJECT_SHARE": "Freigabe ausblenden"
+    },
     "TITLE": "Verwalten",
     "BREADCRUMB": {
       "HOME": "Startseite",
-      "ACTIVITY": "Aktivitäten"
+      "ACTIVITY": "Aktivitäten",
+      "SHARE": "Freigaben"
     },
     "ACTIVITY": {
-      "NO_RECENT_ACTIVITIES": "Keine kürzlichen Aktivitäten gefunden"
+      "EMPTY": "Keine kürzlichen Aktivitäten gefunden"
+    },
+    "SHARE": {
+      "EMPTY": "Keine Freigaben gefunden"
     }
   }
 }

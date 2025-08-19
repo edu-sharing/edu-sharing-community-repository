@@ -673,6 +673,32 @@ export class DialogsService {
             closable: Closable.Casual,
         });
     }
+    async openRejectShareDialog(data: { shareId: string[] }) {
+        return this.openGenericDialog({
+            title: 'SHARE_REJECT.TITLE',
+            subtitle: 'SHARE_REJECT.SUBTITLE',
+            message: 'SHARE_REJECT.MESSAGE',
+            minHeight: 240,
+            minWidth: 500,
+            closable: Closable.Casual,
+            buttons: [
+                {
+                    config: {
+                        color: 'standard',
+                        position: 'standard',
+                    },
+                    label: 'CANCEL',
+                },
+                {
+                    config: {
+                        color: 'primary',
+                        position: 'standard',
+                    },
+                    label: 'SHARE_REJECT.CONFIRM',
+                },
+            ],
+        });
+    }
 
     async openDeleteNodesDialog(
         data: DeleteNodesDialogData,

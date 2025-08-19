@@ -22,6 +22,7 @@ export class ListItemLabelPipe implements PipeTransform {
             GROUP: 'GROUP',
             USER: 'USER',
             EVENT: 'EVENT',
+            SHARE: 'SHARE',
         };
         if (item.label) {
             return rxjs.of(item.label);
