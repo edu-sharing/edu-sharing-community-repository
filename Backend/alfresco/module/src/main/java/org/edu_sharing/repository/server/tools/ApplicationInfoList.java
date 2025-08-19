@@ -236,7 +236,7 @@ public class ApplicationInfoList {
 		return getHomeRepository();
 	}
 	
-	public static void refresh(){
+	public static synchronized void refresh(){
 		logger.debug("calling");
 		appInfos.clear();
 		getApplicationInfos();

@@ -29,4 +29,6 @@
     <property name="dataSource" ref="defaultDataSource"/>
   </bean>
 
+  <bean id="applicationInfoSource" class="org.edu_sharing.alfresco.monitoring.ApplicationInfoMBeanImpl"/>
+
 </beans>

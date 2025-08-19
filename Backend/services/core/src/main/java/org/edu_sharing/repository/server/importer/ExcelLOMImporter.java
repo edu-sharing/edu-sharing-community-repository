@@ -89,6 +89,8 @@ public class ExcelLOMImporter {
 					folderProps.put(QName.createQName(CCConstants.CM_NAME), folderName);
 					folderProps.put(QName.createQName(CCConstants.CM_PROP_C_TITLE), folderName);
 					parentFolder = nodeService.createNode(targetFolderNodeRef,assocTypeContains, QName.createQName(folderName),  QName.createQName(CCConstants.CCM_TYPE_MAP),folderProps).getChildRef().getId();
+				}else{
+					parentFolder = currentFolder.getId();
 				}
 				
 				try{
