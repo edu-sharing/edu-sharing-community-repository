@@ -2141,7 +2141,7 @@
           "sharedBy": {
             "$ref": "#/components/schemas/UserSimple"
           },
-          "sharedWidth": {
+          "sharedWith": {
             "$ref": "#/components/schemas/UserSimple"
           },
           "timestamp": {

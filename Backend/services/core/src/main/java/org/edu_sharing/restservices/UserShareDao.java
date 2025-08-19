@@ -83,7 +83,7 @@ public class UserShareDao {
     public static class InviteEvent {
         private Node node;
         private UserSimple sharedBy;
-        private UserSimple sharedWidth;
+        private UserSimple sharedWith;
         private Date timestamp;
         private ShareInfo.ShareTypeEnum shareType;
         private ShareInfo.ShareStatusEnum shareStatus;
