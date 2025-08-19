@@ -885,14 +885,15 @@ public class SearchServiceElastic extends SearchServiceImpl {
         // mds specialFilter processing on per-query basis
         if (query != null) {
             for (MetadataQuery.SpecialFilter filter : query.getSpecialFilter()) {
+                // we use "path" instead of "fullpath" since query performance of wildcard queries is worse
                 if (MetadataQuery.SpecialFilter.exclude_system_folder.equals(filter)) {
-                    queryBuilderGlobalConditions.mustNot(mustNot -> mustNot.wildcard(wild -> wild.field("fullpath").value("*/" + SystemFolder.getSystemFolderBase().getId() + "*")));
+                    queryBuilderGlobalConditions.mustNot(mustNot -> mustNot.match(wild -> wild.field("path").query(SystemFolder.getSystemFolderBase().getId())));
                 } else if (MetadataQuery.SpecialFilter.exclude_sites_folder.equals(filter)) {
-                    queryBuilderGlobalConditions.mustNot(mustNot -> mustNot.wildcard(wild -> wild.field("fullpath").value("*/" + SystemFolder.getSitesFolder().getId() + "*")));
+                    queryBuilderGlobalConditions.mustNot(mustNot -> mustNot.match(wild -> wild.field("path").query(SystemFolder.getSitesFolder().getId())));
                 } else if (MetadataQuery.SpecialFilter.exclude_people_folder.equals(filter)) {
                     org.alfresco.service.cmr.repository.NodeRef personFolder = SystemFolder.getPersonFolder();
                     if (personFolder != null) {
-                        queryBuilderGlobalConditions.mustNot(mustNot -> mustNot.wildcard(wild -> wild.field("fullpath").value("*/" + SystemFolder.getPersonFolder().getId() + "*")));
+                        queryBuilderGlobalConditions.mustNot(mustNot -> mustNot.match(wild -> wild.field("path").query(SystemFolder.getPersonFolder().getId())));
                     } else {
                         logger.warn("People folder unknown, elastic query is skipping special filter");
                     }
