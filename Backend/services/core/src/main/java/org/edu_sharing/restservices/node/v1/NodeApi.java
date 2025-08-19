@@ -1650,8 +1650,9 @@ public class NodeApi  {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-	    	
-	    	NodeDao newNode = nodeDao.changeContent(inputStream, mimetype, versionComment);
+
+			//use tika framework for mimetype detection
+	    	NodeDao newNode = nodeDao.changeContent(inputStream, null, versionComment);
 	    	
 	    	NodeEntry response = new NodeEntry();
 	    	response.setNode(newNode.asNode());
