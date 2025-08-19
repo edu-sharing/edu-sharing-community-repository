@@ -40,9 +40,11 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
 import org.alfresco.service.transaction.TransactionService;
 import org.alfresco.util.ISO8601DateFormat;
+import org.alfresco.util.TempFileProvider;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tika.mime.MediaType;
 import org.edu_sharing.alfresco.HasPermissionsWork;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
@@ -83,6 +85,8 @@ import org.springframework.extensions.surf.util.I18NUtil;
 import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -1582,6 +1586,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         final String encoding = (_encoding == null) ? "UTF-8" : _encoding;
         log.debug("called nodeID:" + nodeID + " store:" + store + " mimetype:" + mimetype + " property:" + property);
 
+        File tempFile = TempFileProvider.createTempFile("edu_mimedetect.", ".bin");
         RetryingTransactionCallback callback = () -> {
 
             NodeRef nodeRef = new NodeRef(store, nodeID);
@@ -1592,20 +1597,31 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                         ", URL:" + contentWriter.getContentData().getContentUrl() +
                         ", MimeType:" + contentWriter.getContentData().getMimetype() + "" +
                         ", ContentData ToString:" + contentWriter.getContentData().toString());
-                        if(onComplete != null) {
-                            onComplete.run();
-                        }
+                if(onComplete != null) {
+                    onComplete.run();
+                }
+                tempFile.delete();
             });
 
             String finalMimeType = mimetype;
+            contentWriter.setEncoding(encoding);
+            InputStream finalContent = content;
             if (StringUtils.isBlank(finalMimeType)) {
-                finalMimeType = MCAlfrescoAPIClient.this.guessMimetype(MCAlfrescoAPIClient.this.getProperty(storeRef, nodeID, CCConstants.CM_NAME));
+                //finalMimeType = MCAlfrescoAPIClient.this.guessMimetype(MCAlfrescoAPIClient.this.getProperty(storeRef, nodeID, CCConstants.CM_NAME));
+
+                Files.copy(content, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                try(InputStream in = Files.newInputStream(tempFile.toPath()) ){
+                    String filename = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+                    MediaType mediaType = NodeCustomizationPolicies.getMediaType(filename, in);
+                    finalMimeType = mediaType.toString();
+                }
+                finalContent = Files.newInputStream(tempFile.toPath());
             }
 
-            contentWriter.setMimetype(finalMimeType);
-            contentWriter.setEncoding(encoding);
-            contentWriter.putContent(content);
-
+            try(InputStream in = finalContent){
+                contentWriter.setMimetype(finalMimeType);
+                contentWriter.putContent(in);
+            }
             return null;
         };
         TransactionService transactionService = serviceRegistry.getTransactionService();
