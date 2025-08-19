@@ -55,6 +55,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.ZoneId;
@@ -225,14 +227,23 @@ public class DataProtectionService{
         NodeServiceInterceptor.setEduSharingScope(null);
 
         log.info("creating report for {}", userName);
-        summmaryReport(userName, collectionNodes, feedBacks, comments, rootPath);
+        File reportFile = summmaryReport(userName, collectionNodes, feedBacks, comments, rootPath);
 
 
         log.info("creating archive for {}", userName);
-        File target = new File(rootPath+".zip");
-        archive(new File(rootPath), target);
+        File target;
+        String mimeType;
+        if(reportOnly() && reportFile != null) {
+            target = new File(rootPath+".pdf");
+            Files.copy(reportFile.toPath(),target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            mimeType = "application/pdf";
+        }else{
+            target = new File(rootPath+".zip");
+            archive(new File(rootPath), target);
+            mimeType = "application/zip";
+        }
 
-        return AuthenticationUtil.runAsSystem(() -> persistAndCleanup(userName, target, rootPath));
+        return AuthenticationUtil.runAsSystem(() -> persistAndCleanup(userName, target, rootPath, mimeType));
     }
 
     private File summmaryReport(String userName, List<NodeRef> collectionNodes, List<NodeRef> feedBacks, List<NodeRef> comments, String rootPath) {
@@ -311,13 +322,13 @@ public class DataProtectionService{
                 .collect(Collectors.toList());
     }
 
-    private NodeRef persistAndCleanup(String userName, File target, String rootPath) {
+    private NodeRef persistAndCleanup(String userName, File target, String rootPath, String mimeType) {
         try {
             NodeRef nodeRef = getTargetNode(userName);
             permissionService.setPermission(nodeRef,userName,PermissionService.CONSUMER,true);
             nodeService.removeAspect(nodeRef,ContentModel.ASPECT_VERSIONABLE);
             ContentWriter writer = contentService.getWriter(nodeRef, ContentModel.PROP_CONTENT, true);
-            writer.setMimetype("application/zip");
+            writer.setMimetype(mimeType);
             writer.addListener(() -> {
                 try {
                     FileUtils.deleteDirectory(new File(rootPath));
@@ -355,7 +366,15 @@ public class DataProtectionService{
         Date date = new Date(); // or your custom date
         SimpleDateFormat formatter = new SimpleDateFormat("yyMMdd");
         String formatted = formatter.format(date);
-        return formatted.concat("_").concat(fileName).concat(".zip");
+        String fileExtension = (reportOnly()) ?".pdf" : ".zip";
+        return formatted.concat("_").concat(fileName).concat(fileExtension);
+    }
+
+    public boolean reportOnly(){
+        if(summaryExport && !metadataExport){
+            return true;
+        }
+        return false;
     }
 
     private void createStructure(String rootPath, String subPath, HashMap<NodeRef, String> pathMap) throws IOException {
