@@ -1,5 +1,7 @@
 import { Inject, Injectable, InjectionToken, Injector, Optional, Type } from '@angular/core';
 import { createCustomElement } from '@angular/elements';
+import { TranslationsService } from 'ngx-edu-sharing-ui';
+import { environment } from '../../environments/environment';
 
 export type WebComponent = {
     name: string;
@@ -15,8 +17,12 @@ export const EDU_SHARING_WEB_COMPONENTS = new InjectionToken<WebComponent[]>(
 export class WebComponentService {
     constructor(
         private injector: Injector,
+        private translations: TranslationsService,
         @Optional() @Inject(EDU_SHARING_WEB_COMPONENTS) private components: WebComponent[],
     ) {
+        if (environment.webComponentMode) {
+            this.translations.initialize().subscribe();
+        }
         this.components?.forEach((c) => this.registerWebComponent(c.name, c.component));
     }
 

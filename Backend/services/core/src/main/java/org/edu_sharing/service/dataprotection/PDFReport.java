@@ -41,7 +41,7 @@ public class PDFReport {
     @Value("${repository.dataprotection.link:http://edu-sharing.com}")
     String link;
 
-    public void report(Data reportData, File dir){
+    public File report(Data reportData, File dir){
 
         String userName = reportData.getUserName();
 
@@ -62,10 +62,13 @@ public class PDFReport {
                 "application/pdf",
                 TransformServiceStatic.TransformerId.EDU_SHARING,
                 byte[].class);
-        try (FileOutputStream fos = new FileOutputStream(dir.getPath() + "/report.pdf")) {
+        File file = new File(dir.getPath() + "/report.pdf");
+        try (FileOutputStream fos = new FileOutputStream(file)) {
             fos.write(result);
+            return file;
         }catch (Exception e){
             e.printStackTrace();
+            return null;
         }
     }
 
@@ -74,6 +77,7 @@ public class PDFReport {
     @lombok.Builder
     public static class Data{
         String userName;
+        String secondaryUserName;
         String firstName;
         String lastName;
         String email;

@@ -34,6 +34,7 @@ import { CoreModule } from './core-module/core.module';
 import { extensionDeclarations } from './extension/extension-declarations';
 import { extensionImports } from './extension/extension-imports';
 import { extensionProviders } from './extension/extension-providers';
+import { extensionUiProviders } from './extension/extension-ui-providers';
 import { extensionSchemas } from './extension/extension-schemas';
 import { DialogsModule } from './features/dialogs/dialogs.module';
 import { ManagementDialogsModule } from './features/management-dialogs/management-dialogs.module';
@@ -50,6 +51,8 @@ import { BApiModule } from 'ngx-edu-sharing-b-api';
 import { WrapperComponent } from './web-components/wrapper/app/wrapper.component';
 import { MockLocationStrategy } from '@angular/common/testing';
 import { WebComponentService } from './main/web-component.service';
+import { PreviewSidebarComponent } from './features/preview-sidebar/preview-sidebar.component';
+import { WebComponentLocationStrategy } from './main/web-component.utils';
 
 const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     showDelay: 500,
@@ -73,8 +76,8 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DragDropModule,
         // forRoot is empty; It is initalized via useFactory!
         EduSharingApiModule.forRoot({}),
-        EduSharingUiModule.forRoot({ production: environment.production }, extensionProviders),
-        BApiModule.forRoot({ rootUrl: '/edu-sharing/rest/bapi' }),
+        EduSharingUiModule.forRoot({ production: environment.production }, extensionUiProviders),
+        BApiModule.forRoot({ rootUrl: environment.bApiUrl || '/edu-sharing/rest/bapi' }),
         extensionImports,
         HttpClientModule,
         MainModule,
@@ -105,7 +108,8 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         { provide: MAT_CHECKBOX_DEFAULT_OPTIONS, useValue: { color: 'primary' } },
         { provide: MAT_RADIO_DEFAULT_OPTIONS, useValue: { color: 'primary' } },
         { provide: MAT_SLIDE_TOGGLE_DEFAULT_OPTIONS, useValue: { color: 'primary' } },
-        extensionProviders,
+        ...extensionProviders,
+        ...extensionUiProviders,
 
         WebComponentService,
         ErrorHandlerService,
@@ -114,7 +118,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
             ? [
                   {
                       provide: LocationStrategy,
-                      useClass: MockLocationStrategy,
+                      useClass: WebComponentLocationStrategy,
                   },
               ]
             : [],
@@ -137,6 +141,9 @@ export class AppModule implements DoBootstrap {
             this.injector
                 .get(WebComponentService)
                 .registerWebComponent('edu-sharing-actionbar', ActionbarComponent);
+            this.injector
+                .get(WebComponentService)
+                .registerWebComponent('edu-sharing-preview-sidebar', PreviewSidebarComponent);
         } else {
             appRef.bootstrap(AppComponent);
         }

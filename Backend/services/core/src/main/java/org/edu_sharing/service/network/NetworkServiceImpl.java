@@ -113,7 +113,7 @@ public class NetworkServiceImpl implements NetworkService {
             String parent=new UserEnvironmentTool().getEdu_SharingServiceFolder();
             String node = nodeService.findNodeByName(parent, id);
             Map<String, String[]> props = generateProps(id,service);
-            nodeService.updateNode(node,props);
+            nodeService.updateNode(node,props,true);
             return new StoredService(id,service);
         }
         catch(Throwable t){

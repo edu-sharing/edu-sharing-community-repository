@@ -443,6 +443,11 @@ public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEven
 
                 for (JobKey jobKey : quartzScheduler.getJobKeys(GroupMatcher.jobGroupEquals(groupName))) {
                     String jobName = jobKey.getName();
+                    if(jobConfigListStatic.stream().map(JobConfig::getJobname).collect(Collectors.toList()).contains(jobName)) {
+                        logger.debug("ignoring static job " + jobName);
+                        continue;
+                    }
+                    logger.debug("deleting job " + jobName);
                     if (!quartzScheduler.deleteJob(jobKey)) {
                         logger.warn("Unable to delete previously scheduled job " + jobName);
                     }
@@ -730,6 +735,7 @@ public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEven
 
     @EventListener(ContextRefreshedEvent.class)
     private void refreshStatic() throws SchedulerException {
+        logger.info("loading static jobs:" + jobConfigListStatic.size());
         if (!isPrimaryRepository()) {
             logger.info("Not primary repository, will not register or handle quartz jobs");
             return;

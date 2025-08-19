@@ -131,7 +131,7 @@ public class CollectionImporter {
 				for(Property property : collection.getProperty()) {
 					properties.put(property.getKey(),property.getValue().toArray(new String[0]));
 				}
-				nodeService.updateNode(collectionID,NodeServiceHelper.transformShortToLongProperties(properties));    			
+				nodeService.updateNode(collectionID,NodeServiceHelper.transformShortToLongProperties(properties), true);
 			}
 			if(collection.getImage()!=null) {
 				InputStream is=null;

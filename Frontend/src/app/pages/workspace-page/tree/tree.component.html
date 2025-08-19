@@ -77,7 +77,7 @@
 </div>
 <div class="tree" *ngIf="root === TO_ME_SHARED_FILES">
   <es-workspace-sub-tree
-    [node]="workspace.getRootFolderInternalId()"
+    [node]="workspace.getRootFolderId()"
     [currentPath]="currentPath"
     (updateOptions)="doUpdateOptions($event)"
     (dropElement)="drop($event)"

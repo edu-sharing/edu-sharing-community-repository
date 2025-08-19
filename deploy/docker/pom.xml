@@ -95,7 +95,7 @@
     </docker.edu_sharing.community.common.redis.name>
 
     <docker.edu_sharing.community.common.redis.tag>
-      8.0.3
+      8.2.0
     </docker.edu_sharing.community.common.redis.tag>
 
     <docker.edu_sharing.community.common.redis>
@@ -123,7 +123,7 @@
     </docker.from.openjdk.17.liberica.debian>
 
     <docker.from.edu_sharing.community.common.alfresco.repository>
-      ${docker.registry}/${docker.common}/edu_sharing-community-common-docker-alfresco-repository:25.2.0-1
+      ${docker.registry}/${docker.common}/edu_sharing-community-common-docker-alfresco-repository:25.2.0-2
     </docker.from.edu_sharing.community.common.alfresco.repository>
 
     <helm.kube.version>&gt;= 1.20.0-0</helm.kube.version>

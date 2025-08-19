@@ -77,12 +77,6 @@
       </ng-container>
     </ng-container>
   </div>
-  <ng-container *ngIf="isSafe && !mainMenuSidebar?.show">
-    <div class="timeout" *ngIf="autoLogoutTimeout$ | async as timeout" data-test="logout-timer">
-      <i esIcon="av_timer"></i>
-      {{ timeout }}
-    </div>
-  </ng-container>
   <div class="add-material">
     <ng-container *ngTemplateOutlet="createButtonRef"></ng-container>
     <ng-container *ngIf="!createButtonRef">
@@ -120,12 +114,28 @@
         aria-hidden="true"
       ></button>
     </ng-container>
+    <ng-container *ngIf="mainNavService.getCustomTemplateSlot(TemplateSlot.AfterCreateMenu)">
+      <ng-container
+        *ngTemplateOutlet="
+          mainNavService.getCustomTemplateSlot(TemplateSlot.AfterCreateMenu);
+          context: {
+            currentScope: currentScope
+          }
+        "
+      ></ng-container>
+    </ng-container>
   </div>
   <div class="topBarSearch" [class.noScope]="!showScope">
     <div class="scopeNameMobile" *ngIf="!searchEnabled">{{ title | translate }}</div>
     <ng-content select="[data-selector-search-field]"></ng-content>
   </div>
   <div class="topbar-search-right">
+    <ng-container *ngIf="isSafe && !mainMenuSidebar?.show">
+      <div class="timeout" *ngIf="autoLogoutTimeout$ | async as timeout" data-test="logout-timer">
+        <i esIcon="av_timer"></i>
+        {{ timeout }}
+      </div>
+    </ng-container>
     <ng-container *ngIf="mainNavService.getCustomTemplateSlot(TemplateSlot.BeforeUserMenu)">
       <ng-container
         *ngTemplateOutlet="
