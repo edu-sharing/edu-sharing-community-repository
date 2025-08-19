@@ -7,6 +7,37 @@
     gap: 10px;
 }
 .time-wrapper {
+    display: flex;
+    .timeline {
+        position: relative;
+        color: var(--textLight);
+        font-weight: bold;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: space-between;
+        padding-right: 6px;
+        .timeline-line {
+            position: absolute;
+            right: -4px;
+            height: 100%;
+            width: 2px;
+            background-color: #666;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 10px 0;
+            .timeline-dot {
+                background-color: #666;
+                position: relative;
+                left: -2px;
+                width: 6px;
+                height: 6px;
+                border-radius: 100%;
+            }
+        }
+    }
+    gap: 5px;
     > label {
         display: flex;
         font-weight: bold;

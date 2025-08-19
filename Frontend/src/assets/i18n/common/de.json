@@ -1543,9 +1543,9 @@
     "shares": {
       "TITLE": "Letzte Freigaben für Sie",
       "SUBTITLE": {
-        "fromUser": "von Mir",
-        "toUser": "an Mich",
-        "toUserOrGroups": "an Mich oder meine Gruppen"
+        "fromUser": "von mir",
+        "toUser": "an mich",
+        "toUserOrGroups": "an mich oder meine Gruppen"
       }
     },
     "recent-activities": {

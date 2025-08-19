@@ -1,55 +1,66 @@
 <div class="time-wrapper">
-  <div class="event" *ngFor="let event of events()">
-    <div class="details">
-      <!--
-      <div
-        *ngIf="event.type === 'SHARE'"
-        [innerHTML]="
-          'DASHBOARD_SWIMLANE.STREAM.SHARED_INFO'
-            | translate
-              : {
-                  initiator: (event.initiator | authorityName),
-                  element:
-                    '<a href=\'' +
-                    event.node?.content?.url +
-                    '\'>' +
-                    (event.node | nodeTitle) +
-                    '</a>'
-                }
-        "
-      ></div>
-      -->
-      <div class="info-group">
-        <es-node-url [node]="event.node">
-          {{ event.node | nodeTitle }}
-        </es-node-url>
-        <div class="action">
-          <ng-container *ngIf="type() === 'activity'">
-            {{
-              'EVENT.TYPE.' + $any(event).eventType
-                | translate : { fallback: $any(event).eventType }
-            }}
-          </ng-container>
-
-          <ng-container *ngIf="type() === 'share'">
-            {{ 'DASHBOARD_SWIMLANE.SHARE.INFO_MESSAGE' | translate }}
-          </ng-container>
-        </div>
-      </div>
+  <div class="timeline">
+    <div class="today" *ngIf="events().length > 0">{{ 'TODAY' | translate }}</div>
+    <div class="oldest" *ngIf="oldestEvent() && events().length > 1">
+      {{ oldestEvent().timestamp | formatDate : { relative: false, time: false } }}
     </div>
-    <div class="timestamp">
-      {{
-        event.timestamp
-          | formatDate
-          : {
-            async: true,
-            relative: true,
-          }
-          | async
-      }}
+    <div class="timeline-line">
+      <div class="timeline-dot" *ngFor="let _ of events()"></div>
     </div>
   </div>
-</div>
-<div class="empty" *ngIf="events().length < 1">
-  {{ 'DASHBOARD_SWIMLANE.' + type().toUpperCase() + '.EMPTY' | translate }}
+  <div>
+    <div class="event" *ngFor="let event of events()">
+      <div class="details">
+        <!--
+        <div
+          *ngIf="event.type === 'SHARE'"
+          [innerHTML]="
+            'DASHBOARD_SWIMLANE.STREAM.SHARED_INFO'
+              | translate
+                : {
+                    initiator: (event.initiator | authorityName),
+                    element:
+                      '<a href=\'' +
+                      event.node?.content?.url +
+                      '\'>' +
+                      (event.node | nodeTitle) +
+                      '</a>'
+                  }
+          "
+        ></div>
+        -->
+        <div class="info-group">
+          <es-node-url [node]="event.node">
+            {{ event.node | nodeTitle }}
+          </es-node-url>
+          <div class="action">
+            <ng-container *ngIf="type() === 'activity'">
+              {{
+                'EVENT.TYPE.' + $any(event).eventType
+                  | translate : { fallback: $any(event).eventType }
+              }}
+            </ng-container>
+
+            <ng-container *ngIf="type() === 'share'">
+              {{ 'DASHBOARD_SWIMLANE.SHARE.INFO_MESSAGE' | translate }}
+            </ng-container>
+          </div>
+        </div>
+      </div>
+      <div class="timestamp">
+        {{
+          event.timestamp
+            | formatDate
+            : {
+              async: true,
+              relative: true,
+            }
+            | async
+        }}
+      </div>
+    </div>
+  </div>
+  <div class="empty" *ngIf="events().length < 1">
+    {{ 'DASHBOARD_SWIMLANE.' + type().toUpperCase() + '.EMPTY' | translate }}
+  </div>
 </div>

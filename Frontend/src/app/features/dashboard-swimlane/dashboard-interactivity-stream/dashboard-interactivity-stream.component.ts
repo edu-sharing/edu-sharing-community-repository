@@ -48,6 +48,9 @@ export class DashboardInteractivityStreamComponent {
     // readonly TimeGroups = TimeGroups;
     readonly events = input.required<(UserEvent | InviteEvent)[]>();
     readonly type = input.required<'activity' | 'share'>();
+    readonly oldestEvent = computed(() => {
+        return this.events()[this.events().length - 1];
+    });
     /*readonly eventsGrouped = computed(() => {
         const result: EventsGrouped = {};
         this.events()?.forEach((e) => {
