@@ -44,6 +44,7 @@ import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SharedToMeType;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.share.GlobalShareService;
+import org.edu_sharing.service.share.ShareInfoContextHolder;
 import org.edu_sharing.service.tracking.ActivityEventService;
 import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -2091,13 +2092,16 @@ public class NodeApi  {
     	@Parameter(description = "mailtext",required=false ) @QueryParam("mailtext")  String mailText,
     	@Parameter(description = "sendMail",required=true ) @QueryParam("sendMail") Boolean sendMail,
     	@Parameter(description = "sendCopy",required=true ) @QueryParam("sendCopy") Boolean sendCopy,
+        @Parameter(description = "creates share infos for shared by/with me", schema = @Schema(defaultValue="true")) @QueryParam("createShares") Boolean createShares,
 		@Context HttpServletRequest req) {
-    
+
     	try {
-		
+
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-	    	
+	    	if(createShares == Boolean.FALSE){
+                ShareInfoContextHolder.getContext().setCreateSharesOnPermissionChanged(false);
+            }
 	    	nodeDao.setPermissions(permissions,mailText,sendMail,sendCopy);
 	    	
 	    	return Response.status(Response.Status.OK).build();

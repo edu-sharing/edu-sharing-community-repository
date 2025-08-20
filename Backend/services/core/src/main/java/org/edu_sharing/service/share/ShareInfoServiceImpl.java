@@ -96,6 +96,10 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
 
     @EventListener
     public void onRemovedPermissionEvent(RemovedPermissionEvent event) {
+        if(!ShareInfoContextHolder.getContext().isCreateSharesOnPermissionChanged()){
+            return;
+        }
+
         retryingTransactionHelper.doInTransaction(() -> {
             Set<String> sharesToRemove = event.permissions()
                     .stream()
@@ -116,6 +120,10 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
 
     @EventListener
     public void onAddedPermissionEvent(AddedPermissionsEvent event) {
+        if(!ShareInfoContextHolder.getContext().isCreateSharesOnPermissionChanged()){
+            return;
+        }
+
         retryingTransactionHelper.doInTransaction(() -> {
             Set<String> sharesToAdd = event.permissions()
                     .stream()

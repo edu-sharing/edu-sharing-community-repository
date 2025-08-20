@@ -30365,6 +30365,15 @@
             "schema": {
               "type": "boolean"
             }
+          },
+          {
+            "description": "creates share infos for shared by/with me",
+            "in": "query",
+            "name": "createShares",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
           }
         ],
         "requestBody": {
