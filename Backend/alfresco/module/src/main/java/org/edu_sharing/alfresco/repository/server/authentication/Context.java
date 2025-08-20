@@ -1,5 +1,6 @@
 package org.edu_sharing.alfresco.repository.server.authentication;
 
+import org.apache.logging.log4j.ThreadContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import jakarta.servlet.ServletContext;
@@ -118,13 +119,13 @@ public class Context {
         };
 
         if(b3.getTraceId() != null) {
-            MDC.put("TraceId", b3.getTraceId());
+            ThreadContext.put("TraceId", b3.getTraceId());
         }
         if(b3.getClientTraceId() != null) {
-            MDC.put("ClientTraceId", b3.getClientTraceId());
+            ThreadContext.put("ClientTraceId", b3.getClientTraceId());
         }
         if(b3.getSpanId() != null) {
-            MDC.put("SpanId", b3.getSpanId());
+            ThreadContext.put("SpanId", b3.getSpanId());
         }
     }
 
