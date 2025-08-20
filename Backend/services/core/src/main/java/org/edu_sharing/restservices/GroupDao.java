@@ -30,7 +30,7 @@ import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.notification.NotificationService;
-import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
+import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.service.organization.GroupSignupMethod;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
@@ -142,7 +142,7 @@ public class GroupDao {
             this.baseClient = repoDao.getBaseClient();
             this.authorityService = AuthorityServiceFactory.getAuthorityService(repoDao.getApplicationInfo().getAppId());
             this.searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
-            this.notificationService = NotificationServiceFactoryUtility.getLocalService();
+            this.notificationService = NotificationServiceFactory.getLocalService();
             this.repoDao = repoDao;
 
             this.authorityName =

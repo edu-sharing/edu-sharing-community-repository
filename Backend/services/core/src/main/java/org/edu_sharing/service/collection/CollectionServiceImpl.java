@@ -49,7 +49,7 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.NodeServiceInterceptor;
 import org.edu_sharing.service.notification.NotificationService;
-import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
+import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.service.notification.Status;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
@@ -151,7 +151,7 @@ public class CollectionServiceImpl implements CollectionService {
             this.path = path;
             this.toolPermissionService = ToolPermissionServiceFactory.getInstance();
             this.permissionService = PermissionServiceFactory.getPermissionService(appId);
-            this.notificationService = NotificationServiceFactoryUtility.getNotificationService(appId);
+            this.notificationService = NotificationServiceFactory.getServiceByAppId(appId);
             ApplicationContext appContext = AlfAppContextGate.getApplicationContext();
             policyBehaviourFilter = appContext.getBean("policyBehaviourFilter", BehaviourFilter.class);
             repositoryCache = appContext.getBean(RepositoryCache.class);

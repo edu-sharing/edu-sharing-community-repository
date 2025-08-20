@@ -55,7 +55,7 @@ import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.*;
 import org.edu_sharing.service.notification.NotificationService;
-import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
+import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.service.permission.HandleParam;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
@@ -69,7 +69,6 @@ import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SharedToMeType;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.share.GlobalShareService;
-import org.edu_sharing.service.share.GlobalShareServiceImpl;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.edu_sharing.spring.ApplicationContextFactory;
@@ -2188,7 +2187,7 @@ public class NodeDao {
             NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_STATUS, history.getStatus(), false);
             NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_PROTOCOL, list, false);
             if (sendMail) {
-                NotificationService localService = NotificationServiceFactoryUtility.getLocalService();
+                NotificationService localService = NotificationServiceFactory.getLocalService();
                 receivers.forEach((receiver) -> localService
                         .notifyWorkflowChanged(nodeId, nodeType, aspects, properties, receiver, comment, history.getStatus()));
             }
@@ -2614,7 +2613,7 @@ public class NodeDao {
             String type = nodeService.getType(nodeId);
             Map<String, Object> properties = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
             List<String> aspects = Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId));
-            NotificationServiceFactoryUtility.getLocalService()
+            NotificationServiceFactory.getLocalService()
                     .notifyNodeIssue(nodeId, mode, reason, type, aspects, properties, userEmail, userComment);
         } catch (Throwable t) {
             throw DAOException.mapping(t);

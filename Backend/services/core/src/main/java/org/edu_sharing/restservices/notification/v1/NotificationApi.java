@@ -11,7 +11,7 @@ import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.DAOException;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.service.notification.NotificationConfig;
-import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
+import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.rest.notification.event.NotificationEventDTO;
 import org.edu_sharing.rest.notification.data.StatusDTO;
 import org.springframework.data.domain.Page;
@@ -43,7 +43,7 @@ public class NotificationApi {
 
     public Response getConfig(@Context HttpServletRequest req) throws DAOException {
         try {
-            return Response.ok(NotificationServiceFactoryUtility.getLocalService().getConfig()).build();
+            return Response.ok(NotificationServiceFactory.getLocalService().getConfig()).build();
         } catch (Throwable t) {
             throw DAOException.mapping(t);
         }
@@ -58,7 +58,7 @@ public class NotificationApi {
             })
     public Response setConfig(@Context HttpServletRequest req, NotificationConfig config) throws DAOException {
         try {
-            NotificationServiceFactoryUtility.getLocalService().setConfig(config);
+            NotificationServiceFactory.getLocalService().setConfig(config);
             return Response.ok().build();
         } catch (Throwable t) {
             throw DAOException.mapping(t);
@@ -98,7 +98,7 @@ public class NotificationApi {
             }
 
             PageRequest pageRequest = PageRequest.of(page, size, Sort.by(orders));
-            return Response.ok(new NotificationResponsePage(NotificationServiceFactoryUtility.getLocalService().getNotifications(receiverId, status, pageRequest))).build();
+            return Response.ok(new NotificationResponsePage(NotificationServiceFactory.getLocalService().getNotifications(receiverId, status, pageRequest))).build();
         } catch (Throwable t) {
             throw DAOException.mapping(t);
         }
@@ -123,7 +123,7 @@ public class NotificationApi {
             @QueryParam("status") @DefaultValue(value = "READ") StatusDTO status
     ) throws DAOException {
         try {
-            return Response.ok(NotificationServiceFactoryUtility.getLocalService().setNotificationStatusByNotificationId(id, status)).build();
+            return Response.ok(NotificationServiceFactory.getLocalService().setNotificationStatusByNotificationId(id, status)).build();
         } catch (Throwable t) {
             throw DAOException.mapping(t);
         }
@@ -141,7 +141,7 @@ public class NotificationApi {
             @QueryParam("newStatus") @DefaultValue(value = "READ") StatusDTO newStatus
     ) throws DAOException {
         try {
-            NotificationServiceFactoryUtility.getLocalService().setNotificationStatusByReceiverId(receiverId, oldStatus, newStatus);
+            NotificationServiceFactory.getLocalService().setNotificationStatusByReceiverId(receiverId, oldStatus, newStatus);
             return Response.ok().build();
         } catch (Throwable t) {
             throw DAOException.mapping(t);
@@ -155,7 +155,7 @@ public class NotificationApi {
             responses = @ApiResponse(responseCode = "200", description = "deleted notification"))
     public Response deleteNotification(@QueryParam("id") String id) throws DAOException {
         try {
-            NotificationServiceFactoryUtility.getLocalService().deleteNotification(id);
+            NotificationServiceFactory.getLocalService().deleteNotification(id);
             return Response.ok().build();
         } catch (Throwable t) {
             throw DAOException.mapping(t);

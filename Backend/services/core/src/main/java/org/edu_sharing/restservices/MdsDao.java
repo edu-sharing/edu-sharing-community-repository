@@ -14,7 +14,7 @@ import org.edu_sharing.restservices.shared.Mds;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.notification.NotificationService;
-import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
+import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.service.search.Suggestion;
 
 public class MdsDao {
@@ -74,7 +74,7 @@ public class MdsDao {
         this.repoDao = repoDao;
         this.mds = mds;
         this.nodeService = NodeServiceFactory.getNodeService(repoDao.getApplicationInfo().getAppId());
-        this.notificationService = NotificationServiceFactoryUtility.getLocalService();
+        this.notificationService = NotificationServiceFactory.getLocalService();
     }
 
     public Mds asMds() {

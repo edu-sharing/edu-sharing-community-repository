@@ -1,25 +1,17 @@
 package org.edu_sharing.service.notification;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.rest.notification.data.StatusDTO;
 import org.edu_sharing.rest.notification.event.NotificationEventDTO;
 import org.edu_sharing.restservices.mds.v1.model.MdsValue;
-import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.permission.annotation.Permission;
 import org.edu_sharing.service.rating.RatingDetails;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -59,32 +51,22 @@ public interface NotificationService {
     void notifyRatingChanged(String nodeId, String nodeType, List<String> aspects, Map<String, Object> nodeProps, Double rating, RatingDetails accumulatedRatings, Status removed);
 
     @Permission(requiresUser = true)
-    default NotificationConfig getConfig() throws Exception {
-        Map<String, String> info = new MCAlfrescoAPIClient().getUserInfo(AuthenticationUtil.getFullyAuthenticatedUser());
-        if (!StringUtils.isEmpty(info.get(CCConstants.CCM_PROP_PERSON_NOTIFICATION_PREFERENCES))) {
-            return new ObjectMapper().readValue(info.get(CCConstants.CCM_PROP_PERSON_NOTIFICATION_PREFERENCES), NotificationConfig.class);
-        }
-        return new NotificationConfig();
-    }
+    NotificationConfig getConfig() throws Exception;
 
     @Permission(requiresUser = true)
-    default void setConfig(NotificationConfig config) throws Exception {
-        Map<String, Object> userInfo = new HashMap<>();
-        userInfo.put(CCConstants.PROP_USERNAME, AuthenticationUtil.getFullyAuthenticatedUser());
-        userInfo.put(CCConstants.CCM_PROP_PERSON_NOTIFICATION_PREFERENCES, new ObjectMapper().writeValueAsString(config));
-        new MCAlfrescoAPIClient().updateUser(userInfo);
-    }
+    void setConfig(NotificationConfig config) throws Exception;
 
     @Permission(requiresUser = true)
-    Page<NotificationEventDTO> getNotifications(String receiverId, List<StatusDTO> status, Pageable pageable) throws IOException, InsufficientPermissionException;
+    Page<NotificationEventDTO> getNotifications(String receiverId, List<StatusDTO> status, Pageable pageable);
 
     @Permission(requiresUser = true)
-    NotificationEventDTO setNotificationStatusByNotificationId(String id, StatusDTO status) throws IOException, InsufficientPermissionException;
+    NotificationEventDTO setNotificationStatusByNotificationId(String id, StatusDTO status);
 
     @Permission(requiresUser = true)
-    void setNotificationStatusByReceiverId(String receiverId, List<StatusDTO> oldStatusList, StatusDTO newStatus) throws IOException, InsufficientPermissionException;
+    void setNotificationStatusByReceiverId(String receiverId, List<StatusDTO> oldStatusList, StatusDTO newStatus);
 
     @Permission(requiresUser = true)
-    void deleteNotification(String id) throws IOException, InsufficientPermissionException;
+    void deleteNotification(String id);
+
 
 }

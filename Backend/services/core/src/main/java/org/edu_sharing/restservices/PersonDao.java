@@ -44,7 +44,7 @@ import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
-import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
+import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
@@ -799,7 +799,7 @@ public class PersonDao {
         NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), getNodeId(), CCConstants.CM_PROP_PERSON_ESPERSONSTATUS, status.name(), false);
         NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), getNodeId(), CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE, new Date(), false);
         if (notifyMail) {
-            NotificationServiceFactoryUtility.getLocalService()
+            NotificationServiceFactory.getLocalService()
                     .notifyPersonStatusChanged(
                             (String) userInfo.get(CCConstants.CM_PROP_PERSON_EMAIL),
                             getFirstName(),

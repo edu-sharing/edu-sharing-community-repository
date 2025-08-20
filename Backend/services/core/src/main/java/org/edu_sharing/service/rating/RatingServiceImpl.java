@@ -20,7 +20,7 @@ import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.notification.NotificationService;
-import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
+import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.service.notification.Status;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
@@ -57,7 +57,7 @@ public class RatingServiceImpl extends RatingServiceAdapter {
         this.nodeService = NodeServiceFactory.getLocalService();
         this.authorityService = AuthorityServiceFactory.getLocalService();
         this.permissionService = PermissionServiceFactory.getLocalService();
-        this.notificationService = NotificationServiceFactoryUtility.getLocalService();
+        this.notificationService = NotificationServiceFactory.getLocalService();
     }
 
     @Override

@@ -73,7 +73,6 @@
     <constructor-arg index="0" value="notused"/>
   </bean>
   <bean id="relationService" class="org.edu_sharing.service.relations.RelationServiceDefaultImpl"/>
-  <bean id="notificationServiceFactory" class="org.edu_sharing.service.notification.NotificationServiceFactoryImpl"/>
   <bean id="permissionChecking" class="org.edu_sharing.service.permission.PermissionChecking"/>
   <bean id="suggestionService" class="org.edu_sharing.service.suggestion.DefaultSuggestionService"/>
   <bean id="contextRefresher" class="org.edu_sharing.spring.scope.refresh.ContextRefresher">

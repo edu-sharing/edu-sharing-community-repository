@@ -2,7 +2,6 @@ package org.edu_sharing.service.provider;
 
 import org.edu_sharing.service.rating.RatingService;
 import org.edu_sharing.service.rating.RatingServiceFactory;
-import org.edu_sharing.service.rating.RatingServiceImpl;
 import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.collection.CollectionServiceElastic;
 import org.edu_sharing.service.relations.RelationService;
