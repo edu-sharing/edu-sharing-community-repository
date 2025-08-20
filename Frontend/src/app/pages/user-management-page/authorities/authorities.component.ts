@@ -1239,6 +1239,9 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             );
     }
     searchMembers() {
+        if (this.memberList.isLoading === true) {
+            return;
+        }
         this.memberOptions.addOptions = this.getMemberOptions();
         this.memberList.reset();
         this.nodeMemberAdd.getSelection().clear();
