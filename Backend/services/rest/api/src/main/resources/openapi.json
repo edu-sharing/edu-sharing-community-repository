@@ -130,6 +130,20 @@
         ],
         "type": "object"
       },
+      "Access": {
+        "properties": {
+          "endpoints": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "openapi": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "AddToCollectionEventDTO": {
         "allOf": [
           {
@@ -960,6 +974,9 @@
           },
           "current": {
             "$ref": "#/components/schemas/Values"
+          },
+          "currentBackend": {
+            "$ref": "#/components/schemas/ValuesBackend"
           },
           "global": {
             "$ref": "#/components/schemas/Values"
@@ -6518,6 +6535,14 @@
         },
         "type": "object"
       },
+      "SecurityConfig": {
+        "properties": {
+          "access": {
+            "$ref": "#/components/schemas/Access"
+          }
+        },
+        "type": "object"
+      },
       "ServerUpdateInfo": {
         "properties": {
           "auto": {
@@ -8151,6 +8176,14 @@
           "workspaceViewType": {
             "format": "int32",
             "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ValuesBackend": {
+        "properties": {
+          "security": {
+            "$ref": "#/components/schemas/SecurityConfig"
           }
         },
         "type": "object"

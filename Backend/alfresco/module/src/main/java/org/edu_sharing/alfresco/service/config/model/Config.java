@@ -18,6 +18,7 @@ public class Config implements Serializable {
 
 
 	@XmlElement public Values values;
+	public ValuesBackend valuesBackend;
 	@XmlElement public Contexts contexts;
 	@XmlElement public List<Language> language;
 	@XmlElement public Variables variables;
