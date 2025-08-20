@@ -711,9 +711,8 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
                 downloadAll.group = DefaultGroups.View;
                 downloadAll.priority = 35;
                 options.splice(1, 0, downloadAll);
-                this.currentOptions = options;
             }
-            this.initOptions();
+            this.currentOptions = options;
         };
 
         this.nodeApi
@@ -721,10 +720,12 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
             .subscribe(
                 (data: NodeList) => {
                     addButton(data);
+                    this.initOptions();
                 },
                 (error) => {
                     console.warn(error);
                     addButton();
+                    this.initOptions();
                 },
             );
     }
