@@ -1,5 +1,9 @@
 <div th:fragment="content">
     <h2 th:text="#{dataprotection_header}"></h2>
+    <h2 th:if="${#messages.msgOrNull('dataprotection_general_hint_header') != null}"
+        th:text="#{dataprotection_general_hint_header}">
+    </h2>
+    <div th:if="${#messages.msgOrNull('dataprotection_general_hint_content') != null}" th:text="#{dataprotection_general_hint_content}"></div>
     <h2 th:text="#{dataprotection_general_header}"></h2>
     <div th:text="#{dataprotection_general_content}"></div>
     <br/>
@@ -68,7 +72,8 @@
     </table>
     <br/>
     <h2 th:text="#{dataprotection_further_header}"></h2>
-    <div th:text="#{dataprotection_further_content(${link})}"></div>
+    <div th:text="#{dataprotection_further_content}"></div>
+    <div th:each="link, iterStat : ${links}" th:text="${link}"></div>
     <br/>
     <table class="dataprotectionTable">
         <colgroup>

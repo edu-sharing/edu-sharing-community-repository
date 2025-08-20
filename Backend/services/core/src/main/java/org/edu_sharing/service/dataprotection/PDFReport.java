@@ -38,15 +38,16 @@ public class PDFReport {
     @Value("${repository.dataprotection.templatePath:html/dataprotection/report.html}")
     String templatePath;
 
-    @Value("${repository.dataprotection.link:http://edu-sharing.com}")
-    String link;
+    //@Value("${repository.dataprotection.links:http://edu-sharing.com}")
+    @Value("#{'${repository.dataprotection.links:http://edu-sharing.com}'.split(',')}")
+    List<String> links;
 
     public File report(Data reportData, File dir){
 
         // @TODO get locale for exported user
         final Context ctx = new Context(LocaleUtils.toLocale(Locale.GERMANY));
         ctx.setVariable("data",reportData);
-        ctx.setVariable("link", link);
+        ctx.setVariable("links", links);
         ctx.setVariable("titleKey", "dataprotection_header");
         ctx.setVariable("template",templatePath);
         ctx.setVariable("templateStyle","html/dataprotection/style");
