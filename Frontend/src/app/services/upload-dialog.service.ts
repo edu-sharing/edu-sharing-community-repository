@@ -172,7 +172,7 @@ export class UploadDialogService {
                 return n;
             });
         }
-        if (!updatedNodes) {
+        if (!updatedNodes || updatedNodes === 'CANCEL') {
             // only delete these original nodes which are actually new
             // to check whether a node is new check that it only has one version:
             const nodesWithOneVersion = await merge(
