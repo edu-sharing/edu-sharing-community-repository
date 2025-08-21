@@ -5,7 +5,7 @@ import org.edu_sharing.service.notification.Status;
 import java.util.List;
 import java.util.Map;
 
-public record AddCollectionEvent(
+public record AddToCollectionEvent(
         String collectionId,
         String refNodeId,
         String collectionType,

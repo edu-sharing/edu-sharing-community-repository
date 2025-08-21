@@ -49,11 +49,11 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyPermissionChanged(String senderAuthority, String receiverAuthority, String nodeId, String nodeType, List<String> aspects, Map<String, Object> props, String[] permissions, String mailText) throws Throwable {
+    public void notifyPermissionChanged(String senderAuthority, String receiverAuthority, String nodeId, String nodeType, List<String> aspects, Map<String, Object> props, String[] permissions, String mailText) {
         applicationEventPublisher.publishEvent(new PermissionChangedEvent(senderAuthority, receiverAuthority, nodeId, nodeType, aspects, props, permissions, mailText));
     }
 
-    public void notifyMetadataSetSuggestion(MdsValue mdsValue, MetadataWidget widgetDefinition, List<String> nodeId, List<String> nodeType, List<List<String>> aspects, List<Map<String, Object>> nodePropertiesList) throws Throwable {
+    public void notifyMetadataSetSuggestion(MdsValue mdsValue, MetadataWidget widgetDefinition, List<String> nodeId, List<String> nodeType, List<List<String>> aspects, List<Map<String, Object>> nodePropertiesList) {
         applicationEventPublisher.publishEvent(new MetadataSetSuggestionEvent(mdsValue, widgetDefinition, nodeId, nodeType, aspects, nodePropertiesList));
     }
 
@@ -64,7 +64,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void notifyAddCollection(String collectionId, String refNodeId, String collectionType, List<String> collectionAspects, Map<String, Object> collectionProperties, String nodeType, List<String> nodeAspects, Map<String, Object> nodeProperties, Status status) {
-        applicationEventPublisher.publishEvent(new AddCollectionEvent(collectionId, refNodeId, collectionType, collectionAspects, collectionProperties, nodeType, nodeAspects, nodeProperties, status));
+        applicationEventPublisher.publishEvent(new AddToCollectionEvent(collectionId, refNodeId, collectionType, collectionAspects, collectionProperties, nodeType, nodeAspects, nodeProperties, status));
     }
 
     @Override
