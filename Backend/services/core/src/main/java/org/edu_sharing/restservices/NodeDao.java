@@ -69,6 +69,8 @@ import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SharedToMeType;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.share.GlobalShareService;
+import org.edu_sharing.service.tracking.ActivityEventService;
+import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.edu_sharing.spring.ApplicationContextFactory;
@@ -2191,6 +2193,8 @@ public class NodeDao {
                 receivers.forEach((receiver) -> localService
                         .notifyWorkflowChanged(nodeId, nodeType, aspects, properties, receiver, comment, history.getStatus()));
             }
+            ActivityEventService activityEventService = ApplicationContextFactory.getApplicationContext().getBean(ActivityEventService.class);
+            activityEventService.trackActivityOnNode(nodeRef, null, ActivityOnNodeEventType.WORKFLOW_CHANGED_ON_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
         } catch (Throwable t) {
             throw DAOException.mapping(t);
         }

@@ -3,18 +3,15 @@ package org.edu_sharing.service.collection;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
-import org.alfresco.repo.search.impl.solr.ESSearchParameters;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
-import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
@@ -55,13 +52,13 @@ import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.remote.RemoteObjectService;
 import org.edu_sharing.service.search.SearchService;
-import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.SearchServiceFactory;
-import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.edu_sharing.service.tracking.ActivityEventService;
+import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
 import org.edu_sharing.spring.ApplicationContextFactory;
@@ -79,7 +76,8 @@ import java.util.stream.Collectors;
 public class CollectionServiceImpl implements CollectionService {
 
     private final RepositoryCache repositoryCache;
-    private NotificationService notificationService;
+    private final NotificationService notificationService;
+    private final ActivityEventService activityEventService;
 
     public static CollectionService build(String appId) {
         CollectionServiceConfig config = (CollectionServiceConfig) ApplicationContextFactory.getApplicationContext().getBean("collectionServiceConfig");
@@ -152,6 +150,7 @@ public class CollectionServiceImpl implements CollectionService {
             this.toolPermissionService = ToolPermissionServiceFactory.getInstance();
             this.permissionService = PermissionServiceFactory.getPermissionService(appId);
             this.notificationService = NotificationServiceFactory.getServiceByAppId(appId);
+            this.activityEventService = ApplicationContextFactory.getApplicationContext().getBean(ActivityEventService.class);
             ApplicationContext appContext = AlfAppContextGate.getApplicationContext();
             policyBehaviourFilter = appContext.getBean("policyBehaviourFilter", BehaviourFilter.class);
             repositoryCache = appContext.getBean(RepositoryCache.class);
@@ -320,6 +319,7 @@ public class CollectionServiceImpl implements CollectionService {
                     nodeAspects = new ArrayList<>();
                 }
                 notificationService.notifyAddCollection(collectionId, refNodeId, colllectionType, collectionAspects, collectionProperties, nodeType, nodeAspects, nodeProperties, Status.ADDED);
+                activityEventService.trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, collectionId), null, ActivityOnNodeEventType.ADD_MATERIAL_TO_COLLECTION, AuthenticationUtil.getFullyAuthenticatedUser());
                 return refId;
             });
 
@@ -403,7 +403,7 @@ public class CollectionServiceImpl implements CollectionService {
                 nodeAspects = new ArrayList<>();
             }
             notificationService.notifyProposeForCollection(collectionId, originalNodeId, colllectionType, collectionAspects, collectionProperties, nodeType, nodeAspects, nodeProperties, Status.ADDED);
-
+            activityEventService.trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, collectionId), null, ActivityOnNodeEventType.PROPOSE_MATERIAL_TO_COLLECTION, AuthenticationUtil.getFullyAuthenticatedUser());
             return refId;
         });
     }
