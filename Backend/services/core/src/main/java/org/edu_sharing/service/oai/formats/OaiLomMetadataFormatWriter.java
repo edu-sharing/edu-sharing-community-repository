@@ -16,6 +16,7 @@ import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.util.PropertyMapper;
+import org.edu_sharing.spring.conditions.ConditionalOnProperty;
 import org.edu_sharing.spring.scope.refresh.annotations.RefreshScope;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
@@ -81,6 +82,7 @@ import java.util.stream.Collectors;
 @Component
 @RefreshScope
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "exporter.oai.lom.enabled", havingValue = "true")
 public class OaiLomMetadataFormatWriter extends AbstractMetadataFormatWriter {
     private final static String LANG_ATTRIBUTE = "language";
 

@@ -1,6 +1,8 @@
 package org.edu_sharing.service.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.typesafe.config.ConfigBeanFactory;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
@@ -85,9 +87,14 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
         synchronized (jaxbUnmarshaller) {
             config = (Config) jaxbUnmarshaller.unmarshal(is);
         }
+        config.valuesBackend = getLightbendMapped();
         is.close();
         configCache.put(CACHE_KEY, config);
         return config;
+    }
+
+    private ValuesBackend getLightbendMapped() {
+        return ConfigBeanFactory.create(LightbendConfigLoader.get(), ValuesBackend.class);
     }
 
     private InputStream getConfigInputStream() throws IOException {

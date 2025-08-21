@@ -28,6 +28,7 @@ export class PreviewSidebarService {
         this.currentNode$.next(instance.node);
         // listen to the closed event
         this.instance$.value.closed.subscribe(() => {
+            void this.instance$.value.updateNode(null);
             this.currentNode$.next(null);
         });
     }
@@ -53,6 +54,6 @@ export class PreviewSidebarService {
             return;
         }
         this.currentNode$.next(this.instance$.value.node !== node ? node : null);
-        this.instance$.value.node = this.currentNode$.value;
+        void this.instance$.value.updateNode(this.currentNode$.value);
     }
 }

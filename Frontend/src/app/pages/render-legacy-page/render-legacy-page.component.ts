@@ -713,9 +713,8 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
                 downloadAll.group = DefaultGroups.View;
                 downloadAll.priority = 35;
                 options.splice(1, 0, downloadAll);
-                this.currentOptions = options;
             }
-            void this.initOptions();
+            this.currentOptions = options;
         };
 
         this.nodeApi
@@ -723,10 +722,12 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
             .subscribe(
                 (data: NodeList) => {
                     addButton(data);
+                    void this.initOptions();
                 },
                 (error) => {
                     console.warn(error);
                     addButton();
+                    void this.initOptions();
                 },
             );
     }
