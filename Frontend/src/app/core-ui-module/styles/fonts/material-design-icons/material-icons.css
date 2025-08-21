@@ -32,3 +32,18 @@
     /* Support for IE. */
     font-feature-settings: 'liga';
 }
+
+/* dirty hack for old icons */
+.toggle-OPTIONS-DESELECT .material-icons {
+    position: relative;
+}
+.toggle-OPTIONS-DESELECT .material-icons:after {
+    content: '';
+    position: absolute;
+    transform: rotate(-45deg);
+    background-color: var(--textLight);
+    left: 11px;
+    top: -1px;
+    width: 2px;
+    height: 26px;
+}

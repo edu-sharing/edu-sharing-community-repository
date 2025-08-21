@@ -1499,7 +1499,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                     toggleSelection.icon = 'select_all';
                 } else {
                     toggleSelection.name = 'OPTIONS.DESELECT';
-                    toggleSelection.icon = 'deselect';
+
+                    // @TODO: in 10.0, we can use 'deselect'
+                    toggleSelection.icon = 'select_all';
                 }
             };
             list?.getSelection()
