@@ -7113,7 +7113,10 @@
               "LINK_UNSHARE_MATERIAL",
               "FEEDBACK_MATERIAL",
               "REPORT_MATERIAL",
-              "EDIT_MATERIAL_RELATION"
+              "EDIT_MATERIAL_RELATION",
+              "PROPOSE_MATERIAL_TO_COLLECTION",
+              "WORKFLOW_CHANGED_ON_MATERIAL",
+              "ADD_MATERIAL_TO_COLLECTION"
             ],
             "type": "string"
           },
@@ -7155,24 +7158,6 @@
           "timestamp",
           "type",
           "username"
-        ],
-        "type": "object"
-      },
-      "UserNodeActivityPageResult": {
-        "properties": {
-          "activities": {
-            "items": {
-              "$ref": "#/components/schemas/UserNodeActivity"
-            },
-            "type": "array"
-          },
-          "pagination": {
-            "$ref": "#/components/schemas/Pagination"
-          }
-        },
-        "required": [
-          "activities",
-          "pagination"
         ],
         "type": "object"
       },
@@ -37081,7 +37066,10 @@
                   "LINK_UNSHARE_MATERIAL",
                   "FEEDBACK_MATERIAL",
                   "REPORT_MATERIAL",
-                  "EDIT_MATERIAL_RELATION"
+                  "EDIT_MATERIAL_RELATION",
+                  "PROPOSE_MATERIAL_TO_COLLECTION",
+                  "WORKFLOW_CHANGED_ON_MATERIAL",
+                  "ADD_MATERIAL_TO_COLLECTION"
                 ],
                 "type": "string"
               },
@@ -40245,28 +40233,17 @@
             "description": "Date to filter activities from",
             "in": "query",
             "name": "after",
-            "required": true,
             "schema": {
               "format": "date-time",
               "type": "string"
             }
           },
           {
-            "description": "maximum items per page",
+            "description": "maximum items",
             "in": "query",
             "name": "maxItems",
             "schema": {
-              "default": 10,
-              "format": "int32",
-              "type": "integer"
-            }
-          },
-          {
-            "description": "skip a number of items",
-            "in": "query",
-            "name": "skipCount",
-            "schema": {
-              "default": 0,
+              "default": 100,
               "format": "int32",
               "type": "integer"
             }
@@ -40277,7 +40254,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserNodeActivityPageResult"
+                  "items": {
+                    "$ref": "#/components/schemas/UserNodeActivity"
+                  },
+                  "type": "array"
                 }
               }
             },
@@ -40492,7 +40472,10 @@
                 "LINK_UNSHARE_MATERIAL",
                 "FEEDBACK_MATERIAL",
                 "REPORT_MATERIAL",
-                "EDIT_MATERIAL_RELATION"
+                "EDIT_MATERIAL_RELATION",
+                "PROPOSE_MATERIAL_TO_COLLECTION",
+                "WORKFLOW_CHANGED_ON_MATERIAL",
+                "ADD_MATERIAL_TO_COLLECTION"
               ],
               "type": "string"
             }

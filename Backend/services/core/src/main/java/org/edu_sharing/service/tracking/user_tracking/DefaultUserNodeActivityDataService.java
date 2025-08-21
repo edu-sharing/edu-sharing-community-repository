@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.edu_sharing.spring.conditions.ConditionalOnMissingBean;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -24,8 +23,8 @@ public class DefaultUserNodeActivityDataService implements UserNodeActivityDataS
 
     @NotNull
     @Override
-    public Page<UserNodeActivity> getDataForAllUsers(@NotNull Date after, int skip, int limit) {
-        return Page.empty();
+    public List<UserNodeActivity> getDataForAllUsers(@NotNull Date after, int limit) {
+        return Collections.emptyList();
     }
 
     @NotNull

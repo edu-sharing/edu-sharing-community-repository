@@ -115,27 +115,24 @@ public class TrackingApi {
     @Path("/tracking/{repository}/allUserNodeActivities")
     @Operation(summary = "Get all user activities", description = "Returns a paginated list of all user activities after a specific date")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = UserNodeActivityPageResult.class))),
+            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserNodeActivity.class)))),
             @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public Response getAllUserNodeActivities(
+    public List<UserNodeActivity> getAllUserNodeActivities(
             @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repId,
-            @Parameter(description = "Date to filter activities from", required = true) @QueryParam("after") Date after,
-            @Parameter(description = "maximum items per page", schema = @Schema(defaultValue = "10")) @QueryParam("maxItems") Integer maxItems,
-            @Parameter(description = "skip a number of items", schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount,
+            @Parameter(description = "Date to filter activities from") @QueryParam("after") Date after,
+            @Parameter(description = "maximum items", schema = @Schema(defaultValue = "100")) @QueryParam("maxItems") Integer maxItems,
             @Context HttpServletRequest req) {
 
         if (!RepositoryDao.getRepository(repId).isHomeRepo()) {
             throw new IllegalArgumentException("The given repository is not the home repository");
         }
 
-        Page<UserNodeActivity> trackedActivities = userNodeActivityDataService.getDataForAllUsers(after, skipCount, maxItems);
-        UserNodeActivityPageResult result = new UserNodeActivityPageResult(trackedActivities.getContent(), new Pagination(trackedActivities));
-        return Response.status(Response.Status.OK).entity(result).build();
+        return userNodeActivityDataService.getDataForAllUsers(after, maxItems);
     }
 
 
