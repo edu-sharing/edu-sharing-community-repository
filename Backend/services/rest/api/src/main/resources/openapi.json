@@ -137,9 +137,6 @@
               "type": "object"
             },
             "type": "object"
-          },
-          "openapi": {
-            "type": "string"
           }
         },
         "type": "object"
