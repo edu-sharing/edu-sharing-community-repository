@@ -1606,7 +1606,7 @@
           <type>d:text</type>
           <multiple>true</multiple>
         </property>
-        <!-- for remote / link objects: indicates wheter the external link allows/supports downloading -->
+        <!-- for remote / link objects: indicates whether the external link allows/supports downloading -->
         <property name="ccm:external_download_allowed">
           <type>d:boolean</type>
           <multiple>false</multiple>
