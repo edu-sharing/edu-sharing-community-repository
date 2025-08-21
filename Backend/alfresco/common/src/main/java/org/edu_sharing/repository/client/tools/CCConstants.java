@@ -1259,6 +1259,9 @@ public class CCConstants {
 	public final static String CCM_PROP_RESTRICTED_ACCESS_PERMISSIONS ="{http://www.campuscontent.de/model/1.0}restricted_access_permissions";
 
 
+	public final static String CCM_PROP_EXTERNAL_DOWNLOAD_ALLOWED ="{http://www.campuscontent.de/model/1.0}external_download_allowed";
+
+
 	/**
 	 * LOM Props
 	 */
