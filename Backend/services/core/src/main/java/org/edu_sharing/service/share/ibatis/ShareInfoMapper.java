@@ -66,6 +66,11 @@ public interface ShareInfoMapper {
     })
     List<ShareInfoData> getAllSharesByNodeId(String nodeId);
 
+
+    @Select("<script> DELETE FROM edu_share_info WHERE node_id = #{nodeId} AND shared_by isnull AND share_status = #{shareStatus} AND shared_with IN <foreach item='item' collection='sharedWiths' open='(' separator=',' close=')'>#{item}</foreach> RETURNING id </script>")
+    List<Long> deleteAllByNodeIdAndSharedByIsNullAndShareStatusAndSharedWithIn(String nodeId, ShareStatus shareStatus, Collection<String> sharedWiths);
+
+
     @Select("<script> DELETE FROM edu_share_info WHERE node_id = #{nodeId} AND shared_by = #{sharedBy} AND share_status = #{shareStatus} AND shared_with IN <foreach item='item' collection='sharedWiths' open='(' separator=',' close=')'>#{item}</foreach> RETURNING id </script>")
     List<Long> deleteAllByNodeIdAndSharedByAndShareStatusAndSharedWithIn(String nodeId, String sharedBy, ShareStatus shareStatus, Collection<String> sharedWiths);
 

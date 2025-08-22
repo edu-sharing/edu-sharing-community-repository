@@ -192,7 +192,11 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
             throw new IllegalStateException("System user cannot reject shares");
         }
         retryingTransactionHelper.doInTransaction(() -> {
-            List<Long> ids = shareInfoMapper.deleteAllByNodeIdAndSharedByAndShareStatusAndSharedWithIn(nodeId, null, ShareStatus.REJECTED, List.of(AuthenticationUtil.getRunAsUser()));
+            List<Long> ids = shareInfoMapper.deleteAllByNodeIdAndSharedByIsNullAndShareStatusAndSharedWithIn(nodeId, ShareStatus.REJECTED, List.of(AuthenticationUtil.getRunAsUser()));
+            if(ids.isEmpty()){
+                return null;
+            }
+
             List<ShareInfoOplogData> oplogs = ids.stream()
                     .map(x -> new ShareInfoOplogData(null, x, OpLogAction.DELETE, new Date()))
                     .toList();
