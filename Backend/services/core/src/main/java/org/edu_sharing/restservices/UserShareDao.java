@@ -96,7 +96,7 @@ public class UserShareDao {
                 return PersonDao.getPerson(this.repoDao, authorityName).asPersonSimple(false);
             }
         } catch (Exception e) {
-            log.error("Could not get Authority for name: {}", authorityName, e);
+            log.info("Could not get Authority for name: {}", authorityName);
             return null;
         }
     }
