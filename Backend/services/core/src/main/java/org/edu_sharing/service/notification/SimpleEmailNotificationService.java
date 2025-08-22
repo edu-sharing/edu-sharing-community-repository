@@ -26,7 +26,6 @@ import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.spring.conditions.ConditionalOnProperty;
 import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -46,7 +45,6 @@ public class SimpleEmailNotificationService {
         log.info("SimpleEmailNotificationService initialized");
     }
 
-    @Async
     @EventListener
     public void onNodeIssueEvent(NodeIssueEvent event) throws Exception {
         log.info("send notifyNodeIssue: nodeId: {}, reason: {}, userComment: {}", event.nodeId(), event.reason(), event.userComment());
@@ -122,7 +120,6 @@ public class SimpleEmailNotificationService {
         }
     }
 
-    @Async
     @EventListener
     public void onWorkflowChanged(WorkflowChangedEvent event) {
         log.info("send notifyWorkflowChanged: nodeId: {}, nodePropertiesList: {}, comment: {}, status: {}", event.nodeId(), event.nodeProperties(), event.comment(), event.status());
@@ -148,7 +145,6 @@ public class SimpleEmailNotificationService {
         }
     }
 
-    @Async
     @EventListener
     public void onPersonStatusChanged(PersonStatusChangedEvent event) {
         Map<String, String> replace = new HashMap<>();
@@ -164,7 +160,6 @@ public class SimpleEmailNotificationService {
         }
     }
 
-    @Async
     @EventListener
     public void onMetadataSetSuggestion(MetadataSetSuggestionEvent event) throws Throwable {
         String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
@@ -192,7 +187,6 @@ public class SimpleEmailNotificationService {
         }
     }
 
-    @Async
     @EventListener
     public void onPermissionChanged(PermissionChangedEvent event) throws Throwable {
         MailTemplate.UserMail sender = MailTemplate.getUserMailData(event.senderAuthority());
