@@ -19,7 +19,6 @@ import org.edu_sharing.repository.server.NodeRefVersion;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.LRMITool;
 import org.edu_sharing.restservices.*;
-import org.edu_sharing.restservices.node.v1.NodeApi;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.search.v1.model.SearchParameters;
@@ -32,12 +31,12 @@ import org.edu_sharing.service.search.UserShareDirection;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SearchVCard;
 import org.edu_sharing.service.search.model.SortDefinition;
-import org.edu_sharing.service.tracking.ActivityOnNodeEvent;
 import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -678,7 +677,11 @@ public class SearchApi {
 					getSearchToken(contentType, maxItems, skipCount, null, null, parameters)
 			);
 			SearchResultInvite response = new SearchResultInvite();
-			response.setNodes(events.getNodes().stream().map(UserShareDao::asUserEvent).toList());
+			response.setNodes(events.getNodes()
+                    .stream()
+                    .map(UserShareDao::asUserEvent)
+                    .filter(Objects::nonNull)
+                    .toList());
 			response.setFacets(events.getFacets());
 			response.setPagination(events.getPagination());
 			return Response.status(Response.Status.OK).entity(response).build();

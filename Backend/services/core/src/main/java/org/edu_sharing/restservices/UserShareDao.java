@@ -7,6 +7,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.generated.repository.backend.services.rest.client.model.ShareInfo;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
@@ -68,22 +69,44 @@ public class UserShareDao {
     }
 
     public InviteEvent asUserEvent() {
+        Authority sharedBy = getAuthority(this.event.getSharedBy());
+        Authority sharedWith = getAuthority(this.event.getSharedWith());
+        if (sharedBy == null || sharedWith == null) {
+            return null;
+        }
+
         return new InviteEvent(
                 this.nodeDao.asNode(),
-                PersonDao.getPerson(this.repoDao, this.event.getSharedBy()).asPersonSimple(false),
-                PersonDao.getPerson(this.repoDao, this.event.getSharedWith()).asPersonSimple(false),
+                sharedBy,
+                sharedWith,
                 this.event.getTimestamp(),
                 this.event.getShareType(),
                 this.event.getShareStatus()
         );
     }
 
+    private Authority getAuthority(String authorityName) {
+        if (authorityName == null) {
+            return null;
+        }
+        try {
+            if (authorityName.startsWith(CCConstants.PERM_AUTHORITY_TYPE_GROUP)) {
+                return GroupDao.getGroup(this.repoDao, authorityName).asGroup();
+            } else {
+                return PersonDao.getPerson(this.repoDao, authorityName).asPersonSimple(false);
+            }
+        } catch (Exception e) {
+            log.error("Could not get Authority for name: {}", authorityName, e);
+            return null;
+        }
+    }
+
     @Data
     @AllArgsConstructor
     public static class InviteEvent {
         private Node node;
-        private UserSimple sharedBy;
-        private UserSimple sharedWith;
+        private Authority sharedBy;
+        private Authority sharedWith;
         private Date timestamp;
         private ShareInfo.ShareTypeEnum shareType;
         private ShareInfo.ShareStatusEnum shareStatus;
