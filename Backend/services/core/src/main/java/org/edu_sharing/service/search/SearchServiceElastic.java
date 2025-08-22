@@ -414,13 +414,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         facetsResult.add(getMultitermFacet(mds, queryData, aggregation.getKey(), multiTerm, definition));
                     }
                 }
-            }else if(a.getValue().isSterms()){
+            } else if (a.getValue().isSterms()) {
                 if (a.getValue().isSterms()) {
                     Aggregation definition = aggregations.get(a.getKey());
                     StringTermsAggregate sterms = a.getValue().sterms();
-                    facetsResult.add(getFacet(mds,queryData, a.getKey(), sterms, definition));
+                    facetsResult.add(getFacet(mds, queryData, a.getKey(), sterms, definition));
                 }
-            }else {
+            } else {
                 logger.error("non supported aggregation " + a.getKey());
             }
         }
@@ -453,7 +453,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     private void setSumOtherDocCount(MetadataQuery queryData, String name, TermsAggregateBase<?> buckets, NodeSearch.Facet facet) {
-        if(queryData == null) return;
+        if (queryData == null) return;
         facet.setSumOtherDocCount(buckets.sumOtherDocCount());
         MetadataQueryParameter metadataQueryParameter = queryData.findParameterByName(name);
         if (metadataQueryParameter == null) {
@@ -461,12 +461,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }
 
         MetadataQueryParameter.MetadataQueryFacet metadataQueryFacet = metadataQueryParameter.getFacet();
-        if(metadataQueryFacet == null) {
+        if (metadataQueryFacet == null) {
             return;
         }
 
         Integer maxBucketSize = metadataQueryFacet.getMaxBucketSize();
-        if(maxBucketSize == null) {
+        if (maxBucketSize == null) {
             return;
         }
 
@@ -474,7 +474,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     private void sortFacetValues(MetadataSet mds, MetadataQuery queryData, String name, List<NodeSearch.Facet.Value> values) {
-        if(mds == null || queryData == null) return;
+        if (mds == null || queryData == null) return;
 
         MetadataWidget widget = mds.findWidget(name);
         Map<String, MetadataKey> valuesAsMap = widget.getValuesAsMap();
@@ -499,7 +499,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 }
                 return lhsMetadataKey.getCaption().compareToIgnoreCase(rhsMetadataKey.getCaption()) * order;
             });
-        } else if(metadataQueryFacet.getSortOrder() == MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc) {
+        } else if (metadataQueryFacet.getSortOrder() == MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc) {
             values.sort(Comparator.comparing(NodeSearch.Facet.Value::getCount));
         }
     }
@@ -544,10 +544,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
             searchToken.getSortDefinition().applyToSearchSourceBuilder(searchRequest);
         }
 
-        return fetchAllFromRequest(mds,queryData,searchToken, searchRequest,null).getData();
+        return fetchAllFromRequest(mds, queryData, searchToken, searchRequest, null).getData();
     }
 
-    private @NotNull SearchResultNodeRef fetchAllFromRequest(MetadataSet mds, MetadataQuery queryData, SearchToken searchToken, SearchRequest.Builder searchRequest,Map<String,Aggregation> aggregations) throws IOException {
+    private @NotNull SearchResultNodeRef fetchAllFromRequest(MetadataSet mds, MetadataQuery queryData, SearchToken searchToken, SearchRequest.Builder searchRequest, Map<String, Aggregation> aggregations) throws IOException {
         SearchResultNodeRef sr = new SearchResultNodeRef();
         List<NodeRef> data = new ArrayList<>();
         sr.setData(data);
@@ -562,8 +562,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     searchResponse = client
                             .withTransportOptions(this::getRequestOptions)
                             .search(searchRequest.build(), Map.class);
-                    if(aggregations != null) {
-                        sr.setFacets(getFacets(mds,queryData,aggregations,searchResponse));
+                    if (aggregations != null) {
+                        sr.setFacets(getFacets(mds, queryData, aggregations, searchResponse));
                     }
                 } else {
                     final String usedScrollId = scrollId;
@@ -633,7 +633,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             BoolQuery metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criteria, true).build();
             BoolQuery metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criteria, false).build();
             StoreRef storeRef = (searchToken.getStoreName() != null && searchToken.getStoreProtocol() != null) ? new StoreRef(searchToken.getStoreProtocol(), searchToken.getStoreName()) : null;
-            BoolQuery queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData, storeRef,true).build();
+            BoolQuery queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData, storeRef, true).build();
 
             // add collapse builder
             // CollapseBuilder collapseBuilder = new CollapseBuilder("properties.ccm:original");
@@ -713,7 +713,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                         .must(must -> must.bool(metadataQueryBuilderFilter))
                                         .must(must -> must.bool(queryBuilderGlobalConditions))))
                         .must(must -> must.bool(metadataQueryBuilderAsQuery)));
-                if(!queryData.getFunctions().isEmpty()) {
+                if (!queryData.getFunctions().isEmpty()) {
                     return q.functionScore(f ->
                             f.query(q2 -> q2.bool(boolQuery)).
                                     functions(queryData.getFunctions().stream().map(f2 -> FunctionScore.of(
@@ -875,7 +875,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             queryBuilderGlobalConditions = permissionsFilter;
         }
 
-        if(scoped){
+        if (scoped) {
             if (NodeServiceInterceptor.getEduSharingScope() == null) {
                 queryBuilderGlobalConditions.mustNot(mustNot -> mustNot.exists(exist -> exist.field("properties.ccm:eduscopename")));
             } else {
@@ -1628,6 +1628,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             );
         });
     }
+
     @Override
     public org.edu_sharing.repository.server.SearchResult<SearchInviteEvent> getUserShares(UserShareDirection direction, Map<String, String[]> searchCriteria, SearchToken searchToken) throws Exception {
         String username = AuthenticationUtil.getFullyAuthenticatedUser();
@@ -1646,14 +1647,14 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                                 .field("share.sharedBy")
                                                 .value(username)
                                         ));
-                                    } else if(direction.equals(UserShareDirection.toUser)) {
+                                    } else if (direction.equals(UserShareDirection.toUser)) {
                                         b = b.must(m -> m.term(t -> t
                                                 .field("share.sharedWith")
                                                 .value(username)
                                         ));
-                                    } else if(direction.equals(UserShareDirection.toUserOrGroups)) {
+                                    } else if (direction.equals(UserShareDirection.toUserOrGroups)) {
                                         b.minimumShouldMatch("1");
-                                        for(String group: getAllMemberships(username)) {
+                                        for (String group : getAllMemberships(username)) {
                                             b = b.should(m -> m.term(t -> t
                                                     .field("share.sharedWith")
                                                     .value(group)
@@ -1682,21 +1683,19 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                         )
                                 )
                         )
-                ))).must(
+                ))).mustNot(
                 // filter rejected
                 Query.of(q2 -> q2.hasChild(hc -> hc
                         .type("share")
-                        .query(cq -> cq.bool(qcb -> qcb.mustNot(
-                                        mn -> mn.bool(mnb -> mnb.must(
-                                                mnbm -> mnbm.term(t -> t
-                                                        .field("share.sharedWith")
-                                                        .value(username)
-                                                )).must(
-                                                mnbm -> mnbm.term(t -> t
-                                                        .field("share.shareStatus")
-                                                        .value("REJECTED")
-                                                )
-                                        ))
+                        .query(cq -> cq.bool(qcb -> qcb.must(
+                                        mnbm -> mnbm.term(t -> t
+                                                .field("share.sharedWith")
+                                                .value(username)
+                                        )).must(
+                                        mnbm -> mnbm.term(t -> t
+                                                .field("share.shareStatus")
+                                                .value("REJECTED")
+                                        )
                                 ))
                         )
                 ))
@@ -1713,12 +1712,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
             );
         });
     }
-    private<T> org.edu_sharing.repository.server.SearchResult<T> searchInternalWithChildQuery(
+
+    private <T> org.edu_sharing.repository.server.SearchResult<T> searchInternalWithChildQuery(
             String queryId,
             Map<String, String[]> searchCriteria,
             SearchToken searchToken,
             Query childQuery,
-            Function<ResultData,T> mapResult
+            Function<ResultData, T> mapResult
     ) throws Exception {
         MetadataSet mds = MetadataHelper.getLocalDefaultMetadataset();
         MetadataQueries queries = mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL);
@@ -1847,15 +1847,15 @@ public class SearchServiceElastic extends SearchServiceImpl {
         SearchToken token = new SearchToken();
         token.setContentType(contentType);
         BoolQuery.Builder builder = QueryBuilders.bool();
-        if(contentType.equals(ContentType.FILES)) {
+        if (contentType.equals(ContentType.FILES)) {
             builder.must(m -> m.match(match -> match.field("type").query(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO))));
-        } else if(contentType.equals(ContentType.FOLDERS)) {
+        } else if (contentType.equals(ContentType.FOLDERS)) {
             builder.must(m -> m.match(match -> match.field("type").query(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_MAP))));
             builder.mustNot(m -> m.match(match -> match.field("aspects").query(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION))));
-        } else if(contentType.equals(ContentType.COLLECTIONS)) {
+        } else if (contentType.equals(ContentType.COLLECTIONS)) {
             builder.must(m -> m.match(match -> match.field("type").query(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_MAP))));
             builder.must(m -> m.match(match -> match.field("aspects").query(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION))));
-        } else if(contentType.equals(ContentType.FILES_AND_FOLDERS)) {
+        } else if (contentType.equals(ContentType.FILES_AND_FOLDERS)) {
             builder.minimumShouldMatch("1");
             builder.should(
                     s -> s.bool(
@@ -1863,9 +1863,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                     mustNot(m -> m.match(match -> match.field("aspects").query(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION))))
                     )).should(s -> s.match(match -> match.field("type").query(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO)))
             );
-        } else if(contentType.equals(ContentType.COLLECTION_PROPOSALS)) {
+        } else if (contentType.equals(ContentType.COLLECTION_PROPOSALS)) {
             builder.must(m -> m.match(match -> match.field("type").query(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_COLLECTION_PROPOSAL))));
-        } else if(contentType.equals(ContentType.TOOLPERMISSIONS)) {
+        } else if (contentType.equals(ContentType.TOOLPERMISSIONS)) {
             builder.must(m -> m.match(match -> match.field("type").query(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_TOOLPERMISSION))));
         } else {
             logger.warn("Unsupported/Unknown content type: " + contentType);
@@ -1874,14 +1874,14 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     private SearchResultNodeRef searchByQuery(QueryVariant query, int skipCount, int maxItems, SortDefinition sortDefinition) throws IOException {
-        return searchByQuery(query, skipCount, maxItems, sortDefinition, null,null);
+        return searchByQuery(query, skipCount, maxItems, sortDefinition, null, null);
     }
 
-    private SearchResultNodeRef searchByQuery(QueryVariant query, int skipCount, int maxItems, SortDefinition sortDefinition, String index, Map<String,Aggregation> aggregations) throws IOException {
-        if(index == null) index = WORKSPACE_INDEX;
+    private SearchResultNodeRef searchByQuery(QueryVariant query, int skipCount, int maxItems, SortDefinition sortDefinition, String index, Map<String, Aggregation> aggregations) throws IOException {
+        if (index == null) index = WORKSPACE_INDEX;
 
-        if((maxItems - skipCount) > 10000){
-            return  searchAllByQuery(query, sortDefinition, index,aggregations);
+        if ((maxItems - skipCount) > 10000) {
+            return searchAllByQuery(query, sortDefinition, index, aggregations);
         }
         checkClient();
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder().index(index);
@@ -1892,7 +1892,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         searchRequestBuilder.source(src -> src
                 .filter(filter -> filter.excludes(appendDefaultExcludes(new ArrayList<>())))
         );
-        if(aggregations != null){
+        if (aggregations != null) {
             searchRequestBuilder.aggregations(aggregations);
         }
         if (sortDefinition != null) {
@@ -1910,8 +1910,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
         sr.setStartIDX(skipCount);
         sr.setNodeCount((int) hits.total().value());
 
-        if(aggregations != null){
-            sr.setFacets(getFacets(null,null, aggregations,searchResponse));
+        if (aggregations != null) {
+            sr.setFacets(getFacets(null, null, aggregations, searchResponse));
         }
 
         return sr;
@@ -1966,7 +1966,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         try {
 
 
-            SearchResultNodeRef searchResultNodeRef = this.searchByQuery(finalQuery.build(), from, nrOfResults, sort, AUTHORITIES_INDEX,null);
+            SearchResultNodeRef searchResultNodeRef = this.searchByQuery(finalQuery.build(), from, nrOfResults, sort, AUTHORITIES_INDEX, null);
 
             searchResultNodeRef.getData().stream().forEach(c -> {
                 String authorityName = (String) c.getProperties().get(CCConstants.CM_PROP_AUTHORITY_NAME);
@@ -1984,15 +1984,15 @@ public class SearchServiceElastic extends SearchServiceImpl {
     static BoolQuery.Builder getAuthorityCombinedQuery(AuthorityType type, Map<String, String> customProperties, BoolQuery.Builder findUsersQuery, BoolQuery.Builder findGroupsQuery) {
         BoolQuery.Builder finalQuery = QueryBuilders.bool().minimumShouldMatch("1");
         if (findUsersQuery != null && customProperties != null) {
-            for(Map.Entry<String, String> entry : customProperties.entrySet().stream().filter(k -> Objects.equals(CCConstants.getValidGlobalName(k.getKey()), CCConstants.CM_PROP_PERSON_ESPERSONSTATUS)).collect(Collectors.toList())){
+            for (Map.Entry<String, String> entry : customProperties.entrySet().stream().filter(k -> Objects.equals(CCConstants.getValidGlobalName(k.getKey()), CCConstants.CM_PROP_PERSON_ESPERSONSTATUS)).collect(Collectors.toList())) {
                 findUsersQuery.must(m -> m.wildcard(t -> t
                         .field("properties." + entry.getKey() + ".keyword")
                         .value(entry.getValue())
                 ));
             }
         }
-        if (findGroupsQuery != null && customProperties !=null) {
-            for(Map.Entry<String, String> entry : customProperties.entrySet()){
+        if (findGroupsQuery != null && customProperties != null) {
+            for (Map.Entry<String, String> entry : customProperties.entrySet()) {
                 findGroupsQuery.must(m -> m.wildcard(t -> t
                         .field("properties." + entry.getKey() + ".keyword")
                         .value(entry.getValue())
@@ -2052,13 +2052,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     for (Map.Entry<String, Double> field : searchFields.entrySet()) {
                         String fToken = token;
                         fieldQuery.should(s -> s.wildcard(w -> w
-                                .field("properties.cm:" + field.getKey()+".keyword")
+                                .field("properties.cm:" + field.getKey() + ".keyword")
                                 .value(fToken)
                                 .caseInsensitive(true))
                         );
                         if (field.getValue() > 1) {
                             fieldQuery.should(s -> s.wildcard(w -> w
-                                    .field("properties.cm:" + field.getKey()+".keyword")
+                                    .field("properties.cm:" + field.getKey() + ".keyword")
                                     .value(StringUtils.strip(fToken, "*"))
                                     .boost(field.getValue().floatValue())
                                     .caseInsensitive(true)));
@@ -2306,7 +2306,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 if (nonFuzzyField.startsWith("=@")) {
                     nonFuzzyField = nonFuzzyField.replace("=@", "");
                 }
-                String fnonFuzzyField = "properties." + nonFuzzyField+".keyword";
+                String fnonFuzzyField = "properties." + nonFuzzyField + ".keyword";
                 String ftoken = token;
                 subQuery.must(m -> m.wildcard(w -> w.
                         field(fnonFuzzyField)
@@ -2403,7 +2403,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             return this.searchAllByQuery(
                     finalQuery.build(),
                     sort,
-                    AUTHORITIES_INDEX,null).getData();
+                    AUTHORITIES_INDEX, null).getData();
         } else {
             assert memberships != null;
             return memberships.stream().map(m -> {
@@ -2421,7 +2421,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
     }
 
-    private SearchResultNodeRef searchAllByQuery(QueryVariant query, SortDefinition sortDefinition, String index, Map<String,Aggregation> aggregations) throws IOException {
+    private SearchResultNodeRef searchAllByQuery(QueryVariant query, SortDefinition sortDefinition, String index, Map<String, Aggregation> aggregations) throws IOException {
         checkClient();
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder().index(index)
                 .query(query._toQuery())
@@ -2430,14 +2430,14 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 .source(src -> src
                         .filter(filter -> filter.excludes(appendDefaultExcludes(new ArrayList<>())))
                 );
-        if(aggregations != null){
+        if (aggregations != null) {
             searchRequestBuilder.aggregations(aggregations);
         }
         if (sortDefinition != null) {
             sortDefinition.applyToSearchSourceBuilder(searchRequestBuilder);
         }
         SearchToken token = new SearchToken();
-        SearchResultNodeRef sr  = fetchAllFromRequest(null,null,token, searchRequestBuilder,aggregations);
+        SearchResultNodeRef sr = fetchAllFromRequest(null, null, token, searchRequestBuilder, aggregations);
 
         return sr;
     }
@@ -2446,7 +2446,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         BoolQuery.Builder b = QueryBuilders.bool();
         b.must(m -> m.term(t -> t.field("aspects").value(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION_PINNED))));
         b.must(m -> m.term(t -> t.field("nodeRef.storeRef.protocol").value("workspace")));
-        return searchAllByQuery(b.build(), null, WORKSPACE_INDEX,null).getData();
+        return searchAllByQuery(b.build(), null, WORKSPACE_INDEX, null).getData();
     }
 
     @Override
@@ -2462,7 +2462,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 t -> t.field("properties.sys:node-uuid").value(nodeId)
         ));
         globalConditions.must(m -> m.bool(b.build()));
-        return searchAllByQuery(globalConditions.build(), null, WORKSPACE_INDEX,null).getData();
+        return searchAllByQuery(globalConditions.build(), null, WORKSPACE_INDEX, null).getData();
     }
 
     @Override
@@ -2489,7 +2489,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             Set<String> memberships;
             {
                 Set<String> m = serviceRegistry.getAuthorityService().getAuthorities();
-                if(m == null) {
+                if (m == null) {
                     m = Collections.emptySet();
                 }
                 memberships = m;
@@ -2540,7 +2540,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                     }
                                 }
                             }
-                            if(!memberQuery.hasClauses()){
+                            if (!memberQuery.hasClauses()) {
                                 return new SearchResult<EduGroup>();
                             }
                             finalQuery.must(must -> must.bool(memberQuery.build()));
@@ -2557,7 +2557,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                             skipCount,
                             maxValues,
                             sort,
-                            AUTHORITIES_INDEX,null);
+                            AUTHORITIES_INDEX, null);
                     // do in transaction for better performance of getProperty
                     return serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
                         List<EduGroup> result = new ArrayList<>();
@@ -2581,7 +2581,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                     org.alfresco.service.cmr.repository.NodeRef folderRef = new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
                                     eduGroup.setFolderName(NodeServiceHelper.getProperty(folderRef, CCConstants.CM_NAME));
                                     eduGroup.setScope(NodeServiceHelper.getProperty(folderRef, CCConstants.CCM_PROP_EDUSCOPE_NAME));
-                                }catch(Throwable t) {
+                                } catch (Throwable t) {
                                     logger.warn("Exception while fetching edu organization folder for " + eduGroup.getGroupId() + "(folder: " + nodeId + ")", t);
                                 }
                                 boolean add = false;
@@ -2625,7 +2625,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             List<String> comparator) throws IOException {
 
         BoolQuery.Builder b = QueryBuilders.bool();
-        for(int i = 0; i < properties.size(); i++){
+        for (int i = 0; i < properties.size(); i++) {
             int finalI = i;
             String comp = "=";
             if (comparator != null)
@@ -2634,81 +2634,81 @@ public class SearchServiceElastic extends SearchServiceImpl {
             QueryVariant query;
             if (comp.equals("<=")) {
                 RangeQuery.Builder r = QueryBuilders.range();
-                r.number(n -> n.field("properties." + properties.get(finalI)+".number").to(Double.valueOf(value.get(finalI))));
+                r.number(n -> n.field("properties." + properties.get(finalI) + ".number").to(Double.valueOf(value.get(finalI))));
                 query = r.build();
-            }else if (comp.equals(">=")) {
+            } else if (comp.equals(">=")) {
                 RangeQuery.Builder r = QueryBuilders.range();
-                r.number(n -> n.field("properties." + properties.get(finalI)+".number").from(Double.valueOf(value.get(finalI))));
+                r.number(n -> n.field("properties." + properties.get(finalI) + ".number").from(Double.valueOf(value.get(finalI))));
                 query = r.build();
-            }else{
+            } else {
                 TermQuery.Builder t = QueryBuilders.term();
                 t.field("properties." + properties.get(finalI)).value(value.get(finalI));
                 query = t.build();
             }
 
-            if(CombineMode.AND.equals(combineMode)){
-                if(query instanceof RangeQuery){
-                    b.must(m -> m.range((RangeQuery)query));
-                }else if(query instanceof TermQuery){
-                    b.must(m -> m.term((TermQuery)query));
+            if (CombineMode.AND.equals(combineMode)) {
+                if (query instanceof RangeQuery) {
+                    b.must(m -> m.range((RangeQuery) query));
+                } else if (query instanceof TermQuery) {
+                    b.must(m -> m.term((TermQuery) query));
                 }
-            }else{
-                if(query instanceof RangeQuery){
-                    b.should(m -> m.range((RangeQuery)query));
-                }else if(query instanceof TermQuery){
-                    b.should(m -> m.term((TermQuery)query));
+            } else {
+                if (query instanceof RangeQuery) {
+                    b.should(m -> m.range((RangeQuery) query));
+                } else if (query instanceof TermQuery) {
+                    b.should(m -> m.term((TermQuery) query));
                 }
             }
         }
-        BoolQuery.Builder globalConditions = getGlobalConditions(null, null, null, null,true);
+        BoolQuery.Builder globalConditions = getGlobalConditions(null, null, null, null, true);
         globalConditions.must(m -> m.bool(b.build()));
 
-        if((searchToken.getMaxResult() - searchToken.getFrom()) > 10000){
-            return  searchAllByQuery(globalConditions.build(), searchToken.getSortDefinition(), WORKSPACE_INDEX,null);
-        }else {
+        if ((searchToken.getMaxResult() - searchToken.getFrom()) > 10000) {
+            return searchAllByQuery(globalConditions.build(), searchToken.getSortDefinition(), WORKSPACE_INDEX, null);
+        } else {
             return searchByQuery(globalConditions.build(), searchToken.getFrom(), searchToken.getMaxResult(), searchToken.getSortDefinition());
         }
     }
 
     @Override
     public SearchResultNodeRef search(SearchToken searchToken, boolean scoped) {
-        if(searchToken.getElasticQuery() == null && searchToken.getLuceneString() != null){
-            return super.search(searchToken,scoped);
+        if (searchToken.getElasticQuery() == null && searchToken.getLuceneString() != null) {
+            return super.search(searchToken, scoped);
         }
         try {
             StoreRef storeRef = (searchToken.getStoreProtocol() != null && searchToken.getStoreName() != null)
-                    ? new StoreRef(searchToken.getStoreProtocol(),searchToken.getStoreName())
+                    ? new StoreRef(searchToken.getStoreProtocol(), searchToken.getStoreName())
                     : null;
-            BoolQuery.Builder globalConditions = getGlobalConditions(searchToken.getAuthorityScope(), null, null,storeRef,scoped);
+            BoolQuery.Builder globalConditions = getGlobalConditions(searchToken.getAuthorityScope(), null, null, storeRef, scoped);
             globalConditions.must(searchToken.getElasticQuery()._toQuery());
 
-            Map<String,Aggregation> aggregations = null;
-            if(searchToken.getFacets() != null && !searchToken.getFacets().isEmpty()){
+            Map<String, Aggregation> aggregations = null;
+            if (searchToken.getFacets() != null && !searchToken.getFacets().isEmpty()) {
                 aggregations = searchToken.getFacets()
                         .stream()
-                        .collect(Collectors.toMap(s -> s,s ->
+                        .collect(Collectors.toMap(s -> s, s ->
                                 AggregationBuilders.terms()
-                                        .field((MetadataElasticSearchHelper.nonKeywordFacets.contains(s)) ? "properties."+s : "properties."+s+".keyword")
+                                        .field((MetadataElasticSearchHelper.nonKeywordFacets.contains(s)) ? "properties." + s : "properties." + s + ".keyword")
                                         .size(searchToken.getFacetLimit())
                                         .minDocCount(searchToken.getFacetsMinCount())
                                         .build()._toAggregation()));
 
             }
-            return searchByQuery(globalConditions.build(), searchToken.getFrom(), searchToken.getMaxResult(), searchToken.getSortDefinition(),searchToken.getElasticIndex(),aggregations);
-        }catch (IOException e){
+            return searchByQuery(globalConditions.build(), searchToken.getFrom(), searchToken.getMaxResult(), searchToken.getSortDefinition(), searchToken.getElasticIndex(), aggregations);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
     public SearchResultNodeRef searchByDisplayPath(String path, String index) throws IOException {
-        BoolQuery.Builder globalConditions = getGlobalConditions(null, null, null, null,true);
+        BoolQuery.Builder globalConditions = getGlobalConditions(null, null, null, null, true);
         globalConditions.must(m -> m.wildcard(QueryBuilders.wildcard()
                 .field("fulldisplaypath")
                 .value(path)
                 .build()
         ));
-        return searchAllByQuery(globalConditions.build(),null,index,null);
+        return searchAllByQuery(globalConditions.build(), null, index, null);
     }
 
     @Data
