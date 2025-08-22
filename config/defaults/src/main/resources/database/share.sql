@@ -23,3 +23,7 @@ CREATE TABLE edu_share_info_oplog
 );
 
 CREATE INDEX idx_edu_share_oplog_timestamp ON edu_share_info_oplog (timestamp);
+
+CREATE UNIQUE INDEX edu_share_info_node_id_shared_by_shared_with_share_status_share
+    ON edu_share_info (node_id, shared_by, shared_with, share_status, share_type)
+    NULLS NOT DISTINCT;

@@ -22,7 +22,10 @@ import org.edu_sharing.service.permission.events.AddedPermissionsEvent;
 import org.edu_sharing.service.permission.events.RemovedPermissionEvent;
 import org.edu_sharing.service.share.ibatis.ShareInfoMapper;
 import org.edu_sharing.service.share.ibatis.ShareInfoOpLogMapper;
+import org.postgresql.util.PSQLException;
 import org.springframework.context.event.EventListener;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -96,7 +99,7 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
 
     @EventListener
     public void onRemovedPermissionEvent(RemovedPermissionEvent event) {
-        if(!ShareInfoContextHolder.getContext().isCreateSharesOnPermissionChanged()){
+        if (!ShareInfoContextHolder.getContext().isCreateSharesOnPermissionChanged()) {
             return;
         }
 
@@ -120,11 +123,11 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
 
     @EventListener
     public void onAddedPermissionEvent(AddedPermissionsEvent event) {
-        if(!ShareInfoContextHolder.getContext().isCreateSharesOnPermissionChanged()){
+        if (!ShareInfoContextHolder.getContext().isCreateSharesOnPermissionChanged()) {
             return;
         }
 
-        retryingTransactionHelper.doInTransaction(() -> {
+        Exception error = retryingTransactionHelper.doInTransaction(() -> {
             Set<String> sharesToAdd = event.permissions()
                     .stream()
                     .map(AccessPermission::getAuthority)
@@ -151,25 +154,44 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
                             ShareType.AUTHORITY,
                             new Date()
                     )).toList();
-            shareInfoMapper.createAll(shareInfos);
-            List<ShareInfoOplogData> oplogs = shareInfos.stream()
-                    .map(x -> new ShareInfoOplogData(null, x.getId(), OpLogAction.CREATE, new Date()))
-                    .toList();
+            try {
+                shareInfoMapper.createAll(shareInfos);
 
-            shareInfoOpLogMapper.createAll(oplogs);
+                List<ShareInfoOplogData> oplogs = shareInfos.stream()
+                        .map(x -> new ShareInfoOplogData(null, x.getId(), OpLogAction.CREATE, new Date()))
+                        .toList();
+
+                shareInfoOpLogMapper.createAll(oplogs);
+            } catch (DuplicateKeyException e) {
+                log.warn("Some shares already exists: {}", shareInfos);
+                return e;
+            }
             return null;
         });
+
+        if (error != null) {
+            throw new RuntimeException(error);
+        }
     }
 
     @Override
     @Transactional
     public void createShare(@NonNull String nodeId, @NonNull String sharedBy, @NonNull String sharedWith, @NonNull ShareType shareType) {
-        retryingTransactionHelper.doInTransaction(() -> {
+        Exception error = retryingTransactionHelper.doInTransaction(() -> {
             ShareInfoData shareInfoData = new ShareInfoData(null, nodeId, sharedBy, sharedWith, ShareStatus.SHARED, shareType, new Date());
-            shareInfoMapper.create(shareInfoData);
-            shareInfoOpLogMapper.create(new ShareInfoOplogData(null, shareInfoData.getId(), OpLogAction.CREATE, new Date()));
-            return null;
+            try {
+                shareInfoMapper.create(shareInfoData);
+                shareInfoOpLogMapper.create(new ShareInfoOplogData(null, shareInfoData.getId(), OpLogAction.CREATE, new Date()));
+                return null;
+            } catch (DuplicateKeyException e) {
+                log.warn("Share already exists: {}", shareInfoData);
+                return e;
+            }
         });
+
+        if (error != null) {
+            throw new RuntimeException(error);
+        }
     }
 
     @Override
@@ -179,9 +201,13 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
         }
 
         retryingTransactionHelper.doInTransaction(() -> {
-            ShareInfoData shareInfoData = new ShareInfoData(null, nodeId, null, AuthenticationUtil.getRunAsUser(), ShareStatus.REJECTED, ShareType.AUTHORITY, new Date());
-            shareInfoMapper.create(shareInfoData);
-            shareInfoOpLogMapper.create(new ShareInfoOplogData(null, shareInfoData.getId(), OpLogAction.CREATE, new Date()));
+            try {
+                ShareInfoData shareInfoData = new ShareInfoData(null, nodeId, null, AuthenticationUtil.getRunAsUser(), ShareStatus.REJECTED, ShareType.AUTHORITY, new Date());
+                shareInfoMapper.create(shareInfoData);
+                shareInfoOpLogMapper.create(new ShareInfoOplogData(null, shareInfoData.getId(), OpLogAction.CREATE, new Date()));
+            } catch (DuplicateKeyException e) {
+                return null;
+            }
             return null;
         });
     }
@@ -193,7 +219,7 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
         }
         retryingTransactionHelper.doInTransaction(() -> {
             List<Long> ids = shareInfoMapper.deleteAllByNodeIdAndSharedByIsNullAndShareStatusAndSharedWithIn(nodeId, ShareStatus.REJECTED, List.of(AuthenticationUtil.getRunAsUser()));
-            if(ids.isEmpty()){
+            if (ids.isEmpty()) {
                 return null;
             }
 
