@@ -1689,7 +1689,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         .query(cq -> cq.bool(qcb -> qcb.mustNot(
                                         mn -> mn.bool(mnb -> mnb.must(
                                                 mnbm -> mnbm.term(t -> t
-                                                        .field("share.sharedWidth")
+                                                        .field("share.sharedWith")
                                                         .value(username)
                                                 )).must(
                                                 mnbm -> mnbm.term(t -> t
