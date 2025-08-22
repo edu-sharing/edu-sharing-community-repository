@@ -31,7 +31,8 @@ mat-chip {
     // spacing for drop-down button
     padding-right: 35px;
 }
-mat-chip {
+mat-chip,
+mat-chip-row {
     &.indeterminate {
         background: repeating-linear-gradient(
             -45deg,
