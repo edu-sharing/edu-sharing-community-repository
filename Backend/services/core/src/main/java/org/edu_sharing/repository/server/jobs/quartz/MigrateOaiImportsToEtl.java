@@ -174,7 +174,7 @@ public class MigrateOaiImportsToEtl extends AbstractInterruptableJob{
 	}
 
 	private void transformInternal(NodeRef nodeRef) {
-		logger.debug("Bulk transform node " + nodeRef.getId());
+		logger.debug("Bulk transform node " + nodeRef.getId() + " started");
 		if (skipDeleted != null && skipDeleted) {
 			Serializable state = nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_EDITORIAL_STATE));
 			if ("deleted".equals(state)) {
@@ -197,7 +197,7 @@ public class MigrateOaiImportsToEtl extends AbstractInterruptableJob{
 						newId
 				);
 			}
-			logger.info("Bulk transform node " + nodeRef.getId() + " " + newId + " " + nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID)));
+			logger.info("Bulk transforming node replication id " + nodeRef.getId() + " " + newId + " " + nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID)));
 		}
 
 		nodeService.setProperty(
@@ -205,8 +205,9 @@ public class MigrateOaiImportsToEtl extends AbstractInterruptableJob{
 				QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE),
 				sourceId
 		);
-
-		semaphore.acquireUninterruptibly();
+		if(threaded != null && threaded) {
+			semaphore.acquireUninterruptibly();
+		}
 		String parentName = NodeServiceHelper.getProperty(NodeServiceHelper.getPrimaryParent(nodeRef), CCConstants.CM_NAME);
 		String groupedTarget = NodeServiceFactory.getLocalService().findNodeByName(
 				target,
@@ -224,7 +225,9 @@ public class MigrateOaiImportsToEtl extends AbstractInterruptableJob{
 					props
 			).getChildRef().getId();
 		}
-		semaphore.release();
+		if(threaded != null && threaded) {
+			semaphore.release();
+		}
 		NodeServiceFactory.getLocalService().moveNode(groupedTarget, CCConstants.CM_ASSOC_FOLDER_CONTAINS, nodeRef.getId());
 		try {
 			// hold the latest state of the object, i.e. user modificationns
@@ -257,6 +260,7 @@ public class MigrateOaiImportsToEtl extends AbstractInterruptableJob{
 					serviceRegistry.getVersionService().deleteVersion(nodeRef, version);
 				}
 			}
+			logger.info("Bulk transform fully finished for " + nodeRef.getId() + " ");
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
