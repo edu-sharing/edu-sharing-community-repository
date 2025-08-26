@@ -24,7 +24,7 @@ class ConfigServiceMock extends ConfigService {
 class IamV1ServiceMock extends IamV1Service {
     getUserStats(params: GetUserStats$Params, context?: HttpContext): Observable<UserStats> {
         return of({
-            nodeCount: 1,
+            nodeCount: Math.floor(Math.pow(Math.random(), 2) * 150),
             nodeCountCC: 1,
             collectionCount: 1,
         });

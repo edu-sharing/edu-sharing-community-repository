@@ -41,7 +41,7 @@ export class SharePublishMotivationDialogComponent implements OnInit, OnDestroy 
             const conf = confetti.create(null, {
                 resize: true,
             });
-            await conf({
+            void conf({
                 gravity: 2,
                 spread: 125,
                 particleCount: 600,
@@ -55,7 +55,12 @@ export class SharePublishMotivationDialogComponent implements OnInit, OnDestroy 
                 }),
             ),
         );
-        this.img.set((config.range.findIndex((r) => this.stats().nodeCount >= r) + 1).toString());
+        let index = config.range.findIndex((r) => r >= this.stats().nodeCount) + 1;
+        if (index === 0) {
+            index = config.range.length;
+        }
+        this.img.set(index.toString());
+        console.log(index);
     }
     readonly destroyed$ = new Subject<void>();
 
