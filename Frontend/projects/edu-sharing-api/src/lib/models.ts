@@ -95,6 +95,7 @@ export {
     UserProfile,
     UserQuota,
     UserStats,
+    UserStatsGroup,
     UserStatus,
     WebsiteInformation,
     RegisterInformation,

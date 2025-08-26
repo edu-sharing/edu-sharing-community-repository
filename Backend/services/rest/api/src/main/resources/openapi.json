@@ -2139,10 +2139,10 @@
             "type": "string"
           },
           "sharedBy": {
-            "$ref": "#/components/schemas/UserSimple"
+            "$ref": "#/components/schemas/Authority"
           },
           "sharedWith": {
-            "$ref": "#/components/schemas/UserSimple"
+            "$ref": "#/components/schemas/Authority"
           },
           "timestamp": {
             "format": "date-time",
@@ -5010,6 +5010,9 @@
         },
         "type": "object"
       },
+      "PublishingConfig": {
+        "type": "object"
+      },
       "QAEntry": {
         "properties": {
           "answer": {
@@ -7360,6 +7363,17 @@
       },
       "UserStats": {
         "properties": {
+          "allStats": {
+            "$ref": "#/components/schemas/UserStatsGroup"
+          },
+          "publicStats": {
+            "$ref": "#/components/schemas/UserStatsGroup"
+          }
+        },
+        "type": "object"
+      },
+      "UserStatsGroup": {
+        "properties": {
           "collectionCount": {
             "format": "int32",
             "type": "integer"
@@ -7588,6 +7602,9 @@
           },
           "publish": {
             "$ref": "#/components/schemas/ConfigPublish"
+          },
+          "publishing": {
+            "$ref": "#/components/schemas/PublishingConfig"
           },
           "publishingNotice": {
             "type": "boolean"

@@ -20,9 +20,7 @@ import {
     RestConnectorService,
     RestConstants,
     RestHelper,
-    RestIamService,
-    User,
-    UserStats,
+    User as UserLegacy,
 } from '../../core-module/core.module';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -37,8 +35,10 @@ import {
     HOME_REPOSITORY,
     IamV1Service,
     ME,
-    Node,
     NodeEntry,
+    User,
+    UserProfile,
+    UserStatsGroup,
 } from 'ngx-edu-sharing-api';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { Closable } from '../../features/dialogs/card-dialog/card-dialog-config';
@@ -73,7 +73,6 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
         private sanitizer: DomSanitizer,
         private optionsHelperDataService: OptionsHelperDataService,
         private loadingScreen: LoadingScreenService,
-        private iamServiceLegacy: RestIamService,
         private iamService: IamV1Service,
     ) {
         this.translations.waitForInit().subscribe(() => {
@@ -91,8 +90,8 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     }
     private static PASSWORD_MIN_LENGTH = 5;
     public user: User;
-    public userStats: UserStats;
-    public userEdit: User;
+    public userEdit: UserLegacy;
+    public userStats: UserStatsGroup;
     public isMe: boolean;
     public edit: boolean;
     public avatarFile: any;
@@ -129,32 +128,45 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
         this.toast.showProgressSpinner();
         this.connector.isLoggedIn().subscribe((login) => {
             observableForkJoin(
-                this.iamServiceLegacy.getUser(authority),
-                this.iamServiceLegacy.getUserStats(authority),
+                this.iamService.getUser({
+                    repository: HOME_REPOSITORY,
+                    person: authority,
+                }),
+                this.iamService.getUserStats({
+                    repository: HOME_REPOSITORY,
+                    person: authority,
+                }),
             ).subscribe(
                 ([profile, stats]) => {
                     this.user = profile.person;
-                    this.userStats = stats;
+                    this.userStats = stats.allStats;
                     this.userEditProfile = profile.editProfile;
                     this.toast.closeProgressSpinner();
                     this.userEdit = Helper.deepCopy(this.user);
-                    if (!(this.user.profile.vcard instanceof VCard)) {
+                    if (!((this.user.profile.vcard as any) instanceof VCard)) {
                         this.user.profile.vcard = new VCard(
                             this.user.profile.vcard as unknown as string,
-                        );
+                        ) as any;
                     }
-                    this.userEdit.profile.vcard = this.user.profile.vcard?.copy();
+                    this.userEdit.profile.vcard = (
+                        this.user.profile.vcard as unknown as VCard
+                    )?.copy() as any;
                     if (!this.loadingTask.isDone) {
                         this.loadingTask.done();
                     }
-                    void this.iamServiceLegacy.getCurrentUserAsync().then((me) => {
+                    void firstValueFrom(
+                        this.iamService.getUser({
+                            repository: HOME_REPOSITORY,
+                            person: RestConstants.ME,
+                        }),
+                    ).then((me) => {
                         this.isMe = profile.person.authorityName === me.person.authorityName;
                         if (this.isMe && login.isGuest) {
                             this.ui.goToLogin();
                         }
                         if (this.isMe) {
                             this.iamService
-                                .getDataProtectionExport({
+                                .requestDataProtectionExport({
                                     person: ME,
                                     repository: HOME_REPOSITORY,
                                 })
@@ -164,7 +176,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
                                         return of(null);
                                     }),
                                 )
-                                .subscribe((gdpr) => (this.gdprExport = gdpr?.nodeEntry));
+                                .subscribe((gdpr) => (this.gdprExport = (gdpr as any)?.nodeEntry));
                         }
 
                         setTimeout(() => {
@@ -195,14 +207,19 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
         });
     }
     private getProfileSetting(authority: string) {
-        this.iamServiceLegacy.getProfileSettings(authority).subscribe(
-            (res: ProfileSettings) => {
-                this.profileSettings = res;
-            },
-            (error: any) => {
-                this.profileSettings = null;
-            },
-        );
+        this.iamService
+            .getProfileSettings({
+                repository: HOME_REPOSITORY,
+                person: authority,
+            })
+            .subscribe(
+                (res) => {
+                    this.profileSettings = res;
+                },
+                (error) => {
+                    this.profileSettings = null;
+                },
+            );
     }
     public updateAvatar(event: any) {
         if (
@@ -221,7 +238,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
             return;
         }
         this.userEdit = Helper.deepCopy(this.user);
-        this.userEdit.profile.vcard = this.user.profile.vcard.copy();
+        this.userEdit.profile.vcard = (this.user.profile.vcard as unknown as VCard).copy() as any;
         this.edit = true;
         this.avatarFile = null;
     }
@@ -243,8 +260,12 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
                 return;
             }
             const credentials = { oldPassword: this.oldPassword, newPassword: this.password };
-            this.iamServiceLegacy
-                .editUserCredentials(this.user.authorityName, credentials)
+            this.iamService
+                .changeUserPassword({
+                    repository: HOME_REPOSITORY,
+                    person: this.user.authorityName,
+                    body: credentials,
+                })
                 .subscribe(
                     () => {
                         this.saveAvatar();
@@ -279,37 +300,54 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
             }
         }
         this.toast.showProgressSpinner();
-        this.iamServiceLegacy.editUser(this.user.authorityName, this.userEdit.profile).subscribe(
-            () => {
-                this.saveProfileSettings();
-            },
-            (error: any) => {
-                this.toast.closeProgressSpinner();
-                this.toast.error(error);
-            },
-        );
+        this.iamService
+            .changeUserProfile({
+                repository: HOME_REPOSITORY,
+                person: this.user.authorityName,
+                body: this.userEdit.profile as unknown as UserProfile,
+            })
+            .subscribe(
+                () => {
+                    this.saveProfileSettings();
+                },
+                (error: any) => {
+                    this.toast.closeProgressSpinner();
+                    this.toast.error(error);
+                },
+            );
     }
 
     private saveAvatar() {
         this.user = null;
         if (!this.userEdit.profile.avatar && !this.avatarFile) {
-            this.iamServiceLegacy.removeUserAvatar(this.userEdit.authorityName).subscribe(
-                () => {
-                    this.edit = false;
-                    this.editAbout = false;
-                    this.oldPassword = '';
-                    this.password = '';
-                    this.changePassword = false;
-                    this.toast.toast('PROFILE_UPDATED');
-                    this.loadUser(this.userEdit.authorityName);
-                },
-                (error) => {
-                    this.toast.error(error);
-                },
-            );
+            this.iamService
+                .removeUserAvatar({
+                    repository: HOME_REPOSITORY,
+                    person: this.userEdit.authorityName,
+                })
+                .subscribe(
+                    () => {
+                        this.edit = false;
+                        this.editAbout = false;
+                        this.oldPassword = '';
+                        this.password = '';
+                        this.changePassword = false;
+                        this.toast.toast('PROFILE_UPDATED');
+                        this.loadUser(this.userEdit.authorityName);
+                    },
+                    (error) => {
+                        this.toast.error(error);
+                    },
+                );
         } else if (this.avatarFile) {
-            this.iamServiceLegacy
-                .setUserAvatar(this.avatarFile, this.userEdit.authorityName)
+            this.iamService
+                .changeUserAvatar({
+                    repository: HOME_REPOSITORY,
+                    person: this.userEdit.authorityName,
+                    body: {
+                        avatar: this.avatarFile,
+                    },
+                })
                 .subscribe(
                     () => {
                         this.edit = false;
@@ -338,8 +376,12 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     }
 
     private saveProfileSettings() {
-        this.iamServiceLegacy
-            .setProfileSettings(this.profileSettings, this.user.authorityName)
+        this.iamService
+            .setProfileSettings({
+                repository: HOME_REPOSITORY,
+                person: this.user.authorityName,
+                body: this.profileSettings,
+            })
             .subscribe(
                 () => {
                     this.saveAvatar();
@@ -352,7 +394,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     }
     public aboutEdit() {
         this.userEdit = Helper.deepCopy(this.user);
-        this.userEdit.profile.vcard = this.user.profile.vcard?.copy();
+        this.userEdit.profile.vcard = (this.user.profile.vcard as unknown as VCard)?.copy() as any;
         this.editAbout = true;
     }
 

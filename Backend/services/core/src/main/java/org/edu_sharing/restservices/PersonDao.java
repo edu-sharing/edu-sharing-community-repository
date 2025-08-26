@@ -483,7 +483,7 @@ public class PersonDao {
     private BoolQuery.Builder getUserStatsBaseQuery(boolean publicStats) {
         BoolQuery.Builder bool = QueryBuilders.bool();
         if(publicStats) {
-            bool.must(m -> m.term(t -> t.field("permissions.read").value(getAuthorityName())));
+            bool.must(m -> m.term(t -> t.field("permissions.read").value(CCConstants.AUTHORITY_GROUP_EVERYONE)));
         }
         bool.must(m -> m.term(t -> t.field("properties.cm:creator").value(getAuthorityName())));
         bool.mustNot(mn -> mn.term(t -> t.field("aspects").value("ccm:collection_io_reference")));

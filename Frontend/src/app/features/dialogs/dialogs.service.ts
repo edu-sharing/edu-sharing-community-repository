@@ -151,6 +151,10 @@ import {
     SelectElementDialogData,
     SelectElementDialogResult,
 } from './dialog-modules/select-element-dialog/select-element-dialog-data';
+import {
+    SharePublishMotivationDialogComponentData,
+    SharePublishMotivationDialogResult,
+} from './dialog-modules/share-publish-motivation/share-publish-motivation-dialog-dialog-data';
 
 export enum DialogTemplate {
     AddMaterialDialogBelow,
@@ -463,7 +467,23 @@ export class DialogsService {
             data,
         });
     }
-
+    async openSharePublishMotivationDialog(
+        data: SharePublishMotivationDialogComponentData,
+    ): Promise<
+        CardDialogRef<SharePublishMotivationDialogComponentData, SharePublishMotivationDialogResult>
+    > {
+        const { SharePublishMotivationDialogComponent } = await import(
+            './dialog-modules/share-publish-motivation/share-publish-motivation-dialog.component'
+        );
+        return this.cardDialog.open(SharePublishMotivationDialogComponent, {
+            title: 'WORKSPACE.SHARE.PUBLISH.MOTIVATION.TITLE',
+            contentPadding: 0,
+            width: 900,
+            height: 800,
+            closable: Closable.Casual,
+            data: { ...new SharePublishMotivationDialogComponentData(), ...data },
+        });
+    }
     async openShareDialog(
         data: ShareDialogData,
     ): Promise<CardDialogRef<ShareDialogData, ShareDialogResult>> {

@@ -7,10 +7,19 @@ import { SharePublishMotivationDialogComponentData } from './share-publish-motiv
 import * as confetti from 'canvas-confetti';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { TranslateModule } from '@ngx-translate/core';
+import { DialogButton } from '../../../../util/dialog-button';
+import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
+import { ShareDialogData, ShareDialogResult } from '../share-dialog/share-dialog-data';
 
 export type MotivationConfig = {
     confetti: boolean;
     range: number[];
+};
+
+export const ConfigMotivationDefaultConfig = {
+    enabled: true,
+    confetti: true,
+    range: [1, 10, 25, 42, 64, 100],
 };
 
 @Component({
@@ -21,7 +30,7 @@ export type MotivationConfig = {
 })
 export class SharePublishMotivationDialogComponent implements OnInit, OnDestroy {
     randomMessage = signal<number>(Math.floor(Math.random() * 31) + 1);
-    node = signal<Node>(null);
+    nodes = signal<Node[]>(null);
     img = signal<string>('1');
 
     stats = signal<UserStats>(null);
@@ -29,14 +38,21 @@ export class SharePublishMotivationDialogComponent implements OnInit, OnDestroy 
     constructor(
         private config: ConfigService,
         private iamV1Service: IamV1Service,
+        @Optional() private dialogRef: CardDialogRef<ShareDialogData, ShareDialogResult>,
         @Optional()
         @Inject(CARD_DIALOG_DATA)
         public data: SharePublishMotivationDialogComponentData,
     ) {
-        this.node.set(data?.node);
+        this.dialogRef?.patchConfig({
+            buttons: DialogButton.getSingleButton('CLOSE', () => dialogRef.close(), 'standard'),
+        });
+        this.nodes.set(data?.nodes);
     }
     async ngOnInit() {
-        const config = await this.config.get<MotivationConfig>('publishing.motivation');
+        const config = await this.config.get<MotivationConfig>(
+            'publishing.motivation',
+            ConfigMotivationDefaultConfig,
+        );
         if (config.confetti) {
             const conf = confetti.create(null, {
                 resize: true,
@@ -44,6 +60,7 @@ export class SharePublishMotivationDialogComponent implements OnInit, OnDestroy 
             void conf({
                 gravity: 2,
                 spread: 125,
+                zIndex: 1010,
                 particleCount: 600,
             });
         }
@@ -55,7 +72,7 @@ export class SharePublishMotivationDialogComponent implements OnInit, OnDestroy 
                 }),
             ),
         );
-        let index = config.range.findIndex((r) => r >= this.stats().nodeCount) + 1;
+        let index = config.range.findIndex((r) => r >= this.stats().publicStats.nodeCount) + 1;
         if (index === 0) {
             index = config.range.length;
         }

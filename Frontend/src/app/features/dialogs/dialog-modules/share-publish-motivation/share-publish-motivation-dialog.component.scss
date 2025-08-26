@@ -38,9 +38,9 @@ h3 {
 
     &:before {
         position: relative;
-        bottom: -0.5em;
+        bottom: 0.1em;
         content: open-quote;
-        margin-right: 0.05em;
+        margin-right: 0;
     }
     &:after {
         content: close-quote;

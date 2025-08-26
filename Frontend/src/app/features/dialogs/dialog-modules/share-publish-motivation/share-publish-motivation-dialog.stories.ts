@@ -4,11 +4,10 @@ import {
     SharePublishMotivationDialogComponent,
 } from './share-publish-motivation-dialog.component';
 import { Injectable } from '@angular/core';
-import { ConfigService, IamV1Service } from 'ngx-edu-sharing-api';
+import { ConfigService, IamV1Service, UserStats } from 'ngx-edu-sharing-api';
 import { GetUserStats$Params } from '../../../../../../dist/edu-sharing-api/lib/api/fn/iam-v-1/get-user-stats';
 import { HttpContext } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { UserStats } from '../../../../core-module/rest/data-object';
 import { mdsStorybookProviders } from '../../../mds/mds-editor/storybook-utils';
 
 @Injectable()
@@ -24,9 +23,12 @@ class ConfigServiceMock extends ConfigService {
 class IamV1ServiceMock extends IamV1Service {
     getUserStats(params: GetUserStats$Params, context?: HttpContext): Observable<UserStats> {
         return of({
-            nodeCount: Math.floor(Math.pow(Math.random(), 2) * 150),
-            nodeCountCC: 1,
-            collectionCount: 1,
+            allStats: null,
+            publicStats: {
+                nodeCount: Math.floor(Math.pow(Math.random(), 2) * 150),
+                nodeCountCC: 1,
+                collectionCount: 1,
+            },
         });
     }
 }

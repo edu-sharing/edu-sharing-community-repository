@@ -14,7 +14,7 @@ import {
 import { TranslateService } from '@ngx-translate/core';
 import { LocalEventsService, UIAnimation } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
-import { forkJoin as observableForkJoin } from 'rxjs';
+import { firstValueFrom, forkJoin as observableForkJoin } from 'rxjs';
 import {
     CollectionUsage,
     ConfigurationService,
@@ -52,6 +52,7 @@ import {
     NodeService,
 } from 'ngx-edu-sharing-api';
 import { ShareDialogRestrictedAccessComponent } from './restricted-access/restricted-access.component';
+import { ConfigMotivationDefaultConfig } from '../share-publish-motivation/share-publish-motivation-dialog.component';
 
 export type ExtendedAcl = {
     inherited: boolean;
@@ -1060,7 +1061,16 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         );
     }
 
-    private checkEventsBeforeClose(permissions: ExtendedAcl) {
+    private async checkEventsBeforeClose(permissions: ExtendedAcl) {
+        console.log('check close', this.getState() === 'PUBLIC' && this.isStateModified());
+        const conf = await firstValueFrom(
+            this.config.get('publishing.motivation', ConfigMotivationDefaultConfig),
+        );
+        if (conf.enabled && this.getState() === 'PUBLIC' && this.isStateModified()) {
+            void this.dialogs.openSharePublishMotivationDialog({
+                nodes: this.data.nodes as Node[],
+            });
+        }
         this.dialogRef?.close(this.getEmitObject(permissions));
     }
 }
