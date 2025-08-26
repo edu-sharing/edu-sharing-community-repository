@@ -1,0 +1,50 @@
+:host {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+img {
+    width: 100%;
+    max-width: 500px;
+}
+h3 {
+    justify-content: center;
+    text-align: center;
+    font-size: 200%;
+    font-weight: bold;
+}
+.message {
+    font-size: 150%;
+    text-align: center;
+    .count {
+        font-weight: bold;
+    }
+}
+.random-message {
+    position: relative;
+    margin-top: 20px;
+    color: var(--textLight);
+    text-align: center;
+    font-size: 120%;
+    &:before,
+    &:after {
+        font-size: 150%;
+        line-height: 0;
+        vertical-align: -0.15em;
+    }
+
+    &:before {
+        position: absolute;
+        left: -0.1em;
+        bottom: -0.1em;
+        content: open-quote;
+        margin-right: 0.125em;
+    }
+    &:after {
+        content: close-quote;
+        margin-left: 0.05em;
+    }
+}

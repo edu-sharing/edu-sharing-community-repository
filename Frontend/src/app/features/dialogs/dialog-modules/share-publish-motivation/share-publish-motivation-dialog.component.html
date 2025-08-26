@@ -1,0 +1,14 @@
+<img [src]="'/assets/images/motivation/' + img() + '.svg'" alt="" *ngIf="img() !== null" />
+
+<h3>{{ 'WORKSPACE.SHARE.PUBLISH.MOTIVATION.TITLE' | translate }}</h3>
+<div class="message">
+  {{ 'WORKSPACE.SHARE.PUBLISH.MOTIVATION.MESSAGE_INTRO' | translate }}
+  <span class="count">{{
+    'WORKSPACE.SHARE.PUBLISH.MOTIVATION.MESSAGE_COUNT'
+      | translate : { count: stats()?.nodeCount || 1 }
+  }}</span>
+  {{ 'WORKSPACE.SHARE.PUBLISH.MOTIVATION.MESSAGE_OUTRO' | translate }}
+</div>
+<div class="random-message">
+  {{ 'WORKSPACE.SHARE.PUBLISH.MOTIVATION.MESSAGES.' + randomMessage() | translate }}
+</div>

@@ -855,7 +855,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
             if (this.data.sendToApi) {
                 this.localEvents.nodesChanged.emit(this.data.nodes as Node[]);
             }
-            this.dialogRef?.close(this.getEmitObject(permissions));
+            this.checkEventsBeforeClose(permissions);
             if (!error) {
                 this.toast.toast('WORKSPACE.PERMISSIONS_UPDATED');
             }
@@ -1058,5 +1058,9 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                 .sort()
                 .reverse()?.[0]
         );
+    }
+
+    private checkEventsBeforeClose(permissions: ExtendedAcl) {
+        this.dialogRef?.close(this.getEmitObject(permissions));
     }
 }

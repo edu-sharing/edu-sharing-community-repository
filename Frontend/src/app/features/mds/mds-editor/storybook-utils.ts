@@ -26,7 +26,7 @@ import {
     SuggestionResponseDto,
     User,
 } from 'ngx-edu-sharing-api';
-import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
+import { BehaviorSubject, forkJoin, Observable, of, Subject } from 'rxjs';
 import { CordovaService } from '../../../services/cordova.service';
 import { Toast as ToastService } from '../../../services/toast';
 import { InputStatus, MdsWidgetValue } from '../types/types';
@@ -62,16 +62,27 @@ export class translateProvider {
 
     get(v: string, args: any = {}): Observable<any> {
         if (!this.translation$) {
-            this.translation$ = this.httpClient.get('/edu-sharing/assets/i18n/common/de.json').pipe(
-                catchError(() =>
-                    this.httpClient
-                        .get('http://localhost:4200/edu-sharing/assets/i18n/common/de.json')
-                        .pipe(catchError(() => of({}))),
-                ),
-                tap((v) => this.cache$.next(v)),
+            const sources = ['common/de.json', 'workspace/de.json'];
+
+            const requests = sources.map((file) =>
+                this.httpClient
+                    .get(`/edu-sharing/assets/i18n/${file}`)
+                    .pipe(
+                        catchError(() =>
+                            this.httpClient
+                                .get(`http://localhost:4200/edu-sharing/assets/i18n/${file}`)
+                                .pipe(catchError(() => of({}))),
+                        ),
+                    ),
+            );
+
+            this.translation$ = forkJoin(requests).pipe(
+                map((results) => results.reduce((acc, cur) => ({ ...acc, ...cur }), {})),
+                tap((merged) => this.cache$.next(merged)),
                 shareReplay(1),
             );
         }
+
         return this.translation$.pipe(map((_) => this.instant(v, args)));
     }
 

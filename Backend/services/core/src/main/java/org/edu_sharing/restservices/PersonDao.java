@@ -52,6 +52,7 @@ import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.spring.ApplicationContextFactory;
 import org.edu_sharing.util.CheckedCast;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -442,40 +443,48 @@ public class PersonDao {
         if (!LightbendConfigCache.getBoolean("repository.statistics.byUser")) {
             return null;
         }
-        UserStats stats = new UserStats();
         // run as admin so solr counts all materials and collections
         return AuthenticationUtil.runAsSystem(new RunAsWork<UserStats>() {
 
             @Override
             public UserStats doWork() throws Exception {
-                BoolQuery.Builder filesQuery = getUserStatsBaseQuery();
-                filesQuery.must(m -> m.term(t -> t.field("type").value("ccm:io")));
-
-                SearchToken token = new SearchToken();
-                token.setMaxResult(0);
-                token.setElasticQuery(filesQuery.build());
-                SearchResultNodeRef result = searchService.search(token);
-                stats.setNodeCount(result.getNodeCount());
-
-                BoolQuery.Builder ccQuery = getUserStatsBaseQuery();
-                ccQuery.must(m -> m.term(t -> t.field("type").value("ccm:io")));
-                ccQuery.must(m -> m.wildcard(w -> w.field("properties.ccm:commonlicense_key.keyword").value("CC_*")));
-                token.setElasticQuery(ccQuery.build());
-                result = searchService.search(token);
-                stats.setNodeCountCC(result.getNodeCount());
-
-                BoolQuery.Builder colQuery = getUserStatsBaseQuery();
-                colQuery.must(m -> m.term(t -> t.field("aspects").value("ccm:collection")));
-                token.setElasticQuery(colQuery.build());
-                result = searchService.search(token);
-                stats.setCollectionCount(result.getNodeCount());
+                UserStats stats = new UserStats();
+                stats.setAllStats(getStatsInternal(false));
+                stats.setPublicStats(getStatsInternal(true));
                 return stats;
             }
         });
     }
 
-    private BoolQuery.Builder getUserStatsBaseQuery() {
+    @NotNull
+    private UserStats.UserStatsGroup getStatsInternal(boolean publicStats) {
+        UserStats.UserStatsGroup stats = new UserStats.UserStatsGroup();
+        BoolQuery.Builder filesQuery = getUserStatsBaseQuery(publicStats);
+        filesQuery.must(m -> m.term(t -> t.field("type").value("ccm:io")));
+        SearchToken token = new SearchToken();
+        token.setMaxResult(0);
+        token.setElasticQuery(filesQuery.build());
+        SearchResultNodeRef result = searchService.search(token);
+        stats.setNodeCount(result.getNodeCount());
+        BoolQuery.Builder ccQuery = getUserStatsBaseQuery(publicStats);
+        ccQuery.must(m -> m.term(t -> t.field("type").value("ccm:io")));
+        ccQuery.must(m -> m.wildcard(w -> w.field("properties.ccm:commonlicense_key.keyword").value("CC_*")));
+        token.setElasticQuery(ccQuery.build());
+        result = searchService.search(token);
+        stats.setNodeCountCC(result.getNodeCount());
+        BoolQuery.Builder colQuery = getUserStatsBaseQuery(publicStats);
+        colQuery.must(m -> m.term(t -> t.field("aspects").value("ccm:collection")));
+        token.setElasticQuery(colQuery.build());
+        result = searchService.search(token);
+        stats.setCollectionCount(result.getNodeCount());
+        return stats;
+    }
+
+    private BoolQuery.Builder getUserStatsBaseQuery(boolean publicStats) {
         BoolQuery.Builder bool = QueryBuilders.bool();
+        if(publicStats) {
+            bool.must(m -> m.term(t -> t.field("permissions.read").value(getAuthorityName())));
+        }
         bool.must(m -> m.term(t -> t.field("properties.cm:creator").value(getAuthorityName())));
         bool.mustNot(mn -> mn.term(t -> t.field("aspects").value("ccm:collection_io_reference")));
         bool.mustNot(mn -> mn.term(t -> t.field("aspects").value("ccm:io_childobject")));
