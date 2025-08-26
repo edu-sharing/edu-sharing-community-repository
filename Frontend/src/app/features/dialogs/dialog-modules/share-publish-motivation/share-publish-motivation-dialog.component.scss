@@ -37,11 +37,10 @@ h3 {
     }
 
     &:before {
-        position: absolute;
-        left: -0.1em;
-        bottom: -0.1em;
+        position: relative;
+        bottom: -0.5em;
         content: open-quote;
-        margin-right: 0.125em;
+        margin-right: 0.05em;
     }
     &:after {
         content: close-quote;
