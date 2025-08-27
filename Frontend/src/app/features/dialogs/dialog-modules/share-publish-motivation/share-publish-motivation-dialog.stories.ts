@@ -10,24 +10,28 @@ import { HttpContext } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { mdsStorybookProviders } from '../../../mds/mds-editor/storybook-utils';
 
+const DefaultRange = [1, 10, 25, 42, 64, 100];
 @Injectable()
 class ConfigServiceMock extends ConfigService {
-    async get<T = string>(name: string, defaultValue?: T): Promise<T> {
+    async get<T = MotivationConfig>(name: string, defaultValue?: T): Promise<T> {
         return {
             confetti: true,
-            range: [1, 10, 25, 42, 64, 100],
+            range: DefaultRange,
         } as MotivationConfig as any;
     }
 }
 @Injectable()
 class IamV1ServiceMock extends IamV1Service {
+    constructor(private count: number) {
+        super(null, null);
+    }
     getUserStats(params: GetUserStats$Params, context?: HttpContext): Observable<UserStats> {
         return of({
             allStats: null,
             publicStats: {
-                nodeCount: Math.floor(Math.pow(Math.random(), 2) * 150),
-                nodeCountCC: 1,
-                collectionCount: 1,
+                nodeCountOER: this.count,
+                nodeCount: this.count,
+                collectionCount: this.count,
             },
         });
     }
@@ -45,7 +49,7 @@ const dialog: Meta<SharePublishMotivationDialogComponent> = {
                 },
                 {
                     provide: IamV1Service,
-                    useClass: IamV1ServiceMock,
+                    useValue: new IamV1ServiceMock(1),
                 },
             ],
         }),
@@ -56,6 +60,80 @@ const dialog: Meta<SharePublishMotivationDialogComponent> = {
 export default dialog;
 type Story = StoryObj<SharePublishMotivationDialogComponent>;
 
-export const Default: Story = {
-    args: {},
+export const Variant_1: Story = {
+    decorators: [
+        applicationConfig({
+            providers: [
+                {
+                    provide: IamV1Service,
+                    useValue: new IamV1ServiceMock(DefaultRange[0]),
+                },
+            ],
+        }),
+    ],
+};
+
+export const Variant_2: Story = {
+    decorators: [
+        applicationConfig({
+            providers: [
+                {
+                    provide: IamV1Service,
+                    useValue: new IamV1ServiceMock(DefaultRange[1]),
+                },
+            ],
+        }),
+    ],
+};
+
+export const Variant_3: Story = {
+    decorators: [
+        applicationConfig({
+            providers: [
+                {
+                    provide: IamV1Service,
+                    useValue: new IamV1ServiceMock(DefaultRange[2]),
+                },
+            ],
+        }),
+    ],
+};
+
+export const Variant_4: Story = {
+    decorators: [
+        applicationConfig({
+            providers: [
+                {
+                    provide: IamV1Service,
+                    useValue: new IamV1ServiceMock(DefaultRange[3]),
+                },
+            ],
+        }),
+    ],
+};
+
+export const Variant_5: Story = {
+    decorators: [
+        applicationConfig({
+            providers: [
+                {
+                    provide: IamV1Service,
+                    useValue: new IamV1ServiceMock(DefaultRange[4]),
+                },
+            ],
+        }),
+    ],
+};
+
+export const Variant_6: Story = {
+    decorators: [
+        applicationConfig({
+            providers: [
+                {
+                    provide: IamV1Service,
+                    useValue: new IamV1ServiceMock(DefaultRange[5]),
+                },
+            ],
+        }),
+    ],
 };

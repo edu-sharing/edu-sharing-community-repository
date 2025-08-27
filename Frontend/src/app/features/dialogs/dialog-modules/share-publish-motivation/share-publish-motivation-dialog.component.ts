@@ -1,4 +1,13 @@
-import { Component, Inject, OnDestroy, OnInit, Optional, signal } from '@angular/core';
+import {
+    Component,
+    ElementRef,
+    Inject,
+    NgZone,
+    OnDestroy,
+    OnInit,
+    Optional,
+    signal,
+} from '@angular/core';
 import { ConfigService, HOME_REPOSITORY, IamV1Service, Node, UserStats } from 'ngx-edu-sharing-api';
 import { firstValueFrom, Subject } from 'rxjs';
 import { SharedModule } from '../../../../shared/shared.module';
@@ -18,7 +27,7 @@ export type MotivationConfig = {
 };
 
 export const ConfigMotivationDefaultConfig: MotivationConfig = {
-    enabled: false,
+    enabled: true,
     confetti: true,
     range: [1, 10, 25, 42, 64, 100],
 };
@@ -39,6 +48,7 @@ export class SharePublishMotivationDialogComponent implements OnInit, OnDestroy 
     constructor(
         private config: ConfigService,
         private iamV1Service: IamV1Service,
+        private ngZone: NgZone,
         @Optional() private dialogRef: CardDialogRef<ShareDialogData, ShareDialogResult>,
         @Optional()
         @Inject(CARD_DIALOG_DATA)
@@ -55,14 +65,27 @@ export class SharePublishMotivationDialogComponent implements OnInit, OnDestroy 
             ConfigMotivationDefaultConfig,
         );
         if (config.confetti) {
-            const conf = confetti.create(null, {
-                resize: true,
-            });
-            void conf({
-                gravity: 2,
-                spread: 125,
-                zIndex: 1010,
-                particleCount: 600,
+            this.ngZone.runOutsideAngular(() => {
+                const conf = confetti.create(null, {
+                    resize: true,
+                });
+                for (let i = 0; i < 10; i++) {
+                    setTimeout(
+                        () =>
+                            void conf({
+                                origin: {
+                                    x: Math.random() * 0.6 + 0.2,
+                                    y: Math.random() * 0.6 + 0.2,
+                                },
+                                startVelocity: 30,
+                                spread: 260,
+                                gravity: 1,
+                                zIndex: 1010,
+                                particleCount: 30,
+                            }),
+                        100 * i,
+                    );
+                }
             });
         }
         this.stats.set(
