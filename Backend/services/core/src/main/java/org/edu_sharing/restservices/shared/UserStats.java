@@ -12,9 +12,10 @@ public class UserStats  {
 	private UserStatsGroup publicStats;
 
 	@Data
+
 	public static class UserStatsGroup {
 		private int nodeCount = 0;
-		private int nodeCountCC = 0;
+		private int nodeCountOER = 0;
 		private int collectionCount = 0;
 	}
 }

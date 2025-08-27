@@ -158,7 +158,7 @@
         </mat-radio-button>
       </mat-radio-group>
       <div class="publish-bulk">
-        <mat-slide-toggle [(ngModel)]="bulkInvite" [disabled]="!publishPermission">
+        <mat-slide-toggle [(ngModel)]="bulkPublish" [disabled]="!publishPermission">
           <es-multi-line-label>
             <ng-container slot="label">
               {{ 'WORKSPACE.SHARE.PUBLISH.MODE_DIRECT' | translate }}

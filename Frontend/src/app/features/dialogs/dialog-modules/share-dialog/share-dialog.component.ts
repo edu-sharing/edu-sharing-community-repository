@@ -12,7 +12,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { LocalEventsService, UIAnimation } from 'ngx-edu-sharing-ui';
+import { LocalEventsService, NodeHelperService, UIAnimation } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
 import { firstValueFrom, forkJoin as observableForkJoin } from 'rxjs';
 import {
@@ -48,11 +48,17 @@ import {
     Acl,
     AuthenticationService,
     Authority,
+    ConfigService,
+    HOME_REPOSITORY,
+    IamV1Service,
     Node,
     NodeService,
 } from 'ngx-edu-sharing-api';
 import { ShareDialogRestrictedAccessComponent } from './restricted-access/restricted-access.component';
-import { ConfigMotivationDefaultConfig } from '../share-publish-motivation/share-publish-motivation-dialog.component';
+import {
+    ConfigMotivationDefaultConfig,
+    MotivationConfig,
+} from '../share-publish-motivation/share-publish-motivation-dialog.component';
 
 export type ExtendedAcl = {
     inherited: boolean;
@@ -153,7 +159,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     newPermissions: ExtendedAce[] = [];
     inheritAccessDenied = false;
     bulkMode = 'extend';
-    bulkInvite = false;
+    bulkPublish = false;
     owner: ExtendedAce;
     publishEnabled: ExtendedAce;
     linkEnabled: ExtendedAce;
@@ -196,13 +202,16 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         private cardDialogUtils: CardDialogUtilsService,
         private collectionService: RestCollectionService,
         private config: ConfigurationService,
+        private configService: ConfigService,
         private connector: RestConnectorService,
         private localEvents: LocalEventsService,
         private dialogs: DialogsService,
         private aboutService: AboutService,
         private iam: RestIamService,
+        private iamV1Service: IamV1Service,
         private nodeApiLegacy: RestNodeService,
         private nodeApi: NodeService,
+        private nodeHelperService: NodeHelperService,
         private toast: Toast,
         private translate: TranslateService,
         private usageApi: RestUsageService,
@@ -666,7 +675,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                 return async () => {
                     let permissions: Ace[] = Helper.deepCopy(this.permissions);
                     if (this.isBulk()) {
-                        if (this.bulkInvite) {
+                        if (this.bulkPublish) {
                             const permission = RestHelper.getAllAuthoritiesPermission();
                             permission.permissions = [
                                 RestConstants.ACCESS_CONSUMER,
@@ -835,6 +844,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     getPublishActive() {
         return (
             this.getPublishInherit() ||
+            this.bulkPublish ||
             // this.localPublish() ||
             this.publishComponent?.shareModeDirect ||
             this.publishComponent?.shareModeCopy
@@ -1062,14 +1072,38 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     }
 
     private async checkEventsBeforeClose(permissions: ExtendedAcl) {
-        console.log('check close', this.getState() === 'PUBLIC' && this.isStateModified());
-        const conf = await firstValueFrom(
-            this.config.get('publishing.motivation', ConfigMotivationDefaultConfig),
+        const showOerDialog = this._nodes?.every(
+            (n) =>
+                this.nodeHelperService.isOerLicense(
+                    n.properties[RestConstants.CCM_PROP_LICENSE]?.[0],
+                ) &&
+                this.getState() === 'PUBLIC' &&
+                this.isStateModified(),
         );
-        if (conf.enabled && this.getState() === 'PUBLIC' && this.isStateModified()) {
-            void this.dialogs.openSharePublishMotivationDialog({
-                nodes: this.data.nodes as Node[],
-            });
+        const conf = await this.configService.get<MotivationConfig>(
+            'publishing.motivation',
+            ConfigMotivationDefaultConfig,
+        );
+        console.log('show dialog', showOerDialog, conf, this.getState(), this.isStateModified());
+        if (showOerDialog && conf.enabled) {
+            this.iamV1Service
+                .getUserStats({
+                    repository: HOME_REPOSITORY,
+                    person: RestConstants.ME,
+                })
+                .subscribe((stats) => {
+                    const count = stats.publicStats.nodeCountOER + this._nodes.length;
+                    let offset = conf.range.find((r) => r >= count);
+                    if (offset === null) {
+                        offset = conf.range[conf.range.length - 1];
+                    }
+                    console.log(count, offset);
+                    if (true || offset == 1 || count % offset === 0) {
+                        void this.dialogs.openSharePublishMotivationDialog({
+                            nodes: this._nodes as Node[],
+                        });
+                    }
+                });
         }
         this.dialogRef?.close(this.getEmitObject(permissions));
     }

@@ -1,12 +1,12 @@
 package org.edu_sharing.restservices;
 
+import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import jakarta.servlet.http.HttpSession;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
-import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.NoSuchPersonException;
@@ -16,7 +16,6 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -55,7 +54,6 @@ import org.edu_sharing.util.CheckedCast;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -468,10 +466,20 @@ public class PersonDao {
         stats.setNodeCount(result.getNodeCount());
         BoolQuery.Builder ccQuery = getUserStatsBaseQuery(publicStats);
         ccQuery.must(m -> m.term(t -> t.field("type").value("ccm:io")));
-        ccQuery.must(m -> m.wildcard(w -> w.field("properties.ccm:commonlicense_key.keyword").value("CC_*")));
+
+        ccQuery.must(m -> m.terms(t -> t
+                .field("properties.ccm:commonlicense_key.keyword")
+                .terms(ts -> ts.value(Arrays.asList(
+                        FieldValue.of("CC_0"),
+                        FieldValue.of("PDM"),
+                        FieldValue.of("CC_BY"),
+                        FieldValue.of("CC_BY_SA")
+                )))
+        ));
+
         token.setElasticQuery(ccQuery.build());
         result = searchService.search(token);
-        stats.setNodeCountCC(result.getNodeCount());
+        stats.setNodeCountOER(result.getNodeCount());
         BoolQuery.Builder colQuery = getUserStatsBaseQuery(publicStats);
         colQuery.must(m -> m.term(t -> t.field("aspects").value("ccm:collection")));
         token.setElasticQuery(colQuery.build());

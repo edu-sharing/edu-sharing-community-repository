@@ -354,12 +354,7 @@ export class LicenseDialogContentComponent implements OnInit {
     }
 
     isOerLicense() {
-        return (
-            this.getLicenseProperty() == 'CC_0' ||
-            this.getLicenseProperty() == 'PDM' ||
-            this.getLicenseProperty() == 'CC_BY' ||
-            this.getLicenseProperty() == 'CC_BY_SA'
-        );
+        return this.nodeHelper.isOerLicense(this.getLicenseProperty());
     }
 
     private loadNodes(nodes: Node[]) {

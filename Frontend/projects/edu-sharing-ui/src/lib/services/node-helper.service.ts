@@ -357,4 +357,7 @@ export class NodeHelperService {
         }
         return true;
     }
+    isOerLicense(value: string) {
+        return ['CC_0', 'PDM', 'CC_BY', 'CC_BY_SA'].includes(value);
+    }
 }

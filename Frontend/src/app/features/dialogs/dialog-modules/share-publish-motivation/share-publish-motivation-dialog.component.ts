@@ -12,12 +12,13 @@ import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { ShareDialogData, ShareDialogResult } from '../share-dialog/share-dialog-data';
 
 export type MotivationConfig = {
+    enabled: boolean;
     confetti: boolean;
     range: number[];
 };
 
-export const ConfigMotivationDefaultConfig = {
-    enabled: true,
+export const ConfigMotivationDefaultConfig: MotivationConfig = {
+    enabled: false,
     confetti: true,
     range: [1, 10, 25, 42, 64, 100],
 };
@@ -72,7 +73,7 @@ export class SharePublishMotivationDialogComponent implements OnInit, OnDestroy 
                 }),
             ),
         );
-        let index = config.range.findIndex((r) => r >= this.stats().publicStats.nodeCount) + 1;
+        let index = config.range.findIndex((r) => r >= this.stats().publicStats.nodeCountOER) + 1;
         if (index === 0) {
             index = config.range.length;
         }
