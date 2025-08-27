@@ -208,7 +208,7 @@ public class MigrateOaiImportsToEtl extends AbstractInterruptableJob{
 		if(threaded != null && threaded) {
 			semaphore.acquireUninterruptibly();
 		}
-		String parentName = NodeServiceHelper.getProperty(NodeServiceHelper.getPrimaryParent(nodeRef), CCConstants.CM_NAME);
+		String parentName = setId + "_" + NodeServiceHelper.getProperty(NodeServiceHelper.getPrimaryParent(nodeRef), CCConstants.CM_NAME);
 		String groupedTarget = NodeServiceFactory.getLocalService().findNodeByName(
 				target,
 				parentName
