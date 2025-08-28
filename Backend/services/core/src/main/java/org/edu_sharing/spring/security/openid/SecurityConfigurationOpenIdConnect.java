@@ -62,7 +62,9 @@ public class SecurityConfigurationOpenIdConnect {
 
     @Bean
     SecurityFilterChain app(HttpSecurity http) throws Exception {
+        logger.info("SecurityFilterChain openid client config");
         http
+                .securityMatcher("/login/**","/logout/**","/oauth2","/oauth2/**","/shibboleth","/rest/authentication/v1/validateSSOSession/**")
                 .authorizeHttpRequests((authorize) -> authorize
                         //   .requestMatchers("/shibboleth").authenticated()
                         //   .requestMatchers("/**").permitAll()
