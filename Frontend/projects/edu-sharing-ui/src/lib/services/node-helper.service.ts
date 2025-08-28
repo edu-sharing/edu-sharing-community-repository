@@ -214,6 +214,18 @@ export class NodeHelperService {
             Workflow.WORKFLOW_STATUS_CHECKED,
         ]);
     }
+
+    getFilenameWithoutExtension(filename: string) {
+        if (filename === null) {
+            return null;
+        }
+        const components = filename.split('.');
+        if (components.length === 1) {
+            return filename;
+        }
+        components.splice(components.length - 1, 1);
+        return components.join('.');
+    }
     copyDataToNode<T extends Node | User>(target: T, source: T) {
         target.properties = source.properties;
         (target as Node).name = (source as Node).name;
