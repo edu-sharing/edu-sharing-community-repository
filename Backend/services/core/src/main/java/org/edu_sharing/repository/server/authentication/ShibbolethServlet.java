@@ -59,6 +59,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal;
 import org.springframework.security.saml2.provider.service.authentication.Saml2Authentication;
+import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -288,6 +289,12 @@ public class ShibbolethServlet extends HttpServlet {
 
 		//remove trunk param here cause it's only needed cause of anchor is added here (server side does not get anchors)
 		redirectUrl = UrlTool.setParamEncode(redirectUrl, "redirectFromSSO", "true");
+
+		DefaultSavedRequest defaultSavedRequest = ((DefaultSavedRequest)req.getSession().getAttribute("SPRING_SECURITY_SAVED_REQUEST"));
+		if(defaultSavedRequest != null){
+			logger.info("using redirect from spring framework:" + defaultSavedRequest.getRedirectUrl());
+			redirectUrl = defaultSavedRequest.getRedirectUrl();
+		}
 
 		resp.sendRedirect(redirectUrl);
 	}
