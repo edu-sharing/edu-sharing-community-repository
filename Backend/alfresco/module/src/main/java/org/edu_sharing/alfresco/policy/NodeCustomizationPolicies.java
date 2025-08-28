@@ -208,7 +208,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
         }
         Collection<Version> versions = history.getAllVersions();
         if(versions != null) {
-            Optional<ComparableVersion> highestVersions = versions.stream().map(v -> new ComparableVersion(v.getVersionLabel())).max(ComparableVersion::compareTo);
+            Optional<ComparableVersion> highestVersions = versions.stream().map(v -> new ComparableVersion(v.getVersionLabel() == null ? "0.0" : v.getVersionLabel())).max(ComparableVersion::compareTo);
             if (highestVersions.isPresent()) {
                 Serializable currentVersion = transFormedProps.get(CCConstants.CM_PROP_VERSIONABLELABEL);
                 if (!Objects.equals(currentVersion, highestVersions.get().toString())) {
