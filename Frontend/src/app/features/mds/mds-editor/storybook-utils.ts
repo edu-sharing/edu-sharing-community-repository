@@ -166,13 +166,6 @@ export class ConfigServiceMock extends ConfigService {
                                 defaultVisibility: 'visible',
                             },
                             {
-                                id: 'myfiles',
-                                icon: 'svg-myfiles.svg',
-                                url: '/edu-sharing/components/workspace?root=MY_FILES&id=b59d36e0-af5c-4b37-9d36-e0af5ceb378d&mainnav=true&displayType=0',
-                                toolPermission: 'TOOLPERMISSION_WORKSPACE',
-                                defaultVisibility: 'visible',
-                            },
-                            {
                                 id: 'mycollections',
                                 icon: 'layers',
                                 url: '/edu-sharing/components/collections?scope=MY',
@@ -232,12 +225,6 @@ export class IamServiceMock extends IamV1Service {
             {
                 type: 'default',
                 id: 'workspace',
-                title: null,
-                node: null,
-            },
-            {
-                type: 'default',
-                id: 'myfiles',
                 title: null,
                 node: null,
             },
