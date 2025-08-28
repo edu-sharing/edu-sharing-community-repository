@@ -34,6 +34,7 @@ import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.repository.server.tools.security.JwtTokenUtil;
 import org.edu_sharing.repository.server.tools.security.Signing;
+import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.collection.v1.model.CollectionReference;
 import org.edu_sharing.restservices.collection.v1.model.CollectionRelationReference;
@@ -1569,6 +1570,9 @@ public class NodeDao {
     private Content getContent(Node data) throws DAOException {
         Content content = new Content();
         content.setUrl(getContentUrl());
+        if(isCollectionReference()) {
+            content.setOriginalUrl(URLHelper.getNgRenderNodeUrl(getReferenceOriginalId(), null));
+        }
         // skip hash + version for search cause of performance penalties
         if (Arrays.asList(CallSourceHelper.CallSource.Search, CallSourceHelper.CallSource.Sitemap).contains(CallSourceHelper.getCallSource())) {
             return content;
