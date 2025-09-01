@@ -17,7 +17,7 @@ import {
     UIAnimation,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
-import { Observable, Observer, Subject } from 'rxjs';
+import { defer, Observable, Observer, Subject } from 'rxjs';
 import { SuggestItem } from './autocomplete/autocomplete.component';
 import {
     Application,
@@ -93,6 +93,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     cancelJobInfo: Job;
     private readonly destroyed$ = new Subject<void>();
     private queryParams: Params;
+    jobsLoading = false;
 
     constructor(
         private about: AboutService,
@@ -995,6 +996,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         }
         this.jobs = jobs.filter((j: any) => !!j);
         this.updateJobLogs();
+        this.jobsLoading = false;
     }
     getMajorVersion(version: string) {
         const v = version.split('.');
@@ -1419,8 +1421,10 @@ export class AdminPageComponent implements OnInit, OnDestroy {
                 this.availableJobs = jobs;
                 this.prepareJobClasses();
             });
-            this.admin
-                .getJobs()
+            defer(() => {
+                this.jobsLoading = true;
+                return this.admin.getJobs();
+            })
                 .pipe(
                     tap((jobs) => this.reloadJobStatus(jobs)),
                     delay(5000),
@@ -1457,6 +1461,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         }
     }
     async reloadJobs() {
+        this.jobsLoading = true;
         const jobs = await this.admin.getJobs().toPromise();
         this.reloadJobStatus(jobs);
     }
