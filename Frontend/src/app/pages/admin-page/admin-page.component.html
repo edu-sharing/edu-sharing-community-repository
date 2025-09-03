@@ -678,6 +678,7 @@
       </div>
       <div class="group">
         <div class="reload">
+          <es-spinner-small *ngIf="jobsLoading"></es-spinner-small>
           <i class="material-icons clickable" (click)="reloadJobs()">refresh</i>
         </div>
         <es-info-message *ngIf="jobs === null">

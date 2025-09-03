@@ -262,12 +262,15 @@ public class MigrateOaiImportsToEtl extends AbstractInterruptableJob{
 			}
 			logger.info("Bulk transform fully finished for " + nodeRef.getId() + " ");
 		} catch (Exception e) {
+            logger.error(e.getMessage(), e);
 			throw new RuntimeException(e);
 		}
 	}
 
 	private void throwMissingParam(String param) {
-		throw new IllegalArgumentException("Missing required parameter(s) '" + param + "'");
+        String message = "Missing required parameter(s) '" + param + "'";
+        logger.error(message);
+        throw new IllegalArgumentException(message);
 	}
 
 	public void run() {
