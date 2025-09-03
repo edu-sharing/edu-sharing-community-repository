@@ -169,7 +169,8 @@ export class NodeHelperService {
             url
                 .replace('{{version}}', licenseVersion)
                 .replace('{{locale}}', locale)
-                .replace('{{language}}', this.translate.currentLang || 'en'),
+                // use base language for de- special variants
+                .replace('{{language}}', this.translate.currentLang?.split('-')?.[0] || 'en'),
         );
     }
 
