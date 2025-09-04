@@ -66,8 +66,8 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -76,8 +76,8 @@
               }
             }
           },
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
@@ -146,8 +146,8 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -156,8 +156,8 @@
               }
             }
           },
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
@@ -226,8 +226,8 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -236,8 +236,8 @@
               }
             }
           },
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
@@ -277,8 +277,8 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -287,8 +287,8 @@
               }
             }
           },
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
@@ -331,8 +331,8 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -341,8 +341,8 @@
               }
             }
           },
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
@@ -385,8 +385,8 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -395,8 +395,8 @@
               }
             }
           },
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
@@ -436,8 +436,8 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -446,8 +446,8 @@
               }
             }
           },
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
@@ -487,8 +487,8 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -497,8 +497,8 @@
               }
             }
           },
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
@@ -538,8 +538,8 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -548,8 +548,8 @@
               }
             }
           },
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
@@ -590,8 +590,8 @@
           }
         ],
         "responses": {
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -600,8 +600,8 @@
               }
             }
           },
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
@@ -634,8 +634,8 @@
         "summary": " \n           List and describe the various provider available in the API\n        ",
         "operationId": "listProviders",
         "responses": {
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -644,8 +644,8 @@
               }
             }
           },
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
@@ -2552,7 +2552,14 @@
             "type": "array",
             "description": "\n        A list of aiConfig id's those stored in the metadata set provided by the metadataSet property or\n        nodesId those objects are storing the LLM request configuration or parts of it in the ccm:bapi_config property. \n        Note: Within the list, each subsequent element takes precedence over the previous one. \n        Schema of bapi_config: \n        {\n            \"provider\": \"provider name\", -> Required, provider of the chat completions model e.g. openai \n            \"useCaching\": \"true/false\", -> Optional, should the result be cached in the Database, default: false \n            \"chatCompletion\": { ... } -> required only for chat completion requests, see ChatCompletionRequest schema\n            \"createImage\": { ... } -> required only for create image requests, see CreateImageRequest schema\n        }\n        ",
             "items": {
-              "type": "string"
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/MdsConfig"
+                },
+                {
+                  "$ref": "#/components/schemas/NodeConfig"
+                }
+              ]
             }
           },
           "user": {
@@ -2588,6 +2595,59 @@
           "user",
           "variables",
           "widgetAiConfigs"
+        ]
+      },
+      "IdConfig": {
+        "discriminator": {
+          "propertyName": "type"
+        },
+        "properties": {
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "MdsConfig": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/IdConfig"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "required": [
+          "id"
+        ]
+      },
+      "NodeConfig": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/IdConfig"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "nodeId": {
+                "type": "string"
+              },
+              "configName": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "required": [
+          "configName",
+          "nodeId"
         ]
       },
       "WidgetAiConfigInfo": {
@@ -2927,7 +2987,14 @@
             "type": "array",
             "description": "\n        A list of aiConfig id's those stored in the metadata set provided by the metadataSet property or\n        nodesId those objects are storing the LLM request configuration or parts of it in the ccm:bapi_config property. \n        Note: Within the list, each subsequent element takes precedence over the previous one. \n        Schema of bapi_config: \n        {\n            \"provider\": \"provider name\", -> Required, provider of the chat completions model e.g. openai \n            \"useCaching\": \"true/false\", -> Optional, should the result be cached in the Database, default: false \n            \"chatCompletion\": { ... } -> required only for chat completion requests, see ChatCompletionRequest schema\n            \"createImage\": { ... } -> required only for create image requests, see CreateImageRequest schema\n        }\n        ",
             "items": {
-              "type": "string"
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/MdsConfig"
+                },
+                {
+                  "$ref": "#/components/schemas/NodeConfig"
+                }
+              ]
             }
           },
           "user": {
@@ -2969,7 +3036,14 @@
             "type": "array",
             "description": "\n        A list of aiConfig id's those stored in the metadata set provided by the metadataSet property or\n        nodesId those objects are storing the LLM request configuration or parts of it in the ccm:bapi_config property. \n        Note: Within the list, each subsequent element takes precedence over the previous one. \n        Schema of bapi_config: \n        {\n            \"provider\": \"provider name\", -> Required, provider of the chat completions model e.g. openai \n            \"useCaching\": \"true/false\", -> Optional, should the result be cached in the Database, default: false \n            \"chatCompletion\": { ... } -> required only for chat completion requests, see ChatCompletionRequest schema\n            \"createImage\": { ... } -> required only for create image requests, see CreateImageRequest schema\n        }\n        ",
             "items": {
-              "type": "string"
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/MdsConfig"
+                },
+                {
+                  "$ref": "#/components/schemas/NodeConfig"
+                }
+              ]
             }
           },
           "user": {
@@ -4779,12 +4853,12 @@
           },
           "version": {
             "type": "string",
-            "default": "0.1.1",
+            "default": "0.1.2",
             "title": "Version"
           },
           "timestamp": {
             "type": "string",
-            "default": "2025-08-14T18:02:03.542778+02:00",
+            "default": "2025-08-19T16:13:41.705896+02:00",
             "title": "Timestamp"
           }
         },
@@ -4973,14 +5047,14 @@
           },
           "num_pairs": {
             "type": "integer",
-            "default": 10,
-            "maximum": 20.0,
+            "default": 15,
+            "maximum": 200.0,
             "minimum": 1.0,
             "title": "Num Pairs"
           },
           "max_answer_length": {
             "type": "integer",
-            "default": 250,
+            "default": 400,
             "maximum": 1000.0,
             "minimum": 50.0,
             "title": "Max Answer Length"
@@ -5071,14 +5145,14 @@
           },
           "num_pairs": {
             "type": "integer",
-            "default": 10,
-            "maximum": 20.0,
+            "default": 15,
+            "maximum": 200.0,
             "minimum": 1.0,
             "title": "Num Pairs"
           },
           "max_answer_length": {
             "type": "integer",
-            "default": 250,
+            "default": 400,
             "maximum": 1000.0,
             "minimum": 50.0,
             "title": "Max Answer Length"
@@ -5144,22 +5218,22 @@
           },
           "num_pairs": {
             "type": "integer",
-            "default": 10,
+            "default": 15,
             "examples": [
-              5,
-              10,
-              20
+              15,
+              100,
+              200
             ],
-            "maximum": 20.0,
+            "maximum": 200.0,
             "minimum": 1.0,
             "title": "Num Pairs"
           },
           "max_answer_length": {
             "type": "integer",
-            "default": 250,
+            "default": 400,
             "examples": [
-              200,
-              50,
+              400,
+              250,
               1000
             ],
             "maximum": 1000.0,

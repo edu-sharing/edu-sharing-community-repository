@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { AuthenticationService, MdsWidget, Node } from 'ngx-edu-sharing-api';
-import { EduSharingLlmService, Image, ImageResult } from 'ngx-edu-sharing-b-api';
+import { EduSharingLlmService, Image, ImageResult, MdsConfig } from 'ngx-edu-sharing-b-api';
 import { firstValueFrom } from 'rxjs';
 import { Toast } from '../../../../../../services/toast';
 import { MdsEditorInstanceService } from '../../../mds-editor-instance.service';
@@ -202,10 +202,14 @@ export class AiPreviewImagesOverlayComponent implements OnInit {
         const user: string =
             (await firstValueFrom(this.auth.observeLoginInfo()))?.authorityName ?? 'guest';
         const values = await this.mdsEditorInstance.getValues(null, false);
+        const mdsConfig: MdsConfig = {
+            type: 'mds',
+            id: 'image_ai',
+        };
         return firstValueFrom(
             this.eduSharingLlmService.imageGeneration1({
                 body: {
-                    configIds: ['image_ai'],
+                    configIds: [mdsConfig],
                     metadataSet: this.mdsEditorInstance.mdsId,
                     user,
                     contextNodeId: this.node.ref.id,
