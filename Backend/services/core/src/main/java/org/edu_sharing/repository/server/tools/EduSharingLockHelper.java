@@ -1,8 +1,5 @@
 package org.edu_sharing.repository.server.tools;
 
-import org.alfresco.repo.cache.SimpleCache;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.restservices.ltiplatform.v13.model.LoginInitiationSessionObject;
 import org.edu_sharing.spring.ApplicationContextFactory;
 
 import java.util.concurrent.Callable;
