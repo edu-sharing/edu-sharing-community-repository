@@ -28,8 +28,11 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.util.UrlUtils;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -100,6 +103,21 @@ public class SecurityConfigurationOpenIdConnect {
         HeadersConfig.config(http);
 
         return http.build();
+    }
+
+    /**
+     * prevent shibboleth path will be cached in SPRING_SECURITY_SAVED_REQUEST
+     * when oauth2server is unauthenticated and redirects to shibboleth servlet
+     * this would prevent redirect back to /oauth2server/authorize after successfull auth
+     * @return
+     */
+    @Bean
+    public RequestCache requestCache() {
+        HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
+        requestCache.setRequestMatcher(
+                new NegatedRequestMatcher(new AntPathRequestMatcher("/shibboleth/**"))
+        );
+        return requestCache;
     }
 
     private LogoutSuccessHandler oidcLogoutSuccessHandler() {
