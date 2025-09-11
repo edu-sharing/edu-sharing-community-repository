@@ -273,7 +273,7 @@ public class DataProtectionService{
         String role = (String)user.getProperties().get(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION);
         List<String> roles = role == null ? null : Stream.of(role).map(r -> I18nAngular.getTranslationAngular("common","USER.PRIMARY_AFFILIATION."+r)).collect(Collectors.toList());
         EduGroup eduGroup = allEduGroups != null && !allEduGroups.isEmpty() ? allEduGroups.get(0) : null;
-        String secondaryUserName = (String)user.getProperties().get(CCConstants.PROP_USER_SECONDARY_IDS);
+        ArrayList<String> secondaryUserName = (ArrayList<String>)user.getProperties().get(CCConstants.PROP_USER_SECONDARY_IDS);
         PDFReport.Data.DataBuilder reportData = PDFReport.Data.builder()
                 .userName(userName)
                 .secondaryUserName(secondaryUserName)
