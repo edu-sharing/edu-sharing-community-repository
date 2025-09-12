@@ -12,7 +12,7 @@ public interface BulkService {
 
     NodeRef getPrimaryFolder();
 
-    NodeRef sync(String group, List<String> match, List<String> groupBy, String type, List<String> aspects, Map<String, String[]> properties, boolean forceUpdate) throws Throwable;
+    NodeRef sync(String group, List<String> match, List<String> groupBy, String type, List<String> aspects, Map<String, String[]> properties, boolean forceUpdate);
 
     List<NodeRef> list(Map<String, String[]> properties) throws Exception;
 

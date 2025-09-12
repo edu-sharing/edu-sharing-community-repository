@@ -1,7 +1,5 @@
 package org.edu_sharing.restservices.shared;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
@@ -16,6 +14,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.EduSharingLockException;
 import org.edu_sharing.restservices.*;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -132,6 +131,13 @@ public class ErrorResponse {
         }
         if (t instanceof DAODuplicateNodeNameException || t instanceof DAODuplicateNodeException) {
             return Response.status(Response.Status.CONFLICT)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(new ErrorResponse(t))
+                    .build();
+        }
+
+        if(t instanceof EduSharingLockException){
+            return Response.status(ExtendedStatus.LOCKED)
                     .type(MediaType.APPLICATION_JSON_TYPE)
                     .entity(new ErrorResponse(t))
                     .build();
