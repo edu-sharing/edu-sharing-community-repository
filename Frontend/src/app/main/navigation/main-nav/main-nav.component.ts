@@ -686,13 +686,13 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     private registerAutoLogoutTimeout(): void {
         this.autoLogoutTimeout$ = this.authentication.observeTimeUntilAutoLogout(1000).pipe(
             takeUntil(this.destroyed$),
-            map((timeUntilLogout) => this.getTimeoutString(timeUntilLogout)),
             tap((timeUntilLogout) =>
                 this.eventsService.broadcastEvent(
                     FrameEventsService.EVENT_SESSION_TIMEOUT,
-                    timeUntilLogout,
+                    timeUntilLogout / 1000,
                 ),
             ),
+            map((timeUntilLogout) => this.getTimeoutString(timeUntilLogout)),
         );
     }
 
