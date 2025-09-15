@@ -1236,6 +1236,9 @@
           "hash": {
             "type": "string"
           },
+          "originalUrl": {
+            "type": "string"
+          },
           "url": {
             "type": "string"
           },
