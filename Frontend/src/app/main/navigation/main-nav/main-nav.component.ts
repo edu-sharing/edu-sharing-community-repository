@@ -32,6 +32,7 @@ import { Observable, ReplaySubject, Subject } from 'rxjs';
 import { delay, filter, map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import {
     ConfigurationService,
+    FrameEventsService,
     RestConnectorService,
     RestConstants,
     RestHelper,
@@ -119,6 +120,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         private appContainer: AppContainerService,
         public iam: RestIamService,
         public connector: RestConnectorService,
+        public eventsService: FrameEventsService,
         private bridge: BridgeService,
         private configService: ConfigurationService,
         private aboutService: AboutService,
@@ -685,6 +687,12 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.autoLogoutTimeout$ = this.authentication.observeTimeUntilAutoLogout(1000).pipe(
             takeUntil(this.destroyed$),
             map((timeUntilLogout) => this.getTimeoutString(timeUntilLogout)),
+            tap((timeUntilLogout) =>
+                this.eventsService.broadcastEvent(
+                    FrameEventsService.EVENT_SESSION_TIMEOUT,
+                    timeUntilLogout,
+                ),
+            ),
         );
     }
 
