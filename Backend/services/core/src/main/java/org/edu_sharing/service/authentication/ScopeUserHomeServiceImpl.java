@@ -133,7 +133,7 @@ public class ScopeUserHomeServiceImpl implements ScopeUserHomeService{
 		}
 		
 		if(nodeRefUserHome == null){
-			logger.error("could not find userhome for user " + username +" and scope " + scope );
+			logger.info("could not find userhome for user " + username +" and scope " + scope );
 		}else{
 			
 			if(manageEduGroupFolders){
