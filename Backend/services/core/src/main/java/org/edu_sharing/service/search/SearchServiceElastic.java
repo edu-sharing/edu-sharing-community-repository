@@ -2383,9 +2383,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }
         BoolQuery.Builder globalConditions = getGlobalConditions(null, null, null, null,true);
         globalConditions.must(m -> m.bool(b.build()));
+        if(searchToken.getContentType() != null){
+            globalConditions.must(getContentTypeQuery(searchToken.getContentType()));
+        }
 
         if((searchToken.getMaxResult() - searchToken.getFrom()) > 10000){
-            return  searchAllByQuery(globalConditions.build(), searchToken.getSortDefinition(), WORKSPACE_INDEX,null);
+            return searchAllByQuery(globalConditions.build(), searchToken.getSortDefinition(), WORKSPACE_INDEX,null);
         }else {
             return searchByQuery(globalConditions.build(), searchToken.getFrom(), searchToken.getMaxResult(), searchToken.getSortDefinition());
         }
