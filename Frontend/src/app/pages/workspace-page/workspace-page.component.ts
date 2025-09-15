@@ -1057,10 +1057,12 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
     async prepareActionbar() {
         const toggle = new OptionItem(
             'OPTIONS.TOGGLE_SHARED_TO_ME',
-            this.toMeSharedToggle$ ? 'edu-content_shared_me_all' : 'edu-content_shared_me_private',
+            this.toMeSharedToggle$.value
+                ? 'edu-content_shared_me_all'
+                : 'edu-content_shared_me_private',
             () => {
                 this.toMeSharedToggle$.next(!this.toMeSharedToggle$.value);
-                toggle.icon = this.toMeSharedToggle$
+                toggle.icon = this.toMeSharedToggle$.value
                     ? 'edu-content_shared_me_all'
                     : 'edu-content_shared_me_private';
                 this.session.set('toMeSharedGroup', this.toMeSharedToggle$.value);
