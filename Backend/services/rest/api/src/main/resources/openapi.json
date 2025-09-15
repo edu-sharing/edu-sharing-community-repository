@@ -3321,10 +3321,13 @@
       "MdsList": {
         "properties": {
           "columns": {
-            "items": {
-              "$ref": "#/components/schemas/MdsColumn"
+            "additionalProperties": {
+              "items": {
+                "$ref": "#/components/schemas/MdsColumn"
+              },
+              "type": "array"
             },
-            "type": "array"
+            "type": "object"
           },
           "id": {
             "type": "string"
