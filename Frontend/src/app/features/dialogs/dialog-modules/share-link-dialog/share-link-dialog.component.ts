@@ -23,7 +23,7 @@ import { filter, first } from 'rxjs/operators';
     standalone: false,
 })
 export class ShareLinkDialogComponent implements OnInit {
-    private loading$ = new BehaviorSubject<boolean>(false);
+    loading$ = new BehaviorSubject<boolean>(false);
     constructor(
         @Inject(CARD_DIALOG_DATA) public data: ShareLinkDialogData,
         private dialogRef: CardDialogRef<ShareLinkDialogData, ShareLinkDialogResult>,

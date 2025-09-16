@@ -5,11 +5,11 @@
     flex-direction: column;
     width: 100%;
     .info-checkbox {
-        padding-bottom: 10px;
+        padding-bottom: 8px;
     }
     .configuration-link {
         position: relative;
-        margin-bottom: 20px;
+        margin-bottom: 16px;
     }
     .info-left {
         width: 100%;
@@ -28,12 +28,12 @@
 
 es-input-password {
     display: flex;
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
 .copyLink {
     padding-left: 10px;
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
 .heading {
@@ -52,7 +52,8 @@ es-input-password {
 }
 
 .link-info {
-    padding: 10px 0 5px;
+    padding: 8px 0 5px;
+    margin-bottom: 8px;
     display: flex;
     .linkInput {
         flex-grow: 1;
@@ -61,4 +62,10 @@ es-input-password {
 
 .link-disabled {
     filter: blur(2px);
+}
+
+.qr-code {
+    margin-top: 8px;
+    display: flex;
+    justify-content: center;
 }
