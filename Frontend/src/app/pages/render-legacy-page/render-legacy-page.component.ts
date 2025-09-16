@@ -28,10 +28,10 @@ import {
 } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
+    ColumnType,
     DefaultGroups,
     ElementType,
     InteractionType,
-    ListItem,
     LocalEventsService,
     MdsHelperService,
     MdsWidgetComponent,
@@ -121,6 +121,7 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
         private connectors: RestConnectorsService,
         private iam: RestIamService,
         private mdsService: MdsService,
+        private mdsHelperService: MdsHelperService,
         private nodeApi: RestNodeService,
         private searchApi: RestSearchService,
         private toolService: RestToolService,
@@ -271,7 +272,7 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
     _fromHomeRepository: boolean;
     _nodeId: string;
     @Output() closePage = new EventEmitter<void>();
-    similarNodeColumns: ListItem[] = [];
+    similarNodeColumns: ColumnType;
 
     @HostListener('window:beforeunload', ['$event'])
     beforeunloadHandler(event: any) {
@@ -562,8 +563,7 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
                             this.toast.error(e);
                         }
                         this.mds.pipe(filter((set) => !!set)).subscribe((set) => {
-                            this.similarNodeColumns = MdsHelperService.getColumns(
-                                this.translate,
+                            this.similarNodeColumns = this.mdsHelperService.getColumns(
                                 set,
                                 'search',
                             );

@@ -21,6 +21,7 @@ import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { FileChooserDialogData, FileChooserDialogResult } from './file-chooser-dialog-data';
 import { BreadcrumbsService } from '../../../../shared/components/breadcrumbs/breadcrumbs.service';
 import {
+    ColumnType,
     InteractionType,
     ListItem,
     ListSortConfig,
@@ -47,7 +48,9 @@ export class FileChooserDialogComponent implements OnInit, AfterViewInit {
      */
     readonly path$ = new BehaviorSubject<Node[]>([]);
     isLoading: boolean;
-    columns: ListItem[] = [];
+    columns = {
+        Default: [new ListItem('NODE', RestConstants.CM_NAME)],
+    } as ColumnType;
     sort: ListSortConfig;
     selectedFiles: Node[] = [];
     displayType = NodeEntriesDisplayType.Table;
@@ -98,7 +101,6 @@ export class FileChooserDialogComponent implements OnInit, AfterViewInit {
         private translate: TranslateService,
     ) {
         // http://plnkr.co/edit/btpW3l0jr5beJVjohy1Q?p=preview
-        this.columns.push(new ListItem('NODE', RestConstants.CM_NAME));
     }
 
     ngOnInit(): void {
@@ -175,24 +177,24 @@ export class FileChooserDialogComponent implements OnInit, AfterViewInit {
             this.hasHeading = false;
             this.searchMode = true;
             this.searchQuery = '';
-            this.columns = UIHelper.getDefaultCollectionColumns();
+            this.columns = { Default: UIHelper.getDefaultCollectionColumns() };
             this.sort = {
                 active: RestConstants.CM_MODIFIED_DATE,
                 direction: 'desc',
                 columns: [],
             };
         } else {
-            this.columns = WorkspaceExplorerComponent.getColumns(this.connector);
-            this.columns = this.columns.map((c, i) => {
+            this.columns = { Default: WorkspaceExplorerComponent.getColumns(this.connector) };
+            this.columns.Default = this.columns.Default.map((c, i) => {
                 c.visible = i === 0;
                 return c;
             });
             this.sort = {
-                active: this.columns[0].name,
+                active: this.columns.Default[0].name,
                 direction: 'asc',
                 allowed: true,
                 columns: RestConstants.POSSIBLE_SORT_BY_FIELDS.filter((s) =>
-                    this.columns.some((c) => c.name === s.name),
+                    this.columns.Default.some((c) => c.name === s.name),
                 ),
             };
         }

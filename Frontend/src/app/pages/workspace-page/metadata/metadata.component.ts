@@ -17,6 +17,7 @@ import {
     NodeVersionEntries,
 } from 'ngx-edu-sharing-api';
 import {
+    ColumnType,
     DurationHelper,
     FormatDatePipe,
     InteractionType,
@@ -109,8 +110,8 @@ export class WorkspaceMetadataComponent implements OnInit {
     nodeObject: Node;
     versions: NodeVersion[];
     versionsLoading = false;
-    columns: ListItem[] = [];
-    columnsCollections: ListItem[] = [];
+    columns: ColumnType;
+    columnsCollections: ColumnType;
     statsTotalPoints: number;
     forkedParent: Node;
     forkedChildren = new NodeDataSource();
@@ -141,10 +142,16 @@ export class WorkspaceMetadataComponent implements OnInit {
         private searchApi: RestSearchService,
         private usageApi: RestUsageService,
     ) {
-        this.columns.push(new ListItem('NODE', RestConstants.CM_NAME));
-        this.columnsCollections.push(new ListItem('COLLECTION', 'title'));
-        this.columnsCollections.push(new ListItem('COLLECTION', 'info'));
-        this.columnsCollections.push(new ListItem('COLLECTION', 'scope'));
+        this.columns = {
+            Default: [new ListItem('NODE', RestConstants.CM_NAME)],
+        };
+        this.columnsCollections = {
+            Default: [
+                new ListItem('COLLECTION', 'title'),
+                new ListItem('COLLECTION', 'info'),
+                new ListItem('COLLECTION', 'scope'),
+            ],
+        };
     }
 
     ngOnInit(): void {

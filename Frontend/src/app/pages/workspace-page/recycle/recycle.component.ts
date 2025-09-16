@@ -11,6 +11,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { GenericAuthority, Node } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
+    ColumnType,
     CustomOptions,
     DefaultGroups,
     ElementType,
@@ -68,10 +69,12 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
 
     @Input() actionbar: ActionbarComponent;
 
-    public columns: ListItem[] = [
-        new ListItem('NODE', RestConstants.CM_NAME),
-        new ListItem('NODE', RestConstants.CM_ARCHIVED_DATE),
-    ];
+    public columns: ColumnType = {
+        Default: [
+            new ListItem('NODE', RestConstants.CM_NAME),
+            new ListItem('NODE', RestConstants.CM_ARCHIVED_DATE),
+        ],
+    };
     public options: CustomOptions = {
         useDefaultOptions: false,
         addOptions: [],

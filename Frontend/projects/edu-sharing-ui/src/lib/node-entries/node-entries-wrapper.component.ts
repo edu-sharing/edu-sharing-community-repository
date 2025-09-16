@@ -62,6 +62,7 @@ import {
 import { VirtualNode } from '../types/api-models';
 import { OptionsHelperDataService } from '../services/options-helper-data.service';
 import { UIService } from '../services/ui.service';
+import { ColumnType } from '../mds/mds-helper.service';
 
 @Component({
     selector: 'es-node-entries-wrapper',
@@ -94,7 +95,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @ViewChild('nodeEntriesComponent') nodeEntriesComponentRef: NodeEntriesComponent<T>;
     @Input() dataSource: NodeDataSource<T>;
     @Input() scope: Scope;
-    @Input() columns: ListItem[];
+    @Input() columns: ColumnType;
     @Input() configureColumns: boolean;
     @Input() checkbox = true;
     /**
@@ -239,7 +240,10 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.scope = this.scope;
         if (changes.columns) {
             this.entriesService.columnsSubject.next({
-                columns: this.columns,
+                columns:
+                    this.columns[
+                        this.displayType === NodeEntriesDisplayType.Table ? 'Table' : 'Default'
+                    ] || this.columns['Default'],
                 fromUser: false,
             });
         }
