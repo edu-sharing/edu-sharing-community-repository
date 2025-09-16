@@ -28,6 +28,7 @@ public class MyBatisOidcSessionRegistry implements OidcSessionRegistry {
     public OidcSessionInformation removeSessionInformation(String clientSessionId) {
         OidcUserSessionRecord record = mapper.findBySessionId(clientSessionId);
         if (record != null) {
+            log.debug("Removing session information for sessionId: {}", record.getSessionId());
             mapper.deleteBySessionId(clientSessionId);
             return record.getSessionInformation().toDomain(record.getSessionInformation().getAuthorities().entrySet()
                     .stream()
@@ -49,6 +50,7 @@ public class MyBatisOidcSessionRegistry implements OidcSessionRegistry {
         List<OidcSessionInformation> removed = new ArrayList<>();
         for (OidcUserSessionRecord record : all) {
             if (matcher.test(record.getSessionInformation())) {
+                log.debug("Removing session information: {}", record.getSessionInformation().getSessionId());
                 mapper.deleteBySessionId(record.getSessionId());
                 removed.add(record.getSessionInformation()
                         .toDomain(Collections.emptySet())); // you can enrich authorities if needed
