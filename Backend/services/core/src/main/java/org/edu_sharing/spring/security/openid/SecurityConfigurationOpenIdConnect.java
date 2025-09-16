@@ -12,6 +12,8 @@ import org.edu_sharing.spring.security.basic.EduAuthSuccsessHandler;
 import org.edu_sharing.spring.security.basic.EduWebSecurityCustomizer;
 import org.edu_sharing.spring.security.basic.HeadersConfig;
 import org.edu_sharing.spring.security.openid.config.OpenIdConfigService;
+import org.edu_sharing.spring.security.openid.persistence.MyBatisOidcSessionRegistry;
+import org.edu_sharing.spring.security.openid.persistence.OidcUserSessionMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +23,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.oidc.session.OidcSessionRegistry;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -62,6 +65,10 @@ public class SecurityConfigurationOpenIdConnect {
     @Lazy // Lazy annotation to break the circular dependency
     SilentLoginAuthorizationRequestResolver silentLoginAuthorizationRequestResolver;
 
+    @Autowired
+    private OidcUserSessionMapper mapper;
+
+
     @Bean
     SecurityFilterChain app(HttpSecurity http) throws Exception {
         http
@@ -98,6 +105,8 @@ public class SecurityConfigurationOpenIdConnect {
 
         CSRFConfig.config(http);
         HeadersConfig.config(http);
+
+        http.setSharedObject(OidcSessionRegistry.class,new MyBatisOidcSessionRegistry(mapper));
 
         return http.build();
     }
