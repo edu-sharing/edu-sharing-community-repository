@@ -85,20 +85,25 @@ export class ListTextComponent extends ListWidget implements OnInit {
                 : node.properties[this.item.name]?.join(', '),
         );
 
-        const mds = await this.mds
-            .getMetadataSet({
-                repository: node.ref?.repo || Constants.HOME_REPOSITORY,
-                metadataSet: node.metadataset || Constants.DEFAULT,
-            })
-            .toPromise();
-        const widget = MdsHelperService.getWidget(this.item.name, null, mds.widgets);
-        if (widget?.values) {
-            const i18n = node.properties[this.item.name]
-                ?.map((prop) => widget.values.filter((v) => v.id === prop)?.[0]?.caption)
-                .filter((cap) => !!cap);
-            if (i18n) {
-                this.displayName$.next(i18n.join(', '));
+        try {
+            const mds = await this.mds
+                .getMetadataSet({
+                    repository: node.ref?.repo || Constants.HOME_REPOSITORY,
+                    metadataSet: node.metadataset || Constants.DEFAULT,
+                })
+                .toPromise();
+            const widget = MdsHelperService.getWidget(this.item.name, null, mds.widgets);
+            if (widget?.values) {
+                const i18n = node.properties[this.item.name]
+                    ?.map((prop) => widget.values.filter((v) => v.id === prop)?.[0]?.caption)
+                    .filter((cap) => !!cap);
+                if (i18n) {
+                    this.displayName$.next(i18n.join(', '));
+                }
             }
+        } catch (e) {
+            // access to mds might be forbidden
+            e.preventDefault();
         }
     }
 }
