@@ -993,8 +993,9 @@ public class MetadataReader {
                 if (name.equals("id"))
                     list.setId(value);
                 if (name.equals("columns")) {
+                    Node columnType = data.getAttributes().getNamedItem("type");
                     List<MetadataColumn> columns = getMetadataColumns(data);
-                    list.setColumns(columns);
+                    list.setColumns(columnType == null ? MetadataList.ColumnType.Default : MetadataList.ColumnType.valueOf(columnType.getTextContent()), columns);
                 }
             }
             lists.add(list);

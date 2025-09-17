@@ -3,17 +3,17 @@ import { TranslateService } from '@ngx-translate/core';
 import {
     MdsDefinition,
     MdsService,
+    MdsSortDefault,
     MetadataSetInfo,
     Node,
-    SearchService,
-    MdsSortDefault,
     Repository,
+    SearchService,
 } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { RestConstants } from '../../core-module/core.module';
-import { MdsHelperService, NodeHelperService } from 'ngx-edu-sharing-ui';
+import { ColumnType, MdsHelperService, NodeHelperService } from 'ngx-edu-sharing-ui';
 import {
     fromSearchResults,
     NodeDataSourceRemote,
@@ -23,7 +23,6 @@ import {
 import { SearchPageRestoreService } from './search-page-restore.service';
 import { SearchPageResults } from './search-page-results.service';
 import { SearchPageService } from './search-page.service';
-import { ListItem } from 'ngx-edu-sharing-ui';
 import { Router } from '@angular/router';
 
 interface RepoData {
@@ -31,7 +30,7 @@ interface RepoData {
     id: string;
     isHome: boolean;
     dataSource: NodeDataSourceRemote;
-    columns: Observable<ListItem[]>;
+    columns: Observable<ColumnType>;
     loadingParams: Observable<boolean>;
     loadingContent: Observable<boolean>;
 }
@@ -51,6 +50,7 @@ export class SearchPageResultsAllService extends SearchPageResults implements On
         _searchPage: SearchPageService,
         private _searchPageRestore: SearchPageRestoreService,
         private _mds: MdsService,
+        private mdsHelperService: MdsHelperService,
         private _translate: TranslateService,
     ) {
         super(_router, _searchPage, _nodeHelper);
@@ -93,7 +93,7 @@ export class SearchPageResultsAllService extends SearchPageResults implements On
         const mdsDefinition: Observable<MdsDefinition> = metadataSet.pipe(
             switchMap((metadataSet) => this._getMdsDefinition(repository, metadataSet)),
         );
-        const columns: Observable<ListItem[]> = mdsDefinition.pipe(
+        const columns: Observable<ColumnType> = mdsDefinition.pipe(
             switchMap((mdsDefinition) => this._getColumns(mdsDefinition)),
         );
         const sort = mdsDefinition.pipe(
@@ -135,16 +135,12 @@ export class SearchPageResultsAllService extends SearchPageResults implements On
         return this._mds.getMetadataSet({ repository: repository.id, metadataSet: metadataSet.id });
     }
 
-    private _getColumns(mdsDefinition: MdsDefinition): Observable<ListItem[]> {
+    private _getColumns(mdsDefinition: MdsDefinition): Observable<ColumnType> {
         return (
             this._translate
                 // Make sure translations are initialized when MdsHelper calls `instant`.
                 .get('dummy')
-                .pipe(
-                    map(() =>
-                        MdsHelperService.getColumns(this._translate, mdsDefinition, 'search'),
-                    ),
-                )
+                .pipe(map(() => this.mdsHelperService.getColumns(mdsDefinition, 'search')))
         );
     }
 

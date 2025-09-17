@@ -83,17 +83,6 @@ export type MdsEditorWidgetComponent = {
 
 export type EditorType = 'angular';
 
-export interface MdsList {
-    columns: MdsListColumn[];
-    id: string;
-}
-
-export interface MdsListColumn {
-    format: null;
-    id: string;
-    showDefault: boolean;
-}
-
 export enum RequiredMode {
     Mandatory = 'mandatory',
     MandatoryForPublish = 'mandatoryForPublish',

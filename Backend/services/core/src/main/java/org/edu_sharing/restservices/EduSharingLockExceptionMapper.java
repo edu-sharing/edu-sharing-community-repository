@@ -7,10 +7,10 @@ import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DaoExceptionMapper implements ExceptionMapper<DAOException> {
+public class EduSharingLockExceptionMapper implements ExceptionMapper<EduSharingLockException> {
     @Override
-    public Response toResponse(DAOException daoException) {
-        return ErrorResponse.createResponse(daoException);
+    public Response toResponse(EduSharingLockException e) {
+        return Response.status(ExtendedStatus.LOCKED).entity(new ErrorResponse(e)).build();
     }
 }
 

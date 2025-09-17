@@ -18,6 +18,7 @@ import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { DialogsService } from '../../dialogs.service';
 import { SavedSearchesDialogData, SavedSearchesDialogResult } from './saved-searches-dialog-data';
 import {
+    ColumnType,
     InteractionType,
     ListItem,
     NodeEntriesDisplayType,
@@ -53,7 +54,9 @@ export class SavedSearchesDialogComponent implements OnInit, OnDestroy {
 
     readonly mySavedSearchesSource = new NodeDataSourceRemote(this.injector);
     readonly sharedSavedSearchesSource = new NodeDataSourceRemote(this.injector);
-    readonly columns = [new ListItem('NODE', RestConstants.LOM_PROP_TITLE)];
+    readonly columns = {
+        Default: [new ListItem('NODE', RestConstants.LOM_PROP_TITLE)],
+    } as ColumnType;
     readonly displayType = NodeEntriesDisplayType.Table;
     readonly scope = Scope.SavedSearches;
     readonly interactionType = InteractionType.Emitter;

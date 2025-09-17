@@ -11,6 +11,7 @@
     flex-direction: column;
     position: relative;
     overflow: hidden;
+    @include materialShadow();
 
     .loading {
         @include overlay();

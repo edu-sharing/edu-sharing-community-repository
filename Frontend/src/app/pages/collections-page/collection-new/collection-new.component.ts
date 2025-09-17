@@ -15,6 +15,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import {
     ActionbarComponent,
     ColorHelper,
+    ColumnType,
     DefaultGroups,
     ElementType,
     InteractionType,
@@ -87,7 +88,6 @@ import {
 import { OptionsHelperService } from '../../../services/options-helper.service';
 import { filter, first } from 'rxjs/operators';
 import { CollectionsTypeConfig } from '../../../../../dist/edu-sharing-api/lib/api/models/collections-type-config';
-import { CARD_DIALOG_DATA } from '../../../features/dialogs/card-dialog/card-dialog-config';
 
 type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITORIAL_GROUPS';
 
@@ -139,9 +139,9 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     public editId: any;
     public editorialGroups = new NodeDataSource<Group>();
     public editorialPublic = true;
-    public editorialColumns: ListItem[] = [
-        new ListItem('GROUP', RestConstants.AUTHORITY_DISPLAYNAME),
-    ];
+    public editorialColumns: ColumnType = {
+        Default: [new ListItem('GROUP', RestConstants.AUTHORITY_DISPLAYNAME)],
+    };
     imageData: string | SafeUrl = null;
     private imageFile: File = null;
     readonly STEP_NEW = 'NEW';

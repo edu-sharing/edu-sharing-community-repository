@@ -6,6 +6,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { AboutService, NetworkService, Node, Store } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
+    ColumnType,
     DateHelper,
     InteractionType,
     ListItem,
@@ -116,9 +117,6 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         private translate: TranslateService,
         private translations: TranslationsService,
     ) {
-        this.searchColumns.push(new ListItem('NODE', RestConstants.CM_NAME));
-        this.searchColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
-        this.searchColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
         this.translations.waitForInit().subscribe(() => {
             this.getTemplates();
             this.connector.isLoggedIn().subscribe((data: LoginResult) => {
@@ -229,7 +227,13 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     public xmlAppKeys: string[];
     public editableXmls = [{ name: 'HOMEAPP', file: RestConstants.HOME_APPLICATION_XML }];
     searchResponse = new NodeDataSource<Node>();
-    searchColumns: ListItem[] = [];
+    searchColumns = {
+        Default: [
+            new ListItem('NODE', RestConstants.CM_NAME),
+            new ListItem('NODE', RestConstants.NODE_ID),
+            new ListItem('NODE', RestConstants.CM_MODIFIED_DATE),
+        ],
+    } as ColumnType;
     public selectedTemplate = '';
     public templates: string[];
     public eduGroupSuggestions: SuggestItem[];
@@ -1376,14 +1380,12 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         }
         this.globalProgress = false;
 
-        this.searchColumns = WorkspaceExplorerComponent.getColumns(this.connector);
-        this.searchColumns
-            .filter((s) =>
-                [RestConstants.CM_NAME, RestConstants.NODE_ID, RestConstants.CM_CREATOR].includes(
-                    s.name,
-                ),
-            )
-            .forEach((s) => (s.visible = true));
+        this.searchColumns.Default = WorkspaceExplorerComponent.getColumns(this.connector);
+        this.searchColumns.Default.filter((s) =>
+            [RestConstants.CM_NAME, RestConstants.NODE_ID, RestConstants.CM_CREATOR].includes(
+                s.name,
+            ),
+        ).forEach((s) => (s.visible = true));
 
         this.route.queryParams.subscribe((data: Params) => {
             this.queryParams = data;

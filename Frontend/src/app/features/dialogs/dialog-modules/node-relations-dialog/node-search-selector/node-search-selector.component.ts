@@ -17,15 +17,14 @@ import { RestSearchService } from '../../../../../core-module/rest/services/rest
 import { SearchRequestCriteria } from '../../../../../core-module/rest/data-object';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import {
-    ListItem,
+    ColumnType,
     MdsHelperService,
     NodesRightMode,
     SearchHelperService,
     UIAnimation,
 } from 'ngx-edu-sharing-ui';
-import { RestMdsService } from '../../../../../core-module/rest/services/rest-mds.service';
 import { TranslateService } from '@ngx-translate/core';
-import { Node } from 'ngx-edu-sharing-api';
+import { MdsService, Node } from 'ngx-edu-sharing-api';
 import { NodeHelperService } from '../../../../../services/node-helper.service';
 import { trigger } from '@angular/animations';
 import { MdsEditorWrapperComponent } from '../../../../mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
@@ -77,15 +76,16 @@ export class NodeSearchSelectorComponent implements AfterViewInit {
         loading: false,
     };
     input = new UntypedFormControl('');
-    columns: ListItem[];
+    columns: ColumnType;
     showMds = false;
     private values: { [p: string]: string[] };
     hasMds = false;
 
     constructor(
         private searchApi: RestSearchService,
-        private mdsService: RestMdsService,
+        private mdsService: MdsService,
         private translate: TranslateService,
+        private mdsHelperService: MdsHelperService,
         private nodeHelper: NodeHelperService,
         private searchHelperService: SearchHelperService,
         private changeDetectorRef: ChangeDetectorRef,
@@ -144,8 +144,8 @@ export class NodeSearchSelectorComponent implements AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.mdsService.getSet().subscribe((set) => {
-            this.columns = MdsHelperService.getColumns(this.translate, set, this.columnsIds);
+        this.mdsService.getMetadataSet({}).subscribe((set) => {
+            this.columns = this.mdsHelperService.getColumns(set, this.columnsIds);
         });
         combineLatest([this.input.valueChanges, this.mdsEditor.mdsEditorInstance.values])
             .pipe(

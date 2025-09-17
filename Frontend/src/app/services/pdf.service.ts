@@ -1,7 +1,7 @@
-import { Injectable, Injector, Optional } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
-import { TDocumentDefinitions } from 'pdfmake/interfaces';
+import { Content, StyleDictionary, TDocumentDefinitions } from 'pdfmake/interfaces';
 import { Node } from 'ngx-edu-sharing-api';
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { NodeHelperService } from './node-helper.service';
@@ -44,7 +44,7 @@ export class PdfService {
 
         const logoSvg = await this.loadSvgContent('assets/images/logo.svg');
 
-        const content: any[] = [];
+        const content: Content = [];
 
         if (logoSvg) {
             content.push({
@@ -84,8 +84,18 @@ export class PdfService {
             margin: [0, 10, 0, 10],
         });
 
-        const qrCodeData = await this.createQrCode(node);
+        const urlBlock = {
+            text: node.content.url,
+            link: node.content.url,
+            columnGap: 20,
+            color: document.documentElement.style.getPropertyValue('--primary'),
+            margin: [0, 10, 0, 10],
+            decoration: 'underline',
+            fontSize: 9,
+            noWrap: false,
+        } as Content;
 
+        const qrCodeData = await this.createQrCode(node);
         if (imageData && qrCodeData && imageDimensions) {
             content.push({
                 columns: [
@@ -94,14 +104,16 @@ export class PdfService {
                         width: imageDimensions.width,
                         height: imageDimensions.height,
                     },
+                    { width: '*', text: '' },
                     {
-                        width: '*',
+                        width: '200',
                         alignment: 'right',
                         stack: [
                             {
                                 image: qrCodeData,
                                 width: 100,
                             },
+                            urlBlock,
                         ],
                     },
                 ],
@@ -166,15 +178,20 @@ export class PdfService {
         );
 
         const documentDefinition: TDocumentDefinitions = {
-            content: content,
+            content,
         };
 
-        pdfMake.createPdf(documentDefinition).download(node.ref.id + '.pdf');
+        pdfMake
+            .createPdf(documentDefinition)
+            .download(
+                (this.injector.get(NodeHelperService).getFilenameWithoutExtension(node.name) ||
+                    node.ref.id) + '.pdf',
+            );
     }
 
-    private async createQrCode(node: Node): Promise<String> {
+    private async createQrCode(node: Node): Promise<string> {
         try {
-            return await QRCode.toDataURL(node.content.url, {
+            return await QRCode.toDataURL(node.content.url || node.content.url, {
                 errorCorrectionLevel: 'M',
                 type: 'image/png',
                 margin: 2,

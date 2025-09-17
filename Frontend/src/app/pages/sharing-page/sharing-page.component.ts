@@ -1,6 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
+    ColumnType,
     CustomOptions,
     DefaultGroups,
     ElementType,
@@ -52,7 +53,7 @@ export class SharingPageComponent {
     private params: Params;
     sharingInfo: SharingInfo;
     nodesDataSource = new NodeDataSource<Node>();
-    columns: ListItem[] = [];
+    columns: ColumnType;
     sort: ListSortConfig = {
         allowed: true,
         columns: RestConstants.POSSIBLE_SORT_BY_FIELDS,
@@ -77,9 +78,13 @@ export class SharingPageComponent {
         private config: ConfigService,
         private translations: TranslationsService,
     ) {
-        this.columns.push(new ListItem('NODE', RestConstants.CM_NAME));
-        this.columns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
-        this.columns.push(new ListItem('NODE', RestConstants.SIZE));
+        this.columns = {
+            Default: [
+                new ListItem('NODE', RestConstants.CM_NAME),
+                new ListItem('NODE', RestConstants.CM_MODIFIED_DATE),
+                new ListItem('NODE', RestConstants.SIZE),
+            ],
+        };
         const download = new OptionItem('SHARING.DOWNLOAD', 'cloud_download', (node: Node) =>
             this.download(
                 this.optionsHelper.getObjects(node, this.nodeEntries.optionsHelper.getData()),
