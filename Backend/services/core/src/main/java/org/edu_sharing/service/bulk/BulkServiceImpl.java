@@ -177,7 +177,7 @@ public class BulkServiceImpl implements BulkService, ApplicationListener<Refresh
 
 
 	@Override
-	public NodeRef sync(String group, List<String> match, List<String> groupBy, String type, List<String> aspects, Map<String, String[]> properties, boolean resetVersion) throws Throwable {
+	public NodeRef sync(String group, List<String> match, List<String> groupBy, String type, List<String> aspects, Map<String, String[]> properties, boolean resetVersion) {
 		if(match == null || match.size() == 0){
 			throw new IllegalArgumentException("match should contain at least 1 property");
 		}

@@ -1,28 +1,24 @@
 package org.edu_sharing.restservices.shared;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.media.Schema;;
-
-import java.io.PrintWriter;
-import java.io.Serializable;
-import java.io.StringWriter;
-import java.util.Map;
-
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
+import org.edu_sharing.repository.server.tools.EduSharingLockException;
 import org.edu_sharing.restservices.*;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.edu_sharing.service.usage.Usage2Service;
-import org.springframework.http.HttpStatus;
-import org.edu_sharing.service.foldertemplates.LoggingErrorHandler;
 import org.edu_sharing.service.usage.UsageException;
+import org.springframework.http.HttpStatus;
+
+import java.io.PrintWriter;
+import java.io.Serializable;
+import java.io.StringWriter;
+import java.util.Map;
 
 @Schema(description = "")
 public class ErrorResponse {
@@ -37,8 +33,8 @@ public class ErrorResponse {
 
 	private Map<String, Serializable> details;
 
-	public ErrorResponse() {	
-		
+	public ErrorResponse() {
+
 	}
 
 	@Override
@@ -105,6 +101,13 @@ public class ErrorResponse {
         	return Response.status(Response.Status.CONFLICT).entity(new ErrorResponse(t)).build();
         }
 
+        if(t instanceof EduSharingLockException){
+            return Response.status(ExtendedStatus.LOCKED)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(new ErrorResponse(t))
+                    .build();
+        }
+
 
 
 		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
@@ -153,7 +156,7 @@ public class ErrorResponse {
 			}
 		}
 	}
-	
+
 	/**
 	 **/
 	@Schema(required = true, description = "")
