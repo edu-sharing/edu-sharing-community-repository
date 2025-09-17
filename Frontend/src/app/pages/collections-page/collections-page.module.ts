@@ -10,6 +10,10 @@ import { InfobarComponent } from './infobar/infobar.component';
 import { CollectionProposalsComponent } from './collection-proposals/collection-proposals.component';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
 import { ShareDialogModule } from '../../features/dialogs/dialog-modules/share-dialog/share-dialog.module';
+import { EditorialSidebarComponent } from '../editorial-page/editorial-sidebar/editorial-sidebar.component';
+import { ResizableSidenavDirective } from '../editorial-page/resizable-sidenav.directive';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatSidenavModule } from '@angular/material/sidenav';
 
 @NgModule({
     declarations: [
@@ -26,6 +30,9 @@ import { ShareDialogModule } from '../../features/dialogs/dialog-modules/share-d
         MdsModule,
         CollectionsPageRoutingModule,
         FooterComponent,
+        MatSidenavModule,
+        ResizableSidenavDirective,
+        EditorialSidebarComponent,
     ],
     exports: [CollectionInfoBarComponent, CollectionContentComponent],
 })

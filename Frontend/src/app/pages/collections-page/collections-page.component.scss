@@ -161,9 +161,13 @@ section {
     }
 }
 .breadcrumb-space {
-    padding: 15px 30px;
+    padding: 15px 10px 15px 20px;
     background: #fff;
     @include materialShadow();
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: center;
 }
 
 @media only screen and (max-width: $mobileWidth+$mobileStage*3) {

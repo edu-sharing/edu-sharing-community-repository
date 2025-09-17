@@ -20,42 +20,9 @@ mat-sidenav-container {
         }
     }
 }
-mat-sidenav {
-    .mat-sidenav-content {
-        margin: 15px 20px 15px 20px;
-        min-height: calc(100vh - 10px - 15px - 15px - var(--mainnavCurrentHeight));
-        border-radius: var(--borderRadiusCards);
-        @include mixins.materialShadowMedium();
-    }
-    .mat-sidenav-padding {
-        padding: 20px 20px;
-    }
-}
 
 .empty {
     font-size: vars.$fontSizeXLarge;
     color: var(--textLight);
     padding: 20px 0;
-}
-:host ::ng-deep {
-    .sidenav-resizer {
-        width: 7px;
-        background-color: rgba(0, 0, 0, 0.05);
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        z-index: 10;
-        cursor: ew-resize;
-        background-image: url('data:image/svg+xml,%3csvg%20width%3d%226%22%20height%3d%2220%22%20viewBox%3d%220%200%206%2020%22%20xmlns%3d%22http%3a//www.w3.org/2000/svg%22%20fill%3d%22none%22%3e%3ccircle%20cx%3d%223%22%20cy%3d%223%22%20r%3d%222%22%20fill%3d%22rgba(0%2c%200%2c%200%2c%200.4)%22/%3e%3ccircle%20cx%3d%223%22%20cy%3d%2210%22%20r%3d%222%22%20fill%3d%22rgba(0%2c%200%2c%200%2c%200.4)%22/%3e%3ccircle%20cx%3d%223%22%20cy%3d%2217%22%20r%3d%222%22%20fill%3d%22rgba(0%2c%200%2c%200%2c%200.4)%22/%3e%3c/svg%3e');
-        background-repeat: no-repeat;
-        background-position: 0 50%;
-    }
-
-    .sidenav-resizer.start {
-        right: 0;
-    }
-
-    .sidenav-resizer.end {
-        left: 0;
-    }
 }

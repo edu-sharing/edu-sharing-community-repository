@@ -56,7 +56,7 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
 
     private addResizer() {
         this.resizer = this.renderer.createElement('div');
-        this.renderer.addClass(this.resizer, 'sidenav-resizer');
+        this.renderer.addClass(this.resizer, 'es-sidenav-resizer');
         this.renderer.addClass(this.resizer, this.position);
         this.renderer.appendChild(this.el.nativeElement, this.resizer);
 

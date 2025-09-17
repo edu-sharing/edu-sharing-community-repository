@@ -4,6 +4,7 @@ import {
     ElementRef,
     EventEmitter,
     OnDestroy,
+    signal,
     TemplateRef,
     ViewChild,
 } from '@angular/core';
@@ -12,6 +13,7 @@ import {
     ColorHelper,
     LocalEventsService,
     NodeEntriesDisplayType,
+    OptionItemToggleSidebar,
     OptionsHelperDataService,
     PreferredColor,
     Scope,
@@ -80,6 +82,8 @@ export class CollectionsPageComponent implements OnDestroy {
     tabSelected: string = RestConstants.COLLECTIONSCOPE_MY;
     isLoading = true;
     isReady = false;
+    sidenavRight = signal(false);
+    sidebarOption = [OptionItemToggleSidebar(this.sidenavRight)];
     collection: Node;
     collectionSortEmitter = new EventEmitter<SortEvent>();
     collectionCustomSortEmitter = new EventEmitter<boolean>();
@@ -168,6 +172,7 @@ export class CollectionsPageComponent implements OnDestroy {
         private translations: TranslationsService,
         private uiService: UIService,
     ) {
+        this.sidebarOption[0].onlyDesktop = true;
         this.translations.waitForInit().subscribe(() => {
             combineLatest([
                 this.connector.isLoggedIn(),

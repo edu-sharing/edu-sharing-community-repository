@@ -47,147 +47,170 @@
   </mat-tab>
 </mat-tab-group>
 <ng-container *ngTemplateOutlet="customTemplates.value.belowTabs"></ng-container>
-<div class="collections-header-group">
-  <es-actionbar
-    *ngIf="collectionContentTemplateRef && !isRootLevelCollection()"
-    #actionbarCollection
-    [numberOfAlwaysVisibleOptions]="1"
-    [numberOfAlwaysVisibleOptionsMobile]="1"
-    appearance="round"
-    [style]="'flat'"
-    [dropdownPosition]="'right'"
-  ></es-actionbar>
-  <!-- collection header -->
-  <ng-container
-    [ngTemplateOutlet]="collectionContentTemplateRef ?? collectionContentTemplateRefDefault"
-    [ngTemplateOutletContext]="{
-      $implicit: null,
-      collection: collection,
-      permissions: collectionContentRef?.permissions ?? null,
-      isLoading: isLoading,
-      tabSelected: tabSelected
-    }"
-  ></ng-container>
-  <ng-template #collectionContentTemplateRefDefault> </ng-template>
-</div>
-
-<div cdkDropList [cdkDropListSortingDisabled]="true">
-  <div
-    [class.collectionsContainerTabs]="showTabs()"
-    [class.collectionsContainerNoSidebar]="isRootLevelCollection() || isLoading"
-    class="collectionsContainer"
-    [attr.data-test]="'collections-grid-' + tabSelected.toLowerCase().replaceAll('_', '-')"
+<mat-sidenav-container>
+  <mat-sidenav
+    #rightSidenav
+    [mode]="'side'"
+    [opened]="sidenavRight()"
+    [defaultWidth]="0.3"
+    storageKey="EDITORIAL_SIDENAV_RIGHT_WIDTH"
+    esResizableSidenav
+    position="end"
   >
-    <es-collection-info-bar
-      #infobar
-      *ngIf="!isLoading && !isRootLevelCollection() && collection"
-      [collection]="collection"
-      [permissions]="collectionContentRef?.permissions ?? null"
-      (edit)="collectionEdit()"
-    ></es-collection-info-bar>
-    <!-- <div *ngIf="isLoading" class="collection-loading"><es-spinner-small></es-spinner-small></div> -->
-    <div class="collections-right">
-      <section *ngIf="isLoading || !isReady" class="collections-loading-div">
-        <es-spinner></es-spinner>
-      </section>
-      <h1 *ngIf="isRootLevelCollection()" esTitle class="cdk-visually-hidden">
-        {{ 'COLLECTIONS.TITLE' | translate }}
-      </h1>
-      <a
-        *ngIf="!isLoading && isGuest"
-        mat-button
-        color="primary"
-        class="switchToSearch"
-        title="{{ 'COLLECTIONS.TO_SEARCH' | translate }}"
-        tabindex="0"
-        (click)="navigateToSearch()"
-        [routerLink]="['/' + ROUTER_PREFIX + 'search']"
-      >
-        {{ 'COLLECTIONS.TO_SEARCH' | translate }}
-        <i esIcon="arrow_forward"></i>
-      </a>
-      <ng-container *ngIf="collection">
-        <div
-          role="navigation"
-          [attr.aria-label]="'NAV.COLLECTIONS' | translate"
-          class="breadcrumb-space"
-          *ngIf="!isRootLevelCollection() && !isLoading"
-        >
-          <es-breadcrumbs
-            class="collections-breadcrumb"
-            [home]="'COLLECTIONS.TAB.' + tabSelected"
-            [homeRouterLink]="{
-              routerLink: ['.'],
-              queryParams: { scope: tabSelected, id: null },
-              queryParamsHandling: 'merge'
-            }"
-            preferredName="title"
-            [invisibleDescription]="true"
-            [canDropNodes]="collectionContentComponent.canDropOnCollectionBreadcrumbs"
-            (dropElement)="
-              collectionContentComponent.dropOnCollection($event.target, $event.source)
-            "
-          ></es-breadcrumbs>
-        </div>
-        <es-collection-content
-          #collectionContentComponent
-          [collection]="collection"
-          [getInfobar]="getInfobar"
-          [scope]="getScope()"
-          [isRootLevel]="isRootLevelCollection()"
-          [createAllowed]="createAllowed"
-          [class.collections-master-div-notabs]="!showTabs()"
-        >
-          <ng-template #empty>
-            <ng-container *ngIf="isRootLevelCollection()">
-              <ng-container *ngIf="tabSelected === 'EDU_GROUPS'">
-                {{ 'COLLECTIONS.EMPTY.SHARED' | translate }}
-              </ng-container>
-              <ng-container *ngIf="tabSelected === 'EDU_ALL'">
-                {{ 'COLLECTIONS.EMPTY.PUBLIC' | translate }}
-              </ng-container>
-            </ng-container>
-            <ng-container *ngIf="!isRootLevelCollection()">
-              {{ 'COLLECTIONS.EMPTY.SUBCOLLECTIONS' | translate }}
-            </ng-container>
-          </ng-template>
-        </es-collection-content>
-      </ng-container>
+    <div class="es-mat-sidenav-content">
+      <es-editorial-sidebar
+        [primaryMode]="'collections'"
+        [nodes]="collection ? [collection] : null"
+        (closeTrigger)="sidenavRight.set(false)"
+      ></es-editorial-sidebar>
     </div>
-  </div>
-  <es-footer [scope]="'collections'"></es-footer>
-</div>
-<ng-template
-  #sortTool
-  let-columns="columns"
-  let-sortInfo="sortInfo"
-  let-callback="callback"
-  let-toggleCallback="toggleCallback"
->
-  <mat-slide-toggle
-    *ngIf="sortInfo.name === 'ccm:collection_ordered_position'"
-    [(ngModel)]="sortInfo.customActive"
-    (ngModelChange)="toggleCallback.emit($event)"
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <div class="collections-header-group">
+      <es-actionbar
+        *ngIf="collectionContentTemplateRef && !isRootLevelCollection()"
+        #actionbarCollection
+        [numberOfAlwaysVisibleOptions]="1"
+        [numberOfAlwaysVisibleOptionsMobile]="1"
+        appearance="round"
+        [style]="'flat'"
+        [dropdownPosition]="'right'"
+      ></es-actionbar>
+      <!-- collection header -->
+      <ng-container
+        [ngTemplateOutlet]="collectionContentTemplateRef ?? collectionContentTemplateRefDefault"
+        [ngTemplateOutletContext]="{
+          $implicit: null,
+          collection: collection,
+          permissions: collectionContentRef?.permissions ?? null,
+          isLoading: isLoading,
+          tabSelected: tabSelected
+        }"
+      ></ng-container>
+      <ng-template #collectionContentTemplateRefDefault> </ng-template>
+    </div>
+
+    <div cdkDropList [cdkDropListSortingDisabled]="true">
+      <div
+        [class.collectionsContainerTabs]="showTabs()"
+        [class.collectionsContainerNoSidebar]="isRootLevelCollection() || isLoading"
+        class="collectionsContainer"
+        [attr.data-test]="'collections-grid-' + tabSelected.toLowerCase().replaceAll('_', '-')"
+      >
+        <es-collection-info-bar
+          #infobar
+          *ngIf="!isLoading && !isRootLevelCollection() && collection"
+          [collection]="collection"
+          [permissions]="collectionContentRef?.permissions ?? null"
+          (edit)="collectionEdit()"
+        ></es-collection-info-bar>
+        <!-- <div *ngIf="isLoading" class="collection-loading"><es-spinner-small></es-spinner-small></div> -->
+        <div class="collections-right">
+          <section *ngIf="isLoading || !isReady" class="collections-loading-div">
+            <es-spinner></es-spinner>
+          </section>
+          <h1 *ngIf="isRootLevelCollection()" esTitle class="cdk-visually-hidden">
+            {{ 'COLLECTIONS.TITLE' | translate }}
+          </h1>
+          <a
+            *ngIf="!isLoading && isGuest"
+            mat-button
+            color="primary"
+            class="switchToSearch"
+            title="{{ 'COLLECTIONS.TO_SEARCH' | translate }}"
+            tabindex="0"
+            (click)="navigateToSearch()"
+            [routerLink]="['/' + ROUTER_PREFIX + 'search']"
+          >
+            {{ 'COLLECTIONS.TO_SEARCH' | translate }}
+            <i esIcon="arrow_forward"></i>
+          </a>
+          <ng-container *ngIf="collection">
+            <div
+              role="navigation"
+              [attr.aria-label]="'NAV.COLLECTIONS' | translate"
+              class="breadcrumb-space"
+              *ngIf="!isRootLevelCollection() && !isLoading"
+            >
+              <es-breadcrumbs
+                class="collections-breadcrumb"
+                [home]="'COLLECTIONS.TAB.' + tabSelected"
+                [homeRouterLink]="{
+                  routerLink: ['.'],
+                  queryParams: { scope: tabSelected, id: null },
+                  queryParamsHandling: 'merge'
+                }"
+                preferredName="title"
+                [invisibleDescription]="true"
+                [canDropNodes]="collectionContentComponent.canDropOnCollectionBreadcrumbs"
+                (dropElement)="
+                  collectionContentComponent.dropOnCollection($event.target, $event.source)
+                "
+              ></es-breadcrumbs>
+              <es-actionbar [options]="sidebarOption"></es-actionbar>
+            </div>
+            <es-collection-content
+              #collectionContentComponent
+              [collection]="collection"
+              [getInfobar]="getInfobar"
+              [scope]="getScope()"
+              [isRootLevel]="isRootLevelCollection()"
+              [createAllowed]="createAllowed"
+              [class.collections-master-div-notabs]="!showTabs()"
+            >
+              <ng-template #empty>
+                <ng-container *ngIf="isRootLevelCollection()">
+                  <ng-container *ngIf="tabSelected === 'EDU_GROUPS'">
+                    {{ 'COLLECTIONS.EMPTY.SHARED' | translate }}
+                  </ng-container>
+                  <ng-container *ngIf="tabSelected === 'EDU_ALL'">
+                    {{ 'COLLECTIONS.EMPTY.PUBLIC' | translate }}
+                  </ng-container>
+                </ng-container>
+                <ng-container *ngIf="!isRootLevelCollection()">
+                  {{ 'COLLECTIONS.EMPTY.SUBCOLLECTIONS' | translate }}
+                </ng-container>
+              </ng-template>
+            </es-collection-content>
+          </ng-container>
+        </div>
+      </div>
+      <es-footer [scope]="'collections'"></es-footer>
+    </div>
+  </mat-sidenav-content>
+  <ng-template
+    #sortTool
+    let-columns="columns"
+    let-sortInfo="sortInfo"
+    let-callback="callback"
+    let-toggleCallback="toggleCallback"
   >
-    {{ 'COLLECTIONS.SORT_SLIDER' | translate }}
-  </mat-slide-toggle>
-  <button
-    *ngIf="sortDropdown.menu"
-    [matMenuTriggerFor]="sortDropdown.menu"
-    mat-button
-    color="primary"
-  >
-    {{ 'NODE.' + sortInfo.name | translate }}
-    <i
-      *ngIf="sortInfo.name !== 'ccm:collection_ordered_position'"
-      [esIcon]="'arrow_' + (sortInfo.ascending ? 'upward' : 'downward')"
-    ></i>
-  </button>
-  <es-sort-dropdown
-    #sortDropdown
-    [columns]="columns"
-    [sortBy]="sortInfo.name"
-    [sortAscending]="sortInfo.ascending"
-    (sort)="callback.emit($event)"
-  ></es-sort-dropdown>
-</ng-template>
+    <mat-slide-toggle
+      *ngIf="sortInfo.name === 'ccm:collection_ordered_position'"
+      [(ngModel)]="sortInfo.customActive"
+      (ngModelChange)="toggleCallback.emit($event)"
+    >
+      {{ 'COLLECTIONS.SORT_SLIDER' | translate }}
+    </mat-slide-toggle>
+    <button
+      *ngIf="sortDropdown.menu"
+      [matMenuTriggerFor]="sortDropdown.menu"
+      mat-button
+      color="primary"
+    >
+      {{ 'NODE.' + sortInfo.name | translate }}
+      <i
+        *ngIf="sortInfo.name !== 'ccm:collection_ordered_position'"
+        [esIcon]="'arrow_' + (sortInfo.ascending ? 'upward' : 'downward')"
+      ></i>
+    </button>
+    <es-sort-dropdown
+      #sortDropdown
+      [columns]="columns"
+      [sortBy]="sortInfo.name"
+      [sortAscending]="sortInfo.ascending"
+      (sort)="callback.emit($event)"
+    ></es-sort-dropdown>
+  </ng-template>
+</mat-sidenav-container>

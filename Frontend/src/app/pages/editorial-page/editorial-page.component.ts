@@ -51,6 +51,7 @@ import {
     NodeEntriesWrapperComponent,
     OptionItem,
     OptionItemToggle,
+    OptionItemToggleSidebar,
     Scope,
     SearchHelperService,
     UIService,
@@ -68,7 +69,7 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { SelectionModel } from '@angular/cdk/collections';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 
-export type PrimaryMode = 'activity' | 'share';
+export type PrimaryMode = 'activity' | 'share' | 'collections';
 type RouteConfig = {
     primaryMode: PrimaryMode;
 };
@@ -177,12 +178,6 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 this.searchEvent$ = instance.onSearchTriggered();
                 this.initSubscription();
             });
-        effect(() => {
-            const open = this.sidenavRight();
-            if (this.sidebarOptionToggle) {
-                this.sidebarOptionToggle.toggleState = open;
-            }
-        });
     }
 
     ngAfterViewInit(): void {
@@ -190,19 +185,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     private prepareOptions() {
-        this.sidebarOptionToggle = new OptionItemToggle(
-            {
-                enabled: 'EDITORIAL.OPTION.TOGGLE_SIDEBAR',
-                disabled: 'EDITORIAL.OPTION.TOGGLE_SIDEBAR',
-            },
-            {
-                enabled: 'splitscreen_right',
-                disabled: 'view_column_2',
-            },
-            this.sidenavRight(),
-            () => this.sidenavRight.set(!this.sidenavRight()),
-        );
-        this.sidebarOptionToggle.elementType = [];
+        this.sidebarOptionToggle = OptionItemToggleSidebar(this.sidenavRight);
         const reject = new OptionItem('EDITORIAL.OPTION.REJECT_SHARE', 'cancel', () => {
             void this.dialogs.openRejectShareDialog({
                 shareId: null,

@@ -88,6 +88,25 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
                 addOptions: options,
             },
         });
+        const sortInto = new OptionItem(
+            'EDITORIAL.OPTIONS.SORT_INTO',
+            'splitscreen_vertical_add',
+            (nodes) => {},
+        );
+        sortInto.elementType = [ElementType.Node];
+        sortInto.constrains = [Constrain.Collections];
+        sortInto.scopes = ['collections'];
+        options.push(sortInto);
+        this.optionsHelperDataService.setData({
+            scope: this.primaryMode(),
+            activeObjects: this.nodes(),
+            selectedObjects: this.nodes(),
+            allObjects: this.nodes(),
+            customOptions: {
+                useDefaultOptions: false,
+                addOptions: options,
+            },
+        });
         this.options.set(await this.optionsHelperDataService.getAvailableOptions(Target.Actionbar));
     }
 
