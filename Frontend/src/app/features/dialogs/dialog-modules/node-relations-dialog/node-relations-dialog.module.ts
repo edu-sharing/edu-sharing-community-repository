@@ -10,6 +10,6 @@ export { NodeRelationsDialogComponent };
 @NgModule({
     declarations: [NodeRelationsDialogComponent, NodeSearchSelectorComponent],
     imports: [SharedModule, EduSharingUiModule, MdsModule],
-    exports: [NodeRelationsDialogComponent],
+    exports: [NodeRelationsDialogComponent, NodeSearchSelectorComponent],
 })
 export class NodeRelationsDialogModule {}

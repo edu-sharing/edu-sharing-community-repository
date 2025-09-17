@@ -1,0 +1,18 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+
+:host ::ng-deep {
+    mat-tab-header {
+        --mdc-secondary-navigation-tab-container-height: 55px;
+    }
+    .mdc-tab__text-label {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .mdc-tab-indicator--active {
+        .mdc-tab__text-label {
+            // font-weight: bold;
+        }
+    }
+}

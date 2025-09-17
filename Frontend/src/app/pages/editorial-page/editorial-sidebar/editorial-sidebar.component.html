@@ -1,4 +1,7 @@
 <div class="sidebar-header">
+  <button mat-icon-button color="primary" *ngIf="enabledOption()" (click)="enabledOption.set(null)">
+    <i esIcon="keyboard_arrow_left"></i>
+  </button>
   <div>{{ title() | translate }}</div>
   <button mat-icon-button color="primary" (click)="closeTrigger.emit()">
     <i esIcon="close"></i>
@@ -6,7 +9,10 @@
 </div>
 <ng-container *ngTemplateOutlet="content"></ng-container>
 <ng-template #content>
-  <div class="entries">
+  <div *ngIf="enabledOption() as option" class="option option-{{ option.name }}">
+    <es-nodes-selector></es-nodes-selector>
+  </div>
+  <div class="entries" *ngIf="!enabledOption()">
     <div class="entry" (click)="option.callback(nodes())" *ngFor="let option of options()">
       <i class="icon" [esIcon]="option.icon"></i>
       <div class="text">

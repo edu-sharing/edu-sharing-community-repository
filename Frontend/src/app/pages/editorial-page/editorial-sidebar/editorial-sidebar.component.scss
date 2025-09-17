@@ -6,11 +6,17 @@
     justify-content: space-between;
     align-items: center;
     padding: 20px;
-    > div:first-child {
+    > div {
         font-size: vars.$fontSizeXLarge;
+        flex-grow: 1;
     }
 }
-
+.option-show {
+    animation: slide-fade 1s;
+}
+.option {
+    padding: 0 20px;
+}
 .entries {
     display: flex;
     flex-direction: column;
@@ -45,5 +51,16 @@
         }
         .navigate {
         }
+    }
+}
+
+@keyframes slide-fade {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }

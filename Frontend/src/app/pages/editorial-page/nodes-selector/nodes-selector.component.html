@@ -1,0 +1,21 @@
+<mat-tab-group>
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <i esIcon="layers" class="tab-icon"></i>
+      <span class="tab-label">{{ 'COLLECTIONS.TITLE' | translate }}</span>
+    </ng-template>
+  </mat-tab>
+
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <i esIcon="search" class="tab-icon"></i>
+      <span class="tab-label">{{ 'SEARCH.TITLE' | translate }}</span>
+    </ng-template>
+  </mat-tab>
+  <mat-tab *ngIf="'TOOLPERMISSION_WORKSPACE' | esToolpermission | async">
+    <ng-template mat-tab-label>
+      <i esIcon="cloud" class="tab-icon"></i>
+      <span class="tab-label">{{ 'WORKSPACE.TITLE' | translate }}</span>
+    </ng-template>
+  </mat-tab>
+</mat-tab-group>

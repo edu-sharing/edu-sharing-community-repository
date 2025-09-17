@@ -46,6 +46,7 @@ export * from './node-entries/node-entries.module';
 export * from './mds-viewer/mds-viewer.component';
 export * from './mds-viewer/replace-element-with-div';
 export * from './node-url/node-url.component';
+export * from './pipes/toolpermission.pipe';
 export * from './pipes/property-slug.pipe';
 export * from './pipes/file-size.pipe';
 export * from './pipes/format-date.pipe';

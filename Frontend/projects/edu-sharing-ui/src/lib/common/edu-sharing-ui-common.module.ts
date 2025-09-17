@@ -34,6 +34,7 @@ import { MdsDurationPipe } from '../pipes/mds-duration.pipe';
 import { MdsViewerComponent } from '../mds-viewer/mds-viewer.component';
 import { SpinnerSmallComponent } from '../spinner-small/spinner-small.component';
 import { NodeUrlPipe } from '../pipes/node-url.pipe';
+import { ToolpermissionPipe } from '../pipes/toolpermission.pipe';
 
 @NgModule({
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -70,6 +71,7 @@ import { NodeUrlPipe } from '../pipes/node-url.pipe';
         MatMenuModule,
         SpinnerComponent,
         SpinnerSmallComponent,
+        ToolpermissionPipe,
         MatButtonModule,
         MatTooltipModule,
         MatRippleModule,
@@ -98,6 +100,7 @@ import { NodeUrlPipe } from '../pipes/node-url.pipe';
         NodePersonNamePipe,
         NodeTitlePipe,
         NodeUrlComponent,
+        ToolpermissionPipe,
         SortDropdownComponent,
         SpinnerComponent,
         SpinnerSmallComponent,

@@ -1,7 +1,6 @@
 import {
     Component,
     computed,
-    effect,
     EventEmitter,
     input,
     OnChanges,
@@ -30,25 +29,37 @@ import { Subject } from 'rxjs';
 import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { PrimaryMode } from '../editorial-page.component';
+import { NodesSelectorComponent } from '../nodes-selector/nodes-selector.component';
 
 @Component({
     selector: 'es-editorial-sidebar',
     templateUrl: 'editorial-sidebar.component.html',
     styleUrls: ['editorial-sidebar.component.scss'],
-    imports: [EduSharingUiCommonModule, CommonModule, MatButtonModule, TranslateModule],
+    imports: [
+        EduSharingUiCommonModule,
+        CommonModule,
+        MatButtonModule,
+        TranslateModule,
+        NodesSelectorComponent,
+    ],
     providers: [OptionsHelperDataService],
 })
 export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     nodes = input<Node[]>();
     primaryMode = input.required<PrimaryMode>();
+    enabledOption = signal<OptionItem>(null);
     isModal = input<boolean>(false);
 
     @Output() closeTrigger = new EventEmitter<void>();
     @ViewChild('content', { static: true }) dialogContent: TemplateRef<unknown>;
 
     private readonly destroyed = new Subject<void>();
-    readonly title = computed(() => 'EDITORIAL.SIDEBAR.TITLE_' + this.primaryMode()?.toUpperCase());
+    readonly title = computed(() =>
+        this.enabledOption()
+            ? this.enabledOption().name
+            : 'EDITORIAL.SIDEBAR.TITLE_' + this.primaryMode()?.toUpperCase(),
+    );
     options = signal<OptionItem[]>(null);
 
     constructor(
@@ -91,7 +102,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         const sortInto = new OptionItem(
             'EDITORIAL.OPTIONS.SORT_INTO',
             'splitscreen_vertical_add',
-            (nodes) => {},
+            () => this.enabledOption.set(sortInto),
         );
         sortInto.elementType = [ElementType.Node];
         sortInto.constrains = [Constrain.Collections];
