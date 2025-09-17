@@ -25,7 +25,8 @@ public class SilentLoginModeRedirect {
             return false;
         }
 
-        if (request.getServletPath().equals("/rest")) {
+        // preview redirect is problematic since browser seem to load random images from cache on 302 responses
+        if (request.getServletPath().equals("/rest") || request.getServletPath().equals("/preview")) {
             return false;
         }
 
