@@ -92,7 +92,6 @@ export class MdsHelperService {
             }
             columns['Default'] = defaultColumns;
         }
-        console.log(columns);
         return columns;
     }
 

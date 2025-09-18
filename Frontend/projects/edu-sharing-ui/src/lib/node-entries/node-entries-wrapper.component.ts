@@ -238,7 +238,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
                 .subscribe(() => (this.lastLoadingCompleted = Date.now()));
         }
         this.entriesService.scope = this.scope;
-        if (changes.columns) {
+        if (changes.columns || changes.displayType) {
             this.entriesService.columnsSubject.next({
                 columns:
                     this.columns[
