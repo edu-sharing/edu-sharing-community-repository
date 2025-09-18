@@ -66,6 +66,7 @@ export class OptionsHelperDataService implements OnDestroy {
     ) {
         this.registerStaticSubscriptions();
     }
+
     /** Performs subscriptions that don't have to be refreshed. */
     private registerStaticSubscriptions(): void {
         this.localEvents.nodesDeleted

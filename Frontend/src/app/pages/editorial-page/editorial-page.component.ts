@@ -1,12 +1,4 @@
-import {
-    AfterViewInit,
-    Component,
-    effect,
-    OnDestroy,
-    OnInit,
-    signal,
-    ViewChild,
-} from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import {
     AuthenticationService,
     ConfigService,
@@ -51,7 +43,6 @@ import {
     NodeEntriesWrapperComponent,
     OptionItem,
     OptionItemToggle,
-    OptionItemToggleSidebar,
     Scope,
     SearchHelperService,
     UIService,
@@ -68,6 +59,7 @@ import { debounceTime, delay, distinctUntilChanged, first, startWith, tap } from
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { SelectionModel } from '@angular/cdk/collections';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
+import { OptionsHelperService } from '../../services/options-helper.service';
 
 export type PrimaryMode = 'activity' | 'share' | 'collections';
 type RouteConfig = {
@@ -78,6 +70,7 @@ type RouteConfig = {
     selector: 'es-editorial-page',
     templateUrl: 'editorial-page.component.html',
     styleUrls: ['editorial-page.component.scss'],
+    providers: [OptionsHelperService],
     standalone: false,
 })
 export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -134,6 +127,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         private searchServiceUnwrapped: SearchServiceUnwrapped,
         private configService: ConfigService,
         private searchHelperService: SearchHelperService,
+        private optionsHelperService: OptionsHelperService,
         private ui: UIService,
         private authenticationService: AuthenticationService,
         public editorialPageService: EditorialPageService,
@@ -185,7 +179,9 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     private prepareOptions() {
-        this.sidebarOptionToggle = OptionItemToggleSidebar(this.sidenavRight);
+        this.sidebarOptionToggle = this.optionsHelperService.getOptionItemToggleSidebar(
+            this.sidenavRight,
+        );
         const reject = new OptionItem('EDITORIAL.OPTION.REJECT_SHARE', 'cancel', () => {
             void this.dialogs.openRejectShareDialog({
                 shareId: null,

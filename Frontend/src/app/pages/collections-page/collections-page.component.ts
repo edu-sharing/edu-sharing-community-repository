@@ -13,7 +13,6 @@ import {
     ColorHelper,
     LocalEventsService,
     NodeEntriesDisplayType,
-    OptionItemToggleSidebar,
     OptionsHelperDataService,
     PreferredColor,
     Scope,
@@ -48,6 +47,7 @@ import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcru
 import { CollectionContentComponent } from './collection-content/collection-content.component';
 import { CollectionInfoBarComponent } from './collection-info-bar/collection-info-bar.component';
 import { GlobalCollectionsPageServiceInternal } from './global-collections-page.service';
+import { OptionsHelperService } from 'src/app/services/options-helper.service';
 
 // component class
 @Component({
@@ -83,7 +83,7 @@ export class CollectionsPageComponent implements OnDestroy {
     isLoading = true;
     isReady = false;
     sidenavRight = signal(false);
-    sidebarOption = [OptionItemToggleSidebar(this.sidenavRight)];
+    sidebarOption = [this.optionsHelperService.getOptionItemToggleSidebar(this.sidenavRight)];
     collection: Node;
     collectionSortEmitter = new EventEmitter<SortEvent>();
     collectionCustomSortEmitter = new EventEmitter<boolean>();
@@ -163,6 +163,7 @@ export class CollectionsPageComponent implements OnDestroy {
         private nodeService: RestNodeService,
         private route: ActivatedRoute,
         private router: Router,
+        private optionsHelperService: OptionsHelperService,
         private globalCollectionsPageServiceInternal: GlobalCollectionsPageServiceInternal,
         private tempStorage: TemporaryStorageService,
         private optionsService: OptionsHelperDataService,

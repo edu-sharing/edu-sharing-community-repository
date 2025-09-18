@@ -7,7 +7,6 @@
  */
 import { KeyboardShortcutCondition } from '../types/keyboard-shortcuts';
 import { Node } from 'ngx-edu-sharing-api';
-import { effect, Signal, WritableSignal } from '@angular/core';
 
 export enum NodesRightMode {
     // rights on the current node, no matter if its a reference or origianl
@@ -215,26 +214,6 @@ export class CustomOptions {
      * Options to add/insert into the menu
      */
     public addOptions?: OptionItem[];
-}
-
-export function OptionItemToggleSidebar(state: WritableSignal<boolean>) {
-    const toggle = new OptionItemToggle(
-        {
-            enabled: 'EDITORIAL.OPTION.TOGGLE_SIDEBAR',
-            disabled: 'EDITORIAL.OPTION.TOGGLE_SIDEBAR',
-        },
-        {
-            enabled: 'splitscreen_right',
-            disabled: 'view_column_2',
-        },
-        state(),
-        () => state.set(!state()),
-    );
-    effect(() => {
-        toggle.toggleState = state();
-    });
-    toggle.elementType = [];
-    return toggle;
 }
 
 export enum HideMode {
