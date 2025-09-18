@@ -49,7 +49,7 @@ export class MdsHelperService {
                             if (c.id.includes('.')) {
                                 const split = c.id.split('.');
                                 type = split[0] as ListItemType;
-                                c.id = split[1];
+                                c.id = split.slice(1).join('.');
                             }
                             const item = new ListItem(type, c.id);
                             item.format = c.format;
