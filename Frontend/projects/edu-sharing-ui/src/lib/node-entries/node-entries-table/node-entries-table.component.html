@@ -249,24 +249,6 @@ available. -->
 </ng-template>
 <ng-template #icon let-node="node">
   <div class="icon-bg">
-    <img
-      *ngIf="node.iconURL"
-      [src]="node | esNodeIcon | async"
-      [alt]="
-        node.mediatype
-          ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
-          : ''
-      "
-      [matTooltip]="
-        node.mediatype
-          ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
-          : ''
-      "
-      matTooltipTouchGestures="off"
-    />
-    <i
-      *ngIf="!node.iconURL"
-      [esIcon]="node.authorityType ? (node.authorityType === 'GROUP' ? 'group' : 'person') : null"
-    ></i>
+    <es-node-type-badge [node]="node"></es-node-type-badge>
   </div>
 </ng-template>
