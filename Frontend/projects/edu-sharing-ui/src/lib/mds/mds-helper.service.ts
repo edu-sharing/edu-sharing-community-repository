@@ -30,10 +30,8 @@ export class MdsHelperService {
     /**
      *
      * get columns as an object structure
-     * There are always Columns in the result['Default'] but there can also be further types
-     * @param translate
-     * @param mdsSet
-     * @param name
+     * There are always Columns in the result.Default but there can also be further types
+     * See @ColumnType
      */
     getColumns(mdsSet: MdsDefinition, name: string) {
         let columns: ColumnType = {};
