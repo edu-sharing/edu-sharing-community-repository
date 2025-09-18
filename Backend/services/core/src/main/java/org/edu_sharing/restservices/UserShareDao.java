@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.generated.repository.backend.services.rest.client.model.ShareInfo;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
@@ -14,6 +15,7 @@ import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.UserShareDirection;
 import org.edu_sharing.service.search.model.SearchInviteEvent;
 import org.edu_sharing.service.search.model.SearchToken;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Date;
@@ -95,9 +97,9 @@ public class UserShareDao {
             } else {
                 return PersonDao.getPerson(this.repoDao, authorityName).asPersonSimple(false);
             }
-        } catch (Exception e) {
-            log.info("Could not get Authority for name: {}", authorityName);
-            return null;
+        } catch (Throwable e) {
+            log.info("Could not get authority for name: {}", authorityName);
+            return PersonDao.getDummyAuthority(authorityName);
         }
     }
 

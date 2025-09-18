@@ -1614,17 +1614,7 @@ public class IamApi {
                     result.add(getUserOrGroup(repoDao, user));
                 } catch (DAOMissingException e) {
                     logger.warn("Authority " + user + " as provided by search was not found", e);
-                    if (user.startsWith(PermissionService.GROUP_PREFIX)) {
-                        Group groupObj = new Group();
-                        groupObj.setAuthorityName(user);
-                        groupObj.setAuthorityType(Authority.Type.GROUP);
-                        result.add(groupObj);
-                    } else {
-                        User userObj = new User();
-                        userObj.setAuthorityName(user);
-                        userObj.setAuthorityType(Authority.Type.USER);
-                        result.add(userObj);
-                    }
+                    result.add(PersonDao.getDummyAuthority(user));
                 }
             }
             AuthorityEntries response = new AuthorityEntries();

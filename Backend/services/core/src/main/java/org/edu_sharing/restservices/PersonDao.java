@@ -10,6 +10,7 @@ import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.NoSuchPersonException;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
@@ -903,5 +904,20 @@ public class PersonDao {
 
     public void deleteDashboardShortcuts() {
         dashboardConfigService.setDashboardShortcuts(getUserName(), null);
+    }
+
+    @NotNull
+    public static Authority getDummyAuthority(String authorityName) {
+        if (authorityName.startsWith(PermissionService.GROUP_PREFIX)) {
+            Group groupObj = new Group();
+            groupObj.setAuthorityName(authorityName);
+            groupObj.setAuthorityType(Authority.Type.GROUP);
+            return groupObj;
+        } else {
+            User userObj = new User();
+            userObj.setAuthorityName(authorityName);
+            userObj.setAuthorityType(Authority.Type.USER);
+            return userObj;
+        }
     }
 }
