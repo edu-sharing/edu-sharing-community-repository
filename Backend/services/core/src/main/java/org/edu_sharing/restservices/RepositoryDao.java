@@ -3,13 +3,13 @@ package org.edu_sharing.restservices;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.appcontext.ApplicationInfoContextHolder;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.restservices.shared.Repo;
@@ -33,18 +33,16 @@ public class RepositoryDao {
 
 	public static final String HOME = "-home-";
 
-	static Logger logger = Logger.getLogger(RepositoryDao.class);
-	
+
 	public static RepositoryDao getRepository(String repId) throws DAOException {
 
 		try {
 			ApplicationInfo appInfo = 
 					HOME.equals(repId) 
-				  ? ApplicationInfoList.getHomeRepositoryObeyConfig(ConfigServiceFactory.getCurrentConfig().getValue("availableRepositories", (String[]) null))
+				  ? ApplicationInfoList.getHomeRepositoryObeyConfig(ConfigServiceFactory.getCurrentConfig().getValue("availableRepositories", null))
 				  : ApplicationInfoList.getRepositoryInfoById(repId); 
 			
 			if (appInfo == null) {
-				
 				throw new DAOMissingException(
 						new IllegalArgumentException(repId));
 			}
@@ -55,9 +53,8 @@ public class RepositoryDao {
 						new IllegalArgumentException("unsupported repository type."));
 			}
 
-			
 			//WSClient is deprecated always use ApiClient, WS Impl of Service Tier is used
-			MCAlfrescoBaseClient baseClient = null;
+			MCAlfrescoBaseClient baseClient;
 
 			/*
 			//prevent when there is a runas user that authenticationService.validate (AuthenticationUtil) overwrites the runas user

@@ -65,7 +65,7 @@ public class ApiApplication extends ResourceConfig {
 
         this.registerClasses(SERVICES);
         this.registerClasses(exceptionMapper);
-        this.packages(getClass().getPackage().getName());
+        this.packages("org.edu_sharing");
 
         // swagger service
         /**
