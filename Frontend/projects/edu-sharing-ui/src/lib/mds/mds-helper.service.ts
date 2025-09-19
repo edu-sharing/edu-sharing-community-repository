@@ -66,7 +66,7 @@ export class MdsHelperService {
                 }
             }
         }
-        if (!columns['Default']?.length) {
+        if (!columns?.Default?.length) {
             const defaultColumns = [];
             if (mdsSet !== null) {
                 console.warn(
