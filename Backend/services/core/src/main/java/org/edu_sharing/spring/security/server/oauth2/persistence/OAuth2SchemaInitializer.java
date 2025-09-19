@@ -1,13 +1,19 @@
 package org.edu_sharing.spring.security.server.oauth2.persistence;
 
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
+import org.alfresco.repo.transaction.RetryingTransactionHelper;
+import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 
-@Component
+@Slf4j
+@Component("oAuth2SchemaInitializer")
 public class OAuth2SchemaInitializer {
 
     private final JdbcTemplate jdbcTemplate;
@@ -18,6 +24,7 @@ public class OAuth2SchemaInitializer {
 
     @PostConstruct
     public void init() throws Exception {
+        log.info("Initializing OAuth2 schema...");
 
         if (!tableExists("oauth2_authorization")) {
             executeSqlFromClasspath(
@@ -45,16 +52,25 @@ public class OAuth2SchemaInitializer {
                 throw new IllegalStateException("Schema file not found: " + path);
             }
             String sql = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+
             sql = sql.replace("attributes blob","attributes text");
             sql = sql.replace("_metadata blob","_metadata varchar(2000)");
 
-            //sql = sql.replace("blob", "bytea");
             sql = sql.replace("blob", "text");
-            for (String statement : sql.split(";")) {
+
+            String finalSql = sql;
+
+            ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
+            Connection con = dbAlf.getConnection();
+            for (String statement : finalSql.split(";")) {
                 if (!statement.isBlank()) {
-                    jdbcTemplate.execute(statement.trim());
+                    try(PreparedStatement ps = con.prepareStatement(finalSql)){
+                        ps.executeUpdate();
+                    }
                 }
             }
+            con.commit();
+            dbAlf.cleanUp(con);
         }
     }
 }

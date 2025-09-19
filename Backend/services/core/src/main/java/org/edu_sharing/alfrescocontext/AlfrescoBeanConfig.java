@@ -54,7 +54,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
+import org.springframework.jdbc.datasource.DelegatingDataSource;
+import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 
+import javax.sql.DataSource;
 import java.util.Properties;
 
 /**
@@ -337,6 +340,12 @@ public class AlfrescoBeanConfig {
     @Bean(name = "globalProperties")
     public Properties globalProperties() {
         return (Properties)applicationContext.getBean("global-properties");
+    }
+
+    @Bean(name="dataSource")
+    public DataSource dataSource() {
+        DataSource dataSource = applicationContext.getBean("dataSource", DataSource.class);
+        return new TransactionAwareDataSourceProxy(dataSource);
     }
 
 
