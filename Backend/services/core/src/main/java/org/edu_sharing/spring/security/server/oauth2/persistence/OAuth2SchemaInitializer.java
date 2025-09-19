@@ -45,7 +45,11 @@ public class OAuth2SchemaInitializer {
                 throw new IllegalStateException("Schema file not found: " + path);
             }
             String sql = new String(in.readAllBytes(), StandardCharsets.UTF_8);
-            sql = sql.replace("blob", "bytea");
+            sql = sql.replace("attributes blob","attributes text");
+            sql = sql.replace("_metadata blob","_metadata varchar(2000)");
+
+            //sql = sql.replace("blob", "bytea");
+            sql = sql.replace("blob", "text");
             for (String statement : sql.split(";")) {
                 if (!statement.isBlank()) {
                     jdbcTemplate.execute(statement.trim());
