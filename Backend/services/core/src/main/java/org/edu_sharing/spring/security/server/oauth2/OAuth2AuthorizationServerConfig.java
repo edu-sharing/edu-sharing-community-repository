@@ -88,24 +88,8 @@ public class OAuth2AuthorizationServerConfig {
     }
 
     @Bean
-    public JWKSource<SecurityContext> jwkSource() {
-        RSAKey rsaKey = generateRsa();
-        JWKSet jwkSet = new JWKSet(rsaKey);
-        return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
-    }
-
-    private static RSAKey generateRsa() {
-        try {
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(2048);
-            KeyPair keyPair = keyPairGenerator.generateKeyPair();
-            return new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())
-                    .privateKey(keyPair.getPrivate())
-                    .keyID(UUID.randomUUID().toString())
-                    .build();
-        } catch (Exception ex) {
-            throw new IllegalStateException(ex);
-        }
+    public JWKSource<SecurityContext> jwkSource() throws Exception {
+        return oAuth2ConfigService.getJwkSource();
     }
 
     @Bean

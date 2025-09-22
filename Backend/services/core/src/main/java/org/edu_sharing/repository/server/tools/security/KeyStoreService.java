@@ -86,6 +86,10 @@ public class KeyStoreService {
         }
     }
 
+    public void storeKeyStore(KeyStore ks, String keyStoreName, String keyStorePassword) throws Exception{
+        storeKeyStore(ks,keyStorePassword,getKeyStoreLocation(keyStoreName));
+    }
+
     private void storeKeyStore(KeyStore ks, String keyStorePassword, File f) throws Exception{
         try (FileOutputStream fos = new FileOutputStream(f)) {
             ks.store(fos, keyStorePassword.toCharArray());
