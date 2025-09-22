@@ -60,6 +60,7 @@ public class SecurityConfigurationSaml {
     SecurityFilterChain app(HttpSecurity http) throws Exception {
 
         http
+                .securityMatcher("/login/**","/logout/**","/saml2","/saml2/**","/shibboleth")
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(new AntPathRequestMatcher("/shibboleth")).authenticated()
                         .requestMatchers(new AntPathRequestMatcher("/**")).permitAll()
