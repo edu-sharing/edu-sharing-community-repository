@@ -255,7 +255,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
                 columns:
                     this.columns[
                         this.displayType === NodeEntriesDisplayType.Table ? 'Table' : 'Default'
-                    ] || this.columns['Default'],
+                    ] || this.columns?.Default,
                 fromUser: false,
             });
         }

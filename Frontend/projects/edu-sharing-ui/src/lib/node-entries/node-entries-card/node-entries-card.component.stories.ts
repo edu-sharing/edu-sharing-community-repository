@@ -58,7 +58,7 @@ export class NodeEntriesServiceMock implements Partial<NodeEntriesService<any>> 
     checkbox = true;
     selection = new CustomSelectionModel<any>();
     get columns(): ListItem[] {
-        return DefaultColumns;
+        return DefaultColumns.Default;
     }
 }
 @Injectable()

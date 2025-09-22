@@ -112,7 +112,7 @@ export const EntriesSimpleGrid: Story = {
 export const EntriesTableLoading: Story = {
     args: {
         displayType: NodeEntriesDisplayType.Table,
-        dataSource: loadingDataSource,
+        dataSource: loadingDataSource as any,
     },
 };
 export const EntriesHorizontalGrid: Story = {
