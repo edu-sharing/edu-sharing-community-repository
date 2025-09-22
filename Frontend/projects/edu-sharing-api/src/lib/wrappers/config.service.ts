@@ -114,13 +114,14 @@ export class ConfigService {
             LTI: '/lti/v13',
         };
         return this.observeBackendConfig().pipe(
-            map(
-                (c) =>
-                    !['disabled', 'admin'].includes(
-                        Object.entries(c?.security?.access?.endpoints).find(
-                            (e) => e[0] === EndpointId[endpoint],
-                        )?.[1] as string,
-                    ),
+            map((c) =>
+                c?.security?.access?.endpoints
+                    ? !['disabled', 'admin'].includes(
+                          Object.entries(c.security.access.endpoints).find(
+                              (e) => e[0] === EndpointId[endpoint],
+                          )?.[1] as string,
+                      )
+                    : true,
             ),
         );
     }
