@@ -181,6 +181,9 @@ mat-cell {
         justify-content: center;
         align-items: center;
         @include materialShadowSmall();
+        > es-node-type-badge {
+            box-shadow: none;
+        }
         > img {
             width: 18px;
             height: auto;
