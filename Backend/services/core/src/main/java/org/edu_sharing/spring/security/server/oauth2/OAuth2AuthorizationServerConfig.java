@@ -5,6 +5,9 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import lombok.extern.slf4j.Slf4j;
+import org.edu_sharing.spring.conditions.ConditionalOnProperty;
+import org.edu_sharing.spring.security.server.oauth2.config.OAuth2ConfigService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -12,7 +15,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
-import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -24,12 +26,18 @@ import org.springframework.security.web.authentication.LoginUrlAuthenticationEnt
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPublicKey;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Configuration
+@ConditionalOnProperty(name = OAuth2ConfigService.CONFIG_PATH + ".enabled", havingValue = "true")
 @EnableWebSecurity()
 public class OAuth2AuthorizationServerConfig {
+
+    @Autowired
+    OAuth2ConfigService oAuth2ConfigService;
 
     @Bean
     //@Order(1)
@@ -53,27 +61,26 @@ public class OAuth2AuthorizationServerConfig {
 
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
-        RegisteredClient registeredClient = RegisteredClient.withId("moodle-client-id")
-                .clientId("moodle-client")
-                .clientSecret("{noop}moodle-secret")
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .redirectUri("https://oauth.pstmn.io/v1/callback")
-                .scope(OidcScopes.OPENID)
-                .scope("read")
-                .build();
-        RegisteredClient testClient = RegisteredClient.withId("test-client-id")
-                .clientId("test-client")
-                .clientSecret("{noop}123&Test")
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN).redirectUri("http://localhost:8081/login/oauth2/code/my-client")
-                .scope(OidcScopes.OPENID)
-                .scope(OidcScopes.PROFILE)
-                .scope("read")
-                .build();
-        return new InMemoryRegisteredClientRepository(registeredClient,testClient);
+        try {
+
+            List<RegisteredClient> collect = oAuth2ConfigService.getDefaultConfig().getClients().stream()
+                    .map(c -> {
+                                RegisteredClient.Builder builder = RegisteredClient.withId(c.getClientId())
+                                        .clientId(c.getClientId())
+                                        .clientSecret(c.getClientSecret())
+                                        .clientAuthenticationMethod(new ClientAuthenticationMethod(c.getClientAuthenticationMethod()))
+                                        .redirectUri(c.getRedirectUri());
+                                c.getAuthorizationGrantTypes().forEach(gt -> builder.authorizationGrantType(new AuthorizationGrantType(gt)));
+                                c.getScopes().forEach(builder::scope);
+                                return builder.build();
+                            }
+                    ).collect(Collectors.toList());
+
+            return new InMemoryRegisteredClientRepository(collect);
+        } catch (Throwable e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
     }
 
     @Bean

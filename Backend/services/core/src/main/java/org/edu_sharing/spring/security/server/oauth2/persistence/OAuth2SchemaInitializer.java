@@ -2,8 +2,9 @@ package org.edu_sharing.spring.security.server.oauth2.persistence;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
+import org.edu_sharing.spring.conditions.ConditionalOnProperty;
+import org.edu_sharing.spring.security.server.oauth2.config.OAuth2ConfigService;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,7 @@ import java.sql.PreparedStatement;
 
 @Slf4j
 @Component("oAuth2SchemaInitializer")
+@ConditionalOnProperty(name = OAuth2ConfigService.CONFIG_PATH + ".enabled", havingValue = "true")
 public class OAuth2SchemaInitializer {
 
     private final JdbcTemplate jdbcTemplate;
