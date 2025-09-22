@@ -8,13 +8,16 @@ import {
     MdsQueryCriteria,
     NetworkService,
     SearchResultEvent,
+    SearchResultInvite,
     SearchResults,
 } from '../../public-api';
-import * as apiModels from '../api/models';
 import { SearchV1Service } from '../api/services';
 import { onSubscription } from '../utils/rxjs-operators/on-subscription';
 import { LabeledValuesDict, MdsLabelService, RawValuesDict } from './mds-label.service';
-import { SearchResultInvite } from '../api/models';
+import { SearchParameters } from '../api/models/search-parameters';
+import { Facet } from '../api/models/facet';
+import { Suggest } from '../api/models/suggest';
+import { Value } from '../api/models/value';
 
 /** Configuration for `SearchService`. */
 export class SearchConfig {
@@ -46,7 +49,7 @@ export type FacetsDict = {
     [property: string]: FacetAggregation;
 };
 
-export type DidYouMeanSuggestion = Pick<apiModels.Suggest, 'highlighted' | 'text'>;
+export type DidYouMeanSuggestion = Pick<Suggest, 'highlighted' | 'text'>;
 
 /** Parameters to be provided to `search`. */
 export type SearchRequestParams = (Parameters<SearchV1Service['search']>[0] &
@@ -94,9 +97,7 @@ export class SearchService {
         null,
     );
     private readonly facetsSubject = new BehaviorSubject<FacetsDict>({});
-    private readonly didYouMeanSuggestionsSubject = new BehaviorSubject<apiModels.Suggest[] | null>(
-        null,
-    );
+    private readonly didYouMeanSuggestionsSubject = new BehaviorSubject<Suggest[] | null>(null);
     private readonly searchParamsSubject = new BehaviorSubject<SearchRequestParams | null>(null);
     private readonly subscribedFacetsSubject = new BehaviorSubject<string[][]>([]);
     private didYouMeanSuggestionsSubscribers = 0;
@@ -419,9 +420,9 @@ export class SearchService {
      * This includes everything but the free-text search string.
      */
     private getFilterCriteria(
-        criteria: apiModels.SearchParameters['criteria'] = this.searchParamsSubject.value?.body
-            .criteria ?? [],
-    ): apiModels.SearchParameters['criteria'] {
+        criteria: SearchParameters['criteria'] = this.searchParamsSubject.value?.body.criteria ??
+            [],
+    ): SearchParameters['criteria'] {
         return criteria.filter((criterion) => criterion.property !== 'ngsearchword');
     }
 
@@ -510,7 +511,7 @@ export class SearchService {
             (facet) => !facetsToUpdate.includes(facet),
         );
         const updatedFacets =
-            completedRequest.results.facets?.filter((facet) =>
+            completedRequest.results.facets?.filter((facet: Facet) =>
                 facetsToUpdate.includes(facet.property),
             ) ?? [];
         return this.mapFacets(updatedFacets).pipe(
@@ -595,10 +596,7 @@ export class SearchService {
 
     /** Compares the criteria arrays of two search-request parameters and returns the properties for
      * which the entries differ as a string array. */
-    private getChangedCriteria(
-        lhs: apiModels.MdsQueryCriteria[],
-        rhs: apiModels.MdsQueryCriteria[],
-    ): string[] {
+    private getChangedCriteria(lhs: MdsQueryCriteria[], rhs: MdsQueryCriteria[]): string[] {
         const properties = [
             ...new Set([
                 ...lhs.map((criterion) => criterion.property),
@@ -631,7 +629,7 @@ export class SearchService {
      * Maps a facets list of a single property from a search response to a facet aggregation with
      * labeled facet values.
      */
-    private mapFacet(facet: apiModels.Facet): Observable<FacetAggregation> {
+    private mapFacet(facet: Facet): Observable<FacetAggregation> {
         if (facet.values.length === 0) {
             return rxjs.of({ values: [], hasMore: false });
         }
@@ -648,10 +646,7 @@ export class SearchService {
     /**
      * Maps a single facet value from a search response to a labeled facet value.
      */
-    private mapFacetValue(
-        property: string,
-        { count, value }: apiModels.Value,
-    ): Observable<FacetValue> {
+    private mapFacetValue(property: string, { count, value }: Value): Observable<FacetValue> {
         return this.mdsLabel
             .getLabel(this.getMdsIdentifier(), property, value)
             .pipe(map((label) => ({ count, value, ...label })));
@@ -661,7 +656,7 @@ export class SearchService {
      * Maps the `criteria` array of a search request to a simple dictionary of values indexed by
      * properties.
      */
-    private criteriaToRawValues(criteria: apiModels.SearchParameters['criteria']): RawValuesDict {
+    private criteriaToRawValues(criteria: SearchParameters['criteria']): RawValuesDict {
         return criteria.reduce((acc, criterion) => {
             acc[criterion.property] = criterion.values;
             return acc;

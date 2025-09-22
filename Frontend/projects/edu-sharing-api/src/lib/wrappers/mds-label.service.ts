@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { MdsValue } from '../api/models';
+import { MdsValue } from '../api/models/mds-value';
 import { MdsIdentifier, MdsService } from './mds.service';
 
 export interface LabeledValue {

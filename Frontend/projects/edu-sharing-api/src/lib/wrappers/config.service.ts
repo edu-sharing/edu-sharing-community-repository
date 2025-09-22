@@ -11,13 +11,15 @@ import {
     tap,
 } from 'rxjs/operators';
 import { ApiRequestConfiguration } from '../api-request-configuration';
-import * as apiModels from '../api/models';
 import { ConfigV1Service } from '../api/services';
 import { switchReplay } from '../utils/rxjs-operators/switch-replay';
+import { Values } from '../api/models/values';
+import { Variables as Vars } from '../api/models/variables';
+import { ValuesBackend } from '../api/models/values-backend';
 
-export type ClientConfig = apiModels.Values;
-export type ClientConfigBackend = apiModels.ValuesBackend;
-export type Variables = apiModels.Variables['current'];
+export type ClientConfig = Values;
+export type ClientConfigBackend = ValuesBackend;
+export type Variables = Vars['current'];
 export type TranslationsDict = { [key: string]: string | TranslationsDict };
 
 export type Locale = 'de_DE' | 'en_US' | 'fr_FR' | 'it_IT' | 'none';
@@ -41,7 +43,7 @@ export class ConfigService {
         locale: Locale;
         language: string;
     } | null>(null);
-    private configSubject = new BehaviorSubject<apiModels.Values | undefined>(undefined);
+    private configSubject = new BehaviorSubject<Values | undefined>(undefined);
     private readonly config$ = this.updateTrigger.pipe(
         startWith(void 0 as void),
         switchReplay(() => this.configV1.getConfig1()),

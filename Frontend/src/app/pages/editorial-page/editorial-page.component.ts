@@ -28,6 +28,7 @@ import { RestConstants } from '../../core-module/rest/rest-constants';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
     ActionbarComponent,
+    ColumnType,
     Constrain,
     DefaultGroups,
     ElementType,
@@ -106,7 +107,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     init$ = new BehaviorSubject<boolean>(false);
     mdsDefinition$ = new BehaviorSubject<MdsDefinition>(null);
     dataSource = new NodeDataSource();
-    columns = signal<ListItem[]>(null);
+    columns = signal<ColumnType>(null);
     displayType = signal(NodeEntriesDisplayType.Table);
     selection = signal<SelectionModel<Node | null>>(null);
     private sidebarOptionToggle: OptionItemToggle;
@@ -225,11 +226,13 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         this.params$.subscribe(async (p) => {
             console.log(p);
             if (p.primaryMode === 'activity') {
-                this.columns.set([
-                    new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
-                    new ListItem('EVENT', 'eventType'),
-                    new ListItem('EVENT', 'timestamp'),
-                ]);
+                this.columns.set({
+                    Default: [
+                        new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
+                        new ListItem('EVENT', 'eventType'),
+                        new ListItem('EVENT', 'timestamp'),
+                    ],
+                });
                 this.mdsDefinition$.next(
                     await firstValueFrom(
                         this.mdsService.getMetadataSet({ repository: HOME_REPOSITORY }),
@@ -250,10 +253,12 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                     this.editorialPageService.registerTabsFromWidget(widget);
                 }
             } else if (p.primaryMode === 'share') {
-                this.columns.set([
-                    new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
-                    new ListItem('SHARE', 'timestamp'),
-                ]);
+                this.columns.set({
+                    Default: [
+                        new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
+                        new ListItem('SHARE', 'timestamp'),
+                    ],
+                });
                 this.mdsDefinition$.next(
                     await firstValueFrom(
                         this.mdsService.getMetadataSet({ repository: HOME_REPOSITORY }),

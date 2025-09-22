@@ -2,12 +2,15 @@ import { TranslateService } from '@ngx-translate/core';
 import {
     AuthenticationService,
     MdsDefinition,
+    MdsIdentifier,
+    MdsService,
     MdsSort,
     MdsWidget,
     RestConstants,
 } from 'ngx-edu-sharing-api';
 import { Injectable } from '@angular/core';
 import { ListItem, ListItemType } from '../types/list-item';
+import { firstValueFrom } from 'rxjs';
 
 type ColumnTypeInternal<T extends string> = { [k in T]?: ListItem[] };
 export type ColumnType = ColumnTypeInternal<'Default' | 'Table'>;
@@ -126,6 +129,7 @@ export class MdsHelperService {
 
     constructor(
         private authentication: AuthenticationService,
+        private mdsService: MdsService,
         private translate: TranslateService,
     ) {}
 
@@ -200,6 +204,13 @@ export class MdsHelperService {
             }
         }
         return used;
+    }
+
+    /**
+     * Same as getColumns, but you don't need to fetch the mds yourself
+     */
+    async getColumnsByMdsId(name: string, mds: Partial<MdsIdentifier>) {
+        return this.getColumns(await firstValueFrom(this.mdsService.getMetadataSet(mds)), name);
     }
 }
 

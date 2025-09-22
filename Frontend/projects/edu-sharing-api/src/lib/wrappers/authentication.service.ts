@@ -14,11 +14,11 @@ import {
     tap,
 } from 'rxjs/operators';
 import { ApiRequestConfiguration } from '../api-request-configuration';
-import * as apiModels from '../api/models';
 import { AuthenticationV1Service as AuthenticationApiService } from '../api/services';
 import { switchReplay } from '../utils/rxjs-operators/switch-replay';
+import { Login } from '../api/models/login';
 
-export type LoginInfo = apiModels.Login;
+export type LoginInfo = Login;
 
 type LoginAction =
     | {

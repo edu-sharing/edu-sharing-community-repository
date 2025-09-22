@@ -9,6 +9,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import {
+    ColumnType,
     EduSharingUiCommonModule,
     GridConfig,
     InteractionType,
@@ -94,7 +95,7 @@ export class DashboardSwimlaneComponent {
      */
     readonly maxItems = 25;
     readonly maxItemsEvents = 6;
-    columns = signal([]);
+    columns = signal({} as ColumnType);
     streamEvents = signal(null as StreamDetails[]);
     sharesEvents = signal(null as ShareDetails[]);
     displayType = signal(NodeEntriesDisplayType.Grid);
@@ -127,7 +128,7 @@ export class DashboardSwimlaneComponent {
                 .get(this.getStorageKey(), this.swimlane().defaultExpanded)
                 .subscribe((v) => this.open.next(v));
 
-            this.dataSource.isLoading = this.nodes() == null || this.columns().length === 0;
+            this.dataSource.isLoading = this.nodes() == null || !this.columns();
             if (!this.dataSource.isLoading) {
                 this.dataSource.setData(this.nodes().nodes, this.nodes().pagination);
             }
@@ -153,7 +154,7 @@ export class DashboardSwimlaneComponent {
         this.dataSource.reset();
         this.dataSource.isLoading = true;
         void this.mdsHelperService
-            .getColumns('swimlane_' + this.swimlane().id, {
+            .getColumnsByMdsId('swimlane_' + this.swimlane().id, {
                 repository: HOME_REPOSITORY,
                 metadataSet: DEFAULT,
             })

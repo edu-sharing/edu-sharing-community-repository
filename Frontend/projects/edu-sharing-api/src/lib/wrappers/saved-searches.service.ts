@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { map, startWith, switchMap, take, tap } from 'rxjs/operators';
-import { MdsQueryCriteria, Node } from '../api/models';
 import { SearchV1Service } from '../api/services';
+import { Node } from '../api/models/node';
 import { CONTENT_TYPE_ALL, DEFAULT, HOME_REPOSITORY, PROPERTY_FILTER_ALL } from '../constants';
 import { SearchResults, Sort } from '../models';
 import { switchReplay } from '../utils/rxjs-operators/switch-replay';
 import { RawValuesDict } from './mds-label.service';
 import { NodeService } from './node.service';
 import { SearchService } from './search.service';
+import { MdsQueryCriteria } from '../api/models/mds-query-criteria';
 
 const SAVED_SEARCH = '-saved_search-';
 const COUNT_UNLIMITED = 1247483647;

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
-import { ConnectorList } from '../api/models';
+import { ConnectorList } from '../api/models/connector-list';
 import { ConnectorV1Service } from '../api/services';
 import { HOME_REPOSITORY } from '../constants';
 import { shareReplayReturnValue } from '../utils/decorators/share-replay-return-value';
