@@ -117,7 +117,7 @@ export class ConfigService {
             map(
                 (c) =>
                     !['disabled', 'admin'].includes(
-                        Object.entries(c.security.access.endpoints).find(
+                        Object.entries(c?.security?.access?.endpoints).find(
                             (e) => e[0] === EndpointId[endpoint],
                         )?.[1] as string,
                     ),
