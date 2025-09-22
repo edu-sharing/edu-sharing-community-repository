@@ -54,7 +54,9 @@ public class ConfigApi {
         try {
             Config config = new Config();
             ConfigService configService = ConfigServiceFactory.getConfigService();
-            config.setGlobal(configService.getConfig().values);
+            org.edu_sharing.alfresco.service.config.model.Config configData = configService.getConfig();
+            config.setGlobal(configData.values);
+            config.setCurrentBackend(configData.valuesBackend);
             try {
                 Context context = configService.getContextByDomain(ConfigServiceFactory.getCurrentDomain());
                 if (context != null) {

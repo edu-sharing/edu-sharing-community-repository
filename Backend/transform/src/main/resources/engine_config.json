@@ -142,7 +142,14 @@
       "supportedSourceAndTargetList": [
         {"sourceMediaType": "video/quicktime", "targetMediaType": "alfresco-metadata-extract"},
         {"sourceMediaType": "video/mp4", "targetMediaType": "alfresco-metadata-extract"},
-        {"sourceMediaType": "video/x-matroska", "targetMediaType": "alfresco-metadata-extract"}
+        {"sourceMediaType": "video/x-matroska", "targetMediaType": "alfresco-metadata-extract"},
+        {"sourceMediaType": "video/mpeg", "targetMediaType": "alfresco-metadata-extract"},
+        {"sourceMediaType": "video/x-msvideo", "targetMediaType": "alfresco-metadata-extract"},
+        {"sourceMediaType": "video/vnd.avi", "targetMediaType": "alfresco-metadata-extract"},
+        {"sourceMediaType": "video/avi", "targetMediaType": "alfresco-metadata-extract"},
+        {"sourceMediaType": "video/x-flv", "targetMediaType": "alfresco-metadata-extract"},
+        {"sourceMediaType": "video/ogg", "targetMediaType": "alfresco-metadata-extract"},
+        {"sourceMediaType": "video/x-ms-wmv", "targetMediaType": "alfresco-metadata-extract"}
       ],
       "transformOptions": [
         "metadataOptions"

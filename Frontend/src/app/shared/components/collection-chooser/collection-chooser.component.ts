@@ -18,7 +18,6 @@ import {
 } from '../../../core-module/core.module';
 import {
     DEFAULT,
-    GenericAuthority,
     HOME_REPOSITORY,
     Node,
     PROPERTY_FILTER_ALL,
@@ -27,6 +26,7 @@ import {
 } from 'ngx-edu-sharing-api';
 import { Toast } from '../../../services/toast';
 import {
+    ColumnType,
     InteractionType,
     ListItem,
     ListSortConfig,
@@ -81,7 +81,7 @@ export class CollectionChooserComponent implements OnInit {
     );
 
     private hasMoreToLoad: boolean;
-    columns: ListItem[] = ListItem.getCollectionDefaults();
+    columns: ColumnType = { Default: ListItem.getCollectionDefaults() };
     sortBy: string[];
     sortAscending = false;
     sort: ListSortConfig = {

@@ -1,11 +1,18 @@
 import { Component, EventEmitter, NgZone, Output, ViewChild } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { Group, HOME_REPOSITORY, Mediacenter, MediacenterService, Node } from 'ngx-edu-sharing-api';
 import {
+    Group,
+    HOME_REPOSITORY,
+    MdsService,
+    Mediacenter,
+    MediacenterService,
+    Node,
+} from 'ngx-edu-sharing-api';
+import {
+    ColumnType,
     DefaultGroups,
     ElementType,
     InteractionType,
-    ListItem,
     ListSortConfig,
     MdsHelperService,
     NodeDataSource,
@@ -19,7 +26,6 @@ import {
 import {
     RequestObject,
     RestConnectorService,
-    RestMdsService,
     RestMediacenterService,
 } from '../../../core-module/core.module';
 import { CsvHelper } from '../../../core-module/csv.helper';
@@ -70,8 +76,8 @@ export class AdminMediacenterComponent {
         allowed: true,
     };
 
-    groupColumns: ListItem[];
-    nodeColumns: ListItem[];
+    groupColumns: ColumnType;
+    nodeColumns: ColumnType;
     _currentTab = 0;
     get currentTab() {
         return this._currentTab;
@@ -133,7 +139,8 @@ export class AdminMediacenterComponent {
     constructor(
         private mediacenterServiceLegacy: RestMediacenterService,
         private mediacenterService: MediacenterService,
-        private mdsService: RestMdsService,
+        private mdsService: MdsService,
+        private mdsHelperService: MdsHelperService,
         private optionsHelperService: OptionsHelperService,
         private searchHelperService: SearchHelperService,
         private translate: TranslateService,
@@ -147,17 +154,9 @@ export class AdminMediacenterComponent {
             RestConstants.TOOLPERMISSION_MEDIACENTER_MANAGE,
         );
         this.refresh();
-        this.mdsService.getSet().subscribe((mds) => {
-            this.nodeColumns = MdsHelperService.getColumns(
-                this.translate,
-                mds,
-                'mediacenterManaged',
-            );
-            this.groupColumns = MdsHelperService.getColumns(
-                this.translate,
-                mds,
-                'mediacenterGroups',
-            );
+        this.mdsService.getMetadataSet({}).subscribe((mds) => {
+            this.nodeColumns = this.mdsHelperService.getColumns(mds, 'mediacenterManaged');
+            this.groupColumns = this.mdsHelperService.getColumns(mds, 'mediacenterGroups');
         });
     }
 
@@ -496,9 +495,9 @@ export class AdminMediacenterComponent {
     }
 
     async exportNodes() {
-        const properties = this.nodeColumns
-            .map((c) => c.name)
-            .filter((n) => n !== 'ccm:mediacenter');
+        const properties = this.nodeColumns.Default.map((c) => c.name).filter(
+            (n) => n !== 'ccm:mediacenter',
+        );
         const propertiesLabel = properties.map((p) => this.translate.instant('NODE.' + p));
         this.toast.showProgressSpinner();
         const data = (await this.mediacenterService

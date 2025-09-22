@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.util.TempFileProvider;
@@ -118,7 +119,7 @@ public class DownloadServlet extends SpringHttpServlet {
                 String metadata = getMetadataRenderer(nodeRef).render("io_text");
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 out.write(metadata.getBytes());
-                outputData(resp, name + ".txt", out);
+				outputData(resp,name + ".txt", out, "text/plain");
                 return;
             }
             String originalNodeId;
@@ -147,6 +148,7 @@ public class DownloadServlet extends SpringHttpServlet {
         OutputStream bufferOut = resp.getOutputStream();
         InputStream is = null;
         Long length = null;
+		String mimeType=null;
         try {
             if (originalNodeId != null) {
                 String finalVersion = version;
@@ -175,7 +177,23 @@ public class DownloadServlet extends SpringHttpServlet {
                     }
                     return null;
                 });
+
+				mimeType = AuthenticationUtil.runAsSystem(() -> {
+					try{
+						ContentReader contentReader = nodeService.getContentReader(StoreRef.PROTOCOL_WORKSPACE,
+								StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+								originalNodeId,
+								finalVersion,
+								ContentModel.PROP_CONTENT.toString());
+						if(contentReader != null) {
+							return contentReader.getMimetype();
+						}
+					} catch (Throwable ignored) {
+					}
+					return null;
+				});
             } else {
+
                 is = nodeService.getContent(
                         StoreRef.PROTOCOL_WORKSPACE,
                         StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
@@ -188,6 +206,14 @@ public class DownloadServlet extends SpringHttpServlet {
                         nodeRef.getId(),
                         version,
                         ContentModel.PROP_CONTENT.toString());
+				ContentReader contentReader = nodeService.getContentReader(StoreRef.PROTOCOL_WORKSPACE,
+						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+						nodeRef.getId(),
+						version,
+						ContentModel.PROP_CONTENT.toString());
+				if(contentReader != null) {
+					mimeType = contentReader.getMimetype();
+				}
             }
         } catch (Throwable ignored) {
 
@@ -198,7 +224,7 @@ public class DownloadServlet extends SpringHttpServlet {
                     @Override
                     public void handle(InputStream is) {
                         try {
-                            setHeaders(resp, name);
+							setHeaders(resp, name, null);
                             //resp.setHeader("Content-Length",""+is.available());
                             StreamUtils.copy(is, bufferOut);
                         } catch (Throwable e) {
@@ -215,7 +241,7 @@ public class DownloadServlet extends SpringHttpServlet {
                 return;
             }
         }
-        setHeaders(resp, name);
+		setHeaders(resp, name,mimeType);
         if (length != null) {
             resp.setHeader("Content-Length", Long.toString(length));
         }
@@ -364,7 +390,7 @@ public class DownloadServlet extends SpringHttpServlet {
                 result = runAll.doWork();
             }
             if (result) {
-                outputData(resp, zipName, file);
+				outputData(resp, zipName, file, "application/zip");
             }
         } catch (Throwable t) {
             t.printStackTrace();
@@ -447,21 +473,22 @@ public class DownloadServlet extends SpringHttpServlet {
         return render;
     }
 
-    private static void outputData(HttpServletResponse resp, String filename, ByteArrayOutputStream bufferOut) throws IOException {
-        setHeaders(resp, filename);
+	private static void outputData(HttpServletResponse resp, String filename, ByteArrayOutputStream bufferOut, String mimeType) throws IOException {
+		setHeaders(resp, filename, mimeType);
         resp.setHeader("Content-Length", "" + bufferOut.size());
         resp.getOutputStream().write(bufferOut.toByteArray());
     }
 
-    private static void outputData(HttpServletResponse resp, String filename, File file) throws IOException {
-        setHeaders(resp, filename);
+	private static void outputData(HttpServletResponse resp, String filename, File file, String mimeType) throws IOException {
+		setHeaders(resp, filename,mimeType);
         resp.setHeader("Content-Length", "" + file.length());
         IOUtils.copy(new FileInputStream(file), resp.getOutputStream());
     }
 
 
-    private static void setHeaders(HttpServletResponse resp, String filename) {
-        resp.setHeader("Content-type", "application/octet-stream");
+	private static void setHeaders(HttpServletResponse resp, String filename, String mimeType) throws IOException {
+		mimeType = (mimeType == null) ? "application/octet-stream" : mimeType;
+		resp.setHeader("Content-type",mimeType);
         resp.setHeader("Content-Transfer-Encoding", "binary");
         resp.setHeader("Content-Disposition", "attachment; filename=\"" + cleanName(filename) + "\"");
     }

@@ -123,7 +123,7 @@ export class SearchService {
         const requestParams = {
             ...params,
             body: {
-                ...params.body,
+                ...JSON.parse(JSON.stringify(params.body)),
                 facets: this.getFacetsToFetch(params, facetUpdates),
                 returnSuggestions:
                     params.body.returnSuggestions || this.didYouMeanSuggestionsSubscribers > 0,

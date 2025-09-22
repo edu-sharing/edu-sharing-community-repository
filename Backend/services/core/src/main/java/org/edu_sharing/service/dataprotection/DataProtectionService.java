@@ -26,6 +26,8 @@ import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
+import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.repository.tools.URLHelper;
@@ -53,6 +55,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.ZoneId;
@@ -223,14 +227,23 @@ public class DataProtectionService{
         NodeServiceInterceptor.setEduSharingScope(null);
 
         log.info("creating report for {}", userName);
-        summmaryReport(userName, collectionNodes, feedBacks, comments, rootPath);
+        File reportFile = summmaryReport(userName, collectionNodes, feedBacks, comments, rootPath);
 
 
         log.info("creating archive for {}", userName);
-        File target = new File(rootPath+".zip");
-        archive(new File(rootPath), target);
+        File target;
+        String mimeType;
+        if(reportOnly() && reportFile != null) {
+            target = new File(rootPath+".pdf");
+            Files.copy(reportFile.toPath(),target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            mimeType = "application/pdf";
+        }else{
+            target = new File(rootPath+".zip");
+            archive(new File(rootPath), target);
+            mimeType = "application/zip";
+        }
 
-        return AuthenticationUtil.runAsSystem(() -> persistAndCleanup(userName, target, rootPath));
+        return AuthenticationUtil.runAsSystem(() -> persistAndCleanup(userName, target, rootPath, mimeType));
     }
 
     private File summmaryReport(String userName, List<NodeRef> collectionNodes, List<NodeRef> feedBacks, List<NodeRef> comments, String rootPath) {
@@ -259,8 +272,7 @@ public class DataProtectionService{
         Date lastLogin = (Date)user.getProperties().get(CCConstants.PROP_USER_ESLASTLOGIN);
         String role = (String)user.getProperties().get(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION);
         List<String> roles = role == null ? null : Stream.of(role).map(r -> I18nAngular.getTranslationAngular("common","USER.PRIMARY_AFFILIATION."+r)).collect(Collectors.toList());
-        EduGroup eduGroup = allEduGroups != null && !allEduGroups.isEmpty() ? allEduGroups.get(0) : null;
-        String secondaryUserName = (String)user.getProperties().get(CCConstants.PROP_USER_SECONDARY_IDS);
+        ArrayList<String> secondaryUserName = (ArrayList<String>)user.getProperties().get(CCConstants.PROP_USER_SECONDARY_IDS);
         PDFReport.Data.DataBuilder reportData = PDFReport.Data.builder()
                 .userName(userName)
                 .secondaryUserName(secondaryUserName)
@@ -279,9 +291,9 @@ public class DataProtectionService{
                 .comments(getNameList(comments))
                 .groupList(groupList);
 
-        if(eduGroup != null) {
-            reportData.schoolName(eduGroup.getGroupId());
-            reportData.schoolDisplayName(eduGroup.getGroupDisplayName());
+        if(allEduGroups != null && !allEduGroups.isEmpty()) {
+            //reportData.schoolName(allEduGroups.stream().map(e -> (e.getGroupDisplayName() +"("+e.getGroupId()+")")).collect(Collectors.joining(",")));
+            reportData.schoolDisplayName(allEduGroups.stream().map(e -> (e.getGroupDisplayName() +"("+e.getGroupId()+")")).collect(Collectors.joining(",")));
         }
 
         String reportDirectory = rootPath.concat("/report");
@@ -309,12 +321,13 @@ public class DataProtectionService{
                 .collect(Collectors.toList());
     }
 
-    private NodeRef persistAndCleanup(String userName, File target, String rootPath) {
+    private NodeRef persistAndCleanup(String userName, File target, String rootPath, String mimeType) {
         try {
             NodeRef nodeRef = getTargetNode(userName);
             permissionService.setPermission(nodeRef,userName,PermissionService.CONSUMER,true);
             nodeService.removeAspect(nodeRef,ContentModel.ASPECT_VERSIONABLE);
             ContentWriter writer = contentService.getWriter(nodeRef, ContentModel.PROP_CONTENT, true);
+            writer.setMimetype(mimeType);
             writer.addListener(() -> {
                 try {
                     FileUtils.deleteDirectory(new File(rootPath));
@@ -352,7 +365,15 @@ public class DataProtectionService{
         Date date = new Date(); // or your custom date
         SimpleDateFormat formatter = new SimpleDateFormat("yyMMdd");
         String formatted = formatter.format(date);
-        return formatted.concat("_").concat(fileName).concat(".zip");
+        String fileExtension = (reportOnly()) ?".pdf" : ".zip";
+        return formatted.concat("_").concat(fileName).concat(fileExtension);
+    }
+
+    public boolean reportOnly(){
+        if(summaryExport && !metadataExport){
+            return true;
+        }
+        return false;
     }
 
     private void createStructure(String rootPath, String subPath, HashMap<NodeRef, String> pathMap) throws IOException {
@@ -511,11 +532,13 @@ public class DataProtectionService{
         String firstname = (String)nodeService.getProperty(personRef, ContentModel.PROP_FIRSTNAME);
         String lastName = (String)nodeService.getProperty(personRef,ContentModel.PROP_LASTNAME);
         String email = (String)nodeService.getProperty(personRef, ContentModel.PROP_EMAIL);
+        String downloadUrl = URLTool.getDownloadServletUrl(nodeRef.getId(), null, true);
+
         if(email == null) return;
         Map<String, String> replace = new HashMap<>();
         replace.put("firstName", firstname);
         replace.put("lastName", lastName);
-        replace.put("link", URLHelper.getNgRenderNodeUrl(nodeRef.getId(), null, true));
+        replace.put("link", downloadUrl);
         replace.put("retentionPeriod", Duration.parse(retentionPeriod).toDays()+"");
         try {
             String template = "gdpr";

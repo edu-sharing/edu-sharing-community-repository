@@ -57,10 +57,7 @@ import org.json.JSONObject;
 import org.springframework.extensions.surf.util.URLEncoder;
 import org.springframework.security.crypto.codec.Base64;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -200,7 +197,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
         }
         Collection<Version> versions = history.getAllVersions();
         if (versions != null) {
-            Optional<ComparableVersion> highestVersions = versions.stream().map(v -> new ComparableVersion(v.getVersionLabel())).max(ComparableVersion::compareTo);
+            Optional<ComparableVersion> highestVersions = versions.stream().map(v -> new ComparableVersion(v.getVersionLabel() == null ? "0.0" : v.getVersionLabel())).max(ComparableVersion::compareTo);
             if (highestVersions.isPresent()) {
                 Serializable currentVersion = transFormedProps.get(CCConstants.CM_PROP_VERSIONABLELABEL);
                 if (!Objects.equals(currentVersion, highestVersions.get().toString())) {
@@ -390,15 +387,8 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
             if (reader == null) {
                 return;
             }
-            TikaConfig config = TikaConfig.getDefaultConfig();
-            Detector detector = config.getDetector();
-            TikaInputStream stream = TikaInputStream.get(reader.getContentInputStream());
-            Metadata metadata = new Metadata();
-            if (StringUtils.isNotBlank(filename)) {
-                metadata.set(TikaCoreProperties.RESOURCE_NAME_KEY, filename);
-            }
-
-            MediaType mediaType = detector.detect(stream, metadata);
+            InputStream inputStream = reader.getContentInputStream();
+            MediaType mediaType = getMediaType(filename, inputStream);
             if (mediaType.equals(MediaType.OCTET_STREAM) && !allowUnknownMimetypes) {
                 throw new NodeMimetypeUnknownValidationException();
             }
@@ -423,6 +413,18 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
         } catch (IOException e) {
             logger.warn("Tika mime type detection failed", e);
         }
+    }
+
+    public static MediaType getMediaType(String filename, InputStream inputStream) throws IOException {
+        TikaConfig config = TikaConfig.getDefaultConfig();
+        Detector detector = config.getDetector();
+        TikaInputStream stream = TikaInputStream.get(inputStream);
+        Metadata metadata = new Metadata();
+        if (StringUtils.isNotBlank(filename)) {
+            metadata.set(TikaCoreProperties.RESOURCE_NAME_KEY, filename);
+        }
+
+        return detector.detect(stream, metadata);
     }
 
     @Override

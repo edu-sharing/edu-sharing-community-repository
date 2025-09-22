@@ -2,16 +2,15 @@ import { TranslateService } from '@ngx-translate/core';
 import {
     AuthenticationService,
     MdsDefinition,
-    MdsIdentifier,
-    MdsService,
     MdsSort,
     MdsWidget,
     RestConstants,
 } from 'ngx-edu-sharing-api';
 import { Injectable } from '@angular/core';
 import { ListItem, ListItemType } from '../types/list-item';
-import { firstValueFrom } from 'rxjs';
 
+type ColumnTypeInternal<T extends string> = { [k in T]?: ListItem[] };
+export type ColumnType = ColumnTypeInternal<'Default' | 'Table'>;
 @Injectable()
 export class MdsHelperService {
     static getSortInfo(mdsSet: MdsDefinition, name: string): MdsSort {
@@ -29,74 +28,78 @@ export class MdsHelperService {
     }
 
     /**
-     * Retrieves columns based on the provided MDS set and name.
      *
-     * @param translate - The TranslateService for translating column names.
-     * @param mdsSet - The MDS Set containing lists of columns.
-     * @param name - The name of the list to retrieve columns from.
-     * @returns An array of ListItem objects representing the columns.
+     * get columns as an object structure
+     * There are always Columns in the result.Default but there can also be further types
+     * See @ColumnType
      */
-    static getColumns(translate: TranslateService, mdsSet: any, name: string) {
-        let columns: ListItem[] = [];
+    getColumns(mdsSet: MdsDefinition, name: string) {
+        let columns: ColumnType = {};
         if (mdsSet) {
             for (const list of mdsSet.lists) {
                 if (list.id === name) {
-                    for (const column of list.columns) {
+                    for (const column of Object.entries(list.columns)) {
                         let type: ListItemType = 'NODE';
                         if (name === 'mediacenterGroups') {
                             type = 'GROUP';
                         } else if (name === 'searchCollections') {
                             type = 'COLLECTION';
                         }
-                        // in this case, the type is included
-                        if (column.id.includes('.')) {
-                            const split = column.id.split('.');
-                            type = split[0];
-                            column.id = split[1];
-                        }
-                        const item = new ListItem(type, column.id);
-                        item.format = column.format;
-                        columns.push(item);
+                        (columns as any)[column[0]] = column[1].map((c) => {
+                            if (c.id.includes('.')) {
+                                const split = c.id.split('.');
+                                type = split[0] as ListItemType;
+                                c.id = split.slice(1).join('.');
+                            }
+                            const item = new ListItem(type, c.id);
+                            item.format = c.format;
+                            const key = item.type + '.' + item.name;
+                            if (item.type === 'NODE' && this.translate.instant(key) === key) {
+                                item.label = mdsSet.widgets.filter(
+                                    (w: any) => w.id === item.name,
+                                )?.[0]?.caption;
+                            }
+                            return item;
+                        });
                     }
                     break;
                 }
             }
         }
-        if (!columns.length) {
+        if (!columns?.Default?.length) {
+            const defaultColumns = [];
             if (mdsSet !== null) {
                 console.warn(
                     'mds does not define columns for ' + name + ', invalid configuration!',
                 );
             }
             if (name === 'searchCollections' || name === 'swimlane_collections') {
-                columns.push(new ListItem('COLLECTION', 'title'));
-                columns.push(new ListItem('COLLECTION', 'info'));
-                columns.push(new ListItem('COLLECTION', 'scope'));
+                defaultColumns.push(new ListItem('COLLECTION', 'title'));
+                defaultColumns.push(new ListItem('COLLECTION', 'info'));
+                defaultColumns.push(new ListItem('COLLECTION', 'scope'));
             } else if (
                 name === 'search' ||
                 name === 'collectionReferences' ||
                 name.startsWith('swimlane_')
             ) {
-                columns.push(new ListItem('NODE', RestConstants.LOM_PROP_TITLE));
-                columns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
-                columns.push(new ListItem('NODE', RestConstants.CCM_PROP_LICENSE));
-                columns.push(new ListItem('NODE', RestConstants.CCM_PROP_REPLICATIONSOURCE));
+                defaultColumns.push(new ListItem('NODE', RestConstants.LOM_PROP_TITLE));
+                defaultColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
+                defaultColumns.push(new ListItem('NODE', RestConstants.CCM_PROP_LICENSE));
+                defaultColumns.push(new ListItem('NODE', RestConstants.CCM_PROP_REPLICATIONSOURCE));
             } else if (name === 'mediacenterManaged') {
-                columns.push(new ListItem('NODE', RestConstants.LOM_PROP_TITLE));
-                columns.push(new ListItem('NODE', RestConstants.CCM_PROP_REPLICATIONSOURCEID));
-                columns.push(new ListItem('NODE', RestConstants.CCM_PROP_REPLICATIONSOURCE));
+                defaultColumns.push(new ListItem('NODE', RestConstants.LOM_PROP_TITLE));
+                defaultColumns.push(
+                    new ListItem('NODE', RestConstants.CCM_PROP_REPLICATIONSOURCEID),
+                );
+                defaultColumns.push(new ListItem('NODE', RestConstants.CCM_PROP_REPLICATIONSOURCE));
             } else if (name === 'mediacenterGroups') {
-                columns.push(new ListItem('GROUP', RestConstants.AUTHORITY_DISPLAYNAME));
-                columns.push(new ListItem('GROUP', RestConstants.AUTHORITY_GROUPTYPE));
+                defaultColumns.push(new ListItem('GROUP', RestConstants.AUTHORITY_DISPLAYNAME));
+                defaultColumns.push(new ListItem('GROUP', RestConstants.AUTHORITY_GROUPTYPE));
+            } else if (name === 'searchCollections') {
+                defaultColumns.push(...ListItem.getCollectionDefaults());
             }
+            columns['Default'] = defaultColumns;
         }
-        columns.map((c) => {
-            const key = c.type + '.' + c.name;
-            if (c.type === 'NODE' && translate.instant(key) === key) {
-                c.label = mdsSet.widgets.filter((w: any) => w.id === c.name)?.[0]?.caption;
-            }
-            return c;
-        });
         return columns;
     }
 
@@ -123,17 +126,9 @@ export class MdsHelperService {
 
     constructor(
         private authentication: AuthenticationService,
-        private mdsService: MdsService,
         private translate: TranslateService,
     ) {}
 
-    async getColumns(name: string, mds: Partial<MdsIdentifier>) {
-        return MdsHelperService.getColumns(
-            this.translate,
-            await firstValueFrom(this.mdsService.getMetadataSet(mds)),
-            name,
-        );
-    }
     /**
      * Same as getWidget, but will also check the widget conditions
      * @param connector

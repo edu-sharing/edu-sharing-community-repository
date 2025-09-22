@@ -16,6 +16,7 @@ import { ConfigV1Service } from '../api/services';
 import { switchReplay } from '../utils/rxjs-operators/switch-replay';
 
 export type ClientConfig = apiModels.Values;
+export type ClientConfigBackend = apiModels.ValuesBackend;
 export type Variables = apiModels.Variables['current'];
 export type TranslationsDict = { [key: string]: string | TranslationsDict };
 
@@ -93,6 +94,33 @@ export class ConfigService {
             this.updateTrigger.next();
         }
         return this.config$.pipe(map((c) => c?.current ?? null));
+    }
+    /**
+     * Returns the current system configuration for the (exposed) backend values.
+     *
+     * The observable will update on changes.
+     */
+    observeBackendConfig({ forceUpdate = false } = {}): Observable<ClientConfigBackend | null> {
+        if (forceUpdate) {
+            this.updateTrigger.next();
+        }
+        return this.config$.pipe(map((c) => c?.currentBackend ?? null));
+    }
+
+    observeEndpointAllowed(endpoint: 'LTI') {
+        const EndpointId = {
+            LTI: '/lti/v13',
+        };
+        return this.observeBackendConfig().pipe(
+            map(
+                (c) =>
+                    !['disabled', 'admin'].includes(
+                        Object.entries(c.security.access.endpoints).find(
+                            (e) => e[0] === EndpointId[endpoint],
+                        )?.[1] as string,
+                    ),
+            ),
+        );
     }
 
     observeContextId(): Observable<string | null> {

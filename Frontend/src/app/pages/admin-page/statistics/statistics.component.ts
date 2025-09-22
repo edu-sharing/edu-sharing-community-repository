@@ -13,6 +13,7 @@ import {
 import { TranslateService } from '@ngx-translate/core';
 import { DEFAULT, HOME_REPOSITORY, Node, SearchResults, SearchService } from 'ngx-edu-sharing-api';
 import {
+    ColumnType,
     FormatDatePipe,
     InteractionType,
     ListCountsComponent,
@@ -142,7 +143,7 @@ export class AdminStatisticsComponent implements OnInit {
     singleDataRows: string[];
     groupedChart: any;
     nodesDataSource: NodeDataSource<Node | any> = null;
-    columns: ListItem[];
+    columns: ColumnType;
     currentTab = 0;
     exportProperties: string;
     showModes = false;
@@ -150,7 +151,9 @@ export class AdminStatisticsComponent implements OnInit {
     currentTemplate: GroupTemplate;
     showExport: boolean;
     archivedNodesDataSource = new NodeDataSource<Node>();
-    archivedNodesColumns = [new ListItem('NODE', RestConstants.LOM_PROP_TITLE)];
+    archivedNodesColumns = {
+        Default: [new ListItem('NODE', RestConstants.LOM_PROP_TITLE)],
+    } as ColumnType;
 
     set groupedStart(groupedStart: Date) {
         this._groupedStart = groupedStart;
@@ -996,15 +999,15 @@ export class AdminStatisticsComponent implements OnInit {
     private initColumns() {
         const columns: string[] = this.config.instant('admin.statistics.nodeColumns');
         if (columns) {
-            this.columns = columns.map((c) => new ListItem('NODE', c));
+            this.columns = { Default: columns.map((c) => new ListItem('NODE', c)) };
         } else {
-            this.columns = [new ListItem('NODE', RestConstants.CM_NAME)];
+            this.columns = { Default: [new ListItem('NODE', RestConstants.CM_NAME)] };
         }
         this.storage
-            .get('admin_statistics_properties', this.columns.map((c) => c.name).join('\n'))
+            .get('admin_statistics_properties', this.columns.Default.map((c) => c.name).join('\n'))
             .subscribe((p) => (this.exportProperties = p));
 
-        this.columns = this.columns.concat([
+        this.columns.Default = this.columns.Default.concat([
             //new ListItem('NODE', 'counts.OVERALL'),
             new ListItem('NODE', 'counts.VIEW_MATERIAL'),
             new ListItem('NODE', 'counts.VIEW_MATERIAL_EMBEDDED'),

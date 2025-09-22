@@ -659,6 +659,7 @@ public class NodeApi  {
     public Response changeMetadata(
     	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
 	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    @Parameter(description = "obey the mds definition, onyl accepting fields defined in the mds",required = false, schema = @Schema(defaultValue="true" )) @QueryParam("obeyMds") Boolean obeyMds,
 	    @Parameter(description = "properties" ,required=true ) HashMap<String, String[]> properties,
 		@Context HttpServletRequest req) {
     	
@@ -667,7 +668,7 @@ public class NodeApi  {
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 	    	
-	    	NodeDao newNode = nodeDao.changeProperties(properties);
+	    	NodeDao newNode = nodeDao.changeProperties(properties, obeyMds == null || obeyMds);
 	    	
 	    	NodeEntry response = new NodeEntry();
 	    	response.setNode(newNode.asNode());
@@ -822,7 +823,8 @@ public class NodeApi  {
 	    @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
 	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 	    @Parameter(description = "comment",required=true) @QueryParam("versionComment") String versionComment,
-	    @Parameter(description = "properties" ,required=true ) HashMap<String, String[]> properties,
+		@Parameter(description = "obey the mds definition, onyl accepting fields defined in the mds",required = false, schema = @Schema(defaultValue="true" )) @QueryParam("obeyMds") Boolean obeyMds,
+		@Parameter(description = "properties" ,required=true ) HashMap<String, String[]> properties,
 		@Context HttpServletRequest req) {
     	
     	try {
@@ -830,7 +832,7 @@ public class NodeApi  {
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 	    	
-	    	NodeDao newNode = nodeDao.changePropertiesWithVersioning(properties, versionComment);
+	    	NodeDao newNode = nodeDao.changePropertiesWithVersioning(properties, obeyMds == null || obeyMds, versionComment);
 	    	
 	    	NodeEntry response = new NodeEntry();
 	    	response.setNode(newNode.asNode());
@@ -1664,8 +1666,9 @@ public class NodeApi  {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-	    	
-	    	NodeDao newNode = nodeDao.changeContent(inputStream, mimetype, versionComment);
+
+			//use tika framework for mimetype detection
+	    	NodeDao newNode = nodeDao.changeContent(inputStream, null, versionComment);
 	    	
 	    	NodeEntry response = new NodeEntry();
 	    	response.setNode(newNode.asNode());

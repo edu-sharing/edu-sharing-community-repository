@@ -34,6 +34,7 @@ import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.repository.server.tools.security.JwtTokenUtil;
 import org.edu_sharing.repository.server.tools.security.Signing;
+import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.collection.v1.model.CollectionReference;
 import org.edu_sharing.restservices.collection.v1.model.CollectionRelationReference;
@@ -269,7 +270,7 @@ public class NodeDao {
             // fix published mode only for original
             props.remove(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_PUBLISHED_MODE));
 
-            return changeProperties(props);
+            return changeProperties(props, true);
         } catch (Throwable t) {
             throw DAOException.mapping(t);
         }
@@ -1182,12 +1183,12 @@ public class NodeDao {
         }
     }
 
-    public NodeDao changeProperties(Map<String, String[]> properties)
+    public NodeDao changeProperties(Map<String, String[]> properties, boolean obeyMds)
             throws DAOException {
 
         try {
 
-            this.nodeService.updateNode(nodeId, transformProperties(properties));
+            this.nodeService.updateNode(nodeId, transformProperties(properties), obeyMds);
 
             return new NodeDao(repoDao, nodeId, Filter.createShowAllFilter());
 
@@ -1198,7 +1199,7 @@ public class NodeDao {
     }
 
     public NodeDao changePropertiesWithVersioning(
-            Map<String, String[]> properties, String comment) throws DAOException {
+            Map<String, String[]> properties, boolean obeyMds, String comment) throws DAOException {
 
         // Throws ConcurrencyFailureException if the previous call changes the preview (DESP-851)
         ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
@@ -1209,7 +1210,7 @@ public class NodeDao {
                 mergeVersionComment(properties, comment);
 
                 // 1. update
-                this.nodeService.updateNode(nodeId, transformProperties(properties));
+                this.nodeService.updateNode(nodeId, transformProperties(properties), obeyMds);
 
                 // 2. versioning
                 this.nodeService.createVersion(nodeId);
@@ -1238,7 +1239,7 @@ public class NodeDao {
                 //mergeVersionComment(props, versionComment);
             }
             props.put(CCConstants.CCM_PROP_IO_CREATE_VERSION, new String[]{Boolean.toString(version)});
-            nodeService.updateNode(nodeId, props);
+            nodeService.updateNode(nodeId, props, true);
             nodeService.writeContent(storeRef, nodeId, result.getInputStream(), result.getMediaType().toString(), null,
                     isDirectory() ? CCConstants.CCM_PROP_MAP_ICON : CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
             PreviewCache.purgeCache(nodeId);
@@ -1274,7 +1275,7 @@ public class NodeDao {
                 //mergeVersionComment(props, versionComment);
             }
             props.put(CCConstants.CCM_PROP_IO_CREATE_VERSION, new String[]{Boolean.toString(version)});
-            nodeService.updateNode(nodeId, props);
+            nodeService.updateNode(nodeId, props, true);
 
 
             // 2. change content (automatic versioning)
@@ -1568,6 +1569,9 @@ public class NodeDao {
     private Content getContent(Node data) throws DAOException {
         Content content = new Content();
         content.setUrl(getContentUrl());
+        if(isCollectionReference()) {
+            content.setOriginalUrl(URLHelper.getNgRenderNodeUrl(getReferenceOriginalId(), null));
+        }
         // skip hash + version for search cause of performance penalties
         if (Arrays.asList(CallSourceHelper.CallSource.Search, CallSourceHelper.CallSource.Sitemap).contains(CallSourceHelper.getCallSource())) {
             return content;
@@ -2579,7 +2583,7 @@ public class NodeDao {
     }
 
     public void createVersion(String comment) throws Exception {
-        this.changePropertiesWithVersioning(getAllProperties(), comment);
+        this.changePropertiesWithVersioning(getAllProperties(), true, comment);
     }
 
     public static List<NodeRef> convertAlfrescoNodeRef(java.util.Collection<org.alfresco.service.cmr.repository.NodeRef> refs) {
@@ -2646,7 +2650,7 @@ public class NodeDao {
             } catch (DAOException e) {
                 if (e.getCause() instanceof DuplicateChildNodeNameException && replace) {
                     NodeDao old = NodeDao.getByParent(RepositoryDao.getHomeRepository(), parent, CCConstants.CCM_TYPE_SAVED_SEARCH, NodeServiceHelper.cleanupCmName(name));
-                    old.changeProperties(props);
+                    old.changeProperties(props, true);
                     return old;
                 }
                 throw e;

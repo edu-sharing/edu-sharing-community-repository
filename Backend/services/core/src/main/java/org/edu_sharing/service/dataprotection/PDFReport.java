@@ -1,29 +1,19 @@
 package org.edu_sharing.service.dataprotection;
 
 
-import lombok.Data;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.LocaleUtils;
-import org.edu_sharing.repository.client.rpc.EduGroup;
-import org.edu_sharing.repository.client.rpc.User;
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.service.authority.AuthorityService;
-import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.transform.TransformServiceStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-import java.time.ZonedDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Locale;
 
 @Service
 public class PDFReport {
@@ -38,17 +28,16 @@ public class PDFReport {
     @Value("${repository.dataprotection.templatePath:html/dataprotection/report.html}")
     String templatePath;
 
-    @Value("${repository.dataprotection.link:http://edu-sharing.com}")
-    String link;
+    //@Value("${repository.dataprotection.links:http://edu-sharing.com}")
+    @Value("#{'${repository.dataprotection.links:http://edu-sharing.com}'.split(',')}")
+    List<String> links;
 
     public File report(Data reportData, File dir){
-
-        String userName = reportData.getUserName();
 
         // @TODO get locale for exported user
         final Context ctx = new Context(LocaleUtils.toLocale(Locale.GERMANY));
         ctx.setVariable("data",reportData);
-        ctx.setVariable("link", link);
+        ctx.setVariable("links", links);
         ctx.setVariable("titleKey", "dataprotection_header");
         ctx.setVariable("template",templatePath);
         ctx.setVariable("templateStyle","html/dataprotection/style");
@@ -77,7 +66,7 @@ public class PDFReport {
     @lombok.Builder
     public static class Data{
         String userName;
-        String secondaryUserName;
+        List<String> secondaryUserName;
         String firstName;
         String lastName;
         String email;

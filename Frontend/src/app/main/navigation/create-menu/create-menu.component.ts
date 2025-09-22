@@ -10,7 +10,14 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { ConnectorService, LtiPlatformService, Node, Tool, Tools } from 'ngx-edu-sharing-api';
+import {
+    ConfigService,
+    ConnectorService,
+    LtiPlatformService,
+    Node,
+    Tool,
+    Tools,
+} from 'ngx-edu-sharing-api';
 import {
     Constrain,
     DateHelper,
@@ -26,7 +33,7 @@ import {
     VirtualNode,
 } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { delay, filter, map, startWith, takeUntil } from 'rxjs/operators';
+import { delay, filter, map, startWith, takeUntil, tap } from 'rxjs/operators';
 import {
     Connector,
     Filetype,
@@ -120,6 +127,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         private cardDialogService: CardDialogService,
         private connector: RestConnectorService,
         private connectorApi: ConnectorService,
+        private configService: ConfigService,
         private mainNavService: MainNavService,
         private connectors: RestConnectorsService,
         private dialogs: DialogsService,
@@ -170,10 +178,15 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                 this.mainNavConfig = config;
                 void this.updateOptions();
             });
-        this.ltiPlatformService.getTools().subscribe((t) => {
-            this.tools = t;
-            void this.updateOptions();
-        });
+        this.configService
+            .observeEndpointAllowed('LTI')
+            .pipe(filter((allowed) => allowed))
+            .subscribe(() =>
+                this.ltiPlatformService.getTools().subscribe((t) => {
+                    this.tools = t;
+                    void this.updateOptions();
+                }),
+            );
     }
 
     ngOnInit(): void {

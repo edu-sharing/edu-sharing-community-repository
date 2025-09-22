@@ -11,13 +11,14 @@ import { UntypedFormControl } from '@angular/forms';
 import { Node, SavedSearch, SavedSearchesService } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { debounceTime, filter, first, map, startWith, switchMap, takeUntil } from 'rxjs/operators';
-import { DialogButton } from '../../../../core-module/core.module';
+import { DialogButton, RestConstants } from '../../../../core-module/core.module';
 import { NodeHelperService } from '../../../../services/node-helper.service';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { DialogsService } from '../../dialogs.service';
 import { SavedSearchesDialogData, SavedSearchesDialogResult } from './saved-searches-dialog-data';
 import {
+    ColumnType,
     InteractionType,
     ListItem,
     NodeEntriesDisplayType,
@@ -53,7 +54,9 @@ export class SavedSearchesDialogComponent implements OnInit, OnDestroy {
 
     readonly mySavedSearchesSource = new NodeDataSourceRemote(this.injector);
     readonly sharedSavedSearchesSource = new NodeDataSourceRemote(this.injector);
-    readonly columns = [new ListItem('NODE', 'title')];
+    readonly columns = {
+        Default: [new ListItem('NODE', RestConstants.LOM_PROP_TITLE)],
+    } as ColumnType;
     readonly displayType = NodeEntriesDisplayType.Table;
     readonly scope = Scope.SavedSearches;
     readonly interactionType = InteractionType.Emitter;

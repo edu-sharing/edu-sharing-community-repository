@@ -1571,6 +1571,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         registerSelectionChange(components?.list);
         toggleSelection.scopes = [Scope.WorkspaceList, Scope.Search, Scope.CollectionsReferences];
         toggleSelection.group = DefaultGroups.Toggles;
+        toggleSelection.customShowCallback = async () => data?.allObjects?.length > 0;
         toggleSelection.elementType = [];
         toggleSelection.priority = 10;
         toggleSelection.togglePosition = 'before';

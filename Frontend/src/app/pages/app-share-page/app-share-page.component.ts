@@ -1,4 +1,5 @@
 import {
+    ColumnType,
     DateHelper,
     InteractionType,
     ListItem,
@@ -48,7 +49,7 @@ export class AppSharePageComponent {
     previewUrl: any;
     private inboxPath: Node[];
     inbox: Node;
-    columns: ListItem[] = [];
+    columns: ColumnType;
     collections = new NodeDataSource<Node>();
     private cordovaType: string;
     private mimetype: string;
@@ -73,9 +74,13 @@ export class AppSharePageComponent {
     ) {
         // when the user finished sharing and navigates back he must return to the origin app
         this.cordova.setOnBackBehaviour(OnBackBehaviour.closeApp);
-        this.columns.push(new ListItem('COLLECTION', 'title'));
-        this.columns.push(new ListItem('COLLECTION', 'info'));
-        this.columns.push(new ListItem('COLLECTION', 'scope'));
+        this.columns = {
+            Default: [
+                new ListItem('COLLECTION', 'title'),
+                new ListItem('COLLECTION', 'info'),
+                new ListItem('COLLECTION', 'scope'),
+            ],
+        };
         if (this.cordova.isRunningCordova()) {
             this.cordova.subscribeServiceReady().subscribe(() => {
                 this.init();

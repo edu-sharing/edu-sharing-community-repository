@@ -8,7 +8,10 @@
     [class.active]="sortBy === item.name"
   >
     <span class="title" *ngIf="item.label">{{ item.label }}</span>
-    <span class="title" *ngIf="!item.label">{{ item.type + '.' + item.name | translate }}</span>
+    <span class="title" *ngIf="!item.label">{{
+      item.type + '_SORT.' + item.name
+        | translate : { fallback: (item.type + '.' + item.name | translate) }
+    }}</span>
     <ng-container *ngIf="sortBy === item.name && item.name !== 'ccm:collection_ordered_position'">
       <i class="material-icons" *ngIf="sortAscending" [altText]="'ASCENDING' | translate">
         arrow_upward

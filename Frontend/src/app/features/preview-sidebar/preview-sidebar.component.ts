@@ -10,13 +10,14 @@ import {
     ViewChild,
 } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
-import { Subject } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import { map, takeUntil, tap } from 'rxjs/operators';
 import { RestHelper } from '../../core-module/core.module';
 import { CardDialogRef } from '../dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../dialogs/dialogs.service';
 import { PreviewContentComponent } from './preview-content.component';
 import { GenericDialogData } from '../dialogs/dialog-modules/generic-dialog/generic-dialog-data';
+import { PreviewSidebarService } from './preview-sidebar.service';
 
 /**
  * Sidebar component that previews an element with preview image and some metadata.
@@ -43,7 +44,13 @@ export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
     private readonly destroyed = new Subject<void>();
     private modalDialogRef: CardDialogRef<GenericDialogData<string>, string>;
 
-    constructor(private dialogs: DialogsService, private breakpointObserver: BreakpointObserver) {}
+    constructor(
+        private dialogs: DialogsService,
+        private previewSidebarService: PreviewSidebarService,
+        private breakpointObserver: BreakpointObserver,
+    ) {
+        this.previewSidebarService.registerInstance(this);
+    }
 
     ngAfterViewInit(): void {
         // Wait for `contentRef` to be populated before calling `registerDialogOnMobile`.
@@ -53,6 +60,18 @@ export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
     ngOnDestroy(): void {
         this.destroyed.next();
         this.destroyed.complete();
+        this.previewSidebarService.unregisterInstance(this);
+    }
+
+    async updateNode(node: Node): Promise<void> {
+        this.node = node;
+        const isMobileScreen: boolean = await firstValueFrom(this.getIsMobileScreen());
+        if (isMobileScreen && !this.modalDialogRef) {
+            // setTimeout is currently necessary to wait for the view being rendered
+            setTimeout(async (): Promise<void> => {
+                await this.openAsDialog();
+            });
+        }
     }
 
     private registerDialogOnMobile(): void {
@@ -76,6 +95,10 @@ export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
     }
 
     private async openAsDialog() {
+        if (!this.node) {
+            this.modalDialogRef = null;
+            return;
+        }
         this.modalDialogRef = await this.dialogs.openGenericDialog({
             title: RestHelper.getTitle(this.node),
             avatar: { kind: 'image', url: this.node.iconURL },

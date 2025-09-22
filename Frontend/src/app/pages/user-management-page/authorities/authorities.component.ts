@@ -29,6 +29,7 @@ import {
 } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
+    ColumnType,
     Constrain,
     CustomOptions,
     DefaultGroups,
@@ -150,9 +151,9 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     };
     editDetails: any;
     editId: string = null;
-    public columns: ListItem[] = [];
-    public addMemberColumns: ListItem[] = [];
-    public editGroupColumns: ListItem[] = [];
+    public columns: ColumnType;
+    public addMemberColumns: ColumnType;
+    public editGroupColumns: ColumnType;
     public _searchQuery: string;
     manageMemberSearch: string;
     public options: CustomOptions = {
@@ -351,7 +352,9 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             columns.push(new ListItem(mode, RestConstants.AUTHORITY_DISPLAYNAME));
             columns.push(new ListItem(mode, RestConstants.AUTHORITY_GROUPTYPE));
         }
-        return columns;
+        return {
+            Default: columns,
+        } as ColumnType;
     }
 
     constructor(
@@ -1274,6 +1277,9 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             );
     }
     searchMembers() {
+        if (this.memberList.isLoading === true) {
+            return;
+        }
         this.memberOptions.addOptions = this.getMemberOptions();
         this.memberList.reset();
         this.nodeMemberAdd.getSelection().clear();
@@ -1399,7 +1405,9 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     }
 
     private downloadMembers() {
-        const headers = this.columns.map((c) => this.translate.instant(this._mode + '.' + c.name));
+        const headers = this.columns['Default'].map((c) =>
+            this.translate.instant(this._mode + '.' + c.name),
+        );
         const data: string[][] = [];
         for (const entry of this.dataSource.getData() as User[]) {
             data.push([

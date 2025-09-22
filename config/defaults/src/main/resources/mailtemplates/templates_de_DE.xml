@@ -245,9 +245,9 @@
 		<message><![CDATA[
 			<div class="center">
 				<h1>Hallo {{firstName}} {{lastName}},</h1>
-				<p>Vielen Dank für ihre Anfrage eines DSVGO Daten Exports!</p>
+				<p>Vielen Dank für Ihre Anfrage eines DSVGO Daten Exports!</p>
 				<br><br>
-				<p>Ihre Daten stehen ihnen jetzt unter folgendem Link {{retentionPeriod}} Tage zur Verfügung:</p>
+				<p>Ihre Daten stehen Ihnen jetzt unter folgendem Link {{retentionPeriod}} Tage zur Verfügung:</p>
 				<a class="btn" href="{{link}}">Zu ihren Daten</a>
 			</div>
 		]]>

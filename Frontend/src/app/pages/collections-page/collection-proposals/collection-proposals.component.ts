@@ -10,6 +10,7 @@ import {
 import { Node, ProposalNode } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
+    ColumnType,
     InteractionType,
     ListEventInterface,
     ListItem,
@@ -38,11 +39,13 @@ export class CollectionProposalsComponent implements OnChanges {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     readonly Scope = Scope;
-    proposalColumns = [
-        new ListItem('NODE', RestConstants.CM_PROP_TITLE),
-        new ListItem('NODE_PROPOSAL', RestConstants.CM_CREATOR, { showLabel: false }),
-        new ListItem('NODE_PROPOSAL', RestConstants.CM_PROP_C_CREATED, { showLabel: false }),
-    ];
+    proposalColumns = {
+        Default: [
+            new ListItem('NODE', RestConstants.CM_PROP_TITLE),
+            new ListItem('NODE_PROPOSAL', RestConstants.CM_CREATOR, { showLabel: false }),
+            new ListItem('NODE_PROPOSAL', RestConstants.CM_PROP_C_CREATED, { showLabel: false }),
+        ],
+    } as ColumnType;
     @ViewChild('listProposals') listProposals: ListEventInterface<ProposalNode>;
     @ViewChild(ActionbarComponent) actionbar: ActionbarComponent;
     dataSourceCollectionProposals = new NodeDataSource<ProposalNode>();

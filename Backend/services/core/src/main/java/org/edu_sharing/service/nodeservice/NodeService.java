@@ -20,7 +20,7 @@ import java.util.*;
 public interface NodeService {
 
 
-    void updateNode(String nodeId, Map<String, String[]> props) throws Throwable;
+	void updateNode(String nodeId, Map<String, String[]> props, boolean obeyMds) throws Throwable;
 
     void createAssoc(String parentId, String childId, String assocName);
 

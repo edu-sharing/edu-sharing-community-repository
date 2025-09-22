@@ -51,6 +51,7 @@ export {
     FeedbackV1Service,
     IamV1Service,
     OrganizationV1Service,
+    QuestionAnswerV1Service,
     NodeV1Service as NodeServiceUnwrapped,
     CollectionV1Service as CollectionServiceUnwrapped,
     SearchV1Service as SearchServiceUnwrapped,

@@ -1,14 +1,8 @@
-import {
-    AfterViewInit,
-    ApplicationRef,
-    Component,
-    DoCheck,
-    OnInit,
-    ViewChild,
-} from '@angular/core';
+import { ApplicationRef, Component, DoCheck, OnInit, ViewChild } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { User } from 'ngx-edu-sharing-api';
 import {
+    ColumnType,
     FetchEvent,
     InteractionType,
     ListItem,
@@ -53,7 +47,7 @@ export class PermissionsDeleteComponent implements OnInit, DoCheck {
     receiver: User;
     receiverGroup: Group;
     usersDataSource = new NodeDataSource<User>();
-    columns: ListItem[] = [];
+    columns: ColumnType;
     deleteResult: string;
     deleteButtons: DialogButton[];
     jobs: JobDescription[];
@@ -116,9 +110,13 @@ export class PermissionsDeleteComponent implements OnInit, DoCheck {
                 this.options = defaultOptions;
             }
         });
-        this.columns.push(new ListItem('USER', RestConstants.AUTHORITY_NAME));
-        this.columns.push(new ListItem('USER', RestConstants.AUTHORITY_FIRSTNAME));
-        this.columns.push(new ListItem('USER', RestConstants.AUTHORITY_LASTNAME));
+        this.columns = {
+            Default: [
+                new ListItem('USER', RestConstants.AUTHORITY_NAME),
+                new ListItem('USER', RestConstants.AUTHORITY_FIRSTNAME),
+                new ListItem('USER', RestConstants.AUTHORITY_LASTNAME),
+            ],
+        };
         this.deleteButtons = DialogButton.getOk(() => {
             this.deleteResult = null;
         });

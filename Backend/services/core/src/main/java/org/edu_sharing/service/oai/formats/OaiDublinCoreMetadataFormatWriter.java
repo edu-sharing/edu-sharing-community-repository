@@ -7,6 +7,7 @@ import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.util.PropertyMapper;
+import org.edu_sharing.spring.conditions.ConditionalOnProperty;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.extensions.surf.util.ISO8601DateFormat;
@@ -81,6 +82,7 @@ import java.util.stream.Stream;
  * - Open Archives Initiative: https://www.openarchives.org/
  */
 @Component
+@ConditionalOnProperty(name = "exporter.oai.dublinCore.enabled", havingValue = "true")
 public class OaiDublinCoreMetadataFormatWriter extends AbstractMetadataFormatWriter {
 
     @Value("${repository.privacy.filterVCardEmail:true}")

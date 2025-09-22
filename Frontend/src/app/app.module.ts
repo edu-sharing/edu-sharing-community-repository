@@ -51,6 +51,8 @@ import { BApiModule } from 'ngx-edu-sharing-b-api';
 import { WrapperComponent } from './web-components/wrapper/app/wrapper.component';
 import { MockLocationStrategy } from '@angular/common/testing';
 import { WebComponentService } from './main/web-component.service';
+import { PreviewSidebarComponent } from './features/preview-sidebar/preview-sidebar.component';
+import { WebComponentLocationStrategy } from './main/web-component.utils';
 
 const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     showDelay: 500,
@@ -116,7 +118,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
             ? [
                   {
                       provide: LocationStrategy,
-                      useClass: MockLocationStrategy,
+                      useClass: WebComponentLocationStrategy,
                   },
               ]
             : [],
@@ -139,6 +141,9 @@ export class AppModule implements DoBootstrap {
             this.injector
                 .get(WebComponentService)
                 .registerWebComponent('edu-sharing-actionbar', ActionbarComponent);
+            this.injector
+                .get(WebComponentService)
+                .registerWebComponent('edu-sharing-preview-sidebar', PreviewSidebarComponent);
         } else {
             appRef.bootstrap(AppComponent);
         }

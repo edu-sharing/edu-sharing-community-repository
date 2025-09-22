@@ -6,6 +6,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { AboutService, NetworkService, Node, Store } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
+    ColumnType,
     DateHelper,
     InteractionType,
     ListItem,
@@ -17,7 +18,7 @@ import {
     UIAnimation,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
-import { Observable, Observer, Subject } from 'rxjs';
+import { defer, Observable, Observer, Subject } from 'rxjs';
 import { SuggestItem } from './autocomplete/autocomplete.component';
 import {
     Application,
@@ -93,6 +94,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     cancelJobInfo: Job;
     private readonly destroyed$ = new Subject<void>();
     private queryParams: Params;
+    jobsLoading = false;
 
     constructor(
         private about: AboutService,
@@ -115,9 +117,6 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         private translate: TranslateService,
         private translations: TranslationsService,
     ) {
-        this.searchColumns.push(new ListItem('NODE', RestConstants.CM_NAME));
-        this.searchColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
-        this.searchColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
         this.translations.waitForInit().subscribe(() => {
             this.getTemplates();
             this.connector.isLoggedIn().subscribe((data: LoginResult) => {
@@ -228,7 +227,13 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     public xmlAppKeys: string[];
     public editableXmls = [{ name: 'HOMEAPP', file: RestConstants.HOME_APPLICATION_XML }];
     searchResponse = new NodeDataSource<Node>();
-    searchColumns: ListItem[] = [];
+    searchColumns = {
+        Default: [
+            new ListItem('NODE', RestConstants.CM_NAME),
+            new ListItem('NODE', RestConstants.NODE_ID),
+            new ListItem('NODE', RestConstants.CM_MODIFIED_DATE),
+        ],
+    } as ColumnType;
     public selectedTemplate = '';
     public templates: string[];
     public eduGroupSuggestions: SuggestItem[];
@@ -995,6 +1000,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         }
         this.jobs = jobs.filter((j: any) => !!j);
         this.updateJobLogs();
+        this.jobsLoading = false;
     }
     getMajorVersion(version: string) {
         const v = version.split('.');
@@ -1374,14 +1380,12 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         }
         this.globalProgress = false;
 
-        this.searchColumns = WorkspaceExplorerComponent.getColumns(this.connector);
-        this.searchColumns
-            .filter((s) =>
-                [RestConstants.CM_NAME, RestConstants.NODE_ID, RestConstants.CM_CREATOR].includes(
-                    s.name,
-                ),
-            )
-            .forEach((s) => (s.visible = true));
+        this.searchColumns.Default = WorkspaceExplorerComponent.getColumns(this.connector);
+        this.searchColumns.Default.filter((s) =>
+            [RestConstants.CM_NAME, RestConstants.NODE_ID, RestConstants.CM_CREATOR].includes(
+                s.name,
+            ),
+        ).forEach((s) => (s.visible = true));
 
         this.route.queryParams.subscribe((data: Params) => {
             this.queryParams = data;
@@ -1419,8 +1423,10 @@ export class AdminPageComponent implements OnInit, OnDestroy {
                 this.availableJobs = jobs;
                 this.prepareJobClasses();
             });
-            this.admin
-                .getJobs()
+            defer(() => {
+                this.jobsLoading = true;
+                return this.admin.getJobs();
+            })
                 .pipe(
                     tap((jobs) => this.reloadJobStatus(jobs)),
                     delay(5000),
@@ -1457,6 +1463,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         }
     }
     async reloadJobs() {
+        this.jobsLoading = true;
         const jobs = await this.admin.getJobs().toPromise();
         this.reloadJobStatus(jobs);
     }
