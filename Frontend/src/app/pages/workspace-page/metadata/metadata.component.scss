@@ -23,24 +23,12 @@
     word-break: break-all;
     padding-left: 5px;
 }
-.header {
-    display: flex;
-    background-color: $workspaceMetadataBackground;
-    align-items: center;
-    .name {
-        flex-grow: 1;
-        font-size: 110%;
-        padding: 10px 15px;
-        word-break: break-all;
-    }
-}
 
 mat-tab-group {
     min-height: 0;
 }
 
 mat-tab-group ::ng-deep mat-tab-header {
-    background-color: $workspaceMetadataBackground;
 }
 
 .standalone-container {
@@ -66,7 +54,7 @@ mat-tab-group ::ng-deep mat-tab-header {
     gap: 10px;
 }
 .content {
-    padding: 0 12px;
+    padding: 0 20px;
 }
 
 .content-properties {
@@ -89,6 +77,8 @@ p.description {
 
 canvas {
     align-self: flex-start;
+    height: 250px;
+    width: 100% !important;
 }
 .statistic-value {
     display: grid;

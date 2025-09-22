@@ -9,19 +9,23 @@ import { WorkspaceSubTreeComponent } from './sub-tree/sub-tree.component';
 import { WorkspaceTreeComponent } from './tree/tree.component';
 import { WorkspacePageRoutingModule } from './workspace-page-routing.module';
 import { WorkspacePageComponent } from './workspace-page.component';
+import { EditorialSidebarComponent } from '../editorial-page/editorial-sidebar/editorial-sidebar.component';
+import { ResizableSidenavDirective } from '../editorial-page/resizable-sidenav.directive';
 
 @NgModule({
     declarations: [
-        MetadataSidebarComponent,
         RecycleMainComponent,
         WorkspaceExplorerComponent,
-        WorkspaceMetadataBlockComponent,
-        WorkspaceMetadataComponent,
         WorkspacePageComponent,
         WorkspaceSubTreeComponent,
         WorkspaceTreeComponent,
     ],
-    imports: [SharedModule, WorkspacePageRoutingModule],
-    exports: [WorkspaceMetadataBlockComponent],
+    imports: [
+        SharedModule,
+        WorkspacePageRoutingModule,
+        EditorialSidebarComponent,
+        ResizableSidenavDirective,
+    ],
+    exports: [],
 })
 export class WorkspacePageModule {}

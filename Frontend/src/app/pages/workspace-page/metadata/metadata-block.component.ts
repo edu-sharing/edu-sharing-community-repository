@@ -11,6 +11,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { ConfigService, Node } from 'ngx-edu-sharing-api';
 import { DurationHelper, FormatDatePipe, NodeImageSizePipe, VCard } from 'ngx-edu-sharing-ui';
 import { NodeHelperService } from '../../../services/node-helper.service';
+import { SharedModule } from '../../../shared/shared.module';
 
 // Charts.js
 declare var Chart: any;
@@ -19,7 +20,7 @@ declare var Chart: any;
     selector: 'es-workspace-metadata-block',
     templateUrl: 'metadata-block.component.html',
     styleUrls: ['metadata-block.component.scss'],
-    standalone: false,
+    imports: [SharedModule],
 })
 export class WorkspaceMetadataBlockComponent {
     @Input() set node(node: Node) {

@@ -60,7 +60,7 @@
     <div class="es-mat-sidenav-content">
       <es-editorial-sidebar
         [primaryMode]="'collections'"
-        [nodes]="collection ? [collection] : null"
+        [parent]="collection"
         (closeTrigger)="sidenavRight.set(false)"
       ></es-editorial-sidebar>
     </div>

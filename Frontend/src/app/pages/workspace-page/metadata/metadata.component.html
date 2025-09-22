@@ -1,10 +1,4 @@
 <div *ngIf="data" class="main" data-test="workspace-sidebar">
-  <div class="header">
-    <div class="name" data-test="workspace-sidebar-element-name">{{ data.name }}</div>
-    <div class="close">
-      <button mat-icon-button (click)="doClose()"><i class="material-icons">close</i></button>
-    </div>
-  </div>
   <es-spinner *ngIf="loading"></es-spinner>
   <ng-container *ngIf="!loading">
     <mat-tab-group *ngIf="!data.isDirectory; else standaloneInfoTab">
@@ -45,7 +39,7 @@
       <div class="content content-properties">
         <p class="description">{{ 'WORKSPACE.METADATA.USAGE_COUNT_TITLE' | translate }}</p>
 
-        <canvas #canvas width="320" height="200"></canvas>
+        <canvas #canvas></canvas>
         <ul class="statistic-value">
           <li
             *ngFor="let point of stats.points; let i = index"

@@ -8,6 +8,7 @@
     padding: 20px;
     > div {
         font-size: vars.$fontSizeXLarge;
+        @include mixins.limitLineCount(1);
         flex-grow: 1;
     }
 }
@@ -16,6 +17,10 @@
 }
 .option {
     padding: 0 20px;
+    &.option-EDITORIAL_OPTIONS_WORKSPACE_METADATA {
+        // has own padding cause of tabs
+        padding: 0;
+    }
 }
 .entries {
     display: flex;

@@ -19,12 +19,14 @@ import {
 import {
     ColumnType,
     DurationHelper,
+    EduSharingUiCommonModule,
     FormatDatePipe,
     InteractionType,
     ListItem,
     NodeDataSource,
     NodeEntriesDisplayType,
     NodeImageSizePipe,
+    TranslationsModule,
     UIConstants,
     VCard,
 } from 'ngx-edu-sharing-ui';
@@ -57,6 +59,8 @@ import {
     Title,
     Tooltip,
 } from 'chart.js';
+import { SharedModule } from '../../../shared/shared.module';
+import { WorkspaceMetadataBlockComponent } from './metadata-block.component';
 
 Chart.register(BarController, BarElement, CategoryScale, PointElement, Tooltip, LinearScale, Title);
 
@@ -72,11 +76,12 @@ interface Stats {
     selector: 'es-workspace-metadata',
     templateUrl: 'metadata.component.html',
     styleUrls: ['metadata.component.scss'],
-    standalone: false,
+    imports: [SharedModule, WorkspaceMetadataBlockComponent],
 })
 export class WorkspaceMetadataComponent implements OnInit {
     private _canvas: ElementRef<HTMLCanvasElement>;
     private currentChart: Chart<ChartType, number[], string>;
+    private canvasObserver: ResizeObserver;
     @ViewChild('canvas')
     get canvas(): ElementRef<HTMLCanvasElement> {
         return this._canvas;
@@ -142,6 +147,9 @@ export class WorkspaceMetadataComponent implements OnInit {
         private searchApi: RestSearchService,
         private usageApi: RestUsageService,
     ) {
+        this.canvasObserver = new ResizeObserver((entries) => {
+            this.drawBarChart();
+        });
         this.columns = {
             Default: [new ListItem('NODE', RestConstants.CM_NAME)],
         };
@@ -449,6 +457,7 @@ export class WorkspaceMetadataComponent implements OnInit {
         if (!canvas) {
             return;
         }
+        this.canvasObserver.observe(canvas);
         const ctx = canvas.getContext('2d');
         // FontFamily
         // Chart.defaults.global.defaultFontFamily = 'open_sansregular';
@@ -479,7 +488,7 @@ export class WorkspaceMetadataComponent implements OnInit {
                     },
                     tooltip: {},
                 },
-                responsive: false,
+                responsive: true,
                 layout: {
                     padding: {
                         left: 0,

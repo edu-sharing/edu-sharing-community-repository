@@ -30,6 +30,7 @@ import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { PrimaryMode } from '../editorial-page.component';
 import { NodesSelectorComponent } from '../nodes-selector/nodes-selector.component';
+import { MetadataSidebarComponent } from '../../workspace-page/metadata/metadata-sidebar.component';
 
 @Component({
     selector: 'es-editorial-sidebar',
@@ -41,11 +42,13 @@ import { NodesSelectorComponent } from '../nodes-selector/nodes-selector.compone
         MatButtonModule,
         TranslateModule,
         NodesSelectorComponent,
+        MetadataSidebarComponent,
     ],
     providers: [OptionsHelperDataService],
 })
 export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
+    parent = input<Node>();
     nodes = input<Node[]>();
     primaryMode = input.required<PrimaryMode>();
     enabledOption = signal<OptionItem>(null);
@@ -89,6 +92,16 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         shareElement.constrains = [Constrain.NoBulk];
         shareElement.scopes = ['activity'];
         options.push(shareElement);
+
+        const workspaceMetadata = new OptionItem(
+            'EDITORIAL.OPTIONS.WORKSPACE_METADATA',
+            'info',
+            () => this.enabledOption.set(workspaceMetadata),
+        );
+        workspaceMetadata.elementType = [ElementType.Node];
+        workspaceMetadata.constrains = [Constrain.NoBulk];
+        workspaceMetadata.scopes = ['workspace'];
+        options.push(workspaceMetadata);
         this.optionsHelperDataService.setData({
             scope: this.primaryMode(),
             activeObjects: this.nodes(),

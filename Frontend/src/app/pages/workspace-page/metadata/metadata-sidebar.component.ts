@@ -1,5 +1,5 @@
 import { trigger } from '@angular/animations';
-import { Component, HostListener } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { Router } from '@angular/router';
 import { LocalEventsService, UIAnimation, UIConstants } from 'ngx-edu-sharing-ui';
 import {
@@ -13,7 +13,8 @@ import { Toast } from '../../../services/toast';
 import { YES_OR_NO } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { BulkBehavior } from '../../../features/mds/types/types';
-import { WorkspaceService } from '../workspace.service';
+import { WorkspaceMetadataComponent } from './metadata.component';
+import { CommonModule } from '@angular/common';
 
 /**
  * Container Component for the workspace's metadata sidebar.
@@ -26,12 +27,10 @@ import { WorkspaceService } from '../workspace.service';
     templateUrl: './metadata-sidebar.component.html',
     styleUrls: ['./metadata-sidebar.component.scss'],
     animations: [trigger('fromRight', UIAnimation.fromRight())],
-    standalone: false,
+    imports: [CommonModule, WorkspaceMetadataComponent],
 })
 export class MetadataSidebarComponent {
-    get nodeSidebar() {
-        return this.workspace.nodeSidebar;
-    }
+    nodeSidebar = input.required<Node>();
 
     constructor(
         private dialogs: DialogsService,
@@ -39,20 +38,7 @@ export class MetadataSidebarComponent {
         private node: RestNodeService,
         private router: Router,
         private toast: Toast,
-        private workspace: WorkspaceService,
     ) {}
-
-    @HostListener('document:keydown', ['$event'])
-    handleKeyboardEvent(event: KeyboardEvent) {
-        if (event.key === 'Escape') {
-            if (this.workspace.nodeSidebar != null) {
-                this.closeSidebar();
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-            }
-        }
-    }
 
     async restoreVersion(restore: { version: Version; node: Node }) {
         const dialogRef = await this.dialogs.openGenericDialog({
@@ -77,17 +63,14 @@ export class MetadataSidebarComponent {
                 version.version.minor,
             )
             .subscribe(
-                (data: NodeVersions) => {
+                () => {
                     this.toast.closeProgressSpinner();
-                    this.closeSidebar();
                     // @TODO type is not compatible
                     this.node
                         .getNodeMetadata(version.version.node.id, [RestConstants.ALL])
                         .subscribe(
                             (node) => {
                                 this.localEvents.nodesChanged.emit([node.node]);
-                                this.workspace.nodeSidebar = node.node;
-                                this.workspace.nodeSidebarChange.emit(node.node);
                                 this.toast.toast('WORKSPACE.REVERTED_VERSION');
                             },
                             (error: any) => this.toast.error(error),
@@ -95,11 +78,6 @@ export class MetadataSidebarComponent {
                 },
                 (error: any) => this.toast.error(error),
             );
-    }
-
-    closeSidebar() {
-        this.workspace.nodeSidebar = null;
-        this.workspace.nodeSidebarChange.emit(null);
     }
 
     goToNode(node: Node) {
@@ -126,13 +104,6 @@ export class MetadataSidebarComponent {
 
     private closeMdsEditor(originalNodes: Node[], updatedNodes: Node[] = null) {
         let refresh = !!updatedNodes;
-        if (
-            this.workspace.nodeSidebar &&
-            this.workspace.nodeSidebar.ref.id === originalNodes[0]?.ref.id &&
-            updatedNodes
-        ) {
-            this.workspace.nodeSidebar = updatedNodes[0];
-        }
         if (refresh) {
             this.localEvents.nodesChanged.emit(updatedNodes);
         }

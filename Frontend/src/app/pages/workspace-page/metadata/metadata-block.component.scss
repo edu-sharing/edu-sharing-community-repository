@@ -39,12 +39,12 @@
     white-space: pre-line;
 }
 .preview {
-    width: calc(100% + 24px);
-    margin-left: -12px;
-    margin-bottom: 12px;
-    height: 200px;
+    width: calc(100% + 40px);
+    margin-left: -20px;
+    margin-bottom: 20px;
+    max-height: 350px;
     position: relative;
-    object-fit: cover;
+    object-fit: contain;
 }
 .license-value {
     img.license {

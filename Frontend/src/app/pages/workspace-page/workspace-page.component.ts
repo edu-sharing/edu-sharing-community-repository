@@ -6,6 +6,7 @@ import {
     NgZone,
     OnDestroy,
     OnInit,
+    signal,
     ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
@@ -80,6 +81,7 @@ import { WorkspaceService } from './workspace.service';
 import { ThemeService } from '../../services/theme.service';
 import { RecycleMainComponent } from './recycle/recycle.component';
 import { DialogsService } from 'src/app/features/dialogs/dialogs.service';
+import { OptionsHelperService } from '../../services/options-helper.service';
 
 type NodeWrapper = { node: Node };
 
@@ -94,6 +96,7 @@ type NodeWrapper = { node: Node };
         trigger('fromLeft', UIAnimation.fromLeft()),
         trigger('fromRight', UIAnimation.fromRight()),
     ],
+    providers: [OptionsHelperService],
     standalone: false,
 })
 export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy {
@@ -181,6 +184,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
     showLtiTools = false;
     private oldParams: Params;
     selectedNodeTree: string;
+    sidenavRight = signal(false);
     contributorNode: Node;
     shareLinkNode: Node;
     displayType: NodeEntriesDisplayType = null;
@@ -208,6 +212,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         private nodeHelper: NodeHelperService,
         private route: ActivatedRoute,
         private router: Router,
+        private optionsHelperService: OptionsHelperService,
         private searchField: SearchFieldService,
         private session: SessionStorageService,
         private storage: TemporaryStorageService,
@@ -219,7 +224,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         private configService: ConfigService,
         private themeService: ThemeService,
         private ui: UIService,
-        private workspace: WorkspaceService,
+        public workspace: WorkspaceService,
     ) {
         this.event.addListener(this, this.destroyed$);
         this.connector.setRoute(this.route, this.router);
@@ -1064,7 +1069,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
                 ),
             ),
         );
-        const toggle = new OptionItemToggle(
+        const shareToggle = new OptionItemToggle(
             {
                 enabled: 'OPTIONS.TOGGLE_SHARED_TO_ME',
                 disabled: 'OPTIONS.TOGGLE_SHARED_TO_ME',
@@ -1085,13 +1090,16 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
                 );
             },
         );
-        toggle.group = DefaultGroups.Toggles;
-        toggle.elementType = [ElementType.NoneOrUnknown];
-        toggle.priority = 5;
-        toggle.customShowCallback = async () => {
+        shareToggle.group = DefaultGroups.Toggles;
+        shareToggle.elementType = [ElementType.NoneOrUnknown, ElementType.Node];
+        shareToggle.priority = 5;
+        shareToggle.customShowCallback = async () => {
             return this.root === 'TO_ME_SHARED_FILES';
         };
-        this.customOptions.addOptions = [toggle];
+        const sidebarToggle = this.optionsHelperService.getOptionItemToggleSidebar(
+            this.sidenavRight,
+        );
+        this.customOptions.addOptions = [sidebarToggle, shareToggle];
     }
 
     private getLastLocationStorageId() {

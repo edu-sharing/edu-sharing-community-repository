@@ -1,9 +1,10 @@
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
-import { Node } from 'ngx-edu-sharing-api';
+import { HOME_REPOSITORY, Node, RestConstants } from 'ngx-edu-sharing-api';
 import {
     CanDrop,
     DragData,
     DropSource,
+    NodeEntriesService,
     NodeRoot,
     OptionItem,
     OptionsHelperDataService,
@@ -11,8 +12,6 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { WorkspacePageComponent } from '../workspace-page.component';
 import { WorkspaceSubTreeComponent } from '../sub-tree/sub-tree.component';
-import { NodeEntriesService } from 'ngx-edu-sharing-ui/services/node-entries.service';
-import { HOME_REPOSITORY, RestConstants } from 'ngx-edu-sharing-api';
 import { TranslateService } from '@ngx-translate/core';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 

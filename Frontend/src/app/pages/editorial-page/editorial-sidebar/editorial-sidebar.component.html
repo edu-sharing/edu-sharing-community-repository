@@ -9,8 +9,12 @@
 </div>
 <ng-container *ngTemplateOutlet="content"></ng-container>
 <ng-template #content>
-  <div *ngIf="enabledOption() as option" class="option option-{{ option.name }}">
-    <es-nodes-selector></es-nodes-selector>
+  <div *ngIf="enabledOption() as option" class="option option-{{ option.name | propertySlug }}">
+    <es-nodes-selector *ngIf="option.name === 'EDITORIAL.OPTIONS.SORT_INTO'"></es-nodes-selector>
+    <es-metadata-sidebar
+      *ngIf="option.name === 'EDITORIAL.OPTIONS.WORKSPACE_METADATA'"
+      [nodeSidebar]="nodes()?.[0]"
+    ></es-metadata-sidebar>
   </div>
   <div class="entries" *ngIf="!enabledOption()">
     <div class="entry" (click)="option.callback(nodes())" *ngFor="let option of options()">

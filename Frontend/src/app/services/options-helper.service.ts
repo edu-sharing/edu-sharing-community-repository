@@ -1496,45 +1496,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             this.infoToggle.isToggle = true;
             options.push(this.infoToggle);
          */
-        let metadataSidebarSubscription: Subscription;
-        const metadataSidebar = new OptionItemToggle(
-            {
-                enabled: 'OPTIONS.METADATA_SIDEBAR',
-                disabled: 'OPTIONS.METADATA_SIDEBAR',
-            },
-            {
-                enabled: 'info',
-                disabled: 'info',
-            },
-            !!this.workspace.nodeSidebar,
-            (object) => {
-                this.workspace.nodeSidebar = this.workspace.nodeSidebar
-                    ? null
-                    : this.getObjects(object, data)[0];
-                if (this.workspace.nodeSidebar == null) {
-                    metadataSidebarSubscription?.unsubscribe();
-                } else {
-                    metadataSidebarSubscription = components.list
-                        ?.getSelection()
-                        .changed.subscribe((selection) => {
-                            if (selection.source.selected.length === 0) {
-                                return;
-                            }
-                            if (this.workspace.nodeSidebar == null) {
-                                metadataSidebarSubscription?.unsubscribe();
-                                return;
-                            }
-                            this.workspace.nodeSidebar = selection.source.selected[0] as Node;
-                            this.workspace.nodeSidebarChange.emit(this.workspace.nodeSidebar);
-                        });
-                }
-                this.workspace.nodeSidebarChange.emit(this.workspace.nodeSidebar);
-            },
-        );
-        metadataSidebar.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
-        metadataSidebar.scopes = [Scope.WorkspaceList];
-        metadataSidebar.constrains = [Constrain.NoBulk];
-        metadataSidebar.group = DefaultGroups.Toggles;
         const registerSelectionChange = (list: ListEventInterface<any>) => {
             const updateVisibility = () => {
                 toggleSelection.isToggleVisible =
@@ -1622,7 +1583,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         options.push(reportNode);
         options.push(toggleViewType);
         options.push(toggleSelection);
-        options.push(metadataSidebar);
 
         if (data?.postPrepareOptions) {
             data.postPrepareOptions(options, objects);
@@ -2168,6 +2128,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         runInInjectionContext(this.injector, () => {
             effect(() => (toggle.toggleState = state()));
         });
+        toggle.priority = 1000;
         toggle.elementType = [];
         return toggle;
     }
