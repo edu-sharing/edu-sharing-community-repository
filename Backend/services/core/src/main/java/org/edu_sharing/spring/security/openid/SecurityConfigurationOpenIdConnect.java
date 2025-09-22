@@ -105,21 +105,6 @@ public class SecurityConfigurationOpenIdConnect {
         return http.build();
     }
 
-    /**
-     * prevent shibboleth path will be cached in SPRING_SECURITY_SAVED_REQUEST
-     * when oauth2server is unauthenticated and redirects to shibboleth servlet
-     * this would prevent redirect back to /oauth2server/authorize after successfull auth
-     * @return
-     */
-    @Bean
-    public RequestCache requestCache() {
-        HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
-        requestCache.setRequestMatcher(
-                new NegatedRequestMatcher(new AntPathRequestMatcher("/shibboleth/**"))
-        );
-        return requestCache;
-    }
-
     private LogoutSuccessHandler oidcLogoutSuccessHandler() {
         OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler =
                 new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository(configService)){
