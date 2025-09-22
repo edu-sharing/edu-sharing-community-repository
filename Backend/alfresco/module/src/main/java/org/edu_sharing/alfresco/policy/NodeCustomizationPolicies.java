@@ -11,6 +11,7 @@ import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.version.VersionModel;
+import org.alfresco.repo.version.common.VersionUtil;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.lock.LockService;
@@ -216,6 +217,16 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
                     nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_VERSIONABLELABEL), highestVersions.get().toString());
                     transFormedProps.put(CCConstants.CM_PROP_VERSIONABLELABEL, highestVersions.get().toString());
                 }
+            }
+            Version nullVersion = null;
+            for(Version version : versions) {
+                if(version.getVersionLabel() == null){
+                    nullVersion = version;
+                }
+            }
+            if(nullVersion != null) {
+                logger.info("Node has incomplete version:" +nodeRef + " frozen:"+nullVersion.getFrozenStateNodeRef() +": "+ VersionUtil.convertNodeRef(nullVersion.getFrozenStateNodeRef()) +" versionObject:" + nullVersion +"  removing version.");
+                nodeService.deleteNode(VersionUtil.convertNodeRef(nullVersion.getFrozenStateNodeRef()));
             }
         }
     }
