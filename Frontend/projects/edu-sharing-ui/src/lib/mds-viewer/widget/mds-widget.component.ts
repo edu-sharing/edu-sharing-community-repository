@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -19,17 +18,14 @@ import { MatRipple } from '@angular/material/core';
 import { filter, first, map, takeUntil } from 'rxjs/operators';
 import { MdsValue, MdsWidget, Node, RestConstants, Suggestion } from 'ngx-edu-sharing-api';
 import { UIConstants } from '../../util/ui-constants';
-import { DateHelper } from '../../util/DateHelper';
 import { UIService } from '../../services/ui.service';
 import { ViewInstanceService } from '../view-instance.service';
 import { RestHelper } from '../../util/rest-helper';
-import { FormatSizePipe } from '../../pipes/file-size.pipe';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { MdsViewerService } from '../mds-viewer.service';
 import { Values } from '../../services/search-helper.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { MdsEditorInstanceServiceAbstract } from '../mds-editor-instance-service.abstract';
-import { tap } from 'rxjs';
 
 export enum MdsType {
     Io = 'io',
@@ -180,7 +176,7 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     async ngOnInit() {
-        this.widget.focusTrigger.pipe(takeUntil(this.destroyed$)).subscribe(async () => {
+        this.widget.focusTrigger?.pipe(takeUntil(this.destroyed$)).subscribe(async () => {
             await this.focus();
             this.startEdit();
         });
