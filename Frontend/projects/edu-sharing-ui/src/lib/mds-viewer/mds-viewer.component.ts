@@ -158,6 +158,7 @@ export class MdsViewerComponent implements OnChanges {
                             this.injector,
                         );
                     }
+                    setTimeout(() => this.hideEmpty(c), 1);
                 });
             }
         });
@@ -204,6 +205,15 @@ export class MdsViewerComponent implements OnChanges {
         }
         if (inflate) {
             void this.inflate();
+        }
+    }
+
+    private hideEmpty(c: ElementRef) {
+        for (let emptyGroup of c.nativeElement.getElementsByTagName('hideifempty')) {
+            console.log(emptyGroup);
+            if (!emptyGroup.getElementsByTagName('hideifempty-content')?.[0]?.innerText?.trim()) {
+                emptyGroup.parentElement.removeChild(emptyGroup);
+            }
         }
     }
 }
