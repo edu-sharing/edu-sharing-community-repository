@@ -17161,128 +17161,140 @@ export const DefaultMds: MdsDefinition = {
     lists: [
         {
             id: 'search',
-            columns: [
-                {
-                    id: 'cclom:title',
-                    format: null,
-                    showDefault: true,
-                },
-                {
-                    id: 'cm:modified',
-                    format: null,
-                    showDefault: true,
-                },
-                {
-                    id: 'ccm:commonlicense_key',
-                    format: null,
-                    showDefault: true,
-                },
-                {
-                    id: 'ccm:replicationsource',
-                    format: null,
-                    showDefault: true,
-                },
-            ],
+            columns: {
+                Default: [
+                    {
+                        id: 'cclom:title',
+                        format: null,
+                        showDefault: true,
+                    },
+                    {
+                        id: 'cm:modified',
+                        format: null,
+                        showDefault: true,
+                    },
+                    {
+                        id: 'ccm:commonlicense_key',
+                        format: null,
+                        showDefault: true,
+                    },
+                    {
+                        id: 'ccm:replicationsource',
+                        format: null,
+                        showDefault: true,
+                    },
+                ],
+            },
         },
         {
             id: 'searchCollections',
-            columns: [
-                {
-                    id: 'COLLECTION.title',
-                    format: null,
-                    showDefault: true,
-                },
-                {
-                    id: 'COLLECTION.info',
-                    format: null,
-                    showDefault: true,
-                },
-                {
-                    id: 'COLLECTION.scope',
-                    format: null,
-                    showDefault: true,
-                },
-            ],
+            columns: {
+                Default: [
+                    {
+                        id: 'COLLECTION.title',
+                        format: null,
+                        showDefault: true,
+                    },
+                    {
+                        id: 'COLLECTION.info',
+                        format: null,
+                        showDefault: true,
+                    },
+                    {
+                        id: 'COLLECTION.scope',
+                        format: null,
+                        showDefault: true,
+                    },
+                ],
+            },
         },
         {
             id: 'collectionReferences',
-            columns: [
-                {
-                    id: 'cclom:title',
-                    format: null,
-                    showDefault: true,
-                },
-                {
-                    id: 'cm:modified',
-                    format: null,
-                    showDefault: true,
-                },
-                {
-                    id: 'ccm:commonlicense_key',
-                    format: null,
-                    showDefault: true,
-                },
-                {
-                    id: 'ccm:replicationsource',
-                    format: null,
-                    showDefault: true,
-                },
-            ],
+            columns: {
+                Default: [
+                    {
+                        id: 'cclom:title',
+                        format: null,
+                        showDefault: true,
+                    },
+                    {
+                        id: 'cm:modified',
+                        format: null,
+                        showDefault: true,
+                    },
+                    {
+                        id: 'ccm:commonlicense_key',
+                        format: null,
+                        showDefault: true,
+                    },
+                    {
+                        id: 'ccm:replicationsource',
+                        format: null,
+                        showDefault: true,
+                    },
+                ],
+            },
         },
         {
             id: 'mediacenterManaged',
-            columns: [
-                {
-                    id: 'cclom:title',
-                    format: null,
-                    showDefault: true,
-                },
-                {
-                    id: 'ccm:replicationsourceid',
-                    format: null,
-                    showDefault: true,
-                },
-                {
-                    id: 'ccm:replicationsource',
-                    format: null,
-                    showDefault: true,
-                },
-            ],
+            columns: {
+                Default: [
+                    {
+                        id: 'cclom:title',
+                        format: null,
+                        showDefault: true,
+                    },
+                    {
+                        id: 'ccm:replicationsourceid',
+                        format: null,
+                        showDefault: true,
+                    },
+                    {
+                        id: 'ccm:replicationsource',
+                        format: null,
+                        showDefault: true,
+                    },
+                ],
+            },
         },
         {
             id: 'mediacenterGroups',
-            columns: [
-                {
-                    id: 'displayName',
-                    format: null,
-                    showDefault: true,
-                },
-                {
-                    id: 'groupType',
-                    format: null,
-                    showDefault: true,
-                },
-            ],
+            columns: {
+                Default: [
+                    {
+                        id: 'displayName',
+                        format: null,
+                        showDefault: true,
+                    },
+                    {
+                        id: 'groupType',
+                        format: null,
+                        showDefault: true,
+                    },
+                ],
+            },
         },
         {
             id: 'relationNodes',
-            columns: [
-                {
-                    id: 'cclom:title',
-                    format: null,
-                    showDefault: true,
-                },
-                {
-                    id: 'cm:creator',
-                    format: null,
-                    showDefault: true,
-                },
-                {
-                    id: 'cm:created',
-                    format: null,
-                    showDefault: true,
-                },
-            ],
+            columns: {
+                Default: [
+                    {
+                        id: 'cclom:title',
+                        format: null,
+                        showDefault: true,
+                    },
+                    {
+                        id: 'cm:creator',
+                        format: null,
+                        showDefault: true,
+                    },
+                    {
+                        id: 'cm:created',
+                        format: null,
+                        showDefault: true,
+                    },
+                ],
+            },
         },
     ],
     sorts: [
