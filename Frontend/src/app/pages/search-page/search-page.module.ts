@@ -12,6 +12,8 @@ import { EduSharingUiModule } from 'ngx-edu-sharing-ui';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
 import { PreviewSidebarModule } from '../../features/preview-sidebar/preview-sidebar.module';
 import { SearchPageFilterBarComponent } from './search-page-filter-bar.component';
+import { EditorialSidebarComponent } from '../editorial-page/editorial-sidebar/editorial-sidebar.component';
+import { ResizableSidenavDirective } from '../editorial-page/resizable-sidenav.directive';
 
 @NgModule({
     declarations: [
@@ -31,6 +33,8 @@ import { SearchPageFilterBarComponent } from './search-page-filter-bar.component
         EduSharingUiModule,
         MdsModule,
         FooterComponent,
+        EditorialSidebarComponent,
+        ResizableSidenavDirective,
     ],
     // This module is lazy-loaded and should not export anything.
     exports: [],

@@ -19,25 +19,25 @@ export class SearchPageResultsAllComponent implements OnInit {
 
     readonly repoData = this._results.repoData;
     readonly loadingProgress = this._results.loadingProgress;
-    readonly addToCollectionMode = this._searchPage.addToCollectionMode;
+    readonly addToCollectionMode = this.searchPage.addToCollectionMode;
     allEmpty = false;
 
     readonly onClick = this._results.onClick;
     readonly onDblClick = this._results.onDblClick;
-    private readonly _searchString = this._searchPage.searchString;
-    private readonly _activeRepository = this._searchPage.activeRepository;
+    private readonly _searchString = this.searchPage.searchString;
+    private readonly _activeRepository = this.searchPage.activeRepository;
     previewMode: string | 'Sidebar' | 'RenderingPage';
 
     constructor(
-        private _searchPage: SearchPageService,
+        public searchPage: SearchPageService,
         private _results: SearchPageResultsAllService,
         private configService: ConfigService,
     ) {}
 
     async ngOnInit() {
         setTimeout(() => {
-            this._searchPage.results = this._results;
-            this._searchPage.showingAllRepositories.next(true);
+            this.searchPage.results = this._results;
+            this.searchPage.showingAllRepositories.next(true);
         });
         this._registerAllEmpty();
         this.previewMode = await this.configService.get('searchPreviewMode', 'Sidebar');

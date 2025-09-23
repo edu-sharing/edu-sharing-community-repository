@@ -1,7 +1,5 @@
 @use 'variables-scss' as *;
 
-$sidebarWidth: 600px;
-
 :host {
     display: flex;
 }
@@ -9,11 +7,7 @@ $sidebarWidth: 600px;
 .preview-sidebar {
     display: flex;
     flex-direction: column;
-    width: $sidebarWidth;
-    overflow: hidden;
-    margin: 10px;
-    border-radius: 10px;
-    @include materialShadow();
+    width: 100%;
 }
 
 .preview-sidebar-header {

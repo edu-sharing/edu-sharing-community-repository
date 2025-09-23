@@ -69,7 +69,7 @@
   <div
     *ngIf="optionsToggleAfter.length"
     class="actionToggle after"
-    [class.actionToggleDivider]="(optionsAlways$ | async).length"
+    [class.actionToggleDivider]="(optionsAlways$ | async).length || optionsToggleBefore.length"
   >
     <ng-container
       *ngTemplateOutlet="toggle; context: { optionsToggle: optionsToggleAfter }"

@@ -52,15 +52,30 @@ where. -->
 
 <ng-template #tabBody>
   <main>
-    <es-search-page-filters-sidebar></es-search-page-filters-sidebar>
-    <div class="search-page-body">
-      <router-outlet></router-outlet>
-    </div>
-    <es-preview-sidebar
-      @fromRight
-      *ngIf="previewNode.getValue() as node"
-      [node]="node"
-      (closed)="previewNode.next(null)"
-    ></es-preview-sidebar>
+    <mat-sidenav-container>
+      <mat-sidenav
+        #rightSidenav
+        [mode]="'side'"
+        [opened]="sidenavRight()"
+        [defaultWidth]="0.3"
+        [maxWidth]="0.5"
+        class="es-mat-sidenav"
+        storageKey="SEARCH_SIDENAV_RIGHT_WIDTH"
+        esResizableSidenav
+        position="end"
+      >
+        <div class="es-mat-sidenav-content">
+          <es-editorial-sidebar
+            [primaryMode]="'search'"
+            [nodes]="searchPage.selection | async"
+            (closeTrigger)="sidenavRight.set(false)"
+          ></es-editorial-sidebar>
+        </div>
+      </mat-sidenav>
+      <es-search-page-filters-sidebar></es-search-page-filters-sidebar>
+      <div class="search-page-body">
+        <router-outlet></router-outlet>
+      </div>
+    </mat-sidenav-container>
   </main>
 </ng-template>

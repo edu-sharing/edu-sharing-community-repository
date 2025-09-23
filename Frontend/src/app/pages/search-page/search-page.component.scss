@@ -6,6 +6,11 @@
     flex-direction: column;
     min-height: calc(100vh - var(--mainnavHeight));
 }
+:host ::ng-deep {
+    mat-sidenav-container mat-sidenav-content {
+        display: flex;
+    }
+}
 
 mat-progress-bar {
     position: sticky;
@@ -85,7 +90,7 @@ es-preview-sidebar,
 es-search-page-filters-sidebar {
     position: sticky;
     flex-shrink: 0;
-    top: var(--mainnavCurrentHeight);
+    // top: var(--mainnavCurrentHeight);
     max-height: calc(100vh - var(--mainnavCurrentHeight));
 }
 

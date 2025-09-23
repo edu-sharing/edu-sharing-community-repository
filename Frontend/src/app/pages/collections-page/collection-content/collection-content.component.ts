@@ -38,6 +38,7 @@ import {
     NodeClickEvent,
     NodeDataSource,
     NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent,
     NodesRightMode,
     OptionItem,
     OptionsHelperDataService,
@@ -115,7 +116,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     @Output() clickItem = new EventEmitter<NodeClickEvent<Node | CollectionReference>>();
     @ContentChild('empty') emptyRef: TemplateRef<unknown>;
     @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
-    @ViewChild('listReferences') listReferences: ListEventInterface<CollectionReference>;
+    @ViewChild('listReferences') listReferences: NodeEntriesWrapperComponent<CollectionReference>;
     @ViewChild('listCollections') listCollections: ListEventInterface<Node>;
 
     private mainNavUpdateTrigger = new Subject<void>();

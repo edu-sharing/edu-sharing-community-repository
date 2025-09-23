@@ -4,6 +4,7 @@
     [mode]="'side'"
     [opened]="sidenavLeft()"
     position="start"
+    class="es-mat-sidenav"
     storageKey="EDITORIAL_SIDENAV_LEFT_WIDTH"
     esResizableSidenav
   >
@@ -28,6 +29,7 @@
     [opened]="sidenavRight() && (isMobile$ | async) === false"
     [defaultWidth]="0.3"
     storageKey="EDITORIAL_SIDENAV_RIGHT_WIDTH"
+    class="es-mat-sidenav"
     esResizableSidenav
     position="end"
   >

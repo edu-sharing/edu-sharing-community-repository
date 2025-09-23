@@ -6,18 +6,31 @@
     justify-content: space-between;
     align-items: center;
     padding: 20px;
+    gap: 5px;
     > div {
         font-size: vars.$fontSizeXLarge;
         @include mixins.limitLineCount(1);
         flex-grow: 1;
     }
 }
+
+:host {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
 .option-show {
     animation: slide-fade 1s;
 }
+.sidebar-container {
+    overflow-y: auto;
+    height: 0;
+    flex-grow: 1;
+}
 .option {
     padding: 0 20px;
-    &.option-EDITORIAL_OPTIONS_WORKSPACE_METADATA {
+    &.option-EDITORIAL_OPTIONS_WORKSPACE_METADATA,
+    &.option-EDITORIAL_OPTIONS_PREVIEW {
         // has own padding cause of tabs
         padding: 0;
     }

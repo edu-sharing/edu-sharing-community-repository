@@ -108,10 +108,13 @@
         left: 0;
     }
 }
-mat-sidenav {
-    .es-mat-sidenav-content {
+mat-sidenav.es-mat-sidenav {
+    position: fixed;
+    top: var(--mainnavCurrentHeight);
+    div.es-mat-sidenav-content {
         margin: 15px 20px 15px 20px;
-        min-height: calc(100vh - 10px - 15px - 15px - var(--mainnavCurrentHeight));
+        //min-height: calc(100vh - 10px - 15px - 15px - var(--mainnavCurrentHeight));
+        height: calc(100vh - 30px - var(--mainnavCurrentHeight));
         border-radius: var(--borderRadiusCards);
         @include materialShadowMedium();
     }

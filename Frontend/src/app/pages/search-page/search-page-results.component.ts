@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import {
     ActionbarComponent,
+    CustomOptions,
     InteractionType,
     ListSortConfig,
     NodeEntriesDisplayType,
@@ -51,7 +52,7 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
         private globalSearchPageInternal: GlobalSearchPageServiceInternal,
         private results: SearchPageResultsService,
         private configService: ConfigService,
-        private searchPage: SearchPageService,
+        public searchPage: SearchPageService,
         private temporaryStorageService: TemporaryStorageService,
         private announcer: LiveAnnouncer,
         private translate: TranslateService,

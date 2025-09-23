@@ -12,8 +12,16 @@ import {
     Repository,
 } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
+import {
+    combineLatest,
+    distinctUntilChanged,
+    filter,
+    map,
+    switchMap,
+    takeUntil,
+    tap,
+} from 'rxjs/operators';
 import { RestConstants, UIConstants } from '../../core-module/core.module';
 import {
     CustomOptions,
@@ -23,6 +31,7 @@ import {
     NodesRightMode,
     notNull,
     OptionItem,
+    OptionItemToggle,
 } from 'ngx-edu-sharing-ui';
 import { OptionsHelperService } from '../../services/options-helper.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
@@ -66,6 +75,7 @@ export class SearchPageService implements OnDestroy {
     readonly filterBarIsVisible = this.userModifiableValues.createBoolean(false);
     // Current preview element, visible either as sidebar or dialog on mobile.
     readonly previewNode = new BehaviorSubject<Node>(null);
+    readonly selection = new BehaviorSubject<Node[]>(null);
     readonly searchFilters = this.userModifiableValues.createDict();
     readonly searchString = this.userModifiableValues.createString();
     readonly loadingProgress = new BehaviorSubject<number>(null);
@@ -83,6 +93,30 @@ export class SearchPageService implements OnDestroy {
      */
     readonly facetsToFetch = new BehaviorSubject<string[]>(null);
     private _results = new BehaviorSubject<SearchPageResults>(null);
+    /**
+     * holds the toggle to open or close the global search sidebar on the right
+     */
+    readonly sidebarOption = new BehaviorSubject<OptionItemToggle>(null);
+    /**
+     * observable of custom options to be used for the material list views
+     */
+    getCustomMaterialOptions = merge([this.sidebarOption, this.addToCollectionMode]).pipe(
+        distinctUntilChanged(),
+        map(() => {
+            let custom = {
+                useDefaultOptions: true,
+            } as CustomOptions;
+            if (this.addToCollectionMode.value?.customOptions) {
+                custom = this.addToCollectionMode.value?.customOptions;
+            }
+            return {
+                ...custom,
+                addOptions: [this.sidebarOption.value, ...(custom.addOptions || [])].filter(
+                    (f) => !!f,
+                ),
+            } as CustomOptions;
+        }),
+    );
     get results(): SearchPageResults {
         return this._results.value;
     }

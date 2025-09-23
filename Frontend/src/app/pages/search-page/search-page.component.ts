@@ -1,10 +1,18 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Component, HostBinding, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import {
+    Component,
+    HostBinding,
+    OnDestroy,
+    OnInit,
+    signal,
+    TemplateRef,
+    ViewChild,
+} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfigService, Repository } from 'ngx-edu-sharing-api';
-import { isTrue, notNull, Scope, UIAnimation } from 'ngx-edu-sharing-ui';
+import { isTrue, notNull, OptionsHelperDataService, Scope, UIAnimation } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { filter, map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
@@ -15,12 +23,13 @@ import { MainNavService } from '../../main/navigation/main-nav.service';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
 import { NavigationScheduler } from './navigation-scheduler';
 import { SearchPageService } from './search-page.service';
+import { OptionsHelperService } from '../../services/options-helper.service';
 
 @Component({
     selector: 'es-search-page',
     templateUrl: './search-page.component.html',
     styleUrls: ['./search-page.component.scss'],
-    providers: [SearchPageService],
+    providers: [SearchPageService, OptionsHelperDataService, OptionsHelperService],
     animations: [
         trigger('fadeOut', [
             state('visible', style({ opacity: 1 })),
@@ -33,6 +42,7 @@ import { SearchPageService } from './search-page.service';
 })
 export class SearchPageComponent implements OnInit, OnDestroy {
     readonly Scope = Scope;
+    sidenavRight = signal(false);
 
     @ViewChild('filtersDialogResetButton', { static: true })
     filtersDialogResetButton: TemplateRef<HTMLElement>;
@@ -59,12 +69,16 @@ export class SearchPageComponent implements OnInit, OnDestroy {
         private dialogs: DialogsService,
         private mainNav: MainNavService,
         private navigationScheduler: NavigationScheduler,
+        private optionsHelperService: OptionsHelperService,
         private route: ActivatedRoute,
-        private searchPage: SearchPageService,
+        public searchPage: SearchPageService,
         private configService: ConfigService,
         private translate: TranslateService,
     ) {
         this.searchPage.init();
+        this.searchPage.sidebarOption.next(
+            this.optionsHelperService.getOptionItemToggleSidebar(this.sidenavRight),
+        );
     }
 
     ngOnInit(): void {

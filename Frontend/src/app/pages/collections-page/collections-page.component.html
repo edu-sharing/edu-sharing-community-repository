@@ -53,7 +53,8 @@
     [mode]="'side'"
     [opened]="sidenavRight()"
     [defaultWidth]="0.3"
-    storageKey="EDITORIAL_SIDENAV_RIGHT_WIDTH"
+    class="es-mat-sidenav"
+    storageKey="COLLECTIONS_SIDENAV_RIGHT_WIDTH"
     esResizableSidenav
     position="end"
   >
@@ -61,6 +62,7 @@
       <es-editorial-sidebar
         [primaryMode]="'collections'"
         [parent]="collection"
+        [nodes]="collectionContentRef?.listReferences?.getSelection()?.selected"
         (closeTrigger)="sidenavRight.set(false)"
       ></es-editorial-sidebar>
     </div>

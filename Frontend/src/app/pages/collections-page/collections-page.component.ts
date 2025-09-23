@@ -55,7 +55,7 @@ import { OptionsHelperService } from 'src/app/services/options-helper.service';
     templateUrl: 'collections-page.component.html',
     styleUrls: ['collections-page.component.scss'],
     // provide a new instance so to not get conflicts with other service instances
-    providers: [OptionsHelperDataService],
+    providers: [OptionsHelperDataService, OptionsHelperService],
     standalone: false,
 })
 export class CollectionsPageComponent implements OnDestroy {

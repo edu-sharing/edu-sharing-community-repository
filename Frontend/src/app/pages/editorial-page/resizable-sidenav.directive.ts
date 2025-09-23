@@ -17,12 +17,12 @@ import { firstValueFrom } from 'rxjs';
 export class ResizableSidenavDirective implements OnInit, OnDestroy {
     @Input() storageKey: string;
     @Input() position: 'start' | 'end' = 'start';
-    @Input() minWidth = 100;
+    @Input() minWidth = 0.2;
     /**
      * default width (is calculated based on the full screen with [0...1]
      */
-    @Input() defaultWidth = 0.2;
-    @Input() maxWidth = 99999;
+    @Input() defaultWidth = 0.3;
+    @Input() maxWidth = 0.7;
     private resizer!: HTMLElement;
     private dragging = false;
 
@@ -84,7 +84,10 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
             newWidth = containerWidth - event.clientX;
         }
 
-        newWidth = Math.max(this.minWidth, Math.min(newWidth, this.maxWidth));
+        newWidth = Math.max(
+            this.minWidth * window.innerWidth,
+            Math.min(newWidth, this.maxWidth * window.innerWidth),
+        );
         this.renderer.setStyle(this.el.nativeElement, 'width', `${newWidth}px`);
         if (this.storageKey) {
             void this.storage.set(this.storageKey, newWidth);

@@ -7,23 +7,30 @@
     <i esIcon="close"></i>
   </button>
 </div>
-<ng-container *ngTemplateOutlet="content"></ng-container>
-<ng-template #content>
-  <div *ngIf="enabledOption() as option" class="option option-{{ option.name | propertySlug }}">
-    <es-nodes-selector *ngIf="option.name === 'EDITORIAL.OPTIONS.SORT_INTO'"></es-nodes-selector>
-    <es-metadata-sidebar
-      *ngIf="option.name === 'EDITORIAL.OPTIONS.WORKSPACE_METADATA'"
-      [nodeSidebar]="nodes()?.[0]"
-    ></es-metadata-sidebar>
-  </div>
-  <div class="entries" *ngIf="!enabledOption()">
-    <div class="entry" (click)="option.callback(nodes())" *ngFor="let option of options()">
-      <i class="icon" [esIcon]="option.icon"></i>
-      <div class="text">
-        <div class="title">{{ option.name | translate }}</div>
-        <div class="description">{{ option.name + '_DESCRIPTION' | translate }}</div>
-      </div>
-      <i class="navigate" esIcon="keyboard_arrow_right"></i>
+<div class="sidebar-container">
+  <ng-container *ngTemplateOutlet="content"></ng-container>
+  <ng-template #content>
+    <div *ngIf="enabledOption() as option" class="option option-{{ option.name | propertySlug }}">
+      <es-nodes-selector *ngIf="option.name === 'EDITORIAL.OPTIONS.SORT_INTO'"></es-nodes-selector>
+      <es-metadata-sidebar
+        *ngIf="option.name === 'EDITORIAL.OPTIONS.WORKSPACE_METADATA'"
+        [nodeSidebar]="nodes()?.[0]"
+      ></es-metadata-sidebar>
+      <es-preview-sidebar
+        *ngIf="option.name === 'EDITORIAL.OPTIONS.PREVIEW'"
+        [node]="nodes()?.[0]"
+      ></es-preview-sidebar>
     </div>
-  </div>
-</ng-template>
+
+    <div class="entries" *ngIf="!enabledOption()">
+      <div class="entry" (click)="option.callback(nodes())" *ngFor="let option of options()">
+        <i class="icon" [esIcon]="option.icon"></i>
+        <div class="text">
+          <div class="title">{{ option.name | translate }}</div>
+          <div class="description">{{ option.name + '_DESCRIPTION' | translate }}</div>
+        </div>
+        <i class="navigate" esIcon="keyboard_arrow_right"></i>
+      </div>
+    </div>
+  </ng-template>
+</div>

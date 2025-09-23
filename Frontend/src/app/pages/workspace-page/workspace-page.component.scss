@@ -4,12 +4,17 @@
     display: flex;
     flex-direction: column;
 }
+mat-sidenav-container,
+mat-sidenav-content {
+    // otherwise, position sticky is not working for the top bar
+    overflow: unset;
+}
 mat-sidenav-content {
     min-height: calc(100vh - var(--mainnavHeight));
 }
 .topbarFrame {
     position: sticky;
-    //top: var(--mainnavHeight);
+    top: var(--mainnavHeight);
     z-index: 60;
     > div {
         width: 100%;

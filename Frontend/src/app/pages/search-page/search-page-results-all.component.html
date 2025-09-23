@@ -26,6 +26,7 @@ own OptionsHelperService instance and take exclusive control of the actionbar. -
   [dataSource]="repo.dataSource"
   [scope]="Scope.Search"
   [columns]="repo.columns | async"
+  (selectionChange)="searchPage.selection.next($event.source.selected)"
   [disableInfiniteScroll]="true"
   [elementInteractionType]="
     previewMode === 'Sidebar' ? InteractionType.Emitter : InteractionType.DefaultActionLink

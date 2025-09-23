@@ -17,6 +17,7 @@ import {
     Constrain,
     EduSharingUiCommonModule,
     ElementType,
+    NodeHelperService,
     OptionItem,
     OptionsHelperDataService,
     Target,
@@ -31,6 +32,7 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { PrimaryMode } from '../editorial-page.component';
 import { NodesSelectorComponent } from '../nodes-selector/nodes-selector.component';
 import { MetadataSidebarComponent } from '../../workspace-page/metadata/metadata-sidebar.component';
+import { PreviewSidebarModule } from '../../../features/preview-sidebar/preview-sidebar.module';
 
 @Component({
     selector: 'es-editorial-sidebar',
@@ -43,6 +45,7 @@ import { MetadataSidebarComponent } from '../../workspace-page/metadata/metadata
         TranslateModule,
         NodesSelectorComponent,
         MetadataSidebarComponent,
+        PreviewSidebarModule,
     ],
     providers: [OptionsHelperDataService],
 })
@@ -67,6 +70,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
 
     constructor(
         private dialogs: DialogsService,
+        private nodeHelperService: NodeHelperService,
         private optionsHelperDataService: OptionsHelperDataService,
     ) {}
 
@@ -102,6 +106,15 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         workspaceMetadata.constrains = [Constrain.NoBulk];
         workspaceMetadata.scopes = ['workspace'];
         options.push(workspaceMetadata);
+
+        const preview = new OptionItem('EDITORIAL.OPTIONS.PREVIEW', 'preview', () =>
+            this.enabledOption.set(preview),
+        );
+        preview.elementType = [ElementType.Node];
+        preview.constrains = [Constrain.NoBulk, Constrain.Files];
+        // preview.scopes = ['workspace', 'collections'];
+        options.push(preview);
+
         this.optionsHelperDataService.setData({
             scope: this.primaryMode(),
             activeObjects: this.nodes(),
@@ -117,8 +130,9 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
             'splitscreen_vertical_add',
             () => this.enabledOption.set(sortInto),
         );
-        sortInto.elementType = [ElementType.Node];
-        sortInto.constrains = [Constrain.Collections];
+        sortInto.customShowCallback = async () =>
+            this.parent() && this.nodeHelperService.isNodeCollection(this.parent());
+        sortInto.elementType = [ElementType.NoneOrUnknown];
         sortInto.scopes = ['collections'];
         options.push(sortInto);
         this.optionsHelperDataService.setData({

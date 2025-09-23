@@ -62,7 +62,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { OptionsHelperService } from '../../services/options-helper.service';
 
-export type PrimaryMode = 'activity' | 'share' | 'collections' | 'workspace';
+export type PrimaryMode = 'activity' | 'share' | 'collections' | 'workspace' | 'search';
 type RouteConfig = {
     primaryMode: PrimaryMode;
 };
