@@ -1960,7 +1960,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
     }
 
-    public String getGroupNodeId(String groupName) throws Exception {
+    /**
+     * @Deprecated
+     */
+    private String getGroupNodeId(String groupName) throws Exception {
 
         AuthorityService authorityService = serviceRegistry.getAuthorityService();
 

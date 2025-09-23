@@ -42,6 +42,7 @@ import org.edu_sharing.service.authentication.totp.OneTimeTokenService;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
@@ -334,6 +335,7 @@ public class AuthorityServiceImpl implements AuthorityService {
         }
     }
 
+
     @Override
     public String createGroup(String groupName, String displayName, String parentGroup) throws Exception {
         if (parentGroup != null && parentGroup.isEmpty())
@@ -350,9 +352,43 @@ public class AuthorityServiceImpl implements AuthorityService {
 
             @Override
             public String doWork() throws Exception {
-                return new MCAlfrescoAPIClient().createOrUpdateGroup(groupName, displayName, parentGroupFinal, true);
+                return createGroupInternal(groupName, displayName, parentGroupFinal);
             }
         });
+    }
+    private String getGroupNodeId(String groupName) {
+
+        return transactionService.getRetryingTransactionHelper().doInTransaction(
+                () -> {
+                    String key = groupName.startsWith(PermissionService.GROUP_PREFIX) ? groupName : PermissionService.GROUP_PREFIX + groupName;
+
+                    return authorityService.authorityExists(key)
+                            ? authorityService.getAuthorityNodeRef(key).getId()
+                            : null;
+                }, true);
+
+    }
+
+    private String createGroupInternal(String groupName, String displayName, String parentGroup) {
+        if (parentGroup != null) {
+            if (getGroupNodeId(parentGroup) == null) {
+                throw new IllegalArgumentException("parent group " + parentGroup + " does not exists");
+            }
+        }
+        String name = org.edu_sharing.alfresco.service.AuthorityService.getGroupName(groupName, parentGroup);
+        String key = PermissionService.GROUP_PREFIX + name;
+        if (authorityService.authorityExists(key)) {
+            throw new DuplicateKeyException(key);
+        }
+        return transactionService.getRetryingTransactionHelper().doInTransaction(
+                () -> {
+                    authorityService.createAuthority(AuthorityType.GROUP, name, displayName, authorityService.getDefaultZones());
+                    if (parentGroup != null) {
+                        addMemberships(parentGroup, new String[] { key });
+                    }
+                    return name;
+                }
+                , false);
     }
 
     @Override
@@ -500,30 +536,30 @@ public class AuthorityServiceImpl implements AuthorityService {
         String firstName = (String) userInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
         String lastName = (String) userInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
         String email = (String) userInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
-		NodeRef currentUserRef = personService.getPersonOrNull(userName);
-		if(StringUtils.isBlank(userName)){
+        NodeRef currentUserRef = personService.getPersonOrNull(userName);
+        if(StringUtils.isBlank(userName)){
             throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_USERNAME);
         }
 
-		if(StringUtils.isBlank(firstName) &&
-				(
-						currentUserRef == null || !StringUtils.isBlank((String) NodeServiceHelper.getPropertyNative(currentUserRef, CCConstants.CM_PROP_PERSON_FIRSTNAME))
-				)
-		){
+        if(StringUtils.isBlank(firstName) &&
+                (
+                        currentUserRef == null || !StringUtils.isBlank((String) NodeServiceHelper.getPropertyNative(currentUserRef, CCConstants.CM_PROP_PERSON_FIRSTNAME))
+                )
+        ){
             throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_FIRSTNAME);
         }
 
-		if(StringUtils.isBlank(lastName) &&
-				(
-						currentUserRef == null || !StringUtils.isBlank((String) NodeServiceHelper.getPropertyNative(currentUserRef, CCConstants.CM_PROP_PERSON_LASTNAME))
-				)){
+        if(StringUtils.isBlank(lastName) &&
+                (
+                        currentUserRef == null || !StringUtils.isBlank((String) NodeServiceHelper.getPropertyNative(currentUserRef, CCConstants.CM_PROP_PERSON_LASTNAME))
+                )){
             throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_LASTNAME);
         }
 
-		if(StringUtils.isBlank(email) &&
-				(
-						currentUserRef == null || !StringUtils.isBlank((String) NodeServiceHelper.getPropertyNative(currentUserRef, CCConstants.CM_PROP_PERSON_EMAIL))
-				)){
+        if(StringUtils.isBlank(email) &&
+                (
+                        currentUserRef == null || !StringUtils.isBlank((String) NodeServiceHelper.getPropertyNative(currentUserRef, CCConstants.CM_PROP_PERSON_EMAIL))
+                )){
             throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_EMAIL);
         }
 
@@ -778,10 +814,10 @@ public class AuthorityServiceImpl implements AuthorityService {
         }
 
 //        Boolean status = retryingTransactionHelper.doInTransaction(() -> AuthenticationUtil.runAs(() -> {
-                NodeRef personNodeRef = authenticationDao.getUserOrNull(user);
-                if (personNodeRef == null) {
-                    return false;
-                }
+        NodeRef personNodeRef = authenticationDao.getUserOrNull(user);
+        if (personNodeRef == null) {
+            return false;
+        }
         Boolean status = (Boolean) nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CCM_PROP_PERSON_2FA_ACTIVATED));
 //        return (Boolean) nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CCM_PROP_PERSON_2FA_ACTIVATED));
 //            }, ApplicationInfoList.getHomeRepository().getUsername()));
