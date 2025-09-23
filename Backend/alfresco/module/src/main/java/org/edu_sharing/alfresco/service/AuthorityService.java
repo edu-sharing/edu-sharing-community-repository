@@ -1,10 +1,14 @@
 package org.edu_sharing.alfresco.service;
 
+import lombok.Setter;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.util.MD5;
 import org.apache.log4j.Logger;
 
+/**
+ * @Deprecated
+ */
 public class AuthorityService {
 
 	public static final String MEDIA_CENTER_GROUP_TYPE = "MEDIA_CENTER";
@@ -23,8 +27,13 @@ public class AuthorityService {
 
 	
 
-	org.alfresco.service.cmr.security.AuthorityService authorityService;
+	@Setter
+    org.alfresco.service.cmr.security.AuthorityService authorityService;
 
+	/**
+	 * @Deprecated
+	 * use org.edu_sharing.service.authority.AuthorityServiceImpl
+	 */
 	public String createOrUpdateGroup(String groupName, String displayName, String parentGroup,
 			boolean preventDuplicate) {
 		String originalName = AuthorityService.getGroupName(groupName, parentGroup);
@@ -79,10 +88,6 @@ public class AuthorityService {
 		String name = prefix + groupName;
 
 		return name;
-	}
-
-	public void setAuthorityService(org.alfresco.service.cmr.security.AuthorityService authorityService) {
-		this.authorityService = authorityService;
 	}
 
 }

@@ -22,6 +22,7 @@ import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.collection.DuplicateNodeException;
 import org.edu_sharing.service.handleservicedoi.DOIServiceException;
 import org.edu_sharing.service.permission.PermissionException;
+import org.springframework.dao.DuplicateKeyException;
 
 import java.io.FileNotFoundException;
 import java.io.Serializable;
@@ -173,7 +174,7 @@ public class DAOException extends RuntimeException {
         if (t instanceof RestrictedAccessException) {
             return new DAORestrictedAccessException(t, nodeId);
         }
-        if (t instanceof DuplicateChildNodeNameException || t instanceof DuplicateNodeException) {
+        if (t instanceof DuplicateChildNodeNameException || t instanceof DuplicateNodeException || t instanceof DuplicateKeyException) {
             return new DAODuplicateNodeNameException(t, nodeId);
         }
 
