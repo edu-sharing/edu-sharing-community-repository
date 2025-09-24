@@ -41,7 +41,9 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
     private async setInitialWidth() {
         const defaultWidth = window.innerWidth * this.defaultWidth;
         if (this.storageKey) {
-            const lastValue = await firstValueFrom(this.storage.get(this.storageKey, defaultWidth));
+            const lastValue = this.applyWidthConstrains(
+                await firstValueFrom(this.storage.get(this.storageKey, defaultWidth)),
+            );
             this.renderer.setStyle(this.el.nativeElement, 'width', `${lastValue}px`);
             this.sidenavContainer.updateContentMargins();
         } else {
@@ -84,15 +86,19 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
             newWidth = containerWidth - event.clientX;
         }
 
-        newWidth = Math.max(
-            this.minWidth * window.innerWidth,
-            Math.min(newWidth, this.maxWidth * window.innerWidth),
-        );
+        newWidth = this.applyWidthConstrains(newWidth);
         this.renderer.setStyle(this.el.nativeElement, 'width', `${newWidth}px`);
         if (this.storageKey) {
             void this.storage.set(this.storageKey, newWidth);
         }
     };
+
+    private applyWidthConstrains(newWidth: number) {
+        return Math.max(
+            this.minWidth * window.innerWidth,
+            Math.min(newWidth, this.maxWidth * window.innerWidth),
+        );
+    }
 
     private stopResize = () => {
         if (this.dragging && this.sidenavContainer) {
