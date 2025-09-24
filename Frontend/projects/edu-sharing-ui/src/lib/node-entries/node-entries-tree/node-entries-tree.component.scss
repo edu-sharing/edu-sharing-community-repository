@@ -1,0 +1,126 @@
+@use 'sass:color';
+@use '../../../../assets/scss/mixins' as *;
+
+:host {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.dropdown-dummy {
+    position: fixed;
+}
+
+.tree-search-container {
+    display: flex;
+    align-items: center;
+
+    .search-field {
+        flex: 1;
+        border-radius: 50px !important;
+
+        ::ng-deep .mat-mdc-form-field-outline {
+            border-radius: 50px !important;
+        }
+    }
+
+    .filter-button {
+        margin-left: 8px;
+    }
+}
+
+.tree-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+}
+
+mat-tree-node.selected {
+    background: #f2fafe;
+}
+
+.child-tree-node {
+    flex-wrap: wrap;
+
+    .child-tree-node-container {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        width: 100%;
+        min-height: 48px;
+
+        .toggle-button {
+            margin-left: 8px;
+            cursor: pointer;
+            color: inherit;
+        }
+    }
+
+    .flex-line-break {
+        flex-basis: 100%;
+        height: 0;
+    }
+
+    .placeholder-container {
+        margin: 16px 0 8px;
+        padding-left: 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        width: 100%;
+
+        .placeholder {
+            background: #eee;
+            height: 20px;
+        }
+    }
+}
+
+.node-information {
+    padding-left: 8px;
+    padding-right: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+
+    &.cursor-pointer {
+        cursor: pointer;
+    }
+
+    .container {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+
+        img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .node-title {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+
+            &.font-bold {
+                font-weight: bold;
+            }
+        }
+
+        .node-detail {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+
+            .mat-icon {
+                width: 14px;
+                height: 14px;
+                font-size: 14px;
+            }
+        }
+    }
+}

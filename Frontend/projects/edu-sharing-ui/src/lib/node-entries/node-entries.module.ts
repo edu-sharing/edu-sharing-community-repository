@@ -8,12 +8,15 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatRippleModule } from '@angular/material/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatTreeModule } from '@angular/material/tree';
 import { TranslateModule } from '@ngx-translate/core';
 import { EduSharingUiCommonModule } from '../common/edu-sharing-ui-common.module';
 import { NodesDragSourceDirective } from '../directives/drag-nodes/nodes-drag-source.directive';
@@ -28,6 +31,7 @@ import { NodeEntriesCardComponent } from './node-entries-card/node-entries-card.
 import { NodeEntriesGlobalOptionsComponent } from './node-entries-global-options/node-entries-global-options.component';
 import { ColumnChooserComponent } from './node-entries-table/column-chooser/column-chooser.component';
 import { NodeEntriesTableComponent } from './node-entries-table/node-entries-table.component';
+import { NodeEntriesTreeComponent } from './node-entries-tree/node-entries-tree.component';
 import { NodeEntriesWrapperComponent } from './node-entries-wrapper.component';
 import { NodeEntriesComponent } from './node-entries.component';
 import { NodeRatingComponent } from './node-rating/node-rating.component';
@@ -46,6 +50,7 @@ import { SortSelectPanelComponent } from './sort-select-panel/sort-select-panel.
         NodeEntriesCardGridComponent,
         NodeEntriesCardSmallComponent,
         NodeEntriesTableComponent,
+        NodeEntriesTreeComponent,
         NodeRatingComponent,
         PreviewImageComponent,
         NodeEntriesComponent,
@@ -72,6 +77,8 @@ import { SortSelectPanelComponent } from './sort-select-panel/sort-select-panel.
         MatCheckboxModule,
         MatButtonModule,
         MatBadgeModule,
+        MatFormFieldModule,
+        MatInputModule,
         MatMenuModule,
         MatTableModule,
         MatCheckboxModule,
@@ -80,6 +87,7 @@ import { SortSelectPanelComponent } from './sort-select-panel/sort-select-panel.
         MatSlideToggleModule,
         MatSortModule,
         MatTooltipModule,
+        MatTreeModule,
         TranslateModule,
     ],
     exports: [

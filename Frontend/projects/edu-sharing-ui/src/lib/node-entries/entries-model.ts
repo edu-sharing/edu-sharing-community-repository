@@ -22,6 +22,7 @@ export enum NodeEntriesDisplayType {
     Table,
     Grid,
     SmallGrid,
+    Tree,
 }
 
 export enum InteractionType {
