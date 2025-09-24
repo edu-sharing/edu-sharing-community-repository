@@ -30,10 +30,8 @@ export class MdsHelperService {
     /**
      *
      * get columns as an object structure
-     * There are always Columns in the result['Default'] but there can also be further types
-     * @param translate
-     * @param mdsSet
-     * @param name
+     * There are always Columns in the result.Default but there can also be further types
+     * See @ColumnType
      */
     getColumns(mdsSet: MdsDefinition, name: string) {
         let columns: ColumnType = {};
@@ -51,7 +49,7 @@ export class MdsHelperService {
                             if (c.id.includes('.')) {
                                 const split = c.id.split('.');
                                 type = split[0] as ListItemType;
-                                c.id = split[1];
+                                c.id = split.slice(1).join('.');
                             }
                             const item = new ListItem(type, c.id);
                             item.format = c.format;
@@ -68,7 +66,7 @@ export class MdsHelperService {
                 }
             }
         }
-        if (!columns['Default']?.length) {
+        if (!columns?.Default?.length) {
             const defaultColumns = [];
             if (mdsSet !== null) {
                 console.warn(
@@ -94,7 +92,6 @@ export class MdsHelperService {
             }
             columns['Default'] = defaultColumns;
         }
-        console.log(columns);
         return columns;
     }
 

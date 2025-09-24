@@ -227,6 +227,15 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
             changes.dataSource.currentValue !== changes.dataSource.previousValue
         ) {
             this.dataSourceDestroy$.next();
+            this.entriesService.dataSource
+                .connect()
+                .pipe(distinctUntilChanged(), takeUntil(this.dataSourceDestroy$))
+                .subscribe((o) => {
+                    if (this.optionsHelper.getData()) {
+                        this.optionsHelper.getData().allObjects = o;
+                        void this.optionsHelper.refreshComponents();
+                    }
+                });
             this.entriesService.dataSource.isLoadingSubject
                 .pipe(
                     distinctUntilChanged(),
@@ -238,7 +247,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
                 .subscribe(() => (this.lastLoadingCompleted = Date.now()));
         }
         this.entriesService.scope = this.scope;
-        if (changes.columns) {
+        if (changes.columns || changes.displayType) {
             this.entriesService.columnsSubject.next({
                 columns:
                     this.columns[

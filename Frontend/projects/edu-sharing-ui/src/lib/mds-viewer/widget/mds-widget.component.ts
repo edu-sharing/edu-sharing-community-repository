@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -19,17 +18,14 @@ import { MatRipple } from '@angular/material/core';
 import { filter, first, map, takeUntil } from 'rxjs/operators';
 import { MdsValue, MdsWidget, Node, RestConstants, Suggestion } from 'ngx-edu-sharing-api';
 import { UIConstants } from '../../util/ui-constants';
-import { DateHelper } from '../../util/DateHelper';
 import { UIService } from '../../services/ui.service';
 import { ViewInstanceService } from '../view-instance.service';
 import { RestHelper } from '../../util/rest-helper';
-import { FormatSizePipe } from '../../pipes/file-size.pipe';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { MdsViewerService } from '../mds-viewer.service';
 import { Values } from '../../services/search-helper.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { MdsEditorInstanceServiceAbstract } from '../mds-editor-instance-service.abstract';
-import { tap } from 'rxjs';
 
 export enum MdsType {
     Io = 'io',
@@ -46,13 +42,11 @@ export enum MdsType {
 export interface MdsValueList {
     values: Suggestion[];
 }
-export interface MdsViewerWidget {
+export abstract class MdsViewerWidget {
     definition: MdsWidget;
     focusTrigger: Subject<void>;
-    getInitalValuesAsync(): Promise<InitialValues>;
-    getInitialDisplayValues(): BehaviorSubject<MdsValueList>;
-    getBasicType(flat?: boolean): string;
-    getFormattedValue(value: string[], basicType: string, translate: TranslateService): string[];
+    abstract getInitalValuesAsync(): Promise<InitialValues>;
+    abstract getInitialDisplayValues(): BehaviorSubject<MdsValueList>;
 }
 export enum MdsWidgetType {
     Text = 'text',
@@ -180,7 +174,7 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     async ngOnInit() {
-        this.widget.focusTrigger.pipe(takeUntil(this.destroyed$)).subscribe(async () => {
+        this.widget.focusTrigger?.pipe(takeUntil(this.destroyed$)).subscribe(async () => {
             await this.focus();
             this.startEdit();
         });
@@ -191,7 +185,12 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
             .subscribe(async (value: MdsValueList) => {
                 this.value.set(value.values.map((v) => v.displayString));
             });
-        this.basicType.set(this.widget.getBasicType(this.viewInstance.treeDisplay === 'flat'));
+        this.basicType.set(
+            MdsViewerService.getBasicType(
+                this.getDefinition(),
+                this.viewInstance.treeDisplay === 'flat',
+            ),
+        );
         this.rawValue = await this.getRawValue().toPromise();
     }
 
@@ -220,7 +219,12 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
         }
         const id = this.getDefinition().id;
         const values = this.getNodeValues();
-        if (this.widget.getBasicType(this.viewInstance.treeDisplay === 'flat') === 'license') {
+        if (
+            MdsViewerService.getBasicType(
+                this.definition,
+                this.viewInstance.treeDisplay === 'flat',
+            ) === 'license'
+        ) {
             this.license$.next({
                 icon: await this.nodeHelper.getLicenseIcon({
                     properties: this.getNodeValues(),
@@ -263,12 +267,14 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
 
     click() {
         if (this.getDefinition().link === '_BLANK') {
-            window.open(this.widget.getFormattedValue(this.value(), 'text', this.translate)[0]);
+            window.open(
+                this.mdsViewerService.getFormattedValue(this.value(), this.definition, 'text')[0],
+            );
         } else if (this.getDefinition().link === '_SELF') {
-            window.location.href = this.widget.getFormattedValue(
+            window.location.href = this.mdsViewerService.getFormattedValue(
                 this.value(),
+                this.definition,
                 'text',
-                this.translate,
             )[0];
         } else {
             console.warn('Unsupported link type ' + this.getDefinition().link);
@@ -276,10 +282,13 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     formatValue(): string[] {
-        return this.widget.getFormattedValue(
+        return this.mdsViewerService.getFormattedValue(
             this.value(),
-            this.widget.getBasicType(this.viewInstance.treeDisplay === 'flat'),
-            this.translate,
+            this.widget.definition,
+            MdsViewerService.getBasicType(
+                this.widget.definition,
+                this.viewInstance.treeDisplay === 'flat',
+            ),
         );
     }
 
