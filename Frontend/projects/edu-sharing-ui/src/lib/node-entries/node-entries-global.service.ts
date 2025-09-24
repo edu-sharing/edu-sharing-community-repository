@@ -87,6 +87,9 @@ export class NodeEntriesGlobalService {
      * Registers a custom (node) attribute you want to render via the given template.
      *
      * You may also override existing attributes if you want to provide a custom view.
+     * each template gets two bindings:
+     * node: the current node
+     * entriesService: the injected service which provides state & config infos of the current view      *
      */
     registerCustomFieldRendering(customFieldInfo: CustomFieldInfo) {
         this.customFields.push(customFieldInfo);
