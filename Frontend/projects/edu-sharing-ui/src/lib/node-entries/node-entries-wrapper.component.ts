@@ -250,9 +250,9 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         if (changes.columns || changes.displayType) {
             this.entriesService.columnsSubject.next({
                 columns:
-                    this.columns[
+                    this.columns?.[
                         this.displayType === NodeEntriesDisplayType.Table ? 'Table' : 'Default'
-                    ] || this.columns['Default'],
+                    ] || this.columns?.Default,
                 fromUser: false,
             });
         }
