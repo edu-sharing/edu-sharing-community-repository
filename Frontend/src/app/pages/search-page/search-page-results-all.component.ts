@@ -40,7 +40,7 @@ export class SearchPageResultsAllComponent implements OnInit {
             this.searchPage.showingAllRepositories.next(true);
         });
         this._registerAllEmpty();
-        this.previewMode = await this.configService.get('searchPreviewMode', 'Sidebar');
+        this.previewMode = await this.configService.get('searchPreviewMode', 'RenderingPage');
     }
 
     getShowMoreQueryParams(repoId: string): { [key: string]: string } {
