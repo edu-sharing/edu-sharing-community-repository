@@ -31,149 +31,148 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Lazy
 @Service
-public class SearchServiceYouTubeImpl extends SearchServiceAdapter{
-	
-	private SearchResultNodeRef searchInternal(SearchCriterias rc, String query, List<MdsQueryCriteria> criterias, SearchToken token)
-			throws Throwable {
-		
-		if (!MetadataSet.DEFAULT_CLIENT_QUERY.equals(query)) {
-			throw new Exception("Only ngsearch query is supported for this repository type, requested "+query);
-		}
-		
-		MdsQueryCriteria searchWordCriteria = null;
-		
-		for(MdsQueryCriteria criteria : criterias){
-			if (MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA.equals(criteria.getProperty())) {
-				searchWordCriteria = criteria;
-			}	
-		}
-		
-		if (searchWordCriteria == null) {
-			throw new Exception("Only supported criteria found for query, please use ngsearchword");
-		}
-		
-		String searchWord = searchWordCriteria.getValues().get(0);
-		
-		try {
-			// This object is used to make YouTube Data API requests.
-			// The last argument is required, but since we don't need anything
-			// initialized when the HttpRequest is initialized, we
-			// override the interface and provide a no-op function.
+public class SearchServiceYouTubeImpl extends SearchServiceAdapter {
 
-			// Prompt the user to enter a query term.
-			String queryTerm = searchWord;
+    private SearchResultNodeRef searchInternal(SearchCriterias rc, String query, List<MdsQueryCriteria> criterias, SearchToken token)
+            throws Throwable {
 
-			// Define the API request for retrieving search results.
-			YouTube.Search.List search = NodeServiceYouTube.getYoutube().search().list("id,snippet");
-			
-			// Set your developer key from the Google Developers Console
-			// for non-authenticated requests. See:
-			// https://console.developers.google.com/
+        if (!MetadataSet.DEFAULT_CLIENT_QUERY.equals(query)) {
+            throw new Exception("Only ngsearch query is supported for this repository type, requested " + query);
+        }
+
+        MdsQueryCriteria searchWordCriteria = null;
+
+        for (MdsQueryCriteria criteria : criterias) {
+            if (MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA.equals(criteria.getProperty())) {
+                searchWordCriteria = criteria;
+            }
+        }
+
+        if (searchWordCriteria == null) {
+            throw new Exception("Only supported criteria found for query, please use ngsearchword");
+        }
+
+        String searchWord = searchWordCriteria.getValues().get(0);
+
+        try {
+            // This object is used to make YouTube Data API requests.
+            // The last argument is required, but since we don't need anything
+            // initialized when the HttpRequest is initialized, we
+            // override the interface and provide a no-op function.
+
+            // Prompt the user to enter a query term.
+            String queryTerm = searchWord;
+
+            // Define the API request for retrieving search results.
+            YouTube.Search.List search = NodeServiceYouTube.getYoutube().search().list("id,snippet");
+
+            // Set your developer key from the Google Developers Console
+            // for non-authenticated requests. See:
+            // https://console.developers.google.com/
 
             ApplicationInfo appInfo = ApplicationInfoContextHolder.getCurrentApplicationInfo();
             // String apiKey = properties.getProperty("youtube.apikey");
-			search.setKey(appInfo.getApiKey());
-			search.setQ(queryTerm);
+            search.setKey(appInfo.getApiKey());
+            search.setQ(queryTerm);
 
-			// Restrict the search results to only include videos. See:
-			// https://developers.google.com/youtube/v3/docs/search/list#type
-			search.setType("video");
+            // Restrict the search results to only include videos. See:
+            // https://developers.google.com/youtube/v3/docs/search/list#type
+            search.setType("video");
 
-			// To increase efficiency, only retrieve the fields that the application uses.
-			search.setFields("items(id/kind,id/videoId,snippet/title,snippet/description,snippet/publishedAt,snippet/thumbnails/default/url,snippet/channelTitle)");
-			// youtube api only supports max. 50
-			search.setMaxResults(Math.min((long) token.getFrom()+token.getMaxResult(),50));
-			
-			search.setVideoLicense("creativecommon");
-			//search.setPageToken(arg0)
+            // To increase efficiency, only retrieve the fields that the application uses.
+            search.setFields("items(id/kind,id/videoId,snippet/title,snippet/description,snippet/publishedAt,snippet/thumbnails/default/url,snippet/channelTitle)");
+            // youtube api only supports max. 50
+            int totalResults = Math.min(token.getFrom() + token.getMaxResult(), 50);
+            search.setMaxResults((long)totalResults);
+            search.setVideoLicense("creativecommon");
+            //search.setPageToken(arg0)
 
-			// Call the API and print results.
-			
-			SearchListResponse searchResponse = search.execute();
-			
-			SearchResultNodeRef searchResultNodeRef = new SearchResultNodeRef();
-			List<SearchResult> searchResultList = searchResponse.getItems();
-			if (searchResultList != null) {
-				
-				// prettyPrint(searchResultList.iterator(), queryTerm);
+            // Call the API and print results.
 
-				
-				searchResultNodeRef.setSearchCriterias(rc);
-				
-				
-				Map<String, Map<String, Object>> resultData = new HashMap<>();
-				searchResultNodeRef.setStartIDX(token.getFrom());
-				searchResultNodeRef.setNodeCount(searchResponse.getPageInfo()==null ? 0 : searchResponse.getPageInfo().getTotalResults());
-				Iterator<SearchResult> iteratorSearchResults = searchResultList.iterator();
-				int i = 0;
-				
-			    List<org.edu_sharing.service.model.NodeRef> nodeRefs = new ArrayList<org.edu_sharing.service.model.NodeRef>();
-				while (iteratorSearchResults.hasNext()) {
-					
-					SearchResult singleVideo = iteratorSearchResults.next();
-					if(i >= token.getFrom()){
-						
-						ResourceId rId = singleVideo.getId();
+            SearchListResponse searchResponse = search.execute();
 
-						// Confirm that the result represents a video.
-						// Otherwise, the item will not contain a video ID.
-						if (rId.getKind().equals("youtube#video")) {
-							Map<String, Object> esResult = NodeServiceYouTube.getPropsByVideoEntry(appInfo.getAppId(),singleVideo);
-							//resultData.put((String) esResult.get(CCConstants.SYS_PROP_NODE_UID), esResult);
-							
-							org.edu_sharing.service.model.NodeRef enr = new org.edu_sharing.service.model.NodeRefImpl(appInfo.getAppId(),
-									StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(),
-									StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), esResult);
-							nodeRefs.add(enr);
-						}
-						
-					}
-					i++;
+            SearchResultNodeRef searchResultNodeRef = new SearchResultNodeRef();
+            List<SearchResult> searchResultList = searchResponse.getItems();
+            if (searchResultList != null) {
 
-				}
-				searchResultNodeRef.setData(nodeRefs);
-				
-				
-				return searchResultNodeRef;
+                // prettyPrint(searchResultList.iterator(), queryTerm);
 
-			}
-		} catch (GoogleJsonResponseException e) {
-			System.err.println("There was a service error: " + e.getDetails().getCode() + " : " + e.getDetails().getMessage());
-			throw e;
-		} catch (IOException e) {
-			System.err.println("There was an IO error: " + e.getCause() + " : " + e.getMessage());
-			throw e;
-		} catch (Throwable t) {
-			t.printStackTrace();
-			throw t;
-		}
 
-		return null;
-	}
-	
-	@Override
-	public SearchResultNodeRef search(MetadataSet mds, String query, Map<String, String[]> criterias,
-									  SearchToken searchToken) throws Throwable {
+                Iterator<SearchResult> iteratorSearchResults = searchResultList.iterator();
+                int i = 0;
+
+                List<org.edu_sharing.service.model.NodeRef> nodeRefs = new ArrayList<>();
+                while (iteratorSearchResults.hasNext()) {
+
+                    SearchResult singleVideo = iteratorSearchResults.next();
+                    if (i >= token.getFrom()) {
+
+                        ResourceId rId = singleVideo.getId();
+
+                        // Confirm that the result represents a video.
+                        // Otherwise, the item will not contain a video ID.
+                        if (rId.getKind().equals("youtube#video")) {
+                            Map<String, Object> esResult = NodeServiceYouTube.getPropsByVideoEntry(appInfo.getAppId(), singleVideo);
+                            //resultData.put((String) esResult.get(CCConstants.SYS_PROP_NODE_UID), esResult);
+
+                            org.edu_sharing.service.model.NodeRef enr = new org.edu_sharing.service.model.NodeRefImpl(appInfo.getAppId(),
+                                    StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(),
+                                    StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), esResult);
+                            nodeRefs.add(enr);
+                        }
+
+                    }
+                    i++;
+
+                }
+                searchResultNodeRef.setData(nodeRefs);
+                searchResultNodeRef.setSearchCriterias(rc);
+
+
+                searchResultNodeRef.setStartIDX(token.getFrom());
+                searchResultNodeRef.setNodeCount(searchResponse.getPageInfo() == null ?  Math.min(token.getFrom() + nodeRefs.size() + token.getMaxResult(), 50)  : searchResponse.getPageInfo().getTotalResults());
+
+
+                return searchResultNodeRef;
+
+            }
+        } catch (GoogleJsonResponseException e) {
+            log.error("There was a service error: {} : {}", e.getDetails().getCode(), e.getDetails().getMessage(), e);
+            throw e;
+        } catch (IOException e) {
+            log.error("There was an IO error: {} : {}", e.getCause(), e.getMessage(), e);
+            throw e;
+        } catch (Throwable t) {
+            log.error("There was an unexpected error: {} : {}", t.getCause(), t.getMessage(), t);
+            throw t;
+        }
+
+        return null;
+    }
+
+    @Override
+    public SearchResultNodeRef search(MetadataSet mds, String query, Map<String, String[]> criterias,
+                                      SearchToken searchToken) throws Throwable {
         ApplicationInfo appInfo = ApplicationInfoContextHolder.getCurrentApplicationInfo();
 
-		SearchCriterias rc = new SearchCriterias();
-		rc.setMetadataSetId(mds.getId());
-		rc.setMetadataSetQuery(query);
-		rc.setRepositoryId(appInfo.getAppId());
-		
-		//recommend search
-		if(criterias == null || criterias.isEmpty()) {
+        SearchCriterias rc = new SearchCriterias();
+        rc.setMetadataSetId(mds.getId());
+        rc.setMetadataSetQuery(query);
+        rc.setRepositoryId(appInfo.getAppId());
+
+        //recommend search
+        if (criterias == null || criterias.isEmpty()) {
             criterias = new HashMap<>();
-			String searchword = ApplicationInfoList.getRepositoryInfoById(appInfo.getAppId()).getRecommend_objects_query();
-			if (searchword == null) {
-				searchword = "Mathematik";
-			}
-			criterias.put(MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA, new String[] {searchword});
-			query = MetadataSet.DEFAULT_CLIENT_QUERY;
-		}
-		
-		List<MdsQueryCriteria> criterasConverted = MdsQueryCriteria.fromMap(criterias);
-		return searchInternal(rc,query,criterasConverted,searchToken);
-	}
-	
+            String searchword = ApplicationInfoList.getRepositoryInfoById(appInfo.getAppId()).getRecommend_objects_query();
+            if (searchword == null) {
+                searchword = "Mathematik";
+            }
+            criterias.put(MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA, new String[]{searchword});
+            query = MetadataSet.DEFAULT_CLIENT_QUERY;
+        }
+
+        List<MdsQueryCriteria> criterasConverted = MdsQueryCriteria.fromMap(criterias);
+        return searchInternal(rc, query, criterasConverted, searchToken);
+    }
+
 }
