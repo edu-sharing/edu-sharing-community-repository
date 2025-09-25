@@ -16,6 +16,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -166,6 +167,10 @@ public class AppContextServiceLocator {
 
     private String resolveProviderName(ApplicationInfo appInfo) {
         return remoteProviderCache.computeIfAbsent(appInfo, k -> {
+            if(!appInfo.getType().equals(ApplicationInfo.TYPE_REPOSITORY)){
+                return "local";
+            }
+
             String remoteProvider = appInfo.getString(ApplicationInfo.KEY_REMOTE_PROVIDER, null);
             if (!StringUtils.isBlank(remoteProvider)) {
                 return remoteProvider;
@@ -180,30 +185,17 @@ public class AppContextServiceLocator {
     }
 
     private <T> T resolve(Class<T> type, String contextName) {
-        // 1) registry override by bean name
-        AppContextRegistry.ContextDefinition contextDef = appContextRegistry.getContexts(contextName);
-        AppContextRegistry.BeanOverride<T> beanOverride = contextDef.resolveOverrideBean(type);
-        if (beanOverride != null) {
-            return beanOverride.getBean(beanFactory);
-        }
 
-        // 2) register override by bean name in fallback context
-        AppContextRegistry.ContextDefinition fallbackContextDef = appContextRegistry.getFallbackContext();
-        AppContextRegistry.BeanOverride<T> fallbackBeanOverride = fallbackContextDef.resolveOverrideBean(type);
-        if (fallbackBeanOverride != null) {
-            return fallbackBeanOverride.getBean(beanFactory);
-        }
-
-        // 3) registry override by annoation @AppContext(contextName)
+        // 1) registry override by annoation @AppContext(contextName)
         Map<String, T> candidates = beanFactory.getBeansOfType(type);
         for (T bean : candidates.values()) {
             AppContext ann = getAppContextAnnotation(bean, AppContext.class);
-            if (ann != null && contextName.equals(ann.value())) {
+            if (ann != null && Arrays.asList(ann.value()).contains(contextName)) {
                 return bean;
             }
         }
 
-        // 4) local override by annoation @LocalAppContext
+        // 2) local override by annoation @LocalAppContext
         for (T bean : candidates.values()) {
             LocalAppContext ann = getAppContextAnnotation(bean, LocalAppContext.class);
             if (ann != null) {
@@ -211,7 +203,31 @@ public class AppContextServiceLocator {
             }
         }
 
-        // 5) fallback to local context if only one candidate is found in local context
+        // 3) local override by annoation @LocalAppContext
+        for (T bean : candidates.values()) {
+            FallbackAppContext ann = getAppContextAnnotation(bean, FallbackAppContext.class);
+            if (ann != null && Arrays.asList(ann.value()).contains(contextName)) {
+                return bean;
+            }
+        }
+
+
+        // 4) registry override by bean name
+        AppContextRegistry.ContextDefinition contextDef = appContextRegistry.getContexts(contextName);
+        AppContextRegistry.BeanOverride<T> beanOverride = contextDef.resolveOverrideBean(type);
+        if (beanOverride != null) {
+            return beanOverride.getBean(beanFactory);
+        }
+
+        // 5) register override by bean name in fallback context
+        AppContextRegistry.ContextDefinition fallbackContextDef = appContextRegistry.getFallbackContext();
+        AppContextRegistry.BeanOverride<T> fallbackBeanOverride = fallbackContextDef.resolveOverrideBean(type);
+        if (fallbackBeanOverride != null) {
+            return fallbackBeanOverride.getBean(beanFactory);
+        }
+
+
+        // 6) fallback to local context if only one candidate is found in local context
         if (contextName.equals("local") && candidates.size() == 1) {
             return candidates.values().stream().findFirst().get();
         }

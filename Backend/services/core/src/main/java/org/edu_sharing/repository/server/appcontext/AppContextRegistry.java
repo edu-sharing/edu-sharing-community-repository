@@ -3,7 +3,9 @@ package org.edu_sharing.repository.server.appcontext;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.context.ApplicationContext;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +41,9 @@ public final class AppContextRegistry {
         if (localContext == null) {
             throw new IllegalArgumentException("No local app context found");
         }
+        // add an alias for the local provider
+        copyContext.put("org.edu_sharing.service.provider.LocalProvider", localContext);
+
         this.fallbackContext = copyContext.remove("fallback");
         this.contexts = Collections.unmodifiableMap(copyContext);
     }
@@ -166,6 +171,8 @@ public final class AppContextRegistry {
 
     public interface BeanOverride<T> {
         T getBean(ListableBeanFactory beanFactory);
+
+        void validateBeanDefinitionExists(ApplicationContext applicationContext);
     }
 
     public record OverrideByBeanName<T>(Class<T> type, String name) implements BeanOverride<T> {
@@ -173,12 +180,28 @@ public final class AppContextRegistry {
         public T getBean(ListableBeanFactory beanFactory) {
             return beanFactory.getBean(name, type);
         }
+
+        @Override
+        public void validateBeanDefinitionExists(ApplicationContext applicationContext) {
+            String[] beanNames =  applicationContext.getBeanNamesForType(type);
+            if(Arrays.stream(beanNames).noneMatch(x->x.equals(name))){
+                throw new IllegalStateException("No bean definition found for type: " + type.getName());
+            }
+        }
     }
 
     public record OverrideByClass<T, I extends T>(Class<I> type) implements BeanOverride<T> {
         @Override
         public T getBean(ListableBeanFactory beanFactory) {
             return beanFactory.getBean(type);
+        }
+
+        @Override
+        public void validateBeanDefinitionExists(ApplicationContext applicationContext) {
+            String[] beanNames =  applicationContext.getBeanNamesForType(type);
+            if (beanNames.length == 0) {
+                throw new IllegalStateException("No bean definition found for type: " + type.getName());
+            }
         }
     }
 
