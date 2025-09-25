@@ -20,6 +20,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.edu_sharing.repository.server.appcontext.ApplicationInfoContextHolder;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.ISO8601DateFormat;
@@ -28,20 +29,15 @@ import org.edu_sharing.service.search.model.SearchToken;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.extensions.surf.util.URLEncoder;
+import org.springframework.stereotype.Service;
 
+@Lazy
+@Service
 public class SearchServiceTutoryImpl extends SearchServiceAdapter{
 	
-	private String repositoryId;
 
-
-
-	public SearchServiceTutoryImpl(String appId) {
-		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
-		this.repositoryId = appInfo.getAppId();		
-	}
-
-	
 	@Override
 	public SearchResultNodeRef search(MetadataSet mds, String query, Map<String, String[]> criterias,
 									  SearchToken searchToken) throws Throwable {
@@ -66,11 +62,12 @@ public class SearchServiceTutoryImpl extends SearchServiceAdapter{
 		List<NodeRef> data=new ArrayList<>();
 		searchResultNodeRef.setNodeCount(result.getInt("total"));
 		searchResultNodeRef.setData(data);
-		
-		for(int i = 0; i < jsonArray.length(); i++) {
+
+        ApplicationInfo appInfo = ApplicationInfoContextHolder.getCurrentApplicationInfo();
+        for(int i = 0; i < jsonArray.length(); i++) {
 			JSONObject worksheet = jsonArray.getJSONObject(i);
 			
-			org.edu_sharing.service.model.NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(repositoryId, 
+			org.edu_sharing.service.model.NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(appInfo.getAppId(),
 					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(),
 					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),getProperties(worksheet));
 			data.add(ref);
@@ -116,7 +113,7 @@ public class SearchServiceTutoryImpl extends SearchServiceAdapter{
 		return properties;
 	}
 	
-	public static String getHttpResult(String url) throws KeyManagementException, NoSuchAlgorithmException, MalformedURLException, IOException {
+	public static String getHttpResult(String url) throws IOException {
 		HttpsURLConnection connection = openUrl(new URL(url));
 		connection.connect();
 		InputStream is=connection.getInputStream();
@@ -133,7 +130,7 @@ public class SearchServiceTutoryImpl extends SearchServiceAdapter{
 	
 	
 	
-	public static HttpsURLConnection openUrl(URL url) throws KeyManagementException, IOException, NoSuchAlgorithmException{
+	public static HttpsURLConnection openUrl(URL url) throws IOException {
 		return (HttpsURLConnection) url.openConnection();
 	}
 }

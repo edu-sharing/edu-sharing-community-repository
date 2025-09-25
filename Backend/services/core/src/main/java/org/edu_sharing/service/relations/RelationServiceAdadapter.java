@@ -5,10 +5,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class RelationServiceAdadapter implements RelationService {
 
-    public RelationServiceAdadapter(String appId) {
-
-    }
-
     @NotNull
     @Override
     public NodeRelation getRelations(@NotNull String node) {

@@ -89,8 +89,8 @@ public class ContentServlet extends SpringHttpServlet {
 					NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef,nodeId);
 					// if remote repository, fetch the content via the implemented node service
 					if (repId != null && !homeAppInfo.getAppId().equals(repId)) {
-						String mimetype = NodeServiceFactory.getNodeService(repId).getContentMimetype(null, null, nodeId);
-						InputStream is = NodeServiceFactory.getNodeService(repId).getContent(null, null, nodeId, null, ContentModel.PROP_CONTENT.toString());
+						String mimetype = NodeServiceFactory.getInstance().getService(repId).getContentMimetype(null, null, nodeId);
+						InputStream is = NodeServiceFactory.getInstance().getService(repId).getContent(null, null, nodeId, null, ContentModel.PROP_CONTENT.toString());
 						resp.setContentType((mimetype != null) ? mimetype : "application/octet-stream");
 						ByteArrayOutputStream bos = new ByteArrayOutputStream();
 						if (is != null) {

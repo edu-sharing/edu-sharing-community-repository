@@ -1,35 +1,30 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
-import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.Path;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.SearchParameters;
-import org.alfresco.service.cmr.search.SearchService;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.jobs.helper.NodeHelper;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
+import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.apache.camel.model.rest.RestParamType.query;
-
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @JobDescription(description = "logs diff elastic and db")
 public class ProtocolDiffDBSolrJob extends AbstractJobMapAnnotationParams{
 
@@ -43,6 +38,8 @@ public class ProtocolDiffDBSolrJob extends AbstractJobMapAnnotationParams{
     String startFolder;
 
     int PAGE_SIZE = 1000;
+    @Autowired
+    private SearchService searchService;
 
     @Override
     public void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
@@ -76,7 +73,6 @@ public class ProtocolDiffDBSolrJob extends AbstractJobMapAnnotationParams{
                     .must(m -> m.term(t -> t.field("type").value("ccm:io")))
                     .build());
 
-        org.edu_sharing.service.search.SearchService searchService = SearchServiceFactory.getLocalService();
 
         logger.info("collect elastic nodes " + token.getElasticQuery());
         SearchResultNodeRef search = searchService.search(token);

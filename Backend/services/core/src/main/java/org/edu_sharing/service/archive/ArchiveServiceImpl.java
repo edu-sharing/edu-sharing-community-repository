@@ -65,8 +65,8 @@ public class ArchiveServiceImpl implements ArchiveService  {
         try{
 			this.appInfo = ApplicationInfoList.getHomeRepository();
 			this.client = new MCAlfrescoAPIClient();
-			this.searchService = SearchServiceFactory.getSearchService(this.appInfo.getAppId());
-			this.authorityService = AuthorityServiceFactory.getAuthorityService(this.appInfo.getAppId());
+			this.searchService = SearchServiceFactory.getInstance().getService(this.appInfo.getAppId());
+			this.authorityService = AuthorityServiceFactory.getInstance().getService(this.appInfo.getAppId());
 			
 		}catch(Throwable e){
 			throw new RuntimeException(e.getMessage());

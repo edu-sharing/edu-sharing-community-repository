@@ -10,12 +10,6 @@ import java.util.List;
 
 public class RatingServiceAdapter implements RatingService {
 
-    private final Logger logger= Logger.getLogger(RatingServiceAdapter.class);
-
-    public RatingServiceAdapter(String appId) {
-
-    }
-
     @Override
     public void addOrUpdateRating(String nodeId, Double rating, String text) throws Exception {
         throw new NotImplementedException();

@@ -226,7 +226,7 @@ public class BulkServiceImpl implements BulkService, ApplicationListener<Refresh
 							// add a default comment for bulk import
 							propertiesNativeMapped.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_BULK_CREATE);
 							existing = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
-									NodeServiceFactory.getLocalService().createNodeBasic(
+									NodeServiceFactory.getInstance().getLocalService().createNodeBasic(
 											groupFolder.getId(),
 											CCConstants.getValidGlobalName(type),
 											propertiesNativeMapped
@@ -245,13 +245,13 @@ public class BulkServiceImpl implements BulkService, ApplicationListener<Refresh
 							}
 							propertiesNativeMapped = getCleanProps(existing, finalPropertiesNative);
 							propertiesNativeMapped.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, resetVersion ? CCConstants.VERSION_COMMENT_BULK_CREATE : CCConstants.VERSION_COMMENT_BULK_UPDATE);
-							NodeServiceFactory.getLocalService().updateNodeNative(existing.getId(), propertiesNativeMapped);
+							NodeServiceFactory.getInstance().getLocalService().updateNodeNative(existing.getId(), propertiesNativeMapped);
 							// version the previous state
 							createVersion(existing);
 							if (propertiesKeep != null) {
 								propertiesKeep = getCleanProps(existing, propertiesKeep);
 								propertiesKeep.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_BULK_UPDATE_RESYNC);
-								NodeServiceFactory.getLocalService().updateNodeNative(existing.getId(), propertiesKeep);
+								NodeServiceFactory.getInstance().getLocalService().updateNodeNative(existing.getId(), propertiesKeep);
 								// 2. versioning
 								createVersion(existing);
 							}
@@ -262,7 +262,7 @@ public class BulkServiceImpl implements BulkService, ApplicationListener<Refresh
 					return existing;
 				}));
 		if(aspects != null) {
-			aspects.forEach((a) -> NodeServiceFactory.getLocalService().addAspect(result.getId(), CCConstants.getValidGlobalName(a)));
+			aspects.forEach((a) -> NodeServiceFactory.getInstance().getLocalService().addAspect(result.getId(), CCConstants.getValidGlobalName(a)));
 		}
 		for (BulkServiceInterceptorInterface interceptor : interceptors) {
 			interceptor.onNodeCreated(result, propertiesNative);
@@ -274,7 +274,7 @@ public class BulkServiceImpl implements BulkService, ApplicationListener<Refresh
 	private void createVersion(NodeRef existing) throws Exception {
 		// disable behaviour cause otherwise we will trigger duplicate Node Interceptor calls
 		policyBehaviourFilter.disableBehaviour(existing);
-		NodeServiceFactory.getLocalService().createVersion(existing.getId());
+		NodeServiceFactory.getInstance().getLocalService().createVersion(existing.getId());
 		policyBehaviourFilter.enableBehaviour(existing);
 	}
 

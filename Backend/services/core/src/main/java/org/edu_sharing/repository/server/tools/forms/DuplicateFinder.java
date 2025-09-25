@@ -69,19 +69,19 @@ public class DuplicateFinder {
         String[] splitted = value.split("\\.");
 
         String value0 = (splitted.length > 0) ? splitted[0] : value;
-        String result = value;
+        StringBuilder result = new StringBuilder(value);
 
-        while (valueForPropIsTaken(nodes, currentNodeId, CCConstants.CM_NAME, result)) {
-            result = value0 + cm_name_exists_counter;
+        while (valueForPropIsTaken(nodes, currentNodeId, CCConstants.CM_NAME, result.toString())) {
+            result = new StringBuilder(value0 + cm_name_exists_counter);
             if (splitted.length > 1) {
                 for (int i = 1; i < splitted.length; i++) {
-                    result = result + "." + splitted[i];
+                    result.append(".").append(splitted[i]);
                 }
             }
             cm_name_exists_counter++;
         }
 
-        return result;
+        return result.toString();
     }
 
     public String getUniqueValue(String parentId, String property, String value) {
@@ -89,18 +89,18 @@ public class DuplicateFinder {
 
         String[] splitted = value.split("\\.");
         String value0 = (splitted.length > 0) ? splitted[0] : value;
-        String result = value;
-        while (NodeServiceFactory.getLocalService().findNodeByName(parentId, result) != null) {
-            result = value0 + " - " + cm_name_exists_counter;
+        StringBuilder result = new StringBuilder(value);
+        while (NodeServiceFactory.getInstance().getLocalService().findNodeByName(parentId, result.toString()) != null) {
+            result = new StringBuilder(value0 + " - " + cm_name_exists_counter);
             if (splitted.length > 1) {
                 for (int i = 1; i < splitted.length; i++) {
-                    result = result + "." + splitted[i];
+                    result.append(".").append(splitted[i]);
                 }
             }
             cm_name_exists_counter++;
         }
 
-        return result;
+        return result.toString();
     }
 
     /**
@@ -116,24 +116,22 @@ public class DuplicateFinder {
 
         String[] splitted = value.split("\\.");
         String value0 = (splitted.length > 0) ? splitted[0] : value;
-        String result = value;
-        while (valueForPropIsTaken(nodes, CCConstants.CM_NAME, result)) {
-            result = value0 + " - " + cm_name_exists_counter;
+        StringBuilder result = new StringBuilder(value);
+        while (valueForPropIsTaken(nodes, CCConstants.CM_NAME, result.toString())) {
+            result = new StringBuilder(value0 + " - " + cm_name_exists_counter);
             if (splitted.length > 1) {
                 for (int i = 1; i < splitted.length; i++) {
-                    result = result + "." + splitted[i];
+                    result.append(".").append(splitted[i]);
                 }
             }
             cm_name_exists_counter++;
         }
 
-        return result;
+        return result.toString();
     }
 
     /**
      * replaces CM_NAME prop with an unique and clean safeable name
-     * @param currentLevelObjects
-     * @param propsToSafe
      */
     public void transformToSafeName(Map<String, Map<String, Object>> currentLevelObjects, Map<String, Object> propsToSafe) {
 
@@ -145,7 +143,7 @@ public class DuplicateFinder {
             // replace ie fakepath like C:\fakepath\test.png
             String replaceFakePathPrefixRegEx = "^[A-Za-z]:\\\\fakepath\\\\";
             String fakePaceCleanedString = cmNameReadableName.replaceFirst(replaceFakePathPrefixRegEx, "");
-            if (fakePaceCleanedString.length() > 0) {
+            if (!fakePaceCleanedString.isEmpty()) {
                 cmNameReadableName = fakePaceCleanedString;
             }
 
@@ -154,7 +152,7 @@ public class DuplicateFinder {
             cmNameReadableName = cmNameReadableName.replaceAll(ApplicationInfoList.getHomeRepository().getValidatorRegexCMName(), "_");
 
             //replace ending dot with nothing
-            cmNameReadableName = cmNameReadableName.replaceAll("[\\.]*$", "");
+            cmNameReadableName = cmNameReadableName.replaceAll("[.]*$", "");
             cmNameReadableName = NodeServiceHelper.cleanupCmName(cmNameReadableName);
 
             cmNameReadableName = new DuplicateFinder().getUniqueValue(currentLevelObjects, CCConstants.CM_NAME, cmNameReadableName);

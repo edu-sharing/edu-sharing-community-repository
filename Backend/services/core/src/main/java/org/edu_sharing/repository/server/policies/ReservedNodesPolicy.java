@@ -37,6 +37,7 @@ public class ReservedNodesPolicy implements NodeServicePolicies.OnCreateNodePoli
 
     private final PolicyComponent policyComponent;
     private final NodeService nodeService;
+    private final AuthenticationToolAPI authTool;
 
     private final List<String> reservedNodeNames = List.of("inbox", "savedsearch");
 
@@ -83,7 +84,7 @@ public class ReservedNodesPolicy implements NodeServicePolicies.OnCreateNodePoli
                 return;
             }
 
-            String userName = new AuthenticationToolAPI().getAuthentication(httpSession).get(CCConstants.AUTH_USERNAME);
+            String userName = authTool.getAuthentication(httpSession).get(CCConstants.AUTH_USERNAME);
             MCAlfrescoAPIClient baseClient = new MCAlfrescoAPIClient();
             String homeFolderID = baseClient.getHomeFolderID(userName);
             if (!parentRef.getId().equals(homeFolderID)) {

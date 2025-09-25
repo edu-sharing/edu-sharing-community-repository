@@ -39,7 +39,7 @@ public class NodeCollectorElastic {
         searchToken.setStoreProtocol(storeRef.getProtocol());
         searchToken.setStoreName(storeRef.getIdentifier());
 
-        SearchService searchService = SearchServiceFactory.getLocalService();
+        SearchService searchService = SearchServiceFactory.getInstance().getLocalService();
         SearchResultNodeRef search = searchService.search(searchToken);
         search.getData().forEach(n -> {
             NodeRef nodeRef = new NodeRef(new StoreRef(n.getStoreProtocol(),n.getStoreId()),n.getNodeId());

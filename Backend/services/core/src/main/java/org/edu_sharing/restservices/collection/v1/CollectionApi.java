@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
@@ -49,8 +48,6 @@ import java.util.*;
 @Produces({"application/json"})
 public class CollectionApi {
 
-	private static Logger logger = Logger.getLogger(CollectionApi.class);
-
 	@Autowired
 	private ActivityEventService activityEventService;
 
@@ -78,20 +75,10 @@ public class CollectionApi {
 
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 
-			if (repoDao == null) {
-
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
-
-			NodeDao nodeDao = NodeDao.getNode(repoDao,
+            NodeDao nodeDao = NodeDao.getNode(repoDao,
 					collectionId, Filter.createShowAllFilter());
 
-			if (nodeDao == null) {
-
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
-
-			CollectionEntry response = new CollectionEntry();
+            CollectionEntry response = new CollectionEntry();
 
 			Node collection = nodeDao.asNode();
 
@@ -112,7 +99,7 @@ public class CollectionApi {
 	@Path("/collections/{repository}/{collection}/order")
 	@Operation(summary = "Set order of nodes in a collection. In order to work as expected, provide a list of all nodes in this collection", description = "Current order will be overriden. Requires full permissions for the parent collection")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema())),
 			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -128,10 +115,7 @@ public class CollectionApi {
 
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 
-			if (repoDao == null) {
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
-			CollectionDao.getCollection(repoDao, collectionId).setOrder(nodes);
+            CollectionDao.getCollection(repoDao, collectionId).setOrder(nodes);
 			return Response.status(Response.Status.OK).build();
 
 		} catch (Throwable t) {
@@ -158,10 +142,7 @@ public class CollectionApi {
 
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 
-			if (repoDao == null) {
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
-			CollectionDao.setPinned(repoDao, collections);
+            CollectionDao.setPinned(repoDao, collections);
 			return Response.status(Response.Status.OK).build();
 
 		} catch (Throwable t) {
@@ -195,11 +176,7 @@ public class CollectionApi {
 		try {
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 
-			if (repoDao == null) {
-
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
-			SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getId());
+            SearchService searchService = SearchServiceFactory.getInstance().getService(repoDao.getId());
 
 
 			MetadataSet mds = MdsDao.getMds(repoDao,CCConstants.metadatasetdefault_id).getMds();
@@ -235,7 +212,7 @@ public class CollectionApi {
 	@Operation(summary = "Update a collection.", description = "Update a collection.")
 
 	@ApiResponses(value = {
-			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema())),
 			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -252,19 +229,9 @@ public class CollectionApi {
 
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 
-			if (repoDao == null) {
+            CollectionDao collectionDao = CollectionDao.getCollection(repoDao, node.getRef().getId());
 
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
-
-			CollectionDao collectionDao = CollectionDao.getCollection(repoDao, node.getRef().getId());
-
-			if (collectionDao == null) {
-
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
-
-			collectionDao.update(node);
+            collectionDao.update(node);
 
 			return Response.status(Response.Status.OK).build();
 
@@ -280,7 +247,7 @@ public class CollectionApi {
 	@Operation(summary = "Delete a collection.", description = "Delete a collection.")
 
 	@ApiResponses(value = {
-			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema())),
 			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -297,19 +264,9 @@ public class CollectionApi {
 
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 
-			if (repoDao == null) {
+            CollectionDao collectionDao = CollectionDao.getCollection(repoDao, collectionId);
 
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
-
-			CollectionDao collectionDao = CollectionDao.getCollection(repoDao, collectionId);
-
-			if (collectionDao == null) {
-
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
-
-			collectionDao.delete();
+            collectionDao.delete();
 
 			return Response.status(Response.Status.OK).build();
 
@@ -451,8 +408,7 @@ public class CollectionApi {
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
 			CollectionEntries response = new CollectionEntries();
-			List<Node> collections = new ArrayList<>();
-			Filter filter = new Filter();
+            Filter filter = new Filter();
 			filter.setProperties(propertyFilter);
 			CollectionBaseEntries base = CollectionDao.getCollectionsSubcollections(repoDao, parentId, scope,
 					fetchCounts == null || fetchCounts,
@@ -460,9 +416,7 @@ public class CollectionApi {
 					sortDefinition,
 					skipCount == null ? 0 : skipCount,
 					maxItems == null ? 500 : maxItems);
-			for(Node item : base.getEntries()) {
-				collections.add(item);
-			}
+            List<Node> collections = new ArrayList<>(base.getEntries());
 			response.setCollections(collections);
 			response.setPagination(base.getPagination());
 			return Response.status(Response.Status.OK).entity(response).build();
@@ -496,13 +450,8 @@ public class CollectionApi {
 		try {
 
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			
-			if (repoDao == null) {
-				
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
 
-			NodeDao result = null;
+            NodeDao result;
 			
 			if (CollectionDao.ROOT.equals(parentId)) {
 				
@@ -511,13 +460,8 @@ public class CollectionApi {
 			} else {
 
 				CollectionDao parentCollectionDao = CollectionDao.getCollection(repoDao, parentId);
-	
-				if (parentCollectionDao == null) {
-	
-					return Response.status(Response.Status.NOT_FOUND).build();
-				}
-	
-				result = parentCollectionDao.createChild(collection);
+
+                result = parentCollectionDao.createChild(collection);
 			}
 			
 			CollectionEntry response = new CollectionEntry();
@@ -560,11 +504,7 @@ public class CollectionApi {
 
 
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			
-			if (repoDao == null) {
-				
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
+
             NodeEntry entry=new NodeEntry();
 
 			sourceRepo = sourceRepo != null && !sourceRepo.equals(RepositoryDao.getHomeRepository().getId()) ? sourceRepo : null;
@@ -587,7 +527,7 @@ public class CollectionApi {
 	@Operation(summary = "Delete a node from a collection.", description = "Delete a node from a collection.")
 	
 	@ApiResponses(value = {
-			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema())),
 	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
 	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
 	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
@@ -604,28 +544,13 @@ public class CollectionApi {
 		try {
 
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			
-			if (repoDao == null) {
-				
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
 
-			CollectionDao collectionDao = CollectionDao.getCollection(repoDao,
+            CollectionDao collectionDao = CollectionDao.getCollection(repoDao,
 					collectionId);
 
-			if (collectionDao == null) {
+            NodeDao nodeDao = NodeDao.getNode(repoDao, nodeId);
 
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
-
-			NodeDao nodeDao = NodeDao.getNode(repoDao, nodeId);
-			
-			if (nodeDao == null) {
-
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
-			
-			collectionDao.removeFromCollection(nodeDao);
+            collectionDao.removeFromCollection(nodeDao);
 
 			return Response.status(Response.Status.OK).build();
 
@@ -660,21 +585,11 @@ public class CollectionApi {
 			try {
 		
 				RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-				
-				if (repoDao == null) {
-					
-					return Response.status(Response.Status.NOT_FOUND).build();
-				}
 
-				CollectionDao collectionDao = CollectionDao.getCollection(repoDao,
+                CollectionDao collectionDao = CollectionDao.getCollection(repoDao,
 						collectionId);
 
-				if (collectionDao == null) {
-
-					return Response.status(Response.Status.NOT_FOUND).build();
-				}
-
-				collectionDao.writePreviewImage(inputStream, mimetype);
+                collectionDao.writePreviewImage(inputStream, mimetype);
 				
 				CollectionEntry response = new CollectionEntry();
 				
@@ -694,7 +609,7 @@ public class CollectionApi {
 	@Operation(summary = "Deletes Preview Image of a collection.", description = "Deletes Preview Image of a collection.")
 
 	@ApiResponses(value = {
-			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema())),
 			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -711,20 +626,10 @@ public class CollectionApi {
 
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 
-			if (repoDao == null) {
-
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
-
-			CollectionDao collectionDao = CollectionDao.getCollection(repoDao,
+            CollectionDao collectionDao = CollectionDao.getCollection(repoDao,
 					collectionId);
 
-			if (collectionDao == null) {
-
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
-
-			collectionDao.removePreviewImage();
+            collectionDao.removePreviewImage();
 
 			return Response.status(Response.Status.OK).build();
 

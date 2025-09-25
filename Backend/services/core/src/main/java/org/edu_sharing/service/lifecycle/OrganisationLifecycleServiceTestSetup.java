@@ -165,7 +165,7 @@ public class OrganisationLifecycleServiceTestSetup {
     }
 
     private void createCollectionsAndRefs(String user, List<NodeRef> fileList) {
-        CollectionService collectionService = CollectionServiceFactory.getLocalService();
+        CollectionService collectionService = CollectionServiceFactory.getInstance().getLocalService();
         Collection level0Col = null;
         List<Collection> collectionList = new ArrayList<>();
         for(int i = 0; i < numberOfCollections; i++){

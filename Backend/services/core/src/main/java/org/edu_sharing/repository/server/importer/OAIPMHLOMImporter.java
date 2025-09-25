@@ -105,15 +105,6 @@ public class OAIPMHLOMImporter implements Importer{
 	Date from;
 	Date until;
 
-	/**
-	 * @param oai_base_url
-	 * @param recordHandler
-	 * @param nrOfResumptions
-	 * @param nrOfRecords
-	 * @param metadataPrefix
-	 * @param sets
-	 * @throws Exception
-	 */
 	/*
 	public OAIPMHLOMImporter(String oai_base_url,PersistentHandlerInterface persistentHandler, RecordHandlerInterface recordHandler, BinaryHandler binaryHandler, int nrOfResumptions, int nrOfRecords, String metadataPrefix, String[] sets) throws Exception{
 		
@@ -469,9 +460,9 @@ public class OAIPMHLOMImporter implements Importer{
 			}
 			if(job!=null &&
 					(job.getJobDataMap().getBoolean(OAIConst.PARAM_FORCE_UPDATE) || job.getJobDataMap().getBoolean(OAIConst.PARAM_NO_VERSION))){
-				NodeServiceFactory.getLocalService().deleteVersionHistory(nodeId);
+				NodeServiceFactory.getInstance().getLocalService().deleteVersionHistory(nodeId);
 			}
-			NodeServiceFactory.getLocalService().createVersion(nodeId);
+			NodeServiceFactory.getInstance().getLocalService().createVersion(nodeId);
 		}
 		return nodeId;
 	}

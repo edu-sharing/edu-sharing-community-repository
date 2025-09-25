@@ -1,6 +1,8 @@
 package org.edu_sharing.service.permission;
 
 import com.google.gson.Gson;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
@@ -43,21 +45,20 @@ import org.springframework.stereotype.Service;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
+@RequiredArgsConstructor
 @Service(value = "permissionServiceImpl")
 public class PermissionServiceImpl implements org.edu_sharing.service.permission.PermissionService {
 
     public static final String NODE_PUBLISHED = "NODE_PUBLISHED";
     // the maximal number of "notify" entries in the PH_HISTORY field that are serialized
     private static final int MAX_NOTIFY_HISTORY_LENGTH = 100;
-    private final EduSharingCustomPermissionService customPermissionService;
+    private final Optional<EduSharingCustomPermissionService> customPermissionService;
     private final NodeService nodeService;
     private final PersonService personService;
-    private final ApplicationInfo appInfo;
     private final ToolPermissionService toolPermission;
     private final org.edu_sharing.service.nodeservice.NodeService eduNodeService;
 
@@ -75,39 +76,12 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
     private final OwnableService ownableService;
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    public PermissionServiceImpl(
-            ToolPermissionService toolPermissionService,
-            org.edu_sharing.service.nodeservice.NodeService nodeService,
-            TimedPermissionMapper timedPermissionMapper,
-            Optional<EduSharingCustomPermissionService> customPermissionService,
-            OrganisationService organisationService,
-            BehaviourFilter policyBehaviourFilter,
-            AuthorityService authorityService,
-            RetryingTransactionHelper retryingTransactionHelper,
-            RepositoryCache repositoryCache,
-            GuestService guestService,
-            PermissionService permissionService,
-            PersonService personService,
-            NodeService alfNodeService,
-            OwnableService ownableService,
-            ApplicationEventPublisher applicationEventPublisher
-    ) {
+    private ApplicationInfo appInfo;
+
+
+    @PostConstruct
+    public void init() {
         appInfo = ApplicationInfoList.getHomeRepository();
-        this.eduNodeService = nodeService;
-        this.toolPermission = toolPermissionService;
-        this.customPermissionService = customPermissionService.orElse(null);
-        this.nodeService = alfNodeService;
-        this.personService = personService;
-        this.timedPermissionMapper = timedPermissionMapper;
-        this.organisationService = organisationService;
-        this.policyBehaviourFilter = policyBehaviourFilter;
-        this.authorityService = authorityService;
-        this.retryingTransactionHelper = retryingTransactionHelper;
-        this.repositoryCache = repositoryCache;
-        this.guestService = guestService;
-        this.permissionService = permissionService;
-        this.ownableService = ownableService;
-        this.applicationEventPublisher = applicationEventPublisher;
     }
 
 
@@ -246,7 +220,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
         }
 
         if (nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION))) {
-            CollectionServiceFactory.getCollectionService(appInfo.getAppId()).updateScope(nodeRef, aces);
+            CollectionServiceFactory.getInstance().getService(appInfo.getAppId()).updateScope(nodeRef, aces);
         }
     }
 
@@ -352,7 +326,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
                 String nodeType = eduNodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
                 Map<String, Object> props = eduNodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
                 List<String> aspects = Arrays.asList(eduNodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId));
-                NotificationServiceFactory.getLocalService()
+                NotificationServiceFactory.getInstance().getLocalService()
                         .notifyPermissionChanged(user, authority, nodeId, nodeType, aspects, props, permissions, _mailText);
             }
         }
@@ -582,7 +556,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
         return false;
     }
 
-    private void checkCanManagePermissions(String node, String authority) throws Exception {
+    private void checkCanManagePermissions(String node, String authority) {
         ACE ace = new ACE();
         ace.setAuthority(authority);
         checkCanManagePermissions(node, List.of(ace));
@@ -640,7 +614,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
             List<String> sharedFolderIds = new ArrayList<>();
 
             if (groupFolderId != null) {
-                List<ChildAssociationRef> children = NodeServiceFactory.getLocalService().getChildrenChildAssociationRef(groupFolderId);
+                List<ChildAssociationRef> children = NodeServiceFactory.getInstance().getLocalService().getChildrenChildAssociationRef(groupFolderId);
                 for (ChildAssociationRef key : children) {
                     sharedFolderIds.add(key.getChildRef().getId());
                 }
@@ -752,7 +726,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
             checkCanManagePermissions(nodeId, aces);
 
             NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
-            boolean isGlobalAdmin = AuthorityServiceFactory.getLocalService().isGlobalAdmin();
+            boolean isGlobalAdmin = AuthorityServiceFactory.getInstance().getLocalService().isGlobalAdmin();
             String fullyAuthenticatedUser = AuthenticationUtil.getFullyAuthenticatedUser();
 
             String adminAuthority = getAdminAuthority(nodeRef);
@@ -892,8 +866,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
     public List<String> getOrganizationsOfUser() {
         List<String> eduGroupAuthorityNames = organisationService.getMyOrganisations(true);
-        if (customPermissionService != null) {
-            return customPermissionService.getLocalOrganizations(eduGroupAuthorityNames);
+        if (customPermissionService.isPresent()) {
+            return customPermissionService.get().getLocalOrganizations(eduGroupAuthorityNames);
         }
         return eduGroupAuthorityNames;
     }

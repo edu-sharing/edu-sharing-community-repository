@@ -14,6 +14,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.search.SearchServiceElastic;
+import org.edu_sharing.spring.ApplicationContextFactory;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
@@ -26,9 +27,9 @@ public abstract class FixElasticSearchBase extends AbstractJobMapAnnotationParam
     protected final ServiceRegistry serviceRegistry = applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY, ServiceRegistry.class);
     protected final BehaviourFilter policyBehaviourFilter = applicationContext.getBean("policyBehaviourFilter", BehaviourFilter.class);
     protected final NodeService nodeService = serviceRegistry.getNodeService();
+    protected final SearchServiceElastic searchServiceElastic = ApplicationContextFactory.getApplicationContext().getBean(SearchServiceElastic.class);
 
     static int pageSize = 1000;
-    SearchServiceElastic searchServiceElastic = new SearchServiceElastic(ApplicationInfoList.getHomeRepository().getAppId());
 
     public interface SearchResultHandler {
         public void handleSearchHit(Hit<Map> searchHit) throws IOException;

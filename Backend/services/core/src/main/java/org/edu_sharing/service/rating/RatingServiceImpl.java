@@ -10,7 +10,6 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.EduSharingRatingCache;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityService;
@@ -25,11 +24,9 @@ import org.edu_sharing.service.notification.Status;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
-import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -50,14 +47,13 @@ public class RatingServiceImpl extends RatingServiceAdapter {
     private NotificationService notificationService;
 
     public RatingServiceImpl() {
-        super(ApplicationInfoList.getHomeRepository().getAppId());
     }
 
     public void init() {
-        this.nodeService = NodeServiceFactory.getLocalService();
-        this.authorityService = AuthorityServiceFactory.getLocalService();
-        this.permissionService = PermissionServiceFactory.getLocalService();
-        this.notificationService = NotificationServiceFactory.getLocalService();
+        this.nodeService = NodeServiceFactory.getInstance().getLocalService();
+        this.authorityService = AuthorityServiceFactory.getInstance().getLocalService();
+        this.permissionService = PermissionServiceFactory.getInstance().getLocalService();
+        this.notificationService = NotificationServiceFactory.getInstance().getLocalService();
     }
 
     @Override

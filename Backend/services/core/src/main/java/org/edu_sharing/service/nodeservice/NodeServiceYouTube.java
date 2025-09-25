@@ -1,6 +1,5 @@
 package org.edu_sharing.service.nodeservice;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.HashMap;
@@ -9,11 +8,10 @@ import java.util.Map;
 
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
+import org.edu_sharing.repository.server.appcontext.ApplicationInfoContextHolder;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 
-import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -23,36 +21,34 @@ import com.google.api.services.youtube.model.SearchResult;
 import com.google.api.services.youtube.model.Thumbnail;
 import com.google.api.services.youtube.model.Video;
 import com.google.api.services.youtube.model.VideoListResponse;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
 
+@Lazy
+@Service
 public class NodeServiceYouTube extends NodeServiceAdapter{
 
-	private String repositoryId;
-	private String googleAPIKey;
-	public NodeServiceYouTube(String appId) {
-		super(appId);
-		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
-		this.repositoryId = appInfo.getAppId();
-		googleAPIKey = appInfo.getApiKey(); 
-	}
 
 	@Override
 	public Map<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable {
 		return getProperties(nodeId);
 	}
+
 	private Map<String, Object> getProperties(String nodeId) throws Throwable {
 		YouTube youtube = new YouTube.Builder(new NetHttpTransport(), new JacksonFactory(), arg -> {
         }).setApplicationName("youtube-cmdline-search-sample").build();
-		Videos.List list = youtube.videos().list("id,snippet");
+        ApplicationInfo appInfo = ApplicationInfoContextHolder.getCurrentApplicationInfo();
+        Videos.List list = youtube.videos().list("id,snippet");
 		list.setId(nodeId);
-		list.setKey(googleAPIKey);
+		list.setKey(appInfo.getApiKey());
 		VideoListResponse vlr = list.execute();
 		
 		List<Video> result = vlr.getItems();
 		
-		if(result.size() > 0){
+		if(!result.isEmpty()){
 			
 			Video video = result.get(0);
-			return getPropsByVideoEntry(repositoryId,video);
+			return getPropsByVideoEntry(appInfo.getAppId(),video);
 		}
 		
 		return null;
@@ -127,7 +123,7 @@ public class NodeServiceYouTube extends NodeServiceAdapter{
 			
 		}
 		
-		if (kind.equals("youtube#video")) {
+		if ("youtube#video".equals(kind)) {
 			
 			properties.put(CCConstants.CM_NAME, esrTitle);
 			properties.put(CCConstants.LOM_PROP_GENERAL_TITLE, esrTitle);
@@ -164,11 +160,8 @@ public class NodeServiceYouTube extends NodeServiceAdapter{
 		return properties;
 	}
 	public static YouTube getYoutube() {
-		return new YouTube.Builder(new NetHttpTransport(), new JacksonFactory(), new HttpRequestInitializer() {
-			@Override
-			public void initialize(com.google.api.client.http.HttpRequest request) throws IOException {
-			}
-		}).setApplicationName("youtube-cmdline-search-sample").build();
+		return new YouTube.Builder(new NetHttpTransport(), new JacksonFactory(), request -> {
+        }).setApplicationName("youtube-cmdline-search-sample").build();
 	}
 	
 	@Override

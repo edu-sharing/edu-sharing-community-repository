@@ -25,6 +25,7 @@ import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.springframework.context.ApplicationContext;
 
 import jakarta.servlet.ServletContext;
+
 import java.io.Serializable;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
@@ -36,8 +37,8 @@ import org.edu_sharing.repository.tools.URLHelper;
 public class RegisterServiceImpl implements RegisterService {
     static Logger logger = Logger.getLogger(RegisterServiceImpl.class);
     private static int KEY_LENGTH = 16;
-    public final static SimpleCache<String,RegisterInformation> registerUserCache = (SimpleCache)  AlfAppContextGate.getApplicationContext().getBean("eduSharingRegisterUserCache");
-    public final static SimpleCache<String,RegisterInformation> recoverPasswordCache = (SimpleCache)  AlfAppContextGate.getApplicationContext().getBean("eduSharingRecoverPasswordCache");
+    public final static SimpleCache<String, RegisterInformation> registerUserCache = (SimpleCache) AlfAppContextGate.getApplicationContext().getBean("eduSharingRegisterUserCache");
+    public final static SimpleCache<String, RegisterInformation> recoverPasswordCache = (SimpleCache) AlfAppContextGate.getApplicationContext().getBean("eduSharingRecoverPasswordCache");
 
     private final PersonService personService;
     private final NodeService nodeService;
@@ -52,44 +53,47 @@ public class RegisterServiceImpl implements RegisterService {
         nodeService = serviceRegistry.getNodeService();
         authService = serviceRegistry.getAuthenticationService();
     }
-    protected void sendRegisterMail(RegisterInformation info, String key) throws Exception {
-        String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
 
-        String subject=MailTemplate.getSubject("userRegister", currentLocale);
-        String content=MailTemplate.getContent("userRegister", currentLocale,true);
-        Map<String,String> replace=new HashMap<>();
-        replace.put("link", URLHelper.getNgComponentsUrl()+"register/done/"+URLEncoder.encode(key)+"/"+ URLEncoder.encode(info.getEmail()));
-        replace.put("key",key);
+    protected void sendRegisterMail(RegisterInformation info, String key) throws Exception {
+        String currentLocale = AuthenticationToolAPI.getInstance().getCurrentLocale();
+
+        String subject = MailTemplate.getSubject("userRegister", currentLocale);
+        String content = MailTemplate.getContent("userRegister", currentLocale, true);
+        Map<String, String> replace = new HashMap<>();
+        replace.put("link", URLHelper.getNgComponentsUrl() + "register/done/" + URLEncoder.encode(key) + "/" + URLEncoder.encode(info.getEmail()));
+        replace.put("key", key);
         addMailRegisterInfo(info, replace);
-        Mail mail=new Mail();
+        Mail mail = new Mail();
         ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
         mail.sendMailHtml(
                 context,
                 info.getEmail(),
-                subject,content,replace);
+                subject, content, replace);
 
     }
 
     private void addMailRegisterInfo(RegisterInformation info, Map<String, String> replace) {
-        replace.put("firstName",info.getFirstName());
-        replace.put("lastName",info.getLastName());
-        replace.put("email",info.getEmail());
-        replace.put("organization",info.getOrganization());
+        replace.put("firstName", info.getFirstName());
+        replace.put("lastName", info.getLastName());
+        replace.put("email", info.getEmail());
+        replace.put("organization", info.getOrganization());
     }
 
     public boolean userExists(String id) throws Exception {
         return personService.personExists(id);
     }
+
     public boolean userExists(RegisterInformation info) throws Exception {
         return userExists(info.getEmail());
     }
+
     @Override
     public void resetPassword(String key, String newPassword) throws Exception {
         RegisterInformation info = recoverPasswordCache.get(key);
-        if(info==null)
+        if (info == null)
             throw new InvalidKeyException();
-        AuthenticationUtil.runAsSystem(()-> {
-            setPassword(info,newPassword);
+        AuthenticationUtil.runAsSystem(() -> {
+            setPassword(info, newPassword);
             info.setPassword(newPassword);
             recoverPasswordCache.remove(key);
             authenticate(info);
@@ -97,21 +101,21 @@ public class RegisterServiceImpl implements RegisterService {
         });
     }
 
-    protected void setPassword(RegisterInformation info, String newPassword) throws Exception{
+    protected void setPassword(RegisterInformation info, String newPassword) throws Exception {
         authService.setAuthentication(info.getAuthorityName(), newPassword.toCharArray());
     }
 
     @Override
     public boolean recoverPassword(String id) throws Exception {
-        return AuthenticationUtil.runAsSystem(()-> {
+        return AuthenticationUtil.runAsSystem(() -> {
             try {
                 RegisterInformation info = getPersonById(id);
-                if(AuthorityServiceHelper.isAdmin(info.getAuthorityName())) {
+                if (AuthorityServiceHelper.isAdmin(info.getAuthorityName())) {
                     throw new SecurityException("Recovering passwords is forbidden for admin users");
                 }
-                String key = addToCacheNoDuplicate(info,recoverPasswordCache,false);
+                String key = addToCacheNoDuplicate(info, recoverPasswordCache, false);
 
-                String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
+                String currentLocale = AuthenticationToolAPI.getInstance().getCurrentLocale();
                 String subject = MailTemplate.getSubject("userRecoverPassword", currentLocale);
                 String content = MailTemplate.getContent("userRecoverPassword", currentLocale, true);
                 Map<String, String> replace = new HashMap<>();
@@ -126,14 +130,14 @@ public class RegisterServiceImpl implements RegisterService {
                         info.getEmail(),
                         subject, content, replace);
                 return true;
-            } catch (NoSuchPersonException|AuthenticationCredentialsNotFoundException e) {
+            } catch (NoSuchPersonException | AuthenticationCredentialsNotFoundException e) {
                 return false;
             }
         });
     }
 
     private RegisterInformation getPersonById(String id) {
-        NodeRef ref = personService.getPerson(id,false);
+        NodeRef ref = personService.getPerson(id, false);
         Map<QName, Serializable> props = nodeService.getProperties(ref);
         RegisterInformation info = new RegisterInformation();
         info.setAuthorityName((String) props.get(ContentModel.PROP_USERNAME));
@@ -141,7 +145,7 @@ public class RegisterServiceImpl implements RegisterService {
         info.setLastName((String) props.get(ContentModel.PROP_LASTNAME));
         info.setEmail((String) props.get(ContentModel.PROP_EMAIL));
         info.setOrganization((String) props.get(ContentModel.PROP_ORGANIZATION));
-        if(props.containsKey(QName.createQName(CCConstants.CM_PROP_PERSON_ALLOW_NOTIFICATIONS)))
+        if (props.containsKey(QName.createQName(CCConstants.CM_PROP_PERSON_ALLOW_NOTIFICATIONS)))
             info.setAllowNotifications((Boolean) props.get(QName.createQName(CCConstants.CM_PROP_PERSON_ALLOW_NOTIFICATIONS)));
         return info;
     }
@@ -149,29 +153,29 @@ public class RegisterServiceImpl implements RegisterService {
     @Override
     public String activate(String key) throws Throwable {
         RegisterInformation info = registerUserCache.get(key);
-        if(info==null)
+        if (info == null)
             throw new InvalidKeyException();
         String result = storeUser(info);
         registerUserCache.remove(key);
         // authenticate the newly activated user automatically
         authenticate(info);
 
-        try{
+        try {
             Map<String, String> replace = new HashMap<>();
-            replace.put("link", URLHelper.getNgComponentsUrl()+"permissions");
+            replace.put("link", URLHelper.getNgComponentsUrl() + "permissions");
             addMailRegisterInfo(info, replace);
             Mail mail = new Mail();
             ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
-            String currentLocale = new AuthenticationToolAPI().getPrimaryLocale();
+            String currentLocale = AuthenticationToolAPI.getInstance().getPrimaryLocale();
             String subject = MailTemplate.getSubject("userRegisterInformation", currentLocale);
             String content = MailTemplate.getContent("userRegisterInformation", currentLocale, true);
-            String receiver=mail.getConfig().getString("register.receiver");
+            String receiver = mail.getConfig().getString("register.receiver");
             mail.sendMailHtml(
                     context,
                     receiver,
-                    subject,content, replace);
-        }catch(Throwable t){
-            logger.warn("Error sending register confirmation to admin",t);
+                    subject, content, replace);
+        } catch (Throwable t) {
+            logger.warn("Error sending register confirmation to admin", t);
         }
 
         return result;
@@ -179,14 +183,14 @@ public class RegisterServiceImpl implements RegisterService {
     }
 
     private void authenticate(RegisterInformation info) throws Exception {
-        AuthenticationTool authTool=new AuthenticationToolAPI();
+        AuthenticationTool authTool = AuthenticationToolAPI.getInstance();
         Map<String, String> validatedAuth = authTool.createNewSession(info.getAuthorityName(), info.getPassword());
-        authTool.storeAuthInfoInSession(info.getAuthorityName(), validatedAuth.get(CCConstants.AUTH_TICKET),CCConstants.AUTH_TYPE_DEFAULT, Context.getCurrentInstance().getRequest().getSession(true));
-        authService.authenticate(info.getAuthorityName(),info.getPassword().toCharArray());
+        authTool.storeAuthInfoInSession(info.getAuthorityName(), validatedAuth.get(CCConstants.AUTH_TICKET), CCConstants.AUTH_TYPE_DEFAULT, Context.getCurrentInstance().getRequest().getSession(true));
+        authService.authenticate(info.getAuthorityName(), info.getPassword().toCharArray());
     }
 
     protected String storeUser(RegisterInformation info) throws Exception {
-        return AuthenticationUtil.runAsSystem(()-> {
+        return AuthenticationUtil.runAsSystem(() -> {
             Map<QName, Serializable> map = new HashMap<>();
             String authority = info.getEmail();
             map.put(ContentModel.PROP_USERNAME, authority);
@@ -206,58 +210,62 @@ public class RegisterServiceImpl implements RegisterService {
             }
         });
     }
+
     @Override
-    public void register(RegisterInformation info) throws DuplicateAuthorityException, Throwable{
+    public void register(RegisterInformation info) throws DuplicateAuthorityException, Throwable {
         try {
             AuthenticationUtil.runAsSystem(() -> {
                 // on register, authority name equlas the user name
                 info.setAuthorityName(info.getEmail());
                 if (userExists(info))
                     throw new DuplicateAuthorityException();
-                String value = addToCacheNoDuplicate(info, registerUserCache,true);
+                String value = addToCacheNoDuplicate(info, registerUserCache, true);
                 sendRegisterMail(info, value);
                 return null;
             });
-        }catch(RuntimeException e){
+        } catch (RuntimeException e) {
             throw e.getCause();
         }
 
     }
+
     @Override
     public boolean resendRegisterMail(String mail) throws Exception {
-        String key=getKeyForMail(mail,registerUserCache);
-        if(key!=null){
-            sendRegisterMail(registerUserCache.get(key),key);
+        String key = getKeyForMail(mail, registerUserCache);
+        if (key != null) {
+            sendRegisterMail(registerUserCache.get(key), key);
             return true;
         }
         return false;
     }
-    private String getKeyForMail(String mail,SimpleCache<String,RegisterInformation> cache){
+
+    private String getKeyForMail(String mail, SimpleCache<String, RegisterInformation> cache) {
         for (String cacheKey : cache.getKeys()) {
             try {
                 if (cache.get(cacheKey).getAuthorityName().equals(mail))
                     return cacheKey;
-            }catch(Throwable t){
+            } catch (Throwable t) {
                 // it's possible to get class cast exceptions when hot deploying
             }
         }
         return null;
     }
-    private String addToCacheNoDuplicate(RegisterInformation info,SimpleCache cache,boolean override) {
-        String existing=getKeyForMail(info.getAuthorityName(),cache);
-        if(existing!=null) {
-            cache.put(existing,info);
+
+    private String addToCacheNoDuplicate(RegisterInformation info, SimpleCache cache, boolean override) {
+        String existing = getKeyForMail(info.getAuthorityName(), cache);
+        if (existing != null) {
+            cache.put(existing, info);
             return existing;
         }
         return addToCache(info, cache);
     }
 
     private String addToCache(Object data, SimpleCache cache) {
-        while(true){
-            String id=RandomStringUtils.random(KEY_LENGTH,true,true);
-            if(cache.contains(id))
+        while (true) {
+            String id = RandomStringUtils.random(KEY_LENGTH, true, true);
+            if (cache.contains(id))
                 continue;
-            cache.put(id,data);
+            cache.put(id, data);
             return id;
         }
     }

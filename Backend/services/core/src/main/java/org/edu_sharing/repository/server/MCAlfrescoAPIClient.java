@@ -75,9 +75,7 @@ import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.PropertiesGetInterceptor;
 import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
-import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.share.GlobalShareService;
-import org.edu_sharing.service.share.GlobalShareServiceImpl;
 import org.edu_sharing.spring.ApplicationContextFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.surf.util.I18NUtil;
@@ -2154,7 +2152,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                 log.info("User " + userName + " has no home folder, will return no group folder for person");
                 return null;
             }
-            NodeRef child = NodeServiceFactory.getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, homeFolder, CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP);
+            NodeRef child = NodeServiceFactory.getInstance().getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, homeFolder, CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP);
             return child.getId();
         } catch (Exception e) {
             log.info("Exception while fetching user " + userName + ": " + e.getMessage() + ", will return no group folder for person");

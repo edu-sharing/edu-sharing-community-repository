@@ -4,14 +4,15 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
-import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
+import org.edu_sharing.service.mediacenter.MediacenterService;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.ParseException;
 import java.util.Date;
 
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @JobDescription(description = "Sync permissions for imported objects based on a custom implementation of a MediacenterLicenseProvider")
 public class MediacenterNodePermissionsJob extends AbstractInterruptableJob {
 
@@ -19,9 +20,12 @@ public class MediacenterNodePermissionsJob extends AbstractInterruptableJob {
 	Integer period_in_days;
 
 	Logger logger = Logger.getLogger(MediacenterNodePermissionsJob.class);
-	
+
+    @Autowired
+    private MediacenterService mediacenterService;
+
 	@Override
-	public void executeInterruptable(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+	public void executeInterruptable(JobExecutionContext jobExecutionContext) {
 
 		JobDataMap jobDataMap = jobExecutionContext.getJobDetail().getJobDataMap();
 
@@ -46,21 +50,17 @@ public class MediacenterNodePermissionsJob extends AbstractInterruptableJob {
 
 		Date from = fromLocal;
 		Date until = untilLocal;
-		AuthenticationUtil.RunAsWork<Void> runAs = new AuthenticationUtil.RunAsWork<Void>() {
-			
-			@Override
-			public Void doWork() throws Exception {
-				run(from,until);
-				return null;
-			}
-		};
+		AuthenticationUtil.RunAsWork<Void> runAs = () -> {
+            run(from,until);
+            return null;
+        };
 		
 		AuthenticationUtil.runAsSystem(runAs);
 		
 	}
 	
 	private void run(Date from, Date until) {
-		MediacenterServiceFactory.getLocalService().manageNodeLicenses(from, until);
+        mediacenterService.manageNodeLicenses(from, until);
 	}
 	
 

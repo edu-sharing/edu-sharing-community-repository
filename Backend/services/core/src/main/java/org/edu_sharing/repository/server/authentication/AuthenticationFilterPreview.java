@@ -63,7 +63,7 @@ public class AuthenticationFilterPreview implements jakarta.servlet.Filter {
 		
 		// If we didn't have a session, a fallback guest session might have been created, so a
 		// ticket provided via request parameter takes precedence.
-		AuthenticationToolAPI authTool = new AuthenticationToolAPI();
+		AuthenticationToolAPI authTool = AuthenticationToolAPI.getInstance();
 		String ticket = req.getParameter("ticket");
 		if (ticket == null || ticket.length() == 0) {
 			ticket = authTool.getTicketFromSession(httpServletRequest.getSession());

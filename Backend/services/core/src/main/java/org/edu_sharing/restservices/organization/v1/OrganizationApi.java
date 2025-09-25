@@ -74,9 +74,9 @@ public class OrganizationApi  {
     		RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 
 	    	OrganizationEntries response = new OrganizationEntries();
-	    	response.setCanCreate(AuthorityServiceFactory.getAuthorityService(repoDao.getId()).isGlobalAdmin());
+	    	response.setCanCreate(AuthorityServiceFactory.getInstance().getService(repoDao.getId()).isGlobalAdmin());
 	    	List<Organization> data = new ArrayList<>();
-	    	SearchResult<EduGroup> result=SearchServiceFactory.getSearchService(repoDao.getId()).searchOrganizations( 
+	    	SearchResult<EduGroup> result=SearchServiceFactory.getInstance().getService(repoDao.getId()).searchOrganizations(
 	    			pattern, 
 	    			skipCount!=null ? skipCount : 0, 
 	    			maxItems!=null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS, 

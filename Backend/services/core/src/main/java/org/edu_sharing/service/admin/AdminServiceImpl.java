@@ -105,6 +105,7 @@ public class AdminServiceImpl implements AdminService {
     private final ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
     private final ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
     private final SearchService searchService;
+    private final AuthenticationToolAPI authTool;
 
     //cause standard properties class does not save the values sorted
     static class SortedProperties extends Properties {
@@ -134,11 +135,11 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Collection<String> getAllValuesFor(String property) throws Throwable {
+    public Collection<String> getAllValuesFor(String property) {
         Set<String> result = new HashSet<String>();
 
-        List<NodeRef> children = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
-                NodeServiceFactory.getLocalService().getCompanyHome(),
+        List<NodeRef> children = NodeServiceFactory.getInstance().getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+                NodeServiceFactory.getInstance().getLocalService().getCompanyHome(),
                 Collections.singletonList(CCConstants.CCM_TYPE_IO),
                 RecurseMode.Folders
         );
@@ -171,12 +172,12 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Map<String, ToolPermission> getToolpermissions(String authority) throws Throwable {
+    public Map<String, ToolPermission> getToolpermissions(String authority) {
 
         ToolPermissionService tpService = ToolPermissionServiceFactory.getInstance();
-        PermissionService permissionService = PermissionServiceFactory.getLocalService();
+        PermissionService permissionService = PermissionServiceFactory.getInstance().getLocalService();
         boolean isEveryone = CCConstants.AUTHORITY_GROUP_EVERYONE.equals(authority);
-        if (!isEveryone && AuthorityServiceFactory.getLocalService().getMemberships(authority).contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)) {
+        if (!isEveryone && AuthorityServiceFactory.getInstance().getLocalService().getMemberships(authority).contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)) {
             throw new IllegalArgumentException("Toolpermissions are not supported for members of " + CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS);
         }
         // transaction reduces additional sub-transactions and improves performance significantly
@@ -212,15 +213,15 @@ public class AdminServiceImpl implements AdminService {
         });
     }
 
-    private List<Group> getEffectiveSource(String nodeId, String authority, String permissionName) throws Exception {
-        PermissionService permissionService = PermissionServiceFactory.getLocalService();
+    private List<Group> getEffectiveSource(String nodeId, String authority, String permissionName) {
+        PermissionService permissionService = PermissionServiceFactory.getInstance().getLocalService();
         List<Group> result = new ArrayList<>();
         // getMemberships can not be called for group everyone
         if(authority.equals(CCConstants.AUTHORITY_GROUP_EVERYONE)) {
             result.add(Group.getEveryone());
             return result;
         }
-        for (String group : AuthorityServiceFactory.getLocalService().getMemberships(authority)) {
+        for (String group : AuthorityServiceFactory.getInstance().getLocalService().getMemberships(authority)) {
             List<String> permissionsExplicit = permissionService.getExplicitPermissionsForAuthority(nodeId, group);
             if (permissionsExplicit.contains(permissionName)) {
                 if (group.equals(CCConstants.AUTHORITY_GROUP_EVERYONE)) {
@@ -239,16 +240,16 @@ public class AdminServiceImpl implements AdminService {
         ToolPermissionService tpService = ToolPermissionServiceFactory.getInstance();
         Map<String, Object> props = new HashMap<>();
         props.put(CCConstants.CM_NAME, name);
-        String nodeId = NodeServiceFactory.getLocalService().createNodeBasic(tpService.getEdu_SharingToolPermissionsFolder().getId(), CCConstants.CCM_TYPE_TOOLPERMISSION, props);
-        PermissionServiceFactory.getLocalService().setPermissionInherit(nodeId, false);
+        String nodeId = NodeServiceFactory.getInstance().getLocalService().createNodeBasic(tpService.getEdu_SharingToolPermissionsFolder().getId(), CCConstants.CCM_TYPE_TOOLPERMISSION, props);
+        PermissionServiceFactory.getInstance().getLocalService().setPermissionInherit(nodeId, false);
         return nodeId;
     }
 
     @Override
     public void setToolpermissions(String authority, Map<String, ToolPermission.Status> toolpermissions) throws Throwable {
         ToolPermissionService tpService = ToolPermissionServiceFactory.getInstance();
-        PermissionService permissionService = PermissionServiceFactory.getLocalService();
-        if (!CCConstants.AUTHORITY_GROUP_EVERYONE.equals(authority) && AuthorityServiceFactory.getLocalService().getMemberships(authority).contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)) {
+        PermissionService permissionService = PermissionServiceFactory.getInstance().getLocalService();
+        if (!CCConstants.AUTHORITY_GROUP_EVERYONE.equals(authority) && AuthorityServiceFactory.getInstance().getLocalService().getMemberships(authority).contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)) {
             throw new IllegalArgumentException("Toolpermissions are not supported for members of " + CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS);
         }
         for (String tp : tpService.getAllAvailableToolPermissions()) {
@@ -786,7 +787,7 @@ public class AdminServiceImpl implements AdminService {
         ArrayList<GlobalGroup> result = new ArrayList<>();
 
 
-        org.edu_sharing.service.search.SearchService service = SearchServiceFactory.getLocalService();
+        org.edu_sharing.service.search.SearchService service = SearchServiceFactory.getInstance().getLocalService();
 
         SearchToken searchToken = new SearchToken();
         searchToken.setFrom(0);
@@ -813,11 +814,11 @@ public class AdminServiceImpl implements AdminService {
     }
 
     private Map<String, String> getAuthInfo() {
-        return new AuthenticationToolAPI().getAuthentication(Context.getCurrentInstance().getRequest().getSession());
+        return authTool.getAuthentication(Context.getCurrentInstance().getRequest().getSession());
     }
 
     @Override
-    public List<Class<?>> getImporterClasses() throws Exception {
+    public List<Class<?>> getImporterClasses() {
         Class<?>[] importerBaseClass = new Class[]{
                 org.edu_sharing.repository.server.jobs.quartz.ImporterJob.class,
                 org.edu_sharing.repository.server.jobs.quartz.OAIXMLValidatorJob.class,
@@ -1119,7 +1120,6 @@ public class AdminServiceImpl implements AdminService {
         HttpSession session = Context.getCurrentInstance().getRequest().getSession(true);
         ToolPermissionServiceFactory.getInstance().invalidateSessionCache();
         //session.setMaxInactiveInterval(30);
-        AuthenticationToolAPI authTool = new AuthenticationToolAPI();
         String ticket = authTool.setUser(authorityName);
         authTool.storeAuthInfoInSession(
                 authorityName,

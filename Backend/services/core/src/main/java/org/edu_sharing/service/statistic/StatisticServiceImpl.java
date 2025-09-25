@@ -11,6 +11,7 @@ import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
@@ -74,7 +75,7 @@ public class StatisticServiceImpl implements StatisticService {
 			}
 		}
 
-		SearchService localService = SearchServiceFactory.getLocalService();
+		SearchService localService = SearchServiceFactory.getInstance().getLocalService();
 		SearchToken searchToken = new SearchToken();
 		searchToken.setFrom(0);
 		searchToken.setMaxResult(0);
@@ -83,10 +84,10 @@ public class StatisticServiceImpl implements StatisticService {
 		SearchResultNodeRef search = localService.search(searchToken);
 
 		Statistics stats = new Statistics();
-		search.getFacets().stream().forEach(f -> {
+		search.getFacets().forEach(f -> {
 			StatisticEntry statEntry = new StatisticEntry();
 			statEntry.setProperty(f.getProperty());
-			statEntry.setStatistic(f.getValues().stream().collect(Collectors.toMap(v -> v.getValue(),v->v.getCount())));
+			statEntry.setStatistic(f.getValues().stream().collect(Collectors.toMap(NodeSearch.Facet.Value::getValue, NodeSearch.Facet.Value::getCount)));
 			stats.getEntries().add(statEntry);
 		});
 		return stats;

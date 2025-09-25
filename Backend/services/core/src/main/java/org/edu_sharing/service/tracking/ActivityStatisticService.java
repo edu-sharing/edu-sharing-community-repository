@@ -1,6 +1,5 @@
 package org.edu_sharing.service.tracking;
 
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
+import org.edu_sharing.service.mediacenter.MediacenterService;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.tracking.ibatis.*;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
@@ -133,6 +132,7 @@ public class ActivityStatisticService {
     private final NodeTrackingMapper nodeTrackingMapper;
     private final UserTrackingMapper userTrackingMapper;
     private final ActivityStatisticsUtil activityStatisticsUtil;
+    private final MediacenterService mediacenterService;
 
 
     public List<String> getAlteredNodes(java.util.Date from) {
@@ -297,7 +297,7 @@ public class ActivityStatisticService {
         );
         return AuthenticationUtil.runAsSystem(
                 () -> permissionService
-                        .getExplicitPermissionsForAuthority(nodeId, MediacenterServiceFactory.getLocalService().getMediacenterProxyGroup(mediacenter))
+                        .getExplicitPermissionsForAuthority(nodeId, mediacenterService.getMediacenterProxyGroup(mediacenter))
                         .stream().anyMatch(readPermissions::contains)
         );
     }

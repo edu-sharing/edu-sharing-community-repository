@@ -23,7 +23,7 @@ public class LicenseService {
 		return getLicenseUrl(license, locale, null);
 	}
 	public String getLicenseUrl(String license, String locale, String version){
-		return getLicenseUrl(license, locale, version, new AuthenticationToolAPI().getCurrentLanguage());
+		return getLicenseUrl(license, locale, version, AuthenticationToolAPI.getInstance().getCurrentLanguage());
 	}
 
 	public String getLicenseUrl(String license, String locale, String version, String userLanguage){

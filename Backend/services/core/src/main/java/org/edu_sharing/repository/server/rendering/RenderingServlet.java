@@ -49,7 +49,7 @@ public class RenderingServlet extends SpringHttpServlet {
         }
         String version = req.getParameter("version");
 
-        RenderingService renderingService = RenderingServiceFactory.getLocalService();
+        RenderingService renderingService = RenderingServiceFactory.getInstance().getLocalService();
         Map<String, String> params = new HashMap<>();
         for (Object key : req.getParameterMap().keySet()) {
             params.put((String) key, req.getParameter((String) key));
@@ -83,7 +83,7 @@ public class RenderingServlet extends SpringHttpServlet {
                     throw new AccessDeniedException(CCConstants.PERMISSION_EMBED);
                 }
             } else {
-                if (!PermissionServiceFactory.getLocalService().hasPermission(ref.getStoreRef().getProtocol(),
+                if (!PermissionServiceFactory.getInstance().getLocalService().hasPermission(ref.getStoreRef().getProtocol(),
                         ref.getStoreRef().getIdentifier(),
                         node_id,
                         CCConstants.PERMISSION_EMBED)) {

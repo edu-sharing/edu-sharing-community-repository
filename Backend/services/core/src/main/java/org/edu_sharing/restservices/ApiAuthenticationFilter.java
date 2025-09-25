@@ -50,7 +50,7 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
 
         HttpSession session = httpReq.getSession(true);
         //session.setMaxInactiveInterval(30);
-        AuthenticationToolAPI authTool = new AuthenticationToolAPI();
+        AuthenticationToolAPI authTool = AuthenticationToolAPI.getInstance();
         Map<String, String> validatedAuth = authTool.validateAuthentication(session);
 
         AuthenticationFilter.handleLocale(true, httpReq.getHeader("locale"), httpReq, httpResp);
@@ -192,7 +192,7 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
             }
         }
 
-        if (adminRequired && !AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
+        if (adminRequired && !AuthorityServiceFactory.getInstance().getLocalService().isGlobalAdmin()) {
             httpResp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             httpResp.flushBuffer();
             httpResp.getWriter().print("Admin rights are required for this endpoint");
@@ -230,7 +230,7 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
 
     public static Map<String, String> httpBasicAuth(HttpServletRequest httpReq, String authHdr, boolean ignore2FA) {
         Map<String, String> validatedAuth = null;
-        AuthenticationToolAPI authTool = new AuthenticationToolAPI();
+        AuthenticationToolAPI authTool = AuthenticationToolAPI.getInstance();
 
         // Basic authentication details present
 
@@ -254,7 +254,7 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
             //check 2FA
             if(!ignore2FA) {
                 int twoFaCode = httpReq.getIntHeader("X-2FA-Token");
-                AuthorityService authorityService = AuthorityServiceFactory.getLocalService();
+                AuthorityService authorityService = AuthorityServiceFactory.getInstance().getLocalService();
                 if (!authorityService.validate2Fa(username, twoFaCode)) {
                     httpReq.setAttribute(CCConstants.AUTH_ERROR_STATUS, CCConstants.AUTH_ERROR_STATUS_2FA);
                     throw new AuthenticationException("Invalid verification code for 2FA");

@@ -40,7 +40,7 @@ public class CASFilter  implements jakarta.servlet.Filter {
 			
 		EduAuthentication authService =  (EduAuthentication)eduApplicationContext.getBean("authenticationService");
 		
-		AuthenticationToolAPI authTool = new AuthenticationToolAPI();
+		AuthenticationToolAPI authTool = AuthenticationToolAPI.getInstance();
 		
 		Map<String,String> validAuthInfo = authTool.validateAuthentication(httpReq.getSession());
 		

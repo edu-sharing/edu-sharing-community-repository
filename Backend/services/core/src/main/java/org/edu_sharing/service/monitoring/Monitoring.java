@@ -11,10 +11,6 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.SearchParameters;
-import org.alfresco.service.cmr.search.SearchService;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
@@ -67,7 +63,7 @@ public class Monitoring {
 				searchToken.setElasticQuery(QueryBuilders.term().field("type").value("ccm:io").build());
 				searchToken.setFrom(0);
 				searchToken.setMaxResult(1);
-				SearchResultNodeRef search = SearchServiceFactory.getLocalService().search(searchToken);
+				SearchResultNodeRef search = SearchServiceFactory.getInstance().getLocalService().search(searchToken);
 				if(search != null && search.getData() != null && search.getData().size() > 0) {
 					return search.getData().get(0).getNodeId();
 				}else return null;

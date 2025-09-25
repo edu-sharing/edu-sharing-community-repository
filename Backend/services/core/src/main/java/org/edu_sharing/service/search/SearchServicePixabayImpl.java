@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,45 +17,40 @@ import javax.net.ssl.HttpsURLConnection;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.edu_sharing.repository.server.appcontext.ApplicationInfoContextHolder;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.nodeservice.NodeServicePixabayImpl;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.extensions.surf.util.URLEncoder;
+import org.springframework.stereotype.Service;
 
+@Lazy
+@Slf4j
+@Service
 public class SearchServicePixabayImpl extends SearchServiceAdapter{
 
 	private static final String PIXABAY_API = "https://pixabay.com/api/";
 	public static final String PIXABAY_LICENSE_URL = "https://pixabay.com/de/service/terms/#license";
 
-	Logger logger = Logger.getLogger(SearchServicePixabayImpl.class);
-	
-	String repositoryId = null;
 
-	String APIKey = null;
-	private static Cache<String, String> searchCache = CacheBuilder.newBuilder()
+	private static final Cache<String, String> searchCache = CacheBuilder.newBuilder()
 			.maximumSize(100)
 			.expireAfterWrite(1, TimeUnit.MINUTES)
 			.build();
 
-	public SearchServicePixabayImpl(String appId) {
-		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
-		this.repositoryId = appInfo.getAppId();		
-		APIKey = appInfo.getApiKey(); 
-
-	}
-	public static HttpsURLConnection openPixabayUrl(URL url) throws KeyManagementException, IOException, NoSuchAlgorithmException{
+	public static HttpsURLConnection openPixabayUrl(URL url) throws IOException {
 		HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
 		// required, otherwise 403 will be thrown
 		conn.setRequestProperty("User-Agent", "edu-sharing pixabay API");
@@ -91,8 +84,13 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 		return connection;
 		*/
 	}
-	public static SearchResultNodeRef searchPixabay(String repositoryId,String apiKey,String path) throws Exception{
-		String lang=new AuthenticationToolAPI().getCurrentLocale().split("_")[0];
+	public static SearchResultNodeRef searchPixabay(String path) throws Exception{
+
+
+        ApplicationInfo currentApplicationInfo = ApplicationInfoContextHolder.getCurrentApplicationInfo();
+        String repositoryId = currentApplicationInfo.getAppId();
+        String apiKey = currentApplicationInfo.getApiKey();
+        String lang= AuthenticationToolAPI.getInstance().getCurrentLocale().split("_")[0];
 		String url=PIXABAY_API+"?key="+URLEncoder.encodeUriComponent(apiKey)+"&lang="+lang+path;
 		String jsonString=searchCache.getIfPresent(url);
 		if(jsonString!=null){
@@ -225,11 +223,11 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 					"&per_page="+searchToken.getMaxResult()+
 					"&page="+page;
 			searchToken.setQueryString(uri);
-			return searchPixabay(repositoryId,APIKey,uri);
+			return searchPixabay(uri);
 			
 		}
 		catch (Throwable t) {
-			logger.warn(t.getMessage(),t);
+			log.warn(t.getMessage(),t);
 			throw new Exception("Error communicating with the Pixabay API");
 		}
 

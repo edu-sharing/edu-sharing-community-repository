@@ -190,7 +190,7 @@ public class EduSharingItemRepository implements ItemRepository {
             sort.addSortDefinitionEntry(new SortDefinition.SortDefinitionEntry(CCConstants.CM_PROP_C_CREATED, true));
             token.setSortDefinition(sort);
             token.setContentType(SearchService.ContentType.FILES);
-            SearchResultNodeRef result = SearchServiceFactory.getLocalService().search(
+            SearchResultNodeRef result = SearchServiceFactory.getInstance().getLocalService().search(
                     MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id),
                     "oai",
                     searchCriteria,
@@ -224,7 +224,7 @@ public class EduSharingItemRepository implements ItemRepository {
             sort.addSortDefinitionEntry(new SortDefinition.SortDefinitionEntry(CCConstants.CM_PROP_C_CREATED, true));
             token.setSortDefinition(sort);
             token.setContentType(SearchService.ContentType.FILES);
-            SearchResultNodeRef result = SearchServiceFactory.getLocalService().search(
+            SearchResultNodeRef result = SearchServiceFactory.getInstance().getLocalService().search(
                     MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id),
                     (!resumptionToken.hasSetSpec() || resumptionToken.getSetSpec().equals("default") ? "oai" : "oai_" + resumptionToken.getSetSpec()),
                     searchCriteria,

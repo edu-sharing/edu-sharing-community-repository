@@ -97,14 +97,14 @@ public class MigrateOaiImportsToEtl extends AbstractInterruptableJob{
 		AuthenticationUtil.runAsSystem(() -> {
 			try {
 				String importFolder = PersistentHandlerEdusharing.prepareImportFolder();
-				startFolder = NodeServiceFactory.getLocalService().getChild(
+				startFolder = NodeServiceFactory.getInstance().getLocalService().getChild(
 						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, importFolder,
 						CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME,
 						setId
 				);
 				Map<QName, Serializable> props = new HashMap<>();
 				props.put(ContentModel.PROP_NAME, spiderId);
-				target = NodeServiceFactory.getLocalService().findNodeByName(
+				target = NodeServiceFactory.getInstance().getLocalService().findNodeByName(
 						BulkServiceFactory.getInstance().getPrimaryFolder().getId(),
 						spiderId
 				);
@@ -209,7 +209,7 @@ public class MigrateOaiImportsToEtl extends AbstractInterruptableJob{
 			semaphore.acquireUninterruptibly();
 		}
 		String parentName = setId + "_" + NodeServiceHelper.getProperty(NodeServiceHelper.getPrimaryParent(nodeRef), CCConstants.CM_NAME);
-		String groupedTarget = NodeServiceFactory.getLocalService().findNodeByName(
+		String groupedTarget = NodeServiceFactory.getInstance().getLocalService().findNodeByName(
 				target,
 				parentName
 		);
@@ -228,14 +228,14 @@ public class MigrateOaiImportsToEtl extends AbstractInterruptableJob{
 		if(threaded != null && threaded) {
 			semaphore.release();
 		}
-		NodeServiceFactory.getLocalService().moveNode(groupedTarget, CCConstants.CM_ASSOC_FOLDER_CONTAINS, nodeRef.getId());
+		NodeServiceFactory.getInstance().getLocalService().moveNode(groupedTarget, CCConstants.CM_ASSOC_FOLDER_CONTAINS, nodeRef.getId());
 		try {
 			// hold the latest state of the object, i.e. user modificationns
 			nodeService.setProperty(nodeRef,
 					QName.createQName(CCConstants.CCM_PROP_IO_VERSION_COMMENT),
 					CCConstants.VERSION_COMMENT_BULK_MIGRATION
 			);
-			org.edu_sharing.service.nodeservice.NodeService service = NodeServiceFactory.getLocalService();
+			org.edu_sharing.service.nodeservice.NodeService service = NodeServiceFactory.getInstance().getLocalService();
 			service.createVersion(nodeRef.getId());
 			VersionHistory history = serviceRegistry.getVersionService().getVersionHistory(nodeRef);
 			// revert to the initial version of the import

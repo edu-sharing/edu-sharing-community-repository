@@ -70,7 +70,7 @@ public class RenderingProxy extends SpringHttpServlet {
 
 		String parentId=nodeId;
 		if(childobjectId!=null){
-			boolean isChild=AuthenticationUtil.runAsSystem(()-> NodeServiceHelper.isChildOf(NodeServiceFactory.getLocalService(),childobjectId,parentId));
+			boolean isChild=AuthenticationUtil.runAsSystem(()-> NodeServiceHelper.isChildOf(NodeServiceFactory.getInstance().getLocalService(),childobjectId,parentId));
 			if(!isChild){
 				throw new RenderingException(HttpServletResponse.SC_BAD_REQUEST,"Node "+childobjectId+" is not a child of "+parentId,RenderingException.I18N.invalid_parameters);
 			}
@@ -343,7 +343,7 @@ public class RenderingProxy extends SpringHttpServlet {
 	private void render(ApplicationInfo repoInfo, HttpServletRequest req, HttpServletResponse resp,
 			String nodeId, String usernameDecrypted, Usage usage,
 			RenderingServiceOptions options) throws RenderingException {
-		RenderingService service = RenderingServiceFactory.getRenderingService(repoInfo.getAppId());
+		RenderingService service = RenderingServiceFactory.getInstance().getService(repoInfo.getAppId());
 		RepoProxy.RemoteRepoDetails remoteRepo = RepoProxyFactory.getRepoProxy().myTurn(repoInfo.getAppId(), nodeId);
 		if(RepoProxyFactory.getRepoProxy().myTurn(repoInfo.getAppId(), nodeId) != null){
 			try {
@@ -453,8 +453,8 @@ public class RenderingProxy extends SpringHttpServlet {
 				 ApplicationInfo.TYPE_CMS.equals(appInfoApplication.getType()))) {
 			Context.getCurrentInstance().addSingleUseNode(parentId);
 
-			//new AuthenticationToolAPI().authenticateUser(usernameDecrypted, session);
-			AuthenticationToolAPI authTool = new AuthenticationToolAPI();
+			//AuthenticationToolAPI.getInstance().authenticateUser(usernameDecrypted, session);
+			AuthenticationToolAPI authTool = AuthenticationToolAPI.getInstance();
 			if(authTool.validateTicket(ticket)) {
 				authTool.storeAuthInfoInSession(getUsername(req), ticket,CCConstants.AUTH_TYPE_DEFAULT, req.getSession());
 			}else {
@@ -549,7 +549,7 @@ public class RenderingProxy extends SpringHttpServlet {
 					usage = new Usage2Service().getUsage(req.getParameter("app_id"), req.getParameter("course_id"), parentId, req.getParameter("resource_id"));
 				}
 				if(usage==null) {
-					boolean ccpublish=AuthenticationUtil.runAs(()->PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,CCConstants.PERMISSION_CC_PUBLISH), getUsername(req));
+					boolean ccpublish=AuthenticationUtil.runAs(()->PermissionServiceFactory.getInstance().getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,CCConstants.PERMISSION_CC_PUBLISH), getUsername(req));
 					if(ccpublish){
 						throw new RenderingException(HttpServletResponse.SC_UNAUTHORIZED,"Usage fetching failed for node "+nodeId,RenderingException.I18N.usage_missing_permissions);
 					}

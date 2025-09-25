@@ -15,18 +15,16 @@ import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.appcontext.AppContextServiceLocator;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.service.provider.ElasticSearchProvider;
-import org.edu_sharing.service.provider.Provider;
-import org.edu_sharing.service.provider.ProviderHelper;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.stream.StreamServiceFactory;
 import org.edu_sharing.service.stream.StreamServiceHelper;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
+import org.edu_sharing.spring.ApplicationContextFactory;
 import org.springframework.context.ApplicationContext;
 
 import java.io.Serializable;
@@ -176,16 +174,16 @@ public class NodeServiceInterceptor implements MethodInterceptor {
         RetryingTransactionHelper rth = serviceRegistry.getTransactionService().getRetryingTransactionHelper();
 
         return rth.doInTransaction(() -> {
-            Serializable quota = (Serializable) AuthorityServiceFactory.getLocalService().getAuthorityProperty(AuthenticationUtil.getFullyAuthenticatedUser(), CCConstants.CM_PROP_PERSON_SIZE_QUOTA);
+            Serializable quota = (Serializable) AuthorityServiceFactory.getInstance().getLocalService().getAuthorityProperty(AuthenticationUtil.getFullyAuthenticatedUser(), CCConstants.CM_PROP_PERSON_SIZE_QUOTA);
             AuthenticationUtil.runAsSystem(() -> {
-                AuthorityServiceFactory.getLocalService().setAuthorityProperty(AuthenticationUtil.getFullyAuthenticatedUser(), CCConstants.CM_PROP_PERSON_SIZE_QUOTA, null);
+                AuthorityServiceFactory.getInstance().getLocalService().setAuthorityProperty(AuthenticationUtil.getFullyAuthenticatedUser(), CCConstants.CM_PROP_PERSON_SIZE_QUOTA, null);
                 return null;
             });
 
             T result = callable.call();
 
             AuthenticationUtil.runAsSystem(() -> {
-                AuthorityServiceFactory.getLocalService().setAuthorityProperty(AuthenticationUtil.getFullyAuthenticatedUser(), CCConstants.CM_PROP_PERSON_SIZE_QUOTA, quota);
+                AuthorityServiceFactory.getInstance().getLocalService().setAuthorityProperty(AuthenticationUtil.getFullyAuthenticatedUser(), CCConstants.CM_PROP_PERSON_SIZE_QUOTA, quota);
                 return null;
             });
             return result;
@@ -294,11 +292,10 @@ public class NodeServiceInterceptor implements MethodInterceptor {
 
     public static List<String> hasCollectionPermissions(String nodeId, List<String> permissions) {
         long test = System.currentTimeMillis();
-        Provider providerByApp = ProviderHelper.getProviderByApp(ApplicationInfoList.getHomeRepository());
-        if (!(providerByApp instanceof ElasticSearchProvider)) {
-            logger.debug("Skipping collection permission check cause no elastic provider present");
-            return Collections.emptyList();
-        }
+        AppContextServiceLocator locator = AppContextServiceLocator.getInstance();
+        locator.getLocal(SearchServiceElastic.class);
+
+        SearchServiceElastic bean = ApplicationContextFactory.getApplicationContext().getBean(SearchServiceElastic.class);
         if (
                 !Arrays.asList(
                         CallSourceHelper.CallSource.Render, CallSourceHelper.CallSource.Preview,
@@ -309,7 +306,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
             logger.debug("Skipping collection permission check for call source " + CallSourceHelper.getCallSource());
             return Collections.emptyList();
         }
-        List<String> result = ((SearchServiceElastic) providerByApp.getSearchService()).hasPermissions(nodeId, permissions);
+        List<String> result = bean.hasPermissions(nodeId, permissions);
         logger.debug("collection permission check took:" + (System.currentTimeMillis() - test) + "ms");
         return result;
     }

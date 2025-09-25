@@ -43,8 +43,8 @@ class SearchServiceDDBImplTest {
         ApplicationInfo dummyInfo = Mockito.mock(ApplicationInfo.class);
         Mockito.when(dummyInfo.getApiKey()).thenReturn(this.apiKey);
         applicationInfoListMockedStatic.when(() -> ApplicationInfoList.getRepositoryInfoById(null)).thenReturn(dummyInfo);
-        underTestSearch = new SearchServiceDDBImpl(null);
-        underTestNode = new NodeServiceDDBImpl(null);
+        underTestSearch = new SearchServiceDDBImpl();
+        underTestNode = new NodeServiceDDBImpl();
     }
     @AfterEach
     void teardown() {
@@ -54,7 +54,7 @@ class SearchServiceDDBImplTest {
     @Test
     void searchDDB() {
         try {
-            SearchResultNodeRef result = underTestSearch.searchDDB(null, null, "/search?query=Mathe&oauth_consumer_key=" + this.apiKey);
+            SearchResultNodeRef result = underTestSearch.searchDDB(null, "/search?query=Mathe&oauth_consumer_key=" + this.apiKey);
             /*result.getData().forEach(r -> {
                 try {
                     underTestNode.getProperties(null, null, r.getNodeId());

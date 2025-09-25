@@ -2,7 +2,6 @@ package org.edu_sharing.service.feedback;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import lombok.SneakyThrows;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -11,6 +10,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.appcontext.AppContextServiceLocator;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.authority.AuthorityServiceImpl;
@@ -18,7 +18,6 @@ import org.edu_sharing.service.feedback.model.FeedbackData;
 import org.edu_sharing.service.feedback.model.FeedbackResult;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
@@ -36,11 +35,15 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class FeedbackServiceImplTest {
     private FeedbackServiceImpl underTest;
+
+    private MockedStatic<AppContextServiceLocator> locatorMockedStatic;
+
 
     @Mock
     private NodeService nodeService;
@@ -61,11 +64,15 @@ class FeedbackServiceImplTest {
         sessionId = "session" + Math.random();
         userEsId = UUID.randomUUID().toString();
         NodeRef userNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, UUID.randomUUID().toString());
+        locatorMockedStatic = mockStatic(AppContextServiceLocator.class);
+        locatorMockedStatic.when(AppContextServiceLocator::getInstance).thenReturn(null);
         nodeServiceHelperMockedStatic = Mockito.mockStatic(NodeServiceHelper.class);
         authorityServiceHelperMockedStatic = Mockito.mockStatic(AuthorityServiceHelper.class);
         authorityServiceFactoryMockedStatic = Mockito.mockStatic(AuthorityServiceFactory.class);
+        AuthorityServiceFactory authorityServiceFactory = Mockito.mock(AuthorityServiceFactory.class);
         AuthorityServiceImpl authorityServiceMock = Mockito.mock(AuthorityServiceImpl.class);
-        authorityServiceFactoryMockedStatic.when(AuthorityServiceFactory::getLocalService).thenReturn(authorityServiceMock);
+        authorityServiceFactoryMockedStatic.when(AuthorityServiceFactory::getInstance).thenReturn(authorityServiceFactory);
+        authorityServiceFactoryMockedStatic.when(authorityServiceFactory::getLocalService).thenReturn(authorityServiceMock);
         Mockito.lenient().when(authorityServiceMock.isGuest()).thenReturn(false);
         authenticationUtilMockedStatic = Mockito.mockStatic(AuthenticationUtil.class);
         contextMockedStatic = Mockito.mockStatic(Context.class);
@@ -91,6 +98,7 @@ class FeedbackServiceImplTest {
         authorityServiceHelperMockedStatic.close();
         nodeServiceHelperMockedStatic.close();
         contextMockedStatic.close();
+        locatorMockedStatic.close();
     }
 
     @RepeatedTest(value = 5, name = RepeatedTest.LONG_DISPLAY_NAME)

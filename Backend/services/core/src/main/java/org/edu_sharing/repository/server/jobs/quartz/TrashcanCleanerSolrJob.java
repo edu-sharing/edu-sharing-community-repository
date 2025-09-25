@@ -5,7 +5,6 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
-import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
@@ -46,7 +45,7 @@ public class TrashcanCleanerSolrJob extends AbstractJobMapAnnotationParams {
 			@Override
 			public Void doWork() throws Exception {
 				
-				new TrashcanCleanerSolr(TimeUnit.MILLISECONDS.convert(time, TimeUnit.DAYS),batch, execute).exeute();
+				new TrashcanCleanerSolr(TimeUnit.MILLISECONDS.convert(time, TimeUnit.DAYS),batch, execute).execute();
 				return null;
 			}
 		};

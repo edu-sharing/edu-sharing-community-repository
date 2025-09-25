@@ -1,11 +1,13 @@
 package org.edu_sharing.service.search;
 
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.edu_sharing.repository.server.appcontext.ApplicationInfoContextHolder;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
@@ -15,26 +17,24 @@ import org.edu_sharing.service.nodeservice.NodeServiceBrockhausImpl;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.extensions.surf.util.URLEncoder;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Lazy
+@Slf4j
+@Service
 public class SearchServiceBrockhausImpl extends SearchServiceAdapter{
 
 	private static final String BROCKHAUS_API = "https://api2.brockhaus.de/search";
-	private final ApplicationInfo appInfo;
 
-	Logger logger = Logger.getLogger(SearchServiceBrockhausImpl.class);
-	String repositoryId = null;
 
-	public SearchServiceBrockhausImpl(String appId) {
-		this.appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
-		this.repositoryId = appInfo.getAppId();
-	}
-	public SearchResultNodeRef searchBrockhaus(String path) throws Exception{
+	public SearchResultNodeRef searchBrockhaus(String path) {
 		String url=BROCKHAUS_API+path;
 
 		HttpQueryTool query = new HttpQueryTool();
@@ -73,10 +73,10 @@ public class SearchServiceBrockhausImpl extends SearchServiceAdapter{
 			properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,"brockhaus");
 			//String contentUrl=buildUrl(apiKey,document.getString("url"));
 			//properties.put(CCConstants.CONTENTURL,URLTool.getRedirectServletLink(repositoryId, document.getString("url")));
-			properties.put(CCConstants.CONTENTURL,buildUrl(appInfo, (String) properties.get(CCConstants.SYS_PROP_NODE_UID)));
-			properties.put(CCConstants.CCM_PROP_IO_WWWURL,buildUrl(appInfo, (String) properties.get(CCConstants.SYS_PROP_NODE_UID)));
+			properties.put(CCConstants.CONTENTURL,buildUrl((String) properties.get(CCConstants.SYS_PROP_NODE_UID)));
+			properties.put(CCConstants.CCM_PROP_IO_WWWURL,buildUrl((String) properties.get(CCConstants.SYS_PROP_NODE_UID)));
 
-			NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(repositoryId,
+			NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(ApplicationInfoContextHolder.getCurrentApplicationInfo().getAppId(),
 					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(),
 					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),properties);
 			data.add(ref);
@@ -86,7 +86,8 @@ public class SearchServiceBrockhausImpl extends SearchServiceAdapter{
 		}
 		return searchResultNodeRef;
 	}
-	public static String buildUrl(ApplicationInfo appInfo, String id){
+	public static String buildUrl(String id){
+        ApplicationInfo appInfo = ApplicationInfoContextHolder.getCurrentApplicationInfo();
 		String prefix = "";
 		if(id.startsWith("%2fkilex")) {
 			prefix = "/junior";
@@ -110,9 +111,10 @@ public class SearchServiceBrockhausImpl extends SearchServiceAdapter{
 
 		String[] searchWordCriteria=criterias.get(MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA);
 		if(searchWordCriteria == null){
-			searchWordCriteria = new String[] {
-					!StringUtils.isEmpty(appInfo.getRecommend_objects_query()) ?
-							appInfo.getRecommend_objects_query() : "*"};
+            ApplicationInfo currentApplicationInfo = ApplicationInfoContextHolder.getCurrentApplicationInfo();
+            searchWordCriteria = new String[] {
+					!StringUtils.isEmpty(currentApplicationInfo.getRecommend_objects_query()) ?
+                            currentApplicationInfo.getRecommend_objects_query() : "*"};
 		}
 		String searchWord = searchWordCriteria[0];
 		String src="ecs";
@@ -131,7 +133,7 @@ public class SearchServiceBrockhausImpl extends SearchServiceAdapter{
 			
 		}
 		catch (Throwable t) {
-			logger.warn(t.getMessage(),t);
+			log.warn(t.getMessage(),t);
 			throw new Exception("Error communicating with the Brockhaus API");
 		}
 

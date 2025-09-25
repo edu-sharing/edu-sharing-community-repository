@@ -81,9 +81,9 @@ public class RegistrationService {
 
     public DynamicRegistrationToken generate() throws Throwable{
         NodeRef systemObject = SystemFolder.getSystemObject(CCConstants.CCM_VALUE_IO_NAME_LTI_REGISTRATION_NODE_NAME);
-        ACL acl = PermissionServiceFactory.getLocalService().getPermissions(systemObject.getId());
+        ACL acl = PermissionServiceFactory.getInstance().getLocalService().getPermissions(systemObject.getId());
         if(acl.isInherited()) {
-            PermissionServiceFactory.getLocalService().setPermissionInherit(systemObject.getId(), false);
+            PermissionServiceFactory.getInstance().getLocalService().setPermissionInherit(systemObject.getId(), false);
         }
         DynamicRegistrationTokens systemObjectContent = SystemFolder.getSystemObjectContent(
                         CCConstants.CCM_VALUE_IO_NAME_LTI_REGISTRATION_NODE_NAME,

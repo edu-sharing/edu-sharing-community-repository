@@ -10,12 +10,12 @@ import org.alfresco.repo.nodelocator.NodeLocatorService;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.repo.rendition2.LocalTransformClient;
-import org.alfresco.repo.rendition2.RenditionDefinitionRegistry2;
 import org.alfresco.repo.rendition2.RenditionDefinitionRegistry2Impl;
 import org.alfresco.repo.search.SearchTrackingComponent;
 import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.MutableAuthenticationDao;
 import org.alfresco.repo.security.authentication.RepositoryAuthenticationDao;
+import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
 import org.alfresco.repo.security.person.RegexHomeFolderProvider;
 import org.alfresco.repo.tenant.TenantService;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
@@ -337,7 +337,7 @@ public class AlfrescoBeanConfig {
 
     @Bean(name = "globalProperties")
     public Properties globalProperties() {
-        return (Properties)applicationContext.getBean("global-properties");
+        return (Properties) applicationContext.getBean("global-properties");
     }
 
 
@@ -346,12 +346,12 @@ public class AlfrescoBeanConfig {
     RenditionDefinitionRegistry2Impl renditionRegistry = (RenditionDefinitionRegistry2Impl)AlfAppContextGate.getApplicationContext().getBean("renditionDefinitionRegistry2");
      */
     @Bean(name = "localTransformClient")
-    public LocalTransformClient localTransformClient(){
+    public LocalTransformClient localTransformClient() {
         return applicationContext.getBean("localTransformClient", LocalTransformClient.class);
     }
 
     @Bean(name = "renditionRegistry")
-    public RenditionDefinitionRegistry2Impl renditionRegistry(){
+    public RenditionDefinitionRegistry2Impl renditionRegistry() {
         return applicationContext.getBean("renditionDefinitionRegistry2", RenditionDefinitionRegistry2Impl.class);
     }
 
@@ -382,8 +382,8 @@ public class AlfrescoBeanConfig {
     }
 
     @Bean
-    public ContentStore fileContentStore(){
-        return (ContentStore)applicationContext.getBean("fileContentStore");
+    public ContentStore fileContentStore() {
+        return (ContentStore) applicationContext.getBean("fileContentStore");
     }
 
     @Bean
@@ -408,5 +408,10 @@ public class AlfrescoBeanConfig {
         }
 
         throw new NoSuchBeanDefinitionException(RepositoryAuthenticationDao.class);
+    }
+
+    @Bean
+    public PermissionModel permissionsModelDAO() {
+        return applicationContext.getBean("permissionsModelDAO", PermissionModel.class);
     }
 }

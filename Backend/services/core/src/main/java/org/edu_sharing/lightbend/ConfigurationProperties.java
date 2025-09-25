@@ -1,5 +1,7 @@
 package org.edu_sharing.lightbend;
 
+import org.springframework.stereotype.Indexed;
+
 import java.lang.annotation.*;
 
 /**
@@ -11,6 +13,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
+@Indexed
 public @interface ConfigurationProperties {
 
     /**

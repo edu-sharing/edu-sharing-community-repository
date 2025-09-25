@@ -33,7 +33,7 @@ public class XApiTool {
     public static String VERB_DOWNLOADED="http://adlnet.gov/expapi/verbs/downloaded";
 
     public static String sendToXApi(String nodeId, JSONObject xApiData) throws Throwable {
-        if(AuthorityServiceFactory.getLocalService().isGuest()){
+        if(AuthorityServiceFactory.getInstance().getLocalService().isGuest()){
             throw new IllegalArgumentException("user is guest, will not track xApi data");
         }
         JSONObject data = addData(nodeId, xApiData);

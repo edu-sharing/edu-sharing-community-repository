@@ -5,13 +5,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
@@ -45,7 +45,8 @@ import org.edu_sharing.service.nodeservice.annotation.NodeOriginal;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.model.SortDefinition;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -53,19 +54,20 @@ import java.security.GeneralSecurityException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@Slf4j
+@Primary
+@Service
+@RequiredArgsConstructor
 public class RenderingServiceImpl implements RenderingService{
 
 
 	private final NodeService nodeService;
 	private final PermissionService permissionService;
 	private final GuestService guestService;
-	ApplicationInfo appInfo;
 
 	Map<String,String> authInfo;
 
 
-	static Logger logger = Logger.getLogger(RenderingServiceImpl.class);
 	private ApplicationInfo setAppId(String appId) {
 
 		try{
@@ -78,7 +80,7 @@ public class RenderingServiceImpl implements RenderingService{
 					|| "admin".equals(AuthenticationUtil.getRunAsUser()))
 					|| Context.getCurrentInstance().getCurrentInstance() == null
 					|| guestService.isGuestUser(AuthenticationUtil.getFullyAuthenticatedUser())) {
-				logger.debug("starting in runas user mode");
+				log.debug("starting in runas user mode");
 				this.authInfo = new HashMap<>();
 				this.authInfo.put(CCConstants.AUTH_USERNAME, AuthenticationUtil.getRunAsUser());
 			}else {
@@ -112,7 +114,7 @@ public class RenderingServiceImpl implements RenderingService{
 			renderingServiceUrl = new RenderingTool().getRenderServiceUrl(appInfo,nodeId,parameters,displayMode);
 			// base url for dynamic context routing of domains
 			renderingServiceUrl = UrlTool.setParam(renderingServiceUrl, "baseUrl",URLEncoder.encode(URLHelper.getBaseUrl(true)));
-			logger.debug(renderingServiceUrl);
+			log.debug(renderingServiceUrl);
 			RenderingServiceOptions options = new RenderingServiceOptions();
 			options.displayMode = displayMode;
 			options.parameters = parameters;
@@ -121,7 +123,7 @@ public class RenderingServiceImpl implements RenderingService{
 			details.setRenderingServiceData(data);
 			return details;
 		}catch(Throwable t) {
-			logger.warn(t.getMessage(),t);
+			log.warn(t.getMessage(),t);
 			RenderingException exception = new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t.getMessage(), RenderingException.I18N.unknown, t);
 			RenderingDetails details = new RenderingDetails(RenderingErrorServlet.errorToHTML(null, exception));
 			details.setException(exception);
@@ -177,7 +179,7 @@ public class RenderingServiceImpl implements RenderingService{
 	@Override
 	public RenderingServiceData getData(ApplicationInfo appInfo, String nodeId, String nodeVersion, String user, RenderingServiceOptions options) throws Throwable {
 		long time=System.currentTimeMillis();
-		NodeService nodeService = NodeServiceFactory.getNodeService(appInfo.getAppId());
+		NodeService nodeService = NodeServiceFactory.getInstance().getService(appInfo.getAppId());
 		RenderingServiceData data=new RenderingServiceData();
 		if(appInfo.ishomeNode()) {
 			data.setEditors(getAvailableEditors(nodeId, nodeVersion, user));
@@ -203,7 +205,7 @@ public class RenderingServiceImpl implements RenderingService{
 						NodeDao originalNodeDao = NodeDao.getNode(repoDao, original);
 						node.setContent(originalNodeDao.asNode().getContent());
 					} catch (DAOException e) {
-						logger.error(e.getMessage());
+						log.error(e.getMessage());
 					}
 					return null;
 				});
@@ -259,7 +261,7 @@ public class RenderingServiceImpl implements RenderingService{
 		data.setConfigValues(ConfigServiceFactory.getCurrentConfig().values);
 		data.setNodeUrls(new NodeUrls(node, nodeVersion));
 
-		logger.info("Preparing rendering data took "+(System.currentTimeMillis()-time)+" ms");
+        log.info("Preparing rendering data took {} ms", System.currentTimeMillis() - time);
 		return data;
 	}
 

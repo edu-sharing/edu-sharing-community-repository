@@ -15,16 +15,15 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.*;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.NodeTool;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.SearchServiceFactory;
-import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.springframework.beans.factory.annotation.Autowired;
 
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @JobDescription(description = "distributes flat folder nodes over a date path folder hierarchy ")
 public class NodeDistributionJob extends AbstractJobMapAnnotationParams{
 
@@ -34,15 +33,18 @@ public class NodeDistributionJob extends AbstractJobMapAnnotationParams{
 	@JobFieldDescription(description = "date pattern that defines the folder structure. i.e: yyyy/MM/dd/HH/mm/ss/SS")
 	private String pattern;
 	private static final String SEPARATOR = "/";
-	
+
+    @Autowired
+    private SearchService searchService;
+
 	public NodeDistributionJob() {
 		this.logger = LogFactory.getLog(NodeDistributionJob.class);
 	}
 	
 	@Override
-	public Class[] getJobClasses() {
+	public Class<?>[] getJobClasses() {
 
-		Class[] result = Arrays.copyOf(allJobs, allJobs.length + 1);
+		Class<?>[] result = Arrays.copyOf(allJobs, allJobs.length + 1);
 	    result[result.length - 1] = NodeDistributionJob.class;
 		return result;
 	}
@@ -65,8 +67,7 @@ public class NodeDistributionJob extends AbstractJobMapAnnotationParams{
 
 				// request node
 
-				SearchService localService = SearchServiceFactory.getLocalService();
-				SearchResultNodeRef searchResultNodeRef = localService.searchByDisplayPath(path, SearchServiceElastic.WORKSPACE_INDEX);
+				SearchResultNodeRef searchResultNodeRef = searchService.searchByDisplayPath(path, SearchServiceElastic.WORKSPACE_INDEX);
 
 				if (searchResultNodeRef.getNodeCount() != 1) {
 					throw new IllegalArgumentException("The path must reference a unique node.");

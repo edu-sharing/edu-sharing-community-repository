@@ -179,7 +179,7 @@ public class ConfigApi {
     public Response getLanguage() {
         try {
             Language language = new Language();
-            language.setCurrentLanguage(new AuthenticationToolAPI().getCurrentLanguage());
+            language.setCurrentLanguage(AuthenticationToolAPI.getInstance().getCurrentLanguage());
 
             language.setGlobal(getActiveLanguage(ConfigServiceFactory.getConfigService().getConfig().language));
             try {

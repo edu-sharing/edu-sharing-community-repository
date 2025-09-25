@@ -4,10 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang.NotImplementedException;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
+@Lazy
+@Service
 public class RenderingServiceNotSupported implements RenderingService{
 
 	public RenderingServiceNotSupported(){

@@ -1,18 +1,13 @@
 package org.edu_sharing.service.notification;
 
+import org.edu_sharing.repository.server.appcontext.AppContextServiceFactory;
 import org.edu_sharing.spring.ApplicationContextFactory;
 
-public class NotificationServiceFactory {
 
+public interface NotificationServiceFactory extends AppContextServiceFactory<NotificationService> {
 
-	private static final NotificationService notificationService = ApplicationContextFactory.getApplicationContext().getBean(NotificationService.class);
+    static NotificationServiceFactory getInstance() {
+        return ApplicationContextFactory.getApplicationContext().getBean(NotificationServiceFactory.class);
+    }
 
-
-	public static NotificationService getServiceByAppId(String appId) {
-		return notificationService;
-	}
-
-	public static NotificationService getLocalService() {
-		return notificationService;
-	}
 }

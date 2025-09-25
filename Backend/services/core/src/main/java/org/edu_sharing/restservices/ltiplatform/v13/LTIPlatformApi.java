@@ -930,7 +930,7 @@ public class LTIPlatformApi {
                     }
                 }
 
-                org.edu_sharing.service.nodeservice.NodeService eduNodeService = NodeServiceFactory.getLocalService();
+                org.edu_sharing.service.nodeservice.NodeService eduNodeService = NodeServiceFactory.getInstance().getLocalService();
 
 
                 String nodeId = sessionObject.getContentUrlNodeId();

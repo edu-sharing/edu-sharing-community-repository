@@ -116,10 +116,10 @@ public class PreviewServlet extends SpringHttpServlet {
 		String repository = req.getParameter("repository");
 		boolean remoteNode = false;
 		if(repository!=null){
-			nodeService = NodeServiceFactory.getNodeService(repository);
+			nodeService = NodeServiceFactory.getInstance().getService(repository);
 			remoteNode = true;
 		} else {
-			nodeService = NodeServiceFactory.getLocalService();
+			nodeService = NodeServiceFactory.getInstance().getLocalService();
 		}
 		try {
 			nodeId = req.getParameter("nodeId");
@@ -144,7 +144,7 @@ public class PreviewServlet extends SpringHttpServlet {
 					if (remoteNode || nodeType.equals(CCConstants.CCM_TYPE_REMOTEOBJECT) || aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)) {
 						if(aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)){
 							// just fetch dynamic data which needs to be fetched, because the local io already has metadata
-							props.putAll(NodeServiceFactory.getNodeService(
+							props.putAll(NodeServiceFactory.getInstance().getService(
 									(String) props.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID)
 							).getPropertiesDynamic(storeProtocol, storeId, (String) props.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID)));
 						}
@@ -155,7 +155,7 @@ public class PreviewServlet extends SpringHttpServlet {
 							return;
 						}
 						if(nodeType.equals(CCConstants.CCM_TYPE_REMOTEOBJECT) || aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)) {
-							props = NodeServiceFactory.getNodeService((String) props.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID))
+							props = NodeServiceFactory.getInstance().getService((String) props.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID))
 									.getProperties(storeProtocol, storeId, (String) props.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
 						}
 						if(props != null){
@@ -338,7 +338,7 @@ public class PreviewServlet extends SpringHttpServlet {
 				final String nodeIdFinal=nodeId;
 				props=AuthenticationUtil.runAsSystem(() -> {
                     try{
-                        return NodeServiceFactory.getLocalService().getProperties(storeRef.getProtocol(), storeRef.getIdentifier(),nodeIdFinal);
+                        return NodeServiceFactory.getInstance().getLocalService().getProperties(storeRef.getProtocol(), storeRef.getIdentifier(),nodeIdFinal);
                     }catch(Throwable t){
                         throw new Exception(t);
                     }
@@ -358,7 +358,7 @@ public class PreviewServlet extends SpringHttpServlet {
 	}
 
 	private void validatePermissions(StoreRef storeRef, String nodeId) {
-		boolean result = PermissionServiceFactory.getLocalService().hasPermission(storeRef.getProtocol(),storeRef.getIdentifier(),nodeId,CCConstants.PERMISSION_READ_PREVIEW);
+		boolean result = PermissionServiceFactory.getInstance().getLocalService().hasPermission(storeRef.getProtocol(),storeRef.getIdentifier(),nodeId,CCConstants.PERMISSION_READ_PREVIEW);
 		if(!result)
 			throw new AccessDeniedException("No "+CCConstants.PERMISSION_READ_PREVIEW+" on "+nodeId);
 	}
@@ -427,7 +427,7 @@ public class PreviewServlet extends SpringHttpServlet {
 		}
 		if (getPrevResult.getType().equals(PreviewDetail.TYPE_DEFAULT)) {
 			NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId);
-			String mimetype=NodeServiceFactory.getLocalService().getContentMimetype(storeRef.getProtocol(), storeRef.getIdentifier(),nodeId);
+			String mimetype=NodeServiceFactory.getInstance().getLocalService().getContentMimetype(storeRef.getProtocol(), storeRef.getIdentifier(),nodeId);
 			if(mimetype!=null && mimetype.startsWith("image")) {
 				if(deliverContentAsSystem(nodeRef,  CCConstants.CM_PROP_CONTENT, req, resp))
 					return true;

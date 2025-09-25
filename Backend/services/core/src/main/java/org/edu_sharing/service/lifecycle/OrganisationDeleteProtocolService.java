@@ -5,7 +5,6 @@ import org.alfresco.repo.content.ContentStore;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
-import org.alfresco.service.namespace.QName;
 import org.alfresco.util.Pair;
 import org.alfresco.util.TempFileProvider;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -17,10 +16,8 @@ import org.springframework.context.ApplicationContext;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -82,7 +79,7 @@ public abstract class OrganisationDeleteProtocolService {
             NodeRef fNodeRef = protocolNodeRef;
             serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
                 behaviourFilter.disableBehaviour(fNodeRef);
-                NodeServiceFactory.getLocalService().writeContent(
+                NodeServiceFactory.getInstance().getLocalService().writeContent(
                         StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
                         fNodeRef.getId(),
                         new FileInputStream(tempFile),

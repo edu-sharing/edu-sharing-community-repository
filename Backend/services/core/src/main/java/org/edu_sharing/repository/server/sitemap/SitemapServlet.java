@@ -8,13 +8,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.Marshaller;
 
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -36,10 +35,10 @@ import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.spring.servlet.SpringHttpServlet;
 
 
+@Slf4j
 public class SitemapServlet extends SpringHttpServlet {
     public final static String NS_SITEMAP="http://www.sitemaps.org/schemas/sitemap/0.9";
     public final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-    private static Logger logger = Logger.getLogger(SitemapServlet.class);
     private static final int NODES_PER_MAP = 500;
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -58,14 +57,14 @@ public class SitemapServlet extends SpringHttpServlet {
             }
         }
         catch(Throwable t){
-            t.printStackTrace();
+            log.error(t.getMessage(),t);
             resp.sendError(500,t.toString());
         }
     }
 
     private Sitemapindex getAll(HttpServletRequest request) throws Throwable {
         Sitemapindex index = new Sitemapindex();
-        SearchService search = SearchServiceFactory.getLocalService();
+        SearchService search = SearchServiceFactory.getInstance().getLocalService();
 
         SearchToken token=new SearchToken();
         token.setContentType(SearchService.ContentType.FILES);
@@ -101,8 +100,8 @@ public class SitemapServlet extends SpringHttpServlet {
 
     private Urlset getNodes(HttpServletRequest request, String type, int from) throws Throwable {
         Urlset set = new Urlset();
-        SearchService search = SearchServiceFactory.getLocalService();
-        NodeService nodeService = NodeServiceFactory.getLocalService();
+        SearchService search = SearchServiceFactory.getInstance().getLocalService();
+        NodeService nodeService = NodeServiceFactory.getInstance().getLocalService();
 
         SearchToken token=new SearchToken();
         if("collection".equals(type))
@@ -117,7 +116,7 @@ public class SitemapServlet extends SpringHttpServlet {
         token.setSortDefinition(sort);
         SearchResultNodeRef result = search.search(getMds(request), MetadataSet.DEFAULT_CLIENT_QUERY, getSearchAllCriterias(), token);
         for(org.edu_sharing.service.model.NodeRef ref : result.getData()){
-            logger.info("node:"+ref.getNodeId() +" "+ref.getStoreId());
+            log.info("node:{} {}", ref.getNodeId(), ref.getStoreId());
             Urlset.Url url=new Urlset.Url();
             String[] aspects = nodeService.getAspects(ref.getStoreProtocol(),ref.getStoreId(),ref.getNodeId());
             Date property = (ref.getProperties() != null)
@@ -137,15 +136,15 @@ public class SitemapServlet extends SpringHttpServlet {
                 try {
                     video.content_loc = new MCAlfrescoAPIClient().getDownloadUrl(ref.getNodeId());
                 }catch(Throwable t){
-                    logger.warn("Can not read download url: "+t.getMessage());
+                    log.warn("Can not read download url: {}", t.getMessage());
                 }                video.title = nodeService.getProperty(ref.getStoreProtocol(),ref.getStoreId(),ref.getNodeId(),CCConstants.CM_NAME);
                 url.video.add(video);
             }
-            else {
-                Urlset.Url.Image image = new Urlset.Url.Image();
-                image.loc = NodeServiceHelper.getPreview(ref).getUrl();
+//            else {
+//                Urlset.Url.Image image = new Urlset.Url.Image();
+//                image.loc = NodeServiceHelper.getPreview(ref).getUrl();
                 //url.image.add(image);
-            }
+//            }
             //getPreviewServletUrl
             set.url.add(url);
         }

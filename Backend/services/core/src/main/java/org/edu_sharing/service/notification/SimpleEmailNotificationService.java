@@ -18,10 +18,12 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.repository.tools.URLHelper;
+import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.notification.events.*;
+import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.spring.conditions.ConditionalOnProperty;
@@ -38,6 +40,7 @@ import java.util.stream.Collectors;
 public class SimpleEmailNotificationService {
 
     private final Optional<NotificationService.NodeIssueMapping> customNodeIssueMapping;
+    private final AuthenticationToolAPI authTool;
 
 
     @PostConstruct
@@ -48,7 +51,7 @@ public class SimpleEmailNotificationService {
     @EventListener
     public void onNodeIssueEvent(NodeIssueEvent event) throws Exception {
         log.info("send notifyNodeIssue: nodeId: {}, reason: {}, userComment: {}", event.nodeId(), event.reason(), event.userComment());
-        String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
+        String currentLocale = authTool.getCurrentLocale();
         NotificationService.NodeContext nodeContext = new NotificationService.NodeContext(event.nodeId(), event.aspects(), event.nodeProperties());
         String defaultTemplate = "nodeIssue";
         if(NotificationService.NotifyMode.Feedback.equals(event.mode())) {
@@ -78,16 +81,18 @@ public class SimpleEmailNotificationService {
             );
         }
         try {
-            Map<String, Object> userProps = NodeServiceHelper.getProperties(AuthorityServiceFactory.getLocalService().getAuthorityNodeRef(AuthenticationUtil.getFullyAuthenticatedUser()));
+            AuthorityService authorityService = AuthorityServiceFactory.getInstance().getLocalService();
+            Map<String, Object> userProps = NodeServiceHelper.getProperties(authorityService.getAuthorityNodeRef(AuthenticationUtil.getFullyAuthenticatedUser()));
             MailTemplate.applyNodePropertiesToMap("user.", userProps, replace);
-            SearchResult<EduGroup> orgList = SearchServiceFactory.getLocalService().getAllOrganizations(true);
+            SearchService searchService = SearchServiceFactory.getInstance().getLocalService();
+            SearchResult<EduGroup> orgList = searchService.getAllOrganizations(true);
             if(!orgList.getData().isEmpty()) {
-                Map<String, Object> orgProps = NodeServiceHelper.getProperties(AuthorityServiceFactory.getLocalService().getAuthorityNodeRef(orgList.getData().get(0).getGroupname()));
+                Map<String, Object> orgProps = NodeServiceHelper.getProperties(authorityService.getAuthorityNodeRef(orgList.getData().get(0).getGroupname()));
                 MailTemplate.applyNodePropertiesToMap("user.organization.", orgProps, replace);
             }
-            List<String> mzList = SearchServiceFactory.getLocalService().getAllMediacenters();
+            List<String> mzList = searchService.getAllMediacenters();
             if(!mzList.isEmpty()) {
-                Map<String, Object> mzProps = NodeServiceHelper.getProperties(AuthorityServiceFactory.getLocalService().getAuthorityNodeRef(mzList.get(0)));
+                Map<String, Object> mzProps = NodeServiceHelper.getProperties(authorityService.getAuthorityNodeRef(mzList.get(0)));
                 MailTemplate.applyNodePropertiesToMap("user.mediacenter.", mzProps, replace);
             }
         } catch (Throwable ignored) {
@@ -128,7 +133,7 @@ public class SimpleEmailNotificationService {
         EmailValidator mailValidator = EmailValidator.getInstance(true, true);
         if (mailValidator.isValid(receiverMail.getEmail())) {
             try {
-                MailTemplate.UserMail sender = MailTemplate.getUserMailData(new AuthenticationToolAPI().getCurrentUser());
+                MailTemplate.UserMail sender = MailTemplate.getUserMailData(authTool.getCurrentUser());
                 Map<String, String> replace = new HashMap<>();
                 sender.applyToMap("assigner.", replace);
                 replace.put("comment", event.comment());

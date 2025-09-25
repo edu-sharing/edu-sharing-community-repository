@@ -22,14 +22,12 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.NodeServiceImpl;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.spring.ApplicationContextFactory;
 import org.springframework.context.ApplicationContext;
 
 public class RemoteObjectService {
 
     Logger logger = Logger.getLogger(RemoteObjectService.class);
-    private ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-    ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-    private BehaviourFilter policyBehaviourFilter = (BehaviourFilter) applicationContext.getBean("policyBehaviourFilter");
 
     /**
      * creates and returns remoteObjectId when it's a 3dParty repo
@@ -50,7 +48,7 @@ public class RemoteObjectService {
                     MCAlfrescoBaseClient mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
 
                     org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory
-                            .getPermissionService(ApplicationInfoList.getHomeRepository().getAppId());
+                            .getInstance().getService(ApplicationInfoList.getHomeRepository().getAppId());
                     String remoteObjectFolderId = getRemoteObjectsFolder();
 
 
@@ -71,9 +69,9 @@ public class RemoteObjectService {
                                 repInfo.getRepositoryType());
                         remoteObjectProps.put(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID, repInfo.getAppId());
                         String containerId = NodeServiceHelper.getContainerId(remoteObjectFolderId, "yyyy/MM/dd");
-                        remoteObjectNodeId = NodeServiceFactory.getLocalService().createNodeBasic(containerId,
+                        remoteObjectNodeId = NodeServiceFactory.getInstance().getLocalService().createNodeBasic(containerId,
                                 CCConstants.CCM_TYPE_REMOTEOBJECT, remoteObjectProps);
-                        NodeService nodeService = NodeServiceFactory.getNodeService(repInfo.getAppId());
+                        NodeService nodeService = NodeServiceFactory.getInstance().getService(repInfo.getAppId());
                         InputStream content = nodeService.getContent(StoreRef.PROTOCOL_WORKSPACE,
                                 StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId,
                                 null, CCConstants.CM_PROP_CONTENT);
@@ -81,7 +79,7 @@ public class RemoteObjectService {
                                 StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
                         if (content != null) {
                             // Store content from remote repo in node
-                            NodeServiceFactory.getLocalService().writeContent(
+                            NodeServiceFactory.getInstance().getLocalService().writeContent(
                                     StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, remoteObjectNodeId, content,
                                     (String) properties.get(CCConstants.LOM_PROP_TECHNICAL_FORMAT), "UTF-8",
                                     CCConstants.CM_PROP_CONTENT);
@@ -117,10 +115,11 @@ public class RemoteObjectService {
         try {
             String tmpNodeId = getRemoteObject(repositoryId, nodeId);
             if (nodeId.equals(tmpNodeId)) {
-                return NodeServiceFactory.getNodeService(repositoryId).getProperties(MCAlfrescoAPIClient.storeRef.getProtocol(), MCAlfrescoAPIClient.storeRef.getIdentifier(), tmpNodeId);
+                return NodeServiceFactory.getInstance().getService(repositoryId).getProperties(MCAlfrescoAPIClient.storeRef.getProtocol(), MCAlfrescoAPIClient.storeRef.getIdentifier(), tmpNodeId);
             } else {
-                Map<String, Object> props = new NodeServiceImpl(repositoryId).getProperties(MCAlfrescoAPIClient.storeRef.getProtocol(), MCAlfrescoAPIClient.storeRef.getIdentifier(), tmpNodeId);
-                props.putAll(NodeServiceFactory.getNodeService(repositoryId).getProperties(MCAlfrescoAPIClient.storeRef.getProtocol(), MCAlfrescoAPIClient.storeRef.getIdentifier(), tmpNodeId));
+                NodeServiceImpl nodeServiceImpl = ApplicationContextFactory.getApplicationContext().getBean("nodeServiceImpl", NodeServiceImpl.class);
+                Map<String, Object> props = nodeServiceImpl.getProperties(MCAlfrescoAPIClient.storeRef.getProtocol(), MCAlfrescoAPIClient.storeRef.getIdentifier(), tmpNodeId);
+                props.putAll(NodeServiceFactory.getInstance().getService(repositoryId).getProperties(MCAlfrescoAPIClient.storeRef.getProtocol(), MCAlfrescoAPIClient.storeRef.getIdentifier(), tmpNodeId));
                 return props;
             }
         } catch (Throwable e) {
@@ -163,14 +162,14 @@ public class RemoteObjectService {
     public static synchronized String getOrCreateRemoteMetadataObject(String sourceRepositoryId, String originalNodeId) throws Throwable {
         String ROOT_PATH = "app:company_home/ccm:remote_ios";
         ApplicationInfo repInfo = ApplicationInfoList.getRepositoryInfoById(sourceRepositoryId);
-        NodeService nsSourceRepo = NodeServiceFactory.getNodeService(sourceRepositoryId);
+        NodeService nsSourceRepo = NodeServiceFactory.getInstance().getService(sourceRepositoryId);
 		Map<String, Object> propsIn = nsSourceRepo.getPropertiesPersisting(null, null, originalNodeId);
 		if(propsIn == null || propsIn.isEmpty()) {
             throw new Exception("no properties found for source nodeId:" + originalNodeId + ", appId: " + sourceRepositoryId);
         }
         if (propsIn.containsKey(CCConstants.CM_NAME)) {
             propsIn.put(CCConstants.CM_NAME,
-                    NodeServiceHelper.cleanupCmName((String) propsIn.get(CCConstants.CM_NAME) + "_" + UUID.randomUUID())
+                    NodeServiceHelper.cleanupCmName(propsIn.get(CCConstants.CM_NAME) + "_" + UUID.randomUUID())
             );
         }
         String importMds = repInfo.getString(ApplicationInfo.KEY_IMPORT_METADATASET, null);
@@ -198,10 +197,10 @@ public class RemoteObjectService {
                 Map<String, Object> searchProps = new HashMap<>();
                 searchProps.put(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID, originalNodeId);
                 searchProps.put(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID, repInfo.getAppId());
-                NodeService nodeService = NodeServiceFactory.getLocalService();
+                NodeService nodeService = NodeServiceFactory.getInstance().getLocalService();
                 String root = NodeServiceHelper.getContainerRootPath(ROOT_PATH);
                 // allow everyone to cc publish from this folder
-                PermissionServiceFactory.getLocalService().setPermissions(root, CCConstants.AUTHORITY_GROUP_EVERYONE,
+                PermissionServiceFactory.getInstance().getLocalService().setPermissions(root, CCConstants.AUTHORITY_GROUP_EVERYONE,
                         new String[]{CCConstants.PERMISSION_CONSUMER, CCConstants.PERMISSION_CC_PUBLISH}, false);
                 PersistentHandlerEdusharing phe = new PersistentHandlerEdusharing(null, null, false);
                 phe.setImportFolderId(root);

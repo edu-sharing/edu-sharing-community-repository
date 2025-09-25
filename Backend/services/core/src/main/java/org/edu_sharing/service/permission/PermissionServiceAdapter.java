@@ -3,10 +3,15 @@ package org.edu_sharing.service.permission;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.repository.client.rpc.*;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.*;
 
+@Lazy
+@Service
 public class PermissionServiceAdapter implements PermissionService {
 	
 	protected List<String> ALLOWED_PERMISSIONS=new ArrayList<>();
@@ -18,7 +23,7 @@ public class PermissionServiceAdapter implements PermissionService {
 
 	@Override
 	public void addPermissions(String _nodeId, Map<String, String[]> _authPerm, Boolean _inheritPermissions,
-							   String _mailText, Boolean _sendMail, Boolean _sendCopy) throws Throwable {
+							   String _mailText, Boolean _sendMail, Boolean _sendCopy) {
 	}
 
 	@Override
@@ -48,12 +53,12 @@ public class PermissionServiceAdapter implements PermissionService {
 	}
 
 	@Override
-	public void setPermissionInherit(String nodeId, boolean inheritPermission) throws Exception {
+	public void setPermissionInherit(String nodeId, boolean inheritPermission) {
 
 	}
 
 	@Override
-	public void addPermissions(String nodeId, ACE[] aces) throws Exception {
+	public void addPermissions(String nodeId, ACE[] aces) {
 	}
 
 	@Override
@@ -61,7 +66,7 @@ public class PermissionServiceAdapter implements PermissionService {
 	}
 
 	@Override
-	public void removeAllPermissions(String nodeId) throws Exception {
+	public void removeAllPermissions(String nodeId) {
 
 	}
 

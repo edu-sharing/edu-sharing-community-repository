@@ -11,8 +11,6 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.tools.I18nServer;
-import org.edu_sharing.service.admin.model.RepositoryConfig;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -34,7 +32,7 @@ public class SystemFolder {
 
     public static NodeRef getSystemObject(String name) throws Throwable {
         String folder = ToolPermissionServiceFactory.getInstance().getEdu_SharingSystemFolderBase().getId();
-        NodeService nodeService = NodeServiceFactory.getLocalService();
+        NodeService nodeService = NodeServiceFactory.getInstance().getLocalService();
         String node = nodeService.findNodeByName(folder, name);
         if (node == null) {
             Map<String, Object> props = new HashMap<>();

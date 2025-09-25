@@ -100,11 +100,12 @@ public class ConfigurationPropertiesAnnotationProcessor implements BeanDefinitio
 
             ConstructorArgumentValues properties = new ConstructorArgumentValues();
             properties.addGenericArgumentValue(clazz);
-            //properties.addGenericArgumentValue((Object)null);
+
             rootBeanDefinition.setConstructorArgumentValues(properties);
             rootBeanDefinition.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR);
             rootBeanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
             rootBeanDefinition.setScope(BeanDefinition.SCOPE_SINGLETON);
+
             if (beanDefinition instanceof AnnotatedBeanDefinition) {
                 AnnotatedBeanDefinition annotatedBeanDefinition = (AnnotatedBeanDefinition) beanDefinition;
                 String scope = annotatedBeanDefinition

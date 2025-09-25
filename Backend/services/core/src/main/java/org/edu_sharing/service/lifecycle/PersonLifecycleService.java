@@ -233,16 +233,16 @@ public class PersonLifecycleService {
 
 	public void processRatings(PersonDeleteResult result, String userName, boolean delete) {
 		if(delete) {
-			RatingServiceFactory.getLocalService().deleteUserData(userName);
+			RatingServiceFactory.getInstance().getLocalService().deleteUserData(userName);
 		} else {
-			RatingServiceFactory.getLocalService().changeUserData(userName, result.deletedName);
+			RatingServiceFactory.getInstance().getLocalService().changeUserData(userName, result.deletedName);
 		}
 	}
 	public void processFeedback(PersonDeleteResult result, String userName, boolean delete) {
 		if(delete) {
-			FeedbackServiceFactory.getLocalService().deleteUserData(userName);
+			FeedbackServiceFactory.getInstance().getLocalService().deleteUserData(userName);
 		} else {
-			FeedbackServiceFactory.getLocalService().changeUserData(userName, result.deletedName);
+			FeedbackServiceFactory.getInstance().getLocalService().changeUserData(userName, result.deletedName);
 		}
 	}
 
@@ -436,7 +436,7 @@ public class PersonLifecycleService {
 	private List<NodeRef> filterPublic(List<NodeRef> refs) {
 		return refs.stream().filter(ref -> {
 			try {
-				return Arrays.stream(PermissionServiceFactory.getLocalService().getPermissions(ref.getId()).getAces()).anyMatch(
+				return Arrays.stream(PermissionServiceFactory.getInstance().getLocalService().getPermissions(ref.getId()).getAces()).anyMatch(
 						ace -> ace.getAuthorityType().equals(CCConstants.PERM_AUTHORITY_TYPE_EVERYONE) &&
 								ace.getAuthority().equals(CCConstants.AUTHORITY_GROUP_EVERYONE) && (
 								ace.getPermission().equals(CCConstants.PERMISSION_READ) || ace.getPermission().equals(CCConstants.PERMISSION_CONSUMER
@@ -586,12 +586,12 @@ public class PersonLifecycleService {
 			}
 		}
 		// remove the dummy EDUGROUP folder first, it will lead to problems otherwise
-		NodeRef child = NodeServiceFactory.getLocalService().getChild(homeFolder.getStoreRef(), homeFolder.getId(), CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP);
+		NodeRef child = NodeServiceFactory.getInstance().getLocalService().getChild(homeFolder.getStoreRef(), homeFolder.getId(), CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP);
 		if(child!=null){
-			NodeServiceFactory.getLocalService().removeNode(child.getId(),null,false);
+			NodeServiceFactory.getInstance().getLocalService().removeNode(child.getId(),null,false);
 			logger.info("Deleting the EDUGROUP folder of "+userName);
 		}
-		List<NodeRef> childrens = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, homeFolder.getId(), null,RecurseMode.Folders);
+		List<NodeRef> childrens = NodeServiceFactory.getInstance().getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, homeFolder.getId(), null,RecurseMode.Folders);
 		PersonDeleteResult.Counts counts = new PersonDeleteResult.Counts(convertToElements(childrens));
 		if(options.homeFolder.folders.equals(PersonDeleteOptions.FolderDeleteMode.none)
 				&& options.homeFolder.privateFiles.equals(PersonDeleteOptions.DeleteMode.none)
@@ -658,7 +658,7 @@ public class PersonLifecycleService {
 			}
 		}
 		if(options.homeFolder.folders.equals(PersonDeleteOptions.FolderDeleteMode.delete)) {
-			NodeServiceFactory.getLocalService().removeNode(homeFolder.getId(), null, false);
+			NodeServiceFactory.getInstance().getLocalService().removeNode(homeFolder.getId(), null, false);
 		}
 		return counts;
 	}
@@ -728,18 +728,18 @@ public class PersonLifecycleService {
 			NodeServiceInterceptor.setEduSharingScope(scope);
 			String username = (String) nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 			NodeRef deleted = getDeletedFolderForOrg(options, scope);
-			String userFolder = NodeServiceFactory.getLocalService().findNodeByName(deleted.getId(), username);
+			String userFolder = NodeServiceFactory.getInstance().getLocalService().findNodeByName(deleted.getId(), username);
 			if (userFolder == null) {
 				Map<String, Object> props = new HashMap<>();
 				props.put(CCConstants.CM_NAME, username);
-				userFolder = NodeServiceFactory.getLocalService().createNodeBasic(deleted.getId(), CCConstants.CCM_TYPE_MAP, props);
+				userFolder = NodeServiceFactory.getInstance().getLocalService().createNodeBasic(deleted.getId(), CCConstants.CCM_TYPE_MAP, props);
 			}
 			if (subfolder == null)
 				return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, userFolder);
 
 			Map<String, Object> props = new HashMap<>();
 			props.put(CCConstants.CM_NAME, subfolder);
-			return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, NodeServiceFactory.getLocalService().createNodeBasic(userFolder, CCConstants.CCM_TYPE_MAP, props));
+			return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, NodeServiceFactory.getInstance().getLocalService().createNodeBasic(userFolder, CCConstants.CCM_TYPE_MAP, props));
 		}catch(Exception e){
 			throw e;
 		}finally {
@@ -765,11 +765,11 @@ public class PersonLifecycleService {
 		NodeRef orgHome = (NodeRef) nodeService.getProperty(orgRef,
 				QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
 
-		String deletedHome= NodeServiceFactory.getLocalService().findNodeByName(orgHome.getId(),DELETED_PERSONS_FOLDER);
+		String deletedHome= NodeServiceFactory.getInstance().getLocalService().findNodeByName(orgHome.getId(),DELETED_PERSONS_FOLDER);
 		if(deletedHome==null) {
 			Map<String, Object> props=new HashMap<>();
 			props.put(CCConstants.CM_NAME,DELETED_PERSONS_FOLDER);
-			deletedHome=NodeServiceFactory.getLocalService().createNodeBasic(orgHome.getId(), CCConstants.CCM_TYPE_MAP, props);
+			deletedHome=NodeServiceFactory.getInstance().getLocalService().createNodeBasic(orgHome.getId(), CCConstants.CCM_TYPE_MAP, props);
 			NodeRef deletedRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, deletedHome);
 			permissionService.setInheritParentPermissions(deletedRef, false);
 			permissionService.setPermission(deletedRef,getAdminGroup(options) , CCConstants.PERMISSION_COORDINATOR, true);
@@ -808,7 +808,7 @@ public class PersonLifecycleService {
 	public void deleteAllRefs(Collection<NodeRef> refs) {
 		refs.forEach((ref)->{
 			try {
-				NodeServiceFactory.getLocalService().removeNode(ref.getId(),null,false);
+				NodeServiceFactory.getInstance().getLocalService().removeNode(ref.getId(),null,false);
 			} catch (InvalidNodeRefException ignored){
 
 			}

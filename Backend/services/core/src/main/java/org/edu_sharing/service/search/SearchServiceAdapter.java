@@ -7,10 +7,14 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.search.model.*;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
 
+@Lazy
+@Service
 public class SearchServiceAdapter implements SearchService {
 
     @Override

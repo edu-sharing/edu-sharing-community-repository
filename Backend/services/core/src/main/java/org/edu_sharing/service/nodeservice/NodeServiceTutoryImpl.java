@@ -1,20 +1,19 @@
 package org.edu_sharing.service.nodeservice;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.appcontext.ApplicationInfoContextHolder;
 import org.edu_sharing.service.search.SearchServiceTutoryImpl;
 import org.json.JSONObject;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
 
+@Lazy
+@Service
 public class NodeServiceTutoryImpl extends NodeServiceAdapter {
-	
-	
-	
-	public NodeServiceTutoryImpl(String appId) {
-		super(appId);
-	}
 
+	
 	@Override
 	public Map<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable {
 		
@@ -22,7 +21,9 @@ public class NodeServiceTutoryImpl extends NodeServiceAdapter {
 		
 		JSONObject worksheet = new JSONObject(httpResult);
 		Map<String, Object> properties = SearchServiceTutoryImpl.getProperties(worksheet);
-		properties.put(CCConstants.REPOSITORY_ID, this.appId);
+
+        String appId = ApplicationInfoContextHolder.getCurrentApplicationInfo().getAppId();
+		properties.put(CCConstants.REPOSITORY_ID, appId);
 		
 		return properties;
 	}

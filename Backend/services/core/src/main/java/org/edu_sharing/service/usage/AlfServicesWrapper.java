@@ -90,12 +90,12 @@ public class AlfServicesWrapper implements UsageDAO{
 		authenticationService = serviceRegistry.getAuthenticationService();
 		ownableService = serviceRegistry.getOwnableService();
 		nodeService = serviceRegistry.getNodeService();
-		searchService = SearchServiceFactory.getLocalService();
+		searchService = SearchServiceFactory.getInstance().getLocalService();
 	}
 
 	public AlfServicesWrapper(Map<String,String> authInfo) {
 		this();
-		authenticationService.validate((String) authInfo.get(CCConstants.AUTH_TICKET));
+		authenticationService.validate(authInfo.get(CCConstants.AUTH_TICKET));
 	}
 
 	public Map<String, String> authenticate(String username, String password) {

@@ -73,8 +73,8 @@ public class MdsDao {
     private MdsDao(RepositoryDao repoDao, MetadataSet mds) {
         this.repoDao = repoDao;
         this.mds = mds;
-        this.nodeService = NodeServiceFactory.getNodeService(repoDao.getApplicationInfo().getAppId());
-        this.notificationService = NotificationServiceFactory.getLocalService();
+        this.nodeService = NodeServiceFactory.getInstance().getService(repoDao.getApplicationInfo().getAppId());
+        this.notificationService = NotificationServiceFactory.getInstance().getLocalService();
     }
 
     public Mds asMds() {

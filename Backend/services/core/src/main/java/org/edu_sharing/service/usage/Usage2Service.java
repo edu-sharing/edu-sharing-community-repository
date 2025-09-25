@@ -158,7 +158,7 @@ public class Usage2Service {
                 if (usage == null) {
                     String usageNodeId = parentNodeId;
                     // for collection references, we always rely on the main object permissions
-                    if (NodeServiceFactory.getLocalService().hasAspect(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), usageNodeId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
+                    if (NodeServiceFactory.getInstance().getLocalService().hasAspect(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), usageNodeId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
                         usageNodeId = NodeServiceHelper.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, usageNodeId), CCConstants.CCM_PROP_IO_ORIGINAL);
                     }
                     boolean hasPublishPerm = ((MCAlfrescoClient) RepoFactory.getInstance(ApplicationInfoList.getHomeRepository().getAppId(),
@@ -173,7 +173,7 @@ public class Usage2Service {
                     }
                 }
 
-                return setUsageInternal(repoId, user, lmsId, courseId, parentNodeId, userMail, fromUsed, toUsed, distinctPersons, _version, resourceId, xmlParams);
+                return setUsageInternal(user, lmsId, courseId, parentNodeId, userMail, fromUsed, toUsed, distinctPersons, _version, resourceId, xmlParams);
             } catch (Throwable e) {
                 log.error(e.getMessage(), e);
                 throw new UsageException(e.getMessage(), e);
@@ -187,7 +187,7 @@ public class Usage2Service {
      * this method will not run as system and will not check any permissions
      * used by collections
      */
-    public Usage setUsageInternal(String repoId, String user, String lmsId, String courseId, String parentNodeId, String userMail, Calendar fromUsed, Calendar toUsed, int distinctPersons, String version, String resourceId, String xmlParams) throws Exception {
+    public Usage setUsageInternal(String user, String lmsId, String courseId, String parentNodeId, String userMail, Calendar fromUsed, Calendar toUsed, int distinctPersons, String version, String resourceId, String xmlParams) throws Exception {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> usage = usageDao.getUsage(lmsId, courseId, parentNodeId, resourceId);
         String guid = null;
@@ -273,7 +273,7 @@ public class Usage2Service {
         log.info("starting");
 
 
-        if (!PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,
+        if (!PermissionServiceFactory.getInstance().getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,
                 StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
                 parentNodeId,
                 PermissionService.READ)) {
@@ -301,7 +301,7 @@ public class Usage2Service {
      * Add indirect usages which are attached to collection reference objects
      */
     private void addUsagesFromReferenceObjects(String parentNodeId, ArrayList<Usage> result) {
-        List<org.edu_sharing.service.model.NodeRef> nodes = CollectionServiceFactory.getLocalService().getReferenceObjects(parentNodeId);
+        List<org.edu_sharing.service.model.NodeRef> nodes = CollectionServiceFactory.getInstance().getLocalService().getReferenceObjects(parentNodeId);
         for (org.edu_sharing.service.model.NodeRef node : nodes) {
             Map<String, Map<String, Object>> usages = usageDao.getUsages(node.getNodeId());
             for (String key : usages.keySet()) {

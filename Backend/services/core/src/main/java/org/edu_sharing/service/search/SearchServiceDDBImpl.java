@@ -1,17 +1,17 @@
 package org.edu_sharing.service.search;
 
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.log4j.Logger;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
 import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
 import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.edu_sharing.repository.server.appcontext.ApplicationInfoContextHolder;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.model.NodeRef;
@@ -19,35 +19,26 @@ import org.edu_sharing.service.search.model.SearchToken;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
 
 import javax.net.ssl.*;
 import java.io.*;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Lazy
+@Slf4j
+@Service
 public class SearchServiceDDBImpl extends SearchServiceAdapter {
 
     public static final String DDB_API = "https://api.deutsche-digitale-bibliothek.de";
 
-    Logger logger = Logger.getLogger(SearchServiceDDBImpl.class);
-
-    String repositoryId = null;
-
-    String APIKey = null;
-
-    private ApplicationInfo appInfo;
-
-
-    public SearchServiceDDBImpl(String appId) {
-        appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
-        this.repositoryId = appInfo.getAppId();
-        this.APIKey = appInfo.getApiKey();
-
-    }
 
     public static HttpsURLConnection openDDBUrl(URL url) throws KeyManagementException, IOException, NoSuchAlgorithmException {
         HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
@@ -71,15 +62,11 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter {
         SSLContext sc = SSLContext.getInstance("SSL");
         sc.init(null, trustAllCerts, new java.security.SecureRandom());
         connection.setSSLSocketFactory(sc.getSocketFactory());
-        connection.setHostnameVerifier(new HostnameVerifier() {
-            public boolean verify(String hostname, SSLSession session) {
-                return true;
-            }
-        });
+        connection.setHostnameVerifier((hostname, session) -> true);
         return connection;
     }
 
-    public SearchResultNodeRef searchDDB(String repositoryId, String apiKey, String path) throws Exception {
+    public SearchResultNodeRef searchDDB(String repositoryId, String path) throws Exception {
         String jsonString = "";
         String urlAsStr = DDB_API + path;
         jsonString = query(urlAsStr);
@@ -116,7 +103,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter {
         HttpsURLConnection connection = openDDBUrl(url);
         connection.connect();
 
-        InputStreamReader isr = new InputStreamReader(connection.getInputStream(), "UTF-8");
+        InputStreamReader isr = new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8);
         BufferedReader br = new BufferedReader(isr);
         StringBuilder sb = new StringBuilder();
         String line;
@@ -140,7 +127,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter {
             id = (String) doc.get("id");
         } catch (JSONException e1) {
             // TODO Auto-generated catch block
-            e1.printStackTrace();
+            log.error(e1.getMessage(), e1);
         }
         return id;
     }
@@ -187,37 +174,29 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter {
             }
 
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
         return result;
     }
 
     public String getUrl(String basePath, String query, List<String> facets, int offset, int rows) {
-        String url = DDB_API + basePath;
+        StringBuilder url = new StringBuilder(DDB_API + basePath);
 
-        try {
-            url += "?oauth_consumer_key=" + URLEncoder.encode(APIKey, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        url += "&query=" + org.springframework.extensions.surf.util.URLEncoder.encodeUriComponent(query);
-        if (facets != null && facets.size() > 0) {
-            url += "&facet=";
+        ApplicationInfo appInfo = ApplicationInfoContextHolder.getCurrentApplicationInfo();
+        url.append("?oauth_consumer_key=").append(URLEncoder.encode(appInfo.getApiKey(), StandardCharsets.UTF_8));
+        url.append("&query=").append(org.springframework.extensions.surf.util.URLEncoder.encodeUriComponent(query));
+        if (facets != null && !facets.isEmpty()) {
+            url.append("&facet=");
             int i = 0;
             for (String facet : facets) {
-                if (i == 0) {
-                    url += facet;
-                } else {
-                    url += "," + facet;
-                }
+                url.append(facet);
 
             }
         }
-        url += "&offset=" + offset;
-        url += "&rows=" + rows;
+        url.append("&offset=").append(offset);
+        url.append("&rows=").append(rows);
 
-        return url;
+        return url.toString();
     }
 
     @Override
@@ -274,8 +253,8 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter {
 
         try {
 
-
-            String oauth = "/search?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8");
+            ApplicationInfo appInfo = ApplicationInfoContextHolder.getCurrentApplicationInfo();
+            String oauth = "/search?oauth_consumer_key=" + URLEncoder.encode(appInfo.getApiKey(), StandardCharsets.UTF_8);
             String offset = "&offset=" + searchToken.getFrom();
             String rows = "&rows=" + searchToken.getMaxResult();
             String solrQuery = QueryParser.escape(searchWord);
@@ -289,7 +268,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter {
 
             searchToken.setQueryString(uri.toString());
 
-            return searchDDB(repositoryId, APIKey, uri.toString());
+            return searchDDB(appInfo.getAppId(), uri.toString());
 
         } catch (IOException e) {
             InputStream is = connection.getErrorStream();

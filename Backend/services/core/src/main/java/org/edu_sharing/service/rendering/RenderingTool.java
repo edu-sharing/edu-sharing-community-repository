@@ -69,7 +69,7 @@ public class RenderingTool {
 		}
 		renderingService = UrlTool.setParam(renderingService, "ts",""+timestamp);
 		try{
-			renderingService = UrlTool.setParam(renderingService, "language",new AuthenticationToolAPI().getCurrentLanguage());
+			renderingService = UrlTool.setParam(renderingService, "language",AuthenticationToolAPI.getInstance().getCurrentLanguage());
 		}catch(Throwable t){}
 
 		renderingService = UrlTool.setParam(renderingService, "sig", getSignatureSigned(appId,nodeId,timestamp));
@@ -170,7 +170,7 @@ public class RenderingTool {
 						return null;
 					}
 					// @TODO: May we need to build up caches just for particular file types?
-					RenderingService service = RenderingServiceFactory.getLocalService();
+					RenderingService service = RenderingServiceFactory.getInstance().getLocalService();
 					return service.getDetails(ApplicationInfoList.getHomeRepository().getAppId(), nodeId, null, DISPLAY_PRERENDER, null);
 				} catch (Exception e) {
 					logger.warn("Error building rendering cache for node " + nodeId + ": " + e.getMessage(), e);

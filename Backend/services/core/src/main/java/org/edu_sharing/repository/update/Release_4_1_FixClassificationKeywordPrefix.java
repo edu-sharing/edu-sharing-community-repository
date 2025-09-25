@@ -10,8 +10,6 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.namespace.QName;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -51,7 +49,7 @@ public class Release_4_1_FixClassificationKeywordPrefix {
                     .must(m -> m.term(t -> t.field("type").value("ccm:io")))
                     .must(m -> m.wildcard(w -> w.field("properties.cclom:classification_keyword").value("*")))
                     .build());
-            org.edu_sharing.service.search.SearchService searchService = SearchServiceFactory.getLocalService();
+            org.edu_sharing.service.search.SearchService searchService = SearchServiceFactory.getInstance().getLocalService();
             SearchResultNodeRef result = searchService.search(searchToken);
             result.getData().forEach(n -> {
                 NodeRef nodeRef = new NodeRef(new StoreRef(n.getStoreProtocol(),n.getStoreId()),n.getNodeId());

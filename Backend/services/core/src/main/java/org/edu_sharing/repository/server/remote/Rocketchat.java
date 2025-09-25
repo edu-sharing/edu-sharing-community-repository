@@ -108,7 +108,7 @@ public class Rocketchat {
     }
 
     private String createUser() throws Exception {
-        Map<String, Serializable> user = AuthorityServiceFactory.getLocalService().getUserInfo(AuthenticationUtil.getFullyAuthenticatedUser());
+        Map<String, Serializable> user = AuthorityServiceFactory.getInstance().getLocalService().getUserInfo(AuthenticationUtil.getFullyAuthenticatedUser());
         logger.info("Creating rocketchat user");
         JSONObject json = callApi("v1/users.create", "POST",
                 new JSONObject()

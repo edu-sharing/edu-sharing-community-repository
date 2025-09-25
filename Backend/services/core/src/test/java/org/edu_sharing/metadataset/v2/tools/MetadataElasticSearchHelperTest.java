@@ -30,7 +30,7 @@ class MetadataElasticSearchHelperTest {
     private MetadataSet mds;
     private AuthenticationToolAPI authenticationToolApi;
     private MockedConstruction<AuthenticationToolAPI> authenticationToolApiConstruction;
-
+    private MockedStatic<AuthenticationToolAPI> authenticationToolApiMockedStatic;
 
     @BeforeEach
     void beforeEach() {
@@ -40,6 +40,9 @@ class MetadataElasticSearchHelperTest {
         authenticationToolApi = Mockito.mock(AuthenticationToolAPI.class);
         authenticationToolApiConstruction = Mockito.mockConstruction(AuthenticationToolAPI.class);
         when(authenticationToolApi.getCurrentLocale()).thenReturn("en");
+
+        authenticationToolApiMockedStatic = Mockito.mockStatic(AuthenticationToolAPI.class);
+        authenticationToolApiMockedStatic.when(AuthenticationToolAPI::getInstance).thenReturn(authenticationToolApi);
 
         query = new MetadataQuery();
         basequery = "{\"exists\":{\"field\": \"type\"}}";
@@ -61,6 +64,7 @@ class MetadataElasticSearchHelperTest {
     void afterEach() {
         authenticationUtilMockedStatic.close();
         authenticationToolApiConstruction.close();
+        authenticationToolApiMockedStatic.close();
     }
 
     @Test

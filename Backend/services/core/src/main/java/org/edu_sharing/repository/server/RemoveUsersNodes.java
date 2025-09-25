@@ -28,7 +28,6 @@
 package org.edu_sharing.repository.server;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.alfresco.repo.security.authentication.AuthenticationException;
@@ -36,8 +35,6 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.SearchService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -92,7 +89,7 @@ public class RemoveUsersNodes extends SpringHttpServlet {
 					return;
 				}
 
-				org.edu_sharing.service.search.SearchService localService = SearchServiceFactory.getLocalService();
+				org.edu_sharing.service.search.SearchService localService = SearchServiceFactory.getInstance().getLocalService();
 				SearchToken token = new SearchToken();
 				token.setFrom(0);
 				//force searchAll

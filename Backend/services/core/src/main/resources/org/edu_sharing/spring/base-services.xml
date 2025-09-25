@@ -14,10 +14,8 @@
   <aop:aspectj-autoproxy/>
   <context:component-scan base-package="org.edu_sharing"/>
 
-  <bean id="nodeService" class="org.springframework.aop.framework.ProxyFactoryBean">
-    <property name="targetName">
-      <value>nodeServiceImpl</value>
-    </property>
+  <bean id="nodeService" primary="true" class="org.springframework.aop.framework.ProxyFactoryBean">
+    <property name="targetName" value="nodeServiceImpl"/>
     <property name="proxyInterfaces">
       <list>
         <value>org.edu_sharing.service.nodeservice.NodeService</value>
@@ -30,14 +28,10 @@
     </property>
   </bean>
 
-	<bean id="nodeServiceImpl" class="org.edu_sharing.service.nodeservice.NodeServiceImpl">
-		<property name="handleServiceFactory" ref="handleServiceFactory"/>
-	</bean>
   <bean id="nodeServiceInterceptor" class="org.edu_sharing.service.nodeservice.NodeServiceInterceptor"
         init-method="init"/>
 
-  <bean id="authorityService" class=" org.edu_sharing.service.authority.AuthorityServiceImpl"/>
-  <bean id="permissionService" class="org.springframework.aop.framework.ProxyFactoryBean">
+  <bean id="permissionService" primary="true" class="org.springframework.aop.framework.ProxyFactoryBean">
     <property name="targetName" value="permissionServiceImpl"/>
     <property name="proxyInterfaces">
       <list>
@@ -53,7 +47,7 @@
   <bean id="permissionServiceInterceptor" class="org.edu_sharing.service.permission.PermissionServiceInterceptor"
         init-method="init"/>
 
-  <bean id="toolPermissionService" class="org.springframework.aop.framework.ProxyFactoryBean">
+  <bean id="toolPermissionService" primary="true" class="org.springframework.aop.framework.ProxyFactoryBean">
     <property name="targetName" value="toolPermissionServiceImpl"/>
   </bean>
   <bean id="toolPermissionServiceImpl" class="org.edu_sharing.service.toolpermission.ToolPermissionService">
@@ -61,20 +55,18 @@
   </bean>
 
   <bean id="collectionServiceConfig" class="org.edu_sharing.service.collection.CollectionServiceConfig">
-    <property name="pattern" value="yyyy/MM/dd/HH/mm/ss/SS"/>
-    <property name="path" value="app:company_home/ccm:collections"/>
+    <constructor-arg name="pattern" value="yyyy/MM/dd/HH/mm/ss/SS"/>
+    <constructor-arg name="path" value="app:company_home/ccm:collections"/>
   </bean>
 
   <bean id="repoProxy" class="org.edu_sharing.service.repoproxy.RepoProxyDummyImpl">
   </bean>
 
   <bean id="mediacenterLicenseProvider" class="org.edu_sharing.service.mediacenter.MediacenterLicenseProviderImpl"/>
-  <bean id="ratingService" class="org.edu_sharing.service.rating.RatingServiceAdapter">
-    <constructor-arg index="0" value="notused"/>
-  </bean>
-  <bean id="relationService" class="org.edu_sharing.service.relations.RelationServiceDefaultImpl"/>
+  <bean id="localRatingService" class="org.edu_sharing.service.rating.RatingServiceAdapter" />
+  <bean id="localRelationService" class="org.edu_sharing.service.relations.RelationServiceDefaultImpl"/>
   <bean id="permissionChecking" class="org.edu_sharing.service.permission.PermissionChecking"/>
-  <bean id="suggestionService" class="org.edu_sharing.service.suggestion.DefaultSuggestionService"/>
+  <bean id="suggestionService" primary="true" class="org.edu_sharing.service.suggestion.DefaultSuggestionService"/>
   <bean id="contextRefresher" class="org.edu_sharing.spring.scope.refresh.ContextRefresher">
     <constructor-arg name="scope" ref="refreshScope"/>
   </bean>

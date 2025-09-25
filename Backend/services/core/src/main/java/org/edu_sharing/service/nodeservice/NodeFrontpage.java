@@ -9,25 +9,20 @@ import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.json.JsonData;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.metadataset.v2.QueryUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.admin.RepositoryConfigFactory;
 import org.edu_sharing.service.admin.model.RepositoryConfig;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
+import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.model.NodeRef;
-import org.edu_sharing.service.model.NodeRefImpl;
-import org.edu_sharing.service.permission.PermissionService;
-import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.ReadableWrapperQueryBuilder;
-import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceElastic;
-import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.edu_sharing.spring.ApplicationContextFactory;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -37,19 +32,10 @@ import java.util.*;
 import static org.edu_sharing.service.search.SearchServiceElastic.WORKSPACE_INDEX;
 
 public class NodeFrontpage {
-    private Logger logger= Logger.getLogger(NodeFrontpage.class);
-    private static final String INDEX_NAME = "frontpage_cache";
-    private static final String TYPE_NAME = "_doc";
-    private SearchService searchService= SearchServiceFactory.getLocalService();
-    private NodeService nodeService=NodeServiceFactory.getLocalService();
-    private PermissionService permissionService= PermissionServiceFactory.getLocalService();
-    private Map<String, Date> APPLY_DATES;
 
-    SearchServiceElastic searchServiceElastic = new SearchServiceElastic(ApplicationInfoList.getHomeRepository().getAppId());
-
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-
+    private final SearchServiceElastic searchServiceElastic =  ApplicationContextFactory.getApplicationContext().getBean(SearchServiceElastic.class);
     SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
+    private final CollectionService collectionService = CollectionServiceFactory.getInstance().getLocalService();
 
     public NodeFrontpage(){
     }
@@ -66,13 +52,12 @@ public class NodeFrontpage {
             SortDefinition sortDefinition=new SortDefinition();
             sortDefinition.addSortDefinitionEntry(
                     new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CCM_PROP_COLLECTION_ORDERED_POSITION),true),0);
-
-            return CollectionServiceFactory.getLocalService().getChildren(config.collection, null,sortDefinition, Collections.singletonList("files"));
+            return collectionService.getChildren(config.collection, null,sortDefinition, Collections.singletonList("files"));
         }
 
         BoolQuery.Builder query = new BoolQuery.Builder()
                 .must(
-                        m -> m.bool(b -> searchServiceElastic.getReadPermissionsQuery(b)))
+                        m -> m.bool(searchServiceElastic::getReadPermissionsQuery))
                 .must(
                         m -> m.term(t -> t.field("type").value("ccm:io"))
                 )
@@ -102,7 +87,7 @@ public class NodeFrontpage {
 
         //InputStream is = NodeFrontpage.class.getClassLoader().getResourceAsStream("frontpage-ratings.properties");
         InputStream is = NodeFrontpage.class.getClassLoader().getResource("frontpage-ratings.properties").openStream();
-        String sortingScript = IOUtils.toString(is, StandardCharsets.UTF_8.name());
+        String sortingScript = IOUtils.toString(is, StandardCharsets.UTF_8);
 
         Script sortingScriptInline = new Script.Builder().
                 lang("painless")
@@ -132,7 +117,7 @@ public class NodeFrontpage {
         for(Hit<Map> hit : searchResult.hits().hits()){
             result.add(searchServiceElastic.transformSearchHit(isAdmin, authorities, user,hit.source(),false));
         }
-        result = result.subList(0, result.size() > config.totalCount ? config.totalCount : result.size());
+        result = result.subList(0, Math.min(result.size(), config.totalCount));
         if(config.displayCount<config.totalCount) {
             Set<NodeRef> randoms = new HashSet<>();
             // grab a random count of elements (equals displayCount) of the whole array
@@ -157,7 +142,7 @@ public class NodeFrontpage {
             prefix = "statistic_DOWNLOAD_MATERIAL_";
         }
 
-        if(config.timespanAll == true){
+        if(config.timespanAll){
             String fieldName = prefix + "null";
             result.add(fieldName);
         }else {

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.Builder;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -37,22 +38,17 @@ import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.comment.CommentService;
-import org.edu_sharing.service.comment.CommentServiceFactory;
 import org.edu_sharing.service.dataprotection.queue.DataProtectionQueue;
 import org.edu_sharing.service.dataprotection.queue.DataProtectionQueueEntry;
 import org.edu_sharing.service.feedback.FeedbackService;
-import org.edu_sharing.service.feedback.FeedbackServiceFactory;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.lifecycle.Utils;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.RecurseMode;
-import org.edu_sharing.service.rating.RatingService;
-import org.edu_sharing.service.rating.RatingServiceFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -68,32 +64,21 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
-@Component
+@Service
+@RequiredArgsConstructor
 public class DataProtectionService{
 
-    @Autowired
-    NodeService nodeService;
+    private final NodeService nodeService;
+    private final PersonService personService;
+    private final ContentService contentService;
+    private final PermissionService permissionService;
+    private final RegexHomeFolderProvider regexHomeFolderProvider;
+    private final DataProtectionConfig config;
+    private final DataProtectionQueue queue;
+    private final PDFReport report;
+    private final FeedbackService feedbackService;
+    private final CommentService commentService;
 
-    @Autowired
-    PersonService personService;
-
-    @Autowired
-    ContentService contentService;
-
-    @Autowired
-    PermissionService permissionService;
-
-    @Autowired
-    RegexHomeFolderProvider regexHomeFolderProvider;
-
-    @Autowired
-    DataProtectionConfig config;
-
-    @Autowired
-    DataProtectionQueue queue;
-
-    @Autowired
-    PDFReport report;
 
     @Value("${repository.dataprotection.retentionPeriod:PT240H}")
     private String retentionPeriod;
@@ -117,22 +102,11 @@ public class DataProtectionService{
 
     String systemFolder;
 
-    RatingService ratingService;
-
-    FeedbackService feedbackService;
-
-    CommentService commentService;
-
-
     @EventListener(ContextRefreshedEvent.class)
     public void onContextRefreshed() {
         log.info("DataProtectionService started");
         AuthenticationUtil.runAsSystem(() -> {
             try {
-                ratingService = RatingServiceFactory.getLocalService();
-                feedbackService = FeedbackServiceFactory.getLocalService();
-                commentService = CommentServiceFactory.getLocalService();
-
                 systemFolder = new UserEnvironmentTool().getEdu_SharingGdprFolder();
             } catch (Throwable e) {
                 throw new RuntimeException(e);
@@ -256,7 +230,7 @@ public class DataProtectionService{
         List<NodeRef> sharedCollections =  collectionNodes.stream().filter(n -> isSharedNode(n,userName)).collect(Collectors.toList());
 
 
-        AuthorityService authorityService = AuthorityServiceFactory.getLocalService();
+        AuthorityService authorityService = AuthorityServiceFactory.getInstance().getLocalService();
         Set<String> groupSet = authorityService.getMemberships(userName);
         ArrayList<EduGroup> allEduGroups = AuthenticationUtil.runAsSystem(() -> authorityService.getAllEduGroups(userName));
         List<String> groupList = groupSet.stream().map(g ->  (String)authorityService.getAuthorityProperty(g,CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME)).collect(Collectors.toList());
@@ -409,7 +383,7 @@ public class DataProtectionService{
         levelOne.forEach(n -> {
             QName type = nodeService.getType(n);
                 if(QName.createQName(CCConstants.CCM_TYPE_MAP).equals(type) || QName.createQName(CCConstants.CM_TYPE_FOLDER).equals(type) ){
-                    result.addAll(NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, n.getId(), null, RecurseMode.All));
+                    result.addAll(NodeServiceFactory.getInstance().getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, n.getId(), null, RecurseMode.All));
                 }
         });
         return NodeRefResult.builder().nodes(result).ignored(ignored).build();
@@ -579,7 +553,7 @@ public class DataProtectionService{
     }
 
     private static void removeNode(String nodeId) {
-        org.edu_sharing.service.nodeservice.NodeService eduNodeService = NodeServiceFactory.getLocalService();
+        org.edu_sharing.service.nodeservice.NodeService eduNodeService = NodeServiceFactory.getInstance().getLocalService();
         eduNodeService.removeNode(nodeId,null,false);
     }
 

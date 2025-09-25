@@ -19,8 +19,10 @@ import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.edu_sharing.service.tracking.ActivityEventService;
 import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
+@Primary
 @Service
 @RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService{

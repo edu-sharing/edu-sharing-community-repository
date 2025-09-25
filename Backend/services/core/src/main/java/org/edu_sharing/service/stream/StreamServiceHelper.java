@@ -11,16 +11,12 @@ import java.util.List;
 
 public class StreamServiceHelper {
     public static List<String> getCurrentAuthorities() {
-        AuthorityService authorityService=AuthorityServiceFactory.getLocalService();
+        AuthorityService authorityService=AuthorityServiceFactory.getInstance().getLocalService();
         ArrayList<String> authorities = new ArrayList<>();
         authorities.add(AuthenticationUtil.getFullyAuthenticatedUser());
-        AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<Void>() {
-
-            @Override
-            public Void doWork() throws Exception {
-                authorities.addAll(authorityService.getMemberships(AuthenticationUtil.getFullyAuthenticatedUser()));
-                return null;
-            }
+        AuthenticationUtil.runAsSystem((AuthenticationUtil.RunAsWork<Void>) () -> {
+            authorities.addAll(authorityService.getMemberships(AuthenticationUtil.getFullyAuthenticatedUser()));
+            return null;
         });
         if(!authorities.contains(CCConstants.AUTHORITY_GROUP_EVERYONE))
             authorities.add(CCConstants.AUTHORITY_GROUP_EVERYONE);

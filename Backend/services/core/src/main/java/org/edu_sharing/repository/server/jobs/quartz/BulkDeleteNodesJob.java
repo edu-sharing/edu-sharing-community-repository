@@ -93,7 +93,7 @@ public class BulkDeleteNodesJob extends AbstractJob{
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
 		nodeService = serviceRegistry.getNodeService();
-		nodeServiceEdu = NodeServiceFactory.getLocalService();
+		nodeServiceEdu = NodeServiceFactory.getInstance().getLocalService();
 
 		elastic = (String) context.getJobDetail().getJobDataMap().get("lucene");
 		startFolder = (String) context.getJobDetail().getJobDataMap().get("startFolder");

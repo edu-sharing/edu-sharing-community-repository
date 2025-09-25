@@ -26,9 +26,9 @@ public class Release_8_1_CleanupCollectionSeriesObject {
 			isNonTransactional = true)
 	public boolean execute(boolean test) {
 		int count = doTransform((ref) -> {
-			log.info("Deleting " + ref);
+            log.info("Deleting {}", ref);
 			if(!test) {
-				NodeServiceFactory.getLocalService().removeNode(ref.getId(), null, false);
+				NodeServiceFactory.getInstance().getLocalService().removeNode(ref.getId(), null, false);
 			}
 		});
 		log.info("Deleted " + count + " objects");
@@ -43,7 +43,7 @@ public class Release_8_1_CleanupCollectionSeriesObject {
 		runner.setThreaded(false);
 		runner.setKeepModifiedDate(true);
 		runner.setTransaction(NodeRunner.TransactionMode.LocalRetrying);
-		runner.setStartFolder(CollectionServiceFactory.getLocalService().getCollectionHomeParent());
+		runner.setStartFolder(CollectionServiceFactory.getInstance().getLocalService().getCollectionHomeParent());
 		AtomicInteger count = new AtomicInteger();
 		runner.setFilter((ref) -> {
 			if(NodeServiceHelper.hasAspect(ref, CCConstants.CCM_ASPECT_IO_CHILDOBJECT) &&

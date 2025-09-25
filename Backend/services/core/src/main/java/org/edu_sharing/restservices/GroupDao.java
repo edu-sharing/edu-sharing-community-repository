@@ -66,7 +66,7 @@ public class GroupDao {
 
     public static String createGroup(RepositoryDao repoDao, String groupName, GroupProfile profile, String parentGroup) throws DAOException {
         try {
-            AuthorityService authorityService = AuthorityServiceFactory.getAuthorityService(repoDao.getApplicationInfo().getAppId());
+            AuthorityService authorityService = AuthorityServiceFactory.getInstance().getService(repoDao.getApplicationInfo().getAppId());
             String result = authorityService.createGroup(groupName, profile.getDisplayName(), parentGroup);
             if (result != null) {
                 // permission check was done already, so run as system to allow org admin to set properties
@@ -91,13 +91,13 @@ public class GroupDao {
         setGroupType(nodeService, authorityRef, profile);
         setScopeType(nodeService, authorityRef, profile);
         if(profile.getCustomAttributes() != null && !profile.getCustomAttributes().isEmpty()) {
-            AuthorityServiceFactory.getLocalService().setCustomAttributes(authorityName, profile.getCustomAttributes());
+            AuthorityServiceFactory.getInstance().getLocalService().setCustomAttributes(authorityName, profile.getCustomAttributes());
         }
     }
 
     public static List<GroupDao> search(RepositoryDao repoDao, String pattern) throws DAOException {
 
-        AuthorityService authorityService = AuthorityServiceFactory.getAuthorityService(repoDao.getApplicationInfo().getAppId());
+        AuthorityService authorityService = AuthorityServiceFactory.getInstance().getService(repoDao.getApplicationInfo().getAppId());
         try {
 
             List<GroupDao> resultset = new ArrayList<>();
@@ -140,9 +140,9 @@ public class GroupDao {
         try {
 
             this.baseClient = repoDao.getBaseClient();
-            this.authorityService = AuthorityServiceFactory.getAuthorityService(repoDao.getApplicationInfo().getAppId());
-            this.searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
-            this.notificationService = NotificationServiceFactory.getLocalService();
+            this.authorityService = AuthorityServiceFactory.getInstance().getService(repoDao.getApplicationInfo().getAppId());
+            this.searchService = SearchServiceFactory.getInstance().getService(repoDao.getApplicationInfo().getAppId());
+            this.notificationService = NotificationServiceFactory.getInstance().getLocalService();
             this.repoDao = repoDao;
 
             this.authorityName =

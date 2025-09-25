@@ -9,7 +9,6 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.appcontext.ApplicationInfoContextHolder;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.restservices.shared.Repo;
@@ -47,7 +46,7 @@ public class RepositoryDao {
 						new IllegalArgumentException(repId));
 			}
 				  
-			if (appInfo == null || !(ApplicationInfo.TYPE_REPOSITORY.equals(appInfo.getType()))) {
+			if (!(ApplicationInfo.TYPE_REPOSITORY.equals(appInfo.getType()))) {
 				
 				throw new DAOValidationException(
 						new IllegalArgumentException("unsupported repository type."));
@@ -71,9 +70,9 @@ public class RepositoryDao {
 			// 5.1: there is no other client anymore
             baseClient = new MCAlfrescoAPIClient();
 
-            CollectionService collectionClient = CollectionServiceFactory.getCollectionService(appInfo.getAppId());
+            CollectionService collectionClient = CollectionServiceFactory.getInstance().getService(appInfo.getAppId());
 			
-			RenderingService renderingClient = RenderingServiceFactory.getRenderingService(appInfo.getAppId());
+			RenderingService renderingClient = RenderingServiceFactory.getInstance().getService(appInfo.getAppId());
 			
 			return new RepositoryDao(appInfo, baseClient, collectionClient, renderingClient);
 			
@@ -117,7 +116,7 @@ public class RepositoryDao {
 		this.baseClient = baseClient;
 		this.collectionClient = collectionClient;
 		this.renderingClient = renderingClient;
-		this.nodeService=NodeServiceFactory.getNodeService(appInfo.getAppId());
+		this.nodeService=NodeServiceFactory.getInstance().getService(appInfo.getAppId());
 	}
 	
 	public String getId() {
@@ -170,7 +169,7 @@ public class RepositoryDao {
 	}
 	
 	public String getUserName(){
-		return new AuthenticationToolAPI().getAuthentication(Context.getCurrentInstance().getRequest().getSession()).get(CCConstants.AUTH_USERNAME);
+		return AuthenticationToolAPI.getInstance().getAuthentication(Context.getCurrentInstance().getRequest().getSession()).get(CCConstants.AUTH_USERNAME);
 	}
 	
 	public String getUserHome() throws Exception{
@@ -212,20 +211,20 @@ public class RepositoryDao {
 	}
 
 	private boolean getRenderingSupported() {
-		return RenderingServiceFactory.getRenderingService(getId()).renderingSupported();
+		return RenderingServiceFactory.getInstance().getService(getId()).renderingSupported();
 	}
 
 	AuthorityService getAuthorityService(){
-		return AuthorityServiceFactory.getAuthorityService(getId());
+		return AuthorityServiceFactory.getInstance().getService(getId());
 	}
 	NodeService getNodeService(){
-		return NodeServiceFactory.getNodeService(getId());
+		return NodeServiceFactory.getInstance().getService(getId());
 	}
 	SearchService getSearchService() {
-		return SearchServiceFactory.getSearchService(getId());
+		return SearchServiceFactory.getInstance().getService(getId());
 	}
 	MediacenterService getMediacenterService(){
-		return MediacenterServiceFactory.getMediacenterService(getId());
+		return MediacenterServiceFactory.getInstance();
 	}
 
 }

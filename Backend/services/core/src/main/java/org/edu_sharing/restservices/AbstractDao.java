@@ -1,9 +1,7 @@
 package org.edu_sharing.restservices;
 
 import org.edu_sharing.service.authority.AuthorityService;
-import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeService;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.search.SearchService;
 
 public abstract class AbstractDao {

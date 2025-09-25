@@ -41,7 +41,7 @@ public class OrganizationDao {
 
 	public static List<EduGroup> getOrganizations(RepositoryDao repoDao) throws DAOException {
 		try{
-			return SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId()).searchOrganizations("", 0, Integer.MAX_VALUE, null,false,false).getData();
+			return SearchServiceFactory.getInstance().getService(repoDao.getApplicationInfo().getAppId()).searchOrganizations("", 0, Integer.MAX_VALUE, null,false,false).getData();
 		}catch(Throwable t){
 			throw DAOException.mapping(t);
 		}
@@ -92,7 +92,7 @@ public class OrganizationDao {
 	public static OrganizationDao getInstant(RepositoryDao repoDao, String groupName) throws DAOException {
 
 		try {
-			return new OrganizationDao(repoDao,AuthorityServiceFactory.getAuthorityService(repoDao.getId()).getEduGroup(groupName));
+			return new OrganizationDao(repoDao,AuthorityServiceFactory.getInstance().getService(repoDao.getId()).getEduGroup(groupName));
 		} catch (Throwable t) {
 			if(t instanceof NullPointerException) {
 				throw new DAOMissingException(t);
@@ -145,7 +145,7 @@ public class OrganizationDao {
 
 		this.authorityName = generateAuthorityName(eduGroup);
 		this.groupName = generateGroupName(eduGroup);
-		this.ref = AuthorityServiceFactory.getAuthorityService(repoDao.getId()).getAuthorityNodeRef(this.authorityName);
+		this.ref = AuthorityServiceFactory.getInstance().getService(repoDao.getId()).getAuthorityNodeRef(this.authorityName);
 	}
 
 	public static List<Organization> mapOrganizations(List<EduGroup> parentOrganizations) {
@@ -166,7 +166,7 @@ public class OrganizationDao {
 	 * @return
 	 */
 	public boolean hasAdministrationAccess(){
-		return AuthorityServiceFactory.getAuthorityService(repoDao.getId()).hasAdminAccessToOrganization(groupName);
+		return AuthorityServiceFactory.getInstance().getService(repoDao.getId()).hasAdminAccessToOrganization(groupName);
 	}
 
 	public Organization asOrganization() {

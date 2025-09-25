@@ -490,7 +490,7 @@ public class MetadataTemplateRenderer {
 	private boolean renderMaterialFeedback(MetadataWidget widget, StringBuffer widgetHtml) {
 		boolean empty=true;
 		try {
-			String parent = NodeServiceFactory.getLocalService().getPrimaryParent(nodeRef.getId());
+			String parent = NodeServiceFactory.getInstance().getLocalService().getPrimaryParent(nodeRef.getId());
 			if (parent != null) {
 			/* check that
 				- the parent is of type collection
@@ -499,12 +499,12 @@ public class MetadataTemplateRenderer {
 				- the user has the PERMISSION_FEEDBACK permission
 				- the user is not administrator (PERMISSION_DELETE) of the collection
 			 */
-				logger.info(ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_MATERIAL_FEEDBACK) + " " + PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), parent, CCConstants.PERMISSION_FEEDBACK)
-						+ " " + PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), parent, CCConstants.PERMISSION_DELETE));
+				logger.info(ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_MATERIAL_FEEDBACK) + " " + PermissionServiceFactory.getInstance().getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), parent, CCConstants.PERMISSION_FEEDBACK)
+						+ " " + PermissionServiceFactory.getInstance().getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), parent, CCConstants.PERMISSION_DELETE));
 				if (
 						ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_MATERIAL_FEEDBACK) &&
-								PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeRef.getId(), CCConstants.PERMISSION_FEEDBACK) &&
-								!PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeRef.getId(), CCConstants.PERMISSION_DELETE)
+								PermissionServiceFactory.getInstance().getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeRef.getId(), CCConstants.PERMISSION_FEEDBACK) &&
+								!PermissionServiceFactory.getInstance().getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeRef.getId(), CCConstants.PERMISSION_DELETE)
 				) {
 					try {
 						widgetHtml.

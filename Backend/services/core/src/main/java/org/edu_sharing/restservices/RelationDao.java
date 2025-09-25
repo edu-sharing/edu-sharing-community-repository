@@ -20,8 +20,8 @@ public class RelationDao {
 
     public RelationDao(RepositoryDao repoDao) {
         this.repoDao = repoDao;
-        this.relationService = RelationServiceFactory.getRelationService(repoDao.getId());
-        this.authorityService = AuthorityServiceFactory.getAuthorityService(repoDao.getId());
+        this.relationService = RelationServiceFactory.getInstance().getService(repoDao.getId());
+        this.authorityService = AuthorityServiceFactory.getInstance().getService(repoDao.getId());
     }
 
     public void createRelation(String sourceNodeId, String targetNodeId, InputRelationType relationType) throws DAOException {

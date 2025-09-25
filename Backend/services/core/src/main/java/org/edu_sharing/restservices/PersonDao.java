@@ -96,7 +96,7 @@ public class PersonDao {
     public static PersonDao getPersonByUserId(RepositoryDao repoDao, String userId) throws DAOException {
 
         try {
-            String username = NodeServiceFactory.getNodeService(repoDao.getId()).getProperty(
+            String username = NodeServiceFactory.getInstance().getService(repoDao.getId()).getProperty(
                     StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(),
                     StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
                     userId,
@@ -142,7 +142,7 @@ public class PersonDao {
                 Map<String, Serializable> userInfo = profileToMap(profile);
                 userInfo.put(CCConstants.PROP_USERNAME, userName);
 
-                AuthorityServiceFactory.getAuthorityService(repoDao.getId()).createOrUpdateUser(userInfo);
+                AuthorityServiceFactory.getInstance().getService(repoDao.getId()).createOrUpdateUser(userInfo);
                 if (returnResult) {
                     PersonDao result = new PersonDao(repoDao, userName);
                     if (password != null)
@@ -180,10 +180,10 @@ public class PersonDao {
         try {
 
             this.baseClient = repoDao.getBaseClient();
-            this.nodeService = NodeServiceFactory.getNodeService(repoDao.getId());
-            this.searchService = SearchServiceFactory.getSearchService(repoDao.getId());
-            this.authorityService = AuthorityServiceFactory.getAuthorityService(repoDao.getId());
-            this.dashboardConfigService = DashboardConfigServiceFactory.getDashboardConfigService(repoDao.getId());
+            this.nodeService = NodeServiceFactory.getInstance().getService(repoDao.getId());
+            this.searchService = SearchServiceFactory.getInstance().getService(repoDao.getId());
+            this.authorityService = AuthorityServiceFactory.getInstance().getService(repoDao.getId());
+            this.dashboardConfigService = DashboardConfigServiceFactory.getInstance().getService(repoDao.getId());
 
             this.repoDao = repoDao;
 
@@ -254,7 +254,7 @@ public class PersonDao {
         newUserInfo.put(CCConstants.CM_PROP_PERSON_ABOUT, profile.getAbout());
         newUserInfo.put(CCConstants.CM_PROP_PERSON_SKILLS, profile.getSkills() != null ? new ArrayList<>(Arrays.asList(profile.getSkills())) : null);
         newUserInfo.put(CCConstants.CM_PROP_PERSON_VCARD, profile.getVCard());
-        if (AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
+        if (AuthorityServiceFactory.getInstance().getLocalService().isGlobalAdmin()) {
             newUserInfo.put(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION, profile.getPrimaryAffiliation());
             if (profile.getSizeQuota() > 0) {
                 newUserInfo.put(CCConstants.CM_PROP_PERSON_SIZE_QUOTA, "" + profile.getSizeQuota());
@@ -266,10 +266,10 @@ public class PersonDao {
     }
 
     public GroupEntries getMemberships(String pattern, int skipCount, int maxItems, SortDefinition sort) throws DAOException {
-        if (!AuthenticationUtil.getFullyAuthenticatedUser().equals(getAuthorityName()) && !AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
+        if (!AuthenticationUtil.getFullyAuthenticatedUser().equals(getAuthorityName()) && !AuthorityServiceFactory.getInstance().getLocalService().isGlobalAdmin()) {
             throw new NotAnAdminException();
         }
-        SearchResult<String> search = SearchServiceFactory.getSearchService(repoDao.getId()).searchPersonGroups(
+        SearchResult<String> search = SearchServiceFactory.getInstance().getService(repoDao.getId()).searchPersonGroups(
                 getAuthorityName(),
                 pattern,
                 skipCount,
@@ -569,7 +569,7 @@ public class PersonDao {
     }
 
     public UserRender asPersonRender() {
-        org.edu_sharing.service.authority.AuthorityService service = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+        org.edu_sharing.service.authority.AuthorityService service = AuthorityServiceFactory.getInstance().getService(ApplicationInfoList.getHomeRepository().getAppId());
         UserRender data = new UserRender();
         data.setGuest(authorityService.isGuest());
         data.setAuthorityName(getAuthorityName());
@@ -757,13 +757,13 @@ public class PersonDao {
     }
 
     private String getCurrentNodeListJson() throws Exception {
-        org.edu_sharing.service.authority.AuthorityService service = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+        org.edu_sharing.service.authority.AuthorityService service = AuthorityServiceFactory.getInstance().getService(ApplicationInfoList.getHomeRepository().getAppId());
         HttpSession session = Context.getCurrentInstance().getRequest().getSession();
         String data;
         if (service.isGuest()) {
             data = (String) session.getAttribute(CCConstants.CCM_PROP_PERSON_NODE_LISTS);
         } else {
-            data = (String) AuthorityServiceFactory.getLocalService().getAuthorityProperty(this.getUserName(), CCConstants.CCM_PROP_PERSON_NODE_LISTS);
+            data = (String) AuthorityServiceFactory.getInstance().getLocalService().getAuthorityProperty(this.getUserName(), CCConstants.CCM_PROP_PERSON_NODE_LISTS);
         }
         return data;
     }
@@ -798,12 +798,12 @@ public class PersonDao {
     }
 
     private void updateNodeList(JSONObject json) throws Exception {
-        org.edu_sharing.service.authority.AuthorityService service = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+        org.edu_sharing.service.authority.AuthorityService service = AuthorityServiceFactory.getInstance().getService(ApplicationInfoList.getHomeRepository().getAppId());
         HttpSession session = Context.getCurrentInstance().getRequest().getSession();
         if (service.isGuest()) {
             session.setAttribute(CCConstants.CCM_PROP_PERSON_NODE_LISTS, json.toString());
         } else {
-            AuthorityServiceFactory.getLocalService().setAuthorityProperty(this.getUserName(), CCConstants.CCM_PROP_PERSON_NODE_LISTS, json.toString());
+            AuthorityServiceFactory.getInstance().getLocalService().setAuthorityProperty(this.getUserName(), CCConstants.CCM_PROP_PERSON_NODE_LISTS, json.toString());
         }
     }
 
@@ -814,10 +814,10 @@ public class PersonDao {
             );
         }
         String oldStatus = (String) userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS);
-        NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), getNodeId(), CCConstants.CM_PROP_PERSON_ESPERSONSTATUS, status.name(), false);
-        NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), getNodeId(), CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE, new Date(), false);
+        NodeServiceFactory.getInstance().getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), getNodeId(), CCConstants.CM_PROP_PERSON_ESPERSONSTATUS, status.name(), false);
+        NodeServiceFactory.getInstance().getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), getNodeId(), CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE, new Date(), false);
         if (notifyMail) {
-            NotificationServiceFactory.getLocalService()
+            NotificationServiceFactory.getInstance().getLocalService()
                     .notifyPersonStatusChanged(
                             (String) userInfo.get(CCConstants.CM_PROP_PERSON_EMAIL),
                             getFirstName(),

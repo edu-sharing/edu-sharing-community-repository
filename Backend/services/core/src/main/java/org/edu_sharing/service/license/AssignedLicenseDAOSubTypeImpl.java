@@ -21,7 +21,7 @@ public class AssignedLicenseDAOSubTypeImpl implements AssignedLicenseDAO {
 		//remote repositories need a valid homeAuth to make the AuthByApp
 		Map<String, String> homeAuthInfo = null;
 		if(!ApplicationInfoList.getRepositoryInfoById(repositoryId).ishomeNode()){
-			homeAuthInfo = new AuthenticationToolAPI().getAuthentication(Context.getCurrentInstance().getRequest().getSession());
+			homeAuthInfo = AuthenticationToolAPI.getInstance().getAuthentication(Context.getCurrentInstance().getRequest().getSession());
 		}
 		
 		MCAlfrescoBaseClient mcAlfrescoBaseClient = (MCAlfrescoBaseClient) RepoFactory.getInstance(repositoryId, homeAuthInfo);
@@ -46,7 +46,7 @@ public class AssignedLicenseDAOSubTypeImpl implements AssignedLicenseDAO {
 		//remote repositories need a valid homeAuth to make the AuthByApp
 		Map<String, String> homeAuthInfo = null;
 		if(repositoryId != null && !ApplicationInfoList.getRepositoryInfoById(repositoryId).ishomeNode()){
-			homeAuthInfo = new AuthenticationToolAPI().getAuthentication(Context.getCurrentInstance().getRequest().getSession());
+			homeAuthInfo = AuthenticationToolAPI.getInstance().getAuthentication(Context.getCurrentInstance().getRequest().getSession());
 		}
 		
 		MCAlfrescoBaseClient mcAlfrescoBaseClient = (MCAlfrescoBaseClient) RepoFactory.getInstance(repositoryId,homeAuthInfo);

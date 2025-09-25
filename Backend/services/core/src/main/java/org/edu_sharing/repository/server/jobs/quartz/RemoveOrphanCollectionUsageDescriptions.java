@@ -72,7 +72,7 @@ public class RemoveOrphanCollectionUsageDescriptions extends AbstractJobMapAnnot
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
 		nodeService = serviceRegistry.getNodeService();
-		org.edu_sharing.service.nodeservice.NodeService nodeServiceEdu = NodeServiceFactory.getLocalService();
+		org.edu_sharing.service.nodeservice.NodeService nodeServiceEdu = NodeServiceFactory.getInstance().getLocalService();
 
 		if(testRun==null){
 			throw new IllegalArgumentException("Missing required boolean parameter 'testRun'");

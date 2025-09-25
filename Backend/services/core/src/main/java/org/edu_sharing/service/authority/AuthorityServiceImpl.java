@@ -23,7 +23,6 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
-import org.apache.log4j.Logger;
 import org.apache.tika.utils.StringUtils;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.guest.GuestService;
@@ -41,9 +40,9 @@ import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authentication.totp.OneTimeTokenService;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Service;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.*;
@@ -51,8 +50,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 
 @Slf4j
-@Component
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@Primary
+@Service
+@RequiredArgsConstructor
 public class AuthorityServiceImpl implements AuthorityService {
 
     private final UserCache userCache;
@@ -563,7 +563,7 @@ public class AuthorityServiceImpl implements AuthorityService {
             throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_EMAIL);
         }
 
-        if (!currentUser.equals(userName) && !AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
+        if (!currentUser.equals(userName) && !AuthorityServiceFactory.getInstance().getLocalService().isGlobalAdmin()) {
             throw new NotAnAdminException();
         }
         if (!lightbendConfigLoader.getConfig().getIsNull("repository.personActiveStatus")) {

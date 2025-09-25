@@ -7,41 +7,1053 @@ import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.json.JsonData;
-import org.alfresco.service.cmr.repository.AssociationRef;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.apache.lucene.queryparser.classic.QueryParser;
+import lombok.extern.slf4j.Slf4j;
+import org.alfresco.model.ContentModel;
+import org.alfresco.repo.policy.BehaviourFilter;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.*;
+import org.alfresco.service.cmr.security.AccessPermission;
+import org.alfresco.service.cmr.security.AuthenticationService;
+import org.alfresco.service.cmr.security.OwnableService;
+import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.transaction.TransactionService;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.service.guest.GuestService;
+import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
+import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
+import org.edu_sharing.repository.client.rpc.ACE;
+import org.edu_sharing.repository.client.rpc.ACL;
+import org.edu_sharing.repository.client.rpc.EduGroup;
+import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.AuthenticationTool;
+import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.edu_sharing.repository.server.appcontext.AppContextScope;
+import org.edu_sharing.repository.server.appcontext.ApplicationInfoContextHolder;
+import org.edu_sharing.repository.server.appcontext.UseLocalAppContext;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.I18nServer;
+import org.edu_sharing.repository.server.tools.ImageTool;
+import org.edu_sharing.repository.server.tools.cache.PreviewCache;
+import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
+import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
 import org.edu_sharing.restservices.CollectionDao;
-import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.restservices.shared.Authority;
+import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
+import org.edu_sharing.service.model.NodeRefImpl;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.nodeservice.NodeServiceInterceptor;
+import org.edu_sharing.service.notification.NotificationService;
+import org.edu_sharing.service.notification.Status;
+import org.edu_sharing.service.permission.PermissionServiceHelper;
+import org.edu_sharing.service.remote.RemoteObjectService;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceElastic;
-import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
-import org.edu_sharing.spring.ApplicationContextFactory;
+import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
+import org.edu_sharing.service.toolpermission.ToolPermissionService;
+import org.edu_sharing.service.tracking.ActivityEventService;
+import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
+import org.edu_sharing.service.usage.Usage;
+import org.edu_sharing.service.usage.Usage2Service;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
-public class CollectionServiceElastic extends CollectionServiceImpl {
+@Slf4j
+@Primary
+@Service
+public class CollectionServiceElastic implements CollectionService {
 
     private final SearchServiceElastic searchServiceElastic;
+    private final RepositoryCache repositoryCache;
+    private final NotificationService notificationService;
+    private final ActivityEventService activityEventService;
+    private final AuthenticationTool authTool;
+    private final BehaviourFilter policyBehaviourFilter;
+    private final Map<String, String> authInfo;
+    private final SearchService searchService;
+    private final NodeService nodeService;
+    private final org.edu_sharing.service.nodeservice.NodeService eduNodeService;
+    private final TransactionService transactionService;
+    private final ToolPermissionService toolPermissionService;
+    private final PermissionService permissionService;
+    private final org.edu_sharing.service.permission.PermissionService eduPermissionService;
+    private final CollectionServiceConfig collectionServiceConfig;
+    private final OwnableService ownableService;
+    private final org.alfresco.service.cmr.security.AuthorityService authorityService;
+    private final AuthenticationService authenticationService;
+    private final AuthorityService localAuthorityService;
+    private MCAlfrescoAPIClient client;
 
-    public static CollectionServiceElastic build(String appId) {
-        CollectionServiceConfig config = (CollectionServiceConfig) ApplicationContextFactory.getApplicationContext().getBean("collectionServiceConfig");
-        return new CollectionServiceElastic(appId, config.getPattern(), config.getPath());
+    public CollectionServiceElastic(SearchServiceElastic searchServiceElastic,
+                                    RepositoryCache repositoryCache,
+                                    NotificationService notificationService,
+                                    ActivityEventService activityEventService,
+                                    AuthenticationTool authTool,
+                                    BehaviourFilter policyBehaviourFilter,
+                                    SearchService searchService,
+                                    NodeService nodeService,
+                                    org.edu_sharing.service.nodeservice.NodeService eduNodeService,
+                                    TransactionService transactionService,
+                                    ToolPermissionService toolPermissionService,
+                                    org.edu_sharing.service.permission.PermissionService eduPermissionService,
+                                    GuestService guestService,
+                                    PermissionService permissionService,
+                                    CollectionServiceConfig collectionServiceConfig,
+                                    OwnableService ownableService,
+                                    org.alfresco.service.cmr.security.AuthorityService authorityService,
+                                    AuthenticationService authenticationService,
+                                    @UseLocalAppContext
+                                    AuthorityService localAuthorityService) {
+        this.searchServiceElastic = searchServiceElastic;
+
+        this.repositoryCache = repositoryCache;
+        this.notificationService = notificationService;
+        this.activityEventService = activityEventService;
+        this.authTool = authTool;
+        this.policyBehaviourFilter = policyBehaviourFilter;
+        this.searchService = searchService;
+        this.nodeService = nodeService;
+        this.eduNodeService = eduNodeService;
+        this.transactionService = transactionService;
+        this.toolPermissionService = toolPermissionService;
+        this.eduPermissionService = eduPermissionService;
+        this.permissionService = permissionService;
+        this.collectionServiceConfig = collectionServiceConfig;
+        this.ownableService = ownableService;
+        this.authorityService = authorityService;
+        this.authenticationService = authenticationService;
+        this.localAuthorityService = localAuthorityService;
+
+        try {
+            this.client = new MCAlfrescoAPIClient();
+        } catch (net.sf.acegisecurity.AuthenticationCredentialsNotFoundException e) {
+            //when remote auth
+            log.warn(e.getMessage(), e);
+        }
+
+        // @TODO check if the following code is necessary any longer.
+        // this.authTool.validateAuthentication destroys runAs code
+
+        //fix for running in runas user mode
+        if ((AuthenticationUtil.isRunAsUserTheSystemUser()
+                || "admin".equals(AuthenticationUtil.getRunAsUser()))
+                || Context.getCurrentInstance() == null
+                || (guestService.isGuestUser(AuthenticationUtil.getFullyAuthenticatedUser()))) {
+            log.debug("starting in runas user mode");
+            this.authInfo = new HashMap<>();
+            this.authInfo.put(CCConstants.AUTH_USERNAME, AuthenticationUtil.getRunAsUser());
+        } else {
+            this.authInfo = this.authTool.validateAuthentication(Context.getCurrentInstance().getRequest().getSession());
+        }
     }
 
-    public CollectionServiceElastic(String appId, String pattern, String path) {
-        super(appId, pattern, path);
-        this.searchServiceElastic = new SearchServiceElastic(appId);
+    private String addToCollection(String collectionId, String refNodeId, boolean allowDuplicate) throws Throwable {
+
+        // use original
+        String nodeId = refNodeId;
+        String originalNodeId;
+        if (AuthenticationUtil.runAsSystem(() -> eduNodeService.hasAspect(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), refNodeId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))) {
+            originalNodeId = client.getProperty(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), MCAlfrescoAPIClient.storeRef.getIdentifier(), refNodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
+        } else {
+            originalNodeId = refNodeId;
+        }
+        NodeRef originalNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalNodeId);
+
+        // user must have CC_PUBLISH on either the original, a reference object or it is already proposed
+        if (!client.hasPermissions(originalNodeId, new String[]{CCConstants.PERMISSION_CC_PUBLISH})
+                && !client.hasPermissions(nodeId, new String[]{CCConstants.PERMISSION_CC_PUBLISH})
+                // we allow adding if it is a proposal since it was proposed from someone with CC_PUBLISH
+                // DESP-989
+                && getChildrenProposalIntern(collectionId).stream().noneMatch(
+                c -> c.getTargetRef().equals(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalNodeId))
+        )) {
+            String message = I18nServer.getTranslationDefaultResourcebundleNoException("collection_no_publish_permission");
+            throw new Exception(message);
+        }
+        NodeRef collectionRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, collectionId);
+        boolean collectionIsPublic = false;
+        Set<AccessPermission> permissions = permissionService.getAllSetPermissions(collectionRef);
+        for (AccessPermission accessPermission : permissions) {
+            if (PermissionService.ALL_AUTHORITIES.equals(accessPermission.getAuthority())) {
+                if (PermissionService.READ.equals(accessPermission.getPermission())
+                        || PermissionService.CONSUMER.equals(accessPermission.getPermission())
+                        || "ConsumerMetadata".equals(accessPermission.getPermission())
+                        || PermissionService.EDITOR.equals(accessPermission.getPermission())
+                        || PermissionService.CONTRIBUTOR.equals(accessPermission.getPermission())
+                        || PermissionService.COORDINATOR.equals(accessPermission.getPermission())) {
+                    collectionIsPublic = true;
+                }
+            }
+
+        }
+
+        if (collectionIsPublic && !toolPermissionService.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_ALLAUTHORITIES)
+                && !client.isOwner(collectionId, AuthenticationUtil.getFullyAuthenticatedUser())) {
+            throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_ALLAUTHORITIES);
+        }
+
+        String originalNodeType = client.getNodeType(originalNodeId);
+        if (!originalNodeType.equals(CCConstants.CCM_TYPE_IO)) {
+            throw new Exception("Only Files are allowed to be added!");
+        }
+        //NodeRef child = nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, collectionId, CCConstants.CCM_TYPE_IO, CCConstants.CCM_PROP_IO_ORIGINAL, originalNodeId);
+        if (!allowDuplicate) {
+            List<NodeRef> child = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO, new HashMap<>() {{
+                        put(CCConstants.CCM_PROP_IO_ORIGINAL, originalNodeId);
+                    }},
+                    CMISSearchHelper.CMISSearchData.builder().inFolder(collectionId).build()
+            );
+            if (!child.isEmpty()) {
+                throw new DuplicateNodeException("Node is already in collection");
+            }
+        }
+            /*
+            for(ChildAssociationRef node : nodeService.getChildrenChildAssociationRef(collectionId)){
+                // TODO: Maybe we can find a faster way to determine it?
+                String nodeRef = client.getProperty(node.getChildRef().getStoreRef().getProtocol(),node.getChildRef().getStoreRef().getIdentifier(),node.getChildRef().getId(), CCConstants.CCM_PROP_IO_ORIGINAL);
+                if(originalNodeId.equals(nodeRef)){
+                    String message = I18nServer.getTranslationDefaultResourcebundle("collection_already_in", locale);
+
+                    throw new DuplicateNodeException(message);
+                }
+            }
+            */
+
+        // we need to copy as system because the user may just has full access to the ref (which may has different metadata)
+        // we check the add children permissions before continuing
+        if (!eduPermissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), collectionId, CCConstants.PERMISSION_ADD_CHILDREN)) {
+            throw new SecurityException("No permissions to add childrens to collection");
+        }
+
+        Map<String, Object> props = AuthenticationUtil.runAsSystem(() -> {
+            try {
+                Map<String, Object> data = new HashMap<>();
+                data.put(CCConstants.CM_PROP_VERSIONABLELABEL, NodeServiceHelper.getProperty(originalNodeRef, CCConstants.CM_PROP_VERSIONABLELABEL));
+                data.put(CCConstants.LOM_PROP_TECHNICAL_SIZE, NodeServiceHelper.getProperty(originalNodeRef, CCConstants.LOM_PROP_TECHNICAL_SIZE));
+                return data;
+            } catch (Throwable t) {
+                throw new RuntimeException(t);
+            }
+        });
+        String versLabel = (String) props.get(CCConstants.CM_PROP_VERSIONABLELABEL);
+
+        eduPermissionService.addToRecentProperty(CCConstants.CCM_PROP_PERSON_RECENT_COLLECTIONS, collectionRef);
+
+        return AuthenticationUtil.runAsSystem(() -> {
+            /*
+             * make a copy of the original.
+             * OnCopyCollectionRefPolicy cares about
+             * - not duplicating the content
+             * - ignore childs: usage and license data
+             * - the preview child will be copied
+             */
+            String refId = client.copyNode(originalNodeId, collectionId, false);
+
+            eduPermissionService.setPermissions(refId, null, true);
+            client.addAspect(refId, CCConstants.CCM_ASPECT_POSITIONABLE);
+
+
+            /*
+             * write content, so that the index tracking will be triggered
+             * the overwritten NodeContentGet class checks if it' s an collection ref object
+             * and switches the nodeId to original node, which is used for indexing
+             * Do a transaction and disable all policy filters to prevent quota exceptions to kick in
+             *
+             * Alfresco 5.2 Set mimetype 5.2 to prevent thumbnail transformation to crash with different mimetype warning
+             * "Transformation has not taken place because the declared mimetype (image/jpeg) does not match the detected mimetype (text/plain)"
+             */
+            NodeServiceInterceptor.ignoreQuota(() -> {
+                client.writeContent(refId, "1".getBytes(), "text/plain", "utf-8", CCConstants.CM_PROP_CONTENT);
+                return null;
+            });
+
+            //set to original size
+            client.setProperty(refId, CCConstants.LOM_PROP_TECHNICAL_SIZE, (String) props.get(CCConstants.LOM_PROP_TECHNICAL_SIZE));
+
+            // run setUsage as admin because the user may not has cc_publish on the original node (but on the ref)
+            new Usage2Service().setUsageInternal(
+                    authInfo.get(CCConstants.AUTH_USERNAME),
+                    ApplicationInfoList.getHomeRepository().getAppId(),
+                    collectionId,
+                    originalNodeId, null, null, null, -1, versLabel, refId, null);
+
+            String colllectionType = null;
+            List<String> collectionAspects;
+            Map<String, Object> collectionProperties;
+            try {
+                colllectionType = eduNodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), collectionId);
+                collectionAspects = Arrays.asList(eduNodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), collectionId));
+                collectionProperties = eduNodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), collectionId);
+            } catch (Throwable ignored) {
+                collectionAspects = new ArrayList<>();
+                collectionProperties = new HashMap<>();
+            }
+
+            String nodeType = null;
+            List<String> nodeAspects;
+            Map<String, Object> nodeProperties;
+            try {
+                nodeType = eduNodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), refNodeId);
+                nodeAspects = Arrays.asList(eduNodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), refNodeId));
+                nodeProperties = eduNodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), refNodeId);
+            } catch (Throwable ignored) {
+                nodeProperties = new HashMap<>();
+                nodeAspects = new ArrayList<>();
+            }
+            notificationService.notifyAddCollection(collectionId, refNodeId, colllectionType, collectionAspects, collectionProperties, nodeType, nodeAspects, nodeProperties, Status.ADDED);
+            activityEventService.trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, collectionId), null, ActivityOnNodeEventType.ADD_MATERIAL_TO_COLLECTION, AuthenticationUtil.getFullyAuthenticatedUser());
+            return refId;
+        });
+
     }
 
     @Override
+    public List<AssociationRef> getChildrenProposal(String parentId) {
+        if (!PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId), CCConstants.PERMISSION_WRITE)) {
+            throw new InsufficientPermissionException("No " + CCConstants.PERMISSION_WRITE + " on collection " + parentId);
+        }
+        return getChildrenProposalIntern(parentId);
+    }
+
+    private static List<AssociationRef> getChildrenProposalIntern(String parentId) {
+        return NodeServiceFactory.getInstance().getLocalService().getChildrenChildAssociationRefType(parentId, CCConstants.CCM_TYPE_COLLECTION_PROPOSAL).stream().map((proposal) -> {
+            NodeRef target = new NodeRef(NodeServiceHelper.getProperty(proposal.getChildRef(), CCConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET));
+            return new AssociationRef(proposal.getChildRef(), ContentModel.ASSOC_ORIGINAL, target);
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public void proposeForCollection(String collectionId, String originalNodeId, String sourceRepositoryId)
+            throws Throwable {
+        String finalId = mapNodeId(originalNodeId, sourceRepositoryId);
+
+        /*
+        if(!PermissionServiceHelper.isNodePublic(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, finalId))) {
+            throw new IllegalArgumentException("Suggested node is required to be publicly accessible");
+        }
+        */
+        ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PROPOSAL);
+        if (!PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, collectionId), CCConstants.PERMISSION_READ)) {
+            throw new InsufficientPermissionException("No " + CCConstants.PERMISSION_READ + " permissions for collection " + collectionId);
+        }
+        if (!PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, finalId), CCConstants.PERMISSION_CC_PUBLISH)) {
+            throw new InsufficientPermissionException("No " + CCConstants.PERMISSION_CC_PUBLISH + " permissions for collection " + collectionId);
+        }
+        AuthenticationUtil.runAsSystem(() -> {
+            NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, finalId);
+            if (getChildren(collectionId, null, new SortDefinition(), Collections.singletonList("files")).stream().anyMatch((ref) ->
+                    nodeRef.getId().equals(NodeServiceHelper.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, ref.getNodeId()), CCConstants.CCM_PROP_IO_ORIGINAL))
+            )) {
+                throw new DuplicateNodeException("Node id " + nodeRef.getId() + " is already in this collection");
+            }
+            if (getChildrenProposal(collectionId).stream().anyMatch((assoc) -> assoc.getTargetRef().equals(nodeRef))) {
+                throw new DuplicateNodeException("Node id " + nodeRef.getId() + " is already proposed for this collection");
+            }
+            Map<String, Serializable> props = new HashMap<>();
+            props.put(CCConstants.CM_NAME, NodeServiceHelper.getProperty(nodeRef, CCConstants.CM_NAME));
+            props.put(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, finalId));
+            props.put(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS, CCConstants.PROPOSAL_STATUS.PENDING);
+
+            String refId = AppContextScope.useLocalAppContext(() -> eduNodeService.createNodeBasic(collectionId, CCConstants.CCM_TYPE_COLLECTION_PROPOSAL, props));
+
+            String colllectionType = null;
+            List<String> collectionAspects;
+            Map<String, Object> collectionProperties;
+            try {
+                colllectionType = eduNodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), collectionId);
+                collectionAspects = Arrays.asList(eduNodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), collectionId));
+                collectionProperties = eduNodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), collectionId);
+            } catch (Throwable ignored) {
+                collectionAspects = new ArrayList<>();
+                collectionProperties = new HashMap<>();
+            }
+
+            String nodeType = null;
+            List<String> nodeAspects;
+            Map<String, Object> nodeProperties;
+            try {
+                nodeType = eduNodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), originalNodeId);
+                nodeAspects = Arrays.asList(eduNodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), originalNodeId));
+                nodeProperties = eduNodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), originalNodeId);
+            } catch (Throwable ignored) {
+                nodeProperties = new HashMap<>();
+                nodeAspects = new ArrayList<>();
+            }
+            notificationService.notifyProposeForCollection(collectionId, originalNodeId, colllectionType, collectionAspects, collectionProperties, nodeType, nodeAspects, nodeProperties, Status.ADDED);
+            activityEventService.trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, collectionId), null, ActivityOnNodeEventType.PROPOSE_MATERIAL_TO_COLLECTION, AuthenticationUtil.getFullyAuthenticatedUser());
+            return refId;
+
+        });
+    }
+
+    public String mapNodeId(String originalNodeId, String sourceRepositoryId) throws Throwable {
+        if (sourceRepositoryId != null) {
+            ApplicationInfo rep = ApplicationInfoList.getRepositoryInfoById(sourceRepositoryId);
+            if (rep.ishomeNode() || ApplicationInfo.REPOSITORY_TYPE_LOCAL.equals(rep.getRepositoryType())) {
+                return originalNodeId;
+            }
+            return RemoteObjectService.getOrCreateRemoteMetadataObject(sourceRepositoryId, originalNodeId);
+        }
+        return originalNodeId;
+    }
+
+    @Override
+    public String addToCollection(String collectionId, String originalNodeId, String sourceRepositoryId, boolean allowDuplicate)
+            throws Throwable {
+        originalNodeId = mapNodeId(originalNodeId, sourceRepositoryId);
+        return addToCollection(collectionId, originalNodeId, allowDuplicate);
+    }
+
+    @Override
+    public Collection create(String parentId, Collection collection) throws Throwable {
+
+        String currentUsername = null;
+        ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS);
+        if (Context.getCurrentInstance() != null) {
+            currentUsername = authTool.validateAuthentication(Context.getCurrentInstance().getRequest().getSession()).get(CCConstants.AUTH_USERNAME);
+        } else {
+            if (AuthenticationUtil.getRunAsUser() != null) {
+                currentUsername = AuthenticationUtil.getRunAsUser();
+            }
+        }
+
+        final String fcurrentUsername = currentUsername;
+
+        if (fcurrentUsername != null) {
+            return AuthenticationUtil.runAsSystem(() -> {
+                String parentIdLocal = parentId;
+                if (parentIdLocal == null) {
+
+                    collection.setLevel0(true);
+
+                    parentIdLocal = getHomePath();
+                }
+
+                Map<String, Object> props = asProps(collection);
+                try {
+                    new DuplicateFinder().transformToSafeName(client.getChildren(parentIdLocal), props);
+                } catch (Throwable e) {
+                    throw new Exception(e);
+                }
+
+                String collectionId = client.createNode(parentIdLocal, CCConstants.CCM_TYPE_MAP, props);
+                client.addAspect(collectionId, CCConstants.CCM_ASPECT_COLLECTION);
+                client.addAspect(collectionId, CCConstants.CCM_ASPECT_POSITIONABLE);
+
+                client.setOwner(collectionId, fcurrentUsername);
+                collection.setNodeId(collectionId);
+                return collection;
+            });
+        } else {
+            throw new Exception("not authenticated");
+        }
+
+    }
+
+    /**
+     * return the main folder where ALL collections are stored
+     */
+    @Override
+    public String getCollectionHomeParent() {
+        return AuthenticationUtil.runAsSystem(() -> {
+            try {
+                return NodeServiceHelper.getContainerRootPath(collectionServiceConfig.path());
+            } catch (Throwable e) {
+                throw new RuntimeException();
+            }
+        });
+    }
+
+    /**
+     * return the folder id to the collection home where new collections should be created
+     */
+    @Override
+    public String getHomePath() {
+        return AuthenticationUtil.runAsSystem(() -> {
+            AuthenticationUtil.pushAuthentication();
+            try {
+                AuthenticationUtil.setFullyAuthenticatedUser("System");
+                return NodeServiceHelper.getContainerIdByPath(collectionServiceConfig.path(), collectionServiceConfig.pattern());
+            } finally {
+                AuthenticationUtil.popAuthentication();
+            }
+        });
+    }
+
+    @Override
+    public Collection createAndSetScope(String parentId, Collection collection) throws Throwable {
+        Collection col = create(parentId, collection);
+        setScope(col);
+        return col;
+    }
+
+    /**
+     * TODO not ready yet, set usage again, refId must be safed by addToCollection
+     * set level0 to false when moving an root collection to an sub one
+     * set level0 to true when moving an childcollection to root
+     */
+    @Override
+    public void move(String toCollection, String toMove) {
+        try {
+
+            if (CCConstants.CCM_TYPE_IO.equals(client.getNodeType(toMove))) {
+                String parent = client.getParents(toMove, true).keySet().iterator().next();
+                client.moveNode(toCollection, CCConstants.CM_ASSOC_FOLDER_CONTAINS, toMove);
+
+                Map<String, Map<String, Object>> assocNode = client.getAssocNode(toMove, CCConstants.CM_ASSOC_ORIGINAL);
+                String originalNodeId = (String) assocNode.entrySet().iterator().next().getValue().get(CCConstants.SYS_PROP_NODE_UID);
+
+                // set the usage for the new collection
+                Usage2Service usageService = new Usage2Service();
+                ApplicationInfo appInfo = ApplicationInfoContextHolder.getCurrentApplicationInfo();
+                Usage usage = usageService.getUsage(appInfo.getAppId(), parent, originalNodeId, toMove);
+                client.removeNode(usage.getNodeId(), originalNodeId);
+                usageService.setUsage(appInfo.getAppId(),
+                        authInfo.get(CCConstants.AUTH_USERNAME),
+                        appInfo.getAppId(),
+                        toCollection,
+                        originalNodeId, null, null, null, -1, usage.getUsageVersion(), toMove, null);
+
+            } else {
+                client.moveNode(toCollection, CCConstants.CM_ASSOC_FOLDER_CONTAINS, toMove);
+                // handle level0
+                Map<String, Object> properties = client.getProperties(toMove);
+                if (Boolean.parseBoolean((String) properties.get(CCConstants.CCM_PROP_MAP_COLLECTIONLEVEL0))) {
+                    if (Arrays.asList(client.getAspects(toCollection)).contains(CCConstants.CCM_ASPECT_COLLECTION)) {
+                        client.setProperty(toMove, CCConstants.CCM_PROP_MAP_COLLECTIONLEVEL0, "false");
+                    }
+                } else {
+                    if (!Arrays.asList(client.getAspects(toCollection)).contains(CCConstants.CCM_ASPECT_COLLECTION)) {
+                        client.setProperty(toMove, CCConstants.CCM_PROP_MAP_COLLECTIONLEVEL0, "true");
+                    }
+                }
+            }
+
+        } catch (Throwable e) {
+            log.error(e.getMessage(), e);
+        }
+
+    }
+
+    @Override
+    public void remove(String collectionId) {
+
+        try {
+            /*
+             * first remove the children so that the usages from the original are also removed
+             */
+            // Moved to @BeforeDeleteIOPolicy
+
+            /*
+             * remove the collection
+             */
+            // maybe it is a collection on root and someone else already created a collection that day
+            // this will result in an error, so we need to fetch the parent id as system
+            String parent = AuthenticationUtil.runAsSystem(() -> {
+                try {
+                    return client.getParents(collectionId, true).keySet().iterator().next();
+                } catch (Throwable throwable) {
+                    log.warn(throwable.getMessage(), throwable);
+                    return null;
+                }
+            });
+            client.removeNode(collectionId, parent);
+
+        } catch (Throwable e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void removeFromCollection(String collectionId, String nodeId) {
+        try {
+            String originalNodeId = eduNodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
+            client.removeNode(nodeId, collectionId);
+
+            if (originalNodeId == null) {
+                log.warn("reference object " + nodeId + " has no originId, can not remove usage");
+                return;
+            }
+
+            // Usage handling is now handled in @BeforeDeleteIOPolicy
+
+            try {
+                repositoryCache.remove(originalNodeId);
+            } catch (Throwable t) {
+                // may fail if original has no access, however, this is not an issue
+            }
+
+        } catch (Throwable e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void update(Collection collection) {
+        Map<String, Object> props = asProps(collection);
+        props.remove(CCConstants.CCM_PROP_MAP_COLLECTIONLEVEL0);
+        client.updateNode(collection.getNodeId(), props);
+    }
+
+    @Override
+    public void updateAndSetScope(Collection collection) throws Exception {
+        update(collection);
+        if (eduPermissionService.hasPermission(
+                StoreRef.PROTOCOL_WORKSPACE,
+                StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+                collection.getNodeId(),
+                CCConstants.PERMISSION_CHANGEPERMISSIONS
+        )) {
+            setScope(collection);
+        }
+    }
+
+    public Map<String, Object> asProps(Collection collection) {
+        Map<String, Object> props = new HashMap<>();
+        props.put(CCConstants.CM_PROP_TITLE, collection.getTitle());
+        props.put(CCConstants.CM_NAME, NodeServiceHelper.cleanupCmName(collection.getTitle()));
+        props.put(CCConstants.CM_PROP_DESCRIPTION, collection.getDescription());
+        props.put(CCConstants.CCM_PROP_MAP_X, collection.getX());
+        props.put(CCConstants.CCM_PROP_MAP_Y, collection.getY());
+        props.put(CCConstants.CCM_PROP_MAP_Z, collection.getZ());
+        props.put(CCConstants.CCM_PROP_MAP_COLLECTIONSCOPE, collection.getScope());
+
+        props.put(CCConstants.CCM_PROP_MAP_COLLECTIONCOLOR, collection.getColor());
+        props.put(CCConstants.CCM_PROP_MAP_COLLECTIONTYPE, collection.getType());
+        props.put(CCConstants.CCM_PROP_MAP_COLLECTIONVIEWTYPE, collection.getViewtype());
+        props.put(CCConstants.CCM_PROP_MAP_COLLECTIONLEVEL0, collection.isLevel0());
+        if (collection.getAuthorFreetext() != null && !collection.getAuthorFreetext().isEmpty()) {
+            ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CHANGE_OWNER);
+            props.put(CCConstants.CCM_PROP_MAP_COLLECTION_AUTHOR_FREETEXT, collection.getAuthorFreetext());
+        }
+        return props;
+    }
+
+    public Collection asCollection(Map<String, Object> props) {
+        Collection collection = new Collection();
+        collection.setNodeId((String) props.get(CCConstants.SYS_PROP_NODE_UID));
+
+        collection.setTitle((String) props.get(CCConstants.CM_PROP_TITLE));
+        collection.setDescription((String) props.get(CCConstants.CM_PROP_DESCRIPTION));
+
+        String x = (String) props.get(CCConstants.CCM_PROP_MAP_X);
+        if (x != null) collection.setX(Integer.parseInt(x));
+
+        String y = (String) props.get(CCConstants.CCM_PROP_MAP_Y);
+        if (y != null) collection.setY(Integer.parseInt(y));
+
+        String z = (String) props.get(CCConstants.CCM_PROP_MAP_Z);
+        if (z != null) collection.setZ(Integer.parseInt(z));
+
+        collection.setColor((String) props.get(CCConstants.CCM_PROP_MAP_COLLECTIONCOLOR));
+        collection.setType((String) props.get(CCConstants.CCM_PROP_MAP_COLLECTIONTYPE));
+        collection.setViewtype((String) props.get(CCConstants.CCM_PROP_MAP_COLLECTIONVIEWTYPE));
+        collection.setScope((String) props.get(CCConstants.CCM_PROP_MAP_COLLECTIONSCOPE));
+        collection.setOrderAscending(false);
+        String[] order = NodeServiceHelper.getPropertiesMultivalue(props).get(CCConstants.CCM_PROP_MAP_COLLECTION_ORDER_MODE);
+        if (order != null) {
+            collection.setOrderMode(order[0]);
+            // since 6.1, we store 2 values
+            if (order.length > 1) {
+                collection.setOrderAscending(Boolean.parseBoolean(order[1]));
+            }
+        }
+        collection.setAuthorFreetext((String) props.get(CCConstants.CCM_PROP_MAP_COLLECTION_AUTHOR_FREETEXT));
+        if (props.containsKey(CCConstants.CCM_PROP_COLLECTION_PINNED_STATUS))
+            collection.setPinned(Boolean.parseBoolean((String) props.get(CCConstants.CCM_PROP_COLLECTION_PINNED_STATUS)));
+
+        return collection;
+    }
+
+    @Override
+    public Collection get(org.edu_sharing.service.model.NodeRef nodeRef, boolean fetchCounts, boolean resolveUsernames, BoolQuery readPermissionsQuery) {
+        try {
+            Map<String, Object> props = nodeRef.getProperties() == null ? eduNodeService.getProperties(nodeRef.getStoreProtocol(), nodeRef.getStoreId(), nodeRef.getNodeId()) : nodeRef.getProperties();
+            throwIfNotACollection(nodeRef);
+
+            Collection collection = asCollection(props);
+
+            // using solr to count all underlying refs recursive
+            if (fetchCounts) {
+                addCollectionCountProperties(new NodeRef(new StoreRef(nodeRef.getStoreProtocol(), nodeRef.getStoreId()), nodeRef.getNodeId()), collection, readPermissionsQuery);
+            }
+            //collection.setChildReferencesCount(client.getChildAssociationByType(storeProtocol,storeId,collectionId, CCConstants.CCM_TYPE_IO).size());
+            //collection.setChildCollectionsCount(client.getChildAssociationByType(storeProtocol,storeId,collectionId, CCConstants.CCM_TYPE_MAP).size());
+
+            if (resolveUsernames) {
+                User owner = client.getOwner(nodeRef.getStoreId(), nodeRef.getStoreProtocol(), nodeRef.getNodeId());
+
+                String currentUser = client.getAuthenticationInfo().get(CCConstants.AUTH_USERNAME);
+                if (!currentUser.equals(owner.getUsername()) && !client.isAdmin(currentUser)) {
+                    //leave out username
+                    owner.setUsername(null);
+                    owner.setEmail(null);
+                    owner.setNodeId(null);
+                }
+                collection.setFromUser(currentUser.equals(owner.getUsername()));
+                collection.setOwner(owner);
+            }
+
+            String parentId = (String) props.get(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID);
+            AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<Void>() {
+
+                @Override
+                public Void doWork() throws Exception {
+                    if (StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.equals(new StoreRef(nodeRef.getStoreProtocol(), nodeRef.getStoreId()))) {
+                        if (Arrays.asList(client.getAspects(nodeRef.getStoreProtocol(), nodeRef.getStoreId(), parentId)).contains(CCConstants.CCM_ASPECT_COLLECTION)) {
+                            collection.setLevel0(false);
+                        } else {
+                            collection.setLevel0(true);
+                        }
+                    }
+                    return null;
+                }
+            });
+            detectAndSetCollectionScope(nodeRef, collection);
+            return collection;
+
+        } catch (Throwable e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void detectAndSetCollectionScope(org.edu_sharing.service.model.NodeRef nodeRef, Collection collection) {
+        if (!CollectionDao.Scope.CUSTOM.name().equals(collection.getScope())) {
+            return;
+        }
+        AuthenticationUtil.runAsSystem((AuthenticationUtil.RunAsWork<Void>) () -> {
+            if (nodeRef.getPublic() != null) {
+                if (nodeRef.getPublic().equals(true)) {
+                    collection.setScope(CollectionDao.Scope.CUSTOM_PUBLIC.name());
+                }
+                return null;
+            }
+            ACL permissions = eduPermissionService.getPermissions(nodeRef.getNodeId());
+            for (ACE acl : permissions.getAces()) {
+                if (acl.getAuthority().equals(CCConstants.AUTHORITY_GROUP_EVERYONE)) {
+                    collection.setScope(CollectionDao.Scope.CUSTOM_PUBLIC.name());
+                    break;
+                }
+            }
+            return null;
+        });
+    }
+
+    @Override
+    public List<org.edu_sharing.service.model.NodeRef> getRecentForCurrentUser() throws Throwable {
+        return eduPermissionService.getRecentProperty(CCConstants.CCM_PROP_PERSON_RECENT_COLLECTIONS).stream().map(
+                ref -> new NodeRefImpl(ref.getId())
+        ).collect(Collectors.toList());
+    }
+
+    @Override
+    public SearchResultNodeRef getRoot(String scope, SortDefinition sortDefinition, int skipCount, int maxItems) throws Throwable {
+        return searchChildren(scope, sortDefinition, skipCount, maxItems);
+    }
+
+    @Override
+    public List<org.edu_sharing.service.model.NodeRef> getChildren(String parentId, String scope, SortDefinition sortDefinition, List<String> filter) {
+        try {
+            if (parentId == null) {
+                throw new IllegalArgumentException("parentId must be set, please use getRoot() instead");
+            } else {
+                List<ChildAssociationRef> children = eduNodeService.getChildrenChildAssociationRefAssoc(parentId, null, filter, sortDefinition);
+                List<org.edu_sharing.service.model.NodeRef> returnVal = new ArrayList<>();
+                for (ChildAssociationRef child : children) {
+                    returnVal.add(new NodeRefImpl(
+                            child.getChildRef().getId()
+                    ));
+                }
+                return returnVal;
+            }
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Nullable
+    protected static String getQueryForScope(String scope) {
+        return switch (CollectionDao.SearchScope.valueOf(scope)) {
+            case MY -> "collections_scope_my";
+            case EDU_ALL -> "collections_scope_public";
+            case EDU_GROUPS -> "collections_scope_shared";
+            case TYPE_EDITORIAL -> "collections_scope_editorial";
+            case TYPE_MEDIA_CENTER -> "collections_scope_media_center";
+            default -> null;
+        };
+    }
+
+    protected MCAlfrescoAPIClient.ContextSearchMode getContextModeForScope(String scope) {
+        MCAlfrescoAPIClient.ContextSearchMode mode = MCAlfrescoAPIClient.ContextSearchMode.Default;
+        if (CollectionDao.Scope.EDU_GROUPS.name().equals(scope)) {
+            mode = MCAlfrescoAPIClient.ContextSearchMode.UserAndGroups;
+        } else if (CollectionDao.Scope.EDU_ALL.name().equals(scope)) {
+            mode = MCAlfrescoAPIClient.ContextSearchMode.Public;
+        }
+        return mode;
+    }
+
+    protected boolean isSubCollection(org.edu_sharing.service.model.NodeRef nodeRef) {
+        try {
+            return AuthenticationUtil.runAsSystem(() -> {
+                NodeRef parent = NodeServiceHelper.getPrimaryParent(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeRef.getNodeId()));
+                return NodeServiceHelper.hasAspect(parent, CCConstants.CCM_ASPECT_COLLECTION);
+            });
+        } catch (InvalidNodeRefException e) {
+            // node from elastic index might already deleted, ignore to prevent full fail of query
+            log.info("isSubCollection failed", e);
+            return true;
+        }
+    }
+
+    @Override
+    public void updateScope(NodeRef ref, List<ACE> permissions) {
+        CollectionDao.Scope result = CollectionDao.Scope.MY;
+        String creator = ownableService.getOwner(ref);
+        for (ACE ace : permissions) {
+            if (ace.getAuthority().equals(creator)) {
+                // nothing is done
+            } else if (ace.getAuthority().equals(CCConstants.AUTHORITY_GROUP_EVERYONE)) {
+                result = CollectionDao.Scope.CUSTOM_PUBLIC;
+            } else if (result.equals(CollectionDao.Scope.MY)) {
+                result = CollectionDao.Scope.CUSTOM;
+            }
+        }
+        eduNodeService.setProperty(ref.getStoreRef().getProtocol(),
+                ref.getStoreRef().getIdentifier(),
+                ref.getId(),
+                CCConstants.CCM_PROP_MAP_COLLECTIONSCOPE,
+                result.toString(),
+                false);
+    }
+
+    public void setScope(Collection collection) throws Exception {
+        String collectionId = collection.getNodeId();
+        String scope = collection.getScope();
+        boolean custom = (scope == null || scope.equals(CollectionDao.Scope.CUSTOM.name()));
+        org.edu_sharing.repository.client.rpc.ACL acl = new org.edu_sharing.repository.client.rpc.ACL();
+
+        List<org.edu_sharing.repository.client.rpc.ACE> aces = new ArrayList<>();
+        if (acl.getAces() != null)
+            aces.addAll(Arrays.asList(acl.getAces()));
+        if (CCConstants.COLLECTIONTYPE_MEDIA_CENTER.equals(collection.getType())) {
+            List<String> mediacenters = searchService.getAllMediacenters().stream().filter((m) -> localAuthorityService.hasAdminAccessToMediacenter(m)).toList();
+            if (mediacenters.size() != 1) {
+                throw new IllegalArgumentException("Current user is assigned to " + mediacenters.size() + " mediacenters, but must be assigned to exactly 1");
+            }
+            ACE ace = new ACE();
+            ace.setAuthority(mediacenters.get(0));
+            ace.setAuthorityType(Authority.Type.GROUP.name());
+            ace.setPermission(CCConstants.PERMISSION_CONSUMER);
+            aces.add(ace);
+            ACE ace2 = new ACE();
+            ace2.setAuthority(PermissionService.GROUP_PREFIX + AuthorityService.getGroupName(org.edu_sharing.alfresco.service.AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP, mediacenters.get(0)));
+            ace2.setAuthorityType(Authority.Type.GROUP.name());
+            ace2.setPermission(CCConstants.PERMISSION_COORDINATOR);
+            aces.add(ace2);
+
+            eduPermissionService.setPermissions(collectionId, aces, false);
+        } else if (custom) {
+
+            if (collection.isLevel0()) { // don't allow inherition on root level
+                eduPermissionService.setPermissionInherit(collectionId, false);
+                return;
+            }
+
+        } else {
+            acl.setInherited(false);
+            if (scope.equals(CollectionDao.Scope.MY.name())) {
+
+            } else if (scope.equals(CollectionDao.Scope.EDU_ALL.name())) {
+                org.edu_sharing.repository.client.rpc.ACE ace2 = new org.edu_sharing.repository.client.rpc.ACE();
+                ace2.setAuthority(CCConstants.AUTHORITY_GROUP_EVERYONE);
+                ace2.setAuthorityType(Authority.Type.EVERYONE.name());
+                ace2.setPermission(CCConstants.PERMISSION_CONSUMER);
+                aces.add(ace2);
+            } else if (scope.equals(CollectionDao.Scope.EDU_GROUPS.name())) {
+
+                List<EduGroup> groups = searchService.getAllOrganizations(false).getData();
+                for (EduGroup group : groups) {
+                    org.edu_sharing.repository.client.rpc.ACE ace2 = new org.edu_sharing.repository.client.rpc.ACE();
+                    ace2 = new org.edu_sharing.repository.client.rpc.ACE();
+                    ace2.setAuthority(group.getGroupname());
+                    ace2.setAuthorityType(Authority.Type.GROUP.name());
+                    ace2.setPermission(CCConstants.PERMISSION_CONSUMER);
+                    aces.add(ace2);
+
+                }
+            }
+        }
+
+        final ACL aclFinal = acl;
+        if (scope != null && scope.equals(CollectionDao.Scope.MY.name())) {
+            // We need to set inherition
+            AuthenticationUtil.runAsSystem((AuthenticationUtil.RunAsWork<Void>) () -> {
+                eduPermissionService.setPermissions(collectionId, aces, aclFinal.isInherited());
+                return null;
+            });
+        } else if (!custom) {
+            eduPermissionService.setPermissions(collectionId, aces, aclFinal.isInherited());
+        }
+    }
+
+    /**
+     * unpin all current collections and set the list of collection ids pinned
+     */
+    @Override
+    public void setPinned(String[] collections) {
+        List<org.edu_sharing.service.model.NodeRef> currentPinned;
+        try {
+            currentPinned = searchService.getAllPinnedCollections();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        for (org.edu_sharing.service.model.NodeRef pinned : currentPinned) {
+            eduNodeService.removeAspect(pinned.getNodeId(), CCConstants.CCM_ASPECT_COLLECTION_PINNED);
+            eduNodeService.removeProperty(pinned.getStoreProtocol(), pinned.getStoreId(), pinned.getNodeId(), CCConstants.CCM_PROP_COLLECTION_PINNED_STATUS);
+            eduNodeService.removeProperty(pinned.getStoreProtocol(), pinned.getStoreId(), pinned.getNodeId(), CCConstants.CCM_PROP_COLLECTION_PINNED_ORDER);
+        }
+        int order = 0;
+        for (String collection : collections) {
+            throwIfNotACollection(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), collection);
+            eduNodeService.addAspect(collection, CCConstants.CCM_ASPECT_COLLECTION_PINNED);
+
+            Map<String, Object> props = new HashMap<>();
+            props.put(CCConstants.CCM_PROP_COLLECTION_PINNED_STATUS, true);
+            props.put(CCConstants.CCM_PROP_COLLECTION_PINNED_ORDER, order);
+            eduNodeService.updateNodeNative(collection, props);
+
+            order++;
+        }
+    }
+
+    private void throwIfNotACollection(String storeProtocol, String storeId, String collection) {
+        if (!eduNodeService.hasAspect(storeProtocol, storeId, collection, CCConstants.CCM_ASPECT_COLLECTION)) {
+            throw new IllegalArgumentException("Node " + collection + " is not a collection (Aspect " + CCConstants.CCM_ASPECT_COLLECTION + " not found)");
+        }
+    }
+
+    private void throwIfNotACollection(org.edu_sharing.service.model.NodeRef nodeRef) {
+        if (nodeRef.getAspects() != null && !nodeRef.getAspects().isEmpty()) {
+            if (!nodeRef.getAspects().contains(CCConstants.CCM_ASPECT_COLLECTION)) {
+                throw new IllegalArgumentException("Node " + nodeRef.getNodeId() + " is not a collection (Aspect " + CCConstants.CCM_ASPECT_COLLECTION + " not found)");
+            }
+        } else {
+            throwIfNotACollection(nodeRef.getStoreProtocol(), nodeRef.getStoreId(), nodeRef.getNodeId());
+        }
+    }
+
+    @Override
+    public void writePreviewImage(String collectionId, InputStream is, String mimeType) throws Exception {
+        ImageTool.VerifyResult result = ImageTool.verifyAndPreprocessImage(is, ImageTool.MAX_THUMB_SIZE);
+        client.writeContent(MCAlfrescoAPIClient.storeRef, collectionId, result.getInputStream(), result.getMediaType().toString(), null, CCConstants.CCM_PROP_MAP_ICON);
+        ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
+        ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+        PreviewCache.purgeCache(collectionId);
+    }
+
+    @Override
+    public void removePreviewImage(String collectionId) throws Exception {
+        NodeServiceFactory.getInstance().getLocalService().removeProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), collectionId, CCConstants.CCM_PROP_MAP_ICON);
+        PreviewCache.purgeCache(collectionId);
+    }
+
+    @Override
+    public void setOrder(String parentId, String[] nodes) {
+        List<org.edu_sharing.service.model.NodeRef> refs = getChildren(parentId, null, new SortDefinition(), Arrays.asList("files", "folders"));
+        AtomicInteger order = new AtomicInteger(0);
+
+        Map<String, Object> collectionProps = new HashMap<>();
+        eduNodeService.updateNodeNative(parentId, collectionProps);
+
+        if (nodes == null)
+            return;
+        for (String node : nodes) {
+            transactionService.getRetryingTransactionHelper().doInTransaction(() -> {
+                NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node);
+                policyBehaviourFilter.disableBehaviour(ref, ContentModel.ASPECT_AUDITABLE);
+                if (!refs.contains(new NodeRefImpl(ref.getId())))
+                    throw new IllegalArgumentException("Node id " + node + " is not a children of the collection " + parentId);
+
+                eduNodeService.addAspect(node, CCConstants.CCM_ASPECT_COLLECTION_ORDERED);
+                Map<String, Object> props = new HashMap<>();
+                props.put(CCConstants.CCM_PROP_COLLECTION_ORDERED_POSITION, order.get());
+                eduNodeService.updateNodeNative(node, props);
+                policyBehaviourFilter.enableBehaviour(ref, ContentModel.ASPECT_AUDITABLE);
+                return ref;
+            });
+            order.incrementAndGet();
+        }
+    }
+
+    /**
+     * Get all reference objects for a given node
+     */
+    @Override
+    public List<org.edu_sharing.service.model.NodeRef> getReferenceObjects(String nodeId) {
+        try {
+            UUID.fromString(nodeId);
+            return searchService.getReferenceObjects(nodeId);
+        } catch (IllegalArgumentException e) {
+            log.warn("nodeId {} is no valid uuid", nodeId);
+            return Collections.emptyList();
+        } catch (IOException e) {
+            log.warn("{}. while fetching reference objects", e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public List<NodeRef> getReferenceObjectsSync(String nodeId) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(CCConstants.CCM_PROP_IO_ORIGINAL, nodeId);
+
+        List<String> aspects = new ArrayList<>();
+        aspects.add(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
+        log.debug("cmis helper start");
+        List<org.alfresco.service.cmr.repository.NodeRef> nodes = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO, map, aspects, null, 100000, (StoreRef) null);
+        log.debug("cmis helper finished");
+        return nodes;
+    }
+
+    @Override
+    public List<NodeRef> getCollectionProposals(String nodeId, CCConstants.PROPOSAL_STATUS status) {
+        Map<String, Object> filters = new HashMap<>();
+        filters.put(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId).toString());
+        filters.put(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS, status.toString());
+        List<NodeRef> collections = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_COLLECTION_PROPOSAL, filters);
+        return collections.stream().map(
+                (ref) -> nodeService.getPrimaryParent(ref).getParentRef()
+        ).filter((ref) ->
+                PermissionServiceHelper.hasPermission(ref, CCConstants.PERMISSION_ADD_CHILDREN)
+        ).collect(Collectors.toList());
+
+    }
+
+
     protected void addCollectionCountProperties(NodeRef nodeRef, Collection collection, BoolQuery readPermissionsQuery) {
         try {
             SearchRequest searchRequest = SearchRequest.of(req -> req
@@ -68,25 +1080,25 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
                 }
             }
         } catch (Exception e) {
-            logger.warn("Error fetching collection counts for " + nodeRef, e);
+            log.warn("Error fetching collection counts for {}", nodeRef, e);
         }
     }
 
     @Override
     public CollectionProposalInfo getCollectionsContainingProposals(CCConstants.PROPOSAL_STATUS status, Integer skipCount, Integer maxItems, SortDefinition sortDefinition) throws Throwable {
 
-        SearchRequest searchRequest = SearchRequest.of(req->req
+        SearchRequest searchRequest = SearchRequest.of(req -> req
                 .index(SearchServiceElastic.WORKSPACE_INDEX)
                 .size(maxItems)
                 .from(skipCount)
-                .source(src->src.fetch(true))
-                .trackTotalHits(t->t.enabled(true))
-                .scriptFields("proposals", sf->sf.script(src->src
+                .source(src -> src.fetch(true))
+                .trackTotalHits(t -> t.enabled(true))
+                .scriptFields("proposals", sf -> sf.script(src -> src
                         .lang("painless")
                         .source("Map m = new HashMap();for(def proposal: params._source.children) { if(proposal['type'] == 'ccm:collection_proposal') {def value = proposal['properties']['ccm:collection_proposal_status']; if(m.containsKey(value)) { m.put(value, m.get(value) + 1); } else { m.put(value, 1); } } } return m;")))
                 .query(q -> q.scriptScore(ssq -> ssq
                         .minScore(1f)
-                        .script(scr->scr
+                        .script(scr -> scr
                                 .lang("painless")
                                 .source("if(!params._source.containsKey('children')) return 0; for(def proposal: params._source.children) { if(proposal['type'] == 'ccm:collection_proposal' && proposal.containsKey('properties') && proposal['properties'].containsKey('ccm:collection_proposal_status') && proposal['properties']['ccm:collection_proposal_status'] == params.status) return 1; } return 0;")
                                 .params("status", JsonData.of(status)))
@@ -101,7 +1113,7 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
         SearchResponse<Map> result = searchServiceElastic.searchNative(searchRequest);
         List<CollectionProposalInfo.CollectionProposalData> dataList = new ArrayList<>();
         Set<String> authorities = searchServiceElastic.getUserAuthorities();
-        String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
+        String user = authenticationService.getCurrentUserName();
         boolean isAdmin = AuthorityServiceHelper.isAdmin();
 
         for (Hit<Map> hit : result.hits().hits()) {
@@ -113,32 +1125,20 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
                     Map.Entry entry = (Map.Entry) e;
                     data.getProposalCount().put(CCConstants.PROPOSAL_STATUS.valueOf((String) entry.getKey()), (Integer) entry.getValue());
                 }
-                logger.info(v);
+                log.info(v.toString());
             }
             dataList.add(data);
         }
         return new CollectionProposalInfo(dataList, result.hits().total().value());
     }
 
-    @Override
-    public List<AssociationRef> getChildrenProposal(String parentId) throws Exception {
-        return super.getChildrenProposal(parentId);
-    }
-
-    @Override
-    public void proposeForCollection(String collectionId, String originalNodeId, String sourceRepositoryId) throws DuplicateNodeException, Throwable {
-        super.proposeForCollection(collectionId, originalNodeId, sourceRepositoryId);
-    }
-
-    @Override
     protected SearchResultNodeRef searchChildren(String scope, SortDefinition sortDefinition, int skipCount, int maxItems) throws Throwable {
 
+        ApplicationInfo appInfo = ApplicationInfoContextHolder.getCurrentApplicationInfo();
         MetadataSet mds = MetadataHelper.getMetadataset(appInfo, CCConstants.metadatasetdefault_id);
 
         String queryId = getQueryForScope(scope);
-        /**
-         * @TODO owner + inherit off -> node will be found even if search is done in edu-group context
-         */
+        // TODO owner + inherit off -> node will be found even if search is done in edu-group context
 
         List<org.edu_sharing.service.model.NodeRef> returnVal = new ArrayList<>();
         SearchToken token = new SearchToken();
@@ -146,21 +1146,23 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
         token.setSortDefinition(sortDefinition);
         token.setFrom(skipCount);
         token.setMaxResult(maxItems);
-        if(CollectionDao.SearchScope.valueOf(scope).equals(CollectionDao.SearchScope.EDU_GROUPS)) {
-            ArrayList<String> authorities = new ArrayList<>(serviceRegistry.getAuthorityService().getAuthorities());
-            authorities.add(serviceRegistry.getAuthenticationService().getCurrentUserName());
+        if (CollectionDao.SearchScope.valueOf(scope).equals(CollectionDao.SearchScope.EDU_GROUPS)) {
+            ArrayList<String> authorities = new ArrayList<>(authorityService.getAuthorities());
+            authorities.add(authenticationService.getCurrentUserName());
             authorities.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
             token.setAuthorityScope(authorities);
         }
-        SearchResultNodeRef nodeRefs = SearchServiceFactory.getLocalService().search(mds, queryId, Collections.emptyMap(), token);
-        for (org.edu_sharing.service.model.NodeRef nodeRef : nodeRefs.getData()) {
-            if (isSubCollection(nodeRef)) {
-                continue;
+        try (AppContextScope.UseAppContext ignored = AppContextScope.useLocalAppContext()) {
+            SearchResultNodeRef nodeRefs = searchService.search(mds, queryId, Collections.emptyMap(), token);
+            for (org.edu_sharing.service.model.NodeRef nodeRef : nodeRefs.getData()) {
+                if (isSubCollection(nodeRef)) {
+                    continue;
+                }
+                returnVal.add(nodeRef);
             }
-            returnVal.add(nodeRef);
+            nodeRefs.setData(returnVal);
+            return nodeRefs;
         }
-        nodeRefs.setData(returnVal);
-        return nodeRefs;
     }
 }
 

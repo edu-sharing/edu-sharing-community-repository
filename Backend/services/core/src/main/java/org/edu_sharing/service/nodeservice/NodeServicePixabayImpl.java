@@ -2,31 +2,22 @@ package org.edu_sharing.service.nodeservice;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.search.SearchServicePixabayImpl;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
 
+@Lazy
+@Slf4j
+@Service
 public class NodeServicePixabayImpl extends NodeServiceAdapterCached{
 
-	private String repositoryId;
-	private String APIKey;
-	private Logger logger= Logger.getLogger(NodeServicePixabayImpl.class);
-
-	public NodeServicePixabayImpl(String appId) {
-		super(appId);
-		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
-		this.repositoryId = appInfo.getAppId();		
-		APIKey = appInfo.getApiKey(); 
-	}
-	
 	@Override
 	public InputStream getContent(String nodeId) throws Throwable {
 		try {
@@ -44,7 +35,7 @@ public class NodeServicePixabayImpl extends NodeServiceAdapterCached{
 			return is;
 		}catch(Throwable t){
 			// this is likely to fail since pixabay does block any programatic image access
-			logger.warn("Can not fetch inputStream from pixabay for node "+nodeId+": "+t.getMessage(),t);
+            log.warn("Can not fetch inputStream from pixabay for node {}: {}", nodeId, t.getMessage(), t);
 			return null;
 		}
 	}
@@ -59,14 +50,14 @@ public class NodeServicePixabayImpl extends NodeServiceAdapterCached{
 		// some api keys still have it, we can still try it
 		
 		try{
-			SearchResultNodeRef list = SearchServicePixabayImpl.searchPixabay(repositoryId, APIKey, "&id="+nodeId);
-			if(list.getData()!=null && list.getData().size()>0){
+            SearchResultNodeRef list = SearchServicePixabayImpl.searchPixabay("&id="+nodeId);
+			if(list.getData()!=null && !list.getData().isEmpty()){
 				updateCache(list.getData().get(0).getProperties());
 				return list.getData().get(0).getProperties();
 			}
 		}
 		catch(Throwable t){
-			t.printStackTrace();
+            log.warn("Can not fetch properties from pixabay for node {}: {}", nodeId, t.getMessage(), t);
 		}
 		
 		throw new Exception("Node "+nodeId+" was not found (cache expired)");

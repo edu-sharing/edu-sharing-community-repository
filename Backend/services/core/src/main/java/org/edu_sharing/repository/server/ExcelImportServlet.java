@@ -40,7 +40,7 @@ public class ExcelImportServlet extends SpringHttpServlet {
 		JakartaServletFileUpload upload = new JakartaServletFileUpload(factory);
 		
 		
-		Map<String, String> authInfo = new AuthenticationToolAPI().validateAuthentication(request.getSession());
+		Map<String, String> authInfo = AuthenticationToolAPI.getInstance().validateAuthentication(request.getSession());
 		
 		if(authInfo == null){
 			logger.error("not authenticated");

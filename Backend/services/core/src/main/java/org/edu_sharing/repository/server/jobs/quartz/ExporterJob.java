@@ -13,7 +13,6 @@ import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.oai.core.EduMetadataFormatRegistry;
 import org.edu_sharing.service.oai.core.EduSharingItemRepository;
 import org.edu_sharing.service.search.SearchService;
-import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -37,6 +36,9 @@ public class ExporterJob extends AbstractJobMapAnnotationParams{
     @Autowired
     private EduSharingItemRepository eduSharingItemRepository;
 
+    @Autowired
+    private SearchService searchService;
+
 	@JobFieldDescription(description = "elastic query to fetch the nodes that shall be processed.")
 	private String elasticQuery;
 
@@ -56,14 +58,13 @@ public class ExporterJob extends AbstractJobMapAnnotationParams{
         AuthenticationUtil.runAsSystem(() -> {
             try {
                 MetadataFormat formatWriter = eduMetadataFormatRegistry.getMetadataFormat(format);
-                SearchService localService = SearchServiceFactory.getLocalService();
 
                 SearchToken searchToken = new SearchToken();
                 searchToken.setFrom(0);
                 searchToken.setMaxResult(Integer.MAX_VALUE);
                 searchToken.setElasticQuery(QueryBuilders.wrapper().query(new String(Base64.getEncoder().encode(elasticQuery.getBytes()))).build());
 
-                SearchResultNodeRef search = localService.search(searchToken);
+                SearchResultNodeRef search = searchService.search(searchToken);
                 if(search != null) {
                     log.info("found " + search.getData().size() + " to export with " + elasticQuery);
                     for(NodeRef nodeRef : search.getData()){

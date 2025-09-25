@@ -75,7 +75,7 @@ public class RepoTools {
     public static String authenticate(HttpServletRequest req, Map<String,String> ssoMap){
         ApplicationContext eduApplicationContext = org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
         SSOAuthorityMapper ssoMapper = (SSOAuthorityMapper)eduApplicationContext.getBean("ssoAuthorityMapper");
-        AuthenticationToolAPI authTool = new AuthenticationToolAPI();
+        AuthenticationToolAPI authTool = AuthenticationToolAPI.getInstance();
         Map<String,String> validAuthInfo = authTool.validateAuthentication(req.getSession());
 
         String userName = ssoMap.get(ssoMapper.getSSOUsernameProp());

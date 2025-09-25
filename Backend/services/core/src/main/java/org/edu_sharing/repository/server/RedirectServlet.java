@@ -51,8 +51,8 @@ public class RedirectServlet extends SpringHttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String appId = req.getParameter("APP_ID");
 		String nodeId = req.getParameter("NODE_ID");
-		if(!RenderingServiceFactory.getRenderingService(appId).renderingSupported()){
-			String wwwurl = NodeServiceFactory.getNodeService(appId).getProperty(StoreRef.PROTOCOL_WORKSPACE,
+		if(!RenderingServiceFactory.getInstance().getService(appId).renderingSupported()){
+			String wwwurl = NodeServiceFactory.getInstance().getService(appId).getProperty(StoreRef.PROTOCOL_WORKSPACE,
 					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
 					nodeId,
 					CCConstants.LOM_PROP_TECHNICAL_LOCATION);

@@ -38,7 +38,7 @@ public class UsageDao {
 
 		this.repoDao = repoDao;
 		this.baseClient = repoDao.getBaseClient();
-		this.permissionService = PermissionServiceFactory.getPermissionService(repoDao.getId());
+		this.permissionService = PermissionServiceFactory.getInstance().getService(repoDao.getId());
 	}
 
 	public List<Usage> getUsages(String appId) throws DAOException {
@@ -215,7 +215,7 @@ public class UsageDao {
 				} catch (Throwable t) {
 				}
 			}
-			CollectionServiceFactory.getLocalService().getCollectionProposals(nodeId, CCConstants.PROPOSAL_STATUS.PENDING).forEach((ref) -> {
+			CollectionServiceFactory.getInstance().getLocalService().getCollectionProposals(nodeId, CCConstants.PROPOSAL_STATUS.PENDING).forEach((ref) -> {
 				Usages.CollectionUsage usage = new Usages.CollectionUsage();
 				try {
 					usage.setCollection(CollectionDao.getCollection(repoDao, ref.getId()).asNode());
@@ -225,7 +225,7 @@ public class UsageDao {
 					logger.warn("Could not fetch collection: " + e.getMessage(), e);
 				}
 			});
-			CollectionServiceFactory.getLocalService().getCollectionProposals(nodeId, CCConstants.PROPOSAL_STATUS.DECLINED).forEach((ref) -> {
+			CollectionServiceFactory.getInstance().getLocalService().getCollectionProposals(nodeId, CCConstants.PROPOSAL_STATUS.DECLINED).forEach((ref) -> {
 				Usages.CollectionUsage usage = new Usages.CollectionUsage();
 				try {
 					usage.setCollection(CollectionDao.getCollection(repoDao, ref.getId()).asNode());
@@ -272,7 +272,7 @@ public class UsageDao {
 				|| ContextManagementFilter.accessTool.get() == null){
 			throw new DAOSecurityException(new Exception("app signature required to use this endpoint."));
 		}
-		if(AuthenticationUtil.getFullyAuthenticatedUser() == null || AuthorityServiceFactory.getLocalService().isGuest()){
+		if(AuthenticationUtil.getFullyAuthenticatedUser() == null || AuthorityServiceFactory.getInstance().getLocalService().isGuest()){
 			throw new DAOSecurityException(new Exception("authenticated user required to use this endpoint."));
 		}
 
@@ -283,7 +283,7 @@ public class UsageDao {
 				usage.appId,
 				usage.courseId,
 				usage.nodeId,
-				(String)AuthorityServiceFactory.getLocalService().getUserInfo(AuthenticationUtil.getFullyAuthenticatedUser()).get(CCConstants.PROP_USER_EMAIL),
+				(String)AuthorityServiceFactory.getInstance().getLocalService().getUserInfo(AuthenticationUtil.getFullyAuthenticatedUser()).get(CCConstants.PROP_USER_EMAIL),
 				null,
 				null,
 				-1 ,

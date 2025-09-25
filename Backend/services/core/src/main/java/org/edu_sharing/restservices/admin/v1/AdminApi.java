@@ -34,6 +34,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.cache.CacheCluster;
 import org.edu_sharing.repository.client.rpc.cache.CacheInfo;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.appcontext.ApplicationInfoContextHolder;
 import org.edu_sharing.repository.server.jobs.quartz.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
 import org.edu_sharing.repository.server.tools.ActionObserver;
@@ -1056,7 +1057,7 @@ public class AdminApi {
 
             //check that there is an admin
             AdminServiceFactory.getInstance();
-            SearchServiceElastic elastic = new SearchServiceElastic(ApplicationInfoList.getHomeRepository().getAppId());
+            SearchServiceElastic elastic = ApplicationContextFactory.getApplicationContext().getBean(SearchServiceElastic.class);
 			SearchResultNodeRefElastic search = elastic.searchDSL(dsl,index);
             RepositoryDao repoDao = RepositoryDao.getHomeRepository();
             List<Node> data = new ArrayList<>();
@@ -1216,7 +1217,7 @@ public class AdminApi {
                     Map<String, Serializable> props = new HashMap<>();
                     for (String prop : properties) {
                         if (prop.startsWith("parent::")) {
-                            String parentId = NodeServiceFactory.getLocalService().getPrimaryParent(ref.getId());
+                            String parentId = NodeServiceFactory.getInstance().getLocalService().getPrimaryParent(ref.getId());
                             String realProp = prop.substring("parent::".length());
                             props.put(prop, NodeServiceHelper.getPropertyNative(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId), CCConstants.getValidGlobalName(realProp)));
 						}

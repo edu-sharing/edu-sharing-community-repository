@@ -23,9 +23,6 @@ import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.spring.security.openid.SilentLoginModeRedirect;
 
-import java.io.IOException;
-import java.util.Map;
-
 public class GuestFilter implements jakarta.servlet.Filter {
 
     Logger logger = Logger.getLogger(GuestFilter.class);
@@ -88,7 +85,7 @@ public class GuestFilter implements jakarta.servlet.Filter {
                     logger.debug("no guest defined");
                 }
 			}else if(authentication != null){
-				if(AuthorityServiceFactory.getLocalService().isGuest()){
+				if(AuthorityServiceFactory.getInstance().getLocalService().isGuest()){
 					if(SilentLoginModeRedirect.process(httpRequest, httpresponse)){
 						return;
 					}

@@ -5,7 +5,6 @@ import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.restservices.sharing.v1.model.SharingInfo;
 
 import org.edu_sharing.service.InsufficientPermissionException;
-import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.share.GlobalShareService;
 import org.edu_sharing.service.share.GlobalShareServiceImpl;
 import org.edu_sharing.spring.ApplicationContextFactory;

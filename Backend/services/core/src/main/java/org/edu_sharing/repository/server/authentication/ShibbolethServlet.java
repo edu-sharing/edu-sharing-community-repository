@@ -110,7 +110,7 @@ public class ShibbolethServlet extends SpringHttpServlet {
 			headerUserName = req.getRemoteUser();
 		}
 
-		AuthenticationToolAPI authTool = new AuthenticationToolAPI();
+		AuthenticationToolAPI authTool = AuthenticationToolAPI.getInstance();
 		Map<String,String> validAuthInfo = authTool.validateAuthentication(req.getSession());
 
 		redirectUrl = (String)req.getSession().getAttribute(NgServlet.PREVIOUS_ANGULAR_URL);
@@ -129,7 +129,7 @@ public class ShibbolethServlet extends SpringHttpServlet {
 
 				// do not trigger as guest
 				// otherwise, the session will be invalidated but still holding the OIDC token from the user
-			} else if(!AuthorityServiceFactory.getLocalService().isGuest()) {
+			} else if(!AuthorityServiceFactory.getInstance().getLocalService().isGuest()) {
 
 				logger.info("end session for user:" + validAuthInfo.get(CCConstants.AUTH_USERNAME));
 				authTool.logout(validAuthInfo.get(CCConstants.AUTH_TICKET));

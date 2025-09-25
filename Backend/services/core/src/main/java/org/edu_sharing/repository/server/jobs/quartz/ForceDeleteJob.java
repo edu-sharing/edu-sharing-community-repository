@@ -1,6 +1,5 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
-import org.alfresco.repo.node.db.DbNodeServiceImpl;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -10,9 +9,6 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 public class ForceDeleteJob extends AbstractJob {
 
@@ -33,7 +29,7 @@ public class ForceDeleteJob extends AbstractJob {
             ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
             ServiceRegistry sr = (ServiceRegistry)applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
             sr.getRetryingTransactionHelper().doInTransaction(()-> {
-                NodeServiceFactory.getLocalService().removeNodeForce(store, protocol, id,false);
+                NodeServiceFactory.getInstance().getLocalService().removeNodeForce(store, protocol, id,false);
                 return null;
             });
             return null;

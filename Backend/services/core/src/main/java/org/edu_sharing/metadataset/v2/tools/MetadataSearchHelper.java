@@ -7,7 +7,6 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -17,11 +16,8 @@ import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.SearchServiceFactory;
-import org.edu_sharing.service.search.SearchServiceImpl;
 import org.edu_sharing.service.search.Suggestion;
-import org.edu_sharing.service.search.model.SharedToMeType;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.security.InvalidParameterException;
 import java.sql.Connection;
@@ -34,8 +30,6 @@ import java.util.regex.Pattern;
 @Slf4j
 public class MetadataSearchHelper {
 
-    private static final MetadataQueryPreprocessor preprocessor = new MetadataQueryPreprocessor(MetadataReader.QUERY_SYNTAX_LUCENE);
-
     public static Map<String, String[]> convertCriterias(List<MdsQueryCriteria> criterias) {
         Map<String, String[]> criteriasMap = new HashMap<>();
         if (criterias != null) {
@@ -44,87 +38,6 @@ public class MetadataSearchHelper {
             }
         }
         return criteriasMap;
-    }
-
-    static String getLuceneSearchQuery(MetadataQuery query, Map<String, String[]> parameters) throws IllegalArgumentException {
-
-        // We need to add the baseQuery, it's currently still getting the base query from the old mds -> added at other stage
-        //String queryString="("+queries.getBasequery()+")";
-        StringBuilder queryString = new StringBuilder();
-        String baseQuery = query.findBasequery(parameters != null ? parameters.keySet() : null);
-        if (baseQuery != null && !baseQuery.trim().isEmpty()) {
-            queryString.append("(").append(replaceCommonQueryVariables(baseQuery)).append(")");
-        }
-        if (parameters == null) {
-            return queryString.toString();
-        }
-        for (String name : parameters.keySet()) {
-            MetadataQueryParameter parameter = query.findParameterByName(name);
-            if (parameter == null)
-                throw new IllegalArgumentException("Could not find parameter " + name + " in the query " + query.getId());
-
-            String[] values = parameters.get(parameter.getName());
-            if ((values == null || values.length == 0)) {
-                if (parameter.getIgnorable() == 0)
-                    continue;
-                if (!queryString.isEmpty())
-                    queryString.append(" ").append(query.getJoin()).append(" ");
-                // handle ignorable parameters
-                queryString.append("ISNULL:@").append(QueryParser.escape(parameter.getName()));
-                continue;
-            }
-            if (!queryString.isEmpty())
-                queryString.append(" ").append(query.getJoin()).append(" ");
-            queryString.append("(");
-            if (parameter.isMultiple()) {
-                int i = 0;
-                for (String value : values) {
-                    if (i > 0)
-                        queryString.append(" ").append(parameter.getMultiplejoin()).append(" ");
-                    queryString.append("(").append(replaceCommonQueryVariables(getStatementForValue(parameter, value))).append(")");
-                    i++;
-                }
-            } else if (values.length > 1) {
-                throw new InvalidParameterException("Trying to search for multiple values of a non-multivalue field " + parameter.getName());
-            } else {
-                String sharedFilesResult = null;
-                if ("workspace".equals(query.getId()) && parameter.getName().equals("parent") && parameter.getPreprocessor().equals("node_path")) {
-                    sharedFilesResult = handleSharedFilesSearch(values);
-                }
-                if (sharedFilesResult == null) {
-                    queryString.append(replaceCommonQueryVariables(getStatementForValue(parameter, values[0])));
-                } else {
-                    queryString.append(sharedFilesResult);
-                }
-            }
-            queryString.append(")");
-        }
-        return queryString.toString();
-
-    }
-
-    @Nullable
-    protected static String handleSharedFilesSearch(String[] values) {
-        if (values[0].startsWith("-to_me_shared_files")) {
-            try {
-                if ("-to_me_shared_files_personal-".equals(values[0])) {
-                    return SearchServiceImpl.getFilesSharedToMeLucene(SharedToMeType.Private);
-                } else if ("-to_me_shared_files-".equals(values[0])) {
-                    return SearchServiceImpl.getFilesSharedToMeLucene(SharedToMeType.All);
-                } else {
-                    log.error("unknown SharedToMeType:{}", values[0]);
-                }
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
-        } else if (values[0].startsWith("-my_shared_files")) {
-            try {
-                return SearchServiceImpl.getFilesSharedByMeLucene();
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
-        }
-        return null;
     }
 
     /**
@@ -137,7 +50,7 @@ public class MetadataSearchHelper {
             NodeRef ref = null;
             while (matcher.find()) {
                 if (ref == null) {
-                    ref = AuthorityServiceFactory.getLocalService().getAuthorityNodeRef(AuthenticationUtil.getFullyAuthenticatedUser());
+                    ref = AuthorityServiceFactory.getInstance().getLocalService().getAuthorityNodeRef(AuthenticationUtil.getFullyAuthenticatedUser());
                 }
                 Serializable value = NodeServiceHelper.getPropertyNative(ref, CCConstants.getValidGlobalName(matcher.group(2)));
                 if (value == null) {
@@ -152,39 +65,6 @@ public class MetadataSearchHelper {
             log.warn("replaceCommonQueryVariables failed: {}", t.getMessage());
         }
         return statement;
-    }
-
-    /**
-     * If string is enclosed in "", search for the whole string
-     * otherwise, search for every single word (concat with AND)
-     */
-    private static String getStatementForValue(MetadataQueryParameter parameter, String value) {
-        if (value == null && parameter.isMandatory()) {
-            throw new java.lang.IllegalArgumentException("null value for mandatory parameter " + parameter.getName() + " given, null values are not allowed if mandatory is set to true");
-        }
-        if (value == null) {
-            return "";
-        }
-
-        // invoke any preprocessors for this value
-        try {
-            value = preprocessor.run(parameter, value);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException(e);
-        }
-
-        if (value.startsWith("\"") && value.endsWith("\"") || parameter.isExactMatching())
-            return parameter.getStatement(value).replace("${value}", QueryParser.escape(value));
-
-        String[] words = value.split(" ");
-        StringBuilder query = new StringBuilder();
-        for (String word : words) {
-            if (!query.isEmpty())
-                query.append(" AND ");
-            query.append(parameter.getStatement(value).replace("${value}", QueryParser.escape(word)));
-        }
-        return query.toString();
     }
 
     public static MetadataQueryParameter getParameter(MetadataQueries queries, String queryId, String parameterId) {
@@ -212,13 +92,13 @@ public class MetadataSearchHelper {
         // remote repo
         if (!ApplicationInfoList.getHomeRepository().getAppId().equals(repoId) &&
                 !ApplicationInfo.REPOSITORY_TYPE_LOCAL.equals(ApplicationInfoList.getRepositoryInfoById(repoId).getRepositoryType())) {
-            return SearchServiceFactory.getSearchService(repoId).getSuggestions(mds, queryId, parameterId, value, criterias);
+            return SearchServiceFactory.getInstance().getService(repoId).getSuggestions(mds, queryId, parameterId, value, criterias);
         }
 
         // local repo
         return switch (source) {
             case MetadataReader.SUGGESTION_SOURCE_SEARCH ->
-                    SearchServiceFactory.getSearchService(repoId).getSuggestions(mds, queryId, parameterId, value, criterias);
+                    SearchServiceFactory.getInstance().getService(repoId).getSuggestions(mds, queryId, parameterId, value, criterias);
             case MetadataReader.SUGGESTION_SOURCE_MDS -> getSuggestionsMds(widget, value);
             case MetadataReader.SUGGESTION_SOURCE_SQL -> getSuggestionsSql(widget, value);
             default ->
@@ -234,8 +114,8 @@ public class MetadataSearchHelper {
                                                                 String value) throws IllegalArgumentException {
         String query = widget.getSuggestionQuery();
         List<Suggestion> result = new ArrayList<>();
-        Connection con = null;
-        PreparedStatement statement = null;
+        Connection con;
+        PreparedStatement statement;
         if (StringUtils.isBlank(query)) {
             throw new IllegalArgumentException("suggestionSource " + MetadataReader.SUGGESTION_SOURCE_SQL + " at widget " + widget.getId() + " needs an suggestionQuery, but none was found");
         }
@@ -273,7 +153,6 @@ public class MetadataSearchHelper {
         } catch (Throwable e) {
             log.debug(e.getMessage(), e);
         }
-        //dbAlf.cleanUp(con, statement);
         return result;
     }
 
@@ -296,88 +175,4 @@ public class MetadataSearchHelper {
         return result;
     }
 
-    private static String getSearchString(String field, String[] types) {
-        StringBuilder result = new StringBuilder("(");
-
-        Iterator<String> iter = Arrays.asList(types).iterator();
-        while (iter.hasNext()) {
-            String key = iter.next();
-            result.append(field).append(":\"").append(key).append("\"");
-            if (iter.hasNext())
-                result.append(" OR ");
-
-        }
-        result.append(")");
-        return result.toString();
-    }
-
-    public static String getLuceneString(String queryId, Map<String, String[]> parameters) throws Exception {
-        MetadataQueries queries = MetadataHelper.getLocalDefaultMetadataset().getQueries(MetadataReader.QUERY_SYNTAX_LUCENE);
-        return getLuceneString(queries, queries.findQuery(queryId), null, parameters);
-    }
-
-    public static String getLuceneString(MetadataQueries queries, MetadataQuery query, SearchCriterias searchCriterias, Map<String, String[]> parameters) throws IllegalArgumentException {
-        if (parameters == null) {
-            parameters = new HashMap<>();
-        }
-        String lucene = getLuceneSearchQuery(query, parameters);
-        if (query.isApplyBasequery()) {
-            String andQuery = "";
-            if (StringUtils.isNotBlank(lucene))
-                andQuery = " AND (" + lucene + ")";
-            if (queries.findBasequery(parameters.keySet()) != null &&
-                    !queries.findBasequery(parameters.keySet()).isEmpty()) {
-                lucene = queries.findBasequery(parameters.keySet()) + andQuery;
-            }
-            lucene = applyCondition(queries, lucene);
-        }
-        lucene = applyCondition(query, lucene);
-        lucene = convertSearchCriteriaToLucene(lucene, searchCriterias);
-        return lucene;
-    }
-
-    private static String applyCondition(MetadataQueryBase query, String lucene) {
-        StringBuilder luceneBuilder = new StringBuilder(lucene);
-        for (MetadataQueryCondition condition : query.getConditions()) {
-            boolean conditionState = MetadataHelper.checkConditionTrue(condition.getCondition());
-            if (conditionState && condition.getQueryTrue() != null) {
-                String conditionString = condition.getQueryTrue();
-                conditionString = replaceCommonQueryVariables(conditionString);
-                luceneBuilder.append(" AND (").append(conditionString).append(")");
-            }
-            if (!conditionState && condition.getQueryFalse() != null) {
-                String conditionString = condition.getQueryFalse();
-                conditionString = replaceCommonQueryVariables(conditionString);
-                luceneBuilder.append(" AND (").append(conditionString).append(")");
-            }
-        }
-        lucene = luceneBuilder.toString();
-
-        return lucene;
-    }
-
-    public static String convertSearchCriteriaToLucene(String lucene, SearchCriterias searchCriterias) {
-        String searchTypesString = null;
-        String searchAspectsString = null;
-        if (searchCriterias != null) {
-            if (searchCriterias.getContentkind() != null && searchCriterias.getContentkind().length >= 1) {
-                searchTypesString = getSearchString("TYPE", searchCriterias.getContentkind());
-            }
-
-            if (searchCriterias.getAspects() != null) {
-                searchAspectsString = getSearchString("ASPECT", searchCriterias.getAspects());
-
-            }
-
-            if (StringUtils.isNotBlank(lucene) && searchTypesString != null) {
-                lucene += " AND " + searchTypesString;
-
-            } else if (StringUtils.isBlank(lucene)) {
-                lucene = searchTypesString;
-            }
-            if (searchAspectsString != null)
-                lucene += " AND " + searchAspectsString;
-        }
-        return lucene;
-    }
 }

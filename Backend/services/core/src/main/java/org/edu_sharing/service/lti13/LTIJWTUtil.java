@@ -284,7 +284,7 @@ public class LTIJWTUtil {
             try {
                 Map<String,String> thumbnail = new HashMap<>();
                 //thumbnail.put("url",node.getPreview().getUrl());
-                thumbnail.put("url",new MimeTypesV2().getIcon(node.getType(),NodeServiceFactory.getLocalService().getProperties(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier() ,node.getRef().getId()) ,node.getAspects()));
+                thumbnail.put("url",new MimeTypesV2().getIcon(node.getType(),NodeServiceFactory.getInstance().getLocalService().getProperties(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier() ,node.getRef().getId()) ,node.getAspects()));
                 thumbnail.put("width",""+node.getPreview().getWidth());
                 thumbnail.put("height",""+node.getPreview().getHeight());
                 deepLink.put("icon",thumbnail);

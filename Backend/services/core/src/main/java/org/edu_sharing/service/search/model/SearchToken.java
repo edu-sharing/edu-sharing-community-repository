@@ -125,23 +125,6 @@ public class SearchToken implements Serializable {
 	@Getter
 	private Map<String, String[]> parameters;
 
-	public String getLuceneString() throws IllegalArgumentException {
-		if(query!=null){
-			return MetadataSearchHelper.getLuceneString(queries,query,searchCriterias,parameters);
-		}
-		if(searchCriterias!=null){
-			logger.debug("Using lucene string only search");
-			/*QueryBuilder queryBuilder = new QueryBuilder();
-			queryBuilder.setSearchCriterias(searchCriterias);
-			if(luceneString==null || luceneString.trim().isEmpty())
-				return queryBuilder.getSearchString();
-			return "("+queryBuilder.getSearchString()+") AND ("+luceneString+")";
-			*/
-			return MetadataSearchHelper.convertSearchCriteriasToLucene(luceneString,searchCriterias);
-		}
-		return luceneString;
-	}
-
 	/**
 	 * Nulls any existing search criterias
 	 */

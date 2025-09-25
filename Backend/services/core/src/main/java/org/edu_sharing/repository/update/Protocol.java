@@ -57,7 +57,7 @@ public class Protocol {
 		NodeRef updateInfoRef;
 		eduSystemFolderUpdate = userEnvironmentToolFactory.createEnvironmentTool(ApplicationInfoList.getHomeRepository().getAppId(), authInfo)
 				.getEdu_SharingSystemFolderUpdate();
-		updateInfoRef = NodeServiceFactory.getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+		updateInfoRef = NodeServiceFactory.getInstance().getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
 				eduSystemFolderUpdate,
 				CCConstants.CCM_TYPE_SYSUPDATE,
 				CCConstants.CCM_PROP_SYSUPDATE_ID,

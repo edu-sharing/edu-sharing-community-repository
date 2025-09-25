@@ -359,13 +359,13 @@ public class MediacenterApi {
 			MdsDao mdsDao = MdsDao.getMds(repoDao, MdsDao.DEFAULT);
 			List<Map<String, List<Serializable>>> data = new ArrayList<>();
 
-			List<NodeRef> nodes = MediacenterServiceFactory.getLocalService().getAllLicensedNodes(mediacenter, MetadataSearchHelper.convertCriterias(parameters.getCriteria()), new SortDefinition(sortProperties, sortAscending));
+			List<NodeRef> nodes = MediacenterServiceFactory.getInstance().getAllLicensedNodes(mediacenter, MetadataSearchHelper.convertCriterias(parameters.getCriteria()), new SortDefinition(sortProperties, sortAscending));
 			for (NodeRef ref : nodes) {
 				Map<String, List<Serializable>> props=new HashMap<>();
 				for(String prop : properties){
 					Object value;
 					if(prop.startsWith("parent::")){
-						String parentId = NodeServiceFactory.getLocalService().getPrimaryParent(ref.getNodeId());
+						String parentId = NodeServiceFactory.getInstance().getLocalService().getPrimaryParent(ref.getNodeId());
 						String realProp=prop.substring("parent::".length());
 						value = NodeServiceHelper.getPropertyNative(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentId),CCConstants.getValidGlobalName(realProp));
 					}
@@ -509,7 +509,7 @@ public class MediacenterApi {
 									   @Context HttpServletRequest req) {
 		try {
 
-			org.edu_sharing.service.authority.AuthorityService eduAuthorityService = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+			org.edu_sharing.service.authority.AuthorityService eduAuthorityService = AuthorityServiceFactory.getInstance().getService(ApplicationInfoList.getHomeRepository().getAppId());
 			if(!eduAuthorityService.isGlobalAdmin()){
 				throw new Exception("Admin rights are required for this endpoint");
 			}
@@ -539,7 +539,7 @@ public class MediacenterApi {
 										@Context HttpServletRequest req) {
 		try {
 
-			org.edu_sharing.service.authority.AuthorityService eduAuthorityService = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+			org.edu_sharing.service.authority.AuthorityService eduAuthorityService = AuthorityServiceFactory.getInstance().getService(ApplicationInfoList.getHomeRepository().getAppId());
 			if(!eduAuthorityService.isGlobalAdmin()){
 				throw new Exception("Admin rights are required for this endpoint");
 			}
@@ -568,7 +568,7 @@ public class MediacenterApi {
 										   @Context HttpServletRequest req) {
 		try {
 
-			org.edu_sharing.service.authority.AuthorityService eduAuthorityService = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+			org.edu_sharing.service.authority.AuthorityService eduAuthorityService = AuthorityServiceFactory.getInstance().getService(ApplicationInfoList.getHomeRepository().getAppId());
 			if(!eduAuthorityService.isGlobalAdmin()){
 				throw new Exception("Admin rights are required for this endpoint");
 			}

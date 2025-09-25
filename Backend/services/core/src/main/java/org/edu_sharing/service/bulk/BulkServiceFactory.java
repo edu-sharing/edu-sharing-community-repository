@@ -7,7 +7,7 @@ public class BulkServiceFactory {
 	private static BulkService bulkService;
 
 	public static BulkService getInstance() throws NotAnAdminException{
-		if(!AuthorityServiceFactory.getLocalService().isGlobalAdmin()){
+		if(!AuthorityServiceFactory.getInstance().getLocalService().isGlobalAdmin()){
 			throw new NotAnAdminException();
 		}
 		if(bulkService == null) {

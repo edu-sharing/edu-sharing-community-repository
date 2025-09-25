@@ -15,7 +15,6 @@ import org.edu_sharing.service.rendering.RenderingService;
 import org.edu_sharing.service.rendering.RenderingServiceFactory;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.xml.bind.JAXBContext;
@@ -54,7 +53,7 @@ public class oEmbedServlet extends SpringHttpServlet {
             if(maxheight!=null)
                 maxHeight=Integer.parseInt(maxheight);
             try {
-                RenderingService renderingService = RenderingServiceFactory.getLocalService();
+                RenderingService renderingService = RenderingServiceFactory.getInstance().getLocalService();
                 Map<String, String> params = new HashMap<>();
                 for (Object key : req.getParameterMap().keySet()) {
                     params.put((String) key, req.getParameter((String) key));

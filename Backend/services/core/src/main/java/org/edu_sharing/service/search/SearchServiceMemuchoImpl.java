@@ -6,8 +6,7 @@ import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.appcontext.ApplicationInfoContextHolder;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.json.JSONArray;
@@ -35,11 +34,8 @@ public class SearchServiceMemuchoImpl extends SearchServiceAdapter{
 
 	Logger logger = Logger.getLogger(SearchServiceMemuchoImpl.class);
 
-	String repositoryId = null;
 
-	public SearchServiceMemuchoImpl(String appId) {
-		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
-		this.repositoryId = appInfo.getAppId();
+	public SearchServiceMemuchoImpl() {
 	}
 
 	public static HttpURLConnection openMemuchoUrl(URL url) throws KeyManagementException, IOException, NoSuchAlgorithmException{
@@ -60,11 +56,7 @@ public class SearchServiceMemuchoImpl extends SearchServiceAdapter{
 		SSLContext sc = SSLContext.getInstance("SSL");
 	    sc.init(null, trustAllCerts, new java.security.SecureRandom());
 		connection.setSSLSocketFactory(sc.getSocketFactory());
-		connection.setHostnameVerifier(new HostnameVerifier() {
-		    public boolean verify(String hostname, SSLSession session) {
-		      return true;
-		    }
-		  });
+		connection.setHostnameVerifier((hostname, session) -> true);
 		return connection;
 
 	}
@@ -136,7 +128,8 @@ System.out.println(json);
 
 		try {
 
-			return searchMemucho(searchWord, this.repositoryId);
+            String appId = ApplicationInfoContextHolder.getCurrentApplicationInfo().getAppId();
+            return searchMemucho(searchWord, appId);
 		}
 		catch(IOException e){
 			InputStream is=connection.getErrorStream();

@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.alfresco.service.ServiceRegistry;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
-import org.edu_sharing.repository.client.rpc.Result;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
@@ -37,7 +36,7 @@ public class UserEventDao {
         ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
         ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
         return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(() -> {
-            SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
+            SearchService searchService = SearchServiceFactory.getInstance().getService(repoDao.getApplicationInfo().getAppId());
             try {
                 Map<String, String[]> criteriaMap = MetadataSearchHelper.convertCriterias(searchCriteria);
                 org.edu_sharing.repository.server.SearchResult<SearchUserEvent> result = searchService.getRecentUserEvents(filter, criteriaMap, searchToken);

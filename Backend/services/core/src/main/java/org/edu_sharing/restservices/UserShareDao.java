@@ -40,7 +40,7 @@ public class UserShareDao {
         ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
         ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
         return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(() -> {
-            SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
+            SearchService searchService = SearchServiceFactory.getInstance().getService(repoDao.getApplicationInfo().getAppId());
             try {
                 Map<String, String[]> criteriaMap = MetadataSearchHelper.convertCriterias(searchCriteria);
                 org.edu_sharing.repository.server.SearchResult<SearchInviteEvent> result = searchService.getUserShares(direction, criteriaMap, searchToken);

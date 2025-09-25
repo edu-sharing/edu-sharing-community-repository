@@ -13,7 +13,7 @@ public class RatingDao {
 	private RepositoryDao repoDao;
 	public RatingDao(RepositoryDao repoDao) {
 		this.repoDao = repoDao;
-		this.ratingService = RatingServiceFactory.getRatingService(repoDao.getId());
+		this.ratingService = RatingServiceFactory.getInstance().getService(repoDao.getId());
 	}
 	public void addOrUpdateRating(String nodeId,Double rating,String text) throws DAOException{
 		try{

@@ -94,7 +94,7 @@ public class ContextManagementFilter implements jakarta.servlet.Filter {
 				String user = (String) ((HttpServletRequest) req).getSession().getAttribute(CCConstants.AUTH_USERNAME);
 				// Run as System because there is yet no session opened
 				Map<String, Serializable> info = AuthenticationUtil.runAsSystem(() ->
-						AuthorityServiceFactory.getLocalService().getUserInfo(
+						AuthorityServiceFactory.getInstance().getLocalService().getUserInfo(
 								user)
 				);
 				QueryUtils.setUserInfo(info);
@@ -223,7 +223,7 @@ public class ContextManagementFilter implements jakarta.servlet.Filter {
 						if (usage != null) {
 							Context.getCurrentInstance().addSingleUseNode(nodeId);
 							authenticationComponent.setCurrentUser(CCConstants.PROXY_USER);
-							AuthenticationToolAPI authTool = new AuthenticationToolAPI();
+							AuthenticationToolAPI authTool = AuthenticationToolAPI.getInstance();
 							authTool.storeAuthInfoInSession(CCConstants.PROXY_USER, authservice.getCurrentTicket(), CCConstants.AUTH_TYPE_SIGNATURE, httpReq.getSession());
 						}
 

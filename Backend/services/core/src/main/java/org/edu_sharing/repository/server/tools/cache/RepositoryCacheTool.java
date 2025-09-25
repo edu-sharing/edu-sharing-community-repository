@@ -192,7 +192,7 @@ public class RepositoryCacheTool {
     }
 
     private Map<NodeRef, Map<String, Object>> buildCache(String parent, String type) {
-        List<NodeRef> refs = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parent, Collections.singletonList(type), RecurseMode.Folders);
+        List<NodeRef> refs = NodeServiceFactory.getInstance().getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parent, Collections.singletonList(type), RecurseMode.Folders);
         return refs.stream().collect(Collectors.toMap(ref -> ref,
                 ref -> {
                     try {

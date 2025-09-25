@@ -26,7 +26,6 @@ import org.edu_sharing.service.permission.PermissionException;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.alfresco.RestrictedAccessException;
-import org.edu_sharing.service.search.SearchResultNodeRefElastic;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.SearchServiceFactory;
@@ -124,23 +123,23 @@ public class NodeServiceHelper {
 	 * @return
 	 */
     public static String getProperty(NodeRef nodeRef,String key){
-		return NodeServiceFactory.getLocalService().getProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key);
+		return NodeServiceFactory.getInstance().getLocalService().getProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key);
 	}
 	public static void setProperty(NodeRef nodeRef, String key, Serializable value, boolean skipDefinitionChecks){
-		NodeServiceFactory.getLocalService().setProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key,value, skipDefinitionChecks);
+		NodeServiceFactory.getInstance().getLocalService().setProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key,value, skipDefinitionChecks);
 	}
 	public static void addAspect(NodeRef nodeRef,String aspect){
-		NodeServiceFactory.getLocalService().addAspect(nodeRef.getId(),aspect);
+		NodeServiceFactory.getInstance().getLocalService().addAspect(nodeRef.getId(),aspect);
 	}
 	public static void removeAspect(NodeRef nodeRef,String aspect){
-		NodeServiceFactory.getLocalService().removeAspect(nodeRef.getId(),aspect);
+		NodeServiceFactory.getInstance().getLocalService().removeAspect(nodeRef.getId(),aspect);
 	}
 	public static void removeProperty(NodeRef nodeRef,String key){
-		NodeServiceFactory.getLocalService().removeProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key);
+		NodeServiceFactory.getInstance().getLocalService().removeProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key);
 	}
 
 	public static void removeNode(NodeRef nodeRef,boolean recycle){
-		NodeServiceFactory.getLocalService().removeNode(nodeRef.getId(), null, recycle);
+		NodeServiceFactory.getInstance().getLocalService().removeNode(nodeRef.getId(), null, recycle);
 	}
 
 	/**
@@ -207,30 +206,30 @@ public class NodeServiceHelper {
 		}
 	}
 	public static String getType(NodeRef nodeRef){
-		return NodeServiceFactory.getLocalService().getType(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
+		return NodeServiceFactory.getInstance().getLocalService().getType(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
 	}
 	public static NodeRef getPrimaryParent(NodeRef nodeRef){
 		return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
-				NodeServiceFactory.getLocalService().getPrimaryParent(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId())
+				NodeServiceFactory.getInstance().getLocalService().getPrimaryParent(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId())
 		);
 	}
 	public static List<ChildAssociationRef> getChildrenChildAssociationRefType(NodeRef nodeRef, String type){
-    	return NodeServiceFactory.getLocalService().getChildrenChildAssociationRefType(nodeRef.getId(), type);
+    	return NodeServiceFactory.getInstance().getLocalService().getChildrenChildAssociationRefType(nodeRef.getId(), type);
 	}
 	public static String[] getAspects(NodeRef nodeRef){
-		return NodeServiceFactory.getLocalService().getAspects(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
+		return NodeServiceFactory.getInstance().getLocalService().getAspects(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
 	}
 	public static boolean hasAspect(NodeRef nodeRef,String aspect){
-		return NodeServiceFactory.getLocalService().hasAspect(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),aspect);
+		return NodeServiceFactory.getInstance().getLocalService().hasAspect(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),aspect);
 	}
     public static Map<String, Object> getProperties(NodeRef nodeRef) throws Throwable {
-        return NodeServiceFactory.getLocalService().getProperties(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
+        return NodeServiceFactory.getInstance().getLocalService().getProperties(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
     }
 	public static Map<String, Object> getPropertiesVersion(NodeRef nodeRef, String version) throws Throwable {
     	if(version == null){
     		return getProperties(nodeRef);
 		}
-		Map<String, Map<String, Object>> versionHistory = NodeServiceFactory.getLocalService().getVersionHistory(nodeRef.getId());
+		Map<String, Map<String, Object>> versionHistory = NodeServiceFactory.getInstance().getLocalService().getVersionHistory(nodeRef.getId());
 
 		if (versionHistory != null) {
 			for (Map<String, Object> versionData : versionHistory.values()) {
@@ -256,7 +255,7 @@ public class NodeServiceHelper {
 		return serviceRegistry.getNodeService().getProperties(nodeRef);
 	}
 	public static InputStream getContent(NodeRef nodeRef) throws Throwable {
-		return NodeServiceFactory.getLocalService().getContent(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),null, ContentModel.PROP_CONTENT.toString());
+		return NodeServiceFactory.getInstance().getLocalService().getContent(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),null, ContentModel.PROP_CONTENT.toString());
 	}
 
 	public static void validatePermissionRestrictedAccess(NodeRef nodeRef, String... permissions) throws RestrictedAccessException {
@@ -264,7 +263,7 @@ public class NodeServiceHelper {
 			String originalNodeId = NodeServiceHelper.getProperty(nodeRef, CCConstants.CCM_PROP_IO_ORIGINAL);
 			Boolean restricted = (Boolean) AuthenticationUtil.runAsSystem(() -> NodeServiceHelper.getPropertyNative(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalNodeId), CCConstants.CCM_PROP_RESTRICTED_ACCESS));
 			if (restricted != null && restricted && !Arrays.stream(permissions).allMatch((permission) -> PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalNodeId), permission))) {
-				List restrictedPermissions = (List) AuthenticationUtil.runAsSystem(() -> NodeServiceHelper.getPropertyNative(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalNodeId), CCConstants.CCM_PROP_RESTRICTED_ACCESS_PERMISSIONS));
+				List<?> restrictedPermissions = (List<?>) AuthenticationUtil.runAsSystem(() -> NodeServiceHelper.getPropertyNative(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalNodeId), CCConstants.CCM_PROP_RESTRICTED_ACCESS_PERMISSIONS));
 				if(restrictedPermissions != null) {
 					/*for (String permission : permissions) {
 						PermissionReference pr = permissionModel.getPermissionReference(null, permissions);
@@ -289,7 +288,7 @@ public class NodeServiceHelper {
 		}
 	}
 	public static void writeContent(NodeRef nodeRef,InputStream content,String mimetype) throws Throwable {
-		NodeServiceFactory.getLocalService().writeContent(
+		NodeServiceFactory.getInstance().getLocalService().writeContent(
 				nodeRef.getStoreRef(),
 				nodeRef.getId(),
 				content,
@@ -306,7 +305,7 @@ public class NodeServiceHelper {
 	 * @throws Throwable
 	 */
 	public static void writeContentText(NodeRef nodeRef,String content) throws Throwable {
-		NodeServiceFactory.getLocalService().writeContent(
+		NodeServiceFactory.getInstance().getLocalService().writeContent(
 				nodeRef.getStoreRef(),
 				nodeRef.getId(),
 				new ByteArrayInputStream(content.getBytes()),
@@ -376,7 +375,7 @@ public class NodeServiceHelper {
 	 * @return
 	 */
 	public static List<NodeRef> findNodeByPropertiesRecursive(NodeRef parent, List<String> types, Map<String, Object> properties){
-		NodeService nodeService = NodeServiceFactory.getLocalService();
+		NodeService nodeService = NodeServiceFactory.getInstance().getLocalService();
 		List<NodeRef> list = nodeService.getChildrenRecursive(parent.getStoreRef(), parent.getId(), types, RecurseMode.Folders);
 		return list.stream().filter((ref) ->
 				properties.entrySet().stream().allMatch((e) ->
@@ -385,13 +384,13 @@ public class NodeServiceHelper {
 	}
 
 	public static GetPreviewResult getPreview(NodeRef ref) {
-		return NodeServiceFactory.getLocalService().getPreview(ref.getStoreRef().getProtocol(),ref.getStoreRef().getIdentifier(),ref.getId(), null, null);
+		return NodeServiceFactory.getInstance().getLocalService().getPreview(ref.getStoreRef().getProtocol(),ref.getStoreRef().getIdentifier(),ref.getId(), null, null);
 	}
 	public static GetPreviewResult getPreview(NodeRef ref, Map<String, Object> nodeProps) {
-		return NodeServiceFactory.getLocalService().getPreview(ref.getStoreRef().getProtocol(),ref.getStoreRef().getIdentifier(),ref.getId(), nodeProps, null);
+		return NodeServiceFactory.getInstance().getLocalService().getPreview(ref.getStoreRef().getProtocol(),ref.getStoreRef().getIdentifier(),ref.getId(), nodeProps, null);
 	}
 	public static GetPreviewResult getPreview(org.edu_sharing.service.model.NodeRef ref) {
-		return NodeServiceFactory.getNodeService(ref.getRepositoryId()).getPreview(ref.getStoreProtocol(),ref.getStoreId(),ref.getNodeId(), null, null);
+		return NodeServiceFactory.getInstance().getService(ref.getRepositoryId()).getPreview(ref.getStoreProtocol(),ref.getStoreId(),ref.getNodeId(), null, null);
 	}
 	public static NodeRef getCompanyHome() {
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
@@ -402,11 +401,11 @@ public class NodeServiceHelper {
 		return getNodeByName(getCompanyHome(), CCConstants.CCM_TYPE_MAP, name);
 	}
 	public static NodeRef getNodeByName(NodeRef parent, String type, String name){
-		return NodeServiceFactory.getLocalService().getChild(parent.getStoreRef(), parent.getId(), type, CCConstants.CM_NAME, name);
+		return NodeServiceFactory.getInstance().getLocalService().getChild(parent.getStoreRef(), parent.getId(), type, CCConstants.CM_NAME, name);
 	}
 	public static void blockImport(NodeRef node) throws Exception {
 		setProperty(node, CCConstants.CCM_PROP_IO_IMPORT_BLOCKED, true, false);
-		PermissionServiceFactory.getLocalService().setPermissions(node.getId(), new ArrayList<>(), false);
+		PermissionServiceFactory.getInstance().getLocalService().setPermissions(node.getId(), new ArrayList<>(), false);
 	}
 
 
@@ -483,7 +482,7 @@ public class NodeServiceHelper {
 
 	public static String getContainerRootPath(String rootPath) throws Throwable {
 
-		SearchService localService = SearchServiceFactory.getLocalService();
+		SearchService localService = SearchServiceFactory.getInstance().getLocalService();
 		SearchResultNodeRef searchResultNodeRef = localService.searchByDisplayPath(rootPath, SearchServiceElastic.WORKSPACE_INDEX);
 		String rootId = null;
 		if (searchResultNodeRef.getNodeCount() != 1) {
@@ -554,7 +553,7 @@ public class NodeServiceHelper {
 		while(currentNode != null){
 			String parent=null;
 			try {
-				parent = NodeServiceFactory.getLocalService().getPrimaryParent(currentNode.getId());
+				parent = NodeServiceFactory.getInstance().getLocalService().getPrimaryParent(currentNode.getId());
 			}catch(Exception e){
 			}
 			if(parent != null){
@@ -573,7 +572,7 @@ public class NodeServiceHelper {
 	}
 
 	public static boolean exists(NodeRef node) {
-		return NodeServiceFactory.getLocalService().exists(node.getStoreRef().getProtocol(), node.getStoreRef().getIdentifier(), node.getId());
+		return NodeServiceFactory.getInstance().getLocalService().exists(node.getStoreRef().getProtocol(), node.getStoreRef().getIdentifier(), node.getId());
 	}
 
 	/**

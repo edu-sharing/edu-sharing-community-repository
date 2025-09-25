@@ -34,7 +34,7 @@ public class CASServlet extends SpringHttpServlet {
 		
 		
 		
-		AuthenticationToolAPI authTool = new AuthenticationToolAPI();
+		AuthenticationToolAPI authTool = AuthenticationToolAPI.getInstance();
 		
 		Map<String,String> validAuthInfo = authTool.validateAuthentication(req.getSession());
 		

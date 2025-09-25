@@ -10,14 +10,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 
 
+import lombok.Getter;
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.cmr.repository.*;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.SearchParameters;
-import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.*;
@@ -34,12 +32,7 @@ import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 
-import java.io.InputStream;
-import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.*;
-import java.util.stream.Stream;
 
 
 public class ExcelLOMImporter {
@@ -53,9 +46,9 @@ public class ExcelLOMImporter {
 	DictionaryService dictionaryService = serviceRegistry.getDictionaryService(); 
 	NodeService nodeService = serviceRegistry.getNodeService();
 	
-	String targetFolder = null;
+	String targetFolder;
 	
-	InputStream is = null;
+	InputStream is;
 	
 	int maxNodesInFolder = 100;
 	
@@ -63,13 +56,10 @@ public class ExcelLOMImporter {
 	
 	private Map<String, Map<String, Object>> currentLevelObjects = null;
 
-	private int rowCount;
-	
-	public int getRowCount() {
-		return rowCount;
-	}
+	@Getter
+    private int rowCount;
 
-	QName qnameWWWUrl = QName.createQName(CCConstants.CCM_PROP_IO_WWWURL);
+    QName qnameWWWUrl = QName.createQName(CCConstants.CCM_PROP_IO_WWWURL);
 	QName qnameTitle = QName.createQName(CCConstants.LOM_PROP_GENERAL_TITLE);
 	QName qnameLicenseKey = QName.createQName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
 	QName qnameThumbnail = QName.createQName(CCConstants.CCM_PROP_IO_THUMBNAILURL);
@@ -82,167 +72,160 @@ public class ExcelLOMImporter {
 		
 		
 		Map<Integer,String> IdxColumnMap = new HashMap<>();
-		
-		try{
-			Workbook workbook = WorkbookFactory.create(this.is);
-			
-			Sheet sheet = workbook.getSheetAt(0);
-			
-			rowCount = 0;
-			String parentFolder = targetFolder;
-			
-			NodeRef targetFolderNodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef,targetFolder);
-			QName assocTypeContains = QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS);
-			for(Row row : sheet){
-				String folderName = new Integer(rowCount / maxNodesInFolder).toString();
-				NodeRef currentFolder = nodeService.getChildByName(targetFolderNodeRef, assocTypeContains, folderName);
-				
-				if(currentFolder == null){
-					Map<QName,Serializable> folderProps = new HashMap<>();
-					folderProps.put(QName.createQName(CCConstants.CM_NAME), folderName);
-					folderProps.put(QName.createQName(CCConstants.CM_PROP_C_TITLE), folderName);
-					parentFolder = nodeService.createNode(targetFolderNodeRef,assocTypeContains, QName.createQName(folderName),  QName.createQName(CCConstants.CCM_TYPE_MAP),folderProps).getChildRef().getId();
-				}else{
-					parentFolder = currentFolder.getId();
-				}
-				
-				try{
-					currentLevelObjects = apiClient.getChildren(parentFolder);
-				}catch(Throwable e){
-					logger.error(e.getMessage(),e);
-				}
-				
-				if(!IdxColumnMap.isEmpty()){
-					//we got the headers
-					Map<QName,Serializable> toSafe = new HashMap<>();
-					
-					String contentUrl = null;
-					LinkedHashSet<String> collectionsToImportTo = new LinkedHashSet<>();
-					for(Cell cell : row){
-						
-						int colIdxIdx = cell.getColumnIndex();
-						
-						if(CellType.NUMERIC != cell.getCellType() && CellType.STRING != cell.getCellType()){
-							continue;
-						}
 
-						String columnName = IdxColumnMap.get(colIdxIdx);
-						if(columnName == null){
-							logger.error("no column name found for column:"+colIdxIdx);
-							continue;
-						}
-						columnName = columnName.trim();
+        Workbook workbook = WorkbookFactory.create(this.is);
 
-						if(columnName.startsWith("collection")){
-							String value = cell.getStringCellValue();
-							if(value != null){
-								collectionsToImportTo.add(value);
-							}
-						}
+        Sheet sheet = workbook.getSheetAt(0);
 
-						//System.out.println(columnName + " " + toSafe.get(QName.createQName(CCConstants.CM_NAME)) + " " + cell.getStringCellValue() + " colIdx:" + colIdxIdx);
-						String alfrescoProperty = null;
-						String value = (CellType.NUMERIC == cell.getCellType() ) ? Double.valueOf(cell.getNumericCellValue()).toString() : cell.getStringCellValue();
-						if(value == null) continue;
-						value = value.trim();
-						if(value.isEmpty()) continue;
-						
+        rowCount = 0;
+        String parentFolder = targetFolder;
 
-						alfrescoProperty = getExcelAlfMap().get(columnName);
+        NodeRef targetFolderNodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef,targetFolder);
+        QName assocTypeContains = QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS);
+        for(Row row : sheet){
+            String folderName = Integer.toString(rowCount / maxNodesInFolder);
+            NodeRef currentFolder = nodeService.getChildByName(targetFolderNodeRef, assocTypeContains, folderName);
 
-						
-						if(alfrescoProperty != null){
-							if(alfrescoProperty.equals(CCConstants.CM_PROP_CONTENT)){
-								contentUrl = value;
-							}else{
-								PropertyDefinition propDef = dictionaryService.getProperty(QName.createQName(alfrescoProperty));
-								
-								if(propDef != null) {
-									if(propDef.isMultiValued() && !alfrescoProperty.contains("contributer")){
-										ArrayList<String> multival = new ArrayList<>();
+            if(currentFolder == null){
+                Map<QName,Serializable> folderProps = new HashMap<>();
+                folderProps.put(QName.createQName(CCConstants.CM_NAME), folderName);
+                folderProps.put(QName.createQName(CCConstants.CM_PROP_C_TITLE), folderName);
+                parentFolder = nodeService.createNode(targetFolderNodeRef,assocTypeContains, QName.createQName(folderName),  QName.createQName(CCConstants.CCM_TYPE_MAP),folderProps).getChildRef().getId();
+            }else{
+                parentFolder = currentFolder.getId();
+            }
 
-                                        //String[] vals = value.split(",");   StringTool.escape(CCConstants.MULTIVALUE_SEPARATOR)
-										String[] vals = value.split(StringTool.escape(CCConstants.MULTIVALUE_SEPARATOR));
-										multival.addAll(Arrays.asList(vals));
-										
-										toSafe.put(QName.createQName(alfrescoProperty), multival);
-									}else{
-										if("java.lang.Integer".equals(propDef.getDataType().getJavaClassName())){
-											value = Integer.valueOf( (int)Math.round(Double.parseDouble(value))).toString();
-										}
-										toSafe.put(QName.createQName(alfrescoProperty), value);
-									}
-								}else {
-									logger.error("unkown property: " + alfrescoProperty);
-									continue;
-								}
-							}
-						}
-						
-					}
+            try{
+                currentLevelObjects = apiClient.getChildren(parentFolder);
+            }catch(Throwable e){
+                logger.error(e.getMessage(),e);
+            }
 
-					//try to get title from wwurl
-					String wwwUrl = (String)toSafe.get(qnameWWWUrl);
+            if(!IdxColumnMap.isEmpty()){
+                //we got the headers
+                Map<QName,Serializable> toSafe = new HashMap<>();
 
-					String nodeName = addName(toSafe, wwwUrl);
-					addThumbnail(toSafe, wwwUrl);
+                String contentUrl = null;
+                LinkedHashSet<String> collectionsToImportTo = new LinkedHashSet<>();
+                for(Cell cell : row){
 
-					if(!toSafe.isEmpty() && nodeName != null && !nodeName.trim().isEmpty()){
-						
-						//check for valid thumbnail url
-						boolean createNode = true;
-						String thumbUrl = (String)toSafe.get(qnameThumbnail);
+                    int colIdxIdx = cell.getColumnIndex();
 
-						if((thumbUrl == null || !thumbUrl.startsWith("http")) && (contentUrl == null || contentUrl.trim().isEmpty())) {
-							logger.error("invalid thumbnail url:" + thumbUrl +" for:" +toSafe.get(QName.createQName(CCConstants.CM_NAME))+" will not safe object");
-							createNode = false;
-						}
-						if(createNode) {
-							ChildAssociationRef newNode = nodeService.createNode(new NodeRef(MCAlfrescoAPIClient.storeRef,parentFolder),QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS), QName.createQName(nodeName),  QName.createQName(CCConstants.CCM_TYPE_IO),toSafe);
-							
-							if(contentUrl != null && !contentUrl.trim().isEmpty()){
-								String mimetype = MimeTypes.guessMimetype(contentUrl);
-								try {
-									InputStream inputStream = new URL(contentUrl).openConnection().getInputStream();
-									apiClient.writeContent(MCAlfrescoAPIClient.storeRef,
-											newNode.getChildRef().getId(),
-											inputStream,
-											mimetype,
-											null,
-											CCConstants.CM_PROP_CONTENT);
-								}catch (java.io.FileNotFoundException e){
-									logger.error("no content found for:" + toSafe.get(QName.createQName(CCConstants.CM_NAME))+ "url:" +contentUrl);
-								}
-							}
-						
-							apiClient.createVersion(newNode.getChildRef().getId());
+                    if(CellType.NUMERIC != cell.getCellType() && CellType.STRING != cell.getCellType()){
+                        continue;
+                    }
 
-							logger.info("node created:" + serviceRegistry.getNodeService().getPath(newNode.getChildRef()));
-							addToCollections(newNode,collectionsToImportTo,addToCollection);
-						}
-					}else {
-						logger.error("can not determine name property for row: "+row.getRowNum());
-					}
-					
-				}else{
-				//build the headers
-					for(Cell cell : row){
-						if(CellType.STRING == cell.getCellType()){
-							IdxColumnMap.put(cell.getColumnIndex(),cell.getStringCellValue());
-						}
-					}
-				}
-				
-				rowCount++;
-			}
-			
-			
-			
-		}catch(Exception e){
-			throw e;
-		}
+                    String columnName = IdxColumnMap.get(colIdxIdx);
+                    if(columnName == null){
+                        logger.error("no column name found for column:"+colIdxIdx);
+                        continue;
+                    }
+                    columnName = columnName.trim();
 
-	}
+                    if(columnName.startsWith("collection")){
+                        String value = cell.getStringCellValue();
+                        if(value != null){
+                            collectionsToImportTo.add(value);
+                        }
+                    }
+
+                    //System.out.println(columnName + " " + toSafe.get(QName.createQName(CCConstants.CM_NAME)) + " " + cell.getStringCellValue() + " colIdx:" + colIdxIdx);
+                    String alfrescoProperty = null;
+                    String value = (CellType.NUMERIC == cell.getCellType() ) ? Double.valueOf(cell.getNumericCellValue()).toString() : cell.getStringCellValue();
+                    if(value == null) continue;
+                    value = value.trim();
+                    if(value.isEmpty()) continue;
+
+
+                    alfrescoProperty = getExcelAlfMap().get(columnName);
+
+
+                    if(alfrescoProperty != null){
+                        if(alfrescoProperty.equals(CCConstants.CM_PROP_CONTENT)){
+                            contentUrl = value;
+                        }else{
+                            PropertyDefinition propDef = dictionaryService.getProperty(QName.createQName(alfrescoProperty));
+
+                            if(propDef != null) {
+                                if(propDef.isMultiValued() && !alfrescoProperty.contains("contributer")){
+
+//String[] vals = value.split(",");   StringTool.escape(CCConstants.MULTIVALUE_SEPARATOR)
+                                    String[] vals = value.split(StringTool.escape(CCConstants.MULTIVALUE_SEPARATOR));
+ArrayList<String> multival = new ArrayList<>(Arrays.asList(vals));
+
+                                    toSafe.put(QName.createQName(alfrescoProperty), multival);
+                                }else{
+                                    if("java.lang.Integer".equals(propDef.getDataType().getJavaClassName())){
+                                        value = Integer.valueOf( (int)Math.round(Double.parseDouble(value))).toString();
+                                    }
+                                    toSafe.put(QName.createQName(alfrescoProperty), value);
+                                }
+                            }else {
+                                logger.error("unkown property: " + alfrescoProperty);
+                                continue;
+                            }
+                        }
+                    }
+
+                }
+
+                //try to get title from wwurl
+                String wwwUrl = (String)toSafe.get(qnameWWWUrl);
+
+                String nodeName = addName(toSafe, wwwUrl);
+                addThumbnail(toSafe, wwwUrl);
+
+                if(!toSafe.isEmpty() && nodeName != null && !nodeName.trim().isEmpty()){
+
+                    //check for valid thumbnail url
+                    boolean createNode = true;
+                    String thumbUrl = (String)toSafe.get(qnameThumbnail);
+
+                    if((thumbUrl == null || !thumbUrl.startsWith("http")) && (contentUrl == null || contentUrl.trim().isEmpty())) {
+                        logger.error("invalid thumbnail url:" + thumbUrl +" for:" +toSafe.get(QName.createQName(CCConstants.CM_NAME))+" will not safe object");
+                        createNode = false;
+                    }
+                    if(createNode) {
+                        ChildAssociationRef newNode = nodeService.createNode(new NodeRef(MCAlfrescoAPIClient.storeRef,parentFolder),QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS), QName.createQName(nodeName),  QName.createQName(CCConstants.CCM_TYPE_IO),toSafe);
+
+                        if(contentUrl != null && !contentUrl.trim().isEmpty()){
+                            String mimetype = MimeTypes.guessMimetype(contentUrl);
+                            try {
+                                InputStream inputStream = new URL(contentUrl).openConnection().getInputStream();
+                                apiClient.writeContent(MCAlfrescoAPIClient.storeRef,
+                                        newNode.getChildRef().getId(),
+                                        inputStream,
+                                        mimetype,
+                                        null,
+                                        CCConstants.CM_PROP_CONTENT);
+                            }catch (java.io.FileNotFoundException e){
+                                logger.error("no content found for:" + toSafe.get(QName.createQName(CCConstants.CM_NAME))+ "url:" +contentUrl);
+                            }
+                        }
+
+                        apiClient.createVersion(newNode.getChildRef().getId());
+
+                        logger.info("node created:" + serviceRegistry.getNodeService().getPath(newNode.getChildRef()));
+                        addToCollections(newNode,collectionsToImportTo,addToCollection);
+                    }
+                }else {
+                    logger.error("can not determine name property for row: "+row.getRowNum());
+                }
+
+            }else{
+            //build the headers
+                for(Cell cell : row){
+                    if(CellType.STRING == cell.getCellType()){
+                        IdxColumnMap.put(cell.getColumnIndex(),cell.getStringCellValue());
+                    }
+                }
+            }
+
+            rowCount++;
+        }
+
+
+    }
 
 	private void addThumbnail(Map<QName, Serializable> toSafe, String wwwUrl) {
 		String thumbnailUrl = (String) toSafe.get(qnameThumbnail);
@@ -261,9 +244,6 @@ public class ExcelLOMImporter {
 	 * if still not present it tries to get name from wwwurl
 	 * name is cleared to get an alfresco conform name
 	 *
-	 * @param toSafe
-	 * @param wwwUrl
-	 * @return
 	 */
 	private String addName(Map<QName, Serializable> toSafe, String wwwUrl) {
 		if(toSafe.get(qnameTitle) == null && wwwUrl != null && wwwUrl.startsWith("http")){
@@ -323,15 +303,15 @@ public class ExcelLOMImporter {
 							.must(m -> m.wildcard(w -> w.field("properties.cm:name").wildcard(targetCollection)))
 							.build());
 
-			SearchResultNodeRef search = SearchServiceFactory.getLocalService().search(searchToken);
+			SearchResultNodeRef search = SearchServiceFactory.getInstance().getLocalService().search(searchToken);
 
 
 			//check if there is a parent
-			AtomicReference<NodeRef> pathMatchesNodeRef = new AtomicReference();
+			AtomicReference<NodeRef> pathMatchesNodeRef = new AtomicReference<>();
 
 			LinkedHashSet<String> pathsMatch = new LinkedHashSet<>();
 
-			search.getData().stream().forEach(n -> {
+			search.getData().forEach(n -> {
 				NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, n.getNodeId());
 				Path path = serviceRegistry.getNodeService().getPath(nodeRef);
 				String displayPath = path.toDisplayPath(serviceRegistry.getNodeService(),serviceRegistry.getPermissionService());
@@ -353,7 +333,7 @@ public class ExcelLOMImporter {
 				logger.info("adding;" + nodeName +";"+newNode.getChildRef() +";TO;" + pathsMatch.iterator().next() +"/"+nodeService.getProperty(pathMatchesNodeRef.get(),ContentModel.PROP_NAME));
 				try {
 					if(addToCollection) {
-						CollectionServiceFactory.getLocalService().addToCollection(pathMatchesNodeRef.get().getId(), newNode.getChildRef().getId(), null, false);
+						CollectionServiceFactory.getInstance().getLocalService().addToCollection(pathMatchesNodeRef.get().getId(), newNode.getChildRef().getId(), null, false);
 					}
 				} catch (Throwable throwable) {
 

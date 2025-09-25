@@ -6,12 +6,14 @@ import java.util.Map;
 import jakarta.servlet.http.HttpSession;
 
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
 
+@Lazy
+@Service
 public class AuthenticationToolYouTube extends AuthenticationToolAbstract {
 
-	public AuthenticationToolYouTube(String repId){
-	}
-	
+
 	@Override
 	public Map<String, String> createNewSession(String userName, String password) throws Exception {
 		return null;

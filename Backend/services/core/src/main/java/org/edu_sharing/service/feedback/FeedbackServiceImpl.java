@@ -27,14 +27,17 @@ import org.edu_sharing.service.permission.annotation.NodePermission;
 import org.edu_sharing.service.permission.annotation.Permission;
 import org.edu_sharing.spring.scope.refresh.RefreshScopeRefreshedEvent;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Log4j
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@Primary
+@Service
+@RequiredArgsConstructor
 public class FeedbackServiceImpl implements FeedbackService, ApplicationListener<RefreshScopeRefreshedEvent> {
     private final NodeService nodeService;
     UserMode userMode;
@@ -119,7 +122,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationListener
             Map<String, List<String>> feedbackData
     ) {
         String userId = AuthenticationUtil.getFullyAuthenticatedUser();
-        if (AuthorityServiceFactory.getLocalService().isGuest() && !userMode.equals(UserMode.session)) {
+        if (AuthorityServiceFactory.getInstance().getLocalService().isGuest() && !userMode.equals(UserMode.session)) {
             throw new IllegalArgumentException("Guest feedback is only supported when userMode == session");
         }
         return AuthenticationUtil.runAsSystem(() -> {

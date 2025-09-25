@@ -276,7 +276,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
     public static Map<String, Aggregation> getAggregations(MetadataSet mds, MetadataQuery query, Map<String, String[]> parameters, List<String> facets, Set<MetadataQueryParameter> excludeOwn, Query globalConditions, SearchToken searchToken) throws IllegalArgumentException {
         MetadataQueries queries = mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL);
         Map<String, Aggregation> result = new HashMap<>();
-        String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
+        String currentLocale = AuthenticationToolAPI.getInstance().getCurrentLocale();
         for (String facet : facets) {
 
             Map<String, String[]> tmp = new HashMap<>(parameters == null ? Collections.emptyMap() : parameters);

@@ -1,14 +1,11 @@
 package org.edu_sharing.service.network;
 
 import com.google.gson.Gson;
-import com.typesafe.config.ConfigBeanFactory;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
-import org.edu_sharing.alfresco.service.connector.ConnectorList;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.service.network.model.Service;
@@ -16,19 +13,13 @@ import org.edu_sharing.service.network.model.StoredService;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 public class NetworkServiceImpl implements NetworkService {
     NodeService nodeService;
     public NetworkServiceImpl(){
-        nodeService=NodeServiceFactory.getLocalService();
+        nodeService=NodeServiceFactory.getInstance().getLocalService();
     }
     @Override
     public Collection<StoredService> getServices() throws Throwable{

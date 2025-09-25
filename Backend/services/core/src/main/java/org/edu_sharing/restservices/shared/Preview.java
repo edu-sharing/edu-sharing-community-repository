@@ -62,7 +62,7 @@ public class Preview implements Serializable {
   }
 
   public Preview(String storeProtocol, String storeIdentifier, String nodeId, NodeRef.Preview previewData) {
-    setUrl(NodeServiceFactory.getLocalService().getPreviewUrl(
+    setUrl(NodeServiceFactory.getInstance().getLocalService().getPreviewUrl(
             storeProtocol,
             storeIdentifier,
             nodeId,

@@ -2,7 +2,6 @@ package org.edu_sharing.restservices;
 
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.apache.commons.lang.NotImplementedException;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.comment.v1.model.Comment;
 import org.edu_sharing.restservices.comment.v1.model.Comments;
@@ -21,7 +20,7 @@ public class CommentDao {
 	private CommentService commentService;
 	public CommentDao(RepositoryDao repoDao) {
 		this.repoDao = repoDao;
-		this.commentService = CommentServiceFactory.getCommentService(repoDao.getId());
+		this.commentService = CommentServiceFactory.getInstance().getService(repoDao.getId());
 	}
 	public void addComment(String nodeId,String commentReference,String comment) throws DAOException{
 		try{

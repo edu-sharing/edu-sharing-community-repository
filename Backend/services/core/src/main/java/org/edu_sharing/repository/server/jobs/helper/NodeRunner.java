@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class NodeRunner {
 
-    private final NodeService nodeService = NodeServiceFactory.getLocalService();
+    private final NodeService nodeService = NodeServiceFactory.getInstance().getLocalService();
     private final ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
     private final ServiceRegistry serviceRegistry = applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY, ServiceRegistry.class);
     private final BehaviourFilter policyBehaviourFilter = applicationContext.getBean("policyBehaviourFilter", BehaviourFilter.class);

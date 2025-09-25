@@ -66,7 +66,7 @@ public class ActivityStatisticsUtil {
                     }
                 }
                 result = AuthenticationUtil.runAs(
-                        () -> SearchServiceFactory.getLocalService().getAllOrganizations(true).getData().stream().map(EduGroup::getGroupname).toArray(String[]::new),
+                        () -> SearchServiceFactory.getInstance().getLocalService().getAllOrganizations(true).getData().stream().map(EduGroup::getGroupname).toArray(String[]::new),
                         AuthenticationUtil.getFullyAuthenticatedUser()
                 );
                 if (session != null) {
@@ -75,7 +75,7 @@ public class ActivityStatisticsUtil {
                 return result;
             } else {
                 return AuthenticationUtil.runAs(
-                        () -> SearchServiceFactory.getLocalService().getAllOrganizations(true).getData().stream().map(EduGroup::getGroupname).toArray(String[]::new),
+                        () -> SearchServiceFactory.getInstance().getLocalService().getAllOrganizations(true).getData().stream().map(EduGroup::getGroupname).toArray(String[]::new),
                         ContextManagementFilter.accessTool.get().getUserId()
                 );
             }
@@ -98,7 +98,7 @@ public class ActivityStatisticsUtil {
                     }
                 }
                 result = AuthenticationUtil.runAs(
-                        () -> SearchServiceFactory.getLocalService().getAllMediacenters(true).toArray(String[]::new),
+                        () -> SearchServiceFactory.getInstance().getLocalService().getAllMediacenters(true).toArray(String[]::new),
                         AuthenticationUtil.getFullyAuthenticatedUser()
                 );
                 if (session != null) {
@@ -107,7 +107,7 @@ public class ActivityStatisticsUtil {
                 return result;
             } else {
                 return AuthenticationUtil.runAs(
-                        () -> SearchServiceFactory.getLocalService().getAllMediacenters(true).toArray(String[]::new),
+                        () -> SearchServiceFactory.getInstance().getLocalService().getAllMediacenters(true).toArray(String[]::new),
                         ContextManagementFilter.accessTool.get().getUserId()
                 );
             }

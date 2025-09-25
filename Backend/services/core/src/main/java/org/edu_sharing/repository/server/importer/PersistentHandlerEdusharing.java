@@ -369,7 +369,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		}
 		if (allNodesInImportfolder == null) {
 			getLogger().info("allNodesInImportfolder is null starting to initialize it");
-			allNodesInImportfolder = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,importFolderId, Collections.singletonList(CCConstants.CCM_TYPE_IO), RecurseMode.Folders);
+			allNodesInImportfolder = NodeServiceFactory.getInstance().getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,importFolderId, Collections.singletonList(CCConstants.CCM_TYPE_IO), RecurseMode.Folders);
 
 			getLogger().info("allNodesInImportfolder initialize finished! size:" + ((allNodesInImportfolder != null) ? allNodesInImportfolder.size() : 0));
 			getLogger().info("allNodesInImportfolder initialize finished! calculated size:" + ((allNodesInImportfolder != null) ? (estimateObjectSize(allNodesInImportfolder)/1024)+" kb" : 0));
@@ -399,7 +399,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			// disable behaviour cause otherwise each delete will trigger "onUpdateProperties"
 			serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(() -> {
 				policyBehaviourFilter.disableBehaviour(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
-				NodeServiceFactory.getLocalService().updateNodeNative(nodeId,
+				NodeServiceFactory.getInstance().getLocalService().updateNodeNative(nodeId,
 						propertiesToRemove.stream().collect(
 								HashMap::new, (m, v) -> m.put(v, null), HashMap::putAll
 						)
@@ -412,13 +412,13 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		}
 
 		try {
-			NodeServiceFactory.getLocalService().updateNodeNative(nodeId, simpleProps);
+			NodeServiceFactory.getInstance().getLocalService().updateNodeNative(nodeId, simpleProps);
 		}catch(DuplicateChildNodeNameException e){
 			simpleProps.put(CCConstants.CM_NAME, EduSharingNodeHelper.makeUniqueName((String) simpleProps.get(CCConstants.CM_NAME)));
-			NodeServiceFactory.getLocalService().updateNodeNative(nodeId, simpleProps);
+			NodeServiceFactory.getInstance().getLocalService().updateNodeNative(nodeId, simpleProps);
 		} catch (IntegrityException e) {
 			simpleProps.put(CCConstants.CM_NAME, EduSharingNodeHelper.makeUniqueName((String)simpleProps.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID)));
-			NodeServiceFactory.getLocalService().updateNodeNative(nodeId, simpleProps);
+			NodeServiceFactory.getInstance().getLocalService().updateNodeNative(nodeId, simpleProps);
 		}
 		createChildobjects(nodeId, nodeProps);
 	}
@@ -468,13 +468,13 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		// do not auto create versions (otherwise the node will get several versions e.g. during binary handler or preview)
 		simpleProps.put(CCConstants.CCM_PROP_IO_CREATE_VERSION,false);
 		try {
-			newNodeId = NodeServiceFactory.getLocalService().createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId, type, association, simpleProps);
+			newNodeId = NodeServiceFactory.getInstance().getLocalService().createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId, type, association, simpleProps);
 		} catch (DuplicateChildNodeNameException e) {
 			simpleProps.put(CCConstants.CM_NAME, EduSharingNodeHelper.makeUniqueName((String)simpleProps.get(CCConstants.CM_NAME)));
-			newNodeId = NodeServiceFactory.getLocalService().createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId, type, association, simpleProps);
+			newNodeId = NodeServiceFactory.getInstance().getLocalService().createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId, type, association, simpleProps);
 		} catch (IntegrityException e) {
 			simpleProps.put(CCConstants.CM_NAME, EduSharingNodeHelper.makeUniqueName((String)simpleProps.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID)));
-			newNodeId = NodeServiceFactory.getLocalService().createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId, type, association, simpleProps);
+			newNodeId = NodeServiceFactory.getInstance().getLocalService().createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId, type, association, simpleProps);
 		}
 		if (aspects != null) {
 			for (String aspect : aspects) {
@@ -537,10 +537,6 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 
 	/**
 	 * checks if an repl object must be created or updated
-	 *
-	 * @param replId
-	 * @param timeStamp
-	 * @return
 	 */
 	public synchronized boolean mustBePersisted(NodeRef childId, String replId, String newTimeStamp, String oldTimeStamp) {
 

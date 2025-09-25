@@ -264,7 +264,7 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
 
     @Override
     public DynamicConfig setDynamicValue(String key, boolean readPublic, JSONObject object) throws Throwable {
-        if (!AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
+        if (!AuthorityServiceFactory.getInstance().getLocalService().isGlobalAdmin()) {
             throw new NotAnAdminException();
         }
         String folder = userEnvironmentTool.getEdu_SharingConfigFolder();

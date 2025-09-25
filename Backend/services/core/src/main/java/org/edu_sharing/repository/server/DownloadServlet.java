@@ -91,7 +91,7 @@ public class DownloadServlet extends SpringHttpServlet {
             String fileName, Mode mode) throws ServletException, InsufficientPermissionException {
         try {
             // allow signature based auth from connector to bypass the download/content access
-            NodeService nodeService = repositoryId == null ? NodeServiceFactory.getLocalService() : NodeServiceFactory.getNodeService(repositoryId);
+            NodeService nodeService = repositoryId == null ? NodeServiceFactory.getInstance().getLocalService() : NodeServiceFactory.getInstance().getService(repositoryId);
             logger.debug("Access tool: " + ContextManagementFilter.accessTool.get());
             if (repositoryId == null &&
                     !NodeServiceHelper.downloadAllowed(nodeId) &&
@@ -324,14 +324,7 @@ public class DownloadServlet extends SpringHttpServlet {
 		*/
 
 
-        ServletOutputStream op = resp.getOutputStream();
-
-        ApplicationContext appContext = AlfAppContextGate.getApplicationContext();
-
-        ApplicationInfo homeAppInfo = ApplicationInfoList.getHomeRepository();
-
-        NodeService nodeService = NodeServiceFactory.getLocalService();
-        PermissionService permissionService = PermissionServiceFactory.getLocalService();
+        NodeService nodeService = NodeServiceFactory.getInstance().getLocalService();
 
         File file = TempFileProvider.createTempFile("edu.", ".zip");
         FileOutputStream bufferOut = new FileOutputStream(file);

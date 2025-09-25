@@ -54,7 +54,7 @@ public class StreamDao {
 	public static void deleteEntry(RepositoryDao repoDao,String entryId) throws DAOException{
 		try {
 			StreamService service=StreamServiceFactory.getStreamService();
-			if(!AuthorityServiceFactory.getLocalService().isGlobalAdmin()  && !service.getEntry(entryId).author.equals(AuthenticationUtil.getFullyAuthenticatedUser())) {
+			if(!AuthorityServiceFactory.getInstance().getLocalService().isGlobalAdmin()  && !service.getEntry(entryId).author.equals(AuthenticationUtil.getFullyAuthenticatedUser())) {
 				throw new AccessDeniedException("No permissions to delete stream entry "+entryId);
 			}
 			// simply check if the given authority is valid (does not work for special groups)
@@ -67,7 +67,7 @@ public class StreamDao {
 	public static void updateStatus(RepositoryDao repoDao,String entryId,String authority,String status) throws DAOException{
 		try {
 			StreamService service=StreamServiceFactory.getStreamService();
-			if(!AuthorityServiceFactory.getLocalService().isGlobalAdmin()  && !service.getEntry(entryId).author.equals(AuthenticationUtil.getFullyAuthenticatedUser())) {
+			if(!AuthorityServiceFactory.getInstance().getLocalService().isGlobalAdmin()  && !service.getEntry(entryId).author.equals(AuthenticationUtil.getFullyAuthenticatedUser())) {
 				if(!AuthenticationUtil.getFullyAuthenticatedUser().equals(authority) || getStatusForEntry(entryId)==null)
 					throw new AccessDeniedException("No permissions to change status of authority "+authority+" for stream entry "+entryId);
 			}

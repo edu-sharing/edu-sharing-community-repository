@@ -46,7 +46,7 @@ public class MetadataHelper {
 	public static Collection<MetadataWidget> getWidgetsByNode(NodeRef node, boolean onlyPrimaryWidgets) throws Exception{
 		MetadataSet metadata = getMetadataset(node);
 		return metadata.getWidgetsByNode(
-				NodeServiceFactory.getLocalService().getType(node.getId()),
+				NodeServiceFactory.getInstance().getLocalService().getType(node.getId()),
 				Arrays.asList(NodeServiceHelper.getAspects(node)),
 				onlyPrimaryWidgets
 		);
@@ -55,7 +55,7 @@ public class MetadataHelper {
 		private static String getLocale() {
 		String locale="default";
 		try{
-			locale = new AuthenticationToolAPI().getCurrentLocale();
+			locale = AuthenticationToolAPI.getInstance().getCurrentLocale();
 		}catch(Throwable t){}
 		return locale;
 	}

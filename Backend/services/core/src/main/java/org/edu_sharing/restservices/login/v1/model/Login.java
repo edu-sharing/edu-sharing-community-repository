@@ -89,7 +89,7 @@ public class Login {
             statusCode = (isValidLogin) ? STATUS_CODE_OK : STATUS_CODE_INVALID_CREDENTIALS;
         }
 
-        org.edu_sharing.service.authority.AuthorityService service = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+        org.edu_sharing.service.authority.AuthorityService service = AuthorityServiceFactory.getInstance().getService(ApplicationInfoList.getHomeRepository().getAppId());
 
         if (isValidLogin) {
             try {
@@ -137,7 +137,7 @@ public class Login {
             }
 
             if (ltiSessionObject.getContextId() != null
-                    && NodeServiceFactory.getLocalService().exists("workspace", "SpacesStore", ltiSessionObject.getContextId())) {
+                    && NodeServiceFactory.getInstance().getLocalService().exists("workspace", "SpacesStore", ltiSessionObject.getContextId())) {
                 try {
                     Node node = NodeDao.getNode(RepositoryDao.getHomeRepository(), ltiSessionObject.getContextId()).asNode();
                     if (node.getAspects().contains("ccm:ltitool_node")) {

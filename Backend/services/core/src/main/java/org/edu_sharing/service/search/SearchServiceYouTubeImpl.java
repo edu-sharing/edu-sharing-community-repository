@@ -7,11 +7,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.SearchCriterias;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.edu_sharing.repository.server.appcontext.ApplicationInfoContextHolder;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
@@ -23,21 +25,14 @@ import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.ResourceId;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
 
+@Slf4j
+@Lazy
+@Service
 public class SearchServiceYouTubeImpl extends SearchServiceAdapter{
 	
-	Logger logger = Logger.getLogger(SearchServiceYouTubeImpl.class);
-	
-	String repositoryId = null;
-
-	String googleAPIKey = null;
-	
-	public SearchServiceYouTubeImpl(String appId) {
-		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
-		this.repositoryId = appInfo.getAppId();		
-		googleAPIKey = appInfo.getApiKey(); 
-	}
-
 	private SearchResultNodeRef searchInternal(SearchCriterias rc, String query, List<MdsQueryCriteria> criterias, SearchToken token)
 			throws Throwable {
 		
@@ -75,8 +70,9 @@ public class SearchServiceYouTubeImpl extends SearchServiceAdapter{
 			// for non-authenticated requests. See:
 			// https://console.developers.google.com/
 
-			// String apiKey = properties.getProperty("youtube.apikey");
-			search.setKey(googleAPIKey);
+            ApplicationInfo appInfo = ApplicationInfoContextHolder.getCurrentApplicationInfo();
+            // String apiKey = properties.getProperty("youtube.apikey");
+			search.setKey(appInfo.getApiKey());
 			search.setQ(queryTerm);
 
 			// Restrict the search results to only include videos. See:
@@ -122,10 +118,10 @@ public class SearchServiceYouTubeImpl extends SearchServiceAdapter{
 						// Confirm that the result represents a video.
 						// Otherwise, the item will not contain a video ID.
 						if (rId.getKind().equals("youtube#video")) {
-							Map<String, Object> esResult = NodeServiceYouTube.getPropsByVideoEntry(repositoryId,singleVideo);
+							Map<String, Object> esResult = NodeServiceYouTube.getPropsByVideoEntry(appInfo.getAppId(),singleVideo);
 							//resultData.put((String) esResult.get(CCConstants.SYS_PROP_NODE_UID), esResult);
 							
-							org.edu_sharing.service.model.NodeRef enr = new org.edu_sharing.service.model.NodeRefImpl(this.repositoryId, 
+							org.edu_sharing.service.model.NodeRef enr = new org.edu_sharing.service.model.NodeRefImpl(appInfo.getAppId(),
 									StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(),
 									StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), esResult);
 							nodeRefs.add(enr);
@@ -158,14 +154,17 @@ public class SearchServiceYouTubeImpl extends SearchServiceAdapter{
 	@Override
 	public SearchResultNodeRef search(MetadataSet mds, String query, Map<String, String[]> criterias,
 									  SearchToken searchToken) throws Throwable {
+        ApplicationInfo appInfo = ApplicationInfoContextHolder.getCurrentApplicationInfo();
+
 		SearchCriterias rc = new SearchCriterias();
 		rc.setMetadataSetId(mds.getId());
 		rc.setMetadataSetQuery(query);
-		rc.setRepositoryId(this.repositoryId);
+		rc.setRepositoryId(appInfo.getAppId());
 		
 		//recommend search
-		if(criterias == null || criterias.size() == 0) {
-			String searchword = ApplicationInfoList.getRepositoryInfoById(this.repositoryId).getRecommend_objects_query();
+		if(criterias == null || criterias.isEmpty()) {
+            criterias = new HashMap<>();
+			String searchword = ApplicationInfoList.getRepositoryInfoById(appInfo.getAppId()).getRecommend_objects_query();
 			if (searchword == null) {
 				searchword = "Mathematik";
 			}

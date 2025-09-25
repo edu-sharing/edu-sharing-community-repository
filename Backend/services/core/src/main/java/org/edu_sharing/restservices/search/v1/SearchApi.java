@@ -467,7 +467,7 @@ public class SearchApi {
 				throw new InvalidArgumentException("Number of properties must be equal to number of comparators");
 			}
 
-			SearchService localService = SearchServiceFactory.getLocalService();
+			SearchService localService = SearchServiceFactory.getInstance().getLocalService();
 			SearchResultNodeRef searchResultNodeRef = localService.searchByProperty(token, combineMode, property, value, comparator);
 
 			List<Node> data = NodeDao.transform(repoDao, searchResultNodeRef, filter, null).getNodes();
@@ -552,7 +552,7 @@ public class SearchApi {
 		try {
 
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			Set<SearchVCard> result = SearchServiceFactory.getSearchService(repoDao.getId()).searchContributors(searchWord, fields, contributorProperties, contributorKind);
+			Set<SearchVCard> result = SearchServiceFactory.getInstance().getService(repoDao.getId()).searchContributors(searchWord, fields, contributorProperties, contributorKind);
 			return Response.status(Response.Status.OK).entity(result).build();
 
 		} catch (Throwable t) {

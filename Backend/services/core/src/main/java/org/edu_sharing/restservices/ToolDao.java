@@ -31,7 +31,7 @@ public class ToolDao {
 	private String getToolFolder(String repositoryId) throws DAOException {
 		
 		RepositoryDao repoDao = RepositoryDao.getRepository(repositoryId);
-		NodeService nodeService = NodeServiceFactory.getNodeService(repoDao.getApplicationInfo().getAppId());
+		NodeService nodeService = NodeServiceFactory.getInstance().getService(repoDao.getApplicationInfo().getAppId());
 		String companyHomeId = nodeService.getCompanyHome();
 		String toolHomeFolder = nodeService.findNodeByName(companyHomeId, CCConstants.TOOL_HOMEFOLDER);
 		if(toolHomeFolder==null){
@@ -42,9 +42,9 @@ public class ToolDao {
 				public String doWork() throws Exception {
 					// TODO Auto-generated method stub
 					try {
-						NodeService nodeService = NodeServiceFactory.getNodeService(repoDao.getApplicationInfo().getAppId());
+						NodeService nodeService = NodeServiceFactory.getInstance().getService(repoDao.getApplicationInfo().getAppId());
 						String nodeId = nodeService.createNode(companyHomeId, CCConstants.CCM_TYPE_MAP, nodeService.getNameProperty( CCConstants.TOOL_HOMEFOLDER));
-						PermissionServiceFactory.getPermissionService(null).setPermissions(nodeId, new ArrayList<>(), false, null,null, false);
+						PermissionServiceFactory.getInstance().getService(null).setPermissions(nodeId, new ArrayList<>(), false, null,null, false);
 						return nodeId;
 		}catch(Throwable e) {
 			throw new Exception(e);
@@ -132,7 +132,7 @@ public class ToolDao {
 	public List<Node> getAllToolDefinitions(String repositoryId) throws DAOException{
 		
 		RepositoryDao repoDao = RepositoryDao.getRepository(repositoryId);
-		NodeService nodeService = NodeServiceFactory.getNodeService(repoDao.getApplicationInfo().getAppId());
+		NodeService nodeService = NodeServiceFactory.getInstance().getService(repoDao.getApplicationInfo().getAppId());
 		
 		String toolFolderId = getToolFolder(repositoryId);
 		List<ChildAssociationRef> children = nodeService.getChildrenChildAssociationRef(toolFolderId);
@@ -161,7 +161,7 @@ public class ToolDao {
 			throw new DAOException(new Exception("toolObject must have a tool_object aspect"),toolObject) ;
 		}
 		
-		NodeService nodeService = NodeServiceFactory.getNodeService(repository);
+		NodeService nodeService = NodeServiceFactory.getInstance().getService(repository);
 		//nodeService.get
 		String[] instanceRef = node.getProperties().get(CCConstants.CCM_PROP_TOOL_OBJECT_TOOLINSTANCEREF);
 		return null;

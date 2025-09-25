@@ -37,6 +37,7 @@ import org.edu_sharing.service.authentication.*;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.spring.security.openid.SilentLoginModeRedirect;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import java.util.*;
@@ -49,6 +50,9 @@ import java.util.*;
 public class LoginApi {
 
     Logger logger = Logger.getLogger(LoginApi.class);
+
+    @Autowired
+    private AuthenticationToolAPI authTool;
 
     @GET
     @Path("/validateSession")
@@ -64,7 +68,6 @@ public class LoginApi {
     public Response login(@Context HttpServletRequest req) {
 
 
-        AuthenticationToolAPI authTool = new AuthenticationToolAPI();
         boolean authenticated = (authTool.validateAuthentication(req.getSession()) == null) ? false : true;
         String personActiveStatus = null;
         if (!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
@@ -74,13 +77,13 @@ public class LoginApi {
         String status = null;
         if (authenticated && personActiveStatus != null && !personActiveStatus.trim().equals("")) {
             String username = (String) req.getSession().getAttribute(CCConstants.AUTH_USERNAME);
-            NodeRef authorityNodeRef = AuthorityServiceFactory.getLocalService().getAuthorityNodeRef(username);
+            NodeRef authorityNodeRef = AuthorityServiceFactory.getInstance().getLocalService().getAuthorityNodeRef(username);
 
-            String personStatus = NodeServiceFactory.getLocalService().getProperty(authorityNodeRef.getStoreRef().getProtocol(),
+            String personStatus = NodeServiceFactory.getInstance().getLocalService().getProperty(authorityNodeRef.getStoreRef().getProtocol(),
                     authorityNodeRef.getStoreRef().getIdentifier(),
                     authorityNodeRef.getId(), CCConstants.CM_PROP_PERSON_ESPERSONSTATUS);
             // ignore the active status for admins to prevent a "lock out" from the system
-            boolean allowAdminAccess = AuthorityServiceFactory.getLocalService().isGlobalAdmin() && personStatus == null;
+            boolean allowAdminAccess = AuthorityServiceFactory.getInstance().getLocalService().isGlobalAdmin() && personStatus == null;
             if (!personActiveStatus.equals(personStatus) && !allowAdminAccess) {
                 authenticated = false;
                 authTool.logoutWithoutSecurityContext(authTool.getTicketFromSession(req.getSession()));
@@ -149,7 +152,6 @@ public class LoginApi {
 
     public Response loginToScope(@Parameter(description = "credentials, example: test,test", required = true) LoginCredentials credentials,
                                  @Context HttpServletRequest req) {
-        AuthenticationToolAPI authTool = new AuthenticationToolAPI();
         ScopeAuthenticationService service = ScopeAuthenticationServiceFactory.getScopeAuthenticationService();
 
         Map<String, String> auth = authTool.validateAuthentication(req.getSession());
@@ -216,7 +218,6 @@ public class LoginApi {
             @Parameter(description = "scope", required = true) @QueryParam("scope") String scope,
             @Context HttpServletRequest req) {
         try {
-            AuthenticationToolAPI authTool = new AuthenticationToolAPI();
             ScopeAuthenticationService service = ScopeAuthenticationServiceFactory.getScopeAuthenticationService();
             boolean access = service.checkScope(authTool.getCurrentUser(), scope);
             return Response.ok(new ScopeAccess(access)).build();
@@ -237,7 +238,7 @@ public class LoginApi {
 
     public Response logout(@Context HttpServletRequest req) {
         try {
-            new AuthenticationToolAPI().logout((String) req.getSession().getAttribute(CCConstants.AUTH_TICKET));
+            authTool.logout((String) req.getSession().getAttribute(CCConstants.AUTH_TICKET));
             req.getSession().invalidate();
             return Response.ok().build();
         } catch (Throwable t) {

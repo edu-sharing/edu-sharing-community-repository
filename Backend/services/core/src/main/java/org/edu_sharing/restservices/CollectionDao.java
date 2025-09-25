@@ -193,7 +193,7 @@ public class CollectionDao {
 						scope != null ? scope.toString() : null, sortDefinition, skipCount, maxItems
 				);
 				BoolQuery readPermissionsQuery = null;
-				SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getId());
+				SearchService searchService = SearchServiceFactory.getInstance().getService(repoDao.getId());
 				if(searchService instanceof SearchServiceElastic) {
 					// improve performance by caching the relatively expensive query
 					readPermissionsQuery = ((SearchServiceElastic)searchService).getReadPermissionsQuery(new BoolQuery.Builder()).build();
@@ -313,7 +313,7 @@ public class CollectionDao {
 		try {
 			List<NodeProposal> proposals = new ArrayList<>();
 
-			for(AssociationRef ref : CollectionServiceFactory.getCollectionService(repoDao.getApplicationInfo().getAppId()).
+			for(AssociationRef ref : CollectionServiceFactory.getInstance().getService(repoDao.getApplicationInfo().getAppId()).
 					getChildrenProposal(parentId)) {
 				NodeProposal proposal = new NodeProposal();
 				String status = NodeServiceHelper.getProperty(ref.getSourceRef(), CCConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS);
@@ -351,7 +351,7 @@ public class CollectionDao {
 	public static synchronized void proposeForCollection(RepositoryDao repoDao, String collectionId, String nodeId, String sourceRepositoryId) throws DAOException {
 		try {
 
-			CollectionServiceFactory.getCollectionService(repoDao.getApplicationInfo().getAppId()).
+			CollectionServiceFactory.getInstance().getService(repoDao.getApplicationInfo().getAppId()).
 					proposeForCollection(collectionId,nodeId,sourceRepositoryId);
 		} catch (Throwable t) {
 			throw DAOException.mapping(t);
@@ -361,7 +361,7 @@ public class CollectionDao {
 	public static NodeDao addToCollection(RepositoryDao repoDao, String collectionId, String nodeId, String sourceRepositoryId, boolean allowDuplicate) throws DAOException {
 		try {
 
-			String resultId=CollectionServiceFactory.getCollectionService(repoDao.getApplicationInfo().getAppId()).
+			String resultId=CollectionServiceFactory.getInstance().getService(repoDao.getApplicationInfo().getAppId()).
 					addToCollection(collectionId,nodeId,sourceRepositoryId,allowDuplicate);
 			return NodeDao.getNode(repoDao,resultId,Filter.createShowAllFilter());
 		} catch (Throwable t) {

@@ -58,7 +58,7 @@ public class BulkSetTemporaryPermissionsJob extends AbstractJobMapAnnotationPara
 	public void executeInternal(JobExecutionContext context) throws JobExecutionException {
 
 		AuthenticationUtil.runAsSystem(() -> {
-			PermissionService permissionService = PermissionServiceFactory.getLocalService();
+			PermissionService permissionService = PermissionServiceFactory.getInstance().getLocalService();
 			PersistentHandlerEdusharing phe;
 			try {
 				phe = new PersistentHandlerEdusharing(this, null, false);

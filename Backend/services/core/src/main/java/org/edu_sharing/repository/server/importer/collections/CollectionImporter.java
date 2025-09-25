@@ -111,8 +111,8 @@ public class CollectionImporter {
     private String createCollection(String parentId, Collections.Collection collection) throws Throwable {
     	String collectionID = null;
 		try {
-			CollectionService collectionService=CollectionServiceFactory.getLocalService();
-			NodeService nodeService=NodeServiceFactory.getLocalService();
+			CollectionService collectionService=CollectionServiceFactory.getInstance().getLocalService();
+			NodeService nodeService=NodeServiceFactory.getInstance().getLocalService();
 			
 			// set main attributes and create collection
 			Collection collectionObj = new Collection();

@@ -31,7 +31,7 @@ public abstract class ScopeAuthenticationServiceAbstract implements ScopeAuthent
 				authService.authenticate(username, password.toCharArray());
 				//invalidate guest session if login was valid
 				Context.getCurrentInstance().getRequest().getSession(true).invalidate();
-				AuthenticationToolAPI authToolApi = new AuthenticationToolAPI();
+				AuthenticationToolAPI authToolApi = AuthenticationToolAPI.getInstance();
 				HttpSession session = Context.getCurrentInstance().getRequest().getSession(true);
 				authToolApi.storeAuthInfoInSession(username, authService.getCurrentTicket(), 
 						CCConstants.AUTH_TYPE_DEFAULT, session);

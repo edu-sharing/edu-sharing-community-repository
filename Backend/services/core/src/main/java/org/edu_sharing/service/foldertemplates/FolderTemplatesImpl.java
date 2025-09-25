@@ -47,7 +47,7 @@ public class FolderTemplatesImpl implements FolderTemplates {
 	
 	LoggingErrorHandler loggingErrorHandler = new LoggingErrorHandler();
 	
-	org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(ApplicationInfoList.getHomeRepository().getAppId());
+	org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getInstance().getService(ApplicationInfoList.getHomeRepository().getAppId());
 
 	public FolderTemplatesImpl(MCAlfrescoBaseClient repoClient) {
 		this.repoClient = repoClient;
@@ -75,7 +75,7 @@ public class FolderTemplatesImpl implements FolderTemplates {
 		}
 		mappedGroup = mappedGroup.replace("GROUP_", "");
 
-		String[] member = AuthorityServiceFactory.getLocalService().getMembershipsOfGroup(mappedGroup);
+		String[] member = AuthorityServiceFactory.getInstance().getLocalService().getMembershipsOfGroup(mappedGroup);
 
 		String user = (String) Context.getCurrentInstance().getRequest().getSession()
 				.getAttribute(CCConstants.AUTH_USERNAME);
@@ -138,7 +138,7 @@ public class FolderTemplatesImpl implements FolderTemplates {
 	 * @author hupfer
 	 */
 	private boolean setEduGroup(String eduGroupname) throws Throwable {
-		this.eduGroup = AuthorityServiceFactory.getAuthorityService((ApplicationInfoList.getHomeRepository().getAppId())).getEduGroup(eduGroupname);
+		this.eduGroup = AuthorityServiceFactory.getInstance().getService((ApplicationInfoList.getHomeRepository().getAppId())).getEduGroup(eduGroupname);
 		if (this.eduGroup == null || this.eduGroup.getGroupId().isEmpty()) {
 			logger.error("no eduGroup found");
 			loggingErrorHandler.getMessage().add("no eduGroup found");

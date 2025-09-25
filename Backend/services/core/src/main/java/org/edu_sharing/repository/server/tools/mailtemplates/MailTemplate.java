@@ -78,7 +78,7 @@ public class MailTemplate {
 		} catch(Throwable t) {
 			context = Context.getGlobalContext();
 		}
-		String currentLocale = mapLocale(new AuthenticationToolAPI().getCurrentLocale());
+		String currentLocale = mapLocale(AuthenticationToolAPI.getInstance().getCurrentLocale());
 		mail.sendMailHtml(
 				context,
 				receiver,
@@ -102,7 +102,7 @@ public class MailTemplate {
 		} catch(Throwable t) {
 			context = Context.getGlobalContext();
 		}
-		String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
+		String currentLocale = AuthenticationToolAPI.getInstance().getCurrentLocale();
 		mail.sendMailHtml(
 				context,
 				senderName,
@@ -114,7 +114,7 @@ public class MailTemplate {
 	}
 
 	public static void addContentLinks(ApplicationInfo appInfo,String nodeId, Map<String, String> target, String keyName) throws Throwable{
-		NodeService nodeService=NodeServiceFactory.getNodeService(appInfo.getAppId());
+		NodeService nodeService=NodeServiceFactory.getInstance().getService(appInfo.getAppId());
 		String mime=MimeTypesV2.getMimeType(
 				nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId),
 				nodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId)
@@ -137,7 +137,7 @@ public class MailTemplate {
 		String fullName = null;
 		String firstName = null, lastName = null, email = null;
 
-		String user = new AuthenticationToolAPI().getCurrentUser();
+		String user = AuthenticationToolAPI.getInstance().getCurrentUser();
 		NodeRef nodeRef = AuthorityServiceHelper.getAuthorityNodeRef(authorityName);
 		if(nodeRef != null) {
 			firstName = (String) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CM_PROP_PERSON_FIRSTNAME);

@@ -6,8 +6,6 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
-import java.util.Map;
-
 public class RemoveNodeJob extends AbstractJob {
 
     @Override
@@ -22,9 +20,9 @@ public class RemoveNodeJob extends AbstractJob {
             return;
         }
         AuthenticationUtil.runAsSystem(()->{
-            String parent=NodeServiceFactory.getLocalService().getPrimaryParent(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),id);
+            String parent=NodeServiceFactory.getInstance().getLocalService().getPrimaryParent(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),id);
             logger.info("Removing node "+id+" from parent "+parent);
-            NodeServiceFactory.getLocalService().removeNode(id,parent);
+            NodeServiceFactory.getInstance().getLocalService().removeNode(id,parent);
             logger.info("Removing done");
             return null;
         });

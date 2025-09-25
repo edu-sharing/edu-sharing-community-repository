@@ -57,6 +57,6 @@ public class AuthorityServiceHelper {
     }
 
     public static NodeRef getAuthorityNodeRef(String user) {
-        return AuthorityServiceFactory.getLocalService().getAuthorityNodeRef(user);
+        return AuthorityServiceFactory.getInstance().getLocalService().getAuthorityNodeRef(user);
     }
 }

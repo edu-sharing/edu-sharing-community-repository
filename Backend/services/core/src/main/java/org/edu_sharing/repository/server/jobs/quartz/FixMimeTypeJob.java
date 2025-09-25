@@ -14,7 +14,7 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
-import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -38,11 +38,12 @@ public class FixMimeTypeJob extends AbstractJobMapAnnotationParams {
     Boolean execute;
 
 
-    @Autowired NodeService nodeService;
-    @Autowired ContentService contentService;
-    @Autowired BehaviourFilter policyBehaviourFilter;
-    @Autowired RepositoryCache repositoryCache;
-    @Autowired RetryingTransactionHelper retryingTransactionHelper;
+    @Autowired private NodeService nodeService;
+    @Autowired private ContentService contentService;
+    @Autowired private BehaviourFilter policyBehaviourFilter;
+    @Autowired private RepositoryCache repositoryCache;
+    @Autowired private RetryingTransactionHelper retryingTransactionHelper;
+    @Autowired private SearchService searchService;
 
 
     @Override
@@ -67,7 +68,6 @@ public class FixMimeTypeJob extends AbstractJobMapAnnotationParams {
             searchToken.setFrom(0);
             searchToken.setMaxResult(Integer.MAX_VALUE);
             searchToken.setElasticQuery(QueryBuilders.wrapper().query(new String(Base64.getEncoder().encode(filter.getBytes()))).build());
-            org.edu_sharing.service.search.SearchService searchService = SearchServiceFactory.getLocalService();
             SearchResultNodeRef search = searchService.search(searchToken);
             Set<NodeRef> collect = search.getData().stream()
                     .map(n -> new NodeRef(new StoreRef(n.getStoreProtocol(), n.getStoreId()), n.getNodeId()))

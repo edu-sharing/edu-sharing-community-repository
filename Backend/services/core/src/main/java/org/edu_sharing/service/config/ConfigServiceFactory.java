@@ -103,14 +103,14 @@ public class ConfigServiceFactory {
 		return null;
 	}
 	public static List<KeyValuePair> getLanguageData(List<Language> languages) {
-		String language=new AuthenticationToolAPI().getCurrentLanguage();
+		String language=AuthenticationToolAPI.getInstance().getCurrentLanguage();
 		return getLanguageData(languages,language);
 	}
 	public static List<KeyValuePair> getLanguageData(String language) throws Exception {
 		return getLanguageData(getCurrentConfig().language,language);
 	}
 	public static List<KeyValuePair> getLanguageData() throws Exception {
-		String language=new AuthenticationToolAPI().getCurrentLanguage();
+		String language=AuthenticationToolAPI.getInstance().getCurrentLanguage();
 		return getLanguageData(language);
 	}
 

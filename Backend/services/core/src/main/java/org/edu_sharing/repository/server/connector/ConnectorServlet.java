@@ -71,7 +71,7 @@ public class ConnectorServlet extends SpringHttpServlet {
 		String nodeId = req.getParameter("nodeId");
 		
 		
-		Map<String,String> auth = new AuthenticationToolAPI().validateAuthentication(req.getSession());
+		Map<String,String> auth = AuthenticationToolAPI.getInstance().validateAuthentication(req.getSession());
 		
 		if(auth == null){
 			resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
@@ -87,8 +87,8 @@ public class ConnectorServlet extends SpringHttpServlet {
 		NodeRef nodeRefOriginal = nodeRef;
 		try{
 			MCAlfrescoBaseClient repoClient = null;
-			NodeService nodeService = NodeServiceFactory.getLocalService();
-			PermissionService permissionService = PermissionServiceFactory.getLocalService();
+			NodeService nodeService = NodeServiceFactory.getInstance().getLocalService();
+			PermissionService permissionService = PermissionServiceFactory.getInstance().getLocalService();
 			// if collection ref, use original node
 			isCollection = NodeServiceHelper.hasAspect(nodeRef, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
 			if(isCollection){
@@ -118,7 +118,7 @@ public class ConnectorServlet extends SpringHttpServlet {
 			Optional<SimpleConnector> simpleConnector = ConnectorServiceFactory.getConnectorList().getSimpleConnectors().stream().filter(c -> c.getId().equals(connectorId)).findAny();
 			if(simpleConnector.isPresent()) {
 				HashMap<String, Serializable> properties = handleSimpleConnector(convertParameters(req), simpleConnector.orElse(null), nodeRefOriginal);
-				NodeServiceFactory.getLocalService().updateNodeNative(nodeRefOriginal.getId(), properties);
+				NodeServiceFactory.getInstance().getLocalService().updateNodeNative(nodeRefOriginal.getId(), properties);
 				resp.sendRedirect((String) properties.get(CCConstants.CCM_PROP_IO_WWWURL));
 				// @TODO: redirect resp to the generated element/uri
 				return;
@@ -199,7 +199,7 @@ public class ConnectorServlet extends SpringHttpServlet {
 			jsonObject.put("ts", System.currentTimeMillis() / 1000);
             jsonObject.put("sessionId", req.getSession().getId());
             try{
-                jsonObject.put("language",new AuthenticationToolAPI().getCurrentLanguage());
+                jsonObject.put("language",AuthenticationToolAPI.getInstance().getCurrentLanguage());
             }catch(Throwable t){}
             jsonObject.put("ticket", req.getSession().getAttribute(CCConstants.AUTH_TICKET));
 			jsonObject.put("api_url",homeRepo.getClientBaseUrl() + "/rest");

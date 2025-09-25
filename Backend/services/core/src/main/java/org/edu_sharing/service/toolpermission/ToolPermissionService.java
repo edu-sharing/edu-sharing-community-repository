@@ -50,7 +50,7 @@ public class ToolPermissionService extends ToolPermissionBaseService {
 	}
 
 	public boolean hasToolPermissionForConnector(String connectorId){
-		AuthenticationToolAPI authTool = new AuthenticationToolAPI();
+		AuthenticationToolAPI authTool = AuthenticationToolAPI.getInstance();
 		String scope=authTool.getScope();
 		if(scope==null)
 			scope="";

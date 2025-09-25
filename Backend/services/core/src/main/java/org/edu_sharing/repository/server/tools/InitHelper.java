@@ -28,7 +28,7 @@ public class InitHelper {
     public static void initGroups() throws Exception {
         List<? extends Config> createGroups = LightbendConfigLoader.get().getConfigList("repository.groups.create");
         if (createGroups != null && !createGroups.isEmpty()) {
-            AuthorityService authorityService = AuthorityServiceFactory.getLocalService();
+            AuthorityService authorityService = AuthorityServiceFactory.getInstance().getLocalService();
             for (Config group : createGroups) {
                 String id = group.getString("id");
                 if (!id.startsWith(PermissionService.GROUP_PREFIX)) {
@@ -135,6 +135,6 @@ public class InitHelper {
 
     public static void initProxyUser() {
         //init proxyuser
-        ((AuthorityServiceImpl) AuthorityServiceFactory.getLocalService()).createProxyUser();
+        ((AuthorityServiceImpl) AuthorityServiceFactory.getInstance().getLocalService()).createProxyUser();
     }
 }

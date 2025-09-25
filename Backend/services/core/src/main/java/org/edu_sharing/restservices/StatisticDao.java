@@ -3,6 +3,7 @@ package org.edu_sharing.restservices;
 import lombok.NonNull;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.metadataset.v2.MetadataKey;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
@@ -26,7 +27,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class StatisticDao {
-    private static Map<String,String> SUB_GROUP_MAPPING=new HashMap<>();
+    private static final Map<String,String> SUB_GROUP_MAPPING=new HashMap<>();
     static{
         SUB_GROUP_MAPPING.put("subject",null);
         SUB_GROUP_MAPPING.put("keywords",CCConstants.LOM_PROP_GENERAL_KEYWORD);
@@ -48,8 +49,8 @@ public class StatisticDao {
 
 			List<String> facets = subGroup.stream()
 					.filter(f -> SUB_GROUP_MAPPING.get(f) != null)
-					.map(sg -> SUB_GROUP_MAPPING.get(sg))
-					.map(sg -> CCConstants.getValidLocalName(sg))
+					.map(SUB_GROUP_MAPPING::get)
+					.map(CCConstants::getValidLocalName)
 					.collect(Collectors.toList());
 
 			StatisticsGlobal statistics = new StatisticsGlobal();
@@ -69,13 +70,18 @@ public class StatisticDao {
 			statistics.setOverall(overall);
 			List<StatisticsGlobal.StatisticsKeyGroup> groups = new ArrayList<>();
 			statistics.setGroups(groups);
-			mdsLicenseWidget.getValues().stream().map(v -> v.getKey()).collect(Collectors.toList())
+			mdsLicenseWidget.getValues().stream().map(MetadataKey::getKey).toList()
 					.forEach(v -> {
 						SearchResultNodeRef srGroup = search(Map.of(mdsProp, new String[]{v}), facets, mds);
 						if (srGroup.getNodeCount() > 0) {
 							StatisticsGlobal.StatisticsKeyGroup g = new StatisticsGlobal.StatisticsKeyGroup();
 							g.key = v;
-							g.displayName = mdsLicenseWidget.getValues().stream().filter(vs -> vs.getKey().equals(v)).findFirst().map(m -> m.getCaption()).orElse(v);//I18nAngular.getTranslationAngular("common", "LICENSE." + v);
+							g.displayName = mdsLicenseWidget.getValues()
+                                    .stream()
+                                    .filter(vs -> vs.getKey().equals(v))
+                                    .findFirst()
+                                    .map(MetadataKey::getCaption)
+                                    .orElse(v);//I18nAngular.getTranslationAngular("common", "LICENSE." + v);
 							g.count = srGroup.getNodeCount();
 							g.subGroups = getFacets(srGroup,subGroup);
 							groups.add(g);
@@ -88,10 +94,10 @@ public class StatisticDao {
 		}
 	}
 
-    private static StatisticsGlobal.StatisticsUser getUser() throws Exception {
+    private static StatisticsGlobal.StatisticsUser getUser() {
         StatisticsGlobal.StatisticsUser user = new StatisticsGlobal.StatisticsUser();
         AuthenticationUtil.runAsSystem(()-> {
-            user.count = SearchServiceFactory.getLocalService().searchUsers("*", true, 0, 0, new SortDefinition(), null).getTotalCount();
+            user.count = SearchServiceFactory.getInstance().getLocalService().searchUsers("*", true, 0, 0, new SortDefinition(), null).getTotalCount();
             return null;
         });
         return user;
@@ -110,7 +116,7 @@ public class StatisticDao {
 				List<StatisticsGlobal.StatisticsGroup.StatisticsSubGroup.SubGroupItem> subGroups = new ArrayList<>();
 				if(userFacet.equals("fileFormat")){
 					Map<String, Integer> countsSum=new HashMap<>();
-					facet.getValues().stream().forEach(v -> {
+					facet.getValues().forEach(v -> {
 						String mappedMime=MimeTypesV2.getTypeFromMimetype(v.getValue());
 						if(countsSum.containsKey(mappedMime)) {
 							countsSum.put(mappedMime, countsSum.get(mappedMime) + v.getCount());
@@ -119,11 +125,9 @@ public class StatisticDao {
 						}
 					});
 					countsSum.remove("file");
-					countsSum.entrySet().stream().forEach(e -> {
-						subGroups.add(new StatisticsGlobal.StatisticsGroup.StatisticsSubGroup.SubGroupItem(e.getKey(),I18nAngular.getTranslationAngular("common","MEDIATYPE."+e.getKey()), e.getValue()));
-					});
+					countsSum.forEach((key, value) -> subGroups.add(new StatisticsGlobal.StatisticsGroup.StatisticsSubGroup.SubGroupItem(key, I18nAngular.getTranslationAngular("common", "MEDIATYPE." + key), value)));
 				}else{
-					facet.getValues().stream().forEach(v -> {
+					facet.getValues().forEach(v -> {
 						subGroups.add(new StatisticsGlobal.StatisticsGroup.StatisticsSubGroup.SubGroupItem(v.getValue(), v.getCount()));
 					});
 				}
@@ -176,7 +180,7 @@ public class StatisticDao {
 
 	static SearchResultNodeRef search(Map<String,String[]> criterias, List<String> facets, MetadataSet mds) {
 		try {
-			SearchService localService = SearchServiceFactory.getLocalService();
+			SearchService localService = SearchServiceFactory.getInstance().getLocalService();
 
 			SearchToken token = new SearchToken();
 			token.setFacets(facets);

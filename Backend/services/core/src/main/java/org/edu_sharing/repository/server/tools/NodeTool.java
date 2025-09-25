@@ -19,12 +19,12 @@ public class NodeTool {
 
         if (!path.isEmpty()) {
             String name = path.get(0);
-            NodeRef child = NodeServiceFactory.getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME, name);
+            NodeRef child = NodeServiceFactory.getInstance().getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME, name);
 
             if (child == null) {
                 Map<String, Serializable> _props = new HashMap<>();
                 _props.put(CCConstants.CM_NAME, name);
-                parentId =  NodeServiceFactory.getLocalService().createNodeBasic(parentId, CCConstants.CCM_TYPE_MAP, _props);
+                parentId =  NodeServiceFactory.getInstance().getLocalService().createNodeBasic(parentId, CCConstants.CCM_TYPE_MAP, _props);
             } else {
                 parentId = child.getId();
             }

@@ -96,9 +96,9 @@ public class IamApi {
                     ? sortProperties.stream().map(p -> CCConstants.getValidGlobalName(p) == null ? "cm:"+p : p).collect(Collectors.toList())
                     : sortProperties;
 
-            SearchResult<String> search = SearchServiceFactory.getSearchService(repoDao.getId()).searchUsers(
+            SearchResult<String> search = SearchServiceFactory.getInstance().getService(repoDao.getId()).searchUsers(
                     pattern,
-                    global == null ? true : global,
+                    global == null || global,
                     skipCount != null ? skipCount : 0,
                     maxItems != null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS,
                     new SortDefinition(sortProperties, sortAscending),
@@ -309,7 +309,7 @@ public class IamApi {
             @Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue = "-me-")) @PathParam("person") String person,
             @Context HttpServletRequest req) {
         try {
-            org.edu_sharing.service.authority.AuthorityService service = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+            org.edu_sharing.service.authority.AuthorityService service = AuthorityServiceFactory.getInstance().getService(ApplicationInfoList.getHomeRepository().getAppId());
             if (service.isGuest())
                 throw new Exception("Not allowed for guest user");
             RepositoryDao repoDao = RepositoryDao.getRepository(repository);
@@ -343,7 +343,7 @@ public class IamApi {
             @Parameter(description = "preferences (json string)", required = true, schema = @Schema(defaultValue = "-me-")) String content,
             @Context HttpServletRequest req) {
         try {
-            org.edu_sharing.service.authority.AuthorityService service = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+            org.edu_sharing.service.authority.AuthorityService service = AuthorityServiceFactory.getInstance().getService(ApplicationInfoList.getHomeRepository().getAppId());
             if (service.isGuest())
                 throw new Exception("Not allowed for guest user");
             RepositoryDao repoDao = RepositoryDao.getRepository(repository);
@@ -374,7 +374,7 @@ public class IamApi {
             @Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue = "-me-")) @PathParam("person") String person,
             @Context HttpServletRequest req) {
         try {
-            org.edu_sharing.service.authority.AuthorityService service = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+            org.edu_sharing.service.authority.AuthorityService service = AuthorityServiceFactory.getInstance().getService(ApplicationInfoList.getHomeRepository().getAppId());
             if (service.isGuest())
                 throw new Exception("Not allowed for guest user");
             RepositoryDao repoDao = RepositoryDao.getRepository(repository);
@@ -407,7 +407,7 @@ public class IamApi {
             @Parameter(description = "ProfileSetting Object", required = true) ProfileSettings profileSettings,
             @Context HttpServletRequest req) {
         try {
-            org.edu_sharing.service.authority.AuthorityService service = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+            org.edu_sharing.service.authority.AuthorityService service = AuthorityServiceFactory.getInstance().getService(ApplicationInfoList.getHomeRepository().getAppId());
             if (service.isGuest())
                 throw new Exception("Not allowed for guest user");
             RepositoryDao repoDao = RepositoryDao.getRepository(repository);
@@ -1029,7 +1029,7 @@ public class IamApi {
                 props.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD), signupMethod);
             }
             RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-            SearchResult<String> search = SearchServiceFactory.getSearchService(repoDao.getId()).findAuthorities(
+            SearchResult<String> search = SearchServiceFactory.getInstance().getService(repoDao.getId()).findAuthorities(
                     AuthorityType.GROUP,
                     pattern,
                     global == null ? true : global,
@@ -1425,7 +1425,7 @@ public class IamApi {
 
             RepositoryDao repoDao = RepositoryDao.getRepository(repository);
             GroupDao.getGroup(repoDao, group).checkAdminAccess();
-            SearchResult<String> search = SearchServiceFactory.getSearchService(repoDao.getId()).searchGroupMembers(
+            SearchResult<String> search = SearchServiceFactory.getInstance().getService(repoDao.getId()).searchGroupMembers(
                     group,
                     pattern,
                     authorityType,
@@ -1580,7 +1580,7 @@ public class IamApi {
                 props.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD), signupMethod);
             }
             RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-            SearchResult<String> search = SearchServiceFactory.getSearchService(repoDao.getId()).findAuthorities(
+            SearchResult<String> search = SearchServiceFactory.getInstance().getService(repoDao.getId()).findAuthorities(
                     null,
                     pattern,
                     global == null ? true : global,
@@ -1631,7 +1631,7 @@ public class IamApi {
 
         try {
             RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-            List<String> recent = PermissionServiceFactory.getPermissionService(repoDao.getId()).getRecentlyInvited();
+            List<String> recent = PermissionServiceFactory.getInstance().getService(repoDao.getId()).getRecentlyInvited();
             List<Authority> result = new ArrayList<>();
             for (String user : recent) {
                 result.add(getUserOrGroup(repoDao, user));

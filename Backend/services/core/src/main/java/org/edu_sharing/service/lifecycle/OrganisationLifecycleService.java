@@ -159,7 +159,7 @@ public class OrganisationLifecycleService {
                     allNodeRefs = allNodeRefs.stream().filter(nodeRef ->
                             !(
                                     !nodeService.hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION))
-                                    && nodeService.getPath(nodeRef).toPrefixString(serviceRegistry.getNamespaceService()).contains(collectionServiceConfig.getPath())
+                                    && nodeService.getPath(nodeRef).toPrefixString(serviceRegistry.getNamespaceService()).contains(collectionServiceConfig.path())
                             )
                     ).collect(Collectors.toList());
                 }

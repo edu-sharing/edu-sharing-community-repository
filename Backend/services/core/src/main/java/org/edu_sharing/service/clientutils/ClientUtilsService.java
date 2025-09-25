@@ -154,7 +154,7 @@ public class ClientUtilsService {
 	}
 
 	private static void addDuplicateNodes(String url, WebsiteInformation info) throws DAOException {
-		SearchService searchService = SearchServiceFactory.getLocalService();
+		SearchService searchService = SearchServiceFactory.getInstance().getLocalService();
 		if(!(searchService instanceof SearchServiceElastic)) {
 			return;
 		}

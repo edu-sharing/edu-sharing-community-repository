@@ -192,7 +192,7 @@ public class ScopeUserHomeServiceImpl implements ScopeUserHomeService{
 
 	@Override
 	public EduGroup getOrCreateScopedEduGroup(String authority, String scope){
-		AuthorityService authorityService = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+		AuthorityService authorityService = AuthorityServiceFactory.getInstance().getService(ApplicationInfoList.getHomeRepository().getAppId());
 		EduGroup check = authorityService.getEduGroup(authority + "_" + scope);
 		if(check == null) {
 			EduGroup eduGroup = authorityService.getEduGroup(authority);
@@ -210,7 +210,7 @@ public class ScopeUserHomeServiceImpl implements ScopeUserHomeService{
 	
 	public void manageEduGroupFolders(String userName, String scope, NodeRef userHome ){
 		
-		AuthorityService authorityService = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+		AuthorityService authorityService = AuthorityServiceFactory.getInstance().getService(ApplicationInfoList.getHomeRepository().getAppId());
 		
 		
 		if(userHome != null){

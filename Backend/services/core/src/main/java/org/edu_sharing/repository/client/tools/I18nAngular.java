@@ -21,11 +21,11 @@ public class I18nAngular {
     public static final String GENDER_SEPARATOR = "*";
     public static Logger logger=Logger.getLogger(I18nAngular.class);
     public static String getTranslationAngular(String scope,String key){
-        return getTranslationAngular(scope,key,new AuthenticationToolAPI().getCurrentAngularLanguage());
+        return getTranslationAngular(scope,key,AuthenticationToolAPI.getInstance().getCurrentAngularLanguage());
     }
 
     public static JSONObject getLanguageStrings() throws Exception{
-        String language=new AuthenticationToolAPI().getCurrentAngularLanguage();
+        String language=AuthenticationToolAPI.getInstance().getCurrentAngularLanguage();
         ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
         File[] dirs = new File(context.getRealPath("/assets/i18n/")).listFiles(File::isDirectory);
         JSONObject result=new JSONObject();

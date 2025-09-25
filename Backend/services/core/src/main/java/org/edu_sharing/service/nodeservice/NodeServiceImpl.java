@@ -1,29 +1,28 @@
 package org.edu_sharing.service.nodeservice;
 
 import com.typesafe.config.Config;
-import lombok.Setter;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
-import org.alfresco.service.ServiceRegistry;
+import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AccessStatus;
-import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.security.OwnableService;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.cmr.version.VersionService;
-import org.alfresco.service.namespace.QName;
-import org.alfresco.service.namespace.QNamePattern;
-import org.alfresco.service.namespace.RegexQNamePattern;
+import org.alfresco.service.namespace.*;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
@@ -31,7 +30,6 @@ import org.edu_sharing.alfresco.policy.OnCopyIOPolicy;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
@@ -41,6 +39,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
+import org.edu_sharing.repository.server.appcontext.ApplicationInfoContextHolder;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.repository.tools.URLHelper;
@@ -53,6 +52,7 @@ import org.edu_sharing.service.handleservicedoi.FeatureInfoDoiService;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.service.permission.HandleParam;
+import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.service.search.Suggestion;
@@ -61,7 +61,9 @@ import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.edu_sharing.spring.ApplicationContextFactory;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -73,62 +75,82 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
+@Service
+@RequiredArgsConstructor
 public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.NodeService {
 
-    protected String appId;
-    protected ContentService contentService;
-    protected DictionaryService dictionaryService;
+    //    protected String appId;
+    protected final ContentService contentService;
+    protected final DictionaryService dictionaryService;
     protected final BehaviourFilter policyBehaviourFilter;
     protected String repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
-    protected ServiceRegistry serviceRegistry;
-    protected NodeService nodeService;
-    protected NodeService nodeServiceAlfresco;
-    protected VersionService versionService;
-    @Setter
-    protected HandleServiceFactory handleServiceFactory;
+    protected final NodeService nodeService;
+    protected final NodeService nodeServiceAlfresco;
+    protected final VersionService versionService;
+    protected final HandleServiceFactory handleServiceFactory;
     protected final RepositoryCache repositoryCache;
     protected final LightbendConfigLoader lightbendConfigLoader;
+    private final Repository repositoryHelper;
+    private final AuthenticationToolAPI authTool;
+    // preventing circular dependency
+    private final ObjectProvider<PermissionService> eduPermissionService;
 
-    Logger logger = Logger.getLogger(NodeServiceImpl.class);
+    private final org.alfresco.service.cmr.security.PermissionService permissionService;
+    private final OwnableService ownableService;
+    private final RetryingTransactionHelper retryingTransactionHelper;
+    private final CopyService copyService;
+    private final NamespaceService namespaceService;
 
-    Repository repositoryHelper;
 
-    MCAlfrescoAPIClient apiClient;
+    private MCAlfrescoAPIClient apiClient;
 
-    public NodeServiceImpl() {
-        this(ApplicationInfoList.getHomeRepository().getAppId());
-    }
-
-    public ApplicationInfo getApplication() {
-        return ApplicationInfoList.getRepositoryInfoById(appId);
-    }
-
-    public NodeServiceImpl(String appId) {
-        ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-        serviceRegistry = applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY, ServiceRegistry.class);
-        nodeService = serviceRegistry.getNodeService();
-        nodeServiceAlfresco = applicationContext.getBean("alfrescoDefaultDbNodeService", NodeService.class);
-        policyBehaviourFilter = applicationContext.getBean("policyBehaviourFilter", BehaviourFilter.class);
-        contentService = serviceRegistry.getContentService();
-        versionService = serviceRegistry.getVersionService();
-        dictionaryService = serviceRegistry.getDictionaryService();
-        repositoryHelper = applicationContext.getBean("repositoryHelper", Repository.class);
-        repositoryCache = applicationContext.getBean(RepositoryCache.class);
-        lightbendConfigLoader = applicationContext.getBean(LightbendConfigLoader.class);
-
-        this.appId = appId;
+    @PostConstruct
+    public void init() {
         Map<String, String> homeAuthInfo = null;
         if (!ApplicationInfoList.getRepositoryInfoById(repositoryId).ishomeNode()) {
-            homeAuthInfo = new AuthenticationToolAPI().getAuthentication(Context.getCurrentInstance().getRequest().getSession());
+            homeAuthInfo = authTool.getAuthentication(Context.getCurrentInstance().getRequest().getSession());
         }
         try {
+
             apiClient = (MCAlfrescoAPIClient) RepoFactory.getInstance(repositoryId, homeAuthInfo);
         } catch (Throwable e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new RuntimeException(e.getMessage());
         }
-
     }
+
+
+    private ApplicationInfo getApplication() {
+        return ApplicationInfoContextHolder.getCurrentApplicationInfo();
+    }
+
+//    public NodeServiceImpl(String appId) {
+//        ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+//        serviceRegistry = applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY, ServiceRegistry.class);
+//        nodeService = serviceRegistry.getNodeService();
+//        nodeServiceAlfresco = applicationContext.getBean("alfrescoDefaultDbNodeService", NodeService.class);
+//        policyBehaviourFilter = applicationContext.getBean("policyBehaviourFilter", BehaviourFilter.class);
+//        contentService = serviceRegistry.getContentService();
+//        versionService = serviceRegistry.getVersionService();
+//        dictionaryService = serviceRegistry.getDictionaryService();
+//        repositoryHelper = applicationContext.getBean("repositoryHelper", Repository.class);
+//        repositoryCache = applicationContext.getBean(RepositoryCache.class);
+//        lightbendConfigLoader = applicationContext.getBean(LightbendConfigLoader.class);
+//
+//        this.appId = appId;
+//        Map<String, String> homeAuthInfo = null;
+//        if (!ApplicationInfoList.getRepositoryInfoById(repositoryId).ishomeNode()) {
+//            homeAuthInfo = new AuthenticationToolAPI().getAuthentication(Context.getCurrentInstance().getRequest().getSession());
+//        }
+//        try {
+//            apiClient = (MCAlfrescoAPIClient) RepoFactory.getInstance(repositoryId, homeAuthInfo);
+//        } catch (Throwable e) {
+//            logger.error(e.getMessage(), e);
+//            throw new RuntimeException(e.getMessage());
+//        }
+//
+//    }
 
     public void updateNode(String nodeId, Map<String, String[]> props, boolean obeyMds) throws Throwable {
         String nodeType = getType(nodeId);
@@ -150,11 +172,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     public NodeRef copyNode(String nodeId, String toNodeId, boolean copyChildren) throws Throwable {
         // copy and rename has a weird naming scheme
 
-        return serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+        return retryingTransactionHelper.doInTransaction(() -> {
             NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
             throwIfRestrictedAccessPresent(nodeRef);
-
-            CopyService copyService = serviceRegistry.getCopyService();
 
             // copy and rename has a weird naming scheme
             String originalName = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
@@ -184,7 +204,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     private void throwIfRestrictedAccessPresent(NodeRef nodeRef) {
         Boolean restrictedAccess = (Boolean) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CCM_PROP_RESTRICTED_ACCESS);
         if (restrictedAccess != null && restrictedAccess) {
-            if (!serviceRegistry.getPermissionService().hasPermission(nodeRef, CCConstants.PERMISSION_CHANGEPERMISSIONS).equals(AccessStatus.ALLOWED)) {
+            if (!permissionService.hasPermission(nodeRef, CCConstants.PERMISSION_CHANGEPERMISSIONS).equals(AccessStatus.ALLOWED)) {
                 throw new SecurityException("Node has restricted access and no permission " + CCConstants.PERMISSION_CHANGEPERMISSIONS + " available");
             }
         }
@@ -271,7 +291,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 nodeService.setProperties(nodeRef, convertToFinalProperties(nodeRef, storedProperties));
             }
         } catch (Throwable e) {
-            logger.warn("Could not run after interceptors", e);
+            log.warn("Could not run after interceptors", e);
         }
     }
 
@@ -286,7 +306,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     }
 
     private Map<String, Object> getToSafeProps(Map<String, String[]> props, boolean obeyMds, String nodeType, String[] aspects, String nodeId, String parentId, String templateName) throws Throwable {
-        if(obeyMds) {
+        if (obeyMds) {
             Map<String, String[]> propsCopy = new HashMap<>(props);
             String[] metadataSetIdArr = propsCopy.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
 
@@ -332,8 +352,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                     mds.getWidgetsByTemplate(templateName))) {
                 String id = widget.getId();
                 if (!MetadataHelper.checkConditionTrue(widget.getCondition())) {
-                    logger.info("widget " + id + " skipped because condition failed");
-                    logger.info("condition that should match: " + widget.getCondition().getType() + " " + (widget.getCondition().isNegate() ? "!=" : "=") + " " + widget.getCondition().getValue());
+                    log.info("widget " + id + " skipped because condition failed");
+                    log.info("condition that should match: " + widget.getCondition().getType() + " " + (widget.getCondition().isNegate() ? "!=" : "=") + " " + widget.getCondition().getValue());
                     continue;
                 }
                 id = CCConstants.getValidGlobalName(id);
@@ -347,7 +367,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                     toSafe.put(id + "_from", valuesFrom[0]);
                     toSafe.put(id + "_to", valuesTo[0]);
                 } else if ("defaultvalue".equals(widget.getType())) {
-                    logger.info("will save property " + widget.getId() + " with predefined defaultvalue " + widget.getDefaultvalue());
+                    log.info("will save property " + widget.getId() + " with predefined defaultvalue " + widget.getDefaultvalue());
                     toSafe.put(id, widget.getDefaultvalue());
                     continue;
                 } else if ("date".equals(widget.getType()) && props.containsKey(id)) {
@@ -366,7 +386,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                         }).collect(Collectors.toList());
 
                     } catch (Throwable t) {
-                        logger.info("Could not parse date for widget id " + widget.getId() + ": " + t.getMessage());
+                        log.info("Could not parse date for widget id " + widget.getId() + ": " + t.getMessage());
                         values = new ArrayList<>();
                     }
                 } else if ("datetime".equals(widget.getType()) && props.containsKey(id)) {
@@ -385,7 +405,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                         }).collect(Collectors.toList());
 
                     } catch (Throwable t) {
-                        logger.info("Could not parse date for widget id " + widget.getId() + ": " + t.getMessage());
+                        log.info("Could not parse date for widget id " + widget.getId() + ": " + t.getMessage());
                         values = new ArrayList<>();
                     }
                 }
@@ -468,6 +488,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         }
         return converted;
     }
+
     //transient Logger logger = Logger.getLogger(MetadataWidget.class);
 
     private static Iterable<String> getAllSafeProps() {
@@ -525,8 +546,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         try {
             NodeRef nodeRef = new NodeRef(store, nodeId);
             //logger.info("nodeRef:"+ nodeRef +"path: " + nodeServiceAlfresco.getPath(nodeRef).toDisplayPath(serviceRegistry.getNodeService(),serviceRegistry.getPermissionService()));
-            if (logger.isDebugEnabled()) {
-                logger.debug("nodeRef:" + nodeRef + "path: " + nodeServiceAlfresco.getPath(nodeRef).toPrefixString(serviceRegistry.getNamespaceService()));
+            if (log.isDebugEnabled()) {
+                log.debug("nodeRef:{}path: {}", nodeRef, nodeServiceAlfresco.getPath(nodeRef).toPrefixString(namespaceService));
             }
             List<ChildAssociationRef> assocs;
             if (types == null) {
@@ -540,7 +561,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 if (assoc.isPrimary()) {
                     result.add(assoc.getChildRef());
                 } else {
-                    logger.warn("ignoring non primary association parent:" + assoc.getParentRef() + " child:" + assoc.getChildRef());
+                    log.warn("ignoring non primary association parent:" + assoc.getParentRef() + " child:" + assoc.getChildRef());
                 }
             }
             List<ChildAssociationRef> maps;
@@ -559,15 +580,15 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                     AuthenticationUtil.runAs(() -> result.addAll(getChildrenRecursive(store, map.getChildRef().getId(), types, recurseMode))
                             , user);
                 } else {
-                    logger.warn("ignoring non primary association for recursive traversing parent:" + map.getParentRef() + " child:" + map.getChildRef());
+                    log.warn("ignoring non primary association for recursive traversing parent:" + map.getParentRef() + " child:" + map.getChildRef());
                 }
             });
 
 
-            logger.info("Get children recursive finished with " + result.size() + " nodes");
+            log.info("Get children recursive finished with " + result.size() + " nodes");
             return result;
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             return result;
         }
     }
@@ -772,7 +793,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
             // do in transaction to disable behaviour
             // otherwise interceptors might be called multiple times -> the final update props is enough!
             // do it AFTER set properties so the values can be sent as NULL-Values into setProperties to be read by interceptors
-            serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+            retryingTransactionHelper.doInTransaction(() -> {
                 policyBehaviourFilter.disableBehaviour(nodeRef);
                 for (QName prop : propsNull) {
                     // use alfresco service to prevent overhead
@@ -787,7 +808,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
             // this occurs sometimes in workspace
             // it seems it is an alfresco bug:
             // https://issues.alfresco.com/jira/browse/ETHREEOH-2461
-            logger.error("Thats maybe an alfreco bug: https://issues.alfresco.com/jira/browse/ETHREEOH-2461", e);
+            log.error("Thats maybe an alfreco bug: https://issues.alfresco.com/jira/browse/ETHREEOH-2461", e);
         }
 
     }
@@ -800,7 +821,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                         propsFinal,
                         nodeRef == null ? Collections.emptyList() : Arrays.asList(getAspects(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId())), null, null));
             } catch (Throwable e) {
-                logger.warn("Error while calling interceptor " + i.getClass().getName() + ": " + e.toString());
+                log.warn("Error while calling interceptor {}: {}", i.getClass().getName(), e.toString());
             }
         }
         return propsFinal;
@@ -838,8 +859,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 }
                 result.put(QName.createQName(key), (Serializable) value);
             } catch (ClassCastException e) {
-                logger.error("this prop has a wrong value:" + key + " val:" + value);
-                logger.error(e.getMessage(), e);
+                log.error("this prop has a wrong value:{} val:{}", key, value);
+                log.error(e.getMessage(), e);
             }
         }
         return result;
@@ -863,12 +884,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     }
 
     public boolean isSubOf(String type, String parentType) throws Throwable {
-
-        return serviceRegistry.getDictionaryService().isSubClass(QName.createQName(type), QName.createQName(parentType));
+        return dictionaryService.isSubClass(QName.createQName(type), QName.createQName(parentType));
     }
 
     public void setOwner(String nodeId, String username) {
-        serviceRegistry.getOwnableService().setOwner(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), username);
+        ownableService.setOwner(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), username);
     }
 
 
@@ -879,16 +899,15 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
      */
     public void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission) throws Exception {
 
-        PermissionService permissionsService = this.serviceRegistry.getPermissionService();
         NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
         if (inheritPermission != null) {
-            logger.info("setInheritParentPermissions " + inheritPermission);
-            permissionsService.setInheritParentPermissions(nodeRef, inheritPermission);
+            log.info("setInheritParentPermissions " + inheritPermission);
+            permissionService.setInheritParentPermissions(nodeRef, inheritPermission);
         }
 
         if (permissions != null) {
             for (String permission : permissions) {
-                permissionsService.setPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), authority, permission, true);
+                permissionService.setPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), authority, permission, true);
             }
         }
 
@@ -901,7 +920,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         if (inbox != null && !inbox.isEmpty())
             return inbox.get(0).getChildRef().getId();
         if (createIfNotExists) {
-            return serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+            return retryingTransactionHelper.doInTransaction(() -> {
                 policyBehaviourFilter.disableBehaviour();
                 try {
                     Map<String, Object> properties = new HashMap<>();
@@ -923,7 +942,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         if (savedSearch != null && !savedSearch.isEmpty())
             return savedSearch.get(0).getChildRef().getId();
         if (createIfNotExists) {
-            return serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+            return retryingTransactionHelper.doInTransaction(() -> {
                 policyBehaviourFilter.disableBehaviour();
                 try {
                     Map<String, Object> properties = new HashMap<>();
@@ -999,8 +1018,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         for (SortDefinition.SortDefinitionEntry entry : sortDefinition.getSortDefinitionEntries()) {
             QName prop = QName.createQName(CCConstants.getValidGlobalName(entry.getProperty()));
             Object prop1, prop2;
-            String key1 = n1.toString() + prop.toString();
-            String key2 = n2.toString() + prop.toString();
+            String key1 = n1.toString() + prop;
+            String key2 = n2.toString() + prop;
             if (cache.containsKey(key1)) {
                 prop1 = cache.get(key1);
             } else {
@@ -1219,7 +1238,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
             Object r = method.invoke(nodeServiceAlfresco, nodeRef, false);
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
 		/*	return null;
 		});*/
@@ -1231,12 +1250,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     }
 
     @Override
-    public Map<String, Object> getPropertiesDynamic(String storeProtocol, String storeId, String nodeId) throws Throwable {
+    public Map<String, Object> getPropertiesDynamic(String storeProtocol, String storeId, String nodeId) {
         throw new NotImplementedException("getPropertiesDynamic may not be called for the local repository (was the remote repo removed?)");
     }
 
     @Override
-    public Map<String, Object> getPropertiesPersisting(String storeProtocol, String storeId, String nodeId) throws Throwable {
+    public Map<String, Object> getPropertiesPersisting(String storeProtocol, String storeId, String nodeId) {
         throw new NotImplementedException("getPropertiesPersisting may not be called for the local repository (was the remote repo removed or is it missing the remote_provider setting?)");
     }
 
@@ -1252,7 +1271,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
     @Override
     public void keepModifiedDate(String storeProtocol, String storeId, String nodeId, Runnable task) {
-        serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+        retryingTransactionHelper.doInTransaction(() -> {
             NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);
             // disable behaviour so no version data is altered externally
             policyBehaviourFilter.disableBehaviour(nodeRef, ContentModel.ASPECT_AUDITABLE);
@@ -1273,7 +1292,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
             throw new IllegalArgumentException("Only allowed for elements with aspect " + CCConstants.CCM_ASPECT_PUBLISHED);
         }
         String finalNodeId = nodeId;
-        serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+        retryingTransactionHelper.doInTransaction(() -> {
             removeContent(new NodeRef(new StoreRef(storeProtocol, storeId), finalNodeId), CCConstants.CM_PROP_CONTENT);
             removeContent(new NodeRef(new StoreRef(storeProtocol, storeId), finalNodeId), CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
             // remove childs like childobjects or preview images
@@ -1294,13 +1313,13 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
             eduAppContext.getBean(FeatureInfoDoiService.class);
             handleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.doi).updateState(nodeId, "hide");
         } catch (NoSuchBeanDefinitionException e) {
-            logger.info("doi service not enabled");
+            log.info("doi service not enabled");
         }
     }
 
     private void removeContent(NodeRef nodeRef, String contentProperty) {
-        serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(() -> {
-            ContentWriter writer = serviceRegistry.getContentService().getWriter(nodeRef, QName.createQName(contentProperty), true);
+        retryingTransactionHelper.doInTransaction(() -> {
+            ContentWriter writer = contentService.getWriter(nodeRef, QName.createQName(contentProperty), true);
             writer.putContent("");
             // writer.setMimetype(null);
             return null;
@@ -1320,7 +1339,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                             handleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.handle),
                             handleParam.handleService);
                 } catch (NoSuchBeanDefinitionException e) {
-                    logger.error("handle service not enabled");
+                    log.error("handle service not enabled", e);
                 }
             }
             if (handleParam.doiService != null) {
@@ -1330,7 +1349,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                             handleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.doi),
                             handleParam.doiService);
                 } catch (NoSuchBeanDefinitionException e) {
-                    logger.error("doi service not enabled");
+                    log.error("doi service not enabled", e);
                 }
             }
         }
@@ -1362,7 +1381,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         } catch (Throwable t) {
             throw new RuntimeException("Invalid configuration for publishing. Please check the repository config", t);
         }
-        return serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+        return retryingTransactionHelper.doInTransaction(() -> {
             // permissions are checked beforehand,
             return AuthenticationUtil.runAsSystem(() -> {
                 String currentVersion = getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.LOM_PROP_LIFECYCLE_VERSION);
@@ -1383,7 +1402,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 } catch (Throwable t) {
                     throw new RuntimeException(t);
                 }
-                return serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+                return retryingTransactionHelper.doInTransaction(() -> {
                     // disable behaviour so no version data is altered externally
                     policyBehaviourFilter.disableBehaviour(newNode);
                     // replace owner, creator & modifier
@@ -1401,7 +1420,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                         setPublishedCopyProperties(oldNodeRef, child.getChildRef(), owner);
                         policyBehaviourFilter.enableBehaviour(child.getChildRef());
                     }
-                    serviceRegistry.getPermissionService().deletePermissions(newNode);
+                    permissionService.deletePermissions(newNode);
                     setPermissions(newNode.getId(), CCConstants.AUTHORITY_GROUP_EVERYONE,
                             new String[]{CCConstants.PERMISSION_CONSUMER, CCConstants.PERMISSION_CC_PUBLISH},
                             true);
@@ -1414,7 +1433,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                                         handleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.handle),
                                         handleParam.handleService);
                             } catch (NoSuchBeanDefinitionException e) {
-                                logger.error("handle service not enabled");
+                                log.error("handle service not enabled");
                             }
                         }
                         if (handleParam.doiService != null) {
@@ -1424,7 +1443,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                                         handleServiceFactory.instance(HandleServiceFactory.IMPLEMENTATION.doi),
                                         handleParam.doiService);
                             } catch (NoSuchBeanDefinitionException e) {
-                                logger.error("doi service not enabled");
+                                log.error("doi service not enabled", e);
                             }
                         }
                     }
@@ -1439,7 +1458,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
     private static void checkPublishPermission(String nodeId) {
         ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_PUBLISH_COPY);
-        if (PermissionServiceFactory.getLocalService().hasAllPermissions(StoreRef.PROTOCOL_WORKSPACE,
+        if (PermissionServiceFactory.getInstance().getLocalService().hasAllPermissions(StoreRef.PROTOCOL_WORKSPACE,
                         StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
                         nodeId,
                         new String[]{CCConstants.PERMISSION_READ, CCConstants.PERMISSION_CHANGEPERMISSIONS}).
@@ -1490,7 +1509,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                     handle = generated;
 
                 } catch (Exception e) {
-                    logger.error("Internal error while creating handle id", e);
+                    log.error("Internal error while creating handle id", e);
                     // DEBUG ONLY
                     //handle = "test/" + Math.random();
                     throw new RuntimeException("Handle generation throwed an error: " + e.getMessage(), e);
@@ -1536,7 +1555,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 String contentLink = URLHelper.getNgRenderNodeUrl(nodeRef.getId(), null, false);
                 Map<QName, Serializable> properties = nodeService.getProperties(nodeRef);
                 if (handleMode.equals(HandleMode.distinct)) {
-                    logger.info("Create handle " + handle + ", " + contentLink);
+                    log.info("Create handle " + handle + ", " + contentLink);
                     handle = handleService.create(handle, nodeRef.getId(), properties);
                     if (handleService instanceof DOIService) {
                         properties.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_DOI_ID), handle);
@@ -1544,10 +1563,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                         properties.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID), handle);
                     }
                 } else if (handleMode.equals(HandleMode.sync)) {
-                    logger.info("Sync handle " + handle + ", " + contentLink);
+                    log.info("Sync handle " + handle + ", " + contentLink);
                     handleService.sync(handle, nodeRef.getId(), properties);
                 } else {
-                    logger.info("Update handle " + handle + ", " + contentLink);
+                    log.info("Update handle " + handle + ", " + contentLink);
                     handleService.update(handle, nodeRef.getId(), properties);
                 }
             }
@@ -1652,7 +1671,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 return cr.getReader();
             } else return null;
         } else {
-            VersionHistory versionHistory = serviceRegistry.getVersionService().getVersionHistory(nodeRef);
+            VersionHistory versionHistory = versionService.getVersionHistory(nodeRef);
             Version versionObj = versionHistory.getVersion(version);
             ContentReader cr = contentService.getReader(versionObj.getFrozenStateNodeRef(), QName.createQName(contentProp)).getReader();
             if (cr != null) {
@@ -1727,7 +1746,6 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
      */
     @Override
     public void revertVersionNoRollback(String nodeId, String verLbl) throws Exception {
-        VersionService versionService = serviceRegistry.getVersionService();
         VersionHistory versionHistory = versionService.getVersionHistory(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
         if (versionHistory != null && versionHistory.getAllVersions() != null && !versionHistory.getAllVersions().isEmpty()) {
             NodeRef ioNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
@@ -1777,7 +1795,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
     @Override
     public String getContentMimetype(String protocol, String storeId, String nodeId) {
-        if (PermissionServiceFactory.getPermissionService(appId).hasPermission(protocol, storeId, nodeId, CCConstants.PERMISSION_READ))
+        if (eduPermissionService.getObject().hasPermission(protocol, storeId, nodeId, CCConstants.PERMISSION_READ))
             return new MCAlfrescoAPIClient().getAlfrescoMimetype(new NodeRef(protocol, storeId, nodeId));
         else
             throw new AccessDeniedException("No " + CCConstants.PERMISSION_READ + " permission on node " + nodeId);
@@ -1822,7 +1840,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
             try {
                 value = validatePropertyByDefinition(prop, value);
             } catch (IllegalArgumentException ex) {
-                logger.error("property " + property + " is not defined in content model");
+                log.error("property " + property + " is not defined in content model");
                 return;
             }
         }
@@ -1843,11 +1861,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                                 Arrays.asList(getAspects(protocol, storeId, nodeId)), null, null)
                         );
                     } catch (Throwable e) {
-                        logger.warn("Error while calling interceptors " + i.getClass().getName() + ": " + e);
+                        log.warn("Error while calling interceptors " + i.getClass().getName() + ": " + e);
                     }
                 }
             } catch (Throwable e) {
-                logger.warn("Error while handling set interceptors: " + e);
+                log.warn("Error while handling set interceptors: " + e);
             }
         }
         if (properties != null) {

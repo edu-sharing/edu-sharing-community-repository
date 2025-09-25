@@ -29,7 +29,7 @@ public class NodeCustomClasses {
                     @Override
                     public void handle(InputStream is) {
                         try {
-                            NodeServiceFactory.getLocalService().writeContent(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeRef.getId(), is,
+                            NodeServiceFactory.getInstance().getLocalService().writeContent(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeRef.getId(), is,
                                     "image/jpeg", null, CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
                         } catch (Exception e) {
                             Logger.getLogger(BulkEditNodesJob.class).warn("Thumb fetching failed for " + nodeRef + " " + thumbUrl);

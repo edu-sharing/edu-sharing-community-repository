@@ -4,14 +4,11 @@ import com.opencsv.CSVWriter;
 import lombok.*;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -20,16 +17,13 @@ import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescript
 import org.edu_sharing.repository.server.tools.NodeTool;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.VCardConverter;
-import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.mediacenter.MediacenterService;
-import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.nodeservice.NodeService;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
-import org.edu_sharing.service.permission.PermissionServiceFactory;
-import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.edu_sharing.service.tracking.ActivityStatisticService;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
@@ -37,7 +31,7 @@ import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.jetbrains.annotations.NotNull;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
@@ -50,6 +44,7 @@ import java.util.stream.Collectors;
 
 import static org.edu_sharing.alfresco.service.AuthorityService.ORG_GROUP_PREFIX;
 
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @JobDescription(description = "Creates reports for all mediacenters on the 1st of each month for the last month")
 public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams {
 
@@ -70,9 +65,6 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
     private ReportMode mode;
 
     protected Logger logger = Logger.getLogger(MediacenterMonthlyReportsJob.class);
-    private org.alfresco.service.cmr.repository.NodeService nodeService;
-    private NodeService nodeServiceEdu;
-
     @JobFieldDescription(description = "List of properties to include in the export file, first value is the property, second value (only for vcard) is the vcard field id", sampleValue = "[\"cm:name\"]")
     private List<List<String>> columns = new ArrayList<List<String>>() {{
         add(Collections.singletonList("cclom:title"));
@@ -111,19 +103,23 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 
     @JobFieldDescription(description = "Delete stats of the month if they're already existing")
     private boolean delete = false;
-    private ContentService contentService;
 
+
+    @Autowired
+    private NodeService nodeServiceEdu;
+    @Autowired
+    private SearchService searchService;
+    @Autowired
+    private AuthorityService authorityService;
+    @Autowired
+    private MediacenterService mediacenterService;
+    @Autowired
+    private org.edu_sharing.service.permission.PermissionService permissionService;
+    ActivityStatisticService activityStatisticService = TrackingServiceFactory.getTrackingService();
 
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
 
-        ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-
-        ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-
-        contentService = serviceRegistry.getContentService();
-        nodeService = serviceRegistry.getNodeService();
-        nodeServiceEdu = NodeServiceFactory.getLocalService();
 
         Date date = new Date();
         LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -144,7 +140,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
             if (customDate != null) {
                 localDate = customDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             }
-            for (String mediacenter : mediacenters == null ? SearchServiceFactory.getLocalService().getAllMediacenters() : mediacenters) {
+            for (String mediacenter : mediacenters == null ? searchService.getAllMediacenters() : mediacenters) {
 
                 LocalDate lastMonth = localDate.minusMonths(1);
                 LocalDate from = lastMonth.withDayOfMonth(1);
@@ -194,7 +190,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 
             // Holds for each event (VIEW, DOWNLOAD...) a list of Org ids + counts
             Map<String, Map<String, Long>> result = new HashMap<>();
-            Set<String> organizations = new HashSet<>(Arrays.asList(AuthorityServiceFactory.getLocalService().getMembershipsOfGroup(mediacenter)));
+            Set<String> organizations = new HashSet<>(Arrays.asList(authorityService.getMembershipsOfGroup(mediacenter)));
             for (StatisticEntry v : dataNodes.values()) {
                 v.getGroups().forEach((eventType, stats) -> {
                     result.computeIfAbsent(eventType, k -> new HashMap<>());
@@ -247,11 +243,8 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
         }
     }
 
-    ActivityStatisticService activityStatisticService = TrackingServiceFactory.getTrackingService();
-    MediacenterService mediacenterService = MediacenterServiceFactory.getLocalService();
 
     private void generateReportByTimeRange(String mediacenter, Date startDate, Date endDate, ReportType reportType) throws Throwable {
-        ActivityStatisticService activityStatisticService = TrackingServiceFactory.getTrackingService();
         Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> data = null;
         if (mode.equals(ReportMode.AlfrescoPermissionData)) {
             List<NodeRef> nodes = mediacenterService.getAllLicensedNodes(mediacenter, Collections.emptyMap(), null);
@@ -294,17 +287,16 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 
     private String generateCSVNode(String mediacenter, String csvPostfix, Date startDate, Date endDate, ReportType reportType) throws Throwable {
         String baseFolder = new UserEnvironmentTool().getEdu_SharingMediacenterFolder();
-        MediacenterService mediacenterService = MediacenterServiceFactory.getLocalService();
         String filename = getFilename(mediacenter, csvPostfix, startDate, endDate, reportType);
         String parent = NodeTool.createOrGetNodeByName(baseFolder, new String[]{mediacenter});
-        PermissionServiceFactory.getLocalService().setPermission(parent, mediacenterService.getMediacenterAdminGroup(mediacenter), CCConstants.PERMISSION_CONSUMER);
+        permissionService.setPermission(parent, mediacenterService.getMediacenterAdminGroup(mediacenter), CCConstants.PERMISSION_CONSUMER);
         if (delete) {
-            String node = NodeServiceFactory.getLocalService().findNodeByName(parent, filename);
+            String node = nodeServiceEdu.findNodeByName(parent, filename);
             if (node != null) {
-                NodeServiceFactory.getLocalService().removeNode(node, null, false);
+                nodeServiceEdu.removeNode(node, null, false);
             }
         }
-        String nodeId = NodeServiceFactory.getLocalService().createNode(parent, CCConstants.CCM_TYPE_IO, NodeServiceFactory.getLocalService().getNameProperty(filename));
+        String nodeId = nodeServiceEdu.createNode(parent, CCConstants.CCM_TYPE_IO, nodeServiceEdu.getNameProperty(filename));
         NodeServiceHelper.addAspect(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), CCConstants.CCM_MEDIACENTER_STATISTICS);
         NodeServiceHelper.setProperty(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), CCConstants.CCM_PROP_MEDIACENTER_ID, mediacenter, false);
         return nodeId;
@@ -441,7 +433,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
             csvEntry.addAll(STAT_FIELDS.stream()
                     .map(event -> entry.getValue().getCounts().getOrDefault(event, 0))
                     .map(String::valueOf)
-                    .collect(Collectors.toList()));
+                    .toList());
 
             // add additional, custom mapped field accounts (i.e. for role)
             additionalFieldValues.forEach((key, value) ->
@@ -455,25 +447,19 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
                                     .reduce(Long::sum)
                                     .orElse(0L))
                             .map(String::valueOf)
-                            .collect(Collectors.toList())
+                            .toList()
                     ));
             entries.add(new ReportEntry(csvEntry, totalSum));
         }
         Collections.sort(entries);
-        List<String[]> csvContent = entries.stream().map(ReportEntry::getEntry).map(l -> l.toArray(new String[0])).collect(Collectors.toList());
+        List<String[]> csvContent = entries.stream().map(ReportEntry::entry).map(l -> l.toArray(new String[0])).collect(Collectors.toList());
         writeCSVFileInternal(nodeId, header, csvContent);
     }
 
-    @Value
-    @AllArgsConstructor
-    private static class ReportEntry implements Comparable<ReportEntry> {
-        List<String> entry;
-        int totalCount;
-
-
-        @Override
-        public int compareTo(@NotNull ReportEntry reportEntry) {
-            return Long.compare(reportEntry.totalCount, this.totalCount);
+        private record ReportEntry(List<String> entry, int totalCount) implements Comparable<ReportEntry> {
+            @Override
+            public int compareTo(@NotNull ReportEntry reportEntry) {
+                return Long.compare(reportEntry.totalCount, this.totalCount);
+            }
         }
-    }
 }

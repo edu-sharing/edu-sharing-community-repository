@@ -1,7 +1,6 @@
 package org.edu_sharing.repository.server.importer;
 
 import java.io.StringReader;
-import java.net.URLEncoder;
 import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -68,7 +67,7 @@ public class ImportCleanerIdentifiersList {
 			if(allNodesInSet.size()<nodeAtOaiService.size()){
 				logger.warn("It seems that you have not yet imported the whole oai set");
 			}
-			if(nodeAtOaiService.size() == 0){
+			if(nodeAtOaiService.isEmpty()){
 				throw new RuntimeException("Got no nodes from oai, will cancel the delete job");
 			}
 
@@ -83,7 +82,7 @@ public class ImportCleanerIdentifiersList {
 				logger.info("will delete replicationsourceid:" + allNodesInSet.get(toDelete) +" alfresco id:" + toDelete +" cause it does not longer exist in set");
 				
 				if(!testMode) {
-					NodeServiceFactory.getLocalService().removeNode(toDelete, null, false);
+					NodeServiceFactory.getInstance().getLocalService().removeNode(toDelete, null, false);
 				}
 				deletedCounter++;
 			}
@@ -101,12 +100,12 @@ public class ImportCleanerIdentifiersList {
 	
 	private void readAllNodesInRepository(String set) throws Throwable {
 		String importFolder=PersistentHandlerEdusharing.prepareImportFolder();
-		NodeRef setFolderRef = NodeServiceFactory.getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,importFolder, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME,
+		NodeRef setFolderRef = NodeServiceFactory.getInstance().getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,importFolder, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME,
 				set);
 		if(setFolderRef==null){
 			throw new IllegalArgumentException("Set folder "+set+" was not found. Please check your "+OAIPMHLOMImporter.FOLDER_NAME_IMPORTED_OBJECTS+" folder");
 		}
-		List<NodeRef> allNodes = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, setFolderRef.getId(), Collections.singletonList(CCConstants.CCM_TYPE_IO), RecurseMode.Folders);
+		List<NodeRef> allNodes = NodeServiceFactory.getInstance().getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, setFolderRef.getId(), Collections.singletonList(CCConstants.CCM_TYPE_IO), RecurseMode.Folders);
 		allNodesInSet=new HashMap<>();
 		allNodes.parallelStream().forEach((entry)-> {
 			AuthenticationUtil.runAsSystem(()->allNodesInSet.put(entry.getId(), NodeServiceHelper.getProperty(entry, CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID)));
@@ -141,7 +140,7 @@ public class ImportCleanerIdentifiersList {
 				}
 				//&& completeListSize != null && cursor != null &&  (new Integer(completeListSize) > new Integer(cursor))
 
-				if (token.trim().length() > 0) {
+				if (!token.trim().isEmpty()) {
 					try {
 						String urlNext = this.oaiBaseUrl + "?verb=ListIdentifiers&resumptionToken=" + token;
 						readAllNodesAtOaiService(urlNext, false);

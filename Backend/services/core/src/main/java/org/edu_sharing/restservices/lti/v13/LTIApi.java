@@ -513,7 +513,7 @@ public class LTIApi {
                                 ltiSessionObject.getEduSharingAppId(),
                                 ltiSessionObject.getContextId(),
                                 nodeId,
-                                (String) AuthorityServiceFactory.getLocalService().getUserInfo(user).get(CCConstants.PROP_USER_EMAIL),
+                                (String) AuthorityServiceFactory.getInstance().getLocalService().getUserInfo(user).get(CCConstants.PROP_USER_EMAIL),
                                 null,null,-1,null,
                                 null, //TODO moodle does not deliver such information
                                 null);

@@ -264,7 +264,7 @@ public class GlobalShareServiceImpl implements GlobalShareService {
         Map<String, Object> props;
         Map<QName, Serializable> propsNative;
         try {
-            props = NodeServiceFactory.getLocalService().getProperties(shareNodeRef.getStoreRef().getProtocol(),
+            props = NodeServiceFactory.getInstance().getLocalService().getProperties(shareNodeRef.getStoreRef().getProtocol(),
                     shareNodeRef.getStoreRef().getIdentifier(),
                     shareNodeRef.getId());
             propsNative = nodeService.getProperties(shareNodeRef);

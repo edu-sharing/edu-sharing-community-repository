@@ -28,7 +28,6 @@ import org.edu_sharing.service.tracking.ActivityEventService;
 import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +41,9 @@ public class FeedbackApi {
 
 	@Autowired
 	private ActivityEventService activityEventService;
+
+    @Autowired
+    private FeedbackServiceFactory feedbackServiceFactory;
 
 	@PUT
 	@Path("/feedback/{repository}/{node}/add")
@@ -61,7 +63,7 @@ public class FeedbackApi {
 			@Context HttpServletRequest req) {
     	try {
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			FeedbackResult result = FeedbackServiceFactory.getFeedbackService(repoDao.getId()).addFeedback(
+			FeedbackResult result = feedbackServiceFactory.getService(repoDao.getId()).addFeedback(
 					nodeId,
 					feedbackData
 			);
@@ -88,7 +90,7 @@ public class FeedbackApi {
 			@Context HttpServletRequest req) {
 		try {
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			List<FeedbackData> entity = FeedbackServiceFactory.getFeedbackService(repoDao.getId()).getFeedback(
+			List<FeedbackData> entity = feedbackServiceFactory.getService(repoDao.getId()).getFeedback(
 					nodeId
 			);
 			return Response.status(Response.Status.OK).entity(entity).build();

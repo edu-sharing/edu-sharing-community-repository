@@ -52,7 +52,7 @@ public class UserEnvironmentTool {
      * @throws Throwable
      */
     public UserEnvironmentTool(String runAsUser) {
-        this(NodeServiceFactory.getLocalService(), runAsUser);
+        this(NodeServiceFactory.getInstance().getLocalService(), runAsUser);
     }
 
     public UserEnvironmentTool(NodeService nodeService) {
@@ -65,7 +65,7 @@ public class UserEnvironmentTool {
     }
 
     public UserEnvironmentTool(String repositoryId, Map<String, String> authInfo) {
-        this(NodeServiceFactory.getLocalService(), repositoryId, authInfo);
+        this(NodeServiceFactory.getInstance().getLocalService(), repositoryId, authInfo);
     }
 
     public UserEnvironmentTool(NodeService nodeService, String repositoryId, Map<String, String> authInfo) {

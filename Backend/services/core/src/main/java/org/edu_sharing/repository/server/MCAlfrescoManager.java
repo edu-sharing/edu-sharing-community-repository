@@ -58,7 +58,7 @@ public class MCAlfrescoManager extends ContextLoaderListener {
 
 
             //do update this class checks if it is already done
-            AuthenticationToolAPI authTool = new AuthenticationToolAPI();
+            AuthenticationToolAPI authTool = AuthenticationToolAPI.getInstance();
             authTool.createNewSession(appInfo.getUsername(), appInfo.getPassword());
 
             super.setContextInitializers(new EduSharingContextInitializer());

@@ -27,10 +27,8 @@
  */
 package org.edu_sharing.repository.server.jobs.quartz;
 
-import org.alfresco.service.ServiceRegistry;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
@@ -39,28 +37,22 @@ import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.model.NodeRef;
-import org.edu_sharing.service.nodeservice.NodeService;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.springframework.context.ApplicationContext;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @JobDescription(description = "Fix brockhaus nodes with wrong identifiers")
 public class RepairBrockhausRemoteIosJob extends AbstractJob{
 
 	protected Logger logger = Logger.getLogger(RepairBrockhausRemoteIosJob.class);
-	private org.alfresco.service.cmr.repository.NodeService nodeService;
-	private NodeService nodeServiceEdu;
 
-	@JobFieldDescription(description = "test only, do not migrate ids", sampleValue = "true")
+    @JobFieldDescription(description = "test only, do not migrate ids", sampleValue = "true")
 	private Boolean test;
 	@JobFieldDescription(description = "throttle in ms between each request to reduce api load on brockhaus", sampleValue = "1000")
 	private Integer throttle;
@@ -68,12 +60,6 @@ public class RepairBrockhausRemoteIosJob extends AbstractJob{
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 
-		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-
-		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-
-		nodeService = serviceRegistry.getNodeService();
-		nodeServiceEdu = NodeServiceFactory.getLocalService();
 
 		test = context.getJobDetail().getJobDataMap().getBooleanFromString("test");
 		if(test == null){
@@ -84,7 +70,7 @@ public class RepairBrockhausRemoteIosJob extends AbstractJob{
 			throw new IllegalArgumentException("Missing required boolean parameter 'throttle'");
 		}
 		NodeRunner runner = new NodeRunner();
-		SearchService searchServiceBrockhaus = SearchServiceFactory.getSearchService(ApplicationInfoList.getRepositoryInfoByRepositoryType("BROCKHAUS").getAppId());
+		SearchService searchServiceBrockhaus = SearchServiceFactory.getInstance().getService(ApplicationInfoList.getRepositoryInfoByRepositoryType("BROCKHAUS").getAppId());
 		runner.setTask((ref)->{
 			try {
 				if(isInterrupted()) {
@@ -140,12 +126,12 @@ public class RepairBrockhausRemoteIosJob extends AbstractJob{
 											brockhausId
 									);
 
-				}).collect(Collectors.toList());
+				}).toList();
 
 				String newId = null;
 				if(filtered.size() == 1) {
 					 newId = filtered.get(0).getNodeId();
-				} else if(filtered.size() == 0) {
+				} else if(filtered.isEmpty()) {
 					logger.warn("Failed: Brockhaus search did not return results for this item. Guessing new id");
 
 					// -enzy-article-a-b ==> %2fenzy%2farticle%2fa-b
