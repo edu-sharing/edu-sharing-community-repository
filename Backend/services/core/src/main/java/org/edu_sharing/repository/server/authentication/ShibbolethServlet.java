@@ -126,7 +126,11 @@ public class ShibbolethServlet extends HttpServlet {
 		}
 
 		if (validAuthInfo != null ) {
-			if (validAuthInfo.get(CCConstants.AUTH_USERNAME).equals(headerUserName)) {
+			if(headerUserName == null){
+				logger.info("no sso username provided, but got valid ticket from session for user:"+validAuthInfo.get(CCConstants.AUTH_USERNAME));
+				redirect(resp, req);
+				return;
+			}else if (validAuthInfo.get(CCConstants.AUTH_USERNAME).equals(headerUserName)) {
 
 				logger.info("got valid ticket from session for user:"+headerUserName);
 				redirect(resp, req);

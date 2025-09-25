@@ -24,6 +24,7 @@ public class SecurityConfigurationBasic {
 
     @Bean
     SecurityFilterChain app(HttpSecurity http) throws Exception {
+        http.securityMatcher("/rest","/rest/**");
         CSRFConfig.config(http);
         HeadersConfig.config(http);
         return http.build();

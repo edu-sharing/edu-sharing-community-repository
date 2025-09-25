@@ -3,7 +3,7 @@ package org.edu_sharing.spring.security.saml2;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.spring.security.basic.CSRFConfig;
 import org.edu_sharing.spring.security.basic.EduAuthSuccsessHandler;
@@ -36,12 +36,12 @@ import java.lang.reflect.InvocationTargetException;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
+@Slf4j
 @Profile(SecurityConfigurationSaml.PROFILE_ID)
 @EnableWebSecurity()
 @Configuration
 public class SecurityConfigurationSaml {
 
-    Logger logger = Logger.getLogger(SecurityConfigurationSaml.class);
 
     @Autowired(required = false)
     Saml2LogoutRequestResolver logoutRequestResolver;
@@ -107,7 +107,7 @@ public class SecurityConfigurationSaml {
      *
      * @return "/components/login"  when loginProvidersUrl + loginAllowLocal is set to allow custom wayf list else returns null
      */
-    private String getLoginPath() {
+    public static String getLoginPath() {
         String loginPath = null;
         org.edu_sharing.alfresco.service.config.model.Config clientConfig = null;
         try {
@@ -119,7 +119,7 @@ public class SecurityConfigurationSaml {
                 loginPath =   "/components/login";
             }
         } catch (Exception e) {
-            logger.error(e.getMessage(),e);
+            log.error(e.getMessage(),e);
         }
         return loginPath;
     }

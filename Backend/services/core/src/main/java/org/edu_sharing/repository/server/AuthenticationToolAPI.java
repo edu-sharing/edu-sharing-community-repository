@@ -27,11 +27,7 @@
  */
 package org.edu_sharing.repository.server;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import jakarta.servlet.http.HttpSession;
-
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationComponent;
@@ -51,8 +47,16 @@ import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
-import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 	
@@ -95,8 +99,28 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 		if(toolPermissionService != null) {
 			toolPermissionService.invalidateSessionCache();
 		}
+
 		return returnval;
 	};
+
+	public void addToSpringContext(String userName, HttpSession session) {
+		UserDetails user = User.withUsername(userName)
+				.password("N/A")   // Password not longer needed
+				.roles("USER")
+				.build();
+
+		Authentication auth = new UsernamePasswordAuthenticationToken(
+				user, null, user.getAuthorities()
+		);
+
+		// set auth in SecurityContext
+		SecurityContext context = SecurityContextHolder.createEmptyContext();
+		context.setAuthentication(auth);
+		SecurityContextHolder.setContext(context);
+
+		// set Session-Attribut
+		session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
+	}
 	
 	@Override
 	public Map<String, String> getUserInfo(String userName, String ticket) throws Exception {
@@ -135,7 +159,7 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 		authInfo.put(CCConstants.AUTH_USER_HOMEDIR, homeFolderId);
 		
 		boolean isAdmin = mcAlfrescoAPIClient.isAdmin(authInfo.get(CCConstants.AUTH_USERNAME));
-		authInfo.put(CCConstants.AUTH_USER_ISADMIN, new Boolean(isAdmin).toString());
+		authInfo.put(CCConstants.AUTH_USER_ISADMIN, Boolean.valueOf(isAdmin).toString());
 	}
 
 	public String setUser(String authorityName){
@@ -247,6 +271,8 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 				session.setAttribute(CCConstants.AUTH_LOCALE, localeObj.toString());
 			}
 		}
+
+		addToSpringContext(username,session);
 	}
 	
 	public void authenticateUser(String username, HttpSession session) {

@@ -1,15 +1,16 @@
 package org.edu_sharing.spring.security.server.oauth2;
 
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import lombok.extern.slf4j.Slf4j;
 import org.edu_sharing.spring.conditions.ConditionalOnProperty;
+import org.edu_sharing.spring.security.openid.SecurityConfigurationOpenIdConnect;
+import org.edu_sharing.spring.security.saml2.SecurityConfigurationSaml;
 import org.edu_sharing.spring.security.server.oauth2.config.OAuth2ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -27,11 +28,8 @@ import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.interfaces.RSAPublicKey;
+import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -42,6 +40,10 @@ public class OAuth2AuthorizationServerConfig {
 
     @Autowired
     OAuth2ConfigService oAuth2ConfigService;
+
+
+    @Autowired
+    Environment env;
 
     @Bean
     //@Order(1)
@@ -57,11 +59,21 @@ public class OAuth2AuthorizationServerConfig {
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .csrf(csrf -> csrf.ignoringRequestMatchers(authorizationServerConfigurer.getEndpointsMatcher()))
                 .exceptionHandling(e ->
-                        e.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/shibboleth")))
+                        e.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint(getLoginPath())))
                 .with(authorizationServerConfigurer, Customizer.withDefaults());
         return http.build();
     }
 
+
+    String getLoginPath(){
+        if(Arrays.asList(env.getActiveProfiles()).contains(SecurityConfigurationSaml.PROFILE_ID)){
+            return SecurityConfigurationSaml.getLoginPath();
+        }
+        if(Arrays.asList(env.getActiveProfiles()).contains(SecurityConfigurationOpenIdConnect.PROFILE_ID)){
+            return "/shibboleth";
+        }
+        return "/components/login?next=/shibboleth";
+    }
 
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
