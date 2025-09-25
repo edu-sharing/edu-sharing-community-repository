@@ -62,7 +62,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { OptionsHelperService } from '../../services/options-helper.service';
 
-export type PrimaryMode = 'activity' | 'share' | 'collections' | 'workspace' | 'search';
+export type PrimaryMode = 'activity' | 'share' | 'assignment';
 type RouteConfig = {
     primaryMode: PrimaryMode;
 };
@@ -79,6 +79,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     readonly PageCount = 25;
     readonly TabWidgetActivities = 'virtual:activityType';
     readonly TabWidgetShares = 'virtual:shareDirection';
+    readonly TabWidgetAssignment = 'virtual:assignmentType';
     readonly InteractionType = InteractionType;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Scope = Scope;
@@ -94,10 +95,16 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
      * mds group, used to fetch the template group AND search query id!
      */
     mdsGroup = signal<string>(null);
+
     params$ = new BehaviorSubject<RouteConfig>(null);
     loginInfo$ = new BehaviorSubject<LoginInfo>(null);
     queryParams$ = new BehaviorSubject<Params>(null);
     tabSelection$ = new BehaviorSubject<number>(0);
+
+    /**
+     * primary component to show in the center
+     */
+    mainComponent$ = new BehaviorSubject<string>(null);
     searchValues$ = new BehaviorSubject<Values>({});
     mdsLoaded$ = new BehaviorSubject(false);
     searchEvent$: Observable<SearchEvent>;
@@ -278,6 +285,37 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 } else {
                     this.editorialPageService.registerTabsFromWidget(widget);
                 }
+            } else if (p.primaryMode === 'assignment') {
+                this.columns.set({
+                    Default: [
+                        new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
+                        new ListItem('NODE', RestConstants.LOM_PROP_DESCRIPTION),
+                    ],
+                });
+                this.mdsDefinition$.next(
+                    await firstValueFrom(
+                        this.mdsService.getMetadataSet({ repository: HOME_REPOSITORY }),
+                    ),
+                );
+                const widget = MdsHelperService.getWidget(
+                    this.TabWidgetAssignment,
+                    null,
+                    this.mdsDefinition$.value.widgets,
+                );
+                this.updateCreateOptions([
+                    new OptionItem('EDITORIAL.CREATE.ASSIGNMENT', 'task', () =>
+                        this.mainComponent$.next('createAssignment'),
+                    ),
+                ]);
+                this.mdsGroup.set('editorial_assignment');
+                if (widget == null) {
+                    console.warn(
+                        'Can not register tabs since widget definition was not found',
+                        this.TabWidgetAssignment,
+                    );
+                } else {
+                    this.editorialPageService.registerTabsFromWidget(widget);
+                }
             }
         });
     }
@@ -305,6 +343,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             ),
             this.tabSelection$.pipe(distinctUntilChanged()),
             this.pagination$.pipe(distinctUntilChanged((a, b) => Helper.objectEquals(a, b))),
+            this.mainComponent$.pipe(distinctUntilChanged()),
             // first one will be the init of the set
             this.searchValues$.pipe(
                 distinctUntilChanged((a, b) => Helper.objectEquals(a, b)),
@@ -316,12 +355,13 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 distinctUntilChanged(),
                 debounceTime(50),
             )
-            .subscribe(([init, search, tab, pagination, values]) => {
+            .subscribe(([init, search, tab, pagination, mainComponent, values]) => {
                 console.log('THIS MUST BE SHOWN ONCE', search, tab, pagination, values);
                 const queryParams = {
                     q: search?.searchString,
                     offset: pagination?.skipCount || null,
                     size: pagination?.maxItems || null,
+                    mainComponent,
                     filters: JSON.stringify({
                         ...values,
                         ...this.editorialPageService.buildSearchCriteria(tab),
@@ -342,6 +382,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         });
         const mds = await firstValueFrom(this.mdsDefinition$.pipe(filter((m) => !!m)));
         const criteria = JSON.parse(params.filters || '{}');
+        this.mainComponent$.next(params.mainComponent || null);
         const pagination = {
             skipCount: parseInt(params.offset) || 0,
             maxItems: parseInt(params.size) || this.PageCount,
@@ -375,7 +416,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         this.dataSource.isLoading = true;
         this.dataSource.reset();
 
-        this.nodeEntriesRef.setPaginator(pagination);
+        this.nodeEntriesRef?.setPaginator(pagination);
         // wait for mds and delay to make sure the facets are registered
         await firstValueFrom(
             this.mdsLoaded$.pipe(
@@ -503,5 +544,15 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 ),
             ),
         );
+    }
+
+    private updateCreateOptions(options: OptionItem[]) {
+        options.map((o) => {
+            o.elementType = [ElementType.NoneOrUnknown];
+            return o;
+        });
+        this.mainNav.patchMainNavConfig({
+            customCreateOptions: options,
+        });
     }
 }

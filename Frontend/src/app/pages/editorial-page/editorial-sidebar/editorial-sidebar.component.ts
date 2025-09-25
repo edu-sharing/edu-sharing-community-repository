@@ -33,7 +33,7 @@ import { PrimaryMode } from '../editorial-page.component';
 import { NodesSelectorComponent } from '../nodes-selector/nodes-selector.component';
 import { MetadataSidebarComponent } from '../../workspace-page/metadata/metadata-sidebar.component';
 import { PreviewSidebarModule } from '../../../features/preview-sidebar/preview-sidebar.module';
-
+export type SidebarContext = PrimaryMode | 'collections' | 'workspace' | 'search';
 @Component({
     selector: 'es-editorial-sidebar',
     templateUrl: 'editorial-sidebar.component.html',
@@ -53,7 +53,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     parent = input<Node>();
     nodes = input<Node[]>();
-    primaryMode = input.required<PrimaryMode>();
+    primaryMode = input.required<SidebarContext>();
     enabledOption = signal<OptionItem>(null);
     isModal = input<boolean>(false);
 

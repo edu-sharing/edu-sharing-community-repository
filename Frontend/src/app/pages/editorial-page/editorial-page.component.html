@@ -2,7 +2,7 @@
   <mat-sidenav
     #leftSidenav
     [mode]="'side'"
-    [opened]="sidenavLeft()"
+    [opened]="sidenavLeft() && (mainComponent$ | async) === null"
     position="start"
     class="es-mat-sidenav"
     storageKey="EDITORIAL_SIDENAV_LEFT_WIDTH"
@@ -58,38 +58,43 @@
         <es-editorial-breadcrumb [mode]="(params$ | async).primaryMode"></es-editorial-breadcrumb>
         <es-actionbar [numberOfAlwaysVisibleOptions]="1"></es-actionbar>
       </div>
-      <mat-tab-group
-        *ngIf="(editorialPageService.observeTabs() | async)?.length"
-        [selectedIndex]="tabSelection$ | async"
-        (selectedIndexChange)="tabSelection$.next($event)"
-      >
-        <mat-tab *ngFor="let tab of editorialPageService.observeTabs() | async">
-          <ng-template mat-tab-label>
-            <i [esIcon]="tab.icon"></i>
-            {{ tab.caption ? tab.caption : ('EDITORIAL.TAB.' + tab.id | translate) }}
-          </ng-template>
-        </mat-tab>
-      </mat-tab-group>
-      <ng-container *ngIf="(params$ | async).primaryMode as mode">
-        <ng-container *ngIf="mode === 'activity' || mode === 'share'">
-          <es-node-entries-wrapper
-            [primaryInstance]="true"
-            [dataSource]="dataSource"
-            [elementInteractionType]="InteractionType.Emitter"
-            [scope]="Scope.EditorialPage"
-            singleClickHint="static"
-            (clickItem)="select($event)"
-            (fetchData)="fetchEvent($event)"
-            (selectionChange)="selection.set($any($event.source))"
-            [columns]="columns()"
-            [displayType]="displayType()"
-          >
-            <ng-template #empty>
-              <div class="empty">
-                {{ 'EDITORIAL.' + mode.toUpperCase() + '.EMPTY' | translate }}
-              </div>
+      <ng-container *ngIf="mainComponent$ | async as component">
+        {{ component }}
+      </ng-container>
+      <ng-container *ngIf="(mainComponent$ | async) === null">
+        <mat-tab-group
+          *ngIf="(editorialPageService.observeTabs() | async)?.length"
+          [selectedIndex]="tabSelection$ | async"
+          (selectedIndexChange)="tabSelection$.next($event)"
+        >
+          <mat-tab *ngFor="let tab of editorialPageService.observeTabs() | async">
+            <ng-template mat-tab-label>
+              <i [esIcon]="tab.icon"></i>
+              {{ tab.caption ? tab.caption : ('EDITORIAL.TAB.' + tab.id | translate) }}
             </ng-template>
-          </es-node-entries-wrapper>
+          </mat-tab>
+        </mat-tab-group>
+        <ng-container *ngIf="(params$ | async).primaryMode as mode">
+          <ng-container *ngIf="mode === 'activity' || mode === 'share' || mode === 'assignment'">
+            <es-node-entries-wrapper
+              [primaryInstance]="true"
+              [dataSource]="dataSource"
+              [elementInteractionType]="InteractionType.Emitter"
+              [scope]="Scope.EditorialPage"
+              singleClickHint="static"
+              (clickItem)="select($event)"
+              (fetchData)="fetchEvent($event)"
+              (selectionChange)="selection.set($any($event.source))"
+              [columns]="columns()"
+              [displayType]="displayType()"
+            >
+              <ng-template #empty>
+                <div class="empty">
+                  {{ 'EDITORIAL.' + mode.toUpperCase() + '.EMPTY' | translate }}
+                </div>
+              </ng-template>
+            </es-node-entries-wrapper>
+          </ng-container>
         </ng-container>
       </ng-container>
     </div>
