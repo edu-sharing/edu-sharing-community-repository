@@ -17,15 +17,16 @@
   </ng-container>
   <ng-container *ngIf="!getCustomTemplate()">
     <img
+      *ngIf="node.relations?.Original || node as n"
       [src]="node | esNodeIcon | async"
       [alt]="
-        node.mediatype
-          ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
+        n.mediatype
+          ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + n.mediatype | translate)
           : ''
       "
       [matTooltip]="
-        node.mediatype
-          ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
+        n.mediatype
+          ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + n.mediatype | translate)
           : ''
       "
     />
