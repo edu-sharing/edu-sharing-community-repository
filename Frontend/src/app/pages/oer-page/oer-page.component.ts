@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
+    ColumnType,
     ListItem,
     MdsHelperService,
     OptionItem,
@@ -37,7 +38,7 @@ export class OerPageComponent implements OnInit, OnDestroy {
     public MATERIALS = 1;
     public TOOLS = 2;
     private TYPE_COUNT = 3;
-    columns: ListItem[][] = [];
+    columns: ColumnType[] = [];
     private options: OptionItem[][] = [];
     private displayedNode: Node;
     private currentQuerySubject = new BehaviorSubject<string>(null);
@@ -62,6 +63,7 @@ export class OerPageComponent implements OnInit, OnDestroy {
         private nodeHelper: NodeHelperService,
         private searchService: RestSearchService,
         private mdsService: RestMdsService,
+        private mdsHelperService: MdsHelperService,
         private storage: TemporaryStorageService,
         private translations: TranslationsService,
         private mainNav: MainNavService,
@@ -70,20 +72,14 @@ export class OerPageComponent implements OnInit, OnDestroy {
     ) {
         this.translations.waitForInit().subscribe(() => {
             for (let i = 0; i < this.TYPE_COUNT; i++) {
-                this.columns.push([]);
+                this.columns.push({ Default: [] });
                 this.updateOptions(i);
                 this.nodes.push([]);
             }
 
-            this.columns[this.COLLECTIONS].push(new ListItem('NODE', RestConstants.CM_NAME));
-            this.columns[this.COLLECTIONS].push(new ListItem('COLLECTION', 'info'));
-            this.columns[this.COLLECTIONS].push(new ListItem('COLLECTION', 'scope'));
+            this.columns[this.COLLECTIONS].Default = ListItem.getCollectionDefaults();
             this.mdsService.getSet().subscribe((mds: any) => {
-                this.columns[this.MATERIALS] = MdsHelperService.getColumns(
-                    this.translate,
-                    mds,
-                    'search',
-                );
+                this.columns[this.MATERIALS] = this.mdsHelperService.getColumns(mds, 'search');
             });
             /*
           this.config.get("searchColumns").subscribe((data:any)=>{
@@ -102,8 +98,10 @@ export class OerPageComponent implements OnInit, OnDestroy {
           });
           //this.columns[this.MATERIALS].push(new ListItem("NODE",RestConstants.CCM_PROP_REPLICATIONSOURCE));
           */
-            this.columns[this.TOOLS].push(new ListItem('NODE', RestConstants.CM_NAME));
-            this.columns[this.TOOLS].push(new ListItem('NODE', RestConstants.LOM_PROP_DESCRIPTION));
+            this.columns[this.TOOLS].Default.push(new ListItem('NODE', RestConstants.CM_NAME));
+            this.columns[this.TOOLS].Default.push(
+                new ListItem('NODE', RestConstants.LOM_PROP_DESCRIPTION),
+            );
 
             this.connector.numberPerRequest = 20;
             for (let i = 0; i < this.TYPE_COUNT; i++) {

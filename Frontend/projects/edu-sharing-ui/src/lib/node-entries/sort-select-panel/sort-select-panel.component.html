@@ -12,7 +12,9 @@
     mat-button
     color="primary"
   >
-    <span *ngIf="active">{{ 'NODE.' + active | translate }}</span>
+    <span *ngIf="active">{{
+      'NODE_SORT.' + active | translate : { fallback: ('NODE.' + active | translate) }
+    }}</span>
     <span *ngIf="!active">{{ 'SORT_BY' | translate }}</span>
     <i
       *ngIf="active && active !== 'ccm:collection_ordered_position'"

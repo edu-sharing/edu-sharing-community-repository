@@ -25,6 +25,7 @@ import {
 import {
     ActionbarComponent,
     CanDrop,
+    ColumnType,
     DragData,
     DropSource,
     FetchEvent,
@@ -44,7 +45,7 @@ import {
     UIConstants,
     VirtualNode,
 } from 'ngx-edu-sharing-ui';
-import { forkJoin, Subject } from 'rxjs';
+import { firstValueFrom, forkJoin, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import * as EduData from '../../../core-module/core.module';
 import {
@@ -167,8 +168,8 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     });
     dataSourceCollections = new NodeDataSource<Node>();
     dataSourceReferences = new NodeDataSource<CollectionReference>();
-    collectionsColumns: ListItem[] = [];
-    referencesColumns: ListItem[] = [];
+    collectionsColumns: ColumnType;
+    referencesColumns: ColumnType;
     private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed$ });
 
     private contentNode: Node;
@@ -186,6 +187,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         private loadingScreen: LoadingScreenService,
         private mainNavService: MainNavService,
         private mdsService: MdsService,
+        private mdsHelperService: MdsHelperService,
         private nodeHelper: NodeHelperService,
         private nodeService: RestNodeService,
         private optionsService: OptionsHelperDataService,
@@ -200,10 +202,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         // this.collectionCustomSortEmitter.subscribe((state: boolean) => state ? this.toggleCollectionsOrder() : this.changeCollectionsOrder());
         // this.referenceSortEmitter.subscribe((sort: SortEvent) => this.setReferenceSort(sort));
         // this.referenceCustomSortEmitter.subscribe((state: boolean) => state ? this.toggleReferencesOrder() : this.changeReferencesOrder());
-        this.collectionsColumns.push(new ListItem('COLLECTION', 'title'));
-        this.collectionsColumns.push(new ListItem('COLLECTION', 'info'));
-        this.collectionsColumns.push(new ListItem('COLLECTION', 'scope'));
-
+        this.collectionsColumns = {
+            Default: ListItem.getCollectionDefaults(),
+        };
         this.mainNavService.getDialogs().eventTriggered.subscribe((event: ManagementEvent) => {
             if (event.event === ManagementEventType.AddCollectionNodes) {
                 if (event.data.collection.ref.id === this.collection.ref.id) {
@@ -236,14 +237,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             this.mdsService,
             this.configurationService,
         );
-        const set = await this.mdsService
-            .getMetadataSet({ metadataSet: mdsSets[0].id })
-            .toPromise();
-        this.referencesColumns = MdsHelperService.getColumns(
-            this.translation,
-            set,
-            'collectionReferences',
+        const set = await firstValueFrom(
+            this.mdsService.getMetadataSet({ metadataSet: mdsSets[0].id }),
         );
+        this.referencesColumns = this.mdsHelperService.getColumns(set, 'collectionReferences');
 
         // check: this sometimes caused missing actionbar data, why is it here?
         //this.optionsService.clearComponents(this.actionbarReferences);

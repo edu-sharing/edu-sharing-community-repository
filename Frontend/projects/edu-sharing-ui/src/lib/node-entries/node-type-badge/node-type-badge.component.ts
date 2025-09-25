@@ -1,7 +1,8 @@
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, Input, OnChanges, Optional } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { CustomFieldSpecialType, NodeEntriesGlobalService } from '../node-entries-global.service';
 import { NodeHelperService } from '../../services/node-helper.service';
+import { NodeEntriesService } from '../../services/node-entries.service';
 
 /**
  * A small circular badge that depicts the node's type.
@@ -22,6 +23,7 @@ export class NodeTypeBadgeComponent implements OnChanges {
     constructor(
         public nodeHelper: NodeHelperService,
         private nodeEntriesGlobalService: NodeEntriesGlobalService,
+        @Optional() public nodeEntriesService: NodeEntriesService<Node>,
     ) {}
 
     ngOnChanges(): void {

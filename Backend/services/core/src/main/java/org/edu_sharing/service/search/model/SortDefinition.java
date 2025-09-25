@@ -12,6 +12,8 @@ import org.alfresco.util.Pair;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.spring.ApplicationContextFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 
 import java.io.Serializable;
@@ -121,16 +123,39 @@ public class SortDefinition implements Serializable {
 	}
 	public void applyToSearchParameters(SearchParameters searchParameters) {
 		// Group by Folders & Files
-		sortDefinitionEntries.add(0, new SortDefinitionEntry("TYPE",false));
-		for (SortDefinitionEntry sortDefintionEntry : getSortDefinitionEntries()) {
+		List<SortDefinitionEntry> entries = prepareParameters();
+		entries.add(0, new SortDefinitionEntry("TYPE",false));
+		for (SortDefinitionEntry sortDefintionEntry : entries) {
 			searchParameters.addSort(sortDefintionEntry.getProperty(), sortDefintionEntry.isAscending());
 		}
 	}
 
+	/**
+	 * map custom sorting
+	 * @Service
+	 * public class CustomSortDefinitionMapping implements SortDefinition.SortDefinitionMapping {
+	 *     @Override
+	 *     public List<SortDefinition.SortDefinitionEntry> getCustomMapping(List<SortDefinition.SortDefinitionEntry> entries)
+	 */
+	public interface SortDefinitionMapping {
+		List<SortDefinitionEntry> getCustomMapping(List<SortDefinitionEntry> entries);
+	}
+	private List<SortDefinitionEntry> prepareParameters() {
+		try {
+			return ApplicationContextFactory.getApplicationContext().getBean(SortDefinitionMapping.class).getCustomMapping(getSortDefinitionEntries());
+		} catch (NoSuchBeanDefinitionException ignored) {
+
+		} catch(Throwable t){
+			logger.warn(t.getMessage(), t);
+		}
+		return getSortDefinitionEntries();
+	}
+
 	public void applyToSearchSourceBuilder(co.elastic.clients.elasticsearch.core.SearchRequest.Builder builder) {
 		// Group by Folders & Files
+		List<SortDefinitionEntry> entries = prepareParameters();
 		builder.sort(sort -> sort.field(field -> field.field("type").order(SortOrder.Desc)));
-		for (SortDefinitionEntry sortDefintionEntry : getSortDefinitionEntries()) {
+		for (SortDefinitionEntry sortDefintionEntry : entries) {
 			SortOrder sortOrder = sortDefintionEntry.ascending ? SortOrder.Asc : SortOrder.Desc;
 			if(sortDefintionEntry.getProperty().equalsIgnoreCase("score")) {
 				builder.sort(sort->sort.score(score->score.order(sortOrder)));

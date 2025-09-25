@@ -1,7 +1,7 @@
 import { Injectable, Injector } from '@angular/core';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
-import { Content, StyleDictionary, TDocumentDefinitions } from 'pdfmake/interfaces';
+import { Content, TDocumentDefinitions } from 'pdfmake/interfaces';
 import { Node } from 'ngx-edu-sharing-api';
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { NodeHelperService } from './node-helper.service';
@@ -10,7 +10,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { MdsEditorInstanceService } from '../features/mds/mds-editor/mds-editor-instance.service';
 import { firstValueFrom } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { NodeLicensePipe } from 'ngx-edu-sharing-ui';
+import { MdsViewerService, NodeLicensePipe } from 'ngx-edu-sharing-ui';
 import { filter } from 'rxjs/operators';
 
 pdfMake.vfs = pdfFonts.vfs;
@@ -21,6 +21,7 @@ export class PdfService {
         private injector: Injector,
         private translate: TranslateService,
         private mdsEditorInstanceService: MdsEditorInstanceService,
+        private mdsViewerService: MdsViewerService,
         private http: HttpClient,
     ) {}
 
@@ -257,11 +258,11 @@ export class PdfService {
                 );
                 content.push([
                     widget.definition.caption,
-                    widget.getFormattedValue(
+                    this.mdsViewerService.getFormattedValue(
                         displayValues.values?.map((v) => v.displayString || v.key) ||
                             initialValues.jointValues,
-                        widget.getBasicType(true),
-                        this.translate,
+                        widget.definition,
+                        MdsViewerService.getBasicType(widget.definition, true),
                     )[0],
                 ]);
             }

@@ -29,7 +29,10 @@
 </form>
 <div class="relation-result" *ngIf="target">
   <div class="relation-node">
-    <es-node-row [node]="swapRelation ? target : source" [columns]="selector.columns"></es-node-row>
+    <es-node-row
+      [node]="swapRelation ? target : source"
+      [columns]="selector.columns.Default"
+    ></es-node-row>
     <button
       mat-icon-button
       color="primary"
@@ -48,7 +51,10 @@
     <span>{{ 'NODE_RELATIONS.RELATION_TYPE.' + form.get('relation').value | translate }}</span>
   </div>
   <div class="relation-node">
-    <es-node-row [node]="swapRelation ? source : target" [columns]="selector.columns"></es-node-row>
+    <es-node-row
+      [node]="swapRelation ? source : target"
+      [columns]="selector.columns.Default"
+    ></es-node-row>
     <button
       mat-icon-button
       color="primary"
@@ -89,7 +95,7 @@
         *ngFor="let relation of getRelations(key)"
         [class.added]="addRelations.includes(relation)"
       >
-        <es-node-row [node]="relation.node" [columns]="columns">
+        <es-node-row [node]="relation.node" [columns]="columns.Default">
           <ng-template #customMetadata>
             <div class="info-group">
               <label>{{ 'NODE_RELATIONS.RELATION_CREATED' | translate }}</label>

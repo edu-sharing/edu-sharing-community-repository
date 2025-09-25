@@ -23,6 +23,7 @@ import { Toast } from '../../../services/toast';
 import { Helper } from '../../../core-module/rest/helper';
 import {
     ActionbarComponent,
+    ColumnType,
     CustomOptions,
     DropSource,
     DropTarget,
@@ -176,7 +177,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     };
     sortReady = new BehaviorSubject(false);
 
-    public columns: ListItem[] = [];
+    public columns: ColumnType;
     @Input() displayType = NodeEntriesDisplayType.Table;
     @Output() refreshTree = new EventEmitter<void>();
     @Output() displayTypeChange = new EventEmitter<NodeEntriesDisplayType>();
@@ -478,7 +479,9 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     initColumns() {
         this.config.get('workspaceColumns').subscribe((data: string[]) => {
             this.storage.get('workspaceColumns').subscribe((columns: any[]) => {
-                this.columns = WorkspaceExplorerComponent.getColumns(this.connector, columns, data);
+                this.columns = {
+                    Default: WorkspaceExplorerComponent.getColumns(this.connector, columns, data),
+                };
             });
         });
     }
