@@ -1,20 +1,3 @@
-<es-dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></es-dropdown>
-<button
-  #menuTrigger="matMenuTrigger"
-  mat-button
-  class="dropdown-dummy cdk-visually-hidden"
-  [style.left.px]="dropdownLeft"
-  [style.top.px]="dropdownTop"
-  [matMenuTriggerFor]="dropdown.menu"
-  tabindex="-1"
-  aria-hidden="true"
-></button>
-<es-node-entries-global-options
-  *ngIf="(entriesService.globalOptionsSubject | async)?.length"
-  [displayType]="NodeEntriesDisplayType.Tree"
->
-</es-node-entries-global-options>
-
 <!-- search field + filter button -->
 <div class="tree-search-container">
   <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
@@ -59,53 +42,86 @@
 </div>
 
 <!-- tree component -->
-<mat-tree
-  [dataSource]="dataSource"
-  [treeControl]="treeControl"
-  *ngIf="dataSource && treeControl && dataSource.data?.length"
->
-  <!-- child nodes -->
-  <mat-tree-node
-    *matTreeNodeDef="let node"
-    matTreeNodePadding
-    [class.selected]="entriesService.selection.isSelected(node.item)"
+<div class="tree-container">
+  <es-dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></es-dropdown>
+  <button
+    #menuTrigger="matMenuTrigger"
+    mat-button
+    class="dropdown-dummy cdk-visually-hidden"
+    [style.left.px]="dropdownLeft"
+    [style.top.px]="dropdownTop"
+    [matMenuTriggerFor]="dropdown.menu"
+    tabindex="-1"
+    aria-hidden="true"
+  ></button>
+  <es-node-entries-global-options
+    *ngIf="(entriesService.globalOptionsSubject | async)?.length"
+    [displayType]="NodeEntriesDisplayType.Tree"
   >
-    <ng-container *ngTemplateOutlet="nodeInformation; context: { node: node }"></ng-container>
-  </mat-tree-node>
-  <!-- nodes with children -->
-  <!-- flex-wrap: wrap; is necessary to wrap the loading containers to the next line -->
-  <mat-tree-node
-    class="child-tree-node"
-    [class.selected]="entriesService.selection.isSelected(node.item)"
-    *matTreeNodeDef="let node; when: hasChild"
-    matTreeNodePadding
-    [cdkTreeNodeTypeaheadLabel]="node.item"
+  </es-node-entries-global-options>
+  <mat-tree
+    [dataSource]="dataSource"
+    [treeControl]="treeControl"
+    *ngIf="dataSource && treeControl && dataSource.data?.length"
   >
-    <div class="child-tree-node-container">
-      <a
-        matIconButton
-        class="toggle-button"
-        role="button"
-        matTreeNodeToggle
-        tabindex="0"
-        [attr.aria-label]="'Toggle ' + node.item"
-      >
-        <i [esIcon]="treeControl.isExpanded(node) ? 'expand_less' : 'chevron_right'"></i>
-      </a>
+    <!-- child nodes -->
+    <mat-tree-node
+      *matTreeNodeDef="let node"
+      matTreeNodePadding
+      [class.selected]="entriesService.selection.isSelected(node.item)"
+    >
       <ng-container *ngTemplateOutlet="nodeInformation; context: { node: node }"></ng-container>
-    </div>
+    </mat-tree-node>
 
-    <ng-container *ngIf="node.isLoading()">
-      <div class="flex-line-break"></div>
-      <div class="placeholder-container" *ngIf="node.item.collection?.childCollectionsCount">
-        <div
-          class="placeholder"
-          *ngFor="let i of childrenIndices(node.item.collection.childCollectionsCount)"
-        ></div>
+    <!-- load more button for leaf nodes -->
+    <mat-tree-node *matTreeNodeDef="let node; when: isLoadMoreNode" matTreeNodePadding>
+      <div class="load-more-container">
+        <button mat-button color="primary" (click)="loadFurtherChildren(node)">
+          <i esIcon="refresh"></i>
+          <span>{{ 'LOAD_MORE' | translate }}</span>
+        </button>
       </div>
-    </ng-container>
-  </mat-tree-node>
-</mat-tree>
+    </mat-tree-node>
+
+    <!-- nodes with children -->
+    <!-- flex-wrap: wrap; is necessary to wrap the loading containers to the next line -->
+    <mat-tree-node
+      class="child-tree-node"
+      [class.selected]="entriesService.selection.isSelected(node.item)"
+      *matTreeNodeDef="let node; when: hasChild"
+      matTreeNodePadding
+      [cdkTreeNodeTypeaheadLabel]="node.item"
+    >
+      <div class="child-tree-node-container">
+        <a
+          matIconButton
+          [attr.id]="'toggle-' + node.item.ref.id"
+          class="toggle-button fade"
+          role="button"
+          matTreeNodeToggle
+          tabindex="0"
+          [attr.aria-label]="'Toggle ' + node.item.title"
+        >
+          <i [esIcon]="treeControl.isExpanded(node) ? 'expand_less' : 'chevron_right'"></i>
+        </a>
+        <ng-container *ngTemplateOutlet="nodeInformation; context: { node: node }"></ng-container>
+      </div>
+
+      <ng-container *ngIf="node.isLoading()">
+        <div class="flex-line-break"></div>
+        <div
+          class="placeholder-container"
+          *ngIf="node.item.collection?.childCollectionsCount; else loading"
+        >
+          <div
+            class="placeholder"
+            *ngFor="let i of childrenIndices(node.item.collection.childCollectionsCount)"
+          ></div>
+        </div>
+      </ng-container>
+    </mat-tree-node>
+  </mat-tree>
+</div>
 
 <ng-template #nodeInformation let-node="node">
   <div
@@ -113,7 +129,7 @@
     [class.cursor-pointer]="node.level > 0"
     (click)="updateSelectedNodes(node)"
   >
-    <div class="container">
+    <div class="general-information container">
       <ng-container *ngIf="node.item.iconURL; else previewIcon">
         <img [src]="node.item.iconURL" />
       </ng-container>
@@ -127,15 +143,39 @@
           />
         </ng-template>
       </ng-template>
-      <span [class.font-bold]="node.level === 0">
-        {{ node.item | nodeTitle }}
+      <span
+        class="node-title"
+        [class.font-bold]="node.level === 0"
+        [matTooltip]="
+          node.item && titleWrapper.offsetWidth < title.offsetWidth ? title.innerText : null
+        "
+        #titleWrapper
+      >
+        <span #title>
+          {{ node.item | nodeTitle }}
+        </span>
       </span>
     </div>
-    <div class="container">
-      <div class="node-detail" *ngIf="node.item.collection?.childCollectionsCount">
+    <div
+      class="action-buttons container"
+      *ngIf="
+        (node.item.mediatype === 'collection' &&
+          (node.item.collection?.childCollectionsCount ||
+            node.item.collection?.childReferencesCount)) ||
+        (node.level > 0 &&
+          nodeHelper.getCollectionScopeInfo($any(node.item))?.scopeName !== 'UNKNOWN')
+      "
+    >
+      <div
+        class="node-detail"
+        *ngIf="node.item.mediatype === 'collection' && node.item.collection?.childCollectionsCount"
+      >
         <i esIcon="layers"></i> {{ node.item.collection.childCollectionsCount }}
       </div>
-      <div class="node-detail" *ngIf="node.item.collection?.childReferencesCount">
+      <div
+        class="node-detail"
+        *ngIf="node.item.mediatype === 'collection' && node.item.collection?.childReferencesCount"
+      >
         <i esIcon="insert_drive_file"></i> {{ node.item.collection.childReferencesCount }}
       </div>
       <ng-container *ngIf="nodeHelper.getCollectionScopeInfo($any(node.item)) as scopeInfo">
@@ -153,4 +193,10 @@
   </div>
 </ng-template>
 
-<es-spinner *ngIf="entriesService.dataSource.isLoadingSubject | async"></es-spinner>
+<ng-container *ngIf="entriesService.dataSource.isLoadingSubject | async">
+  <ng-container *ngTemplateOutlet="loading"></ng-container>
+</ng-container>
+
+<ng-template #loading>
+  <es-spinner></es-spinner>
+</ng-template>

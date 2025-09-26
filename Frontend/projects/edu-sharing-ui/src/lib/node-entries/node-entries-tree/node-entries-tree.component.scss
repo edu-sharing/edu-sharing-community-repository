@@ -11,17 +11,17 @@
     position: fixed;
 }
 
+:host ::ng-deep .search-field {
+    --mdc-outlined-text-field-container-shape: 28px;
+}
+
 .tree-search-container {
     display: flex;
     align-items: center;
 
     .search-field {
         flex: 1;
-        border-radius: 50px !important;
-
-        ::ng-deep .mat-mdc-form-field-outline {
-            border-radius: 50px !important;
-        }
+        display: flex;
     }
 
     .filter-button {
@@ -39,6 +39,12 @@ mat-tree-node.selected {
     background: #f2fafe;
 }
 
+.load-more-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
 .child-tree-node {
     flex-wrap: wrap;
 
@@ -53,6 +59,17 @@ mat-tree-node.selected {
             margin-left: 8px;
             cursor: pointer;
             color: inherit;
+            display: inline-flex;
+            align-items: center;
+
+            &.fade {
+                opacity: 1;
+                transition: opacity 0.5s ease; /* Smooth fade */
+
+                &.hidden {
+                    opacity: 0 !important;
+                }
+            }
         }
     }
 
@@ -82,10 +99,27 @@ mat-tree-node.selected {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 16px;
     width: 100%;
+    // take up remaining space
+    flex: 1;
+    // allow shrinking
+    min-width: 0;
 
     &.cursor-pointer {
         cursor: pointer;
+    }
+
+    .general-information {
+        // take up remaining space
+        flex: 1;
+        // allow shrinking
+        min-width: 0;
+    }
+
+    .action-buttons {
+        // do not allow buttons to shrink
+        flex-shrink: 0;
     }
 
     .container {
@@ -99,11 +133,14 @@ mat-tree-node.selected {
         }
 
         .node-title {
-            overflow: hidden;
+            white-space: nowrap;
             text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 1;
-            -webkit-box-orient: vertical;
+            overflow: hidden;
+            //overflow: hidden;
+            //text-overflow: ellipsis;
+            //display: -webkit-box;
+            //-webkit-line-clamp: 1;
+            //-webkit-box-orient: vertical;
 
             &.font-bold {
                 font-weight: bold;

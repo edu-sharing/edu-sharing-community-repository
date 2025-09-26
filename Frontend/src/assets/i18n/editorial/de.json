@@ -6,6 +6,30 @@
     "OPTION": {
       "REJECT_SHARE": "Freigabe ausblenden"
     },
+    "OPTIONS": {
+      "SORT_INTO": "Mit Splitscreen einsortieren",
+      "SORT_INTO_DESCRIPTION": "Hier kannst du mit der Suche, aus Sammlungen und Workspace oder durch Upload etwas einsortieren.",
+      "SORT_INTO_TAB": {
+        "SEARCH": {
+          "PLACEHOLDER": "Suche nach Inhalten",
+          "NO_RESULTS": "Es konnten keine Ergebnisse gefunden werden."
+        },
+        "COPY": {
+          "SINGLE": "Gewählten Inhalt kopieren",
+          "MULTIPLE": "Gewählte Inhalte kopieren"
+        },
+        "CONFIGURE_CONFIG": {
+          "INFO_HEADING": "Wie wir Speicherplatz sparen:",
+          "INFO_MESSAGE": "Standardmäßig werden Inhalte nicht kopiert, sondern verlinkt und freigegeben. Das belastet deine Quota nicht. In den kopierten Sammlungshüllen werden Links zu den Original-Inhalten eingefügt. Später am Herkunftsort eingefügte Inhalte werden nicht freigegeben.",
+          "CONFIG_HEADING": "Kopiervorgang konfigurieren",
+          "COPY": "Kopiere",
+          "INCLUDE_MAIN": "Hauptsammlung inkludieren",
+          "INCLUDE_SUB": "Untersammlungen inkludieren",
+          "INCLUDE_ITEMS": "Inhalte inkludieren",
+          "NO_CONFIG_OPTIONS": "Für diesen Inhalt existieren keine weiteren Kopieroptionen."
+        }
+      }
+    },
     "TITLE": "Verwalten",
     "BREADCRUMB": {
       "HOME": "Startseite",

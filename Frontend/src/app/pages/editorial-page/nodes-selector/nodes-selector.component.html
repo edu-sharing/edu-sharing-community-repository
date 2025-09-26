@@ -1,50 +1,205 @@
-<mat-tab-group (selectedTabChange)="onTabChange($event)">
-  <mat-tab>
+<!-- TABS WITH CONTENT -->
+<mat-tab-group class="tab-main-view" (selectedTabChange)="onTabChange($event)">
+  <!-- SEARCH TAB -->
+  <mat-tab [id]="idPrefix + TabType.SEARCH">
     <ng-template mat-tab-label>
       <i esIcon="search" class="tab-icon"></i>
       <span class="tab-label">{{ 'SIDEBAR.SEARCH_SHORT' | translate }}</span>
     </ng-template>
+    <ng-container
+      *ngTemplateOutlet="tabContent; context: { tabType: TabType.SEARCH }"
+    ></ng-container>
   </mat-tab>
-  <mat-tab>
+
+  <!-- COLLECTIONS TAB -->
+  <mat-tab [id]="idPrefix + TabType.COLLECTIONS">
     <ng-template mat-tab-label>
       <i esIcon="layers" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TITLE' | translate }}</span>
     </ng-template>
+    <ng-container
+      *ngTemplateOutlet="tabContent; context: { tabType: TabType.COLLECTIONS }"
+    ></ng-container>
   </mat-tab>
-  <mat-tab *ngIf="'TOOLPERMISSION_WORKSPACE' | esToolpermission | async">
+
+  <!-- WORKSPACE TAB -->
+  <mat-tab
+    [id]="idPrefix + TabType.WORKSPACE"
+    *ngIf="'TOOLPERMISSION_WORKSPACE' | esToolpermission | async"
+  >
     <ng-template mat-tab-label>
       <i esIcon="cloud" class="tab-icon"></i>
       <span class="tab-label">{{ 'WORKSPACE.TITLE' | translate }}</span>
     </ng-template>
+    <ng-container
+      *ngTemplateOutlet="tabContent; context: { tabType: TabType.WORKSPACE }"
+    ></ng-container>
   </mat-tab>
-  <mat-tab>
+
+  <!-- UPLOAD TAB -->
+  <mat-tab [id]="idPrefix + TabType.UPLOAD">
     <ng-template mat-tab-label>
       <i esIcon="upload" class="tab-icon"></i>
       <span class="tab-label">{{ 'WORKSPACE.UPLOAD_EXISTS.UPLOAD' | translate }}</span>
     </ng-template>
+    <ng-container
+      *ngTemplateOutlet="tabContent; context: { tabType: TabType.UPLOAD }"
+    ></ng-container>
   </mat-tab>
 </mat-tab-group>
 
-<div class="tab-content" [ngSwitch]="selectedTabIndex">
-  <ng-container *ngSwitchCase="1">
-    <es-node-entries-wrapper
-      [columns]="collectionsColumns"
-      [dataSource]="dataSourceCollections"
-      [displayType]="NodeEntriesDisplayType.Tree"
-      (selectionChange)="onCollectionSelectionChange($event)"
-    ></es-node-entries-wrapper>
+<ng-template #tabContent let-tabType="tabType">
+  <div class="tab-content" *ngIf="tabType === selectedTab()">
+    <ng-container [ngSwitch]="selectedTab()" *ngIf="isSelectStep(); else configureCopy">
+      <!-- SEARCH TAB -->
+      <ng-container *ngSwitchCase="TabType.SEARCH">
+        <div class="search-container">
+          <div class="search-actions">
+            <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
+              <i esIcon="search" matPrefix></i>
+              <input
+                matInput
+                [placeholder]="i18nPrefix + 'SEARCH.PLACEHOLDER' | translate"
+                [(ngModel)]="searchText"
+                (keydown.enter)="executeSearch()"
+              />
+              <button
+                *ngIf="searchText"
+                matSuffix
+                mat-icon-button
+                [attr.aria-label]="'SEARCH_CLEAR' | translate"
+                (click)="clearSearch()"
+              >
+                <i esIcon="close"></i>
+              </button>
+            </mat-form-field>
+            <es-actionbar
+              #actionbarReferences
+              class="actionbar-search"
+              [class.display-none]="dataSourceSearch.isEmpty() || dataSourceSearch.isLoading"
+              [numberOfAlwaysVisibleOptions]="0"
+            ></es-actionbar>
+          </div>
+          <es-node-entries-wrapper
+            *ngIf="dataSourceSearch.isLoading || !dataSourceSearch.isEmpty()"
+            [columns]="searchColumns"
+            [dataSource]="dataSourceSearch"
+            [(displayType)]="searchDisplayType"
+            [initConfig]="{ actionbar: actionbarReferences }"
+            [scope]="Scope.Search"
+            (fetchData)="loadMore($event)"
+            (selectionChange)="onNodeSelectionChange($event)"
+          ></es-node-entries-wrapper>
+          <es-info-message
+            mode="info"
+            *ngIf="dataSourceSearch.isEmpty() && !dataSourceSearch.isLoading && searchSent()"
+          >
+            {{ i18nPrefix + 'SEARCH.NO_RESULTS' | translate }}
+          </es-info-message>
+        </div>
+      </ng-container>
+
+      <!-- COLLECTIONS TAB -->
+      <ng-container *ngSwitchCase="TabType.COLLECTIONS">
+        <es-node-entries-wrapper
+          *ngIf="selectedTab() === TabType.COLLECTIONS"
+          [columns]="collectionsColumns"
+          [dataSource]="dataSourceCollections"
+          [displayType]="NodeEntriesDisplayType.Tree"
+          (selectionChange)="onNodeSelectionChange($event)"
+        ></es-node-entries-wrapper>
+      </ng-container>
+
+      <!-- WORKSPACE TAB -->
+      <ng-container *ngSwitchCase="TabType.WORKSPACE">
+        <es-node-entries-wrapper
+          *ngIf="selectedTab() === TabType.WORKSPACE"
+          [columns]="workspaceColumns"
+          [dataSource]="dataSourceWorkspace"
+          [displayType]="NodeEntriesDisplayType.Tree"
+          (selectionChange)="onNodeSelectionChange($event)"
+        ></es-node-entries-wrapper>
+      </ng-container>
+
+      <!-- FALLBACK -->
+      <ng-container *ngSwitchDefault> No view defined for tab {{ selectedTab() }}. </ng-container>
+    </ng-container>
+    <ng-template #configureCopy>
+      <es-info-message mode="info">
+        <h4>
+          {{ i18nPrefix + 'CONFIGURE_CONFIG.INFO_HEADING' | translate }}
+        </h4>
+        {{ i18nPrefix + 'CONFIGURE_CONFIG.INFO_MESSAGE' | translate }}
+      </es-info-message>
+      <h3>
+        {{ i18nPrefix + 'CONFIGURE_CONFIG.CONFIG_HEADING' | translate }}
+      </h3>
+      <ng-container *ngIf="selectedNodes()[0] as selectedNode">
+        {{ i18nPrefix + 'CONFIGURE_CONFIG.COPY' | translate }} "{{ selectedNode.title }}"
+        <ng-container *ngIf="selectedNode.mediatype === 'collection'; else folderType">
+          ({{ 'MEDIATYPE.collection' | translate }})
+        </ng-container>
+        <ng-template #folderType> ({{ 'MEDIATYPE.folder' | translate }}) </ng-template>
+        <div
+          class="checklist"
+          *ngIf="selectedNode.mediatype === 'collection'; else noConfigOptions"
+        >
+          <mat-checkbox [(ngModel)]="configOption.includeMain" disabled>
+            Hauptsammlung inkludieren
+          </mat-checkbox>
+
+          <mat-checkbox
+            [(ngModel)]="configOption.includeSub"
+            disabled
+            *ngIf="selectedNode.collection?.childCollectionsCount"
+          >
+            {{ selectedNode.collection.childCollectionsCount }} Untersammlung{{
+              selectedNode.collection.childCollectionsCount !== 1 ? 'en' : ''
+            }}
+            inkludieren
+          </mat-checkbox>
+
+          <mat-checkbox
+            [(ngModel)]="configOption.includeItems"
+            disabled
+            *ngIf="selectedNode.collection?.childReferencesCount"
+          >
+            {{ selectedNode.collection.childReferencesCount }} Inhalt{{
+              selectedNode.collection.childReferencesCount !== 1 ? 'e' : ''
+            }}
+            inkludieren
+          </mat-checkbox>
+        </div>
+        <ng-template #noConfigOptions>
+          <es-info-message mode="info" style="display: block; margin-top: 16px">
+            {{ i18nPrefix + 'CONFIGURE_CONFIG.NO_CONFIG_OPTIONS' | translate }}
+          </es-info-message>
+        </ng-template>
+      </ng-container>
+    </ng-template>
+  </div>
+</ng-template>
+
+<!-- FOOTER ACTION BAR -->
+<div class="tab-action-bar" *ngIf="selectedNodes().length">
+  <ng-container *ngIf="!isSelectStep()">
+    <button mat-flat-button color="primary" class="back-btn" (click)="goBack()">
+      <i esIcon="arrow_back"></i>
+      {{ 'BACK' | translate }}
+    </button>
   </ng-container>
-  <ng-container *ngSwitchDefault>
-    <p>No view available for tab {{ selectedTabIndex + 1 }}.</p>
-  </ng-container>
-  {{ selectedNodes()?.length }}
-  <div
-    style="margin-top: 16px; margin-bottom: 8px; width: 100%; display: flex; justify-content: end"
-    *ngIf="selectedNodes().length"
-  >
-    <button mat-flat-button color="primary" (click)="copyNodes(selectedNodes())">
-      Gewählte Sammlung kopieren
+  <ng-container>
+    <button
+      mat-flat-button
+      color="primary"
+      [disabled]="!isValidSelection() || !isSelectStep()"
+      (click)="copyNodes()"
+    >
+      {{
+        i18nPrefix + 'COPY.' + (selectedNodes().length === 1 ? 'SINGLE' : 'MULTIPLE') | translate
+      }}
+      <ng-container *ngIf="!isSelectStep()">(TODO)</ng-container>
       <i esIcon="arrow_forward"></i>
     </button>
-  </div>
+  </ng-container>
 </div>

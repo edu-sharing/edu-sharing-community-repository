@@ -1,22 +1,118 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
-:host ::ng-deep {
-    mat-tab-header {
-        --mdc-secondary-navigation-tab-container-height: 55px;
-    }
-    .mdc-tab__text-label {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-    }
-    .mdc-tab-indicator--active {
+// workaround to set outer option height to 100%
+::ng-deep .option-EDITORIAL_OPTIONS_SORT_INTO {
+    height: 100%;
+    //overflow: hidden;
+}
+
+:host {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+
+    ::ng-deep {
+        mat-tab-header {
+            --mdc-secondary-navigation-tab-container-height: 55px;
+        }
         .mdc-tab__text-label {
-            // font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .mdc-tab-indicator--active {
+            .mdc-tab__text-label {
+                //font-weight: bold;
+            }
         }
     }
 }
 
+.tab-main-view {
+    top: 0;
+    border-bottom: 1px solid #ccc;
+    box-sizing: border-box;
+    height: 100%;
+}
+
 .tab-content {
+    margin-top: 16px;
+    margin-bottom: 16px;
+    // takes up remaining space
+    flex: 1 1 auto;
+    // scrollable
+    overflow-y: auto;
+    // fix taking margins into account
+    box-sizing: border-box;
+}
+
+.tab-action-bar {
+    // fixed height
+    flex: 0 0 auto;
+    position: sticky;
+    z-index: 1;
+    background: #fff;
+    // workaround to draw the border over the full width
+    margin-left: -20px;
+    margin-right: -20px;
+    padding: 8px 20px;
+    bottom: 0;
+    display: flex;
+    justify-content: flex-end;
+    border-top: 1px solid #ccc;
+    box-sizing: border-box;
+
+    .back-btn {
+        margin-right: auto;
+    }
+}
+
+// search tab related styles
+:host ::ng-deep .search-field {
+    --mdc-outlined-text-field-container-shape: 28px;
+    width: 100%;
+}
+
+.search-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow: hidden;
+
+    .search-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+
+        .search-field {
+            flex: 1 1 auto;
+        }
+
+        .actionbar-search {
+            flex: 0 0 auto;
+        }
+    }
+}
+
+// fix actionbar layout buttons do not align with search field
+es-actionbar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+// fix info message header should not have margin-top
+es-info-message {
+    h4 {
+        margin-top: 0;
+    }
+}
+
+.checklist {
     margin-top: 8px;
+    display: flex;
+    flex-direction: column;
 }

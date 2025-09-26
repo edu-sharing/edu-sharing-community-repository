@@ -67,10 +67,31 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
             node.isLoading.set(true);
         }
         // retrieve the children of the node either from the cache or the server
-        const children = await this.treeNodeService.getChildren(node.item.ref.id);
+        const children = await this.treeNodeService.getChildren(node.item);
         const index = this.data.indexOf(node);
-        if (!children || index < 0) {
-            // if no children exist, or the node cannot be found, return
+        if (!children?.length || index < 0) {
+            // if no children exist, or the node cannot be found in the data, return
+            // workaround using CSS
+            const element = document.getElementById('toggle-' + node.item.ref.id);
+            if (
+                this.treeNodeService.emptyFolders.includes(node.item.ref.id) &&
+                element &&
+                element.style.display !== 'none'
+            ) {
+                element.classList.add('hidden');
+                element.addEventListener('transitionend', function handleTransition() {
+                    element.style.display = 'none';
+                    element.removeEventListener('transitionend', handleTransition);
+                });
+            }
+            // non-working approach:
+            // if (this.treeNodeService.emptyFolders.includes(node.item.ref.id)) {
+            //     const dataNode = this.data.find((n) => n.item.ref.id === node.item.ref.id);
+            //     if (dataNode) {
+            //         dataNode.expandable = false;
+            //         this.dataChange.next(this.data);
+            //     }
+            // }
             node.isLoading.set(false);
             return;
         }

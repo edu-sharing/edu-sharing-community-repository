@@ -1,45 +1,127 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal, WritableSignal } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatTabChangeEvent, MatTabsModule } from '@angular/material/tabs';
-import { TranslateModule } from '@ngx-translate/core';
-import { HOME_REPOSITORY, Node } from 'ngx-edu-sharing-api';
 import {
+    Component,
+    computed,
+    Input,
+    OnInit,
+    Signal,
+    signal,
+    ViewChild,
+    WritableSignal,
+} from '@angular/core';
+import { MatTabChangeEvent } from '@angular/material/tabs';
+import { Router } from '@angular/router';
+import {
+    HOME_REPOSITORY,
+    MdsQueryCriteria,
+    Node,
+    NodeService,
+    PROPERTY_FILTER_ALL,
+    SearchRequestParams,
+    SearchResults,
+    SearchService,
+} from 'ngx-edu-sharing-api';
+import {
+    ActionbarComponent,
     ColumnType,
-    EduSharingUiModule,
+    FetchEvent,
     ListItem,
     NodeDataSource,
     NodeEntriesDisplayType,
     NodeEntriesService,
+    Scope,
 } from 'ngx-edu-sharing-ui';
 import { firstValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { CollectionSubcollections } from '../../../core-module/rest/data-object';
-import { RestConstants } from '../../../core-module/rest/rest-constants';
+import { FrameEventsService } from '../../../core-module/rest/services/frame-events.service';
 import { RestCollectionService } from '../../../core-module/rest/services/rest-collection.service';
+import { RestConstants } from '../../../core-module/rest/rest-constants';
+import { UIHelper } from '../../../core-ui-module/ui-helper';
+import { BridgeService } from '../../../services/bridge.service';
+import { NodeHelperService } from '../../../services/node-helper.service';
+import { Toast } from '../../../services/toast';
+import { SharedModule } from '../../../shared/shared.module';
+
+enum TabType {
+    SEARCH = 'search',
+    COLLECTIONS = 'collections',
+    WORKSPACE = 'workspace',
+    UPLOAD = 'upload',
+}
+
+enum StepType {
+    SELECT = 'select',
+    CONFIGURE = 'configure',
+}
 
 @Component({
     selector: 'es-nodes-selector',
     templateUrl: 'nodes-selector.component.html',
     styleUrls: ['nodes-selector.component.scss'],
-    imports: [CommonModule, EduSharingUiModule, MatButtonModule, MatTabsModule, TranslateModule],
+    imports: [SharedModule],
     providers: [NodeEntriesService],
 })
 export class NodesSelectorComponent implements OnInit {
-    selectedTabIndex: number = 0;
+    protected readonly i18nPrefix: string = 'EDITORIAL.OPTIONS.SORT_INTO_TAB.';
+    protected readonly idPrefix: string = 'nodes-selector-tab';
+
+    @Input() parent: Node;
+
+    selectedTab: WritableSignal<TabType> = signal(TabType.SEARCH);
+    selectedNodes: WritableSignal<Partial<Node>[]> = signal([]);
+    private currentStep: WritableSignal<StepType> = signal(StepType.SELECT);
+    isSelectStep: Signal<boolean> = computed((): boolean => this.currentStep() === StepType.SELECT);
+    onlyOneSelected: Signal<boolean> = computed(() => this.selectedNodes().length === 1);
+    onlyFilesSelected: Signal<boolean> = computed((): boolean =>
+        this.selectedNodes().every((node) => node.type === RestConstants.CCM_TYPE_IO),
+    );
+    isValidSelection: Signal<boolean> = computed(
+        (): boolean => this.onlyOneSelected() || this.onlyFilesSelected(),
+    );
+    configOption = {
+        includeMain: false,
+        includeSub: false,
+        includeItems: false,
+    };
+
+    // search tab
+    searchColumns: ColumnType;
+    dataSourceSearch: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
+    searchDisplayType: NodeEntriesDisplayType = NodeEntriesDisplayType.Table;
+    searchText: string = '';
+    searchSent: WritableSignal<boolean> = signal(false);
+    @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
 
     // collections tab
     collectionsColumns: ColumnType;
     dataSourceCollections: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
-    selectedNodes: WritableSignal<Partial<Node>[]> = signal([]);
 
-    constructor(private collectionService: RestCollectionService) {}
+    // workspace tab
+    workspaceColumns: ColumnType;
+    dataSourceWorkspace: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
+
+    constructor(
+        private bridge: BridgeService,
+        private collectionService: RestCollectionService,
+        private events: FrameEventsService,
+        private nodeHelper: NodeHelperService,
+        private nodeService: NodeService,
+        private router: Router,
+        private searchService: SearchService,
+        private toast: Toast,
+    ) {}
 
     /**
      * Initializes the component by definition the default columns for the collections data source.
      */
     ngOnInit(): void {
+        this.searchColumns = {
+            Default: [new ListItem('NODE', RestConstants.CM_PROP_TITLE)],
+        };
         this.collectionsColumns = {
+            Default: ListItem.getCollectionDefaults(),
+        };
+        this.workspaceColumns = {
             Default: ListItem.getCollectionDefaults(),
         };
     }
@@ -49,7 +131,7 @@ export class NodesSelectorComponent implements OnInit {
      *
      * @param event
      */
-    onCollectionSelectionChange(event: any) {
+    onNodeSelectionChange(event: any) {
         const selectedNodes = this.selectedNodes();
         event.added?.forEach((node: Node) => {
             selectedNodes.push(node);
@@ -60,7 +142,7 @@ export class NodesSelectorComponent implements OnInit {
                 selectedNodes.splice(selectedIndex, 1);
             }
         });
-        this.selectedNodes.set(selectedNodes);
+        this.selectedNodes.update(() => [...selectedNodes]);
     }
 
     /**
@@ -69,19 +151,84 @@ export class NodesSelectorComponent implements OnInit {
      * @param event
      */
     async onTabChange(event: MatTabChangeEvent) {
-        this.selectedTabIndex = event.index;
-        if (this.selectedTabIndex === 1) {
-            await this.updateCollectionsDataSource();
+        // reset step information and individual variables
+        this.currentStep.set(StepType.SELECT);
+        this.selectedNodes.update(() => []);
+        this.searchText = '';
+        // execute tab-specific actions
+        switch (event.tab.id) {
+            case this.idPrefix + TabType.SEARCH:
+                this.selectedTab.set(TabType.SEARCH);
+                await this.updateSearchDataSource();
+                break;
+            case this.idPrefix + TabType.COLLECTIONS:
+                this.selectedTab.set(TabType.COLLECTIONS);
+                await this.updateCollectionsDataSource();
+                break;
+            case this.idPrefix + TabType.WORKSPACE:
+                this.selectedTab.set(TabType.WORKSPACE);
+                await this.updateWorkspaceDataSource();
+                break;
+            case this.idPrefix + TabType.UPLOAD:
+                this.selectedTab.set(TabType.UPLOAD);
+                break;
+            default:
+                console.log('onTabChange', event);
         }
     }
 
     /**
      * Copies the selected nodes into the currently opened view.
-     *
-     * @param nodes
      */
-    copyNodes(nodes: Partial<Node>[]) {
-        console.log('copyNodes', nodes);
+    async copyNodes(): Promise<void> {
+        if (!this.parent || !this.selectedNodes().length) {
+            return;
+        }
+        if (this.onlyFilesSelected()) {
+            try {
+                UIHelper.addToCollection(
+                    this.nodeHelper,
+                    this.collectionService,
+                    this.router,
+                    this.bridge,
+                    this.parent,
+                    this.selectedNodes() as Node[],
+                    false,
+                    (references) => {
+                        // TODO: How to tell the outer dataSource to update? (multiple outputs vs. event)
+                        console.log('references', references);
+                        this.events.broadcastEvent(
+                            FrameEventsService.EVENT_PARENT_FETCH_DATA,
+                            references,
+                        );
+                        window.location.reload();
+                        return;
+                    },
+                );
+            } catch (e) {
+                console.error(e);
+                this.toast.error({}, 'Der gewählte Inhalt existiert bereits in der Sammlung.');
+            }
+        } else {
+            this.currentStep.set(StepType.CONFIGURE);
+        }
+    }
+
+    /**
+     * Sets the step back to the node selection and resets the selected nodes as the view is rendered again.
+     */
+    goBack() {
+        this.currentStep.set(StepType.SELECT);
+        this.selectedNodes.update(() => []);
+    }
+
+    /**
+     * Helper function to initialize the search datasource.
+     */
+    private async updateSearchDataSource(): Promise<void> {
+        this.dataSourceSearch.isLoading = true;
+        this.dataSourceSearch.setData([]);
+        this.dataSourceSearch.isLoading = false;
     }
 
     /**
@@ -89,7 +236,7 @@ export class NodesSelectorComponent implements OnInit {
      */
     private async updateCollectionsDataSource(): Promise<void> {
         // return, if dataSource is already initialized
-        if (this.dataSourceCollections.getData()?.length) {
+        if (!this.dataSourceCollections.isEmpty()) {
             return;
         }
         this.dataSourceCollections.isLoading = true;
@@ -103,6 +250,7 @@ export class NodesSelectorComponent implements OnInit {
             'Meine Sammlungen',
             'person',
             RestConstants.COLLECTIONSCOPE_MY,
+            true,
         );
         const subMyCollections: CollectionSubcollections = await firstValueFrom(
             this.collectionService.getCollectionSubcollections(
@@ -123,6 +271,7 @@ export class NodesSelectorComponent implements OnInit {
             'Redaktionelle Sammlungen',
             'star',
             RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL,
+            true,
         );
         const subEditorialCollections: CollectionSubcollections = await firstValueFrom(
             this.collectionService.getCollectionSubcollections(
@@ -143,15 +292,68 @@ export class NodesSelectorComponent implements OnInit {
     }
 
     /**
+     * Helper function to initialize the workspace datasource with (faked) nodes for "my" and "shared" files.
+     */
+    private async updateWorkspaceDataSource(): Promise<void> {
+        // return, if dataSource is already initialized
+        if (!this.dataSourceWorkspace.isEmpty()) {
+            return;
+        }
+        this.dataSourceWorkspace.isLoading = true;
+        let initialData: Partial<Node>[] = [];
+        const params = {
+            filter: ['folders'],
+            skipCount: 0,
+            maxItems: 100,
+            sortProperties: [RestConstants.CM_NAME],
+            sortAscending: [true],
+            propertiesFilter: RestConstants.ALL,
+        };
+        // my contents
+        const myContentsNode: Partial<Node> = this.createFakeNode('Meine Inhalte', 'person');
+        const subMyContents: Node[] = (
+            await firstValueFrom(this.nodeService.getChildren(RestConstants.USERHOME, params))
+        ).nodes;
+        subMyContents?.forEach((node) => {
+            // set the ID to the (fake) parent node
+            node.parent.id = myContentsNode.ref.id;
+        });
+        initialData.push(myContentsNode);
+        initialData = initialData.concat(subMyContents);
+        // shared contents
+        const sharedContentsNode: Partial<Node> = this.createFakeNode(
+            'Gemeinsame Inhalte',
+            'group',
+        );
+        const subSharedContents: Node[] = (
+            await firstValueFrom(this.nodeService.getChildren(RestConstants.SHARED_FILES, params))
+        ).nodes;
+        subSharedContents?.forEach((node) => {
+            // set the ID to the (fake) parent node
+            node.parent.id = sharedContentsNode.ref.id;
+        });
+        initialData.push(sharedContentsNode);
+        initialData = initialData.concat(subSharedContents);
+        this.dataSourceWorkspace.setData(initialData);
+        this.dataSourceWorkspace.isLoading = false;
+    }
+
+    /**
      * Helper function to create a fake node for the datasource, e.g., for the parent elements
      * of the collections tree.
      *
      * @param title
      * @param icon
      * @param scope
+     * @param isCollection
      */
-    private createFakeNode(title: string, icon: string, scope: string): Partial<Node> {
-        return {
+    private createFakeNode(
+        title: string,
+        icon: string,
+        scope: string = '',
+        isCollection: boolean = false,
+    ): Partial<Node> {
+        const node: Partial<Node> = {
             collection: {
                 fromUser: false,
                 level0: false,
@@ -172,7 +374,89 @@ export class NodesSelectorComponent implements OnInit {
             },
             title,
         };
+        if (isCollection) {
+            node.mediatype = 'collection';
+        }
+        return node;
+    }
+
+    /**
+     * Executes the search query and updates the search datasource.
+     */
+    async executeSearch() {
+        this.dataSourceSearch.isLoading = true;
+        this.searchSent.set(true);
+        this.selectedNodes.update(() => []);
+
+        // reset the search datasource, if it is already initialized
+        if (!this.dataSourceSearch.isEmpty()) {
+            this.dataSourceSearch.reset();
+        }
+
+        if (!this.searchText) {
+            this.dataSourceSearch.setData([]);
+            this.dataSourceSearch.isLoading = false;
+            return;
+        }
+
+        const request = this.createSearchRequest();
+        const searchResult: SearchResults = await firstValueFrom(
+            this.searchService.search(request),
+        );
+
+        this.dataSourceSearch.setData(searchResult.nodes, searchResult.pagination);
+        this.dataSourceSearch.isLoading = false;
+    }
+
+    clearSearch(): void {
+        this.searchText = '';
+        void this.executeSearch();
+    }
+
+    async loadMore(event: FetchEvent): Promise<void> {
+        if (!this.dataSourceSearch.hasMore() || this.dataSourceSearch.isLoading) {
+            return;
+        }
+
+        this.dataSourceSearch.isLoading = true;
+        const request = this.createSearchRequest(event.offset);
+        const searchResult: SearchResults = await firstValueFrom(
+            this.searchService.search(request),
+        );
+
+        this.dataSourceSearch.appendData(searchResult.nodes);
+        this.dataSourceSearch.isLoading = false;
+    }
+
+    /**
+     * Helper function to retrieve the base search request parameters.
+     */
+    private createSearchRequest(skipCount: number = 0): SearchRequestParams {
+        const criteria: MdsQueryCriteria[] = [
+            {
+                property: 'ngsearchword',
+                values: [this.searchText],
+            },
+        ];
+
+        return {
+            query: 'ngsearch',
+            repository: HOME_REPOSITORY,
+            maxItems: 51,
+            skipCount,
+            propertyFilter: [PROPERTY_FILTER_ALL],
+            contentType: 'ALL',
+            metadataset: '-default-',
+            sortProperties: ['cm:created'],
+            sortAscending: [true],
+            body: {
+                criteria,
+                resolveCollections: true,
+            },
+        };
     }
 
     protected readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    protected readonly Scope = Scope;
+    protected readonly TabType = TabType;
 }

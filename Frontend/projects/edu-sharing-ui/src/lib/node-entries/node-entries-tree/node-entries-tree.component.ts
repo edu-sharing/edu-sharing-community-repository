@@ -27,6 +27,7 @@ import { TreeNodeService } from './tree-node.service';
     selector: 'es-node-entries-tree',
     templateUrl: './node-entries-tree.component.html',
     styleUrls: ['./node-entries-tree.component.scss'],
+    providers: [TreeNodeService],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false,
 })
@@ -50,6 +51,13 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     getLevel = (node: DynamicFlatNode) => node.level;
     hasChild = (_: number, _nodeData: DynamicFlatNode) => _nodeData.expandable;
     isExpandable = (node: DynamicFlatNode) => node.expandable;
+    isLoadMoreNode = (index: number, node: DynamicFlatNode): boolean => {
+        return (
+            node.item.parent &&
+            this.treeNodeService.parentIdToLastLoadedNodeId.get(node.item.parent.id) ===
+                node.item.ref.id
+        );
+    };
     searchText: string = '';
     treeInitialized: WritableSignal<boolean> = signal(false);
 
@@ -97,7 +105,7 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     /**
      * Clears the search text.
      */
-    clearSearch() {
+    clearSearch(): void {
         this.searchText = '';
     }
 
@@ -113,14 +121,14 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     /**
      * Collapses all nodes of the tree.
      */
-    collapseNodes() {
+    collapseNodes(): void {
         this.treeControl.collapseAll();
     }
 
     /**
      * Expands the first level of the tree.
      */
-    expandNodes() {
+    expandNodes(): void {
         this.treeControl.dataNodes?.forEach((node) => {
             if (node.level === 0 && node.expandable) {
                 this.treeControl.expand(node);
@@ -129,11 +137,31 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     }
 
     /**
+     * Loads further children of a node parent.
+     *
+     * @param node
+     */
+    async loadFurtherChildren(node: DynamicFlatNode): Promise<void> {
+        const parentId: string = node.item.parent?.id;
+        if (parentId) {
+            await this.treeNodeService.getFurtherChildren(parentId);
+            setTimeout(async () => {
+                const parent = this.dataSource.data?.find((n) => n.item?.ref.id === parentId);
+                if (parent) {
+                    // TODO: dirty workaround to trigger the update of the tree
+                    await this.dataSource.toggleNode(parent, false);
+                    await this.dataSource.toggleNode(parent, true);
+                }
+            }, 100);
+        }
+    }
+
+    /**
      * Handle the click event on a node by toggling its selection.
      *
      * @param flatNode
      */
-    updateSelectedNodes(flatNode: DynamicFlatNode) {
+    updateSelectedNodes(flatNode: DynamicFlatNode): void {
         if (flatNode.level === 0) {
             return;
         }

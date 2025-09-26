@@ -11,7 +11,10 @@
   <ng-container *ngTemplateOutlet="content"></ng-container>
   <ng-template #content>
     <div *ngIf="enabledOption() as option" class="option option-{{ option.name | propertySlug }}">
-      <es-nodes-selector *ngIf="option.name === 'EDITORIAL.OPTIONS.SORT_INTO'"></es-nodes-selector>
+      <es-nodes-selector
+        *ngIf="option.name === 'EDITORIAL.OPTIONS.SORT_INTO'"
+        [parent]="parent()"
+      ></es-nodes-selector>
       <es-metadata-sidebar
         *ngIf="option.name === 'EDITORIAL.OPTIONS.WORKSPACE_METADATA'"
         [nodeSidebar]="nodes()?.[0]"

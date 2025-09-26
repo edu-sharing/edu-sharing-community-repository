@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Node, NodeService } from 'ngx-edu-sharing-api';
+import { Node, NodeEntries, NodeService } from 'ngx-edu-sharing-api';
 import { firstValueFrom } from 'rxjs';
 import { DynamicFlatNode } from './dynamic-flat-node';
 
@@ -9,6 +9,17 @@ import { DynamicFlatNode } from './dynamic-flat-node';
 export class TreeNodeService {
     // holds the already requested nodes
     dataMap = new Map<string, Partial<Node>[]>();
+    // holds the IDs of already clicked, but empty folders
+    emptyFolders: string[] = [];
+    // node types with children
+    private folderTypes: string[] = ['cm:folder', 'ccm:map'];
+    // holds information on the last loaded children node ID, which is used for pagination
+    parentIdToLastLoadedNodeId = new Map<string, string>();
+    private baseSearchParams = {
+        maxItems: 11,
+        sortAscending: [true],
+        sortProperties: ['cm:title'],
+    };
 
     constructor(private nodeService: NodeService) {}
 
@@ -70,7 +81,9 @@ export class TreeNodeService {
                 if (subChildren.length) {
                     // we just want to add the number of sub-collections, not the total number of sub-nodes
                     const numberOfSubCollections = subChildren.filter(
-                        (child) => child.mediatype === 'collection',
+                        (child) =>
+                            child.mediatype === 'collection' ||
+                            this.folderTypes.includes(child.type),
                     ).length;
                     child.collection.childCollectionsCount =
                         numberOfSubCollections +
@@ -95,20 +108,59 @@ export class TreeNodeService {
     /**
      * Retrieves the nodes children either from the dataMap or by requesting them from the backend.
      *
-     * @param nodeId
+     * @param node
      */
-    async getChildren(nodeId: string): Promise<Partial<Node>[] | undefined> {
+    async getChildren(node: Partial<Node>): Promise<Partial<Node>[] | undefined> {
+        const nodeId = node.ref.id;
         let children: Partial<Node>[] = this.dataMap.get(nodeId) || [];
         if (!children?.length) {
-            children = (
-                await firstValueFrom(
-                    this.nodeService.getChildren(nodeId, {
-                        sortAscending: [true],
-                        sortProperties: ['cm:title'],
-                    }),
-                )
-            )?.nodes.sort((a, b) => a.title.localeCompare(b.title));
+            const nodeEntries: NodeEntries = await firstValueFrom(
+                this.nodeService.getChildren(nodeId, this.baseSearchParams),
+            );
+            children = nodeEntries?.nodes ?? [];
+            // hold the last loaded node ID to load the next elements
+            if (children.length < nodeEntries.pagination.total) {
+                this.parentIdToLastLoadedNodeId.set(
+                    node.ref.id,
+                    children[children.length - 1].ref.id,
+                );
+            } else if (this.parentIdToLastLoadedNodeId.has(node.ref.id)) {
+                this.parentIdToLastLoadedNodeId.delete(node.ref.id);
+            }
+
+            // workaround for holding information about empty folders
+            if (!children.length && !this.emptyFolders.includes(nodeId)) {
+                this.emptyFolders.push(nodeId);
+            }
             this.dataMap.set(nodeId, children);
+        }
+        return children;
+    }
+
+    /**
+     * Retrieves the next children of a node.
+     *
+     * @param nodeId
+     */
+    async getFurtherChildren(nodeId: string): Promise<Partial<Node>[] | undefined> {
+        // delete the map entry first
+        this.parentIdToLastLoadedNodeId.delete(nodeId);
+        // request both existing and further children and concat those
+        const existingChildren: Partial<Node>[] = this.dataMap.get(nodeId) || [];
+        const extendedCriteria = JSON.parse(JSON.stringify(this.baseSearchParams));
+        extendedCriteria.skipCount = existingChildren.length;
+        const nodeEntries: NodeEntries = await firstValueFrom(
+            this.nodeService.getChildren(nodeId, {
+                ...this.baseSearchParams,
+                skipCount: existingChildren.length,
+            }),
+        );
+        const requestedChildren = nodeEntries?.nodes ?? [];
+        const children = existingChildren.concat(requestedChildren);
+        this.dataMap.set(nodeId, children);
+        // update the last loaded node ID to load the next elements
+        if (children.length < nodeEntries.pagination.total) {
+            this.parentIdToLastLoadedNodeId.set(nodeId, children[children.length - 1].ref.id);
         }
         return children;
     }
@@ -119,6 +171,9 @@ export class TreeNodeService {
      * @param node
      */
     isExpandable(node: Partial<Node>): boolean {
-        return node.collection?.childCollectionsCount > 0;
+        const atLeastOneChild: boolean = node.collection?.childCollectionsCount > 0;
+        const unclickedFolder: boolean =
+            this.folderTypes.includes(node.type) && !this.emptyFolders.includes(node.ref.id);
+        return atLeastOneChild || unclickedFolder;
     }
 }
