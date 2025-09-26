@@ -306,140 +306,144 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     }
 
     private Map<String, Object> getToSafeProps(Map<String, String[]> props, boolean obeyMds, String nodeType, String[] aspects, String nodeId, String parentId, String templateName) throws Throwable {
-        if (obeyMds) {
-            Map<String, String[]> propsCopy = new HashMap<>(props);
-            String[] metadataSetIdArr = propsCopy.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
+        if (!obeyMds) {
+            return validatePropertiesByDefinition(props);
+        }
 
-            String metadataSetId = (metadataSetIdArr != null && metadataSetIdArr.length > 0) ? metadataSetIdArr[0] : null;
-            if (metadataSetId == null && nodeId != null) {
-                // check if the node already as a metadata set id -> in this case, skip overwriting
-                metadataSetId = (String) getPropertyNative(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
-                if ("default".equals(metadataSetId)) {
-                    metadataSetId = null;
-                }
+        Map<String, String[]> propsCopy = new HashMap<>(props);
+        String[] metadataSetIdArr = propsCopy.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
+
+        String metadataSetId = (metadataSetIdArr != null && metadataSetIdArr.length > 0) ? metadataSetIdArr[0] : null;
+        if (metadataSetId == null && nodeId != null) {
+            // check if the node already as a metadata set id -> in this case, skip overwriting
+            metadataSetId = (String) getPropertyNative(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
+            if ("default".equals(metadataSetId)) {
+                metadataSetId = null;
             }
-            if (metadataSetId == null) {
-                // allow to run as admin since user might don't have access to the parent ref
-                metadataSetId = AuthenticationUtil.runAsSystem(() -> {
-                    Boolean forceMds = false;
-                    NodeRef parentRef = new NodeRef(MCAlfrescoAPIClient.storeRef, parentId);
-                    if (nodeService.exists(parentRef)) {
-                        try {
-                            forceMds = (Boolean) nodeService.getProperty(parentRef, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET));
-                            if (forceMds == null) forceMds = false;
-                        } catch (Throwable ignored) {
-                        }
-                    }
-                    if (Boolean.TRUE.equals(forceMds)) {
-                        return (String) nodeService.getProperty(parentRef, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
-                    } else {
-                        String mdsId;
-                        if (HttpContext.getCurrentMetadataSet() != null && !HttpContext.getCurrentMetadataSet().trim().isEmpty()) {
-                            mdsId = HttpContext.getCurrentMetadataSet();
-                        } else {
-                            mdsId = CCConstants.metadatasetdefault_id;
-                        }
-                        propsCopy.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, new String[]{mdsId});
-                        return mdsId;
-                    }
-                });
-            }
+        }
 
-            MetadataSet mds = MetadataHelper.getMetadataset(getApplication(), metadataSetId);
-            Map<String, Object> toSafe = new HashMap<>();
-            for (MetadataWidget widget : (templateName == null ?
-                    mds.getWidgetsByNode(nodeType, Arrays.asList(ArrayUtils.nullToEmpty(aspects)), false) :
-                    mds.getWidgetsByTemplate(templateName))) {
-                String id = widget.getId();
-                if (!MetadataHelper.checkConditionTrue(widget.getCondition())) {
-                    log.info("widget " + id + " skipped because condition failed");
-                    log.info("condition that should match: " + widget.getCondition().getType() + " " + (widget.getCondition().isNegate() ? "!=" : "=") + " " + widget.getCondition().getValue());
-                    continue;
-                }
-                id = CCConstants.getValidGlobalName(id);
-                String[] propsValue = propsCopy.get(id);
-                List<Serializable> values = propsValue != null ? Arrays.asList((Serializable[]) propsValue) : null;
-                if ("range".equals(widget.getType())) {
-                    String[] valuesFrom = propsCopy.get(id + "_from");
-                    String[] valuesTo = propsCopy.get(id + "_to");
-                    if (valuesFrom == null || valuesTo == null)
-                        continue;
-                    toSafe.put(id + "_from", valuesFrom[0]);
-                    toSafe.put(id + "_to", valuesTo[0]);
-                } else if ("defaultvalue".equals(widget.getType())) {
-                    log.info("will save property " + widget.getId() + " with predefined defaultvalue " + widget.getDefaultvalue());
-                    toSafe.put(id, widget.getDefaultvalue());
-                    continue;
-                } else if ("date".equals(widget.getType()) && props.containsKey(id)) {
+        if (metadataSetId == null) {
+            // allow to run as admin since user might don't have access to the parent ref
+            metadataSetId = AuthenticationUtil.runAsSystem(() -> {
+                Boolean forceMds = false;
+                NodeRef parentRef = new NodeRef(MCAlfrescoAPIClient.storeRef, parentId);
+                if (nodeService.exists(parentRef)) {
                     try {
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                        values = Arrays.stream(propsCopy.get(id)).map((p) -> {
-                            try {
-                                return sdf.parse(p);
-                            } catch (ParseException e) {
-                                long l = Long.parseLong(p);
-                                if (l > 0) {
-                                    return new Date(l);
-                                }
-                                throw new RuntimeException(e);
-                            }
-                        }).collect(Collectors.toList());
-
-                    } catch (Throwable t) {
-                        log.info("Could not parse date for widget id " + widget.getId() + ": " + t.getMessage());
-                        values = new ArrayList<>();
-                    }
-                } else if ("datetime".equals(widget.getType()) && props.containsKey(id)) {
-                    try {
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
-                        values = Arrays.stream(props.get(id)).map((p) -> {
-                            try {
-                                return sdf.parse(p);
-                            } catch (ParseException e) {
-                                long l = Long.parseLong(p);
-                                if (l > 0) {
-                                    return new Date(l);
-                                }
-                                throw new RuntimeException(e);
-                            }
-                        }).collect(Collectors.toList());
-
-                    } catch (Throwable t) {
-                        log.info("Could not parse date for widget id " + widget.getId() + ": " + t.getMessage());
-                        values = new ArrayList<>();
+                        forceMds = (Boolean) nodeService.getProperty(parentRef, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET));
+                        if (forceMds == null) forceMds = false;
+                    } catch (Throwable ignored) {
                     }
                 }
-                // changed: otherwise reset values for multivalue fields is not possible
-                // if(values==null || values.length==0)
-                if (values == null)
-                    continue;
-                if (!widget.isMultivalue() && values.size() > 1)
-                    throw new IllegalArgumentException("Multiple values given for a non-multivalue widget: ID " + id + ", widget type " + widget.getType());
-                if (widget.isMultivalue()) {
-                    toSafe.put(id, values.isEmpty() ? null : new ArrayList<>(values));
+                if (Boolean.TRUE.equals(forceMds)) {
+                    return (String) nodeService.getProperty(parentRef, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
                 } else {
-                    toSafe.put(id, values.isEmpty() ? null : values.get(0));
-                }
-
-                if (widget.getSuggestDisplayProperty() != null) {
-                    String[] keys = propsCopy.get(id);
-                    if (keys != null) {
-                        Set<String> displayStrings = new HashSet<>();
-                        for (String key : keys) {
-                            List<? extends Suggestion> suggestions = MetadataSearchHelper.getSuggestions(getApplication().getAppId(), mds, "ngsearch", widget.getId(), key, null);
-                            displayStrings.add(suggestions.get(0).getDisplayString());
-                        }
-                        toSafe.put(CCConstants.getValidGlobalName(widget.getSuggestDisplayProperty()), displayStrings.isEmpty() ? null : new ArrayList<>(displayStrings));
+                    String mdsId;
+                    if (HttpContext.getCurrentMetadataSet() != null && !HttpContext.getCurrentMetadataSet().trim().isEmpty()) {
+                        mdsId = HttpContext.getCurrentMetadataSet();
+                    } else {
+                        mdsId = CCConstants.metadatasetdefault_id;
                     }
+                    propsCopy.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, new String[]{mdsId});
+                    return mdsId;
+                }
+            });
+        }
+
+        MetadataSet mds = MetadataHelper.getMetadataset(getApplication(), metadataSetId);
+        Map<String, Object> toSafe = new HashMap<>();
+        for (MetadataWidget widget : (templateName == null ?
+                mds.getWidgetsByNode(nodeType, Arrays.asList(ArrayUtils.nullToEmpty(aspects)), false) :
+                mds.getWidgetsByTemplate(templateName))) {
+            String id = widget.getId();
+            if (!MetadataHelper.checkConditionTrue(widget.getCondition())) {
+                log.info("widget {} skipped because condition failed", id);
+                log.info("condition that should match: {} {} {}", widget.getCondition().getType(), widget.getCondition().isNegate() ? "!=" : "=", widget.getCondition().getValue());
+                continue;
+            }
+            id = CCConstants.getValidGlobalName(id);
+            String[] propsValue = propsCopy.get(id);
+            List<Serializable> values = propsValue != null ? Arrays.asList((Serializable[]) propsValue) : null;
+            if ("range".equals(widget.getType())) {
+                String[] valuesFrom = propsCopy.get(id + "_from");
+                String[] valuesTo = propsCopy.get(id + "_to");
+                if (valuesFrom == null || valuesTo == null)
+                    continue;
+                toSafe.put(id + "_from", valuesFrom[0]);
+                toSafe.put(id + "_to", valuesTo[0]);
+            } else if ("defaultvalue".equals(widget.getType())) {
+                log.info("will save property {} with predefined defaultvalue {}", widget.getId(), widget.getDefaultvalue());
+                toSafe.put(id, widget.getDefaultvalue());
+                continue;
+            } else if ("date".equals(widget.getType()) && props.containsKey(id)) {
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    values = Arrays.stream(propsCopy.get(id)).map((p) -> {
+                        try {
+                            return sdf.parse(p);
+                        } catch (ParseException e) {
+                            long l = Long.parseLong(p);
+                            if (l > 0) {
+                                return new Date(l);
+                            }
+                            throw new RuntimeException(e);
+                        }
+                    }).collect(Collectors.toList());
+
+                } catch (Throwable t) {
+                    log.info("Could not parse date for widget id {}: {}", widget.getId(), t.getMessage());
+                    values = new ArrayList<>();
+                }
+            } else if ("datetime".equals(widget.getType()) && props.containsKey(id)) {
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+                    values = Arrays.stream(props.get(id)).map((p) -> {
+                        try {
+                            return sdf.parse(p);
+                        } catch (ParseException e) {
+                            long l = Long.parseLong(p);
+                            if (l > 0) {
+                                return new Date(l);
+                            }
+                            throw new RuntimeException(e);
+                        }
+                    }).collect(Collectors.toList());
+
+                } catch (Throwable t) {
+                    log.info("Could not parse date for widget id {}: {}", widget.getId(), t.getMessage());
+                    values = new ArrayList<>();
                 }
             }
-
-            for (String property : getAllSafeProps()) {
-                if (!propsCopy.containsKey(property)) continue;
-
-                NodeServiceHelper.convertMutlivaluePropToGeneric(propsCopy.get(property), toSafe, property);
+            // changed: otherwise reset values for multivalue fields is not possible
+            // if(values==null || values.length==0)
+            if (values == null)
+                continue;
+            if (!widget.isMultivalue() && values.size() > 1)
+                throw new IllegalArgumentException("Multiple values given for a non-multivalue widget: ID " + id + ", widget type " + widget.getType());
+            if (widget.isMultivalue()) {
+                toSafe.put(id, values.isEmpty() ? null : new ArrayList<>(values));
+            } else {
+                toSafe.put(id, values.isEmpty() ? null : values.get(0));
             }
-            // removed in 5.1
+
+            if (widget.getSuggestDisplayProperty() != null) {
+                String[] keys = propsCopy.get(id);
+                if (keys != null) {
+                    Set<String> displayStrings = new HashSet<>();
+                    for (String key : keys) {
+                        List<? extends Suggestion> suggestions = MetadataSearchHelper.getSuggestions(getApplication().getAppId(), mds, "ngsearch", widget.getId(), key, null);
+                        displayStrings.add(suggestions.get(0).getDisplayString());
+                    }
+                    toSafe.put(CCConstants.getValidGlobalName(widget.getSuggestDisplayProperty()), displayStrings.isEmpty() ? null : new ArrayList<>(displayStrings));
+                }
+            }
+        }
+
+        for (String property : getAllSafeProps()) {
+            if (!propsCopy.containsKey(property)) continue;
+
+            NodeServiceHelper.convertMutlivaluePropToGeneric(propsCopy.get(property), toSafe, property);
+        }
+        // removed in 5.1
 		/*
 		if (isSubOf(nodeType, CCConstants.CM_TYPE_OBJECT)) {
 			// only when there is an title
@@ -457,24 +461,22 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				}
 			}
 			if (cmNameReadableName != null) {
-	
+
 				// replace ie fakepath like C:\fakepath\test.png
 				String replaceFakePathPrefixRegEx = "^[A-Za-z]:\\\\fakepath\\\\";
 				String fakePaceCleanedString = cmNameReadableName.replaceFirst(replaceFakePathPrefixRegEx, "");
 				if (fakePaceCleanedString.length() > 0) {
 					cmNameReadableName = fakePaceCleanedString;
 				}
-	
+
 				cmNameReadableName = NodeServiceHelper.cleanupCmName(cmNameReadableName);
-	
-				toSafe.put(CCConstants.CM_NAME, cmNameReadableName);	
+
+				toSafe.put(CCConstants.CM_NAME, cmNameReadableName);
 			}
 		}
 		*/
-            return toSafe;
-        } else {
-            return validatePropertiesByDefinition(props);
-        }
+        return toSafe;
+
     }
 
     private Map<String, Object> validatePropertiesByDefinition(Map<String, String[]> props) {
