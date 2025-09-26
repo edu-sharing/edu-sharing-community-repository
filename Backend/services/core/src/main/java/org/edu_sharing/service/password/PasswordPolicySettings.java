@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@RefreshScope
 @ConfigurationProperties(prefix = "security.passwordPolicy")
 public class PasswordPolicySettings {
     private int minLength = 1;

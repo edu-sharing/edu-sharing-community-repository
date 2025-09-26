@@ -1,6 +1,8 @@
 package org.edu_sharing.service.handleservicedoi;
 
 import com.google.gson.Gson;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -14,12 +16,10 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.service.handleservice.HandleService;
-import org.edu_sharing.service.handleservice.HandleServiceNotConfiguredException;
 import org.edu_sharing.service.handleservicedoi.model.*;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.spring.scope.refresh.RefreshScopeRefreshedEvent;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class DOIService implements HandleService {
 
     public static final String APICITE_PREFIX = "http://api.datacite.org/";
@@ -51,34 +52,22 @@ public class DOIService implements HandleService {
 
 
     private final Optional<DOIPropertyMapping> customMapping;
-    private final BeanFactory beanFactory;
-    private DoiConfig doiConfig;
+    private final DoiConfig doiConfig;
 
-    RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+    private final RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 
-    public DOIService(Optional<DOIPropertyMapping> customMapping, BeanFactory beanFactory) throws HandleServiceNotConfiguredException {
-        this.customMapping = customMapping;
-        this.beanFactory = beanFactory;
-        loadConfig();
-    }
 
-    @EventListener
-    public void onRefreshScopeRefreshed(RefreshScopeRefreshedEvent event){
-        loadConfig();
-    }
-
-    private void loadConfig() {
+    @PostConstruct
+    @EventListener(RefreshScopeRefreshedEvent.class)
+    public void loadConfig() {
         try {
-            DoiConfig doiConfig = beanFactory.getBean(DoiConfig.class);
-
-            if(doiConfig.isEnabled()){
+            if (doiConfig.isEnabled()) {
                 Objects.requireNonNull(doiConfig.getBaseUrl(), "repository.doiservice.baseUrl not set");
                 Objects.requireNonNull(doiConfig.getAccountId(), "repository.doiservice.accountId not set");
                 Objects.requireNonNull(doiConfig.getPrefix(), "repository.doiservice.prefix not set");
                 Objects.requireNonNull(doiConfig.getPassword(), "repository.doiservice.password not set");
             }
-           this.doiConfig = doiConfig;
-        }catch (Throwable t){
+        } catch (Throwable t) {
             log.error("Could not initialize doi service properly cause of error in config, please check config for \"repository.doiservice\"", t);
         }
     }
@@ -254,7 +243,7 @@ public class DOIService implements HandleService {
 
         List<String> publisherList = (List<String>) properties.get(QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER));
         String publisher;
-        if((publisherList == null || publisherList.isEmpty())){
+        if ((publisherList == null || publisherList.isEmpty())) {
             if (failOnMissing) {
                 throw new DOIServiceMissingAttributeException(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER), "Publisher");
             }
@@ -297,11 +286,11 @@ public class DOIService implements HandleService {
 
     @Override
     public String getContentLink(Map<QName, Serializable> properties) {
-        if(StringUtils.isNotBlank(doiConfig.getRepoUrl())){
-            return URLHelper.getNgRenderNodeUrl(doiConfig.getRepoUrl(), (String)properties.get(ContentModel.PROP_NODE_UUID), null);
+        if (StringUtils.isNotBlank(doiConfig.getRepoUrl())) {
+            return URLHelper.getNgRenderNodeUrl(doiConfig.getRepoUrl(), (String) properties.get(ContentModel.PROP_NODE_UUID), null);
         }
 
-        return URLHelper.getNgRenderNodeUrl((String)properties.get(ContentModel.PROP_NODE_UUID), null, false);
+        return URLHelper.getNgRenderNodeUrl((String) properties.get(ContentModel.PROP_NODE_UUID), null, false);
     }
 
     private HttpHeaders getHttpHeaders() {

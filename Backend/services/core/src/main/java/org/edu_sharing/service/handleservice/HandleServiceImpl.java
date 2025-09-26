@@ -1,5 +1,7 @@
 package org.edu_sharing.service.handleservice;
 
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.handle.api.HSAdapter;
 import net.handle.api.HSAdapterFactory;
@@ -28,14 +30,32 @@ import java.util.Objects;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class HandleServiceImpl implements HandleService {
 
 
-    private final BeanFactory beanFactory;
     private final Integer idIndex = 300;
+    private final HandleConfig handleConfig;
 
-    private HandleConfig handleConfig;
 
+    @PostConstruct
+    @EventListener(RefreshScopeRefreshedEvent.class)
+    public void loadConfig() {
+        try {
+            if (handleConfig.isEnabled()) {
+                Objects.requireNonNull(handleConfig.getPrefix(), "repository.handleservice.prefix not set");
+                Objects.requireNonNull(handleConfig.getRepoid(), "repository.handleservice.repoid not set");
+                Objects.requireNonNull(handleConfig.getPrivkey(), "repository.handleservice.privkey not set");
+            }
+            if (StringUtils.isNotBlank(handleConfig.getConfigDir())) {
+                System.setProperty("net.handle.configDir", handleConfig.getConfigDir());
+            } else {
+                System.clearProperty("net.handle.configDir");
+            }
+        } catch (Throwable t) {
+            log.error("Could not initialize handle service properly cause of error in config, please check config for \"repository.handleservice\"", t);
+        }
+    }
 
     @Override
     public boolean available() {
@@ -74,41 +94,11 @@ public class HandleServiceImpl implements HandleService {
         return CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID;
     }
 
-    public HandleServiceImpl(BeanFactory beanFactory) throws HandleServiceNotConfiguredException {
-        this.beanFactory = beanFactory;
-        this.handleConfig = beanFactory.getBean(HandleConfig.class);
-        loadConfig();
-    }
-
     public String getId() {
-        if(!handleConfig.isEnabled()){
+        if (!handleConfig.isEnabled()) {
             return null;
         }
         return "0.NA/" + handleConfig.getPrefix();
-    }
-
-    @EventListener
-    public void onRefreshScopeRefreshed(RefreshScopeRefreshedEvent event) {
-        loadConfig();
-    }
-
-    private void loadConfig() {
-        try {
-            HandleConfig handleConfig = beanFactory.getBean(HandleConfig.class);
-            if(handleConfig.isEnabled()){
-                Objects.requireNonNull(handleConfig.getPrefix(),"repository.handleservice.prefix not set");
-                Objects.requireNonNull(handleConfig.getRepoid(), "repository.handleservice.repoid not set");
-                Objects.requireNonNull(handleConfig.getPrivkey(),"repository.handleservice.privkey not set");
-            }
-            if(StringUtils.isNotBlank(handleConfig.getConfigDir())) {
-                System.setProperty("net.handle.configDir", handleConfig.getConfigDir());
-            }else {
-                System.clearProperty("net.handle.configDir");
-            }
-            this.handleConfig = handleConfig;
-        } catch (Throwable t) {
-            log.error("Could not initialize handle service properly cause of error in config, please check config for \"repository.handleservice\"", t);
-        }
     }
 
 

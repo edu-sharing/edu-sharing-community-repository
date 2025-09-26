@@ -52,7 +52,6 @@ public class OaiConfiguration {
     @Lazy
     @Bean
     @RefreshScope
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     RepositoryConfiguration repositoryConfiguration(OaiSettings settings) {
         OaiIdentifier identifier = settings.getIdentify();
         int itemsPerPage = settings.getItemsPerPage();
@@ -71,8 +70,6 @@ public class OaiConfiguration {
 
     @Lazy
     @Bean
-    @RefreshScope
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     SetRepository setRepository(OaiSettings settings) throws TransformerConfigurationException {
         return new SetRepository() {
             @Override

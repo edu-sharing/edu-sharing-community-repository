@@ -2,6 +2,7 @@ package org.edu_sharing.service.password;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.StringUtils;
 import org.edu_sharing.service.util.ViolationUtils;
 import org.passay.*;
@@ -15,16 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 
+@RequiredArgsConstructor
 public class PasswordConstraintValidator implements ConstraintValidator<ValidPassword, String> {
 
     public static final String PASSWORD_POLICY_VIOLATION = "PasswordPolicyViolation";
 
-    private final BeanFactory beanFactory;
+    private final PasswordPolicySettings settings;
 
-    @Autowired
-    public PasswordConstraintValidator(BeanFactory beanFactory) {
-        this.beanFactory = beanFactory;
-    }
 
     @Override
     public void initialize(ValidPassword constraintAnnotation) {
@@ -37,7 +35,6 @@ public class PasswordConstraintValidator implements ConstraintValidator<ValidPas
             return true;
         }
 
-        PasswordPolicySettings settings = beanFactory.getBean(PasswordPolicySettings.class);
         List<Rule> rules = new ArrayList<>(List.of(
                 new LengthRule(settings.getMinLength(), settings.getMaxLength()),
                 new CharacterRule(EnglishCharacterData.UpperCase, settings.getNumberOfLowerCaseCharacters()),
