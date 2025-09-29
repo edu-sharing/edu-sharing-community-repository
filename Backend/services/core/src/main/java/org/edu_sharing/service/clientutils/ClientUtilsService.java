@@ -4,6 +4,7 @@ import com.typesafe.config.Config;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.validator.routines.DomainValidator;
 import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.entity.StringEntity;
@@ -161,12 +162,19 @@ public class ClientUtilsService {
         try {
 			SearchToken token = new SearchToken();
 			token.setMaxResult(10);
-			HashSet<org.edu_sharing.service.model.NodeRef> nodes = new HashSet<>(searchService.search(MetadataHelper.getLocalDefaultMetadataset(), "link_duplicates", new HashMap<>() {{
-				put("url", new String[]{url});
-				put("title", new String[]{info.getTitle()});
-				put("description", new String[]{info.getDescription()});
-				put("keywords", info.getKeywords());
-			}}, token).getData());
+			HashMap<String, String[]> queryData = new HashMap<>() {{
+				put("url", new String[]{url.trim()});
+			}};
+			if(StringUtils.isNotEmpty(info.getTitle())) {
+				queryData.put("title", new String[]{info.getTitle()});
+			}
+			if(StringUtils.isNotEmpty(info.getDescription())) {
+				queryData.put("description", new String[]{info.getDescription()});
+			}
+			if(info.getKeywords() != null) {
+				queryData.put("keywords", info.getKeywords());
+			}
+			HashSet<org.edu_sharing.service.model.NodeRef> nodes = new HashSet<>(searchService.search(MetadataHelper.getLocalDefaultMetadataset(), "link_duplicates", queryData, token).getData());
         if(info.getRawContent() != null) {
 			Config duplicate = LightbendConfigLoader.get().getConfig("repository.communication.duplicate");
 			try {
