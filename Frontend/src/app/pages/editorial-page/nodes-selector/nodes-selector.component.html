@@ -74,19 +74,24 @@
               </button>
             </mat-form-field>
             <es-actionbar
-              #actionbarReferences
+              #actionbarSearchTab
               class="actionbar-search"
               [class.display-none]="dataSourceSearch.isEmpty() || dataSourceSearch.isLoading"
-              [numberOfAlwaysVisibleOptions]="0"
             ></es-actionbar>
           </div>
           <es-node-entries-wrapper
+            #wrapperRef
             *ngIf="dataSourceSearch.isLoading || !dataSourceSearch.isEmpty()"
             [columns]="searchColumns"
             [dataSource]="dataSourceSearch"
             [(displayType)]="searchDisplayType"
-            [initConfig]="{ actionbar: actionbarReferences }"
+            [elementInteractionType]="InteractionType.Emitter"
+            [initConfig]="{
+              actionbar: actionbarSearchTab,
+              customOptions: { supportedOptions: ['OPTIONS.SWITCH_TO_CARDS_VIEW'] }
+            }"
             [scope]="Scope.Search"
+            (clickItem)="selectOnClick(wrapperRef, $event)"
             (fetchData)="loadMore($event)"
             (selectionChange)="onNodeSelectionChange($event)"
           ></es-node-entries-wrapper>
@@ -136,13 +141,18 @@
       </h3>
       <ng-container *ngIf="selectedNodes()[0] as selectedNode">
         {{ i18nPrefix + 'CONFIGURE_CONFIG.COPY' | translate }} "{{ selectedNode.title }}"
-        <ng-container *ngIf="selectedNode.mediatype === 'collection'; else folderType">
+        <ng-container
+          *ngIf="nodeHelperService.isNodeCollection(partialAsNode(selectedNode)); else folderType"
+        >
           ({{ 'MEDIATYPE.collection' | translate }})
         </ng-container>
         <ng-template #folderType> ({{ 'MEDIATYPE.folder' | translate }}) </ng-template>
         <div
           class="checklist"
-          *ngIf="selectedNode.mediatype === 'collection'; else noConfigOptions"
+          *ngIf="
+            nodeHelperService.isNodeCollection(partialAsNode(selectedNode));
+            else noConfigOptions
+          "
         >
           <mat-checkbox [(ngModel)]="configOption.includeMain" disabled>
             {{ i18nPrefix + 'CONFIGURE_CONFIG.INCLUDE_MAIN' | translate }}

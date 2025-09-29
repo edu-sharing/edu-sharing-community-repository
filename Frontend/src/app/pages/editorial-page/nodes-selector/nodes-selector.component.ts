@@ -23,10 +23,14 @@ import {
     ActionbarComponent,
     ColumnType,
     FetchEvent,
+    InteractionType,
     ListItem,
+    MdsHelperService,
+    NodeClickEvent,
     NodeDataSource,
     NodeEntriesDisplayType,
     NodeEntriesService,
+    NodeEntriesWrapperComponent,
     Scope,
 } from 'ngx-edu-sharing-ui';
 import { firstValueFrom } from 'rxjs';
@@ -34,10 +38,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { CollectionSubcollections } from '../../../core-module/rest/data-object';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestCollectionService } from '../../../core-module/rest/services/rest-collection.service';
-import { MainNavConfig, MainNavService } from '../../../main/navigation/main-nav.service';
+import { UIService } from '../../../core-module/rest/services/ui.service';
+import { NodeHelperService } from '../../../services/node-helper.service';
 import { Toast } from '../../../services/toast';
 import { SharedModule } from '../../../shared/shared.module';
-import { UIService } from '../../../core-module/rest/services/ui.service';
 
 enum TabType {
     SEARCH = 'search',
@@ -80,8 +84,6 @@ export class NodesSelectorComponent implements OnInit {
         includeSub: false,
         includeItems: false,
     };
-    // main nav config necessary for triggering the copy process
-    mainNavConfig: MainNavConfig;
 
     // search tab
     searchColumns: ColumnType;
@@ -101,7 +103,8 @@ export class NodesSelectorComponent implements OnInit {
 
     constructor(
         private collectionService: RestCollectionService,
-        private mainNavService: MainNavService,
+        private mdsHelperService: MdsHelperService,
+        public nodeHelperService: NodeHelperService,
         private nodeService: NodeService,
         private uiService: UIService,
         private searchService: SearchService,
@@ -112,16 +115,16 @@ export class NodesSelectorComponent implements OnInit {
      * Initializes the component by definition the default columns for the collections data source.
      */
     async ngOnInit(): Promise<void> {
-        this.searchColumns = {
-            Default: [new ListItem('NODE', RestConstants.CM_PROP_TITLE)],
-        };
+        this.searchColumns = await this.mdsHelperService.getColumnsByMdsId('search', {
+            repository: HOME_REPOSITORY,
+        });
+
         this.collectionsColumns = {
             Default: ListItem.getCollectionDefaults(),
         };
         this.workspaceColumns = {
             Default: ListItem.getCollectionDefaults(),
         };
-        this.mainNavConfig = await firstValueFrom(this.mainNavService.observeMainNavConfig());
     }
 
     /**
@@ -256,6 +259,25 @@ export class NodesSelectorComponent implements OnInit {
     goBack() {
         this.currentStep.set(StepType.SELECT);
         this.selectedNodes.update(() => []);
+    }
+
+    /**
+     * Callback for the node click event that toggles the selection of the clicked node.
+     *
+     * @param source
+     * @param event
+     */
+    selectOnClick(source: NodeEntriesWrapperComponent<Node>, event: NodeClickEvent<Node>) {
+        source.getSelection().toggle(event.element);
+    }
+
+    /**
+     * View helper function to cast a partial node to a node.
+     *
+     * @param node
+     */
+    partialAsNode(node: Partial<Node>): Node {
+        return node as Node;
     }
 
     /**
@@ -444,6 +466,7 @@ export class NodesSelectorComponent implements OnInit {
         };
     }
 
+    protected readonly InteractionType = InteractionType;
     protected readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     protected readonly Scope = Scope;
     protected readonly TabType = TabType;
