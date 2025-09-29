@@ -35,16 +35,29 @@
     top: 0;
     border-bottom: 1px solid #ccc;
     box-sizing: border-box;
-    height: 100%;
+    // take the available space
+    flex: 1 1 0;
+    // important to flexbox to work properly
+    min-height: 0;
+    overflow: hidden;
+}
+
+// fix default tab body overflow
+:host ::ng-deep {
+    .mat-mdc-tab-body {
+        overflow: hidden;
+    }
+
+    .mat-mdc-tab-body-content {
+        overflow-y: auto;
+    }
 }
 
 .tab-content {
     margin-top: 16px;
     margin-bottom: 16px;
     // takes up remaining space
-    flex: 1 1 auto;
-    // scrollable
-    overflow-y: auto;
+    flex: 1 1 0;
     // fix taking margins into account
     box-sizing: border-box;
 }
