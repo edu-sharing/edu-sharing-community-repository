@@ -145,7 +145,7 @@
           *ngIf="selectedNode.mediatype === 'collection'; else noConfigOptions"
         >
           <mat-checkbox [(ngModel)]="configOption.includeMain" disabled>
-            Hauptsammlung inkludieren
+            {{ i18nPrefix + 'CONFIGURE_CONFIG.INCLUDE_MAIN' | translate }}
           </mat-checkbox>
 
           <mat-checkbox
@@ -153,10 +153,17 @@
             disabled
             *ngIf="selectedNode.collection?.childCollectionsCount"
           >
-            {{ selectedNode.collection.childCollectionsCount }} Untersammlung{{
-              selectedNode.collection.childCollectionsCount !== 1 ? 'en' : ''
-            }}
-            inkludieren
+            <ng-container
+              *ngIf="selectedNode.collection.childCollectionsCount === 1; else includeMultipleSub"
+            >
+              {{ i18nPrefix + 'CONFIGURE_CONFIG.INCLUDE_SUB.SINGLE' | translate }}
+            </ng-container>
+            <ng-template #includeMultipleSub>
+              {{
+                i18nPrefix + 'CONFIGURE_CONFIG.INCLUDE_SUB.MULTIPLE'
+                  | translate : { count: selectedNode.collection.childCollectionsCount }
+              }}
+            </ng-template>
           </mat-checkbox>
 
           <mat-checkbox
@@ -164,10 +171,17 @@
             disabled
             *ngIf="selectedNode.collection?.childReferencesCount"
           >
-            {{ selectedNode.collection.childReferencesCount }} Inhalt{{
-              selectedNode.collection.childReferencesCount !== 1 ? 'e' : ''
-            }}
-            inkludieren
+            <ng-container
+              *ngIf="selectedNode.collection.childReferencesCount === 1; else includeMultipleItems"
+            >
+              {{ i18nPrefix + 'CONFIGURE_CONFIG.INCLUDE_ITEMS.SINGLE' | translate }}
+            </ng-container>
+            <ng-template #includeMultipleItems>
+              {{
+                i18nPrefix + 'CONFIGURE_CONFIG.INCLUDE_ITEMS.MULTIPLE'
+                  | translate : { count: selectedNode.collection.childReferencesCount }
+              }}
+            </ng-template>
           </mat-checkbox>
         </div>
         <ng-template #noConfigOptions>

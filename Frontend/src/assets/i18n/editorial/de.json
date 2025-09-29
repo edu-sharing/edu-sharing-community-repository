@@ -24,8 +24,14 @@
           "CONFIG_HEADING": "Kopiervorgang konfigurieren",
           "COPY": "Kopiere",
           "INCLUDE_MAIN": "Hauptsammlung inkludieren",
-          "INCLUDE_SUB": "Untersammlungen inkludieren",
-          "INCLUDE_ITEMS": "Inhalte inkludieren",
+          "INCLUDE_SUB": {
+            "SINGLE": "1 Untersammlung inkludieren",
+            "MULTIPLE": "{{count}} Untersammlungen inkludieren"
+          },
+          "INCLUDE_ITEMS": {
+            "SINGLE": "1 Inhalt inkludieren",
+            "MULTIPLE": "{{count}} Inhalte inkludieren"
+          },
           "NO_CONFIG_OPTIONS": "Für diesen Inhalt existieren keine weiteren Kopieroptionen."
         }
       }
