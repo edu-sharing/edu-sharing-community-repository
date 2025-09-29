@@ -23,6 +23,7 @@ import {
     RestHelper,
     RestNodeService,
     RestUtilitiesService,
+    UIService,
 } from '../../core-module/core.module';
 import { DomSanitizer } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
@@ -65,6 +66,7 @@ export class AppSharePageComponent {
         private node: RestNodeService,
         private connectors: RestConnectorsService,
         private events: FrameEventsService,
+        private uiService: UIService,
         private utilities: RestUtilitiesService,
         private translate: TranslateService,
         private translations: TranslationsService,
@@ -202,7 +204,7 @@ export class AppSharePageComponent {
             this.collectionApi
                 .addNodeToCollection(collection.ref.id, node.ref.id, node.ref.repo)
                 .subscribe(() => {
-                    UIHelper.goToCollection(this.router, collection, null, { replaceUrl: true });
+                    this.uiService.goToCollection(collection, null, { replaceUrl: true });
                     this.events.broadcastEvent(FrameEventsService.EVENT_SHARED, node);
                 });
         });

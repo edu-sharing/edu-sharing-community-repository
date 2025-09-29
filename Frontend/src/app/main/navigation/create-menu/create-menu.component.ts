@@ -250,7 +250,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         }
         if (this._parent && this.nodeHelper.isNodeCollection(this._parent)) {
             const newCollection = new OptionItem('OPTIONS.NEW_COLLECTION', 'layers', (node) =>
-                UIHelper.goToCollection(this.router, this._parent, 'new'),
+                this.uiService.goToCollection(this._parent, 'new'),
             );
             newCollection.elementType = [ElementType.NoneOrUnknown];
             newCollection.constrains = [Constrain.NoSelection, Constrain.User];

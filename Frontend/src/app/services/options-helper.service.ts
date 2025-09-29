@@ -2048,7 +2048,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     }
 
     private editCollection(object: Node | any) {
-        UIHelper.goToCollection(this.router, object, 'edit');
+        this.uiService.goToCollection(object, 'edit');
     }
 
     /**

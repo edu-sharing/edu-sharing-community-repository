@@ -195,23 +195,6 @@ export class UIHelper {
         void router.navigate([UIConstants.ROUTER_PREFIX, 'render', node.ref.id]);
     }
 
-    public static goToCollection(
-        router: Router,
-        node: Node,
-        mode: null | 'new' | 'edit' = null,
-        extras: NavigationExtras = {},
-    ) {
-        if (mode === 'new' || mode === 'edit') {
-            void router.navigate(
-                [UIConstants.ROUTER_PREFIX, 'collections', 'collection', mode, node.ref.id],
-                extras,
-            );
-        } else {
-            extras.queryParams = { id: node.ref.id };
-            void router.navigate([UIConstants.ROUTER_PREFIX, 'collections'], extras);
-        }
-    }
-
     /**
      * Navigate to the search in reurl (apply) mode
      * when done, the app will redirect to the current location
@@ -314,53 +297,6 @@ export class UIHelper {
         return result;
     }
 
-    static showAddedToCollectionInfo(
-        bridge: BridgeService,
-        router: Router,
-        node: any,
-        count: number,
-        asProposal = false,
-    ) {
-        let scope = node.collection ? node.collection.scope : node.scope;
-        let type = node.collection ? node.collection.type : node.type;
-        if (scope == RestConstants.COLLECTIONSCOPE_MY) {
-            scope = 'MY';
-        } else if (
-            scope == RestConstants.COLLECTIONSCOPE_ORGA ||
-            scope == RestConstants.COLLECTIONSCOPE_CUSTOM
-        ) {
-            scope = 'SHARED';
-        } else if (
-            scope == RestConstants.COLLECTIONSCOPE_ALL ||
-            scope == RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC
-        ) {
-            scope = 'PUBLIC';
-        } else if (type == RestConstants.COLLECTIONTYPE_EDITORIAL) {
-            scope = 'PUBLIC';
-        } else if (type == RestConstants.COLLECTIONTYPE_MEDIA_CENTER) {
-            scope = 'MEDIA_CENTER';
-        }
-        if (asProposal) {
-            bridge.showTemporaryMessage(
-                MessageType.info,
-                'WORKSPACE.TOAST.PROPOSED_FOR_COLLECTION',
-                { count: count, collection: RestHelper.getTitle(node) },
-            );
-        } else {
-            bridge.showTemporaryMessage(
-                MessageType.info,
-                'WORKSPACE.TOAST.ADDED_TO_COLLECTION_' + scope,
-                { count: count, collection: RestHelper.getTitle(node) },
-                {
-                    link: {
-                        caption: 'WORKSPACE.TOAST.VIEW_COLLECTION',
-                        callback: () => UIHelper.goToCollection(router, node),
-                    },
-                },
-            );
-        }
-    }
-
     static prepareMetadatasets(translate: TranslateService, mdsSets: MdsInfo[]) {
         for (let i = 0; i < mdsSets.length; i++) {
             if (mdsSets[i].id == 'mds')
@@ -368,120 +304,6 @@ export class UIHelper {
                     name: mdsSets[i].name,
                 });
         }
-    }
-
-    /**
-     * handles adding nodes to a collection
-     * @param nodeHelper
-     * @param collectionService
-     * @param router
-     * @param bridge
-     * @param collection
-     * @param nodes
-     * @param callback
-     * @param allowDuplicate false (default) will trigger a confirmation if duplicate was detected, true will always create a duplicate and 'ignore' works as false but will not trigger a confirmation but silently abort
-     */
-
-    static addToCollection(
-        nodeHelper: NodeHelperService,
-        collectionService: RestCollectionService,
-        router: Router,
-        bridge: BridgeService,
-        collection: Node,
-        nodes: Node[],
-        asProposal = false,
-        callback: (nodes: CollectionReference[]) => void = null,
-        allowDuplicate: boolean | 'ignore' = false,
-    ) {
-        from(
-            nodes.map((node) =>
-                collectionService
-                    .addNodeToCollection(
-                        collection.ref.id,
-                        node.ref.id,
-                        node.ref.repo,
-                        allowDuplicate === true,
-                        asProposal,
-                    )
-                    .pipe(catchError((error) => of({ error, node }))),
-            ),
-        )
-            .pipe(
-                concatMap((req) => req),
-                toArray(),
-            )
-            .subscribe(async (results) => {
-                const success: { node: Node }[] = results.filter((r) => !(r as any).error);
-                const failed: { node: Node; error: any }[] = results.filter(
-                    (r) => !!(r as any).error,
-                ) as { node: Node; error: any }[];
-                if (success.length > 0) {
-                    UIHelper.showAddedToCollectionInfo(
-                        bridge,
-                        router,
-                        collection,
-                        success.length,
-                        asProposal,
-                    );
-                }
-                if (failed.length > 0) {
-                    const duplicated = failed.filter(
-                        ({ error }) => error.status === RestConstants.DUPLICATE_NODE_RESPONSE,
-                    );
-                    if (duplicated.length > 0 && !asProposal) {
-                        if (allowDuplicate !== 'ignore') {
-                            const dialogRef = await bridge.openGenericDialog({
-                                title: 'COLLECTIONS.ADD_TO.DUPLICATE_TITLE',
-                                message: 'COLLECTIONS.ADD_TO.DUPLICATE_MESSAGE',
-                                messageParameters: { count: duplicated.length.toString() },
-                                buttons: YES_OR_NO,
-                            });
-                            dialogRef.afterClosed().subscribe((response) => {
-                                if (response === 'YES') {
-                                    UIHelper.addToCollection(
-                                        nodeHelper,
-                                        collectionService,
-                                        router,
-                                        bridge,
-                                        collection,
-                                        duplicated.map((d) => d.node),
-                                        false,
-                                        (nodes) =>
-                                            // Invoke `callback` with both, the nodes successfully added
-                                            // before and the duplicate nodes added now.
-                                            callback?.([
-                                                ...success.map(
-                                                    (n) => n.node as CollectionReference,
-                                                ),
-                                                ...nodes,
-                                            ]),
-                                        true,
-                                    );
-                                } else if (response === 'NO') {
-                                    // Invoke `callback` only with the nodes successfully added
-                                    // before.
-                                    callback?.(success.map((n) => n.node as CollectionReference));
-                                } else {
-                                    // Dialog was canceled by the user.
-                                    //
-                                    // TODO: should we invoke `callback` here?
-                                    bridge.closeModalDialog();
-                                }
-                            });
-                            return;
-                        }
-                    } else {
-                        nodeHelper.handleNodeError(
-                            RestHelper.getTitle(failed[0].node),
-                            failed[0].error,
-                        );
-                    }
-                }
-
-                if (callback) {
-                    callback(success.map((n) => n.node as CollectionReference));
-                }
-            });
     }
 
     static openWindow(w: Window, url: string) {

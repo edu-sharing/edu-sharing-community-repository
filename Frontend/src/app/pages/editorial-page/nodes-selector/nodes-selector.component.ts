@@ -37,6 +37,7 @@ import { RestCollectionService } from '../../../core-module/rest/services/rest-c
 import { MainNavConfig, MainNavService } from '../../../main/navigation/main-nav.service';
 import { Toast } from '../../../services/toast';
 import { SharedModule } from '../../../shared/shared.module';
+import { UIService } from '../../../core-module/rest/services/ui.service';
 
 enum TabType {
     SEARCH = 'search',
@@ -102,6 +103,8 @@ export class NodesSelectorComponent implements OnInit {
         private collectionService: RestCollectionService,
         private mainNavService: MainNavService,
         private nodeService: NodeService,
+        private uiService: UIService,
+        private router: Router,
         private searchService: SearchService,
         private toast: Toast,
     ) {}
@@ -237,10 +240,15 @@ export class NodesSelectorComponent implements OnInit {
             return;
         }
         if (this.onlyFilesSelected()) {
-            if (this.mainNavConfig) {
-                this.mainNavConfig.onCreate(this.selectedNodes() as Node[]);
-            } else {
-                this.toast.error({}, 'Beim Kopieren der Inhalte ist ein Fehler aufgetreten.');
+            try {
+                this.uiService.addToCollection(
+                    this.parent,
+                    this.selectedNodes() as Node[],
+                    false,
+                );
+            } catch (e) {
+                console.error(e);
+                this.toast.error({}, 'Der gewählte Inhalt existiert bereits in der Sammlung.');
             }
         } else {
             this.currentStep.set(StepType.CONFIGURE);

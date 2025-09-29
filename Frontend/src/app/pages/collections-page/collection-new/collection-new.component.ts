@@ -976,20 +976,11 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
             this.saveImage(collection);
             return;
         }
-        UIHelper.addToCollection(
-            this.nodeHelper,
-            this.collectionService,
-            this.router,
-            this.bridge,
-            collection,
-            add.nodes,
-            false,
-            (references) => {
-                this.saveImage(collection);
-                add.callback?.emit({ collection, references });
-                return;
-            },
-        );
+        this.uiService.addToCollection(collection, add.nodes, false, (references) => {
+            this.saveImage(collection);
+            add.callback?.emit({ collection, references });
+            return;
+        });
     }
 
     deleteImage() {

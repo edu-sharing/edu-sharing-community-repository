@@ -23,6 +23,7 @@ import {
     RestConstants,
     RestHelper,
     RestNodeService,
+    UIService,
 } from '../../core-module/core.module';
 import { Toast } from '../../services/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
@@ -108,6 +109,7 @@ export class WorkspaceManagementDialogsComponent {
         private dialogs: DialogsService,
         private errorProcessing: ErrorProcessingService,
         private localEvents: LocalEventsService,
+        private uiService: UIService,
         private nodeHelper: NodeHelperService,
         private nodeService: RestNodeService,
         private router: Router,
@@ -196,22 +198,13 @@ export class WorkspaceManagementDialogsComponent {
             this.toast.closeProgressSpinner();
         }
         this.toast.showProgressSpinner();
-        UIHelper.addToCollection(
-            this.nodeHelper,
-            this.collectionService,
-            this.router,
-            this.bridge,
-            collection,
-            list,
-            asProposal,
-            (nodes) => {
-                this.toast.closeProgressSpinner();
-                this.storedAddToCollection.emit({ collection, references: nodes });
-                if (callback) {
-                    callback();
-                }
-            },
-        );
+        this.uiService.addToCollection(collection, list, asProposal, (nodes) => {
+            this.toast.closeProgressSpinner();
+            this.storedAddToCollection.emit({ collection, references: nodes });
+            if (callback) {
+                callback();
+            }
+        });
     }
 
     closeMaterialViewFeedback() {

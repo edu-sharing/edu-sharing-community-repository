@@ -34,6 +34,7 @@ import {
     ListItem,
     ListItemSort,
     ListSortConfig,
+    LocalEventsService,
     MdsHelperService,
     NodeClickEvent,
     NodeDataSource,
@@ -47,7 +48,7 @@ import {
     VirtualNode,
 } from 'ngx-edu-sharing-ui';
 import { firstValueFrom, forkJoin, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { filter, takeUntil } from 'rxjs/operators';
 import * as EduData from '../../../core-module/core.module';
 import {
     CollectionReference,
@@ -179,6 +180,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
     constructor(
         private authenticationService: AuthenticationService,
+        private localEventsService: LocalEventsService,
         private bridge: BridgeService,
         private collectionService: RestCollectionService,
         private configurationService: ConfigService,
@@ -213,6 +215,12 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 }
             }
         });
+        this.localEventsService.nodesChanged
+            .pipe(
+                takeUntil(this.destroyed$),
+                filter((n) => n.some((n1) => n1?.ref?.id === this.collection?.ref?.id)),
+            )
+            .subscribe(() => this.refreshContent());
         this.authenticationService
             .observeLoginInfo()
             .pipe(takeUntil(this.destroyed$))
@@ -491,11 +499,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 );
                 dialogRef.afterClosed().subscribe((result) => {
                     if (result === 'WORKSPACE.COPY_MOVE.COPY') {
-                        UIHelper.addToCollection(
-                            this.nodeHelper,
-                            this.collectionService,
-                            this.router,
-                            this.bridge,
+                        this.uiService.addToCollection(
                             target as Node,
                             source.element,
                             false,
@@ -927,11 +931,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
     addNodesToCollection(nodes: Node[], allowDuplicate: boolean | 'ignore' = false) {
         this.toast.showProgressSpinner();
-        UIHelper.addToCollection(
-            this.nodeHelper,
-            this.collectionService,
-            this.router,
-            this.bridge,
+        this.uiService.addToCollection(
             this.collection,
             nodes,
             false,

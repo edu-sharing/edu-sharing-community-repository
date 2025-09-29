@@ -653,7 +653,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         const list = this.getNodeList(event);
         if (list[0].isDirectory || list[0].type === RestConstants.SYS_TYPE_CONTAINER) {
             if (list[0].collection) {
-                UIHelper.goToCollection(this.router, list[0]);
+                this.ui.goToCollection(list[0]);
             } else {
                 this.openDirectory(list[0].ref.id);
             }

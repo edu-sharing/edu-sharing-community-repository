@@ -43,6 +43,7 @@ import {
     RestNodeService,
     RestSearchService,
     RestUsageService,
+    UIService,
     Usage,
     UsageList,
 } from '../../../core-module/core.module';
@@ -141,6 +142,7 @@ export class WorkspaceMetadataComponent implements OnInit {
         private config: ConfigService,
         private nodeHelper: NodeHelperService,
         private router: Router,
+        private uiService: UIService,
         private iamApi: RestIamService,
         private nodeApi: RestNodeService,
         private nodeService: NodeService,
@@ -291,7 +293,7 @@ export class WorkspaceMetadataComponent implements OnInit {
     }
 
     displayCollection(collection: Node) {
-        UIHelper.goToCollection(this.router, collection);
+        this.uiService.goToCollection(collection);
     }
 
     private openPermalink() {
