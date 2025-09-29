@@ -104,7 +104,6 @@ export class NodesSelectorComponent implements OnInit {
         private mainNavService: MainNavService,
         private nodeService: NodeService,
         private uiService: UIService,
-        private router: Router,
         private searchService: SearchService,
         private toast: Toast,
     ) {}
@@ -241,11 +240,7 @@ export class NodesSelectorComponent implements OnInit {
         }
         if (this.onlyFilesSelected()) {
             try {
-                this.uiService.addToCollection(
-                    this.parent,
-                    this.selectedNodes() as Node[],
-                    false,
-                );
+                this.uiService.addToCollection(this.parent, this.selectedNodes() as Node[], false);
             } catch (e) {
                 console.error(e);
                 this.toast.error({}, 'Der gewählte Inhalt existiert bereits in der Sammlung.');
