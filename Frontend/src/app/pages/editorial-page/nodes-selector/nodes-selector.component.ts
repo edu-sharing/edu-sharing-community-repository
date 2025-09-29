@@ -9,7 +9,6 @@ import {
     WritableSignal,
 } from '@angular/core';
 import { MatTabChangeEvent } from '@angular/material/tabs';
-import { Router } from '@angular/router';
 import {
     HOME_REPOSITORY,
     MdsQueryCriteria,
@@ -33,12 +32,9 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { CollectionSubcollections } from '../../../core-module/rest/data-object';
-import { FrameEventsService } from '../../../core-module/rest/services/frame-events.service';
-import { RestCollectionService } from '../../../core-module/rest/services/rest-collection.service';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { BridgeService } from '../../../services/bridge.service';
-import { NodeHelperService } from '../../../services/node-helper.service';
+import { RestCollectionService } from '../../../core-module/rest/services/rest-collection.service';
+import { MainNavConfig, MainNavService } from '../../../main/navigation/main-nav.service';
 import { Toast } from '../../../services/toast';
 import { SharedModule } from '../../../shared/shared.module';
 
@@ -83,6 +79,8 @@ export class NodesSelectorComponent implements OnInit {
         includeSub: false,
         includeItems: false,
     };
+    // main nav config necessary for triggering the copy process
+    mainNavConfig: MainNavConfig;
 
     // search tab
     searchColumns: ColumnType;
@@ -101,12 +99,9 @@ export class NodesSelectorComponent implements OnInit {
     dataSourceWorkspace: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
 
     constructor(
-        private bridge: BridgeService,
         private collectionService: RestCollectionService,
-        private events: FrameEventsService,
-        private nodeHelper: NodeHelperService,
+        private mainNavService: MainNavService,
         private nodeService: NodeService,
-        private router: Router,
         private searchService: SearchService,
         private toast: Toast,
     ) {}
@@ -114,7 +109,7 @@ export class NodesSelectorComponent implements OnInit {
     /**
      * Initializes the component by definition the default columns for the collections data source.
      */
-    ngOnInit(): void {
+    async ngOnInit(): Promise<void> {
         this.searchColumns = {
             Default: [new ListItem('NODE', RestConstants.CM_PROP_TITLE)],
         };
@@ -124,6 +119,7 @@ export class NodesSelectorComponent implements OnInit {
         this.workspaceColumns = {
             Default: ListItem.getCollectionDefaults(),
         };
+        this.mainNavConfig = await firstValueFrom(this.mainNavService.observeMainNavConfig());
     }
 
     /**
@@ -178,6 +174,62 @@ export class NodesSelectorComponent implements OnInit {
     }
 
     /**
+     * Executes the search query and updates the search datasource.
+     */
+    async executeSearch() {
+        this.dataSourceSearch.isLoading = true;
+        this.searchSent.set(true);
+        this.selectedNodes.update(() => []);
+
+        // reset the search datasource, if it is already initialized
+        if (!this.dataSourceSearch.isEmpty()) {
+            this.dataSourceSearch.reset();
+        }
+
+        if (!this.searchText) {
+            this.dataSourceSearch.setData([]);
+            this.dataSourceSearch.isLoading = false;
+            return;
+        }
+
+        const request = this.createSearchRequest();
+        const searchResult: SearchResults = await firstValueFrom(
+            this.searchService.search(request),
+        );
+
+        this.dataSourceSearch.setData(searchResult.nodes, searchResult.pagination);
+        this.dataSourceSearch.isLoading = false;
+    }
+
+    /**
+     * Clears the search text and executes the search again.
+     */
+    clearSearch(): void {
+        this.searchText = '';
+        void this.executeSearch();
+    }
+
+    /**
+     * Reacts to fetchData output of search datasource by loading further results.
+     *
+     * @param event
+     */
+    async loadMore(event: FetchEvent): Promise<void> {
+        if (!this.dataSourceSearch.hasMore() || this.dataSourceSearch.isLoading) {
+            return;
+        }
+
+        this.dataSourceSearch.isLoading = true;
+        const request = this.createSearchRequest(event.offset);
+        const searchResult: SearchResults = await firstValueFrom(
+            this.searchService.search(request),
+        );
+
+        this.dataSourceSearch.appendData(searchResult.nodes);
+        this.dataSourceSearch.isLoading = false;
+    }
+
+    /**
      * Copies the selected nodes into the currently opened view.
      */
     async copyNodes(): Promise<void> {
@@ -185,29 +237,10 @@ export class NodesSelectorComponent implements OnInit {
             return;
         }
         if (this.onlyFilesSelected()) {
-            try {
-                UIHelper.addToCollection(
-                    this.nodeHelper,
-                    this.collectionService,
-                    this.router,
-                    this.bridge,
-                    this.parent,
-                    this.selectedNodes() as Node[],
-                    false,
-                    (references) => {
-                        // TODO: How to tell the outer dataSource to update? (multiple outputs vs. event)
-                        console.log('references', references);
-                        this.events.broadcastEvent(
-                            FrameEventsService.EVENT_PARENT_FETCH_DATA,
-                            references,
-                        );
-                        window.location.reload();
-                        return;
-                    },
-                );
-            } catch (e) {
-                console.error(e);
-                this.toast.error({}, 'Der gewählte Inhalt existiert bereits in der Sammlung.');
+            if (this.mainNavConfig) {
+                this.mainNavConfig.onCreate(this.selectedNodes() as Node[]);
+            } else {
+                this.toast.error({}, 'Beim Kopieren der Inhalte ist ein Fehler aufgetreten.');
             }
         } else {
             this.currentStep.set(StepType.CONFIGURE);
@@ -378,54 +411,6 @@ export class NodesSelectorComponent implements OnInit {
             node.mediatype = 'collection';
         }
         return node;
-    }
-
-    /**
-     * Executes the search query and updates the search datasource.
-     */
-    async executeSearch() {
-        this.dataSourceSearch.isLoading = true;
-        this.searchSent.set(true);
-        this.selectedNodes.update(() => []);
-
-        // reset the search datasource, if it is already initialized
-        if (!this.dataSourceSearch.isEmpty()) {
-            this.dataSourceSearch.reset();
-        }
-
-        if (!this.searchText) {
-            this.dataSourceSearch.setData([]);
-            this.dataSourceSearch.isLoading = false;
-            return;
-        }
-
-        const request = this.createSearchRequest();
-        const searchResult: SearchResults = await firstValueFrom(
-            this.searchService.search(request),
-        );
-
-        this.dataSourceSearch.setData(searchResult.nodes, searchResult.pagination);
-        this.dataSourceSearch.isLoading = false;
-    }
-
-    clearSearch(): void {
-        this.searchText = '';
-        void this.executeSearch();
-    }
-
-    async loadMore(event: FetchEvent): Promise<void> {
-        if (!this.dataSourceSearch.hasMore() || this.dataSourceSearch.isLoading) {
-            return;
-        }
-
-        this.dataSourceSearch.isLoading = true;
-        const request = this.createSearchRequest(event.offset);
-        const searchResult: SearchResults = await firstValueFrom(
-            this.searchService.search(request),
-        );
-
-        this.dataSourceSearch.appendData(searchResult.nodes);
-        this.dataSourceSearch.isLoading = false;
     }
 
     /**
