@@ -9,6 +9,7 @@ import {
     WritableSignal,
 } from '@angular/core';
 import { MatTabChangeEvent } from '@angular/material/tabs';
+import { TranslateService } from '@ngx-translate/core';
 import {
     HOME_REPOSITORY,
     MdsQueryCriteria,
@@ -109,6 +110,7 @@ export class NodesSelectorComponent implements OnInit {
         private uiService: UIService,
         private searchService: SearchService,
         private toast: Toast,
+        private translate: TranslateService,
     ) {}
 
     /**
@@ -243,10 +245,21 @@ export class NodesSelectorComponent implements OnInit {
         }
         if (this.onlyFilesSelected()) {
             try {
-                this.uiService.addToCollection(this.parent, this.selectedNodes() as Node[], false);
+                this.toast.showProgressSpinner();
+                this.uiService.addToCollection(
+                    this.parent,
+                    this.selectedNodes() as Node[],
+                    false,
+                    () => {
+                        this.toast.closeProgressSpinner();
+                    },
+                );
             } catch (e) {
                 console.error(e);
-                this.toast.error({}, 'Der gewählte Inhalt existiert bereits in der Sammlung.');
+                this.toast.closeProgressSpinner();
+                setTimeout(() => {
+                    this.toast.error({}, this.i18nPrefix + 'COPY.ERROR');
+                });
             }
         } else {
             this.currentStep.set(StepType.CONFIGURE);
@@ -305,7 +318,7 @@ export class NodesSelectorComponent implements OnInit {
         };
         // my collections
         const myCollectionsNode: Partial<Node> = this.createFakeNode(
-            'Meine Sammlungen',
+            this.translate.instant(this.i18nPrefix + 'COLLECTIONS.MY_COLLECTIONS'),
             'person',
             RestConstants.COLLECTIONSCOPE_MY,
             true,
@@ -326,7 +339,7 @@ export class NodesSelectorComponent implements OnInit {
         initialData = initialData.concat(subMyCollections.collections);
         // editorial collections
         const editorialCollectionsNode: Partial<Node> = this.createFakeNode(
-            'Redaktionelle Sammlungen',
+            this.translate.instant(this.i18nPrefix + 'COLLECTIONS.EDITORIAL_COLLECTIONS'),
             'star',
             RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL,
             true,
@@ -368,7 +381,10 @@ export class NodesSelectorComponent implements OnInit {
             propertiesFilter: RestConstants.ALL,
         };
         // my contents
-        const myContentsNode: Partial<Node> = this.createFakeNode('Meine Inhalte', 'person');
+        const myContentsNode: Partial<Node> = this.createFakeNode(
+            this.translate.instant(this.i18nPrefix + 'WORKSPACE.MY_CONTENTS'),
+            'person',
+        );
         const subMyContents: Node[] = (
             await firstValueFrom(this.nodeService.getChildren(RestConstants.USERHOME, params))
         ).nodes;
@@ -380,7 +396,7 @@ export class NodesSelectorComponent implements OnInit {
         initialData = initialData.concat(subMyContents);
         // shared contents
         const sharedContentsNode: Partial<Node> = this.createFakeNode(
-            'Gemeinsame Inhalte',
+            this.translate.instant(this.i18nPrefix + 'WORKSPACE.SHARED_CONTENTS'),
             'group',
         );
         const subSharedContents: Node[] = (

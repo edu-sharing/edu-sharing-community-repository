@@ -14,9 +14,18 @@
           "PLACEHOLDER": "Suche nach Inhalten",
           "NO_RESULTS": "Es konnten keine Ergebnisse gefunden werden."
         },
+        "COLLECTIONS": {
+          "MY_COLLECTIONS": "Meine Sammlungen",
+          "EDITORIAL_COLLECTIONS": "Redaktionelle Sammlungen"
+        },
+        "WORKSPACE": {
+          "MY_CONTENTS": "Meine Inhalte",
+          "SHARED_CONTENTS": "Gemeinsame Inhalte"
+        },
         "COPY": {
           "SINGLE": "Gewählten Inhalt kopieren",
-          "MULTIPLE": "Gewählte Inhalte kopieren"
+          "MULTIPLE": "Gewählte Inhalte kopieren",
+          "ERROR": "Beim Kopieren der Inhalte ist ein Fehler aufgetreten."
         },
         "CONFIGURE_CONFIG": {
           "INFO_HEADING": "Wie wir Speicherplatz sparen:",
