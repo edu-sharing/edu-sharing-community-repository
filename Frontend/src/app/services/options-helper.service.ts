@@ -226,7 +226,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             this.subscriptions = [];
         }
 
-        this.globalOptions = await this.getAvailableOptions(Target.Actionbar, [], components, data);
         if (components.list) {
             components.list.setOptions({
                 [Target.List]: await this.getAvailableOptions(Target.List, [], components, data),
@@ -248,7 +247,12 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             components.dropdown.ngOnChanges();
         }
         if (components.actionbar) {
-            components.actionbar.options = this.globalOptions;
+            components.actionbar.options = await this.getAvailableOptions(
+                Target.Actionbar,
+                [],
+                components,
+                data,
+            );
             components.actionbar.invalidate();
         }
     }
