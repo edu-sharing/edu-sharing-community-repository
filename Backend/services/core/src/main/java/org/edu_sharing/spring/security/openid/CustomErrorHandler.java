@@ -19,17 +19,22 @@ public class CustomErrorHandler implements AuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
         log.info("authentication failure", exception);
-        if(exception instanceof OAuth2AuthenticationException && ((OAuth2AuthenticationException) exception).getError() != null) {
-            if(Objects.equals("authorization_request_not_found", ((OAuth2AuthenticationException) exception).getError().getErrorCode())) {
-                log.warn("oauth can't find request in session. Is something wrong with the session storage?");
-            }
-        }
         try {
             if(SilentLoginModeRedirect.processError(request,response)){
                 return;
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+
+        if(exception instanceof OAuth2AuthenticationException && ((OAuth2AuthenticationException) exception).getError() != null) {
+            String error = ((OAuth2AuthenticationException) exception).getError().getErrorCode();
+            if(Objects.equals("authorization_request_not_found",error) || Objects.equals("login_required",error)) {
+                String redirect = "/edu-sharing/sso";
+                log.warn("oauth error {} can't find request in session. redirect to {}", error,redirect);
+                response.sendRedirect(redirect);
+                return;
+            }
         }
 
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
