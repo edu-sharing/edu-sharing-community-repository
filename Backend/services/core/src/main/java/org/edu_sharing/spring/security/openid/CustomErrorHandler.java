@@ -28,9 +28,11 @@ public class CustomErrorHandler implements AuthenticationFailureHandler {
         }
 
         if(exception instanceof OAuth2AuthenticationException && ((OAuth2AuthenticationException) exception).getError() != null) {
-            if(Objects.equals("authorization_request_not_found", ((OAuth2AuthenticationException) exception).getError().getErrorCode())) {
-                log.warn("oauth authorization_request_not_found can't find request in session. redirect to /edu-sharing/sso");
-                response.sendRedirect("/edu-sharing/sso");
+            String error = ((OAuth2AuthenticationException) exception).getError().getErrorCode();
+            if(Objects.equals("authorization_request_not_found",error) || Objects.equals("login_required",error)) {
+                String redirect = "/edu-sharing/sso";
+                log.warn("oauth error {} can't find request in session. redirect to {}", error,redirect);
+                response.sendRedirect(redirect);
                 return;
             }
         }
