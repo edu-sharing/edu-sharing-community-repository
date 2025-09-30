@@ -1,6 +1,10 @@
 @use 'sass:color';
 @use '../../../../assets/scss/mixins' as *;
 
+:host {
+    overflow: visible;
+}
+
 .drag-preview {
     display: flex;
     align-items: center;
