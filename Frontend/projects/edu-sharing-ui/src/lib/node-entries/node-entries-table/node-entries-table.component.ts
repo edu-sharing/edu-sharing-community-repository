@@ -48,6 +48,7 @@ import { Toast } from '../../services/abstract/toast.service';
 import { DropdownComponent } from '../../dropdown/dropdown.component';
 import { NodeDataSourceRemote } from '../node-data-source-remote';
 import { TranslationsService } from '../../translations/translations.service';
+import { NodesDragDropService } from '../../services/nodes-drag-drop.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 
 @Component({
@@ -98,6 +99,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         private toast: Toast,
         private translations: TranslationsService,
         private nodeHelperService: NodeHelperService,
+        private nodesDragDropService: NodesDragDropService,
         private changeDetectorRef: ChangeDetectorRef,
         public ui: UIService,
         private ngZone: NgZone,
@@ -295,6 +297,9 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     }
 
     canDrop = (dragData: DragData<T>): CanDrop => {
+        dragData.keepViewContext =
+            !this.nodesDragDropService.draggedComponentId ||
+            this.entriesService.uniqueId === this.nodesDragDropService.draggedComponentId;
         return this.entriesService.dragDrop.dropAllowed?.(dragData);
     };
 

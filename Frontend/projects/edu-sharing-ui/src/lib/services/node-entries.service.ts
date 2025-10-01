@@ -29,6 +29,7 @@ import { NodeDataSourceRemote } from '../node-entries/node-data-source-remote';
 import { delay, map } from 'rxjs/operators';
 import { DropdownComponent } from '../dropdown/dropdown.component';
 import { Toast } from './abstract/toast.service';
+import { generateUniqueId } from '../util/functions';
 
 /**
  Custom selection model which adds the click source of the selection.
@@ -151,6 +152,10 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     disableInfiniteScroll: boolean;
     showIconColumn = new BehaviorSubject(true);
     scrollGradientColor: WritableSignal<string> = signal('fff');
+    private readonly _uniqueId: string = generateUniqueId();
+    get uniqueId(): string {
+        return this._uniqueId;
+    }
 
     constructor(
         private uiService: UIService,

@@ -6,6 +6,7 @@ export interface DragData<T = unknown> {
     draggedNodes: Node[];
     action: DropAction;
     target: T;
+    keepViewContext?: boolean;
 }
 export interface DropTargetState {
     action: DropAction;

@@ -192,6 +192,7 @@
     (cdkDragEnded)="onDragEnded()"
     [esNodesDropTarget]="node"
     [canDropNodes]="canDrop"
+    [componentId]="entriesService.uniqueId"
     (nodeDropped)="drop($event)"
     class="mat-row"
     [class.mat-row-selected]="entriesService.selection.isSelected(node)"

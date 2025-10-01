@@ -22,6 +22,7 @@ import {
 } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
+    CanDrop,
     ColumnType,
     FetchEvent,
     InteractionType,
@@ -215,6 +216,22 @@ export class NodesSelectorComponent implements OnInit {
         this.searchText = '';
         void this.executeSearch();
     }
+
+    /**
+     * Do not allow dropping on the search references.
+     */
+    canDropOnSearchRef = (): CanDrop => {
+        return {
+            accept: false,
+        };
+    };
+
+    /**
+     * Return if something is dropped.
+     */
+    dropped = async () => {
+        return;
+    };
 
     /**
      * Reacts to fetchData output of search datasource by loading further results.

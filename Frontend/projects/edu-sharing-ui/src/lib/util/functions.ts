@@ -13,3 +13,9 @@ export function microTick(): Promise<void> {
 export function macroTick(): Promise<void> {
     return new Promise((resolve) => setTimeout(() => resolve()));
 }
+
+export function generateUniqueId(): string {
+    const timestamp = Date.now().toString(36);
+    const randomString = Math.random().toString(36).substr(2, 9);
+    return `component-${timestamp}-${randomString}`;
+}

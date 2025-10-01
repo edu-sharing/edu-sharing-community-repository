@@ -32,6 +32,7 @@ import { ListItemSort } from '../../types/list-item';
 import { DragData } from '../../types/drag-drop';
 import { CdkOverlayOrigin } from '@angular/cdk/overlay';
 import { NodeHelperService } from '../../services/node-helper.service';
+import { NodesDragDropService } from '../../services/nodes-drag-drop.service';
 
 let displayedWarnings: string[] = [];
 
@@ -101,6 +102,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
         public entriesGlobalService: NodeEntriesGlobalService,
         public templatesService: NodeEntriesTemplatesService,
         public nodeHelperService: NodeHelperService,
+        private nodesDragDropService: NodesDragDropService,
         public ui: UIService,
         private ngZone: NgZone,
     ) {
@@ -297,7 +299,12 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
         });
     }
 
-    canDropNodes = (dragData: DragData<T>) => this.entriesService.dragDrop.dropAllowed?.(dragData);
+    canDropNodes = (dragData: DragData<T>) => {
+        dragData.keepViewContext =
+            !this.nodesDragDropService.draggedComponentId ||
+            this.entriesService.uniqueId === this.nodesDragDropService.draggedComponentId;
+        return this.entriesService.dragDrop.dropAllowed?.(dragData);
+    };
 
     onNodesDropped(dragData: DragData<Node>) {
         this.entriesService.dragDrop.dropped(dragData.target, {

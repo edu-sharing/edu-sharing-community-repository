@@ -24,6 +24,14 @@ export class NodesDragDropService {
     private dropActionSubject = new BehaviorSubject<DropAction>('move');
     /** The current cursor style. */
     private curserSubject = new BehaviorSubject<string>(null);
+    /** The ID of the component the dragged nodes belong to. */
+    private _draggedComponentId: string;
+    get draggedComponentId(): string {
+        return this._draggedComponentId;
+    }
+    set draggedComponentId(value: string) {
+        this._draggedComponentId = value;
+    }
 
     set draggedNodes(nodes: Node[]) {
         this.draggedNodesSubject.next(nodes);

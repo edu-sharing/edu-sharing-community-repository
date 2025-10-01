@@ -81,7 +81,15 @@
           </div>
           <es-node-entries-wrapper
             #wrapperRef
-            *ngIf="dataSourceSearch.isLoading || !dataSourceSearch.isEmpty()"
+            *ngIf="
+              (selectedTab() === TabType.SEARCH && dataSourceSearch.isLoading) ||
+              !dataSourceSearch.isEmpty()
+            "
+            [dragDrop]="{
+              dragAllowed: true,
+              dropAllowed: canDropOnSearchRef,
+              dropped: dropped
+            }"
             [columns]="searchColumns"
             [dataSource]="dataSourceSearch"
             [(displayType)]="searchDisplayType"

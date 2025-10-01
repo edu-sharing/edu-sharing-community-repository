@@ -420,14 +420,24 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     };
 
     canDropOnRef = (dragData: DragData<CollectionReference>): CanDrop => {
-        // do not allow to drop here
+        // allow dropping when only files are dragged and the view context was changed
         return {
-            accept: false,
+            accept:
+                dragData.draggedNodes.every((n) => n.type === 'ccm:io') &&
+                !dragData.keepViewContext,
         };
     };
 
     dropOnRef = (target: Node, source: DropSource<CollectionReference>) => {
-        return;
+        try {
+            this.toast.showProgressSpinner();
+            this.uiService.addToCollection(this.collection, source.element as Node[], false, () => {
+                this.toast.closeProgressSpinner();
+            });
+        } catch (e) {
+            console.error(e);
+            this.toast.closeProgressSpinner();
+        }
     };
     dropOnCollection = async (target: Node | 'HOME', source: DropSource<Node>) => {
         if (source.element[0] === target) {
