@@ -112,6 +112,8 @@
           class="card-grid-drag-wrapper"
           *ngFor="let node of nodes; let i = index"
           role="none"
+          cdkDropList
+          [cdkDropListSortingDisabled]="true"
           [esNodesDropTarget]="node"
           [canDropNodes]="canDropNodes"
           (nodeDropped)="onNodesDropped($event)"
