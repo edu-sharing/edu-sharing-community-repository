@@ -16,7 +16,9 @@ import { debounceTime, startWith, takeUntil } from 'rxjs/operators';
 import { DropdownComponent } from '../../dropdown/dropdown.component';
 import { NodeEntriesService } from '../../services/node-entries.service';
 import { NodeHelperService } from '../../services/node-helper.service';
+import { NodesDragDropService } from '../../services/nodes-drag-drop.service';
 import { TranslationsService } from '../../translations/translations.service';
+import { CanDrop, DragData } from '../../types/drag-drop';
 import { Target } from '../../types/option-item';
 import { NodeEntriesDataType, NodeEntriesDisplayType } from '../entries-model';
 import { DynamicDataSource } from './dynamic-data-source';
@@ -43,6 +45,8 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     dropdownLeft: number;
     dropdownTop: number;
 
+    isDragging = false;
+
     private destroyed = new Subject<void>();
 
     // tree-related variables
@@ -62,10 +66,11 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     treeInitialized: WritableSignal<boolean> = signal(false);
 
     constructor(
-        public entriesService: NodeEntriesService<T>,
-        private translations: TranslationsService,
         private changeDetectorRef: ChangeDetectorRef,
+        public entriesService: NodeEntriesService<T>,
         public nodeHelper: NodeHelperService,
+        private nodesDragDropService: NodesDragDropService,
+        private translations: TranslationsService,
         private treeNodeService: TreeNodeService,
     ) {
         // listening to selection changed subject
@@ -166,6 +171,54 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
             return;
         }
         this.entriesService.selection.toggle(flatNode.item as T);
+    }
+
+    canDrop = (dragData: DragData<T>): CanDrop => {
+        dragData.keepViewContext =
+            !this.nodesDragDropService.draggedComponentId ||
+            this.entriesService.uniqueId === this.nodesDragDropService.draggedComponentId;
+        return this.entriesService.dragDrop.dropAllowed?.(dragData);
+    };
+
+    async drop(dragData: DragData<Node>) {
+        this.entriesService.dragDrop.dropped(dragData.target, {
+            element: dragData.draggedNodes,
+            mode: dragData.action,
+        });
+        // TODO: reload target together with its children
+        // const targetId = dragData.target.ref.id;
+        // // remove target ID from helper structures of treeNodeService
+        // this.treeNodeService.parentIdToLastLoadedNodeId.delete(dragData.target.ref.id);
+        // this.treeNodeService.dataMap.delete(targetId);
+        // this.treeNodeService.emptyFolders = this.treeNodeService.emptyFolders.filter(id => id !== targetId);
+        // // retrieve updates
+        // await this.treeNodeService.getChildren(dragData.target);
+        // const treeElement = this.dataSource.data.find(d => d.item.ref.id === dragData.target.ref.id);
+        // if (treeElement) {
+        //     await this.dataSource.toggleNode(treeElement, false);
+        //     await this.dataSource.toggleNode(treeElement, true);
+        // }
+    }
+
+    getDragData(node: T): T[] {
+        const selection = this.entriesService.selection;
+        if (selection.isSelected(node)) {
+            return selection.selected;
+        } else {
+            return [node];
+        }
+    }
+
+    onDragStarted(node: T) {
+        if (!this.entriesService.selection.isSelected(node)) {
+            this.entriesService.selection.clear();
+            this.entriesService.selection.select(node);
+        }
+        this.isDragging = true;
+    }
+
+    onDragEnded() {
+        this.isDragging = false;
     }
 
     /**

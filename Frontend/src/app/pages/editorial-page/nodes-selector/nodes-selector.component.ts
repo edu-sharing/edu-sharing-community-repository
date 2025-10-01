@@ -24,6 +24,8 @@ import {
     ActionbarComponent,
     CanDrop,
     ColumnType,
+    DragData,
+    DropSource,
     FetchEvent,
     InteractionType,
     ListItem,
@@ -37,7 +39,10 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { firstValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { CollectionSubcollections } from '../../../core-module/rest/data-object';
+import {
+    CollectionReference,
+    CollectionSubcollections,
+} from '../../../core-module/rest/data-object';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestCollectionService } from '../../../core-module/rest/services/rest-collection.service';
 import { UIService } from '../../../core-module/rest/services/ui.service';
@@ -231,6 +236,39 @@ export class NodesSelectorComponent implements OnInit {
      */
     dropped = async () => {
         return;
+    };
+
+    /**
+     * Allow dropping on collections.
+     *
+     * @param dragData
+     */
+    canDropOnCollection = (dragData: DragData<CollectionReference>): CanDrop => {
+        // allow dropping if only files are dragged, the target is a collection, and the view context changed
+        return {
+            accept:
+                dragData.draggedNodes.every((n) => n.type === 'ccm:io') &&
+                this.nodeHelperService.isNodeCollection(dragData.target) &&
+                !dragData.keepViewContext,
+        };
+    };
+
+    /**
+     * Adds the dropped nodes to the collection.
+     *
+     * @param target
+     * @param source
+     */
+    dropOnCollection = (target: Node, source: DropSource<CollectionReference>) => {
+        try {
+            this.toast.showProgressSpinner();
+            this.uiService.addToCollection(target, source.element as Node[], false, () => {
+                this.toast.closeProgressSpinner();
+            });
+        } catch (e) {
+            console.error(e);
+            this.toast.closeProgressSpinner();
+        }
     };
 
     /**

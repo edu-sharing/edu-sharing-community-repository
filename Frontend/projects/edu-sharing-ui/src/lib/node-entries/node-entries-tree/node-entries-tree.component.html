@@ -42,7 +42,7 @@
 </div>
 
 <!-- tree component -->
-<div class="tree-container">
+<div class="tree-container" cdkDropList [cdkDropListSortingDisabled]="true">
   <es-dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></es-dropdown>
   <button
     #menuTrigger="matMenuTrigger"
@@ -69,7 +69,23 @@
       *matTreeNodeDef="let node"
       matTreeNodePadding
       [class.selected]="entriesService.selection.isSelected(node.item)"
+      cdkDrag
+      esNodesDrag
+      [cdkDragData]="getDragData(node.item)"
+      [cdkDragDisabled]="!entriesService.dragDrop?.dragAllowed"
+      (cdkDragStarted)="onDragStarted(node.item)"
+      (cdkDragEnded)="onDragEnded()"
+      [esNodesDropTarget]="node.item"
+      [canDropNodes]="canDrop"
+      [componentId]="entriesService.uniqueId"
+      (nodeDropped)="drop($event)"
     >
+      <es-drag-preview
+        *cdkDragPreview
+        [node]="node.item"
+        [selected]="entriesService.selection.selected"
+        [item]="entriesService.columns[0]"
+      ></es-drag-preview>
       <ng-container *ngTemplateOutlet="nodeInformation; context: { node: node }"></ng-container>
     </mat-tree-node>
 
@@ -91,7 +107,20 @@
       *matTreeNodeDef="let node; when: hasChild"
       matTreeNodePadding
       [cdkTreeNodeTypeaheadLabel]="node.item"
+      cdkDrag
+      cdkDragDisabled
+      esNodesDrag
+      [esNodesDropTarget]="node.item"
+      [canDropNodes]="canDrop"
+      [componentId]="entriesService.uniqueId"
+      (nodeDropped)="drop($event)"
     >
+      <es-drag-preview
+        *cdkDragPreview
+        [node]="node.item"
+        [selected]="entriesService.selection.selected"
+        [item]="entriesService.columns[0]"
+      ></es-drag-preview>
       <div class="child-tree-node-container">
         <a
           matIconButton

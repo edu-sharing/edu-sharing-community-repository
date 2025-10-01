@@ -119,6 +119,11 @@
           [columns]="collectionsColumns"
           [dataSource]="dataSourceCollections"
           [displayType]="NodeEntriesDisplayType.Tree"
+          [dragDrop]="{
+            dragAllowed: true,
+            dropAllowed: canDropOnCollection,
+            dropped: dropOnCollection
+          }"
           (selectionChange)="onNodeSelectionChange($event)"
         ></es-node-entries-wrapper>
       </ng-container>
@@ -130,6 +135,11 @@
           [columns]="workspaceColumns"
           [dataSource]="dataSourceWorkspace"
           [displayType]="NodeEntriesDisplayType.Tree"
+          [dragDrop]="{
+            dragAllowed: true,
+            dropAllowed: canDropOnCollection,
+            dropped: dropOnCollection
+          }"
           (selectionChange)="onNodeSelectionChange($event)"
         ></es-node-entries-wrapper>
       </ng-container>
