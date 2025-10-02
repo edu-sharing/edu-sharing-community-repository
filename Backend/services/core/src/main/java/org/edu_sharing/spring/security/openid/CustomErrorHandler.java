@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -30,8 +31,17 @@ public class CustomErrorHandler implements AuthenticationFailureHandler {
         if(exception instanceof OAuth2AuthenticationException && ((OAuth2AuthenticationException) exception).getError() != null) {
             String error = ((OAuth2AuthenticationException) exception).getError().getErrorCode();
             if(Objects.equals("authorization_request_not_found",error) || Objects.equals("login_required",error)) {
-                String redirect = "/edu-sharing/sso";
+
+                String redirect = "/edu-sharing";
+                HttpSession session = request.getSession();
                 log.warn("oauth error {} can't find request in session. redirect to {}", error,redirect);
+                if(session != null) {
+                    if(log.isDebugEnabled()) {
+                        session.getAttributeNames().asIterator().forEachRemaining(name -> log.debug("session contains attribute {}", name));
+                    }
+                    log.warn("invalidating incomplete session before redirect");
+                    session.invalidate();
+                }
                 response.sendRedirect(redirect);
                 return;
             }
