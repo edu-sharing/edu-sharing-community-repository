@@ -86,6 +86,12 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
                     await this.initializeTree();
                 }
             });
+        // listening to tree-node service node changes
+        this.treeNodeService.nodesChanged
+            .pipe(takeUntil(this.destroyed))
+            .subscribe((nodes: Node[]) => {
+                void this.updateTree(nodes);
+            });
     }
 
     async ngAfterViewInit(): Promise<void> {
@@ -151,12 +157,7 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
         if (parentId) {
             await this.treeNodeService.getFurtherChildren(parentId);
             setTimeout(async () => {
-                const parent = this.dataSource.data?.find((n) => n.item?.ref.id === parentId);
-                if (parent) {
-                    // TODO: dirty workaround to trigger the update of the tree
-                    await this.dataSource.toggleNode(parent, false);
-                    await this.dataSource.toggleNode(parent, true);
-                }
+                await this.triggerNodeUpdate(parentId);
             }, 100);
         }
     }
@@ -185,19 +186,6 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
             element: dragData.draggedNodes,
             mode: dragData.action,
         });
-        // TODO: reload target together with its children
-        // const targetId = dragData.target.ref.id;
-        // // remove target ID from helper structures of treeNodeService
-        // this.treeNodeService.parentIdToLastLoadedNodeId.delete(dragData.target.ref.id);
-        // this.treeNodeService.dataMap.delete(targetId);
-        // this.treeNodeService.emptyFolders = this.treeNodeService.emptyFolders.filter(id => id !== targetId);
-        // // retrieve updates
-        // await this.treeNodeService.getChildren(dragData.target);
-        // const treeElement = this.dataSource.data.find(d => d.item.ref.id === dragData.target.ref.id);
-        // if (treeElement) {
-        //     await this.dataSource.toggleNode(treeElement, false);
-        //     await this.dataSource.toggleNode(treeElement, true);
-        // }
     }
 
     getDragData(node: T): T[] {
@@ -232,5 +220,29 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
         this.dataSource.data = await this.treeNodeService.getInitialData(nodes);
         this.treeInitialized.set(true);
         this.changeDetectorRef.detectChanges();
+    }
+
+    /**
+     * Helper function to update given nodes of the tree.
+     */
+    private async updateTree(nodes: Node[]): Promise<void> {
+        for (const node of nodes) {
+            await this.triggerNodeUpdate(node.ref.id);
+        }
+        this.changeDetectorRef.detectChanges();
+    }
+
+    /**
+     * Helper function as a workaround to trigger node updates by toggling the node expansion twice.
+     *
+     * @param nodeId
+     */
+    private async triggerNodeUpdate(nodeId: string): Promise<void> {
+        const treeElement = this.dataSource.data.find((d) => d.item.ref.id === nodeId);
+        if (treeElement) {
+            const isExpanded = this.treeControl.isExpanded(treeElement);
+            await this.dataSource.toggleNode(treeElement, !isExpanded);
+            await this.dataSource.toggleNode(treeElement, isExpanded);
+        }
     }
 }

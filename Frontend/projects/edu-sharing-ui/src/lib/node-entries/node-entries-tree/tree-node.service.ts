@@ -1,6 +1,14 @@
-import { Injectable } from '@angular/core';
-import { Node, NodeEntries, NodeService } from 'ngx-edu-sharing-api';
+import { EventEmitter, Injectable } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+    CollectionService,
+    HOME_REPOSITORY,
+    Node,
+    NodeEntries,
+    NodeService,
+} from 'ngx-edu-sharing-api';
 import { firstValueFrom } from 'rxjs';
+import { LocalEventsService } from '../../services/local-events.service';
 import { DynamicFlatNode } from './dynamic-flat-node';
 
 @Injectable({
@@ -20,8 +28,23 @@ export class TreeNodeService {
         sortAscending: [true],
         sortProperties: ['cm:title'],
     };
+    readonly nodesChanged = new EventEmitter<Node[]>();
 
-    constructor(private nodeService: NodeService) {}
+    constructor(
+        private collectionService: CollectionService,
+        private localEventsService: LocalEventsService,
+        private nodeService: NodeService,
+    ) {
+        this.localEventsService.nodesChanged
+            .pipe(takeUntilDestroyed())
+            .subscribe((nodes: Node[]) => this.refreshTree(nodes));
+        // TODO: support deleting references as well
+        // this.localEventsService.nodesDeleted
+        //     .pipe(
+        //         takeUntilDestroyed(),
+        //     )
+        //     .subscribe((nodes: Node[]) => this.refreshTree(nodes, true));
+    }
 
     /**
      * Retrieves the initial data by iterating the nodes and ordering them into a tree structure.
@@ -175,5 +198,35 @@ export class TreeNodeService {
         const unclickedFolder: boolean =
             this.folderTypes.includes(node.type) && !this.emptyFolders.includes(node.ref.id);
         return atLeastOneChild || unclickedFolder;
+    }
+
+    /**
+     * Helper function to refresh the tree if updates were made to given nodes.
+     *
+     * @param nodes
+     * @param deleted
+     */
+    private async refreshTree(nodes: Node[], deleted: boolean = false): Promise<void> {
+        for (let i = 0; i < nodes.length; i++) {
+            const node: Node = nodes[i];
+            const nodeId: string = node.ref.id;
+            // remove node ID from helper structures
+            this.parentIdToLastLoadedNodeId.delete(nodeId);
+            this.emptyFolders = this.emptyFolders.filter((id) => id !== nodeId);
+            // retrieve updated children (also updates the helper structures)
+            this.dataMap.delete(nodeId);
+            await this.getChildren(node);
+            // workaround for updating the number of references
+            // note: update is not done automatically, so reloading the references is necessary
+            const references = await firstValueFrom(
+                this.collectionService.getReferences({
+                    repository: HOME_REPOSITORY,
+                    collection: nodeId,
+                }),
+            );
+            nodes[i].collection.childReferencesCount = references.pagination.total;
+        }
+        // emit the changed nodes
+        this.nodesChanged.emit(nodes);
     }
 }
