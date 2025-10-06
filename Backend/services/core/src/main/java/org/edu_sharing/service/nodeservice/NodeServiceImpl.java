@@ -1037,7 +1037,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 // e.g. for collection sorting
 
                 String fieldType = dictionaryService.getProperty(prop).getDataType().getJavaClassName();
-                if (fieldType.equals(Integer.class.getName())) {
+                if (
+                        // dirty hack: unfortunately the model for cclom:size is of type d:text
+                        CCConstants.LOM_PROP_TECHNICAL_SIZE.equals(prop.toString()) ||
+                        fieldType.equals(Integer.class.getName())
+                ) {
                     if (prop1 instanceof String && prop2 instanceof String) {
                         compare = Integer.compare(Integer.parseInt((String) prop1), Integer.parseInt((String) prop2));
                     }

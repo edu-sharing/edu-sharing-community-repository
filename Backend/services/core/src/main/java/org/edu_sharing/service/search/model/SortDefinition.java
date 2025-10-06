@@ -170,7 +170,7 @@ public class SortDefinition implements Serializable {
 				String property = CCConstants.getValidGlobalName(sortDefintionEntry.getProperty());
 				if(sortDefintionEntry.getProperty().equalsIgnoreCase("sys:node-uuid")) {
 					// do nothing, this field is already a keyword!
-				} else if(Arrays.asList("cm:created", "cm:modified").contains(sortDefintionEntry.getProperty())) {
+				} else if(Arrays.asList("cm:created", "cm:modified", "cclom:size").contains(sortDefintionEntry.getProperty())) {
 					// use numeric
 					addSuffix = "number";
 				} else if(List.of("ccm:replicationsourcetimestamp","sys:archivedDate").contains(sortDefintionEntry.getProperty())) {
