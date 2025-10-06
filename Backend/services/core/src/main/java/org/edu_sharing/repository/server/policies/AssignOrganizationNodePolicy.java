@@ -9,16 +9,14 @@ import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
-import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.service.search.SearchService;
-import org.edu_sharing.service.search.model.SearchResult;
+import org.edu_sharing.service.organization.OrganizationService;
 import org.edu_sharing.spring.conditions.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -27,9 +25,8 @@ import java.util.Map;
 public class AssignOrganizationNodePolicy implements NodeServicePolicies.OnCreateNodePolicy {
 
     private final PolicyComponent policyComponent;
-    //    private final OrganizationService organizationService;
+    private final OrganizationService organizationService;
     private final NodeService nodeService;
-    private final SearchService searchService;
 
     @PostConstruct
     public void init() {
@@ -40,14 +37,12 @@ public class AssignOrganizationNodePolicy implements NodeServicePolicies.OnCreat
     public void onCreateNode(ChildAssociationRef childAssocRef) {
 
         try {
-
-            SearchResult<EduGroup> eduGroupSearchResult = searchService.searchOrganizations(null, 0, 100, null, false, true);
-            List<String> orgaList = eduGroupSearchResult.getData().stream().map(EduGroup::getGroupId).toList();
-            if (orgaList.isEmpty()) {
+            Set<String> organisations = organizationService.getAssignedOrganisations();
+            if (organisations.isEmpty()) {
                 return;
             }
 
-            nodeService.addProperties(childAssocRef.getChildRef(), Map.of(QName.createQName(CCConstants.CCM_PROP_OWNING_EDUGROUP), (Serializable) orgaList));
+            nodeService.addProperties(childAssocRef.getChildRef(), Map.of(QName.createQName(CCConstants.CCM_PROP_OWNING_EDUGROUP), (Serializable) organisations.stream().toList()));
         } catch (Throwable e) {
             log.error(e.getMessage(), e);
         }

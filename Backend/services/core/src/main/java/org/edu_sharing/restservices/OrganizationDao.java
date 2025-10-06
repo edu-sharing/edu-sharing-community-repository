@@ -83,7 +83,7 @@ public class OrganizationDao {
 	 */
 	public static String create(RepositoryDao repoDao, String orgName, GroupProfile profile,String scope) throws DAOException {
 		try {
-			OrganizationService organizationService = OrganizationServiceFactory.getOrganizationService(repoDao.getApplicationInfo().getAppId());
+			OrganizationService organizationService = OrganizationServiceFactory.getInstance().getService(repoDao.getApplicationInfo().getAppId());
 			return organizationService.createOrganization(orgName, profile.getDisplayName(),HttpContext.getCurrentMetadataSet(),scope);
 		} catch (Throwable t) {
 			throw DAOException.mapping(t);

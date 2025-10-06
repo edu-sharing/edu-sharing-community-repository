@@ -1,14 +1,12 @@
 package org.edu_sharing.service.organization;
 
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.appcontext.AppContextServiceFactory;
+import org.edu_sharing.spring.ApplicationContextFactory;
 
-public class OrganizationServiceFactory {
-	public static OrganizationService getOrganizationService(String applicationId){
-		
-		if(!applicationId.equals(ApplicationInfoList.getHomeRepository().getAppId())){
-			throw new RuntimeException("no remote version of SearchService implemented yet");
-		}
-		
-		return new OrganizationServiceImpl();
-	}
+public interface OrganizationServiceFactory extends AppContextServiceFactory<OrganizationService> {
+
+    static OrganizationServiceFactory getInstance() {
+        return ApplicationContextFactory.getApplicationContext().getBean(OrganizationServiceFactory.class);
+    }
+
 }

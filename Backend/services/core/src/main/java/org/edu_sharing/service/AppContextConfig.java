@@ -2,13 +2,11 @@ package org.edu_sharing.service;
 
 import org.edu_sharing.repository.server.AuthenticationTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.repository.server.AuthenticationToolWikimedia;
 import org.edu_sharing.repository.server.AuthenticationToolYouTube;
 import org.edu_sharing.repository.server.appcontext.AppContextRegistry;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceImpl;
 import org.edu_sharing.service.collection.CollectionService;
-import org.edu_sharing.service.collection.CollectionServiceAdapter;
 import org.edu_sharing.service.collection.CollectionServiceElastic;
 import org.edu_sharing.service.comment.CommentService;
 import org.edu_sharing.service.comment.CommentServiceAdapter;
@@ -19,6 +17,7 @@ import org.edu_sharing.service.feedback.FeedbackServiceAdapter;
 import org.edu_sharing.service.feedback.FeedbackServiceImpl;
 import org.edu_sharing.service.nodeservice.*;
 import org.edu_sharing.service.notification.NotificationService;
+import org.edu_sharing.service.organization.OrganizationService;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceAdapter;
 import org.edu_sharing.service.permission.PermissionServiceCCPublish;
@@ -62,6 +61,7 @@ public class AppContextConfig {
                 .defineBean(AuthenticationTool.class, AuthenticationToolAPI.class)
                 .defineBean(AuthorityService.class, AuthorityServiceImpl.class)
                 .defineBean(DashboardConfigService.class, "dashboardConfigServiceImpl")
+                .defineBean(OrganizationService.class, OrganizationService.class)
                 .done()
 
                 .addAppContext("org.edu_sharing.service.provider.ElasticSearchProvider")
@@ -76,6 +76,7 @@ public class AppContextConfig {
                 .defineBean(AuthenticationTool.class, AuthenticationToolAPI.class)
                 .defineBean(AuthorityService.class, AuthorityServiceImpl.class)
                 .defineBean(DashboardConfigService.class, "dashboardConfigServiceImpl")
+                .defineBean(OrganizationService.class, OrganizationService.class)
                 .done()
 
                 .addAppContext("org.edu_sharing.service.provider.BrockhausProvider")

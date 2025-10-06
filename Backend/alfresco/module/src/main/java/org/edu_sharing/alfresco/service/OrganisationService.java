@@ -1,6 +1,8 @@
 package org.edu_sharing.alfresco.service;
 
+import com.drew.lang.annotations.NotNull;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.model.ContentModel;
@@ -23,6 +25,7 @@ import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -195,6 +198,41 @@ public class OrganisationService {
         return organisations;
     }
 
+    @NotNull
+    public Set<String> getAssignedOrganisations(@NotNull @NonNull String authorityName) {
+
+        Set<String> organisations = authorityServiceInsecure.getAllAuthorities(AuthorityType.GROUP)
+                .stream()
+                .filter(this::hasOrganisationPrefix)
+                .collect(Collectors.toSet());
+
+
+        Set<String> authoritiesForUser = authorityService.getAuthoritiesForUser(authorityName);
+        if (authoritiesForUser != null) {
+            organisations.retainAll(authoritiesForUser);
+        }
+
+        return organisations;
+    }
+
+    @NotNull
+    public Set<String> getAssignedOrganisations() {
+
+        Set<String> organisations = authorityServiceInsecure.getAllAuthorities(AuthorityType.GROUP)
+                .stream()
+                .filter(this::hasOrganisationPrefix)
+                .collect(Collectors.toSet());
+
+
+        Set<String> authoritiesForUser = authorityService.getAuthorities();
+        if (authoritiesForUser != null) {
+            organisations.retainAll(authoritiesForUser);
+        }
+
+        return organisations;
+    }
+
+
     private boolean hasOrganisationPrefix(String authorityName) {
         return authorityName.startsWith(AuthorityType.GROUP.getPrefixString() + AuthorityService.ORG_GROUP_PREFIX);
     }
@@ -219,7 +257,7 @@ public class OrganisationService {
             }
 
             if (!displayName.equals(folderName)) {
-                log.info("syncing organisation folder name: {} with displayName: {}" ,folderName, displayName);
+                log.info("syncing organisation folder name: {} with displayName: {}", folderName, displayName);
                 if (execute) {
                     String newFolderName = EduSharingNodeHelper.cleanupCmName(displayName);
                     this.transactionService.getRetryingTransactionHelper().doInTransaction(() -> {
