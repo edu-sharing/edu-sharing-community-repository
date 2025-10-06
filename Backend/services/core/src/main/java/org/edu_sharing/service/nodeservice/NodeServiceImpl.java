@@ -751,7 +751,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
             // do in transaction to disable behaviour
             // otherwise interceptors might be called multiple times -> the final update props is enough!
             // do it AFTER set properties so the values can be sent as NULL-Values into setProperties to be read by interceptors
-            serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+
+            // doesn't seem to be necessary; No interecptors are called anyway, and Alfresco cleans the db internally
+            /*serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
                 policyBehaviourFilter.disableBehaviour(nodeRef);
                 for (QName prop : propsNull) {
                     // use alfresco service to prevent overhead
@@ -760,6 +762,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 policyBehaviourFilter.enableBehaviour(nodeRef);
                 return null;
             });
+             */
         } catch(DuplicateChildNodeNameException e){
             throw e;
         } catch (Exception e) {
