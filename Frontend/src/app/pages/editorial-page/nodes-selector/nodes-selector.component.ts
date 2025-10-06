@@ -244,9 +244,14 @@ export class NodesSelectorComponent implements OnInit {
      * @param dragData
      */
     canDropOnCollection = (dragData: DragData<CollectionReference>): CanDrop => {
-        // allow dropping if only files are dragged, the target is a collection, and the view context changed
+        // allow dropping if:
+        // * access information is set (i.e., no fake node),
+        // * only files are dragged,
+        // * the target is a collection,
+        // * and the view context changed.
         return {
             accept:
+                dragData.target.access?.length &&
                 dragData.draggedNodes.every((n) => n.type === 'ccm:io') &&
                 this.nodeHelperService.isNodeCollection(dragData.target) &&
                 !dragData.keepViewContext,
