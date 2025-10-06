@@ -95,6 +95,18 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
             node.isLoading.set(false);
             return;
         }
+        // remove potentially existing display: none, when dragging into an empty collection
+        else if (children.length) {
+            const element = document.getElementById('toggle-' + node.item.ref.id);
+            if (
+                !this.treeNodeService.emptyFolders.includes(node.item.ref.id) &&
+                element &&
+                element.style.display === 'none'
+            ) {
+                element.classList.remove('hidden');
+                element.style.display = 'block';
+            }
+        }
 
         // collapse or expand the node(s)
         if (!expand) {
