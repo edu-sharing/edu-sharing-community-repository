@@ -73,15 +73,6 @@ export class TreeNodeService {
         // first pass: create DynamicFlatNodes and insert them into dataMap
         nodes.forEach((node) => {
             const level = getLevel(node);
-            if (!node.collection) {
-                node.collection = {
-                    fromUser: false,
-                    level0: false,
-                    scope: '',
-                    title: '',
-                    type: '',
-                };
-            }
             const treeNode: DynamicFlatNode = new DynamicFlatNode(node, level, false);
             // only push first-level nodes into initialData
             if (level === 0) {
@@ -108,6 +99,15 @@ export class TreeNodeService {
                             child.mediatype === 'collection' ||
                             this.folderTypes.includes(child.type),
                     ).length;
+                    if (!child.collection) {
+                        child.collection = {
+                            fromUser: false,
+                            level0: false,
+                            scope: '',
+                            title: '',
+                            type: '',
+                        };
+                    }
                     child.collection.childCollectionsCount =
                         numberOfSubCollections +
                         subChildren.reduce(
