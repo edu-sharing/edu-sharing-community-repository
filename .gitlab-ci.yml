@@ -46,7 +46,7 @@ deploy:
 
 .frontend_job: &frontend_job
   variables:
-    NODE_VERSION: 22
+    NODE_VERSION: 24
   stage: test
   image: node:$NODE_VERSION-alpine3.20
   rules:
@@ -84,7 +84,7 @@ check linting:
 unittest frontend:
   <<: *frontend_job
   variables:
-    NODE_VERSION: 22
+    NODE_VERSION: 24
     CHROME_BIN: /usr/bin/chromium-browser
   before_script:
     - apk add chromium
