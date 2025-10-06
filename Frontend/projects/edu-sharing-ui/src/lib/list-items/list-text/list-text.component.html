@@ -44,6 +44,13 @@
     {{ $any(getNode()).size | formatSize }}
   </span>
   <span
+    *ngSwitchCase="'cclom:size'"
+    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
+  >
+    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+    {{ $any(getNode()).size | formatSize }}
+  </span>
+  <span
     *ngSwitchCase="'dimensions'"
     [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
   >

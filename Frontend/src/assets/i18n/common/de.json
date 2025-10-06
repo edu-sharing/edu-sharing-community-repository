@@ -279,6 +279,7 @@
     "description": "Beschreibung",
     "mimetype": "Dateityp",
     "size": "Größe",
+    "cclom:size": "Größe",
     "mediatype": "Dateityp",
     "ccm:commonlicense_key": "Lizenz",
     "ccm:collection_ordered_position": "Manuelle Sortierung",

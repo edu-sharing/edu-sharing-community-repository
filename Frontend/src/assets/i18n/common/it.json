@@ -235,6 +235,7 @@
     "description": "descrizione",
     "mimetype": "tipo di file",
     "size": "dimensione",
+    "cclom:size": "dimensione",
     "mediatype": "tipo di file",
     "ccm:commonlicense_key": "licenza",
     "ccm:educationallearningresourcetype": "Tipo",
