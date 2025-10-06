@@ -48,7 +48,7 @@ deploy:
   variables:
     NODE_VERSION: 24.9
   stage: test
-  image: node:$NODE_VERSION-alpine3.20
+  image: node:$NODE_VERSION-alpine
   rules:
     - if: $CI_COMMIT_BRANCH =~ /^maven\/release\/.*/ && $CI_PIPELINE_SOURCE == "pipeline"
     - if: $CI_COMMIT_TAG && $CI_PIPELINE_SOURCE == "pipeline"
