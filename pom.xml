@@ -41,8 +41,8 @@
 
     <java.version.range>[11,)</java.version.range>
 
-    <node.version>24.9.0</node.version>
-    <npm.version>11.6.0</npm.version>
+    <node.version>22.17.0</node.version>
+    <npm.version>11.4.2</npm.version>
 
     <npm.args.install>install</npm.args.install>
     <npm.args.build>run build</npm.args.build>
