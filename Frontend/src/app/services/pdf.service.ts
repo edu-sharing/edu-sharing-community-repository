@@ -1,7 +1,7 @@
 import { Injectable, Injector } from '@angular/core';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
-import { Content, StyleDictionary, TDocumentDefinitions } from 'pdfmake/interfaces';
+import { Content, TDocumentDefinitions } from 'pdfmake/interfaces';
 import { Node } from 'ngx-edu-sharing-api';
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { NodeHelperService } from './node-helper.service';
@@ -10,7 +10,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { MdsEditorInstanceService } from '../features/mds/mds-editor/mds-editor-instance.service';
 import { firstValueFrom } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { MdsViewerService, NodeLicensePipe } from 'ngx-edu-sharing-ui';
+import { ColorHelper, MdsViewerService, NodeLicensePipe } from 'ngx-edu-sharing-ui';
 import { filter } from 'rxjs/operators';
 
 pdfMake.vfs = pdfFonts.vfs;
@@ -35,7 +35,7 @@ export class PdfService {
         if (node.preview?.url) {
             try {
                 const helper = this.injector.get(NodeHelperService);
-                await helper.appendImageData(node);
+                await helper.appendImageData(node, 70, 400);
                 imageData = node.preview.data;
                 imageDimensions = await this.getImageDimensions(imageData, 100);
             } catch (error) {
@@ -79,17 +79,19 @@ export class PdfService {
                     x2: 515,
                     y2: 0,
                     lineWidth: 1,
-                    lineColor: '#DDDDDD',
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue(
+                        '--tableSeperatorLineColor',
+                    ),
                 },
             ],
             margin: [0, 10, 0, 10],
         });
 
         const urlBlock = {
-            text: node.content.url,
-            link: node.content.url,
+            text: this.getNodeUrl(node),
+            link: this.getNodeUrl(node),
             columnGap: 20,
-            color: document.documentElement.style.getPropertyValue('--primary'),
+            color: getComputedStyle(document.documentElement).getPropertyValue('--primary'),
             margin: [0, 10, 0, 10],
             decoration: 'underline',
             fontSize: 9,
@@ -148,7 +150,9 @@ export class PdfService {
                         x2: 515,
                         y2: 0,
                         lineWidth: 1,
-                        lineColor: '#DDDDDD',
+                        lineColor: getComputedStyle(document.documentElement).getPropertyValue(
+                            '--tableSeperatorLineColor',
+                        ),
                     },
                 ],
                 margin: [0, 10, 0, 10],
@@ -165,10 +169,21 @@ export class PdfService {
                 },
                 layout: {
                     fillColor: (rowIndex: any, node: any, columnIndex: number) =>
-                        columnIndex === 0 ? '#E8F4F8' : null,
+                        columnIndex === 0
+                            ? ColorHelper.rgbToHex(
+                                  ColorHelper.cssColorToRgb(
+                                      getComputedStyle(document.documentElement).getPropertyValue(
+                                          '--palette-primary-50',
+                                      ),
+                                  ),
+                              )
+                            : null,
                     hLineWidth: () => 0.5,
                     vLineWidth: () => 0,
-                    hLineColor: () => '#DDDDDD',
+                    hLineColor: () =>
+                        getComputedStyle(document.documentElement).getPropertyValue(
+                            '--tableSeperatorLineColor',
+                        ),
                     paddingLeft: () => 10,
                     paddingRight: () => 10,
                     paddingTop: () => 6,
@@ -192,9 +207,9 @@ export class PdfService {
 
     private async createQrCode(node: Node): Promise<string> {
         try {
-            return await QRCode.toDataURL(node.content.url || node.content.url, {
+            return await QRCode.toDataURL(this.getNodeUrl(node), {
                 errorCorrectionLevel: 'M',
-                type: 'image/png',
+                type: 'image/jpeg',
                 margin: 2,
                 width: 200,
             });
@@ -202,6 +217,10 @@ export class PdfService {
             console.error('Error generating QR code:', error);
             return '';
         }
+    }
+
+    private getNodeUrl(node: Node) {
+        return this.injector.get(NodeHelperService).getNodeUrl(node, null, true);
     }
 
     private async addRoundedCornersToImage(

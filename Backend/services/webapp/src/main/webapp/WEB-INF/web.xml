@@ -168,6 +168,10 @@
     </filter-mapping>
     <filter-mapping>
         <filter-name>SecurityHeadersFilter</filter-name>
+        <url-pattern>/v/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>SecurityHeadersFilter</filter-name>
         <url-pattern>/eduservlet/*</url-pattern>
     </filter-mapping>
 
@@ -222,6 +226,10 @@
     <filter-mapping>
         <filter-name>DisableCacheFilter</filter-name>
         <url-pattern>/components/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>DisableCacheFilter</filter-name>
+        <url-pattern>/v/*</url-pattern>
     </filter-mapping>
 
     <filter-mapping>
@@ -346,6 +354,14 @@
         <url-pattern>/components/render/*</url-pattern>
     </filter-mapping>
 
+    <filter-mapping>
+        <filter-name>Edu Context Management Filter</filter-name>
+        <url-pattern>/v/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>Edu-Sharing Guest Filter</filter-name>
+        <url-pattern>/v/*</url-pattern>
+    </filter-mapping>
    <filter-mapping>
        	  <filter-name>Edu Context Management Filter</filter-name>
           <url-pattern>/search</url-pattern>
@@ -873,6 +889,10 @@
     <servlet-mapping>
       <servlet-name>ng-index</servlet-name>
       <url-pattern>/components/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ng-index</servlet-name>
+        <url-pattern>/v/*</url-pattern>
     </servlet-mapping>
 
     <servlet>

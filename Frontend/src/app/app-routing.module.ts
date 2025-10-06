@@ -39,6 +39,15 @@ const routes: Routes = [
             ),
     },
 
+    // Render short url
+    {
+        path: 'v',
+        loadChildren: () =>
+            import('./pages/render-main-page/render-main-page-routing.module').then(
+                (m) => m.RenderMainPageRoutingModule,
+            ),
+    },
+
     // Apply to LMS
     {
         path: UIConstants.ROUTER_PREFIX + 'apply-to-lms',
