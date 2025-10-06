@@ -20,6 +20,7 @@ import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.stream.StreamServiceFactory;
 import org.edu_sharing.service.stream.StreamServiceHelper;
@@ -293,9 +294,12 @@ public class NodeServiceInterceptor implements MethodInterceptor {
     public static List<String> hasCollectionPermissions(String nodeId, List<String> permissions) {
         long test = System.currentTimeMillis();
         AppContextServiceLocator locator = AppContextServiceLocator.getInstance();
-        locator.getLocal(SearchServiceElastic.class);
+        SearchService searchService = locator.get(SearchService.class);
+        if(!(searchService instanceof SearchServiceElastic searchServiceElastic)){
+            logger.debug("Skipping collection permission check for SearchServiceElastic");
+            return Collections.emptyList();
+        }
 
-        SearchServiceElastic bean = ApplicationContextFactory.getApplicationContext().getBean(SearchServiceElastic.class);
         if (
                 !Arrays.asList(
                         CallSourceHelper.CallSource.Render, CallSourceHelper.CallSource.Preview,
@@ -306,7 +310,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
             logger.debug("Skipping collection permission check for call source " + CallSourceHelper.getCallSource());
             return Collections.emptyList();
         }
-        List<String> result = bean.hasPermissions(nodeId, permissions);
+        List<String> result = searchServiceElastic.hasPermissions(nodeId, permissions);
         logger.debug("collection permission check took:" + (System.currentTimeMillis() - test) + "ms");
         return result;
     }
