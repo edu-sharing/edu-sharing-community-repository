@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.node.NodeServicePolicies;
 import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
@@ -37,7 +38,8 @@ public class AssignOrganizationNodePolicy implements NodeServicePolicies.OnCreat
     public void onCreateNode(ChildAssociationRef childAssocRef) {
 
         try {
-            Set<String> organisations = organizationService.getAssignedOrganisations();
+            String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
+            Set<String> organisations = organizationService.getAssignedOrganisations(currentUser);
             if (organisations.isEmpty()) {
                 return;
             }

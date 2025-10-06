@@ -127,7 +127,7 @@ public class OrganisationService {
     public void syncOrganisationFolder(String authorityName) {
         NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef(authorityName);
         if (authorityNodeRef == null) {
-            log.error("authority not found " + authorityName);
+            log.error("authority not found {}", authorityName);
             return;
         }
 
@@ -161,7 +161,7 @@ public class OrganisationService {
     public Map<QName, Serializable> getOrganisation(String orgName) {
 
         //prevent a normal group gets switched to an organisation
-        if (orgName.startsWith(AuthorityType.GROUP.getPrefixString()) && !hasOrganisationPrefix(orgName)) {
+        if (!hasOrganisationPrefix(orgName)) {
             log.error("orgName {} is not an Organisation", orgName);
             return null;
         }
@@ -178,6 +178,14 @@ public class OrganisationService {
         }
 
         return dbNodeService.getProperties(authorityNodeRef);
+    }
+
+    private boolean hasOrgAspect(String authorityName) {
+        NodeRef authorityNodeRef = authorityServiceInsecure.getAuthorityNodeRef(authorityName);
+        if(authorityNodeRef == null) {
+            return false;
+        }
+        return dbNodeService.hasAspect(authorityNodeRef, ASPECT_EDUGROUP);
     }
 
     public List<Map<QName, Serializable>> getOrganisations() {
@@ -218,18 +226,11 @@ public class OrganisationService {
     @NotNull
     public Set<String> getAssignedOrganisations() {
 
-        Set<String> organisations = authorityServiceInsecure.getAllAuthorities(AuthorityType.GROUP)
+        return authorityService.getAuthorities()
                 .stream()
                 .filter(this::hasOrganisationPrefix)
+                .filter(this::hasOrgAspect)
                 .collect(Collectors.toSet());
-
-
-        Set<String> authoritiesForUser = authorityService.getAuthorities();
-        if (authoritiesForUser != null) {
-            organisations.retainAll(authoritiesForUser);
-        }
-
-        return organisations;
     }
 
 
@@ -252,7 +253,7 @@ public class OrganisationService {
             String displayName = (String) nodeService.getProperty(organisationNodeRef, ContentModel.PROP_AUTHORITY_DISPLAY_NAME);
             String folderName = (String) nodeService.getProperty(eduGroupFolder, ContentModel.PROP_NAME);
             if (displayName == null || displayName.trim().isEmpty()) {
-                log.error("display name of authority is null or empty " + authorityName);
+                log.error("display name of authority is null or empty {}", authorityName);
                 continue;
             }
 
