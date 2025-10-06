@@ -188,7 +188,7 @@
     <div
       class="action-buttons container"
       *ngIf="
-        (node.item.mediatype === 'collection' &&
+        (nodeHelper.isNodeCollection(node.item) &&
           (node.item.collection?.childCollectionsCount ||
             node.item.collection?.childReferencesCount)) ||
         (node.level > 0 &&
@@ -197,13 +197,15 @@
     >
       <div
         class="node-detail"
-        *ngIf="node.item.mediatype === 'collection' && node.item.collection?.childCollectionsCount"
+        *ngIf="
+          nodeHelper.isNodeCollection(node.item) && node.item.collection?.childCollectionsCount
+        "
       >
         <i esIcon="layers"></i> {{ node.item.collection.childCollectionsCount }}
       </div>
       <div
         class="node-detail"
-        *ngIf="node.item.mediatype === 'collection' && node.item.collection?.childReferencesCount"
+        *ngIf="nodeHelper.isNodeCollection(node.item) && node.item.collection?.childReferencesCount"
       >
         <i esIcon="insert_drive_file"></i> {{ node.item.collection.childReferencesCount }}
       </div>
