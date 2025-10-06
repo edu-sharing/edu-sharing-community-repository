@@ -1038,12 +1038,20 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
                 String fieldType = dictionaryService.getProperty(prop).getDataType().getJavaClassName();
                 if (
-                        // dirty hack: unfortunately the model for cclom:size is of type d:text
+                    // dirty hack: unfortunately the model for cclom:size is of type d:text
                         CCConstants.LOM_PROP_TECHNICAL_SIZE.equals(prop.toString()) ||
-                        fieldType.equals(Integer.class.getName())
+                                fieldType.equals(Integer.class.getName())
                 ) {
                     if (prop1 instanceof String && prop2 instanceof String) {
-                        compare = Integer.compare(Integer.parseInt((String) prop1), Integer.parseInt((String) prop2));
+                        int int1 = 0;
+                        int int2 = 0;
+                        if(StringUtils.isNotEmpty((String) prop1)) {
+                            int1 = Integer.parseInt((String) prop1);
+                        }
+                        if(StringUtils.isNotEmpty((String) prop2)) {
+                            int2 = Integer.parseInt((String) prop2);
+                        }
+                        compare = Integer.compare(int1, int2);
                     }
                 }
 
@@ -1378,8 +1386,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 if (currentCopies.stream()
                         .filter(c -> getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), c, CCConstants.CCM_PROP_IO_REVOKED_DATE) == null)
                         .anyMatch((c) -> currentVersion.equals(getProperty(
-                        StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), c, CCConstants.LOM_PROP_LIFECYCLE_VERSION
-                )))) {
+                                StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), c, CCConstants.LOM_PROP_LIFECYCLE_VERSION
+                        )))) {
                     throw new IllegalArgumentException("The version " + currentVersion + " is already published!");
                 }
                 String container = NodeServiceHelper.getContainerId(parent, pattern);
@@ -1735,15 +1743,15 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
      */
     @Override
     public void revertVersionNoRollback(String nodeId, String verLbl) throws Exception {
-            VersionService versionService = serviceRegistry.getVersionService();
-            VersionHistory versionHistory = versionService.getVersionHistory(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
-            if (versionHistory != null && versionHistory.getAllVersions() != null && !versionHistory.getAllVersions().isEmpty()) {
-                NodeRef ioNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
-                    Version version = versionHistory.getVersion(verLbl);
-                    versionService.revert(ioNodeRef, version, true);
-            } else {
-                throw new IllegalArgumentException("The node " + nodeId + "as no version history");
-            }
+        VersionService versionService = serviceRegistry.getVersionService();
+        VersionHistory versionHistory = versionService.getVersionHistory(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
+        if (versionHistory != null && versionHistory.getAllVersions() != null && !versionHistory.getAllVersions().isEmpty()) {
+            NodeRef ioNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+            Version version = versionHistory.getVersion(verLbl);
+            versionService.revert(ioNodeRef, version, true);
+        } else {
+            throw new IllegalArgumentException("The node " + nodeId + "as no version history");
+        }
     }
 
     @Override
