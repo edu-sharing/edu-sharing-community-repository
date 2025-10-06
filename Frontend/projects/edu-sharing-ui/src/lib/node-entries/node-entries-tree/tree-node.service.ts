@@ -9,6 +9,7 @@ import {
 } from 'ngx-edu-sharing-api';
 import { firstValueFrom } from 'rxjs';
 import { LocalEventsService } from '../../services/local-events.service';
+import { NodeHelperService } from '../../services/node-helper.service';
 import { DynamicFlatNode } from './dynamic-flat-node';
 
 @Injectable({
@@ -23,6 +24,8 @@ export class TreeNodeService {
     private folderTypes: string[] = ['cm:folder', 'ccm:map'];
     // holds information on the last loaded children node ID, which is used for pagination
     parentIdToLastLoadedNodeId = new Map<string, string>();
+    // avoid empty (faked) parents from being toggled, as the IDs do not exist
+    private emptyParentIds: string[] = [];
     private baseSearchParams = {
         maxItems: 11,
         sortAscending: [true],
@@ -33,6 +36,7 @@ export class TreeNodeService {
     constructor(
         private collectionService: CollectionService,
         private localEventsService: LocalEventsService,
+        private nodeHelperService: NodeHelperService,
         private nodeService: NodeService,
     ) {
         this.localEventsService.nodesChanged
@@ -90,14 +94,14 @@ export class TreeNodeService {
         // second pass: update numberOfChildren
         this.dataMap.forEach((children) => {
             children.forEach((child) => {
+                const childIsCollection = this.nodeHelperService.isNodeCollection(child as Node);
                 const childKey = child.ref.id;
+                const treeNode = initialData.find((n) => n.item.ref.id === childKey);
                 const subChildren = this.dataMap.get(childKey) ?? [];
-                if (subChildren.length) {
+                if (subChildren.length && childIsCollection) {
                     // we just want to add the number of sub-collections, not the total number of sub-nodes
-                    const numberOfSubCollections = subChildren.filter(
-                        (child) =>
-                            child.mediatype === 'collection' ||
-                            this.folderTypes.includes(child.type),
+                    const numberOfSubCollections = subChildren.filter((c) =>
+                        this.nodeHelperService.isNodeCollection(c as Node),
                     ).length;
                     if (!child.collection) {
                         child.collection = {
@@ -118,9 +122,11 @@ export class TreeNodeService {
                         (sum, node) => sum + (node.collection?.childReferencesCount || 0),
                         0,
                     );
+                } else if (!subChildren.length && treeNode && treeNode.level === 0) {
+                    // store information about empty root elements
+                    this.emptyParentIds.push(treeNode.item.ref.id);
                 }
-                const treeNode = initialData.find((n) => n.item.ref.id === childKey);
-                if (treeNode && child.collection.childCollectionsCount > 0) {
+                if (treeNode && this.isExpandable(child)) {
                     treeNode.expandable = true;
                 }
             });
@@ -194,9 +200,14 @@ export class TreeNodeService {
      * @param node
      */
     isExpandable(node: Partial<Node>): boolean {
-        const atLeastOneChild: boolean = node.collection?.childCollectionsCount > 0;
+        const atLeastOneChild: boolean =
+            this.nodeHelperService.isNodeCollection(node as Node) &&
+            (node.collection?.childCollectionsCount > 0 ||
+                node.collection?.childReferencesCount > 0);
         const unclickedFolder: boolean =
-            this.folderTypes.includes(node.type) && !this.emptyFolders.includes(node.ref.id);
+            this.folderTypes.includes(node.type) &&
+            !this.emptyFolders.includes(node.ref.id) &&
+            !this.emptyParentIds.includes(node.ref.id);
         return atLeastOneChild || unclickedFolder;
     }
 

@@ -483,13 +483,6 @@ export class NodesSelectorComponent implements OnInit {
         isCollection: boolean = false,
     ): Partial<Node> {
         const node: Partial<Node> = {
-            collection: {
-                fromUser: false,
-                level0: false,
-                scope,
-                title,
-                type: '',
-            },
             preview: {
                 isIcon: true,
                 height: 20,
@@ -502,8 +495,16 @@ export class NodesSelectorComponent implements OnInit {
                 repo: HOME_REPOSITORY,
             },
             title,
+            type: 'ccm:map',
         };
         if (isCollection) {
+            node.collection = {
+                fromUser: false,
+                level0: false,
+                scope,
+                title,
+                type: '',
+            };
             node.mediatype = 'collection';
         }
         return node;
