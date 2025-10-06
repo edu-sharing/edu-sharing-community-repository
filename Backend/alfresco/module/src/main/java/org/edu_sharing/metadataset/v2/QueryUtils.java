@@ -15,6 +15,8 @@ import org.springframework.context.ApplicationContext;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class QueryUtils {
     private static Logger logger = Logger.getLogger(QueryUtils.class);
@@ -47,7 +49,10 @@ public class QueryUtils {
             ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
             Set<String> authorities = serviceRegistry.getAuthorityService().getAuthorities();
             authorities.add(CCConstants.AUTHORITY_GROUP_EVERYONE);
-            query = replacer.replaceString(query, "${authorities}", StringUtils.join(authorities, "|"));
+            query = replacer.replaceString(
+                    query, "${authorities}",
+                    StringUtils.join(authorities.stream().map(v -> v.replaceAll("[\\W]", "\\\\$0")).collect(Collectors.toSet()), "|")
+            );
         }
         return query;
     }
