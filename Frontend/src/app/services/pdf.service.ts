@@ -1,7 +1,7 @@
 import { Injectable, Injector } from '@angular/core';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
-import { Content, TDocumentDefinitions } from 'pdfmake/interfaces';
+import { Content, StyleDictionary, TDocumentDefinitions } from 'pdfmake/interfaces';
 import { Node } from 'ngx-edu-sharing-api';
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { NodeHelperService } from './node-helper.service';
