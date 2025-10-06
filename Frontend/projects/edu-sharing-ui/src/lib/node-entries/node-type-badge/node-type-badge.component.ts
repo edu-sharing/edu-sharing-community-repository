@@ -17,6 +17,11 @@ import { NodeEntriesService } from '../../services/node-entries.service';
 })
 export class NodeTypeBadgeComponent implements OnChanges {
     @Input() node: Node;
+    /**
+     * when true, collection icons will resolve based on their type (editorial, private...)
+     * When false, the generic svg image is used
+     */
+    @Input() collectionIcons = true;
 
     isCollection: boolean;
 
