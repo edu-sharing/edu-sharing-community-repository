@@ -9,6 +9,7 @@ import {
     OptionItem,
     OptionsHelperDataService,
     Scope,
+    UIConstants,
 } from 'ngx-edu-sharing-ui';
 import { WorkspacePageComponent } from '../workspace-page.component';
 import { WorkspaceSubTreeComponent } from '../sub-tree/sub-tree.component';
@@ -43,8 +44,7 @@ export class WorkspaceTreeComponent {
 
     readonly MY_FILES = 'MY_FILES';
     readonly SHARED_FILES = 'SHARED_FILES';
-    readonly MY_SHARED_FILES = 'MY_SHARED_FILES';
-    readonly TO_ME_SHARED_FILES = 'TO_ME_SHARED_FILES';
+    readonly SHARED_FILES_LINK = 'SHARED_FILES_LINK';
     readonly WORKFLOW_RECEIVE = 'WORKFLOW_RECEIVE';
     readonly RECYCLE: 'RECYCLE' = 'RECYCLE';
 
@@ -90,7 +90,7 @@ export class WorkspaceTreeComponent {
                     mode: dragData.action,
                 },
             });
-        } else if (dragData.target === this.MY_SHARED_FILES) {
+        } else if (dragData.target === this.SHARED_FILES_LINK) {
             void this.dialogsService.openShareDialog({
                 nodes: dragData.draggedNodes,
             });
@@ -112,4 +112,8 @@ export class WorkspaceTreeComponent {
     public refresh() {
         this.subTree?.refresh();
     }
+
+    openSharedFiles() {}
+
+    protected readonly UIConstants = UIConstants;
 }

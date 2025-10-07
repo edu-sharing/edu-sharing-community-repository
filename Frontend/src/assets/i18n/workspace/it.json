@@ -41,8 +41,6 @@
     "LTI_SHARED_SECRET": "Segreto condiviso",
     "SHARED_FILES": "Contenuto condiviso",
     "RESTRICTED_FOLDER": "Cartella estera",
-    "MY_SHARED_FILES": "Condiviso da me",
-    "TO_ME_SHARED_FILES": "Condiviso con me",
     "WORKFLOW_RECEIVE": "Assegnato a me",
     "RECYCLE": "Riciclare",
     "DROP_FILES": "Lasciate qui i file per caricarli",

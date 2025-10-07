@@ -2,6 +2,7 @@
 
 .rootNode {
     display: flex;
+    gap: 5px;
     align-items: center;
     @include clickable();
     padding-left: 10px;

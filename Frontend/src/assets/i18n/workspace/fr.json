@@ -41,8 +41,6 @@
     "LTI_SHARED_SECRET": "Secret partagé",
     "SHARED_FILES": "Contenu partagé",
     "RESTRICTED_FOLDER": "Dossier étranger",
-    "MY_SHARED_FILES": "Partagé par moi",
-    "TO_ME_SHARED_FILES": "Partagé avec moi",
     "WORKFLOW_RECEIVE": "Qui m'a été attribuée",
     "RECYCLE": "Recycler",
     "DROP_FILES": "Déposez les fichiers ici pour les télécharger",

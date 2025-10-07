@@ -43,46 +43,14 @@
 </div>
 <div
   class="rootNode"
-  [class.rootNodeSelected]="root == MY_SHARED_FILES"
-  [esNodesDropTarget]="MY_SHARED_FILES"
+  [esNodesDropTarget]="SHARED_FILES_LINK"
   [canDropNodes]="canDropOnMySharedFiles"
   (nodeDropped)="onNodesDrop($event)"
-  (click)="doSetRoot(MY_SHARED_FILES)"
-  data-test="workspace-tree-shared-by-me"
+  [routerLink]="'/' + UIConstants.ROUTER_PREFIX + 'editorial/share'"
+  data-test="workspace-tree-shared-files-link"
 >
-  <i class="material-icons typeIcon">share</i>{{ 'WORKSPACE.MY_SHARED_FILES' | translate }}
-  <i class="material-icons">
-    {{ root === MY_SHARED_FILES ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}
-  </i>
-</div>
-<div class="tree" *ngIf="root === MY_SHARED_FILES">
-  <es-workspace-sub-tree
-    [node]="'-my_shared_files-'"
-    [currentPath]="currentPath"
-    (updateOptions)="doUpdateOptions($event)"
-    (dropElement)="drop($event)"
-    (clickElement)="doOpenNode($event)"
-  ></es-workspace-sub-tree>
-</div>
-<div
-  class="rootNode"
-  [class.rootNodeSelected]="root === TO_ME_SHARED_FILES"
-  (click)="doSetRoot(TO_ME_SHARED_FILES)"
-  data-test="workspace-tree-share-with-me"
->
-  <i class="material-icons typeIcon">send</i>{{ 'WORKSPACE.TO_ME_SHARED_FILES' | translate }}
-  <i class="material-icons">
-    {{ root === TO_ME_SHARED_FILES ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}
-  </i>
-</div>
-<div class="tree" *ngIf="root === TO_ME_SHARED_FILES">
-  <es-workspace-sub-tree
-    [node]="workspace.getRootFolderId()"
-    [currentPath]="currentPath"
-    (updateOptions)="doUpdateOptions($event)"
-    (dropElement)="drop($event)"
-    (clickElement)="doOpenNode($event)"
-  ></es-workspace-sub-tree>
+  <i class="material-icons typeIcon">send</i>{{ 'WORKSPACE.SHARED_FILES_LINK' | translate }}
+  <i class="material-icons"> open_in_new </i>
 </div>
 <div
   class="rootNode"
