@@ -72,7 +72,7 @@ class FeedbackServiceImplTest {
         AuthorityServiceFactory authorityServiceFactory = Mockito.mock(AuthorityServiceFactory.class);
         AuthorityServiceImpl authorityServiceMock = Mockito.mock(AuthorityServiceImpl.class);
         authorityServiceFactoryMockedStatic.when(AuthorityServiceFactory::getInstance).thenReturn(authorityServiceFactory);
-        authorityServiceFactoryMockedStatic.when(authorityServiceFactory::getLocalService).thenReturn(authorityServiceMock);
+        Mockito.lenient().when(authorityServiceFactory.getLocalService()).thenReturn(authorityServiceMock);
         Mockito.lenient().when(authorityServiceMock.isGuest()).thenReturn(false);
         authenticationUtilMockedStatic = Mockito.mockStatic(AuthenticationUtil.class);
         contextMockedStatic = Mockito.mockStatic(Context.class);
@@ -136,7 +136,7 @@ class FeedbackServiceImplTest {
         assertEquals(expected.size(), result.size());
         List<Map<String, Serializable>> expectedSorted = expected.values().stream().sorted(
                 (a, b) -> ((Date) b.get(CCConstants.CM_PROP_C_MODIFIED)).compareTo((Date) a.get(CCConstants.CM_PROP_C_MODIFIED))
-        ).collect(Collectors.toList());
+        ).toList();
         for (int i = 0; i < result.size(); i++) {
             FeedbackData actual = result.get(i);
             Map<String, Serializable> expectedEntry = expectedSorted.get(i);

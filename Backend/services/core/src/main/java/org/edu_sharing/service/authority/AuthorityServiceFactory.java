@@ -1,8 +1,6 @@
 package org.edu_sharing.service.authority;
 
 import org.edu_sharing.repository.server.appcontext.AppContextServiceFactory;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.spring.ApplicationContextFactory;
 
 
