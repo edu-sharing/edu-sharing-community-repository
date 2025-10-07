@@ -144,6 +144,21 @@
         ></es-node-entries-wrapper>
       </ng-container>
 
+      <!-- UPLOAD TAB -->
+      <ng-container *ngSwitchCase="TabType.UPLOAD">
+        <es-add-material-dialog
+          *ngIf="inboxNode"
+          [dialogData]="{
+            childobject: false,
+            chooseParent: false,
+            multiple: true,
+            parent: inboxNode,
+            showLti: false
+          }"
+          (dialogResult)="uploadMaterialDialogResult($event)"
+        ></es-add-material-dialog>
+      </ng-container>
+
       <!-- FALLBACK -->
       <ng-container *ngSwitchDefault> No view defined for tab {{ selectedTab() }}. </ng-container>
     </ng-container>

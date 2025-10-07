@@ -46,8 +46,12 @@ import {
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestCollectionService } from '../../../core-module/rest/services/rest-collection.service';
 import { UIService } from '../../../core-module/rest/services/ui.service';
+import { AddMaterialDialogResult } from '../../../features/dialogs/dialog-modules/add-material-dialog/add-material-dialog-data';
+import { AddMaterialDialogModule } from '../../../features/dialogs/dialog-modules/add-material-dialog/add-material-dialog.module';
+
 import { NodeHelperService } from '../../../services/node-helper.service';
 import { Toast } from '../../../services/toast';
+import { UploadDialogService } from '../../../services/upload-dialog.service';
 import { SharedModule } from '../../../shared/shared.module';
 
 enum TabType {
@@ -66,7 +70,7 @@ enum StepType {
     selector: 'es-nodes-selector',
     templateUrl: 'nodes-selector.component.html',
     styleUrls: ['nodes-selector.component.scss'],
-    imports: [SharedModule],
+    imports: [SharedModule, AddMaterialDialogModule],
     providers: [NodeEntriesService],
 })
 export class NodesSelectorComponent implements OnInit {
@@ -108,12 +112,16 @@ export class NodesSelectorComponent implements OnInit {
     workspaceColumns: ColumnType;
     dataSourceWorkspace: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
 
+    // upload tab
+    inboxNode: Node;
+
     constructor(
         private collectionService: RestCollectionService,
         private mdsHelperService: MdsHelperService,
         public nodeHelperService: NodeHelperService,
         private nodeService: NodeService,
         private uiService: UIService,
+        private uploadDialogService: UploadDialogService,
         private searchService: SearchService,
         private toast: Toast,
         private translate: TranslateService,
@@ -126,13 +134,13 @@ export class NodesSelectorComponent implements OnInit {
         this.searchColumns = await this.mdsHelperService.getColumnsByMdsId('search', {
             repository: HOME_REPOSITORY,
         });
-
         this.collectionsColumns = {
             Default: ListItem.getCollectionDefaults(),
         };
         this.workspaceColumns = {
             Default: ListItem.getCollectionDefaults(),
         };
+        this.inboxNode = await firstValueFrom(this.nodeService.getNode(RestConstants.INBOX));
     }
 
     /**
@@ -222,6 +230,42 @@ export class NodesSelectorComponent implements OnInit {
         void this.executeSearch();
     }
 
+    /**
+     * Reacts to es-add-material-dialog (dialogResult) output and forwards it to the upload dialog service.
+     *
+     * @param result
+     */
+    async uploadMaterialDialogResult(result: AddMaterialDialogResult): Promise<void> {
+        if (!result) {
+            return;
+        }
+        let createdNodes: Node[] | null;
+        switch (result.kind) {
+            case 'file':
+                createdNodes = await this.uploadDialogService.uploadFilesAndCreateNodes(result);
+                break;
+            case 'link':
+                createdNodes = await this.uploadDialogService.createLinkNode(result);
+                break;
+            default:
+                break;
+        }
+        // note: the nodes are added to the inbox node if the upload was successful,
+        //       thus, adding them to the collection is necessary
+        if (createdNodes?.length && this.parent) {
+            try {
+                this.toast.showProgressSpinner();
+                this.uiService.addToCollection(this.parent, createdNodes, false, () => {
+                    this.toast.closeProgressSpinner();
+                });
+            } catch (e) {
+                console.error(e);
+                this.toast.closeProgressSpinner();
+            }
+        }
+    }
+
+    // DRAG-AND-DROP RELATED FUNCTIONS
     /**
      * Do not allow dropping on the search references.
      */

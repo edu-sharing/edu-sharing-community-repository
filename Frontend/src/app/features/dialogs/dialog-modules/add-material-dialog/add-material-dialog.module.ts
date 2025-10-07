@@ -7,5 +7,6 @@ export { AddMaterialDialogComponent };
 @NgModule({
     declarations: [AddMaterialDialogComponent],
     imports: [SharedModule],
+    exports: [AddMaterialDialogComponent],
 })
 export class AddMaterialDialogModule {}

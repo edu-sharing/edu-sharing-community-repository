@@ -1,5 +1,15 @@
 import { trigger } from '@angular/animations';
-import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
+import {
+    Component,
+    ElementRef,
+    EventEmitter,
+    Inject,
+    Input,
+    OnInit,
+    Optional,
+    Output,
+    ViewChild,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl } from '@angular/forms';
 import {
@@ -43,6 +53,9 @@ import { TemplateSlot } from '../../../../main/navigation/main-nav.service';
 })
 export class AddMaterialDialogComponent implements OnInit {
     readonly DialogTemplate = DialogTemplate;
+    @Input() dialogData?: AddMaterialDialogData;
+    @Output() dialogResult: EventEmitter<AddMaterialDialogResult> =
+        new EventEmitter<AddMaterialDialogResult>();
     @ViewChild('fileSelect') private file: ElementRef;
 
     private disabled = true;
@@ -71,9 +84,14 @@ export class AddMaterialDialogComponent implements OnInit {
     protected parent$ = new BehaviorSubject<Node>(null);
     selectedFiles: File[] = [];
 
+    get currentData(): AddMaterialDialogData {
+        return this.data || this.dialogData;
+    }
+
     constructor(
-        @Inject(CARD_DIALOG_DATA) public data: AddMaterialDialogData,
-        private dialogRef: CardDialogRef<AddMaterialDialogData, AddMaterialDialogResult>,
+        @Optional() @Inject(CARD_DIALOG_DATA) public data: AddMaterialDialogData | null,
+        @Optional()
+        private dialogRef: CardDialogRef<AddMaterialDialogData, AddMaterialDialogResult> | null,
         private breadcrumbsService: BreadcrumbsService,
         private clientUtils: ClientutilsV1Service,
         private configService: ConfigurationService,
@@ -84,8 +102,6 @@ export class AddMaterialDialogComponent implements OnInit {
         private userService: UserService,
     ) {
         this.registerParentListener();
-        this.parent$.next(this.data.parent);
-        this.setState('');
         this.userService
             .observeCurrentUser()
             .pipe(takeUntilDestroyed())
@@ -114,6 +130,8 @@ export class AddMaterialDialogComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        this.parent$.next(this.currentData.parent);
+        this.setState('');
         this.registerLink();
     }
 
@@ -156,8 +174,9 @@ export class AddMaterialDialogComponent implements OnInit {
         }
     }
 
+    // dialog-specific function due to button patch
     cancel() {
-        this.dialogRef.close(null);
+        this.dialogRef?.close(null);
     }
 
     selectFile() {
@@ -172,27 +191,31 @@ export class AddMaterialDialogComponent implements OnInit {
         for (let file of fileList) {
             this.selectedFiles.push(file);
         }
-        if (this.data.showFiles === true) {
+        if (this.currentData.showFiles === true) {
             this.setState('');
             this.updateHideFileUpload();
             return;
         }
-        this.dialogRef.close({
+        const dialogResult: AddMaterialDialogResult = {
             kind: 'file',
             files: this.selectedFiles,
             parent: this.parent$.value,
-        });
+        };
+        this.dialogRef ? this.dialogRef.close(dialogResult) : this.dialogResult.emit(dialogResult);
     }
 
     setLink() {
         if (this.disabled) {
             // To nothing
         } else if (this.selectedFiles.length) {
-            this.dialogRef.close({
+            const dialogResult: AddMaterialDialogResult = {
                 kind: 'file',
                 files: this.selectedFiles,
                 parent: this.parent$.value,
-            });
+            };
+            this.dialogRef
+                ? this.dialogRef.close(dialogResult)
+                : this.dialogResult.emit(dialogResult);
         } else if (this.ltiActivated && (!this.ltiConsumerKey || !this.ltiSharedSecret)) {
             const params = {
                 link: {
@@ -210,7 +233,7 @@ export class AddMaterialDialogComponent implements OnInit {
     }
 
     private closeWithLink(): void {
-        this.dialogRef.close({
+        const dialogResult: AddMaterialDialogResult = {
             kind: 'link',
             link: this.linkControl.value,
             parent: this.parent$.value,
@@ -220,14 +243,15 @@ export class AddMaterialDialogComponent implements OnInit {
                       sharedSecret: this.ltiSharedSecret,
                   }
                 : null,
-        });
+        };
+        this.dialogRef ? this.dialogRef.close(dialogResult) : this.dialogResult.emit(dialogResult);
     }
 
     setState(link: string) {
         link = link.trim();
         this.disabled = !link && !this.selectedFiles.length;
         this.updateButtons();
-        this.dialogRef.patchConfig({ closable: Closable.Standard });
+        this.dialogRef?.patchConfig({ closable: Closable.Standard });
     }
 
     async chooseParent() {
@@ -246,19 +270,20 @@ export class AddMaterialDialogComponent implements OnInit {
     parentSelected(event: Node[]) {
         this.showSaveParent = true;
         this.parent$.next(event[0]);
+        // dialog-specific patches
         this.updateButtons();
-        this.dialogRef.patchConfig({ closable: Closable.Standard });
+        this.dialogRef?.patchConfig({ closable: Closable.Standard });
     }
 
     updateButtons() {
         const [okButton] = DialogButton.getOk(() => this.setLink());
         okButton.disabled = !this.canSave();
         const buttons = [...DialogButton.getCancel(() => this.cancel()), okButton];
-        this.dialogRef.patchConfig({ buttons });
+        this.dialogRef?.patchConfig({ buttons });
     }
 
     canSave() {
-        return !(this.disabled || (this.data.chooseParent && !this.parent$.value));
+        return !(this.disabled || (this.currentData.chooseParent && !this.parent$.value));
     }
 
     private getBreadcrumbs(node: Node) {

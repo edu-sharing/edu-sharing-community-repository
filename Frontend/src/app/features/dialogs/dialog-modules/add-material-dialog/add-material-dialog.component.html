@@ -3,7 +3,7 @@
   type="file"
   style="display: none"
   id="fileSelect"
-  [multiple]="data.multiple"
+  [multiple]="currentData.multiple"
   (change)="closeWithFiles($any($event.target).files)"
 />
 
@@ -92,7 +92,7 @@
       </div>
     </ng-container>
   </div>
-  <div class="lti" *ngIf="data.showLti && ltiEnabled">
+  <div class="lti" *ngIf="currentData.showLti && ltiEnabled">
     <div>
       <mat-slide-toggle class="toggle-reverse" [(ngModel)]="ltiActivated">{{
         'WORKSPACE.ADD_OBJECT_LTI' | translate
@@ -117,7 +117,7 @@
       ></div>
     </div>
   </div>
-  <div *ngIf="data.chooseParent" class="location">
+  <div *ngIf="currentData.chooseParent" class="location">
     <div class="caption">{{ 'WORKSPACE.FILE_LOCATION' | translate }}</div>
     <div class="picker-group">
       <div class="no-breadcrumbs" *ngIf="(parent$ | async) === null">
