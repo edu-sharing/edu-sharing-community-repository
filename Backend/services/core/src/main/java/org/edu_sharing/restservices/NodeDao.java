@@ -1244,7 +1244,7 @@ public class NodeDao {
             nodeService.writeContent(storeRef, nodeId, result.getInputStream(), result.getMediaType().toString(), null,
                     isDirectory() ? CCConstants.CCM_PROP_MAP_ICON : CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
             PreviewCache.purgeCache(nodeId);
-            return new NodeDao(repoDao, nodeId);
+            return this;
 
         } catch (Throwable t) {
 
