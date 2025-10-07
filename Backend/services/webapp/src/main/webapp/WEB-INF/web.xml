@@ -857,6 +857,11 @@
 	<listener>
 	     <listener-class>org.edu_sharing.repository.server.MCAlfrescoManager</listener-class>
 	 </listener>
+  <!-- Spring Request Scope aktivieren -->
+  <listener>
+    <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
+  </listener>
+
 	<listener>
 	 	<listener-class>org.edu_sharing.repository.server.authentication.SessionListener</listener-class>
 	 </listener>
