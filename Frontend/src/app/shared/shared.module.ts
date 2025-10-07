@@ -32,7 +32,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTreeModule } from '@angular/material/tree';
 import { RouterModule } from '@angular/router';
-import { EduSharingUiModule } from 'ngx-edu-sharing-ui';
+import { AuthorityNamePipe, EduSharingUiModule } from 'ngx-edu-sharing-ui';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { environment } from '../../environments/environment';
 import { AuthorityRowComponent } from './components/authority-search-input/authority-row/authority-row.component';
@@ -63,7 +63,6 @@ import { ToolpermissionCheckDirective } from './directives/toolpermission-check.
 import { AssetsPathPipe } from './pipes/assets-path.pipe';
 import { AuthorityAffiliationPipe } from './pipes/authority-affiliation.pipe';
 import { AuthorityColorPipe } from './pipes/authority-color.pipe';
-import { AuthorityNamePipe } from './pipes/authority-name.pipe';
 import { BitwisePipe } from './pipes/bitwise.pipe';
 import { PermissionNamePipe } from './pipes/permission-name.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
@@ -79,7 +78,6 @@ import { extensionUiProviders } from '../extension/extension-ui-providers';
         AssetsPathPipe,
         AuthorityAffiliationPipe,
         AuthorityColorPipe,
-        AuthorityNamePipe,
         AuthorityRowComponent,
         AuthoritySearchInputComponent,
         BitwisePipe,
@@ -145,7 +143,6 @@ import { extensionUiProviders } from '../extension/extension-ui-providers';
         AssetsPathPipe,
         AuthorityAffiliationPipe,
         AuthorityColorPipe,
-        AuthorityNamePipe,
         AuthorityRowComponent,
         AuthoritySearchInputComponent,
         BitwisePipe,

@@ -263,6 +263,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 this.columns.set({
                     Default: [
                         new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
+                        new ListItem('SHARE', 'sharedBy'),
                         new ListItem('SHARE', 'timestamp'),
                     ],
                 });

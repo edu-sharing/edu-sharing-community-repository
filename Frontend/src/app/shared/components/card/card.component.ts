@@ -23,10 +23,9 @@ import {
     UIService,
 } from '../../../core-module/core.module';
 import { KeyEvents } from '../../../util/key-events';
-import { UIAnimation } from 'ngx-edu-sharing-ui';
+import { AuthorityNamePipe, UIAnimation } from 'ngx-edu-sharing-ui';
 import { CardService } from '../../../services/card.service';
 import { JumpMark, JumpMarksService } from '../../../services/jump-marks.service';
-import { AuthorityNamePipe } from '../../pipes/authority-name.pipe';
 
 /**
  * A common edu-sharing modal card

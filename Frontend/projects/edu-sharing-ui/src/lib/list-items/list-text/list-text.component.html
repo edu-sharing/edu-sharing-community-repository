@@ -32,6 +32,9 @@
         | translate : { fallback: $any(getNode()).eventType }
     }}
   </span>
+  <span *ngSwitchCase="'sharedBy'">
+    {{ $any(getNode()).sharedBy | authorityName }}
+  </span>
   <span *ngSwitchCase="'timestamp'">
     {{
       $any(getNode()).timestamp | formatDate : { async: true, time: true, relative: true } | async

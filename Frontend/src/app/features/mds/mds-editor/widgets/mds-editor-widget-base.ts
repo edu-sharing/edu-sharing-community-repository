@@ -4,12 +4,11 @@ import { Directive, EventEmitter } from '@angular/core';
 import { MdsEditorWidgetCore } from '../mds-editor-widget-core.directive';
 import { SuggestionResponseDto, SuggestionStatus } from 'ngx-edu-sharing-api';
 import { DisplayValue } from './DisplayValues';
-import { AuthorityNamePipe } from '../../../../shared/pipes/authority-name.pipe';
+import { AuthorityNamePipe, ValueType } from 'ngx-edu-sharing-ui';
 import { map, Observable } from 'rxjs';
 import { Toast, ToastType } from '../../../../services/toast';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 import { TranslateService } from '@ngx-translate/core';
-import { ValueType } from 'ngx-edu-sharing-ui';
 
 @Directive()
 export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {

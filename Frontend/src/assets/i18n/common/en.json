@@ -302,6 +302,10 @@
     "ccm:eaf_sequence_title": "Title of sequence",
     "ccm:collection_ordered_position": "Manual sorting"
   },
+  "SHARE": {
+    "sharedBy": "Shared by",
+    "timestamp": "timestamp"
+  },
   "COOKIE_INFO": {
     "ACCEPT": " Accept",
     "DECLINE": " Decline & Exit",

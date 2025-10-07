@@ -9,7 +9,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { Group, RestConnectorService, UserSimple } from '../../../core-module/core.module';
 import { TranslateService } from '@ngx-translate/core';
-import { AuthorityNamePipe } from '../../pipes/authority-name.pipe';
+import { AuthorityNamePipe } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-user-avatar',

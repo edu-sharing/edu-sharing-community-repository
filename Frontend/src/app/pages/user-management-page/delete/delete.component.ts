@@ -25,7 +25,7 @@ import { Helper } from '../../../core-module/rest/helper';
 import { Toast } from '../../../services/toast';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { AuthoritySearchMode } from '../../../shared/components/authority-search-input/authority-search-input.component';
-import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
+import { AuthorityNamePipe } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject } from 'rxjs';
 
 @Component({

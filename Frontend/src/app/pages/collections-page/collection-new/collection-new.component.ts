@@ -14,6 +14,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import {
     ActionbarComponent,
+    AuthorityNamePipe,
     ColorHelper,
     ColumnType,
     DefaultGroups,
@@ -58,6 +59,7 @@ import { Toast } from '../../../services/toast';
 import {
     Ace,
     Acl,
+    CollectionsTypeConfig,
     ConfigService,
     Group,
     NodeService,
@@ -67,7 +69,6 @@ import {
 import { TranslateService } from '@ngx-translate/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
 import { BridgeService } from '../../../services/bridge.service';
 import { NodeHelperService } from '../../../services/node-helper.service';
 import { Observable, Subject } from 'rxjs';
@@ -87,7 +88,6 @@ import {
 } from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog.component';
 import { OptionsHelperService } from '../../../services/options-helper.service';
 import { filter, first } from 'rxjs/operators';
-import { CollectionsTypeConfig } from '../../../../../dist/edu-sharing-api/lib/api/models/collections-type-config';
 
 type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITORIAL_GROUPS';
 

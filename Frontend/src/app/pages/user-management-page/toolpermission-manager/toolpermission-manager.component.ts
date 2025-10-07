@@ -11,8 +11,7 @@ import { Toast } from '../../../services/toast';
 import { TranslateService } from '@ngx-translate/core';
 import { Helper } from '../../../core-module/rest/helper';
 import { trigger } from '@angular/animations';
-import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
-import { UIAnimation } from 'ngx-edu-sharing-ui';
+import { AuthorityNamePipe, UIAnimation } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-toolpermission-manager',

@@ -11,13 +11,12 @@ import { MdsWidgetValue } from '../../../types/types';
 import { DisplayValue } from '../DisplayValues';
 import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { Authority } from '../../../../../core-module/rest/data-object';
-import { AuthorityNamePipe } from '../../../../../shared/pipes/authority-name.pipe';
+import { AuthorityNamePipe, ValueType } from 'ngx-edu-sharing-ui';
 import { AuthorityAffiliationPipe } from '../../../../../shared/pipes/authority-affiliation.pipe';
 import { RestConnectorService } from '../../../../../core-module/rest/services/rest-connector.service';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { AuthoritySearchInputComponent } from '../../../../../shared/components/authority-search-input/authority-search-input.component';
 import { Toast } from '../../../../../services/toast';
-import { ValueType } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-mds-editor-widget-authority',

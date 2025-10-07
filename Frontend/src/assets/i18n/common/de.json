@@ -323,6 +323,7 @@
     }
   },
   "SHARE": {
+    "sharedBy": "Geteilt von",
     "timestamp": "Zeitpunkt"
   },
   "EVENT": {

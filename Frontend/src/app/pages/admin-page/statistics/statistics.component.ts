@@ -14,6 +14,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { DEFAULT, HOME_REPOSITORY, Node, SearchResults, SearchService } from 'ngx-edu-sharing-api';
 import {
     ColumnType,
+    AuthorityNamePipe,
     FormatDatePipe,
     InteractionType,
     ListCountsComponent,
@@ -36,7 +37,6 @@ import { SessionStorageService } from '../../../core-module/rest/services/sessio
 import { UIService } from '../../../core-module/rest/services/ui.service';
 import { NodeHelperService } from '../../../services/node-helper.service';
 import { Toast } from '../../../services/toast';
-import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
 
 import {
     BarController,

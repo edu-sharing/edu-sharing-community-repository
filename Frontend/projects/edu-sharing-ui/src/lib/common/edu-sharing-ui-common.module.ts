@@ -35,6 +35,7 @@ import { MdsViewerComponent } from '../mds-viewer/mds-viewer.component';
 import { SpinnerSmallComponent } from '../spinner-small/spinner-small.component';
 import { NodeUrlPipe } from '../pipes/node-url.pipe';
 import { ToolpermissionPipe } from '../pipes/toolpermission.pipe';
+import { AuthorityNamePipe } from '../pipes/authority-name.pipe';
 
 @NgModule({
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -55,6 +56,7 @@ import { ToolpermissionPipe } from '../pipes/toolpermission.pipe';
         PropertySlugPipe,
         NodeIconPipe,
         NodeUrlPipe,
+        AuthorityNamePipe,
         NodeImagePipe,
         NodeImageSizePipe,
         NodeLicensePipe,
@@ -95,6 +97,7 @@ import { ToolpermissionPipe } from '../pipes/toolpermission.pipe';
         PropertySlugPipe,
         NodeIconPipe,
         NodeUrlPipe,
+        AuthorityNamePipe,
         NodeImagePipe,
         NodeImageSizePipe,
         NodePersonNamePipe,

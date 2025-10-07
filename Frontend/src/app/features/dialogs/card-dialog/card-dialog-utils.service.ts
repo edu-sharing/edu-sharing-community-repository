@@ -1,11 +1,9 @@
 import { Injectable } from '@angular/core';
 import { CardDialogConfig } from './card-dialog-config';
 import { RestHelper } from '../../../core-module/core.module';
-import { Node } from 'ngx-edu-sharing-api';
-import { RepoUrlService } from 'ngx-edu-sharing-ui';
+import { Group, Node, User } from 'ngx-edu-sharing-api';
+import { AuthorityNamePipe, RepoUrlService } from 'ngx-edu-sharing-ui';
 import { TranslateService } from '@ngx-translate/core';
-import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
-import { Group, User } from 'ngx-edu-sharing-api';
 
 @Injectable({
     providedIn: 'root',

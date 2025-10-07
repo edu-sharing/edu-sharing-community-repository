@@ -1,7 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { Group, Permission, RestConstants, User } from '../../core-module/core.module';
-import { VCard } from 'ngx-edu-sharing-ui';
+import { Group, RestConstants, User } from 'ngx-edu-sharing-api';
+import { VCard } from '../util/VCard';
 
 @Pipe({
     name: 'authorityName',
@@ -10,10 +10,7 @@ import { VCard } from 'ngx-edu-sharing-ui';
 export class AuthorityNamePipe implements PipeTransform {
     constructor(private translate: TranslateService) {}
 
-    transform(
-        authority: Permission | User | Group | any,
-        args = { avatarShortcut: false },
-    ): string {
+    transform(authority: User | Group | any, args = { avatarShortcut: false }): string {
         if (!authority) return 'invalid';
         if (authority.profile?.displayName) {
             if (args?.avatarShortcut) {

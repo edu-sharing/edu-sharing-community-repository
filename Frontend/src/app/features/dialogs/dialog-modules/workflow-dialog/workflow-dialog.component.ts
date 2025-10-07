@@ -2,6 +2,7 @@ import { Component, Inject, ViewChild } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Node, NodeService } from 'ngx-edu-sharing-api';
 import {
+    AuthorityNamePipe,
     LocalEventsService,
     WORKFLOW_STATUS_UNCHECKED,
     WorkflowDefinition,
@@ -21,7 +22,6 @@ import {
 } from '../../../../core-module/core.module';
 import { NodeHelperService } from '../../../../services/node-helper.service';
 import { Toast } from '../../../../services/toast';
-import { AuthorityNamePipe } from '../../../../shared/pipes/authority-name.pipe';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { DialogsService } from '../../dialogs.service';

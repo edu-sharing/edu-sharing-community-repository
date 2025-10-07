@@ -144,6 +144,23 @@ export class RestConstants {
     public static AUTHORITY_STATUS = 'status';
     public static REPOSITORY_TYPE_ALFRESCO = 'ALFRESCO';
     public static GROUP_ALFRESCO_ADMINISTRATORS = 'GROUP_ALFRESCO_ADMINISTRATORS';
+
+    public static AUTHORITY_ROLE_OWNER = 'ROLE_OWNER';
+    public static AUTHORITY_TYPE_USER = 'USER';
+    public static AUTHORITY_TYPE_GROUP = 'GROUP';
+    public static AUTHORITY_TYPE_OWNER = 'OWNER';
+    public static AUTHORITY_TYPE_EVERYONE = 'EVERYONE';
+    public static AUTHORITY_TYPE_UNKNOWN = 'UNKNOWN';
+    public static AUTHORITY_EVERYONE = 'GROUP_EVERYONE';
+
+    public static getAuthorityEveryone() {
+        return {
+            authorityName: RestConstants.AUTHORITY_EVERYONE,
+            authorityType: RestConstants.AUTHORITY_TYPE_EVERYONE,
+        };
+    }
+    public static AUTHORITY_DELETED_USER = 'DELETED_USER';
+
     public static DATE_FIELDS = [
         RestConstants.CM_ARCHIVED_DATE,
         RestConstants.CM_MODIFIED_DATE,
