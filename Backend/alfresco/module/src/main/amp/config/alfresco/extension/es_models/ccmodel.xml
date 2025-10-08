@@ -2151,7 +2151,7 @@
     <aspect name="ccm:eduGroupContent">
       <title>edugroup content for ios</title>
       <properties>
-        <property name="ccm:owning_edugroup">
+        <property name="ccm:owning_organization">
           <type>d:text</type>
           <multiple>true</multiple>
         </property>

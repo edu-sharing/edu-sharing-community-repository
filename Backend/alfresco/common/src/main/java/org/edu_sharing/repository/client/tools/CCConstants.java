@@ -550,7 +550,7 @@ public class CCConstants {
     public final static String CCM_PROP_EDUGROUP_EDU_HOMEDIR = "{http://www.campuscontent.de/model/1.0}edu_homedir";
 
     public final static String CCM_PROP_EDUGROUP_FOLDER_ORGANISATION = "{http://www.campuscontent.de/model/1.0}edu_organisation";
-    public final static String CCM_PROP_OWNING_EDUGROUP = "{http://www.campuscontent.de/model/1.0}owning_organisation";
+    public final static String CCM_PROP_OWNING_ORGANIZATION = "{http://www.campuscontent.de/model/1.0}owning_organization";
 
 	public final static String CCM_ASPECT_SHARES = "{http://www.campuscontent.de/model/1.0}shares";
 

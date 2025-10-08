@@ -45,6 +45,7 @@ public class AssignOrganizationNodePolicy implements NodeServicePolicies.OnCreat
             }
 
             nodeService.addProperties(childAssocRef.getChildRef(), Map.of(QName.createQName(CCConstants.CCM_PROP_OWNING_EDUGROUP), (Serializable) organisations.stream().toList()));
+                nodeService.addProperties(childAssocRef.getChildRef(), Map.of(QName.createQName(CCConstants.CCM_PROP_OWNING_ORGANIZATION), (Serializable) organisations.stream().toList()));
         } catch (Throwable e) {
             log.error(e.getMessage(), e);
         }
