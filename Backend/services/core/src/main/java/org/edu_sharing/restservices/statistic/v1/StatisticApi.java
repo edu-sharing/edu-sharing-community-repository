@@ -168,11 +168,12 @@ public class StatisticApi {
     public Response getByUsers(@Parameter(description = "user id to fetch data for", required = true) @PathParam("userId") String userId,
                                @Parameter(description = "date range from in ISO 8601 format", required = true) @QueryParam("dateFrom") Date dateFrom,
                                @Parameter(description = "date range to in ISO 8601 format", required = true) @QueryParam("dateTo") Date dateTo,
-                               @Parameter(description = "maximum results (up to 50.000)", required = true) @QueryParam("maxResults") int maxResults) throws Throwable {
+                               @Parameter(description = "maximum results (up to 50.000)", required = true) @QueryParam("maxResults") int maxResults,
+                               @Parameter(description = "shows only statistics of published nodes ") @QueryParam("published") Boolean publishedOnly) throws Throwable {
         if("-me-".equals(userId)){
             userId = AuthenticationUtil.getFullyAuthenticatedUser();
         }
-        List<TrackingNode> tracks  = trackingDAO.getNodeStatisticsByOwningUser(userId, dateFrom, dateTo, maxResults);
+        List<TrackingNode> tracks  = trackingDAO.getNodeStatisticsByOwningUser(userId, dateFrom, dateTo, maxResults, publishedOnly == Boolean.TRUE);
         return Response.ok().entity(tracks).build();
     }
 
@@ -190,8 +191,9 @@ public class StatisticApi {
             @Parameter(description = "date range from in ISO 8601 format", required = true) @QueryParam("dateFrom") Date dateFrom,
             @Parameter(description = "date range to in ISO 8601 format", required = true) @QueryParam("dateTo") Date dateTo,
             @Parameter(description = "maximum results (up to 50.000)", required = true) @QueryParam("maxResults") int maxResults,
+            @Parameter(description = "shows only statistics of published nodes ") @QueryParam("published") Boolean publishedOnly,
             @Parameter(description = "node ids to fetch data for") List<String> nodeIds) throws Throwable {
-        List<TrackingNode> tracks  = trackingDAO.getNodeStatisticsByRange(nodeIds, dateFrom, dateTo, maxResults);
+        List<TrackingNode> tracks  = trackingDAO.getNodeStatisticsByRange(nodeIds, dateFrom, dateTo, maxResults, publishedOnly == Boolean.TRUE);
         return Response.ok().entity(tracks).build();
     }
 
@@ -208,8 +210,9 @@ public class StatisticApi {
     public Response getByOrganization(@Parameter(description = "user id to fetch data for", required = true) @PathParam("orgId") String orgId,
                                       @Parameter(description = "date range from in ISO 8601 format", required = true) @QueryParam("dateFrom") Date dateFrom,
                                       @Parameter(description = "date range to in ISO 8601 format", required = true) @QueryParam("dateTo") Date dateTo,
-                                      @Parameter(description = "maximum results (up to 50.000)", required = true) @QueryParam("maxResults") int maxResults) throws Throwable {
-        List<TrackingNode> tracks  = trackingDAO.getNodeStatisticsByOrganization(orgId, dateFrom, dateTo, maxResults);
+                                      @Parameter(description = "maximum results (up to 50.000)", required = true) @QueryParam("maxResults") int maxResults,
+                                      @Parameter(description = "shows only statistics of published nodes ") @QueryParam("published") Boolean publishedOnly) throws Throwable {
+        List<TrackingNode> tracks  = trackingDAO.getNodeStatisticsByOrganization(orgId, dateFrom, dateTo, maxResults, publishedOnly == Boolean.TRUE);
         return Response.ok().entity(tracks).build();
     }
 

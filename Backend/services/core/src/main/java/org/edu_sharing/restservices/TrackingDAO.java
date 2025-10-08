@@ -1,6 +1,8 @@
 package org.edu_sharing.restservices;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryVariant;
 import com.drew.lang.annotations.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -121,28 +123,16 @@ public class TrackingDAO {
 
     @NotNull
     @Permission(CCConstants.CCM_VALUE_TOOLPERMISSION_USER_STATISTICS_NODES)
-    public List<TrackingNode> getNodeStatisticsByOwningUser(@NotNull @NonNull String userId, @NotNull @NonNull Date dateFrom, @NotNull @NonNull Date dateTo, int maxResults) throws Throwable {
-        SearchToken searchToken = new SearchToken();
-        searchToken.setFrom(0);
-        searchToken.setMaxResult(50000);
-        searchToken.setElasticQuery(
-                QueryBuilders.bool()
-                        .must(m -> m.term(t -> t.field("owner").value(userId)))
-                        .must(m -> m.term(t -> t.field("type").value("ccm:io")))
-                        .build());
+    public List<TrackingNode> getNodeStatisticsByOwningUser(@NotNull @NonNull String userId, @NotNull @NonNull Date dateFrom, @NotNull @NonNull Date dateTo, int maxResults, boolean publishedOnly) throws Throwable {
+        BoolQuery.Builder filter = QueryBuilders.bool()
+                .must(m -> m.term(t -> t.field("owner").value(userId)))
+                .must(m -> m.term(t -> t.field("type").value("ccm:io")));
 
-        SearchResultNodeRef search = searchService.search(searchToken);
-        List<org.alfresco.service.cmr.repository.NodeRef> nodeRefs = search.getData().stream().map(this::getOriginalNodeRef).toList();
-        Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> trackingMap = activityStatisticService.getListNodeData(nodeRefs, dateFrom, dateTo, null, null);
+        if (publishedOnly) {
+            filter.must(m->m.bool(searchService::getPublishedPermissionsQuery));
+        }
 
-
-        return search.getData()
-                .stream()
-                .map(nodeRef -> new AbstractMap.SimpleEntry<>(nodeRef, trackingMap.get(getOriginalNodeRef(nodeRef))))
-                .sorted(Comparator.comparing(this::getTotalCounts))
-                .limit(maxResults)
-                .map(this::map)
-                .toList();
+        return searchBasedStatisticEvaluation(filter.build(), dateFrom, dateTo, maxResults);
     }
 
     @org.jetbrains.annotations.NotNull
@@ -154,44 +144,35 @@ public class TrackingDAO {
 
     @NotNull
     @Permission(CCConstants.CCM_VALUE_TOOLPERMISSION_SELECTIVE_STATISTICS_NODES)
-    public List<TrackingNode> getNodeStatisticsByRange(@NotNull @NonNull List<String> nodeIds, @NotNull @NonNull Date dateFrom, @NotNull @NonNull Date dateTo, int maxResults) throws Throwable {
+    public List<TrackingNode> getNodeStatisticsByRange(@NotNull @NonNull List<String> nodeIds, @NotNull @NonNull Date dateFrom, @NotNull @NonNull Date dateTo, int maxResults, boolean publishedOnly) throws Throwable {
         SearchToken searchToken = new SearchToken();
         searchToken.setFrom(0);
         searchToken.setMaxResult(50000);
-        searchToken.setElasticQuery(
-                QueryBuilders.bool()
-                        .must(m -> m.bool(searchService::getCoordinatorPermissionsQuery))
-                        .must(m -> m.term(t -> t.field("type").value("ccm:io")))
-                        .must(m -> m.bool(b -> b
-                                .should(nodeIds.stream().map(id -> QueryBuilders.term(t -> t.field("path").value(id))).toList())
-                                .should(nodeIds.stream().map(id -> QueryBuilders.term(t -> t.field("_id").value(id))).toList())
-                        ))
-                        .build());
+        BoolQuery.Builder filter = QueryBuilders.bool()
+                .must(m -> m.bool(searchService::getCoordinatorPermissionsQuery))
+                .must(m -> m.term(t -> t.field("type").value("ccm:io")))
+                .must(m -> m.bool(b -> b
+                        .should(nodeIds.stream().map(id -> QueryBuilders.term(t -> t.field("path").value(id))).toList())
+                        .should(nodeIds.stream().map(id -> QueryBuilders.term(t -> t.field("_id").value(id))).toList())
+                ));
 
-        SearchResultNodeRef search = searchService.search(searchToken);
-        List<org.alfresco.service.cmr.repository.NodeRef> nodeRefs = search.getData().stream().map(this::getOriginalNodeRef).toList();
-        Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> trackingMap = activityStatisticService.getListNodeData(nodeRefs, dateFrom, dateTo, null, null);
+        if (publishedOnly) {
+            filter.must(m->m.bool(searchService::getPublishedPermissionsQuery));
+        }
 
-
-        return search.getData()
-                .stream()
-                .map(nodeRef -> new AbstractMap.SimpleEntry<>(nodeRef, trackingMap.get(getOriginalNodeRef(nodeRef))))
-                .sorted(Comparator.comparing(this::getTotalCounts))
-                .limit(maxResults)
-                .map(this::map)
-                .toList();
+        return searchBasedStatisticEvaluation(filter.build(), dateFrom, dateTo, maxResults);
     }
 
     private org.alfresco.service.cmr.repository.NodeRef getOriginalNodeRef(org.edu_sharing.service.model.NodeRef nodeRef) {
 
         org.alfresco.service.cmr.repository.NodeRef originalNodeRef = nodeRef.asAlfrescoNodeRef();
         if (nodeRef.getAspects().contains(CCConstants.CCM_ASPECT_PUBLISHED)) {
-            originalNodeRef = org.alfresco.service.cmr.repository.NodeRef.getNodeRefs((String)nodeRef.getProperties().get(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL))
+            originalNodeRef = org.alfresco.service.cmr.repository.NodeRef.getNodeRefs((String) nodeRef.getProperties().get(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL))
                     .stream()
                     .findFirst()
                     .orElse(originalNodeRef);
         } else if (nodeRef.getAspects().contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
-            originalNodeRef =  new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, (String) nodeRef.getProperties().getOrDefault(CCConstants.CCM_PROP_IO_ORIGINAL, nodeRef.getNodeId()));
+            originalNodeRef = new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, (String) nodeRef.getProperties().getOrDefault(CCConstants.CCM_PROP_IO_ORIGINAL, nodeRef.getNodeId()));
         }
         return originalNodeRef;
     }
@@ -202,22 +183,28 @@ public class TrackingDAO {
 
     @NotNull
     @Permission(CCConstants.CCM_VALUE_TOOLPERMISSION_ORGANIZATION_STATISTICS_NODES)
-    public List<TrackingNode> getNodeStatisticsByOrganization(@HasRole @NotNull @NonNull String orgId, @NotNull @NonNull Date dateFrom, @NotNull @NonNull Date dateTo, int maxResults) throws Throwable {
+    public List<TrackingNode> getNodeStatisticsByOrganization(@HasRole @NotNull @NonNull String orgId, @NotNull @NonNull Date dateFrom, @NotNull @NonNull Date dateTo, int maxResults, boolean publishedOnly) throws Throwable {
+        BoolQuery.Builder filter = QueryBuilders.bool()
+                .must(m -> m.bool(searchService::getReadPermissionsQuery))
+                .must(m -> m.term(t -> t.field("properties.ccm:owning_organisation.keyword").value(orgId)))
+                .must(m -> m.term(t -> t.field("type").value("ccm:io")));
 
+        if (publishedOnly) {
+            filter.must(m->m.bool(searchService::getPublishedPermissionsQuery));
+        }
+
+        return searchBasedStatisticEvaluation(filter.build(), dateFrom, dateTo, maxResults);
+    }
+
+    private List<TrackingNode> searchBasedStatisticEvaluation(QueryVariant query, Date startDate, Date endDate, int maxResults) throws Throwable {
         SearchToken searchToken = new SearchToken();
         searchToken.setFrom(0);
-        searchToken.setMaxResult(50000);
-        searchToken.setElasticQuery(
-                QueryBuilders.bool()
-                        .must(m -> m.bool(searchService::getReadPermissionsQuery))
-                        .must(m -> m.term(t -> t.field("properties.ccm:owning_organisation.keyword").value(orgId)))
-                        .must(m -> m.term(t -> t.field("type").value("ccm:io")))
-                        .build());
+        searchToken.setMaxResult(50000); // physical limit because of db execution time
+        searchToken.setElasticQuery(query);
 
         SearchResultNodeRef search = searchService.search(searchToken);
         List<org.alfresco.service.cmr.repository.NodeRef> nodeRefs = search.getData().stream().map(this::getOriginalNodeRef).toList();
-        Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> trackingMap = activityStatisticService.getListNodeData(nodeRefs, dateFrom, dateTo, null, null);
-
+        Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> trackingMap = activityStatisticService.getListNodeData(nodeRefs, startDate, endDate, null, null);
 
         return search.getData()
                 .stream()

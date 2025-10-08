@@ -261,42 +261,45 @@ public class SearchServiceElastic implements SearchService {
     }
 
     public BoolQuery.Builder getPermissionsQuery(BoolQuery.Builder audienceQueryBuilder, String field, Set<String> authorities) {
-        BoolQuery.Builder bool = QueryBuilders.bool();
-        bool.minimumShouldMatch("1");
-        for (String a : authorities) {
-            bool.should(should -> should.match(match -> match.field(field).query(a)));
-        }
-        audienceQueryBuilder.must(bool.build()._toQuery());
+        audienceQueryBuilder.must(m-> m.bool(b -> {
+            b.minimumShouldMatch("1");
+            authorities.forEach(a->b.should(s -> s.match(m2 -> m2.field(field).query(a))));
+            return b;
+        }) );
         return audienceQueryBuilder;
     }
 
     public BoolQuery.Builder getCollectionPermissionsQuery(BoolQuery.Builder builder) {
         if (AuthorityServiceHelper.isAdmin() || AuthenticationUtil.isRunAsUserTheSystemUser()) {
-            return new BoolQuery.Builder().must(q -> q.matchAll(all -> all));
+            return builder.must(q -> q.matchAll(all -> all));
         }
 
         String user = authenticationService.getCurrentUserName();
         CollectionPermissionQueries collectionPermissionQueries = getCollectionPermissionQueries(user);
-        return new BoolQuery.Builder().minimumShouldMatch("1")
+        return builder.minimumShouldMatch("1")
                 .should(q -> q.nested(nested -> nested.path("collections").query(nq -> nq.bool(collectionPermissionQueries.collectionPermissions))))
                 .should(q -> q.nested(nested -> nested.path("collections").query(nq -> nq.bool(collectionPermissionQueries.proposalPermissions))));
     }
 
+    public BoolQuery.Builder getPublishedPermissionsQuery(BoolQuery.Builder builder) {
+        return builder.must(m -> m.term(t->t.field("permissions.read").value(CCConstants.AUTHORITY_GROUP_EVERYONE)));
+    }
+
     public BoolQuery.Builder getCoordinatorPermissionsQuery(BoolQuery.Builder builder) {
         if (AuthorityServiceHelper.isAdmin() || AuthenticationUtil.isRunAsUserTheSystemUser()) {
-            return new BoolQuery.Builder().must(q -> q.matchAll(all -> all));
+            return builder.must(q -> q.matchAll(all -> all));
         }
 
         String user = authenticationService.getCurrentUserName();
-        return new BoolQuery.Builder()
+        return builder
                 .minimumShouldMatch("1")
-                .should(getPermissionsQuery(builder, "permissions.coordinator").build()._toQuery())
+                .should(s-> s.bool(b->getPermissionsQuery(b, "permissions.coordinator")))
                 .should(q -> q.match(m -> m.field("owner").query(user)));
     }
 
     public BoolQuery.Builder getReadPermissionsQuery(BoolQuery.Builder builder) {
         if (AuthorityServiceHelper.isAdmin() || AuthenticationUtil.isRunAsUserTheSystemUser()) {
-            return new BoolQuery.Builder().must(q -> q.matchAll(all -> all));
+            return builder.must(q -> q.matchAll(all -> all));
         }
 
         String user = authenticationService.getCurrentUserName();
@@ -305,9 +308,9 @@ public class SearchServiceElastic implements SearchService {
         // @TODO: FIX after DESP-840
         CollectionPermissionQueries collectionPermissionQueries = getCollectionPermissionQueries(user);
 
-        return new BoolQuery.Builder()
+        return builder
                 .minimumShouldMatch("1")
-                .should(getPermissionsQuery(builder, "permissions.read").build()._toQuery())
+                .should(s-> s.bool(b->getPermissionsQuery(b, "permissions.read")))
                 .should(q -> q.match(m -> m.field("owner").query(user)))
                 .should(audienceQueryBuilderCollections -> audienceQueryBuilderCollections
                         .bool(b -> b
