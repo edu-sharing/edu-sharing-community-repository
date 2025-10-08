@@ -1499,7 +1499,9 @@ public class NodeDao {
 
         data.setRating(getRating());
         try {
-            data.setPreview(getPreview());
+            if(nodeService != null) {
+                data.setPreview(getPreview());
+            }
         } catch (Exception e) {
             logger.warn(e.getMessage(), e);
         }
