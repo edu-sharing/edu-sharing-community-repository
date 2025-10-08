@@ -38,14 +38,16 @@ public class AssignOrganizationNodePolicy implements NodeServicePolicies.OnCreat
     public void onCreateNode(ChildAssociationRef childAssocRef) {
 
         try {
-            String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
-            Set<String> organisations = organizationService.getAssignedOrganisations(currentUser);
-            if (organisations.isEmpty()) {
-                return;
-            }
+            AuthenticationUtil.runAsSystem(() -> {
+                String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
+                Set<String> organisations = organizationService.getAssignedOrganisations(currentUser);
+                if (organisations.isEmpty()) {
+                    return null;
+                }
 
-            nodeService.addProperties(childAssocRef.getChildRef(), Map.of(QName.createQName(CCConstants.CCM_PROP_OWNING_EDUGROUP), (Serializable) organisations.stream().toList()));
                 nodeService.addProperties(childAssocRef.getChildRef(), Map.of(QName.createQName(CCConstants.CCM_PROP_OWNING_ORGANIZATION), (Serializable) organisations.stream().toList()));
+                return null;
+            });
         } catch (Throwable e) {
             log.error(e.getMessage(), e);
         }
