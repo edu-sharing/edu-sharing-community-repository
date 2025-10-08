@@ -127,10 +127,10 @@ public class AdvancedActivityStatisticsTracker {
     private String getOriginalNodeRef(ActivityOnNodeEvent event, Map<QName, Serializable> nativeProps) {
         String originalNodeRef = event.getNodeRef().getId();
         try {
-            if (nodeService.hasAspect(event.getNodeRef().getStoreRef().getProtocol(), event.getNodeRef().getStoreRef().getIdentifier(), event.getNodeRef().getId(), CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
-                originalNodeRef = nodeService.getProperty(event.getNodeRef().getStoreRef().getProtocol(), event.getNodeRef().getStoreRef().getIdentifier(), event.getNodeRef().getId(), CCConstants.CCM_PROP_IO_ORIGINAL);
-            } else if (nodeService.hasAspect(event.getNodeRef().getStoreRef().getProtocol(), event.getNodeRef().getStoreRef().getIdentifier(), event.getNodeRef().getId(), CCConstants.CCM_ASPECT_PUBLISHED)) {
+            if (nodeService.hasAspect(event.getNodeRef().getStoreRef().getProtocol(), event.getNodeRef().getStoreRef().getIdentifier(), event.getNodeRef().getId(), CCConstants.CCM_ASPECT_PUBLISHED)) {
                 originalNodeRef = ((NodeRef) nativeProps.get(QName.createQName(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL))).getId();
+            } else if (nodeService.hasAspect(event.getNodeRef().getStoreRef().getProtocol(), event.getNodeRef().getStoreRef().getIdentifier(), event.getNodeRef().getId(), CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
+                originalNodeRef = nodeService.getProperty(event.getNodeRef().getStoreRef().getProtocol(), event.getNodeRef().getStoreRef().getIdentifier(), event.getNodeRef().getId(), CCConstants.CCM_PROP_IO_ORIGINAL);
             }
         } catch (Throwable ignored) {
         }

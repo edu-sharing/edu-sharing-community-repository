@@ -334,6 +334,18 @@ public class ActivityStatisticService {
         }
     }
 
+    /**
+     * Retrieves a mapping of NodeRef objects to their associated StatisticEntry objects,
+     * containing statistical data filtered by a date range and optional additional fields.
+     *
+     * @param nodes a list of NodeRef objects that represent the nodes to fetch data for. Use the nodeIds of the originals only!
+     * @param dateFrom the start date for the data range filter; uses epoch time if null
+     * @param dateTo the end date for the data range filter; uses the current date if null
+     * @param additionalFields a list of additional fields to include in the statistics; can be null or empty
+     * @param mediacenter a string used as a filter parameter; can be empty or null to skip filtering
+     * @return a map where each key is a NodeRef and the corresponding value is a StatisticEntry containing the statistical data
+     * @throws Throwable if any exception occurs during the database operation or data processing
+     */
     public Map<NodeRef, StatisticEntry> getListNodeData(List<NodeRef> nodes, java.util.Date dateFrom, java.util.Date dateTo, List<String> additionalFields, String mediacenter) throws Throwable {
         ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
         Connection con = null;

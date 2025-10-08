@@ -121,24 +121,24 @@ public class TrackingDAO {
 
     @NotNull
     @Permission(CCConstants.CCM_VALUE_TOOLPERMISSION_USER_STATISTICS_NODES)
-    public List<TrackingNode> getNodeStatisticsByOwningUser(@NotNull @NonNull String userId, @NotNull @NonNull Date dateFrom,@NotNull @NonNull Date dateTo, int maxResults) throws Throwable {
+    public List<TrackingNode> getNodeStatisticsByOwningUser(@NotNull @NonNull String userId, @NotNull @NonNull Date dateFrom, @NotNull @NonNull Date dateTo, int maxResults) throws Throwable {
         SearchToken searchToken = new SearchToken();
         searchToken.setFrom(0);
         searchToken.setMaxResult(50000);
         searchToken.setElasticQuery(
                 QueryBuilders.bool()
-                        .must(m -> m.term(t->t.field("owner").value(userId)))
-                        .must(m -> m.term(t->t.field("type").value("ccm:io")))
+                        .must(m -> m.term(t -> t.field("owner").value(userId)))
+                        .must(m -> m.term(t -> t.field("type").value("ccm:io")))
                         .build());
 
         SearchResultNodeRef search = searchService.search(searchToken);
-        List<org.alfresco.service.cmr.repository.NodeRef> nodeRefs = search.getData().stream().map(org.edu_sharing.service.model.NodeRef::asAlfrescoNodeRef).toList();
+        List<org.alfresco.service.cmr.repository.NodeRef> nodeRefs = search.getData().stream().map(this::getOriginalNodeRef).toList();
         Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> trackingMap = activityStatisticService.getListNodeData(nodeRefs, dateFrom, dateTo, null, null);
 
 
         return search.getData()
                 .stream()
-                .map(nodeRef -> new AbstractMap.SimpleEntry<>(nodeRef, trackingMap.get(nodeRef.asAlfrescoNodeRef())))
+                .map(nodeRef -> new AbstractMap.SimpleEntry<>(nodeRef, trackingMap.get(getOriginalNodeRef(nodeRef))))
                 .sorted(Comparator.comparing(this::getTotalCounts))
                 .limit(maxResults)
                 .map(this::map)
@@ -161,7 +161,7 @@ public class TrackingDAO {
         searchToken.setElasticQuery(
                 QueryBuilders.bool()
                         .must(m -> m.bool(searchService::getCoordinatorPermissionsQuery))
-                        .must(m -> m.term(t->t.field("type").value("ccm:io")))
+                        .must(m -> m.term(t -> t.field("type").value("ccm:io")))
                         .must(m -> m.bool(b -> b
                                 .should(nodeIds.stream().map(id -> QueryBuilders.term(t -> t.field("path").value(id))).toList())
                                 .should(nodeIds.stream().map(id -> QueryBuilders.term(t -> t.field("_id").value(id))).toList())
@@ -169,19 +169,32 @@ public class TrackingDAO {
                         .build());
 
         SearchResultNodeRef search = searchService.search(searchToken);
-        List<org.alfresco.service.cmr.repository.NodeRef> nodeRefs = search.getData().stream().map(org.edu_sharing.service.model.NodeRef::asAlfrescoNodeRef).toList();
+        List<org.alfresco.service.cmr.repository.NodeRef> nodeRefs = search.getData().stream().map(this::getOriginalNodeRef).toList();
         Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> trackingMap = activityStatisticService.getListNodeData(nodeRefs, dateFrom, dateTo, null, null);
 
 
         return search.getData()
                 .stream()
-                .map(nodeRef -> new AbstractMap.SimpleEntry<>(nodeRef, trackingMap.get(nodeRef.asAlfrescoNodeRef())))
+                .map(nodeRef -> new AbstractMap.SimpleEntry<>(nodeRef, trackingMap.get(getOriginalNodeRef(nodeRef))))
                 .sorted(Comparator.comparing(this::getTotalCounts))
                 .limit(maxResults)
                 .map(this::map)
                 .toList();
     }
 
+    private org.alfresco.service.cmr.repository.NodeRef getOriginalNodeRef(org.edu_sharing.service.model.NodeRef nodeRef) {
+
+        org.alfresco.service.cmr.repository.NodeRef originalNodeRef = nodeRef.asAlfrescoNodeRef();
+        if (nodeRef.getAspects().contains(CCConstants.CCM_ASPECT_PUBLISHED)) {
+            originalNodeRef = org.alfresco.service.cmr.repository.NodeRef.getNodeRefs((String)nodeRef.getProperties().get(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL))
+                    .stream()
+                    .findFirst()
+                    .orElse(originalNodeRef);
+        } else if (nodeRef.getAspects().contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
+            originalNodeRef =  new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, (String) nodeRef.getProperties().getOrDefault(CCConstants.CCM_PROP_IO_ORIGINAL, nodeRef.getNodeId()));
+        }
+        return originalNodeRef;
+    }
 
     private int getTotalCounts(AbstractMap.SimpleEntry<org.edu_sharing.service.model.NodeRef, StatisticEntry> entry) {
         return entry.getValue().getCounts().values().stream().reduce(Integer::sum).orElse(0);
@@ -197,18 +210,18 @@ public class TrackingDAO {
         searchToken.setElasticQuery(
                 QueryBuilders.bool()
                         .must(m -> m.bool(searchService::getReadPermissionsQuery))
-                        .must(m -> m.term(t->t.field("properties.ccm:owning_organisation.keyword").value(orgId)))
-                        .must(m -> m.term(t->t.field("type").value("ccm:io")))
+                        .must(m -> m.term(t -> t.field("properties.ccm:owning_organisation.keyword").value(orgId)))
+                        .must(m -> m.term(t -> t.field("type").value("ccm:io")))
                         .build());
 
         SearchResultNodeRef search = searchService.search(searchToken);
-        List<org.alfresco.service.cmr.repository.NodeRef> nodeRefs = search.getData().stream().map(org.edu_sharing.service.model.NodeRef::asAlfrescoNodeRef).toList();
+        List<org.alfresco.service.cmr.repository.NodeRef> nodeRefs = search.getData().stream().map(this::getOriginalNodeRef).toList();
         Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> trackingMap = activityStatisticService.getListNodeData(nodeRefs, dateFrom, dateTo, null, null);
 
 
         return search.getData()
                 .stream()
-                .map(nodeRef -> new AbstractMap.SimpleEntry<>(nodeRef, trackingMap.get(nodeRef.asAlfrescoNodeRef())))
+                .map(nodeRef -> new AbstractMap.SimpleEntry<>(nodeRef, trackingMap.get(getOriginalNodeRef(nodeRef))))
                 .sorted(Comparator.comparing(this::getTotalCounts))
                 .limit(maxResults)
                 .map(this::map)
