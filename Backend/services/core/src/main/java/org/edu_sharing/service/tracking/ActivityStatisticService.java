@@ -84,26 +84,25 @@ public class ActivityStatisticService {
             " LIMIT 100";
 
     //language=postgresql
-    public static String TRACKING_STATISTICS_NODE_GROUPED = "SELECT COALESCE(original_node_uuid, node_uuid) as node,type,COUNT(*) :fields from "+TRACKING_NODE_TABLE_ID+" as tracking" +
+    public static String TRACKING_STATISTICS_NODE_GROUPED = "SELECT COALESCE(original_node_uuid, node_uuid) as node,type,COUNT(*) :fields from " + TRACKING_NODE_TABLE_ID + " as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY node,type :grouping" +
             " ORDER BY count DESC";
 
     //language=postgresql
-    public static String TRACKING_STATISTICS_NODE_SINGLE = "SELECT type,COUNT(*) from "+TRACKING_NODE_TABLE_ID+" as tracking" +
+    public static String TRACKING_STATISTICS_NODE_SINGLE = "SELECT type,COUNT(*) from " + TRACKING_NODE_TABLE_ID + " as tracking" +
             " WHERE node_uuid = ? AND time BETWEEN ? AND ?" +
             " GROUP BY type" +
             " ORDER BY count DESC";
 
     //language=postgresql
-    public static String TRACKING_STATISTICS_NODE_ARRAY = "SELECT COALESCE(original_node_uuid, node_uuid) as node_uuid_final, type,COUNT(*) :fields from "+TRACKING_NODE_TABLE_ID+" as tracking" +
-            " WHERE time BETWEEN ? AND ? AND (ARRAY[?] <@ authority_mediacenter)" +
+    public static String TRACKING_STATISTICS_NODE_ARRAY = "SELECT COALESCE(original_node_uuid, node_uuid) as node_uuid_final, type, COUNT(*) as count :fields from " + TRACKING_NODE_TABLE_ID + " as tracking" +
+            " WHERE time BETWEEN ? AND ? AND (? OR ARRAY[?] <@ authority_mediacenter) AND COALESCE(original_node_uuid, node_uuid) = ANY(?)" +
             " GROUP BY node_uuid_final, type" +
-            " HAVING COALESCE(original_node_uuid, node_uuid) = ANY(?) " +
             " ORDER BY count DESC";
 
     //language=postgresql
-    public static String TRACKING_STATISTICS_NODE_MEDIACENTER = "SELECT COALESCE(original_node_uuid, node_uuid) as node_uuid_final, type,COUNT(*) :fields from "+TRACKING_NODE_TABLE_ID+" as tracking" +
+    public static String TRACKING_STATISTICS_NODE_MEDIACENTER = "SELECT COALESCE(original_node_uuid, node_uuid) as node_uuid_final, type,COUNT(*) :fields from " + TRACKING_NODE_TABLE_ID + " as tracking" +
             " WHERE (ARRAY[?] <@ authority_mediacenter) AND time BETWEEN ? AND ? AND ARRAY_LENGTH(authority_mediacenter, 1) = 1" +
             " GROUP BY node_uuid_final, type" +
             " ORDER BY count DESC";
@@ -347,7 +346,7 @@ public class ActivityStatisticService {
             con = dbAlf.getConnection();
             String query = TRACKING_STATISTICS_NODE_ARRAY;
             String fields = "";
-            if (!additionalFields.isEmpty()) {
+            if (additionalFields != null && !additionalFields.isEmpty()) {
                 fields = "," + StringUtils.join(additionalFields.stream().map(f -> "ARRAY_AGG(" + makeDbField(f, true) + ") as " + f).collect(Collectors.toList()), ",");
             }
             query = query.replace(":fields", fields);
@@ -361,6 +360,7 @@ public class ActivityStatisticService {
                 dateTo = new java.util.Date();
             }
             statement.setTimestamp(index++, Timestamp.valueOf(dateTo.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
+            statement.setBoolean(index++, StringUtils.isBlank(mediacenter));
             statement.setString(index++, mediacenter);
             statement.setArray(index++, con.createArrayOf("text", nodes.stream().map(NodeRef::getId).toArray()));
 
@@ -369,7 +369,7 @@ public class ActivityStatisticService {
                 NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, resultSet.getString("node_uuid_final"));
                 String event = resultSet.getString("type");
                 data.get(nodeRef).getCounts().put(event, resultSet.getInt("count"));
-                if (!additionalFields.isEmpty()) {
+                if (additionalFields != null && !additionalFields.isEmpty()) {
                     mapAdditionalFields(event, additionalFields, resultSet, data.get(nodeRef), mediacenter);
                 }
             }
@@ -510,25 +510,25 @@ public class ActivityStatisticService {
     private String getQuery(GroupingType type, String table, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws SQLException {
         try {
             String prepared = null;
-            if (type.equals(GroupingType.Daily))
-                prepared = TRACKING_STATISTICS_DAILY;
-            else if (type.equals(GroupingType.Monthly))
-                prepared = TRACKING_STATISTICS_MONTHLY;
-            else if (type.equals(GroupingType.Yearly))
-                prepared = TRACKING_STATISTICS_YEARLY;
-            else if (type.equals(GroupingType.Node)) {
-                prepared = TRACKING_STATISTICS_NODE_GROUPED;
-            } else if (type.equals(GroupingType.None)) {
-                if (groupFields != null && !groupFields.isEmpty()) {
-                    prepared = TRACKING_STATISTICS_CUSTOM_GROUPING;
-                } else if (table.equals(TRACKING_NODE_TABLE_ID)) {
-                    prepared = TRACKING_STATISTICS_NODE;
-                } else if (table.equals(TRACKING_USER_TABLE_ID)) {
-                    prepared = TRACKING_STATISTICS_USER;
+            switch (type) {
+                case Daily -> prepared = TRACKING_STATISTICS_DAILY;
+                case Monthly -> prepared = TRACKING_STATISTICS_MONTHLY;
+                case Yearly -> prepared = TRACKING_STATISTICS_YEARLY;
+                case Node -> prepared = TRACKING_STATISTICS_NODE_GROUPED;
+                case None -> {
+                    if (groupFields != null && !groupFields.isEmpty()) {
+                        prepared = TRACKING_STATISTICS_CUSTOM_GROUPING;
+                    } else if (table.equals(TRACKING_NODE_TABLE_ID)) {
+                        prepared = TRACKING_STATISTICS_NODE;
+                    } else if (table.equals(TRACKING_USER_TABLE_ID)) {
+                        prepared = TRACKING_STATISTICS_USER;
+                    }
                 }
             }
-            if (prepared == null)
+
+            if (prepared == null) {
                 throw new IllegalArgumentException("No statement found for tracking table " + table + " and mode " + type);
+            }
 
             prepared = prepared.replace(":table", table);
 
