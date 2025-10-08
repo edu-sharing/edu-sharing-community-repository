@@ -12,10 +12,12 @@ import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.service.AspectConstants;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityService;
+import org.edu_sharing.service.permission.annotation.HasRole;
 import org.edu_sharing.service.permission.annotation.
         NodePermission;
 import org.edu_sharing.service.permission.annotation.Permission;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
+import org.edu_sharing.util.LazyProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
@@ -26,6 +28,7 @@ import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Aspect
@@ -54,6 +57,10 @@ public class PermissionChecking {
 
     @Before("@annotation(org.edu_sharing.service.permission.annotation.Permission)")
     public void checkPermission(JoinPoint joinPoint) throws InsufficientPermissionException, NoSuchMethodException {
+        if(permissionService.isAdminOrSystem()){
+            return;
+        }
+
         String user = AuthenticationUtil.getFullyAuthenticatedUser();
 
 
@@ -74,6 +81,7 @@ public class PermissionChecking {
         }
 
         checkNodePermissions(joinPoint, user, method);
+        checkAuthority(joinPoint, user, method);
     }
 
     /**
@@ -138,4 +146,46 @@ public class PermissionChecking {
                     parameterName, nodeId, String.join(", ", permissions)));
         }
     }
+
+    private void checkAuthority(JoinPoint joinPoint, String user, Method method) {
+
+        Object[] args = joinPoint.getArgs();
+        Parameter[] parameters = method.getParameters();
+
+        LazyProvider<Set<String>> owningAuthorities = new LazyProvider<>(() -> authorityService.getMemberships(user));
+        for (int i = 0; i < parameters.length; i++) {
+            Parameter parameter = parameters[i];
+            Object arg = args[i];
+
+            if (parameter.getAnnotation(HasRole.class) == null) {
+                continue;
+            }
+
+            if (arg.getClass().isArray()) {
+                List<String> requiredAuthorities = Arrays.asList((String[]) arg);
+                if(!owningAuthorities.get().containsAll(requiredAuthorities)){
+                    throw new InsufficientPermissionException(String.format("%s requires authorities: %s", parameter.getName(), String.join(", ", requiredAuthorities)));
+                }
+            } else if (arg instanceof Iterable) {
+                int j = 0;
+                for (Object item : (Iterable<?>) arg) {
+                    if(!(item instanceof String requiredAuthority)) {
+                        throw new InvalidArgumentException(String.format("%s must be of type %s", parameter.getName(), String.class));
+                    }
+                    if(!owningAuthorities.get().contains(requiredAuthority)){
+                        throw new InsufficientPermissionException(String.format("%s requires authorities: %s", String.format("%s[%s] ", parameter.getName(), j), requiredAuthority));
+                    }
+                    j++;
+                }
+            } else if(arg instanceof String requiredAuthority){
+                if(!owningAuthorities.get().contains(requiredAuthority)){
+                    throw new InsufficientPermissionException(String.format("%s requires authorities: %s", parameter.getName(), requiredAuthority));
+                }
+            } else {
+                throw new InvalidArgumentException(String.format("%s must be of type %s, %s or %s", parameter.getName(), String.class, String[].class, Iterable.class));
+            }
+
+        }
+    }
+
 }
