@@ -281,17 +281,13 @@ public class SearchServiceElastic implements SearchService {
                 .should(q -> q.nested(nested -> nested.path("collections").query(nq -> nq.bool(collectionPermissionQueries.collectionPermissions))))
                 .should(q -> q.nested(nested -> nested.path("collections").query(nq -> nq.bool(collectionPermissionQueries.proposalPermissions))));
     }
+
     public BoolQuery.Builder getCoordinatorPermissionsQuery(BoolQuery.Builder builder) {
         if (AuthorityServiceHelper.isAdmin() || AuthenticationUtil.isRunAsUserTheSystemUser()) {
             return new BoolQuery.Builder().must(q -> q.matchAll(all -> all));
         }
 
         String user = authenticationService.getCurrentUserName();
-
-        //enhance to collection permissions
-        // @TODO: FIX after DESP-840
-        CollectionPermissionQueries collectionPermissionQueries = getCollectionPermissionQueries(user);
-
         return new BoolQuery.Builder()
                 .minimumShouldMatch("1")
                 .should(getPermissionsQuery(builder, "permissions.coordinator").build()._toQuery())
