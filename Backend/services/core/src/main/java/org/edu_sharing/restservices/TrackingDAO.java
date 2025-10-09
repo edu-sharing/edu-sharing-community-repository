@@ -26,6 +26,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
 
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -221,19 +223,57 @@ public class TrackingDAO {
         searchToken.setElasticQuery(query);
 
         SearchResultNodeRef search = searchService.search(searchToken);
-        List<org.alfresco.service.cmr.repository.NodeRef> nodeRefs = search.getData()
+        Map<org.alfresco.service.cmr.repository.NodeRef, List<org.edu_sharing.service.model.NodeRef>> nodeRefGroup = search.getData()
                 .stream()
-                .map(this::getOriginalNodeRef)
-                .distinct()
-                .toList();
+                .collect(Collectors.groupingBy(this::getOriginalNodeRef));
 
+        List<org.alfresco.service.cmr.repository.NodeRef> nodeRefs = nodeRefGroup.keySet().stream().toList();
         Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> trackingMap = activityStatisticService.getListNodeData(nodeRefs, startDate, endDate, null, null);
 
-        return search.getData()
+        return trackingMap.entrySet()
                 .stream()
-                .map(nodeRef -> new AbstractMap.SimpleEntry<>(nodeRef, trackingMap.get(getOriginalNodeRef(nodeRef))))
                 .sorted(Comparator.comparing(this::getTotalCounts))
                 .limit(maxResults)
+                .map(x->{
+                    List<org.edu_sharing.service.model.NodeRef> dataList = nodeRefGroup.get(x.getKey());
+                    if(dataList.size() == 1){
+                        return new AbstractMap.SimpleEntry<>(dataList.get(0), x.getValue());
+                    } else {
+                        // find the original node
+                        Optional<org.edu_sharing.service.model.NodeRef> originalNode = dataList.stream().filter(y -> y.getNodeId().equals(x.getKey().getId())).findFirst();
+                        if(originalNode.isPresent()){
+                            return new AbstractMap.SimpleEntry<>(originalNode.get(), x.getValue());
+                        }
+
+                        // find the latest published node or take the first in list
+                        org.edu_sharing.service.model.NodeRef firstRefOrLatestPublishedCopy = dataList.stream().reduce((lhs, rhs) -> {
+                            boolean lhsIsPublished = isPublished(lhs);
+                            boolean rhsIsPublished = isPublished(rhs);
+                            if (lhsIsPublished && rhsIsPublished) {
+                                Date lhsDate = getPublishedDate(lhs);
+                                Date rhsDate = getPublishedDate(rhs);
+                                if (rhsDate == null) {
+                                    return lhs;
+                                }
+
+                                if (lhsDate == null) {
+                                    return rhs;
+                                }
+
+                                return lhsDate.after(rhsDate) ? lhs : rhs;
+                            }
+
+                            if (rhsIsPublished) {
+                                return rhs;
+                            }
+
+                            return lhs;
+                        }).orElseThrow();
+
+                        return new AbstractMap.SimpleEntry<>(firstRefOrLatestPublishedCopy, x.getValue());
+                    }
+
+                })
                 .map(this::map)
                 .toList();
     }
@@ -241,18 +281,35 @@ public class TrackingDAO {
     private org.alfresco.service.cmr.repository.NodeRef getOriginalNodeRef(org.edu_sharing.service.model.NodeRef nodeRef) {
 
         org.alfresco.service.cmr.repository.NodeRef originalNodeRef = nodeRef.asAlfrescoNodeRef();
-        if (nodeRef.getAspects().contains(CCConstants.CCM_ASPECT_PUBLISHED)) {
+        if (isPublished(nodeRef)) {
             originalNodeRef = org.alfresco.service.cmr.repository.NodeRef.getNodeRefs((String) nodeRef.getProperties().get(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL))
                     .stream()
                     .findFirst()
                     .orElse(originalNodeRef);
-        } else if (nodeRef.getAspects().contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
+        } else if (isCollectionIoReference(nodeRef)) {
             originalNodeRef = new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, (String) nodeRef.getProperties().getOrDefault(CCConstants.CCM_PROP_IO_ORIGINAL, nodeRef.getNodeId()));
         }
         return originalNodeRef;
     }
 
-    private int getTotalCounts(@NotNull Map.Entry<org.edu_sharing.service.model.NodeRef, StatisticEntry> entry) {
+    private boolean isCollectionIoReference(org.edu_sharing.service.model.NodeRef nodeRef){
+        return nodeRef.getAspects().contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
+    }
+
+    private boolean isPublished(org.edu_sharing.service.model.NodeRef nodeRef) {
+        return nodeRef.getAspects().contains(CCConstants.CCM_ASPECT_PUBLISHED);
+    }
+
+    private Date getPublishedDate(org.edu_sharing.service.model.NodeRef nodeRef) {
+        return  Optional.ofNullable(nodeRef.getProperties().get(CCConstants.CCM_PROP_PUBLISHED_DATE))
+                .map(String.class::cast)
+                .map(DateTimeFormatter.ISO_OFFSET_DATE_TIME::parse)
+                .map(Instant::from)
+                .map(Date::from)
+                .orElse(null);
+    }
+
+    private int getTotalCounts(@NotNull Map.Entry<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> entry) {
         return entry.getValue().getCounts().values().stream().reduce(Integer::sum).orElse(0);
     }
 
