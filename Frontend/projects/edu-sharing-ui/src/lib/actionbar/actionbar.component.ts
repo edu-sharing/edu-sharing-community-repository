@@ -28,6 +28,11 @@ export class ActionbarComponent implements OnChanges {
     @Input() numberOfAlwaysVisibleOptions = 2;
     @Input() numberOfAlwaysVisibleOptionsMobile = 1;
     /**
+     * show the captions of the action elements
+     * auto (default) uses the screen size
+     */
+    @Input() showCaptions: 'auto' | false | true = 'auto';
+    /**
      * Visual style of the actionbar
      *
      * Values:

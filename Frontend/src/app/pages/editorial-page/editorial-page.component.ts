@@ -204,7 +204,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 this.params$.value.primaryMode === 'share' &&
                 nodes.every(
                     (n) =>
-                        (n as unknown as { share: InviteEvent }).share.sharedBy.authorityName !==
+                        (n as unknown as { share: InviteEvent }).share?.sharedBy.authorityName !==
                         this.loginInfo$.value?.authorityName,
                 )
             );

@@ -123,7 +123,7 @@ button {
 }
 
 @media screen and (max-width: ($mobileWidth + $mobileStage * 4)) {
-    .action-always-caption {
+    .action-always-caption:not(.action-always-caption-custom) {
         display: none;
     }
     @include icon-button();

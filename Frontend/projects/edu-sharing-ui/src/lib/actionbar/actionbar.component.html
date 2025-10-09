@@ -34,9 +34,13 @@
       (click)="click(option)"
     >
       <i [esIcon]="option.icon"></i>
-      <span class="action-always-caption" *ngIf="option.showName && appearance === 'button'">
-        {{ option.name | translate }}</span
+      <span
+        class="action-always-caption"
+        [class.action-always-caption-custom]="showCaptions !== 'auto'"
+        *ngIf="option.showName && appearance === 'button' && showCaptions !== false"
       >
+        {{ option.name | translate }}
+      </span>
     </button>
     <button
       *ngIf="!shouldHighlight(i, option)"
@@ -50,7 +54,11 @@
       (click)="click(option)"
     >
       <i [esIcon]="option.icon"></i>
-      <span class="action-always-caption" *ngIf="option.showName && appearance === 'button'">
+      <span
+        class="action-always-caption"
+        [class.action-always-caption-custom]="showCaptions !== 'auto'"
+        *ngIf="option.showName && appearance === 'button' && showCaptions !== false"
+      >
         {{ option.name | translate }}</span
       >
     </button>

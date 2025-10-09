@@ -53,10 +53,16 @@
        </button>
      </mat-toolbar>
  -->
-    <div class="main-content">
+    <div class="main-content" esBorderBoxObserver #observer="borderBoxObserver">
       <div class="top-area">
-        <es-editorial-breadcrumb [mode]="(params$ | async).primaryMode"></es-editorial-breadcrumb>
-        <es-actionbar [numberOfAlwaysVisibleOptions]="1"></es-actionbar>
+        <es-editorial-breadcrumb
+          [mode]="(params$ | async).primaryMode"
+          [class.display-none]="(observer.width$ | async) < 400"
+        ></es-editorial-breadcrumb>
+        <es-actionbar
+          [numberOfAlwaysVisibleOptions]="2"
+          [showCaptions]="(observer.width$ | async) > 700"
+        ></es-actionbar>
       </div>
       <ng-container *ngIf="mainComponent$ | async as component">
         {{ component }}

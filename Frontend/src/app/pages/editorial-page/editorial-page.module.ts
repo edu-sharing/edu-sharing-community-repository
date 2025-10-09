@@ -7,6 +7,7 @@ import { ResizableSidenavDirective } from './resizable-sidenav.directive';
 import { EditorialBreadcrumbComponent } from './editorial-breadcrumb/editorial-breadcrumb.component';
 import { MdsModule } from '../../features/mds/mds.module';
 import { EditorialSidebarComponent } from './editorial-sidebar/editorial-sidebar.component';
+import { BorderBoxObserverDirective, EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 
 @NgModule({
     declarations: [EditorialPageComponent],
@@ -16,6 +17,7 @@ import { EditorialSidebarComponent } from './editorial-sidebar/editorial-sidebar
         EditorialSidebarComponent,
         MatToolbarModule,
         EditorialPageRoutingModule,
+        EduSharingUiCommonModule,
         SharedModule,
         MdsModule,
     ],
