@@ -6,6 +6,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.QueryVariant;
 import com.drew.lang.annotations.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
@@ -39,7 +40,7 @@ public class TrackingDAO {
     private final RepositoryDao homeRepository = RepositoryDao.getHomeRepository();
     private final Filter filter = Filter.createShowAllFilter();
 
-    @Value( "${repository.statistics.searchResultsLimit:50000}")
+    @Value("${repository.statistics.searchResultsLimit:50000}")
     private int maxSearchResults;
 
     public List<TrackingNode> getNodeStatistics(GroupingType grouping, Date fromDate, Date toDate, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws DAOException {
@@ -128,13 +129,32 @@ public class TrackingDAO {
 
     @NotNull
     @Permission(CCConstants.CCM_VALUE_TOOLPERMISSION_USER_STATISTICS_NODES)
-    public List<TrackingNode> getNodeStatisticsByOwningUser(@NotNull @NonNull String userId, @NotNull @NonNull Date dateFrom, @NotNull @NonNull Date dateTo, int maxResults, boolean publishedOnly) throws Throwable {
+    public List<TrackingNode> getNodeStatisticsByOwningUser(@HasRole @NotNull @NonNull String userId, @NotNull @NonNull Date dateFrom, @NotNull @NonNull Date dateTo, int maxResults, boolean publishedOnly) throws Throwable {
+
+        // type = ccm:io && ((aspect = ccm:published && cm:creator = userId) ...)
         BoolQuery.Builder filter = QueryBuilders.bool()
-                .must(m -> m.term(t -> t.field("owner").value(userId)))
-                .must(m -> m.term(t -> t.field("type").value("ccm:io")));
+                // filter only io's
+                .must(m -> m.term(t -> t.field("type").value("ccm:io")))
+                .minimumShouldMatch("1")
+                // in case originals of published copies are deleted (produces duplications in the result list!)
+                .should(s -> s.bool(b -> b.must(m -> m.bool(b2 -> b2
+                        .must(m2 -> m2.term(t -> t.field("aspects").value("ccm:published")))
+                        .must(m2 -> m2.term(t -> t.field("properties.cm:creator").value(userId)))))));
 
         if (publishedOnly) {
-            filter.must(m->m.bool(searchService::getPublishedPermissionsQuery));
+            // ... || (owner = userId && (permissions.read == GROUP_EVERYONE || ccm:published_mode=copy))
+            filter.should(s -> s.bool(b -> b
+                    // filter by owner
+                    .must(m -> m.term(t -> t.field("owner").value(userId)))
+                    .minimumShouldMatch("1")
+                    // nodes published directly
+                    .should(s2 -> s2.bool(searchService::getPublishedPermissionsQuery))
+                    // in case of published copies
+                    .should(s2 -> s2.term(t -> t.field("properties.ccm:published_mode").value("copy")))));
+
+        } else {
+            // filter by owner
+            filter.should(m -> m.term(t -> t.field("owner").value(userId)));
         }
 
         return searchBasedStatisticEvaluation(filter.build(), dateFrom, dateTo, maxResults);
@@ -144,48 +164,50 @@ public class TrackingDAO {
     @NotNull
     @Permission(CCConstants.CCM_VALUE_TOOLPERMISSION_SELECTIVE_STATISTICS_NODES)
     public List<TrackingNode> getNodeStatisticsByRange(@NotNull @NonNull List<String> nodeIds, @NotNull @NonNull Date dateFrom, @NotNull @NonNull Date dateTo, int maxResults, boolean publishedOnly) throws Throwable {
-        SearchToken searchToken = new SearchToken();
-        searchToken.setFrom(0);
-        searchToken.setMaxResult(50000);
+        String me = AuthenticationUtil.getFullyAuthenticatedUser();
+
+        // type = ccm:io && (nodeId in path or id = nodeId) &&((aspect = ccm:published && cm:creator = userId) ...)
         BoolQuery.Builder filter = QueryBuilders.bool()
-                .must(m -> m.bool(searchService::getCoordinatorPermissionsQuery))
+                // filter only io's
                 .must(m -> m.term(t -> t.field("type").value("ccm:io")))
+                // retrieve nodes inside folders or by id
                 .must(m -> m.bool(b -> b
                         .should(nodeIds.stream().map(id -> QueryBuilders.term(t -> t.field("path").value(id))).toList())
                         .should(nodeIds.stream().map(id -> QueryBuilders.term(t -> t.field("_id").value(id))).toList())
-                ));
+                ))
+                .minimumShouldMatch("1")
+                // in case originals of published copies are deleted (produces duplications in the result list!)
+                .should(s -> s.bool(b -> b.must(m -> m.bool(b2 -> b2
+                        .must(m2 -> m2.term(t -> t.field("aspects").value("ccm:published")))
+                        .must(m2 -> m2.term(t -> t.field("properties.cm:creator").value(me)))))));
+
 
         if (publishedOnly) {
-            filter.must(m->m.bool(searchService::getPublishedPermissionsQuery));
+            // ... || (permissions = coordinator && (permissions.read == GROUP_EVERYONE || published_mode = copy))
+            filter.should(s -> s.bool(b -> b.must(m -> m.bool(searchService::getCoordinatorPermissionsQuery))
+                    .minimumShouldMatch("1")
+                    // nodes published directly
+                    .should(s2 -> s2.bool(searchService::getPublishedPermissionsQuery))
+                    // in case of published copies
+                    .should(s2 -> s2.term(t -> t.field("properties.ccm:published_mode").value("copy")))));
+        } else {
+            // ... || permissions = coordinator
+            filter.should(m -> m.bool(searchService::getCoordinatorPermissionsQuery));
         }
-
         return searchBasedStatisticEvaluation(filter.build(), dateFrom, dateTo, maxResults);
     }
 
-    private org.alfresco.service.cmr.repository.NodeRef getOriginalNodeRef(org.edu_sharing.service.model.NodeRef nodeRef) {
-
-        org.alfresco.service.cmr.repository.NodeRef originalNodeRef = nodeRef.asAlfrescoNodeRef();
-        if (nodeRef.getAspects().contains(CCConstants.CCM_ASPECT_PUBLISHED)) {
-            originalNodeRef = org.alfresco.service.cmr.repository.NodeRef.getNodeRefs((String) nodeRef.getProperties().get(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL))
-                    .stream()
-                    .findFirst()
-                    .orElse(originalNodeRef);
-        } else if (nodeRef.getAspects().contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
-            originalNodeRef = new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, (String) nodeRef.getProperties().getOrDefault(CCConstants.CCM_PROP_IO_ORIGINAL, nodeRef.getNodeId()));
-        }
-        return originalNodeRef;
-    }
 
     @NotNull
     @Permission(CCConstants.CCM_VALUE_TOOLPERMISSION_ORGANIZATION_STATISTICS_NODES)
     public List<TrackingNode> getNodeStatisticsByOrganization(@HasRole @NotNull @NonNull String orgId, @NotNull @NonNull Date dateFrom, @NotNull @NonNull Date dateTo, int maxResults, boolean publishedOnly) throws Throwable {
         BoolQuery.Builder filter = QueryBuilders.bool()
+                .must(m -> m.term(t -> t.field("type").value("ccm:io")))
                 .must(m -> m.bool(searchService::getReadPermissionsQuery))
-                .must(m -> m.term(t -> t.field("properties.ccm:owning_organisation.keyword").value(orgId)))
-                .must(m -> m.term(t -> t.field("type").value("ccm:io")));
+                .must(m -> m.term(t -> t.field("properties.ccm:owning_organisation.keyword").value(orgId)));
 
         if (publishedOnly) {
-            filter.must(m->m.bool(searchService::getPublishedPermissionsQuery));
+            filter.must(m -> m.bool(searchService::getPublishedPermissionsQuery));
         }
 
         return searchBasedStatisticEvaluation(filter.build(), dateFrom, dateTo, maxResults);
@@ -214,6 +236,20 @@ public class TrackingDAO {
                 .limit(maxResults)
                 .map(this::map)
                 .toList();
+    }
+
+    private org.alfresco.service.cmr.repository.NodeRef getOriginalNodeRef(org.edu_sharing.service.model.NodeRef nodeRef) {
+
+        org.alfresco.service.cmr.repository.NodeRef originalNodeRef = nodeRef.asAlfrescoNodeRef();
+        if (nodeRef.getAspects().contains(CCConstants.CCM_ASPECT_PUBLISHED)) {
+            originalNodeRef = org.alfresco.service.cmr.repository.NodeRef.getNodeRefs((String) nodeRef.getProperties().get(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL))
+                    .stream()
+                    .findFirst()
+                    .orElse(originalNodeRef);
+        } else if (nodeRef.getAspects().contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
+            originalNodeRef = new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, (String) nodeRef.getProperties().getOrDefault(CCConstants.CCM_PROP_IO_ORIGINAL, nodeRef.getNodeId()));
+        }
+        return originalNodeRef;
     }
 
     private int getTotalCounts(@NotNull Map.Entry<org.edu_sharing.service.model.NodeRef, StatisticEntry> entry) {
