@@ -429,7 +429,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         // wait for mds and delay to make sure the facets are registered
         await firstValueFrom(
             this.mdsLoaded$.pipe(
-                filter((v) => !!v),
+                filter((v) => v),
                 first(),
                 delay(1),
             ),
