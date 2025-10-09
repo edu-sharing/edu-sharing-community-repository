@@ -1722,6 +1722,7 @@ public class SearchServiceElastic implements SearchService {
             Map share = (Map) data.getInnerHits().get("share").hits().hits().get(0).source().to(Map.class).get("share");
             return new SearchInviteEvent(
                     data.getNodeRef(),
+                    share.get("id").toString(),
                     share.get("sharedBy").toString(),
                     share.get("sharedWith").toString(),
                     new Date((Long) share.get("timestamp")),

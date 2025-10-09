@@ -194,14 +194,13 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         );
         const reject = new OptionItem(
             'EDITORIAL.OPTION.REJECT_SHARE',
-            'cancel',
+            'cancel_schedule_send',
             (element: InviteEvent[]) => {
                 const elements = this.optionsHelperService.getObjects(
                     element,
                     this.nodeEntriesRef.optionsHelper.getData(),
                 );
-                console.log(elements);
-                // void this.dialogs.openRejectShareDialog(element);
+                void this.dialogs.openRejectShareDialog(elements);
             },
         );
         reject.elementType = [ElementType.Node, ElementType.SavedSearch];

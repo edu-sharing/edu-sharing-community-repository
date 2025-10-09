@@ -76,7 +76,7 @@ export type SearchResultGeneric<T extends Node> = Omit<SearchResults, 'nodes'> &
     nodes: Array<T>;
 };
 export type NodeShare = Node & { share: Omit<InviteEvent, 'node'> };
-export type NodeEvent = Node & { share: Omit<UserEvent, 'node'> };
+export type NodeEvent = Node & { event: Omit<UserEvent, 'node'> };
 
 export type GenericSearchResults =
     | SearchResultGeneric<Node>

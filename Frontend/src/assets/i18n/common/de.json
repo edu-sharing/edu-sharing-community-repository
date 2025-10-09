@@ -519,6 +519,11 @@
       "TYPE_MEDIA_CENTER": "Medienzentrum"
     }
   },
+  "SHARE_REJECT": {
+    "TITLE": "Freigabe ausblenden",
+    "MESSAGE": "Möchten Sie die Freigabe(n) ausblenden? Sie werden zukünftig in dieser Liste nicht mehr angezeigt. Ihr Zugriff auf die Elemente, z.B. über die Suche, bleibt jedoch bestehen.",
+    "CONFIRM": "Ausblenden"
+  },
   "CREATE_NODE": {
     "tool_definition": "Neue Toolbeschreibung anlegen",
     "tool_instance": "Neue Konfiguration für Tool {{ parent }} anlegen"

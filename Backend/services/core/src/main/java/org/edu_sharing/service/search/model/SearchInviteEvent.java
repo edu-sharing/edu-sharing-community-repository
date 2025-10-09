@@ -11,6 +11,7 @@ import java.util.Date;
 @Data
 public class SearchInviteEvent {
     NodeRef nodeRef;
+    String id;
     String sharedBy;
     String sharedWith;
     Date timestamp;

@@ -128,7 +128,13 @@ import {
     XmlAppPropertiesDialogResult,
 } from './dialog-modules/xml-app-properties-dialog/xml-app-properties-dialog-data';
 import { NotificationDialogComponent } from '../../main/navigation/top-bar/notification-dialog/notification-dialog.component';
-import { InviteEvent, Node } from 'ngx-edu-sharing-api';
+import {
+    InviteEvent,
+    Node,
+    NodeService,
+    NodeServiceUnwrapped,
+    NodeShare,
+} from 'ngx-edu-sharing-api';
 import { DropSource, DropTarget, NodeRoot, NodeTitlePipe } from 'ngx-edu-sharing-ui';
 import {
     RevocationDialogData,
@@ -155,6 +161,8 @@ import {
     SharePublishMotivationDialogComponentData,
     SharePublishMotivationDialogResult,
 } from './dialog-modules/share-publish-motivation/share-publish-motivation-dialog-dialog-data';
+import { firstValueFrom, from } from 'rxjs';
+import { concatMap, toArray } from 'rxjs/operators';
 
 export enum DialogTemplate {
     AddMaterialDialogBelow,
@@ -172,6 +180,7 @@ export class DialogsService {
     constructor(
         private cardDialog: CardDialogService,
         private cardDialogUtils: CardDialogUtilsService,
+        private NodeServiceUnwrapped: NodeServiceUnwrapped,
         private translate: TranslateService,
         // TODO: Move the methods we use of `RestConnectorService` to a utils function if possible.
         private restConnector: RestConnectorService,
@@ -202,8 +211,8 @@ export class DialogsService {
         return this.cardDialog.open(GenericDialogComponent, {
             title,
             subtitle,
-            avatar,
             ...(nodes ? await this.cardDialogUtils.configForNodes(nodes) : {}),
+            avatar,
             minHeight,
             minWidth,
             maxWidth,
@@ -693,15 +702,17 @@ export class DialogsService {
             closable: Closable.Casual,
         });
     }
-    async openRejectShareDialog(share: InviteEvent[]) {
-        console.log(share);
-        return this.openGenericDialog({
+    async openRejectShareDialog(shares: NodeShare[]) {
+        const dialog = await this.openGenericDialog({
             title: 'SHARE_REJECT.TITLE',
-            subtitle: 'SHARE_REJECT.SUBTITLE',
             message: 'SHARE_REJECT.MESSAGE',
+            nodes: shares,
+            avatar: {
+                kind: 'icon',
+                icon: 'cancel_schedule_send',
+            },
             minHeight: 240,
             minWidth: 500,
-            // ...await (this.cardDialogUtils.configForNodes(share.map(s => s.node))),
             closable: Closable.Casual,
             buttons: [
                 {
@@ -713,13 +724,32 @@ export class DialogsService {
                 },
                 {
                     config: {
-                        color: 'primary',
+                        color: 'danger',
                         position: 'standard',
                     },
                     label: 'SHARE_REJECT.CONFIRM',
                 },
             ],
         });
+        dialog.afterClosed().subscribe(async (button) => {
+            if (button === 'SHARE_REJECT.CONFIRM') {
+                await firstValueFrom(
+                    from(
+                        shares.map((s) =>
+                            this.NodeServiceUnwrapped.removeShare({
+                                node: s.ref.id,
+                                repository: s.ref.repo,
+                                shareId: s.share.id,
+                            }),
+                        ),
+                    ).pipe(
+                        concatMap((req) => req),
+                        toArray(),
+                    ),
+                );
+            }
+        });
+        return dialog;
     }
 
     async openDeleteNodesDialog(
