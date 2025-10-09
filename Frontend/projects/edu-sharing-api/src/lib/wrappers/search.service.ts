@@ -21,6 +21,7 @@ import { SearchParameters } from '../api/models/search-parameters';
 import { Facet } from '../api/models/facet';
 import { Suggest } from '../api/models/suggest';
 import { Value } from '../api/models/value';
+import { omit } from 'lodash';
 
 /** Configuration for `SearchService`. */
 export class SearchConfig {
@@ -166,11 +167,7 @@ export class SearchService {
                     (r as any).nodes = r.nodes.map((e) => {
                         return {
                             ...e.node,
-                            event: {
-                                eventType: e.eventType,
-                                initiator: e.initiator,
-                                timestamp: e.timestamp,
-                            },
+                            event: omit(e, 'node'),
                         };
                     });
                     return r as SearchResultGeneric<NodeEvent>;
@@ -182,11 +179,7 @@ export class SearchService {
                     (r as any).nodes = r.nodes.map((e) => {
                         return {
                             ...e.node,
-                            share: {
-                                sharedWith: e.sharedWith,
-                                sharedBy: e.sharedBy,
-                                timestamp: e.timestamp,
-                            },
+                            share: omit(e, 'node'),
                         };
                     });
                     return r as SearchResultGeneric<NodeEvent>;
