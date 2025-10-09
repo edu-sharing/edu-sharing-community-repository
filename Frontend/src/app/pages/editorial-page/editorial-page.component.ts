@@ -9,6 +9,8 @@ import {
     MdsDefinition,
     MdsService,
     Node,
+    NodeEvent,
+    NodeShare,
     SearchResultEvent,
     SearchResultInvite,
     SearchResults,
@@ -113,7 +115,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
      */
     init$ = new BehaviorSubject<boolean>(false);
     mdsDefinition$ = new BehaviorSubject<MdsDefinition>(null);
-    dataSource = new NodeDataSource();
+    readonly dataSource = new NodeDataSource<Node | NodeShare | NodeEvent>();
     columns = signal<ColumnType>(null);
     displayType = signal(NodeEntriesDisplayType.Table);
     selection = signal<SelectionModel<Node | null>>(null);
@@ -190,11 +192,18 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         this.sidebarOptionToggle = this.optionsHelperService.getOptionItemToggleSidebar(
             this.sidenavRight,
         );
-        const reject = new OptionItem('EDITORIAL.OPTION.REJECT_SHARE', 'cancel', () => {
-            void this.dialogs.openRejectShareDialog({
-                shareId: null,
-            });
-        });
+        const reject = new OptionItem(
+            'EDITORIAL.OPTION.REJECT_SHARE',
+            'cancel',
+            (element: InviteEvent[]) => {
+                const elements = this.optionsHelperService.getObjects(
+                    element,
+                    this.nodeEntriesRef.optionsHelper.getData(),
+                );
+                console.log(elements);
+                // void this.dialogs.openRejectShareDialog(element);
+            },
+        );
         reject.elementType = [ElementType.Node, ElementType.SavedSearch];
         reject.constrains = [Constrain.User];
         reject.group = DefaultGroups.Delete;
@@ -428,7 +437,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         );
         if (routeConfig.primaryMode === 'activity') {
             this.searchService
-                .search<SearchResultEvent>({
+                .search({
                     type: 'recentActivity',
                     metadataset: DEFAULT,
                     query: null,
@@ -443,19 +452,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 })
                 .subscribe((events) => {
                     this.dataSource.isLoading = false;
-                    this.dataSource.setData(
-                        events.nodes.map((e) => {
-                            return {
-                                ...e.node,
-                                event: {
-                                    eventType: e.eventType,
-                                    initiator: e.initiator,
-                                    timestamp: e.timestamp,
-                                },
-                            };
-                        }),
-                        events.pagination,
-                    );
+                    this.dataSource.setData(events.nodes, events.pagination);
                 });
         } else if (routeConfig.primaryMode === 'share') {
             const searchCriteria = this.searchHelperService.convertCritieria(
@@ -469,7 +466,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 true,
             );
             this.searchService
-                .search<SearchResultInvite>({
+                .search({
                     type: 'shares',
                     metadataset: DEFAULT,
                     query: null,
@@ -487,19 +484,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 })
                 .subscribe((events) => {
                     this.dataSource.isLoading = false;
-                    this.dataSource.setData(
-                        events.nodes.map((e) => {
-                            return {
-                                ...e.node,
-                                share: {
-                                    sharedWith: e.sharedWith,
-                                    sharedBy: e.sharedBy,
-                                    timestamp: e.timestamp,
-                                },
-                            };
-                        }),
-                        events.pagination,
-                    );
+                    this.dataSource.setData(events.nodes, events.pagination);
                 });
         } else {
             this.searchService

@@ -2,7 +2,10 @@
   <div class="timeline">
     <div class="today" *ngIf="events().length > 0">{{ 'TODAY' | translate }}</div>
     <div class="oldest" *ngIf="oldestEvent() && events().length > 1">
-      {{ oldestEvent().timestamp | formatDate : { relative: false, time: false } }}
+      {{
+        ($any(oldestEvent()).share || $any(oldestEvent()).event).timestamp
+          | formatDate : { relative: false, time: false }
+      }}
     </div>
     <div class="timeline-line">
       <div class="timeline-dot" *ngFor="let _ of events()"></div>
@@ -30,14 +33,14 @@
         ></div>
         -->
         <div class="info-group">
-          <es-node-url [node]="event.node">
-            {{ event.node | nodeTitle }}
+          <es-node-url [node]="event">
+            {{ event | nodeTitle }}
           </es-node-url>
           <div class="action">
             <ng-container *ngIf="type() === 'activity'">
               {{
-                'EVENT.TYPE.' + $any(event).eventType
-                  | translate : { fallback: $any(event).eventType }
+                'EVENT.TYPE.' + $any(event).event.eventType
+                  | translate : { fallback: $any(event).event.eventType }
               }}
             </ng-container>
 
@@ -49,7 +52,7 @@
       </div>
       <div class="timestamp">
         {{
-          event.timestamp
+          ($any(event).event || $any(event).share).timestamp
             | formatDate
             : {
               async: true,

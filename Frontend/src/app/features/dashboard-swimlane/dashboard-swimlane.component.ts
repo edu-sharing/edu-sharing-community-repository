@@ -32,9 +32,12 @@ import {
     HOME_REPOSITORY,
     Node,
     NodeEntries,
+    NodeEvent,
     NodeService,
+    NodeShare,
     ROOT,
     SearchResultEvent,
+    SearchResultGeneric,
     SearchResultInvite,
     SearchResultNode,
     SearchService,
@@ -51,8 +54,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, first } from 'rxjs/operators';
 import { DashboardInteractivityStreamComponent } from './dashboard-interactivity-stream/dashboard-interactivity-stream.component';
 
-type StreamDetails = { key: string; result: SearchResultEvent; params: Params };
-type ShareDetails = { key: string; result: SearchResultInvite; params: Params };
+type StreamDetails = { key: string; result: SearchResultGeneric<NodeEvent>; params: Params };
+type ShareDetails = { key: string; result: SearchResultGeneric<NodeShare>; params: Params };
 @Component({
     selector: 'es-dashboard-swimlane',
     providers: [NodeEntriesService],
@@ -89,7 +92,7 @@ export class DashboardSwimlaneComponent {
     readonly Scope = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
-    readonly dataSource = new NodeDataSource();
+    readonly dataSource = new NodeDataSource<Node | NodeShare | NodeEvent>();
     /**
      * max items per swimlane
      */

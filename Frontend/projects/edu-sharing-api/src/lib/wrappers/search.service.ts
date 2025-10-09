@@ -3,13 +3,16 @@ import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
 import {
+    InviteEvent,
     LabeledValue,
     MdsIdentifier,
     MdsQueryCriteria,
     NetworkService,
+    Node,
     SearchResultEvent,
     SearchResultInvite,
     SearchResults,
+    UserEvent,
 } from '../../public-api';
 import { SearchV1Service } from '../api/services';
 import { onSubscription } from '../utils/rxjs-operators/on-subscription';
@@ -68,7 +71,16 @@ export type SearchRequestParams = (Parameters<SearchV1Service['search']>[0] &
     criteriaFlat?: MdsQueryCriteria[];
 };
 
-export type GenericSearchResults = SearchResults | SearchResultEvent | SearchResultInvite;
+export type SearchResultGeneric<T extends Node> = Omit<SearchResults, 'nodes'> & {
+    nodes: Array<T>;
+};
+export type NodeShare = Node & { share: Omit<InviteEvent, 'node'> };
+export type NodeEvent = Node & { share: Omit<UserEvent, 'node'> };
+
+export type GenericSearchResults =
+    | SearchResultGeneric<Node>
+    | SearchResultGeneric<NodeShare>
+    | SearchResultGeneric<NodeEvent>;
 
 interface CompletedRequest {
     /** Parameters sent with the API request. */
@@ -149,9 +161,37 @@ export class SearchService {
         if (!params.type || params.type === 'search') {
             return this.searchV1.search(params);
         } else if (params.type === 'recentActivity') {
-            return this.searchV1.getRecentUserEvents(params);
+            return this.searchV1.getRecentUserEvents(params).pipe(
+                map((r) => {
+                    (r as any).nodes = r.nodes.map((e) => {
+                        return {
+                            ...e.node,
+                            event: {
+                                eventType: e.eventType,
+                                initiator: e.initiator,
+                                timestamp: e.timestamp,
+                            },
+                        };
+                    });
+                    return r as SearchResultGeneric<NodeEvent>;
+                }),
+            );
         } else if (params.type === 'shares') {
-            return this.searchV1.getRecentUserShares(params);
+            return this.searchV1.getRecentUserShares(params).pipe(
+                map((r) => {
+                    (r as any).nodes = r.nodes.map((e) => {
+                        return {
+                            ...e.node,
+                            share: {
+                                sharedWith: e.sharedWith,
+                                sharedBy: e.sharedBy,
+                                timestamp: e.timestamp,
+                            },
+                        };
+                    });
+                    return r as SearchResultGeneric<NodeEvent>;
+                }),
+            );
         }
         throw new Error('invalid type: ' + params.type);
     }

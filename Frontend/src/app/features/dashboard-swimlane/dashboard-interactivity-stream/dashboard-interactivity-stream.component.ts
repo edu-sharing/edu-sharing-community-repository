@@ -6,7 +6,7 @@ import {
     NodeEntriesService,
     UIAnimation,
 } from 'ngx-edu-sharing-ui';
-import { InviteEvent, UserEvent } from 'ngx-edu-sharing-api';
+import { InviteEvent, NodeShare, NodeEvent, UserEvent } from 'ngx-edu-sharing-api';
 import { MatButtonModule } from '@angular/material/button';
 import { trigger } from '@angular/animations';
 import { TranslateModule } from '@ngx-translate/core';
@@ -46,7 +46,7 @@ type EventsGrouped = { [key in TimeGroups]?: UserEvent[] };
 })
 export class DashboardInteractivityStreamComponent {
     // readonly TimeGroups = TimeGroups;
-    readonly events = input.required<(UserEvent | InviteEvent)[]>();
+    readonly events = input.required<(NodeShare | NodeEvent)[]>();
     readonly type = input.required<'activity' | 'share'>();
     readonly oldestEvent = computed(() => {
         return this.events()[this.events().length - 1];

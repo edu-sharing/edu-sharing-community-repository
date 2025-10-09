@@ -128,7 +128,7 @@ import {
     XmlAppPropertiesDialogResult,
 } from './dialog-modules/xml-app-properties-dialog/xml-app-properties-dialog-data';
 import { NotificationDialogComponent } from '../../main/navigation/top-bar/notification-dialog/notification-dialog.component';
-import { Node } from 'ngx-edu-sharing-api';
+import { InviteEvent, Node } from 'ngx-edu-sharing-api';
 import { DropSource, DropTarget, NodeRoot, NodeTitlePipe } from 'ngx-edu-sharing-ui';
 import {
     RevocationDialogData,
@@ -693,13 +693,15 @@ export class DialogsService {
             closable: Closable.Casual,
         });
     }
-    async openRejectShareDialog(data: { shareId: string[] }) {
+    async openRejectShareDialog(share: InviteEvent[]) {
+        console.log(share);
         return this.openGenericDialog({
             title: 'SHARE_REJECT.TITLE',
             subtitle: 'SHARE_REJECT.SUBTITLE',
             message: 'SHARE_REJECT.MESSAGE',
             minHeight: 240,
             minWidth: 500,
+            // ...await (this.cardDialogUtils.configForNodes(share.map(s => s.node))),
             closable: Closable.Casual,
             buttons: [
                 {
