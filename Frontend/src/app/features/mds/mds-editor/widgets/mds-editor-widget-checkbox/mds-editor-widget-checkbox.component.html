@@ -6,13 +6,25 @@
   [control]="formControl"
   [wrapInFormField]="false"
 >
-  <mat-checkbox
-    *ngIf="formControl"
-    [class.mat-mdc-checkbox-indeterminate]="isIndeterminate"
-    [(indeterminate)]="isIndeterminate"
-    [formControl]="formControl"
-    [aria-describedby]="container.descriptionId"
-    (indeterminateChange)="onIndeterminateChange($event)"
-    >{{ widget.definition.caption }}</mat-checkbox
-  >
+  <ng-container *ngIf="formControl">
+    <mat-checkbox
+      *ngIf="!isToggle(); else toggleBtn"
+      [class.mat-mdc-checkbox-indeterminate]="isIndeterminate"
+      [(indeterminate)]="isIndeterminate"
+      [formControl]="formControl"
+      [aria-describedby]="container.descriptionId"
+      (indeterminateChange)="onIndeterminateChange($event)"
+    >
+      {{ widget.definition.caption }}
+    </mat-checkbox>
+    <ng-template #toggleBtn>
+      <mat-slide-toggle
+        color="primary"
+        [formControl]="formControl"
+        [aria-describedby]="container.descriptionId"
+      >
+        {{ widget.definition.caption }}
+      </mat-slide-toggle>
+    </ng-template>
+  </ng-container>
 </es-mds-editor-widget-container>
