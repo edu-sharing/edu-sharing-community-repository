@@ -79,6 +79,7 @@ public class UserShareDao {
 
         return new InviteEvent(
                 this.nodeDao.asNode(),
+                this.event.getId(),
                 sharedBy,
                 sharedWith,
                 this.event.getTimestamp(),
@@ -107,6 +108,7 @@ public class UserShareDao {
     @AllArgsConstructor
     public static class InviteEvent {
         private Node node;
+        private String id;
         private Authority sharedBy;
         private Authority sharedWith;
         private Date timestamp;

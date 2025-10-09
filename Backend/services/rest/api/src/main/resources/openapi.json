@@ -2138,6 +2138,9 @@
       },
       "InviteEvent": {
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "node": {
             "$ref": "#/components/schemas/Node"
           },
@@ -38610,6 +38613,14 @@
               "format": "int32",
               "type": "integer"
             }
+          },
+          {
+            "description": "shows only statistics of published nodes ",
+            "in": "query",
+            "name": "published",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -38716,6 +38727,14 @@
             "schema": {
               "format": "int32",
               "type": "integer"
+            }
+          },
+          {
+            "description": "shows only statistics of published nodes ",
+            "in": "query",
+            "name": "published",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -38845,6 +38864,14 @@
             "schema": {
               "format": "int32",
               "type": "integer"
+            }
+          },
+          {
+            "description": "shows only statistics of published nodes ",
+            "in": "query",
+            "name": "published",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
