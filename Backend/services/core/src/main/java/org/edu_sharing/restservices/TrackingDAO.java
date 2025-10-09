@@ -21,6 +21,7 @@ import org.edu_sharing.service.tracking.GroupingType;
 import org.edu_sharing.service.tracking.ibatis.NodeData;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
 
@@ -31,11 +32,15 @@ import java.util.stream.Collectors;
 @RequestScope
 @RequiredArgsConstructor
 public class TrackingDAO {
+
     private final ActivityStatisticService activityStatisticService;
     private final SearchServiceElastic searchService;
 
     private final RepositoryDao homeRepository = RepositoryDao.getHomeRepository();
     private final Filter filter = Filter.createShowAllFilter();
+
+    @Value( "${repository.statistics.searchResultsLimit:50000}")
+    private int maxSearchResults;
 
     public List<TrackingNode> getNodeStatistics(GroupingType grouping, Date fromDate, Date toDate, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws DAOException {
 
@@ -135,12 +140,6 @@ public class TrackingDAO {
         return searchBasedStatisticEvaluation(filter.build(), dateFrom, dateTo, maxResults);
     }
 
-    @org.jetbrains.annotations.NotNull
-    private TrackingNode map(AbstractMap.SimpleEntry<org.edu_sharing.service.model.NodeRef, StatisticEntry> entry) {
-        StatisticEntry statisticEntry = entry.getValue();
-        Node node = new NodeDao(homeRepository, entry.getKey(), filter).asNode();
-        return new TrackingNode(node, convertAuthority(statisticEntry.getAuthorityInfo()), statisticEntry.getDate(), statisticEntry.getCounts(), statisticEntry.getFields(), statisticEntry.getGroups());
-    }
 
     @NotNull
     @Permission(CCConstants.CCM_VALUE_TOOLPERMISSION_SELECTIVE_STATISTICS_NODES)
@@ -177,10 +176,6 @@ public class TrackingDAO {
         return originalNodeRef;
     }
 
-    private int getTotalCounts(AbstractMap.SimpleEntry<org.edu_sharing.service.model.NodeRef, StatisticEntry> entry) {
-        return entry.getValue().getCounts().values().stream().reduce(Integer::sum).orElse(0);
-    }
-
     @NotNull
     @Permission(CCConstants.CCM_VALUE_TOOLPERMISSION_ORGANIZATION_STATISTICS_NODES)
     public List<TrackingNode> getNodeStatisticsByOrganization(@HasRole @NotNull @NonNull String orgId, @NotNull @NonNull Date dateFrom, @NotNull @NonNull Date dateTo, int maxResults, boolean publishedOnly) throws Throwable {
@@ -196,14 +191,20 @@ public class TrackingDAO {
         return searchBasedStatisticEvaluation(filter.build(), dateFrom, dateTo, maxResults);
     }
 
-    private List<TrackingNode> searchBasedStatisticEvaluation(QueryVariant query, Date startDate, Date endDate, int maxResults) throws Throwable {
+    @NotNull
+    private List<TrackingNode> searchBasedStatisticEvaluation(@NotNull @NonNull QueryVariant query, @NotNull @NonNull Date startDate, @NotNull @NonNull Date endDate, int maxResults) throws Throwable {
         SearchToken searchToken = new SearchToken();
         searchToken.setFrom(0);
-        searchToken.setMaxResult(50000); // physical limit because of db execution time
+        searchToken.setMaxResult(maxSearchResults); // physical limit because of db execution time
         searchToken.setElasticQuery(query);
 
         SearchResultNodeRef search = searchService.search(searchToken);
-        List<org.alfresco.service.cmr.repository.NodeRef> nodeRefs = search.getData().stream().map(this::getOriginalNodeRef).toList();
+        List<org.alfresco.service.cmr.repository.NodeRef> nodeRefs = search.getData()
+                .stream()
+                .map(this::getOriginalNodeRef)
+                .distinct()
+                .toList();
+
         Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> trackingMap = activityStatisticService.getListNodeData(nodeRefs, startDate, endDate, null, null);
 
         return search.getData()
@@ -215,4 +216,14 @@ public class TrackingDAO {
                 .toList();
     }
 
+    private int getTotalCounts(@NotNull Map.Entry<org.edu_sharing.service.model.NodeRef, StatisticEntry> entry) {
+        return entry.getValue().getCounts().values().stream().reduce(Integer::sum).orElse(0);
+    }
+
+    @NotNull
+    private TrackingNode map(@NotNull AbstractMap.SimpleEntry<org.edu_sharing.service.model.NodeRef, StatisticEntry> entry) {
+        StatisticEntry statisticEntry = entry.getValue();
+        Node node = new NodeDao(homeRepository, entry.getKey(), filter).asNode();
+        return new TrackingNode(node, convertAuthority(statisticEntry.getAuthorityInfo()), statisticEntry.getDate(), statisticEntry.getCounts(), statisticEntry.getFields(), statisticEntry.getGroups());
+    }
 }
