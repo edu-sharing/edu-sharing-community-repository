@@ -2,7 +2,7 @@ CREATE TABLE edu_share_info
 (
     id           bigint generated always as identity primary key,
     node_id      varchar(36)  not null,
-    shared_by    varchar(100) not null,
+    shared_by    varchar(100),
     shared_with  varchar(100) not null,
     share_status smallint     not null,
     share_type   smallint     not null,
