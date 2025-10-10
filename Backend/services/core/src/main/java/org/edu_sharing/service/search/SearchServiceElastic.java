@@ -99,6 +99,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -1648,7 +1649,7 @@ public class SearchServiceElastic implements SearchService {
     }
 
     @Override
-    public org.edu_sharing.repository.server.SearchResult<SearchInviteEvent> getUserShares(UserShareDirection direction, Map<String, String[]> searchCriteria, SearchToken searchToken) throws Exception {
+    public org.edu_sharing.repository.server.SearchResult<SearchInviteEvent> getUserShares(UserShareDirection direction, Long maxAge, Map<String, String[]> searchCriteria, SearchToken searchToken) throws Exception {
         String username = AuthenticationUtil.getFullyAuthenticatedUser();
         Query childQuery = BoolQuery.of(bool -> bool.must(
                 Query.of(q2 -> q2.hasChild(hc -> hc
@@ -1660,6 +1661,11 @@ public class SearchServiceElastic implements SearchService {
                                             .field("share.shareStatus")
                                             .value("SHARED")
                                     ));
+                                    if (maxAge != null) {
+                                        b = b.must(m -> m.range(t -> t
+                                                .date(td -> td.field("share.timestamp").gte("now-" + maxAge + "s")
+                                        )));
+                                    }
                                     if (direction.equals(UserShareDirection.fromUser)) {
                                         b = b.must(m -> m.term(t -> t
                                                 .field("share.sharedBy")

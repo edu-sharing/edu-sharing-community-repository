@@ -79,6 +79,10 @@ type RouteConfig = {
 export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly HOME_REPOSITORY = HOME_REPOSITORY;
     readonly PageCount = 25;
+    /**
+     * list of fields which are processed before being sent into the criteria list
+     */
+    readonly IgnoredSearchFields = ['virtual:shareMaxAge'];
     readonly TabWidgetActivities = 'virtual:activityType';
     readonly TabWidgetShares = 'virtual:shareDirection';
     readonly TabWidgetAssignment = 'virtual:assignmentType';
@@ -390,7 +394,8 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             placeholder: 'EDITORIAL.SEARCH_PLACEHOLDER.' + routeConfig.primaryMode.toUpperCase(),
         });
         const mds = await firstValueFrom(this.mdsDefinition$.pipe(filter((m) => !!m)));
-        const criteria = JSON.parse(params.filters || '{}');
+        const criteria = JSON.parse(params.filters || '{}') as Values;
+        const originalCriteria = Helper.deepCopy(criteria);
         this.mainComponent$.next(params.mainComponent || null);
         const pagination = {
             skipCount: parseInt(params.offset) || 0,
@@ -405,6 +410,8 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             this.searchFieldService.getCurrentInstance().setSearchString(params.q);
             console.log('search string', params.q);
         }
+
+        this.IgnoredSearchFields.forEach((f) => delete criteria[f]);
         const searchCriteria = this.searchHelperService.convertCritieria(
             {
                 ...criteria,
@@ -464,6 +471,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 mds.widgets,
                 true,
             );
+            const maxAge = originalCriteria['virtual:shareMaxAge']?.[0];
             this.searchService
                 .search({
                     type: 'shares',
@@ -474,6 +482,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                     direction: this.editorialPageService.buildSearchCriteria(
                         this.tabSelection$.value,
                     )[this.TabWidgetShares] as any,
+                    maxAge: !maxAge || maxAge === 'unlimited' ? null : parseInt(maxAge),
                     ...pagination,
                     body: {
                         facetLimit: 5,

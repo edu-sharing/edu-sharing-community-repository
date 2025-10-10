@@ -675,6 +675,19 @@
         <entry icon="send">fromUser</entry>
       </values>
     </widget>
+    <widget>
+      <id>virtual:shareMaxAge</id>
+      <caption>cp_virtual_shareMaxAge</caption>
+      <icon>calendar_clock</icon>
+      <valuespace_i18n_prefix>shareMaxAge_</valuespace_i18n_prefix>
+      <type>radioVertical</type>
+      <defaultvalue>86400</defaultvalue>
+      <values>
+        <entry cap="30">86400</entry>
+        <entry cap="90">7776000</entry>
+        <entry>unlimited</entry>
+      </values>
+    </widget>
   </widgets>
   <templates>
     <template>
@@ -1020,6 +1033,7 @@
     <template>
       <id>editorial_share</id>
       <html><![CDATA[
+              <virtual:shareMaxAge expandable="expanded">
               <ccm:educationallearningresourcetype type="facetList" expandable="expanded" icon="library_books">
               <cclom:general_keyword type="facetList" expandable="expanded" icon="tag">
 				]]></html>
@@ -1544,6 +1558,10 @@
       <property name="ccm:educationallearningresourcetype">
         <multiple>true</multiple>
         <multiplejoin>OR</multiplejoin>
+      </property>
+      <property name="calendar_clock">
+        <statement value="unlimited">{"match_all": {}}</statement>
+        <statement>{"match_all": {}}</statement>
       </property>
     </query>
     <query join="AND" id="workflowReceive">

@@ -37297,6 +37297,15 @@
             }
           },
           {
+            "description": "Max age of the share (in seconds) - or null if no filtering",
+            "in": "query",
+            "name": "maxAge",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
             "description": "Type of element",
             "in": "query",
             "name": "contentType",

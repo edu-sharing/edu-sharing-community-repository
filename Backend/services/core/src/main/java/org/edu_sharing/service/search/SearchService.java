@@ -110,7 +110,7 @@ public interface SearchService {
 		return null;
 	}
 
-	default org.edu_sharing.repository.server.SearchResult<SearchInviteEvent> getUserShares(UserShareDirection direction, Map<String, String[]> searchCriteria, SearchToken searchToken) throws Exception {
+	default org.edu_sharing.repository.server.SearchResult<SearchInviteEvent> getUserShares(UserShareDirection direction, Long maxAge, Map<String, String[]> searchCriteria, SearchToken searchToken) throws Exception {
 		return null;
 	}
 }

@@ -36,14 +36,14 @@ public class UserShareDao {
         this.event = event;
     }
 
-    public static SearchResult<UserShareDao> getUserShares(RepositoryDao repoDao, UserShareDirection direction, List<MdsQueryCriteria> searchCriteria, SearchToken searchToken) throws DAOException {
+    public static SearchResult<UserShareDao> getUserShares(RepositoryDao repoDao, UserShareDirection direction, Long maxAge, List<MdsQueryCriteria> searchCriteria, SearchToken searchToken) throws DAOException {
         ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
         ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
         return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(() -> {
             SearchService searchService = SearchServiceFactory.getInstance().getService(repoDao.getApplicationInfo().getAppId());
             try {
                 Map<String, String[]> criteriaMap = MetadataSearchHelper.convertCriterias(searchCriteria);
-                org.edu_sharing.repository.server.SearchResult<SearchInviteEvent> result = searchService.getUserShares(direction, criteriaMap, searchToken);
+                org.edu_sharing.repository.server.SearchResult<SearchInviteEvent> result = searchService.getUserShares(direction, maxAge, criteriaMap, searchToken);
 
                 SearchResult<UserShareDao> converted = new SearchResult<>();
                 Pagination pagination = new Pagination();

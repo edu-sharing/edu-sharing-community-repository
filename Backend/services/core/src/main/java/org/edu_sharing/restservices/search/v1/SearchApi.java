@@ -661,6 +661,7 @@ public class SearchApi {
 	public Response getRecentUserShares(
 			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
 			@Parameter(description = "Share direction", required = false) @QueryParam("direction")UserShareDirection direction,
+			@Parameter(description = "Max age of the share (in seconds) - or null if no filtering", required = false) @QueryParam("maxAge") Long maxAge,
 			@Parameter(description = "Type of element", required = false) @QueryParam("contentType") SearchService.ContentType contentType,
 			@Parameter(description = "search parameters", required = false) SearchParameters parameters,
 			@Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue = "25")) @QueryParam("maxItems") Integer maxItems,
@@ -673,6 +674,7 @@ public class SearchApi {
 			SearchResult<UserShareDao> events = UserShareDao.getUserShares(
 					repoDao,
 					direction,
+					maxAge,
 					parameters.getCriteria(),
 					getSearchToken(contentType, maxItems, skipCount, null, null, parameters)
 			);
