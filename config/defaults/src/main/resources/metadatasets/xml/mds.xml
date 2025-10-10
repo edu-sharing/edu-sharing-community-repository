@@ -683,8 +683,8 @@
       <type>radioVertical</type>
       <defaultvalue>86400</defaultvalue>
       <values>
-        <entry cap="30">86400</entry>
-        <entry cap="90">7776000</entry>
+        <entry cap="shareMaxAge_30">86400</entry>
+        <entry cap="shareMaxAge_90">7776000</entry>
         <entry>unlimited</entry>
       </values>
     </widget>
