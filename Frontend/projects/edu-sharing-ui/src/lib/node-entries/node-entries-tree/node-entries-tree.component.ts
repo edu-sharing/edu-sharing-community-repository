@@ -228,7 +228,9 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
      */
     private async updateTree(nodes: Node[]): Promise<void> {
         for (const node of nodes) {
-            await this.triggerNodeUpdate(node.ref.id);
+            await this.triggerNodeUpdate(
+                this.nodeHelper.isNodeCollection(node) ? node.ref.id : node.parent.id,
+            );
         }
         this.changeDetectorRef.detectChanges();
     }

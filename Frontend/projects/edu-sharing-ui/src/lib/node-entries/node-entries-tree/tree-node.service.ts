@@ -7,7 +7,7 @@ import {
     NodeEntries,
     NodeService,
 } from 'ngx-edu-sharing-api';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, tap } from 'rxjs';
 import { LocalEventsService } from '../../services/local-events.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { DynamicFlatNode } from './dynamic-flat-node';
@@ -42,12 +42,12 @@ export class TreeNodeService {
         this.localEventsService.nodesChanged
             .pipe(takeUntilDestroyed())
             .subscribe((nodes: Node[]) => this.refreshTree(nodes));
-        // TODO: support deleting references as well
-        // this.localEventsService.nodesDeleted
-        //     .pipe(
-        //         takeUntilDestroyed(),
-        //     )
-        //     .subscribe((nodes: Node[]) => this.refreshTree(nodes, true));
+        this.localEventsService.nodesDeleted
+            .pipe(
+                takeUntilDestroyed(),
+                tap((r) => console.log(r)),
+            )
+            .subscribe((nodes: Node[]) => this.refreshTree(nodes, true));
     }
 
     /**
@@ -221,21 +221,37 @@ export class TreeNodeService {
         for (let i = 0; i < nodes.length; i++) {
             const node: Node = nodes[i];
             const nodeId: string = node.ref.id;
-            // remove node ID from helper structures
-            this.parentIdToLastLoadedNodeId.delete(nodeId);
-            this.emptyFolders = this.emptyFolders.filter((id) => id !== nodeId);
-            // retrieve updated children (also updates the helper structures)
-            this.dataMap.delete(nodeId);
-            await this.getChildren(node);
-            // workaround for updating the number of references
-            // note: update is not done automatically, so reloading the references is necessary
-            const references = await firstValueFrom(
-                this.collectionService.getReferences({
-                    repository: HOME_REPOSITORY,
-                    collection: nodeId,
-                }),
-            );
-            nodes[i].collection.childReferencesCount = references.pagination.total;
+
+            if (this.nodeHelperService.isNodeCollection(node)) {
+                if (!deleted) {
+                    // remove node ID from helper structures
+                    this.parentIdToLastLoadedNodeId.delete(nodeId);
+                    this.emptyFolders = this.emptyFolders.filter((id) => id !== nodeId);
+                    // retrieve updated children (also updates the helper structures)
+                    this.dataMap.delete(nodeId);
+                    await this.getChildren(node);
+                    // workaround for updating the number of references
+                    // note: update is not done automatically, so reloading the references is necessary
+                    const references = await firstValueFrom(
+                        this.collectionService.getReferences({
+                            repository: HOME_REPOSITORY,
+                            collection: nodeId,
+                        }),
+                    );
+                    nodes[i].collection.childReferencesCount = references.pagination.total;
+                }
+            } else {
+                if (deleted) {
+                    console.log('d', node, nodeId, this.dataMap);
+                    for (let entry of this.dataMap.entries()) {
+                        this.dataMap.set(
+                            entry[0],
+                            entry[1].filter((v) => v.ref.id !== nodeId),
+                        );
+                        console.log(this.dataMap, entry[0]);
+                    }
+                }
+            }
         }
         // emit the changed nodes
         this.nodesChanged.emit(nodes);
