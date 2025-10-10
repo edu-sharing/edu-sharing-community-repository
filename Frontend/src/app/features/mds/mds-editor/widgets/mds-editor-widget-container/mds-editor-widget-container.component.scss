@@ -24,6 +24,13 @@
     .mat-expansion-panel-header {
         font-weight: normal;
         font-size: 100%;
+        transition: all var(--transitionNormal);
+        &:hover {
+            background-color: var(--buttonHoverBackground);
+        }
+    }
+    ::ng-deep .mat-expansion-panel-body {
+        padding-top: 8px;
     }
 }
 

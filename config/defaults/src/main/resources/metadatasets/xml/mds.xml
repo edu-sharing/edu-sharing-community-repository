@@ -1013,13 +1013,15 @@
     <template>
       <id>editorial_activity</id>
       <html><![CDATA[
-              <ccm:educationallearningresourcetype type="facetList">
+              <ccm:educationallearningresourcetype type="facetList" expandable="expanded" icon="library_books">
+              <cclom:general_keyword type="facetList" expandable="expanded" icon="tag">
 				]]></html>
     </template>
     <template>
       <id>editorial_share</id>
       <html><![CDATA[
-              <ccm:educationallearningresourcetype type="facetList">
+              <ccm:educationallearningresourcetype type="facetList" expandable="expanded" icon="library_books">
+              <cclom:general_keyword type="facetList" expandable="expanded" icon="tag">
 				]]></html>
     </template>
     <template>

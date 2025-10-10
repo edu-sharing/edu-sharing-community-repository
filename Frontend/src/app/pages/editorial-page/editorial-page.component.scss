@@ -4,6 +4,9 @@
 mat-sidenav-container {
     min-height: calc(100vh - var(--mainnavCurrentHeight));
     --mat-sidenav-content-background-color: #fff;
+    .es-mat-sidenav-content-mds {
+        overflow: hidden;
+    }
     .main-content {
         padding: 20px 20px;
         min-height: calc(100vh - 10px - 15px - 15px - var(--mainnavCurrentHeight));
