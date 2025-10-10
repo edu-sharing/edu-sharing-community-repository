@@ -17,6 +17,8 @@
       "SORT_INTO_DESCRIPTION": "Hier kannst du mit der Suche, aus Sammlungen und Workspace oder durch Upload etwas einsortieren.",
       "PREVIEW": "Vorschau anzeigen",
       "PREVIEW_DESCRIPTION": "Eine Vorschau des Inhalts inkl. der wichtigsten Metadaten anzeigen",
+      "WORKSPACE_METADATA": "Statistik, Versionen & Details",
+      "WORKSPACE_METADATA_DESCRIPTION": "Verwendungsstatistiken, Versionsverwaltung und allgemeine Details anzeigen",
       "SORT_INTO_TAB": {
         "SEARCH": {
           "PLACEHOLDER": "Suche nach Inhalten",
