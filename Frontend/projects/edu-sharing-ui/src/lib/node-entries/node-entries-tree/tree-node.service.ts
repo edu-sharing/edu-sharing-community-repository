@@ -6,8 +6,9 @@ import {
     Node,
     NodeEntries,
     NodeService,
+    RestConstants,
 } from 'ngx-edu-sharing-api';
-import { firstValueFrom, tap } from 'rxjs';
+import { firstValueFrom, map, tap } from 'rxjs';
 import { LocalEventsService } from '../../services/local-events.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { DynamicFlatNode } from './dynamic-flat-node';
@@ -21,7 +22,10 @@ export class TreeNodeService {
     // holds the IDs of already clicked, but empty folders
     emptyFolders: string[] = [];
     // node types with children
-    private folderTypes: string[] = ['cm:folder', 'ccm:map'];
+    private readonly folderTypes: string[] = [
+        RestConstants.CM_TYPE_FOLDER,
+        RestConstants.CCM_TYPE_MAP,
+    ];
     // holds information on the last loaded children node ID, which is used for pagination
     parentIdToLastLoadedNodeId = new Map<string, string>();
     // avoid empty (faked) parents from being toggled, as the IDs do not exist
@@ -29,7 +33,7 @@ export class TreeNodeService {
     private baseSearchParams = {
         maxItems: 11,
         sortAscending: [true],
-        sortProperties: ['cm:title'],
+        sortProperties: [RestConstants.LOM_PROP_TITLE],
     };
     readonly nodesChanged = new EventEmitter<Node[]>();
 
@@ -143,9 +147,67 @@ export class TreeNodeService {
         const nodeId = node.ref.id;
         let children: Partial<Node>[] = this.dataMap.get(nodeId) || [];
         if (!children?.length) {
-            const nodeEntries: NodeEntries = await firstValueFrom(
-                this.nodeService.getChildren(nodeId, this.baseSearchParams),
-            );
+            let nodeEntries: NodeEntries;
+            if (this.nodeHelperService.isNodeCollection(node as Node)) {
+                nodeEntries = await firstValueFrom(
+                    this.collectionService
+                        .getSubcollections({
+                            collection: nodeId,
+                            scope: 'MY',
+                            repository: node.ref.repo,
+                            ...this.baseSearchParams,
+                            sortProperties: [
+                                this.nodeHelperService.getSortByForCollection(node as Node).active,
+                            ],
+                            sortAscending: [
+                                this.nodeHelperService.getSortByForCollection(node as Node)
+                                    .direction === 'asc',
+                            ],
+                        })
+                        .pipe(
+                            map((s) => {
+                                return {
+                                    pagination: s.pagination,
+                                    nodes: s.collections,
+                                };
+                            }),
+                        ),
+                );
+                const nodeEntriesRef = await firstValueFrom(
+                    this.collectionService
+                        .getReferences({
+                            collection: nodeId,
+                            repository: node.ref.repo,
+                            ...this.baseSearchParams,
+                            sortProperties: [
+                                this.nodeHelperService.getSortByForCollectionReferences(
+                                    node as Node,
+                                ).active,
+                            ],
+                            sortAscending: [
+                                this.nodeHelperService.getSortByForCollectionReferences(
+                                    node as Node,
+                                ).direction === 'asc',
+                            ],
+                        })
+                        .pipe(
+                            map((s) => {
+                                return {
+                                    pagination: s.pagination,
+                                    nodes: s.references,
+                                };
+                            }),
+                        ),
+                );
+                nodeEntries.nodes = nodeEntries.nodes.concat(nodeEntriesRef.nodes);
+                nodeEntriesRef.pagination.count += nodeEntries.pagination.count;
+                nodeEntriesRef.pagination.total += nodeEntries.pagination.total;
+            } else {
+                // regular file/folders
+                nodeEntries = await firstValueFrom(
+                    this.nodeService.getChildren(nodeId, this.baseSearchParams),
+                );
+            }
             children = nodeEntries?.nodes ?? [];
             // hold the last loaded node ID to load the next elements
             if (children.length < nodeEntries.pagination.total) {

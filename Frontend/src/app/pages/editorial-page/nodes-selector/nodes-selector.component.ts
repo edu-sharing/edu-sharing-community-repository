@@ -16,6 +16,7 @@ import {
     Node,
     NodeService,
     PROPERTY_FILTER_ALL,
+    ROOT,
     SearchRequestParams,
     SearchResults,
     SearchService,
@@ -417,8 +418,8 @@ export class NodesSelectorComponent implements OnInit {
         this.dataSourceCollections.isLoading = true;
         let initialData: Partial<Node>[] = [];
         const request = {
-            sortBy: [RestConstants.CM_PROP_TITLE],
-            sortAscending: true,
+            sortBy: [this.nodeHelperService.getSortByForCollection(ROOT).active],
+            sortAscending: this.nodeHelperService.getSortByForCollection(ROOT).direction === 'asc',
         };
         // my collections
         const myCollectionsNode: Partial<Node> = this.createFakeNode(
@@ -431,7 +432,7 @@ export class NodesSelectorComponent implements OnInit {
             this.collectionService.getCollectionSubcollections(
                 RestConstants.ROOT,
                 RestConstants.COLLECTIONSCOPE_MY,
-                [],
+                [PROPERTY_FILTER_ALL],
                 request,
             ),
         );
@@ -452,7 +453,7 @@ export class NodesSelectorComponent implements OnInit {
             this.collectionService.getCollectionSubcollections(
                 RestConstants.ROOT,
                 RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL,
-                [],
+                [PROPERTY_FILTER_ALL],
                 request,
             ),
         );

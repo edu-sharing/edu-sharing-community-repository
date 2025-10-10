@@ -17,6 +17,8 @@ import { of } from 'rxjs';
 import { NodesRightMode } from '../types/option-item';
 import { PlatformLocation } from '@angular/common';
 import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
+import { ROOT } from 'ngx-edu-sharing-api';
+import { Sort } from '@angular/material/sort';
 
 @Injectable({
     providedIn: 'root',
@@ -372,5 +374,43 @@ export class NodeHelperService {
     }
     isOerLicense(value: string) {
         return ['CC_0', 'PDM', 'CC_BY', 'CC_BY_SA'].includes(value);
+    }
+
+    /**
+     * get the required sort by fields to be used when querying subcollections for a given collection
+     */
+    getSortByForCollection(collection: Node | typeof ROOT): Sort {
+        if (collection === ROOT) {
+            return {
+                active: RestConstants.CM_MODIFIED_DATE,
+                direction: 'desc',
+            };
+        } else {
+            const orderCollections =
+                collection.properties[RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE];
+            return {
+                active: orderCollections?.[0] || RestConstants.CM_MODIFIED_DATE,
+                direction:
+                    orderCollections?.[0] === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION
+                        ? 'asc'
+                        : orderCollections?.[1] === 'true'
+                        ? 'asc'
+                        : 'desc',
+            };
+        }
+    }
+
+    /**
+     * get the required sort by fields to be used when querying references for a given collection
+     */
+    getSortByForCollectionReferences(collection: Node): Sort {
+        const refMode = collection.collection.orderMode;
+        const refAscending = collection.collection.orderAscending;
+        return {
+            active: ((refMode === RestConstants.COLLECTION_ORDER_MODE_CUSTOM
+                ? RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION
+                : refMode) || RestConstants.CM_MODIFIED_DATE) as any,
+            direction: refAscending ? 'asc' : 'desc',
+        };
     }
 }

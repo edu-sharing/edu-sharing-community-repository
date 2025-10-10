@@ -19,6 +19,7 @@ import {
     MdsService,
     Node,
     ProposalNode,
+    ROOT,
     SessionStorageService,
     Store,
 } from 'ngx-edu-sharing-api';
@@ -267,9 +268,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             if (this.isRootLevel) {
                 // display root collections with tabs
 
-                // Use hardcoded sorting for root collection.
-                this.sortCollections.active = RestConstants.CM_MODIFIED_DATE;
-                this.sortCollections.direction = 'desc';
+                this.sortCollections = {
+                    ...this.sortCollections,
+                    ...this.nodeHelper.getSortByForCollection(ROOT),
+                };
                 // To respect sort configuration of the mds, we would need to wait for it here.
                 //
                 // const sort = metadataSet.sorts.find(sort => sort.id === 'collections');
@@ -281,33 +283,19 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 this.dataSourceCollections.isLoading = true;
                 this.dataSourceReferences.isLoading = true;
                 // set the collection and load content data by refresh
-                const orderCollections =
-                    this.collection.properties[
-                        RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE
-                    ];
-                this.sortCollections.active =
-                    orderCollections?.[0] || RestConstants.CM_MODIFIED_DATE;
-
-                this.sortCollections.direction =
-                    orderCollections?.[0] === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION
-                        ? 'asc'
-                        : orderCollections?.[1] === 'true'
-                        ? 'asc'
-                        : 'desc';
-
-                const refMode = this.collection.collection.orderMode;
-                const refAscending = this.collection.collection.orderAscending;
+                this.sortCollections = {
+                    ...this.sortCollections,
+                    ...this.nodeHelper.getSortByForCollection(this.collection),
+                };
                 // cast old order mode to new parameter
-                this.sortReferences.active = ((refMode ===
-                RestConstants.COLLECTION_ORDER_MODE_CUSTOM
-                    ? RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION
-                    : refMode) || RestConstants.CM_MODIFIED_DATE) as any;
+                this.sortReferences.active = this.nodeHelper.getSortByForCollectionReferences(
+                    this.collection,
+                ).active;
                 this.sortReferences.direction =
                     this.sortReferences.active === RestConstants.COLLECTION_ORDER_MODE_CUSTOM
                         ? 'asc'
-                        : refAscending
-                        ? 'asc'
-                        : 'desc';
+                        : this.nodeHelper.getSortByForCollectionReferences(this.collection)
+                              .direction;
                 this.mainNavUpdateTrigger.next();
                 this.dataSourceCollections.isLoading = false;
                 this.setOptionsCollection();

@@ -15,6 +15,8 @@ export class RestConstants {
     public static COLLECTIONTYPE_MEDIA_CENTER = 'MEDIA_CENTER';
     public static ALL = '-all-';
     public static SAFE_SCOPE = 'safe';
+    public static CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE =
+        'ccm:collectionsubcollectionordermode';
     public static LICENSE_URLS = {
         CC_BY_ABOUT: 'https://creativecommons.org/licenses/?lang=de',
         CC_BY: 'https://creativecommons.org/licenses/by/#version/legalcode.de',
@@ -113,6 +115,7 @@ export class RestConstants {
     public static EXIF_PROP_DATE_TIME_ORIGINAL = 'exif:dateTimeOriginal';
     public static CCM_TYPE_COLLECTION_PROPOSAL = 'ccm:collection_proposal';
     public static CCM_PROP_COLLECTION_ORDERED_POSITION = 'ccm:collection_ordered_position';
+    public static COLLECTION_ORDER_MODE_CUSTOM = 'custom';
     public static CM_NAME = 'cm:name';
     public static LOM_PROP_TITLE = 'cclom:title';
     public static CM_PROP_TITLE = 'cm:title';
@@ -133,7 +136,16 @@ export class RestConstants {
     public static ACCESS_CC_PUBLISH = 'CCPublish';
     public static ACCESS_COMMENT = 'Comment';
     public static IMPLICIT_COLLECTION_PERMISSIONS = [RestConstants.ACCESS_CONSUMER];
-
+    public static CM_PROP_ESUID = 'cm:esuid';
+    public static CM_TYPE_CONTENT = 'cm:content';
+    public static CM_TYPE_OBJECT = 'cm:cmobject';
+    public static CM_TYPE_CONTAINER = 'cm:container';
+    public static CM_TYPE_AUTHORITY_CONTAINER = 'cm:authorityContainer';
+    public static CCM_TYPE_IO = 'ccm:io';
+    public static CCM_TYPE_MAP = 'ccm:map';
+    public static CM_TYPE_FOLDER = 'cm:folder';
+    public static SYS_TYPE_CONTAINER = 'sys:container';
+    public static SYS_NODE_UUID = 'sys:node-uuid';
     public static USER_NAME = 'userName';
     public static AUTHORITY_NAME = 'authorityName';
     public static AUTHORITY_DISPLAYNAME = 'displayName';
