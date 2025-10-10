@@ -1,7 +1,8 @@
 {
   "EDITORIAL": {
     "SEARCH_PLACEHOLDER": {
-      "ACTIVITY": "Aktivitätenliste durchsuchen..."
+      "ACTIVITY": "Aktivitätenliste durchsuchen...",
+      "SHARE": "Freigaben durchsuchen..."
     },
     "SIDEBAR": {
       "TITLE_SHARE": "Freigaben",
