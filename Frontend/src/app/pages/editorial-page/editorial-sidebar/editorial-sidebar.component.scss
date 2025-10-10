@@ -39,6 +39,12 @@
     display: flex;
     flex-direction: column;
     gap: 5px;
+    > es-info-message {
+        margin: 10px 20px;
+        .message {
+            white-space: pre-line;
+        }
+    }
     .entry {
         display: flex;
         align-items: center;

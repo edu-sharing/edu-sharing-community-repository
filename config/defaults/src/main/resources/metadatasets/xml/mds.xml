@@ -670,9 +670,9 @@
       <caption>cp_virtual_shareDirection</caption>
       <valuespace_i18n_prefix>shareDirection_</valuespace_i18n_prefix>
       <values>
-        <entry icon="send">fromUser</entry>
         <entry icon="person">toUser</entry>
         <entry icon="group">toUserOrGroups</entry>
+        <entry icon="send">fromUser</entry>
       </values>
     </widget>
   </widgets>

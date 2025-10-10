@@ -26,14 +26,24 @@
     </div>
 
     <div class="entries" *ngIf="!enabledOption()">
-      <div class="entry" (click)="option.callback(nodes())" *ngFor="let option of options()">
-        <i class="icon" [esIcon]="option.icon"></i>
-        <div class="text">
-          <div class="title">{{ option.name | translate }}</div>
-          <div class="description">{{ option.name + '_DESCRIPTION' | translate }}</div>
+      <ng-container *ngIf="options()?.length">
+        <div class="entry" (click)="option.callback(nodes())" *ngFor="let option of options()">
+          <i class="icon" [esIcon]="option.icon"></i>
+          <div class="text">
+            <div class="title">{{ option.name | translate }}</div>
+            <div class="description">{{ option.name + '_DESCRIPTION' | translate }}</div>
+          </div>
+          <i class="navigate" esIcon="keyboard_arrow_right"></i>
         </div>
-        <i class="navigate" esIcon="keyboard_arrow_right"></i>
-      </div>
+      </ng-container>
+      <es-info-message *ngIf="!options()?.length" mode="info">
+        <div class="message">
+          {{
+            'EDITORIAL.SIDEBAR.NO_OPTIONS' + (nodes()?.length ? '_SELECTION' : '_NO_SELECTION')
+              | translate
+          }}
+        </div>
+      </es-info-message>
     </div>
   </ng-template>
 </div>
