@@ -1,8 +1,8 @@
-import { Injectable, NgZone } from '@angular/core';
+import { ElementRef, Injectable, NgZone } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, map, pairwise } from 'rxjs/operators';
-import { CanDrop, DropAction } from '../types/drag-drop';
+import { CanDrop, DragData, DropAction } from '../types/drag-drop';
 import { NodesDropTargetDirective } from '../directives/drag-nodes/nodes-drop-target.directive';
 import { Node } from 'ngx-edu-sharing-api';
 import { Toast } from './abstract/toast.service';
@@ -25,12 +25,12 @@ export class NodesDragDropService {
     /** The current cursor style. */
     private curserSubject = new BehaviorSubject<string>(null);
     /** The ID of the component the dragged nodes belong to. */
-    private _draggedComponentId: string;
-    get draggedComponentId(): string {
-        return this._draggedComponentId;
+    private _origin: HTMLElement;
+    get origin(): HTMLElement {
+        return this._origin;
     }
-    set draggedComponentId(value: string) {
-        this._draggedComponentId = value;
+    set origin(value: HTMLElement) {
+        this._origin = value;
     }
 
     set draggedNodes(nodes: Node[]) {
@@ -169,5 +169,15 @@ export class NodesDragDropService {
         } else {
             return 'grabbing';
         }
+    }
+
+    /**
+     * convert the given drag data object and resolve the isFromOwnContainer parameter
+     */
+    convertDragData<T>(elementRef: ElementRef<HTMLElement>, dragData: DragData<T>) {
+        dragData.isFromOwnContainer =
+            this.origin === null || elementRef.nativeElement.contains(this.origin);
+        console.log(elementRef.nativeElement, this.origin, dragData.isFromOwnContainer);
+        return dragData;
     }
 }

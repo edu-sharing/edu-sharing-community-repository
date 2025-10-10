@@ -424,7 +424,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         return {
             accept:
                 dragData.draggedNodes.every((n) => n.type === 'ccm:io') &&
-                !dragData.keepViewContext,
+                !dragData.isFromOwnContainer,
         };
     };
 

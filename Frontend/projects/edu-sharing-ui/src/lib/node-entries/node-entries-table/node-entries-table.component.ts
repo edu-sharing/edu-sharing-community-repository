@@ -297,10 +297,9 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     }
 
     canDrop = (dragData: DragData<T>): CanDrop => {
-        dragData.keepViewContext =
-            !this.nodesDragDropService.draggedComponentId ||
-            this.entriesService.uniqueId === this.nodesDragDropService.draggedComponentId;
-        return this.entriesService.dragDrop.dropAllowed?.(dragData);
+        return this.entriesService.dragDrop.dropAllowed?.(
+            this.nodesDragDropService.convertDragData(this.elementRef, dragData),
+        );
     };
 
     drop(dragData: DragData<Node>) {

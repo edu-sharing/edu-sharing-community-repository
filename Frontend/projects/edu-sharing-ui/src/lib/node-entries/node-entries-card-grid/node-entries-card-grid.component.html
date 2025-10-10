@@ -133,7 +133,6 @@
               [cdkDragDisabled]="(getDragEnabled() | async) === false"
               [cdkDragData]="getDragData(node)"
               esNodesDrag
-              [componentId]="entriesService.uniqueId"
               (cdkDragStarted)="onDragStarted(node)"
               (cdkDragEnded)="onDragEnded()"
               [class.card-import-blocked]="isBlocked(node)"
@@ -163,7 +162,6 @@
               [cdkDragDisabled]="(getDragEnabled() | async) === false"
               [cdkDragData]="[node]"
               esNodesDrag
-              [componentId]="entriesService.uniqueId"
             >
             </es-node-entries-card-small>
           </ng-container>

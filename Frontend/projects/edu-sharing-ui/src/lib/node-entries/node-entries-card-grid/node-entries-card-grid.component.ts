@@ -100,6 +100,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
     constructor(
         public entriesService: NodeEntriesService<T>,
         public entriesGlobalService: NodeEntriesGlobalService,
+        public elementRef: ElementRef,
         public templatesService: NodeEntriesTemplatesService,
         public nodeHelperService: NodeHelperService,
         private nodesDragDropService: NodesDragDropService,
@@ -300,10 +301,9 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
     }
 
     canDropNodes = (dragData: DragData<T>) => {
-        dragData.keepViewContext =
-            !this.nodesDragDropService.draggedComponentId ||
-            this.entriesService.uniqueId === this.nodesDragDropService.draggedComponentId;
-        return this.entriesService.dragDrop.dropAllowed?.(dragData);
+        return this.entriesService.dragDrop.dropAllowed?.(
+            this.nodesDragDropService.convertDragData(this.elementRef, dragData),
+        );
     };
 
     onNodesDropped(dragData: DragData<Node>) {

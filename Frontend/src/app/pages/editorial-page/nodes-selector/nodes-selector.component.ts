@@ -298,7 +298,7 @@ export class NodesSelectorComponent implements OnInit {
                 dragData.target.access?.length &&
                 dragData.draggedNodes.every((n) => n.type === 'ccm:io') &&
                 this.nodeHelperService.isNodeCollection(dragData.target) &&
-                !dragData.keepViewContext,
+                !dragData.isFromOwnContainer,
         };
     };
 

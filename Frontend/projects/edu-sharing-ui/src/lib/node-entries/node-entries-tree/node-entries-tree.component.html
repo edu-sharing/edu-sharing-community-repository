@@ -77,7 +77,6 @@
       (cdkDragEnded)="onDragEnded()"
       [esNodesDropTarget]="node.item"
       [canDropNodes]="canDrop"
-      [componentId]="entriesService.uniqueId"
       (nodeDropped)="drop($event)"
     >
       <es-drag-preview
@@ -112,7 +111,6 @@
       esNodesDrag
       [esNodesDropTarget]="node.item"
       [canDropNodes]="canDrop"
-      [componentId]="entriesService.uniqueId"
       (nodeDropped)="drop($event)"
     >
       <es-drag-preview

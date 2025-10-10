@@ -6,7 +6,11 @@ export interface DragData<T = unknown> {
     draggedNodes: Node[];
     action: DropAction;
     target: T;
-    keepViewContext?: boolean;
+    /**
+     * contains true if the event was inside the own view (i.e. the same grid view), false if it was an other view
+     * might be null if it is unknown
+     */
+    isFromOwnContainer?: boolean;
 }
 export interface DropTargetState {
     action: DropAction;

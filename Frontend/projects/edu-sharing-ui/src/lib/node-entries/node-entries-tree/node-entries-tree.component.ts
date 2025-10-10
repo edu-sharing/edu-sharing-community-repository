@@ -4,6 +4,7 @@ import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
+    ElementRef,
     OnDestroy,
     signal,
     ViewChild,
@@ -69,6 +70,7 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
         private changeDetectorRef: ChangeDetectorRef,
         public entriesService: NodeEntriesService<T>,
         public nodeHelper: NodeHelperService,
+        private elementRef: ElementRef,
         private nodesDragDropService: NodesDragDropService,
         private translations: TranslationsService,
         private treeNodeService: TreeNodeService,
@@ -175,10 +177,9 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     }
 
     canDrop = (dragData: DragData<T>): CanDrop => {
-        dragData.keepViewContext =
-            !this.nodesDragDropService.draggedComponentId ||
-            this.entriesService.uniqueId === this.nodesDragDropService.draggedComponentId;
-        return this.entriesService.dragDrop.dropAllowed?.(dragData);
+        return this.entriesService.dragDrop.dropAllowed?.(
+            this.nodesDragDropService.convertDragData(this.elementRef, dragData),
+        );
     };
 
     async drop(dragData: DragData<Node>) {

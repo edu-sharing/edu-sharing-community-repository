@@ -1,4 +1,4 @@
-import { CdkDrag } from '@angular/cdk/drag-drop';
+import { CdkDrag, DragRef } from '@angular/cdk/drag-drop';
 import { Directive, Input } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { NodesDragDropService } from '../../services/nodes-drag-drop.service';
@@ -17,8 +17,15 @@ export class NodesDragDirective {
 
     constructor(private cdkDrag: CdkDrag<Node[]>, private nodesDragDrop: NodesDragDropService) {
         this.cdkDrag.started.subscribe((event) => {
+            console.log(event, (event.source as any)._dragRef as any);
             this.nodesDragDrop.draggedNodes = event.source.data;
-            this.nodesDragDrop.draggedComponentId = this.componentId;
+            this.nodesDragDrop.origin = null;
+            // wait one tick because the element is null otherwise
+            setTimeout(
+                () =>
+                    (this.nodesDragDrop.origin = (event.source as any)._dragRef._initialContainer
+                        ?.element as HTMLElement),
+            );
             // Position the preview element (the one being dragged around) next to the cursor to
             // avoid covering possible drop targets with the preview.
             event.source._dragRef['_pickupPositionInElement'] = { x: 0, y: 0 };
@@ -31,7 +38,7 @@ export class NodesDragDirective {
         this.cdkDrag.dropped.subscribe(() => {
             this.nodesDragDrop.onDropped(this.cdkDrag.data);
             this.nodesDragDrop.draggedNodes = null;
-            this.nodesDragDrop.draggedComponentId = null;
+            this.nodesDragDrop.origin = null;
         });
     }
 
