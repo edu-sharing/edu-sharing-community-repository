@@ -1,4 +1,4 @@
-import { Injectable, TemplateRef } from '@angular/core';
+import { Injectable, Injector, TemplateRef } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { DialogButton, RestConnectorService } from '../../core-module/core.module';
 import { Closable } from './card-dialog/card-dialog-config';
@@ -128,14 +128,14 @@ import {
     XmlAppPropertiesDialogResult,
 } from './dialog-modules/xml-app-properties-dialog/xml-app-properties-dialog-data';
 import { NotificationDialogComponent } from '../../main/navigation/top-bar/notification-dialog/notification-dialog.component';
+import { Node, NodeShare, SharingV1Service } from 'ngx-edu-sharing-api';
 import {
-    InviteEvent,
-    Node,
-    NodeService,
-    NodeServiceUnwrapped,
-    NodeShare,
-} from 'ngx-edu-sharing-api';
-import { DropSource, DropTarget, NodeRoot, NodeTitlePipe } from 'ngx-edu-sharing-ui';
+    DropSource,
+    DropTarget,
+    LocalEventsService,
+    NodeRoot,
+    NodeTitlePipe,
+} from 'ngx-edu-sharing-ui';
 import {
     RevocationDialogData,
     RevocationDialogResult,
@@ -163,6 +163,7 @@ import {
 } from './dialog-modules/share-publish-motivation/share-publish-motivation-dialog-dialog-data';
 import { firstValueFrom, from } from 'rxjs';
 import { concatMap, toArray } from 'rxjs/operators';
+import { Toast } from '../../services/toast';
 
 export enum DialogTemplate {
     AddMaterialDialogBelow,
@@ -180,8 +181,10 @@ export class DialogsService {
     constructor(
         private cardDialog: CardDialogService,
         private cardDialogUtils: CardDialogUtilsService,
-        private NodeServiceUnwrapped: NodeServiceUnwrapped,
+        private sharingV1Service: SharingV1Service,
+        private localEvents: LocalEventsService,
         private translate: TranslateService,
+        private injector: Injector,
         // TODO: Move the methods we use of `RestConnectorService` to a utils function if possible.
         private restConnector: RestConnectorService,
     ) {}
@@ -703,53 +706,60 @@ export class DialogsService {
         });
     }
     async openRejectShareDialog(shares: NodeShare[]) {
-        const dialog = await this.openGenericDialog({
-            title: 'SHARE_REJECT.TITLE',
-            message: 'SHARE_REJECT.MESSAGE',
-            nodes: shares,
-            avatar: {
-                kind: 'icon',
-                icon: 'cancel_schedule_send',
-            },
-            minHeight: 240,
-            minWidth: 500,
-            closable: Closable.Casual,
-            buttons: [
-                {
-                    config: {
-                        color: 'standard',
-                        position: 'standard',
-                    },
-                    label: 'CANCEL',
+        return new Promise<NodeShare[]>(async (resolve) => {
+            const dialog = await this.openGenericDialog({
+                title: 'SHARE_REJECT.TITLE',
+                message: 'SHARE_REJECT.MESSAGE',
+                nodes: shares,
+                avatar: {
+                    kind: 'icon',
+                    icon: 'cancel_schedule_send',
                 },
-                {
-                    config: {
-                        color: 'danger',
-                        position: 'standard',
+                minHeight: 240,
+                minWidth: 500,
+                closable: Closable.Casual,
+                buttons: [
+                    {
+                        config: {
+                            color: 'standard',
+                            position: 'standard',
+                        },
+                        label: 'CANCEL',
                     },
-                    label: 'SHARE_REJECT.CONFIRM',
-                },
-            ],
-        });
-        dialog.afterClosed().subscribe(async (button) => {
-            if (button === 'SHARE_REJECT.CONFIRM') {
-                await firstValueFrom(
-                    from(
-                        shares.map((s) =>
-                            this.NodeServiceUnwrapped.removeShare({
-                                node: s.ref.id,
-                                repository: s.ref.repo,
-                                shareId: s.share.id,
-                            }),
+                    {
+                        config: {
+                            color: 'danger',
+                            position: 'standard',
+                        },
+                        label: 'SHARE_REJECT.CONFIRM',
+                    },
+                ],
+            });
+            dialog.afterClosed().subscribe(async (button) => {
+                if (button === 'SHARE_REJECT.CONFIRM') {
+                    await firstValueFrom(
+                        from(
+                            shares.map((s) =>
+                                this.sharingV1Service.rejectShare({
+                                    node: s.ref.id,
+                                    repository: s.ref.repo,
+                                }),
+                            ),
+                        ).pipe(
+                            concatMap((req) => req),
+                            toArray(),
                         ),
-                    ).pipe(
-                        concatMap((req) => req),
-                        toArray(),
-                    ),
-                );
-            }
+                    );
+                    resolve(shares);
+                    this.localEvents.nodesDeleted.emit(shares);
+                    this.injector
+                        .get(Toast)
+                        .toast('SHARE_REJECT.TOAST_DONE', { count: shares.length });
+                }
+                resolve(null);
+            });
+            return dialog;
         });
-        return dialog;
     }
 
     async openDeleteNodesDialog(

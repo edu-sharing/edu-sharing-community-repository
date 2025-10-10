@@ -522,7 +522,8 @@
   "SHARE_REJECT": {
     "TITLE": "Freigabe ausblenden",
     "MESSAGE": "Möchten Sie die Freigabe(n) ausblenden? Sie werden zukünftig in dieser Liste nicht mehr angezeigt. Ihr Zugriff auf die Elemente, z.B. über die Suche, bleibt jedoch bestehen.",
-    "CONFIRM": "Ausblenden"
+    "CONFIRM": "Ausblenden",
+    "TOAST_DONE": "{{count}} Freigabe(n) ausgeblendet"
   },
   "CREATE_NODE": {
     "tool_definition": "Neue Toolbeschreibung anlegen",

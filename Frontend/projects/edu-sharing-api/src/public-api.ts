@@ -52,6 +52,7 @@ export {
     IamV1Service,
     OrganizationV1Service,
     QuestionAnswerV1Service,
+    SharingV1Service,
     NodeV1Service as NodeServiceUnwrapped,
     CollectionV1Service as CollectionServiceUnwrapped,
     SearchV1Service as SearchServiceUnwrapped,
