@@ -271,7 +271,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
 
     getSortColumns() {
         return this.entriesService.sort?.columns?.filter((c) => {
-            const result = this.entriesService.columns
+            const result = (this.entriesService.columns || [])
                 .concat(
                     new ListItemSort('NODE', 'score'),
                     new ListItemSort('NODE', RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION),
