@@ -30,10 +30,10 @@ public class CustomErrorHandler implements AuthenticationFailureHandler {
 
         if(exception instanceof OAuth2AuthenticationException && ((OAuth2AuthenticationException) exception).getError() != null) {
             String error = ((OAuth2AuthenticationException) exception).getError().getErrorCode();
-            if(Objects.equals("authorization_request_not_found",error) || Objects.equals("login_required",error)) {
+            if(Objects.equals("authorization_request_not_found",error)) {
 
                 String redirect = "/edu-sharing";
-                HttpSession session = request.getSession();
+                HttpSession session = request.getSession(false);
                 log.warn("oauth error {} can't find request in session. redirect to {}", error,redirect);
                 if(session != null) {
                     if(log.isDebugEnabled()) {
