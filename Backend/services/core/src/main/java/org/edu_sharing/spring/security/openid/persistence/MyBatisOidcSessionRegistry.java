@@ -20,6 +20,11 @@ public class MyBatisOidcSessionRegistry implements OidcSessionRegistry {
     @Override
     public void saveSessionInformation(OidcSessionInformation info) {
         OidcSessionInformationDto dto = OidcSessionInformationDto.from(info);
+        log.debug("adding session information: {} , idp sid: {}, issuedAt: {}. expiresAt: {}",
+                info.getSessionId(),
+                info.getPrincipal().getClaims().get("sid"),
+                info.getPrincipal().getIssuedAt(),
+                info.getPrincipal().getExpiresAt());
         mapper.save(info.getSessionId(), dto);
     }
 
@@ -42,6 +47,7 @@ public class MyBatisOidcSessionRegistry implements OidcSessionRegistry {
 
     @Override
     public Iterable<OidcSessionInformation> removeSessionInformation(OidcLogoutToken token) {
+        log.debug("cleanup idp session: {},subject: {}", token.getSessionId(),token.getSubject());
         List<OidcUserSessionRecord> all = mapper.findAll();
         Predicate<OidcSessionInformationDto> matcher = (token.getSessionId() != null)
                 ? dto -> token.getSessionId().equals(dto.getClaims().get("sid"))
@@ -50,7 +56,11 @@ public class MyBatisOidcSessionRegistry implements OidcSessionRegistry {
         List<OidcSessionInformation> removed = new ArrayList<>();
         for (OidcUserSessionRecord record : all) {
             if (matcher.test(record.getSessionInformation())) {
-                log.debug("Removing session information: {}", record.getSessionInformation().getSessionId());
+                log.debug("Removing session information: {} , idp sid: {}, issuedAt: {}. expiresAt: {}",
+                        record.getSessionId(),
+                        record.getSessionInformation().getClaims().get("sid"),
+                        record.getSessionInformation().getIssuedAt(),
+                        record.getSessionInformation().getExpiresAt());
                 mapper.deleteBySessionId(record.getSessionId());
                 removed.add(record.getSessionInformation()
                         .toDomain(Collections.emptySet())); // you can enrich authorities if needed
