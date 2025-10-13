@@ -19,7 +19,7 @@ import java.util.Objects;
 public class CustomErrorHandler implements AuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-        log.info("authentication failure", exception);
+        log.info("authentication failure. url: {}", request.getRequestURI(), exception);
         try {
             if(SilentLoginModeRedirect.processError(request,response)){
                 return;
