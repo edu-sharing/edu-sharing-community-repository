@@ -26,12 +26,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
+import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Path("/statistic/v1")
 @Tag(name = "STATISTIC v1")
@@ -100,8 +98,8 @@ public class StatisticApi {
                                       @Parameter(description = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom,
                                       @Parameter(description = "date range to", required = true) @QueryParam("dateTo") Long dateTo,
                                       @Parameter(description = "the mediacenter to filter for statistics", required = false) @QueryParam("mediacenter") String mediacenter,
-                                      @Parameter(description = "additionals fields of the custom json object stored in each query that should be returned", required = false) @QueryParam("additionalFields") List<String> additionalFields,
-                                      @Parameter(description = "grouping fields of the custom json object stored in each query (currently only meant to be combined with no grouping by date)", required = false) @QueryParam("groupField") List<String> groupField,
+                                      @Parameter(description = "additionals properties of the custom json object stored in each query that should be returned", required = false) @QueryParam("additionalFields") List<String> additionalFields,
+                                      @Parameter(description = "grouping properties of the custom json object stored in each query (currently only meant to be combined with no grouping by date)", required = false) @QueryParam("groupField") List<String> groupField,
                                       @Parameter(description = "filters for the custom json object stored in each entry", required = false) Map<String, String> filters
     ) {
         validatePermissions(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_NODES, mediacenter);
@@ -170,11 +168,33 @@ public class StatisticApi {
                                @Parameter(description = "date range to in ISO 8601 format", required = true) @QueryParam("dateTo") Date dateTo,
                                @Parameter(description = "maximum results (up to 50.000)", required = true) @QueryParam("maxResults") int maxResults,
                                @Parameter(description = "shows only statistics of published nodes ") @QueryParam("published") Boolean publishedOnly) throws Throwable {
-        if("-me-".equals(userId)){
+        if ("-me-".equals(userId)) {
             userId = AuthenticationUtil.getFullyAuthenticatedUser();
         }
-        List<TrackingNode> tracks  = trackingDAO.getNodeStatisticsByOwningUser(userId, dateFrom, dateTo, maxResults, publishedOnly == Boolean.TRUE);
-        return Response.ok().entity(tracks).build();
+        Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> tracks = trackingDAO.getNodeStatisticsByOwningUser(userId, dateFrom, dateTo, maxResults, publishedOnly == Boolean.TRUE);
+        return Response.ok().entity(trackingDAO.map(tracks)).build();
+    }
+
+    @POST
+    @Path("/statistics/nodes/user/{userId}/complete")
+    @Operation(summary = "Schedules a asynchronous job to retrieve statistics for node actions of nodes owned by the given user. The result will be added to your inbox in form of an csv.", description = "requires toolpermission " + CCConstants.CCM_VALUE_TOOLPERMISSION_USER_STATISTICS_NODES)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200),
+            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
+    public Response getByUsersAsync(@Parameter(description = "user id to fetch data for", required = true) @PathParam("userId") String userId,
+                                    @Parameter(description = "date range from in ISO 8601 format", required = true) @QueryParam("dateFrom") Date dateFrom,
+                                    @Parameter(description = "date range to in ISO 8601 format", required = true) @QueryParam("dateTo") Date dateTo,
+                                    @Parameter(description = "shows only statistics of published nodes ") @QueryParam("published") Boolean publishedOnly,
+                                    @Parameter(description = "properties to visualize in export", example = "[[\"cclom:title\"],[\"ccm:replicationsourceid\"],[\"ccm:lifecyclecontributer_publisher\"], [\"ccm:lifecyclecontributer_publisher\",\"X-ES-LOM-CONTRIBUTE-DATE\"]") List<List<String>> properties) {
+        if ("-me-".equals(userId)) {
+            userId = AuthenticationUtil.getFullyAuthenticatedUser();
+        }
+        trackingDAO.scheduleNodeStatisticsByOwningUser(userId, dateFrom, dateTo, publishedOnly == Boolean.TRUE, properties);
+        return Response.ok().build();
     }
 
     @POST
@@ -193,13 +213,40 @@ public class StatisticApi {
             @Parameter(description = "maximum results (up to 50.000)", required = true) @QueryParam("maxResults") int maxResults,
             @Parameter(description = "shows only statistics of published nodes ") @QueryParam("published") Boolean publishedOnly,
             @Parameter(description = "node ids to fetch data for") List<String> nodeIds) throws Throwable {
-        List<TrackingNode> tracks  = trackingDAO.getNodeStatisticsByRange(nodeIds, dateFrom, dateTo, maxResults, publishedOnly == Boolean.TRUE);
-        return Response.ok().entity(tracks).build();
+        Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> tracks = trackingDAO.getNodeStatisticsByRange(nodeIds, dateFrom, dateTo, maxResults, publishedOnly == Boolean.TRUE);
+        return Response.ok().entity(trackingDAO.map(tracks)).build();
+    }
+
+
+    public record GetByNodeIdsRequest(
+            @Parameter(description = "node ids to fetch data for") List<String> nodeIds,
+            @Parameter(description = "properties to visualize in export", example = "[[\"cclom:title\"],[\"ccm:replicationsourceid\"],[\"ccm:lifecyclecontributer_publisher\"], [\"ccm:lifecyclecontributer_publisher\",\"X-ES-LOM-CONTRIBUTE-DATE\"]") List<List<String>> properties
+    ) {
+    }
+
+    @POST
+    @Path("/statistics/nodes/range/complete")
+    @Operation(summary = "Schedules a asynchronous job to retrieve statistics for node actions for the given nodes. The result will be added to your inbox in form of an csv.", description = "requires toolpermission " + CCConstants.CCM_VALUE_TOOLPERMISSION_SELECTIVE_STATISTICS_NODES)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200),
+            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
+    public Response getByNodesAsync(
+            @Parameter(description = "date range from in ISO 8601 format", required = true) @QueryParam("dateFrom") Date dateFrom,
+            @Parameter(description = "date range to in ISO 8601 format", required = true) @QueryParam("dateTo") Date dateTo,
+            @Parameter(description = "shows only statistics of published nodes ") @QueryParam("published") Boolean publishedOnly,
+            GetByNodeIdsRequest request
+            ) {
+        trackingDAO.scheduleNodeStatisticsByRange(request.nodeIds, dateFrom, dateTo, publishedOnly == Boolean.TRUE, request.properties);
+        return Response.ok().build();
     }
 
     @GET
     @Path("/statistics/nodes/organization/{orgId}")
-    @Operation(summary = "get statistics for node actions for the given organization", description = "requires toolpermission " + CCConstants.CCM_VALUE_TOOLPERMISSION_ORGANIZATION_STATISTICS_NODES)
+    @Operation(summary = "get statistics for node actions for the given organization.", description = "requires toolpermission " + CCConstants.CCM_VALUE_TOOLPERMISSION_ORGANIZATION_STATISTICS_NODES)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = TrackingNode[].class))),
             @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -212,9 +259,29 @@ public class StatisticApi {
                                       @Parameter(description = "date range to in ISO 8601 format", required = true) @QueryParam("dateTo") Date dateTo,
                                       @Parameter(description = "maximum results (up to 50.000)", required = true) @QueryParam("maxResults") int maxResults,
                                       @Parameter(description = "shows only statistics of published nodes ") @QueryParam("published") Boolean publishedOnly) throws Throwable {
-        List<TrackingNode> tracks  = trackingDAO.getNodeStatisticsByOrganization(orgId, dateFrom, dateTo, maxResults, publishedOnly == Boolean.TRUE);
-        return Response.ok().entity(tracks).build();
+        Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> tracks = trackingDAO.getNodeStatisticsByOrganization(orgId, dateFrom, dateTo, maxResults, publishedOnly == Boolean.TRUE);
+        return Response.ok().entity(trackingDAO.map(tracks)).build();
     }
+
+    @POST
+    @Path("/statistics/nodes/organization/{orgId}/complete")
+    @Operation(summary = "Schedules a asynchronous job to retrieve statistics for node actions for the given organization. The result will be added to your inbox in form of an csv.", description = "requires toolpermission " + CCConstants.CCM_VALUE_TOOLPERMISSION_ORGANIZATION_STATISTICS_NODES)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200),
+            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
+    public Response getByOrganizationAsync(@Parameter(description = "user id to fetch data for", required = true) @PathParam("orgId") String orgId,
+                                           @Parameter(description = "date range from in ISO 8601 format", required = true) @QueryParam("dateFrom") Date dateFrom,
+                                           @Parameter(description = "date range to in ISO 8601 format", required = true) @QueryParam("dateTo") Date dateTo,
+                                           @Parameter(description = "shows only statistics of published nodes ") @QueryParam("published") Boolean publishedOnly,
+                                           @Parameter(description = "properties to visualize in export", example = "[[\"cclom:title\"],[\"ccm:replicationsourceid\"],[\"ccm:lifecyclecontributer_publisher\"], [\"ccm:lifecyclecontributer_publisher\",\"X-ES-LOM-CONTRIBUTE-DATE\"]") List<List<String>> properties) throws Throwable {
+        trackingDAO.scheduleNodeStatisticsByOrganization(orgId, dateFrom, dateTo, publishedOnly == Boolean.TRUE, properties);
+        return Response.ok().build();
+    }
+
 
     private void validatePermissions(String toolpermission, String mediacenter) throws DAOException {
         if (mediacenter == null || mediacenter.isEmpty()) {
@@ -245,8 +312,8 @@ public class StatisticApi {
                                       @Parameter(description = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom,
                                       @Parameter(description = "date range to", required = true) @QueryParam("dateTo") Long dateTo,
                                       @Parameter(description = "the mediacenter to filter for statistics", required = false) @QueryParam("mediacenter") String mediacenter,
-                                      @Parameter(description = "additionals fields of the custom json object stored in each query that should be returned", required = false) @QueryParam("additionalFields") List<String> additionalFields,
-                                      @Parameter(description = "grouping fields of the custom json object stored in each query (currently only meant to be combined with no grouping by date)", required = false) @QueryParam("groupField") List<String> groupField,
+                                      @Parameter(description = "additionals properties of the custom json object stored in each query that should be returned", required = false) @QueryParam("additionalFields") List<String> additionalFields,
+                                      @Parameter(description = "grouping properties of the custom json object stored in each query (currently only meant to be combined with no grouping by date)", required = false) @QueryParam("groupField") List<String> groupField,
                                       @Parameter(description = "filters for the custom json object stored in each entry", required = false) Map<String, String> filters
     ) {
         validatePermissions(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_USER, mediacenter);
@@ -255,4 +322,6 @@ public class StatisticApi {
         );
         return Response.ok().entity(tracks).build();
     }
+
+
 }

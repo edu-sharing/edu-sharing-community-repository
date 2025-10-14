@@ -19,6 +19,7 @@ import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.tracking.ActivityStatisticService;
 import org.edu_sharing.service.tracking.GroupingType;
+import org.edu_sharing.service.tracking.StatisticsFileService;
 import org.edu_sharing.service.tracking.ibatis.NodeData;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
 
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -38,6 +40,7 @@ public class TrackingDAO {
 
     private final ActivityStatisticService activityStatisticService;
     private final SearchServiceElastic searchService;
+    private final StatisticsFileService statisticsFileService;
 
     private final RepositoryDao homeRepository = RepositoryDao.getHomeRepository();
     private final Filter filter = Filter.createShowAllFilter();
@@ -131,7 +134,7 @@ public class TrackingDAO {
 
     @NotNull
     @Permission(CCConstants.CCM_VALUE_TOOLPERMISSION_USER_STATISTICS_NODES)
-    public List<TrackingNode> getNodeStatisticsByOwningUser(@HasRole @NotNull @NonNull String userId, @NotNull @NonNull Date dateFrom, @NotNull @NonNull Date dateTo, int maxResults, boolean publishedOnly) throws Throwable {
+    public Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> getNodeStatisticsByOwningUser(@HasRole @NotNull @NonNull String userId, @NotNull @NonNull Date dateFrom, @NotNull @NonNull Date dateTo, int maxResults, boolean publishedOnly) throws Throwable {
 
         // type = ccm:io && ((aspect = ccm:published && cm:creator = userId) ...)
         BoolQuery.Builder filter = QueryBuilders.bool()
@@ -165,7 +168,7 @@ public class TrackingDAO {
 
     @NotNull
     @Permission(CCConstants.CCM_VALUE_TOOLPERMISSION_SELECTIVE_STATISTICS_NODES)
-    public List<TrackingNode> getNodeStatisticsByRange(@NotNull @NonNull List<String> nodeIds, @NotNull @NonNull Date dateFrom, @NotNull @NonNull Date dateTo, int maxResults, boolean publishedOnly) throws Throwable {
+    public Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> getNodeStatisticsByRange(@NotNull @NonNull List<String> nodeIds, @NotNull @NonNull Date dateFrom, @NotNull @NonNull Date dateTo, int maxResults, boolean publishedOnly) throws Throwable {
         String me = AuthenticationUtil.getFullyAuthenticatedUser();
 
         // type = ccm:io && (nodeId in path or id = nodeId) &&((aspect = ccm:published && cm:creator = userId) ...)
@@ -202,7 +205,7 @@ public class TrackingDAO {
 
     @NotNull
     @Permission(CCConstants.CCM_VALUE_TOOLPERMISSION_ORGANIZATION_STATISTICS_NODES)
-    public List<TrackingNode> getNodeStatisticsByOrganization(@HasRole @NotNull @NonNull String orgId, @NotNull @NonNull Date dateFrom, @NotNull @NonNull Date dateTo, int maxResults, boolean publishedOnly) throws Throwable {
+    public Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> getNodeStatisticsByOrganization(@HasRole @NotNull @NonNull String orgId, @NotNull @NonNull Date dateFrom, @NotNull @NonNull Date dateTo, int maxResults, boolean publishedOnly) throws Throwable {
         BoolQuery.Builder filter = QueryBuilders.bool()
                 .must(m -> m.term(t -> t.field("type").value("ccm:io")))
                 .must(m -> m.bool(searchService::getReadPermissionsQuery))
@@ -216,7 +219,7 @@ public class TrackingDAO {
     }
 
     @NotNull
-    private List<TrackingNode> searchBasedStatisticEvaluation(@NotNull @NonNull QueryVariant query, @NotNull @NonNull Date startDate, @NotNull @NonNull Date endDate, int maxResults) throws Throwable {
+    private Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> searchBasedStatisticEvaluation(@NotNull @NonNull QueryVariant query, @NotNull @NonNull Date startDate, @NotNull @NonNull Date endDate, int maxResults) throws Throwable {
         SearchToken searchToken = new SearchToken();
         searchToken.setFrom(0);
         searchToken.setMaxResult(maxSearchResults); // physical limit because of db execution time
@@ -234,14 +237,14 @@ public class TrackingDAO {
                 .stream()
                 .sorted(Comparator.comparing(this::getTotalCounts))
                 .limit(maxResults)
-                .map(x->{
+                .map(x -> {
                     List<org.edu_sharing.service.model.NodeRef> dataList = nodeRefGroup.get(x.getKey());
-                    if(dataList.size() == 1){
+                    if (dataList.size() == 1) {
                         return new AbstractMap.SimpleEntry<>(dataList.get(0), x.getValue());
                     } else {
                         // find the original node
                         Optional<org.edu_sharing.service.model.NodeRef> originalNode = dataList.stream().filter(y -> y.getNodeId().equals(x.getKey().getId())).findFirst();
-                        if(originalNode.isPresent()){
+                        if (originalNode.isPresent()) {
                             return new AbstractMap.SimpleEntry<>(originalNode.get(), x.getValue());
                         }
 
@@ -274,8 +277,11 @@ public class TrackingDAO {
                     }
 
                 })
-                .map(this::map)
-                .toList();
+                .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey,
+                        AbstractMap.SimpleEntry::getValue,
+                        (existing, replacement) -> existing,
+                        LinkedHashMap::new
+                ));
     }
 
     private org.alfresco.service.cmr.repository.NodeRef getOriginalNodeRef(org.edu_sharing.service.model.NodeRef nodeRef) {
@@ -292,7 +298,7 @@ public class TrackingDAO {
         return originalNodeRef;
     }
 
-    private boolean isCollectionIoReference(org.edu_sharing.service.model.NodeRef nodeRef){
+    private boolean isCollectionIoReference(org.edu_sharing.service.model.NodeRef nodeRef) {
         return nodeRef.getAspects().contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
     }
 
@@ -301,7 +307,7 @@ public class TrackingDAO {
     }
 
     private Date getPublishedDate(org.edu_sharing.service.model.NodeRef nodeRef) {
-        return  Optional.ofNullable(nodeRef.getProperties().get(CCConstants.CCM_PROP_PUBLISHED_DATE))
+        return Optional.ofNullable(nodeRef.getProperties().get(CCConstants.CCM_PROP_PUBLISHED_DATE))
                 .map(String.class::cast)
                 .map(DateTimeFormatter.ISO_OFFSET_DATE_TIME::parse)
                 .map(Instant::from)
@@ -314,9 +320,60 @@ public class TrackingDAO {
     }
 
     @NotNull
-    private TrackingNode map(@NotNull AbstractMap.SimpleEntry<org.edu_sharing.service.model.NodeRef, StatisticEntry> entry) {
+    public List<TrackingNode> map(@NotNull Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> data) {
+        return data.entrySet()
+                .stream()
+                .map(this::map)
+                .collect(Collectors.toList());
+    }
+
+
+    @NotNull
+    public TrackingNode map(@NotNull Map.Entry<org.edu_sharing.service.model.NodeRef, StatisticEntry> entry) {
         StatisticEntry statisticEntry = entry.getValue();
         Node node = new NodeDao(homeRepository, entry.getKey(), filter).asNode();
         return new TrackingNode(node, convertAuthority(statisticEntry.getAuthorityInfo()), statisticEntry.getDate(), statisticEntry.getCounts(), statisticEntry.getFields(), statisticEntry.getGroups());
+    }
+
+    public void scheduleNodeStatisticsByRange(List<String> nodeIds, Date startDate, Date endDate, boolean publishedOnly, List<List<String>> properties) {
+        try {
+            Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> statisticEntryMap = getNodeStatisticsByRange(nodeIds, startDate, endDate, Integer.MAX_VALUE, publishedOnly);
+            String userInboxNodeId = homeRepository.getUserInbox(true);
+            String filename = getFilename(startDate, endDate, "selective_materials");
+            statisticsFileService.writeCSV(userInboxNodeId, filename, statisticEntryMap, properties);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @NotNull
+    private static String getFilename(Date startDate, Date endDate, String postfix) {
+        return String.join("_",
+                startDate.toInstant().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_LOCAL_DATE)
+                , "to"
+                , endDate.toInstant().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_LOCAL_DATE)
+                , postfix).replace(":", "_");
+    }
+
+    public void scheduleNodeStatisticsByOrganization(String orgId, Date startDate, Date endDate, boolean publishedOnly, List<List<String>> properties) {
+        try {
+            Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> statisticEntryMap = getNodeStatisticsByOrganization(orgId, startDate, endDate, Integer.MAX_VALUE, publishedOnly);
+            String userInboxNodeId = homeRepository.getUserInbox(true);
+            String filename = getFilename(startDate, endDate, orgId + "_materials");
+            statisticsFileService.writeCSV(userInboxNodeId, filename, statisticEntryMap, properties);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void scheduleNodeStatisticsByOwningUser(String userId, Date startDate, Date endDate, boolean publishedOnly, List<List<String>> properties) {
+        try {
+            Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> statisticEntryMap = getNodeStatisticsByOwningUser(userId, startDate, endDate, Integer.MAX_VALUE, publishedOnly);
+            String userInboxNodeId = homeRepository.getUserInbox(true);
+            String filename = getFilename(startDate, endDate, userId + "_materials");
+            statisticsFileService.writeCSV(userInboxNodeId, filename, statisticEntryMap, properties);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
     }
 }
