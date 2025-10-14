@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { NodePermissions, NodeService, SessionStorageService, Store } from 'ngx-edu-sharing-api';
-import { Observable } from 'rxjs';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { from, Observable, of } from 'rxjs';
+import { catchError, concatMap, map, switchMap, tap, toArray } from 'rxjs/operators';
 import {
     DialogButton,
     Node,
@@ -14,7 +14,6 @@ import {
 import { NodeHelperService } from '../../../../services/node-helper.service';
 import { Toast } from '../../../../services/toast';
 import { ClipboardObject, LocalEventsService } from 'ngx-edu-sharing-ui';
-import { forkJoinWithErrors } from '../../../../util/rxjs/forkJoinWithErrors';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { DeleteNodesDialogData, DeleteNodesDialogResult } from './delete-nodes-dialog-data';
@@ -117,11 +116,24 @@ export class DeleteNodesDialogComponent implements OnInit {
 
     private onConfirm(): void {
         this.dialogRef.patchState({ isLoading: true });
-        this.removeTemporaryCollections(this.data.nodes);
-        forkJoinWithErrors(this.data.nodes.map((node) => this.processNode(node))).subscribe(
-            ({ successes: processedNodes, errors }) => {
-                if (errors.length === 0) {
+        void this.removeTemporaryCollections(this.data.nodes);
+        from(
+            this.data.nodes.map((node) =>
+                this.processNode(node).pipe(catchError((error) => of({ error }))),
+            ),
+        )
+            .pipe(
+                concatMap((req) => req),
+                toArray(),
+            )
+            .subscribe((data) => {
+                const processedNodes = data.filter((d) => !(d as { error: any }).error) as Node[];
+                if (!data.some((d) => !!(d as { error: any }).error)) {
                     this.toast.toast('WORKSPACE.TOAST.DELETE_FINISHED');
+                } else {
+                    this.toast.error(
+                        (data.find((d) => (d as { error: any }).error) as { error: any }).error,
+                    );
                 }
                 if (processedNodes.length > 0) {
                     this.dialogRef.close({
@@ -138,8 +150,7 @@ export class DeleteNodesDialogComponent implements OnInit {
                 } else {
                     this.localEvents.nodesDeleted.emit(processedNodes);
                 }
-            },
-        );
+            });
     }
 
     /**
