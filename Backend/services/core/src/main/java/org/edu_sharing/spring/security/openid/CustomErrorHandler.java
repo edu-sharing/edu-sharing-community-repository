@@ -37,7 +37,7 @@ public class CustomErrorHandler implements AuthenticationFailureHandler {
                 log.warn("oauth error {} can't find request in session. redirect to {}", error,redirect);
                 if(session != null) {
                     if(log.isDebugEnabled()) {
-                        session.getAttributeNames().asIterator().forEachRemaining(name -> log.debug("session contains attribute {}", name));
+                        session.getAttributeNames().asIterator().forEachRemaining(name -> log.debug("session contains attribute {} value: {}", name, session.getAttribute(name)));
                     }
                     log.warn("invalidating incomplete session before redirect");
                     session.invalidate();
