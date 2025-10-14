@@ -937,8 +937,14 @@
       "GENERIC_INTERNAL_SERVER_ERROR": "Die Anfrage konnte vom Server nicht bearbeitet werden"
     },
     "GDPR": {
-      "GDPR_DIALOG": "Dieser Inhalt stammt von einer externen Resource.",
-      "GDPR_CONTINUE": "Weiter"
+      "EXTERNAL_SITE": "Externe Seite",
+      "EXTERNAL_CONTENT": "Externer Inhalt",
+      "GDPR_REGULATIONS": "Datenschutzrichtlinien",
+      "AGREE_AND_CONTINUE": "Zustimmen und fortfahren",
+      "FURTHER_INFORMATION": "Weitere Informationen finden Sie hier: ",
+      "EXTERNAL_SITE_INFO": "Beim Öffnen der externen Seite werden möglicherweise Daten übertragen. Bitte beachten Sie unsere ",
+      "EXTERNAL_SOURCE": "einer externen Quelle",
+      "EXTERNAL_CONTENT_INFO": "Sie sind dabei, Inhalte von {{EXTERNAL_RESOURCE}} zu laden und anzuzeigen. Dabei werden unter Umständen persönliche Daten übermittelt und extern verarbeitet."
     }
   },
   "TOAST": {

@@ -888,8 +888,14 @@
       "GENERIC_INTERNAL_SERVER_ERROR": "Internal server error"
     },
     "GDPR": {
-      "GDPR_DIALOG": "This content is provided by a third party resource.",
-      "GDPR_CONTINUE": "Continue"
+      "EXTERNAL_SITE": "External site",
+      "EXTERNAL_CONTENT": "External content",
+      "GDPR_REGULATIONS": "Privacy regulations",
+      "AGREE_AND_CONTINUE": "Agree and continue",
+      "FURTHER_INFORMATION": "Further information: ",
+      "EXTERNAL_SITE_INFO": "When opening the external site data might be transferred. Please refer to our ",
+      "EXTERNAL_SOURCE": "an external source",
+      "EXTERNAL_CONTENT_INFO": "You are about to request content from {{EXTERNAL_RESOURCE}}. Personal data might be transferred."
     }
   },
   "TOAST": {
