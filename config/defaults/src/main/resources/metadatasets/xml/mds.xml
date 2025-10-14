@@ -681,10 +681,10 @@
       <icon>calendar_clock</icon>
       <valuespace_i18n_prefix>shareMaxAge_</valuespace_i18n_prefix>
       <type>radioVertical</type>
-      <defaultvalue>86400</defaultvalue>
+      <defaultvalue>2592000</defaultvalue>
       <values>
-        <entry cap="shareMaxAge_30">86400</entry>
-        <entry cap="shareMaxAge_90">7776000</entry>
+        <entry>2592000</entry>
+        <entry>7776000</entry>
         <entry>unlimited</entry>
       </values>
     </widget>
