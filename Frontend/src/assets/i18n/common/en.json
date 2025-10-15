@@ -825,6 +825,7 @@
     "OPEN": "Open",
     "DOWNLOAD_ZIP": "Download as Zip",
     "LINK": "To original page",
+    "EMPTY_FOLDER": "The shared folder currently contains no files",
     "INVITED_AND_CREATED_BY": "Created and shared by {{inviter}}",
     "INVITED_PLUS_CREATED_BY": "Shared by {{inviter}}, created by {{creator}}",
     "ENTER_PASSWORD": "next",
