@@ -209,7 +209,8 @@ public class OaiLomHSOERMetadataFormatWriter extends AbstractMetadataFormatWrite
             if(i < i18n.size()) {
                 addLanguageAttribute(context, context.createAndAppendElement("langstring", keywordElement, i18n.get(i)));
             }
-            addLanguageAttribute(context.createAndAppendElement("langstring", keywordElement, keyword), "x-none");
+            // @TODO: in 11.0, use and provide the GND-URI here
+            context.createAndAppendElement("id", keywordElement, keyword);
 
             i++;
         }

@@ -86,11 +86,11 @@ class OaiLomHSOERMetadataFormatWriterTest {
                 "    </keyword>\n" +
                 "    <keyword>\n" +
                 "        <langstring xml:lang=\"en\">classification label 1</langstring>\n" +
-                "        <langstring xml:lang=\"x-none\">classification_id1</langstring>\n" +
+                "        <id>classification_id1</id>\n" +
                 "    </keyword>\n" +
                 "    <keyword>\n" +
                 "        <langstring xml:lang=\"en\">classification label 2</langstring>\n" +
-                "        <langstring xml:lang=\"x-none\">classification_id2</langstring>\n" +
+                "        <id>classification_id2</id>\n" +
                 "    </keyword>\n" +
                 "</test>", elementToString(element));
     }
