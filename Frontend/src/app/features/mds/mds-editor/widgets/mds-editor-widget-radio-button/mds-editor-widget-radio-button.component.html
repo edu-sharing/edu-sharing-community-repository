@@ -8,6 +8,7 @@
   [wrapInGroup]="false"
 >
   <mat-radio-group
+    [class.expandable]="(container.expandedState$ | async) !== 'disabled'"
     [formControl]="formControl"
     [attr.aria-labelledby]="container.labelId"
     [attr.aria-describedby]="container.descriptionId"

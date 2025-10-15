@@ -9,6 +9,10 @@ mat-radio-group {
     &.vertical {
         flex-direction: column;
     }
+    &.expandable {
+        margin-top: -8px;
+        padding: 0 8px;
+    }
 }
 
 mat-radio-button.mat-mdc-radio-button {
