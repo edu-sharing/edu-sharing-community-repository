@@ -28,12 +28,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
-//@Log4j
 @Component
 public class UpdaterService implements ApplicationContextAware, ApplicationListener<ContextRefreshedEvent> {
 
     //TODO Cluster
-    private static Set<String> currentlyRunningUpdates = Collections.synchronizedSet(new HashSet<>());
+    private static final Set<String> currentlyRunningUpdates = Collections.synchronizedSet(new HashSet<>());
 
     @Setter
     private ApplicationContext applicationContext;
@@ -110,7 +109,7 @@ public class UpdaterService implements ApplicationContextAware, ApplicationListe
 
         updateInfoList = Arrays.stream(applicationContext.getBeanDefinitionNames())
                 .flatMap(x -> {
-                    Method[] methods = java.util.Optional.ofNullable((RootBeanDefinition) beanFactory.getMergedBeanDefinition(x))
+                    Method[] methods = java.util.Optional.of((RootBeanDefinition) beanFactory.getMergedBeanDefinition(x))
                             .map(RootBeanDefinition::getTargetType)
                             .map(Class::getMethods)
                             .orElse(new Method[0]);
@@ -163,7 +162,7 @@ public class UpdaterService implements ApplicationContextAware, ApplicationListe
     @NotNull
     private ArrayList<UpdateInfo> getAllUpdateInfos() {
         ArrayList<UpdateInfo> updateInfos = new ArrayList<>(updateInfoList);
-        updateInfos.addAll(updateFactories.stream().flatMap(x -> x.getUpdates().stream()).collect(Collectors.toList()));
+        updateInfos.addAll(updateFactories.stream().flatMap(x -> x.getUpdates().stream()).toList());
         updateInfos.sort(Comparator.comparingInt(UpdateInfo::getOrder));
         return updateInfos;
     }
