@@ -9,15 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
 @JobDescription(description = "processes dataprotection requests")
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class DataProtectionExportJob extends AbstractInterruptableJob{
 
     @Autowired
     DataProtectionService dataProtectionService;
 
     @Override
-    protected void executeInterruptable(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+    protected void executeInterruptable(JobExecutionContext jobExecutionContext) {
         log.info("DataProtectionExportJob start");
-        dataProtectionService.startExport();
         dataProtectionService.cleanExpired();
         log.info("DataProtectionExportJob end");
     }

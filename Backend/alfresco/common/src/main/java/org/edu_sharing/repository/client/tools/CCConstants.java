@@ -652,6 +652,11 @@ public class CCConstants {
 	public final static String CCM_ASSOC_COLLECTION_FEEDBACK = "{http://www.campuscontent.de/model/1.0}childcollectionfeedback";
 
 	public final static String CCM_ASSOC_MATERIAL_FEEDBACK = "{http://www.campuscontent.de/model/1.0}childmaterialfeedback";
+
+
+    // GDPR
+    public static final String CCM_ASPECT_GDPR = "{http://www.campuscontent.de/model/1.0}gdpr";
+
 	/**
 	 * update alfresco3stable auf alfresco34e
 	 *

@@ -11,6 +11,9 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.repo.security.person.RegexHomeFolderProvider;
 import org.alfresco.service.cmr.repository.*;
+import org.alfresco.service.cmr.search.ResultSet;
+import org.alfresco.service.cmr.search.SearchParameters;
+import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -22,27 +25,30 @@ import org.apache.commons.compress.archivers.examples.Archiver;
 import org.apache.commons.compress.utils.FileNameUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.edu_sharing.alfresco.service.search.cmis.*;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
+import org.edu_sharing.generated.repository.backend.services.rest.client.model.DataProtectionQueueEntry;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
+import org.edu_sharing.repository.server.jobs.annotations.Queued;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
+import org.edu_sharing.repository.server.tools.security.RunAsSystem;
 import org.edu_sharing.service.authentication.ScopeUserHomeService;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.comment.CommentService;
-import org.edu_sharing.service.dataprotection.queue.DataProtectionQueue;
-import org.edu_sharing.service.dataprotection.queue.DataProtectionQueueEntry;
 import org.edu_sharing.service.feedback.FeedbackService;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.lifecycle.Utils;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.RecurseMode;
+import org.edu_sharing.service.permission.annotation.HasRole;
+import org.edu_sharing.service.permission.annotation.Permission;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -67,15 +73,17 @@ import java.util.stream.Stream;
 public class DataProtectionService {
 
     private final NodeService nodeService;
+    private final org.edu_sharing.service.nodeservice.NodeService eduNodeService;
     private final PersonService personService;
     private final ContentService contentService;
     private final PermissionService permissionService;
     private final RegexHomeFolderProvider regexHomeFolderProvider;
     private final DataProtectionConfig config;
-    private final DataProtectionQueue queue;
     private final PDFReport report;
     private final FeedbackService feedbackService;
     private final CommentService commentService;
+    private final QueryBuilder queryBuilder;
+    private final SearchService searchService;
 
 
     @Value("${repository.dataprotection.retentionPeriod:PT240H}")
@@ -93,12 +101,9 @@ public class DataProtectionService {
     @Value("${repository.dataprotection.fileName:dataprotectioninfo_edu-sharing}")
     private String fileName;
 
-    PersonLifecycleService personLifecycleService = new PersonLifecycleService();
-
-    QName propMapType = QName.createQName(CCConstants.CCM_PROP_MAP_TYPE);
-
-
-    String systemFolder;
+    private PersonLifecycleService personLifecycleService = new PersonLifecycleService();
+    private QName propMapType = QName.createQName(CCConstants.CCM_PROP_MAP_TYPE);
+    private String systemFolder;
 
     @EventListener(ContextRefreshedEvent.class)
     public void onContextRefreshed() {
@@ -113,55 +118,66 @@ public class DataProtectionService {
         });
     }
 
+    @RunAsSystem
     public void cleanExpired() {
-        AuthenticationUtil.runAsSystem(() -> {
-            List<DataProtectionQueueEntry> entries = queue.get(DataProtectionQueue.Status.FINISHED);
-            List<Pair<NodeRef, String>> toRemove = new ArrayList<>();
-            entries.forEach(entry -> {
-                NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, entry.getNode_id());
-                Date modified = (Date) nodeService.getProperty(nodeRef, ContentModel.PROP_MODIFIED);
-                if ((System.currentTimeMillis() - modified.getTime()) > Duration.parse(this.retentionPeriod).toMillis()) {
-                    toRemove.add(new Pair<>(nodeRef, entry.getUser()));
-                }
-            });
-            toRemove.forEach(pair -> {
-                if (DataProtectionQueue.Status.FINISHED.toString().equals(queue.get(pair.getSecond()).getStatus())) {
-                    log.info("removing gdpr export {} {}", nodeService.getProperty(pair.getFirst(), ContentModel.PROP_NAME), pair.getFirst());
-                    removeNode(pair.getFirst().getId());
-                    queue.delete(pair.getSecond());
-                }
-            });
-            return null;
-        });
-    }
+        QueryStatement query = Query.select(CCConstants.SYS_PROP_NODE_UID, CCConstants.CM_NAME)
+                .from(CCConstants.CCM_TYPE_IO)
+                .where(Filters.and(
+                        Filters.hasAspect(CCConstants.CCM_ASPECT_GDPR),
+                        Filters.lt(ContentModel.PROP_MODIFIED, ZonedDateTime.now().minus(Duration.parse(this.retentionPeriod)).toInstant().toEpochMilli())
+                ));
 
-    public void startExport() {
-        List<DataProtectionQueueEntry> allUsers = queue.getAll().stream()
-                .filter(e ->
-                        DataProtectionQueue.Status.REQUESTED.toString().equals(e.getStatus()) || DataProtectionQueue.Status.RUNNING.toString().equals(e.getStatus()))
-                .toList();
-        for (DataProtectionQueueEntry e : allUsers) {
-            startExport(e);
+        SearchParameters searchParameters = new SearchParameters();
+        searchParameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_CMIS_ALFRESCO);
+        searchParameters.setMaxPermissionChecks(0);
+        searchParameters.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+        searchParameters.setQuery(queryBuilder.build(query));
+        ResultSet searchResults = searchService.query(searchParameters);
+
+        if (searchResults.getNumberFound() == 0) {
+            return;
         }
+
+        searchResults.forEach(item -> {
+            try {
+                log.info("removing gdpr export {} {}", item.getValue(ContentModel.PROP_NAME), item.getNodeRef().getId());
+                eduNodeService.removeNode(item.getNodeRef().getId(), item.getChildAssocRef().getParentRef().getId(), false);
+            } catch (Exception e) {
+                log.error("error removing expired export {} {}", item.getValue(ContentModel.PROP_NAME), item.getNodeRef().getId(), e);
+            }
+        });
     }
 
-    public void startExport(DataProtectionQueueEntry entry) {
-        String userName = entry.getUser();
-        queue.update(userName, null, DataProtectionQueue.Status.RUNNING);
-        // be sure systemfolder and target node is created with as admin user so that this files will not be included in export zip
-        AuthenticationUtil.runAsSystem(() -> {
-            prepare(userName);
+
+    @Permission(requiresUser = true)
+    public String getDataProtectionNode(@HasRole String userName) {
+        QueryStatement query = Query.select(CCConstants.SYS_PROP_NODE_UID)
+                .from(CCConstants.CCM_TYPE_IO)
+                .where(Filters.and(
+                        Filters.hasAspect(CCConstants.CCM_ASPECT_GDPR),
+                        Filters.eq(CCConstants.CM_PROP_C_CREATOR, userName)
+                ));
+
+        SearchParameters searchParameters = new SearchParameters();
+        searchParameters.setLanguage(SearchService.LANGUAGE_CMIS_ALFRESCO);
+        searchParameters.setMaxPermissionChecks(0);
+        searchParameters.setMaxItems(1);
+        searchParameters.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+        searchParameters.setQuery(queryBuilder.build(query));
+        ResultSet searchResults = searchService.query(searchParameters);
+
+        if (searchResults.getNumberFound() == 0) {
             return null;
-        });
-        NodeRef nodeRef = AuthenticationUtil.runAs(() -> exportUserNodes(userName), userName);
-        queue.update(userName, nodeRef.getId(), DataProtectionQueue.Status.FINISHED);
+        }
+
+        return searchResults.iterator().next().getNodeRef().getId();
     }
 
     public void prepare(String userName) {
         getTargetNode(userName);
     }
 
-    public NodeRef exportUserNodes(String userName) throws IOException, ArchiveException {
+    public void exportUserNodes(String userName) throws IOException, ArchiveException {
         log.info("starting for user {}", userName);
         String rootPath = config.getMainPath().concat("/" + userName);
 
@@ -216,11 +232,13 @@ public class DataProtectionService {
             mimeType = "application/zip";
         }
 
-        return AuthenticationUtil.runAsSystem(() -> persistAndCleanup(userName, target, rootPath, mimeType));
+        AuthenticationUtil.runAsSystem(() -> persistAndCleanup(userName, target, rootPath, mimeType));
     }
 
     private File summaryReport(String userName, List<NodeRef> collectionNodes, List<NodeRef> feedBacks, List<NodeRef> comments, String rootPath) {
-        if (!summaryExport) return null;
+        if (!summaryExport) {
+            return null;
+        }
 
         // filter collection refs for report
         collectionNodes = collectionNodes.stream().filter(c -> nodeService.getType(c).equals(QName.createQName(CCConstants.CCM_TYPE_MAP))).toList();
@@ -296,6 +314,7 @@ public class DataProtectionService {
         try {
             NodeRef nodeRef = getTargetNode(userName);
             permissionService.setPermission(nodeRef, userName, PermissionService.CONSUMER, true);
+            nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_GDPR), Collections.emptyMap());
             nodeService.removeAspect(nodeRef, ContentModel.ASPECT_VERSIONABLE);
             ContentWriter writer = contentService.getWriter(nodeRef, ContentModel.PROP_CONTENT, true);
             writer.setMimetype(mimeType);
@@ -326,7 +345,7 @@ public class DataProtectionService {
                 NodeRef rs = utils.getNodeRef(parentId, CCConstants.CCM_TYPE_MAP, pathElement);
                 parentId = rs.getId();
             }
-            return new Utils().getNodeRef(parentId, CCConstants.CCM_TYPE_IO, getFileName());
+            return utils.getNodeRef(parentId, CCConstants.CCM_TYPE_IO, getFileName());
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
@@ -461,7 +480,6 @@ public class DataProtectionService {
                     suffix++;
                     path = path.concat("_" + suffix);
                 }
-                ;
                 pathMap.put(k, path);
             }
         });
@@ -522,51 +540,37 @@ public class DataProtectionService {
         new Archiver().create(format, destination, directory);
     }
 
-    public boolean requestDataProtectionExport(String user) {
-        if (!user.equals(AuthenticationUtil.getFullyAuthenticatedUser())) {
-            boolean isAdmin = AuthorityServiceHelper.isAdmin();
-            if (!isAdmin) {
-                throw new SecurityException("admin rights required");
-            }
-        }
-        DataProtectionQueueEntry entry = queue.get(user);
-        if (entry == null) {
-            queue.add(user);
-            return true;
-        } else if (entry.getStatus().equals(DataProtectionQueue.Status.FINISHED.toString())) {
-            AuthenticationUtil.runAsSystem(() -> {
-                removeNode(entry.getNode_id());
-                return null;
-            });
-            entry.setRequested(new Date());
-            entry.setStatus(DataProtectionQueue.Status.REQUESTED.toString());
-            entry.setNode_id(null);
-            entry.setFinished(null);
-            queue.update(entry);
-            return true;
-        }
-        return false;
-    }
+    @Queued(unique = true)
+    @Permission(requiresUser = true)
+    public void requestDataProtectionExport(@HasRole String user) {
 
-    private static void removeNode(String nodeId) {
-        org.edu_sharing.service.nodeservice.NodeService eduNodeService = NodeServiceFactory.getInstance().getLocalService();
-        eduNodeService.removeNode(nodeId, null, false);
-    }
+        AuthenticationUtil.runAsSystem(() -> {
+            prepare(user);
+            return null;
+        });
 
-    public DataProtectionQueueEntry getDataProtectionQueueEntry(String user) {
-        return queue.get(user);
+        try {
+            exportUserNodes(user);
+        } catch (IOException e) {
+            log.error("Error while exporting user nodes", e);
+        } catch (ArchiveException e) {
+            log.error("Error while archiving user nodes", e);
+        }
     }
 
     private String formatDate(Date date, ZoneId zone, Locale locale, FormatStyle style, boolean includeTime) {
-        if (date == null) return null;
-        ZonedDateTime zonedDateTime = date.toInstant().atZone(zone);
+        if (date == null) {
+            return null;
+        }
 
+        ZonedDateTime zonedDateTime = date.toInstant().atZone(zone);
         DateTimeFormatter formatter = (includeTime) ? DateTimeFormatter.ofLocalizedDateTime(style) : DateTimeFormatter.ofLocalizedDate(style);
         formatter = formatter.withLocale(locale)
                 .withZone(zone);
 
         return formatter.format(zonedDateTime);
     }
+
 
     @Data
     @Builder

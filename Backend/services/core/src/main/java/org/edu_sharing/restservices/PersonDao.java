@@ -39,7 +39,6 @@ import org.edu_sharing.service.dashboard.DashboardConfigServiceFactory;
 import org.edu_sharing.service.dashboard.models.DashboardShortcut;
 import org.edu_sharing.service.dataprotection.FeatureInfoDataProtectionService;
 import org.edu_sharing.service.dataprotection.DataProtectionService;
-import org.edu_sharing.service.dataprotection.queue.DataProtectionQueueEntry;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -863,14 +862,14 @@ public class PersonDao {
         return authorityService.generate2FaQRCode(getUserName());
     }
 
-	public boolean requestDataProtectionExport(){
+	public void requestDataProtectionExport(){
             ApplicationContextFactory.getApplicationContext().getBean(FeatureInfoDataProtectionService.class);
-		return dataProtectionService.requestDataProtectionExport(getUserName());
+		dataProtectionService.requestDataProtectionExport(getUserName());
     }
 
-	public DataProtectionQueueEntry getDataProtectionQueueEntry(){
+	public String getDataProtectionNode(){
             ApplicationContextFactory.getApplicationContext().getBean(FeatureInfoDataProtectionService.class);
-		return dataProtectionService.getDataProtectionQueueEntry(getUserName());
+		return dataProtectionService.getDataProtectionNode(getUserName());
     }
 
     public DashboardShortcutEntry[] getDashboardShortcuts() throws Exception {

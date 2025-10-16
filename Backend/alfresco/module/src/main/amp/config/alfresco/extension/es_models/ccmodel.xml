@@ -2382,5 +2382,9 @@
         </property>
       </properties>
     </aspect>
+
+    <aspect name="ccm:gdpr">
+      <title>General Data Protection Regulation</title>
+    </aspect>
   </aspects>
 </model>

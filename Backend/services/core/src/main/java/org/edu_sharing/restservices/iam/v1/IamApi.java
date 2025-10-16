@@ -13,10 +13,13 @@ import jakarta.validation.Valid;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.camel.Body;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.policy.OnUpdatePersonPropertiesPolicy;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.repository.server.jobs.JobQueueContextHolder;
+import org.edu_sharing.repository.server.jobs.JobQueueEntry;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.iam.v1.model.*;
@@ -27,7 +30,6 @@ import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.QRCode2Fa;
 import org.edu_sharing.service.dashboard.models.DashboardShortcut;
-import org.edu_sharing.service.dataprotection.queue.DataProtectionQueueEntry;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.password.ValidPassword;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
@@ -42,10 +44,7 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Path("/iam/v1")
@@ -93,7 +92,7 @@ public class IamApi {
                 filter.put(CCConstants.getValidLocalName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS), status.name());
 
             sortProperties = (sortProperties != null && !sortProperties.isEmpty())
-                    ? sortProperties.stream().map(p -> CCConstants.getValidGlobalName(p) == null ? "cm:"+p : p).collect(Collectors.toList())
+                    ? sortProperties.stream().map(p -> CCConstants.getValidGlobalName(p) == null ? "cm:" + p : p).collect(Collectors.toList())
                     : sortProperties;
 
             SearchResult<String> search = SearchServiceFactory.getInstance().getService(repoDao.getId()).searchUsers(
@@ -615,14 +614,14 @@ public class IamApi {
     @Operation(summary = "requests General Data Protection Regulation (GDPR) export.", description = "Request General Data Protection Regulation (GDPR) export of the user the user. (To request GDPR export for foreign users, admin rights are required.)")
 
     @ApiResponses(
-    value = {
-            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = DataProtectionQueueEntry.class))),
-            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    })
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Long.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response requestDataProtectionExport(
             @Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
@@ -633,10 +632,14 @@ public class IamApi {
 
             RepositoryDao repoDao = RepositoryDao.getRepository(repository);
             PersonDao personDao = PersonDao.getPerson(repoDao, person);
-            boolean created = personDao.requestDataProtectionExport();
-            DataProtectionQueueEntry entry = personDao.getDataProtectionQueueEntry();
-            if(created) return Response.status(Response.Status.OK).entity(entry).build();
-            else return Response.status(Response.Status.CONFLICT).entity(entry).build();
+            personDao.requestDataProtectionExport();
+            List<JobQueueEntry> queuedJobs = JobQueueContextHolder.getJobQueueContext().getQueuedJobs();
+            Optional<Long> jobId = queuedJobs.stream().findFirst().map(JobQueueEntry::getId);
+            if (jobId.isPresent()) {
+                return Response.status(Response.Status.OK).entity(jobId.get()).build();
+            } else {
+                return Response.status(Response.Status.CONFLICT).build();
+            }
 
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
@@ -649,32 +652,28 @@ public class IamApi {
     @Operation(summary = "Fetches the node of general data protection export", description = "Fetches the node of general data protection export.")
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = DataProtectionExport.class))),
-                    @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = DataProtectionExport.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
     public Response getDataProtectionExport(@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
-                                            @Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue = "-me-")) @PathParam("person") String person)
-    {
+                                            @Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue = "-me-")) @PathParam("person") String person) {
         try {
             RepositoryDao repoDao = RepositoryDao.getRepository(repository);
             PersonDao personDao = PersonDao.getPerson(repoDao, person);
-            DataProtectionExport response = new DataProtectionExport();
-            DataProtectionQueueEntry dataProtectionQueueEntry = personDao.getDataProtectionQueueEntry();
-            if(dataProtectionQueueEntry != null) {
-                response.setStatus(dataProtectionQueueEntry);
-                if(dataProtectionQueueEntry.getNode_id() != null) {
-                    NodeDao nodeDao = NodeDao.getNode(repoDao, dataProtectionQueueEntry.getNode_id());
-                    NodeEntry nodeEntry = new NodeEntry();
-                    nodeEntry.setNode(nodeDao.asNode());
-                    response.setNodeEntry(nodeEntry);
-                    return Response.status(Response.Status.OK).entity(response).build();
-                }
+            String nodeId = personDao.getDataProtectionNode();
+            if (StringUtils.isNotBlank(nodeId)) {
+                DataProtectionExport response = new DataProtectionExport();
+                NodeDao nodeDao = NodeDao.getNode(repoDao, nodeId);
+                NodeEntry nodeEntry = new NodeEntry();
+                nodeEntry.setNode(nodeDao.asNode());
+                response.setNodeEntry(nodeEntry);
+                return Response.status(Response.Status.OK).entity(response).build();
             }
-            return Response.status(Response.Status.NOT_FOUND).entity(response).build();
+            return Response.status(Response.Status.NOT_FOUND).build();
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
         }
@@ -793,6 +792,7 @@ public class IamApi {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
         }
     }
+
     @GET
     @Produces({"text/plain", "application/json"})
     @Path("/people/{repository}/{person}/credential/2fa/status")
@@ -817,6 +817,7 @@ public class IamApi {
         boolean status = personDao.get2FaStatus();
         return Response.status(Response.Status.OK).entity(status).build();
     }
+
     @PUT
     @Produces({"text/plain", "application/json"})
     @Path("/people/{repository}/{person}/credential/2fa/generate")
