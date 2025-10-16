@@ -33,7 +33,6 @@ public class Release_11_0_ShareInfos {
 
 
     private final NodeService nodeService;
-    private final OwnableService ownableService;
     private final ShareInfoServiceImpl shareInfoService;
     private final GlobalShareService globalShareService;
 
