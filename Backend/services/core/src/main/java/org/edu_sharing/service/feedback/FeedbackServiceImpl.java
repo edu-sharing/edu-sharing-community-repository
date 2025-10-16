@@ -3,6 +3,7 @@ package org.edu_sharing.service.feedback;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.typesafe.config.Config;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -78,6 +79,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationListener
     }
 
     @Override
+    @PostConstruct
     public void refresh() {
         Config config = LightbendConfigLoader.get().getConfig("repository.feedback");
         userMode = config.getEnum(UserMode.class, "userMode");
@@ -199,17 +201,13 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationListener
 
     private String getHashedAuthority(String authorityName) {
         String esuid = (String) NodeServiceHelper.getPropertyNative(AuthorityServiceHelper.getAuthorityNodeRef(authorityName), CCConstants.PROP_USER_ESUID);
-        if (userMode.equals(UserMode.obfuscate)) {
-            return DigestUtils.sha1Hex(authorityName + esuid);
-        } else if (userMode.equals(UserMode.full)) {
-            return authorityName;
-        } else if (userMode.equals(UserMode.session)) {
-            return DigestUtils.sha1Hex(Context.getCurrentInstance().getSessionId() + esuid);
-        } else if (userMode.equals(UserMode.external)) {
-            throw new NotImplementedException("TODO");
-        } else {
-            throw new IllegalArgumentException("Invalid userMode");
-        }
+        return switch (userMode) {
+            case obfuscate -> DigestUtils.sha1Hex(authorityName + esuid);
+            case full -> authorityName;
+            case session -> DigestUtils.sha1Hex(Context.getCurrentInstance().getSessionId() + esuid);
+            case external -> throw new NotImplementedException("TODO");
+            default -> throw new IllegalArgumentException("Invalid userMode");
+        };
     }
 
 }
