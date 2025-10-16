@@ -172,7 +172,13 @@ export enum BulkBehavior {
  *   - Read only
  *   - Triggered via mds-viewer
  */
-export type EditorMode = 'nodes' | 'search' | 'form' | 'inline' | 'viewer';
+export type EditorMode =
+    | 'nodes'
+    | 'search'
+    | 'form'
+    | 'inline'
+    | 'viewer'
+    | 'searchFacetSuggestion';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;
