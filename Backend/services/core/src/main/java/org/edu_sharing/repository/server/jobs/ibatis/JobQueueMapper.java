@@ -9,6 +9,7 @@ import java.util.List;
 public interface JobQueueMapper {
 
     @Insert("INSERT INTO edu_job_queue (is_unique,job_group,requested,last_updated,ttl,status,bean,method,param_types,params,user_name,job_hash) VALUES (#{unique},#{group},#{requested},#{lastUpdated},#{ttl},#{status},#{bean},#{method},#{paramTypes},#{params},#{user},#{jobHash})")
+    @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
     void insert(JobQueueEntry entry);
 
 
