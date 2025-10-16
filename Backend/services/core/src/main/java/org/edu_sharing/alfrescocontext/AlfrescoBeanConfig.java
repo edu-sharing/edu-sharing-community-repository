@@ -41,6 +41,7 @@ import org.alfresco.service.cmr.workflow.WorkflowService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.type.TypeHandler;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.policy.HomeFolderTool;
 import org.edu_sharing.alfresco.service.OrganisationService;
@@ -51,11 +52,9 @@ import org.edu_sharing.repository.server.tools.cache.UserCache;
 import org.edu_sharing.spring.conditions.ConditionalOnMissingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.*;
 
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -367,8 +366,10 @@ public class AlfrescoBeanConfig {
     }
 
     @Bean
-    public SqlSessionFactory sqlSessionFactoryBean() {
-        return applicationContext.getBean("repoSqlSessionFactory", SqlSessionFactory.class);
+    public SqlSessionFactory sqlSessionFactoryBean(List<TypeHandler<?>> typeHandlers) {
+        SqlSessionFactory sqlSessionFactory = applicationContext.getBean("repoSqlSessionFactory", SqlSessionFactory.class);
+        typeHandlers.forEach(sqlSessionFactory.getConfiguration().getTypeHandlerRegistry()::register);
+        return sqlSessionFactory;
     }
 
     @Bean

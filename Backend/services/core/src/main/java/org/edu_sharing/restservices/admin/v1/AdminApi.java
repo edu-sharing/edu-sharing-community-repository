@@ -18,6 +18,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import lombok.Setter;
 import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
@@ -35,6 +36,8 @@ import org.edu_sharing.repository.client.rpc.cache.CacheCluster;
 import org.edu_sharing.repository.client.rpc.cache.CacheInfo;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.appcontext.ApplicationInfoContextHolder;
+import org.edu_sharing.repository.server.jobs.JobQueueEntry;
+import org.edu_sharing.repository.server.jobs.JobQueueService;
 import org.edu_sharing.repository.server.jobs.quartz.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
 import org.edu_sharing.repository.server.tools.ActionObserver;
@@ -68,6 +71,7 @@ import org.edu_sharing.spring.ApplicationContextFactory;
 import org.edu_sharing.spring.security.SSORegistrationService;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.FileWriter;
 import java.io.InputStream;
@@ -84,6 +88,7 @@ import java.util.stream.Collectors;
 @Produces({"application/json"})
 public class AdminApi {
     static Map<String, String[]> XML_FILTER = new HashMap<>();
+
     static {
         XML_FILTER.put(CCConstants.REPOSITORY_FILE_HOME, new String[]{"private_key", "password"});
     }
@@ -117,7 +122,7 @@ public class AdminApi {
     @Operation(summary = "get detailed version information", description = "detailed information about the running system version")
 
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(type ="object", additionalPropertiesSchema = RepositoryVersionInfo.class))),
+            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(type = "object", additionalPropertiesSchema = RepositoryVersionInfo.class))),
             @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -132,6 +137,7 @@ public class AdminApi {
             return ErrorResponse.createResponse(t);
         }
     }
+
     @GET
     @Path("/toolpermissions/{authority}")
 
@@ -139,7 +145,7 @@ public class AdminApi {
 
     @ApiResponses(value = {
 //            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(array = @ArraySchema(schema = @Schema(type="object", properties = {@StringToClassMapItem(key="<*>", value = ToolPermission.class)})))),
-            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(type="object", additionalPropertiesSchema = ToolPermission.class))),
+            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(type = "object", additionalPropertiesSchema = ToolPermission.class))),
             @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -156,13 +162,14 @@ public class AdminApi {
             return ErrorResponse.createResponse(t);
         }
     }
+
     @PUT
     @Path("/toolpermissions/{authority}")
 
     @Operation(summary = "set toolpermissions for an authority", description = "If a toolpermission has status UNDEFINED, it will remove explicit permissions for the authority")
 
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(type="object", additionalPropertiesSchema = ToolPermission.class))),
+            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(type = "object", additionalPropertiesSchema = ToolPermission.class))),
             @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -180,6 +187,7 @@ public class AdminApi {
             return ErrorResponse.createResponse(t);
         }
     }
+
     @POST
     @Path("/applyTemplate")
 
@@ -299,7 +307,6 @@ public class AdminApi {
             return ErrorResponse.createResponse(t);
         }
     }
-
 
 
     @DELETE
@@ -581,7 +588,7 @@ public class AdminApi {
 
     @Operation(summary = "Get entries of a cache", description = "Get entries of a cache.")
 
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(type= "object",  additionalPropertiesSchema = Object.class))),
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(type = "object", additionalPropertiesSchema = Object.class))),
             @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -596,7 +603,6 @@ public class AdminApi {
             return ErrorResponse.createResponse(t);
         }
     }
-
 
 
     @GET
@@ -731,7 +737,7 @@ public class AdminApi {
             @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
     public Response uploadTemp(@Parameter(description = "filename", required = true) @PathParam("name") String name,
-                               @Parameter(description = "file to upload", schema = @Schema(type="string", format = "binary"), required = true) @FormDataParam("file") InputStream is,
+                               @Parameter(description = "file to upload", schema = @Schema(type = "string", format = "binary"), required = true) @FormDataParam("file") InputStream is,
                                @Context HttpServletRequest req) {
         try {
             String file = AdminServiceFactory.getInstance().uploadTemp(name, is);
@@ -789,7 +795,7 @@ public class AdminApi {
             @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
     public Response importOaiXML(@Parameter(description = "RecordHandler class name", required = false, schema = @Schema(defaultValue = "org.edu_sharing.repository.server.importer.RecordHandlerLOM")) @QueryParam("recordHandlerClassName") String recordHandlerClassName,
                                  @Parameter(description = "BinaryHandler class name (may be empty for none)", required = false, schema = @Schema(defaultValue = "")) @QueryParam("binaryHandlerClassName") String binaryHandlerClassName,
-                                 @Parameter(schema = @Schema(type="string", format = "binary")) @FormDataParam("xml") InputStream xml,
+                                 @Parameter(schema = @Schema(type = "string", format = "binary")) @FormDataParam("xml") InputStream xml,
                                  @Context HttpServletRequest req) {
         try {
             String node = AdminServiceFactory.getInstance().importOaiXml(xml, recordHandlerClassName, binaryHandlerClassName);
@@ -1009,6 +1015,7 @@ public class AdminApi {
         }
 
     }
+
     @POST
     @Path("/job/{jobClass}/sync")
     @Operation(summary = "Start a Job.", description = "Start a Job. Wait for the result synchronously")
@@ -1035,6 +1042,59 @@ public class AdminApi {
 
     }
 
+    @Autowired
+    @Setter
+    private JobQueueService jobQueueService;
+
+    @GET
+    @Path("jobs/queued")
+    @Operation(summary = "Retrieve the list of queued jobs")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(array = @ArraySchema(schema= @Schema(implementation = JobQueueEntry.class)))),
+            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
+    public Response getQueuedJobs(@Parameter(description = "skip", required = true) @QueryParam("skip") int skip,
+                                  @Parameter(description = "limit", required = true) @QueryParam("limit") int limit) {
+        List<JobQueueEntry> queuedJobs = jobQueueService.getQueuedJobs(skip, limit);
+        return Response.ok().entity(queuedJobs).build();
+    }
+
+    @DELETE
+    @Path("jobs/queued")
+    @Operation(summary = "Delete jobs by id", description = "Has no effect on currently running jobs.")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200),
+            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
+    public Response deleteQueuedJobs(@Parameter(description = "job ids to delete")  List<Long> jobIds) {
+        jobQueueService.deleteQueuedJobs(jobIds);
+        return Response.ok().build();
+    }
+
+    @POST
+    @Path("jobs/queued/{id}/reset")
+    @Operation(summary = "Reset jobs by id", description = "Resets the job status and last update date. Has no effect on currently running jobs!")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200),
+            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
+    public Response resetQueuedJob(@Parameter(description = "job id to reset") @PathParam("id") Long jobId) {
+        jobQueueService.resetJobStatus(jobId);
+        return Response.ok().build();
+    }
+
+
+
+
     @GET
     @Path("/elastic")
     @Consumes({"application/json"})
@@ -1050,7 +1110,7 @@ public class AdminApi {
 
     public Response searchByElasticDSL(
             @Parameter(description = "dsl query (json encoded)", schema = @Schema(defaultValue = "")) @QueryParam("dsl") String dsl,
-			@Parameter(description = "index", schema = @Schema(defaultValue="")) @QueryParam("index") String index,
+            @Parameter(description = "index", schema = @Schema(defaultValue = "")) @QueryParam("index") String index,
             @Context HttpServletRequest req) {
 
         try {
@@ -1058,7 +1118,7 @@ public class AdminApi {
             //check that there is an admin
             AdminServiceFactory.getInstance();
             SearchServiceElastic elastic = ApplicationContextFactory.getApplicationContext().getBean(SearchServiceElastic.class);
-			SearchResultNodeRefElastic search = elastic.searchDSL(dsl,index);
+            SearchResultNodeRefElastic search = elastic.searchDSL(dsl, index);
             RepositoryDao repoDao = RepositoryDao.getHomeRepository();
             List<Node> data = new ArrayList<>();
             for (org.edu_sharing.service.model.NodeRef ref : search.getData()) {
@@ -1086,6 +1146,7 @@ public class AdminApi {
             return ErrorResponse.createResponse(t);
         }
     }
+
     @GET
     @Path("/lucene")
     @Consumes({"application/json"})
@@ -1123,7 +1184,7 @@ public class AdminApi {
             token.setFrom(skipCount != null ? skipCount : 0);
             token.setMaxResult(maxItems != null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS);
             token.setContentType(ContentType.ALL);
-			setQuery(query,token);
+            setQuery(query, token);
             StoreRef storeRef = LuceneStore.Archive.equals(store) ? StoreRef.STORE_REF_ARCHIVE_SPACESSTORE : StoreRef.STORE_REF_WORKSPACE_SPACESSTORE;
             if (LuceneStore.Archive.equals(store)) {
                 token.setStoreName(storeRef.getIdentifier());
@@ -1163,7 +1224,7 @@ public class AdminApi {
     @Operation(summary = "Search for custom lucene query and choose specific properties to load", description = "e.g. @cm\\:name:\"*\"")
 
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(array = @ArraySchema(schema = @Schema(type="object", additionalPropertiesSchema = Objects.class)))),
+            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(array = @ArraySchema(schema = @Schema(type = "object", additionalPropertiesSchema = Objects.class)))),
             @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -1198,7 +1259,7 @@ public class AdminApi {
                 token.setFrom(page);
                 token.setMaxResult(pageSize);
                 token.setContentType(ContentType.ALL);
-				setQuery(query, token);
+                setQuery(query, token);
                 token.disableSearchCriterias();
                 token.setAuthorityScope(authorityScope);
                 StoreRef storeRef = LuceneStore.Archive.equals(store) ? StoreRef.STORE_REF_ARCHIVE_SPACESSTORE : StoreRef.STORE_REF_WORKSPACE_SPACESSTORE;
@@ -1220,8 +1281,7 @@ public class AdminApi {
                             String parentId = NodeServiceFactory.getInstance().getLocalService().getPrimaryParent(ref.getId());
                             String realProp = prop.substring("parent::".length());
                             props.put(prop, NodeServiceHelper.getPropertyNative(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId), CCConstants.getValidGlobalName(realProp)));
-						}
-						else{
+                        } else {
                             props.put(prop, NodeServiceHelper.getPropertyNative(alfRef, CCConstants.getValidGlobalName(prop)));
                         }
                     }
@@ -1247,36 +1307,37 @@ public class AdminApi {
         }
     }
 
-	/**
-	 * checks if its an json string. if true its using json else solr.
-	 * @param query
-	 * @param token
-	 */
-	private static void setQuery(String query, SearchToken token) {
-		logger.info("query:" + query);
-		//check if its json
-		boolean elasticQuery;
-		try {
-			JsonParser.parseString(query);
-			elasticQuery =  true;
-		} catch (Exception e) {
-			elasticQuery =  false;
-		}
-		if(elasticQuery) {
-			logger.info("using elasticsearch");
-			query = query.replaceAll("\\s", "");
-			if (query.replaceAll("\\s", "").startsWith("{\"query\"")) {
-				JsonObject jsonObject = JsonParser.parseString(query).getAsJsonObject();
-				JsonObject queryObject = jsonObject.getAsJsonObject("query");
-				logger.info("removed surrounding \"query\": " + queryObject.toString());
-				query = queryObject.toString();
-			}
-			token.setElasticQuery(QueryBuilders.wrapper().query(new String(Base64.getEncoder().encode(query.getBytes()))).build());
-		}else{
-			logger.info("using solr");
-			token.setLuceneString(query);
-		}
-	}
+    /**
+     * checks if its an json string. if true its using json else solr.
+     *
+     * @param query
+     * @param token
+     */
+    private static void setQuery(String query, SearchToken token) {
+        logger.info("query:" + query);
+        //check if its json
+        boolean elasticQuery;
+        try {
+            JsonParser.parseString(query);
+            elasticQuery = true;
+        } catch (Exception e) {
+            elasticQuery = false;
+        }
+        if (elasticQuery) {
+            logger.info("using elasticsearch");
+            query = query.replaceAll("\\s", "");
+            if (query.replaceAll("\\s", "").startsWith("{\"query\"")) {
+                JsonObject jsonObject = JsonParser.parseString(query).getAsJsonObject();
+                JsonObject queryObject = jsonObject.getAsJsonObject("query");
+                logger.info("removed surrounding \"query\": " + queryObject.toString());
+                query = queryObject.toString();
+            }
+            token.setElasticQuery(QueryBuilders.wrapper().query(new String(Base64.getEncoder().encode(query.getBytes()))).build());
+        } else {
+            logger.info("using solr");
+            token.setLuceneString(query);
+        }
+    }
 
 
     @PUT
@@ -1391,9 +1452,6 @@ public class AdminApi {
     }
 
 
-
-
-
     @GET
     @Path("/repositoryConfig")
     @Operation(summary = "get the repository config object")
@@ -1411,6 +1469,7 @@ public class AdminApi {
             return ErrorResponse.createResponse(t);
         }
     }
+
     @PUT
     @Path("/repositoryConfig")
     @Operation(summary = "set/update the repository config object")
@@ -1467,7 +1526,6 @@ public class AdminApi {
             return ErrorResponse.createResponse(t);
         }
     }
-
 
 
     @GET
@@ -1552,6 +1610,7 @@ public class AdminApi {
             return ErrorResponse.createResponse(t);
         }
     }
+
     @POST
     @Path("/authenticate/{authorityName}")
     @Operation(summary = "switch the session to a known authority name")
@@ -1621,4 +1680,6 @@ public class AdminApi {
         Workspace,
         Archive
     }
+
+
 }

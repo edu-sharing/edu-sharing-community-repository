@@ -1885,6 +1885,26 @@
         },
         "type": "object"
       },
+      "GetByNodeIdsRequest": {
+        "properties": {
+          "nodeIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "properties": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "Group": {
         "properties": {
           "aspects": {
@@ -2454,6 +2474,91 @@
             "type": "string"
           },
           "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "JobQueueEntry": {
+        "properties": {
+          "group": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "jobHash": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "lastUpdated": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          },
+          "params": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "requested": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "PENDING",
+              "RUNNING"
+            ],
+            "type": "string"
+          },
+          "ttl": {
+            "properties": {
+              "nano": {
+                "format": "int32",
+                "type": "integer"
+              },
+              "negative": {
+                "type": "boolean"
+              },
+              "positive": {
+                "type": "boolean"
+              },
+              "seconds": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "units": {
+                "items": {
+                  "properties": {
+                    "dateBased": {
+                      "type": "boolean"
+                    },
+                    "durationEstimated": {
+                      "type": "boolean"
+                    },
+                    "timeBased": {
+                      "type": "boolean"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "zero": {
+                "type": "boolean"
+              }
+            },
+            "type": "object"
+          },
+          "unique": {
+            "type": "boolean"
+          },
+          "user": {
             "type": "string"
           }
         },
@@ -11118,6 +11223,286 @@
           }
         },
         "summary": "get all available jobs",
+        "tags": [
+          "ADMIN v1"
+        ]
+      }
+    },
+    "/admin/v1/jobs/queued": {
+      "delete": {
+        "description": "Has no effect on currently running jobs.",
+        "operationId": "deleteQueuedJobs",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "format": "int64",
+                  "type": "integer"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "description": "job ids to delete"
+        },
+        "responses": {
+          "200": {
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Delete jobs by id",
+        "tags": [
+          "ADMIN v1"
+        ]
+      },
+      "get": {
+        "operationId": "getQueuedJobs",
+        "parameters": [
+          {
+            "description": "skip",
+            "in": "query",
+            "name": "skip",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "limit",
+            "in": "query",
+            "name": "limit",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/JobQueueEntry"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Retrieve the list of queued jobs",
+        "tags": [
+          "ADMIN v1"
+        ]
+      }
+    },
+    "/admin/v1/jobs/queued/{id}/reset": {
+      "post": {
+        "description": "Resets the job status and last update date. Has no effect on currently running jobs!",
+        "operationId": "resetQueuedJob",
+        "parameters": [
+          {
+            "description": "job id to reset",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Reset jobs by id",
         "tags": [
           "ADMIN v1"
         ]
@@ -38290,7 +38675,7 @@
             }
           },
           {
-            "description": "additionals fields of the custom json object stored in each query that should be returned",
+            "description": "additionals properties of the custom json object stored in each query that should be returned",
             "in": "query",
             "name": "additionalFields",
             "schema": {
@@ -38301,7 +38686,7 @@
             }
           },
           {
-            "description": "grouping fields of the custom json object stored in each query (currently only meant to be combined with no grouping by date)",
+            "description": "grouping properties of the custom json object stored in each query (currently only meant to be combined with no grouping by date)",
             "in": "query",
             "name": "groupField",
             "schema": {
@@ -38697,7 +39082,127 @@
             "description": "Fatal error occured."
           }
         },
-        "summary": "get statistics for node actions for the given organization",
+        "summary": "get statistics for node actions for the given organization.",
+        "tags": [
+          "STATISTIC v1"
+        ]
+      }
+    },
+    "/statistic/v1/statistics/nodes/organization/{orgId}/complete": {
+      "post": {
+        "description": "requires toolpermission TOOLPERMISSION_ORGANIZATION_STATISTICS_NODES",
+        "operationId": "getByOrganizationAsync",
+        "parameters": [
+          {
+            "description": "user id to fetch data for",
+            "in": "path",
+            "name": "orgId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "date range from in ISO 8601 format",
+            "in": "query",
+            "name": "dateFrom",
+            "required": true,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "date range to in ISO 8601 format",
+            "in": "query",
+            "name": "dateTo",
+            "required": true,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "shows only statistics of published nodes ",
+            "in": "query",
+            "name": "published",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "description": "properties to visualize in export"
+        },
+        "responses": {
+          "200": {
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Schedules a asynchronous job to retrieve statistics for node actions for the given organization. The result will be added to your inbox in form of an csv.",
         "tags": [
           "STATISTIC v1"
         ]
@@ -38831,6 +39336,110 @@
         ]
       }
     },
+    "/statistic/v1/statistics/nodes/range/complete": {
+      "post": {
+        "description": "requires toolpermission TOOLPERMISSION_SELECTIVE_STATISTICS_NODES",
+        "operationId": "getByNodesAsync",
+        "parameters": [
+          {
+            "description": "date range from in ISO 8601 format",
+            "in": "query",
+            "name": "dateFrom",
+            "required": true,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "date range to in ISO 8601 format",
+            "in": "query",
+            "name": "dateTo",
+            "required": true,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "shows only statistics of published nodes ",
+            "in": "query",
+            "name": "published",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetByNodeIdsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Schedules a asynchronous job to retrieve statistics for node actions for the given nodes. The result will be added to your inbox in form of an csv.",
+        "tags": [
+          "STATISTIC v1"
+        ]
+      }
+    },
     "/statistic/v1/statistics/nodes/user/{userId}": {
       "get": {
         "description": "requires toolpermission TOOLPERMISSION_USER_STATISTICS_NODES",
@@ -38955,6 +39564,126 @@
         ]
       }
     },
+    "/statistic/v1/statistics/nodes/user/{userId}/complete": {
+      "post": {
+        "description": "requires toolpermission TOOLPERMISSION_USER_STATISTICS_NODES",
+        "operationId": "getByUsersAsync",
+        "parameters": [
+          {
+            "description": "user id to fetch data for",
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "date range from in ISO 8601 format",
+            "in": "query",
+            "name": "dateFrom",
+            "required": true,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "date range to in ISO 8601 format",
+            "in": "query",
+            "name": "dateTo",
+            "required": true,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "shows only statistics of published nodes ",
+            "in": "query",
+            "name": "published",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "description": "properties to visualize in export"
+        },
+        "responses": {
+          "200": {
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Schedules a asynchronous job to retrieve statistics for node actions of nodes owned by the given user. The result will be added to your inbox in form of an csv.",
+        "tags": [
+          "STATISTIC v1"
+        ]
+      }
+    },
     "/statistic/v1/statistics/users": {
       "post": {
         "description": "requires either toolpermission TOOLPERMISSION_GLOBAL_STATISTICS_USER for global stats or to be admin of the requested mediacenter",
@@ -39005,7 +39734,7 @@
             }
           },
           {
-            "description": "additionals fields of the custom json object stored in each query that should be returned",
+            "description": "additionals properties of the custom json object stored in each query that should be returned",
             "in": "query",
             "name": "additionalFields",
             "schema": {
@@ -39016,7 +39745,7 @@
             }
           },
           {
-            "description": "grouping fields of the custom json object stored in each query (currently only meant to be combined with no grouping by date)",
+            "description": "grouping properties of the custom json object stored in each query (currently only meant to be combined with no grouping by date)",
             "in": "query",
             "name": "groupField",
             "schema": {

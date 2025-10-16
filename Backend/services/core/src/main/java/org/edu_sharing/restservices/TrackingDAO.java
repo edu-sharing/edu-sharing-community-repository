@@ -10,6 +10,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.edu_sharing.repository.server.jobs.annotations.Queued;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.restservices.tracking.v1.model.Tracking;
 import org.edu_sharing.restservices.tracking.v1.model.TrackingNode;
@@ -25,7 +26,6 @@ import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.annotation.RequestScope;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -34,7 +34,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-@RequestScope
 @RequiredArgsConstructor
 public class TrackingDAO {
 
@@ -42,7 +41,6 @@ public class TrackingDAO {
     private final SearchServiceElastic searchService;
     private final StatisticsFileService statisticsFileService;
 
-    private final RepositoryDao homeRepository = RepositoryDao.getHomeRepository();
     private final Filter filter = Filter.createShowAllFilter();
 
     @Value("${repository.statistics.searchResultsLimit:50000}")
@@ -321,24 +319,26 @@ public class TrackingDAO {
 
     @NotNull
     public List<TrackingNode> map(@NotNull Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> data) {
+        RepositoryDao homeRepository = RepositoryDao.getHomeRepository();
         return data.entrySet()
                 .stream()
-                .map(this::map)
+                .map(x -> map(x, homeRepository))
                 .collect(Collectors.toList());
     }
 
 
     @NotNull
-    public TrackingNode map(@NotNull Map.Entry<org.edu_sharing.service.model.NodeRef, StatisticEntry> entry) {
+    public TrackingNode map(@NotNull Map.Entry<org.edu_sharing.service.model.NodeRef, StatisticEntry> entry, @NotNull RepositoryDao homeRepository) {
         StatisticEntry statisticEntry = entry.getValue();
         Node node = new NodeDao(homeRepository, entry.getKey(), filter).asNode();
         return new TrackingNode(node, convertAuthority(statisticEntry.getAuthorityInfo()), statisticEntry.getDate(), statisticEntry.getCounts(), statisticEntry.getFields(), statisticEntry.getGroups());
     }
 
+    @Queued(unique = true)
     public void scheduleNodeStatisticsByRange(List<String> nodeIds, Date startDate, Date endDate, boolean publishedOnly, List<List<String>> properties) {
         try {
             Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> statisticEntryMap = getNodeStatisticsByRange(nodeIds, startDate, endDate, Integer.MAX_VALUE, publishedOnly);
-            String userInboxNodeId = homeRepository.getUserInbox(true);
+            String userInboxNodeId = RepositoryDao.getHomeRepository().getUserInbox(true);
             String filename = getFilename(startDate, endDate, "selective_materials");
             statisticsFileService.writeCSV(userInboxNodeId, filename, statisticEntryMap, properties);
         } catch (Throwable e) {
@@ -355,10 +355,11 @@ public class TrackingDAO {
                 , postfix).replace(":", "_");
     }
 
-    public void scheduleNodeStatisticsByOrganization(String orgId, Date startDate, Date endDate, boolean publishedOnly, List<List<String>> properties) {
+    @Queued(unique = true)
+    public void scheduleNodeStatisticsByOrganization(@HasRole String orgId, Date startDate, Date endDate, boolean publishedOnly, List<List<String>> properties) {
         try {
             Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> statisticEntryMap = getNodeStatisticsByOrganization(orgId, startDate, endDate, Integer.MAX_VALUE, publishedOnly);
-            String userInboxNodeId = homeRepository.getUserInbox(true);
+            String userInboxNodeId = RepositoryDao.getHomeRepository().getUserInbox(true);
             String filename = getFilename(startDate, endDate, orgId + "_materials");
             statisticsFileService.writeCSV(userInboxNodeId, filename, statisticEntryMap, properties);
         } catch (Throwable e) {
@@ -366,10 +367,11 @@ public class TrackingDAO {
         }
     }
 
-    public void scheduleNodeStatisticsByOwningUser(String userId, Date startDate, Date endDate, boolean publishedOnly, List<List<String>> properties) {
+    @Queued(unique = true)
+    public void scheduleNodeStatisticsByOwningUser(@HasRole String userId, Date startDate, Date endDate, boolean publishedOnly, List<List<String>> properties) {
         try {
             Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> statisticEntryMap = getNodeStatisticsByOwningUser(userId, startDate, endDate, Integer.MAX_VALUE, publishedOnly);
-            String userInboxNodeId = homeRepository.getUserInbox(true);
+            String userInboxNodeId = RepositoryDao.getHomeRepository().getUserInbox(true);
             String filename = getFilename(startDate, endDate, userId + "_materials");
             statisticsFileService.writeCSV(userInboxNodeId, filename, statisticEntryMap, properties);
         } catch (Throwable e) {

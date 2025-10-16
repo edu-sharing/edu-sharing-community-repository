@@ -3,7 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
     version="3.0">
-	
+
 	<!-- webdav stuff-->
 	  <context-param>
          <param-name>store</param-name>
@@ -18,22 +18,22 @@
       <param-value>classpath*:/org/edu_sharing/spring/application-context.xml</param-value>
     </context-param>
 
-   
+
    <filter>
-      
+
    	  <filter-name>Edu WebDAV Authentication Filter</filter-name>
-	      
+
       <filter-class>org.alfresco.repo.webdav.Edu_SharingBeanProxyFilter</filter-class>
       <init-param>
          <param-name>beanName</param-name>
          <param-value>WebDavAuthenticationFilter</param-value>
       </init-param>
-       
+
       <!--
       <filter-class>org.alfresco.repo.webdav.auth.Edu_SharingAuthenticationFilter</filter-class>
       -->
 
-      <!--       
+      <!--
       <filter-name>Edu WebDAV Authentication Filter</filter-name>
       <filter-class>org.alfresco.repo.webdav.auth.ShibbolethAuthenticationFilter</filter-class>
       <init-param>
@@ -45,7 +45,7 @@
 		      <param-value>Shib-Session-ID</param-value>
 	  </init-param>
       -->
-      
+
       <!--
       <filter-class>org.alfresco.repo.webdav.auth.LDAPAuthenticationFilter</filter-class>
       <init-param>
@@ -93,7 +93,7 @@
         <filter-name>Edu Global Header Filter</filter-name>
         <filter-class>org.edu_sharing.repository.server.GlobalHeaderFilter</filter-class>
     </filter>
-	
+
 	<filter>
       <filter-name>Edu-Sharing Guest Filter</filter-name>
       <filter-class>org.edu_sharing.repository.server.authentication.GuestFilter</filter-class>
@@ -106,7 +106,7 @@
       <filter-name>Edu-Sharing Authentication Preview Filter</filter-name>
       <filter-class>org.edu_sharing.repository.server.authentication.AuthenticationFilterPreview</filter-class>
     </filter>
-    
+
     <filter>
       <filter-name>Edu-Sharing Authentication Rest Filter</filter-name>
       <filter-class>org.edu_sharing.restservices.ApiAuthenticationFilter</filter-class>
@@ -116,12 +116,12 @@
     	<filter-name>Shibboleth SoapAction Header Fix</filter-name>
     	<filter-class>org.edu_sharing.repository.server.authentication.ShibbolethSLOHeaderFix</filter-class>
     </filter>
-    
+
     <filter>
         <filter-name>REST Origin Filter</filter-name>
         <filter-class>org.edu_sharing.restservices.ApiOriginFilter</filter-class>
     </filter>
-    
+
     <filter>
         <filter-name>ResponseTimeFilter</filter-name>
         <filter-class>org.edu_sharing.repository.server.debug.ResponseTimeFilter</filter-class>
@@ -152,6 +152,11 @@
     <filter>
         <filter-name>WebComponentsFilter</filter-name>
         <filter-class>org.edu_sharing.repository.server.WebComponentsFilter</filter-class>
+    </filter>
+
+    <filter>
+      <filter-name>JobQueueContextCleanupFilter</filter-name>
+      <filter-class>org.edu_sharing.repository.server.jobs.JobQueueContextCleanupFilter</filter-class>
     </filter>
 
     <filter-mapping>
@@ -299,12 +304,12 @@
 	      <filter-name>Edu Context Management Filter</filter-name>
 	      <url-pattern>/services/*</url-pattern>
    </filter-mapping>
-   
+
     <filter-mapping>
 	      <filter-name>Shibboleth SoapAction Header Fix</filter-name>
 	      <url-pattern>/services/LogoutNotification/*</url-pattern>
    </filter-mapping>
-   
+
     <filter-mapping>
 	      <filter-name>Edu Context Management Filter</filter-name>
 	      <url-pattern>/restservice/*</url-pattern>
@@ -320,10 +325,14 @@
   <filter-mapping>
 	      <filter-name>Edu Context Management Filter</filter-name>
    		  <url-pattern>/renderingproxy/*</url-pattern>
-   </filter-mapping>    
-   
+   </filter-mapping>
+   <filter-mapping>
+     <filter-name>JobQueueContextCleanupFilter</filter-name>
+     <url-pattern>/*</url-pattern>
+   </filter-mapping>
 
-   
+
+
     <filter-mapping>
        	  <filter-name>Edu Context Management Filter</filter-name>
           <url-pattern>/screenreader/*</url-pattern>
@@ -349,7 +358,7 @@
    <filter-mapping>
        	  <filter-name>Edu Context Management Filter</filter-name>
           <url-pattern>/search</url-pattern>
-   </filter-mapping>   
+   </filter-mapping>
     <filter-mapping>
        <filter-name>Edu-Sharing Guest Filter</filter-name>
        <url-pattern>/node/*</url-pattern>
@@ -434,18 +443,18 @@
     <filter-name>Edu-Sharing Authentication Rest Filter</filter-name>
     <url-pattern>/graphql</url-pattern>
   </filter-mapping>
-   
+
    <filter-mapping>
        <filter-name>Edu-Sharing Authentication Filter</filter-name>
        <url-pattern>/screenreader/*</url-pattern>
    </filter-mapping>
-   
+
    <filter-mapping>
        <filter-name>Edu-Sharing Authentication Filter</filter-name>
        <url-pattern>/classic.html</url-pattern>
    </filter-mapping>
-   
-   
+
+
    <filter-mapping>
 	      <filter-name>Edu-Sharing Authentication Preview Filter</filter-name>
 	      <url-pattern>/preview</url-pattern>
@@ -460,7 +469,7 @@
 	      <filter-name>ResponseTimeFilter</filter-name>
 	      <url-pattern>/*</url-pattern>
    </filter-mapping>
-   
+
     <!-- uncomment the following to configure cas authentication -->
 	<!--<filter>
   		<filter-name>CAS Authentication Filter</filter-name>
@@ -473,7 +482,7 @@
     			<param-name>serverName</param-name>
     			<param-value>http://edu-sharing.com:8080</param-value>
   		</init-param>
-	</filter> 
+	</filter>
 	<filter>
   		<filter-name>CAS Validation Filter</filter-name>
   		<filter-class>org.jasig.cas.client.validation.Cas20ProxyReceivingTicketValidationFilter</filter-class>
@@ -486,7 +495,7 @@
     			<param-value>http://edu-sharing.com:8080</param-value>
   		</init-param>
 	</filter>
-	
+
 	<filter>
   		<filter-name>CAS HttpServletRequest Wrapper Filter</filter-name>
   		<filter-class>org.jasig.cas.client.util.HttpServletRequestWrapperFilter</filter-class>
@@ -505,39 +514,39 @@
 		<url-pattern>/cas</url-pattern>
 	</filter-mapping>
 	-->
-    
+
 <servlet>
         <servlet-name>FolderTemplateServlet</servlet-name>
         <servlet-class>
             org.edu_sharing.repository.server.FolderTemplateServlet
-        </servlet-class> 
+        </servlet-class>
     </servlet>
 
-   
+
    <servlet>
       <servlet-name>EduWebDAV</servlet-name>
       <servlet-class>org.alfresco.repo.webdav.Edu_SharingWebDAVServlet</servlet-class>
       <load-on-startup>5</load-on-startup>
    </servlet>
-	
+
 
     <servlet>
         <servlet-name>SuggestService</servlet-name>
         <servlet-class>
             org.edu_sharing.repository.server.SuggestServiceImpl
-        </servlet-class> 
+        </servlet-class>
     </servlet>
     <servlet>
         <servlet-name>CCCreate</servlet-name>
         <servlet-class>
             org.edu_sharing.repository.server.CCCreate
-        </servlet-class> 
+        </servlet-class>
     </servlet>
     <servlet>
         <servlet-name>CCUpdate</servlet-name>
         <servlet-class>
             org.edu_sharing.repository.server.CCUpdate
-        </servlet-class> 
+        </servlet-class>
     </servlet>
     <servlet>
         <servlet-name>CCConfirmActivation</servlet-name>
@@ -557,15 +566,15 @@
         <servlet-name>RemoveUsersNodes</servlet-name>
         <servlet-class>
             org.edu_sharing.repository.server.RemoveUsersNodes
-        </servlet-class> 
+        </servlet-class>
     </servlet>
     <servlet>
         <servlet-name>Logout</servlet-name>
-        <servlet-class>org.edu_sharing.repository.server.authentication.LogoutServlet</servlet-class> 
+        <servlet-class>org.edu_sharing.repository.server.authentication.LogoutServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>Shibboleth</servlet-name>
-        <servlet-class>org.edu_sharing.repository.server.authentication.ShibbolethServlet</servlet-class> 
+        <servlet-class>org.edu_sharing.repository.server.authentication.ShibbolethServlet</servlet-class>
         <init-param>
                 <param-name>useHeaders</param-name>
                 <param-value>false</param-value>
@@ -578,17 +587,17 @@
     </servlet>
      <servlet>
         <servlet-name>CAS</servlet-name>
-        <servlet-class>org.edu_sharing.repository.server.authentication.CASServlet</servlet-class> 
+        <servlet-class>org.edu_sharing.repository.server.authentication.CASServlet</servlet-class>
     </servlet>
      <servlet>
         <servlet-name>Metadata</servlet-name>
         <servlet-class>
             org.edu_sharing.repository.server.MetadataServlet
-        </servlet-class> 
+        </servlet-class>
     </servlet>
     <servlet>
     	<servlet-name>PreviewDownload</servlet-name>
-    	<servlet-class>org.edu_sharing.repository.server.PreviewServlet</servlet-class>   
+    	<servlet-class>org.edu_sharing.repository.server.PreviewServlet</servlet-class>
     </servlet>
     <servlet>
     	<servlet-name>ContentServlet</servlet-name>
@@ -612,7 +621,7 @@
     </servlet>
     <servlet>
     	<servlet-name>ShareServlet</servlet-name>
-    	<servlet-class>org.edu_sharing.repository.server.ShareServlet</servlet-class>   
+    	<servlet-class>org.edu_sharing.repository.server.ShareServlet</servlet-class>
     </servlet>
 	<servlet>
 		<servlet-name>RenderingProxy</servlet-name>
@@ -630,9 +639,9 @@
     </servlet>
      <servlet>
     	<servlet-name>ExcelImport</servlet-name>
-    	<servlet-class>org.edu_sharing.repository.server.ExcelImportServlet</servlet-class>   
+    	<servlet-class>org.edu_sharing.repository.server.ExcelImportServlet</servlet-class>
     </servlet>
-    
+
     <servlet>
     	<servlet-name>OAuth2Token</servlet-name>
     	<servlet-class>org.edu_sharing.repository.server.authentication.oauth2.TokenEndpoint</servlet-class>
@@ -646,7 +655,7 @@
     	<servlet-name>cas_proxycallback</servlet-name>
     	<jsp-file>/cas_proxycallback.jsp</jsp-file>
     </servlet>-->
-    
+
     <!-- Axis servlet stuff
     <servlet>
 		<display-name>Apache-Axis Servlet</display-name>
@@ -695,7 +704,7 @@
         <servlet-name>SSORegistrationsDispatcherServlet</servlet-name>
         <url-pattern>/sso</url-pattern>
     </servlet-mapping>
- <servlet-mapping> 
+ <servlet-mapping>
         <servlet-name>FolderTemplateServlet</servlet-name>
         <url-pattern>/eduservlet/foldertemplate</url-pattern>
     </servlet-mapping>
@@ -704,13 +713,13 @@
         <servlet-name>REST API</servlet-name>
         <url-pattern>/rest/*</url-pattern>
     </servlet-mapping>
-	
+
 	<!-- webdav stuff-->
 	<servlet-mapping>
         <servlet-name>EduWebDAV</servlet-name>
         <url-pattern>/webdav/*</url-pattern>
    </servlet-mapping>
-    <servlet-mapping> 
+    <servlet-mapping>
         <servlet-name>Logout</servlet-name>
         <url-pattern>/logout</url-pattern>
     </servlet-mapping>
@@ -722,7 +731,7 @@
     	<servlet-name>CAS</servlet-name>
     	<url-pattern>/cas</url-pattern>
     </servlet-mapping>
-	<servlet-mapping> 
+	<servlet-mapping>
         <servlet-name>CCConfirmActivation</servlet-name>
         <url-pattern>/appactivation</url-pattern>
     </servlet-mapping>
@@ -734,16 +743,16 @@
         <servlet-name>oEmbedServlet</servlet-name>
         <url-pattern>/eduservlet/oembed</url-pattern>
     </servlet-mapping>
-    <servlet-mapping> 
+    <servlet-mapping>
         <servlet-name>SuggestService</servlet-name>
         <url-pattern>/eduservlet/suggestservice</url-pattern>
     </servlet-mapping>
-    
-    <servlet-mapping> 
+
+    <servlet-mapping>
         <servlet-name>CCCreate</servlet-name>
         <url-pattern>/eduservlet/create</url-pattern>
     </servlet-mapping>
-    <servlet-mapping> 
+    <servlet-mapping>
         <servlet-name>CCUpdate</servlet-name>
         <url-pattern>/eduservlet/update</url-pattern>
     </servlet-mapping>
@@ -751,26 +760,26 @@
    		 <servlet-name>RedirectServlet</servlet-name>
     	 <url-pattern>/eduservlet/redirect</url-pattern>
     </servlet-mapping>
-     <servlet-mapping> 
+     <servlet-mapping>
         <servlet-name>ServerUpdate</servlet-name>
         <url-pattern>/eduservlet/serverupdate</url-pattern>
     </servlet-mapping>
-    <servlet-mapping> 
+    <servlet-mapping>
         <servlet-name>RemoveUsersNodes</servlet-name>
         <url-pattern>/eduservlet/removeusernodes</url-pattern>
     </servlet-mapping>
-    <servlet-mapping> 
+    <servlet-mapping>
         <servlet-name>ExcelImport</servlet-name>
         <url-pattern>/eduservlet/excelimport</url-pattern>
     </servlet-mapping>
-    
+
     <servlet-mapping>
     	<servlet-name>Monitoring</servlet-name>
     	<url-pattern>/eduservlet/monitoring</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
      	<servlet-name>DownloadServlet</servlet-name>
-     	<url-pattern>/eduservlet/download</url-pattern>   
+     	<url-pattern>/eduservlet/download</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>SitemapServlet</servlet-name>
@@ -789,25 +798,25 @@
     	<url-pattern>/eduservlet/connector</url-pattern>
     </servlet-mapping>
 
-    
+
      <servlet-mapping>
     	<servlet-name>Metadata</servlet-name>
     	<url-pattern>/metadata</url-pattern>
     </servlet-mapping>
-    
+
     <servlet-mapping>
      	<servlet-name>PreviewDownload</servlet-name>
-     	<url-pattern>/preview</url-pattern>   
+     	<url-pattern>/preview</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
      	<servlet-name>ContentServlet</servlet-name>
-     	<url-pattern>/content</url-pattern>   
+     	<url-pattern>/content</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
      	<servlet-name>ShareServlet</servlet-name>
-     	<url-pattern>/share</url-pattern>   
+     	<url-pattern>/share</url-pattern>
     </servlet-mapping>
-    
+
     <servlet-mapping>
     	<servlet-name>RenderingProxy</servlet-name>
     	<url-pattern>/renderingproxy</url-pattern>
@@ -842,18 +851,18 @@
 		<servlet-name>OAuth2Token</servlet-name>
 		<url-pattern>/oauth2/token</url-pattern>
 	</servlet-mapping>
-		
+
 	<session-config>
       <session-timeout>60</session-timeout>
       <tracking-mode>URL</tracking-mode>
      <!-- <tracking-mode>SSL</tracking-mode>-->
       <tracking-mode>COOKIE</tracking-mode>
    	</session-config>
-	
+
 	<welcome-file-list>
       <welcome-file>index.html</welcome-file>
    	</welcome-file-list>
-   	
+
 	<listener>
 	     <listener-class>org.edu_sharing.repository.server.MCAlfrescoManager</listener-class>
 	 </listener>
