@@ -27,11 +27,9 @@ import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
-import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.service.authentication.ScopeUserHomeService;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
 import org.edu_sharing.service.authority.AuthorityService;
@@ -66,7 +64,7 @@ import java.util.stream.Stream;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DataProtectionService{
+public class DataProtectionService {
 
     private final NodeService nodeService;
     private final PersonService personService;
@@ -115,20 +113,20 @@ public class DataProtectionService{
         });
     }
 
-    public void cleanExpired(){
-        AuthenticationUtil.runAsSystem(()->{
+    public void cleanExpired() {
+        AuthenticationUtil.runAsSystem(() -> {
             List<DataProtectionQueueEntry> entries = queue.get(DataProtectionQueue.Status.FINISHED);
-            List<Pair<NodeRef,String>> toRemove = new ArrayList<>();
+            List<Pair<NodeRef, String>> toRemove = new ArrayList<>();
             entries.forEach(entry -> {
-                NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,entry.getNode_id());
-                Date modified = (Date)nodeService.getProperty(nodeRef, ContentModel.PROP_MODIFIED);
-                if((System.currentTimeMillis() - modified.getTime()) > Duration.parse(this.retentionPeriod).toMillis()){
-                    toRemove.add(new Pair<>(nodeRef,entry.getUser()));
+                NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, entry.getNode_id());
+                Date modified = (Date) nodeService.getProperty(nodeRef, ContentModel.PROP_MODIFIED);
+                if ((System.currentTimeMillis() - modified.getTime()) > Duration.parse(this.retentionPeriod).toMillis()) {
+                    toRemove.add(new Pair<>(nodeRef, entry.getUser()));
                 }
             });
             toRemove.forEach(pair -> {
-                if(DataProtectionQueue.Status.FINISHED.toString().equals(queue.get(pair.getSecond()).getStatus())){
-                    log.info("removing gdpr export {} {}",nodeService.getProperty(pair.getFirst(), ContentModel.PROP_NAME),pair.getFirst());
+                if (DataProtectionQueue.Status.FINISHED.toString().equals(queue.get(pair.getSecond()).getStatus())) {
+                    log.info("removing gdpr export {} {}", nodeService.getProperty(pair.getFirst(), ContentModel.PROP_NAME), pair.getFirst());
                     removeNode(pair.getFirst().getId());
                     queue.delete(pair.getSecond());
                 }
@@ -137,54 +135,55 @@ public class DataProtectionService{
         });
     }
 
-    public void startExport(){
+    public void startExport() {
         List<DataProtectionQueueEntry> allUsers = queue.getAll().stream()
                 .filter(e ->
                         DataProtectionQueue.Status.REQUESTED.toString().equals(e.getStatus()) || DataProtectionQueue.Status.RUNNING.toString().equals(e.getStatus()))
-                .collect(Collectors.toList());
-        for(DataProtectionQueueEntry e: allUsers) {
+                .toList();
+        for (DataProtectionQueueEntry e : allUsers) {
             startExport(e);
         }
     }
 
-    public void startExport(DataProtectionQueueEntry entry){
+    public void startExport(DataProtectionQueueEntry entry) {
         String userName = entry.getUser();
         queue.update(userName, null, DataProtectionQueue.Status.RUNNING);
         // be sure systemfolder and target node is created with as admin user so that this files will not be included in export zip
-        AuthenticationUtil.runAsSystem(()-> {
+        AuthenticationUtil.runAsSystem(() -> {
             prepare(userName);
-            return null;});
+            return null;
+        });
         NodeRef nodeRef = AuthenticationUtil.runAs(() -> exportUserNodes(userName), userName);
         queue.update(userName, nodeRef.getId(), DataProtectionQueue.Status.FINISHED);
     }
 
-    public void prepare(String userName){
+    public void prepare(String userName) {
         getTargetNode(userName);
     }
 
     public NodeRef exportUserNodes(String userName) throws IOException, ArchiveException {
         log.info("starting for user {}", userName);
-        String rootPath = config.getMainPath().concat("/"+userName);
+        String rootPath = config.getMainPath().concat("/" + userName);
 
         log.info("collecting home nodes for {}", userName);
         NodeRefResult userHomeResult = getUserHomeNodes(userName, null);
-        createStructure(rootPath,"home",buildPathMap(createChildParentMap(userHomeResult.getNodes())));
+        createStructure(rootPath, "home", buildPathMap(createChildParentMap(userHomeResult.getNodes())));
 
         log.info("collecting collection nodes for {}", userName);
         List<NodeRef> collectionNodes = getCollectionNodes(userName);
-        createStructure(rootPath,"collection",buildPathMap(createChildParentMap(collectionNodes)));
+        createStructure(rootPath, "collection", buildPathMap(createChildParentMap(collectionNodes)));
 
         log.info("collecting shared nodes for {}", userName);
-        List<NodeRef> sharedNodes = getSharedNodes(userName,null, Stream.concat(userHomeResult.getIgnored().stream(),Stream.concat(userHomeResult.nodes.stream(),collectionNodes.stream())).collect(Collectors.toList()));
-        createStructure(rootPath,"shared",buildPathMap(createChildParentMap(sharedNodes)));
+        List<NodeRef> sharedNodes = getSharedNodes(userName, null, Stream.concat(userHomeResult.getIgnored().stream(), Stream.concat(userHomeResult.nodes.stream(), collectionNodes.stream())).toList());
+        createStructure(rootPath, "shared", buildPathMap(createChildParentMap(sharedNodes)));
 
         log.info("collecting feedbacks for {}", userName);
         List<NodeRef> feedBacks = feedbackService.getUsersFeedback(userName);
-        createStructure(rootPath,"feedback",buildPathMap(createChildParentMap(feedBacks)));
+        createStructure(rootPath, "feedback", buildPathMap(createChildParentMap(feedBacks)));
 
         log.info("collecting comments for {}", userName);
         List<NodeRef> comments = commentService.getUsersComments(userName);
-        createStructure(rootPath,"comment",buildPathMap(createChildParentMap(comments)));
+        createStructure(rootPath, "comment", buildPathMap(createChildParentMap(comments)));
 
         //List<NodeRef> ratings = ratingService....
         //createStructure(rootPath,"comment",buildPathMap(createChildParentMap(comments)));
@@ -193,26 +192,26 @@ public class DataProtectionService{
         // safe
         NodeServiceInterceptor.setEduSharingScope("safe");
         NodeRefResult userHomeResultSafe = getUserHomeNodes(userName, "safe");
-        createStructure(rootPath,"safe/home",buildPathMap(createChildParentMap(userHomeResultSafe.getNodes())));
+        createStructure(rootPath, "safe/home", buildPathMap(createChildParentMap(userHomeResultSafe.getNodes())));
 
         log.info("collecting safe shared nodes for {}", userName);
-        List<NodeRef> sharedNodesSafe = getSharedNodes(userName,"safe", Stream.concat(userHomeResultSafe.getIgnored().stream(),Stream.concat(userHomeResultSafe.nodes.stream(),collectionNodes.stream())).collect(Collectors.toList()));
-        createStructure(rootPath,"safe/shared",buildPathMap(createChildParentMap(sharedNodesSafe)));
+        List<NodeRef> sharedNodesSafe = getSharedNodes(userName, "safe", Stream.concat(userHomeResultSafe.getIgnored().stream(), Stream.concat(userHomeResultSafe.nodes.stream(), collectionNodes.stream())).toList());
+        createStructure(rootPath, "safe/shared", buildPathMap(createChildParentMap(sharedNodesSafe)));
         NodeServiceInterceptor.setEduSharingScope(null);
 
         log.info("creating report for {}", userName);
-        File reportFile = summmaryReport(userName, collectionNodes, feedBacks, comments, rootPath);
+        File reportFile = summaryReport(userName, collectionNodes, feedBacks, comments, rootPath);
 
 
         log.info("creating archive for {}", userName);
         File target;
         String mimeType;
-        if(reportOnly() && reportFile != null) {
-            target = new File(rootPath+".pdf");
-            Files.copy(reportFile.toPath(),target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        if (reportOnly() && reportFile != null) {
+            target = new File(rootPath + ".pdf");
+            Files.copy(reportFile.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
             mimeType = "application/pdf";
-        }else{
-            target = new File(rootPath+".zip");
+        } else {
+            target = new File(rootPath + ".zip");
             archive(new File(rootPath), target);
             mimeType = "application/zip";
         }
@@ -220,54 +219,52 @@ public class DataProtectionService{
         return AuthenticationUtil.runAsSystem(() -> persistAndCleanup(userName, target, rootPath, mimeType));
     }
 
-    private File summmaryReport(String userName, List<NodeRef> collectionNodes, List<NodeRef> feedBacks, List<NodeRef> comments, String rootPath) {
-        if(!summaryExport) return null;
+    private File summaryReport(String userName, List<NodeRef> collectionNodes, List<NodeRef> feedBacks, List<NodeRef> comments, String rootPath) {
+        if (!summaryExport) return null;
 
         // filter collection refs for report
-        collectionNodes = collectionNodes.stream().filter(c -> nodeService.getType(c).equals(QName.createQName(CCConstants.CCM_TYPE_MAP))).collect(Collectors.toList());
+        collectionNodes = collectionNodes.stream().filter(c -> nodeService.getType(c).equals(QName.createQName(CCConstants.CCM_TYPE_MAP))).toList();
 
-        List<NodeRef> privateCollections = collectionNodes.stream().filter(n -> !isSharedNode(n,userName)).collect(Collectors.toList());
-        List<NodeRef> sharedCollections =  collectionNodes.stream().filter(n -> isSharedNode(n,userName)).collect(Collectors.toList());
+        List<NodeRef> privateCollections = collectionNodes.stream().filter(n -> !isSharedNode(n, userName)).toList();
+        List<NodeRef> sharedCollections = collectionNodes.stream().filter(n -> isSharedNode(n, userName)).toList();
 
 
         AuthorityService authorityService = AuthorityServiceFactory.getInstance().getLocalService();
         Set<String> groupSet = authorityService.getMemberships(userName);
         ArrayList<EduGroup> allEduGroups = AuthenticationUtil.runAsSystem(() -> authorityService.getAllEduGroups(userName));
-        List<String> groupList = groupSet.stream().map(g ->  (String)authorityService.getAuthorityProperty(g,CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME)).collect(Collectors.toList());
+        List<String> groupList = groupSet.stream().map(g -> (String) authorityService.getAuthorityProperty(g, CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME)).toList();
         User user = authorityService.getUser(userName);
 
-        /**
-         * @TODO use profile data or something dynamic determine locale and timezone
-         */
+        // @TODO use profile data or something dynamic determine locale and timezone
         ZoneId zone = ZoneId.of("Europe/Berlin");
         Locale locale = Locale.GERMANY;
 
-        Date firstLogin = (Date)user.getProperties().get(CCConstants.PROP_USER_ESFIRSTLOGIN);
-        Date lastLogin = (Date)user.getProperties().get(CCConstants.PROP_USER_ESLASTLOGIN);
-        String role = (String)user.getProperties().get(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION);
-        List<String> roles = role == null ? null : Stream.of(role).map(r -> I18nAngular.getTranslationAngular("common","USER.PRIMARY_AFFILIATION."+r)).collect(Collectors.toList());
-        ArrayList<String> secondaryUserName = (ArrayList<String>)user.getProperties().get(CCConstants.PROP_USER_SECONDARY_IDS);
+        Date firstLogin = (Date) user.getProperties().get(CCConstants.PROP_USER_ESFIRSTLOGIN);
+        Date lastLogin = (Date) user.getProperties().get(CCConstants.PROP_USER_ESLASTLOGIN);
+        String role = (String) user.getProperties().get(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION);
+        List<String> roles = role == null ? null : Stream.of(role).map(r -> I18nAngular.getTranslationAngular("common", "USER.PRIMARY_AFFILIATION." + r)).toList();
+        ArrayList<String> secondaryUserName = (ArrayList<String>) user.getProperties().get(CCConstants.PROP_USER_SECONDARY_IDS);
         PDFReport.Data.DataBuilder reportData = PDFReport.Data.builder()
                 .userName(userName)
                 .secondaryUserName(secondaryUserName)
                 .firstName(user.getGivenName())
                 .lastName(user.getSurname())
-                .firstLogin(formatDate(firstLogin,zone,locale,FormatStyle.MEDIUM,true))
-                .lastLogin(formatDate(lastLogin,zone,locale,FormatStyle.MEDIUM, true))
-                .currentDate(formatDate(new Date(),zone,locale,FormatStyle.MEDIUM,false))
+                .firstLogin(formatDate(firstLogin, zone, locale, FormatStyle.MEDIUM, true))
+                .lastLogin(formatDate(lastLogin, zone, locale, FormatStyle.MEDIUM, true))
+                .currentDate(formatDate(new Date(), zone, locale, FormatStyle.MEDIUM, false))
                 .email(user.getEmail())
                 .roles(roles)
                 .privateCollections(getNameList(privateCollections))
                 .sharedCollections(getNameList(sharedCollections))
-        //todo
+                //todo
                 .ratings(List.of())
                 .feedbacks(getNameList(feedBacks))
                 .comments(getNameList(comments))
                 .groupList(groupList);
 
-        if(allEduGroups != null && !allEduGroups.isEmpty()) {
+        if (allEduGroups != null && !allEduGroups.isEmpty()) {
             //reportData.schoolName(allEduGroups.stream().map(e -> (e.getGroupDisplayName() +"("+e.getGroupId()+")")).collect(Collectors.joining(",")));
-            reportData.schoolDisplayName(allEduGroups.stream().map(e -> (e.getGroupDisplayName() +"("+e.getGroupId()+")")).collect(Collectors.joining(",")));
+            reportData.schoolDisplayName(allEduGroups.stream().map(e -> (e.getGroupDisplayName() + "(" + e.getGroupId() + ")")).collect(Collectors.joining(",")));
         }
 
         String reportDirectory = rootPath.concat("/report");
@@ -279,27 +276,27 @@ public class DataProtectionService{
             }
         }
 
-        return report.report(reportData.build(), dir );
+        return report.report(reportData.build(), dir);
     }
 
     boolean isSharedNode(NodeRef nodeRef, String userName) {
         Set<AccessPermission> allSetPermissions = permissionService.getAllSetPermissions(nodeRef);
         List<AccessPermission> perms = allSetPermissions.stream().filter(a -> !userName.equals(a.getAuthority()) && !AuthorityType.OWNER.equals(a.getAuthorityType()))
-                .collect(Collectors.toList());
+                .toList();
         return !perms.isEmpty();
     }
 
-    private List<String> getNameList(List<NodeRef> nodes){
+    private List<String> getNameList(List<NodeRef> nodes) {
         return nodes.stream()
-                .map(n -> (String)nodeService.getProperty(n, ContentModel.PROP_NAME))
-                .collect(Collectors.toList());
+                .map(n -> (String) nodeService.getProperty(n, ContentModel.PROP_NAME))
+                .toList();
     }
 
     private NodeRef persistAndCleanup(String userName, File target, String rootPath, String mimeType) {
         try {
             NodeRef nodeRef = getTargetNode(userName);
-            permissionService.setPermission(nodeRef,userName,PermissionService.CONSUMER,true);
-            nodeService.removeAspect(nodeRef,ContentModel.ASPECT_VERSIONABLE);
+            permissionService.setPermission(nodeRef, userName, PermissionService.CONSUMER, true);
+            nodeService.removeAspect(nodeRef, ContentModel.ASPECT_VERSIONABLE);
             ContentWriter writer = contentService.getWriter(nodeRef, ContentModel.PROP_CONTENT, true);
             writer.setMimetype(mimeType);
             writer.addListener(() -> {
@@ -309,7 +306,7 @@ public class DataProtectionService{
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                sendMail(userName,nodeRef);
+                sendMail(userName, nodeRef);
             });
             writer.putContent(target);
 
@@ -335,26 +332,23 @@ public class DataProtectionService{
         }
     }
 
-    private String getFileName(){
+    private String getFileName() {
         Date date = new Date(); // or your custom date
         SimpleDateFormat formatter = new SimpleDateFormat("yyMMdd");
         String formatted = formatter.format(date);
-        String fileExtension = (reportOnly()) ?".pdf" : ".zip";
+        String fileExtension = (reportOnly()) ? ".pdf" : ".zip";
         return formatted.concat("_").concat(fileName).concat(fileExtension);
     }
 
-    public boolean reportOnly(){
-        if(summaryExport && !metadataExport){
-            return true;
-        }
-        return false;
+    public boolean reportOnly() {
+        return summaryExport && !metadataExport;
     }
 
-    private void createStructure(String rootPath, String subPath, HashMap<NodeRef, String> pathMap) throws IOException {
-        for(Map.Entry<NodeRef,String> e : pathMap.entrySet()){
+    private void createStructure(String rootPath, String subPath, Map<NodeRef, String> pathMap) throws IOException {
+        for (Map.Entry<NodeRef, String> e : pathMap.entrySet()) {
             NodeRef nodeRef = e.getKey();
             String path = e.getValue();
-            String nodePath = rootPath.concat("/" +subPath+"/").concat(path);
+            String nodePath = rootPath.concat("/" + subPath + "/").concat(path);
             File dir = new File(nodePath);
             if (!dir.exists()) {
                 boolean mkdirs = dir.mkdirs();// creates parent folders as needed
@@ -362,69 +356,68 @@ public class DataProtectionService{
                     throw new RuntimeException("Unable to create directory " + dir.getAbsolutePath());
                 }
             }
-            String fileName = nodePath.concat("/"+nodeService.getProperty(nodeRef,ContentModel.PROP_NAME));
-            writeNodePropertiesToJson(nodeRef,new File(fileName+".json"));
-            writeContent(nodeRef,ContentModel.PROP_CONTENT,new File(fileName));
-            writeContent(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW),new File(fileName+".png"));
+            String fileName = nodePath.concat("/" + nodeService.getProperty(nodeRef, ContentModel.PROP_NAME));
+            writeNodePropertiesToJson(nodeRef, new File(fileName + ".json"));
+            writeContent(nodeRef, ContentModel.PROP_CONTENT, new File(fileName));
+            writeContent(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW), new File(fileName + ".png"));
         }
     }
 
-    private NodeRefResult getUserHomeNodes(String userName, String scope){
+    private NodeRefResult getUserHomeNodes(String userName, String scope) {
         NodeRef userHome = getUserHome(userName, scope);
-        if(userHome == null){
+        if (userHome == null) {
             return NodeRefResult.builder().nodes(new ArrayList<>()).ignored(new ArrayList<>()).build();
         }
-        List<NodeRef> levelOne = nodeService.getChildAssocs(userHome).stream().map(ChildAssociationRef::getChildRef).collect(Collectors.toList());
+        List<NodeRef> levelOne = nodeService.getChildAssocs(userHome).stream().map(ChildAssociationRef::getChildRef).toList();
         // remove shared folder
-        List<NodeRef> ignored = levelOne.stream().filter(n -> CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(nodeService.getProperty(n,propMapType))).collect(Collectors.toList());
-        levelOne = levelOne.stream().filter(n -> !CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(nodeService.getProperty(n,propMapType))).collect(Collectors.toList());
+        List<NodeRef> ignored = levelOne.stream().filter(n -> CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(nodeService.getProperty(n, propMapType))).toList();
+        levelOne = levelOne.stream().filter(n -> !CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(nodeService.getProperty(n, propMapType))).toList();
 
         List<NodeRef> result = new ArrayList<>(levelOne);
         levelOne.forEach(n -> {
             QName type = nodeService.getType(n);
-                if(QName.createQName(CCConstants.CCM_TYPE_MAP).equals(type) || QName.createQName(CCConstants.CM_TYPE_FOLDER).equals(type) ){
-                    result.addAll(NodeServiceFactory.getInstance().getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, n.getId(), null, RecurseMode.All));
-                }
+            if (QName.createQName(CCConstants.CCM_TYPE_MAP).equals(type) || QName.createQName(CCConstants.CM_TYPE_FOLDER).equals(type)) {
+                result.addAll(NodeServiceFactory.getInstance().getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, n.getId(), null, RecurseMode.All));
+            }
         });
         return NodeRefResult.builder().nodes(result).ignored(ignored).build();
     }
 
-    List<NodeRef> getCollectionNodes(String userName){
-        List<NodeRef> all = personLifecycleService.getAllNodeRefs(userName,CCConstants.CCM_TYPE_MAP,null).stream().
-                filter((ref)->nodeService.hasAspect(ref,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION))).
-                collect(Collectors.toList());
-        all.addAll(personLifecycleService.getAllNodeRefs(userName,CCConstants.CCM_TYPE_IO,null).stream().
-                filter((ref)->nodeService.hasAspect(ref,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))).
-                collect(Collectors.toList()));
-       return all;
-    }
-
-    List<NodeRef> getSharedNodes(String userName, String scope, List<NodeRef> filesToIgnore){
-        List<NodeRef> all = personLifecycleService.getAllNodeRefs(userName, CCConstants.CCM_TYPE_IO,scope).stream().
-                filter((ref)->!filesToIgnore.contains(ref)).
-                collect(Collectors.toList());
-        all.addAll(personLifecycleService.getAllNodeRefs(userName, CCConstants.CCM_TYPE_MAP,scope).stream().
-                filter((ref)->!filesToIgnore.contains(ref)).
-                filter((ref)->!nodeService.hasAspect(ref, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION))).
-                collect(Collectors.toList()));
+    List<NodeRef> getCollectionNodes(String userName) {
+        List<NodeRef> all = new ArrayList<>(personLifecycleService.getAllNodeRefs(userName, CCConstants.CCM_TYPE_MAP, null).stream()
+                .filter((ref) -> nodeService.hasAspect(ref, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION)))
+                .toList());
+        all.addAll(personLifecycleService.getAllNodeRefs(userName, CCConstants.CCM_TYPE_IO, null).stream()
+                .filter((ref) -> nodeService.hasAspect(ref, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)))
+                .toList());
         return all;
     }
 
-    private NodeRef getUserHome(String userName, String scope){
+    List<NodeRef> getSharedNodes(String userName, String scope, List<NodeRef> filesToIgnore) {
+        List<NodeRef> all = new ArrayList<>(personLifecycleService.getAllNodeRefs(userName, CCConstants.CCM_TYPE_IO, scope).stream()
+                .filter((ref) -> !filesToIgnore.contains(ref))
+                .toList());
+        all.addAll(personLifecycleService.getAllNodeRefs(userName, CCConstants.CCM_TYPE_MAP, scope).stream()
+                .filter((ref) -> !filesToIgnore.contains(ref))
+                .filter((ref) -> !nodeService.hasAspect(ref, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION)))
+                .toList());
+        return all;
+    }
+
+    private NodeRef getUserHome(String userName, String scope) {
         NodeRef personNodeRef = personService.getPersonOrNull(userName);
         NodeRef homeFolder;
-        if(scope==null){
+        if (scope == null) {
             homeFolder = personLifecycleService.getHomeFolder(personNodeRef);
-            if(homeFolder==null){
-                log.info("Person "+userName+" does not have a home folder, skipping it");
+            if (homeFolder == null) {
+                log.info("Person {} does not have a home folder, skipping it", userName);
                 return null;
             }
-        }
-        else{
+        } else {
             ScopeUserHomeService scopeUserHomeService = ScopeUserHomeServiceFactory.getScopeUserHomeService();
             homeFolder = scopeUserHomeService.getUserHome((String) nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME)), scope, false);
-            if(homeFolder==null){
-                log.info("Person "+userName+" does not have a scope folder for "+scope+", skipping it");
+            if (homeFolder == null) {
+                log.info("Person {} does not have a scope folder for {}, skipping it", userName, scope);
                 return null;
             }
         }
@@ -432,42 +425,43 @@ public class DataProtectionService{
     }
 
 
-    private Map<NodeRef, Optional<NodeRef>>  createChildParentMap(List<NodeRef> nodeRefs){
-        if(!metadataExport) return new HashMap<>();
+    private Map<NodeRef, Optional<NodeRef>> createChildParentMap(List<NodeRef> nodeRefs) {
+        if (!metadataExport) return new HashMap<>();
         return nodeRefs.stream().collect(Collectors.toMap(n -> n, n -> {
             try {
                 NodeRef parent = nodeService.getPrimaryParent(n).getParentRef();
-                if(nodeRefs.contains(parent)) {
+                if (nodeRefs.contains(parent)) {
                     return Optional.of(parent);
                 }
-            } catch (AccessDeniedException e) {
+            } catch (AccessDeniedException ignored) {
             }
             return Optional.empty();
         }));
     }
 
-    private HashMap<NodeRef, String> buildPathMap(Map<NodeRef, Optional<NodeRef>> childParentMap){
-        HashMap<NodeRef, String> pathMap = new HashMap<>();
-        childParentMap.forEach((k,v)->{
+    private Map<NodeRef, String> buildPathMap(Map<NodeRef, Optional<NodeRef>> childParentMap) {
+        Map<NodeRef, String> pathMap = new HashMap<>();
+        childParentMap.forEach((k, v) -> {
             String path = pathMap.get(k);
-            if(path == null){
+            if (path == null) {
                 NodeRef pathEle = k;
                 // build path from child to ancestors
-                do{
-                    String pathEleName = (String)nodeService.getProperty(pathEle, ContentModel.PROP_NAME);
-                    path = (path == null) ? pathEleName : pathEleName.concat("/"+path);
+                do {
+                    String pathEleName = (String) nodeService.getProperty(pathEle, ContentModel.PROP_NAME);
+                    path = (path == null) ? pathEleName : pathEleName.concat("/" + path);
                     pathEle = childParentMap.get(pathEle).orElse(null);
-                }while(pathEle != null);
+                } while (pathEle != null);
 
                 // duplicate handling
                 int suffix = 0;
-                while(pathMap.values().contains(path)){
-                    if(suffix > 0){
-                        path = path.substring(0,path.length()-3);
+                while (pathMap.containsValue(path)) {
+                    if (suffix > 0) {
+                        path = path.substring(0, path.length() - 3);
                     }
                     suffix++;
-                    path = path.concat("_"+suffix);
-                };
+                    path = path.concat("_" + suffix);
+                }
+                ;
                 pathMap.put(k, path);
             }
         });
@@ -489,39 +483,38 @@ public class DataProtectionService{
     }
 
     private void writeContent(NodeRef nodeRef, QName contentProperty, File outputFile) throws IOException {
-        if(!binaryExport) return;
-        if(nodeService.getType(nodeRef).equals(QName.createQName(CCConstants.CCM_TYPE_IO))
-                && !nodeService.hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
+        if (!binaryExport) return;
+        if (nodeService.getType(nodeRef).equals(QName.createQName(CCConstants.CCM_TYPE_IO))
+                && !nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))) {
             ContentReader reader = contentService.getReader(nodeRef, contentProperty);
-            if(reader != null && reader.exists()){
+            if (reader != null && reader.exists()) {
                 try (InputStream in = reader.getContentInputStream(); OutputStream out = new FileOutputStream(outputFile)) {
-                    IOUtils.copy( in,out);
+                    IOUtils.copy(in, out);
                 }
             }
         }
     }
 
-    private void sendMail(String user, NodeRef nodeRef){
+    private void sendMail(String user, NodeRef nodeRef) {
         NodeRef personRef = personService.getPersonOrNull(user);
-        String firstname = (String)nodeService.getProperty(personRef, ContentModel.PROP_FIRSTNAME);
-        String lastName = (String)nodeService.getProperty(personRef,ContentModel.PROP_LASTNAME);
-        String email = (String)nodeService.getProperty(personRef, ContentModel.PROP_EMAIL);
+        String firstname = (String) nodeService.getProperty(personRef, ContentModel.PROP_FIRSTNAME);
+        String lastName = (String) nodeService.getProperty(personRef, ContentModel.PROP_LASTNAME);
+        String email = (String) nodeService.getProperty(personRef, ContentModel.PROP_EMAIL);
         String downloadUrl = URLTool.getDownloadServletUrl(nodeRef.getId(), null, true);
 
-        if(email == null) return;
+        if (email == null) return;
         Map<String, String> replace = new HashMap<>();
         replace.put("firstName", firstname);
         replace.put("lastName", lastName);
         replace.put("link", downloadUrl);
-        replace.put("retentionPeriod", Duration.parse(retentionPeriod).toDays()+"");
+        replace.put("retentionPeriod", Duration.parse(retentionPeriod).toDays() + "");
         try {
             String template = "gdpr";
             MailTemplate.sendMail(email, template, replace);
         } catch (Exception e) {
-            log.warn("Can not send status notify mail to user: " + e.getMessage(), e);
+            log.warn("Can not send status notify mail to user: {}", e.getMessage(), e);
         }
     }
-
 
 
     private void archive(File directory, File destination) throws IOException, ArchiveException {
@@ -529,19 +522,22 @@ public class DataProtectionService{
         new Archiver().create(format, destination, directory);
     }
 
-    public boolean requestDataProtectionExport(String user){
-        if(!user.equals(AuthenticationUtil.getFullyAuthenticatedUser())){
+    public boolean requestDataProtectionExport(String user) {
+        if (!user.equals(AuthenticationUtil.getFullyAuthenticatedUser())) {
             boolean isAdmin = AuthorityServiceHelper.isAdmin();
-            if(!isAdmin){
+            if (!isAdmin) {
                 throw new SecurityException("admin rights required");
             }
         }
         DataProtectionQueueEntry entry = queue.get(user);
-        if(entry == null){
+        if (entry == null) {
             queue.add(user);
             return true;
-        }else if(entry.getStatus().equals(DataProtectionQueue.Status.FINISHED.toString())){
-            AuthenticationUtil.runAsSystem(() -> { removeNode(entry.getNode_id());return null;});
+        } else if (entry.getStatus().equals(DataProtectionQueue.Status.FINISHED.toString())) {
+            AuthenticationUtil.runAsSystem(() -> {
+                removeNode(entry.getNode_id());
+                return null;
+            });
             entry.setRequested(new Date());
             entry.setStatus(DataProtectionQueue.Status.REQUESTED.toString());
             entry.setNode_id(null);
@@ -554,15 +550,15 @@ public class DataProtectionService{
 
     private static void removeNode(String nodeId) {
         org.edu_sharing.service.nodeservice.NodeService eduNodeService = NodeServiceFactory.getInstance().getLocalService();
-        eduNodeService.removeNode(nodeId,null,false);
+        eduNodeService.removeNode(nodeId, null, false);
     }
 
-    public DataProtectionQueueEntry getDataProtectionQueueEntry(String user){
+    public DataProtectionQueueEntry getDataProtectionQueueEntry(String user) {
         return queue.get(user);
     }
 
     private String formatDate(Date date, ZoneId zone, Locale locale, FormatStyle style, boolean includeTime) {
-        if(date == null) return null;
+        if (date == null) return null;
         ZonedDateTime zonedDateTime = date.toInstant().atZone(zone);
 
         DateTimeFormatter formatter = (includeTime) ? DateTimeFormatter.ofLocalizedDateTime(style) : DateTimeFormatter.ofLocalizedDate(style);
@@ -574,7 +570,7 @@ public class DataProtectionService{
 
     @Data
     @Builder
-    public static class NodeRefResult{
+    public static class NodeRefResult {
         List<NodeRef> nodes;
         List<NodeRef> ignored;
     }
