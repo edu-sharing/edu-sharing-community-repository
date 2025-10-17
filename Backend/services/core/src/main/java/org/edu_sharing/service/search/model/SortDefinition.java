@@ -197,13 +197,21 @@ public class SortDefinition implements Serializable {
 				} else {
 					name = "properties." + sortDefintionEntry.getProperty() + ((!addSuffix.isEmpty()) ? ("." + addSuffix) : "");
 				}
-				// currently, we use a dynamic model which might cause that fields not yet exists. We want to ignore this errors to let the request
-				builder.sort(sort->sort.field(field->field.field(name).order(sortOrder).unmappedType(FieldType.Keyword)));
-				if(addSuffix.equals("sort") || addSuffix.equals("number")) {
-					// we can't assume that the field exists, so for security, we always sort for a keyword field as a second option
-					builder.sort(sort->sort.field(field->field
-							.field("properties." + sortDefintionEntry.getProperty() + ".keyword")
+				// vcard/contributor displayname sort
+				if(CCConstants.getLifecycleContributerPropsMap().containsKey(property) || CCConstants.getMetadataContributerPropsMap().containsKey(property)) {
+					builder.sort(sort -> sort.field(field -> field
+							.field("contributor." + CCConstants.getValidLocalName(property) + ".displayname.keyword")
+							.nested(n -> n.path("contributor"))
 							.order(sortOrder).unmappedType(FieldType.Keyword)));
+				} else {
+					// currently, we use a dynamic model which might cause that fields not yet exists. We want to ignore this errors to let the request
+					builder.sort(sort -> sort.field(field -> field.field(name).order(sortOrder).unmappedType(FieldType.Keyword)));
+					if (addSuffix.equals("sort") || addSuffix.equals("number")) {
+						// we can't assume that the field exists, so for security, we always sort for a keyword field as a second option
+						builder.sort(sort -> sort.field(field -> field
+								.field("properties." + sortDefintionEntry.getProperty() + ".keyword")
+								.order(sortOrder).unmappedType(FieldType.Keyword)));
+					}
 				}
 			}
 		}
