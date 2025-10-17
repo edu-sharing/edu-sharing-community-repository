@@ -35,7 +35,7 @@ public class SortDefinition implements Serializable {
 
 	List<SortDefinitionEntry> sortDefinitionEntries = new ArrayList<>();
 
-	public static class SortDefinitionEntry implements Serializable{
+    public static class SortDefinitionEntry implements Serializable{
 		String property;
 		boolean ascending;
 
@@ -78,13 +78,13 @@ public class SortDefinition implements Serializable {
 		}
 		int i=0;
 		for(String sortProp : sortProperties){
-			SortDefinitionEntry entry = new SortDefinitionEntry();
-			Boolean sortAsc=sortAscending.size()==1 ? sortAscending.get(0) : sortAscending.get(i);
-			entry.setAscending(sortAsc);
-			entry.setProperty(namespace!=null && sortProp.split(":").length == 1 ? "{"+namespace+"}"+sortProp : sortProp);
-			addSortDefinitionEntry(entry);
-			i++;
-		}
+				SortDefinitionEntry entry = new SortDefinitionEntry();
+				Boolean sortAsc=sortAscending.size()==1 ? sortAscending.get(0) : sortAscending.get(i);
+				entry.setAscending(sortAsc);
+				entry.setProperty(namespace!=null && sortProp.split(":").length == 1 ? "{"+namespace+"}"+sortProp : sortProp);
+				addSortDefinitionEntry(entry);
+				i++;
+			}
 	}
 	public List<SortDefinitionEntry> getSortDefinitionEntries() {
 		return sortDefinitionEntries;
@@ -193,7 +193,7 @@ public class SortDefinition implements Serializable {
 				}
 				String name;
 				if(sortDefintionEntry.getProperty().startsWith("customProperties.")) {
-					name = sortDefintionEntry.getProperty();
+					name = sortDefintionEntry.getProperty() + ".keyword";
 				} else {
 					name = "properties." + sortDefintionEntry.getProperty() + ((!addSuffix.isEmpty()) ? ("." + addSuffix) : "");
 				}
@@ -206,6 +206,7 @@ public class SortDefinition implements Serializable {
 									.filter(f -> f.term(t -> t.field("contributor.property.keyword").value(CCConstants.getValidLocalName(property))))
 							)
 							.order(sortOrder).unmappedType(FieldType.Keyword)));
+
 				} else {
 					// currently, we use a dynamic model which might cause that fields not yet exists. We want to ignore this errors to let the request
 					builder.sort(sort -> sort.field(field -> field.field(name).order(sortOrder).unmappedType(FieldType.Keyword)));
