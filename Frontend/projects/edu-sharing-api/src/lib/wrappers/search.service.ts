@@ -635,7 +635,7 @@ export class SearchService {
         { count, value }: apiModels.Value,
     ): Observable<FacetValue> {
         return this.mdsLabel
-            .getLabel(this.getMdsIdentifier(), property, value)
+            .getLabel(this.getMdsIdentifier(), property, value, 'search')
             .pipe(map((label) => ({ count, value, ...label })));
     }
 
