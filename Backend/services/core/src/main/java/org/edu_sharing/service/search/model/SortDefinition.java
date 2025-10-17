@@ -32,25 +32,25 @@ public class SortDefinition implements Serializable {
 	);
 	transient ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 	transient ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-	
+
 	List<SortDefinitionEntry> sortDefinitionEntries = new ArrayList<>();
 
-    public static class SortDefinitionEntry implements Serializable{
+	public static class SortDefinitionEntry implements Serializable{
 		String property;
 		boolean ascending;
-		
+
 		public String getProperty() {
 			return property;
 		}
-		
+
 		public void setProperty(String property) {
 			this.property = property;
 		}
-		
+
 		public boolean isAscending() {
 			return ascending;
 		}
-		
+
 		public void setAscending(boolean ascending) {
 			this.ascending = ascending;
 		}
@@ -67,24 +67,24 @@ public class SortDefinition implements Serializable {
 	 * @param sortAscending sort ascending or descending
 	 */
 	public SortDefinition(Iterable<String> sortProperties,List<Boolean> sortAscending){
-		this(null,sortProperties,sortAscending);		
+		this(null,sortProperties,sortAscending);
 	}
 	public SortDefinition(String namespace, Iterable<String> sortProperties, List<Boolean> sortAscending) {
 		if(sortProperties == null)
-			return;			
+			return;
 		if(sortAscending==null) {
 			sortAscending= new ArrayList<>();
 			sortAscending.add(true);
 		}
 		int i=0;
 		for(String sortProp : sortProperties){
-				SortDefinitionEntry entry = new SortDefinitionEntry();
-				Boolean sortAsc=sortAscending.size()==1 ? sortAscending.get(0) : sortAscending.get(i);
-				entry.setAscending(sortAsc);
-				entry.setProperty(namespace!=null && sortProp.split(":").length == 1 ? "{"+namespace+"}"+sortProp : sortProp);
-				addSortDefinitionEntry(entry);
-				i++;
-			}
+			SortDefinitionEntry entry = new SortDefinitionEntry();
+			Boolean sortAsc=sortAscending.size()==1 ? sortAscending.get(0) : sortAscending.get(i);
+			entry.setAscending(sortAsc);
+			entry.setProperty(namespace!=null && sortProp.split(":").length == 1 ? "{"+namespace+"}"+sortProp : sortProp);
+			addSortDefinitionEntry(entry);
+			i++;
+		}
 	}
 	public List<SortDefinitionEntry> getSortDefinitionEntries() {
 		return sortDefinitionEntries;
@@ -95,8 +95,8 @@ public class SortDefinition implements Serializable {
 	public void addSortDefinitionEntry(SortDefinitionEntry sortDefinitionEntry){
 		sortDefinitionEntries.add(sortDefinitionEntry);
 	}
-	/** 
-	 * 
+	/**
+	 *
 	 * @return true if this SortDefinition has entries
 	 */
 	public boolean hasContent() {
@@ -198,10 +198,13 @@ public class SortDefinition implements Serializable {
 					name = "properties." + sortDefintionEntry.getProperty() + ((!addSuffix.isEmpty()) ? ("." + addSuffix) : "");
 				}
 				// vcard/contributor displayname sort
-				if(CCConstants.getLifecycleContributerPropsMap().containsKey(property) || CCConstants.getMetadataContributerPropsMap().containsKey(property)) {
+				if(CCConstants.getLifecycleContributerPropsMap().containsValue(property) || CCConstants.getMetadataContributerPropsMap().containsValue(property)) {
 					builder.sort(sort -> sort.field(field -> field
-							.field("contributor." + CCConstants.getValidLocalName(property) + ".displayname.keyword")
-							.nested(n -> n.path("contributor"))
+							.field("contributor..displayname.keyword")
+							.nested(n -> n
+									.path("contributor")
+									.filter(f -> f.term(t -> t.field("contributor.property.keyword").value(CCConstants.getValidLocalName(property))))
+							)
 							.order(sortOrder).unmappedType(FieldType.Keyword)));
 				} else {
 					// currently, we use a dynamic model which might cause that fields not yet exists. We want to ignore this errors to let the request
