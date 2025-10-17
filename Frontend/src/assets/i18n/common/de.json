@@ -1576,5 +1576,10 @@
     "RELOAD_NOTICE_TITLE": "Seite muss neugeladen werden.",
     "RELOAD_NOTICE": "Beim Laden von wichtigen Informationen ist etwas schief gegangen. Bitte laden Sie die Seite neu.",
     "RELOAD_BUTTON_LABEL": "Seite neu laden"
+  },
+  "STATISTICS": {
+    "SELECTIVE_MATERIALS": "ausgewählte_Materialien",
+    "MATERIALS": "Materialien",
+    "TO": "bis"
   }
 }

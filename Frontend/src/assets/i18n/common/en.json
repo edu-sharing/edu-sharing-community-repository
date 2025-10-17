@@ -1500,5 +1500,11 @@
     "publiccollections": "Public Collections",
     "aboutme": "My Profile",
     "documentation": "Go to Documentation"
+  },
+
+  "STATISTICS": {
+    "SELECTIVE_MATERIALS": "selective_materials",
+    "MATERIALS": "materials",
+    "TO": "to"
   }
 }

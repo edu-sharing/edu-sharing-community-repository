@@ -9,11 +9,13 @@ import lombok.RequiredArgsConstructor;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.jobs.annotations.Queued;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.restservices.tracking.v1.model.Tracking;
 import org.edu_sharing.restservices.tracking.v1.model.TrackingNode;
+import org.edu_sharing.service.notification.NotificationService;
 import org.edu_sharing.service.permission.annotation.HasRole;
 import org.edu_sharing.service.permission.annotation.Permission;
 import org.edu_sharing.service.search.SearchServiceElastic;
@@ -40,6 +42,7 @@ public class TrackingDAO {
     private final ActivityStatisticService activityStatisticService;
     private final SearchServiceElastic searchService;
     private final StatisticsFileService statisticsFileService;
+    private final NotificationService notificationService;
 
     private final Filter filter = Filter.createShowAllFilter();
 
@@ -339,7 +342,7 @@ public class TrackingDAO {
         try {
             Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> statisticEntryMap = getNodeStatisticsByRange(nodeIds, startDate, endDate, Integer.MAX_VALUE, publishedOnly);
             String userInboxNodeId = RepositoryDao.getHomeRepository().getUserInbox(true);
-            String filename = getFilename(startDate, endDate, "selective_materials");
+            String filename = getFilename(startDate, endDate,  I18nAngular.getTranslationAngular("common", "STATISTICS.SELECTIVE_MATERIALS"));
             statisticsFileService.writeCSV(userInboxNodeId, filename, statisticEntryMap, properties);
         } catch (Throwable e) {
             throw new RuntimeException(e);
@@ -348,9 +351,10 @@ public class TrackingDAO {
 
     @NotNull
     private static String getFilename(Date startDate, Date endDate, String postfix) {
+        // TODO i18n
         return String.join("_",
                 startDate.toInstant().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_LOCAL_DATE)
-                , "to"
+                , I18nAngular.getTranslationAngular("common", "STATISTICS.TO")
                 , endDate.toInstant().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_LOCAL_DATE)
                 , postfix).replace(":", "_");
     }
@@ -360,7 +364,8 @@ public class TrackingDAO {
         try {
             Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> statisticEntryMap = getNodeStatisticsByOrganization(orgId, startDate, endDate, Integer.MAX_VALUE, publishedOnly);
             String userInboxNodeId = RepositoryDao.getHomeRepository().getUserInbox(true);
-            String filename = getFilename(startDate, endDate, orgId + "_materials");
+            // TODO i18n
+            String filename = getFilename(startDate, endDate, orgId + "_" + I18nAngular.getTranslationAngular("common", "STATISTICS.MATERIALS"));
             statisticsFileService.writeCSV(userInboxNodeId, filename, statisticEntryMap, properties);
         } catch (Throwable e) {
             throw new RuntimeException(e);
@@ -372,8 +377,10 @@ public class TrackingDAO {
         try {
             Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> statisticEntryMap = getNodeStatisticsByOwningUser(userId, startDate, endDate, Integer.MAX_VALUE, publishedOnly);
             String userInboxNodeId = RepositoryDao.getHomeRepository().getUserInbox(true);
-            String filename = getFilename(startDate, endDate, userId + "_materials");
+            // TODO i18n
+            String filename = getFilename(startDate, endDate, userId + "_" + I18nAngular.getTranslationAngular("common", "STATISTICS.MATERIALS"));
             statisticsFileService.writeCSV(userInboxNodeId, filename, statisticEntryMap, properties);
+            //notificationService.notifyInbox()
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
