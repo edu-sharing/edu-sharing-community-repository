@@ -581,10 +581,10 @@ public class NodeServiceHelper {
 	 */
 	public static Map<String, Object> addVirtualProperties(String type, List<String> aspects, Map<String, Object> properties) {
 		properties.put(CCConstants.VIRT_PROP_TYPE, CCConstants.getValidLocalName(type));
-		properties.put(CCConstants.VIRT_PROP_MEDIATYPE, I18nAngular.getTranslationAngular("common", "MEDIATYPE." + MimeTypesV2.getNodeType(type,
+		properties.put(CCConstants.VIRT_PROP_MEDIATYPE, I18nAngular.getTranslationAngular("common", "MEDIATYPE." + MimeTypesV2.getNodeType(new MimeTypesV2.NodeInfo(type,
 				properties,
-				aspects))
-		);
+				aspects), MimeTypesV2.Type.Mediatype)
+		));
 		return properties;
 	}
 

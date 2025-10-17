@@ -1,16 +1,45 @@
 package org.edu_sharing.service.mime;
 
+import lombok.extern.slf4j.Slf4j;
 import org.edu_sharing.alfresco.action.RessourceInfoExecuter;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.Theme;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.tools.URLHelper;
+import org.edu_sharing.restservices.shared.Node;
+import org.edu_sharing.service.search.model.SortDefinition;
+import org.edu_sharing.spring.ApplicationContextFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 import java.util.*;
 
+@Slf4j
 public class MimeTypesV2 {
-
+	public record NodeInfo(
+		String nodeType,
+		Map<String,Object> properties,
+		List<String> aspects
+	) { }
+	/**
+	 * map custom mime type icons (svg) or previews
+	 * @Service
+	 * public class CustomMimeTypeMapping implements MimeTypesV2.MimeTypeMapping {
+	 *     @Override
+	 *     public String getCustomNodeType(MimeTypesV2.NodeInfo node, MimeTypesV2.Type type, String regularType) {
+	 *         if(type.equals(MimeTypesV2.Type.Mediatype)) {
+	 *             return regularType;
+	 *         }
+	 *         if(regularType.equals("folder")) {
+	 *             return regularType;
+	 *         }
+	 *         return "file-excel";
+	 *     }
+	 * }
+	 */
+	public interface MimeTypeMapping {
+		String getCustomNodeType(NodeInfo node, Type type, String regularType);
+	}
 
 	public enum PathType{
 		Relative,
@@ -161,7 +190,7 @@ public class MimeTypesV2 {
 	 * @return
 	 */
 	public String getIcon(String nodeType,Map<String,Object> properties,List<String> aspects){
-		return getIconPath()+getNodeType(nodeType,properties,aspects)+"."+preferredFormat.getSuffix();
+		return getIconPath()+getNodeType(new NodeInfo(nodeType,properties,aspects), Type.Icon)+"."+preferredFormat.getSuffix();
 	}
 	public String getDefaultIcon(){
 		return getIconPath()+"file."+preferredFormat.getSuffix();
@@ -170,7 +199,7 @@ public class MimeTypesV2 {
 	 * @return
 	 */
 	public String getPreview(String nodeType,Map<String,Object> properties,List<String> aspects){
-		return getPreviewPath()+getNodeType(nodeType,properties,aspects)+"."+preferredFormat.getSuffix();
+		return getPreviewPath()+getNodeType(new NodeInfo(nodeType,properties,aspects), Type.Preview)+"."+preferredFormat.getSuffix();
 	}
 	/**
 	 * Gets a default "unknown" preview
@@ -195,26 +224,35 @@ public class MimeTypesV2 {
 	}
 	/**
 	 * Returns the guessed node-type (used for the preview files), e.g. file-folder, file-word or file-image
-	 * @param properties
-	 * @return
 	 */
-	public static String getNodeType(String nodeType,Map<String,Object> properties,List<String> aspects){
-		if(isCollection(aspects, properties))
+	public static String getNodeType(NodeInfo info, Type type){
+		String regularType = getNodeTypeInternal(info, type);
+		try {
+			return ApplicationContextFactory.getApplicationContext().getBean(MimeTypeMapping.class).getCustomNodeType(info, type, regularType);
+		} catch (NoSuchBeanDefinitionException ignored) {
+
+		} catch(Throwable t){
+			log.warn(t.getMessage(), t);
+		}
+		return regularType;
+	}
+	public static String getNodeTypeInternal(NodeInfo info, Type type){
+		if(isCollection(info.aspects, info.properties))
 			return "collection";
-		if(isDirectory(properties, nodeType)) {
-			if(aspects.contains(CCConstants.CCM_ASPECT_MAP_REF)){
+		if(isDirectory(info.properties, info.nodeType)) {
+			if(info.aspects.contains(CCConstants.CCM_ASPECT_MAP_REF)){
 				return "folder-link";
 			}
 			return "folder";
 		}
-		if(properties != null) {
-			String ccressourcetype = (String) properties.get(CCConstants.CCM_PROP_CCRESSOURCETYPE);
+		if(info.properties != null) {
+			String ccressourcetype = (String) info.properties.get(CCConstants.CCM_PROP_CCRESSOURCETYPE);
 			if(RessourceInfoExecuter.CCM_RESSOURCETYPE_GEOGEBRA.equals(ccressourcetype)) {
 				return "file-geogebra";
 			} else if(RessourceInfoExecuter.CCM_RESSOURCETYPE_SERLO.equals(ccressourcetype)) {
 				return "file-serlo";
-			} else if(RessourceInfoExecuter.CCM_RESSOURCETYPE_CONNECTOR.equals(ccressourcetype) && properties.get(CCConstants.CCM_PROP_CCRESSOURCESUBTYPE) != null) {
-				return "file-" + properties.get(CCConstants.CCM_PROP_CCRESSOURCESUBTYPE).toString().trim().toLowerCase();
+			} else if(RessourceInfoExecuter.CCM_RESSOURCETYPE_CONNECTOR.equals(ccressourcetype) && info.properties.get(CCConstants.CCM_PROP_CCRESSOURCESUBTYPE) != null) {
+				return "file-" + info.properties.get(CCConstants.CCM_PROP_CCRESSOURCESUBTYPE).toString().trim().toLowerCase();
 			}
 			else if(RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_DEFAULT.equals(ccressourcetype)) {
 				return "file-git-repository";
@@ -222,23 +260,23 @@ public class MimeTypesV2 {
 				return "file-jupyter-notebook";
 			}
 		}
-		if(isLtiDefinition(aspects))
+		if(isLtiDefinition(info.aspects))
 			return "tool_definition";
-		if(isSavedSearch(nodeType))
+		if(isSavedSearch(info.nodeType))
 			return "saved_search";
-		if(isLtiObject(aspects) || isLTI13ToolObject(aspects))
+		if(isLtiObject(info.aspects) || isLTI13ToolObject(info.aspects))
 			return "tool_object";
-		if(isLtiInstance(nodeType))
+		if(isLtiInstance(info.nodeType))
 			return "tool_instance";
 		String fallback="file";
-		boolean isLink=properties.get(CCConstants.CCM_PROP_IO_WWWURL)!=null &&
-				!((String)properties.get(CCConstants.CCM_PROP_IO_WWWURL)).isEmpty();
+		boolean isLink=info.properties.get(CCConstants.CCM_PROP_IO_WWWURL)!=null &&
+				!((String)info.properties.get(CCConstants.CCM_PROP_IO_WWWURL)).isEmpty();
 		// do not force link, the remote object might provided an custom TECHNICAL_FORMAT
 		if(isLink){
 			//return "link";
 			fallback="link";
 		}
-		return getTypeFromMimetype(getMimeType(properties, nodeType),properties,fallback);
+		return getTypeFromMimetype(getMimeType(info.properties, info.nodeType),info.properties,fallback);
 	}
 	public static String getTypeFromMimetype(String mimetype) {
 		return getTypeFromMimetype(mimetype,null,"file");
@@ -465,4 +503,9 @@ public class MimeTypesV2 {
 		return mimeType;
 	}
 
+	public enum Type {
+		Preview,
+		Icon,
+		Mediatype
+	}
 }

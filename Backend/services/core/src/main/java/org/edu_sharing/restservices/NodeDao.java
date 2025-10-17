@@ -2361,7 +2361,7 @@ public class NodeDao {
     }
 
     public String getMediatype() {
-        return MimeTypesV2.getNodeType(type, nodeProps, aspects);
+        return MimeTypesV2.getNodeType(new MimeTypesV2.NodeInfo(type, nodeProps, aspects), MimeTypesV2.Type.Mediatype);
     }
 
     private String getSize(Node data) {
