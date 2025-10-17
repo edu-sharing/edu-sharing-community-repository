@@ -866,6 +866,7 @@
     "OPEN": "Öffnen",
     "DOWNLOAD_ZIP": "Als Zip Herunterladen.",
     "LINK": "Zur Originalseite springen.",
+    "EMPTY_FOLDER": "Der freigegebene Ordner enthält noch keine Dateien",
     "INVITED_AND_CREATED_BY": "Erstellt und freigegeben von {{inviter}}",
     "INVITED_PLUS_CREATED_BY": "Freigegeben von {{inviter}}, erstellt von {{creator}}",
     "ENTER_PASSWORD": "weiter",

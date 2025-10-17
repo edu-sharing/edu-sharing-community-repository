@@ -15,7 +15,11 @@
         position: relative;
     }
 }
-
+.empty {
+    justify-content: center;
+    width: 100%;
+    padding: 20px;
+}
 .password-required {
     margin: 0 auto;
     width: 400px;

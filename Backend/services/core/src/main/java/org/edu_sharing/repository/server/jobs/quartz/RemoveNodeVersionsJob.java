@@ -1,13 +1,13 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.cmr.version.VersionService;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
  * keeping the original dbid from the version entry. this job helps reducing entries in alf_node properties.
  */
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+@Slf4j
 @JobDescription(description = "Removes versions of node which are not referenced")
 public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
 
@@ -39,7 +40,6 @@ public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
             CCConstants.VERSION_COMMENT_BULK_UPDATE_RESYNC,
             CCConstants.VERSION_COMMENT_BULK_MIGRATION
     );
-    protected Logger logger = Logger.getLogger(RemoveNodeVersionsJob.class);
 
     @Setter
     @JobFieldDescription(
@@ -87,7 +87,11 @@ public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
         runner.run();
 
         nodeRefs.forEach(n -> AuthenticationUtil.runAsSystem(() -> {
-            handleNode(n);
+            try {
+                handleNode(n);
+            }catch (Exception e){
+                log.error("Could not handle node {}", n, e);
+            }
             return null;
         }));
 
@@ -111,7 +115,7 @@ public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
         try {
             usages = usage2Service.getUsages("-home-", node.getId(), null, null);
         } catch (Exception e) {
-            logger.warn("node " + node + " is be skipped due to a usage request failure", e);
+            log.warn("node {} is be skipped due to a usage request failure", node, e);
             return;
         }
 
@@ -126,7 +130,7 @@ public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
                 .collect(Collectors.toList());
 
         versionsToDelete.forEach(version -> {
-            logger.info("deleteing version node:" + node + " replicationSourceId:" + replicationSourceId + " versionLabel:" + version.getVersionLabel());
+            log.info("deleteing version node:{} replicationSourceId:{} versionLabel:{}", node, replicationSourceId, version.getVersionLabel());
             versionService.deleteVersion(node, version);
         });
     }
