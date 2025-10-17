@@ -191,7 +191,12 @@ public class SortDefinition implements Serializable {
 						}
 					}
 				}
-				String name = "properties." + sortDefintionEntry.getProperty() + ((!addSuffix.isEmpty()) ? ("." + addSuffix) :"" );
+				String name;
+				if(sortDefintionEntry.getProperty().startsWith("customProperties.")) {
+					name = sortDefintionEntry.getProperty();
+				} else {
+					name = "properties." + sortDefintionEntry.getProperty() + ((!addSuffix.isEmpty()) ? ("." + addSuffix) : "");
+				}
 				// currently, we use a dynamic model which might cause that fields not yet exists. We want to ignore this errors to let the request
 				builder.sort(sort->sort.field(field->field.field(name).order(sortOrder).unmappedType(FieldType.Keyword)));
 				if(addSuffix.equals("sort") || addSuffix.equals("number")) {
