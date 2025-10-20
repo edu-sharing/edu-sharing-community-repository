@@ -54,7 +54,7 @@ public class Release_11_0_GDPR {
             }
 
             try(PreparedStatement statement = connection.prepareStatement("DROP TABLE edu_dataprotection_queue")) {
-                statement.executeQuery();
+                statement.execute();
                 connection.commit();
             }
 
