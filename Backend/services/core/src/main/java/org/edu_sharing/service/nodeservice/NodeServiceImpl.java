@@ -576,8 +576,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 throw new IllegalArgumentException("invalid RecurseMode");
             }
             String user = AuthenticationUtil.getFullyAuthenticatedUser();
-            // run in parallel to increase performance
-            maps.parallelStream().forEach((map) -> {
+            maps.forEach((map) -> {
                 if (map.isPrimary()) {
                     AuthenticationUtil.runAs(() -> result.addAll(getChildrenRecursive(store, map.getChildRef().getId(), types, recurseMode))
                             , user);
