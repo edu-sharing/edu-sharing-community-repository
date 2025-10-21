@@ -46,6 +46,8 @@ import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.edu_sharing.spring.ApplicationContextFactory;
+import org.edu_sharing.spring.security.basic.SecurityConfigurationBasic;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -272,7 +274,13 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 			}
 		}
 
-		addToSpringContext(username,session);
+		ApplicationContext eduAppContext = ApplicationContextFactory.getApplicationContext();
+		if(eduAppContext != null){
+			String profiles = eduAppContext.getEnvironment().getProperty("spring.profiles.active");
+			if(profiles != null && profiles.contains(SecurityConfigurationBasic.PROFILE_ID)){
+				addToSpringContext(username,session);
+			}
+		}
 	}
 	
 	public void authenticateUser(String username, HttpSession session) {
