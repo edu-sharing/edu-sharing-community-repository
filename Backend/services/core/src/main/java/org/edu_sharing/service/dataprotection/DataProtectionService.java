@@ -19,7 +19,6 @@ import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
-import org.alfresco.util.Pair;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.examples.Archiver;
 import org.apache.commons.compress.utils.FileNameUtils;
@@ -27,7 +26,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.edu_sharing.alfresco.service.search.cmis.*;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
-import org.edu_sharing.generated.repository.backend.services.rest.client.model.DataProtectionQueueEntry;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -120,11 +118,14 @@ public class DataProtectionService {
 
     @RunAsSystem
     public void cleanExpired() {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        String retentionDate = dateTimeFormatter.format(ZonedDateTime.now(ZoneId.of("UTC")).minus(Duration.parse(this.retentionPeriod)));
+
         QueryStatement query = Query.select(CCConstants.SYS_PROP_NODE_UID, CCConstants.CM_NAME)
                 .from(CCConstants.CCM_TYPE_IO)
                 .where(Filters.and(
                         Filters.hasAspect(CCConstants.CCM_ASPECT_GDPR),
-                        Filters.lt(ContentModel.PROP_MODIFIED, ZonedDateTime.now().minus(Duration.parse(this.retentionPeriod)).toInstant().toEpochMilli())
+                        Filters.lt(CCConstants.CM_PROP_C_MODIFIED, retentionDate)
                 ));
 
         SearchParameters searchParameters = new SearchParameters();
