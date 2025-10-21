@@ -4,6 +4,8 @@ import org.edu_sharing.repository.server.AuthenticationTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.AuthenticationToolYouTube;
 import org.edu_sharing.repository.server.appcontext.AppContextRegistry;
+import org.edu_sharing.service.archive.ArchiveService;
+import org.edu_sharing.service.archive.ArchiveServiceImpl;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceImpl;
 import org.edu_sharing.service.collection.CollectionService;
@@ -62,6 +64,7 @@ public class AppContextConfig {
                 .defineBean(AuthorityService.class, AuthorityServiceImpl.class)
                 .defineBean(DashboardConfigService.class, "dashboardConfigServiceImpl")
                 .defineBean(OrganizationService.class, OrganizationService.class)
+                .defineBean(ArchiveService.class, ArchiveServiceImpl.class)
                 .done()
 
                 .addAppContext("org.edu_sharing.service.provider.ElasticSearchProvider")
@@ -77,6 +80,7 @@ public class AppContextConfig {
                 .defineBean(AuthorityService.class, AuthorityServiceImpl.class)
                 .defineBean(DashboardConfigService.class, "dashboardConfigServiceImpl")
                 .defineBean(OrganizationService.class, OrganizationService.class)
+                .defineBean(ArchiveService.class, ArchiveServiceImpl.class)
                 .done()
 
                 .addAppContext("org.edu_sharing.service.provider.BrockhausProvider")
