@@ -8,6 +8,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
@@ -15,14 +19,9 @@ import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
-import org.edu_sharing.service.bulk.BulkRun;
 import org.edu_sharing.restservices.shared.Node;
+import org.edu_sharing.service.bulk.BulkRun;
 import org.edu_sharing.service.bulk.BulkServiceFactory;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response;
 
 import java.util.HashMap;
 import java.util.List;
@@ -58,7 +57,8 @@ public class BulkApi {
                          @Parameter(description = "reset all versions (like a complete reimport), all data inside edu-sharing will be lost", required = false) @QueryParam("resetVersion") Boolean resetVersion
 
     ) throws Throwable {
-        NodeRef result = BulkServiceFactory.getInstance().sync(group, match, groupBy, type, aspects, properties, resetVersion == null ? false : resetVersion);
+        try {
+            NodeRef result = BulkServiceFactory.getInstance().sync(group, match, groupBy, type, aspects, properties, resetVersion == null ? false : resetVersion);
         NodeEntry entry = new NodeEntry();
         if (resolveNode == null || resolveNode) {
             NodeDao nodeDao = NodeDao.getNode(RepositoryDao.getHomeRepository(),
@@ -70,6 +70,9 @@ public class BulkApi {
             entry.getNode().setRef(new org.edu_sharing.restservices.shared.NodeRef(RepositoryDao.getHomeRepository(), result.getId()));
         }
         return Response.ok().entity(entry).build();
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t, ErrorResponse.ErrorResponseLogging.relaxed);
+        }
     }
 
 

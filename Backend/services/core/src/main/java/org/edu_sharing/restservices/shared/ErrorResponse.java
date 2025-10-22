@@ -1,13 +1,8 @@
 package org.edu_sharing.restservices.shared;
 
-import java.io.PrintWriter;
-import java.io.Serializable;
-import java.io.StringWriter;
-import java.util.Map;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
 import lombok.Data;
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.apache.log4j.Level;
@@ -16,11 +11,15 @@ import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.EduSharingLockException;
 import org.edu_sharing.restservices.*;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.edu_sharing.service.usage.Usage2Service;
-import org.springframework.http.HttpStatus;
 import org.edu_sharing.service.usage.UsageException;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.http.HttpStatus;
+
+import java.io.PrintWriter;
+import java.io.Serializable;
+import java.io.StringWriter;
+import java.util.Map;
 
 @Data
 public class ErrorResponse {
@@ -82,7 +81,7 @@ public class ErrorResponse {
         if (t instanceof AlfrescoRuntimeException && t.getCause() != null) {
             t = t.getCause();
         }
-        if (t instanceof RuntimeException && !(t instanceof DAOException) && t.getCause() != null) {
+        while (t instanceof RuntimeException && !(t instanceof DAOException) && t.getCause() != null) {
             t = t.getCause();
         }
         if (t instanceof DAOValidationException) {
@@ -129,7 +128,7 @@ public class ErrorResponse {
                     .entity(new ErrorResponse(t))
                     .build();
         }
-        if (t instanceof DAODuplicateNodeNameException || t instanceof DAODuplicateNodeException) {
+        if (t instanceof DAODuplicateNodeNameException || t instanceof DAODuplicateNodeException || t instanceof DuplicateKeyException) {
             return Response.status(Response.Status.CONFLICT)
                     .type(MediaType.APPLICATION_JSON_TYPE)
                     .entity(new ErrorResponse(t))
