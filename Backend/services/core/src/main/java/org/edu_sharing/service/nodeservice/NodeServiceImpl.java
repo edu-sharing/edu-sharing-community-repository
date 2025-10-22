@@ -3,7 +3,6 @@ package org.edu_sharing.service.nodeservice;
 import com.typesafe.config.Config;
 import lombok.Setter;
 import org.alfresco.model.ContentModel;
-import org.alfresco.repo.domain.node.NodeDAO;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -21,7 +20,6 @@ import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.QNamePattern;
 import org.alfresco.service.namespace.RegexQNamePattern;
-import org.alfresco.util.Pair;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
@@ -68,7 +66,6 @@ import org.springframework.context.ApplicationContext;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.ParseException;
@@ -86,7 +83,6 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     protected ServiceRegistry serviceRegistry = null;
     protected NodeService nodeService = null;
     protected NodeService nodeServiceAlfresco = null;
-    protected NodeDAO nodeServiceAlfrescoDAO = null;
     protected VersionService versionService;
     @Setter
     protected HandleServiceFactory handleServiceFactory;
@@ -110,15 +106,6 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
         nodeService = serviceRegistry.getNodeService();
         nodeServiceAlfresco = (NodeService) applicationContext.getBean("alfrescoDefaultDbNodeService");
-        try {
-            Class<?> clazz = nodeServiceAlfresco.getClass();
-            Field nodeDAOField = clazz.getDeclaredField("nodeDAO");
-            nodeDAOField.setAccessible(true);
-            nodeServiceAlfrescoDAO = (NodeDAO) nodeDAOField.get(nodeServiceAlfresco);
-
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
-        }
         policyBehaviourFilter = (BehaviourFilter) applicationContext.getBean("policyBehaviourFilter");
         contentService = serviceRegistry.getContentService();
         versionService = serviceRegistry.getVersionService();
@@ -764,14 +751,18 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
             // do in transaction to disable behaviour
             // otherwise interceptors might be called multiple times -> the final update props is enough!
             // do it AFTER set properties so the values can be sent as NULL-Values into setProperties to be read by interceptors
-            serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+
+            // doesn't seem to be necessary; No interecptors are called anyway, and Alfresco cleans the db internally
+            /*serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
                 policyBehaviourFilter.disableBehaviour(nodeRef);
-                Pair<Long, NodeRef> pair = nodeServiceAlfrescoDAO.getNodePair(nodeRef);
-                // use the nodeDAO to do ALL in one step instead of looping since the amount can be >100!
-                nodeServiceAlfrescoDAO.removeNodeProperties(pair.getFirst(), propsNull);
+                for (QName prop : propsNull) {
+                    // use alfresco service to prevent overhead
+                    nodeServiceAlfresco.removeProperty(nodeRef, prop);
+                }
                 policyBehaviourFilter.enableBehaviour(nodeRef);
                 return null;
             });
+             */
         } catch(DuplicateChildNodeNameException e){
             throw e;
         } catch (Exception e) {
