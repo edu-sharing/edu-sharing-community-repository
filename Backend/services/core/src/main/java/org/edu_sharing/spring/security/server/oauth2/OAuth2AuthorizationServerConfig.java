@@ -21,6 +21,7 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
+import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
@@ -28,6 +29,7 @@ import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -84,8 +86,11 @@ public class OAuth2AuthorizationServerConfig {
                                 RegisteredClient.Builder builder = RegisteredClient.withId(c.getClientId())
                                         .clientId(c.getClientId())
                                         .clientSecret(c.getClientSecret())
-                                        .clientAuthenticationMethod(new ClientAuthenticationMethod(c.getClientAuthenticationMethod()))
-                                        .redirectUri(c.getRedirectUri());
+                                        .clientAuthenticationMethod(new ClientAuthenticationMethod(c.getClientAuthenticationMethod()));
+                                if(!c.getRedirectUri().isEmpty()) builder.redirectUri(c.getRedirectUri());
+                                if(!c.getExpires().isEmpty()) builder.tokenSettings(TokenSettings.builder()
+                                        .accessTokenTimeToLive(Duration.ofHours(Integer.parseInt(c.getExpires())))
+                                        .build());
                                 c.getAuthorizationGrantTypes().forEach(gt -> builder.authorizationGrantType(new AuthorizationGrantType(gt)));
                                 c.getScopes().forEach(builder::scope);
                                 return builder.build();
