@@ -47,8 +47,10 @@ public class Context {
     public static Context getCurrentContextForCustomThreads(){
         Context context = getCurrentInstance();
         if(context != null){
-            String serverName = (context != null && context.getRequest() != null) ? context.getRequest().getServerName() : null;
-            String locale = (String)Context.getCurrentInstance().getRequest().getSession(true).getAttribute(CCConstants.AUTH_LOCALE);
+            String serverName = (context.getRequest() != null) ? context.getRequest().getServerName() : null;
+            String locale = (context.getRequest() != null && context.getRequest().getSession(false) != null)
+                    ? (String)context.getRequest().getSession(false).getAttribute(CCConstants.AUTH_LOCALE)
+                    : null;
 
             HttpSessionAdapter session = new HttpSessionAdapter(){
                 @Override
