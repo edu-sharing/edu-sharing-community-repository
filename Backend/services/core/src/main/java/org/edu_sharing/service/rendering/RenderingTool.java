@@ -1,5 +1,19 @@
 package org.edu_sharing.service.rendering;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.UrlTool;
+import org.edu_sharing.repository.server.AuthenticationToolAPI;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.repository.server.tools.security.Encryption;
+import org.edu_sharing.repository.server.tools.security.Signing;
+import org.edu_sharing.service.config.ConfigServiceFactory;
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -8,21 +22,6 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.apache.log4j.Logger;
-import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
-import org.edu_sharing.alfresco.repository.server.authentication.Context;
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.client.tools.UrlTool;
-import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.URLTool;
-import org.edu_sharing.repository.server.tools.security.Encryption;
-import org.edu_sharing.repository.server.tools.security.Signing;
-import org.edu_sharing.service.config.ConfigServiceFactory;
 
 public class RenderingTool {
 
@@ -157,7 +156,7 @@ public class RenderingTool {
 	}
 
 	public static void buildRenderingCache(String nodeId) {
-		final Context context = Context.getCurrentInstance();
+		final Context context = Context.getCurrentContextForCustomThreads();
 		prepareExecutor.execute(()->{
 			AuthenticationUtil.runAsSystem(()-> {
 				try {

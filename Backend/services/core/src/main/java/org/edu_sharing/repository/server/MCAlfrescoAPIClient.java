@@ -1913,19 +1913,16 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         final String encoding = (_encoding == null) ? "UTF-8" : _encoding;
         log.debug("called nodeID:" + nodeID + " store:" + store + " mimetype:" + mimetype + " property:" + property);
 
-        RetryingTransactionCallback callback = () -> {
+        RetryingTransactionCallback<NodeRef> callback = () -> {
 
             NodeRef nodeRef = new NodeRef(store, nodeID);
             final ContentWriter contentWriter = contentService.getWriter(nodeRef, QName.createQName(property), true);
             contentWriter.addListener(() -> {
-                log.debug("Content Stream was closed");
+                log.debug("Content Stream was closed for:"+nodeRef);
                 log.debug(" size:" + contentWriter.getContentData().getSize() +
                         ", URL:" + contentWriter.getContentData().getContentUrl() +
                         ", MimeType:" + contentWriter.getContentData().getMimetype() + "" +
                         ", ContentData ToString:" + contentWriter.getContentData().toString());
-                        if(onComplete != null) {
-                            onComplete.run();
-                        }
             });
 
             String finalMimeType = mimetype;
@@ -1936,11 +1933,14 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
             contentWriter.setMimetype(finalMimeType);
             contentWriter.setEncoding(encoding);
             contentWriter.putContent(content);
-
-            return null;
+            return nodeRef;
         };
         TransactionService transactionService = serviceRegistry.getTransactionService();
-        transactionService.getRetryingTransactionHelper().doInTransaction(callback, false);
+        NodeRef nodeRef = transactionService.getRetryingTransactionHelper().doInTransaction(callback, false);
+        log.debug("finished content writing tx:"+nodeRef);
+        if(onComplete != null && nodeRef != null) {
+            onComplete.run();
+        }
     }
 
     public void setUserDefinedPreview(String nodeId, byte[] content, String fileName) {
