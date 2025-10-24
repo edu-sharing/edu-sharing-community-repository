@@ -32,6 +32,10 @@
     "APP_LOGO": "Logo",
     "SHOW_PASSWORD": "Passwort anzeigen",
     "HIDE_PASSWORD": "Passwort ausblenden",
+    "OAUTH": {
+      "TITLE": "Einloggen über externen Anbieter",
+      "USE_PROVIDER": "Über {{provider}} einloggen"
+    },
     "2FA": {
       "TITLE": "Zweiter Faktor",
       "SUBTITLE": "Zweiten Faktor bestätigen",

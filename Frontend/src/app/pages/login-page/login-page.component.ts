@@ -85,6 +85,8 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     private providers: any;
     private scope = '';
     private destroyed = new Subject<void>();
+    // @TODO change model
+    registeredOauthProviders: { id: string }[];
 
     constructor(
         private connector: RestConnectorService,
@@ -145,6 +147,8 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                         this.scope = null;
                     }
                     this.connector.isLoggedIn().subscribe(async (data: LoginResult) => {
+                        // @TODO this.registeredOauthProviders
+                        // this.registeredOauthProviders = [{id: "Google"}, {id: "Facebook"}, {id: "Github"}]
                         if (data.currentScope) {
                             // just to make sure there is no scope still set // NO: We need a valid session when login to scope!!!
                             try {
@@ -169,9 +173,11 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                         }
                         this.loginUrl = configService.instant('loginUrl');
                         const allowLocal = configService.instant('loginAllowLocal', false);
+                        const hasProviders = this.registeredOauthProviders?.length > 0;
                         if (
                             params.local !== 'true' &&
                             !allowLocal &&
+                            !hasProviders &&
                             this.loginUrl &&
                             data.statusCode !== RestConstants.STATUS_CODE_OK
                         ) {
@@ -457,4 +463,6 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
             this.login(password, this.faConfirm.get('code').value);
         }
     }
+
+    protected readonly encodeURIComponent = encodeURIComponent;
 }
