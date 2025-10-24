@@ -1818,6 +1818,34 @@
         },
         "type": "object"
       },
+      "Gdpr": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "entry": {
+            "items": {
+              "$ref": "#/components/schemas/GdprEntry"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "GdprEntry": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "ref": {
+            "type": "string"
+          },
+          "regex": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "General": {
         "properties": {
           "referencedInInstance": {
@@ -6303,6 +6331,20 @@
         },
         "type": "object"
       },
+      "SearchFacet": {
+        "properties": {
+          "args": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "property": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "SearchParameters": {
         "properties": {
           "criteria": {
@@ -6332,7 +6374,7 @@
           },
           "facets": {
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/SearchFacet"
             },
             "type": "array"
           },
@@ -6380,7 +6422,7 @@
           },
           "facets": {
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/SearchFacet"
             },
             "type": "array"
           }
@@ -6813,7 +6855,7 @@
       "StatisticEntity": {
         "properties": {
           "count": {
-            "format": "int32",
+            "format": "int64",
             "type": "integer"
           },
           "value": {
@@ -7083,7 +7125,7 @@
       "SubGroupItem": {
         "properties": {
           "count": {
-            "format": "int32",
+            "format": "int64",
             "type": "integer"
           },
           "displayName": {
@@ -7884,7 +7926,7 @@
       "Value": {
         "properties": {
           "count": {
-            "format": "int32",
+            "format": "int64",
             "type": "integer"
           },
           "value": {
@@ -7990,6 +8032,9 @@
           },
           "frontpage": {
             "$ref": "#/components/schemas/ConfigFrontpage"
+          },
+          "gdpr": {
+            "$ref": "#/components/schemas/Gdpr"
           },
           "helpMenuOptions": {
             "items": {

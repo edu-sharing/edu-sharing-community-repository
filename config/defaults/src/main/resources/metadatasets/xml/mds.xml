@@ -1632,6 +1632,9 @@
         <multiple>true</multiple>
         <multiplejoin>OR</multiplejoin>
       </property>
+      <property name="virtual:location">
+        <facets type="geo_grid"/>
+      </property>
     </query>
     <query join="AND" id="mediacenter_filter">
       <basequery>{"bool":{"must":[

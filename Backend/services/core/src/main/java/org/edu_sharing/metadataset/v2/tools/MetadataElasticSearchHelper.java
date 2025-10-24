@@ -1,27 +1,28 @@
 package org.edu_sharing.metadataset.v2.tools;
 
-import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.AggregationBuilders;
 import co.elastic.clients.elasticsearch._types.aggregations.MultiTermLookup;
+import co.elastic.clients.elasticsearch._types.mapping.RuntimeField;
+import co.elastic.clients.elasticsearch._types.mapping.RuntimeFieldType;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.json.JsonData;
 import co.elastic.clients.json.JsonpUtils;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
-import co.elastic.clients.util.NamedValue;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.restservices.mds.v1.model.MdsWidget;
+import org.edu_sharing.restservices.search.v1.model.SearchFacet;
 import org.edu_sharing.service.search.ReadableWrapperQueryBuilder;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SharedToMeType;
 
-import javax.swing.text.html.Option;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -32,6 +33,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
      */
     public static final int FACET_LIMIT_MULTIPLIER = 5;
     public static final String FACET_SELECTED_POSTFIX = "_selected";
+    static final String GEOPOINT_RUNTIME_FIELD = "geo_point_runtime";
     static Logger logger = Logger.getLogger(MetadataElasticSearchHelper.class);
     private static MetadataQueryPreprocessor preprocessor = new MetadataQueryPreprocessor(MetadataReader.QUERY_SYNTAX_DSL);
 
@@ -249,10 +251,10 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         return JsonpUtils.toJsonString(Query.of(q -> q.bool(boolQuery.build())), new JacksonJsonpMapper());
     }
 
-    public static Set<MetadataQueryParameter> getExcludeOwnFacets(MetadataQuery query, Map<String, String[]> parameters, List<String> facets) {
+    public static Set<MetadataQueryParameter> getExcludeOwnFacets(MetadataQuery query, Map<String, String[]> parameters, List<SearchFacet> facets) {
         Set<MetadataQueryParameter> excludeOwn = new HashSet<>();
-        for (String name : facets) {
-            MetadataQueryParameter parameter = query.findParameterByName(name);
+        for (SearchFacet name : facets) {
+            MetadataQueryParameter parameter = query.findParameterByName(name.getProperty());
             if (parameter == null) continue;
             if ((parameter.getMultiplejoin() != null && parameter.getMultiplejoin().equals("OR")))
                 excludeOwn.add(parameter);
@@ -273,15 +275,15 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
      * @return
      * @throws IllegalArgumentException
      */
-    public static Map<String, Aggregation> getAggregations(MetadataSet mds, MetadataQuery query, Map<String, String[]> parameters, List<String> facets, Set<MetadataQueryParameter> excludeOwn, Query globalConditions, SearchToken searchToken) throws IllegalArgumentException {
+    public static Map<String, Aggregation> applyAggregations(SearchRequest.Builder searchRequestBuilder, MetadataSet mds, MetadataQuery query, Map<String, String[]> parameters, List<SearchFacet> facets, Set<MetadataQueryParameter> excludeOwn, Query globalConditions, SearchToken searchToken) throws IllegalArgumentException {
         MetadataQueries queries = mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL);
         Map<String, Aggregation> result = new HashMap<>();
         String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
-        for (String facet : facets) {
+        for (SearchFacet facet : facets) {
 
             Map<String, String[]> tmp = new HashMap<>(parameters == null ? Collections.emptyMap() : parameters);
-            if (excludeOwn.stream().anyMatch(mdqp -> mdqp.getName().equals(facet))) {
-                tmp.remove(facet);
+            if (excludeOwn.stream().anyMatch(mdqp -> mdqp.getName().equals(facet.getProperty()))) {
+                tmp.remove(facet.getProperty());
             }
 
             BoolQuery.Builder qbFilter = getElasticSearchQuery(searchToken, queries, query, tmp, true);
@@ -293,12 +295,12 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
 
             List<MetadataQueryParameter.MetadataQueryFacetItem> fieldName = Collections.singletonList(
                     new MetadataQueryParameter.MetadataQueryFacetItem(
-                            (nonKeywordFacets.contains(facet)
-                                    ? "properties." + facet
-                                    : "properties." + facet+".keyword"), null)
+                            (nonKeywordFacets.contains(facet.getProperty())
+                                    ? "properties." + facet.getProperty()
+                                    : "properties." + facet.getProperty()+".keyword"), null)
             );
 
-            MetadataQueryParameter parameter = query.findParameterByName(facet);
+            MetadataQueryParameter parameter = query.findParameterByName(facet.getProperty());
 
             Optional<MetadataQueryParameter.MetadataQueryFacet> metadataQueryFacet = Optional.ofNullable(parameter)
                     .map(MetadataQueryParameter::getFacet);
@@ -314,7 +316,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
             if (searchToken.getQueryString() != null && !searchToken.getQueryString().trim().isEmpty()) {
 
                 boolean isi18nProp = false;
-                MetadataWidget mdw = mds.findWidget(facet);
+                MetadataWidget mdw = mds.findWidget(facet.getProperty());
                 if (mdw != null && new MdsWidget(mdw).isHasValues()) {
                     isi18nProp = true;
                 }
@@ -334,26 +336,46 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                         facetsSearchFilter = getFacetFilter(searchToken.getQueryString(), facetName);
                     }
                 } else if (isi18nProp) {
-                    facetsSearchFilter = getFacetFilter(searchToken.getQueryString(), "i18n." + currentLocale + "." + facet, "collections.i18n." + currentLocale + "." + facet);
+                    facetsSearchFilter = getFacetFilter(searchToken.getQueryString(), "i18n." + currentLocale + "." + facet.getProperty(), "collections.i18n." + currentLocale + "." + facet.getProperty());
                 } else {
-                    facetsSearchFilter = getFacetFilter(searchToken.getQueryString(), "properties." + facet, "properties." + facet + ".keyword");
+                    facetsSearchFilter = getFacetFilter(searchToken.getQueryString(), "properties." + facet.getProperty(), "properties." + facet.getProperty() + ".keyword");
                 }
             }
 
             // https://discuss.elastic.co/t/sub-aggregation-in-new-java-api-client/313447
             Query bqbQuery = null;
             if (fieldName.size() == 1) {
-                Aggregation innerAggregation = AggregationBuilders.terms()
+                Aggregation innerAggregation;
+                if(metadataQueryFacet.isPresent() && metadataQueryFacet.get().getType().equals(MetadataQueryParameter.MetadataQueryFacet.Type.geo_grid)) {
+                    if(facet.getArgs() == null || !facet.getArgs().containsKey("precision")) {
+                        throw new IllegalArgumentException("Parameter for a field of type geo requires args field precision");
+                    }
+                    searchRequestBuilder.runtimeMappings(GEOPOINT_RUNTIME_FIELD, RuntimeField.of(r -> r
+                                    .type(RuntimeFieldType.GeoPoint)
+                                    .script(s -> s.source(
+                                            "if (doc.containsKey('properties.cm:latitude.number') && doc['properties.cm:latitude.number'].size() > 0 && " +
+                                                    "doc.containsKey('properties.cm:longitude.number') && doc['properties.cm:longitude.number'].size() > 0) { " +
+                                                    "emit(doc['properties.cm:latitude.number'].value, doc['properties.cm:longitude.number'].value); }"
+                                    )
+                            )
+                    ));
+                    innerAggregation = AggregationBuilders.geotileGrid()
+                            .field(GEOPOINT_RUNTIME_FIELD)
+                            .precision((int) facet.getArgs().get("precision"))
+                            .build()._toAggregation();
+                } else {
+                    innerAggregation = AggregationBuilders.terms()
                             .field(fieldName.get(0).getValue())
                             .size(metadataQueryFacet.map(MetadataQueryParameter.MetadataQueryFacet::getMaxBucketSize).orElse(searchToken.getFacetLimit() * FACET_LIMIT_MULTIPLIER))
                             .minDocCount(searchToken.getFacetsMinCount())
                             .build()._toAggregation();
+                }
                 if (fieldName.get(0).getNested() != null) {
                     bqbQuery = fullFilterQuery.build()._toQuery();
                     String nestedName = fieldName.get(0).getNested();
                     Query finalFacetsSearchFilter = facetsSearchFilter;
                     Query finalBqbQuery = bqbQuery;
-                    result.put(facet, new Aggregation.Builder().filter(
+                    result.put(facet.getProperty(), new Aggregation.Builder().filter(
                                     f -> f.bool(b -> b.must(finalBqbQuery).must(
                                             m -> m.nested(n -> {
                                                 n.path(nestedName);
@@ -363,8 +385,8 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                                                 return n;
                                             }))
                                     ))
-                            .aggregations(facet, new Aggregation.Builder().nested(n -> n.path(nestedName)).aggregations(
-                                            facet + "_nested", innerAggregation
+                            .aggregations(facet.getProperty(), new Aggregation.Builder().nested(n -> n.path(nestedName)).aggregations(
+                                            facet.getProperty() + "_nested", innerAggregation
                                     ).build()
                             ).build()
                     );
@@ -374,9 +396,9 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                     }
                     bqbQuery = fullFilterQuery.build()._toQuery();
                     result.put(
-                            facet,
+                            facet.getProperty(),
                             new Aggregation.Builder().filter(bqbQuery)
-                                    .aggregations(facet, innerAggregation
+                                    .aggregations(facet.getProperty(), innerAggregation
                                     ).build()
                     );
                 }
@@ -386,10 +408,10 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                 }
                 bqbQuery = fullFilterQuery.build()._toQuery();
                 result.put(
-                        facet,
+                        facet.getProperty(),
                         new Aggregation.Builder().filter(
                                         bqbQuery
-                                ).aggregations(facet, AggregationBuilders.multiTerms()
+                                ).aggregations(facet.getProperty(), AggregationBuilders.multiTerms()
                                         .terms(fieldName.stream().map(f -> MultiTermLookup.of(t -> t.field(f.getValue()).missing(""))).collect(Collectors.toList()))
                                         .size(metadataQueryFacet.map(MetadataQueryParameter.MetadataQueryFacet::getMaxBucketSize).orElse(searchToken.getFacetLimit() * FACET_LIMIT_MULTIPLIER))
                                         .minDocCount((long) searchToken.getFacetsMinCount())
@@ -402,24 +424,25 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
             }
 
 
-            if (parameters != null && parameters.get(facet) != null && parameters.get(facet).length > 0) {
+            if (parameters != null && parameters.get(facet.getProperty()) != null && parameters.get(facet.getProperty()).length > 0) {
                 List<MetadataQueryParameter.MetadataQueryFacetItem> facetDetails = metadataQueryFacet.map(MetadataQueryParameter.MetadataQueryFacet::getItems).orElse(null);
                 result.put(
-                        facet + FACET_SELECTED_POSTFIX,
+                        facet.getProperty() + FACET_SELECTED_POSTFIX,
                         new Aggregation.Builder().filter(
                                 bqbQuery
-                        ).aggregations(facet, agg -> agg
+                        ).aggregations(facet.getProperty(), agg -> agg
                                 .terms(term -> term
-                                        .field(facetDetails == null || facetDetails.isEmpty() ? "properties." + facet + ".keyword" : facetDetails.get(0).getValue())
-                                        .size(parameters.get(facet).length)
+                                        .field(facetDetails == null || facetDetails.isEmpty() ? "properties." + facet.getProperty() + ".keyword" : facetDetails.get(0).getValue())
+                                        .size(parameters.get(facet.getProperty()).length)
                                         .minDocCount(1)
-                                        .include(ti -> ti.terms(Arrays.asList(parameters.get(facet)))))
+                                        .include(ti -> ti.terms(Arrays.asList(parameters.get(facet.getProperty())))))
                         ).build()
                 );
 
             }
 
         }
+        searchRequestBuilder.aggregations(result);
 
         return result;
     }

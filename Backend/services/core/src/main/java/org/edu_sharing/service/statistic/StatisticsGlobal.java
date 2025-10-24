@@ -26,13 +26,13 @@ public class StatisticsGlobal{
 	public static class StatisticsGroup {
 		public static class StatisticsSubGroup {
             public static class SubGroupItem extends StatisticsTranslatableKey {
-                @JsonProperty public int count;
+                @JsonProperty public long count;
 
-                public SubGroupItem(String key, Integer count) {
+                public SubGroupItem(String key, Long count) {
                     super(key);
                     this.count=count;
                 }
-                public SubGroupItem(String key, String displayName, Integer count) {
+                public SubGroupItem(String key, String displayName, Long count) {
                     super(key,displayName);
                     this.count=count;
                 }

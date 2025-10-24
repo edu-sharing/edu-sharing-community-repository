@@ -27,6 +27,7 @@ import org.edu_sharing.repository.server.tools.LRMITool;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.node.v1.model.*;
 import org.edu_sharing.restservices.node.v1.model.SearchResult;
+import org.edu_sharing.restservices.search.v1.model.SearchFacet;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.clientutils.ClientUtilsService;
 import org.edu_sharing.service.clientutils.WebsiteInformation;
@@ -1874,7 +1875,9 @@ public class NodeApi  {
 			searchToken.setLuceneString(query);
 			searchToken.setFrom(skipCount != null ? skipCount : 0);
 			searchToken.setMaxResult(maxItems!= null ? maxItems : 10);
-			searchToken.setFacets(facets);
+			if(facets != null) {
+				searchToken.setFacets(facets.stream().map(f -> new SearchFacet(f, null)).collect(Collectors.toList()));
+			}
 			searchToken.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
     		NodeSearch search = NodeDao.search(repoDao,searchToken);
     		List<Node> data = new ArrayList<>();

@@ -86,7 +86,7 @@ public class MetadataQueryParameter implements Serializable {
 	@NoArgsConstructor
 	@AllArgsConstructor
 	public static class MetadataQueryFacet implements Serializable {
-
+		private Type type = Type.term;
 		private SortBy sortBy = SortBy.count;
 		private SortOrder sortOrder = SortOrder.desc;
 		/**
@@ -96,7 +96,10 @@ public class MetadataQueryParameter implements Serializable {
 		private Integer maxBucketSize = null;
 		private List<MetadataQueryFacetItem> items = new ArrayList<>();
 
-
+		public enum Type {
+			term,
+			geo_grid,
+		}
 		public enum SortBy {
 			count,
 			caption,

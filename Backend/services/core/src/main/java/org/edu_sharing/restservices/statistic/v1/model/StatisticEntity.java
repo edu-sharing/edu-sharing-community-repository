@@ -10,5 +10,5 @@ public class StatisticEntity {
 	@JsonProperty(required = true)
 	private String value;
 	@JsonProperty(required = true)
-	private Integer count;
+	private Long count;
 }

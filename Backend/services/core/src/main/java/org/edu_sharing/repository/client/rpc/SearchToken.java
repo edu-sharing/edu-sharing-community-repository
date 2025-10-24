@@ -28,6 +28,7 @@
 package org.edu_sharing.repository.client.rpc;
 
 import org.edu_sharing.metadataset.v2.SearchCriterias;
+import org.edu_sharing.restservices.search.v1.model.SearchFacet;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ public class SearchToken implements Serializable {
 	/**
 	 * list of props to count
 	 */
-	private ArrayList<String> countProps = null;
+	private ArrayList<SearchFacet> countProps = null;
 	
 	/**
 	 * global facet mincount
@@ -97,11 +98,11 @@ public class SearchToken implements Serializable {
 	 * set this to get counted Props back
 	 * @param countProps
 	 */
-	public void setCountProps(ArrayList<String> countProps) {
+	public void setCountProps(ArrayList<SearchFacet> countProps) {
 		this.countProps = countProps;
 	}
 	
-	public ArrayList<String> getCountProps() {
+	public ArrayList<SearchFacet> getCountProps() {
 		return countProps;
 	}
 	

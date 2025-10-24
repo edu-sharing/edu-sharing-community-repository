@@ -7,7 +7,9 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 public class NodeSearch {
@@ -34,12 +36,14 @@ public class NodeSearch {
 	public static class Facet {
 
 		@Data
+		@NoArgsConstructor
+		@AllArgsConstructor
 		public static class Value {
 			@JsonProperty(required = true)
 			private String value = null;
 
 			@JsonProperty(required = true)
-			private Integer count = null;
+			private Long count = null;
 		}
 
 		@JsonProperty(required = true)
