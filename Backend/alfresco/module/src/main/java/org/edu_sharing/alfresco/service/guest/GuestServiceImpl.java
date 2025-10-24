@@ -68,7 +68,7 @@ public class GuestServiceImpl implements GuestService {
     @Override
     public GuestConfig getConfig(String context) {
         Config rootConfig = configLoader.getConfig();
-        if (StringUtils.isBlank(context)) {
+        if (StringUtils.isBlank(context) || context.equals(CCConstants.EDUCONTEXT_DEFAULT)) {
             return getDefaultConfig();
         }
 
