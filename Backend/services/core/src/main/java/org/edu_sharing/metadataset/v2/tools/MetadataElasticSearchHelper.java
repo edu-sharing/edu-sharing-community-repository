@@ -23,6 +23,7 @@ import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SharedToMeType;
 
+import java.lang.reflect.InvocationTargetException;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -111,16 +112,18 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                 queryBuilderParam = Query.of(q -> q.bool(sharedFilesSearch));
             } else if (parameter.isMultiple()) {
 
-                String multipleJoin = parameter.getMultiplejoin();
+                MetadataQueryParameter.ParameterJoinStrategy multipleJoin = parameter.getMultiplejoin();
                 BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
-                if (multipleJoin.equals("AND")) {
+                if (multipleJoin.equals(MetadataQueryParameter.ParameterJoinStrategy.AND)) {
                     for (String value : values) {
-                        boolQueryBuilder.must(must -> must.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatmentForValue(parameter, value)), parameter).build()));
+                        boolQueryBuilder.must(must -> must.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatementForValue(parameter, value)), parameter).build()));
+                    }
+                } else if (multipleJoin.equals(MetadataQueryParameter.ParameterJoinStrategy.OR)) {
+                    for (String value : values) {
+                        boolQueryBuilder.should(should -> should.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatementForValue(parameter, value)), parameter).build()));
                     }
                 } else {
-                    for (String value : values) {
-                        boolQueryBuilder.should(should -> should.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatmentForValue(parameter, value)), parameter).build()));
-                    }
+                    boolQueryBuilder.should(should -> should.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatementForValues(parameter, values)), parameter).build()));
                 }
 
                 queryBuilderParam = Query.of(q -> q.bool(boolQueryBuilder.build()));
@@ -129,7 +132,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                     throw new InvalidParameterException("Trying to search for multiple values of a non-multivalue field " + parameter.getName());
                 }
 
-                queryBuilderParam = Query.of(q -> q.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatmentForValue(parameter, values[0])), parameter).build()));
+                queryBuilderParam = Query.of(q -> q.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatementForValue(parameter, values[0])), parameter).build()));
             }
 
             if (query.getJoin().equals("AND")) {
@@ -200,8 +203,34 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         }
         return result;
     }
+    private static String getStatementForValues(MetadataQueryParameter parameter, String[] valuesIn) {
+        if(valuesIn == null && parameter.isMandatory()) {
+            throw new java.lang.IllegalArgumentException("null value for mandatory parameter "+parameter.getName()+" given, null values are not allowed if mandatory is set to true");
+        }
+        List<String> values = Arrays.asList(valuesIn);
+        // invoke any preprocessors for this value
+        values = values.stream().map(v -> {
+            try {
+                return preprocessor.run(parameter, v);
+            } catch (Throwable e) {
+                logger.error(e.getMessage(),e);
+                throw new RuntimeException(e);
+            }
+        }).collect(Collectors.toList());
 
-    private static String getStatmentForValue(MetadataQueryParameter parameter, String value) {
+        int i = 0;
+        final BoolQuery.Builder boolQuery = new BoolQuery.Builder();
+        String statement = parameter.getStatement(null);
+        for(String value : values) {
+            statement = QueryUtils.replacerFromSyntax(parameter.getSyntax()).replaceString(statement, "${value[" + i + "]}", value);
+            statement = QueryUtils.replacerFromSyntax(parameter.getSyntax(), true).replaceString(statement,"${valueRaw[" + i + "]}", value);
+            i++;
+        }
+        final String finStatement = statement;
+        boolQuery.must(must -> must.wrapper(new ReadableWrapperQueryBuilder(finStatement).build()));
+        return JsonpUtils.toJsonString(Query.of(q -> q.bool(boolQuery.build())), new JacksonJsonpMapper());
+    }
+    private static String getStatementForValue(MetadataQueryParameter parameter, String value) {
         if (value == null && parameter.isMandatory()) {
             throw new java.lang.IllegalArgumentException("null value for mandatory parameter " + parameter.getName() + " given, null values are not allowed if mandatory is set to true");
         }
@@ -351,8 +380,8 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                         throw new IllegalArgumentException("Parameter for a field of type geo requires args field precision");
                     }
                     searchRequestBuilder.runtimeMappings(GEOPOINT_RUNTIME_FIELD, RuntimeField.of(r -> r
-                                    .type(RuntimeFieldType.GeoPoint)
-                                    .script(s -> s.source(
+                            .type(RuntimeFieldType.GeoPoint)
+                            .script(s -> s.source(
                                             "if (doc.containsKey('properties.cm:latitude.number') && doc['properties.cm:latitude.number'].size() > 0 && " +
                                                     "doc.containsKey('properties.cm:longitude.number') && doc['properties.cm:longitude.number'].size() > 0) { " +
                                                     "emit(doc['properties.cm:latitude.number'].value, doc['properties.cm:longitude.number'].value); }"

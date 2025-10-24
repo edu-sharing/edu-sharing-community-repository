@@ -1633,6 +1633,13 @@
         <multiplejoin>OR</multiplejoin>
       </property>
       <property name="virtual:location">
+        <multiple>true</multiple>
+        <multiplejoin>INTERNAL</multiplejoin>
+        <statement>{"bool": {
+          "must": [
+          {"range":{"properties.cm:latitude.number":{"gte":"${valueRaw[0]}", "lte":"${valueRaw[2]}"}}},
+          {"range":{"properties.cm:longitude.number":{"gte":"${valueRaw[1]}", "lte":"${valueRaw[3]}"}}}
+          ]}}</statement>
         <facets type="geo_grid"/>
       </property>
     </query>

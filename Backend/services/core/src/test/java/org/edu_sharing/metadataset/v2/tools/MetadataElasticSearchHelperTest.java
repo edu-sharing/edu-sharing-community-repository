@@ -92,7 +92,7 @@ class MetadataElasticSearchHelperTest {
         List<MetadataQueryParameter> parameters = new ArrayList<>();
         MetadataQueryParameter parameter = new MetadataQueryParameter(query.getSyntax(), null);
         parameter.setMultiple(true);
-        parameter.setMultiplejoin("AND");
+        parameter.setMultiplejoin(MetadataQueryParameter.ParameterJoinStrategy.AND);
         parameter.setName("parameter");
         parameter.setStatements(new HashMap<>() {{
             put(null, "{\"match\":{\"some_field\":\"{$value}\"}}");
@@ -108,7 +108,7 @@ class MetadataElasticSearchHelperTest {
         );
 
         // OR JOIN
-        parameter.setMultiplejoin("OR");
+        parameter.setMultiplejoin(MetadataQueryParameter.ParameterJoinStrategy.OR);
         result = MetadataElasticSearchHelper.getElasticSearchQuery(token, queries, query, new HashMap<>() {{
             put("parameter", new String[]{"a", "b"});
         }});
@@ -118,12 +118,12 @@ class MetadataElasticSearchHelperTest {
         );
 
 
+
         // 2 Parameters AND combined
         MetadataQueryParameter parameter2 = new MetadataQueryParameter(query.getSyntax(), null);
-        parameter2.setMultiple(true);
-        parameter2.setMultiplejoin("AND");
         parameter2.setName("parameter2");
-        parameter2.setMultiplejoin("OR");
+        parameter2.setMultiple(true);
+        parameter2.setMultiplejoin(MetadataQueryParameter.ParameterJoinStrategy.OR);
         parameters.add(parameter2);
         result = MetadataElasticSearchHelper.getElasticSearchQuery(token, queries, query, new HashMap<>() {{
             put("parameter", new String[]{"a", "b"});
@@ -142,8 +142,49 @@ class MetadataElasticSearchHelperTest {
         SearchServiceElasticTestUtils.assertQuery(
                 "{\n  \"bool\" : {\n    \"must\" : [\n      {\n        \"wrapper\" : {\n          \"query\" : \"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"\n        }\n      }\n    ],\n    \"should\" : [\n      {\n        \"bool\" : {\n          \"should\" : [\n            {\n              \"wrapper\" : {\n                \"query\" : \"eyJtYXRjaCI6eyJzb21lX2ZpZWxkIjoieyR2YWx1ZX0ifX0=\"\n              }\n            },\n            {\n              \"wrapper\" : {\n                \"query\" : \"eyJtYXRjaCI6eyJzb21lX2ZpZWxkIjoieyR2YWx1ZX0ifX0=\"\n              }\n            }\n          ]}\n      },\n      {\n        \"bool\" : {\n          \"should\" : [\n            {\n              \"wrapper\" : {\n                \"query\" : \"eyJ3aWxkY2FyZCI6eyJwcm9wZXJ0aWVzLnBhcmFtZXRlcjIua2V5d29yZCI6eyJjYXNlX2luc2Vuc2l0aXZlIjp0cnVlLCJ2YWx1ZSI6IiphKiJ9fX0=\"\n              }\n            },\n            {\n              \"wrapper\" : {\n                \"query\" : \"eyJ3aWxkY2FyZCI6eyJwcm9wZXJ0aWVzLnBhcmFtZXRlcjIua2V5d29yZCI6eyJjYXNlX2luc2Vuc2l0aXZlIjp0cnVlLCJ2YWx1ZSI6IipiKiJ9fX0=\"\n              }\n            }\n          ]}\n      }\n    ]}\n}",
                 result
-        )
-        ;
+        );
+
+
+        // INTERNAL join
+        token = new SearchToken();
+        parameter.setMultiplejoin(MetadataQueryParameter.ParameterJoinStrategy.INTERNAL);
+        parameter.setStatements(new HashMap<>() {{
+            put(null, "{\"regexp\":{\"some_field\":\"${value[0]}|${value[1]}\"}}");
+        }});
+        result = MetadataElasticSearchHelper.getElasticSearchQuery(token, queries, query, new HashMap<>() {{
+            put("parameter", new String[]{"a", "b"});
+        }});
+        parameters.clear();
+        parameters.add(parameter);
+        SearchServiceElasticTestUtils.assertQuery(
+                "{\n" +
+                        "  \"bool\": {\n" +
+                        "    \"must\": [\n" +
+                        "      {\n" +
+                        "        \"wrapper\": {\n" +
+                        "          \"query\": \"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"\n" +
+                        "        }\n" +
+                        "      }\n" +
+                        "    ],\n" +
+                        "    \"should\": [\n" +
+                        "      {\n" +
+                        "        \"bool\": {\n" +
+                        "          \"should\": [\n" +
+                        "            {\n" +
+                        "              \"wrapper\": {\n" +
+                        "                \"query\": \"eyJib29sIjp7Im11c3QiOlt7IndyYXBwZXIiOnsicXVlcnkiOiJleUp5WldkbGVIQWlPbnNpYzI5dFpWOW1hV1ZzWkNJNkltRjhZaUo5ZlE9PSJ9fV19fQ==\"\n" +
+                        "              }\n" +
+                        "            }\n" +
+                        "          ]\n" +
+                        "        }\n" +
+                        "      }\n" +
+                        "    ]\n" +
+                        "  }\n" +
+                        "}",
+                result
+        );
+
+
     }
 
     @Test

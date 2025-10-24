@@ -308,7 +308,7 @@ public class MetadataReader {
                                 parameter.setMultiple(value.equalsIgnoreCase("true"));
                                 break;
                             case "multiplejoin":
-                                parameter.setMultiplejoin(value);
+                                parameter.setMultiplejoin(MetadataQueryParameter.ParameterJoinStrategy.valueOf(value));
                                 break;
                         }
                     }

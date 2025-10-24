@@ -22,7 +22,7 @@ public class MetadataQueryParameter implements Serializable {
 	private Map<String,String> statements;
 	private boolean multiple;
 	private boolean exactMatching = true;
-	private String multiplejoin;
+	private ParameterJoinStrategy multiplejoin;
 	private int ignorable;
 
 
@@ -118,5 +118,14 @@ public class MetadataQueryParameter implements Serializable {
 	public static class MetadataQueryFacetItem implements Serializable {
 		private String value;
 		private String nested;
+	}
+
+	public enum ParameterJoinStrategy {
+		// concat using and per statement
+		AND,
+		// concat using and per statement
+		OR,
+		// one statement which accesses the parameter via an index structure
+		INTERNAL
 	}
 }
