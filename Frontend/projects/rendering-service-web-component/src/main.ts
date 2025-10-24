@@ -5,7 +5,9 @@ declare global {
     }
 }
 
-__webpack_public_path__ = (window as any).__EDUSHARING_PUBLIC_PATH__ || '';
+if (typeof __webpack_public_path__ !== 'undefined') {
+    __webpack_public_path__ = (window as any).__EDUSHARING_PUBLIC_PATH__ || '';
+}
 
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
