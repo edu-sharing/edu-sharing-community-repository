@@ -1515,7 +1515,6 @@
           "fields": [
           "properties.cm:name^2",
           "properties.cm:title^2",
-          "properties.cm:title.keyword^2",
           "properties.cclom:title^5",
           "properties.cclom:general_description^2",
           "properties.cclom:general_keyword^4",
@@ -1524,7 +1523,8 @@
           "default_operator": "and"
           }
           },
-          {"wildcard":{"nodeRef.id": {"value":"*${value}*", "case_insensitive": true }}}
+          {"wildcard":{"nodeRef.id": {"value":"*${value}*", "case_insensitive": true }}},
+          {"wildcard":{"properties.cm:title.keyword": {"value":"*${value}*", "case_insensitive": true }}}
           ]
           }}
         </statement>

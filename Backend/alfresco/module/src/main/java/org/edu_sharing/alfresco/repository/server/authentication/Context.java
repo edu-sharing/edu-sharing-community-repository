@@ -1,16 +1,16 @@
 package org.edu_sharing.alfresco.repository.server.authentication;
 
-import org.apache.logging.log4j.ThreadContext;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.http.client.methods.RequestBuilder;
 import org.apache.log4j.Logger;
-import org.apache.log4j.MDC;
+import org.apache.logging.log4j.ThreadContext;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,6 +41,41 @@ public class Context {
     @Nullable
     public static Context getCurrentInstance() {
         return instance.get();
+    }
+
+    @Nullable
+    public static Context getCurrentContextForCustomThreads(){
+        Context context = getCurrentInstance();
+        if(context != null){
+            String serverName = (context.getRequest() != null) ? context.getRequest().getServerName() : null;
+            String locale = (context.getRequest() != null && context.getRequest().getSession(false) != null)
+                    ? (String)context.getRequest().getSession(false).getAttribute(CCConstants.AUTH_LOCALE)
+                    : null;
+
+            HttpSessionAdapter session = new HttpSessionAdapter(){
+                @Override
+                public Object getAttribute(String name) {
+                    if(CCConstants.AUTH_LOCALE.equals(name)){
+                        return locale;
+                    }
+                    return null;
+                }
+            };
+            HttpServletRequestAdapter adapter = new HttpServletRequestAdapter(){
+                @Override
+                public HttpSession getSession(boolean create) {
+                    return session;
+                }
+
+                @Override
+                public String getServerName() {
+                    return serverName;
+                }
+            };
+
+            return Context.newInstance(adapter, null, null);
+        }
+        return null;
     }
 
     @Nullable
