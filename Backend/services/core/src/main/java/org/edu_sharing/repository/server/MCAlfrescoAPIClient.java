@@ -1623,10 +1623,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         TransactionService transactionService = serviceRegistry.getTransactionService();
         NodeRef nodeRef = transactionService.getRetryingTransactionHelper().doInTransaction(callback, false);
         log.debug("finished content writing tx:"+nodeRef);
+        tempFile.delete();
         if(onComplete != null && nodeRef != null) {
             onComplete.run();
         }
-        tempFile.delete();
     }
 
     public void setUserDefinedPreview(String nodeId, byte[] content, String fileName) {
