@@ -76,6 +76,7 @@ export enum MdsWidgetType {
     MultiValueTree = 'multivalueTree',
     DefaultValue = 'defaultvalue',
     FacetList = 'facetList',
+    Toggle = 'toggle',
 }
 
 export interface InitialValues {

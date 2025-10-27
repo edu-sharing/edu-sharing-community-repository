@@ -23,6 +23,7 @@ import org.edu_sharing.repository.server.tools.LRMITool;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
+import org.edu_sharing.restservices.search.v1.model.SearchFacet;
 import org.edu_sharing.restservices.search.v1.model.SearchParameters;
 import org.edu_sharing.restservices.search.v1.model.SearchParametersFacets;
 import org.edu_sharing.restservices.shared.*;
@@ -38,10 +39,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Path("/search/v1")
 @Tag(name= "SEARCH v1" )
-@ApiService(value = "SEARCH", major = 1, minor = 0)
+@ApiService(value = "SEARCH", major = 1, minor = 1)
 @Consumes({ "application/json" })
 @Produces({"application/json"})
 public class SearchApi {
@@ -363,7 +365,7 @@ public class SearchApi {
 							maxItems != null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS,
 							contentType,
 							new SortDefinition(sortProperties,sortAscending),
-							facets
+							facets == null ? null : facets.stream().map(f -> new SearchFacet(f, null)).collect(Collectors.toList())
 					);
 			return Response.status(Response.Status.OK).entity(result).build();
 		}  catch (Throwable t) {

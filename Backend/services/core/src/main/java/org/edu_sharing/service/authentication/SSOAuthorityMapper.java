@@ -198,7 +198,7 @@ public class SSOAuthorityMapper {
 		
 		if(isDebug()){
 			for(Map.Entry<String,String> ssoAttribute : ssoAttributes.entrySet()){
-				logger.info("sso attribute: " + ssoAttribute.getKey() + " value: " + ssoAttribute.getValue());
+				logger.debug("sso attribute: " + ssoAttribute.getKey() + " value: " + ssoAttribute.getValue());
 			}
 		}
 

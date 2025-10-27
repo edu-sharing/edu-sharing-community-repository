@@ -61,7 +61,7 @@
         <i esIcon="done"></i>{{ 'SHARING.PASSWORD_CORRECT' | translate }}
       </div>
       <div *ngIf="sharingInfo.node.isDirectory">
-        <div class="download-top">
+        <div class="download-top" *ngIf="!nodesDataSource?.isEmpty()">
           <button mat-raised-button color="primary" (click)="download()">
             <i esIcon="cloud_download"></i>{{ 'SHARING.DOWNLOAD_ZIP' | translate }}
           </button>
@@ -77,10 +77,14 @@
             [elementInteractionType]="InteractionType.None"
             [displayType]="NodeEntriesDisplayType.Table"
             (sortChange)="changeSort($event)"
-          ></es-node-entries-wrapper>
+          >
+            <ng-template #empty>
+              <div class="empty mat-heading-5">{{ 'SHARING.EMPTY_FOLDER' | translate }}</div>
+            </ng-template>
+          </es-node-entries-wrapper>
         </div>
       </div>
-      <div class="download">
+      <div class="download" *ngIf="!sharingInfo.node.isDirectory || !nodesDataSource?.isEmpty()">
         <button mat-raised-button color="primary" (click)="download()">
           <i esIcon="cloud_download"></i
           >{{

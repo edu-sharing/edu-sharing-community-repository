@@ -79,7 +79,7 @@ export class MdsEditorWidgetFacetListComponent
                 first(),
                 switchMap(() =>
                     this.search.loadMoreFacets(
-                        this.widget.definition.id,
+                        { property: this.widget.definition.id },
                         RestConstants.COUNT_UNLIMITED,
                     ),
                 ),
@@ -114,7 +114,7 @@ export class MdsEditorWidgetFacetListComponent
         this.isLoading = true;
         this.showMore = true;
         this.search
-            .loadMoreFacets(this.widget.definition.id, RestConstants.COUNT_UNLIMITED)
+            .loadMoreFacets({ property: this.widget.definition.id }, RestConstants.COUNT_UNLIMITED)
             .pipe(finalize(() => (this.isLoading = false)))
             .subscribe();
     }
@@ -132,7 +132,7 @@ export class MdsEditorWidgetFacetListComponent
                 switchMap((facet) => {
                     return (this.filter.value || this.showMore) && facet.hasMore
                         ? this.search.loadMoreFacets(
-                              this.widget.definition.id,
+                              { property: this.widget.definition.id },
                               RestConstants.COUNT_UNLIMITED,
                           )
                         : of(facet);

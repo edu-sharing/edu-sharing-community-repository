@@ -92,6 +92,10 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
      * custom area for an overlay "above" each card (i.e. to show disabled infos), only for NodeEntriesDisplayType.SmallGrid & odeEntriesDisplayType.Grid
      */
     @ContentChild('overlay') overlayRef: TemplateRef<any>;
+    /**
+     * custom card template for each card only for NodeEntriesDisplayType.Grid
+     */
+    @ContentChild('customCard') customCard: TemplateRef<any>;
     @ViewChild('nodeEntriesComponent') nodeEntriesComponentRef: NodeEntriesComponent<T>;
     @Input() dataSource: NodeDataSource<T>;
     @Input() scope: Scope;
@@ -250,9 +254,9 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         if (changes.columns || changes.displayType) {
             this.entriesService.columnsSubject.next({
                 columns:
-                    this.columns[
+                    this.columns?.[
                         this.displayType === NodeEntriesDisplayType.Table ? 'Table' : 'Default'
-                    ] || this.columns['Default'],
+                    ] || this.columns?.Default,
                 fromUser: false,
             });
         }
@@ -460,6 +464,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.templatesService.empty = this.emptyRef;
         this.templatesService.actionArea = this.actionAreaRef;
         this.templatesService.overlay = this.overlayRef;
+        this.templatesService.customCard = this.customCard;
     }
 
     /**

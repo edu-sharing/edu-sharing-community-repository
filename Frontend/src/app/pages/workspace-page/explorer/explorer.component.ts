@@ -94,7 +94,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         }
         const title = new ListItem('NODE', RestConstants.LOM_PROP_TITLE);
         title.visible = false;
-        const size = new ListItem('NODE', RestConstants.SIZE);
+        const size = new ListItem('NODE', RestConstants.LOM_PROP_SIZE);
         size.visible = false;
         const created = new ListItem('NODE', RestConstants.CM_PROP_C_CREATED);
         created.visible = false;
@@ -478,7 +478,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
 
     initColumns() {
         this.config.get('workspaceColumns').subscribe((data: string[]) => {
-            this.storage.get('workspaceColumns').subscribe((columns: any[]) => {
+            this.storage.get('workspaceColumns_10.0').subscribe((columns: any[]) => {
                 this.columns = {
                     Default: WorkspaceExplorerComponent.getColumns(this.connector, columns, data),
                 };

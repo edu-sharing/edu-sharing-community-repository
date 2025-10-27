@@ -1,35 +1,26 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.cmr.version.VersionService;
-import org.alfresco.webservice.authentication.AuthenticationFault;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.nodeservice.NodeService;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
 import org.jetbrains.annotations.NotNull;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -37,6 +28,8 @@ import java.util.stream.Collectors;
  * to alf_qname local_nome "deleted" is created. for this node there is one entry in alf_node_properties which is
  * keeping the original dbid from the version entry. this job helps reducing entries in alf_node properties.
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+@Slf4j
 @JobDescription(description = "Removes versions of node which are not referenced")
 public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
 
@@ -47,7 +40,6 @@ public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
             CCConstants.VERSION_COMMENT_BULK_UPDATE_RESYNC,
             CCConstants.VERSION_COMMENT_BULK_MIGRATION
     );
-    protected Logger logger = Logger.getLogger(RemoveNodeVersionsJob.class);
 
     @Setter
     @JobFieldDescription(
@@ -63,7 +55,7 @@ public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
 
     @Setter
     @JobFieldDescription(description = "Folder id to start from")
-    private  String startFolder;
+    private String startFolder;
 
     @Setter
     private Usage2Service usage2Service;
@@ -78,8 +70,7 @@ public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
 
     @Override
     public void executeInternal(JobExecutionContext jobExecutionContext) {
-        usage2Service = new Usage2Service();
-        List<NodeRef> nodeRefs = new ArrayList<>();
+        List<NodeRef> nodeRefs = Collections.synchronizedList(new ArrayList<>());
         NodeRunner runner = new NodeRunner();
         runner.setThreaded(true);
         runner.setRunAsSystem(true);
@@ -91,20 +82,22 @@ public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
             runner.setStartFolder(startFolder);
         }
 
-        runner.setTask(n -> nodeRefs.add(n));
+        runner.setTask(nodeRefs::add);
         runner.run();
 
-        nodeRefs.forEach(n -> {
-            AuthenticationUtil.runAsSystem(() -> {
+        nodeRefs.forEach(n -> AuthenticationUtil.runAsSystem(() -> {
+            try {
                 handleNode(n);
-                return null;
-            });
-        });
+            }catch (Exception e){
+                log.error("Could not handle node {}", n, e);
+            }
+            return null;
+        }));
 
     }
 
     public void handleNode(@NotNull NodeRef node) {
-        String replicationSourceId = nodeService.getProperty(node.getStoreRef().getProtocol(),node.getStoreRef().getIdentifier(),node.getId(),CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID);
+        String replicationSourceId = nodeService.getProperty(node.getStoreRef().getProtocol(), node.getStoreRef().getIdentifier(), node.getId(), CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID);
         long timeSpan = StringUtils.isNotBlank(olderThan)
                 ? Duration.parse(olderThan).toMillis()
                 : -1;
@@ -121,28 +114,23 @@ public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
         try {
             usages = usage2Service.getUsages("-home-", node.getId(), null, null);
         } catch (Exception e) {
-            logger.warn("node " + node + " is be skipped due to a usage request failure", e);
+            log.warn("node {} is be skipped due to a usage request failure", node, e);
             return;
         }
 
-        String versionInUse = nodeService.getProperty(node.getStoreRef().getProtocol(),node.getStoreRef().getIdentifier(), node.getId(),  CCConstants.LOM_PROP_LIFECYCLE_VERSION);
+        String versionInUse = nodeService.getProperty(node.getStoreRef().getProtocol(), node.getStoreRef().getIdentifier(), node.getId(), CCConstants.LOM_PROP_LIFECYCLE_VERSION);
 
         List<Version> versionsToDelete = versionHistory.getAllVersions().stream()
                 .skip(keepAtLeast)
                 .filter(version -> !Objects.equals(version.getVersionLabel(), versionInUse))
                 .filter(version -> !BLOCKED_VERSION_LABELS.contains(version.getVersionLabel()))
                 .filter(version -> Math.abs(refDate.getTime() - version.getFrozenModifiedDate().getTime()) > timeSpan)
-                .filter(version -> usages.stream().noneMatch(x-> Objects.equals(x.getUsageVersion(), version.getVersionLabel())))
+                .filter(version -> usages.stream().noneMatch(x -> Objects.equals(x.getUsageVersion(), version.getVersionLabel())))
                 .collect(Collectors.toList());
 
         versionsToDelete.forEach(version -> {
-            logger.info("deleteing version node:"+node + " replicationSourceId:" +replicationSourceId+ " versionLabel:" + version.getVersionLabel());
+            log.info("deleteing version node:{} replicationSourceId:{} versionLabel:{}", node, replicationSourceId, version.getVersionLabel());
             versionService.deleteVersion(node, version);
         });
-    }
-
-    @Override
-    public Class[] getJobClasses() {
-        return allJobs;
     }
 }

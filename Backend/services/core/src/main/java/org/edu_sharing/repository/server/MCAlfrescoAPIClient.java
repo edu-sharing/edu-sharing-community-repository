@@ -1592,7 +1592,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
             NodeRef nodeRef = new NodeRef(store, nodeID);
             final ContentWriter contentWriter = contentService.getWriter(nodeRef, QName.createQName(property), true);
             contentWriter.addListener(() -> {
-                log.debug("Content Stream was closed");
+                log.debug("Content Stream was closed for:"+nodeRef);
                 log.debug(" size:" + contentWriter.getContentData().getSize() +
                         ", URL:" + contentWriter.getContentData().getContentUrl() +
                         ", MimeType:" + contentWriter.getContentData().getMimetype() + "" +

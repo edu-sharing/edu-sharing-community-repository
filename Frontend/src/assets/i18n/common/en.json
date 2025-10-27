@@ -259,6 +259,7 @@
     "description": "description",
     "mimetype": "file type",
     "size": "size",
+    "cclom:size": "size",
     "mediatype": "file type",
     "ccm:commonlicense_key": "license",
     "ccm:educationallearningresourcetype": "Type",
@@ -591,12 +592,12 @@
       "UNTERRICHTS_UND_LEHRMEDIEN": "§60b Media collections for teaching",
       "CC_0": "CC-0",
       "PDM": "PDM",
-      "CC_BY": "CC-BY",
-      "CC_BY_SA": "CC-BY-SA",
-      "CC_BY_NC": "CC-BY-NC",
-      "CC_BY_ND": "CC-BY-ND",
-      "CC_BY_NC_SA": "CC-BY-NC-SA",
-      "CC_BY_NC_ND": "CC-BY-NC-ND",
+      "CC_BY": "CC BY",
+      "CC_BY_SA": "CC BY-SA",
+      "CC_BY_NC": "CC BY-NC",
+      "CC_BY_ND": "CC BY-ND",
+      "CC_BY_NC_SA": "CC BY-NC-SA",
+      "CC_BY_NC_ND": "CC BY-NC-ND",
       "CUSTOM": "Custom license"
     },
     "DESCRIPTION": {
@@ -812,7 +813,7 @@
       "LICENSES": {
         "NONE": "Not licensed",
         "COPYRIGHT_FREE": "Copyright",
-        "CC_BY": "CC-BY (4.0)",
+        "CC_BY": "CC BY (4.0)",
         "CC_0": "CC-0"
       }
     },
@@ -851,6 +852,7 @@
     "OPEN": "Open",
     "DOWNLOAD_ZIP": "Download as Zip",
     "LINK": "To original page",
+    "EMPTY_FOLDER": "The shared folder currently contains no files",
     "INVITED_AND_CREATED_BY": "Created and shared by {{inviter}}",
     "INVITED_PLUS_CREATED_BY": "Shared by {{inviter}}, created by {{creator}}",
     "ENTER_PASSWORD": "next",
@@ -887,8 +889,14 @@
       "GENERIC_INTERNAL_SERVER_ERROR": "Internal server error"
     },
     "GDPR": {
-      "GDPR_DIALOG": "This content is provided by a third party resource.",
-      "GDPR_CONTINUE": "Continue"
+      "EXTERNAL_SITE": "External site",
+      "EXTERNAL_CONTENT": "External content",
+      "GDPR_REGULATIONS": "Privacy regulations",
+      "AGREE_AND_CONTINUE": "Agree and continue",
+      "FURTHER_INFORMATION": "Further information: ",
+      "EXTERNAL_SITE_INFO": "When opening the external site data might be transferred. Please refer to our ",
+      "EXTERNAL_SOURCE": "an external source",
+      "EXTERNAL_CONTENT_INFO": "You are about to request content from {{EXTERNAL_RESOURCE}}. Personal data might be transferred."
     }
   },
   "TOAST": {

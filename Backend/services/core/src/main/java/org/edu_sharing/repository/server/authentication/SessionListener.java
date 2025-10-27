@@ -29,8 +29,8 @@ public class SessionListener implements HttpSessionListener{
 
 	@Override
 	public void sessionCreated(HttpSessionEvent event) {
-		
 		String sessionId = event.getSession().getId();
+		logger.debug("session created: " + sessionId);
 		AllSessions.put(sessionId, event.getSession());
 		
 		String ssoSessionId = (String)event.getSession().getAttribute(CCConstants.AUTH_SSO_SESSIONID);

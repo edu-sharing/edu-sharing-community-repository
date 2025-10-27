@@ -58,6 +58,9 @@ public class Context {
      * @throws ParserConfigurationException if an error occurs during XML document initialization.
      */
     public Context(PropertyMapper propertyMapper, MetadataSet metadataSet, String nodeId) throws ParserConfigurationException {
+        this(propertyMapper, metadataSet, nodeId, null);
+    }
+    public Context(PropertyMapper propertyMapper, MetadataSet metadataSet, String nodeId, Boolean hasWritePermission) throws ParserConfigurationException {
         this.propertyMapper = propertyMapper;
         this.metadataSet = metadataSet;
         this.nodeId = nodeId;
@@ -66,19 +69,23 @@ public class Context {
                 .map(Locale::forLanguageTag)
                 .map(Locale::getLanguage)
                 .orElseGet(() -> Locale.getDefault().getLanguage());
-
-        hasWritePermission = PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), CCConstants.PERMISSION_WRITE);
+        if(hasWritePermission == null) {
+            this.hasWritePermission = PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), CCConstants.PERMISSION_WRITE);
+        } else {
+            this.hasWritePermission = hasWritePermission;
+        }
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
         document = docBuilder.newDocument();
     }
 
-    /**
-     * Creates a new XML element with the specified name.
-     *
-     * @param name the name of the element to create.
-     * @return a new {@link Element} instance.
-     */
+
+        /**
+         * Creates a new XML element with the specified name.
+         *
+         * @param name the name of the element to create.
+         * @return a new {@link Element} instance.
+         */
     public Element createElement(String name) {
         return document.createElement(name);
     }

@@ -2,10 +2,14 @@ package org.edu_sharing.metadataset.v2.tools;
 
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.Lists;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.edu_sharing.metadataset.v2.*;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
+import org.edu_sharing.restservices.search.v1.model.SearchFacet;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceElasticTestUtils;
 import org.edu_sharing.service.search.model.SearchToken;
@@ -15,10 +19,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.opensaml.xmlsec.signature.P;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 class MetadataElasticSearchHelperTest {
@@ -41,6 +47,7 @@ class MetadataElasticSearchHelperTest {
         authenticationToolApiConstruction = Mockito.mockConstruction(AuthenticationToolAPI.class);
         when(authenticationToolApi.getCurrentLocale()).thenReturn("en");
 
+        mds = new MetadataSet();
         query = new MetadataQuery();
         basequery = "{\"exists\":{\"field\": \"type\"}}";
         query.setBasequery(new HashMap<>() {{
@@ -51,7 +58,6 @@ class MetadataElasticSearchHelperTest {
         query.setSyntax(MetadataReader.QUERY_SYNTAX_DSL);
         queries = new MetadataQueries();
         queries.setQueries(Collections.singletonList(query));
-        mds = new MetadataSet();
         mds.setQueries(new HashMap<>() {{
             put(MetadataReader.QUERY_SYNTAX_DSL, queries);
         }});
@@ -86,7 +92,7 @@ class MetadataElasticSearchHelperTest {
         List<MetadataQueryParameter> parameters = new ArrayList<>();
         MetadataQueryParameter parameter = new MetadataQueryParameter(query.getSyntax(), null);
         parameter.setMultiple(true);
-        parameter.setMultiplejoin("AND");
+        parameter.setMultiplejoin(MetadataQueryParameter.ParameterJoinStrategy.AND);
         parameter.setName("parameter");
         parameter.setStatements(new HashMap<>() {{
             put(null, "{\"match\":{\"some_field\":\"{$value}\"}}");
@@ -102,7 +108,7 @@ class MetadataElasticSearchHelperTest {
         );
 
         // OR JOIN
-        parameter.setMultiplejoin("OR");
+        parameter.setMultiplejoin(MetadataQueryParameter.ParameterJoinStrategy.OR);
         result = MetadataElasticSearchHelper.getElasticSearchQuery(token, queries, query, new HashMap<>() {{
             put("parameter", new String[]{"a", "b"});
         }});
@@ -112,12 +118,12 @@ class MetadataElasticSearchHelperTest {
         );
 
 
+
         // 2 Parameters AND combined
         MetadataQueryParameter parameter2 = new MetadataQueryParameter(query.getSyntax(), null);
-        parameter2.setMultiple(true);
-        parameter2.setMultiplejoin("AND");
         parameter2.setName("parameter2");
-        parameter2.setMultiplejoin("OR");
+        parameter2.setMultiple(true);
+        parameter2.setMultiplejoin(MetadataQueryParameter.ParameterJoinStrategy.OR);
         parameters.add(parameter2);
         result = MetadataElasticSearchHelper.getElasticSearchQuery(token, queries, query, new HashMap<>() {{
             put("parameter", new String[]{"a", "b"});
@@ -136,8 +142,49 @@ class MetadataElasticSearchHelperTest {
         SearchServiceElasticTestUtils.assertQuery(
                 "{\n  \"bool\" : {\n    \"must\" : [\n      {\n        \"wrapper\" : {\n          \"query\" : \"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"\n        }\n      }\n    ],\n    \"should\" : [\n      {\n        \"bool\" : {\n          \"should\" : [\n            {\n              \"wrapper\" : {\n                \"query\" : \"eyJtYXRjaCI6eyJzb21lX2ZpZWxkIjoieyR2YWx1ZX0ifX0=\"\n              }\n            },\n            {\n              \"wrapper\" : {\n                \"query\" : \"eyJtYXRjaCI6eyJzb21lX2ZpZWxkIjoieyR2YWx1ZX0ifX0=\"\n              }\n            }\n          ]}\n      },\n      {\n        \"bool\" : {\n          \"should\" : [\n            {\n              \"wrapper\" : {\n                \"query\" : \"eyJ3aWxkY2FyZCI6eyJwcm9wZXJ0aWVzLnBhcmFtZXRlcjIua2V5d29yZCI6eyJjYXNlX2luc2Vuc2l0aXZlIjp0cnVlLCJ2YWx1ZSI6IiphKiJ9fX0=\"\n              }\n            },\n            {\n              \"wrapper\" : {\n                \"query\" : \"eyJ3aWxkY2FyZCI6eyJwcm9wZXJ0aWVzLnBhcmFtZXRlcjIua2V5d29yZCI6eyJjYXNlX2luc2Vuc2l0aXZlIjp0cnVlLCJ2YWx1ZSI6IipiKiJ9fX0=\"\n              }\n            }\n          ]}\n      }\n    ]}\n}",
                 result
-        )
-        ;
+        );
+
+
+        // INTERNAL join
+        token = new SearchToken();
+        parameter.setMultiplejoin(MetadataQueryParameter.ParameterJoinStrategy.INTERNAL);
+        parameter.setStatements(new HashMap<>() {{
+            put(null, "{\"regexp\":{\"some_field\":\"${value[0]}|${value[1]}\"}}");
+        }});
+        result = MetadataElasticSearchHelper.getElasticSearchQuery(token, queries, query, new HashMap<>() {{
+            put("parameter", new String[]{"a", "b"});
+        }});
+        parameters.clear();
+        parameters.add(parameter);
+        SearchServiceElasticTestUtils.assertQuery(
+                "{\n" +
+                        "  \"bool\": {\n" +
+                        "    \"must\": [\n" +
+                        "      {\n" +
+                        "        \"wrapper\": {\n" +
+                        "          \"query\": \"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"\n" +
+                        "        }\n" +
+                        "      }\n" +
+                        "    ],\n" +
+                        "    \"should\": [\n" +
+                        "      {\n" +
+                        "        \"bool\": {\n" +
+                        "          \"should\": [\n" +
+                        "            {\n" +
+                        "              \"wrapper\": {\n" +
+                        "                \"query\": \"eyJib29sIjp7Im11c3QiOlt7IndyYXBwZXIiOnsicXVlcnkiOiJleUp5WldkbGVIQWlPbnNpYzI5dFpWOW1hV1ZzWkNJNkltRjhZaUo5ZlE9PSJ9fV19fQ==\"\n" +
+                        "              }\n" +
+                        "            }\n" +
+                        "          ]\n" +
+                        "        }\n" +
+                        "      }\n" +
+                        "    ]\n" +
+                        "  }\n" +
+                        "}",
+                result
+        );
+
+
     }
 
     @Test
@@ -148,8 +195,8 @@ class MetadataElasticSearchHelperTest {
 
         query.setParameters(Collections.singletonList(parameter));
 
-        Map<String, Aggregation> result = MetadataElasticSearchHelper.getAggregations(mds, query, Collections.emptyMap(),
-                Collections.singletonList("test_facet"), Collections.emptySet(),
+        Map<String, Aggregation> result = MetadataElasticSearchHelper.applyAggregations(new SearchRequest.Builder(), mds, query, Collections.emptyMap(),
+                Collections.singletonList(new SearchFacet("test_facet", null)), Collections.emptySet(),
                 new BoolQuery.Builder().build()._toQuery(),
                 token
         );
@@ -166,8 +213,8 @@ class MetadataElasticSearchHelperTest {
         parameter2.setName("test_facet2");
         query.setParameters(Arrays.asList(parameter, parameter2));
 
-        result = MetadataElasticSearchHelper.getAggregations(mds, query, Collections.emptyMap(),
-                Arrays.asList("test_facet", "test_facet2"), Collections.emptySet(),
+        result = MetadataElasticSearchHelper.applyAggregations(new SearchRequest.Builder(), mds, query, Collections.emptyMap(),
+                Arrays.asList(new SearchFacet("test_facet", null), new SearchFacet("test_facet2", null)), Collections.emptySet(),
                 new BoolQuery.Builder().build()._toQuery(),
                 token
         );
@@ -188,6 +235,7 @@ class MetadataElasticSearchHelperTest {
 
         // multi term facet
         parameter.setFacet(new MetadataQueryParameter.MetadataQueryFacet(
+                MetadataQueryParameter.MetadataQueryFacet.Type.term,
                 MetadataQueryParameter.MetadataQueryFacet.SortBy.count,
                 MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc,
                 null,
@@ -198,8 +246,8 @@ class MetadataElasticSearchHelperTest {
         );
         query.setParameters(Collections.singletonList(parameter));
 
-        result = MetadataElasticSearchHelper.getAggregations(mds, query, Collections.emptyMap(),
-                Collections.singletonList("test_facet"), Collections.emptySet(),
+        result = MetadataElasticSearchHelper.applyAggregations(new SearchRequest.Builder(), mds, query, Collections.emptyMap(),
+                Collections.singletonList(new SearchFacet("test_facet", null)), Collections.emptySet(),
                 new BoolQuery.Builder().build()._toQuery(),
                 token
         );
@@ -209,6 +257,62 @@ class MetadataElasticSearchHelperTest {
                         "\"aggregations\":{\"test_facet\":{\"multi_terms\":{\"min_doc_count\":4,\"size\":250,\"terms\":[{\"field\":\"facet1\",\"missing\":\"\"},{\"field\":\"facet2\",\"missing\":\"\"}]}}}," +
                         "\"meta\":{\"type\":\"multi_terms\"}," +
                         "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}}]}},{\"bool\":{}},{\"bool\":{}}]}}" +
+                        "}",
+                result.get("test_facet")
+        );
+
+
+
+        // geo test
+        parameter.setFacet(new MetadataQueryParameter.MetadataQueryFacet(
+                MetadataQueryParameter.MetadataQueryFacet.Type.geo_grid,
+                MetadataQueryParameter.MetadataQueryFacet.SortBy.count,
+                MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc,
+                null,
+                Collections.emptyList())
+        );
+        query.setParameters(Collections.singletonList(parameter));
+        SearchRequest.Builder builder = new SearchRequest.Builder();
+        result = MetadataElasticSearchHelper.applyAggregations(builder, mds, query, Collections.emptyMap(),
+                Collections.singletonList(new SearchFacet("test_facet", Map.of("precision", 7))), Collections.emptySet(),
+                new BoolQuery.Builder().build()._toQuery(),
+                token
+        );
+        assertNotNull(builder.build().runtimeMappings().get(MetadataElasticSearchHelper.GEOPOINT_RUNTIME_FIELD).script());
+        assertEquals(1, result.size());
+        SearchServiceElasticTestUtils.assertFacet(
+                "{\n" +
+                        "  \"aggregations\": {\n" +
+                        "    \"test_facet\": {\n" +
+                        "      \"geotile_grid\": {\n" +
+                        "        \"field\": \"geo_point_runtime\",\n" +
+                        "        \"precision\": 7.0\n" +
+                        "      }\n" +
+                        "    }\n" +
+                        "  },\n" +
+                        "  \"filter\": {\n" +
+                        "    \"bool\": {\n" +
+                        "      \"must\": [\n" +
+                        "        {\n" +
+                        "          \"bool\": {\n" +
+                        "            \"must\": [\n" +
+                        "              {\n" +
+                        "                \"wrapper\": {\n" +
+                        "                  \"query\": \"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"\n" +
+                        "                }\n" +
+                        "              }\n" +
+                        "            ]\n" +
+                        "          }\n" +
+                        "        },\n" +
+                        "        {\n" +
+                        "          \"bool\": {}\n" +
+                        "        },\n" +
+                        "        {\n" +
+                        "          \"bool\": {}\n" +
+                        "        }\n" +
+                        "      ]\n" +
+                        "    }\n" +
+                        "  }\n" +
                         "}",
                 result.get("test_facet")
         );
@@ -227,8 +331,8 @@ class MetadataElasticSearchHelperTest {
 
         query.setParameters(Collections.singletonList(parameter));
 
-        Map<String, Aggregation> result = MetadataElasticSearchHelper.getAggregations(mds, query, Collections.emptyMap(),
-                Collections.singletonList("test_facet"), Collections.emptySet(),
+        Map<String, Aggregation> result = MetadataElasticSearchHelper.applyAggregations(new SearchRequest.Builder(), mds, query, Collections.emptyMap(),
+                Collections.singletonList(new SearchFacet("test_facet", null)), Collections.emptySet(),
                 new BoolQuery.Builder().build()._toQuery(),
                 token
         );
@@ -243,10 +347,10 @@ class MetadataElasticSearchHelperTest {
 
         // with param
         query.setParameters(Collections.singletonList(parameter));
-        result = MetadataElasticSearchHelper.getAggregations(mds, query, new HashMap<>() {{
+        result = MetadataElasticSearchHelper.applyAggregations(new SearchRequest.Builder(), mds, query, new HashMap<>() {{
                     put("test_facet", new String[]{"a"});
                 }},
-                Collections.singletonList("test_facet"), Collections.emptySet(),
+                Collections.singletonList(new SearchFacet("test_facet", null)), Collections.emptySet(),
                 new BoolQuery.Builder().build()._toQuery(),
                 token
         );
@@ -268,6 +372,7 @@ class MetadataElasticSearchHelperTest {
 
         // multi term facet
         parameter.setFacet(new MetadataQueryParameter.MetadataQueryFacet(
+                MetadataQueryParameter.MetadataQueryFacet.Type.term,
                 MetadataQueryParameter.MetadataQueryFacet.SortBy.count,
                 MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc,
                 null,
@@ -278,8 +383,8 @@ class MetadataElasticSearchHelperTest {
         );
         query.setParameters(Collections.singletonList(parameter));
 
-        result = MetadataElasticSearchHelper.getAggregations(mds, query, Collections.emptyMap(),
-                Collections.singletonList("test_facet"), Collections.emptySet(),
+        result = MetadataElasticSearchHelper.applyAggregations(new SearchRequest.Builder(), mds, query, Collections.emptyMap(),
+                Collections.singletonList(new SearchFacet("test_facet", null)), Collections.emptySet(),
                 new BoolQuery.Builder().build()._toQuery(),
                 token
         );
@@ -295,6 +400,7 @@ class MetadataElasticSearchHelperTest {
 
         // nested facet
         parameter.setFacet(new MetadataQueryParameter.MetadataQueryFacet(
+                MetadataQueryParameter.MetadataQueryFacet.Type.term,
                 MetadataQueryParameter.MetadataQueryFacet.SortBy.count,
                 MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc,
                 null,
@@ -304,8 +410,8 @@ class MetadataElasticSearchHelperTest {
         );
         query.setParameters(Collections.singletonList(parameter));
 
-        result = MetadataElasticSearchHelper.getAggregations(mds, query, Collections.emptyMap(),
-                Collections.singletonList("test_facet"), Collections.emptySet(),
+        result = MetadataElasticSearchHelper.applyAggregations(new SearchRequest.Builder(), mds, query, Collections.emptyMap(),
+                Collections.singletonList(new SearchFacet("test_facet", null)), Collections.emptySet(),
                 new BoolQuery.Builder().build()._toQuery(),
                 token
         );

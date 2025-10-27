@@ -22,7 +22,7 @@ public class MetadataQueryParameter implements Serializable {
 	private Map<String,String> statements;
 	private boolean multiple;
 	private boolean exactMatching = true;
-	private String multiplejoin;
+	private ParameterJoinStrategy multiplejoin;
 	private int ignorable;
 
 
@@ -86,7 +86,7 @@ public class MetadataQueryParameter implements Serializable {
 	@NoArgsConstructor
 	@AllArgsConstructor
 	public static class MetadataQueryFacet implements Serializable {
-
+		private Type type = Type.term;
 		private SortBy sortBy = SortBy.count;
 		private SortOrder sortOrder = SortOrder.desc;
 		/**
@@ -96,7 +96,10 @@ public class MetadataQueryParameter implements Serializable {
 		private Integer maxBucketSize = null;
 		private List<MetadataQueryFacetItem> items = new ArrayList<>();
 
-
+		public enum Type {
+			term,
+			geo_grid,
+		}
 		public enum SortBy {
 			count,
 			caption,
@@ -115,5 +118,14 @@ public class MetadataQueryParameter implements Serializable {
 	public static class MetadataQueryFacetItem implements Serializable {
 		private String value;
 		private String nested;
+	}
+
+	public enum ParameterJoinStrategy {
+		// concat using and per statement
+		AND,
+		// concat using and per statement
+		OR,
+		// one statement which accesses the parameter via an index structure
+		INTERNAL
 	}
 }

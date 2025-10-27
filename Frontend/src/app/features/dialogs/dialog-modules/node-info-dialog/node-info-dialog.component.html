@@ -128,14 +128,22 @@
           <mat-label>{{ property[0] }}</mat-label>
           <input matInput type="text" *ngIf="editMode" [(ngModel)]="property[1]" />
         </mat-form-field>
-        <div *ngIf="!saving">
+        <div *ngIf="!saving" class="actions">
           <button
             mat-raised-button
             color="primary"
             [disabled]="saving"
-            (click)="saveProperty(property)"
+            (click)="saveProperty(property, false)"
           >
             <i esIcon="save"></i>
+          </button>
+          <button
+            mat-button
+            color="warn"
+            [disabled]="saving"
+            (click)="saveProperty(property, true)"
+          >
+            <i esIcon="delete"></i>
           </button>
         </div>
         <div *ngIf="saving"><es-spinner-small></es-spinner-small></div>

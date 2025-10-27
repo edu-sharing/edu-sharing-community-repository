@@ -1505,7 +1505,6 @@
           "fields": [
           "properties.cm:name^2",
           "properties.cm:title^2",
-          "properties.cm:title.keyword^2",
           "properties.cclom:title^5",
           "properties.cclom:general_description^2",
           "properties.cclom:general_keyword^4",
@@ -1514,7 +1513,8 @@
           "default_operator": "and"
           }
           },
-          {"wildcard":{"nodeRef.id": {"value":"*${value}*", "case_insensitive": true }}}
+          {"wildcard":{"nodeRef.id": {"value":"*${value}*", "case_insensitive": true }}},
+          {"wildcard":{"properties.cm:title.keyword": {"value":"*${value}*", "case_insensitive": true }}}
           ]
           }}
         </statement>
@@ -1631,6 +1631,16 @@
         <statement>{"wildcard": {"properties.cclom:format": "${valueRaw}*" }}</statement>
         <multiple>true</multiple>
         <multiplejoin>OR</multiplejoin>
+      </property>
+      <property name="virtual:location">
+        <multiple>true</multiple>
+        <multiplejoin>INTERNAL</multiplejoin>
+        <statement>{"bool": {
+          "must": [
+          {"range":{"properties.cm:latitude.number":{"gte":"${valueRaw[0]}", "lte":"${valueRaw[2]}"}}},
+          {"range":{"properties.cm:longitude.number":{"gte":"${valueRaw[1]}", "lte":"${valueRaw[3]}"}}}
+          ]}}</statement>
+        <facets type="geo_grid"/>
       </property>
     </query>
     <query join="AND" id="mediacenter_filter">

@@ -195,14 +195,24 @@ public class OaiLomHSOERMetadataFormatWriter extends AbstractMetadataFormatWrite
     }
 
 
-    private void createKeyword(Context context, Element general) {
+    void createKeyword(Context context, Element general) {
         PropertyMapper propertyMapper = context.getPropertyMapper();
 
-        List<String> keywords = new ArrayList<>(propertyMapper.getStringList(CCConstants.LOM_PROP_GENERAL_KEYWORD));
-        keywords.addAll(propertyMapper.getStringList(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD));
-
-        for (String keyword : keywords) {
+        for (String keyword : propertyMapper.getStringList(CCConstants.LOM_PROP_GENERAL_KEYWORD)) {
             addLanguageAttribute(context, context.createAndAppendElement("langstring", context.createAndAppendElement("keyword", general), keyword));
+        }
+
+        int i = 0;
+        List<String> i18n = propertyMapper.getStringList(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD_DISPLAY);
+        for (String keyword : propertyMapper.getStringList(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD)) {
+            Element keywordElement = context.createAndAppendElement("keyword", general);
+            if(i < i18n.size()) {
+                addLanguageAttribute(context, context.createAndAppendElement("langstring", keywordElement, i18n.get(i)));
+            }
+            // @TODO: in 11.0, use and provide the GND-URI here
+            context.createAndAppendElement("id", keywordElement, keyword);
+
+            i++;
         }
 
     }

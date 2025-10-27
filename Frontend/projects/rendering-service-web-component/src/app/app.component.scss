@@ -12,6 +12,11 @@
     .cdk-overlay-container {
         font-family: $primaryFontFamily;
     }
+    .module {
+        &.module-AUDIO {
+            border-radius: 2em 2em 0 0;
+        }
+    }
 }
 
 .app-container {

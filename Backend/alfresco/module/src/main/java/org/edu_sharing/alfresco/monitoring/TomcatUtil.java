@@ -117,6 +117,14 @@ public class TomcatUtil {
         return getTomcatSessions(service, host, "/" + app.getName());
     }
 
+    public StandardContext getContext(String webapp){
+        try {
+            return getContext(getService(), "localhost", webapp);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private Service getService() throws MalformedObjectNameException, ReflectionException, AttributeNotFoundException, InstanceNotFoundException, MBeanException {
         MBeanServer mBeanServer = Registry.getRegistry(null, null).getMBeanServer();
         org.apache.catalina.Server server = (org.apache.catalina.Server) mBeanServer.getAttribute(new ObjectName("Catalina", "type", "Server"), "managedResource");

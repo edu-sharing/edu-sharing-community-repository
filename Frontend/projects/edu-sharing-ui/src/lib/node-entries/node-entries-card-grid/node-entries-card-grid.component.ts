@@ -372,6 +372,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
 
     isCustomTemplate(node: T) {
         return (
+            this.templatesService.customCard ||
             this.entriesService.dataSource instanceof CustomTemplatesDataSource ||
             (node as any).elementRef
         );

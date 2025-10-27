@@ -96,4 +96,5 @@ export const WidgetComponents: {
     [MdsWidgetType.MultiValueTree]: MdsEditorWidgetTreeComponent,
     [MdsWidgetType.DefaultValue]: null,
     [MdsWidgetType.FacetList]: MdsEditorWidgetFacetListComponent,
+    [MdsWidgetType.Toggle]: MdsEditorWidgetCheckboxComponent,
 };
