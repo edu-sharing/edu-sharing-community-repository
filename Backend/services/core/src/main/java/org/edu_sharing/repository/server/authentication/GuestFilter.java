@@ -21,7 +21,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
-import org.edu_sharing.spring.security.openid.SilentLoginModeRedirect;
+import org.edu_sharing.spring.security.oauth2.SilentLoginModeRedirect;
 
 public class GuestFilter implements jakarta.servlet.Filter {
 

@@ -1,4 +1,4 @@
-package org.edu_sharing.spring.security.openid;
+package org.edu_sharing.spring.security.oauth2;
 
 import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
@@ -29,7 +29,7 @@ public class CustomErrorHandler implements AuthenticationFailureHandler {
                 return;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
 
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

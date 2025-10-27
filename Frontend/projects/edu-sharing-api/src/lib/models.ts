@@ -124,3 +124,6 @@ export { UserStatsGroup } from './api/models/user-stats-group';
 export { UserStatus } from './api/models/user-status';
 export { WebsiteInformation } from './api/models/website-information';
 export { RegisterInformation } from './api/models/register-information';
+export { PrimaryLogin } from './api/models/primary-login';
+export { ScopeLogin } from './api/models/scope-login';
+export { OAuthEntry } from './api/models/o-auth-entry';

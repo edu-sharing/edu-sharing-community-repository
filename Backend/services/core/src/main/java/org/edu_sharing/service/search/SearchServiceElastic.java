@@ -2051,7 +2051,7 @@ public class SearchServiceElastic implements SearchService {
             return new SearchResult<>(new ArrayList<>(), 0, 0);
         }
 
-        // don't find groups of scopes when no scope is provided
+        // don't find groups of scope when no scope is provided
         if (NodeServiceInterceptor.getEduSharingScope() == null && findGroupsQuery != null) {
 
             /*

@@ -155,12 +155,12 @@
         <h4 class="mat-heading-4">{{ 'LOGIN.OAUTH.TITLE' | translate }}</h4>
         <div>
           <a
-            matTooltip="{{ 'LOGIN.OAUTH.USE_PROVIDER' | translate : { provider: provider.id } }}"
-            [href]="'/edu-sharing/sso?id=' + encodeURIComponent(provider.id)"
+            matTooltip="{{ 'LOGIN.OAUTH.USE_PROVIDER' | translate : { provider: provider.name } }}"
+            [href]="'/edu-sharing/sso?id=' + encodeURIComponent(provider.registrationId)"
             *ngFor="let provider of registeredOauthProviders"
             ><img
-              [src]="'assets/images/oauth/' + provider.id.toLowerCase() + '.svg'"
-              [alt]="provider.id"
+              [src]="'assets/images/oauth/' + provider.name.toLowerCase() + '.svg'"
+              [alt]="provider.name"
           /></a>
         </div>
       </div>

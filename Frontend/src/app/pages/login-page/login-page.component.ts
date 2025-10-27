@@ -34,7 +34,7 @@ import {
     UIService,
 } from 'ngx-edu-sharing-ui';
 import { UIHelper } from '../../core-ui-module/ui-helper';
-import { AuthenticationService, LoginInfo } from 'ngx-edu-sharing-api';
+import { AuthenticationService, LoginInfo, OAuthEntry, PrimaryLogin } from 'ngx-edu-sharing-api';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { firstValueFrom, Subject } from 'rxjs';
@@ -86,7 +86,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     private scope = '';
     private destroyed = new Subject<void>();
     // @TODO change model
-    registeredOauthProviders: { id: string }[];
+    registeredOauthProviders: OAuthEntry[];
 
     constructor(
         private connector: RestConnectorService,
@@ -148,7 +148,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                     }
                     this.connector.isLoggedIn().subscribe(async (data: LoginResult) => {
                         // @TODO this.registeredOauthProviders
-                        // this.registeredOauthProviders = [{id: "Google"}, {id: "Facebook"}, {id: "Github"}]
+                        this.registeredOauthProviders = (data as PrimaryLogin).oauthEntries; // [{id: "Google"}, {id: "Facebook"}, {id: "Github"}]
                         if (data.currentScope) {
                             // just to make sure there is no scope still set // NO: We need a valid session when login to scope!!!
                             try {

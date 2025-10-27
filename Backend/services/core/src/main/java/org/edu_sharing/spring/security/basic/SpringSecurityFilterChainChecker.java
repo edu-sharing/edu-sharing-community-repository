@@ -2,23 +2,21 @@ package org.edu_sharing.spring.security.basic;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.ServletContext;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.edu_sharing.spring.security.openid.SecurityConfigurationOpenIdConnect;
+import org.edu_sharing.spring.security.oauth2.SecurityConfigurationOAuth2;
 import org.edu_sharing.spring.security.saml2.SecurityConfigurationSaml;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-@Profile({SecurityConfigurationOpenIdConnect.PROFILE_ID,SecurityConfigurationSaml.PROFILE_ID,SecurityConfigurationBasic.PROFILE_ID})
+@Profile({SecurityConfigurationOAuth2.PROFILE_ID,SecurityConfigurationSaml.PROFILE_ID,SecurityConfigurationBasic.PROFILE_ID})
 @Slf4j
-@Component()
+@Component
+@RequiredArgsConstructor
 public class SpringSecurityFilterChainChecker {
-    @Autowired
-    ServletContext servletContext;
-
-    @Autowired
-    Environment env;
+    private final ServletContext servletContext;
+    private final Environment env;
 
     @PostConstruct
     private void afterInit(){

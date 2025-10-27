@@ -15,6 +15,7 @@ import org.alfresco.repo.search.SearchTrackingComponent;
 import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.MutableAuthenticationDao;
 import org.alfresco.repo.security.authentication.RepositoryAuthenticationDao;
+import org.alfresco.repo.security.authentication.TicketComponent;
 import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
 import org.alfresco.repo.security.person.RegexHomeFolderProvider;
 import org.alfresco.repo.tenant.TenantService;
@@ -414,5 +415,10 @@ public class AlfrescoBeanConfig {
     @Bean
     public PermissionModel permissionsModelDAO() {
         return applicationContext.getBean("permissionsModelDAO", PermissionModel.class);
+    }
+
+    @Bean
+    public TicketComponent permissionServiceDAO() {
+        return applicationContext.getBean("ticketComponent", TicketComponent.class);
     }
 }

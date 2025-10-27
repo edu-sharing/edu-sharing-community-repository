@@ -1,6 +1,5 @@
 package org.edu_sharing.restservices.login.v1;
 
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -16,8 +15,10 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.repository.TrackingApplicationInfo;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -27,16 +28,15 @@ import org.edu_sharing.repository.server.tools.security.ShibbolethSessions;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions.SessionInfo;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.RestConstants;
-import org.edu_sharing.restservices.login.v1.model.AuthenticationToken;
-import org.edu_sharing.restservices.login.v1.model.Login;
-import org.edu_sharing.restservices.login.v1.model.LoginCredentials;
-import org.edu_sharing.restservices.login.v1.model.ScopeAccess;
+import org.edu_sharing.restservices.login.v1.model.*;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.UserProfileAppAuth;
 import org.edu_sharing.service.authentication.*;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
-import org.edu_sharing.spring.security.openid.SilentLoginModeRedirect;
+import org.edu_sharing.spring.security.oauth2.SilentLoginModeRedirect;
+import org.edu_sharing.spring.security.oauth2.config.OAuth2ClientProperties;
+import org.edu_sharing.spring.security.oauth2.config.OAuth2ConfigProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -54,6 +54,12 @@ public class LoginApi {
     @Autowired
     private AuthenticationToolAPI authTool;
 
+    @Autowired
+    private OAuth2ConfigProvider configService;
+
+    @Autowired
+    private LightbendConfigLoader lightbendConfigLoader;
+
     @GET
     @Path("/validateSession")
     @Operation(summary = "Validates the Basic Auth Credentials and check if the session is a logged in user", description = "Use the Basic auth header field to transfer the credentials")
@@ -62,20 +68,20 @@ public class LoginApi {
                     @ApiResponse(responseCode = "200",
                             description = "Successfully authenticated.\n The session ID is returned in a cookie named `JSESSIONID`. You need to include this cookie in subsequent requests.",
                             headers = {@Header(name = "Set-Cookie", schema = @Schema(type = "string", example = "JSESSIONID=abcde12345; PATH=/; HttpOnly"))},
-                            content = @Content(schema = @Schema(implementation = Login.class))),
+                            content = @Content(schema = @Schema(implementation = PrimaryLogin.class))),
             })
 
     public Response login(@Context HttpServletRequest req) {
 
 
-        boolean authenticated = (authTool.validateAuthentication(req.getSession()) == null) ? false : true;
+        boolean authenticated = authTool.validateAuthentication(req.getSession()) != null;
         String personActiveStatus = null;
-        if (!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
-            personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
+        if (!lightbendConfigLoader.getConfig().getIsNull("repository.personActiveStatus")) {
+            personActiveStatus = lightbendConfigLoader.getConfig().getString("repository.personActiveStatus");
         }
 
         String status = null;
-        if (authenticated && personActiveStatus != null && !personActiveStatus.trim().equals("")) {
+        if (authenticated && StringUtils.isNotBlank(personActiveStatus)) {
             String username = (String) req.getSession().getAttribute(CCConstants.AUTH_USERNAME);
             NodeRef authorityNodeRef = AuthorityServiceFactory.getInstance().getLocalService().getAuthorityNodeRef(username);
 
@@ -87,7 +93,7 @@ public class LoginApi {
             if (!personActiveStatus.equals(personStatus) && !allowAdminAccess) {
                 authenticated = false;
                 authTool.logoutWithoutSecurityContext(authTool.getTicketFromSession(req.getSession()));
-                status = Login.STATUS_CODE_PERSON_BLOCKED;
+                status = AbstractLogin.STATUS_CODE_PERSON_BLOCKED;
                 req.getSession().invalidate();
             }
         }
@@ -96,20 +102,26 @@ public class LoginApi {
             Optional<String> authErrorStatus = Optional.ofNullable(authContext)
                     .map(org.edu_sharing.alfresco.repository.server.authentication.Context::getAuthErrorStatus);
             if (authErrorStatus.isPresent()) {
-                switch (authErrorStatus.get()) {
-                    case CCConstants.AUTH_ERROR_STATUS_2FA:
-                        status = Login.STATUS_CODE_2FA;
-                        break;
-                    default:
-                        break;
+                if (authErrorStatus.get().equals(CCConstants.AUTH_ERROR_STATUS_2FA)) {
+                    status = AbstractLogin.STATUS_CODE_2FA;
                 }
             }
         }
 
-        Login login = new Login(authenticated, authTool.getScope(), null, req.getSession(), status);
-        return Response.ok(login).
 
-                build();
+        String eduSharingContext = NodeCustomizationPolicies.getEduSharingContext();
+        OAuth2ClientProperties config = configService.getConfig(eduSharingContext);
+        List<PrimaryLogin.OAuthEntry> oAuthEntries = config.getRegistration()
+                .entrySet()
+                .stream()
+                .map(x -> new PrimaryLogin.OAuthEntry(
+                        Optional.of(x.getValue())
+                                .map(OAuth2ClientProperties.Registration::getClientName)
+                                .orElse(x.getKey()), config.getRegistrationId(x.getKey())))
+                .toList();
+
+        PrimaryLogin login = new PrimaryLogin(authenticated, authTool.getScope(), null, req.getSession(), status, oAuthEntries);
+        return Response.ok(login).build();
     }
 
     @GET
@@ -121,7 +133,7 @@ public class LoginApi {
                     @ApiResponse(responseCode = "200",
                             description = "Successfully authenticated.\n The session ID is returned in a cookie named `JSESSIONID`. You need to include this cookie in subsequent requests.",
                             headers = {@Header(name = "Set-Cookie", schema = @Schema(type = "string", example = "JSESSIONID=abcde12345; PATH=/; HttpOnly"))},
-                            content = @Content(schema = @Schema(implementation = Login.class))),
+                            content = @Content(schema = @Schema(implementation = PrimaryLogin.class))),
             })
 
     public Response validateSSOSession(@Context HttpServletRequest req, @Context HttpServletResponse resp) {
@@ -147,7 +159,7 @@ public class LoginApi {
                     @ApiResponse(responseCode = "200",
                             description = "Successfully authenticated.\n The session ID is returned in a cookie named `JSESSIONID`. You need to include this cookie in subsequent requests.",
                             headers = {@Header(name = "Set-Cookie", schema = @Schema(type = "string", example = "JSESSIONID=abcde12345; PATH=/; HttpOnly"))},
-                            content = @Content(schema = @Schema(implementation = Login.class))),
+                            content = @Content(schema = @Schema(implementation = ScopeLogin.class))),
             })
 
     public Response loginToScope(@Parameter(description = "credentials, example: test,test", required = true) LoginCredentials credentials,
@@ -156,14 +168,14 @@ public class LoginApi {
 
         Map<String, String> auth = authTool.validateAuthentication(req.getSession());
         if (auth == null) {
-            return Response.ok(new Login(false, null, null, req.getSession(), Login.STATUS_CODE_PREVIOUS_SESSION_REQUIRED)).build();
+            return Response.ok(new ScopeLogin(false, null, null, req.getSession(), AbstractLogin.STATUS_CODE_PREVIOUS_SESSION_REQUIRED)).build();
         }
 
         if (!credentials.getUserName().equals(auth.get(CCConstants.AUTH_USERNAME))) {
-            return Response.ok(new Login(false, null, null, req.getSession(), Login.STATUS_CODE_PREVIOUS_USER_WRONG)).build();
+            return Response.ok(new ScopeLogin(false, null, null, req.getSession(), AbstractLogin.STATUS_CODE_PREVIOUS_USER_WRONG)).build();
         }
 
-        /**
+        /*
          * String shibbolethSessionId = getShibValue("Shib-Session-ID", req);
 
          if(shibbolethSessionId != null && !shibbolethSessionId.trim().equals("")){
@@ -172,7 +184,7 @@ public class LoginApi {
          }
          */
 
-        /**
+        /*
          * remember shibboleth session id to kill safe scope session by LogoutNotiFication
          *
          */
@@ -186,14 +198,14 @@ public class LoginApi {
 
         String userHome = null;
 
-        String statusCode = Login.STATUS_CODE_OK;
-        if (Login.STATUS_CODE_OK.equals(loginStatus)) {
+        String statusCode = AbstractLogin.STATUS_CODE_OK;
+        if (AbstractLogin.STATUS_CODE_OK.equals(loginStatus)) {
 
             NodeRef ref = ScopeUserHomeServiceFactory.getScopeUserHomeService().getUserHome(credentials.getUserName(), credentials.getScope(), true);
             userHome = ref.getId();
             req.getSession().setMaxInactiveInterval(service.getSessionTimeout());
 
-            if (shibbolethSessionId != null && !shibbolethSessionId.trim().equals("")) {
+            if (StringUtils.isNotBlank(shibbolethSessionId)) {
                 ShibbolethSessions.put(shibbolethSessionId, new SessionInfo((String) req.getSession().getAttribute(CCConstants.AUTH_TICKET), req.getSession()));
                 req.getSession().setAttribute(CCConstants.AUTH_SSO_SESSIONID, shibbolethSessionId);
             }
@@ -201,7 +213,7 @@ public class LoginApi {
         } else {
             statusCode = loginStatus;
         }
-        return Response.ok(new Login(Login.STATUS_CODE_OK.equals(loginStatus) ? true : false, authTool.getScope(), userHome, req.getSession(), statusCode)).build();
+        return Response.ok(new ScopeLogin(AbstractLogin.STATUS_CODE_OK.equals(loginStatus), authTool.getScope(), userHome, req.getSession(), statusCode)).build();
     }
 
     @GET
@@ -210,8 +222,8 @@ public class LoginApi {
 
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
-                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = Void.class))),
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = ScopeAccess.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ScopeAccess.class))),
             })
 
     public Response hasAccessToScope(
@@ -232,8 +244,8 @@ public class LoginApi {
 
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
-                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = Void.class))),
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500),
             })
 
     public Response logout(@Context HttpServletRequest req) {
@@ -247,8 +259,6 @@ public class LoginApi {
             return Response.ok().build();
         }
     }
-
-    static List<String> disallowedProps = Arrays.asList(new String[]{CCConstants.CM_PROP_PERSON_SIZE_QUOTA});
 
 
     @POST
@@ -279,32 +289,35 @@ public class LoginApi {
                 return Response.status(Response.Status.PRECONDITION_FAILED).entity(msg).build();
             }
 
-            Map<String, String> ssoDataMap = new HashMap<>();
-            ssoDataMap.put(ssoMapper.getSSOUsernameProp(), userId);
+            Map<String, String> ssoDataMap = new HashMap<>(){{
+                put(SSOAuthorityMapper.PARAM_SSO_TYPE, SSOAuthorityMapper.SSO_TYPE_AuthByApp);
+            }};
+
+            ssoDataMap.put(ssoMapper.getSSOUsernameProp(ssoDataMap), userId);
 
             //add authByAppData
-            ssoDataMap.put(SSOAuthorityMapper.PARAM_APP_ID, verifiedApp.getApplicationInfo().getAppId());
+            ssoDataMap.put(SSOAuthorityMapper.PARAM_AUTHBYAPP_APP_ID, verifiedApp.getApplicationInfo().getAppId());
             ssoDataMap.put(SSOAuthorityMapper.PARAM_SSO_TYPE, SSOAuthorityMapper.SSO_TYPE_AuthByApp);
-            /**
+            /*
              * @TODO check if host validation still needed
              * @org.edu_sharing.service.authentication.AuthMethodTrustedApplication.authenticate
              */
-            ssoDataMap.put(SSOAuthorityMapper.PARAM_APP_IP, new RequestHelper(req).getRemoteAddr());
+            ssoDataMap.put(SSOAuthorityMapper.PARAM_AUTHBYAPP_APP_IP, new RequestHelper(req).getRemoteAddr());
 
             if (userProfile != null) {
-                String firstNameProp = ssoMapper.getUserAttribute(CCConstants.PROP_USER_FIRSTNAME);
+                String firstNameProp = ssoMapper.getUserAttribute(CCConstants.PROP_USER_FIRSTNAME, ssoDataMap);
                 if (firstNameProp != null && userProfile.getFirstName() != null) {
                     ssoDataMap.put(firstNameProp, userProfile.getFirstName());
                 }
-                String lastNameProp = ssoMapper.getUserAttribute(CCConstants.PROP_USER_LASTNAME);
+                String lastNameProp = ssoMapper.getUserAttribute(CCConstants.PROP_USER_LASTNAME, ssoDataMap);
                 if (lastNameProp != null && userProfile.getLastName() != null) {
                     ssoDataMap.put(lastNameProp, userProfile.getLastName());
                 }
-                String mailProp = ssoMapper.getUserAttribute(CCConstants.PROP_USER_EMAIL);
+                String mailProp = ssoMapper.getUserAttribute(CCConstants.PROP_USER_EMAIL, ssoDataMap);
                 if (mailProp != null && userProfile.getEmail() != null) {
                     ssoDataMap.put(mailProp, userProfile.getEmail());
                 }
-                String affiliationProp = ssoMapper.getUserAttribute(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION);
+                String affiliationProp = ssoMapper.getUserAttribute(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION, ssoDataMap);
                 if (affiliationProp != null && userProfile.getPrimaryAffiliation() != null) {
                     ssoDataMap.put(affiliationProp, userProfile.getPrimaryAffiliation());
                 }

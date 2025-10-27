@@ -1,12 +1,9 @@
 package org.edu_sharing.restservices.login.v1.model;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.servlet.http.HttpSession;
-
 import lombok.Data;
+import lombok.Getter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.edu_sharing.repository.server.authentication.LoginHelper;
 import org.edu_sharing.repository.server.authentication.RemoteAuthDescription;
@@ -22,28 +19,13 @@ import org.edu_sharing.service.lti13.model.LTISessionObject;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Data
-public class Login {
-
-    private Map<String, RemoteAuthDescription> remoteAuthentications;
-    @JsonProperty(required = true, value = "isValidLogin")
-    private boolean isValidLogin;
-    private String currentScope;
-    private String userHome;
-    @JsonProperty(required = true)
-    private int sessionTimeout;
-    @JsonProperty(required = true, value = "isGuest")
-    private boolean isGuest;
-    private List<String> toolPermissions;
-    @JsonProperty(required = true,  value = "isAdmin")
-    private boolean isAdmin;
-    private String statusCode;
-    private String authorityName;
-    private LTISession ltiSession;
-
-
+public abstract class AbstractLogin {
     public final static String STATUS_CODE_OK = "OK";
     public final static String STATUS_CODE_GUEST = "GUEST";
     public final static String STATUS_CODE_INVALID_CREDENTIALS = "INVALID_CREDENTIALS";
@@ -53,6 +35,23 @@ public class Login {
     public final static String STATUS_CODE_PASSWORD_EXPIRED = "PASSWORD_EXPIRED";
     public final static String STATUS_CODE_PERSON_BLOCKED = "PERSON_BLOCKED";
     public final static String STATUS_CODE_2FA = "2FA";
+
+
+    protected Map<String, RemoteAuthDescription> remoteAuthentications;
+    @JsonProperty(required = true, value = "isValidLogin")
+    protected boolean isValidLogin;
+    protected String currentScope;
+    protected String userHome;
+    @JsonProperty(required = true)
+    protected int sessionTimeout;
+    @JsonProperty(required = true, value = "isGuest")
+    protected boolean isGuest;
+    protected List<String> toolPermissions;
+    @JsonProperty(required = true, value = "isAdmin")
+    protected boolean isAdmin;
+    protected String statusCode;
+    protected String authorityName;
+    protected LTISession ltiSession;
 
     @Data
     public static class LTISession {
@@ -74,16 +73,12 @@ public class Login {
     }
 
 
-    public Login() {
 
-    }
-
-
-    public Login(boolean isValidLogin, String scope, HttpSession session) {
+    public AbstractLogin(boolean isValidLogin, String scope, HttpSession session) {
         this(isValidLogin, scope, null, session, null);
     }
 
-    public Login(boolean isValidLogin, String scope, String userHome, HttpSession session, String statusCode) {
+    public AbstractLogin(boolean isValidLogin, String scope, String userHome, HttpSession session, String statusCode) {
 
         if (statusCode == null) {
             statusCode = (isValidLogin) ? STATUS_CODE_OK : STATUS_CODE_INVALID_CREDENTIALS;
@@ -142,11 +137,11 @@ public class Login {
                     Node node = NodeDao.getNode(RepositoryDao.getHomeRepository(), ltiSessionObject.getContextId()).asNode();
                     if (node.getAspects().contains("ccm:ltitool_node")) {
                         String toolUrl = node.getProperties().get("ccm:ltitool_url")[0];
-                        ApplicationInfo applicationInfo = ApplicationInfoList
+                        Optional<ApplicationInfo> applicationInfo = ApplicationInfoList
                                 .getApplicationInfos().values().stream()
                                 .filter(a -> toolUrl.equals(a.getLtitoolUrl()))
-                                .findFirst().get();
-                        if (applicationInfo.hasLtiToolCustomContentOption()) {
+                                .findFirst();
+                        if (applicationInfo.isPresent() && applicationInfo.get().hasLtiToolCustomContentOption()) {
                             ltiSession.customContentNode = node;
                         }
                     }

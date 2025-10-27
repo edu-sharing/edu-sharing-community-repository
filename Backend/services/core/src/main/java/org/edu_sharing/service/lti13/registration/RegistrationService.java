@@ -431,8 +431,8 @@ public class RegistrationService {
         lastDeploymentId++;
 
 
-        /**
-         * leave out the issuer here, cause edu-sharing as a platform generates a clientId and deploymentId.
+        /*
+         * leave out the issuer here, cause edu-sharing as a platform generates a registrationId and deploymentId.
          * for tools no issuer is defined in standard.
          */
         String appId = new RepoTools().getAppId(null, clientId, Integer.toString(lastDeploymentId));

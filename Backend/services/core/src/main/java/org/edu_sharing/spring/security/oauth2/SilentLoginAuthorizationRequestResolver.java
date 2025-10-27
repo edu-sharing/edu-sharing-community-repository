@@ -1,14 +1,12 @@
-package org.edu_sharing.spring.security.openid;
+package org.edu_sharing.spring.security.oauth2;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
+import lombok.Getter;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.web.savedrequest.DefaultSavedRequest;
-import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -23,7 +21,8 @@ public class SilentLoginAuthorizationRequestResolver implements OAuth2Authorizat
 
     public static String DEFAULT_SILENT_LOGIN_PATH = "/rest/authentication/v1/validateSSOSession";
 
-    private String silentLoginPath = DEFAULT_SILENT_LOGIN_PATH;
+    @Getter
+    private final String silentLoginPath = DEFAULT_SILENT_LOGIN_PATH;
 
     public SilentLoginAuthorizationRequestResolver(ClientRegistrationRepository clientRegistration) {
         this.defaultAuthorizationRequestResolver = new DefaultOAuth2AuthorizationRequestResolver(
@@ -52,10 +51,6 @@ public class SilentLoginAuthorizationRequestResolver implements OAuth2Authorizat
         }
 
         return authorizationRequest;
-    }
-
-    public String getSilentLoginPath() {
-        return silentLoginPath;
     }
 
     public String getCombinedPath(HttpServletRequest request){

@@ -16,9 +16,10 @@ import {
 import { ApiRequestConfiguration } from '../api-request-configuration';
 import { AuthenticationV1Service as AuthenticationApiService } from '../api/services';
 import { switchReplay } from '../utils/rxjs-operators/switch-replay';
-import { Login } from '../api/models/login';
+import { PrimaryLogin } from '../api/models/primary-login';
+import { ScopeLogin } from '../api/models/scope-login';
 
-export type LoginInfo = Login;
+export type LoginInfo = PrimaryLogin | ScopeLogin;
 
 type LoginAction =
     | {

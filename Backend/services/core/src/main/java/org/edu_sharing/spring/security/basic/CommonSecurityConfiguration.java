@@ -1,13 +1,13 @@
 package org.edu_sharing.spring.security.basic;
 
+import org.edu_sharing.spring.security.oauth2.SecurityConfigurationOAuth2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 
-@Profile({"basic","samlEnabled","openidEnabled"})
+@Profile({"basic","samlEnabled", SecurityConfigurationOAuth2.PROFILE_ID})
 @Configuration
 public class CommonSecurityConfiguration {
     @Bean

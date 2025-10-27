@@ -2,7 +2,7 @@ package org.edu_sharing.spring;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.edu_sharing.spring.security.basic.SecurityConfigurationBasic;
-import org.edu_sharing.spring.security.openid.SecurityConfigurationOpenIdConnect;
+import org.edu_sharing.spring.security.oauth2.SecurityConfigurationOAuth2;
 import org.edu_sharing.spring.security.saml2.SecurityConfigurationSaml;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
@@ -19,7 +19,7 @@ import java.util.concurrent.Executor;
 @EnableScheduling
 @Configuration
 @MapperScan(value = "org.edu_sharing", annotationClass = Mapper.class)
-@Import({SecurityConfigurationSaml.class, SecurityConfigurationOpenIdConnect.class, SecurityConfigurationBasic.class})
+@Import({SecurityConfigurationSaml.class, SecurityConfigurationOAuth2.class, SecurityConfigurationBasic.class})
 //component scan to enable edu-sharing custom condition annotations
 @ComponentScan(basePackages = {"org.edu_sharing"})
 public class SpringConfigRoot {

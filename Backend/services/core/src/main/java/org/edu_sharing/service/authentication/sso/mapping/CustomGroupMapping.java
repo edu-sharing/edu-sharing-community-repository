@@ -1,4 +1,4 @@
-package org.edu_sharing.service.authentication.sso.config;
+package org.edu_sharing.service.authentication.sso.mapping;
 
 import java.util.Map;
 

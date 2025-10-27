@@ -1,16 +1,11 @@
 package org.edu_sharing.spring.security.basic;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.edu_sharing.spring.security.openid.SilentLoginAuthorizationRequestResolver;
+import org.edu_sharing.spring.security.oauth2.SilentLoginAuthorizationRequestResolver;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
 
 /**
  *  redirects to /shibboleth after successfull auth
@@ -22,8 +17,12 @@ import java.io.IOException;
 @Component
 public class EduAuthSuccsessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
+    private SilentLoginAuthorizationRequestResolver silentLoginAuthorizationRequestResolver;
+
     @Autowired(required = false)
-    SilentLoginAuthorizationRequestResolver silentLoginAuthorizationRequestResolver;
+    public void setSilentLoginAuthorizationRequestResolver(SilentLoginAuthorizationRequestResolver silentLoginAuthorizationRequestResolver) {
+        this.silentLoginAuthorizationRequestResolver = silentLoginAuthorizationRequestResolver;
+    }
 
     public EduAuthSuccsessHandler(){
         super("/shibboleth");

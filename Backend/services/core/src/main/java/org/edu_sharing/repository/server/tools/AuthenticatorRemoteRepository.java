@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -40,8 +41,6 @@ import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -49,7 +48,6 @@ import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.restservices.login.v1.model.AuthenticationToken;
 import org.edu_sharing.restservices.shared.UserProfileAppAuth;
-import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.logging.LoggingFeature;
@@ -65,13 +63,9 @@ import jakarta.ws.rs.core.Response;
 @Slf4j
 public class AuthenticatorRemoteRepository {
 
-    ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-
-    ApplicationContext eduApplicationContext = org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
-
-    SSOAuthorityMapper ssoAuthorityMapper = (SSOAuthorityMapper) eduApplicationContext.getBean("ssoAuthorityMapper");
-
-    ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+    private final ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+    private final ApplicationContext eduApplicationContext = org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
+    private final ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
     /**
      * authenticates at remote app with actual local userdata, if fails an guest ticket and the exception message will be returned
@@ -80,33 +74,35 @@ public class AuthenticatorRemoteRepository {
     public AuthenticatorRemoteAppResult getAuthInfoForApp(String username, ApplicationInfo remoteAppInfo) throws Throwable {
 
         Map<String, String> resultAuthInfo = new HashMap<>();
+
+        // TODO can this be deleted?
         MCAlfrescoBaseClient mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
 
-        AuthenticationToken authToken = null;
+        AuthenticationToken authToken;
         if (remoteAppInfo.getString("forced_user", null) != null) {
             log.info("forced_user is set for remote, will authenticate as the specified user");
             try {
                 authToken = remoteAuth(remoteAppInfo.getAppId(), remoteAppInfo.getString("forced_user", null));
             } catch (Exception e) {
-                log.info("Remote repository " + remoteAppInfo.getAppId() + " auth failed (check the remote repo log for more details) " + e.getMessage());
+                log.info("Remote repository {} auth failed (check the remote repo log for more details) {}", remoteAppInfo.getAppId(), e.getMessage());
                 throw e;
             }
         } else {
-            log.info("getting userinfo for" + username);
+            log.info("getting userinfo for{}", username);
             try {
                 authToken = remoteAuth(remoteAppInfo.getAppId(), username);
             } catch (Exception e) {
-                log.info("REMOTE REPOSITORY AUTH FAILED: " + e.getMessage());
+                log.info("REMOTE REPOSITORY AUTH FAILED: {}", e.getMessage());
                 throw e;
             }
         }
         //TODO if exception repository unreachable -> special handling
-        log.info("REMOTE APPID:" + remoteAppInfo.getAppId() + "REMOTE USERNAME:" + authToken.getUserId() + " REMOTETICKET:" + authToken.getTicket());
+        log.info("REMOTE APPID:{}REMOTE USERNAME:{} REMOTETICKET:{}", remoteAppInfo.getAppId(), authToken.getUserId(), authToken.getTicket());
         resultAuthInfo.put(CCConstants.AUTH_USERNAME, authToken.getUserId());
         resultAuthInfo.put(CCConstants.AUTH_TICKET, authToken.getTicket());
         AuthenticatorRemoteAppResult result = new AuthenticatorRemoteAppResult();
         result.setAuthenticationInfo(resultAuthInfo);
-        log.info("REMOTE USERNAME2:" + resultAuthInfo.get(CCConstants.AUTH_USERNAME) + " REMOTETICKET:" + resultAuthInfo.get(CCConstants.AUTH_TICKET));
+        log.info("REMOTE USERNAME2:{} REMOTETICKET:{}", resultAuthInfo.get(CCConstants.AUTH_USERNAME), resultAuthInfo.get(CCConstants.AUTH_TICKET));
         return result;
     }
 
@@ -114,16 +110,7 @@ public class AuthenticatorRemoteRepository {
         ApplicationInfo appInfoRemoteApp = ApplicationInfoList.getRepositoryInfoById(appId);
 
         String localAppId = ApplicationInfoList.getHomeRepository().getAppId();
-        log.info("startSession remoteApplicationId:" + appId + " localAppId:" + localAppId);
-
-
-        Map<String, String> personMapping = new HashMap<>(ssoAuthorityMapper.getMappingConfig().getPersonMapping());
-        String remoteUserid = ApplicationInfoList.getRepositoryInfoById(appId).getString(ApplicationInfo.REMOTE_USERID, null);
-        if (remoteUserid != null && !remoteUserid.isEmpty()) {
-            log.info("remote_userid configured " + remoteUserid + ", will change auth");
-            personMapping.values().remove(CCConstants.CM_PROP_PERSON_USERNAME);
-            personMapping.put(remoteUserid, CCConstants.CM_PROP_PERSON_USERNAME);
-        }
+        log.info("startSession remoteApplicationId:{} localAppId:{}", appId, localAppId);
 
         String esuid;
         Map<String, Serializable> personData;
@@ -182,32 +169,34 @@ public class AuthenticatorRemoteRepository {
         signature = new Base64().encode(signature);
 
         java.util.logging.Logger jaxlogger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-        Client client = ClientBuilder.newClient(new ClientConfig().register(new LoggingFeature(jaxlogger)));
+        try(Client client = ClientBuilder.newClient(new ClientConfig().register(new LoggingFeature(jaxlogger)))) {
 
-        WebTarget webTarget = client.target(appInfoRemoteApp.getClientBaseUrl() + "/rest/");
-        WebTarget currentWebTarget = webTarget.path("authentication/v1/appauth").path(remoteUsername);
+            WebTarget webTarget = client.target(appInfoRemoteApp.getClientBaseUrl() + "/rest/");
+            WebTarget currentWebTarget = webTarget.path("authentication/v1/appauth").path(remoteUsername);
 
-        Response response = currentWebTarget
-                .request(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("X-Edu-App-Id", localAppId)
-                .header("X-Edu-App-Sig", new String(signature))
-                .header("X-Edu-App-Signed", signData)
-                .header("X-Edu-App-Ts", timestamp)
-                .post(Entity.entity(userProfile, MediaType.APPLICATION_JSON));
+            try(Response response = currentWebTarget
+                    .request(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header("X-Edu-App-Id", localAppId)
+                    .header("X-Edu-App-Sig", new String(signature))
+                    .header("X-Edu-App-Signed", signData)
+                    .header("X-Edu-App-Ts", timestamp)
+                    .post(Entity.entity(userProfile, MediaType.APPLICATION_JSON))) {
 
-        if (response.getStatus() == 200) {
-            return response.readEntity(AuthenticationToken.class);
-        } else {
-            String message = (response.getStatusInfo() != null) ? response.getStatusInfo().toString() : null;
-            log.error("remote auth failed:" + response.getStatus() + " " + response.getStatusInfo());
-            log.error("url called: " + currentWebTarget.getUri().toString());
-            RemoteAuthenticationException e = new RemoteAuthenticationException(response.getStatus(), message);
-            throw e;
+                if (response.getStatus() == 200) {
+                    return response.readEntity(AuthenticationToken.class);
+                } else {
+                    String message = (response.getStatusInfo() != null) ? response.getStatusInfo().toString() : null;
+                    log.error("remote auth failed:{} {}", response.getStatus(), response.getStatusInfo());
+                    log.error("url called: {}", currentWebTarget.getUri().toString());
+                    throw new RemoteAuthenticationException(response.getStatus(), message);
+                }
+            }
         }
     }
 
-    public class RemoteAuthenticationException extends Exception {
+    @Getter
+    public static class RemoteAuthenticationException extends Exception {
         int httpStatus;
 
         public RemoteAuthenticationException(int httpStatus, String message) {
@@ -215,9 +204,6 @@ public class AuthenticatorRemoteRepository {
             this.httpStatus = httpStatus;
         }
 
-        public int getHttpStatus() {
-            return httpStatus;
-        }
     }
 
 }

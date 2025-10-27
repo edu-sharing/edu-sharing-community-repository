@@ -1518,31 +1518,6 @@
         "properties": {
           "nodeEntry": {
             "$ref": "#/components/schemas/NodeEntry"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DataProtectionQueueEntry"
-          }
-        },
-        "type": "object"
-      },
-      "DataProtectionQueueEntry": {
-        "properties": {
-          "finished": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "node_id": {
-            "type": "string"
-          },
-          "requested": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "user": {
-            "type": "string"
           }
         },
         "type": "object"
@@ -2794,57 +2769,6 @@
             "type": "string"
           }
         },
-        "type": "object"
-      },
-      "Login": {
-        "properties": {
-          "authorityName": {
-            "type": "string"
-          },
-          "currentScope": {
-            "type": "string"
-          },
-          "isAdmin": {
-            "type": "boolean"
-          },
-          "isGuest": {
-            "type": "boolean"
-          },
-          "isValidLogin": {
-            "type": "boolean"
-          },
-          "ltiSession": {
-            "$ref": "#/components/schemas/LTISession"
-          },
-          "remoteAuthentications": {
-            "additionalProperties": {
-              "$ref": "#/components/schemas/RemoteAuthDescription"
-            },
-            "type": "object"
-          },
-          "sessionTimeout": {
-            "format": "int32",
-            "type": "integer"
-          },
-          "statusCode": {
-            "type": "string"
-          },
-          "toolPermissions": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "userHome": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "isAdmin",
-          "isGuest",
-          "isValidLogin",
-          "sessionTimeout"
-        ],
         "type": "object"
       },
       "LoginCredentials": {
@@ -4435,6 +4359,15 @@
             ],
             "type": "string"
           },
+          "addedToInboxEvent": {
+            "enum": [
+              "immediately",
+              "disabled",
+              "daily",
+              "weekly"
+            ],
+            "type": "string"
+          },
           "commentEvent": {
             "enum": [
               "immediately",
@@ -4569,6 +4502,17 @@
           "permissions",
           "user"
         ],
+        "type": "object"
+      },
+      "OAuthEntry": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "registrationId": {
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "OpenIdConfiguration": {
@@ -5051,6 +4995,63 @@
           "isIcon",
           "url",
           "width"
+        ],
+        "type": "object"
+      },
+      "PrimaryLogin": {
+        "properties": {
+          "authorityName": {
+            "type": "string"
+          },
+          "currentScope": {
+            "type": "string"
+          },
+          "isAdmin": {
+            "type": "boolean"
+          },
+          "isGuest": {
+            "type": "boolean"
+          },
+          "isValidLogin": {
+            "type": "boolean"
+          },
+          "ltiSession": {
+            "$ref": "#/components/schemas/LTISession"
+          },
+          "oauthEntries": {
+            "items": {
+              "$ref": "#/components/schemas/OAuthEntry"
+            },
+            "type": "array"
+          },
+          "remoteAuthentications": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/RemoteAuthDescription"
+            },
+            "type": "object"
+          },
+          "sessionTimeout": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "statusCode": {
+            "type": "string"
+          },
+          "toolPermissions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "userHome": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "isAdmin",
+          "isGuest",
+          "isValidLogin",
+          "sessionTimeout"
         ],
         "type": "object"
       },
@@ -5684,6 +5685,68 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "ScopeAccess": {
+        "properties": {
+          "hasAccess": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "hasAccess"
+        ],
+        "type": "object"
+      },
+      "ScopeLogin": {
+        "properties": {
+          "authorityName": {
+            "type": "string"
+          },
+          "currentScope": {
+            "type": "string"
+          },
+          "isAdmin": {
+            "type": "boolean"
+          },
+          "isGuest": {
+            "type": "boolean"
+          },
+          "isValidLogin": {
+            "type": "boolean"
+          },
+          "ltiSession": {
+            "$ref": "#/components/schemas/LTISession"
+          },
+          "remoteAuthentications": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/RemoteAuthDescription"
+            },
+            "type": "object"
+          },
+          "sessionTimeout": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "statusCode": {
+            "type": "string"
+          },
+          "toolPermissions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "userHome": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "isAdmin",
+          "isGuest",
+          "isValidLogin",
+          "sessionTimeout"
+        ],
         "type": "object"
       },
       "SearchParameters": {
@@ -14079,15 +14142,9 @@
         "operationId": "logout",
         "responses": {
           "200": {
-            "content": {
-              "application/json": {}
-            },
             "description": "OK."
           },
           "500": {
-            "content": {
-              "application/json": {}
-            },
             "description": "Fatal error occured."
           }
         },
@@ -14114,13 +14171,21 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {}
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScopeAccess"
+                }
+              }
             },
             "description": "OK."
           },
           "500": {
             "content": {
-              "application/json": {}
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScopeAccess"
+                }
+              }
             },
             "description": "Fatal error occured."
           }
@@ -14151,7 +14216,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Login"
+                  "$ref": "#/components/schemas/ScopeLogin"
                 }
               }
             },
@@ -14182,7 +14247,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Login"
+                  "$ref": "#/components/schemas/PrimaryLogin"
                 }
               }
             },
@@ -14213,7 +14278,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Login"
+                  "$ref": "#/components/schemas/PrimaryLogin"
                 }
               }
             },
@@ -21295,7 +21360,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DataProtectionQueueEntry"
+                  "format": "int64",
+                  "type": "integer"
                 }
               }
             },
@@ -22699,7 +22765,7 @@
             }
           },
           {
-            "description": "jwt containing the claims aud (clientId of platform), deploymentId and a token. must be signed by platform",
+            "description": "jwt containing the claims aud (registrationId of platform), deploymentId and a token. must be signed by platform",
             "in": "query",
             "name": "jwt",
             "required": true,
@@ -23914,7 +23980,7 @@
             }
           },
           {
-            "description": "jwt containing the claims aud (clientId of platform), deploymentId and a token. must be signed by platform",
+            "description": "jwt containing the claims aud (registrationId of platform), deploymentId and a token. must be signed by platform",
             "in": "query",
             "name": "jwt",
             "required": true,

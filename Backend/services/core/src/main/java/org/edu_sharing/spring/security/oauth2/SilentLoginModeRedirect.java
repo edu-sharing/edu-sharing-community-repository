@@ -1,4 +1,4 @@
-package org.edu_sharing.spring.security.openid;
+package org.edu_sharing.spring.security.oauth2;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -86,16 +86,11 @@ public class SilentLoginModeRedirect {
         }
 
         if (!ApplicationContextFactory.getApplicationContext().getEnvironment()
-                .acceptsProfiles(Profiles.of(SecurityConfigurationOpenIdConnect.PROFILE_ID))) {
+                .acceptsProfiles(Profiles.of(SecurityConfigurationOAuth2.PROFILE_ID))) {
             return false;
         }
 
         Config config = ConfigServiceFactory.getCurrentConfig();
-        if (config != null && !LoginSilentMode.redirect.equals(config.values.loginSilentMode)) {
-            return false;
-        }
-
-
-        return true;
+        return config == null || LoginSilentMode.redirect.equals(config.values.loginSilentMode);
     }
 }

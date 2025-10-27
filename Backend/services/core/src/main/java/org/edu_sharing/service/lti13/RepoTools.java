@@ -19,16 +19,16 @@ public class RepoTools {
 
     public ApplicationInfo getApplicationInfo(String iss, String clientId, String ltiDeploymentId) throws LTIException {
 
-        /**
+        /*
          * can we reuse our ApplicationInfo ?, even we got only one appId?
          * we could take as appId:
          * - client_id + deployment_id OR
-         * - iss + client_id  OR
+         * - iss + client_id OR
          * - iss + deployment_id OR
          * - iss
          */
-        ApplicationInfo applicationInfo = null;
-        String applicationId = null;
+        ApplicationInfo applicationInfo;
+        String applicationId;
         if(clientId != null && ltiDeploymentId != null){
             applicationId = clientId + ltiDeploymentId;
             applicationInfo = ApplicationInfoList.getApplicationInfos().get(applicationId);
@@ -59,7 +59,7 @@ public class RepoTools {
     }
 
     public String getAppId(String iss, String clientId, String ltiDeploymentId){
-        String applicationId = null;
+        String applicationId;
         if(clientId != null && ltiDeploymentId != null) {
             applicationId = clientId + ltiDeploymentId;
         }else if(clientId != null){
@@ -78,16 +78,14 @@ public class RepoTools {
         AuthenticationToolAPI authTool = AuthenticationToolAPI.getInstance();
         Map<String,String> validAuthInfo = authTool.validateAuthentication(req.getSession());
 
-        String userName = ssoMap.get(ssoMapper.getSSOUsernameProp());
+        String userName = ssoMap.get(ssoMapper.getSSOUsernameProp(ssoMap));
         if (validAuthInfo != null ) {
             if (validAuthInfo.get(CCConstants.AUTH_USERNAME).equals(userName)) {
                 logger.info("got valid ticket from session for user:"+userName);
                 return userName;
             } else {
 
-                /**
-                 * this can make problems if lti data that is needed later will be destroyed with session ending
-                 */
+                // this can make problems if lti data that is needed later will be destroyed with session ending
                 logger.error("end session for user:" + validAuthInfo.get(CCConstants.AUTH_USERNAME)
                         + " this can make problems if lti data that is needed later will be destroyed with session invalidating");
                 authTool.logout(validAuthInfo.get(CCConstants.AUTH_TICKET));
@@ -99,7 +97,7 @@ public class RepoTools {
         }
 
         EduAuthentication authService =  (EduAuthentication)eduApplicationContext.getBean("authenticationService");
-        authService.authenticateBySSO(SSOAuthorityMapper.SSO_TYPE_LTI,ssoMap);
+        authService.authenticateBySSO(ssoMap);
         String ticket = authService.getCurrentTicket();
         authTool.storeAuthInfoInSession(userName, ticket,CCConstants.AUTH_TYPE_LTI, req.getSession());
         return userName;
@@ -108,11 +106,13 @@ public class RepoTools {
     public static Map<String,String> mapToSSOMap(String username, String firstName, String lastName, String email){
         ApplicationContext eduApplicationContext = org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
         SSOAuthorityMapper ssoMapper = (SSOAuthorityMapper)eduApplicationContext.getBean("ssoAuthorityMapper");
-        Map<String,String> result = new HashMap<>();
-        if(firstName != null) result.put(ssoMapper.getUserAttribute(CCConstants.CM_PROP_PERSON_FIRSTNAME),firstName);
-        if(username != null) result.put(ssoMapper.getUserAttribute(CCConstants.CM_PROP_PERSON_USERNAME),username);
-        if(lastName != null) result.put(ssoMapper.getUserAttribute(CCConstants.CM_PROP_PERSON_LASTNAME),lastName);
-        if(email != null) result.put(ssoMapper.getUserAttribute(CCConstants.CM_PROP_PERSON_EMAIL),email);
+        Map<String,String> result = new HashMap<>(){{
+            put(SSOAuthorityMapper.PARAM_SSO_TYPE, SSOAuthorityMapper.SSO_TYPE_LTI);
+        }};
+        if(firstName != null) result.put(ssoMapper.getUserAttribute(CCConstants.CM_PROP_PERSON_FIRSTNAME, result),firstName);
+        if(username != null) result.put(ssoMapper.getUserAttribute(CCConstants.CM_PROP_PERSON_USERNAME, result),username);
+        if(lastName != null) result.put(ssoMapper.getUserAttribute(CCConstants.CM_PROP_PERSON_LASTNAME, result),lastName);
+        if(email != null) result.put(ssoMapper.getUserAttribute(CCConstants.CM_PROP_PERSON_EMAIL, result),email);
         return result;
     }
 }

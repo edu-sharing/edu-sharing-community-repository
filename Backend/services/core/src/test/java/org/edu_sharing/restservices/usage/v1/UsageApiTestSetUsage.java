@@ -6,7 +6,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.restservices.login.v1.model.AuthenticationToken;
-import org.edu_sharing.restservices.login.v1.model.Login;
+import org.edu_sharing.restservices.login.v1.model.PrimaryLogin;
 import org.edu_sharing.restservices.shared.UserProfileAppAuth;
 import org.edu_sharing.restservices.usage.v1.model.Usages;
 import org.glassfish.jersey.client.ClientConfig;
@@ -84,7 +84,7 @@ public class UsageApiTestSetUsage {
                     .accept(MediaType.APPLICATION_JSON)
                     .header("Authorization",CCConstants.AUTH_HEADER_EDU_TICKET + token.getTicket()).get();
 
-            Login l = response.readEntity(Login.class);
+            PrimaryLogin l = response.readEntity(PrimaryLogin.class);
 
             System.out.println("valid ticket:" + l.isValidLogin());
 

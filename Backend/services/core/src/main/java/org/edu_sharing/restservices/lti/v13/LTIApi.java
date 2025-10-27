@@ -288,7 +288,7 @@ public class LTIApi {
         }
 
         /**
-         * get claims cause we need clientId,deploymentId,iss for applicationinfo of plattform to instance tool
+         * get claims cause we need registrationId,deploymentId,iss for applicationinfo of plattform to instance tool
          * token will be validated with public key of the platform app
          * @TODO use keyset url
          */
@@ -768,7 +768,7 @@ public class LTIApi {
             @Parameter(description = "ID of node",required=true ) @PathParam("node") String node,
             @Parameter(description = "version of node",required=false) @QueryParam("version") String nodeVersion,
             @Parameter(description = "Rendering displayMode", required=false) @QueryParam("displayMode") String displayMode,
-            @Parameter(description = "jwt containing the claims aud (clientId of platform), deploymentId and a token. must be signed by platform", required=true ) @QueryParam("jwt")  String jwt,
+            @Parameter(description = "jwt containing the claims aud (registrationId of platform), deploymentId and a token. must be signed by platform", required=true ) @QueryParam("jwt")  String jwt,
             @Context HttpServletRequest req){
 
         try{
@@ -827,7 +827,7 @@ public class LTIApi {
             @Parameter(description = "ID of node",required=true ) @PathParam("node") String node,
             @Parameter(description = "version of node",required=false) @QueryParam("version") String nodeVersion,
             @Parameter(description = "Rendering displayMode", required=false) @QueryParam("displayMode") String displayMode,
-            @Parameter(description = "jwt containing the claims aud (clientId of platform), deploymentId and a token. must be signed by platform", required=true ) @QueryParam("jwt")  String jwt,
+            @Parameter(description = "jwt containing the claims aud (registrationId of platform), deploymentId and a token. must be signed by platform", required=true ) @QueryParam("jwt")  String jwt,
             @Context HttpServletRequest req){
 
         try{
