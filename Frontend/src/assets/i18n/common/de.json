@@ -350,12 +350,12 @@
       "UNTERRICHTS_UND_LEHRMEDIEN": "§60b Unterrichts- und Lehrmedien",
       "CC_0": "CC-0",
       "PDM": "PDM",
-      "CC_BY": "CC-BY",
-      "CC_BY_SA": "CC-BY-SA",
-      "CC_BY_NC": "CC-BY-NC",
-      "CC_BY_ND": "CC-BY-ND",
-      "CC_BY_NC_SA": "CC-BY-NC-SA",
-      "CC_BY_NC_ND": "CC-BY-NC-ND",
+      "CC_BY": "CC BY",
+      "CC_BY_SA": "CC BY-SA",
+      "CC_BY_NC": "CC BY-NC",
+      "CC_BY_ND": "CC BY-ND",
+      "CC_BY_NC_SA": "CC BY-NC-SA",
+      "CC_BY_NC_ND": "CC BY-NC-ND",
       "CUSTOM": "Andere Lizenz"
     },
     "DESCRIPTION": {
@@ -862,7 +862,7 @@
       "LICENSES": {
         "NONE": "Unlizenziert",
         "COPYRIGHT_FREE": "Copyright",
-        "CC_BY": "CC-BY (4.0)",
+        "CC_BY": "CC BY (4.0)",
         "CC_0": "CC-0"
       }
     },
@@ -901,6 +901,7 @@
     "OPEN": "Öffnen",
     "DOWNLOAD_ZIP": "Als Zip Herunterladen.",
     "LINK": "Zur Originalseite springen.",
+    "EMPTY_FOLDER": "Der freigegebene Ordner enthält noch keine Dateien",
     "INVITED_AND_CREATED_BY": "Erstellt und freigegeben von {{inviter}}",
     "INVITED_PLUS_CREATED_BY": "Freigegeben von {{inviter}}, erstellt von {{creator}}",
     "ENTER_PASSWORD": "weiter",

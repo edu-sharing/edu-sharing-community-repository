@@ -3,6 +3,7 @@ package org.edu_sharing.spring.security.openid;
 import io.opentelemetry.api.internal.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -12,6 +13,8 @@ import org.edu_sharing.spring.security.basic.EduAuthSuccsessHandler;
 import org.edu_sharing.spring.security.basic.EduWebSecurityCustomizer;
 import org.edu_sharing.spring.security.basic.HeadersConfig;
 import org.edu_sharing.spring.security.openid.config.OpenIdConfigService;
+import org.edu_sharing.spring.security.openid.persistence.MyBatisOidcSessionRegistry;
+import org.edu_sharing.spring.security.openid.persistence.OidcUserSessionMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,11 +24,16 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.oidc.session.OidcSessionRegistry;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.ClientRegistrations;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
+import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizationRequestRepository;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
+import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.util.UrlUtils;
@@ -60,6 +68,10 @@ public class SecurityConfigurationOpenIdConnect {
     @Lazy // Lazy annotation to break the circular dependency
     SilentLoginAuthorizationRequestResolver silentLoginAuthorizationRequestResolver;
 
+    @Autowired
+    private OidcUserSessionMapper mapper;
+
+
     @Bean
     SecurityFilterChain app(HttpSecurity http) throws Exception {
         http
@@ -84,7 +96,9 @@ public class SecurityConfigurationOpenIdConnect {
                         .loginPage("/sso")
                         .failureHandler(new CustomErrorHandler())
                         .successHandler(eduAuthSuccsessHandler)
-                        .authorizationEndpoint(ae -> ae.authorizationRequestResolver(silentLoginAuthorizationRequestResolver)))
+                        .authorizationEndpoint(ae -> ae
+                                .authorizationRequestResolver(silentLoginAuthorizationRequestResolver)
+                                .authorizationRequestRepository(customAuthorizationRequestRepository())))
                 .sessionManagement(s -> s.sessionFixation().none())
                 //frontchannel logout triggerd by edu-sharing gui
                 .logout((logout) ->
@@ -96,6 +110,8 @@ public class SecurityConfigurationOpenIdConnect {
 
         CSRFConfig.config(http);
         HeadersConfig.config(http);
+
+        http.setSharedObject(OidcSessionRegistry.class,new MyBatisOidcSessionRegistry(mapper));
 
         return http.build();
     }
@@ -162,5 +178,52 @@ public class SecurityConfigurationOpenIdConnect {
     SilentLoginAuthorizationRequestResolver silentLoginAuthorizationRequestResolver(ClientRegistrationRepository clientRegistrationRepository){
         logger.info("starting init silentLoginAuthorizationRequestResolver");
         return new SilentLoginAuthorizationRequestResolver(clientRegistrationRepository);
+    }
+
+
+    @Bean
+    public AuthorizationRequestRepository<OAuth2AuthorizationRequest> customAuthorizationRequestRepository() {
+        HttpSessionOAuth2AuthorizationRequestRepository wrapped = new HttpSessionOAuth2AuthorizationRequestRepository();
+        return new AuthorizationRequestRepository<>() {
+
+            @Override
+            public OAuth2AuthorizationRequest loadAuthorizationRequest(HttpServletRequest request) {
+                OAuth2AuthorizationRequest oAuth2AuthorizationRequest = wrapped.loadAuthorizationRequest(request);
+                if (oAuth2AuthorizationRequest == null) {
+                    String parameter = request.getParameter(OAuth2ParameterNames.STATE);
+                    if (parameter == null) {
+                        logger.error("loadAuthorizationRequest returned null cause of missing state parameter");
+                    }
+                    HttpSession session = request.getSession(false);
+                    if (session == null) {
+                        logger.error("loadAuthorizationRequest returned null cause of session is null");
+                    }else{
+                        String attName = HttpSessionOAuth2AuthorizationRequestRepository.class
+                                .getName() + ".AUTHORIZATION_REQUEST";
+                        OAuth2AuthorizationRequest attribute = (OAuth2AuthorizationRequest) session.getAttribute(attName);
+                        if (attribute == null) {
+                            logger.error("loadAuthorizationRequest returned null cause of OAuth2AuthorizationRequest attribute is null");
+                        }else{
+                            if(parameter != null){
+                                if(!parameter.equals(attribute.getState())) {
+                                    logger.error("loadAuthorizationRequest returned null cause of state param "+parameter +" != "+attribute.getState());
+                                }
+                            }
+                        }
+                    }
+                }
+                return oAuth2AuthorizationRequest;
+            }
+
+            @Override
+            public void saveAuthorizationRequest(OAuth2AuthorizationRequest authorizationRequest, HttpServletRequest request, HttpServletResponse response) {
+                wrapped.saveAuthorizationRequest(authorizationRequest, request, response);
+            }
+
+            @Override
+            public OAuth2AuthorizationRequest removeAuthorizationRequest(HttpServletRequest request, HttpServletResponse response) {
+                return wrapped.removeAuthorizationRequest(request, response);
+            }
+        };
     }
 }

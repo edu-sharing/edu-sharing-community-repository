@@ -186,7 +186,8 @@ public class NodeServiceAdapter implements NodeService {
 	
 	// to be overwritten if necessary
 	public InputStream getContent(String nodeId) throws Throwable{
-		throw new Exception("getContent not implemented for this repository");
+		// throw new Exception("getContent not implemented for this repository");
+		return null;
 	}
 
 	public Integer getContentLength(String nodeId) throws Throwable{

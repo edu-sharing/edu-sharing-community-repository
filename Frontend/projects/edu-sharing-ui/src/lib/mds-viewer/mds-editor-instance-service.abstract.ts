@@ -2,7 +2,13 @@ import { BehaviorSubject } from 'rxjs';
 import { Node } from 'ngx-edu-sharing-api';
 import { Values } from '../services/search-helper.service';
 
-export type EditorMode = 'nodes' | 'search' | 'form' | 'inline' | 'viewer';
+export type EditorMode =
+    | 'nodes'
+    | 'search'
+    | 'form'
+    | 'inline'
+    | 'viewer'
+    | 'searchFacetSuggestion';
 
 export abstract class MdsEditorInstanceServiceAbstract {
     mdsId: string;

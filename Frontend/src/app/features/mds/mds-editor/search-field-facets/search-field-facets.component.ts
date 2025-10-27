@@ -119,7 +119,12 @@ export class SearchFieldFacetsComponent implements OnInit, OnDestroy {
     private init(info: Partial<InitInfo>): void {
         if (info.repository && info.metadataSet && info.group) {
             void this.mdsEditorInstance
-                .initWithoutNodes(info.group, info.metadataSet, info.repository)
+                .initWithoutNodes(
+                    info.group,
+                    info.metadataSet,
+                    info.repository,
+                    'searchFacetSuggestion',
+                )
                 .then(() => (this.views = this.mdsEditorInstance.views));
         } else {
             // Consider resetting the mds instance service here.

@@ -49,18 +49,24 @@ export class MdsLabelService {
         }, {} as { [property: string]: string[] });
     }
 
-    /** Converts an array of raw values to an array of labeled values. */
+    /**
+     * Converts an array of raw values to an array of labeled values.
+     * The template represents the template relation of the widget. Use null to not use any specific widget configuration
+     * */
     labelValues(
         mdsId: MdsIdentifier,
         property: string,
         values: string[],
+        template?: string,
     ): Observable<LabeledValue[]> {
         if (!values || values.length === 0) {
             return rxjs.of([]);
         }
         return rxjs.forkJoin(
             values.map((value) =>
-                this.getLabel(mdsId, property, value).pipe(map((label) => ({ value, ...label }))),
+                this.getLabel(mdsId, property, value, template).pipe(
+                    map((label) => ({ value, ...label })),
+                ),
             ),
         );
     }
@@ -70,11 +76,12 @@ export class MdsLabelService {
         mdsId: MdsIdentifier,
         property: string,
         value: string,
+        template?: string,
     ): Observable<{
         mdsValue: MdsValue | undefined;
         label: string;
     }> {
-        return this.findValueById(mdsId, property, value).pipe(
+        return this.findValueById(mdsId, property, value, template).pipe(
             map((mdsValue) => {
                 return { label: mdsValue?.caption ?? value, mdsValue };
             }),
@@ -86,11 +93,13 @@ export class MdsLabelService {
         mdsId: MdsIdentifier,
         property: string,
         id: string,
+        template?: string,
     ): Observable<MdsValue | undefined> {
         return this.findValue(
             mdsId,
             property,
             (value) => value.id === id || value.alternativeIds?.includes(id),
+            template,
         );
     }
 
@@ -99,8 +108,9 @@ export class MdsLabelService {
         mdsId: MdsIdentifier,
         property: string,
         predicate: (value: MdsValue) => unknown,
+        template?: string,
     ): Observable<MdsValue | undefined> {
-        return this.getValueDefinitions(mdsId, property).pipe(
+        return this.getValueDefinitions(mdsId, property, template).pipe(
             map((definitions) => definitions?.find(predicate)),
         );
     }
@@ -108,17 +118,29 @@ export class MdsLabelService {
     /**
      * Gets values for a given property from the respective mds widget definitions.
      */
-    getValueDefinitions(mdsId: MdsIdentifier, property: string): Observable<MdsValue[] | null> {
+    getValueDefinitions(
+        mdsId: MdsIdentifier,
+        property: string,
+        template?: string,
+    ): Observable<MdsValue[] | null> {
         return this.mds.getMetadataSet(mdsId).pipe(
             map(
                 (mds) =>
+                    // try with specific template first
+                    mds.widgets?.find(
+                        (widget) =>
+                            widget.id === property &&
+                            ((!template && !widget.template) || template === widget.template),
+                    )?.values ??
+                    // fallback to the one without template
                     mds.widgets?.find(
                         (widget) =>
                             widget.id === property &&
                             // Values are defined on the general widget and not on special
                             // configurations for specific view.
                             !widget.template,
-                    )?.values ?? null,
+                    )?.values ??
+                    null,
             ),
         );
     }

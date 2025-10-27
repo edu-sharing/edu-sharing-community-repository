@@ -56,6 +56,8 @@ public class MetadataWidget extends MetadataTranslatable {
         none,
         // escape html but allow basic formatting and links (default)
         htmlBasic,
+        // escape html but allow basic formatting and links and also keep the referrer for inserted links
+        htmlBasicWithReferrer,
         // escape html and only allow very basic styling (b, strong, i, em, br, ul, ol, li)
         htmlRestricted,
         // escape all data, only allow text

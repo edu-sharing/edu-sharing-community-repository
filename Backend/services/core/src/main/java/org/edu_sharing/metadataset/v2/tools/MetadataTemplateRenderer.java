@@ -23,10 +23,10 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jsoup.Jsoup;
-import org.owasp.html.HtmlPolicyBuilder;
-import org.owasp.html.PolicyFactory;
-import org.owasp.html.Sanitizers;
+import org.owasp.html.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -752,12 +752,30 @@ public class MetadataTemplateRenderer {
 		return cleaned;
 	}
 
-	private static String cleanupText(MetadataWidget.TextEscapingPolicy textEscapingPolicy, String untrustedHTML) {
+	static String cleanupText(MetadataWidget.TextEscapingPolicy textEscapingPolicy, String untrustedHTML) {
 		if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.htmlBasic)) {
 			PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.BLOCKS).and(
 					new HtmlPolicyBuilder()
 							.allowStandardUrlProtocols().allowElements("a")
 							.allowAttributes("href", "target").onElements("a").requireRelNofollowOnLinks()
+							.toFactory()
+			);
+			return policy.sanitize(untrustedHTML);
+		} else if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.htmlBasicWithReferrer)) {
+			PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.BLOCKS).and(
+					new HtmlPolicyBuilder()
+							.allowElements(new ElementPolicy() {
+								@NotNull
+								@Override
+								public String apply(@NotNull String s, @NotNull List<String> list) {
+									list.add("referrerpolicy");
+									list.add("no-referrer-when-downgrade");
+									return s;
+								}
+							}, "a")
+							.allowStandardUrlProtocols()
+							.allowAttributes("href", "target").onElements("a").requireRelNofollowOnLinks()
+							.skipRelsOnLinks("noopener", "noreferrer")
 							.toFactory()
 			);
 			return policy.sanitize(untrustedHTML);
