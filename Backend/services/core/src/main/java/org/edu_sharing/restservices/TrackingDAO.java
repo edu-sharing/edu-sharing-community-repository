@@ -15,6 +15,7 @@ import org.edu_sharing.repository.server.jobs.annotations.Queued;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.restservices.tracking.v1.model.Tracking;
 import org.edu_sharing.restservices.tracking.v1.model.TrackingNode;
+import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.notification.NotificationService;
 import org.edu_sharing.service.permission.annotation.HasRole;
 import org.edu_sharing.service.permission.annotation.Permission;
@@ -26,6 +27,7 @@ import org.edu_sharing.service.tracking.StatisticsFileService;
 import org.edu_sharing.service.tracking.ibatis.NodeData;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -43,6 +45,7 @@ public class TrackingDAO {
     private final SearchServiceElastic searchService;
     private final StatisticsFileService statisticsFileService;
     private final NotificationService notificationService;
+    private final NodeService nodeService;
 
     private final Filter filter = Filter.createShowAllFilter();
 
@@ -337,21 +340,8 @@ public class TrackingDAO {
         return new TrackingNode(node, convertAuthority(statisticEntry.getAuthorityInfo()), statisticEntry.getDate(), statisticEntry.getCounts(), statisticEntry.getFields(), statisticEntry.getGroups());
     }
 
-    @Queued(unique = true)
-    public void scheduleNodeStatisticsByRange(List<String> nodeIds, Date startDate, Date endDate, boolean publishedOnly, List<List<String>> properties) {
-        try {
-            Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> statisticEntryMap = getNodeStatisticsByRange(nodeIds, startDate, endDate, Integer.MAX_VALUE, publishedOnly);
-            String userInboxNodeId = RepositoryDao.getHomeRepository().getUserInbox(true);
-            String filename = getFilename(startDate, endDate,  I18nAngular.getTranslationAngular("common", "STATISTICS.SELECTIVE_MATERIALS"));
-            statisticsFileService.writeCSV(userInboxNodeId, filename, statisticEntryMap, properties);
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     @NotNull
     private static String getFilename(Date startDate, Date endDate, String postfix) {
-        // TODO i18n
         return String.join("_",
                 startDate.toInstant().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_LOCAL_DATE)
                 , I18nAngular.getTranslationAngular("common", "STATISTICS.TO")
@@ -360,13 +350,32 @@ public class TrackingDAO {
     }
 
     @Queued(unique = true)
+    public void scheduleNodeStatisticsByRange(List<String> nodeIds, Date startDate, Date endDate, boolean publishedOnly, List<List<String>> properties) {
+        try {
+            Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> statisticEntryMap = getNodeStatisticsByRange(nodeIds, startDate, endDate, Integer.MAX_VALUE, publishedOnly);
+            String userInboxNodeId = RepositoryDao.getHomeRepository().getUserInbox(true);
+            String filename = getFilename(startDate, endDate,  I18nAngular.getTranslationAngular("common", "STATISTICS.SELECTIVE_MATERIALS"));
+            String nodeId = statisticsFileService.writeCSV(userInboxNodeId, filename, statisticEntryMap, properties);
+            String type = nodeService.getType(nodeId);
+            String[] aspects = nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
+            Map<String, Object> nodeProps = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
+            notificationService.notifyMaterialAddedToInbox(nodeId, type, Arrays.stream(aspects).toList(), nodeProps, null, "system", AuthenticationUtil.getRunAsUser());
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Queued(unique = true)
     public void scheduleNodeStatisticsByOrganization(@HasRole String orgId, Date startDate, Date endDate, boolean publishedOnly, List<List<String>> properties) {
         try {
             Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> statisticEntryMap = getNodeStatisticsByOrganization(orgId, startDate, endDate, Integer.MAX_VALUE, publishedOnly);
             String userInboxNodeId = RepositoryDao.getHomeRepository().getUserInbox(true);
-            // TODO i18n
             String filename = getFilename(startDate, endDate, orgId + "_" + I18nAngular.getTranslationAngular("common", "STATISTICS.MATERIALS"));
-            statisticsFileService.writeCSV(userInboxNodeId, filename, statisticEntryMap, properties);
+            String nodeId = statisticsFileService.writeCSV(userInboxNodeId, filename, statisticEntryMap, properties);
+            String type = nodeService.getType(nodeId);
+            String[] aspects = nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
+            Map<String, Object> nodeProps = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
+            notificationService.notifyMaterialAddedToInbox(nodeId, type, Arrays.stream(aspects).toList(), nodeProps, null, "system", AuthenticationUtil.getRunAsUser());
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
@@ -377,10 +386,12 @@ public class TrackingDAO {
         try {
             Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> statisticEntryMap = getNodeStatisticsByOwningUser(userId, startDate, endDate, Integer.MAX_VALUE, publishedOnly);
             String userInboxNodeId = RepositoryDao.getHomeRepository().getUserInbox(true);
-            // TODO i18n
             String filename = getFilename(startDate, endDate, userId + "_" + I18nAngular.getTranslationAngular("common", "STATISTICS.MATERIALS"));
-            statisticsFileService.writeCSV(userInboxNodeId, filename, statisticEntryMap, properties);
-            //notificationService.notifyInbox()
+            String nodeId =  statisticsFileService.writeCSV(userInboxNodeId, filename, statisticEntryMap, properties);
+            String type = nodeService.getType(nodeId);
+            String[] aspects = nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
+            Map<String, Object> nodeProps = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
+            notificationService.notifyMaterialAddedToInbox(nodeId, type, Arrays.stream(aspects).toList(), nodeProps, null, "system", AuthenticationUtil.getRunAsUser());
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }

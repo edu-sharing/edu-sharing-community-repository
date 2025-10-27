@@ -133,6 +133,20 @@
 		]]>
 		</message>
 	</template>
+  <template name="added_inbox">
+    <subject>New material in inbox from {{inviter.firstName}} {{inviter.lastName}}</subject>
+    <message><![CDATA[
+			<h1>Hello {{firstName}} {{lastName}}</h1>
+			<h2>There is a new material "{{node.cm:name}}" in your inbox from {{assigner.firstName}} {{assigner.lastName}}.</h2>
+			<br>
+			<div class="center"><a class="btn" href="{{link}}">Link to the material</a></div>
+			<br><br>
+			{{if comment}}Comment from user:<br>
+				{{comment}}
+			{{endif}}
+		]]>
+    </message>
+  </template>
 	<template name="invited_safe">
 		<subject>{{inviter.firstName}} {{inviter.lastName}} invited you to a material.</subject>
 		<message><![CDATA[

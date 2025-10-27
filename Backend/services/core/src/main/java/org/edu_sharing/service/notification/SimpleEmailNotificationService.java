@@ -151,6 +151,30 @@ public class SimpleEmailNotificationService {
     }
 
     @EventListener
+    public void onAddedToInbox(AddedToInboxEvent event){
+        log.info("send notifyAddedToInbox: nodeId: {}, nodePropertiesList: {}, comment: {}", event.nodeId(), event.properties(), event.comment());
+
+        MailTemplate.UserMail receiverMail = MailTemplate.getUserMailData(event.receiverAuthority());
+        EmailValidator mailValidator = EmailValidator.getInstance(true, true);
+        if (mailValidator.isValid(receiverMail.getEmail())) {
+            try {
+                MailTemplate.UserMail sender = MailTemplate.getUserMailData(event.senderAuthority());
+                Map<String, String> replace = new HashMap<>();
+                sender.applyToMap("assigner.", replace);
+                replace.put("comment", event.comment());
+                MailTemplate.addContentLinks(ApplicationInfoList.getHomeRepository(), event.nodeId(), replace, "link");
+                receiverMail.applyToMap("", replace);
+                MailTemplate.applyNodePropertiesToMap("nodeId.", event.properties(), replace);
+
+                String template = "invited_workflow";
+                MailTemplate.sendMail(sender.getFullName(), sender.getEmail(), receiverMail.getEmail(), template, replace);
+            } catch (Throwable t) {
+                log.warn("Mail send failed", t);
+            }
+        }
+    }
+
+    @EventListener
     public void onPersonStatusChanged(PersonStatusChangedEvent event) {
         Map<String, String> replace = new HashMap<>();
         replace.put("firstName", event.firstname());

@@ -78,6 +78,11 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    public void notifyMaterialAddedToInbox(String nodeId, String nodeType, List<String> aspects, Map<String, Object> nodeProperties, String comment, String senderAuthority, String receiverAuthority) {
+        applicationEventPublisher.publishEvent(new AddedToInboxEvent(senderAuthority, receiverAuthority, nodeId, nodeType, aspects, nodeProperties, comment));
+    }
+
+    @Override
     public Page<NotificationEventDTO> getNotifications(String receiverId, List<StatusDTO> status, Pageable pageable) {
         return  notificationProxyService.orElseThrow(NotificationServiceImpl::NotificationProxyServiceNotAvailableException)
                 .getNotifications(receiverId, status, pageable);

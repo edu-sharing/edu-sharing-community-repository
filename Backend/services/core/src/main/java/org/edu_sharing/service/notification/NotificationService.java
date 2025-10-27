@@ -46,15 +46,19 @@ public interface NotificationService {
     void notifyComment(String node, String comment, String commentReference, String nodeType, List<String> aspects, Map<String, Object> nodeProperties, Status status);
 
     void notifyAddCollection(String collectionId, String nodeId, String collectionNodeType, List<String> collectionAspects, Map<String, Object> collectionProperties, String nodeType, List<String> nodeAspects, Map<String, Object> nodeProperties, Status status);
+
     void notifyProposeForCollection(String collectionId, String nodeId, String collectionNodeType, List<String> collectionAspects, Map<String, Object> collectionProperties, String nodeType, List<String> nodeAspects, Map<String, Object> nodeProperties, Status status);
 
     void notifyRatingChanged(String nodeId, String nodeType, List<String> aspects, Map<String, Object> nodeProps, Double rating, RatingDetails accumulatedRatings, Status removed);
+
+    void notifyMaterialAddedToInbox(String nodeId, String nodeType, List<String> aspects, Map<String, Object> nodeProperties, String comment, String senderAuthority, String receiverAuthority);
 
     @Permission(requiresUser = true)
     NotificationConfig getConfig() throws Exception;
 
     @Permission(requiresUser = true)
     void setConfig(NotificationConfig config) throws Exception;
+
 
     @Permission(requiresUser = true)
     Page<NotificationEventDTO> getNotifications(String receiverId, List<StatusDTO> status, Pageable pageable);

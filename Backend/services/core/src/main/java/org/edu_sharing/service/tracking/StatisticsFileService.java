@@ -35,7 +35,7 @@ public class StatisticsFileService {
     );
 
 
-    public void writeCSV(String targetFolder, String filename, Map<NodeRef, StatisticEntry> trackingNodes, List<List<String>> columns) throws Throwable {
+    public String writeCSV(String targetFolder, String filename, Map<NodeRef, StatisticEntry> trackingNodes, List<List<String>> columns) throws Throwable {
         if (!filename.endsWith(".csv")) {
             filename += ".csv";
         }
@@ -102,6 +102,7 @@ public class StatisticsFileService {
         String targetNodeId = nodeService.createNode(targetFolder, CCConstants.CCM_TYPE_IO, nodeService.getNameProperty(filename));
         try {
             writeToFile(targetNodeId, header, data);
+            return existingNodeId;
         } catch (
                 IOException e) {
             nodeService.removeNode(targetNodeId, targetFolder, false);

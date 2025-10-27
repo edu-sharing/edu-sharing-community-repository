@@ -10,6 +10,7 @@ import java.io.Serializable;
 public class NotificationConfig implements Serializable {
     @Data
     public static class NotificationIntervals implements Serializable {
+        private NotificationInterval addedToInboxEvent = NotificationInterval.immediately;
         private NotificationInterval addToCollectionEvent = NotificationInterval.immediately;
         private NotificationInterval proposeForCollectionEvent = NotificationInterval.immediately;
         private NotificationInterval commentEvent = NotificationInterval.immediately;
@@ -40,6 +41,13 @@ public class NotificationConfig implements Serializable {
     @JsonProperty
     // if mode == individual
     private NotificationIntervals intervals = new NotificationIntervals();
+
+    @JsonIgnore
+    public NotificationInterval getAddedToInboxEvent() {
+        return configMode == NotificationConfigMode.individual
+                ? intervals.getAddedToInboxEvent()
+                : defaultInterval;
+    }
 
     @JsonIgnore
     public NotificationInterval getAddToCollectionEvent() {
