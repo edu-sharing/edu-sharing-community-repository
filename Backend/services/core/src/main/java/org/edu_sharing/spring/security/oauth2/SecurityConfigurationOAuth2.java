@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.config.ConfigServiceFactory;
+import org.edu_sharing.spring.scope.refresh.annotations.RefreshScope;
 import org.edu_sharing.spring.security.basic.CSRFConfig;
 import org.edu_sharing.spring.security.basic.EduAuthSuccsessHandler;
 import org.edu_sharing.spring.security.basic.EduWebSecurityCustomizer;
@@ -108,7 +109,7 @@ public class SecurityConfigurationOAuth2 {
                 String targetUrl = super.determineTargetUrl(request, response, authentication);
 
 
-                String idpRedirectUrl = "";
+                String idpRedirectUrl;
                 String successTarget = "/shibboleth";
                 try {
                     successTarget = ConfigServiceFactory.getCurrentConfig(request).getValue("logout.next", successTarget);
@@ -191,6 +192,7 @@ public class SecurityConfigurationOAuth2 {
     }
 
     @Bean
+    @RefreshScope
     public ClientRegistrationRepository clientRegistrationRepository(OAuth2ConfigProvider configService) {
         List<ClientRegistration> registrations = new ArrayList<>(
                 new OAuth2ClientPropertiesMapper(configService).asClientRegistrations().values());
