@@ -209,8 +209,12 @@ public class UpdaterServiceImpl implements ApplicationContextAware, ApplicationL
                     log.error("Error writing protocol entry", throwable);
                 }
             } catch (Exception ex) {
-                if(!x.isNonTransactional()) {
-                    transaction.rollback();
+                try {
+                    if (!x.isNonTransactional()) {
+                        transaction.rollback();
+                    }
+                }catch (Throwable t){
+                    log.error("Error rolling back transaction", t);
                 }
                 log.error("Update failed or not completed", ex);
             }
