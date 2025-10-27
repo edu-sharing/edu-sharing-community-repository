@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.*;
+import org.edu_sharing.restservices.search.v1.model.SearchFacet;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.statistic.v1.model.Filter;
 import org.edu_sharing.restservices.statistic.v1.model.Statistics;
@@ -30,6 +31,7 @@ import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Path("/statistic/v1")
 @Tag(name = "STATISTIC v1")
@@ -56,7 +58,7 @@ public class StatisticApi {
             @QueryParam("properties") List<String> properties,
             @Context HttpServletRequest req) {
 
-        Statistics statistics = new StatisticDao().get(context, properties, filter);
+        Statistics statistics = new StatisticDao().get(context, properties == null ? null : properties.stream().map(p -> new SearchFacet(p, null)).collect(Collectors.toList()), filter);
         return Response.status(Response.Status.OK).entity(statistics).build();
     }
 

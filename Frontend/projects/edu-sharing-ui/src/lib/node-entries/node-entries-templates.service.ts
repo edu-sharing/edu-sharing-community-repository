@@ -26,6 +26,10 @@ export class NodeEntriesTemplatesService {
      * custom container for showing an overlay across each element
      */
     overlay: TemplateRef<any>;
+    /**
+     * custom container for showing an own card layout
+     */
+    customCard: TemplateRef<any>;
 
     constructor() {}
 }

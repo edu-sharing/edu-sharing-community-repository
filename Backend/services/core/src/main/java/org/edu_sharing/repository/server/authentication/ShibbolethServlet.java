@@ -58,6 +58,8 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal;
 import org.springframework.security.saml2.provider.service.authentication.Saml2Authentication;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -177,10 +179,15 @@ public class ShibbolethServlet extends SpringHttpServlet {
         }
 
         log.info("redirectSuccessUrl:{}", redirectUrl);
+
+		UriComponents components = UriComponentsBuilder.fromUriString(redirectUrl).build();
+		if(!components.getQueryParams().containsKey("redirectFromSSO")) {
         //so that redirecting to invited trunk works
         //removes trunk param here because it's only necessary cause of anchor is added here (server side does not get anchors)
         redirectUrl = UrlTool.setParamEncode(redirectUrl, "redirectFromSSO", "true");
+		}
 
+		log.info("redirectSuccessUrl:"+redirectUrl);
         resp.sendRedirect(redirectUrl);
     }
 

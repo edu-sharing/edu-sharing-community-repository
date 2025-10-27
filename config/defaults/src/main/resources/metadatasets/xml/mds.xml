@@ -876,40 +876,33 @@
 				<license>
                 <ccm:imported_object_appname>
                 <ccm:author_freetext>
-				<div class="mdsContributorGroup">
-					<div id="mdsLifecyclecontributorsTitle" class="mdsContributorTitle">{{ cb_contr_material }}</div>
-					<div id="mdsLifecyclecontributors">
-	               		<ccm:lifecyclecontributer_author>
-	               		<ccm:lifecyclecontributer_publisher>
-	               		<ccm:lifecyclecontributer_unknown>
-	               		<ccm:lifecyclecontributer_initiator>
-	               		<ccm:lifecyclecontributer_terminator>
-	               		<ccm:lifecyclecontributer_validator>
-	               		<ccm:lifecyclecontributer_editor>
-	               		<ccm:lifecyclecontributer_graphical_designer>
-	               		<ccm:lifecyclecontributer_technical_implementer>
-	               		<ccm:lifecyclecontributer_content_provider>
-	               		<ccm:lifecyclecontributer_educational_validator>
-	               		<ccm:lifecyclecontributer_script_writer>
-	               		<ccm:lifecyclecontributer_instructional_designer>
-	               		<ccm:lifecyclecontributer_subject_matter_expert>
-               		</div>
-               		<div id="mdsMetadatcontributorsTitle" class="mdsContributorTitle">{{ cb_contr_metadata }}</div>
-               		<div id="mdsMetadatcontributors">
-	               		<ccm:metadatacontributer_creator>
-	               		<ccm:metadatacontributer_validator>
-	               		<ccm:metadatacontributer_provider>
-	               	</div>
-               	</div>
-               	<script>
-               		function hideIfEmpty(toHide,isEmpty){
-               			if(isEmpty.innerHTML.trim()==""){
-               				toHide.style.display='none';
-               			}
-               		}
-               		hideIfEmpty(document.getElementById("mdsLifecyclecontributorsTitle"),document.getElementById("mdsLifecyclecontributors"));
-               		hideIfEmpty(document.getElementById("mdsMetadatcontributorsTitle"),document.getElementById("mdsMetadatcontributors"));
-               	</script>
+				<hideIfEmpty class="mdsContributorGroup">
+                  <div id="mdsLifecyclecontributorsTitle" class="mdsContributorTitle">{{ cb_contr_material }}</div>
+                  <hideIfEmpty-content>
+                   <ccm:lifecyclecontributer_author>
+                   <ccm:lifecyclecontributer_publisher>
+                   <ccm:lifecyclecontributer_unknown>
+                   <ccm:lifecyclecontributer_initiator>
+                   <ccm:lifecyclecontributer_terminator>
+                   <ccm:lifecyclecontributer_validator>
+                   <ccm:lifecyclecontributer_editor>
+                   <ccm:lifecyclecontributer_graphical_designer>
+                   <ccm:lifecyclecontributer_technical_implementer>
+                   <ccm:lifecyclecontributer_content_provider>
+                   <ccm:lifecyclecontributer_educational_validator>
+                   <ccm:lifecyclecontributer_script_writer>
+                   <ccm:lifecyclecontributer_instructional_designer>
+                   <ccm:lifecyclecontributer_subject_matter_expert>
+                 </hideIfEmpty-content>
+               </hideIfEmpty>
+               <hideIfEmpty class="mdsContributorGroup">
+                 <div id="mdsMetadatcontributorsTitle" class="mdsContributorTitle">{{ cb_contr_metadata }}</div>
+                 <hideIfEmpty-content id="mdsMetadatcontributors">
+                   <ccm:metadatacontributer_creator>
+                   <ccm:metadatacontributer_validator>
+                   <ccm:metadatacontributer_provider>
+                 </hideIfEmpty-content>
+               </hideIfEmpty>
 				]]></html>
     </template>
     <template>
@@ -1683,7 +1676,6 @@
           "fields": [
           "properties.cm:name^2",
           "properties.cm:title^2",
-          "properties.cm:title.keyword^2",
           "properties.cclom:title^5",
           "properties.cclom:general_description^2",
           "properties.cclom:general_keyword^4",
@@ -1692,7 +1684,8 @@
           "default_operator": "and"
           }
           },
-          {"wildcard":{"nodeRef.id": {"value":"*${value}*", "case_insensitive": true }}}
+          {"wildcard":{"nodeRef.id": {"value":"*${value}*", "case_insensitive": true }}},
+          {"wildcard":{"properties.cm:title.keyword": {"value":"*${value}*", "case_insensitive": true }}}
           ]
           }}
         </statement>
@@ -1809,6 +1802,16 @@
         <statement>{"wildcard": {"properties.cclom:format": "${valueRaw}*" }}</statement>
         <multiple>true</multiple>
         <multiplejoin>OR</multiplejoin>
+      </property>
+      <property name="virtual:location">
+        <multiple>true</multiple>
+        <multiplejoin>INTERNAL</multiplejoin>
+        <statement>{"bool": {
+          "must": [
+          {"range":{"properties.cm:latitude.number":{"gte":"${valueRaw[0]}", "lte":"${valueRaw[2]}"}}},
+          {"range":{"properties.cm:longitude.number":{"gte":"${valueRaw[1]}", "lte":"${valueRaw[3]}"}}}
+          ]}}</statement>
+        <facets type="geo_grid"/>
       </property>
     </query>
     <query join="AND" id="mediacenter_filter">

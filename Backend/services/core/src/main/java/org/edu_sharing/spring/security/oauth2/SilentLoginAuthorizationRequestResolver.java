@@ -2,6 +2,9 @@ package org.edu_sharing.spring.security.oauth2;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
@@ -15,6 +18,7 @@ import java.util.Map;
  * adds an prompt=none to authorization request if request matches configured path
  * https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest
  */
+@Slf4j
 public class SilentLoginAuthorizationRequestResolver implements OAuth2AuthorizationRequestResolver {
 
     OAuth2AuthorizationRequestResolver defaultAuthorizationRequestResolver;
@@ -33,8 +37,9 @@ public class SilentLoginAuthorizationRequestResolver implements OAuth2Authorizat
     public OAuth2AuthorizationRequest resolve(HttpServletRequest request) {
         OAuth2AuthorizationRequest authorizationRequest =
                 this.defaultAuthorizationRequestResolver.resolve(request);
-
-        if(silentLoginPath.equals(getCombinedPath(request)) && authorizationRequest != null){
+        String combinedPath = getCombinedPath(request);
+        log.debug("Combined path: {} authorizationRequest != null: {}", combinedPath,authorizationRequest != null);
+        if(silentLoginPath.equals(combinedPath) && authorizationRequest != null){
             return customAuthorizationRequest(authorizationRequest);
         }
         return authorizationRequest;
@@ -45,8 +50,9 @@ public class SilentLoginAuthorizationRequestResolver implements OAuth2Authorizat
         OAuth2AuthorizationRequest authorizationRequest =
                 this.defaultAuthorizationRequestResolver.resolve(
                         request, clientRegistrationId);
-
-        if(silentLoginPath.equals(getCombinedPath(request)) && authorizationRequest != null){
+        String combinedPath = getCombinedPath(request);
+        log.debug("Combined path: {} authorizationRequest != null: {}, clientRegistrationId:{}", combinedPath,authorizationRequest != null, clientRegistrationId);
+        if(silentLoginPath.equals(combinedPath) && authorizationRequest != null){
             return customAuthorizationRequest(authorizationRequest);
         }
 

@@ -71,7 +71,6 @@
 				color:#fff;
 				text-decoration:none;
 				background-color:#48708e;
-				text-transform:uppercase;
 				padding:10px 25px;
 				box-shadow:0 2px 5px rgba(0,0,0,.5);
 				display: inline-block;
@@ -360,7 +359,7 @@
 	<template name="footer">
 		<message><![CDATA[
 			<a href="http://edu-sharing.com" style="float:left;">www.edu-sharing.com</a>
-			<a href="https://twitter.com/edusharing" style="float:right;">@edusharing</a>
+			<a href="https://bildung.social/@edu_sharing" style="float:right;">@edusharing</a>
 		]]>
 		</message>
 	</template>

@@ -31,6 +31,7 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
     @Input() activate_service_worker: boolean;
     @Input() assets_url: string = '';
     @Input() resource_url: string = '';
+    @Input() preview_url: string = '';
     showInlineMetadata = false;
     node = signal<Node>(null);
     request = signal<RenderDataRequestWithToken>(null);
@@ -39,6 +40,7 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
     activateServiceWorker: boolean;
     assetUrl: string;
     resourceUrl: string;
+    previewUrl: string;
 
     constructor(
         private renderHelperService: RenderHelperService,
@@ -58,6 +60,7 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
         this.activateServiceWorker = this.activate_service_worker;
         this.assetUrl = this.assets_url;
         this.resourceUrl = this.resource_url;
+        this.previewUrl = this.preview_url;
     }
 
     async ngOnChanges(changes: SimpleChanges) {
@@ -69,6 +72,7 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
                 this.render_url,
                 this.encoded_user,
             );
+            data.node.preview.url = this.previewUrl;
             this.node.set(data.node);
             this.request.set(data.request);
             console.log(data);

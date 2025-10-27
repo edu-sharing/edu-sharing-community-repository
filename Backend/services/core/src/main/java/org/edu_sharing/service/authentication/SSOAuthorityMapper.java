@@ -166,7 +166,7 @@ public class SSOAuthorityMapper {
         final Mapping mapping = ssoMappingProvider.getMapping(ssoAttributes);
         if (mappingConfig.isDebug()) {
             for (Map.Entry<String, String> ssoAttribute : ssoAttributes.entrySet()) {
-                log.info("sso attribute: {} value: {}", ssoAttribute.getKey(), ssoAttribute.getValue());
+                log.debug("sso attribute: {} value: {}", ssoAttribute.getKey(), ssoAttribute.getValue());
             }
         }
 

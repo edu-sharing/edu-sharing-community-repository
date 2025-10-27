@@ -30,10 +30,11 @@ import {
     UIConstants,
 } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
-import { Observable, ReplaySubject, Subject } from 'rxjs';
+import { defer, Observable, ReplaySubject, Subject } from 'rxjs';
 import { delay, filter, map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import {
     ConfigurationService,
+    FrameEventsService,
     RestConnectorService,
     RestConstants,
     RestHelper,
@@ -91,7 +92,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     private hiddenByQueryParam: boolean;
 
     @HostBinding('class.main-nav-visible') visible = !this.shouldAlwaysHide;
-    autoLogoutTimeout$: Observable<string>;
+    autoLogoutTimeout$ = new Subject<string>();
     config: any = {};
     nodeStoreIsOpen = false;
     nodeStoreDialogRef: CardDialogRef<void, void> | null = null;
@@ -122,6 +123,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         private appContainer: AppContainerService,
         public iam: RestIamService,
         public connector: RestConnectorService,
+        public eventsService: FrameEventsService,
         private bridge: BridgeService,
         private configService: ConfigurationService,
         private aboutService: AboutService,
@@ -710,10 +712,20 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private registerAutoLogoutTimeout(): void {
-        this.autoLogoutTimeout$ = this.authentication.observeTimeUntilAutoLogout(1000).pipe(
-            takeUntil(this.destroyed$),
-            map((timeUntilLogout) => this.getTimeoutString(timeUntilLogout)),
-        );
+        this.authentication
+            .observeTimeUntilAutoLogout(1000)
+            .pipe(
+                takeUntil(this.destroyed$),
+                tap((timeUntilLogout) =>
+                    this.eventsService.broadcastEvent(
+                        FrameEventsService.EVENT_SESSION_TIMEOUT,
+                        timeUntilLogout / 1000,
+                    ),
+                ),
+                map((timeUntilLogout) => this.getTimeoutString(timeUntilLogout)),
+                tap((t) => this.autoLogoutTimeout$.next(t)),
+            )
+            .subscribe(() => {});
     }
 
     private registerAutoLogoutDialog(): void {

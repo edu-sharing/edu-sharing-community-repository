@@ -7,5 +7,6 @@ module.exports = {
         umdNamedDefine: true,
         library: 'esrendering',
         libraryTarget: 'amd',
+        publicPath: '',
     },
 };

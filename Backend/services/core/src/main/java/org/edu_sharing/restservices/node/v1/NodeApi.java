@@ -27,6 +27,7 @@ import org.edu_sharing.repository.server.tools.LRMITool;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.node.v1.model.*;
 import org.edu_sharing.restservices.node.v1.model.SearchResult;
+import org.edu_sharing.restservices.search.v1.model.SearchFacet;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.clientutils.ClientUtilsService;
 import org.edu_sharing.service.clientutils.WebsiteInformation;
@@ -1569,36 +1570,16 @@ public class NodeApi  {
     	try {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-	    	
-	    	NodeDao newNode = nodeDao.changePreview(inputStream,mimetype, createVersion==null || createVersion);
+	    	NodeDao nodeDao =  NodeDao.getNode(repoDao, node).changePreview(inputStream,mimetype, createVersion==null || createVersion);
 	    	
 	    	NodeEntry response = new NodeEntry();
-	    	response.setNode(newNode.asNode());
+	    	response.setNode(nodeDao.asNode());
 
 	    	return Response.status(Response.Status.OK).entity(response).build();
 
-    	} catch (DAOValidationException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOSecurityException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOMissingException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
-    		
     	} catch (Throwable t) {
-    		
-    		logger.error(t.getMessage(), t);
-    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
-    	}
-
+			return ErrorResponse.createResponse(t);
+		}
     }
 	@DELETE
 	@Path("/nodes/{repository}/{node}/preview")
@@ -1910,7 +1891,9 @@ public class NodeApi  {
 			searchToken.setLuceneString(query);
 			searchToken.setFrom(skipCount != null ? skipCount : 0);
 			searchToken.setMaxResult(maxItems!= null ? maxItems : 10);
-			searchToken.setFacets(facets);
+			if(facets != null) {
+				searchToken.setFacets(facets.stream().map(f -> new SearchFacet(f, null)).collect(Collectors.toList()));
+			}
 			searchToken.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
     		NodeSearch search = NodeDao.search(repoDao,searchToken);
     		List<Node> data = new ArrayList<>();

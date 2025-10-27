@@ -198,14 +198,14 @@ export class NodeInfoDialogComponent implements OnInit, AfterViewInit {
         }
     }
 
-    saveProperty(property: string[]) {
+    saveProperty(property: string[], remove: boolean) {
         this.saving = true;
         forkJoin(
             this._nodes.map((n) =>
                 this.nodeApi.editNodeProperty(
                     n.ref.id,
                     property[0],
-                    property[1].split(','),
+                    remove ? [] : property[1].split(','),
                     n.ref.repo,
                 ),
             ),

@@ -5,11 +5,12 @@ import { MdsEditorInstanceService } from '../../features/mds/mds-editor/mds-edit
 import { Location } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { NodeService } from 'ngx-edu-sharing-api';
+import { MdsViewerService } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-pdf-metadata-page',
     template: '',
-    providers: [PdfService, MdsEditorInstanceService],
+    providers: [PdfService, MdsEditorInstanceService, MdsViewerService],
     standalone: false,
 })
 export class PdfMetadataPageComponent implements OnInit {

@@ -1580,17 +1580,13 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         log.debug("called nodeID:{} store:{} mimetype:{} property:{}", nodeID, store, mimetype, property);
 
         File tempFile = TempFileProvider.createTempFile("edu_mimedetect.", ".bin");
-        RetryingTransactionCallback callback = () -> {
+        RetryingTransactionCallback<NodeRef> callback = () -> {
 
             NodeRef nodeRef = new NodeRef(store, nodeID);
             final ContentWriter contentWriter = contentService.getWriter(nodeRef, QName.createQName(property), true);
             contentWriter.addListener(() -> {
-                log.debug("Content Stream was closed");
+                log.debug("Content Stream was closed for {}", nodeRef);
                 log.debug(" size:{}, URL:{}, MimeType:{}, ContentData ToString:{}", contentWriter.getContentData().getSize(), contentWriter.getContentData().getContentUrl(), contentWriter.getContentData().getMimetype(), contentWriter.getContentData().toString());
-                if(onComplete != null) {
-                    onComplete.run();
-                }
-                tempFile.delete();
             });
 
             String finalMimeType = mimetype;
@@ -1612,10 +1608,15 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                 contentWriter.setMimetype(finalMimeType);
                 contentWriter.putContent(in);
             }
-            return null;
+            return nodeRef;
         };
         TransactionService transactionService = serviceRegistry.getTransactionService();
-        transactionService.getRetryingTransactionHelper().doInTransaction(callback, false);
+        NodeRef nodeRef = transactionService.getRetryingTransactionHelper().doInTransaction(callback, false);
+        log.debug("finished content writing tx:"+nodeRef);
+        tempFile.delete();
+        if(onComplete != null && nodeRef != null) {
+            onComplete.run();
+        }
     }
 
     public void setUserDefinedPreview(String nodeId, byte[] content, String fileName) {

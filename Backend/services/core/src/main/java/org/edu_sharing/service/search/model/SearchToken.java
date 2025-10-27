@@ -10,6 +10,7 @@ import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
 import org.edu_sharing.metadataset.v2.SearchCriterias;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.restservices.search.v1.model.SearchFacet;
 import org.edu_sharing.service.search.SearchService.ContentType;
 
 import java.io.Serializable;
@@ -35,7 +36,7 @@ public class SearchToken implements Serializable {
 	String elasticIndex;
 	
 	@Setter
-	List<String> facets =null;
+	List<SearchFacet> facets =null;
 
 	@Getter
 	@Setter
@@ -138,17 +139,13 @@ public class SearchToken implements Serializable {
 		this.parameters = parameters;
 	}
 
-	public List<String> getFacets() {
+	public List<SearchFacet> getFacets() {
 		if(this.query != null && facets != null) {
-			List<String> combined = new ArrayList<>();
+			List<SearchFacet> combined = new ArrayList<>();
 			this.facets.forEach((facet) -> {
-				List<String> sublist = this.query.findParameterByName(facet).getFacet().getItems().stream().map(MetadataQueryParameter.MetadataQueryFacetItem::getValue).collect(Collectors.toList());
-				if(sublist != null) {
-					combined.addAll(sublist);
-				} else {
-					combined.add(facet);
-				}
-			});
+				List<String> sublist = this.query.findParameterByName(facet.getProperty()).getFacet().getItems().stream().map(MetadataQueryParameter.MetadataQueryFacetItem::getValue).collect(Collectors.toList());
+                combined.addAll(sublist.stream().map(s -> new SearchFacet(s, facet.getArgs())).collect(Collectors.toList()));
+            });
 			return combined;
 		}
 		return facets;

@@ -1,4 +1,5 @@
 <div th:fragment="footer">
-    <a href="http://edu-sharing.com" style="float:left;">www.edu-sharing.com</a>
-    <a href="https://twitter.com/edusharing" style="float:right;">@edusharing</a>
+    <a th:if="${!#strings.isEmpty(#messages.msgOrNull('provider_home_link'))}" th:attr="href=#{provider_home_link}" th:text="#{provider_home_link_cap}" style="float:left;"></a>
+    <a th:if="${!#strings.isEmpty(#messages.msgOrNull('provider_social_link'))}" th:attr="href=#{provider_social_link}" th:text="#{provider_social_link_cap}" style="float:right;"></a>
+    <a th:if="${!#strings.isEmpty(#messages.msgOrNull('provider_mail'))}" th:attr="href=#{provider_mail}" th:text="#{provider_mail_cap}" style="float:right;"></a>
 </div>

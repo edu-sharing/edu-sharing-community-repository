@@ -21,6 +21,7 @@ import { CreateMapLinkDialogData, CreateMapLinkDialogResult } from './create-map
     templateUrl: './create-map-link-dialog.component.html',
     styleUrls: ['./create-map-link-dialog.component.scss'],
     standalone: false,
+    providers: [BreadcrumbsService],
 })
 export class CreateMapLinkDialogComponent implements OnInit {
     name: string;

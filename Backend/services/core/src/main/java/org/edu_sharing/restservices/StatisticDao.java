@@ -12,6 +12,7 @@ import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.restservices.search.v1.model.SearchFacet;
 import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.restservices.statistic.v1.model.*;
 import org.edu_sharing.service.mime.MimeTypesV2;
@@ -47,10 +48,11 @@ public class StatisticDao {
 				throw new SecurityException(property + " is not set to true in config. No access allowed");
 			}
 
-			List<String> facets = subGroup.stream()
+			List<SearchFacet> facets = subGroup.stream()
 					.filter(f -> SUB_GROUP_MAPPING.get(f) != null)
-					.map(SUB_GROUP_MAPPING::get)
+                    .map(SUB_GROUP_MAPPING::get)
 					.map(CCConstants::getValidLocalName)
+					.map(sg -> new SearchFacet(sg, null))
 					.collect(Collectors.toList());
 
 			StatisticsGlobal statistics = new StatisticsGlobal();
@@ -70,7 +72,7 @@ public class StatisticDao {
 			statistics.setOverall(overall);
 			List<StatisticsGlobal.StatisticsKeyGroup> groups = new ArrayList<>();
 			statistics.setGroups(groups);
-			mdsLicenseWidget.getValues().stream().map(MetadataKey::getKey).toList()
+			mdsLicenseWidget.getValues().stream().map(MetadataKey::getKey).collect(Collectors.toList())
 					.forEach(v -> {
 						SearchResultNodeRef srGroup = search(Map.of(mdsProp, new String[]{v}), facets, mds);
 						if (srGroup.getNodeCount() > 0) {
@@ -115,8 +117,8 @@ public class StatisticDao {
 				group.id = userFacet;
 				List<StatisticsGlobal.StatisticsGroup.StatisticsSubGroup.SubGroupItem> subGroups = new ArrayList<>();
 				if(userFacet.equals("fileFormat")){
-					Map<String, Integer> countsSum=new HashMap<>();
-					facet.getValues().forEach(v -> {
+					Map<String, Long> countsSum=new HashMap<>();
+					facet.getValues().stream().forEach(v -> {
 						String mappedMime=MimeTypesV2.getTypeFromMimetype(v.getValue());
 						if(countsSum.containsKey(mappedMime)) {
 							countsSum.put(mappedMime, countsSum.get(mappedMime) + v.getCount());
@@ -139,7 +141,7 @@ public class StatisticDao {
 	}
 
 
-	public Statistics get(String context, List<String> properties, Filter filter) throws DAOException {
+	public Statistics get(String context, List<SearchFacet> properties, Filter filter) throws DAOException {
 
 		try {
 
@@ -161,7 +163,7 @@ public class StatisticDao {
 				StatisticEntry statEntry = new StatisticEntry();
 				statEntry.setProperty(entry.getProperty());
 				List<StatisticEntity> entities = new ArrayList<>();
-				for (Map.Entry<String, Integer> statEntity : entry.getStatistic().entrySet()) {
+				for (Map.Entry<String, Long> statEntity : entry.getStatistic().entrySet()) {
 					StatisticEntity entity = new StatisticEntity();
 					entity.setValue(statEntity.getKey());
 					entity.setCount(statEntity.getValue());
@@ -178,7 +180,7 @@ public class StatisticDao {
 		}
 	}
 
-	static SearchResultNodeRef search(Map<String,String[]> criterias, List<String> facets, MetadataSet mds) {
+	static SearchResultNodeRef search(Map<String,String[]> criterias, List<SearchFacet> facets, MetadataSet mds) {
 		try {
 			SearchService localService = SearchServiceFactory.getInstance().getLocalService();
 

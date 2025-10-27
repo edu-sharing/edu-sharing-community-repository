@@ -281,6 +281,7 @@
     "description": "Beschreibung",
     "mimetype": "Dateityp",
     "size": "Größe",
+    "cclom:size": "Größe",
     "mediatype": "Dateityp",
     "ccm:commonlicense_key": "Lizenz",
     "ccm:collection_ordered_position": "Manuelle Sortierung",
@@ -379,12 +380,12 @@
       "UNTERRICHTS_UND_LEHRMEDIEN": "§60b Unterrichts- und Lehrmedien",
       "CC_0": "CC-0",
       "PDM": "PDM",
-      "CC_BY": "CC-BY",
-      "CC_BY_SA": "CC-BY-SA",
-      "CC_BY_NC": "CC-BY-NC",
-      "CC_BY_ND": "CC-BY-ND",
-      "CC_BY_NC_SA": "CC-BY-NC-SA",
-      "CC_BY_NC_ND": "CC-BY-NC-ND",
+      "CC_BY": "CC BY",
+      "CC_BY_SA": "CC BY-SA",
+      "CC_BY_NC": "CC BY-NC",
+      "CC_BY_ND": "CC BY-ND",
+      "CC_BY_NC_SA": "CC BY-NC-SA",
+      "CC_BY_NC_ND": "CC BY-NC-ND",
       "CUSTOM": "Andere Lizenz"
     },
     "DESCRIPTION": {
@@ -904,7 +905,7 @@
       "LICENSES": {
         "NONE": "Unlizenziert",
         "COPYRIGHT_FREE": "Copyright",
-        "CC_BY": "CC-BY (4.0)",
+        "CC_BY": "CC BY (4.0)",
         "CC_0": "CC-0"
       }
     },
@@ -943,6 +944,7 @@
     "OPEN": "Öffnen",
     "DOWNLOAD_ZIP": "Als Zip Herunterladen.",
     "LINK": "Zur Originalseite springen.",
+    "EMPTY_FOLDER": "Der freigegebene Ordner enthält noch keine Dateien",
     "INVITED_AND_CREATED_BY": "Erstellt und freigegeben von {{inviter}}",
     "INVITED_PLUS_CREATED_BY": "Freigegeben von {{inviter}}, erstellt von {{creator}}",
     "ENTER_PASSWORD": "weiter",
@@ -979,8 +981,14 @@
       "GENERIC_INTERNAL_SERVER_ERROR": "Die Anfrage konnte vom Server nicht bearbeitet werden"
     },
     "GDPR": {
-      "GDPR_DIALOG": "Dieser Inhalt stammt von einer externen Resource.",
-      "GDPR_CONTINUE": "Weiter"
+      "EXTERNAL_SITE": "Externe Seite",
+      "EXTERNAL_CONTENT": "Externer Inhalt",
+      "GDPR_REGULATIONS": "Datenschutzrichtlinien",
+      "AGREE_AND_CONTINUE": "Zustimmen und fortfahren",
+      "FURTHER_INFORMATION": "Weitere Informationen finden Sie hier: ",
+      "EXTERNAL_SITE_INFO": "Beim Öffnen der externen Seite werden möglicherweise Daten übertragen. Bitte beachten Sie unsere ",
+      "EXTERNAL_SOURCE": "einer externen Quelle",
+      "EXTERNAL_CONTENT_INFO": "Sie sind dabei, Inhalte von {{EXTERNAL_RESOURCE}} zu laden und anzuzeigen. Dabei werden unter Umständen persönliche Daten übermittelt und extern verarbeitet."
     }
   },
   "TOAST": {

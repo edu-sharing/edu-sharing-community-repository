@@ -253,7 +253,7 @@ export class NodeHelperService {
         );
     }
 
-    getNodeLink(mode: 'routerLink' | 'queryParams' | 'plain', node: Node) {
+    getNodeLink(mode: 'routerLink' | 'queryParams' | 'plain', node: Node, short = false) {
         if (!node?.ref) {
             return null;
         }
@@ -293,7 +293,9 @@ export class NodeHelperService {
             } else if (node.ref) {
                 const fromHome = this.networkService.isFromHomeRepository(node);
                 data = {
-                    routerLink: UIConstants.ROUTER_PREFIX + 'render/' + node.ref.id,
+                    routerLink: short
+                        ? UIConstants.ROUTER_PREFIX_SHORT + node.ref.id
+                        : UIConstants.ROUTER_PREFIX + 'render/' + node.ref.id,
                     queryParams: {
                         repository: fromHome ? null : node.ref.repo,
                         proposal: (node as ProposalNode).proposal?.ref.id,

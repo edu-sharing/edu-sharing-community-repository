@@ -17110,7 +17110,36 @@ export const DefaultMds: MdsDefinition = {
             id: 'node_contributor_render',
             caption: 'Lizenz & Beteiligte',
             icon: null,
-            html: '\n\t\t\t\t<license>\n                <ccm:imported_object_appname>\n                <ccm:author_freetext>\n\t\t\t\t<div class="mdsContributorGroup">\n\t\t\t\t\t<div id="mdsLifecyclecontributorsTitle" class="mdsContributorTitle">Mitarbeitende am Material</div>\n\t\t\t\t\t<div id="mdsLifecyclecontributors">\n\t               \t\t<ccm:lifecyclecontributer_author>\n\t               \t\t<ccm:lifecyclecontributer_publisher>\n\t               \t\t<ccm:lifecyclecontributer_unknown>\n\t               \t\t<ccm:lifecyclecontributer_initiator>\n\t               \t\t<ccm:lifecyclecontributer_terminator>\n\t               \t\t<ccm:lifecyclecontributer_validator>\n\t               \t\t<ccm:lifecyclecontributer_editor>\n\t               \t\t<ccm:lifecyclecontributer_graphical_designer>\n\t               \t\t<ccm:lifecyclecontributer_technical_implementer>\n\t               \t\t<ccm:lifecyclecontributer_content_provider>\n\t               \t\t<ccm:lifecyclecontributer_educational_validator>\n\t               \t\t<ccm:lifecyclecontributer_script_writer>\n\t               \t\t<ccm:lifecyclecontributer_instructional_designer>\n\t               \t\t<ccm:lifecyclecontributer_subject_matter_expert>\n               \t\t</div>\n               \t\t<div id="mdsMetadatcontributorsTitle" class="mdsContributorTitle">Mitarbeitende an Metadaten</div>\n               \t\t<div id="mdsMetadatcontributors">\n\t               \t\t<ccm:metadatacontributer_creator>\n\t               \t\t<ccm:metadatacontributer_validator>\n\t               \t\t<ccm:metadatacontributer_provider>\n\t               \t</div>\n               \t</div>\n               \t<script>\n               \t\tfunction hideIfEmpty(toHide,isEmpty){\n               \t\t\tif(isEmpty.innerHTML.trim()==""){\n               \t\t\t\ttoHide.style.display=\'none\';\n               \t\t\t}\n               \t\t}\n               \t\thideIfEmpty(document.getElementById("mdsLifecyclecontributorsTitle"),document.getElementById("mdsLifecyclecontributors"));\n               \t\thideIfEmpty(document.getElementById("mdsMetadatcontributorsTitle"),document.getElementById("mdsMetadatcontributors"));\n               \t</script>\n\t\t\t\t',
+            html: `<license>
+                <ccm:imported_object_appname>
+                <ccm:author_freetext>
+<hideIfEmpty class="mdsContributorGroup">
+<div id="mdsLifecyclecontributorsTitle" class="mdsContributorTitle">{{ cb_contr_material }}</div>
+<hideIfEmpty-content>
+               <ccm:lifecyclecontributer_author>
+               <ccm:lifecyclecontributer_publisher>
+               <ccm:lifecyclecontributer_unknown>
+               <ccm:lifecyclecontributer_initiator>
+               <ccm:lifecyclecontributer_terminator>
+               <ccm:lifecyclecontributer_validator>
+               <ccm:lifecyclecontributer_editor>
+               <ccm:lifecyclecontributer_graphical_designer>
+               <ccm:lifecyclecontributer_technical_implementer>
+               <ccm:lifecyclecontributer_content_provider>
+               <ccm:lifecyclecontributer_educational_validator>
+               <ccm:lifecyclecontributer_script_writer>
+               <ccm:lifecyclecontributer_instructional_designer>
+               <ccm:lifecyclecontributer_subject_matter_expert>
+               </hideIfEmpty-content>
+               </hideIfEmpty>
+               <hideIfEmpty class="mdsContributorGroup">
+               <div id="mdsMetadatcontributorsTitle" class="mdsContributorTitle">{{ cb_contr_metadata }}</div>
+               <hideIfEmpty-content id="mdsMetadatcontributors">
+               <ccm:metadatacontributer_creator>
+               <ccm:metadatacontributer_validator>
+               <ccm:metadatacontributer_provider>
+               </hideIfEmpty-content>
+               </hideIfEmpty>`,
             rel: null,
             hideIfEmpty: false,
             isExtended: false,

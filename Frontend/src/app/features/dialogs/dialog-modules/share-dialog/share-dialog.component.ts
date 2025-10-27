@@ -14,7 +14,7 @@ import {
 import { TranslateService } from '@ngx-translate/core';
 import { LocalEventsService, NodeHelperService, UIAnimation } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
-import { firstValueFrom, forkJoin as observableForkJoin } from 'rxjs';
+import { firstValueFrom, forkJoin as observableForkJoin, of } from 'rxjs';
 import {
     CollectionUsage,
     ConfigurationService,
@@ -59,6 +59,7 @@ import {
     ConfigMotivationDefaultConfig,
     MotivationConfig,
 } from '../share-publish-motivation/share-publish-motivation-dialog.component';
+import { catchError } from 'rxjs/operators';
 
 export type ExtendedAcl = {
     inherited: boolean;
@@ -385,23 +386,26 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                     }
                 },
                 (error: any) => {
+                    error.preventDefault();
                     this.inheritAccessDenied = true;
                 },
             );
-            this.nodeApiLegacy.getNodeParents(this._nodes[0].ref.id).subscribe(
-                (data) => {
+            this.nodeApi
+                .getParents(this._nodes[0].ref.id)
+                .pipe(
+                    catchError((e) => {
+                        e.preventDefault();
+                        return of(null);
+                    }),
+                )
+                .subscribe((data) => {
                     //this.inheritAllowed = !this.isCollection() && data.nodes.length > 1;
                     // changed in 4.1 to keep inherit state of collections
-                    this.inheritAllowed = data.scope === 'MY_FILES' || data.nodes.length > 1;
-                    this.isSharedScope = data.scope === 'SHARED_FILES';
+                    this.inheritAllowed =
+                        !data || data.scope === 'MY_FILES' || data.nodes.length > 1;
+                    this.isSharedScope = data?.scope === 'SHARED_FILES';
                     this.updateToolpermissions();
-                },
-                (error) => {
-                    // this can be caused if the node is somewhere at a location not fully visible to the user
-                    this.inheritAllowed = true;
-                    this.updateToolpermissions();
-                },
-            );
+                });
             if (this._nodes[0].ref.id) {
                 this.nodeApiLegacy
                     .getNodeMetadata(this._nodes[0].ref.id, [RestConstants.ALL])

@@ -442,9 +442,9 @@
         "LICENSE_INFO": "Disponible pour les utilisateurs sous licence conformément aux conditions contractuelles. Pas d'utilisation par des tiers. Attribution conformément à la pratique courante"
       },
       "CC": {
-        "CC_BY_RADIO": "CC-BY",
+        "CC_BY_RADIO": "CC BY",
         "CC_BY_INFO": "D'autres personnes peuvent partager des adaptations du matériel à condition de citer l'auteur.",
-        "CC_BY_SA_RADIO": "CC-BY-SA",
+        "CC_BY_SA_RADIO": "CC BY-SA",
         "CC_BY_SA_INFO": "D'autres personnes peuvent partager des adaptations du matériel à condition de citer l'auteur et de partager le matériel dans les mêmes conditions.",
         "YES_ALIKE": "Oui, à condition que d'autres partagent la même chose",
         "NAME_AUTHOR": "Informations de référence",

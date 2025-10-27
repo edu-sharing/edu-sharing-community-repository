@@ -68,6 +68,7 @@ import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.repository.server.tools.StringTool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.tools.URLHelper;
+import org.edu_sharing.restservices.search.v1.model.SearchFacet;
 import org.edu_sharing.restservices.shared.Contributor;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.restservices.shared.NodeSearch;
@@ -363,7 +364,11 @@ public class SearchServiceElastic implements SearchService {
                 .build();
 
         Set<MetadataQueryParameter> excludeOwnFacets = MetadataElasticSearchHelper.getExcludeOwnFacets(queryData, new HashMap<>(), searchToken.getFacets());
-        Map<String, Aggregation> aggregations = MetadataElasticSearchHelper.getAggregations(
+        SearchRequest.Builder builder = new SearchRequest.Builder().index(WORKSPACE_INDEX)
+                .from(0)
+                .size(0);
+        MetadataElasticSearchHelper.applyAggregations(
+                builder,
                 mds,
                 queryData,
                 criterias,
@@ -372,19 +377,26 @@ public class SearchServiceElastic implements SearchService {
                 globalConditions,
                 searchToken);
 
-        SearchResultNodeRef result = parseAggregations(mds, queryData, searchToken, aggregations);
+        SearchResultNodeRef result = parseAggregations(builder, mds, queryData, searchToken);
         result.setFacets(result.getFacets().stream().peek(facet -> facet.setValues(facet.getValues().stream().filter(s -> {
                             // if one document has i.e. multiple keywords, they will be shown in the facet
                             // so, we filter for values which actually contain the given string
                             {
                                 try {
+
+                        MetadataQueryParameter parameter = queryData.findParameterByName(facet.getProperty());
+                        Optional<MetadataQueryParameter.MetadataQueryFacet> metadataQueryFacet = Optional.ofNullable(parameter)
+                                .map(MetadataQueryParameter::getFacet);
+                        if(metadataQueryFacet.isPresent() && metadataQueryFacet.get().getType().equals(MetadataQueryParameter.MetadataQueryFacet.Type.geo_grid)) {
+                            return true;
+                        }
                                     String value = s.getValue();
                                     try {
                                         // map to i18n value if available
                                         value = mds.findWidget(facet.getProperty()).getValuesAsMap().get(value).getCaption();
                                     } catch (Throwable ignored) {
                                     }
-                                    return value.toLowerCase().contains(searchToken.getQueryString().toLowerCase());
+                        return searchToken.getQueryString() != null && value.toLowerCase().contains(searchToken.getQueryString().toLowerCase());
                                 } catch (IllegalArgumentException e) {
                                     throw new RuntimeException(e);
                                 }
@@ -397,17 +409,13 @@ public class SearchServiceElastic implements SearchService {
     }
 
     @NotNull
-    private SearchResultNodeRef parseAggregations(MetadataSet mds, MetadataQuery queryData, SearchToken searchToken, Map<String, Aggregation> aggregations) throws Exception {
+    private SearchResultNodeRef parseAggregations(SearchRequest.Builder builder, MetadataSet mds, MetadataQuery queryData, SearchToken searchToken) throws Exception {
 //        logger.info("query aggs: "+searchSourceBuilderAggs.toString());
         checkClient();
-        SearchResponse<Map> resp = LogTime.log("Searching elastic for facets", () -> client.search(req -> req
-                        .index(WORKSPACE_INDEX)
-                        .from(0)
-                        .size(0)
-                        .aggregations(aggregations)
-                , Map.class));
+        SearchRequest search = builder.build();
+        SearchResponse<Map> resp = LogTime.log("Searching elastic for facets", () -> client.search(search, Map.class));
 
-        List<NodeSearch.Facet> facetsResult = getFacets(mds, queryData, aggregations, resp);
+        List<NodeSearch.Facet> facetsResult = getFacets(mds, queryData, search.aggregations(), resp);
 
         SearchResultNodeRef searchResultNodeRef = new SearchResultNodeRef();
         searchResultNodeRef.setData(new ArrayList<>());
@@ -438,6 +446,10 @@ public class SearchServiceElastic implements SearchService {
                         Aggregation definition = aggregations.get(a.getKey());
                         MultiTermsAggregate multiTerm = aggregation.getValue().multiTerms();
                         facetsResult.add(getMultitermFacet(mds, queryData, aggregation.getKey(), multiTerm, definition));
+                    } else if (aggregation.getValue().isGeotileGrid()) {
+                        Aggregation definition = aggregations.get(a.getKey());
+                        GeoTileGridAggregate grid = aggregation.getValue().geotileGrid();
+                        facetsResult.add(getFacet(mds, queryData, aggregation.getKey(), grid, definition));
                     }
                 }
             } else if (a.getValue().isSterms()) {
@@ -468,7 +480,7 @@ public class SearchServiceElastic implements SearchService {
                     continue;
                 }
                 value.setValue(fv.stringValue());
-                value.setCount((int) count);
+                value.setCount(count);
                 values.add(value);
             }
         }
@@ -567,7 +579,7 @@ public class SearchServiceElastic implements SearchService {
         return fetchAllFromRequest(mds, queryData, searchToken, searchRequest, null).getData();
     }
 
-    private @NotNull SearchResultNodeRef fetchAllFromRequest(MetadataSet mds, MetadataQuery queryData, SearchToken searchToken, SearchRequest.Builder searchRequest, Map<String, Aggregation> aggregations) throws IOException {
+    private @NotNull SearchResultNodeRef fetchAllFromRequest(MetadataSet mds, MetadataQuery queryData, SearchToken searchToken, SearchRequest.Builder searchRequest,Map<SearchFacet,Aggregation> aggregations) throws IOException {
         SearchResultNodeRef sr = new SearchResultNodeRef();
         List<NodeRef> data = new ArrayList<>();
         sr.setData(data);
@@ -583,7 +595,7 @@ public class SearchServiceElastic implements SearchService {
                             .withTransportOptions(this::getRequestOptions)
                             .search(searchRequest.build(), Map.class);
                     if (aggregations != null) {
-                        sr.setFacets(getFacets(mds, queryData, aggregations, searchResponse));
+                        sr.setFacets(getFacets(mds,queryData,convertSearchFacetAggregations(aggregations),searchResponse));
                     }
                 } else {
                     final String usedScrollId = scrollId;
@@ -669,7 +681,13 @@ public class SearchServiceElastic implements SearchService {
             if (searchToken.getFacets() != null) {
                 Set<MetadataQueryParameter> excludeOwnFacets = MetadataElasticSearchHelper.getExcludeOwnFacets(queryData, criteria, searchToken.getFacets());
                 if (!excludeOwnFacets.isEmpty()) {
-                    Map<String, Aggregation> excludedOwnAggregations = MetadataElasticSearchHelper.getAggregations(
+
+                    SearchRequest.Builder searchSourceAggsBuilder = new SearchRequest.Builder()
+                            .index(WORKSPACE_INDEX)
+                            .from(0)
+                            .size(0);
+                    Map<String, Aggregation> excludedOwnAggregations = MetadataElasticSearchHelper.applyAggregations(
+                            searchSourceAggsBuilder,
                             mds,
                             queryData,
                             criteria,
@@ -680,19 +698,14 @@ public class SearchServiceElastic implements SearchService {
 
                     // remove duplicate facet entries
                     excludedOwnAggregations.entrySet().removeIf(e -> e.getKey().endsWith(MetadataElasticSearchHelper.FACET_SELECTED_POSTFIX));
-
-                    SearchRequest searchSourceAggs = SearchRequest.of(req -> req
-                            .index(WORKSPACE_INDEX)
-                            .from(0)
-                            .size(0)
-                            .aggregations(excludedOwnAggregations));
-
+                    searchSourceAggsBuilder.aggregations(excludedOwnAggregations);
+                    SearchRequest searchSourceAggs = searchSourceAggsBuilder.build();
                     log.info("query aggs: " + JsonpUtils.toJsonString(searchSourceAggs, new JacksonJsonpMapper()));
                     searchResponseAggregations = LogTime.log("Searching elastic for facets", () -> client.search(searchSourceAggs, Map.class));
                     facetsResult = getFacets(mds, queryData, excludedOwnAggregations, searchResponseAggregations);
                     aggregations = null;
                 } else {
-                    aggregations = MetadataElasticSearchHelper.getAggregations(mds, queryData, searchToken.getParameters(), searchToken.getFacets(), Collections.emptySet(), queryBuilderGlobalConditions._toQuery(), searchToken);
+                    aggregations = MetadataElasticSearchHelper.applyAggregations(searchRequestBuilder, mds, queryData, searchToken.getParameters(), searchToken.getFacets(), Collections.emptySet(), queryBuilderGlobalConditions._toQuery(), searchToken);
                     for (Map.Entry<String, Aggregation> agg : aggregations.entrySet()) {
                         // we use a higher facet limit since the facets will be filtered for the containing string!
                         searchRequestBuilder.aggregations(agg.getKey(), agg.getValue());
@@ -817,6 +830,14 @@ public class SearchServiceElastic implements SearchService {
         return sr;
     }
 
+    private NodeSearch.Facet getFacet(MetadataSet mds, MetadataQuery queryData, String name, GeoTileGridAggregate pst, Aggregation builder) {
+        NodeSearch.Facet facet = new NodeSearch.Facet();
+        facet.setProperty(name);
+        facet.setValues(pst.buckets().array().stream().map(
+                b -> new NodeSearch.Facet.Value(b.key(), b.docCount())
+        ).collect(Collectors.toList()));
+        return facet;
+    }
     private NodeSearch.Facet getFacet(MetadataSet mds, MetadataQuery queryData, String name, StringTermsAggregate pst, Aggregation builder) {
         NodeSearch.Facet facet = new NodeSearch.Facet();
         facet.setProperty(name);
@@ -835,7 +856,7 @@ public class SearchServiceElastic implements SearchService {
                         continue;
                     }
                     value.setValue(k);
-                    value.setCount((int) count);
+                    value.setCount(count);
                     values.add(value);
                 }
             } else {
@@ -843,7 +864,7 @@ public class SearchServiceElastic implements SearchService {
                 long count = b.docCount();
                 NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
                 value.setValue(key);
-                value.setCount((int) count);
+                value.setCount(count);
                 values.add(value);
             }
         }
@@ -1537,7 +1558,7 @@ public class SearchServiceElastic implements SearchService {
     public List<? extends Suggestion> getSuggestions(MetadataSet mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
         Map<String, String[]> criteriasMap = MetadataSearchHelper.convertCriterias(criterias);
         SearchToken token = new SearchToken();
-        token.setFacets(Collections.singletonList(parameterId));
+        token.setFacets(Collections.singletonList(parameterId).stream().map(p -> new SearchFacet(p, null)).collect(Collectors.toList()));
         token.setFrom(0);
         token.setMaxResult(0);
         token.setFacetLimit(50);
@@ -1787,7 +1808,12 @@ public class SearchServiceElastic implements SearchService {
             SearchResponse<Map> searchResponseAggregations = null;
             Set<MetadataQueryParameter> excludeOwnFacets = MetadataElasticSearchHelper.getExcludeOwnFacets(queryData, searchCriteria, searchToken.getFacets());
             if (!excludeOwnFacets.isEmpty()) {
-                Map<String, Aggregation> excludedOwnAggregations = MetadataElasticSearchHelper.getAggregations(
+                SearchRequest.Builder searchSourceAggs = new SearchRequest.Builder()
+                        .index(WORKSPACE_INDEX)
+                        .from(0)
+                        .size(0);
+                Map<String, Aggregation> excludedOwnAggregations = MetadataElasticSearchHelper.applyAggregations(
+                        searchSourceAggs,
                         mds,
                         queryData,
                         searchCriteria,
@@ -1799,12 +1825,8 @@ public class SearchServiceElastic implements SearchService {
                 // remove duplicate facet entries
                 excludedOwnAggregations.entrySet().removeIf(e -> e.getKey().endsWith(MetadataElasticSearchHelper.FACET_SELECTED_POSTFIX));
 
-                SearchRequest searchSourceAggs = SearchRequest.of(req -> req
-                        .index(WORKSPACE_INDEX)
-                        .from(0)
-                        .size(0)
-                        .aggregations(excludedOwnAggregations));
-                searchResponseAggregations = client.search(searchSourceAggs, Map.class);
+                searchSourceAggs.aggregations(excludedOwnAggregations);
+                searchResponseAggregations = client.search(searchSourceAggs.build(), Map.class);
                 facetsResult = getFacets(mds, queryData, excludedOwnAggregations, searchResponseAggregations);
                 result.setFacets(facetsResult);
             }
@@ -1989,7 +2011,7 @@ public class SearchServiceElastic implements SearchService {
         return searchByQuery(query, skipCount, maxItems, sortDefinition, null, null);
     }
 
-    private SearchResultNodeRef searchByQuery(QueryVariant query, int skipCount, int maxItems, SortDefinition sortDefinition, String index, Map<String, Aggregation> aggregations) throws IOException {
+    private SearchResultNodeRef searchByQuery(QueryVariant query, int skipCount, int maxItems, SortDefinition sortDefinition, String index, Map<SearchFacet,Aggregation> aggregations) throws IOException {
         if (index == null) index = WORKSPACE_INDEX;
 
         if ((maxItems - skipCount) > 10000) {
@@ -2005,7 +2027,7 @@ public class SearchServiceElastic implements SearchService {
                 .filter(filter -> filter.excludes(appendDefaultExcludes(new ArrayList<>())))
         );
         if (aggregations != null) {
-            searchRequestBuilder.aggregations(aggregations);
+            searchRequestBuilder.aggregations(convertSearchFacetAggregations(aggregations));
         }
         if (sortDefinition != null) {
             sortDefinition.applyToSearchSourceBuilder(searchRequestBuilder);
@@ -2023,10 +2045,18 @@ public class SearchServiceElastic implements SearchService {
         sr.setNodeCount((int) hits.total().value());
 
         if (aggregations != null) {
-            sr.setFacets(getFacets(null, null, aggregations, searchResponse));
+            sr.setFacets(getFacets(null,null, convertSearchFacetAggregations(aggregations),searchResponse));
         }
 
         return sr;
+    }
+
+    private Map<String, Aggregation> convertSearchFacetAggregations(Map<SearchFacet, Aggregation> aggregations) {
+        return aggregations.entrySet().stream().collect(Collectors.toMap(
+                entry -> entry.getKey().getProperty(),
+                Map.Entry::getValue
+        ));
+
     }
 
     @Override
@@ -2543,7 +2573,7 @@ public class SearchServiceElastic implements SearchService {
 
     }
 
-    private SearchResultNodeRef searchAllByQuery(QueryVariant query, SortDefinition sortDefinition, String index, Map<String, Aggregation> aggregations) throws IOException {
+    private SearchResultNodeRef searchAllByQuery(QueryVariant query, SortDefinition sortDefinition, String index, Map<SearchFacet,Aggregation> aggregations) throws IOException {
         checkClient();
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder().index(index)
                 .query(query._toQuery())
@@ -2553,7 +2583,7 @@ public class SearchServiceElastic implements SearchService {
                         .filter(filter -> filter.excludes(appendDefaultExcludes(new ArrayList<>())))
                 );
         if (aggregations != null) {
-            searchRequestBuilder.aggregations(aggregations);
+            searchRequestBuilder.aggregations(convertSearchFacetAggregations(aggregations));
         }
         if (sortDefinition != null) {
             sortDefinition.applyToSearchSourceBuilder(searchRequestBuilder);
@@ -2802,13 +2832,13 @@ public class SearchServiceElastic implements SearchService {
             BoolQuery.Builder globalConditions = getGlobalConditions(searchToken.getAuthorityScope(), null, null, storeRef, scoped);
             globalConditions.must(searchToken.getElasticQuery()._toQuery());
 
-            Map<String, Aggregation> aggregations = null;
+            Map<SearchFacet,Aggregation> aggregations = null;
             if (searchToken.getFacets() != null && !searchToken.getFacets().isEmpty()) {
                 aggregations = searchToken.getFacets()
                         .stream()
                         .collect(Collectors.toMap(s -> s, s ->
                                 AggregationBuilders.terms()
-                                        .field((MetadataElasticSearchHelper.nonKeywordFacets.contains(s)) ? "properties." + s : "properties." + s + ".keyword")
+                                        .field((MetadataElasticSearchHelper.nonKeywordFacets.contains(s.getProperty())) ? "properties."+s.getProperty() : "properties."+s.getProperty()+".keyword")
                                         .size(searchToken.getFacetLimit())
                                         .minDocCount(searchToken.getFacetsMinCount())
                                         .build()._toAggregation()));

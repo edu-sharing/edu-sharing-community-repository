@@ -521,9 +521,9 @@
         "LICENSE_INFO": "Bereitstellung für lizenzierten Personenkreis gemäß den vertraglichen Bedingungen. Keine Nutzung durch Dritte. Quellenangabe gemäß der üblichen Praxis."
       },
       "CC": {
-        "CC_BY_RADIO": "CC-BY",
+        "CC_BY_RADIO": "CC BY",
         "CC_BY_INFO": "Andere dürfen Bearbeitungen des Materials teilen, solange sie den Urheber nennen",
-        "CC_BY_SA_RADIO": "CC-BY-SA",
+        "CC_BY_SA_RADIO": "CC BY-SA",
         "CC_BY_SA_INFO": "Andere dürfen Bearbeitungen des Materials teilen, solange sie den Urheber nennen und es auch selbst unter denselben Bedingungen weitergeben",
         "YES_ALIKE": "Ja, solange es andere unter gleichen Bedinungen weitergeben",
         "NAME_AUTHOR": "Quellen-Angaben",

@@ -91,8 +91,6 @@ import { MdsWidgetTree } from './widgets/mds-editor-widget-tree/tree';
 import { MdsEditorWidgetBase } from './widgets/mds-editor-widget-base';
 import { MdsEditorWidgetErrorComponent } from './widgets/mds-editor-widget-error/mds-editor-widget-error.component';
 import {
-    DateHelper,
-    FormatSizePipe,
     InitialValues,
     MdsEditorInstanceServiceAbstract,
     MdsValueList,
@@ -101,10 +99,7 @@ import {
     replaceElementWithDiv,
     SearchHelperService,
     UIService,
-    VCardNamePipe,
 } from 'ngx-edu-sharing-ui';
-import { TranslateService } from '@ngx-translate/core';
-import { DatePipe } from '@angular/common';
 
 export interface CompletionStatusField {
     widget: Widget;
@@ -346,64 +341,6 @@ export class MdsEditorInstanceService
         }
         getSuggestions() {
             return this.suggestionValuesSubject;
-        }
-
-        getFormattedValue(
-            value: string[],
-            basicType: string,
-            translate: TranslateService,
-        ): string[] {
-            switch (basicType) {
-                case 'date':
-                    return this.formatDate(value, translate);
-                case 'text':
-                    return this.formatText(value);
-                case 'number':
-                    return this.formatNumber(translate);
-                case 'vcard':
-                    return this.formatVCard(value, translate);
-            }
-            return value;
-        }
-
-        private formatVCard(value: string[], translate: TranslateService): string[] {
-            return value.map((v) => {
-                return new VCardNamePipe(translate).transform(v);
-            });
-        }
-
-        private formatDate(value: string[], translate: TranslateService): string[] {
-            return value.map((v) => {
-                if (this.definition.format) {
-                    try {
-                        return new DatePipe(translate.currentLang).transform(
-                            v,
-                            this.definition.format,
-                        );
-                    } catch (e) {
-                        console.warn('Could not format date', e, this.definition);
-                    }
-                }
-                return DateHelper.formatDate(translate, v, { showAlwaysTime: true });
-            });
-        }
-
-        private formatText(value: string[]): string[] {
-            return value.map((v) => {
-                if (this.definition.format) {
-                    return this.definition.format.replace('${value}', v);
-                }
-                return v;
-            });
-        }
-
-        private formatNumber(translate: TranslateService): string[] {
-            return this.getValue().map((value) => {
-                if (this.definition.format === 'bytes') {
-                    return new FormatSizePipe(translate).transform(value);
-                }
-                return value;
-            });
         }
 
         getBasicType(flat: boolean = true): string {
@@ -2165,7 +2102,6 @@ export class MdsEditorInstanceService
                 suggestions: {},
             });
         }
-        console.log(suggestionData);
         let suggestionWidget = this.suggestions.filter((s) => s.nodeId === nodeId)?.[0].suggestions[
             widgetId
         ];

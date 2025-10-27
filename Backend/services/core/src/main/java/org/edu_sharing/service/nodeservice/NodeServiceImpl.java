@@ -794,7 +794,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
             // do in transaction to disable behaviour
             // otherwise interceptors might be called multiple times -> the final update props is enough!
             // do it AFTER set properties so the values can be sent as NULL-Values into setProperties to be read by interceptors
-            retryingTransactionHelper.doInTransaction(() -> {
+
+            // doesn't seem to be necessary; No interecptors are called anyway, and Alfresco cleans the db internally
+            /*retryingTransactionHelper.doInTransaction(() -> {
                 policyBehaviourFilter.disableBehaviour(nodeRef);
                 for (QName prop : propsNull) {
                     // use alfresco service to prevent overhead
@@ -803,6 +805,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 policyBehaviourFilter.enableBehaviour(nodeRef);
                 return null;
             });
+             */
         } catch (DuplicateChildNodeNameException e) {
             throw e;
         } catch (Exception e) {
@@ -1053,9 +1056,21 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 // e.g. for collection sorting
 
                 String fieldType = dictionaryService.getProperty(prop).getDataType().getJavaClassName();
-                if (fieldType.equals(Integer.class.getName())) {
+                if (
+                    // dirty hack: unfortunately the model for cclom:size is of type d:text
+                        CCConstants.LOM_PROP_TECHNICAL_SIZE.equals(prop.toString()) ||
+                                fieldType.equals(Integer.class.getName())
+                ) {
                     if (prop1 instanceof String && prop2 instanceof String) {
-                        compare = Integer.compare(Integer.parseInt((String) prop1), Integer.parseInt((String) prop2));
+                        int int1 = 0;
+                        int int2 = 0;
+                        if(StringUtils.isNotEmpty((String) prop1)) {
+                            int1 = Integer.parseInt((String) prop1);
+                        }
+                        if(StringUtils.isNotEmpty((String) prop2)) {
+                            int2 = Integer.parseInt((String) prop2);
+                        }
+                        compare = Integer.compare(int1, int2);
                     }
                 }
 

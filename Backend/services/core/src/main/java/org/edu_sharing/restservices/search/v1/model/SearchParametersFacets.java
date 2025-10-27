@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 public class SearchParametersFacets {
     @JsonProperty(required = true)
-    private List<String> facets;
+    private List<SearchFacet> facets;
     @Schema(defaultValue = "5")
     Integer facetMinCount = 5;
     @Schema(defaultValue = "10")

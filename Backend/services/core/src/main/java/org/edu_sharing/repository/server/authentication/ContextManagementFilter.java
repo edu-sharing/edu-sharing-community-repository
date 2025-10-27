@@ -223,8 +223,11 @@ public class ContextManagementFilter implements jakarta.servlet.Filter {
 						if (usage != null) {
 							Context.getCurrentInstance().addSingleUseNode(nodeId);
 							authenticationComponent.setCurrentUser(CCConstants.PROXY_USER);
-							AuthenticationToolAPI authTool = AuthenticationToolAPI.getInstance();
-							authTool.storeAuthInfoInSession(CCConstants.PROXY_USER, authservice.getCurrentTicket(), CCConstants.AUTH_TYPE_SIGNATURE, httpReq.getSession());
+                            AuthenticationToolAPI authTool = AuthenticationToolAPI.getInstance();
+							Map<String, String> authInfo = authTool.validateAuthentication(httpReq.getSession());
+							if(authInfo == null) {
+								authTool.storeAuthInfoInSession(CCConstants.PROXY_USER, authservice.getCurrentTicket(), CCConstants.AUTH_TYPE_SIGNATURE, httpReq.getSession());
+							}
 						}
 
 					} catch (Usage2Exception e) {

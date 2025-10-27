@@ -6,7 +6,9 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.*;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.AuthorityType;
@@ -18,6 +20,7 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
+import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -28,9 +31,9 @@ import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
-import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.spring.scope.refresh.RefreshScopeRefreshedEvent;
 import org.springframework.context.ApplicationListener;
+import org.springframework.dao.DuplicateKeyException;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -47,14 +50,14 @@ public class BulkServiceImpl implements BulkService, ApplicationListener<Refresh
 	 * these internal properties will be ignored from the mds and never touched by the bulk service sync method
 	 */
 	private static final List<String> IGNORE_PROPERTIES = Stream.concat(Stream.of(
-			ContentModel.PROP_NODE_UUID,
-			ContentModel.PROP_VERSION_LABEL,
-			ContentModel.PROP_INITIAL_VERSION,
-			ContentModel.PROP_VERSION_TYPE
-	).map(QName::toString),
+					ContentModel.PROP_NODE_UUID,
+					ContentModel.PROP_VERSION_LABEL,
+					ContentModel.PROP_INITIAL_VERSION,
+					ContentModel.PROP_VERSION_TYPE
+			).map(QName::toString),
 			Stream.of(
-				CCConstants.CCM_PROP_IO_VERSION_COMMENT,
-				CCConstants.LOM_PROP_LIFECYCLE_VERSION
+					CCConstants.CCM_PROP_IO_VERSION_COMMENT,
+					CCConstants.LOM_PROP_LIFECYCLE_VERSION
 			)
 	).collect(Collectors.toList());
 	static NodeService nodeServiceAlfresco = (NodeService) AlfAppContextGate.getApplicationContext().getBean("alfrescoDefaultDbNodeService");
@@ -206,61 +209,63 @@ public class BulkServiceImpl implements BulkService, ApplicationListener<Refresh
 		);
 		String lockId = propertiesFiltered.values().stream().filter(Objects::nonNull).map(v -> v[0]).collect(Collectors.joining(","));
 		Map<String, Object> finalPropertiesNative = propertiesNative;
-		NodeRef result = EduSharingLockHelper.runSingleton(BulkServiceImpl.class,"sync_"  + lockId, () ->
-				serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
-					NodeRef existing = null;
-					try {
-						existing = find(propertiesFiltered);
-						Map<String, Object> propertiesNativeMapped = finalPropertiesNative;
-						if (existing == null) {
-							NodeRef groupFolder = getOrCreate(primaryFolder, group, finalPropertiesNative);
-							if (groupBy != null && groupBy.size() > 0) {
-								if (groupBy.size() == 1) {
-									groupFolder = getOrCreate(groupFolder, rawProperties.get(CCConstants.getValidGlobalName(groupBy.get(0))).toString(), finalPropertiesNative);
-								} else {
-									throw new IllegalArgumentException("groupBy currently only supports exactly one value");
-								}
-							}
-							// clean up and remove "null" values since they will result in weird data otherwise
-							propertiesNativeMapped = new HashMap<>(finalPropertiesNative.entrySet().stream().filter((e) -> e.getValue() != null).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-							// add a default comment for bulk import
-							propertiesNativeMapped.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_BULK_CREATE);
-							existing = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
-									NodeServiceFactory.getInstance().getLocalService().createNodeBasic(
-											groupFolder.getId(),
-											CCConstants.getValidGlobalName(type),
-											propertiesNativeMapped
-									));
-							// 2. versioning (use the regular service for proper versioning)
-							createVersion(existing);
-						} else {
-
-							String blocked = NodeServiceHelper.getProperty(existing, CCConstants.CCM_PROP_IO_IMPORT_BLOCKED);
-							if (Boolean.parseBoolean(blocked)) {
-								throw new IllegalStateException("The given node was blocked for any updates and should not be reimported");
-							}
-							Map<String, Object> propertiesKeep = checkInternalOverrides(propertiesNativeMapped, existing);
-							if (resetVersion) {
-								versionServiceAlfresco.deleteVersionHistory(existing);
-							}
-							propertiesNativeMapped = getCleanProps(existing, finalPropertiesNative);
-							propertiesNativeMapped.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, resetVersion ? CCConstants.VERSION_COMMENT_BULK_CREATE : CCConstants.VERSION_COMMENT_BULK_UPDATE);
-							NodeServiceFactory.getInstance().getLocalService().updateNodeNative(existing.getId(), propertiesNativeMapped);
-							// version the previous state
-							createVersion(existing);
-							if (propertiesKeep != null) {
-								propertiesKeep = getCleanProps(existing, propertiesKeep);
-								propertiesKeep.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_BULK_UPDATE_RESYNC);
-								NodeServiceFactory.getInstance().getLocalService().updateNodeNative(existing.getId(), propertiesKeep);
-								// 2. versioning
-								createVersion(existing);
+		NodeRef result = EduSharingLockHelper.runSingleton(BulkServiceImpl.class,"sync_"  + lockId, () -> {
+			// call find outside to prevent repeating transaction on duplicate error
+			NodeRef found = find(propertiesFiltered);
+			return serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+				NodeRef existing = found;
+				try {
+					Map<String, Object> propertiesNativeMapped = finalPropertiesNative;
+					if (existing == null) {
+						NodeRef groupFolder = getOrCreate(primaryFolder, group, finalPropertiesNative);
+						if (groupBy != null && groupBy.size() > 0) {
+							if (groupBy.size() == 1) {
+								groupFolder = getOrCreate(groupFolder, rawProperties.get(CCConstants.getValidGlobalName(groupBy.get(0))).toString(), finalPropertiesNative);
+							} else {
+								throw new IllegalArgumentException("groupBy currently only supports exactly one value");
 							}
 						}
-					} catch (Exception e) {
-						throw new RuntimeException(e);
+						// clean up and remove "null" values since they will result in weird data otherwise
+						propertiesNativeMapped = new HashMap<>(finalPropertiesNative.entrySet().stream().filter((e) -> e.getValue() != null).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+						// add a default comment for bulk import
+						propertiesNativeMapped.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_BULK_CREATE);
+						existing = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+									NodeServiceFactory.getInstance().getLocalService().createNodeBasic(
+										groupFolder.getId(),
+										CCConstants.getValidGlobalName(type),
+										propertiesNativeMapped
+								));
+						// 2. versioning (use the regular service for proper versioning)
+						createVersion(existing);
+					} else {
+
+						String blocked = NodeServiceHelper.getProperty(existing, CCConstants.CCM_PROP_IO_IMPORT_BLOCKED);
+						if (Boolean.parseBoolean(blocked)) {
+							throw new IllegalStateException("The given node was blocked for any updates and should not be reimported");
+						}
+						Map<String, Object> propertiesKeep = checkInternalOverrides(propertiesNativeMapped, existing);
+						if (resetVersion) {
+							versionServiceAlfresco.deleteVersionHistory(existing);
+						}
+						propertiesNativeMapped = getCleanProps(existing, finalPropertiesNative);
+						propertiesNativeMapped.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, resetVersion ? CCConstants.VERSION_COMMENT_BULK_CREATE : CCConstants.VERSION_COMMENT_BULK_UPDATE);
+							NodeServiceFactory.getInstance().getLocalService().updateNodeNative(existing.getId(), propertiesNativeMapped);
+						// version the previous state
+						createVersion(existing);
+						if (propertiesKeep != null) {
+							propertiesKeep = getCleanProps(existing, propertiesKeep);
+							propertiesKeep.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_BULK_UPDATE_RESYNC);
+								NodeServiceFactory.getInstance().getLocalService().updateNodeNative(existing.getId(), propertiesKeep);
+							// 2. versioning
+							createVersion(existing);
+						}
 					}
-					return existing;
-				}));
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+				return existing;
+			});
+		});
 		if(aspects != null) {
 			aspects.forEach((a) -> NodeServiceFactory.getInstance().getLocalService().addAspect(result.getId(), CCConstants.getValidGlobalName(a)));
 		}
@@ -398,7 +403,7 @@ public class BulkServiceImpl implements BulkService, ApplicationListener<Refresh
 			for (Map.Entry<String, String[]> entry : properties.entrySet()) {
 				props.append(entry.getKey()).append(":").append(entry.getValue()[0]).append(" ");
 			}
-			throw new Exception("The given properties ("+props+") matched more than 1 node (" + result.size() + "). Please check your criterias and make sure they match unique data");
+			throw new DuplicateKeyException("The given properties ("+props+") matched more than 1 node (" + result.size() + "). Please check your criterias and make sure they match unique data");
 		}
 		return null;
 	}

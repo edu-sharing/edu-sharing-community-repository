@@ -75,6 +75,7 @@ public class Values implements Serializable {
 	@XmlElement	public String customCSS;
 	@XmlElement	public ConfigThemeColors themeColors;
 	@XmlElement	public ConfigPrivacy privacy;
+    @XmlElement public Gdpr gdpr;
 
 	@JsonPropertyDescription("Config for frontend tutorial (darkened area with highlighted element)")
 	@XmlElement	public ConfigTutorial tutorial;

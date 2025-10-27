@@ -22,6 +22,7 @@ import { Facet } from '../api/models/facet';
 import { Suggest } from '../api/models/suggest';
 import { Value } from '../api/models/value';
 import { omit } from 'lodash';
+import { SearchFacet } from '../api/models/search-facet';
 
 /** Configuration for `SearchService`. */
 export class SearchConfig {
@@ -257,28 +258,30 @@ export class SearchService {
      *
      * @param size number of new items to load.
      */
-    loadMoreFacets(property: string, size: number): Observable<void> {
+    loadMoreFacets(facet: SearchFacet, size: number): Observable<void> {
         const searchParams = this.getSearchParams();
-        const currentFacetSize = this.facetsSubject.value[property].values.length;
+        const currentFacetSize = this.facetsSubject.value[facet.property].values.length;
         return this.searchV1
             .search({
                 ...searchParams,
                 maxItems: 0,
                 body: {
                     ...searchParams.body,
-                    facets: [property],
+                    facets: [facet],
                     facetLimit: currentFacetSize + size,
                 },
             })
             .pipe(
-                map((results) => results.facets.find((facet) => facet.property === property)),
-                switchMap((facet) =>
-                    facet
-                        ? this.mapFacet(facet)
-                        : rxjs.throwError(`Did not receive requested facet for "${property}"`),
+                map((results) => results.facets.find((f) => f.property === facet.property)),
+                switchMap((f) =>
+                    f
+                        ? this.mapFacet(f)
+                        : rxjs.throwError(
+                              `Did not receive requested facet for "${facet.property}"`,
+                          ),
                 ),
-                tap((facet) =>
-                    this.facetsSubject.next({ ...this.facetsSubject.value, [property]: facet }),
+                tap((f) =>
+                    this.facetsSubject.next({ ...this.facetsSubject.value, [facet.property]: f }),
                 ),
                 map(() => {}),
             );
@@ -328,7 +331,7 @@ export class SearchService {
      */
     getAsYouTypeFacetSuggestions(
         inputString: string,
-        facets: string[],
+        facets: SearchFacet[],
         size: number,
     ): Observable<FacetsDict> {
         const searchParams = this.getSearchParams();
@@ -496,9 +499,14 @@ export class SearchService {
     private getFacetsToFetch(
         searchParams: SearchRequestParams,
         facetUpdates: FacetUpdates,
-    ): string[] {
+    ): SearchFacet[] {
         return (
-            [...(searchParams.body.facets ?? []), ...facetUpdates.facetsToUpdate]
+            [
+                ...(searchParams.body.facets ?? []),
+                ...facetUpdates.facetsToUpdate.map((property) => {
+                    return { property };
+                }),
+            ]
                 // Remove duplicates
                 .filter((value, index, array) => array.indexOf(value) === index)
         );
@@ -681,7 +689,7 @@ export class SearchService {
      */
     private mapFacetValue(property: string, { count, value }: Value): Observable<FacetValue> {
         return this.mdsLabel
-            .getLabel(this.getMdsIdentifier(), property, value)
+            .getLabel(this.getMdsIdentifier(), property, value, 'search')
             .pipe(map((label) => ({ count, value, ...label })));
     }
 

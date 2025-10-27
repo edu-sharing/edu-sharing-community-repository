@@ -12,6 +12,7 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.shared.NodeSearch;
+import org.edu_sharing.restservices.search.v1.model.SearchFacet;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
@@ -47,7 +48,7 @@ public class StatisticServiceImpl implements StatisticService {
 	
 
 	@Override
-	public Statistics get(String context, List<String> properties, Filter filter) throws Throwable {
+	public Statistics get(String context, List<SearchFacet> properties, Filter filter) throws Throwable {
 		BoolQuery.Builder query = QueryBuilders.bool();
 
 		if (context != null) {

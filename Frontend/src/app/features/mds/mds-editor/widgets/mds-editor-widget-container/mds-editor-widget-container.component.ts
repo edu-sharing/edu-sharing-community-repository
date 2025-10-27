@@ -211,7 +211,10 @@ export class MdsEditorWidgetContainerComponent
 
     private registerIsHidden(): void {
         const shouldShowFactors = [this.widget.meetsDynamicCondition];
-        if (this.widget.definition.isExtended && this.mdsEditorInstance.editorMode !== 'viewer') {
+        if (
+            this.widget.definition.isExtended &&
+            !['viewer', 'searchFacetSuggestion'].includes(this.mdsEditorInstance.editorMode)
+        ) {
             shouldShowFactors.push(this.mdsEditorInstance.shouldShowExtendedWidgets$);
         }
         combineLatest(shouldShowFactors)

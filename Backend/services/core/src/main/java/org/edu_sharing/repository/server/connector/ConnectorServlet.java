@@ -119,7 +119,14 @@ public class ConnectorServlet extends SpringHttpServlet {
 			if(simpleConnector.isPresent()) {
 				HashMap<String, Serializable> properties = handleSimpleConnector(convertParameters(req), simpleConnector.orElse(null), nodeRefOriginal);
 				NodeServiceFactory.getInstance().getLocalService().updateNodeNative(nodeRefOriginal.getId(), properties);
-				resp.sendRedirect((String) properties.get(CCConstants.CCM_PROP_IO_WWWURL));
+                try {
+					// try to re-fetch to obey Node Interceptors!
+					Map<String, Object> propertiesWritten = NodeServiceHelper.getProperties(nodeRefOriginal);
+					resp.sendRedirect((String) propertiesWritten.get(CCConstants.CCM_PROP_IO_WWWURL));
+				} catch (Throwable e) {
+                    throw new RuntimeException(e);
+                }
+                resp.sendRedirect((String) properties.get(CCConstants.CCM_PROP_IO_WWWURL));
 				// @TODO: redirect resp to the generated element/uri
 				return;
 			}

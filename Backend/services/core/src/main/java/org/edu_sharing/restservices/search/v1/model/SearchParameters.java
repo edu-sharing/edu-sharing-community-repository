@@ -19,7 +19,7 @@ public class SearchParameters extends SearchParametersFacets {
 
 	@Override
 	@JsonProperty(required = false) // explicit set required false
-	public List<String> getFacets() {
+	public List<SearchFacet> getFacets() {
 		return super.getFacets();
 	}
 }

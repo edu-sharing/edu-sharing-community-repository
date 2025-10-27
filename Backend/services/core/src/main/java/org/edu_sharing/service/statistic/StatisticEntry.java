@@ -6,7 +6,7 @@ public class StatisticEntry {
 
 	String property;
 	
-	Map<String,Integer> statistic;
+	Map<String,Long> statistic;
 	
 	public String getProperty() {
 		return property;
@@ -17,11 +17,11 @@ public class StatisticEntry {
 	}
 	
 	
-	public Map<String, Integer> getStatistic() {
+	public Map<String, Long> getStatistic() {
 		return statistic;
 	}
 	
-	public void setStatistic(Map<String, Integer> statistic) {
+	public void setStatistic(Map<String, Long> statistic) {
 		this.statistic = statistic;
 	}
 

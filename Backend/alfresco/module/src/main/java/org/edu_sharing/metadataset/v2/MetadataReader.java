@@ -311,7 +311,7 @@ public class MetadataReader {
                                 parameter.setMultiple(value.equalsIgnoreCase("true"));
                                 break;
                             case "multiplejoin":
-                                parameter.setMultiplejoin(value);
+                                parameter.setMultiplejoin(MetadataQueryParameter.ParameterJoinStrategy.valueOf(value));
                                 break;
                         }
                     }
@@ -348,6 +348,12 @@ public class MetadataReader {
         Optional<NamedNodeMap> attributes = Optional.of(data)
                 .map(Node::getAttributes);
 
+        MetadataQueryParameter.MetadataQueryFacet.Type type = attributes
+                .map(x -> x.getNamedItem("type"))
+                .map(Node::getNodeValue)
+                .map(MetadataQueryParameter.MetadataQueryFacet.Type::valueOf)
+                .orElse(MetadataQueryParameter.MetadataQueryFacet.Type.term);
+
         MetadataQueryParameter.MetadataQueryFacet.SortBy sortBy = attributes
                 .map(x -> x.getNamedItem("sortBy"))
                 .map(Node::getNodeValue)
@@ -380,7 +386,7 @@ public class MetadataReader {
                 metadataQueryFacetItemList.add(metadataQueryFacetItem);
             }
         }
-        return new MetadataQueryParameter.MetadataQueryFacet(sortBy, sortOrder, maxBucketSize, metadataQueryFacetItemList);
+        return new MetadataQueryParameter.MetadataQueryFacet(type, sortBy, sortOrder, maxBucketSize, metadataQueryFacetItemList);
     }
 
     private static InputStream getFile(String name, Filetype type) throws IOException {
