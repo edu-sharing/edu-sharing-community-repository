@@ -90,7 +90,7 @@ public class JobQueueScheduler {
             log.debug("found method: {}", method);
 
             jobQueueContext.setDisableQueuing(true);
-            jobQueueContext.setQueuedJob(nextJob);
+            jobQueueContext.setRunningJob(nextJob);
 
             Object[] params = IntStream.range(0, nextJob.getParams().length)
                     .mapToObj(i -> new MethodParam(nextJob.getParams()[i], nextJob.getParamTypes()[i]))
@@ -104,7 +104,7 @@ public class JobQueueScheduler {
         } catch (Throwable e) {
             log.error("failed to execute job: {} with: {}", nextJob, e.getMessage(), e);
         } finally {
-            jobQueueContext.setQueuedJob(null);
+            jobQueueContext.setRunningJob(null);
             jobQueueContext.setDisableQueuing(false);
             jobQueueMapper.delete(nextJob);
         }
