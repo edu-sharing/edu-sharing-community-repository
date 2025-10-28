@@ -13,6 +13,7 @@ import org.edu_sharing.repository.server.jobs.ibatis.JobQueueMapper;
 import org.edu_sharing.util.CheckedFunction;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.format.datetime.standard.DurationFormatterUtils;
 import org.springframework.stereotype.Component;
 
@@ -65,9 +66,12 @@ public class QueuedJobAspect {
                 user
         );
 
-        jobQueueMapper.insert(entry);
-        jobQueueContext.addQueuedJob(entry);
-
+        try {
+            jobQueueMapper.insert(entry);
+            jobQueueContext.addQueuedJob(entry);
+        } catch (DuplicateKeyException t){
+            throw new DuplicateKeyException("Job was already scheduled", t);
+        }
         return Defaults.defaultValue(signature.getMethod().getReturnType());
     }
 }
