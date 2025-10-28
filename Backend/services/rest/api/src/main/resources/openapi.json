@@ -285,6 +285,122 @@
         },
         "type": "object"
       },
+      "Assignment": {
+        "properties": {
+          "allowAdditionalDocumentSubmissions": {
+            "type": "boolean"
+          },
+          "allowDelayedSubmission": {
+            "type": "boolean"
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/UserSimple"
+          },
+          "endTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "modified": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "permissions": {
+            "items": {
+              "$ref": "#/components/schemas/Permission"
+            },
+            "type": "array"
+          },
+          "ref": {
+            "$ref": "#/components/schemas/NodeRef"
+          },
+          "startTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "OPEN",
+              "PROGRESS",
+              "FINISHED",
+              "CANCELED"
+            ],
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "DEFAULT",
+              "SUBMISSION"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AssignmentFile": {
+        "description": "object of the original assignment file (if applicable)",
+        "properties": {
+          "documentRole": {
+            "enum": [
+              "SUPPLEMENTARY",
+              "SUBMITTABLE"
+            ],
+            "type": "string"
+          },
+          "isDone": {
+            "type": "boolean"
+          },
+          "properties": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "ref": {
+            "$ref": "#/components/schemas/NodeRef"
+          }
+        },
+        "type": "object"
+      },
+      "AssignmentFileRequest": {
+        "properties": {
+          "documentRole": {
+            "enum": [
+              "SUPPLEMENTARY",
+              "SUBMITTABLE"
+            ],
+            "type": "string"
+          },
+          "isDone": {
+            "type": "boolean"
+          },
+          "properties": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "refId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Audience": {
         "properties": {
           "name": {
@@ -382,6 +498,57 @@
           },
           "url": {
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BodyPart": {
+        "properties": {
+          "contentDisposition": {
+            "$ref": "#/components/schemas/ContentDisposition"
+          },
+          "entity": {
+            "type": "object"
+          },
+          "headers": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "properties": {
+              "empty": {
+                "type": "boolean"
+              }
+            },
+            "type": "object"
+          },
+          "mediaType": {
+            "$ref": "#/components/schemas/MediaType"
+          },
+          "messageBodyWorkers": {
+            "$ref": "#/components/schemas/MessageBodyWorkers"
+          },
+          "parameterizedHeaders": {
+            "additionalProperties": {
+              "items": {
+                "$ref": "#/components/schemas/ParameterizedHeader"
+              },
+              "type": "array"
+            },
+            "properties": {
+              "empty": {
+                "type": "boolean"
+              }
+            },
+            "type": "object"
+          },
+          "parent": {
+            "$ref": "#/components/schemas/MultiPart"
+          },
+          "providers": {
+            "$ref": "#/components/schemas/Providers"
           }
         },
         "type": "object"
@@ -1259,6 +1426,39 @@
         },
         "type": "object"
       },
+      "ContentDisposition": {
+        "properties": {
+          "creationDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "modificationDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "parameters": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "readDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Context": {
         "properties": {
           "domain": {
@@ -1406,6 +1606,56 @@
         "properties": {
           "onlyMetadata": {
             "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "CreateAssignmentRequest": {
+        "properties": {
+          "alloDelayedSubmission": {
+            "type": "boolean"
+          },
+          "allowAdditionalDocumentSubmission": {
+            "type": "boolean"
+          },
+          "endTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "permissions": {
+            "items": {
+              "$ref": "#/components/schemas/Permission"
+            },
+            "type": "array"
+          },
+          "startTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "OPEN",
+              "PROGRESS",
+              "FINISHED",
+              "CANCELED"
+            ],
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "DEFAULT",
+              "SUBMISSION"
+            ],
+            "type": "string"
           }
         },
         "type": "object"
@@ -1616,6 +1866,25 @@
         },
         "type": "object"
       },
+      "EditSubmissionRequest": {
+        "properties": {
+          "feedback": {
+            "type": "string"
+          },
+          "validationNotes": {
+            "type": "string"
+          },
+          "validationStatus": {
+            "enum": [
+              "NOT_STARTET",
+              "PENDING",
+              "FINISHED"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Element": {
         "properties": {
           "id": {
@@ -1787,6 +2056,111 @@
             "type": "string"
           },
           "replace": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FormDataBodyPart": {
+        "properties": {
+          "content": {
+            "type": "object"
+          },
+          "contentDisposition": {
+            "$ref": "#/components/schemas/ContentDisposition"
+          },
+          "entity": {
+            "type": "object"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "formDataContentDisposition": {
+            "$ref": "#/components/schemas/FormDataContentDisposition"
+          },
+          "headers": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "properties": {
+              "empty": {
+                "type": "boolean"
+              }
+            },
+            "type": "object"
+          },
+          "mediaType": {
+            "$ref": "#/components/schemas/MediaType"
+          },
+          "messageBodyWorkers": {
+            "$ref": "#/components/schemas/MessageBodyWorkers"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parameterizedHeaders": {
+            "additionalProperties": {
+              "items": {
+                "$ref": "#/components/schemas/ParameterizedHeader"
+              },
+              "type": "array"
+            },
+            "properties": {
+              "empty": {
+                "type": "boolean"
+              }
+            },
+            "type": "object"
+          },
+          "parent": {
+            "$ref": "#/components/schemas/MultiPart"
+          },
+          "providers": {
+            "$ref": "#/components/schemas/Providers"
+          },
+          "simple": {
+            "type": "boolean"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FormDataContentDisposition": {
+        "properties": {
+          "creationDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "modificationDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parameters": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "readDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": {
             "type": "string"
           }
         },
@@ -3377,6 +3751,29 @@
         ],
         "type": "object"
       },
+      "MediaType": {
+        "properties": {
+          "parameters": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "subtype": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "wildcardSubtype": {
+            "type": "boolean"
+          },
+          "wildcardType": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
       "Mediacenter": {
         "properties": {
           "administrationAccess": {
@@ -3537,6 +3934,9 @@
         },
         "type": "object"
       },
+      "MessageBodyWorkers": {
+        "type": "object"
+      },
       "MetadataSetInfo": {
         "properties": {
           "id": {
@@ -3581,6 +3981,91 @@
             "type": "object"
           }
         ],
+        "type": "object"
+      },
+      "MultiPart": {
+        "properties": {
+          "bodyParts": {
+            "items": {
+              "$ref": "#/components/schemas/BodyPart"
+            },
+            "type": "array"
+          },
+          "contentDisposition": {
+            "$ref": "#/components/schemas/ContentDisposition"
+          },
+          "entity": {
+            "type": "object"
+          },
+          "headers": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "properties": {
+              "empty": {
+                "type": "boolean"
+              }
+            },
+            "type": "object"
+          },
+          "mediaType": {
+            "$ref": "#/components/schemas/MediaType"
+          },
+          "messageBodyWorkers": {
+            "$ref": "#/components/schemas/MessageBodyWorkers"
+          },
+          "parameterizedHeaders": {
+            "additionalProperties": {
+              "items": {
+                "$ref": "#/components/schemas/ParameterizedHeader"
+              },
+              "type": "array"
+            },
+            "properties": {
+              "empty": {
+                "type": "boolean"
+              }
+            },
+            "type": "object"
+          },
+          "parent": {
+            "$ref": "#/components/schemas/MultiPart"
+          },
+          "providers": {
+            "$ref": "#/components/schemas/Providers"
+          }
+        },
+        "type": "object"
+      },
+      "MultivaluedMapStringParameterizedHeader": {
+        "additionalProperties": {
+          "items": {
+            "$ref": "#/components/schemas/ParameterizedHeader"
+          },
+          "type": "array"
+        },
+        "properties": {
+          "empty": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "MultivaluedMapStringString": {
+        "additionalProperties": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "properties": {
+          "empty": {
+            "type": "boolean"
+          }
+        },
         "type": "object"
       },
       "Node": {
@@ -4815,6 +5300,20 @@
         ],
         "type": "object"
       },
+      "ParameterizedHeader": {
+        "properties": {
+          "parameters": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Parameters": {
         "properties": {
           "general": {
@@ -4845,6 +5344,25 @@
           "nodes",
           "pagination"
         ],
+        "type": "object"
+      },
+      "Permission": {
+        "properties": {
+          "authority": {
+            "$ref": "#/components/schemas/Authority"
+          },
+          "authorityName": {
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "ASSIGNEE",
+              "OBSERVER",
+              "COORDINATOR"
+            ],
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "Person": {
@@ -5165,6 +5683,9 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "Providers": {
         "type": "object"
       },
       "PublishingConfig": {
@@ -6773,6 +7294,109 @@
             "type": "string"
           },
           "key": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Submission": {
+        "properties": {
+          "assignee": {
+            "$ref": "#/components/schemas/UserSimple"
+          },
+          "feedback": {
+            "type": "string"
+          },
+          "properties": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "ref": {
+            "$ref": "#/components/schemas/NodeRef"
+          },
+          "submissionStatus": {
+            "enum": [
+              "NOT_STARTET",
+              "PENDING",
+              "FINISHED"
+            ],
+            "type": "string"
+          },
+          "validationNotes": {
+            "description": "internal note (not visible for assignee)",
+            "type": "string"
+          },
+          "validationStatus": {
+            "enum": [
+              "NOT_STARTET",
+              "PENDING",
+              "FINISHED"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SubmissionFile": {
+        "properties": {
+          "assignmentFile": {
+            "$ref": "#/components/schemas/AssignmentFile"
+          },
+          "properties": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "ref": {
+            "$ref": "#/components/schemas/NodeRef"
+          },
+          "validationStatus": {
+            "description": "only visible by the coordinator of the task",
+            "enum": [
+              "NOT_STARTET",
+              "PENDING",
+              "FINISHED"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SubmissionFileRequest": {
+        "properties": {
+          "assignmentFile": {
+            "description": "id of the original assignment file (if applicable)",
+            "type": "string"
+          },
+          "originalFile": {
+            "description": "id of an other file (this must create a full copy of this file)",
+            "type": "string"
+          },
+          "properties": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "validationStatus": {
+            "description": "only editable by the coordinator of the task",
+            "enum": [
+              "NOT_STARTET",
+              "PENDING",
+              "FINISHED"
+            ],
             "type": "string"
           }
         },
@@ -14085,6 +14709,1441 @@
         "summary": "Searches for archive nodes.",
         "tags": [
           "ARCHIVE v1"
+        ]
+      }
+    },
+    "/assignment/v1": {
+      "put": {
+        "description": "Create or update an assignment.",
+        "operationId": "createOrUpdateAssignment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAssignmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Assignment"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Create or update an assignment",
+        "tags": [
+          "Assignment"
+        ]
+      }
+    },
+    "/assignment/v1/{assignmentId}": {
+      "delete": {
+        "description": "Delete a assignment an all its related documents and submissions",
+        "operationId": "deleteAssignment",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignmentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Delete a assignment",
+        "tags": [
+          "Assignment"
+        ]
+      },
+      "get": {
+        "description": "Retrieve an assignment based on its id.",
+        "operationId": "getAssignment",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignmentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Assignment"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "get an assignment",
+        "tags": [
+          "Assignment"
+        ]
+      }
+    },
+    "/assignment/v1/{assignmentId}/files": {
+      "get": {
+        "description": "get assignment files.",
+        "operationId": "getAssignmentFiles",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignmentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AssignmentFile"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "get assignment files",
+        "tags": [
+          "Assignment"
+        ]
+      },
+      "put": {
+        "description": "Create or edit assignment file",
+        "operationId": "createOrUpdateAssignmentFiles",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignmentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "id or null if a new assignment file shall be created",
+            "in": "query",
+            "name": "assignmentId",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "encoding": {
+                "binary": {
+                  "contentType": "application/octet-stream"
+                },
+                "metadata": {
+                  "contentType": "application/json"
+                }
+              },
+              "schema": {
+                "properties": {
+                  "binary": {
+                    "type": "string"
+                  },
+                  "metadata": {
+                    "$ref": "#/components/schemas/AssignmentFileRequest"
+                  }
+                },
+                "required": [
+                  "binary",
+                  "metadata"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentFile"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Create or edit assignment file",
+        "tags": [
+          "Assignment"
+        ]
+      }
+    },
+    "/assignment/v1/{assignmentId}/files/{assignmentFileId}": {
+      "delete": {
+        "description": "Delete a assignmentFile.",
+        "operationId": "deleteAssignmentFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignmentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assignmentFileId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Delete a assignmentFile",
+        "tags": [
+          "Assignment"
+        ]
+      }
+    },
+    "/assignment/v1/{assignmentId}/submissions": {
+      "get": {
+        "description": "get submissions (only available with observer/coordinator permissions) - also lists submissions not yet started",
+        "operationId": "getSubmissions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignmentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Submission"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "get submissions",
+        "tags": [
+          "Assignment"
+        ]
+      }
+    },
+    "/assignment/v1/{assignmentId}/submissions/{submissionId}": {
+      "delete": {
+        "description": "Delete a submission and all its related documents",
+        "operationId": "deleteSubmission",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignmentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "id or -me- to get submission from current assignee",
+            "in": "path",
+            "name": "submissionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Delete a submission",
+        "tags": [
+          "Assignment"
+        ]
+      },
+      "get": {
+        "description": "get submissions (only available with observer/coordinator permissions) - also lists submissions not yet started",
+        "operationId": "getSubmission",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignmentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "id or -me- to get submission from current assignee",
+            "in": "path",
+            "name": "submissionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Submission"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "get submissions",
+        "tags": [
+          "Assignment"
+        ]
+      },
+      "put": {
+        "description": "edit submission (only as coordinator of the task)",
+        "operationId": "editSubmission",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignmentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "id or -me- to get submission from current assignee",
+            "in": "path",
+            "name": "submissionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditSubmissionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Submission"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "edut submission",
+        "tags": [
+          "Assignment"
+        ]
+      }
+    },
+    "/assignment/v1/{assignmentId}/submissions/{submissionId}/files": {
+      "get": {
+        "description": "get submission files.",
+        "operationId": "getSubmissionFiles",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignmentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "id or -me- to get submission from current assignee",
+            "in": "path",
+            "name": "submissionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SubmissionFile"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "get submission files",
+        "tags": [
+          "Assignment"
+        ]
+      },
+      "put": {
+        "description": "Create or edit submission file",
+        "operationId": "createOrUpdateSubmissionFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignmentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "id or -me- to get submission from current assignee",
+            "in": "path",
+            "name": "submissionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "id or null if a new submission file shall be created",
+            "in": "query",
+            "name": "submissionFileId",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "encoding": {
+                "binary": {
+                  "contentType": "application/octet-stream"
+                },
+                "metadata": {
+                  "contentType": "application/json"
+                }
+              },
+              "schema": {
+                "properties": {
+                  "binary": {
+                    "type": "string"
+                  },
+                  "metadata": {
+                    "$ref": "#/components/schemas/SubmissionFileRequest"
+                  }
+                },
+                "required": [
+                  "binary",
+                  "metadata"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentFile"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Create or edit submission file",
+        "tags": [
+          "Assignment"
+        ]
+      }
+    },
+    "/assignment/v1/{assignmentId}/submissions/{submissionId}/files/{submissionFileId}": {
+      "delete": {
+        "description": "Delete a submission file",
+        "operationId": "deleteSubmissionFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignmentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "id or -me- to get submission from current assignee",
+            "in": "path",
+            "name": "submissionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "id of the submission file",
+            "in": "path",
+            "name": "submissionFileId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Delete a submission file",
+        "tags": [
+          "Assignment"
+        ]
+      }
+    },
+    "/assignment/v1/{assignmentId}/submissions/{submissionId}/submissionStatus": {
+      "put": {
+        "description": "edut submission status",
+        "operationId": "editSubmission_1",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignmentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "id or -me- to get submission from current assignee",
+            "in": "path",
+            "name": "submissionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "enum": [
+                "NOT_STARTET",
+                "PENDING",
+                "FINISHED"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Submission"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "edut submission status",
+        "tags": [
+          "Assignment"
         ]
       }
     },
@@ -42512,6 +44571,10 @@
     }
   ],
   "tags": [
+    {
+      "description": "Assignment API",
+      "name": "Assignment"
+    },
     {
       "description": "Question answers storage endpoint",
       "name": "QUESTION ANSWER v1"
