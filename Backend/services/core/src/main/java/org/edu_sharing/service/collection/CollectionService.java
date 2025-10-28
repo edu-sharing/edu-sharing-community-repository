@@ -108,4 +108,6 @@ public interface CollectionService {
 	 * @param status The status of the proposals to find
 	 */
 	List<NodeRef> getCollectionProposals(String nodeId, CCConstants.PROPOSAL_STATUS status);
+
+	CopyResult copy(NodeRef src, NodeRef dst, boolean copyRoot, boolean copyRefs, boolean copyPermissions) throws Throwable;
 }

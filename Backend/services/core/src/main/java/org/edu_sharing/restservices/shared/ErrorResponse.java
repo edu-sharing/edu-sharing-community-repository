@@ -84,6 +84,7 @@ public class ErrorResponse {
         while (t instanceof RuntimeException && !(t instanceof DAOException) && t.getCause() != null) {
             t = t.getCause();
         }
+
         if (t instanceof DAOValidationException) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .type(MediaType.APPLICATION_JSON_TYPE)

@@ -8,6 +8,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -22,6 +26,7 @@ import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Node;
+import org.edu_sharing.service.collection.CopyResult;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.SearchServiceFactory;
@@ -31,15 +36,13 @@ import org.edu_sharing.service.tracking.ActivityEventService;
 import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.edu_sharing.service.util.AlfrescoDaoHelper;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Path("/collection/v1")
 @Tag(name= "COLLECTION v1" )
@@ -472,6 +475,46 @@ public class CollectionApi {
     	} catch (Throwable t) {
     		return ErrorResponse.createResponse(t);
     	}
+	}
+
+	@POST
+
+	@Path("/collections/{repository}/{sourceCollection}/copy")
+
+	@Operation(summary = "Copy a collection.", description = "Copy a collection.")
+
+	@ApiResponses(value = {
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = CollectionEntry.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
+
+	public Response copyCollection(
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of parent collection (or \"-root-\" for level0 collections)", required = true) @PathParam("sourceCollection") String sourceCollection,
+			@Parameter(description = "target nodeId. if not set collection will be copied in root", required = false)  @QueryParam("targetCollection") String targetCollection,
+			@Parameter(description = "if true sourceCollection will be copied, else only the children", required = false, schema = @Schema(defaultValue="true")) @QueryParam("copyRoot") boolean copyRoot,
+			@Parameter(description = "if true reference object will be copied",  schema = @Schema(defaultValue="false")) @QueryParam("copyRefs") boolean copyRefs,
+			@Parameter(description = "if true permissions will be copied", schema = @Schema(defaultValue="false")) @QueryParam("copyPermissions") boolean copyPermissions,
+			@Context HttpServletRequest req) {
+		try{
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+
+			CopyResult copyResult = CollectionDao.copyCollection(repoDao, sourceCollection, targetCollection, copyRoot, copyRefs, copyPermissions);
+			Copy copy = new Copy();
+			copy.setRoot(NodeDao.getNode(repoDao,copyResult.getRoot().getId()).asNode());
+
+			for(CopyResult.Entry e : copyResult.getEntries()){
+				copy.getEntries().add(new Copy.Entry(NodeDao.getNode(repoDao,e.id()).asNode(),e.error()));
+			}
+
+			return Response.status(Response.Status.OK).entity(copy).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
 	}
 
 	@PUT

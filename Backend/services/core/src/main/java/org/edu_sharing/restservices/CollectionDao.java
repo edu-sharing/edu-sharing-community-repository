@@ -6,6 +6,8 @@ import java.util.*;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.AssociationRef;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
@@ -20,6 +22,7 @@ import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.collection.CollectionProposalInfo;
 import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
+import org.edu_sharing.service.collection.CopyResult;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceElastic;
@@ -366,6 +369,15 @@ public class CollectionDao {
 			return NodeDao.getNode(repoDao,resultId,Filter.createShowAllFilter());
 		} catch (Throwable t) {
 
+			throw DAOException.mapping(t);
+		}
+	}
+
+	public static CopyResult copyCollection(RepositoryDao repoDao, String srcId, String dstId, boolean copyRoot, boolean copyRefs, boolean copyPermissions) throws DAOException {
+		try {
+			NodeRef dstNodeRef = dstId == null ? null : new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, dstId);
+			return CollectionServiceFactory.getInstance().getLocalService().copy(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, srcId), dstNodeRef, copyRoot, copyRefs, copyPermissions);
+		} catch (Throwable t) {
 			throw DAOException.mapping(t);
 		}
 	}

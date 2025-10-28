@@ -8,6 +8,7 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.json.JsonData;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -17,6 +18,7 @@ import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.OwnableService;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.guest.GuestService;
@@ -1163,6 +1165,90 @@ public class CollectionServiceElastic implements CollectionService {
             nodeRefs.setData(returnVal);
             return nodeRefs;
         }
+    }
+
+    /**
+     *
+     * @param src
+     * @param dst
+     * @param copyRoot
+     * @param copyRefs
+     * @param copyPermissions
+     * @return if copyRoot == true it returns copied root NodeRef else ds
+     * @throws Throwable
+     */
+    public CopyResult copy(NodeRef src, NodeRef dst, boolean copyRoot, boolean copyRefs, boolean copyPermissions) throws Throwable {
+        if(src == null) throw new IllegalArgumentException("src is null");
+        if(!copyRoot) {
+            if (dst == null) {
+                throw new IllegalArgumentException("dst is null");
+            }
+        }
+        CopyResult copyResult = new CopyResult();
+        copyResult.root = copyInternal(copyResult,null,src, dst, copyRoot, copyRefs, copyPermissions);
+        return copyResult;
+    }
+
+    private NodeRef copyInternal(CopyResult copyResult, NodeRef parent, NodeRef src, NodeRef dst, boolean copySrc, boolean copyRefs, boolean copyPermissions) throws Throwable {
+        String parentNodeId = (copySrc) ? copy(copyResult,parent,src,dst,copyPermissions) : dst.getId();
+        List<ChildAssociationRef> childrenChildAssociationRef = eduNodeService.getChildrenChildAssociationRef(src.getId());
+        for (ChildAssociationRef childAssociationRef : childrenChildAssociationRef) {
+            if(!allowedToCopy(childAssociationRef.getChildRef(),copyRefs)){
+                continue;
+            }
+            copyInternal(copyResult,new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentNodeId), childAssociationRef.getChildRef(), new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentNodeId),true, copyRefs,copyPermissions);
+        }
+        return (parentNodeId == null) ? null : new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentNodeId);
+    }
+
+    private boolean allowedToCopy(NodeRef src, boolean copyRefs){
+        List<String> aspects = Arrays.asList(eduNodeService.getAspects(src.getStoreRef().getProtocol(),
+                src.getStoreRef().getIdentifier(),src.getId()));
+        List<String> allowedAspects = new ArrayList<>(List.of(CCConstants.CCM_ASPECT_COLLECTION));
+        if(copyRefs){
+            allowedAspects.add(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
+        }
+        return allowedAspects.stream().anyMatch(aspects::contains);
+    }
+
+    private String copy(CopyResult copyResult, NodeRef parent, NodeRef src, NodeRef dst, boolean copyPermissions) throws Throwable {
+        org.edu_sharing.service.model.NodeRef srcRef = new NodeRefImpl(null,src.getStoreRef().getProtocol(),src.getStoreRef().getIdentifier(),src.getId());
+
+        String result;
+        if(CCConstants.CCM_TYPE_MAP.equals(eduNodeService.getType(srcRef.getNodeId()))
+                && eduNodeService.hasAspect(srcRef.getStoreProtocol(),srcRef.getStoreId(),srcRef.getNodeId(),CCConstants.CCM_ASPECT_COLLECTION)){
+            // get checks aspect without fallback when empty
+           // if(srcRef.getAspects() == null) srcRef.setAspects(List.of(CCConstants.CCM_ASPECT_COLLECTION));
+            Collection srcCollection = get(srcRef,false,false,null);
+            result = create(dst == null ? null : dst.getId(), srcCollection).nodeId;
+        }else if(QName.createQName(CCConstants.CCM_TYPE_IO).equals(nodeService.getType(src))
+                && nodeService.hasAspect(src,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
+            try {
+                String original = (String) nodeService.getProperty(src, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL));
+                result = this.addToCollection(parent.getId(), original, false);
+            } catch (Exception e) {
+                if("collection_no_publish_permission".equals(e.getMessage())){
+                    copyResult.entries.add(new CopyResult.Entry(src.getId(), CopyResult.ErrorCode.NO_PUBLISH_PERMISSION));
+                }else{
+                    copyResult.entries.add(new CopyResult.Entry(src.getId(), CopyResult.ErrorCode.UNKNOWN_ERROR));
+                    log.error(e.getMessage(),e);
+                }
+                return null;
+            }
+        }else{
+            log.warn("don't know how to copy {}", srcRef);
+            return null;
+        }
+
+        if(result != null && copyPermissions){
+            try {
+                ACL acl = eduPermissionService.getPermissions(src.getId());
+                eduPermissionService.setPermissions(result, Arrays.asList(acl.getAces()));
+            }catch (AccessDeniedException e){
+                copyResult.entries.add(new CopyResult.Entry(result,CopyResult.ErrorCode.NO_RIGHTS_ON_PERMISSIONS));
+            }
+        }
+        return result;
     }
 }
 

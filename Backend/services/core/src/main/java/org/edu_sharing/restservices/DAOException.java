@@ -187,6 +187,10 @@ public class DAOException extends RuntimeException {
             return new DAOMissingException(t, nodeId);
         }
 
+        if(t instanceof IllegalArgumentException) {
+            return new DAOValidationException(t, nodeId);
+        }
+
         return new DAOException(t, nodeId);
     }
 

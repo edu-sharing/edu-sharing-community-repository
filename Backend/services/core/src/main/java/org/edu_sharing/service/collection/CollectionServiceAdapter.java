@@ -132,4 +132,9 @@ public class CollectionServiceAdapter implements CollectionService {
     public List<org.alfresco.service.cmr.repository.NodeRef> getCollectionProposals(String nodeId, CCConstants.PROPOSAL_STATUS status) {
         return List.of();
     }
+
+    @Override
+    public CopyResult copy(org.alfresco.service.cmr.repository.NodeRef src, org.alfresco.service.cmr.repository.NodeRef dst, boolean copyRoot, boolean copyRefs, boolean copyPermissions) throws Throwable {
+        return null;
+    }
 }
