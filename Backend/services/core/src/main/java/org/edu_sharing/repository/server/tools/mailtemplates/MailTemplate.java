@@ -12,6 +12,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
@@ -34,7 +35,6 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -136,6 +136,11 @@ public class MailTemplate {
 
 		String fullName = null;
 		String firstName = null, lastName = null, email = null;
+
+        if("system".equalsIgnoreCase(authorityName)) {
+            String domain = ApplicationInfoList.getHomeRepository().getDomain();
+            return new UserMail(domain, null, domain, "");
+        }
 
 		String user = AuthenticationToolAPI.getInstance().getCurrentUser();
 		NodeRef nodeRef = AuthorityServiceHelper.getAuthorityNodeRef(authorityName);

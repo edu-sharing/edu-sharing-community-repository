@@ -38,7 +38,7 @@
 		</message>
 	</template>
   <template name="added_inbox">
-    <subject>Neues Material in der Inbox von {{inviter.firstName}} {{inviter.lastName}}</subject>
+    <subject>Neues Material in der Inbox von {{assigner.firstName}} {{assigner.lastName}}</subject>
     <message><![CDATA[
 			<h1>Hallo {{firstName}} {{lastName}}</h1>
 			<h2>Ein neues Material "{{node.cm:name}}" liegt für Sie in der Inbox von {{assigner.firstName}} {{assigner.lastName}}.</h2>

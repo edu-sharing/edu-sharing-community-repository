@@ -102,7 +102,7 @@ public class StatisticsFileService {
         String targetNodeId = nodeService.createNode(targetFolder, CCConstants.CCM_TYPE_IO, nodeService.getNameProperty(filename));
         try {
             writeToFile(targetNodeId, header, data);
-            return existingNodeId;
+            return targetNodeId;
         } catch (
                 IOException e) {
             nodeService.removeNode(targetNodeId, targetFolder, false);

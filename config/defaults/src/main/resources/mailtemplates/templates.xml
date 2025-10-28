@@ -133,7 +133,7 @@
 		</message>
 	</template>
   <template name="added_inbox">
-    <subject>New material in inbox from {{inviter.firstName}} {{inviter.lastName}}</subject>
+    <subject>New material in inbox from {{assigner.firstName}} {{assigner.lastName}}</subject>
     <message><![CDATA[
 			<h1>Hello {{firstName}} {{lastName}}</h1>
 			<h2>There is a new material "{{node.cm:name}}" in your inbox from {{assigner.firstName}} {{assigner.lastName}}.</h2>

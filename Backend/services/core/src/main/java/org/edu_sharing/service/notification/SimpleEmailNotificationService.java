@@ -164,9 +164,9 @@ public class SimpleEmailNotificationService {
                 replace.put("comment", event.comment());
                 MailTemplate.addContentLinks(ApplicationInfoList.getHomeRepository(), event.nodeId(), replace, "link");
                 receiverMail.applyToMap("", replace);
-                MailTemplate.applyNodePropertiesToMap("nodeId.", event.properties(), replace);
+                MailTemplate.applyNodePropertiesToMap("node.", event.properties(), replace);
 
-                String template = "invited_workflow";
+                String template = "added_inbox";
                 MailTemplate.sendMail(sender.getFullName(), sender.getEmail(), receiverMail.getEmail(), template, replace);
             } catch (Throwable t) {
                 log.warn("Mail send failed", t);
