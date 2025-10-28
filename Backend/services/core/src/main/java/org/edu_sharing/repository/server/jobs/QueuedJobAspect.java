@@ -70,7 +70,7 @@ public class QueuedJobAspect {
             jobQueueMapper.insert(entry);
             jobQueueContext.addQueuedJob(entry);
         } catch (DuplicateKeyException t){
-            throw new DuplicateKeyException("Job was already scheduled", t);
+            throw new DuplicateJobException("Job was already scheduled", t);
         }
         return Defaults.defaultValue(signature.getMethod().getReturnType());
     }
