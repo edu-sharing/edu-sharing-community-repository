@@ -27,7 +27,7 @@ public class OAuth2ConfigProvider {
     private final LightbendConfigLoader configLoader;
 
     @EventListener(RefreshScopeRefreshedEvent.class)
-    @CacheEvict(cacheNames = {"oauth2DefaultConfig", "oauth2Configs", "oauth2AllConfigs"}, allEntries = true)
+    @CacheEvict(cacheNames = {"oauth2DefaultConfig", "oauth2Configs", "oauth2AllConfigs"}, allEntries = true , cacheManager = "localCacheManager")
     public void onConfigurationChanged() {}
 
     @Cacheable(cacheNames = "oauth2DefaultConfig", cacheManager = "localCacheManager")
