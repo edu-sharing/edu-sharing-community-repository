@@ -91,7 +91,7 @@ public class ErrorResponse {
                     .entity(new ErrorResponse(t))
                     .build();
         }
-        if (t instanceof DAOSecurityException) {
+        if (t instanceof DAOSecurityException || t instanceof DAOToolPermissionException) {
             return Response.status(Response.Status.FORBIDDEN)
                     .type(MediaType.APPLICATION_JSON_TYPE)
                     .entity(new ErrorResponse(t))

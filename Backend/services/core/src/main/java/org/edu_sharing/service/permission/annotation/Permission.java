@@ -12,4 +12,5 @@ import java.lang.annotation.*;
 public @interface Permission {
     String[] value() default {};
     boolean requiresUser() default false;
+    boolean requiresGlobalAdmin() default false;
 }

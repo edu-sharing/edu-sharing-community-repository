@@ -11,6 +11,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.service.AspectConstants;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.permission.annotation.HasRole;
 import org.edu_sharing.service.permission.annotation.
@@ -72,6 +73,9 @@ public class PermissionChecking {
 
         if (permissionAnnotation.requiresUser() && authorityService.isGuest()) {
             throw new GuestCagePolicy.GuestPermissionDeniedException(String.format("guests can not use %s", method.getName()));
+        }
+        if (permissionAnnotation.requiresGlobalAdmin() && !authorityService.isGlobalAdmin()) {
+            throw new NotAnAdminException();
         }
 
         for (String requiredPermission : permissionAnnotation.value()) {

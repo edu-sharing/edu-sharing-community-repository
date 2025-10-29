@@ -27,6 +27,7 @@ import org.edu_sharing.repository.server.importer.RecordHandlerInterfaceBase;
 import org.edu_sharing.repository.server.jobs.helper.NodeHelper;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
+import org.edu_sharing.service.permission.annotation.Permission;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.model.SearchToken;
@@ -150,6 +151,7 @@ public class MediacenterServiceImpl implements MediacenterService {
         }
     }
 
+    @Permission(requiresGlobalAdmin = true)
     public String createMediacenter(String id, String displayName, String postalCode, String city) throws Exception {
 
         String authorityName = AuthorityService.MEDIA_CENTER_GROUP_TYPE + "_" + id;

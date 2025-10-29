@@ -173,27 +173,33 @@ public class MediacenterDao extends AbstractDao{
 			throw DAOException.mapping(e);
 		}
 	}
-	public List<GroupDao> getManagedGroups(){
-		return Arrays.stream(authorityService.getMembershipsOfGroup(this.authorityName)).filter((group)->group.startsWith(PermissionService.GROUP_PREFIX)).map((group)-> {
-					try {
-						return GroupDao.getGroup(repoDao,group);
-					} catch (DAOException e) {
-						throw new RuntimeException(e);
-					}
-				}).
-				filter((group)->!AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP_TYPE.equals(group.getGroupType())).
-				collect(Collectors.toList());
+	public List<GroupDao> getManagedGroups() {
+		try {
+			//check and throw if not allowed
+			mediacenterService.isAllowedToManage(authorityName);
+
+			return Arrays.stream(authorityService.getMembershipsOfGroup(this.authorityName)).filter((group) -> group.startsWith(PermissionService.GROUP_PREFIX)).map((group) -> {
+						try {
+							return GroupDao.getGroup(repoDao, group);
+						} catch (DAOException e) {
+							throw new RuntimeException(e);
+						}
+					}).
+					filter((group) -> !AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP_TYPE.equals(group.getGroupType())).
+					collect(Collectors.toList());
+		} catch (Throwable t) {
+			throw DAOException.mapping(t);
+		}
 	}
 
 
 	public void changeProfile(Mediacenter.Profile profile) throws DAOException {
-
-		//check and throw if not allowed
-		mediacenterService.isAllowedToManage(authorityName);
-
-		boolean active = (profile.getMediacenter().getContentStatus()==null
-				|| profile.getMediacenter().getContentStatus().equals(Mediacenter.MediacenterProfileExtension.ContentStatus.Deactivated)) ? false : true;
 		try {
+			//check and throw if not allowed
+			mediacenterService.isAllowedToManage(authorityName);
+
+			boolean active = (profile.getMediacenter().getContentStatus()==null
+					|| profile.getMediacenter().getContentStatus().equals(Mediacenter.MediacenterProfileExtension.ContentStatus.Deactivated)) ? false : true;
 			AuthenticationUtil.runAsSystem(() -> {
 				mediacenterService.updateMediacenter(authorityName, profile.getDisplayName(), null,
 						profile.getMediacenter().getLocation(), profile.getMediacenter().getDistrictAbbreviation(),

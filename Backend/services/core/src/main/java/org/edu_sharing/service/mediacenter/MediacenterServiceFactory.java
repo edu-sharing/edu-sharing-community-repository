@@ -21,9 +21,6 @@ import org.edu_sharing.spring.ApplicationContextFactory;
 public interface MediacenterServiceFactory extends AppContextServiceFactory<MediacenterService> {
 
     static MediacenterService getInstance() throws NotAnAdminException {
-		if(!AuthorityServiceFactory.getInstance().getLocalService().isGlobalAdmin()){
-			throw new NotAnAdminException();
-		}
 		return ApplicationContextFactory.getApplicationContext().getBean(MediacenterService.class);
 	}
 }

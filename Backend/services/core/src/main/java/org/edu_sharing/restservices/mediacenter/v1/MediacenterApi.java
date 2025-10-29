@@ -28,6 +28,7 @@ import org.edu_sharing.restservices.search.v1.SearchApi;
 import org.edu_sharing.restservices.search.v1.model.SearchParameters;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
 import org.edu_sharing.service.mediacenter.MediacenterServiceImpl;
@@ -261,7 +262,7 @@ public class MediacenterApi {
 			SearchToken searchToken=new SearchToken();
 			searchToken.setFrom(skipCount != null ? skipCount : 0);
 			searchToken.setMaxResult(maxItems!= null ? maxItems : 10);
-
+			MediacenterDao.get(repoDao, mediacenter).checkAdminAccess();;
 			checkMediacenterSortProperty(sortProperties, mediacenter);
 
 			searchToken.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
@@ -325,7 +326,7 @@ public class MediacenterApi {
 			//List<Node> result = dao.getLicensedNodes();
 			//return Response.status(Response.Status.OK).entity(result).build();
 		} catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
+			return ErrorResponse.createResponse(DAOException.mapping(t));
 		}
 	}
 
@@ -511,7 +512,7 @@ public class MediacenterApi {
 
 			org.edu_sharing.service.authority.AuthorityService eduAuthorityService = AuthorityServiceFactory.getInstance().getService(ApplicationInfoList.getHomeRepository().getAppId());
 			if(!eduAuthorityService.isGlobalAdmin()){
-				throw new Exception("Admin rights are required for this endpoint");
+				throw new NotAnAdminException();
 			}
 
 			int count = MediacenterServiceFactory.getInstance().importMediacenters(is);
@@ -519,7 +520,7 @@ public class MediacenterApi {
 			result.setRows(count);
 			return Response.ok().entity(result).build();
 		} catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
+			return ErrorResponse.createResponse(DAOException.mapping(t));
 		}
 	}
 
@@ -541,7 +542,7 @@ public class MediacenterApi {
 
 			org.edu_sharing.service.authority.AuthorityService eduAuthorityService = AuthorityServiceFactory.getInstance().getService(ApplicationInfoList.getHomeRepository().getAppId());
 			if(!eduAuthorityService.isGlobalAdmin()){
-				throw new Exception("Admin rights are required for this endpoint");
+				throw new NotAnAdminException();
 			}
 
 			int count = MediacenterServiceFactory.getInstance().importOrganisations(is);
@@ -549,7 +550,7 @@ public class MediacenterApi {
 			result.setRows(count);
 			return Response.ok().entity(result).build();
 		} catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
+			return ErrorResponse.createResponse(DAOException.mapping(t));
 		}
 	}
 
@@ -570,7 +571,7 @@ public class MediacenterApi {
 
 			org.edu_sharing.service.authority.AuthorityService eduAuthorityService = AuthorityServiceFactory.getInstance().getService(ApplicationInfoList.getHomeRepository().getAppId());
 			if(!eduAuthorityService.isGlobalAdmin()){
-				throw new Exception("Admin rights are required for this endpoint");
+				throw new NotAnAdminException();
 			}
 
 			int count = MediacenterServiceFactory.getInstance().importOrgMcConnections(is, removeSchoolsFromMC);
@@ -578,7 +579,7 @@ public class MediacenterApi {
 			result.setRows(count);
 			return Response.ok().entity(result).build();
 		} catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
+			return ErrorResponse.createResponse(DAOException.mapping(t));
 		}
 	}
 
