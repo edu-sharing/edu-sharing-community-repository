@@ -1024,6 +1024,11 @@
 				]]></html>
     </template>
     <template>
+      <id>editorial_assignment</id>
+      <html><![CDATA[
+				]]></html>
+    </template>
+    <template>
       <id>editorial_share</id>
       <html><![CDATA[
               <virtual:shareMaxAge expandable="expanded">
