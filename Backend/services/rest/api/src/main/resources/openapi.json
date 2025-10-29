@@ -375,6 +375,7 @@
         "type": "object"
       },
       "AssignmentFileRequest": {
+        "description": "JSON-Metadaten",
         "properties": {
           "documentRole": {
             "enum": [
@@ -397,6 +398,20 @@
           },
           "refId": {
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AssignmentFileUpload": {
+        "description": "Multipart upload for assignment files",
+        "properties": {
+          "binary": {
+            "description": "File content",
+            "format": "binary",
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/AssignmentFileRequest"
           }
         },
         "type": "object"
@@ -7371,33 +7386,16 @@
         },
         "type": "object"
       },
-      "SubmissionFileRequest": {
+      "SubmissionFileUpload": {
+        "description": "Multipart upload for submission files",
         "properties": {
-          "assignmentFile": {
-            "description": "id of the original assignment file (if applicable)",
+          "binary": {
+            "description": "File content",
+            "format": "binary",
             "type": "string"
           },
-          "originalFile": {
-            "description": "id of an other file (this must create a full copy of this file)",
-            "type": "string"
-          },
-          "properties": {
-            "additionalProperties": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            "type": "object"
-          },
-          "validationStatus": {
-            "description": "only editable by the coordinator of the task",
-            "enum": [
-              "NOT_STARTET",
-              "PENDING",
-              "FINISHED"
-            ],
-            "type": "string"
+          "metadata": {
+            "$ref": "#/components/schemas/AssignmentFileRequest"
           }
         },
         "type": "object"
@@ -15087,7 +15085,7 @@
           {
             "description": "id or null if a new assignment file shall be created",
             "in": "query",
-            "name": "assignmentId",
+            "name": "assignmentFileId",
             "schema": {
               "type": "string"
             }
@@ -15105,19 +15103,7 @@
                 }
               },
               "schema": {
-                "properties": {
-                  "binary": {
-                    "type": "string"
-                  },
-                  "metadata": {
-                    "$ref": "#/components/schemas/AssignmentFileRequest"
-                  }
-                },
-                "required": [
-                  "binary",
-                  "metadata"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/AssignmentFileUpload"
               }
             }
           },
@@ -15835,19 +15821,7 @@
                 }
               },
               "schema": {
-                "properties": {
-                  "binary": {
-                    "type": "string"
-                  },
-                  "metadata": {
-                    "$ref": "#/components/schemas/SubmissionFileRequest"
-                  }
-                },
-                "required": [
-                  "binary",
-                  "metadata"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/SubmissionFileUpload"
               }
             }
           },
@@ -18675,6 +18649,134 @@
           }
         },
         "summary": "Add a node to a collection.",
+        "tags": [
+          "COLLECTION v1"
+        ]
+      }
+    },
+    "/collection/v1/collections/{repository}/{sourceCollection}/copy": {
+      "post": {
+        "description": "Copy a collection.",
+        "operationId": "copyCollection",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of parent collection (or \"-root-\" for level0 collections)",
+            "in": "path",
+            "name": "sourceCollection",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "target nodeId. if not set collection will be copied in root",
+            "in": "query",
+            "name": "targetCollection",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "if true sourceCollection will be copied, else only the children",
+            "in": "query",
+            "name": "copyRoot",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "if true reference object will be copied",
+            "in": "query",
+            "name": "copyRefs",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "if true permissions will be copied",
+            "in": "query",
+            "name": "copyPermissions",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionEntry"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Copy a collection.",
         "tags": [
           "COLLECTION v1"
         ]

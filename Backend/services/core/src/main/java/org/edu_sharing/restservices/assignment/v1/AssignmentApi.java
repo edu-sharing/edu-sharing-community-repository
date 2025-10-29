@@ -120,6 +120,21 @@ public class AssignmentApi {
         return Response.ok().entity(assignmentFiles).build();
     }
 
+
+    /**
+     * Only used for Swagger UI / OpenApi Specification.
+     * To use this as a parameter, we need to register a MessageBodyReader for multipart/form-data.
+     */
+    @Schema(name = "AssignmentFileUpload", description = "Multipart upload for assignment files")
+    public static class AssignmentFileUpload {
+
+        @Schema(description = "JSON-Metadaten")
+        public AssignmentFileRequest metadata;
+
+        @Schema(type = "string", format = "binary", description = "File content")
+        public InputStream binary;
+    }
+
     @PUT
     @Path("/{assignmentId}/files")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -130,20 +145,7 @@ public class AssignmentApi {
                     required = true,
                     content = @Content(
                             mediaType = MediaType.MULTIPART_FORM_DATA,
-                            schema = @Schema(
-                                    type = "object",
-                                    requiredProperties = {"metadata", "binary"},
-                                    properties = {
-                                            @StringToClassMapItem(
-                                                    key = "metadata",
-                                                    value = AssignmentFileRequest.class
-                                            ),
-                                            @StringToClassMapItem(
-                                                    key = "binary",
-                                                    value = String.class
-                                            )
-                                    }
-                            ),
+                            schema = @Schema(implementation = AssignmentFileUpload.class),
                             encoding = {
                                     @Encoding(
                                             name = "metadata",
@@ -170,7 +172,7 @@ public class AssignmentApi {
     )
     public Response createOrUpdateAssignmentFiles(@PathParam("assignmentId") String assignmentId,
                                                   @Parameter(description = "id or null if a new assignment file shall be created")
-                                                  @QueryParam("assignmentId") String assignmentFileId,
+                                                  @QueryParam("assignmentFileId") String assignmentFileId,
                                                   @FormDataParam("metadata") FormDataBodyPart metadataPart,
                                                   @FormDataParam("binary") InputStream fileInputStream,
                                                   @FormDataParam("binary") FormDataContentDisposition fileMetaData) {
@@ -339,6 +341,19 @@ public class AssignmentApi {
         return Response.ok().entity(submissionFiles).build();
     }
 
+    /**
+     * Only used for Swagger UI / OpenApi Specification.
+     * To use this as a parameter, we need to register a MessageBodyReader for multipart/form-data.
+     */
+    @Schema(name = "SubmissionFileUpload", description = "Multipart upload for submission files")
+    public static class SubmissionFileUpload {
+        @Schema(description = "JSON-Metadaten")
+        public AssignmentFileRequest metadata;
+
+        @Schema(type = "string", format = "binary", description = "File content")
+        public InputStream binary;
+    }
+
 
     @PUT
     @Path("/{assignmentId}/submissions/{submissionId}/files")
@@ -350,20 +365,7 @@ public class AssignmentApi {
                     required = true,
                     content = @Content(
                             mediaType = MediaType.MULTIPART_FORM_DATA,
-                            schema = @Schema(
-                                    type = "object",
-                                    requiredProperties = {"metadata", "binary"},
-                                    properties = {
-                                            @StringToClassMapItem(
-                                                    key = "metadata",
-                                                    value = SubmissionFileRequest.class
-                                            ),
-                                            @StringToClassMapItem(
-                                                    key = "binary",
-                                                    value = String.class
-                                            )
-                                    }
-                            ),
+                            schema = @Schema(implementation = SubmissionFileUpload.class),
                             encoding = {
                                     @Encoding(
                                             name = "metadata",
