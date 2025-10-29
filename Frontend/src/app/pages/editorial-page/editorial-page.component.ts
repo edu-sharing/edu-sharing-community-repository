@@ -63,6 +63,7 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { SelectionModel } from '@angular/cdk/collections';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { OptionsHelperService } from '../../services/options-helper.service';
+import { EditorialSidebarService } from './editorial-sidebar/editorial-sidebar.service';
 
 export type PrimaryMode = 'activity' | 'share' | 'assignment';
 export type MainComponentType = 'manageAssignment';
@@ -97,7 +98,6 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         .observe(['(max-width: 900px)'])
         .pipe(map(({ matches }) => matches));
     sidenavLeft = signal(true);
-    sidenavRight = signal(false);
     /**
      * mds group, used to fetch the template group AND search query id!
      */
@@ -139,6 +139,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         private mainNav: MainNavService,
         private searchFieldService: SearchFieldService,
         private searchService: SearchService,
+        public editorialSidebarService: EditorialSidebarService,
         private searchServiceUnwrapped: SearchServiceUnwrapped,
         private configService: ConfigService,
         private searchHelperService: SearchHelperService,
@@ -148,7 +149,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         public editorialPageService: EditorialPageService,
     ) {
         this.isMobile$.pipe(first()).subscribe((mobile) => {
-            this.sidenavRight.set(!mobile);
+            this.editorialSidebarService.sidebarOpened.set(!mobile);
         });
         this.authenticationService
             .observeLoginInfo()
@@ -195,7 +196,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
     private prepareOptions() {
         this.sidebarOptionToggle = this.optionsHelperService.getOptionItemToggleSidebar(
-            this.sidenavRight,
+            this.editorialSidebarService.sidebarOpened,
         );
         const reject = new OptionItem(
             'EDITORIAL.OPTION.REJECT_SHARE',

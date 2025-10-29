@@ -17,20 +17,14 @@
   <ng-template #content>
     <div
       *ngIf="enabledOption()?.option as option"
-      class="option option-{{ option.name | propertySlug }}"
+      class="option option-{{ option | propertySlug }}"
     >
-      <es-nodes-selector
-        *ngIf="option.name === 'EDITORIAL.OPTIONS.SORT_INTO'"
-        [parent]="parent()"
-      ></es-nodes-selector>
+      <es-nodes-selector *ngIf="option === 'SORT_INTO'" [parent]="parent()"></es-nodes-selector>
       <es-metadata-sidebar
-        *ngIf="option.name === 'EDITORIAL.OPTIONS.WORKSPACE_METADATA'"
+        *ngIf="option === 'WORKSPACE_METADATA'"
         [nodeSidebar]="nodes()?.[0]"
       ></es-metadata-sidebar>
-      <es-preview-sidebar
-        *ngIf="option.name === 'EDITORIAL.OPTIONS.PREVIEW'"
-        [node]="nodes()?.[0]"
-      ></es-preview-sidebar>
+      <es-preview-sidebar *ngIf="option === 'PREVIEW'" [node]="nodes()?.[0]"></es-preview-sidebar>
     </div>
 
     <div class="entries" *ngIf="!enabledOption()">

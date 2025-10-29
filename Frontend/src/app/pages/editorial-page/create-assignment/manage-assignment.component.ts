@@ -58,6 +58,7 @@ import { MatStepper, MatStepperModule } from '@angular/material/stepper';
 import { FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ShareDialogChooseDateComponent } from '../../../features/dialogs/dialog-modules/share-dialog/permission/choose-date/choose-date.component';
+import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
 
 @Component({
     selector: 'es-manage-assignment',
@@ -80,7 +81,10 @@ export class ManageAssignmentComponent {
         return null;
     }
 
-    constructor(private formBuilder: FormBuilder) {
+    constructor(
+        private formBuilder: FormBuilder,
+        private editorialSidebarService: EditorialSidebarService,
+    ) {
         this.mainDataFormGroup = this.formBuilder.group(
             {
                 title: ['', [Validators.required]],
@@ -92,5 +96,10 @@ export class ManageAssignmentComponent {
         );
     }
 
-    showFileDialog() {}
+    showFileDialog() {
+        this.editorialSidebarService.showOption({
+            option: 'SORT_INTO',
+            trap: true,
+        });
+    }
 }

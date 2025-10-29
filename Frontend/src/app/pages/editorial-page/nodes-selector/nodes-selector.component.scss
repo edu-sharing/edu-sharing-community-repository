@@ -38,7 +38,7 @@
     // take the available space
     flex: 1 1 0;
     // important to flexbox to work properly
-    min-height: 0;
+    min-height: 100%;
     overflow: hidden;
 }
 

@@ -26,7 +26,7 @@
   <mat-sidenav
     #rightSidenav
     [mode]="'side'"
-    [opened]="sidenavRight() && (isMobile$ | async) === false"
+    [opened]="editorialSidebarService.sidebarOpened() && (isMobile$ | async) === false"
     [defaultWidth]="0.3"
     storageKey="EDITORIAL_SIDENAV_RIGHT_WIDTH"
     class="es-mat-sidenav"
@@ -39,7 +39,7 @@
         [nodes]="selection()?.selected"
         [component]="mainComponent$ | async"
         (showComponent)="mainComponent$.next($event)"
-        (closeTrigger)="sidenavRight.set(false)"
+        (closeTrigger)="editorialSidebarService.sidebarOpened.set(false)"
       ></es-editorial-sidebar>
     </div>
   </mat-sidenav>
@@ -112,9 +112,9 @@
   </mat-sidenav-content>
 </mat-sidenav-container>
 <es-editorial-sidebar
-  *ngIf="(isMobile$ | async) === true && sidenavRight()"
+  *ngIf="(isMobile$ | async) === true && editorialSidebarService.sidebarOpened()"
   [primaryMode]="(params$ | async).primaryMode"
   [nodes]="selection()?.selected"
   [isModal]="true"
-  (closeTrigger)="sidenavRight.set(false)"
+  (closeTrigger)="editorialSidebarService.sidebarOpened.set(false)"
 ></es-editorial-sidebar>

@@ -76,10 +76,10 @@ export class MultiLineLabelComponent implements OnInit, AfterViewInit {
     ngAfterViewInit() {
         this.hasDescription = this.description.nativeElement.childNodes.length !== 0;
         this.label.nativeElement.id = `${this.parent.id}-label`;
-        this.input.setAttribute('aria-labelledby', this.label.nativeElement.id);
+        this.input?.setAttribute('aria-labelledby', this.label.nativeElement.id);
         if (this.description) {
             this.description.nativeElement.id = `${this.parent.id}-description`;
-            this.input.setAttribute('aria-describedby', this.description.nativeElement.id);
+            this.input?.setAttribute('aria-describedby', this.description.nativeElement.id);
         }
         this.changeDetector.detectChanges();
     }
