@@ -26,6 +26,7 @@
       </mat-form-field>
       <label>{{ 'EDITORIAL.ASSIGNMENT.FORM.FILES' | translate }}</label>
       <div class="files">
+        <es-manage-assignment-nodes [nodes]="nodes()"></es-manage-assignment-nodes>
         <button mat-flat-button color="primary" (click)="showFileDialog()">
           <i esIcon="add"></i> {{ 'EDITORIAL.ASSIGNMENT.FORM.ADD_FILE' | translate }}
         </button>

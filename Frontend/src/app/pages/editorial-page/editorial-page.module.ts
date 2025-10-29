@@ -9,7 +9,8 @@ import { MdsModule } from '../../features/mds/mds.module';
 import { EditorialSidebarComponent } from './editorial-sidebar/editorial-sidebar.component';
 import { BorderBoxObserverDirective, EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 import { TranslateModule } from '@ngx-translate/core';
-import { ManageAssignmentComponent } from './create-assignment/manage-assignment.component';
+import { ManageAssignmentComponent } from './manage-assignment/manage-assignment.component';
+import { ManageAssignmentNodesComponent } from './manage-assignment-nodes/manage-assignment-nodes.component';
 
 @NgModule({
     declarations: [EditorialPageComponent],
@@ -18,6 +19,7 @@ import { ManageAssignmentComponent } from './create-assignment/manage-assignment
         EditorialBreadcrumbComponent,
         EditorialSidebarComponent,
         ManageAssignmentComponent,
+        ManageAssignmentNodesComponent,
         MatToolbarModule,
         EditorialPageRoutingModule,
         EduSharingUiCommonModule,
