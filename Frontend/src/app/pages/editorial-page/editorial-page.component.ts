@@ -368,7 +368,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 distinctUntilChanged(),
                 debounceTime(50),
             )
-            .subscribe(([init, search, tab, pagination, mainComponent, values]) => {
+            .subscribe(([_, search, tab, pagination, mainComponent, values]) => {
                 console.log('THIS MUST BE SHOWN ONCE', search, tab, pagination, values);
                 const queryParams = {
                     q: search?.searchString,
@@ -423,17 +423,8 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             mds.widgets,
             true,
         );
-        this.init$.next(true);
-        // this is the first call. In this case, we wait to get a new event with the default uri parameters before loading
-        if (Object.keys(params).length === 0) {
-            return;
-        }
-        console.log('processCurrentValues', params);
-        this.dataSource.isLoading = true;
-        this.dataSource.reset();
 
-        this.nodeEntriesRef?.setPaginator(pagination);
-        // wait for mds and delay to make sure the facets are registered
+        // this is the first call. In this case, we wait to get a new event with the default uri parameters before loading
         await firstValueFrom(
             this.mdsLoaded$.pipe(
                 filter((v) => v),
@@ -441,6 +432,18 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 delay(1),
             ),
         );
+        this.init$.next(true);
+        if (Object.keys(params).length === 0) {
+            return;
+        }
+
+        console.log('processCurrentValues', params);
+        this.dataSource.isLoading = true;
+        this.dataSource.reset();
+
+        this.nodeEntriesRef?.setPaginator(pagination);
+        // wait for mds and delay to make sure the facets are registered
+
         if (routeConfig.primaryMode === 'activity') {
             this.searchService
                 .search({
