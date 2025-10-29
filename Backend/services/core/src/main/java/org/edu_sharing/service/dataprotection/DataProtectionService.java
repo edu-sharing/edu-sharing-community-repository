@@ -99,8 +99,8 @@ public class DataProtectionService {
     @Value("${repository.dataprotection.fileName:dataprotectioninfo_edu-sharing}")
     private String fileName;
 
-    private PersonLifecycleService personLifecycleService = new PersonLifecycleService();
-    private QName propMapType = QName.createQName(CCConstants.CCM_PROP_MAP_TYPE);
+    private final PersonLifecycleService personLifecycleService = new PersonLifecycleService();
+    private final QName propMapType = QName.createQName(CCConstants.CCM_PROP_MAP_TYPE);
     private String systemFolder;
 
     @EventListener(ContextRefreshedEvent.class)
@@ -123,10 +123,8 @@ public class DataProtectionService {
 
         QueryStatement query = Query.select(CCConstants.SYS_PROP_NODE_UID, CCConstants.CM_NAME)
                 .from(CCConstants.CCM_TYPE_IO)
-                .where(Filters.and(
-                        Filters.hasAspect(CCConstants.CCM_ASPECT_GDPR),
-                        Filters.lt(CCConstants.CM_PROP_C_MODIFIED, retentionDate)
-                ));
+                .hasAspect(CCConstants.CCM_ASPECT_GDPR)
+                .where(Filters.lt(CCConstants.CM_PROP_C_MODIFIED, retentionDate));
 
         SearchParameters searchParameters = new SearchParameters();
         searchParameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_CMIS_ALFRESCO);
@@ -154,10 +152,8 @@ public class DataProtectionService {
     public String getDataProtectionNode(@HasRole String userName) {
         QueryStatement query = Query.select(CCConstants.SYS_PROP_NODE_UID)
                 .from(CCConstants.CCM_TYPE_IO)
-                .where(Filters.and(
-                        Filters.hasAspect(CCConstants.CCM_ASPECT_GDPR),
-                        Filters.eq(CCConstants.CM_PROP_C_CREATOR, userName)
-                ));
+                .hasAspect(CCConstants.CCM_ASPECT_GDPR)
+                .where(Filters.eq(CCConstants.CM_PROP_C_CREATOR, userName));
 
         SearchParameters searchParameters = new SearchParameters();
         searchParameters.setLanguage(SearchService.LANGUAGE_CMIS_ALFRESCO);

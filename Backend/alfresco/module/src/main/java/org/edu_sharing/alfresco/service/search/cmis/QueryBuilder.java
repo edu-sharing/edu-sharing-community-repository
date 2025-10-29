@@ -49,6 +49,8 @@ public class QueryBuilder {
                     .collect(Collectors.joining(", "));
         }
 
+        buildAspects(joinTables, queryStatement.getAspects());
+
         String where = "";
         Predicate whereStatement = queryStatement.getWhere();
         if (whereStatement != null) {
@@ -81,16 +83,15 @@ public class QueryBuilder {
         return joinTableAlias + "." + column;
     }
 
-    private String getAspectName(Aspect aspect, Set<Join> joinTables) {
-        QName qName = QName.createQName(aspect.getValue());
+    private void addAspect(Aspect aspect, Set<Join> joinTables) {
+        QName qName = QName.createQName(aspect.value());
         AspectDefinition aspectDefinition = dictionaryService.getAspect(qName);
         if (aspectDefinition == null) {
             throw new RuntimeException(
-                    "The following aspects were not found in alfresco dictionary: " + aspect.getValue());
+                    "The following aspects were not found in alfresco dictionary: " + aspect.value());
         }
 
         joinTables.add(new Join("INNER", aspectDefinition.getName()));
-        return "";
     }
 
     private String buildWhere(Predicate predicate, String fromAlias, Set<Join> joinTables) {
@@ -99,11 +100,11 @@ public class QueryBuilder {
         String lhs = buildWhere(fromAlias, joinTables, predicate.getLhs());
         String rhs = buildWhere(fromAlias, joinTables, predicate.getRhs());
 
-        if(StringUtils.isBlank(lhs)){
+        if (lhs == null) {
             return rhs;
         }
 
-        if(StringUtils.isBlank(rhs)){
+        if (rhs == null) {
             return lhs;
         }
 
@@ -123,8 +124,6 @@ public class QueryBuilder {
             return buildWhere((Predicate) arg, fromAlias, joinTables);
         } else if (arg instanceof Property) {
             return getPropertyName((Property) arg, fromAlias, joinTables);
-        } else if (arg instanceof Aspect) {
-            return getAspectName((Aspect) arg, joinTables);
         } else if (arg instanceof Value) {
             return String.format("'%s'", ((Value) arg).getValue()
                     .replace("\\", "\\\\")
@@ -134,11 +133,18 @@ public class QueryBuilder {
         }
     }
 
+    private void buildAspects(Set<Join> joinTables, List<Aspect> aspects) {
+        if (aspects == null || aspects.isEmpty()) {
+            return;
+        }
+        aspects.forEach(x -> addAspect(x, joinTables));
+    }
+
     record Join(String kind, QName table) {
         public String joinOn(String tableAlias) {
-                String joinTable = CCConstants.getValidLocalName(table.toString());
-                String joinTableAlias = table.getLocalName();
-                return String.format("%s JOIN %s AS %s ON %s.cmis:objectId = %s.cmis:objectId", kind, joinTable, joinTableAlias, joinTableAlias, tableAlias);
+            String joinTable = CCConstants.getValidLocalName(table.toString());
+            String joinTableAlias = table.getLocalName();
+            return String.format("%s JOIN %s AS %s ON %s.cmis:objectId = %s.cmis:objectId", kind, joinTable, joinTableAlias, joinTableAlias, tableAlias);
 
         }
     }

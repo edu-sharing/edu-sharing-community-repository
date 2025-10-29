@@ -1,7 +1,5 @@
 package org.edu_sharing.alfresco.service.search.cmis;
 
-import lombok.*;
-
 import java.util.*;
 
 public final class Query {

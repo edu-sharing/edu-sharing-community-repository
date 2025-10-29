@@ -1,5 +1,6 @@
 package org.edu_sharing.alfresco.service.search.cmis;
 
+import org.alfresco.service.cmr.dictionary.AspectDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.namespace.QName;
@@ -10,8 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 public class QueryBuilderTest {
@@ -223,6 +222,38 @@ public class QueryBuilderTest {
     String actual = queryBuilder.build(query);
     Assertions.assertEquals(expected, actual);
   }
+
+    @Test
+    void whereAndOrNativeFields(){
+
+        String expected = "SELECT * FROM ccm:io AS io WHERE ( ( io.cmis:objectId = '1234' OR io.cmis:name = 'test' ) AND ( io.cmis:objectId = '1234' OR io.cmis:name = 'test' ) )";
+
+        QueryStatement query = Query
+                .selectAll()
+                .from(CCConstants.CCM_TYPE_IO)
+                .where(Filters.and(Filters.or(Filters.eq(CCConstants.SYS_PROP_NODE_UID, "1234"), Filters.eq(CCConstants.CM_NAME, "test")),Filters.or(Filters.eq(CCConstants.SYS_PROP_NODE_UID, "1234"), Filters.eq(CCConstants.CM_NAME, "test"))));
+
+        String actual = queryBuilder.build(query);
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    void hasAspect(){
+
+        String expected = "SELECT * FROM ccm:io AS io INNER JOIN ccm:address AS address ON address.cmis:objectId = io.cmis:objectId";
+
+        AspectDefinition aspectDefinition = Mockito.mock(AspectDefinition.class);
+        Mockito.when(aspectDefinition.getName()).thenReturn(QName.createQName(CCConstants.CCM_ASPECT_ADDRESS));
+        Mockito.when(dictionaryService.getAspect(ArgumentMatchers.notNull())).thenReturn(aspectDefinition);
+
+        QueryStatement query = Query
+                .selectAll()
+                .from(CCConstants.CCM_TYPE_IO)
+                .hasAspect(CCConstants.CCM_ASPECT_ADDRESS);
+
+        String actual = queryBuilder.build(query);
+        Assertions.assertEquals(expected, actual);
+    }
 
   @Test
   void whereIsNotNullNativeFields(){

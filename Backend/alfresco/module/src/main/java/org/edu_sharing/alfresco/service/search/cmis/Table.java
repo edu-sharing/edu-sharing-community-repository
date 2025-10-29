@@ -5,6 +5,11 @@ public class Table extends QueryStatement {
         super(selection, from);
     }
 
+    public Table hasAspect(String aspect){
+        this.addAspect(new Aspect(aspect));
+        return this;
+    }
+
     public QueryStatement where(Predicate predicate) {
         this.setWhere(predicate);
         return this;

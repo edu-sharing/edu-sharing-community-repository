@@ -1,7 +1,6 @@
 package org.edu_sharing.alfresco.service.search.cmis;
 
 import java.util.Arrays;
-import java.util.stream.Stream;
 
 public class Filters {
     private static Predicate parenthesised(Predicate predicate) {
@@ -66,9 +65,5 @@ public class Filters {
 
     public static <T> Predicate isNotNull(T arg) {
         return new Predicate("IS NOT NULL", Value.create(arg), null);
-    }
-
-    public static Predicate hasAspect(String arg) {
-        return new Predicate("", new Aspect(arg), null);
     }
 }
