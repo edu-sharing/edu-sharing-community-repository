@@ -2124,8 +2124,8 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     getOptionItemToggleSidebar(state: WritableSignal<boolean>) {
         const toggle = new OptionItemToggle(
             {
-                enabled: 'EDITORIAL.OPTION.TOGGLE_SIDEBAR',
-                disabled: 'EDITORIAL.OPTION.TOGGLE_SIDEBAR',
+                enabled: 'EDITORIAL.OPTION.TOGGLE_SIDEBAR_ENABLED',
+                disabled: 'EDITORIAL.OPTION.TOGGLE_SIDEBAR_DISABLED',
             },
             {
                 enabled: 'splitscreen_right',

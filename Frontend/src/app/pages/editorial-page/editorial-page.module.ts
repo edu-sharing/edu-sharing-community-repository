@@ -8,6 +8,8 @@ import { EditorialBreadcrumbComponent } from './editorial-breadcrumb/editorial-b
 import { MdsModule } from '../../features/mds/mds.module';
 import { EditorialSidebarComponent } from './editorial-sidebar/editorial-sidebar.component';
 import { BorderBoxObserverDirective, EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
+import { TranslateModule } from '@ngx-translate/core';
+import { ManageAssignmentComponent } from './create-assignment/manage-assignment.component';
 
 @NgModule({
     declarations: [EditorialPageComponent],
@@ -15,11 +17,13 @@ import { BorderBoxObserverDirective, EduSharingUiCommonModule } from 'ngx-edu-sh
         ResizableSidenavDirective,
         EditorialBreadcrumbComponent,
         EditorialSidebarComponent,
+        ManageAssignmentComponent,
         MatToolbarModule,
         EditorialPageRoutingModule,
         EduSharingUiCommonModule,
         SharedModule,
         MdsModule,
+        TranslateModule,
     ],
 })
 export class EditorialPageModule {}

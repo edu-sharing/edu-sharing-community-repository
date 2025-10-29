@@ -37,6 +37,8 @@
       <es-editorial-sidebar
         [primaryMode]="(params$ | async).primaryMode"
         [nodes]="selection()?.selected"
+        [component]="mainComponent$ | async"
+        (showComponent)="mainComponent$.next($event)"
         (closeTrigger)="sidenavRight.set(false)"
       ></es-editorial-sidebar>
     </div>
@@ -64,8 +66,11 @@
           [showCaptions]="(observer.width$ | async) > 700"
         ></es-actionbar>
       </div>
-      <ng-container *ngIf="mainComponent$ | async as component">
-        {{ component }}
+      <ng-container *ngIf="mainComponent$ | async as component" [ngSwitch]="component">
+        <span *ngSwitchCase="'manageAssignment'">
+          <es-manage-assignment></es-manage-assignment>
+        </span>
+        <span *ngSwitchDefault> Component "{{ component }}" not implemented </span>
       </ng-container>
       <ng-container *ngIf="(mainComponent$ | async) === null">
         <mat-tab-group

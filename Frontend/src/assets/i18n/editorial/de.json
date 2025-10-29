@@ -2,19 +2,25 @@
   "EDITORIAL": {
     "SEARCH_PLACEHOLDER": {
       "ACTIVITY": "Aktivitätenliste durchsuchen...",
+      "ASSIGNMENT": "Aufgaben durchsuchen...",
       "SHARE": "Freigaben durchsuchen..."
     },
     "SIDEBAR": {
       "TITLE_SHARE": "Freigaben",
+      "TITLE_ASSIGNMENT": "Aufgaben",
       "NO_OPTIONS_SELECTION": "Für die gewählte Auswahl an Elementen stehen keine übergreifenden Aktionen zur Verfügung.\nBitte ändern Sie die Auswahl",
       "NO_OPTIONS_NO_SELECTION": "Für die gewählte Ansicht stehen keine allgemeinen Aktionen zur Verfügung\nSie können Elemente auswählen, um Aktionen zu erhalten"
     },
     "OPTION": {
-      "REJECT_SHARE": "Freigabe ausblenden"
+      "REJECT_SHARE": "Freigabe ausblenden",
+      "TOGGLE_SIDEBAR_ENABLED": "Seitenleiste ausblenden",
+      "TOGGLE_SIDEBAR_DISABLED": "Seitenleiste einblenden"
     },
     "OPTIONS": {
       "SORT_INTO": "Mit Splitscreen einsortieren",
-      "SORT_INTO_DESCRIPTION": "Hier kannst du mit der Suche, aus Sammlungen und Workspace oder durch Upload etwas einsortieren.",
+      "SORT_INTO_DESCRIPTION": "Hier können Sie über die Suche, aus Sammlungen und Workspace oder durch Upload etwas einsortieren.",
+      "CREATE_ASSIGNMENT": "Neue Aufgabe",
+      "CREATE_ASSIGNMENT_DESCRIPTION": "Anlegen einer neuen Aufgabe",
       "PREVIEW": "Vorschau anzeigen",
       "PREVIEW_DESCRIPTION": "Eine Vorschau des Inhalts inkl. der wichtigsten Metadaten anzeigen",
       "WORKSPACE_METADATA": "Statistik, Versionen & Details",
@@ -59,10 +65,14 @@
     "BREADCRUMB": {
       "HOME": "Startseite",
       "ACTIVITY": "Aktivitäten",
+      "ASSIGNMENT": "Aufgaben",
       "SHARE": "Freigaben"
     },
     "ACTIVITY": {
       "EMPTY": "Keine kürzlichen Aktivitäten gefunden"
+    },
+    "ASSIGNMENT": {
+      "EMPTY": "Keine Aufgaben gefunden"
     },
     "SHARE": {
       "EMPTY": "Keine Freigaben gefunden"

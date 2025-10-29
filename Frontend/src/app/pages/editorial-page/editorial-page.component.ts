@@ -65,6 +65,7 @@ import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { OptionsHelperService } from '../../services/options-helper.service';
 
 export type PrimaryMode = 'activity' | 'share' | 'assignment';
+export type MainComponentType = 'manageAssignment';
 type RouteConfig = {
     primaryMode: PrimaryMode;
 };
@@ -110,7 +111,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     /**
      * primary component to show in the center
      */
-    mainComponent$ = new BehaviorSubject<string>(null);
+    mainComponent$ = new BehaviorSubject<MainComponentType>(null);
     searchValues$ = new BehaviorSubject<Values>({});
     mdsLoaded$ = new BehaviorSubject(false);
     searchEvent$: Observable<SearchEvent>;
@@ -315,11 +316,12 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                     null,
                     this.mdsDefinition$.value.widgets,
                 );
-                this.updateCreateOptions([
-                    new OptionItem('EDITORIAL.CREATE.ASSIGNMENT', 'task', () =>
-                        this.mainComponent$.next('createAssignment'),
-                    ),
-                ]);
+                const createAssigment = new OptionItem('EDITORIAL.CREATE.ASSIGNMENT', 'task', () =>
+                    this.mainComponent$.next('manageAssignment'),
+                );
+                // @TODO: Define toolpermission for create assignment!
+                createAssigment.toolpermissions = [];
+                this.updateCreateOptions([createAssigment]);
                 this.mdsGroup.set('editorial_assignment');
                 if (widget == null) {
                     console.warn(

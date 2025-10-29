@@ -29,7 +29,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { Subject } from 'rxjs';
 import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
-import { PrimaryMode } from '../editorial-page.component';
+import { MainComponentType, PrimaryMode } from '../editorial-page.component';
 import { NodesSelectorComponent } from '../nodes-selector/nodes-selector.component';
 import { MetadataSidebarComponent } from '../../workspace-page/metadata/metadata-sidebar.component';
 import { PreviewSidebarModule } from '../../../features/preview-sidebar/preview-sidebar.module';
@@ -52,9 +52,13 @@ export type SidebarContext = PrimaryMode | 'collections' | 'workspace' | 'search
 export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     parent = input<Node>();
+    /**
+     * current main component (only for editorial page context)
+     */
+    component = input<MainComponentType>();
     nodes = input<Node[]>();
     primaryMode = input.required<SidebarContext>();
-    enabledOption = signal<OptionItem>(null);
+    enabledOption = signal<{ option: OptionItem; trap: boolean }>(null);
     isModal = input<boolean>(false);
 
     @Output() closeTrigger = new EventEmitter<void>();
@@ -63,10 +67,14 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     private readonly destroyed = new Subject<void>();
     readonly title = computed(() =>
         this.enabledOption()
-            ? this.enabledOption().name
+            ? this.enabledOption()?.option.name
             : 'EDITORIAL.SIDEBAR.TITLE_' + this.primaryMode()?.toUpperCase(),
     );
     options = signal<OptionItem[]>(null);
+    /**
+     * trigger to inform the editorial page to show a main component
+     */
+    @Output() showComponent = new EventEmitter<MainComponentType>();
 
     constructor(
         private dialogs: DialogsService,
@@ -74,8 +82,9 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         private optionsHelperDataService: OptionsHelperDataService,
     ) {}
 
-    ngOnChanges(changes: SimpleChanges): void {
-        void this.initOptions();
+    async ngOnChanges(changes: SimpleChanges) {
+        const options = await this.initOptions();
+        this.enableDefaultOption(changes, options);
     }
 
     ngOnInit(): void {
@@ -100,7 +109,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         const workspaceMetadata = new OptionItem(
             'EDITORIAL.OPTIONS.WORKSPACE_METADATA',
             'info',
-            () => this.enabledOption.set(workspaceMetadata),
+            () => this.enabledOption.set({ trap: false, option: workspaceMetadata }),
         );
         workspaceMetadata.elementType = [ElementType.Node];
         workspaceMetadata.constrains = [Constrain.NoBulk];
@@ -108,7 +117,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         options.push(workspaceMetadata);
 
         const preview = new OptionItem('EDITORIAL.OPTIONS.PREVIEW', 'preview', () =>
-            this.enabledOption.set(preview),
+            this.enabledOption.set({ trap: false, option: preview }),
         );
         preview.elementType = [ElementType.Node];
         preview.constrains = [Constrain.NoBulk, Constrain.Files];
@@ -125,10 +134,18 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
                 addOptions: options,
             },
         });
+        const createAssignment = new OptionItem('EDITORIAL.OPTIONS.CREATE_ASSIGNMENT', 'task', () =>
+            this.showComponent.emit('manageAssignment'),
+        );
+        // @TODO: Define toolpermission for create assignment!
+        createAssignment.toolpermissions = [];
+        createAssignment.elementType = [ElementType.NoneOrUnknown];
+        createAssignment.scopes = ['assignment'];
+        options.push(createAssignment);
         const sortInto = new OptionItem(
             'EDITORIAL.OPTIONS.SORT_INTO',
             'splitscreen_vertical_add',
-            () => this.enabledOption.set(sortInto),
+            () => this.enabledOption.set({ trap: false, option: sortInto }),
         );
         sortInto.customShowCallback = async () =>
             this.parent() && this.nodeHelperService.isNodeCollection(this.parent());
@@ -146,6 +163,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
             },
         });
         this.options.set(await this.optionsHelperDataService.getAvailableOptions(Target.Actionbar));
+        return options;
     }
 
     ngOnDestroy(): void {
@@ -160,5 +178,27 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
             contentPadding: 0,
             minWidth: 350,
         });
+    }
+
+    /**
+     * checks if a default option should be triggered for the current state, and if so, does it
+     */
+    private enableDefaultOption(changes: SimpleChanges, options: OptionItem[]) {
+        let optionId = null;
+        let trap = false;
+        if (changes.component?.currentValue === 'manageAssignment') {
+            optionId = 'SORT_INTO';
+            trap = true;
+        }
+        console.log(
+            optionId,
+            options.find((o) => o.name === 'EDITORIAL.OPTIONS.' + optionId),
+        );
+        if (optionId) {
+            this.enabledOption.set({
+                trap,
+                option: options.find((o) => o.name === 'EDITORIAL.OPTIONS.' + optionId),
+            });
+        }
     }
 }

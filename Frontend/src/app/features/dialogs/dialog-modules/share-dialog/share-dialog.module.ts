@@ -19,12 +19,11 @@ export { ShareDialogComponent };
         ShareDialogChooseTypeComponent,
         ShareDialogComponent,
         ShareDialogPermissionComponent,
-        ShareDialogChooseDateComponent,
         ShareDialogPublishComponent,
         ShareDialogUsageComponent,
         ShareDialogRestrictedAccessComponent,
     ],
-    imports: [SharedModule],
+    imports: [SharedModule, ShareDialogChooseDateComponent],
     exports: [ShareDialogComponent],
 })
 export class ShareDialogModule {}

@@ -1,5 +1,10 @@
 <div class="sidebar-header">
-  <button mat-icon-button color="primary" *ngIf="enabledOption()" (click)="enabledOption.set(null)">
+  <button
+    mat-icon-button
+    color="primary"
+    *ngIf="enabledOption() && !enabledOption().trap"
+    (click)="enabledOption.set(null)"
+  >
     <i esIcon="keyboard_arrow_left"></i>
   </button>
   <div>{{ title() | translate }}</div>
@@ -10,7 +15,10 @@
 <div class="sidebar-container">
   <ng-container *ngTemplateOutlet="content"></ng-container>
   <ng-template #content>
-    <div *ngIf="enabledOption() as option" class="option option-{{ option.name | propertySlug }}">
+    <div
+      *ngIf="enabledOption()?.option as option"
+      class="option option-{{ option.name | propertySlug }}"
+    >
       <es-nodes-selector
         *ngIf="option.name === 'EDITORIAL.OPTIONS.SORT_INTO'"
         [parent]="parent()"

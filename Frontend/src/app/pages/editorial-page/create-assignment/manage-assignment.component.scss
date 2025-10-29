@@ -1,0 +1,33 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+
+.step-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.mat-heading-4 {
+    justify-content: center;
+    padding-bottom: 30px;
+}
+
+.main-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    max-width: 500px;
+    justify-self: center;
+    > * {
+        width: 100%;
+    }
+    ::ng-deep mat-slide-toggle > div {
+        display: flex;
+        flex-grow: 1;
+    }
+}
+.navigation {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 20px;
+}

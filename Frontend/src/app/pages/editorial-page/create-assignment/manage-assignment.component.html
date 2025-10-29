@@ -1,0 +1,72 @@
+<mat-stepper [linear]="true" labelPosition="bottom">
+  <!-- Step 1: Title -->
+  <mat-step
+    state="main"
+    label="{{ 'EDITORIAL.ASSIGNMENT.STEP.MAIN' | translate }}"
+    [stepControl]="mainDataFormGroup"
+  >
+    <h2 class="mat-heading-4">
+      <mat-label>{{ 'EDITORIAL.ASSIGNMENT.MAIN_TITLE' | translate }}</mat-label>
+    </h2>
+    <form [formGroup]="mainDataFormGroup" class="main-form">
+      <mat-form-field>
+        <mat-label>{{ 'EDITORIAL.ASSIGNMENT.FORM.TITLE' | translate }}</mat-label>
+        <input matInput formControlName="title" required autofocus />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'EDITORIAL.ASSIGNMENT.FORM.DESCRIPTION' | translate }}</mat-label>
+        <textarea
+          matInput
+          formControlName="description"
+          cdkTextareaAutosize
+          required
+          cdkAutosizeMinRows="2"
+          cdkAutosizeMaxRows="5"
+        ></textarea>
+      </mat-form-field>
+      <label>{{ 'EDITORIAL.ASSIGNMENT.FORM.FILES' | translate }}</label>
+      <div class="files">
+        <button mat-flat-button color="primary" (click)="showFileDialog()">
+          <i esIcon="add"></i> {{ 'EDITORIAL.ASSIGNMENT.FORM.ADD_FILE' | translate }}
+        </button>
+      </div>
+      <mat-slide-toggle formControlName="allowAdditionalDocumentSubmission" class="toggle-reverse">
+        <es-multi-line-label>
+          <ng-container slot="label">
+            {{ 'EDITORIAL.ASSIGNMENT.FORM.FILES_ALLOW_ADDITIONAL' | translate }}
+          </ng-container>
+          <ng-container slot="description">
+            <span
+              innerHTML="{{ 'EDITORIAL.ASSIGNMENT.FORM.ALLOW_ADDITIONAL_DETAILS' | translate }}"
+            ></span>
+          </ng-container>
+        </es-multi-line-label>
+      </mat-slide-toggle>
+      <mat-slide-toggle formControlName="allowDelayedSubmission" class="toggle-reverse">
+        <es-multi-line-label>
+          <ng-container slot="label">
+            {{ 'EDITORIAL.ASSIGNMENT.FORM.DESCRIPTION.END' | translate }}
+          </ng-container>
+          <ng-container slot="description">
+            <span innerHTML="{{ 'EDITORIAL.ASSIGNMENT.FORM.END_DETAILS' | translate }}"></span>
+          </ng-container>
+        </es-multi-line-label>
+      </mat-slide-toggle>
+      <div *ngIf="mainDataFormGroup.get('allowDelayedSubmission').value === true">
+        <es-share-dialog-choose-date
+          #dateChooser
+          [from]="now"
+          [(dateTime)]="dateTime"
+        ></es-share-dialog-choose-date>
+      </div>
+      <div class="navigation">
+        <button mat-flat-button color="primary" matStepperNext>{{ 'NEXT' | translate }}</button>
+      </div>
+    </form>
+  </mat-step>
+  <mat-step state="permissions" label="{{ 'EDITORIAL.ASSIGNMENT.STEP.INVITE' | translate }}">
+  </mat-step>
+  <ng-template matStepperIcon="main">
+    <i esIcon="task">task</i>
+  </ng-template>
+</mat-stepper>

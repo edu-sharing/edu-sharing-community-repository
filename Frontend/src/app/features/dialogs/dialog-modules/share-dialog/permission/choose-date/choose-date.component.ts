@@ -14,12 +14,13 @@ import { MatDatepicker, MatDatepickerInputEvent } from '@angular/material/datepi
 import { MatInput } from '@angular/material/input';
 import { Toast, TranslationsService } from 'ngx-edu-sharing-ui';
 import { DateAdapter } from '@angular/material/core';
+import { SharedModule } from '../../../../../../shared/shared.module';
 
 @Component({
     selector: 'es-share-dialog-choose-date',
     templateUrl: 'choose-date.component.html',
     styleUrls: ['choose-date.component.scss'],
-    standalone: false,
+    imports: [SharedModule],
 })
 export class ShareDialogChooseDateComponent implements OnInit, OnChanges {
     @ViewChild(MatDatepicker) matDatepicker: MatDatepicker<any>;
