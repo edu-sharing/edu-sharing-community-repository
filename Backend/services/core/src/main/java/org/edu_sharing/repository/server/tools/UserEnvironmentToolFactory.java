@@ -16,7 +16,4 @@ public class UserEnvironmentToolFactory {
         return new UserEnvironmentTool(nodeService);
     }
 
-    public UserEnvironmentTool createEnvironmentTool(String repositoryId, Map<String, String> authInfo){
-        return new UserEnvironmentTool(nodeService, repositoryId, authInfo);
-    }
 }

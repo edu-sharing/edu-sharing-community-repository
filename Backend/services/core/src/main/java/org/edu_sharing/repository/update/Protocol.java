@@ -50,12 +50,10 @@ public class Protocol {
 	
 	public NodeRef getSysUpdateEntry(String updaterId) throws Throwable{
 		
-		Map<String,String> authInfo = new HashMap<>();
-		authInfo.put(CCConstants.AUTH_USERNAME, authenticationService.getCurrentUserName());
-		authInfo.put(CCConstants.AUTH_TICKET, authenticationService.getCurrentTicket());
+
 		String eduSystemFolderUpdate;
 		NodeRef updateInfoRef;
-		eduSystemFolderUpdate = userEnvironmentToolFactory.createEnvironmentTool(authInfo)
+		eduSystemFolderUpdate = userEnvironmentToolFactory.createUserEnvironmentTool()
 				.getEdu_SharingSystemFolderUpdate();
 		updateInfoRef = NodeServiceFactory.getInstance().getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
 				eduSystemFolderUpdate,
@@ -74,12 +72,9 @@ public class Protocol {
 		updateInfoProps.put(ContentModel.PROP_NAME, updaterId);
 		updateInfoProps.put(QName.createQName(CCConstants.CCM_PROP_SYSUPDATE_ID),updaterId);
 		updateInfoProps.put(QName.createQName(CCConstants.CCM_PROP_SYSUPDATE_DATE),new Date());
+
 		
-		Map<String,String> authInfo = new HashMap<>();
-		authInfo.put(CCConstants.AUTH_USERNAME, authenticationService.getCurrentUserName());
-		authInfo.put(CCConstants.AUTH_TICKET, authenticationService.getCurrentTicket());
-		
-		String eduSystemFolderUpdate = userEnvironmentToolFactory.createEnvironmentTool(authInfo)
+		String eduSystemFolderUpdate = userEnvironmentToolFactory.createUserEnvironmentTool()
 				.getEdu_SharingSystemFolderUpdate();
 
 		nodeService.createNode(new NodeRef(MCAlfrescoAPIClient.storeRef,eduSystemFolderUpdate), QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS),QName.createQName(updaterId), QName.createQName(CCConstants.CCM_TYPE_SYSUPDATE), updateInfoProps);
