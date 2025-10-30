@@ -2,7 +2,7 @@ package org.edu_sharing.service.password;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
 import org.edu_sharing.service.util.ViolationUtils;
 import org.passay.*;
@@ -10,18 +10,17 @@ import org.passay.PasswordValidator;
 import org.passay.dictionary.ArrayWordList;
 import org.passay.dictionary.WordListDictionary;
 import org.passay.dictionary.sort.QuickSort;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@RequiredArgsConstructor
 public class PasswordConstraintValidator implements ConstraintValidator<ValidPassword, String> {
 
     public static final String PASSWORD_POLICY_VIOLATION = "PasswordPolicyViolation";
 
-    private final PasswordPolicySettings settings;
+    @Setter(onMethod_ = @Autowired)
+    private PasswordPolicySettings settings;
 
 
     @Override
