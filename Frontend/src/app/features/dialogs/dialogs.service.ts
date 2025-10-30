@@ -46,6 +46,7 @@ import {
     FileUploadProgressDialogResult,
 } from './dialog-modules/file-upload-progress-dialog/file-upload-progress-dialog-data';
 import {
+    DISCARD_OR_BACK,
     GenericDialogButton,
     GenericDialogConfig,
     GenericDialogData,
@@ -889,6 +890,22 @@ export class DialogsService {
         });
     }
 
+    /**
+     * shows a generic dialog telling the user that any data will be lost
+     * returns true if the user wants to continue and loose its data
+     */
+    async openGenericConfirmCancelDialog() {
+        const result = await firstValueFrom(
+            (
+                await this.openGenericDialog({
+                    title: 'DIALOG.CONFIRM_DISCARD_TITLE',
+                    message: 'DIALOG.CONFIRM_DISCARD_MESSAGE',
+                    buttons: DISCARD_OR_BACK,
+                })
+            ).afterClosed(),
+        );
+        return result === 'DISCARD';
+    }
     async openCopyMoveDialog(
         oldParent: Node | NodeRoot,
         source: DropSource<Node>,

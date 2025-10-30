@@ -260,15 +260,21 @@ export class NodesSelectorComponent implements OnInit {
         }
         // note: the nodes are added to the inbox node if the upload was successful,
         //       thus, adding them to the collection is necessary
-        if (createdNodes?.length && this.parent) {
-            try {
-                this.toast.showProgressSpinner();
-                this.uiService.addToCollection(this.parent, createdNodes, false, () => {
+        if (createdNodes?.length) {
+            this.editorialSidebarService.applyNodeEmitted.emit({
+                nodes: createdNodes,
+                parent: this.parent,
+            });
+            if (this.parent) {
+                try {
+                    this.toast.showProgressSpinner();
+                    this.uiService.addToCollection(this.parent, createdNodes, false, () => {
+                        this.toast.closeProgressSpinner();
+                    });
+                } catch (e) {
+                    console.error(e);
                     this.toast.closeProgressSpinner();
-                });
-            } catch (e) {
-                console.error(e);
-                this.toast.closeProgressSpinner();
+                }
             }
         }
     }

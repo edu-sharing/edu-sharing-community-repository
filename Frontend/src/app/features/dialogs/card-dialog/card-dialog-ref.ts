@@ -141,21 +141,10 @@ export class CardDialogRef<D = unknown, R = unknown> {
                     case 'x-button':
                     case 'esc-key':
                     case 'navigation':
-                        const closed = this.dialogs
-                            .openGenericDialog({
-                                title: 'DIALOG.CONFIRM_DISCARD_TITLE',
-                                message: 'DIALOG.CONFIRM_DISCARD_MESSAGE',
-                                buttons: DISCARD_OR_BACK,
-                            })
-                            .then((dialogRef) => dialogRef.afterClosed().toPromise())
-                            .then((response) => {
-                                if (response === 'DISCARD') {
-                                    this.close();
-                                    return true;
-                                } else {
-                                    return false;
-                                }
-                            });
+                        const closed = this.dialogs.openGenericConfirmCancelDialog();
+                        if (closed) {
+                            this.close();
+                        }
                         return { acknowledged: true, closed };
                 }
             case Closable.Disabled:

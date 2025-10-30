@@ -4,12 +4,14 @@ import {
     ElementRef,
     EventEmitter,
     Input,
+    OnChanges,
     Output,
+    SimpleChanges,
     ViewChild,
 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { BehaviorSubject, forkJoin, Observable, of } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, forkJoin, Observable, of } from 'rxjs';
 import { catchError, debounceTime, filter, map, startWith, switchMap, tap } from 'rxjs/operators';
 import {
     Authority,
@@ -26,12 +28,15 @@ import {
 import { NodeHelperService } from '../../../services/node-helper.service';
 import { PermissionNamePipe } from '../../pipes/permission-name.pipe';
 import { SuggestItem } from '../../../pages/admin-page/autocomplete/autocomplete.component';
+import { AuthenticationService } from 'ngx-edu-sharing-api';
 
 interface SuggestionGroup {
     label: string;
     values: SuggestItem[];
 }
+
 type SuggestionResult = SuggestionGroup[] | 'NO_RECENT' | 'NO_MATCHES';
+
 @Component({
     selector: 'es-authority-search-input',
     templateUrl: 'authority-search-input.component.html',
@@ -39,10 +44,11 @@ type SuggestionResult = SuggestionGroup[] | 'NO_RECENT' | 'NO_MATCHES';
     providers: [PermissionNamePipe],
     standalone: false,
 })
-export class AuthoritySearchInputComponent {
+export class AuthoritySearchInputComponent implements OnChanges {
     @ViewChild('inputElement') inputElement: ElementRef<HTMLInputElement>;
 
-    @Input() globalSearchAllowed = false;
+    private _globalSearchAllowed = false;
+    @Input() globalSearchAllowed: 'autoDetect' | boolean = false;
     /**
      * Do allow any entered authority (not recommended for general use)
      */
@@ -60,9 +66,11 @@ export class AuthoritySearchInputComponent {
      */
     @Input() showRecent = true;
     @Input() mode = AuthoritySearchMode.UsersAndGroups;
+
     @Input() set disabled(disabled: boolean) {
         disabled ? this.input.disable() : this.input.enable();
     }
+
     @Input() maxSuggestions = 10;
     @Input() inputIcon = 'search';
     /**
@@ -83,6 +91,7 @@ export class AuthoritySearchInputComponent {
         private organization: RestOrganizationService,
         private restConnector: RestConnectorService,
         private namePipe: PermissionNamePipe,
+        private authenticationService: AuthenticationService,
         private nodeHelper: NodeHelperService,
         private changeDetectorRef: ChangeDetectorRef,
     ) {
@@ -100,6 +109,16 @@ export class AuthoritySearchInputComponent {
             switchMap((value) => this.getSuggestions(value)),
             tap(() => this.suggestionLoading.next(false)),
         );
+    }
+
+    async ngOnChanges(changes: SimpleChanges) {
+        if (this.globalSearchAllowed === 'autoDetect') {
+            this._globalSearchAllowed = await this.authenticationService.hasToolpermission(
+                RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH,
+            );
+        } else {
+            this._globalSearchAllowed = this.globalSearchAllowed;
+        }
     }
 
     addSuggestion(data: any) {
@@ -185,7 +204,7 @@ export class AuthoritySearchInputComponent {
                     ),
                 ),
         );
-        if (this.globalSearchAllowed) {
+        if (this._globalSearchAllowed) {
             observables.push(
                 this.iam
                     .searchAuthorities(inputValue, true, this.groupType, '', {
@@ -227,7 +246,7 @@ export class AuthoritySearchInputComponent {
                 })),
             ),
         );
-        if (this.globalSearchAllowed) {
+        if (this._globalSearchAllowed) {
             observables.push(
                 this.iam.searchUsers(inputValue, true).pipe(
                     map(({ users }) => ({
@@ -266,7 +285,7 @@ export class AuthoritySearchInputComponent {
                 }),
             ),
         );
-        if (this.globalSearchAllowed) {
+        if (this._globalSearchAllowed) {
             observables.push(
                 this.organization.getOrganizations(inputValue, false).pipe(
                     map(({ organizations }) => {

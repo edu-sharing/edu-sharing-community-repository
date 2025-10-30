@@ -78,11 +78,22 @@
       },
       "EMPTY": "Keine Aufgaben gefunden",
       "MAIN_TITLE": "Neue Aufgabe erstellen",
+      "PERMISSIONS_TITLE": "Aufgabe zuweisen",
+      "SUBMIT": "Aufgabe austeilen",
+      "ERROR": {
+        "FIELD_TITLE": "Bitte Titel eingeben",
+        "FIELD_SUMMARY": "Bitte Beschreibung eingeben",
+        "MISSING_AUTHORITIES": "Bitte die Aufgabe zuweisen",
+        "MISSING_AUTHORITIES_ASSIGNEE": "Für diesen Aufgabentyp muss mindestens eine Person oder Gruppe in der Rolle \"Erledigen\" eingeladen werden"
+      },
       "FORM": {
         "TITLE": "Titel",
-        "DESCRIPTION": "Beschreibung",
+        "SUMMARY": "Beschreibung",
         "ADD_FILE": "Material hinzufügen",
+        "AUTHORITY_ROLE": "Rolle",
+        "GROUP_MULTIPLY": "Beim Austeilen der Aufgabe werden alle Mitglieder der Gruppe als Einzel-Personen zugewiesen",
         "FILES": "Angehängte Dateien",
+        "AUTHORITIES_EMPTY": "Noch nicht zugewiesen",
         "FILES_EMPTY": "Noch keine angehängten Dateien",
         "FILES_INVITE": "Für die Personen dieser Aufgabe wird automatsich eine Freigabe an dem Element hinzugefügt",
         "FILES_NO_ACCESS": "Ggf. haben nicht alle Personen auf dieses Element Zugriff.",
@@ -94,6 +105,11 @@
         "ROLE": {
           "SUPPLEMENTARY": "Begleitmaterial",
           "SUBMITTABLE": "Arbeitsmaterial (Kopiervorlage)"
+        },
+        "PERMISSION_ROLE": {
+          "ASSIGNEE_GROUP": "je Person erledigen",
+          "ASSIGNEE_USER": "Erledigen",
+          "COORDINATOR": "Korrigieren"
         }
       }
     },

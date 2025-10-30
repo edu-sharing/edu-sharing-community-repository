@@ -14,7 +14,7 @@ export class EditorialSidebarService {
     private _editorialSidebar: EditorialSidebarComponent;
     readonly sidebarOpened = signal(false);
     registerSidebar(editorialSidebar: EditorialSidebarComponent) {
-        if (this._editorialSidebar) {
+        if (this._editorialSidebar && this._editorialSidebar !== editorialSidebar) {
             console.error(
                 'Duplicate registration of editorial sidebar',
                 this._editorialSidebar,
@@ -25,6 +25,12 @@ export class EditorialSidebarService {
         this._editorialSidebar = editorialSidebar;
     }
 
+    unregisterSidebar(editorialSidebar: EditorialSidebarComponent) {
+        if (this._editorialSidebar !== editorialSidebar) {
+            throw new Error('This sidebar is not registered');
+        }
+        this._editorialSidebar = null;
+    }
     get editorialSidebar(): EditorialSidebarComponent {
         return this._editorialSidebar;
     }

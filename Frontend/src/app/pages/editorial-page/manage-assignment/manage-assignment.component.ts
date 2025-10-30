@@ -1,6 +1,6 @@
-import { Component, Input, signal, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, signal, ViewChild } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
-import { MatStepperModule } from '@angular/material/stepper';
+import { MatStepper, MatStepperModule } from '@angular/material/stepper';
 import { FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ShareDialogChooseDateComponent } from '../../../features/dialogs/dialog-modules/share-dialog/permission/choose-date/choose-date.component';
@@ -9,8 +9,17 @@ import {
     ManageAssignmentNodesComponent,
     NodeWithRole,
 } from '../manage-assignment-nodes/manage-assignment-nodes.component';
-import { Node } from 'ngx-edu-sharing-api';
+import { Assignment, Authority, Node, Permission } from 'ngx-edu-sharing-api';
 import { NodeHelperService } from '../../../services/node-helper.service';
+import { EditorComponent } from '@tinymce/tinymce-angular';
+import { PlatformLocation } from '@angular/common';
+import { TranslateService } from '@ngx-translate/core';
+import {
+    AuthorityWithSubmission,
+    ManageAssignmentAuthoritiesComponent,
+} from '../manage-assignment-authorities/manage-assignment-authorities.component';
+import { Toast } from 'ngx-edu-sharing-ui';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
 
 @Component({
     selector: 'es-manage-assignment',
@@ -22,39 +31,70 @@ import { NodeHelperService } from '../../../services/node-helper.service';
         MatFormFieldModule,
         ShareDialogChooseDateComponent,
         ManageAssignmentNodesComponent,
+        ManageAssignmentAuthoritiesComponent,
+        EditorComponent,
     ],
 })
 export class ManageAssignmentComponent {
+    readonly editorConfig = {
+        branding: false,
+        height: 200,
+        base_url: this.platformLocation.getBaseHrefFromDOM() + 'tinymce',
+        suffix: '.min',
+        menubar: false,
+        statusbar: false,
+        resize: true,
+        plugins: ['lists'],
+        default_link_target: '_blank',
+        link_title: false,
+        link_assume_external_targets: true,
+        toolbar: 'bold | bullist numlist | undo redo',
+        language: this.translateService.getDefaultLang(),
+    };
     now = new Date().getTime();
     dateTime = new Date().getTime() + 1000 * 3600 * 24 * 5;
+    @ViewChild(MatStepper) matStepper: MatStepper;
     @ViewChild('dateChooser') dateChooserRef: ShareDialogChooseDateComponent;
-    // @TODO: assignment data type
-    @Input() assignment = signal<any>(null);
+    @Input() assignment = signal<Assignment>({
+        type: 'SUBMISSION',
+    });
+    authorities = signal<AuthorityWithSubmission[]>(null);
     mainDataFormGroup: FormGroup;
-    nodes = signal<Node[]>(null);
-    validateMainForm(group: FormGroup): ValidationErrors | null {
-        if (group.get('allowDelayedSubmission')?.value === true) {
-            return null;
+    nodes = signal<NodeWithRole[]>(null);
+    private close = new EventEmitter<void>();
+    validateMainForm() {
+        this.mainDataFormGroup.markAllAsTouched();
+        if (!this.mainDataFormGroup.valid) {
+            for (let entry of Object.entries(this.mainDataFormGroup.controls)) {
+                if (entry[1].errors) {
+                    this.toast.error(
+                        null,
+                        'EDITORIAL.ASSIGNMENT.ERROR.FIELD_' + entry[0].toUpperCase(),
+                    );
+                    break;
+                }
+            }
+        } else {
+            this.matStepper.next();
         }
-        return null;
     }
 
     constructor(
         private formBuilder: FormBuilder,
+        private toast: Toast,
+        private dialogsService: DialogsService,
         private nodeHelperService: NodeHelperService,
+        private platformLocation: PlatformLocation,
+        private translateService: TranslateService,
         private editorialSidebarService: EditorialSidebarService,
     ) {
-        this.mainDataFormGroup = this.formBuilder.group(
-            {
-                title: ['', [Validators.required]],
-                description: ['', [Validators.required]],
-                allowDelayedSubmission: [false, [Validators.required]],
-                allowAdditionalDocumentSubmission: [false, [Validators.required]],
-            },
-            { validators: this.validateMainForm },
-        );
+        this.mainDataFormGroup = this.formBuilder.group({
+            title: ['', [Validators.required]],
+            summary: ['', [Validators.required]],
+            useEndTime: [false, [Validators.required]],
+            allowAdditionalDocumentSubmissions: [false, [Validators.required]],
+        });
         this.editorialSidebarService.applyNodeEmitted.subscribe(({ nodes }) => {
-            console.log(nodes);
             this.nodes.set(
                 (this.nodes() || []).concat(
                     nodes
@@ -67,7 +107,6 @@ export class ManageAssignmentComponent {
                         }),
                 ),
             );
-            console.log(this.nodes());
         });
     }
 
@@ -78,5 +117,59 @@ export class ManageAssignmentComponent {
             applyCallback: (nodes) =>
                 nodes.every((n) => !this.nodeHelperService.isNodeCollection(n) && !n.isDirectory),
         });
+    }
+
+    addAuthority(authority: Authority) {
+        if ((this.authorities() || []).some((n) => n.authorityName === authority.authorityName)) {
+            return;
+        }
+        (authority as AuthorityWithSubmission).role = 'ASSIGNEE';
+        this.authorities.set((this.authorities() || []).concat(authority));
+    }
+
+    submit() {
+        if (!this.authorities()?.length) {
+            this.toast.error(null, 'EDITORIAL.ASSIGNMENT.ERROR.MISSING_AUTHORITIES');
+            return;
+        }
+        if (
+            this.assignment().type === 'SUBMISSION' &&
+            !this.authorities()?.some((a) => a.role === 'ASSIGNEE')
+        ) {
+            this.toast.error(null, 'EDITORIAL.ASSIGNMENT.ERROR.MISSING_AUTHORITIES_ASSIGNEE');
+            return;
+        }
+        const permissions: Permission[] = this.authorities().map((a) => {
+            return {
+                authorityName: a.authorityName,
+                role: a.role,
+            } as Permission;
+        });
+        const files = this.nodes()?.map((n) => {
+            return {
+                ref: n.ref.id,
+                documentRole: n.documentRole,
+            };
+        });
+        const assignment = {
+            ...this.assignment(),
+            title: this.mainDataFormGroup.get('title').value,
+            summary: this.mainDataFormGroup.get('summary').value,
+            allowAdditionalDocumentSubmissions: this.mainDataFormGroup.get(
+                'allowAdditionalDocumentSubmissions',
+            ).value,
+            // @TODO
+            endTime: this.mainDataFormGroup.get('useEndTime').value ? (this.dateTime as any) : null,
+            permissions,
+        } as Assignment;
+        console.log(assignment, files);
+    }
+
+    async cancel() {
+        if (this.mainDataFormGroup.dirty) {
+            if (await this.dialogsService.openGenericConfirmCancelDialog()) {
+                this.close.emit();
+            }
+        }
     }
 }

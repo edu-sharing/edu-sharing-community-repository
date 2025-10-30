@@ -1,0 +1,38 @@
+<div class="empty" *ngIf="!authorities()?.length">
+  {{ 'EDITORIAL.ASSIGNMENT.FORM.AUTHORITIES_EMPTY' | translate }}
+</div>
+<div class="node-list" *ngIf="authorities()?.length">
+  @for (item of authorities(); track item) {
+  <div>
+    <es-user-avatar [user]="item" size="xsmall"></es-user-avatar>
+    <div class="title">{{ item | authorityName }}</div>
+    <mat-form-field appearance="fill">
+      <mat-label>{{ 'EDITORIAL.ASSIGNMENT.FORM.AUTHORITY_ROLE' | translate }}</mat-label>
+      <mat-select [value]="item.role" (selectionChange)="setRole(item, $event)">
+        @for (role of ['ASSIGNEE', 'COORDINATOR']; track role) {
+        <mat-option [value]="role">{{
+          'EDITORIAL.ASSIGNMENT.FORM.PERMISSION_ROLE.' +
+            role +
+            (role === 'ASSIGNEE' ? '_' + (item.authorityType === 'USER' ? 'USER' : 'GROUP') : '')
+            | translate
+        }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <div class="warn-area">
+      <div
+        class="multiply-group"
+        matTooltip="{{ 'EDITORIAL.ASSIGNMENT.FORM.GROUP_MULTIPLY' | translate }}"
+        *ngIf="
+          item.authorityType !== 'USER' &&
+          item.role === 'ASSIGNEE' &&
+          assignment().type === 'SUBMISSION'
+        "
+      >
+        <i esIcon="asterisk"></i>
+      </div>
+    </div>
+    <button mat-icon-button class="delete" (click)="remove(item)"><i esIcon="close"></i></button>
+  </div>
+  }
+</div>

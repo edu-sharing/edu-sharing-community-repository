@@ -184,6 +184,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     ngOnDestroy(): void {
         this.destroyed.next();
         this.destroyed.complete();
+        this.editorialSidebarService.unregisterSidebar(this);
     }
 
     private async openDialog(): Promise<CardDialogRef<unknown>> {
