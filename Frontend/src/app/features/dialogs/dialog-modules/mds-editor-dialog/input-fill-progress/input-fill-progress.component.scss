@@ -50,7 +50,7 @@
             color: color.adjust($colorStatusNegative, $lightness: -20%);
         }
         &.status-mandatoryForPublish {
-            color: color.adjust($colorStatusWarning, $lightness: -20%);
+            color: color.adjust($warningMedium, $lightness: -20%);
         }
         .show-missing-button {
             font-weight: bold;

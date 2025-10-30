@@ -1,6 +1,11 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
+mat-stepper {
+    max-width: 600px;
+    width: 100%;
+    justify-self: center;
+}
 .step-label {
     display: flex;
     align-items: center;
@@ -16,7 +21,6 @@
     flex-direction: column;
     gap: 10px;
     width: 100%;
-    max-width: 500px;
     justify-self: center;
     > * {
         width: 100%;
@@ -24,6 +28,11 @@
     ::ng-deep mat-slide-toggle > div {
         display: flex;
         flex-grow: 1;
+    }
+}
+.files {
+    > button {
+        margin-top: 10px;
     }
 }
 .navigation {

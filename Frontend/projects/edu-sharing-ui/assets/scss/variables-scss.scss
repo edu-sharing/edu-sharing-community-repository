@@ -17,7 +17,9 @@ $primaryMediumDark: var(--palette-primary-700) !default;
 $tabColor: var(--primary) !default;
 $tabColorDark: var(--primary) !default;
 $tabColorLight: var(--palette-primary-200) !default;
+// @Deprecated: Use the css var(--colorStatusNegative)
 $warning: #cd2457 !default;
+// @Deprecated: Use the css var(--colorStatusWarning)
 $warningMedium: #e98c1b !default;
 $toastLeftError: #c15d5d !default;
 $toastPrimary: #333333 !default;
@@ -75,11 +77,12 @@ $chipsSeperatorLineColor: #e2e2e2 !default;
 $inputBorderColor: #9e9e9e !default;
 $commentsActionsSeperatorLineColor: $backgroundColor !default;
 $noResultsColor: rgba(black, 0.54) !default;
-// prefer using var(--$colorStatusPositive)
+// prefer using var(--colorStatusPositive)
 $colorStatusPositive: #40bf8e !default;
 // prefer using var(--colorStatusNegative)
 $colorStatusNegative: #cd2457 !default;
-$colorStatusWarning: $warningMedium !default;
+// prefer using var(--colorStatusWarning)
+$colorStatusWarning: var(--colorStatusWarning) !default;
 $colorStatusRecommended: #acd331 !default;
 $colorStatusNeutral: #777 !default;
 $colorStarActive: var(--colorStarActive) !default;

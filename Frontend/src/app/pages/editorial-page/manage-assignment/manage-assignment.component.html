@@ -38,7 +38,9 @@
           </ng-container>
           <ng-container slot="description">
             <span
-              innerHTML="{{ 'EDITORIAL.ASSIGNMENT.FORM.ALLOW_ADDITIONAL_DETAILS' | translate }}"
+              innerHTML="{{
+                'EDITORIAL.ASSIGNMENT.FORM.FILES_ALLOW_ADDITIONAL_DETAILS' | translate
+              }}"
             ></span>
           </ng-container>
         </es-multi-line-label>
@@ -46,7 +48,7 @@
       <mat-slide-toggle formControlName="allowDelayedSubmission" class="toggle-reverse">
         <es-multi-line-label>
           <ng-container slot="label">
-            {{ 'EDITORIAL.ASSIGNMENT.FORM.DESCRIPTION.END' | translate }}
+            {{ 'EDITORIAL.ASSIGNMENT.FORM.END' | translate }}
           </ng-container>
           <ng-container slot="description">
             <span innerHTML="{{ 'EDITORIAL.ASSIGNMENT.FORM.END_DETAILS' | translate }}"></span>

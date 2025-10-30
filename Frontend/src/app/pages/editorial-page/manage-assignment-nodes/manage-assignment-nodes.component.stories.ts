@@ -1,9 +1,8 @@
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { TranslateService } from '@ngx-translate/core';
 import { applicationConfig, type Meta, moduleMetadata, type StoryObj } from '@storybook/angular';
-import { EduSharingApiModule, Node } from 'ngx-edu-sharing-api';
+import { EduSharingApiModule, Node, RestConstants } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule, Helper, Toast } from 'ngx-edu-sharing-ui';
-import { signal } from '@angular/core';
 import { ManageAssignmentNodesComponent } from './manage-assignment-nodes.component';
 import {
     DummyNode,
@@ -43,14 +42,20 @@ export default list;
 type Story = StoryObj<ManageAssignmentNodesComponent>;
 export const ListEntries: Story = {
     args: {
-        nodes: Array(6)
+        nodes: Array(10)
             .fill(DummyNode)
             .map((n: Node, i) => {
                 n = Helper.deepCopy(n);
                 n.ref.id = 'id_' + i;
                 n.title += ' ' + i;
+                n.isPublic = Math.random() > 0.5;
+                if (Math.random() > 0.5) {
+                    n.accessEffective = [RestConstants.ACCESS_CHANGE_PERMISSIONS];
+                }
                 return n;
             }),
     },
 };
-export const ListEmpty: Story = {};
+export const ListEmpty: Story = {
+    args: { nodes: null },
+};

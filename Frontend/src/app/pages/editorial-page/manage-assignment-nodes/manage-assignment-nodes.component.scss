@@ -1,33 +1,55 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
-.step-label {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-.mat-heading-4 {
-    justify-content: center;
-    padding-bottom: 30px;
+.empty {
+    color: var(--textLight);
 }
 
-.main-form {
+@mixin container() {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-    max-width: 500px;
-    justify-self: center;
-    > * {
-        width: 100%;
-    }
-    ::ng-deep mat-slide-toggle > div {
-        display: flex;
+    gap: 15px;
+    align-items: center;
+    padding: 5px 10px 5px 0;
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    .title {
         flex-grow: 1;
     }
+    .handle {
+        cursor: move;
+        width: 8px;
+        overflow: hidden;
+        opacity: 0.3;
+        display: flex;
+        align-items: center;
+    }
+    .warn-area {
+        min-width: 28px;
+    }
+    ::ng-deep mat-form-field {
+        .mat-mdc-form-field-subscript-wrapper {
+            display: none;
+        }
+    }
+    .not-public-invite {
+        //color: var(--colorStatusWarning);
+        opacity: 0.7;
+    }
+    .not-public-no-invite {
+        color: var(--colorStatusWarning);
+        opacity: 0.7;
+    }
+    .delete {
+        opacity: 0.7;
+    }
 }
-.navigation {
+.cdk-drag-preview {
+    @include container();
+}
+.node-list {
     display: flex;
-    justify-content: flex-end;
-    padding-top: 20px;
+    flex-direction: column;
+    gap: 5px;
+    > div {
+        @include container();
+    }
 }

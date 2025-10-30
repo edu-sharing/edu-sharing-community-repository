@@ -5,7 +5,10 @@ import { FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/f
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ShareDialogChooseDateComponent } from '../../../features/dialogs/dialog-modules/share-dialog/permission/choose-date/choose-date.component';
 import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
-import { ManageAssignmentNodesComponent } from '../manage-assignment-nodes/manage-assignment-nodes.component';
+import {
+    ManageAssignmentNodesComponent,
+    NodeWithRole,
+} from '../manage-assignment-nodes/manage-assignment-nodes.component';
 import { Node } from 'ngx-edu-sharing-api';
 
 @Component({
@@ -48,6 +51,22 @@ export class ManageAssignmentComponent {
             },
             { validators: this.validateMainForm },
         );
+        this.editorialSidebarService.applyNodeEmitted.subscribe(({ nodes }) => {
+            console.log(nodes);
+            this.nodes.set(
+                (this.nodes() || []).concat(
+                    nodes
+                        .filter((n) => !(this.nodes() || []).some((n2) => n2.ref?.id === n.ref?.id))
+                        .map((node) => {
+                            return {
+                                ...node,
+                                documentRole: 'SUPPLEMENTARY',
+                            } as NodeWithRole;
+                        }),
+                ),
+            );
+            console.log(this.nodes());
+        });
     }
 
     showFileDialog() {

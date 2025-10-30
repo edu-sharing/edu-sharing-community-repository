@@ -1,6 +1,15 @@
-import { Component, input } from '@angular/core';
+import { Component, input, model } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { SharedModule } from '../../../shared/shared.module';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { NodeHelperService, NodesRightMode } from 'ngx-edu-sharing-ui';
+import { RestConstants } from '../../../core-module/rest/rest-constants';
+import { MatSelectChange } from '@angular/material/select';
+
+type Role = 'SUPPLEMENTARY' | 'SUBMITTABLE';
+export type NodeWithRole = Node & {
+    documentRole?: Role;
+};
 
 @Component({
     selector: 'es-manage-assignment-nodes',
@@ -9,5 +18,24 @@ import { SharedModule } from '../../../shared/shared.module';
     imports: [SharedModule],
 })
 export class ManageAssignmentNodesComponent {
-    readonly nodes = input.required<Node[]>();
+    readonly ChangePermissions = RestConstants.ACCESS_CHANGE_PERMISSIONS;
+    nodes = model.required<NodeWithRole[]>();
+    drop(event: CdkDragDrop<NodeWithRole[]>) {
+        moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+        this.nodes.set(this.nodes());
+    }
+
+    constructor(public nodeHelperService: NodeHelperService) {}
+
+    remove(item: NodeWithRole) {
+        this.nodes().splice(this.nodes().indexOf(item), 1);
+        this.nodes.set(this.nodes());
+    }
+
+    protected readonly NodesRightMode = NodesRightMode;
+
+    setRole(item: NodeWithRole, $event: MatSelectChange<Role>) {
+        item.documentRole = $event.value;
+        this.nodes.set(this.nodes());
+    }
 }

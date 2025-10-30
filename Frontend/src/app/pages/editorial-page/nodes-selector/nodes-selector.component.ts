@@ -54,6 +54,7 @@ import { NodeHelperService } from '../../../services/node-helper.service';
 import { Toast } from '../../../services/toast';
 import { UploadDialogService } from '../../../services/upload-dialog.service';
 import { SharedModule } from '../../../shared/shared.module';
+import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
 
 enum TabType {
     SEARCH = 'search',
@@ -120,6 +121,7 @@ export class NodesSelectorComponent implements OnInit {
         private collectionService: RestCollectionService,
         private mdsHelperService: MdsHelperService,
         public nodeHelperService: NodeHelperService,
+        public editorialSidebarService: EditorialSidebarService,
         private nodeService: NodeService,
         private uiService: UIService,
         private uploadDialogService: UploadDialogService,
@@ -345,7 +347,14 @@ export class NodesSelectorComponent implements OnInit {
      * Copies the selected nodes into the currently opened view.
      */
     async copyNodes(): Promise<void> {
-        if (!this.parent || !this.selectedNodes().length) {
+        if (!this.selectedNodes().length) {
+            return;
+        }
+        this.editorialSidebarService.applyNodeEmitted.emit({
+            nodes: this.selectedNodes() as Node[],
+            parent: this.parent,
+        });
+        if (!this.parent) {
             return;
         }
         if (this.onlyFilesSelected()) {

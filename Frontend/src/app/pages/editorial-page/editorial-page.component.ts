@@ -317,8 +317,10 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                     null,
                     this.mdsDefinition$.value.widgets,
                 );
-                const createAssigment = new OptionItem('EDITORIAL.CREATE.ASSIGNMENT', 'task', () =>
-                    this.mainComponent$.next('manageAssignment'),
+                const createAssigment = new OptionItem(
+                    'EDITORIAL.OPTIONS.CREATE_ASSIGNMENT',
+                    'task',
+                    () => this.mainComponent$.next('manageAssignment'),
                 );
                 // @TODO: Define toolpermission for create assignment!
                 createAssigment.toolpermissions = [];

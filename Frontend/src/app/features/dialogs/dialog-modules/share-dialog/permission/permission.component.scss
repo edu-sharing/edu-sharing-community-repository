@@ -79,11 +79,7 @@
         color: $textLight;
     }
     .timebased-active {
-        color: color.mix(
-            color.adjust($colorStatusWarning, $lightness: -10%),
-            $colorStatusNeutral,
-            30%
-        );
+        color: color.mix(color.adjust($warningMedium, $lightness: -10%), $colorStatusNeutral, 30%);
     }
 }
 .permission {
@@ -131,7 +127,7 @@
     }
 }
 .timebased-active {
-    color: color.adjust($colorStatusWarning, $lightness: -10%);
+    color: color.adjust($warningMedium, $lightness: -10%);
 }
 .timebased-invalid {
     color: $colorStatusNegative;

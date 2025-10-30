@@ -1,1 +1,52 @@
-TEST
+<div class="empty" *ngIf="!nodes()?.length">
+  {{ 'EDITORIAL.ASSIGNMENT.FORM.FILES_EMPTY' | translate }}
+</div>
+<div
+  class="node-list"
+  *ngIf="nodes()?.length"
+  cdkDropList
+  [cdkDropListData]="nodes()"
+  (cdkDropListDropped)="drop($event)"
+>
+  @for (item of nodes(); track item) {
+  <div cdkDrag>
+    <div class="handle" cdkDragHandle><i esIcon="reorder"></i></div>
+    <es-node-type-badge [node]="item"></es-node-type-badge>
+    <div class="title">{{ item | nodeTitle }}</div>
+    <mat-form-field appearance="fill">
+      <mat-label>{{ 'EDITORIAL.ASSIGNMENT.FORM.FILES_ROLE' | translate }}</mat-label>
+      <mat-select [value]="item.documentRole" (selectionChange)="setRole(item, $event)">
+        @for (role of ['SUPPLEMENTARY', 'SUBMITTABLE']; track role) {
+        <mat-option [value]="role">{{
+          'EDITORIAL.ASSIGNMENT.FORM.ROLE.' + role | translate
+        }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <div class="warn-area">
+      <div
+        class="not-public-invite"
+        matTooltip="{{ 'EDITORIAL.ASSIGNMENT.FORM.FILES_INVITE' | translate }}"
+        *ngIf="
+          !item.isPublic &&
+          nodeHelperService.getNodesRight([item], ChangePermissions, NodesRightMode.Effective)
+        "
+      >
+        <i esIcon="group_add"></i>
+      </div>
+      <!-- @TODO: To define if node rights are required or we may do a copy? -->
+      <div
+        class="not-public-no-invite"
+        matTooltip="{{ 'EDITORIAL.ASSIGNMENT.FORM.FILES_NO_ACCESS' | translate }}"
+        *ngIf="
+          !item.isPublic &&
+          !nodeHelperService.getNodesRight([item], ChangePermissions, NodesRightMode.Effective)
+        "
+      >
+        <i esIcon="warning"></i>
+      </div>
+    </div>
+    <button mat-icon-button class="delete" (click)="remove(item)"><i esIcon="close"></i></button>
+  </div>
+  }
+</div>

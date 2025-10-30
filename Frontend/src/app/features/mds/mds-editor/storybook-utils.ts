@@ -63,7 +63,7 @@ export class translateProvider {
 
     get(v: string, args: any = {}): Observable<any> {
         if (!this.translation$) {
-            const sources = ['common/de.json', 'workspace/de.json'];
+            const sources = ['common/de.json', 'workspace/de.json', 'editorial/de.json'];
 
             const requests = sources.map((file) =>
                 this.httpClient
@@ -428,10 +428,11 @@ export const DummyNode: Partial<Node> = {
         isIcon: true,
         mimetype: 'image/webp',
     },
+    iconURL: 'assets/images/storybook/link.svg',
     commentCount: 12,
     name: 'Node Name',
     title: 'Node Title',
-    mediatype: 'file-video',
+    mediatype: 'link',
     type: 'ccm:io',
     properties: Data,
 } as Node;

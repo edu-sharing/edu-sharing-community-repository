@@ -72,7 +72,30 @@
       "EMPTY": "Keine kürzlichen Aktivitäten gefunden"
     },
     "ASSIGNMENT": {
-      "EMPTY": "Keine Aufgaben gefunden"
+      "STEP": {
+        "MAIN": "Erstellen",
+        "INVITE": "Zuweisen"
+      },
+      "EMPTY": "Keine Aufgaben gefunden",
+      "MAIN_TITLE": "Neue Aufgabe erstellen",
+      "FORM": {
+        "TITLE": "Titel",
+        "DESCRIPTION": "Beschreibung",
+        "ADD_FILE": "Material hinzufügen",
+        "FILES": "Angehängte Dateien",
+        "FILES_EMPTY": "Noch keine angehängten Dateien",
+        "FILES_INVITE": "Für die Personen dieser Aufgabe wird automatsich eine Freigabe an dem Element hinzugefügt",
+        "FILES_NO_ACCESS": "Ggf. haben nicht alle Personen auf dieses Element Zugriff.",
+        "FILES_ROLE": "Materialtyp",
+        "FILES_ALLOW_ADDITIONAL": "zusätzliche Materialien",
+        "FILES_ALLOW_ADDITIONAL_DETAILS": "Abgabe zusätzlicher Materialien ist erlaubt",
+        "END": "Abgabefrist",
+        "END_DETAILS": "Gibt an, ob die Aufgabe eine Abgabefrist hat",
+        "ROLE": {
+          "SUPPLEMENTARY": "Begleitmaterial",
+          "SUBMITTABLE": "Arbeitsmaterial (Kopiervorlage)"
+        }
+      }
     },
     "SHARE": {
       "EMPTY": "Keine Freigaben gefunden"
