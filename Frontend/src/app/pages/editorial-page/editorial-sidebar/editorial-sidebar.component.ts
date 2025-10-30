@@ -36,7 +36,11 @@ import { PreviewSidebarModule } from '../../../features/preview-sidebar/preview-
 import { EditorialSidebarService } from './editorial-sidebar.service';
 export type SidebarContext = PrimaryMode | 'collections' | 'workspace' | 'search';
 export type EditorialSidebarOption = 'WORKSPACE_METADATA' | 'SHARE_QR' | 'PREVIEW' | 'SORT_INTO';
-export type OptionState = { option: EditorialSidebarOption; trap: boolean };
+export type OptionState = {
+    option: EditorialSidebarOption;
+    trap: boolean;
+    applyCallback?: (selected: Node[]) => boolean;
+};
 @Component({
     selector: 'es-editorial-sidebar',
     templateUrl: 'editorial-sidebar.component.html',

@@ -10,6 +10,7 @@ import {
     NodeWithRole,
 } from '../manage-assignment-nodes/manage-assignment-nodes.component';
 import { Node } from 'ngx-edu-sharing-api';
+import { NodeHelperService } from '../../../services/node-helper.service';
 
 @Component({
     selector: 'es-manage-assignment',
@@ -40,6 +41,7 @@ export class ManageAssignmentComponent {
 
     constructor(
         private formBuilder: FormBuilder,
+        private nodeHelperService: NodeHelperService,
         private editorialSidebarService: EditorialSidebarService,
     ) {
         this.mainDataFormGroup = this.formBuilder.group(
@@ -73,6 +75,8 @@ export class ManageAssignmentComponent {
         this.editorialSidebarService.showOption({
             option: 'SORT_INTO',
             trap: true,
+            applyCallback: (nodes) =>
+                nodes.every((n) => !this.nodeHelperService.isNodeCollection(n) && !n.isDirectory),
         });
     }
 }

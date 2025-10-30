@@ -19,7 +19,11 @@
       *ngIf="enabledOption()?.option as option"
       class="option option-{{ option | propertySlug }}"
     >
-      <es-nodes-selector *ngIf="option === 'SORT_INTO'" [parent]="parent()"></es-nodes-selector>
+      <es-nodes-selector
+        *ngIf="option === 'SORT_INTO'"
+        [option]="enabledOption()"
+        [parent]="parent()"
+      ></es-nodes-selector>
       <es-metadata-sidebar
         *ngIf="option === 'WORKSPACE_METADATA'"
         [nodeSidebar]="nodes()?.[0]"

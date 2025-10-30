@@ -55,6 +55,7 @@ import { Toast } from '../../../services/toast';
 import { UploadDialogService } from '../../../services/upload-dialog.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
+import { OptionState } from '../editorial-sidebar/editorial-sidebar.component';
 
 enum TabType {
     SEARCH = 'search',
@@ -80,6 +81,7 @@ export class NodesSelectorComponent implements OnInit {
     protected readonly idPrefix: string = 'nodes-selector-tab';
 
     @Input() parent: Node;
+    @Input() option!: OptionState;
 
     selectedTab: WritableSignal<TabType> = signal(TabType.SEARCH);
     selectedNodes: WritableSignal<Partial<Node>[]> = signal([]);
@@ -90,7 +92,10 @@ export class NodesSelectorComponent implements OnInit {
         this.selectedNodes().every((node) => node.type === RestConstants.CCM_TYPE_IO),
     );
     isValidSelection: Signal<boolean> = computed(
-        (): boolean => this.onlyOneSelected() || this.onlyFilesSelected(),
+        (): boolean =>
+            (this.onlyOneSelected() || this.onlyFilesSelected()) &&
+            (!this.option.applyCallback ||
+                this.option.applyCallback(this.selectedNodes() as Node[])),
     );
     configOption = {
         includeMain: false,
