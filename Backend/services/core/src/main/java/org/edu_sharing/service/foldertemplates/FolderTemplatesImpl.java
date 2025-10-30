@@ -177,8 +177,7 @@ public class FolderTemplatesImpl implements FolderTemplates {
 
 		String groupNodeId = eduGroup.getGroupId();
 
-		UserEnvironmentTool uit = new UserEnvironmentTool(ApplicationInfoList.getHomeRepository().getAppId(),
-				this.repoClient.getAuthenticationInfo());
+		UserEnvironmentTool uit = new UserEnvironmentTool(this.repoClient.getAuthenticationInfo());
 		String Sysf = uit.getEdu_SharingTemplateFolder();
 
 		Map<String, Map<String, Object>> templatelist = this.repoClient.getChildren(Sysf);

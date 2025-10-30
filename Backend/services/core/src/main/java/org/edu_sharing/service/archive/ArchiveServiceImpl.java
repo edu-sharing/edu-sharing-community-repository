@@ -143,7 +143,7 @@ public class ArchiveServiceImpl implements ArchiveService  {
 				destinationParentId = childRef.getParentRef().getId();
 			}else{
 				try{
-					destinationParentId = new UserEnvironmentTool(null,client.getAuthenticationInfo()).getDefaultUserDataFolder();
+					destinationParentId = new UserEnvironmentTool(client.getAuthenticationInfo()).getDefaultUserDataFolder();
 					restoreResult.setRestoreStatus(RESTORESTATUS_FALLBACK_PARENT_NOT_EXISTS);
 				}catch(Throwable e){
 					log.error(e.getMessage(), e);
@@ -153,7 +153,7 @@ public class ArchiveServiceImpl implements ArchiveService  {
 		
 		if(!client.exists(destinationParentId)){
 			try{
-				destinationParentId = new UserEnvironmentTool(null,client.getAuthenticationInfo()).getDefaultUserDataFolder();
+				destinationParentId = new UserEnvironmentTool(client.getAuthenticationInfo()).getDefaultUserDataFolder();
 				restoreResult.setRestoreStatus(RESTORESTATUS_FALLBACK_PARENT_NOT_EXISTS);
 			}catch(Throwable e){
 				log.error(e.getMessage(), e);
@@ -162,7 +162,7 @@ public class ArchiveServiceImpl implements ArchiveService  {
 		
 		if(!client.hasPermissions(destinationParentId, new String[]{CCConstants.PERMISSION_ADD_CHILDREN})){
 			try{
-				destinationParentId = new UserEnvironmentTool(null,client.getAuthenticationInfo()).getDefaultUserDataFolder();
+				destinationParentId = new UserEnvironmentTool(client.getAuthenticationInfo()).getDefaultUserDataFolder();
 				restoreResult.setRestoreStatus(RESTORESTATUS_FALLBACK_PARENT_NO_PERMISSION);
 			}catch(Throwable e){
 				log.error(e.getMessage(), e);

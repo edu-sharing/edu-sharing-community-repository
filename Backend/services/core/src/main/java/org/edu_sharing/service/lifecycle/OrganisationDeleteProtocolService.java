@@ -105,7 +105,7 @@ public abstract class OrganisationDeleteProtocolService {
     }
 
     protected NodeRef getProtocolNodeRef(String name) throws Throwable {
-        String systemFolderNodeId = new UserEnvironmentTool().getEdu_SharingOrganisatinDeleteProtocolFolder();
+        String systemFolderNodeId = new UserEnvironmentTool().getEdu_SharingOrganizationDeleteProtocolFolder();
         return new Utils().getNodeRef(systemFolderNodeId,CCConstants.CCM_TYPE_IO, name);
     }
 
