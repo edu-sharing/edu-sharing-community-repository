@@ -871,6 +871,7 @@
     "AUTHORED_BY": "by",
     "CONVERTING": "Converting",
     "QUEUED": "Queued",
+    "QUEUE_POSITION": "Queue position",
     "REVOKED": {
       "DETAILS": "The publisher or editorial team has revoked this object. Only the metadata are available.\n\nCheck the reason below for more details",
       "DATE": "Date of revocation",

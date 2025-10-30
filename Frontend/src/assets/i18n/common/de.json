@@ -920,6 +920,7 @@
     "AUTHORED_BY": "von",
     "CONVERTING": "Konvertierung",
     "QUEUED": "Warteschlange",
+    "QUEUE_POSITION": "Position in der Warteschlange",
     "REVOKED": {
       "DETAILS": "Der Herausgebende bzw. die Redaktion hat dieses Objekt zurückgezogen. Es sind nur noch die Metadaten des ursprünglichen Elements verfügbar.\n\nWeitere Details finden Sie in der Begründung unten.",
       "DATE": "Datum der Löschung",
