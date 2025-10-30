@@ -73,7 +73,9 @@ public class Context {
                 }
             };
 
-            return Context.newInstance(adapter, null, null);
+            Context newContext = new Context(adapter,null);
+            newContext.init();
+            return newContext;
         }
         return null;
     }
