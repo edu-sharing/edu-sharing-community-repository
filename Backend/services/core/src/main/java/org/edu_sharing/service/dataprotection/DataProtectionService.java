@@ -293,7 +293,16 @@ public class DataProtectionService{
 
         if(allEduGroups != null && !allEduGroups.isEmpty()) {
             //reportData.schoolName(allEduGroups.stream().map(e -> (e.getGroupDisplayName() +"("+e.getGroupId()+")")).collect(Collectors.joining(",")));
-            reportData.schoolDisplayName(allEduGroups.stream().map(e -> (e.getGroupDisplayName() +"("+e.getGroupId()+")")).collect(Collectors.joining(",")));
+            reportData.schoolDisplayName(allEduGroups.stream()
+                    .map(e -> {
+                            if(e.getGroupDisplayName() != null && e.getGroupDisplayName().contains(e.getGroupname())){
+                                return e.getGroupDisplayName();
+                            }else{
+                                return (e.getGroupDisplayName() +"("+e.getGroupname()+")");
+                            }
+                        }
+                    )
+                    .collect(Collectors.joining(",")));
         }
 
         String reportDirectory = rootPath.concat("/report");
