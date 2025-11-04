@@ -17,14 +17,10 @@ public record Assignment(
         Date endTime,
         Status status,
         Type type,
-        boolean allowDelayedSubmission,
         boolean allowAdditionalDocumentSubmissions,
         Date modified,
         List<Permission> permissions
 ) {
-
-
-
 
     public enum Status {
         OPEN,
@@ -39,15 +35,12 @@ public record Assignment(
 
     public enum Role {
         ASSIGNEE,
-        OBSERVER,
         COORDINATOR
     }
+
     public record Permission(
-            String authorityName,
             Authority authority,
             Role role
     ){
     }
-
-
 }

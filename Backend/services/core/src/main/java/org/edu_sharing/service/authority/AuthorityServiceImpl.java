@@ -35,6 +35,7 @@ import org.edu_sharing.repository.server.PropertyRequiredException;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.KeyTool;
 import org.edu_sharing.repository.server.tools.cache.UserCache;
+import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authentication.totp.OneTimeTokenService;
@@ -47,6 +48,7 @@ import org.springframework.dao.DuplicateKeyException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -356,6 +358,7 @@ public class AuthorityServiceImpl implements AuthorityService {
             }
         });
     }
+
     private String getGroupNodeId(String groupName) {
 
         return transactionService.getRetryingTransactionHelper().doInTransaction(
@@ -384,7 +387,7 @@ public class AuthorityServiceImpl implements AuthorityService {
                 () -> {
                     authorityService.createAuthority(AuthorityType.GROUP, name, displayName, authorityService.getDefaultZones());
                     if (parentGroup != null) {
-                        addMemberships(parentGroup, new String[] { key });
+                        addMemberships(parentGroup, List.of(key));
                     }
                     return name;
                 }
@@ -537,29 +540,29 @@ public class AuthorityServiceImpl implements AuthorityService {
         String lastName = (String) userInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
         String email = (String) userInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
         NodeRef currentUserRef = personService.getPersonOrNull(userName);
-        if(StringUtils.isBlank(userName)){
+        if (StringUtils.isBlank(userName)) {
             throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_USERNAME);
         }
 
-        if(StringUtils.isBlank(firstName) &&
+        if (StringUtils.isBlank(firstName) &&
                 (
                         currentUserRef == null || !StringUtils.isBlank((String) NodeServiceHelper.getPropertyNative(currentUserRef, CCConstants.CM_PROP_PERSON_FIRSTNAME))
                 )
-        ){
+        ) {
             throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_FIRSTNAME);
         }
 
-        if(StringUtils.isBlank(lastName) &&
+        if (StringUtils.isBlank(lastName) &&
                 (
                         currentUserRef == null || !StringUtils.isBlank((String) NodeServiceHelper.getPropertyNative(currentUserRef, CCConstants.CM_PROP_PERSON_LASTNAME))
-                )){
+                )) {
             throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_LASTNAME);
         }
 
-        if(StringUtils.isBlank(email) &&
+        if (StringUtils.isBlank(email) &&
                 (
                         currentUserRef == null || !StringUtils.isBlank((String) NodeServiceHelper.getPropertyNative(currentUserRef, CCConstants.CM_PROP_PERSON_EMAIL))
-                )){
+                )) {
             throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_EMAIL);
         }
 
@@ -624,26 +627,44 @@ public class AuthorityServiceImpl implements AuthorityService {
         return transformed;
     }
 
-    public String[] getMembershipsOfGroup(String groupName) {
-        return retryingTransactionHelper.doInTransaction(() -> {
-            String key = groupName.startsWith(PermissionService.GROUP_PREFIX) ? groupName : PermissionService.GROUP_PREFIX + groupName;
-            return authorityService.getContainedAuthorities(null, key, true).toArray(new String[0]);
-        }, true);
-
+    @RetryingTransaction(readonly = true)
+    public Set<String> getMembershipsOfGroup(String groupName) {
+        String key = groupName.startsWith(PermissionService.GROUP_PREFIX) ? groupName : PermissionService.GROUP_PREFIX + groupName;
+        return authorityService.getContainedAuthorities(null, key, true);
     }
 
+    @RetryingTransaction(readonly = true)
     @Override
-    public void addMemberships(String groupName, String[] members) {
+    public Set<String> getMembershipsOfGroupRecursively(String groupName) {
+        String key = groupName.startsWith(PermissionService.GROUP_PREFIX) ? groupName : PermissionService.GROUP_PREFIX + groupName;
+        Set<String> authorities = authorityService.getContainedAuthorities(null, key, true);
+        Set<String> result = authorities
+                .stream()
+                .filter(x -> AuthorityType.getAuthorityType(x) != AuthorityType.GROUP)
+                .collect(Collectors.toSet());
+
+
+        authorities.stream()
+                .filter(authority -> AuthorityType.getAuthorityType(authority) == AuthorityType.GROUP)
+                .map(this::getMembershipsOfGroupRecursively)
+                .forEach(result::addAll);
+
+        return result;
+    }
+
+
+    @Override
+    public void addMemberships(String groupName, Collection<String> members) {
 
         retryingTransactionHelper.doInTransaction((RetryingTransactionCallback<Void>) () -> {
-            eduAuthorityService.addMemberships(groupName, members);
+            eduAuthorityService.addMemberships(groupName, members.toArray(new String[0]));
             return null;
         }, false);
 
     }
 
     @Override
-    public void removeMemberships(String groupName, String[] members) {
+    public void removeMemberships(String groupName, Collection<String> members) {
 
 
         retryingTransactionHelper.doInTransaction((RetryingTransactionCallback<Void>) () -> {
@@ -766,13 +787,13 @@ public class AuthorityServiceImpl implements AuthorityService {
     }
 
     @Override
-    public String generate2FaCode(String username){
+    public String generate2FaCode(String username) {
         //check if userName exist, if not get login USER
         String user = (username == null)
                 ? AuthenticationUtil.getFullyAuthenticatedUser()
                 : username;
 
-        if(!canChange2Fa(user)){
+        if (!canChange2Fa(user)) {
             throw new InsufficientPermissionException("You are not allowed to activate 2 factor authorization");
         }
 
@@ -809,7 +830,7 @@ public class AuthorityServiceImpl implements AuthorityService {
                 ? AuthenticationUtil.getFullyAuthenticatedUser()
                 : username;
 
-        if(!canChange2Fa(user)){
+        if (!canChange2Fa(user)) {
             throw new InsufficientPermissionException("You are not allowed to check 2 factor authorization");
         }
 
@@ -832,11 +853,11 @@ public class AuthorityServiceImpl implements AuthorityService {
                 ? AuthenticationUtil.getFullyAuthenticatedUser()
                 : username;
 
-        if(!canChange2Fa(user)){
+        if (!canChange2Fa(user)) {
             throw new InsufficientPermissionException("You are not allowed to activate 2 factor authorization");
         }
 
-        if(!validate2Fa(user, code, true)){
+        if (!validate2Fa(user, code, true)) {
             throw new InvalidArgumentException("Invalid 2FA code");
         }
 
@@ -864,7 +885,7 @@ public class AuthorityServiceImpl implements AuthorityService {
     }
 
     boolean canChange2Fa(@NotNull String username) {
-        if(isGlobalAdmin()){
+        if (isGlobalAdmin()) {
             return true;
         }
 
@@ -880,7 +901,7 @@ public class AuthorityServiceImpl implements AuthorityService {
                 ? AuthenticationUtil.getFullyAuthenticatedUser()
                 : username;
 
-        if(!canChange2Fa(user)){
+        if (!canChange2Fa(user)) {
             throw new InsufficientPermissionException("You are not allowed to deactivate 2 factor authorization");
         }
 
@@ -921,7 +942,7 @@ public class AuthorityServiceImpl implements AuthorityService {
                     }
 
                     Boolean isActivated = (Boolean) nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CCM_PROP_PERSON_2FA_ACTIVATED));
-                    if(!ignoreActivationStatus && isActivated != null && !isActivated) {
+                    if (!ignoreActivationStatus && isActivated != null && !isActivated) {
                         return null;
                     }
 
@@ -944,7 +965,7 @@ public class AuthorityServiceImpl implements AuthorityService {
                 ? AuthenticationUtil.getFullyAuthenticatedUser()
                 : username;
 
-        if(!canChange2Fa(user)){
+        if (!canChange2Fa(user)) {
             throw new InsufficientPermissionException("You are not allowed to generate a 2 factor authorization");
         }
 

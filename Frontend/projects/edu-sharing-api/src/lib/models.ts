@@ -82,7 +82,6 @@ export { Submission } from './api/models/submission';
 export { Permission } from './api/models/permission';
 export { AssignmentFile } from './api/models/assignment-file';
 export { AssignmentFileRequest } from './api/models/assignment-file-request';
-export { AssignmentFileUpload } from './api/models/assignment-file-upload';
 export { Node } from './api/models/node';
 export { NodeEntry } from './api/models/node-entry';
 export { NodeEntries } from './api/models/node-entries';

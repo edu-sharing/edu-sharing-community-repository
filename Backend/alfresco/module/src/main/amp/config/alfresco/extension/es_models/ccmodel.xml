@@ -249,7 +249,6 @@
         <aspect>cm:metadataset</aspect>
         <aspect>ccm:educontext</aspect>
         <aspect>ccm:eduscope</aspect>
-        <aspect>ccm:eduGroupContent</aspect>
       </mandatory-aspects>
     </type>
 
@@ -560,6 +559,95 @@
         <aspect>ccm:eduscope</aspect>
       </mandatory-aspects>
     </type>
+
+
+    <type name="ccm:assignment">
+      <title>Campus Content Assignment</title>
+      <parent>cm:cmobject</parent>
+      <includedInSuperTypeQuery>true</includedInSuperTypeQuery>
+      <associations>
+        <child-association name="ccm:assignment_files">
+          <source>
+            <mandatory>false</mandatory>
+            <many>true</many>
+          </source>
+          <target>
+            <class>ccm:assignment_file</class>
+            <mandatory>false</mandatory>
+            <many>false</many>
+          </target>
+          <duplicate>false</duplicate>
+          <propagateTimestamps>true</propagateTimestamps>
+        </child-association>
+        <child-association name="ccm:assignment_submissions">
+          <source>
+            <mandatory>false</mandatory>
+            <many>false</many>
+          </source>
+          <target>
+            <class>ccm:submissions</class>
+            <mandatory>false</mandatory>
+            <many>false</many>
+          </target>
+          <duplicate>false</duplicate>
+          <propagateTimestamps>true</propagateTimestamps>
+        </child-association>
+      </associations>
+      <mandatory-aspects>
+        <aspect>ccm:assignment_metadata</aspect>
+        <aspect>cm:titled</aspect>
+      </mandatory-aspects>
+    </type>
+
+    <type name="ccm:assignment_file">
+      <title>Campus Content Assignment File</title>
+      <parent>cm:cmobject</parent>
+      <includedInSuperTypeQuery>true</includedInSuperTypeQuery>
+      <associations>
+        <child-association name="ccm:assignment_file_copy">
+          <source>
+            <mandatory>false</mandatory>
+            <many>false</many>
+          </source>
+          <target>
+            <class>ccm:io</class>
+            <mandatory>false</mandatory>
+            <many>false</many>
+          </target>
+          <duplicate>false</duplicate>
+          <propagateTimestamps>true</propagateTimestamps>
+        </child-association>
+      </associations>
+      <mandatory-aspects>
+        <aspect>ccm:assignment_file_metadata</aspect>
+      </mandatory-aspects>
+    </type>
+
+    <type name="ccm:submissions">
+      <title>Campus Content Submissions Folder</title>
+      <parent>cm:cmobject</parent>
+      <includedInSuperTypeQuery>true</includedInSuperTypeQuery>
+<!--      <associations>-->
+<!--        <child-association name="ccm:submission_files">-->
+<!--          <source>-->
+<!--            <mandatory>false</mandatory>-->
+<!--            <many>true</many>-->
+<!--          </source>-->
+<!--          <target>-->
+<!--            <class>ccm:assignment_file</class>-->
+<!--            <mandatory>false</mandatory>-->
+<!--            <many>false</many>-->
+<!--          </target>-->
+<!--          <duplicate>false</duplicate>-->
+<!--          <propagateTimestamps>true</propagateTimestamps>-->
+<!--        </child-association>-->
+<!--      </associations>-->
+      <mandatory-aspects>
+        <aspect>cm:titled</aspect>
+      </mandatory-aspects>
+    </type>
+
+
   </types>
 
 
@@ -2385,6 +2473,50 @@
 
     <aspect name="ccm:gdpr">
       <title>General Data Protection Regulation</title>
+    </aspect>
+    
+    <aspect name="ccm:assignment_metadata">
+      <title>Data for asignment objects</title>
+      <properties>
+        <property name="ccm:assignment_type">
+          <type>d:text</type>
+          <multiple>false</multiple>
+        </property>
+        <property name="ccm:assignment_status">
+          <type>d:text</type>
+          <multiple>false</multiple>
+        </property>
+        <property name="ccm:assignment_allowadditionaldocumentsubmission">
+          <type>d:boolean</type>
+          <multiple>false</multiple>
+        </property>
+        <property name="ccm:assignment_startdate">
+          <type>d:date</type>
+          <multiple>false</multiple>
+        </property>
+        <property name="ccm:assignment_enddate">
+          <type>d:date</type>
+          <multiple>false</multiple>
+        </property>
+      </properties>
+    </aspect>
+
+    <aspect name="ccm:assignment_file_metadata">
+      <title>Data for assignment objects</title>
+      <properties>
+        <property name="ccm:assigmentfile_isdone">
+          <type>d:boolean</type>
+          <multiple>false</multiple>
+        </property>
+        <property name="ccm:assigmentfile_documenttype">
+          <type>d:text</type>
+          <multiple>false</multiple>
+        </property>
+        <property name="ccm:assigmentfile_referTo">
+          <type>d:noderef</type>
+          <multiple>false</multiple>
+        </property>
+      </properties>
     </aspect>
   </aspects>
 </model>

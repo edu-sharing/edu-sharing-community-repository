@@ -41,12 +41,12 @@ public class InitHelper {
                 if(group.hasPath("members")) {
                     List<String> membersNew = group.getStringList("members");
                     if (membersNew != null && !membersNew.isEmpty()) {
-                        Set<String> membersOld = Arrays.stream(authorityService.getMembershipsOfGroup(id)).collect(Collectors.toSet());
+                        Set<String> membersOld = authorityService.getMembershipsOfGroup(id).stream().collect(Collectors.toSet());
                         if(!new HashSet<>(membersNew).equals(membersOld)) {
                             logger.info("Init group " + id + ": Resetting members (" + StringUtils.join(membersOld) + ")");
                             authorityService.removeMemberships(id, authorityService.getMembershipsOfGroup(id));
                             logger.info("Init group " + id + ": Setting new members (" + StringUtils.join(membersNew) + ")");
-                            authorityService.addMemberships(id, membersNew.toArray(String[]::new));
+                            authorityService.addMemberships(id, membersNew);
                         } else {
                             logger.info("Init group " + id + ": Is already initialized correctly (" + StringUtils.join(membersOld) + ")");
                         }

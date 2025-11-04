@@ -896,12 +896,12 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         String nodeType = service.getType(nodeRef).toString();
 
         // Properties:
-        for (QName qname : propMap.keySet()) {
+        for (Map.Entry<QName, Serializable> entry : propMap.entrySet()) {
 
-            String propName = qname.toString();
+            String propName = entry.getKey().toString();
 
             // Properties
-            Serializable object = propMap.get(qname);
+            Serializable object = entry.getValue();
 
             // allow only Number and String Types other Types will be handeled
             // in the following code

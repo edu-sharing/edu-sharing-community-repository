@@ -3,7 +3,6 @@ package org.edu_sharing.restservices.assignment.v1;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.StringToClassMapItem;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Encoding;
@@ -18,16 +17,22 @@ import java.io.InputStream;
 
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.assignment.v1.model.*;
 import org.edu_sharing.restservices.shared.ErrorResponse;
+import org.edu_sharing.service.assignment.AssignmentDao;
+import org.edu_sharing.service.assignment.AssignmentFileDao;
+import org.edu_sharing.service.assignment.AssignmentDaoFactory;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Path("/assignment/v1")
@@ -36,6 +41,9 @@ import java.util.List;
 @Consumes({"application/json"})
 @Produces({"application/json"})
 public class AssignmentApi {
+
+    @Setter(onMethod_ = @Autowired)
+    private AssignmentDaoFactory assignmentDaoFactory;
 
 
     /******************
@@ -56,8 +64,9 @@ public class AssignmentApi {
             }
     )
     public Response createOrUpdateAssignment(CreateAssignmentRequest request) {
-        Assignment assignment = null;
-        return Response.ok().entity(assignment).build();
+        AssignmentDao assignment = assignmentDaoFactory.getAssignment(request.id());
+        assignment.createOrUpdate(request);
+        return Response.ok().entity(assignment.getAssignment()).build();
     }
 
     @GET
@@ -75,8 +84,8 @@ public class AssignmentApi {
             }
     )
     public Response getAssignment(@PathParam("assignmentId") String assignmentId) {
-        Assignment assignment = null;
-        return Response.ok().entity(assignment).build();
+        AssignmentDao assignment = assignmentDaoFactory.getAssignment(assignmentId);
+        return Response.ok().entity(assignment.getAssignment()).build();
     }
 
     @DELETE
@@ -94,6 +103,8 @@ public class AssignmentApi {
             }
     )
     public Response deleteAssignment(@PathParam("assignmentId") String assignmentId) {
+        AssignmentDao assignment = assignmentDaoFactory.getAssignment(assignmentId);
+        assignment.delete();
         return Response.ok().build();
     }
 
@@ -116,95 +127,14 @@ public class AssignmentApi {
             }
     )
     public Response getAssignmentFiles(@PathParam("assignmentId") String assignmentId) {
-        List<AssignmentFile> assignmentFiles = null;
+        List<AssignmentFile> assignmentFiles = assignmentDaoFactory.getAssignment(assignmentId)
+                .getAssignmentFiles()
+                .stream()
+                .map(AssignmentFileDao::getAssignmentFile)
+                .filter(Objects::nonNull)
+                .toList();
         return Response.ok().entity(assignmentFiles).build();
     }
-
-
-    /**
-     * Only used for Swagger UI / OpenApi Specification.
-     * To use this as a parameter, we need to register a MessageBodyReader for multipart/form-data.
-     */
-    @Schema(name = "AssignmentFileUpload", description = "Multipart upload for assignment files")
-    public static class AssignmentFileUpload {
-
-        @Schema(description = "JSON-Metadaten")
-        public AssignmentFileRequest metadata;
-
-        @Schema(type = "string", format = "binary", description = "File content")
-        public InputStream binary;
-    }
-
-    @PUT
-    @Path("/{assignmentId}/files")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Operation(
-            summary = "Create or edit assignment file",
-            description = "Create or edit assignment file",
-            requestBody = @RequestBody(
-                    required = true,
-                    content = @Content(
-                            mediaType = MediaType.MULTIPART_FORM_DATA,
-                            schema = @Schema(implementation = AssignmentFileUpload.class),
-                            encoding = {
-                                    @Encoding(
-                                            name = "metadata",
-                                            contentType = "application/json"
-                                    ),
-                                    @Encoding(
-                                            name = "binary",
-                                            contentType = "application/octet-stream"
-                                    )
-                            }
-                    )
-            )
-    )
-    @ApiResponses(
-            value = {
-                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = AssignmentFile.class))),
-                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-            }
-    )
-    public Response createOrUpdateAssignmentFiles(@PathParam("assignmentId") String assignmentId,
-                                                  @Parameter(description = "id or null if a new assignment file shall be created")
-                                                  @QueryParam("assignmentFileId") String assignmentFileId,
-                                                  @FormDataParam("metadata") FormDataBodyPart metadataPart,
-                                                  @FormDataParam("binary") InputStream fileInputStream,
-                                                  @FormDataParam("binary") FormDataContentDisposition fileMetaData) {
-
-        metadataPart.setMediaType(MediaType.APPLICATION_JSON_TYPE);
-        AssignmentFileRequest assignmentFileRequest = metadataPart.getValueAs(AssignmentFileRequest.class);
-        log.debug("Received metadata: {}", assignmentFileRequest);
-        log.debug("Received file: {}", fileMetaData.getFileName());
-
-        AssignmentFile assignmentFile = null;
-        return Response.ok().entity(assignmentFile).build();
-    }
-
-    @DELETE
-    @Path("/{assignmentId}/files/{assignmentFileId}")
-    @Operation(summary = "Delete a assignmentFile", description = "Delete a assignmentFile.")
-    @ApiResponses(
-            value = {
-                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200),
-                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-            }
-    )
-    public Response deleteAssignmentFile(@PathParam("assignmentId") String assignmentId,
-                                         @PathParam("assignmentFileId") String assignmentFileId) {
-        return Response.ok().build();
-    }
-
 
     /******************
      * Submission API *

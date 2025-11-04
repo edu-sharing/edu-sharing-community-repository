@@ -96,14 +96,14 @@ public class MediacenterDao extends AbstractDao{
 
 	public void addManagedGroup(String group) throws DAOException {
 		try {
-			authorityService.addMemberships(this.authorityName, new String[]{group});
+			authorityService.addMemberships(this.authorityName, List.of(group));
 		}catch(Throwable t){
 			throw DAOException.mapping(t);
 		}
 	}
 	public void removeManagedGroup(String group) throws DAOException {
 		try {
-			authorityService.removeMemberships(this.authorityName, new String[]{group});
+			authorityService.removeMemberships(this.authorityName, List.of(group));
 		}catch(Throwable t){
 			throw DAOException.mapping(t);
 		}
@@ -178,7 +178,7 @@ public class MediacenterDao extends AbstractDao{
 			//check and throw if not allowed
 			mediacenterService.isAllowedToManage(authorityName);
 
-			return Arrays.stream(authorityService.getMembershipsOfGroup(this.authorityName)).filter((group) -> group.startsWith(PermissionService.GROUP_PREFIX)).map((group) -> {
+			return authorityService.getMembershipsOfGroup(this.authorityName).stream().filter((group) -> group.startsWith(PermissionService.GROUP_PREFIX)).map((group) -> {
 						try {
 							return GroupDao.getGroup(repoDao, group);
 						} catch (DAOException e) {

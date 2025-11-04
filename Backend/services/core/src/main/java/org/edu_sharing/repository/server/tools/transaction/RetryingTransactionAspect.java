@@ -7,8 +7,11 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+
+import java.lang.reflect.Method;
 
 @Aspect
 @Component
@@ -19,9 +22,11 @@ public class RetryingTransactionAspect {
     private final RetryingTransactionHelper retryingTransactionHelper;
 
     @Around("@annotation(RetryingTransaction)")
-    public Object runAsSystem(ProceedingJoinPoint joinPoint) {
+    public Object runInRetryingTransaction(ProceedingJoinPoint joinPoint) throws NoSuchMethodException {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        RetryingTransaction annotation = signature.getMethod().getAnnotation(RetryingTransaction.class);
+        Class<?> targetClass = joinPoint.getTarget().getClass();
+        Method method = targetClass.getMethod(signature.getName(), signature.getParameterTypes());
+        RetryingTransaction annotation = AnnotationUtils.findAnnotation(method, RetryingTransaction.class);
 
         return retryingTransactionHelper.doInTransaction(() -> {
             try {

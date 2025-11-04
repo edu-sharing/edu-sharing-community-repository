@@ -5,10 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -75,19 +72,11 @@ public class FolderTemplatesImpl implements FolderTemplates {
 		}
 		mappedGroup = mappedGroup.replace("GROUP_", "");
 
-		String[] member = AuthorityServiceFactory.getInstance().getLocalService().getMembershipsOfGroup(mappedGroup);
+		Set<String> member = AuthorityServiceFactory.getInstance().getLocalService().getMembershipsOfGroup(mappedGroup);
 
 		String user = (String) Context.getCurrentInstance().getRequest().getSession()
 				.getAttribute(CCConstants.AUTH_USERNAME);
-
-		int i;
-		for (i = 0; i < member.length; i++) {
-			if (member[i].equals(user)) {
-				return true;
-			}
-		}
-		
-		return false;
+		return member.contains(user);
 	}
 
 	public boolean validateTemplate(InputStream is) throws Throwable {

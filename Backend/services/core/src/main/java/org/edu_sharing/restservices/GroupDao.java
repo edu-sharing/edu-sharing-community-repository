@@ -269,14 +269,10 @@ public class GroupDao {
 
         try {
             checkAdminAccess();
-            AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
-
-                @Override
-                public Void doWork() throws Exception {
-                    authorityService.addMemberships(groupName, new String[]{member});
-                    PersonCache.reset(member);
-                    return null;
-                }
+            AuthenticationUtil.runAsSystem((RunAsWork<Void>) () -> {
+                authorityService.addMemberships(groupName, List.of(member));
+                PersonCache.reset(member);
+                return null;
             });
 
         } catch (Exception e) {
@@ -305,7 +301,7 @@ public class GroupDao {
 
                 @Override
                 public Void doWork() throws Exception {
-                    authorityService.removeMemberships(groupName, new String[]{member});
+                    authorityService.removeMemberships(groupName, List.of(member));
                     PersonCache.reset(member);
                     return null;
                 }

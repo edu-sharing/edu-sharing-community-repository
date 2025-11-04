@@ -4,9 +4,11 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.rpc.User;
+import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -78,11 +80,14 @@ public interface AuthorityService {
 
 	NodeRef getAuthorityNodeRef(String authority);
 
-    void addMemberships(String groupName, String[] members);
+    @RetryingTransaction(readonly = true)
+    Set<String> getMembershipsOfGroupRecursively(String groupName);
 
-	void removeMemberships(String groupName, String[] members);
+    void addMemberships(String groupName, Collection<String> members);
 
-	String[] getMembershipsOfGroup(String groupName);
+	void removeMemberships(String groupName, Collection<String> members);
+
+	Set<String> getMembershipsOfGroup(String groupName);
 
 	void createGroupWithType(String groupName, String displayName, String parentGroup, String groupType) throws Exception;
 

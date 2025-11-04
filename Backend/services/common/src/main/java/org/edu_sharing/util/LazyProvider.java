@@ -48,4 +48,9 @@ public class LazyProvider<T> {
         return value.get();
     }
 
+    public void invalidate() {
+        synchronized(value) {
+            value.set(null);
+        }
+    }
 }

@@ -11,9 +11,9 @@ public record CreateAssignmentRequest(
         Date endTime,
         Assignment.Status status,
         Assignment.Type type,
-        boolean alloDelayedSubmission,
         boolean allowAdditionalDocumentSubmission,
-        List<Assignment.Permission> permissions
+        List<PermissionRequest> permissions,
+        List<AssignmentFileRequest> assignmentFiles
 ) {
 }
 

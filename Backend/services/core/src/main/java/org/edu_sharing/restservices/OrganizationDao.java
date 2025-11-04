@@ -32,6 +32,7 @@ import org.springframework.context.ApplicationContext;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -293,12 +294,12 @@ public class OrganizationDao {
 
 	private void removeMember(String groupName,String authorityName) throws DAOException {
 		try {
-			String[] members = repoDao.getAuthorityService().getMembershipsOfGroup(groupName);
+			Set<String> members = repoDao.getAuthorityService().getMembershipsOfGroup(groupName);
 			for (String auth : members) {
 				if (auth.startsWith(PermissionService.GROUP_PREFIX)) {
 					removeMember(auth.substring(PermissionService.GROUP_PREFIX.length()), authorityName);
 				} else if (auth.equals(authorityName)) {
-					repoDao.getAuthorityService().removeMemberships(groupName, new String[]{authorityName});
+					repoDao.getAuthorityService().removeMemberships(groupName, List.of(authorityName));
 				}
 			}
 		}catch(Exception e){

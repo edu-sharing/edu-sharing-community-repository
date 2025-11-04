@@ -186,6 +186,11 @@ public class UserEnvironmentTool {
         return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_GDPR, CCConstants.I18n_SYSTEMFOLDER_GDPR);
     }
 
+    public String getEdu_SharingAssignmentFolder() throws Exception {
+        return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_ASSIGNMENT, CCConstants.I18n_SYSTEMFOLDER_ASSIGNMENT);
+    }
+
+
     public String getOrCreateSystemFolderByName(String constantName, String i18nId) throws Exception {
         return getOrCreateSystemFolder(constantName, i18nId);
     }

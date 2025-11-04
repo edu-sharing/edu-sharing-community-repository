@@ -48,6 +48,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Arrays;
+import java.util.Set;
 
 @Slf4j
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
@@ -83,8 +84,8 @@ public class RepairAdminGroupsAuthorityName extends AbstractJob {
                 try {
                     searchService.getAllMediacenters().forEach(mz -> {
                         log.info("Processing media center {}", mz);
-                        String[] memberships = authorityService.getMembershipsOfGroup(mz);
-                        Arrays.stream(memberships).forEach(subgroup -> {
+                        Set<String> memberships = authorityService.getMembershipsOfGroup(mz);
+                        memberships.forEach(subgroup -> {
                             String grouptype = (String) authorityService.getAuthorityProperty(subgroup, CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
                             if (org.edu_sharing.alfresco.service.AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP.equals(grouptype)) {
                                 log.info("Checking subgroup " + subgroup + " of parent " + mz);

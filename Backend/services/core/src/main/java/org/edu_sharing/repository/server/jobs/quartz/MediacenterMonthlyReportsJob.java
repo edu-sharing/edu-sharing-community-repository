@@ -190,7 +190,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 
             // Holds for each event (VIEW, DOWNLOAD...) a list of Org ids + counts
             Map<String, Map<String, Long>> result = new HashMap<>();
-            Set<String> organizations = new HashSet<>(Arrays.asList(authorityService.getMembershipsOfGroup(mediacenter)));
+            Set<String> organizations = new HashSet<>(authorityService.getMembershipsOfGroup(mediacenter));
             for (StatisticEntry v : dataNodes.values()) {
                 v.getGroups().forEach((eventType, stats) -> {
                     result.computeIfAbsent(eventType, k -> new HashMap<>());
