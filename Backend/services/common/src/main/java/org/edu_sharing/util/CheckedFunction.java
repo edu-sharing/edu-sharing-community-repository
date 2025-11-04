@@ -33,7 +33,9 @@ public interface CheckedFunction<T, R, E extends Throwable> {
         return t -> {
             try {
                 return checkedFunction.apply(t);
-            } catch (Throwable e) {
+            } catch (RuntimeException e) {
+                throw e;
+            }  catch (Throwable e) {
                 throw new RuntimeException(e);
             }
         };
