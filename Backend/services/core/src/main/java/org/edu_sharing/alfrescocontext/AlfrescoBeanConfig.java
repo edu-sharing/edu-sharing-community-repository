@@ -53,8 +53,13 @@ import org.edu_sharing.repository.server.tools.cache.UserCache;
 import org.edu_sharing.spring.conditions.ConditionalOnMissingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
+import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 
+import javax.sql.DataSource;
 import java.util.List;
 import java.util.Properties;
 
@@ -338,6 +343,12 @@ public class AlfrescoBeanConfig {
     @Bean(name = "globalProperties")
     public Properties globalProperties() {
         return (Properties) applicationContext.getBean("global-properties");
+    }
+
+    @Bean(name="dataSource")
+    public DataSource dataSource() {
+        DataSource dataSource = applicationContext.getBean("dataSource", DataSource.class);
+        return new TransactionAwareDataSourceProxy(dataSource);
     }
 
 

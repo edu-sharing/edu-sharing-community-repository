@@ -189,40 +189,44 @@
     <url-pattern>/*</url-pattern>
   </filter-mapping>
 
-  <!-- SAML
-  <filter-mapping>
-    <filter-name>springSecurityFilterChain</filter-name>
-    <url-pattern>/shibboleth</url-pattern>
-  </filter-mapping>
-  <filter-mapping>
-    <filter-name>springSecurityFilterChain</filter-name>
-    <url-pattern>/saml2/*</url-pattern>
-  </filter-mapping>
-  <filter-mapping>
-    <filter-name>springSecurityFilterChain</filter-name>
-    <url-pattern>/login/*</url-pattern>
-  </filter-mapping>
-  <filter-mapping>
-    <filter-name>springSecurityFilterChain</filter-name>
-    <url-pattern>/logout/*</url-pattern>
-  </filter-mapping>
-  <filter-mapping>
-    <filter-name>springSecurityFilterChain</filter-name>
-    <url-pattern>/oauth2/*</url-pattern>
-   </filter-mapping>
-   <filter-mapping>
+    <!-- SAML
+    <filter-mapping>
       <filter-name>springSecurityFilterChain</filter-name>
-      <url-pattern>/rest/*</url-pattern>
-   </filter-mapping>
-   <filter-mapping>
+      <url-pattern>/shibboleth</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
       <filter-name>springSecurityFilterChain</filter-name>
-      <url-pattern>/graphql/*</url-pattern>
-   </filter-mapping>
+      <url-pattern>/saml2/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+      <filter-name>springSecurityFilterChain</filter-name>
+      <url-pattern>/login/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+      <filter-name>springSecurityFilterChain</filter-name>
+      <url-pattern>/logout/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+      <filter-name>springSecurityFilterChain</filter-name>
+      <url-pattern>/oauth2/*</url-pattern>
+     </filter-mapping>
      <filter-mapping>
       <filter-name>springSecurityFilterChain</filter-name>
-      <url-pattern>/eduservlet/*</url-pattern>
-   </filter-mapping>
-   SAML -->
+      <url-pattern>/oauth2server/*</url-pattern>
+     </filter-mapping>
+     <filter-mapping>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/rest/*</url-pattern>
+     </filter-mapping>
+     <filter-mapping>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/graphql/*</url-pattern>
+     </filter-mapping>
+       <filter-mapping>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/eduservlet/*</url-pattern>
+     </filter-mapping>
+     SAML -->
 
   <filter-mapping>
     <filter-name>DisableCacheFilter</filter-name>

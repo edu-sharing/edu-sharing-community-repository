@@ -1,7 +1,7 @@
 import { SelectionModel } from '@angular/cdk/collections';
 import { ElementRef, EventEmitter, Injectable, Input, signal, WritableSignal } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { Node } from 'ngx-edu-sharing-api';
+import { Node, RestConstants } from 'ngx-edu-sharing-api';
 import {
     ClickSource,
     FetchEvent,
@@ -23,7 +23,7 @@ import {
 } from '../node-entries/node-entries-global.service';
 
 import { OptionItem, Scope } from '../types/option-item';
-import { ListItem } from '../types/list-item';
+import { ListItem, ListItemSort } from '../types/list-item';
 import { UIService } from './ui.service';
 import { NodeDataSourceRemote } from '../node-entries/node-data-source-remote';
 import { delay, map } from 'rxjs/operators';
@@ -249,6 +249,37 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
             } else {
                 this.toast.toast('NO_AVAILABLE_OPTIONS');
             }
+        });
+    }
+
+    getSortColumns() {
+        return this.sort?.columns?.filter((c) => {
+            const result = this.columns
+                .concat(
+                    new ListItemSort('NODE', 'score'),
+                    new ListItemSort('NODE', RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION),
+                    new ListItemSort('NODE', RestConstants.CM_PROP_TITLE),
+                    new ListItemSort('NODE', RestConstants.CM_NAME),
+                    new ListItemSort('NODE', RestConstants.CM_PROP_C_CREATED),
+                    new ListItemSort('NODE', RestConstants.CM_MODIFIED_DATE),
+                    new ListItemSort('NODE', RestConstants.CCM_PROP_REPLICATIONMODIFIED),
+                    new ListItemSort('NODE', RestConstants.CCM_PROP_REPLICATIONSOURCETIMESTAMP),
+                )
+                .some((c2) => c.type === c2.type && c2.name === c.name);
+            if (!result && !this.configureColumns) {
+                return this.sort?.columns;
+                /*
+                    const warning =
+                        'Sort field ' +
+                        c.name +
+                        ' was specified but is not present as a column. ' +
+                        'It will be ignored. Please also configure this field in the <lists> section';
+                    if (!displayedWarnings.includes(warning)) {
+                        console.warn(warning);
+                        displayedWarnings.push(warning);
+                    }*/
+            }
+            return result;
         });
     }
 }

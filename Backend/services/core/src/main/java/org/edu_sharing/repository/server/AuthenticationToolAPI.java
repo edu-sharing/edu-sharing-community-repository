@@ -27,9 +27,6 @@
  */
 package org.edu_sharing.repository.server;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import jakarta.servlet.http.HttpSession;
 
 import lombok.RequiredArgsConstructor;
@@ -54,9 +51,20 @@ import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 
 import org.edu_sharing.spring.ApplicationContextFactory;
+import org.edu_sharing.spring.ApplicationContextFactory;
+import org.edu_sharing.spring.security.basic.SecurityConfigurationBasic;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+
+import java.util.Map;
 
 @Slf4j
 @Primary
@@ -109,7 +117,24 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
         return returnval;
     }
 
-    ;
+    public void addToSpringContext(String userName, HttpSession session) {
+        UserDetails user = User.withUsername(userName)
+                .password("N/A")   // Password not longer needed
+                .roles("USER")
+                .build();
+
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                user, null, user.getAuthorities()
+        );
+
+        // set auth in SecurityContext
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(auth);
+        SecurityContextHolder.setContext(context);
+
+        // set Session-Attribut
+        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
+    }
 
     @Override
     public Map<String, String> getUserInfo(String userName, String ticket) throws Exception {
@@ -252,6 +277,14 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
             Object localeObj = nodeService.getProperty(personService.getPerson(authenticationService.getCurrentUserName()), ContentModel.PROP_LOCALE);
             if (localeObj != null) {
                 session.setAttribute(CCConstants.AUTH_LOCALE, localeObj.toString());
+            }
+        }
+
+        ApplicationContext eduAppContext = ApplicationContextFactory.getApplicationContext();
+        if(eduAppContext != null){
+            String profiles = eduAppContext.getEnvironment().getProperty("spring.profiles.active");
+            if(profiles != null && profiles.contains(SecurityConfigurationBasic.PROFILE_ID)){
+                addToSpringContext(username,session);
             }
         }
     }

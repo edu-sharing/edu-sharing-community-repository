@@ -14,13 +14,14 @@ import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.authentication.AuthenticationFilter;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.service.authentication.oauth2.TokenService;
-import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.spring.security.basic.CSRFConfig;
+import org.edu_sharing.spring.security.server.oauth2.OAuth2TokenService;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
@@ -35,6 +36,8 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
     Logger logger = Logger.getLogger(ApiAuthenticationFilter.class);
 
     private TokenService tokenService;
+
+    private OAuth2TokenService oAuth2TokenService;
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse resp,
@@ -76,8 +79,20 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
 
                 String accessToken = authHdr.substring(6).trim();
 
-                try {
-                    Token token = tokenService.getToken(accessToken);
+                if(oAuth2TokenService != null){
+                    try {
+                        String userName = oAuth2TokenService.extractUsername(accessToken);
+                        if(userName == null) {
+                            httpResp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            httpResp.flushBuffer();
+                            httpResp.getWriter().print("Could not verify access token");
+                            return;
+                        }
+
+                        authTool.authenticateUser(userName,((HttpServletRequest) req).getSession());
+                        validatedAuth = authTool.validateAuthentication(session);
+                        logger.debug("oauth2 username is " + userName);
+                    /*Token token = tokenService.getToken(accessToken);
 
                     if (token != null) {
                         logger.info("oAuthToken:" + token.getAccessToken() + " alfresco ticket:" + token.getTicket());
@@ -92,11 +107,12 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
                         session.setAttribute(CCConstants.AUTH_ACCESS_TOKEN, token.getAccessToken());
 
                         validatedAuth = authTool.validateAuthentication(session);
-                    }
-                } catch (Exception ex) {
+                    }*/
+                    } catch (Exception ex) {
 
-                    logger.error(ex.getMessage(), ex);
-                }
+                        logger.error(ex.getMessage(), ex);
+                    }
+                }else logger.warn("got oauth token but oauth2 service is not available");
             } else if (authHdr.length() > 10 && authHdr.substring(0, 10).equalsIgnoreCase(CCConstants.AUTH_HEADER_EDU_TICKET)) {
                 String ticket = authHdr.substring(10).trim();
                 if (authTool.validateTicket(ticket)) {
@@ -276,6 +292,12 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
                 org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
 
         tokenService = (TokenService) eduApplicationContext.getBean("oauthTokenService");
+        try {
+            oAuth2TokenService = eduApplicationContext.getBean(OAuth2TokenService.class);
+        }catch (NoSuchBeanDefinitionException e){
+            logger.info("Oauth2TokenService not found");
+        }
+
     }
 
 }

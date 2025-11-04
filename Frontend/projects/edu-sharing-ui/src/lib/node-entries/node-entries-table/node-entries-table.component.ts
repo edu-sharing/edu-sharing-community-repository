@@ -7,11 +7,11 @@ import {
     Component,
     ElementRef,
     HostBinding,
-    Input,
     NgZone,
     OnChanges,
     OnDestroy,
     SimpleChanges,
+    TemplateRef,
     ViewChild,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
@@ -50,6 +50,7 @@ import { NodeDataSourceRemote } from '../node-data-source-remote';
 import { TranslationsService } from '../../translations/translations.service';
 import { NodesDragDropService } from '../../services/nodes-drag-drop.service';
 import { NodeHelperService } from '../../services/node-helper.service';
+import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
 
 @Component({
     selector: 'es-node-entries-table',
@@ -72,7 +73,9 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     @ViewChild(DropdownComponent) dropdown: DropdownComponent;
     @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
     @HostBinding('class.scroll') isScroll = false;
-
+    @ViewChild('gridTop', { static: false }) set gridTop(value: TemplateRef<unknown>) {
+        this.registerGridTop(value);
+    }
     dropdownLeft: number;
     dropdownTop: number;
 
@@ -86,6 +89,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     isDragging = false;
 
     private readonly maximumColumnsNumber$ = new BehaviorSubject(1);
+    readonly hasHiddenSortColumns$ = new BehaviorSubject(false);
     readonly visibleDataColumns$;
     readonly visibleColumnNames$;
 
@@ -97,6 +101,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         public entriesGlobalService: NodeEntriesGlobalService,
         private applicationRef: ApplicationRef,
         private toast: Toast,
+        public templatesService: NodeEntriesTemplatesService,
         private translations: TranslationsService,
         private nodeHelperService: NodeHelperService,
         private nodesDragDropService: NodesDragDropService,
@@ -164,11 +169,11 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         this.entriesService.openDropdown(this.dropdown, node, () => this.menuTrigger.openMenu());
     }
 
-    private updateSort(): void {
+    private updateSort(disableClear = false): void {
         this.sort.sort({
             id: this.entriesService.sort?.active,
             start: this.entriesService.sort?.direction as 'asc' | 'desc',
-            disableClear: false,
+            disableClear,
         });
         /*
         this.route.queryParams.pipe(first()).subscribe((queryParams: Params) => {
@@ -225,10 +230,17 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
                 this.entriesService.columnsSubject.pipe(map((c) => c?.columns)),
             ])
             .pipe(
-                map(([maximumColumnsNumber, columns]) => {
-                    return (columns ?? [])
+                map(([maximumColumnsNumber, columns]) =>
+                    (columns ?? [])
                         .filter((column) => column.visible)
-                        .filter((_, index) => index < maximumColumnsNumber);
+                        .filter((_, index) => index < maximumColumnsNumber),
+                ),
+                tap((columns) => {
+                    this.hasHiddenSortColumns$.next(
+                        this.entriesService
+                            .getSortColumns()
+                            .some((c) => !columns.some((c2) => c2.name === c.name)),
+                    );
                 }),
                 shareReplay(1),
             );
@@ -264,6 +276,18 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         }
     }
 
+    private registerGridTop(gridTop: TemplateRef<unknown>): void {
+        setTimeout(() => {
+            this.templatesService.entriesTopMatter = gridTop;
+        });
+        this.destroyed.subscribe(() => {
+            if (this.templatesService.entriesTopMatter === gridTop) {
+                setTimeout(() => {
+                    this.templatesService.entriesTopMatter = null;
+                });
+            }
+        });
+    }
     private registerSortChanges() {
         this.sort.sortChange.subscribe((sort: Sort) => {
             this.entriesService.sort.active = sort.active;
@@ -344,5 +368,15 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
             node.properties?.[RestConstants.CCM_PROP_IMPORT_BLOCKED]?.[0] === 'true' ||
             this.nodeHelperService.isNodeRevoked(node)
         );
+    }
+
+    selectSortChange(sort: Sort) {
+        this.entriesService.sort.active = sort.active;
+        this.entriesService.sort.direction = sort.direction;
+        console.log(sort);
+        this.updateSort(true);
+        /*this.sort.active = sort.active;
+        this.sort.direction = sort.direction;
+        this.changeDetectorRef.detectChanges();*/
     }
 }

@@ -7,6 +7,7 @@
     gap: 12px 10px;
     width: 100%;
     position: relative;
+    justify-content: flex-end;
     // Don't draw the vertical scroll buttons over the top matter
     z-index: 1;
     .title {

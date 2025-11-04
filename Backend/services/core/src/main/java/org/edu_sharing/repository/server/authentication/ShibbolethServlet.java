@@ -58,6 +58,7 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal;
 import org.springframework.security.saml2.provider.service.authentication.Saml2Authentication;
+import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -100,11 +101,16 @@ public class ShibbolethServlet extends SpringHttpServlet {
         String headerUserName = req.getRemoteUser();
         // headerUserName = getShibValue(ssoMapper.getSSOUsernameProp(), req);//transform(req.getHeader(authMethodShibboleth.getShibbolethUsername()));
 
-        if (validAuthInfo != null) {
-            if (validAuthInfo.get(CCConstants.AUTH_USERNAME).equals(headerUserName)) {
-                log.info("got valid ticket from session for user:{}", headerUserName);
-                redirect(resp, req);
-                return;
+		if (validAuthInfo != null ) {
+			if(headerUserName == null){
+				log.info("no sso username provided, but got valid ticket from session for user:"+validAuthInfo.get(CCConstants.AUTH_USERNAME));
+				redirect(resp, req);
+				return;
+			}else if (validAuthInfo.get(CCConstants.AUTH_USERNAME).equals(headerUserName)) {
+
+				log.info("got valid ticket from session for user:"+headerUserName);
+				redirect(resp, req);
+				return;
 
                 // do not trigger as guest
                 // otherwise, the session will be invalidated but still holding the OIDC token from the user
@@ -187,9 +193,15 @@ public class ShibbolethServlet extends SpringHttpServlet {
         redirectUrl = UrlTool.setParamEncode(redirectUrl, "redirectFromSSO", "true");
 		}
 
+		DefaultSavedRequest defaultSavedRequest = ((DefaultSavedRequest)req.getSession().getAttribute("SPRING_SECURITY_SAVED_REQUEST"));
+		if(defaultSavedRequest != null){
+			log.info("using redirect from spring framework:" + defaultSavedRequest.getRedirectUrl());
+			redirectUrl = defaultSavedRequest.getRedirectUrl();
+		}
+
 		log.info("redirectSuccessUrl:"+redirectUrl);
-        resp.sendRedirect(redirectUrl);
-    }
+		resp.sendRedirect(redirectUrl);
+	}
 
     private void mapAttributes(Map<String, String> ssoMap, HttpServletRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

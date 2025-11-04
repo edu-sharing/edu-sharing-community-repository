@@ -3,7 +3,9 @@
  */
 package org.edu_sharing.repository.server;
 
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletRegistration;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.chemistry.opencmis.server.impl.CmisRepositoryContextListener;
@@ -28,6 +30,8 @@ import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.spring.context.EduSharingContextInitializer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.ContextLoaderListener;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
 
 import java.io.File;
 
@@ -63,6 +67,7 @@ public class MCAlfrescoManager extends ContextLoaderListener {
 
             super.setContextInitializers(new EduSharingContextInitializer());
             super.contextInitialized(servletContextEvent);
+            registerSpringDispatcherServlet(servletContextEvent);
 
 
             //init the system folders so that are created with a admin
@@ -120,7 +125,6 @@ public class MCAlfrescoManager extends ContextLoaderListener {
             //ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
             Object factory = applicationContext.getBean("CMISServiceFactory");
             servletContextEvent.getServletContext().setAttribute(CmisRepositoryContextListener.SERVICES_FACTORY, factory);
-
         } catch (Throwable e) {
             e.printStackTrace();
         }
@@ -159,6 +163,23 @@ public class MCAlfrescoManager extends ContextLoaderListener {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    void registerSpringDispatcherServlet(ServletContextEvent event){
+        System.out.println("registering dispatcher servlet");
+        ServletContext servletContext = event.getServletContext();
+
+        // Reuse parent context for DispatcherServlet
+        WebApplicationContext dispatcherContext = getCurrentWebApplicationContext();
+
+        /*AnnotationConfigWebApplicationContext dispatcherContext = new AnnotationConfigWebApplicationContext();
+        dispatcherContext.setParent(parentContext);
+        dispatcherContext.register(MvcConfig.class);  // @EnableWebMvc config for OAuth2 only
+        */
+        DispatcherServlet dispatcherServlet = new DispatcherServlet(dispatcherContext);
+        ServletRegistration.Dynamic dispatcher = servletContext.addServlet("springDispatcher", dispatcherServlet);
+        dispatcher.setLoadOnStartup(1);
+        dispatcher.addMapping("/oauth2server/*");
     }
 
 }
