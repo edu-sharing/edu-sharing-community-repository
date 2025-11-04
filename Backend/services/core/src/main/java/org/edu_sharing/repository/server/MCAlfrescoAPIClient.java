@@ -1587,20 +1587,16 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         log.debug("called nodeID:" + nodeID + " store:" + store + " mimetype:" + mimetype + " property:" + property);
 
         File tempFile = TempFileProvider.createTempFile("edu_mimedetect.", ".bin");
-        RetryingTransactionCallback callback = () -> {
+        RetryingTransactionCallback<NodeRef> callback = () -> {
 
             NodeRef nodeRef = new NodeRef(store, nodeID);
             final ContentWriter contentWriter = contentService.getWriter(nodeRef, QName.createQName(property), true);
             contentWriter.addListener(() -> {
-                log.debug("Content Stream was closed");
+                log.debug("Content Stream was closed for:"+nodeRef);
                 log.debug(" size:" + contentWriter.getContentData().getSize() +
                         ", URL:" + contentWriter.getContentData().getContentUrl() +
                         ", MimeType:" + contentWriter.getContentData().getMimetype() + "" +
                         ", ContentData ToString:" + contentWriter.getContentData().toString());
-                if(onComplete != null) {
-                    onComplete.run();
-                }
-                tempFile.delete();
             });
 
             String finalMimeType = mimetype;
@@ -1622,10 +1618,15 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                 contentWriter.setMimetype(finalMimeType);
                 contentWriter.putContent(in);
             }
-            return null;
+            return nodeRef;
         };
         TransactionService transactionService = serviceRegistry.getTransactionService();
-        transactionService.getRetryingTransactionHelper().doInTransaction(callback, false);
+        NodeRef nodeRef = transactionService.getRetryingTransactionHelper().doInTransaction(callback, false);
+        log.debug("finished content writing tx:"+nodeRef);
+        tempFile.delete();
+        if(onComplete != null && nodeRef != null) {
+            onComplete.run();
+        }
     }
 
     public void setUserDefinedPreview(String nodeId, byte[] content, String fileName) {
@@ -1968,7 +1969,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
     }
 
-    public String getGroupNodeId(String groupName) throws Exception {
+    /**
+     * @Deprecated
+     */
+    private String getGroupNodeId(String groupName) throws Exception {
 
         AuthorityService authorityService = serviceRegistry.getAuthorityService();
 

@@ -43,9 +43,17 @@ public class VirtualEduGroupFolderTool {
 				for (String authority : authorities) {
 
 					NodeRef nodeRefAuthority = authorityService.getAuthorityNodeRef(authority);
+					if(nodeRefAuthority == null) {
+						logger.warn("Error trying to resolve group " + authority + " of user " + user + "(getAuthorityNodeRef == null)");
+						continue;
+					}
 					if (nodeService.hasAspect(nodeRefAuthority, QName.createQName(CCConstants.CCM_ASPECT_EDUGROUP))) {
 
 						NodeRef eduGroupHomeDir = (NodeRef) nodeService.getProperty(nodeRefAuthority, QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
+						if(eduGroupHomeDir == null) {
+							logger.warn("Invalid/missing edugroup home directory for user " + user + ", group: " + authority);
+							continue;
+						}
 						try {
 							String eduGroupHomeDirName = (String) nodeService.getProperty(eduGroupHomeDir, ContentModel.PROP_NAME);
 							children.add(new ChildAssociationRef(ContentModel.ASSOC_CONTAINS, nodeRef, QName.createQName(eduGroupHomeDirName), eduGroupHomeDir));

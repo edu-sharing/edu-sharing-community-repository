@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal, WritableSignal } from '@angular/core';
 import { AbstractControl, UntypedFormControl, ValidatorFn } from '@angular/forms';
 import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { ValueType } from 'ngx-edu-sharing-ui';
@@ -13,6 +13,7 @@ export class MdsEditorWidgetCheckboxComponent extends MdsEditorWidgetBase implem
     readonly valueType: ValueType = ValueType.String;
     formControl: UntypedFormControl;
     isIndeterminate: boolean;
+    isToggle: WritableSignal<boolean> = signal(false);
 
     async ngOnInit() {
         this.formControl = new UntypedFormControl(
@@ -26,6 +27,7 @@ export class MdsEditorWidgetCheckboxComponent extends MdsEditorWidgetBase implem
         this.formControl.setValue(initialValue === 'true');
         this.isIndeterminate = !!(await this.widget.getInitalValuesAsync()).individualValues;
         this.setIndeterminateValues(this.isIndeterminate);
+        this.isToggle.set(this.widget.definition.type === 'toggle');
 
         this.registerValueChanges(this.formControl);
     }

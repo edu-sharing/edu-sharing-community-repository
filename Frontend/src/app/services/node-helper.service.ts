@@ -218,12 +218,20 @@ export class NodeHelperService extends NodeHelperServiceBase {
     /**
      * fetches the preview of the node and appends it at preview.data
      */
-    public async appendImageData(node: Node, quality = 70) {
+    public async appendImageData(node: Node, quality = 70, size: number = null) {
         const options: any = this.rest.getRequestOptions();
         options.responseType = 'blob';
         const url = await this.repoUrlService.getRepoUrl(node.preview.url, node);
+        let sizeStr = '';
+        if (size) {
+            sizeStr =
+                '&crop=true&maxWidth=' +
+                encodeURIComponent(size) +
+                '&maxHeight=' +
+                encodeURIComponent(size);
+        }
         const data = await this.rest
-            .get<Blob>(url + '&allowRedirect=false&quality=' + quality, options, false)
+            .get<Blob>(url + '&allowRedirect=false&quality=' + quality + sizeStr, options, false)
             .toPromise();
         const reader = new FileReader();
         return new Promise((resolve) => {
@@ -733,15 +741,18 @@ export class NodeHelperService extends NodeHelperServiceBase {
     /**
      * Returns the full URL to a node, including the server origin and base href.
      */
-    getNodeUrl(node: UniversalNode, queryParams?: Params): string {
+    getNodeUrl(node: UniversalNode, queryParams?: Params, short = false): string {
         const link = this.getNodeLink('queryParams', node);
         if (link) {
-            const urlTree = this.router.createUrlTree([this.getNodeLink('routerLink', node)], {
-                queryParams: {
-                    ...(this.getNodeLink('queryParams', node) as Params),
-                    ...queryParams,
+            const urlTree = this.router.createUrlTree(
+                [this.getNodeLink('routerLink', node, short)],
+                {
+                    queryParams: {
+                        ...(this.getNodeLink('queryParams', node) as Params),
+                        ...queryParams,
+                    },
                 },
-            });
+            );
             return location.origin + this.location.prepareExternalUrl(urlTree.toString());
         } else {
             return null;

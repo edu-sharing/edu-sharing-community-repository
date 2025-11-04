@@ -43,12 +43,9 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions.SessionInfo;
-import org.edu_sharing.restservices.lti.v13.ApiTool;
-import org.edu_sharing.service.authentication.AuthenticationExceptionMessages;
 import org.edu_sharing.service.authentication.EduAuthentication;
 import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
@@ -60,10 +57,11 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal;
 import org.springframework.security.saml2.provider.service.authentication.Saml2Authentication;
 import org.springframework.security.web.savedrequest.DefaultSavedRequest;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -287,12 +285,14 @@ public class ShibbolethServlet extends HttpServlet {
 			}
 		}
 
-		logger.info("redirectSuccessUrl:"+redirectUrl);
 
-		//so that redirecting to invited trunk works
+		UriComponents components = UriComponentsBuilder.fromUriString(redirectUrl).build();
+		if(!components.getQueryParams().containsKey("redirectFromSSO")) {
+			//so that redirecting to invited trunk works
 
-		//remove trunk param here cause it's only needed cause of anchor is added here (server side does not get anchors)
-		redirectUrl = UrlTool.setParamEncode(redirectUrl, "redirectFromSSO", "true");
+			//remove trunk param here cause it's only needed cause of anchor is added here (server side does not get anchors)
+			redirectUrl = UrlTool.setParamEncode(redirectUrl, "redirectFromSSO", "true");
+		}
 
 		DefaultSavedRequest defaultSavedRequest = ((DefaultSavedRequest)req.getSession().getAttribute("SPRING_SECURITY_SAVED_REQUEST"));
 		if(defaultSavedRequest != null){
@@ -300,6 +300,7 @@ public class ShibbolethServlet extends HttpServlet {
 			redirectUrl = defaultSavedRequest.getRedirectUrl();
 		}
 
+		logger.info("redirectSuccessUrl:"+redirectUrl);
 		resp.sendRedirect(redirectUrl);
 	}
 

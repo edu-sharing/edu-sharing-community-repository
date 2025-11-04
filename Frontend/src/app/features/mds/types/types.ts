@@ -83,17 +83,6 @@ export type MdsEditorWidgetComponent = {
 
 export type EditorType = 'angular';
 
-export interface MdsList {
-    columns: MdsListColumn[];
-    id: string;
-}
-
-export interface MdsListColumn {
-    format: null;
-    id: string;
-    showDefault: boolean;
-}
-
 export enum RequiredMode {
     Mandatory = 'mandatory',
     MandatoryForPublish = 'mandatoryForPublish',
@@ -132,7 +121,13 @@ export enum BulkBehavior {
  *   - Read only
  *   - Triggered via mds-viewer
  */
-export type EditorMode = 'nodes' | 'search' | 'form' | 'inline' | 'viewer';
+export type EditorMode =
+    | 'nodes'
+    | 'search'
+    | 'form'
+    | 'inline'
+    | 'viewer'
+    | 'searchFacetSuggestion';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;

@@ -1,5 +1,6 @@
 export class UIConstants {
     public static ROUTER_PREFIX = 'components/';
+    public static ROUTER_PREFIX_SHORT = 'v/';
     // also declared in scss!
     public static MOBILE_WIDTH = 700;
     public static MOBILE_HEIGHT = 750;

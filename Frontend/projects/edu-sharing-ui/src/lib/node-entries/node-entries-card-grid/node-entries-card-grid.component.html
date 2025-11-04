@@ -16,7 +16,7 @@
     class="order-panel"
     [active]="entriesService.sort.active"
     [direction]="entriesService.sort.direction"
-    [columns]="getSortColumns()"
+    [columns]="entriesService.getSortColumns()"
     (sortChange)="onSortChange($event)"
     [(customSortingInProgress)]="entriesService.sort.customSortingInProgress"
     (customSortingInProgressChange)="onCustomSortingInProgressChange()"
@@ -109,7 +109,12 @@
           #dropTarget="esNodesDropTarget"
         >
           <ng-container *ngIf="isCustomTemplate(node)">
-            <ng-container *ngTemplateOutlet="$any(node)"></ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                templatesService.customCard || $any(node);
+                context: { element: node, options: entriesService.options }
+              "
+            ></ng-container>
           </ng-container>
           <ng-container *ngIf="!isCustomTemplate(node)">
             <es-node-entries-card

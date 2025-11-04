@@ -62,6 +62,7 @@ import {
 import { VirtualNode } from '../types/api-models';
 import { OptionsHelperDataService } from '../services/options-helper-data.service';
 import { UIService } from '../services/ui.service';
+import { ColumnType } from '../mds/mds-helper.service';
 
 @Component({
     selector: 'es-node-entries-wrapper',
@@ -91,10 +92,14 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
      * custom area for an overlay "above" each card (i.e. to show disabled infos), only for NodeEntriesDisplayType.SmallGrid & odeEntriesDisplayType.Grid
      */
     @ContentChild('overlay') overlayRef: TemplateRef<any>;
+    /**
+     * custom card template for each card only for NodeEntriesDisplayType.Grid
+     */
+    @ContentChild('customCard') customCard: TemplateRef<any>;
     @ViewChild('nodeEntriesComponent') nodeEntriesComponentRef: NodeEntriesComponent<T>;
     @Input() dataSource: NodeDataSource<T>;
     @Input() scope: Scope;
-    @Input() columns: ListItem[];
+    @Input() columns: ColumnType;
     @Input() configureColumns: boolean;
     @Input() checkbox = true;
     /**
@@ -226,6 +231,15 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
             changes.dataSource.currentValue !== changes.dataSource.previousValue
         ) {
             this.dataSourceDestroy$.next();
+            this.entriesService.dataSource
+                .connect()
+                .pipe(distinctUntilChanged(), takeUntil(this.dataSourceDestroy$))
+                .subscribe((o) => {
+                    if (this.optionsHelper.getData()) {
+                        this.optionsHelper.getData().allObjects = o;
+                        void this.optionsHelper.refreshComponents();
+                    }
+                });
             this.entriesService.dataSource.isLoadingSubject
                 .pipe(
                     distinctUntilChanged(),
@@ -237,9 +251,12 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
                 .subscribe(() => (this.lastLoadingCompleted = Date.now()));
         }
         this.entriesService.scope = this.scope;
-        if (changes.columns) {
+        if (changes.columns || changes.displayType) {
             this.entriesService.columnsSubject.next({
-                columns: this.columns,
+                columns:
+                    this.columns?.[
+                        this.displayType === NodeEntriesDisplayType.Table ? 'Table' : 'Default'
+                    ] || this.columns?.Default,
                 fromUser: false,
             });
         }
@@ -447,6 +464,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.templatesService.empty = this.emptyRef;
         this.templatesService.actionArea = this.actionAreaRef;
         this.templatesService.overlay = this.overlayRef;
+        this.templatesService.customCard = this.customCard;
     }
 
     /**

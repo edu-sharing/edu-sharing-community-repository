@@ -25,7 +25,7 @@ import {
     tap,
 } from 'rxjs/operators';
 import {
-    ListItem,
+    ColumnType,
     ListItemSort,
     ListSortConfig,
     MdsHelperService,
@@ -84,8 +84,8 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
     readonly resultsDataSource = new NodeDataSourceRemote(this._injector);
     readonly totalResults = this.resultsDataSource.observeTotal();
     readonly collectionsDataSource = new NodeDataSourceRemote(this._injector);
-    readonly resultColumns = new BehaviorSubject<ListItem[]>([]);
-    readonly collectionColumns = new BehaviorSubject<ListItem[]>([]);
+    readonly resultColumns = new BehaviorSubject<ColumnType>({});
+    readonly collectionColumns = new BehaviorSubject<ColumnType>({});
     readonly loadingParams = new BehaviorSubject<boolean>(true);
     readonly loadingContent = new BehaviorSubject<boolean>(true);
     readonly loadingCollections = new BehaviorSubject<boolean>(true);
@@ -102,6 +102,7 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
     constructor(
         private _injector: Injector,
         private _mds: MdsService,
+        private mdsHelperService: MdsHelperService,
         _nodeHelper: NodeHelperService,
         _router: Router,
         private _search: SearchService,
@@ -260,11 +261,11 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
                 ),
             );
         // Register columns.
+        mds.pipe(map((mds) => this.mdsHelperService.getColumns(mds, 'search'))).subscribe(
+            this.resultColumns,
+        );
         mds.pipe(
-            map((mds) => MdsHelperService.getColumns(this._translate, mds, 'search')),
-        ).subscribe(this.resultColumns);
-        mds.pipe(
-            map((mds) => MdsHelperService.getColumns(this._translate, mds, 'searchCollections')),
+            map((mds) => this.mdsHelperService.getColumns(mds, 'searchCollections')),
         ).subscribe(this.collectionColumns);
     }
     /**

@@ -105,18 +105,21 @@ export class MdsEditorSingleWidgetComponent implements OnChanges, OnDestroy, Mds
              */
             this.mdsEditorInstance.editorMode = this.editorMode;
             this.mdsEditorInstance.values$.next({ [this.widgetId]: this.ngModel });
-            if (this.editorMode === 'inline') {
+            if (['inline', 'viewer'].includes(this.editorMode)) {
+                const bindings: { [p: string]: any } = {
+                    widget: this.widget,
+                    showCaption: false,
+                    view: this,
+                };
+                if (this.editorMode === 'inline') {
+                    bindings.inlineEditing = 'always';
+                }
                 UIService.injectAngularComponent(
                     this.factoryResolver,
                     this.containerRef,
                     MdsWidgetComponent,
                     this.ref.nativeElement,
-                    {
-                        widget: this.widget,
-                        inlineEditing: 'always',
-                        showCaption: false,
-                        view: this,
-                    },
+                    bindings,
                     {},
                     this.injector,
                 );

@@ -14,7 +14,14 @@
         </colgroup>
         <tr><td th:text="#{dataprotection_general_firstname}"></td><td th:text="${data.firstName}"></td></tr>
         <tr><td th:text="#{dataprotection_general_lastname}"></td><td th:text="${data.lastName}"></td></tr>
-        <tr th:if="${data.secondaryUserName}"><td th:text="#{dataprotection_general_secondaryUsername}"></td><td th:text="${data.secondaryUserName}"></td></tr>
+        <tr th:if="${!#lists.isEmpty(data.secondaryUserName)}">
+            <td th:text="#{dataprotection_general_secondaryUsername}"></td>
+            <td>
+                <ul>
+                    <li th:each="col, iterStat : ${data.secondaryUserName}" th:text="${col}"></li>
+                </ul>
+            </td>
+        </tr>
         <tr><td th:text="#{dataprotection_general_username}"></td><td th:text="${data.userName}"></td></tr>
         <tr th:if="${data.email}"><td th:text="#{dataprotection_general_email}"></td><td th:text="${data.email}"></td></tr>
         <tr th:if="${!#lists.isEmpty(data.roles)}"><td th:text="#{dataprotection_general_role}"></td>

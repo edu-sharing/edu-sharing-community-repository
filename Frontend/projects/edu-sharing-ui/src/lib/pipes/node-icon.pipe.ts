@@ -9,6 +9,6 @@ import { RepoUrlService } from '../services/repo-url.service';
 export class NodeIconPipe implements PipeTransform {
     constructor(private repoUrlService: RepoUrlService) {}
     transform(node: Node) {
-        return this.repoUrlService.getRepoUrl(node.iconURL, node);
+        return this.repoUrlService.getRepoUrl((node.relations?.Original || node).iconURL, node);
     }
 }

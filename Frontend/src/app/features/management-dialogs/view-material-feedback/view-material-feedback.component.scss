@@ -2,7 +2,7 @@
 
 .feedback {
     .feedback-container:not(:last-child) {
-        border-bottom: 1px solid $genericSeperatorLineColor;
+        border-bottom: 1px solid var(--genericSeperatorLineColor);
         margin-bottom: 30px;
     }
     .empty {

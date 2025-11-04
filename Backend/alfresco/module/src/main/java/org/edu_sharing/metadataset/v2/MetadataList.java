@@ -2,11 +2,17 @@ package org.edu_sharing.metadataset.v2;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MetadataList implements Serializable {
+	public enum ColumnType {
+		Default,
+		Table,
+	}
 	private String id;
-	private List<MetadataColumn> columns;
+	private final Map<ColumnType,List<MetadataColumn>> columns = new HashMap<>();
 
 	public String getId() {
 		return id;
@@ -16,11 +22,11 @@ public class MetadataList implements Serializable {
 		this.id = id;
 	}
 
-	public List<MetadataColumn> getColumns() {
+	public Map<ColumnType,List<MetadataColumn>> getColumns() {
 		return columns;
 	}
-	public void setColumns(List<MetadataColumn> columns) {
-		this.columns = columns;
+	public void setColumns(ColumnType columnType, List<MetadataColumn> columns) {
+		this.columns.put(columnType, columns);
 	}
 	
 	@Override

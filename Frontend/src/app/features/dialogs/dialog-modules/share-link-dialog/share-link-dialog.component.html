@@ -61,7 +61,7 @@
     </div>
   </div>
   <div class="info link-info" [class.link-disabled]="!enabled">
-    <mat-form-field class="linkInput info-left">
+    <mat-form-field class="linkInput info-left" subscriptSizing="dynamic">
       <mat-label>{{ 'WORKSPACE.SHARE_LINK.LINK' | translate }}</mat-label>
       <input
         matInput
@@ -93,4 +93,15 @@
   <div class="link-downloads" *ngIf="enabled">
     {{ 'WORKSPACE.SHARE_LINK.LINK_DOWNLOADS' | translate : { count: currentShare.downloadCount } }}
   </div>
+</div>
+
+<div class="qr-code">
+  <qrcode
+    *ngIf="enabled && currentShare.url && (loading$ | async) === false"
+    elementType="img"
+    errorCorrectionLevel="M"
+    [qrdata]="currentShare.url"
+    [width]="156"
+    [margin]="4"
+  ></qrcode>
 </div>

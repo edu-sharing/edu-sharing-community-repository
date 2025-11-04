@@ -485,9 +485,9 @@
         "LICENSE_INFO": "Available for licensed users in accordance with the contractual conditions. No use by third parties. Attribution in accordance with common practice"
       },
       "CC": {
-        "CC_BY_RADIO": "CC-BY",
+        "CC_BY_RADIO": "CC BY",
         "CC_BY_INFO": "Others may share adaptations of the material as long as they name the author.",
-        "CC_BY_SA_RADIO": "CC-BY-SA",
+        "CC_BY_SA_RADIO": "CC BY-SA",
         "CC_BY_SA_INFO": "Others may share adaptations of the material as long as they name the author and share the material under the same conditions.",
         "YES_ALIKE": "Yes, as long as others share alike",
         "NAME_AUTHOR": "Reference information",

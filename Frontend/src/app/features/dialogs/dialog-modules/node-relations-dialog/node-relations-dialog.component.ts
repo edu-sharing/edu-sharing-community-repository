@@ -23,7 +23,13 @@ import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { NodeRelationsDialogData, NodeRelationsDialogResult } from './node-relations-dialog-data';
-import { ListItem, LocalEventsService, NodesRightMode, OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
+import {
+    ColumnType,
+    ListItem,
+    LocalEventsService,
+    NodesRightMode,
+    OPEN_URL_MODE,
+} from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-node-relations-dialog',
@@ -50,7 +56,7 @@ export class NodeRelationsDialogComponent implements OnInit {
     });
     permissions = [RestConstants.PERMISSION_WRITE];
     target: UniversalNode;
-    columns = [new ListItem('NODE', RestConstants.LOM_PROP_TITLE)];
+    columns = { Default: [new ListItem('NODE', RestConstants.LOM_PROP_TITLE)] } as ColumnType;
 
     private readonly buttons = [
         new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.dialogRef.close(null)),

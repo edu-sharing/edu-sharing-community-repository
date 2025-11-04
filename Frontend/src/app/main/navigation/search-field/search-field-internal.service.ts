@@ -244,7 +244,9 @@ export class SearchFieldInternalService implements EventListener {
                         ? this.search
                               .getAsYouTypeFacetSuggestions(
                                   inputString,
-                                  this.categoriesSubject.value,
+                                  this.categoriesSubject.value.map((property) => {
+                                      return { property };
+                                  }),
                                   NUMBER_OF_FACET_SUGGESTIONS,
                               )
                               // TODO: Figure out if the MDS supports suggestion facet queries

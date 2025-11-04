@@ -2,6 +2,7 @@ package org.edu_sharing.restservices;
 
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
+import org.edu_sharing.repository.server.tools.EduSharingLockException;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.springframework.stereotype.Component;
 
@@ -12,3 +13,4 @@ public class DaoExceptionMapper implements ExceptionMapper<DAOException> {
         return ErrorResponse.createResponse(daoException);
     }
 }
+

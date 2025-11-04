@@ -483,9 +483,9 @@
         "LICENSE_INFO": "Bereitstellung für lizenzierten Personenkreis gemäß den vertraglichen Bedingungen. Keine Nutzung durch Dritte. Quellenangabe gemäß der üblichen Praxis."
       },
       "CC": {
-        "CC_BY_RADIO": "CC-BY",
+        "CC_BY_RADIO": "CC BY",
         "CC_BY_INFO": "Andere dürfen Bearbeitungen des Materials teilen, solange sie den Urheber nennen",
-        "CC_BY_SA_RADIO": "CC-BY-SA",
+        "CC_BY_SA_RADIO": "CC BY-SA",
         "CC_BY_SA_INFO": "Andere dürfen Bearbeitungen des Materials teilen, solange sie den Urheber nennen und es auch selbst unter denselben Bedingungen weitergeben",
         "YES_ALIKE": "Ja, solange es andere unter gleichen Bedinungen weitergeben",
         "NAME_AUTHOR": "Quellen-Angaben",
@@ -507,16 +507,16 @@
       "AI": {
         "TITLE": "Informationen zur KI-Herkunft & -Nutzung",
         "USE_FOR_TRAINING": "Für Training verwendbar",
-        "USE_FOR_TRAINING_INFO": "Dieses Element darf für Training von KI-Netzen benutzt werden (dies ist grundsätzlich der Fall, sofern es nicht explizit ausgeschlossen wird)",
+        "USE_FOR_TRAINING_INFO": "Dieses Element darf für Training von KI-Netzen benutzt werden. (Dies ist grundsätzlich der Fall, sofern es nicht explizit ausgeschlossen wird)",
         "GENERATED": "Durch KI generiert",
-        "GENERATED_INFO": "Dieses Element wurde mit Hilfe einer KI generiert",
+        "GENERATED_INFO": "Dieses Element wurde mit Hilfe einer KI generiert.",
         "TOOL": "Tool",
-        "TOOL_INFO": "Welches Tool/Modell wurde zum Generieren verwendet",
+        "TOOL_INFO": "Welches Tool/Modell wurde zum Generieren verwendet?",
         "TOOL_CUSTOM": "Anderes Tool",
         "TOOL_CUSTOM_NAME": "Tool-Name",
         "TOOL_NO_INFO": "Keine Angabe / Unbekannt",
         "MANUALLY_MODIFIED": "Wurde nachbearbeitet",
-        "MANUALLY_MODIFIED_INFO": "Das Element wurde nach der Generierung noch manuell bearbeitet oder in relevantem Umfang verändert"
+        "MANUALLY_MODIFIED_INFO": "Das Element wurde nach der Generierung noch manuell bearbeitet oder in relevantem Umfang verändert."
       }
     },
     "FILE_CHOOSER": {

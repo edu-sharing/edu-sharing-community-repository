@@ -52,6 +52,10 @@ div {
 .property {
     margin: 0 10px;
     > div {
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
         display: flex;
         align-items: center;
         > mat-form-field {

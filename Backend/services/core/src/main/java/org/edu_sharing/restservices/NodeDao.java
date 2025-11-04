@@ -34,10 +34,12 @@ import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.repository.server.tools.security.JwtTokenUtil;
 import org.edu_sharing.repository.server.tools.security.Signing;
+import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.collection.v1.model.CollectionReference;
 import org.edu_sharing.restservices.collection.v1.model.CollectionRelationReference;
 import org.edu_sharing.restservices.node.v1.model.*;
+import org.edu_sharing.restservices.search.v1.model.SearchFacet;
 import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.restservices.shared.SearchResult;
@@ -666,7 +668,7 @@ public class NodeDao {
         return node;
     }
 
-    public SearchResult<Node> runSavedSearch(int skipCount, int maxItems, SearchService.ContentType contentType, SortDefinition sort, List<String> facets) throws DAOException {
+    public SearchResult<Node> runSavedSearch(int skipCount, int maxItems, SearchService.ContentType contentType, SortDefinition sort, List<SearchFacet> facets) throws DAOException {
         try {
             if (!CCConstants.getValidLocalName(CCConstants.CCM_TYPE_SAVED_SEARCH).equals(getType())) {
                 throw new IllegalArgumentException("The given node must be of type " + CCConstants.CCM_TYPE_SAVED_SEARCH);
@@ -1243,7 +1245,7 @@ public class NodeDao {
             nodeService.writeContent(storeRef, nodeId, result.getInputStream(), result.getMediaType().toString(), null,
                     isDirectory() ? CCConstants.CCM_PROP_MAP_ICON : CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
             PreviewCache.purgeCache(nodeId);
-            return new NodeDao(repoDao, nodeId);
+            return this;
 
         } catch (Throwable t) {
 
@@ -1569,6 +1571,9 @@ public class NodeDao {
     private Content getContent(Node data) throws DAOException {
         Content content = new Content();
         content.setUrl(getContentUrl());
+        if(isCollectionReference()) {
+            content.setOriginalUrl(URLHelper.getNgRenderNodeUrl(getReferenceOriginalId(), null));
+        }
         // skip hash + version for search cause of performance penalties
         if (Arrays.asList(CallSourceHelper.CallSource.Search, CallSourceHelper.CallSource.Sitemap).contains(CallSourceHelper.getCallSource())) {
             return content;
@@ -2725,7 +2730,7 @@ public class NodeDao {
 
     private static void setPropertyInternal(NodeService nodeService, String nodeId, String property, Serializable value) {
         if (value == null || (value instanceof java.util.Collection && ((java.util.Collection<?>) value).isEmpty())) {
-            nodeService.removeProperty(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, property);
+            nodeService.removeProperty(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.getValidGlobalName(property));
         } else {
             nodeService.setProperty(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, property, value, false);
         }

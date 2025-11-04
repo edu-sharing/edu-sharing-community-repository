@@ -1,3 +1,13 @@
+<ng-template #gridTop>
+  <es-sort-select-panel
+    *ngIf="entriesService.sort?.allowed && (hasHiddenSortColumns$ | async)"
+    class="order-panel"
+    [active]="entriesService.sort.active"
+    (sortChange)="selectSortChange($event)"
+    [direction]="entriesService.sort.direction"
+    [columns]="entriesService.getSortColumns()"
+  ></es-sort-select-panel>
+</ng-template>
 <es-dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></es-dropdown>
 <button
   #menuTrigger="matMenuTrigger"
@@ -249,24 +259,6 @@ available. -->
 </ng-template>
 <ng-template #icon let-node="node">
   <div class="icon-bg">
-    <img
-      *ngIf="node.iconURL"
-      [src]="node | esNodeIcon | async"
-      [alt]="
-        node.mediatype
-          ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
-          : ''
-      "
-      [matTooltip]="
-        node.mediatype
-          ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
-          : ''
-      "
-      matTooltipTouchGestures="off"
-    />
-    <i
-      *ngIf="!node.iconURL"
-      [esIcon]="node.authorityType ? (node.authorityType === 'GROUP' ? 'group' : 'person') : null"
-    ></i>
+    <es-node-type-badge [node]="node" [collectionIcons]="false"></es-node-type-badge>
   </div>
 </ng-template>

@@ -7,7 +7,7 @@ import { MdsEditorViewComponent } from '../mds-editor-view/mds-editor-view.compo
 import { AuthenticationService } from 'ngx-edu-sharing-api';
 import { Toast, ToastType } from '../../../../services/toast';
 import { DialogsService } from '../../../dialogs/dialogs.service';
-import { EduSharingLlmService, WidgetAiConfigInfo } from 'ngx-edu-sharing-b-api';
+import { EduSharingLlmService, MdsConfig, WidgetAiConfigInfo } from 'ngx-edu-sharing-b-api';
 import { MdsEditorCommonService } from '../mds-editor-common.service';
 
 @Component({
@@ -87,12 +87,16 @@ export class MdsEditorCoreComponent {
                     };
                 });
             const values = await this.mdsEditorInstance.getValues(null, false);
+            const mdsConfig: MdsConfig = {
+                type: 'mds',
+                id: 'suggestion_ai', // [this.mdsEditorInstance.mdsDefinition$.value.aiConfigs.find(a => a.id === 'suggestion_ai').id],
+            };
             await firstValueFrom(
                 this.eduSharingLlmService.suggestions({
                     body: {
                         user: (await firstValueFrom(this.auth.observeLoginInfo())).authorityName,
                         metadataSet: this.mdsEditorInstance.mdsId,
-                        configIds: ['suggestion_ai'], // [this.mdsEditorInstance.mdsDefinition$.value.aiConfigs.find(a => a.id === 'suggestion_ai').id],
+                        configIds: [mdsConfig],
                         widgetAiConfigs: widgets,
                         contextNodeId: this.mdsEditorInstance.nodes$.value[0].ref.id,
                         variables: values,

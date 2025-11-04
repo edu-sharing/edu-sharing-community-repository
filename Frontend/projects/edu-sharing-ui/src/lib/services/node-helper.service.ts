@@ -170,7 +170,8 @@ export class NodeHelperService {
             url
                 .replace('{{version}}', licenseVersion)
                 .replace('{{locale}}', locale)
-                .replace('{{language}}', this.translate.currentLang || 'en'),
+                // use base language for de- special variants
+                .replace('{{language}}', this.translate.currentLang?.split('-')?.[0] || 'en'),
         );
     }
 
@@ -213,6 +214,18 @@ export class NodeHelperService {
             Workflow.WORKFLOW_STATUS_CHECKED,
         ]);
     }
+
+    getFilenameWithoutExtension(filename: string) {
+        if (filename === null) {
+            return null;
+        }
+        const components = filename.split('.');
+        if (components.length === 1) {
+            return filename;
+        }
+        components.splice(components.length - 1, 1);
+        return components.join('.');
+    }
     copyDataToNode<T extends Node | User>(target: T, source: T) {
         target.properties = source.properties;
         (target as Node).name = (source as Node).name;
@@ -235,7 +248,7 @@ export class NodeHelperService {
         );
     }
 
-    getNodeLink(mode: 'routerLink' | 'queryParams', node: Node) {
+    getNodeLink(mode: 'routerLink' | 'queryParams', node: Node, short = false) {
         if (!node?.ref) {
             return null;
         }
@@ -275,7 +288,9 @@ export class NodeHelperService {
             } else if (node.ref) {
                 const fromHome = this.networkService.isFromHomeRepository(node);
                 data = {
-                    routerLink: UIConstants.ROUTER_PREFIX + 'render/' + node.ref.id,
+                    routerLink: short
+                        ? UIConstants.ROUTER_PREFIX_SHORT + node.ref.id
+                        : UIConstants.ROUTER_PREFIX + 'render/' + node.ref.id,
                     queryParams: {
                         repository: fromHome ? null : node.ref.repo,
                         proposal: (node as ProposalNode).proposal?.ref.id,

@@ -1,3 +1,14 @@
+declare let __webpack_public_path__: string;
+declare global {
+    interface Window {
+        edusharingAngularBootstrapped?: boolean;
+    }
+}
+
+if (typeof __webpack_public_path__ !== 'undefined') {
+    __webpack_public_path__ = (window as any).__EDUSHARING_PUBLIC_PATH__ || '';
+}
+
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
 import { AppModule } from './app/app.module';
@@ -14,10 +25,18 @@ platformBrowserDynamic()
     .catch((err) => console.error(err));
 
 */
-export function init() {
-    platformBrowserDynamic()
-        .bootstrapModule(AppModule)
-        .catch((err) => console.error(err));
+function bootstrapOnce() {
+    console.log('bootstrapOnce');
+    if (!window.edusharingAngularBootstrapped) {
+        window.edusharingAngularBootstrapped = true;
+        platformBrowserDynamic()
+            .bootstrapModule(AppModule)
+            .catch((err) => console.error(err));
+    }
 }
 
-init();
+export function init() {
+    bootstrapOnce();
+}
+
+bootstrapOnce();

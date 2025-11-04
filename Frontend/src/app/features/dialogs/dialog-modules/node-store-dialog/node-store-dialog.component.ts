@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { Node, NodeListService, SortPolicy } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
+    ColumnType,
     CustomOptions,
     DefaultGroups,
     ElementType,
@@ -37,7 +38,7 @@ export class SearchNodeStoreDialogComponent implements OnInit, AfterViewInit, On
     @ViewChild(NodeEntriesWrapperComponent) nodeEntries: NodeEntriesWrapperComponent<Node>;
     @ViewChild(ActionbarComponent) actionBar: ActionbarComponent;
 
-    columns: ListItem[] = [];
+    columns: ColumnType;
     // buttons = DialogButton.getSingleButton('CLOSE', () => this.cancel(), 'standard');
     list = new NodeDataSource<Node>();
 
@@ -63,7 +64,9 @@ export class SearchNodeStoreDialogComponent implements OnInit, AfterViewInit, On
         private toast: Toast,
         private ui: UIService,
     ) {
-        this.columns.push(new ListItem('NODE', RestConstants.LOM_PROP_TITLE));
+        this.columns = {
+            Default: [new ListItem('NODE', RestConstants.LOM_PROP_TITLE)],
+        };
     }
 
     ngOnInit(): void {

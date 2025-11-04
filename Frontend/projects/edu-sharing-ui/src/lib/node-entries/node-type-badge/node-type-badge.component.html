@@ -1,4 +1,4 @@
-<ng-container *ngIf="isCollection">
+<ng-container *ngIf="isCollection && collectionIcons">
   <i
     [matTooltip]="
       'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate
@@ -9,21 +9,24 @@
     [esIcon]="nodeHelper.getCollectionScopeInfo($any(node)).icon"
   ></i>
 </ng-container>
-<ng-container *ngIf="!isCollection">
+<ng-container *ngIf="!(isCollection && collectionIcons)">
   <ng-container *ngIf="getCustomTemplate() as ref">
-    <ng-container *ngTemplateOutlet="ref; context: { node: node }"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="ref; context: { node: node, entriesService: nodeEntriesService }"
+    ></ng-container>
   </ng-container>
   <ng-container *ngIf="!getCustomTemplate()">
     <img
+      *ngIf="node.relations?.Original || node as n"
       [src]="node | esNodeIcon | async"
       [alt]="
-        node.mediatype
-          ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
+        n.mediatype
+          ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + n.mediatype | translate)
           : ''
       "
       [matTooltip]="
-        node.mediatype
-          ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
+        n.mediatype
+          ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + n.mediatype | translate)
           : ''
       "
     />

@@ -3,11 +3,9 @@ package org.edu_sharing.service.search;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.search.impl.solr.ESSearchParameters;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.*;
 import org.alfresco.service.cmr.search.SearchParameters.FieldFacet;
@@ -16,18 +14,15 @@ import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
-import org.alfresco.util.ISO9075;
 import org.alfresco.util.Pair;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.policy.Helper;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
-import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
-import org.edu_sharing.repository.client.rpc.Authority;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -35,12 +30,10 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
+import org.edu_sharing.restservices.search.v1.model.SearchFacet;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.service.InsufficientPermissionException;
-import org.edu_sharing.service.authority.AuthorityServiceHelper;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
-import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.model.*;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
@@ -50,8 +43,6 @@ import org.springframework.extensions.surf.util.URLEncoder;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 public class SearchServiceImpl implements SearchService {
 
@@ -410,7 +401,6 @@ public class SearchServiceImpl implements SearchService {
 		Map<ContentType, SearchToken> lastTokens = getLastSearchTokens();
 		lastTokens.put(searchToken.getContentType(),searchToken);
 		Context.getCurrentInstance().getRequest().getSession().setAttribute(CCConstants.SESSION_LAST_SEARCH_TOKENS,lastTokens);
-		List<String> facets = searchToken.getFacets();
 		SearchResultNodeRef search = search(searchToken,true);
 		return search;
 	}
@@ -466,11 +456,11 @@ public class SearchServiceImpl implements SearchService {
 				}
 			}
 
-			List<String> facets = searchToken.getFacets();
+			List<SearchFacet> facets = searchToken.getFacets();
 
 			if (facets != null && facets.size() > 0) {
-				for (String facetProp : facets) {
-					String fieldFacetStr = facetProp;
+				for (SearchFacet facetProp : facets) {
+					String fieldFacetStr = facetProp.getProperty();
 					if(!fieldFacetStr.startsWith("@")) {
 						fieldFacetStr = "@" + facetProp;
 					}
@@ -541,7 +531,7 @@ public class SearchServiceImpl implements SearchService {
 						if (first != null && !first.trim().equals("") && pair.getSecond() > 0) {
 							NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
 							value.setValue(first);
-							value.setCount(pair.getSecond());
+							value.setCount(pair.getSecond().longValue());
 							facetPair.getValues().add(value);
 						}
 					}

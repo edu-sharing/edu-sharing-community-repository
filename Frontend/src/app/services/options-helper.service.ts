@@ -1520,6 +1520,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         registerSelectionChange(components?.list);
         toggleSelection.scopes = [Scope.WorkspaceList, Scope.Search, Scope.CollectionsReferences];
         toggleSelection.group = DefaultGroups.Toggles;
+        toggleSelection.customShowCallback = async () => data?.allObjects?.length > 0;
         toggleSelection.elementType = [];
         toggleSelection.priority = 10;
         toggleSelection.isToggle = true;
@@ -1722,6 +1723,11 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
      */
     private handleCallbacks(options: OptionItem[], objects: Node[] | any, data: OptionData) {
         options.forEach((o) => {
+            if (data?.scope === Scope.DebugShowAll) {
+                o.showCallback = async () => true;
+                o.enabledCallback = async () => true;
+                return;
+            }
             o.showCallback = async (object) => {
                 const list = NodeHelperService.getActionbarNodes(objects, object);
                 return await this.isOptionAvailable(o, list, data);
