@@ -208,13 +208,14 @@ export class DashboardSwimlaneComponent {
                 }),
             ]);
         } else if (this.swimlane().id === 'recent-activities') {
+            this.routerLink.set('/' + UIConstants.ROUTER_PREFIX + 'editorial/activity');
             const events = [] as StreamDetails[];
             [
                 ['files', 'FILES'],
                 ['collections', 'COLLECTIONS'],
                 ['folders', 'FOLDERS'],
-            ].forEach(async (k) => {
-                events.push({
+            ].forEach(async (k, i) => {
+                events.splice(i, 0, {
                     key: k[0],
                     result: await firstValueFrom(
                         this.searchService.search({
@@ -229,18 +230,21 @@ export class DashboardSwimlaneComponent {
                             },
                         }),
                     ),
-                    params: { contentType: k[1] as any },
+                    params: {
+                        filters: JSON.stringify({ 'virtual:activityType': [k[1]] }),
+                    },
                 });
             });
             this.streamEvents.set(events);
         } else if (this.swimlane().id === 'shares') {
+            this.routerLink.set('/' + UIConstants.ROUTER_PREFIX + 'editorial/share');
             const events = [] as ShareDetails[];
             [
-                ['fromUser', 'fromUser'],
                 ['toUser', 'toUser'],
                 ['toUserOrGroups', 'toUserOrGroups'],
-            ].forEach(async (k) => {
-                events.push({
+                ['fromUser', 'fromUser'],
+            ].forEach(async (k, i) => {
+                events.splice(i, 0, {
                     key: k[0],
                     result: await firstValueFrom(
                         this.searchService.search({
@@ -256,7 +260,9 @@ export class DashboardSwimlaneComponent {
                             },
                         }),
                     ),
-                    params: { direction: k[1] as any },
+                    params: {
+                        filters: JSON.stringify({ 'virtual:shareDirection': [k[1]] }),
+                    },
                 });
             });
             this.sharesEvents.set(events);

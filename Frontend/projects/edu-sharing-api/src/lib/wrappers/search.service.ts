@@ -58,7 +58,8 @@ export type DidYouMeanSuggestion = Pick<Suggest, 'highlighted' | 'text'>;
 
 /** Parameters to be provided to `search`. */
 export type SearchRequestParams = (Parameters<SearchV1Service['search']>[0] &
-    Partial<Parameters<SearchV1Service['getRecentUserShares']>[0]>) & {
+    Partial<Parameters<SearchV1Service['getRecentUserShares']>[0]> &
+    Partial<Parameters<SearchV1Service['getRecentUserEvents']>[0]>) & {
     type?: 'search' | 'shares' | 'recentActivity';
     /**
      * the metadataset id

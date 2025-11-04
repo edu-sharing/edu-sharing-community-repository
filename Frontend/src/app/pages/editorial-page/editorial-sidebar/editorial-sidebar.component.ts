@@ -156,6 +156,8 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         createAssignment.toolpermissions = [];
         createAssignment.elementType = [ElementType.NoneOrUnknown];
         createAssignment.scopes = ['assignment'];
+        // only show when no main component is active
+        createAssignment.customShowCallback = async () => !this.component();
         options.push(createAssignment);
         const sortInto = new OptionItem(
             'EDITORIAL.OPTIONS.SORT_INTO',

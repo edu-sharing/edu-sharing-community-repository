@@ -661,8 +661,9 @@
       <caption>cp_virtual_activityType</caption>
       <valuespace_i18n_prefix>activityType_</valuespace_i18n_prefix>
       <values>
-        <entry icon="person">yours</entry>
-        <entry icon="place">areas</entry>
+        <entry icon="description">FILES</entry>
+        <entry icon="folder">FOLDERS</entry>
+        <entry icon="layers">COLLECTIONS</entry>
       </values>
     </widget>
     <widget>

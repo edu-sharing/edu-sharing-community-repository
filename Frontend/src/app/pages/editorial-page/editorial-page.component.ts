@@ -119,6 +119,10 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
      * called when the first init was done (all fields have been parsed and initalized)
      */
     init$ = new BehaviorSubject<boolean>(false);
+    /**
+     * holds state if this was the first navigation to use replaceUrl for the first param init
+     */
+    firstNavigation$ = new BehaviorSubject<boolean>(false);
     mdsDefinition$ = new BehaviorSubject<MdsDefinition>(null);
     readonly dataSource = new NodeDataSource<Node | NodeShare | NodeEvent>();
     columns = signal<ColumnType>(null);
@@ -375,6 +379,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             )
             .subscribe(([_, search, tab, pagination, mainComponent, values]) => {
                 console.log('THIS MUST BE SHOWN ONCE', search, tab, pagination, values);
+
                 const queryParams = {
                     q: search?.searchString,
                     offset: pagination?.skipCount || null,
@@ -388,9 +393,10 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 // console.log(this.editorialPageService.buildSearchCriteria(tab));
                 void this.router.navigate(['./'], {
                     relativeTo: this.route,
-                    replaceUrl: false,
+                    replaceUrl: !this.firstNavigation$.value,
                     queryParams,
                 });
+                this.firstNavigation$.next(true);
             });
     }
 
@@ -450,14 +456,27 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         // wait for mds and delay to make sure the facets are registered
 
         if (routeConfig.primaryMode === 'activity') {
+            const searchCriteria = this.searchHelperService.convertCritieria(
+                {
+                    ...criteria,
+                    ...(ngsearchword
+                        ? { [RestConstants.PRIMARY_SEARCH_CRITERIA]: [ngsearchword] }
+                        : {}),
+                },
+                mds.widgets,
+                true,
+            );
             this.searchService
                 .search({
                     type: 'recentActivity',
                     metadataset: DEFAULT,
                     query: null,
                     repository: HOME_REPOSITORY,
-                    contentType: 'ALL',
                     ...pagination,
+                    // @TODO: we might need to consider eventType instead?
+                    contentType: this.editorialPageService.buildSearchCriteria(
+                        this.tabSelection$.value,
+                    )[this.TabWidgetActivities] as any,
                     body: {
                         facetLimit: 5,
                         facetMinCount: 1,
@@ -502,6 +521,8 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                     this.dataSource.isLoading = false;
                     this.dataSource.setData(events.nodes, events.pagination);
                 });
+        } else if (routeConfig.primaryMode === 'assignment') {
+            // @TODO: Search for assignments
         } else {
             this.searchService
                 .search<SearchResults>({

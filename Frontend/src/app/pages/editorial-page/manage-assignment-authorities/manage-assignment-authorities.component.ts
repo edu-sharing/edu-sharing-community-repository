@@ -1,9 +1,10 @@
 import { Component, input, model } from '@angular/core';
-import { Authority } from 'ngx-edu-sharing-api';
+import { Authority, CreateAssignmentRequest } from 'ngx-edu-sharing-api';
 import { SharedModule } from '../../../shared/shared.module';
 import { Assignment } from 'ngx-edu-sharing-api';
 import { NodeHelperService, NodesRightMode } from 'ngx-edu-sharing-ui';
 import { MatSelectChange } from '@angular/material/select';
+import { AssignmentBase } from '../manage-assignment/manage-assignment.component';
 
 type Role = 'ASSIGNEE' | 'COORDINATOR';
 export type AuthorityWithSubmission = Authority & {
@@ -17,7 +18,7 @@ export type AuthorityWithSubmission = Authority & {
     imports: [SharedModule],
 })
 export class ManageAssignmentAuthoritiesComponent {
-    assignment = input.required<Assignment>();
+    assignment = input.required<AssignmentBase>();
     authorities = model.required<AuthorityWithSubmission[]>();
 
     constructor(public nodeHelperService: NodeHelperService) {}

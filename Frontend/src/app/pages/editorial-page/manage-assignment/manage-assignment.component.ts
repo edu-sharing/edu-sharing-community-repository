@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, signal, ViewChild } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { MatStepper, MatStepperModule } from '@angular/material/stepper';
-import { FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ShareDialogChooseDateComponent } from '../../../features/dialogs/dialog-modules/share-dialog/permission/choose-date/choose-date.component';
 import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
@@ -9,7 +9,13 @@ import {
     ManageAssignmentNodesComponent,
     NodeWithRole,
 } from '../manage-assignment-nodes/manage-assignment-nodes.component';
-import { Assignment, Authority, Node, Permission } from 'ngx-edu-sharing-api';
+import {
+    Assignment,
+    AssignmentV1Service,
+    Authority,
+    CreateAssignmentRequest,
+    PermissionRequest,
+} from 'ngx-edu-sharing-api';
 import { NodeHelperService } from '../../../services/node-helper.service';
 import { EditorComponent } from '@tinymce/tinymce-angular';
 import { PlatformLocation } from '@angular/common';
@@ -20,7 +26,10 @@ import {
 } from '../manage-assignment-authorities/manage-assignment-authorities.component';
 import { Toast } from 'ngx-edu-sharing-ui';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { firstValueFrom } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
 
+export type AssignmentBase = Pick<Assignment, 'title' | 'type' | 'summary'>;
 @Component({
     selector: 'es-manage-assignment',
     templateUrl: 'manage-assignment.component.html',
@@ -55,9 +64,9 @@ export class ManageAssignmentComponent {
     dateTime = new Date().getTime() + 1000 * 3600 * 24 * 5;
     @ViewChild(MatStepper) matStepper: MatStepper;
     @ViewChild('dateChooser') dateChooserRef: ShareDialogChooseDateComponent;
-    @Input() assignment = signal<Assignment>({
+    @Input() assignment = signal<CreateAssignmentRequest>({
         type: 'SUBMISSION',
-    });
+    } as CreateAssignmentRequest);
     authorities = signal<AuthorityWithSubmission[]>(null);
     mainDataFormGroup: FormGroup;
     nodes = signal<NodeWithRole[]>(null);
@@ -82,7 +91,10 @@ export class ManageAssignmentComponent {
     constructor(
         private formBuilder: FormBuilder,
         private toast: Toast,
+        private router: Router,
+        private route: ActivatedRoute,
         private dialogsService: DialogsService,
+        private assignmentService: AssignmentV1Service,
         private nodeHelperService: NodeHelperService,
         private platformLocation: PlatformLocation,
         private translateService: TranslateService,
@@ -127,7 +139,7 @@ export class ManageAssignmentComponent {
         this.authorities.set((this.authorities() || []).concat(authority));
     }
 
-    submit() {
+    async submit() {
         if (!this.authorities()?.length) {
             this.toast.error(null, 'EDITORIAL.ASSIGNMENT.ERROR.MISSING_AUTHORITIES');
             return;
@@ -139,11 +151,11 @@ export class ManageAssignmentComponent {
             this.toast.error(null, 'EDITORIAL.ASSIGNMENT.ERROR.MISSING_AUTHORITIES_ASSIGNEE');
             return;
         }
-        const permissions: Permission[] = this.authorities().map((a) => {
+        const permissions: PermissionRequest[] = this.authorities().map((a) => {
             return {
                 authorityName: a.authorityName,
                 role: a.role,
-            } as Permission;
+            };
         });
         const files = this.nodes()?.map((n) => {
             return {
@@ -158,11 +170,22 @@ export class ManageAssignmentComponent {
             allowAdditionalDocumentSubmissions: this.mainDataFormGroup.get(
                 'allowAdditionalDocumentSubmissions',
             ).value,
-            // @TODO
             endTime: this.mainDataFormGroup.get('useEndTime').value ? (this.dateTime as any) : null,
             permissions,
-        } as Assignment;
-        console.log(assignment, files);
+            files,
+        } as CreateAssignmentRequest;
+        await firstValueFrom(
+            this.assignmentService.createOrUpdateAssignment({
+                body: assignment,
+            }),
+        );
+        void this.router.navigate([], {
+            relativeTo: this.route,
+            queryParamsHandling: 'merge',
+            queryParams: {
+                mainComponent: null,
+            },
+        });
     }
 
     async cancel() {
