@@ -1254,6 +1254,13 @@
         <view>editorial_share</view>
       </views>
     </group>
+    <group>
+      <id>editorial_assignment</id>
+      <rendering>angular</rendering>
+      <views>
+        <view>editorial_assignment</view>
+      </views>
+    </group>
   </groups>
   <sorts>
     <sort>
