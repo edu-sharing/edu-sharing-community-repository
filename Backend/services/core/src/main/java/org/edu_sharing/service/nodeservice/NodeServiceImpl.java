@@ -171,7 +171,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
     public NodeRef copyNode(String nodeId, String toNodeId, boolean copyChildren) throws Throwable {
         // copy and rename has a weird naming scheme
+        return copyNode(nodeId, toNodeId, CCConstants.CM_ASSOC_FOLDER_CONTAINS, copyChildren);
+    }
 
+    @Override
+    public NodeRef copyNode(String nodeId, String toNodeId, String assocType, boolean copyChildren) {
         return retryingTransactionHelper.doInTransaction(() -> {
             NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
             throwIfRestrictedAccessPresent(nodeRef);
@@ -180,7 +184,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
             String originalName = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
             NodeRef copyNodeRef = copyService.copyAndRename(nodeRef,
                     new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, toNodeId),
-                    QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS),
+                    QName.createQName(assocType),
                     QName.createQName(originalName), copyChildren);
 
             int renameCounter = 1;

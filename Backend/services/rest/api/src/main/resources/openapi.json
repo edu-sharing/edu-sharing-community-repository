@@ -341,6 +341,16 @@
             "type": "string"
           }
         },
+        "required": [
+          "allowAdditionalDocumentSubmissions",
+          "created",
+          "creator",
+          "permissions",
+          "ref",
+          "status",
+          "title",
+          "type"
+        ],
         "type": "object"
       },
       "AssignmentFile": {
@@ -363,6 +373,11 @@
             "$ref": "#/components/schemas/Node"
           }
         },
+        "required": [
+          "documentRole",
+          "isDone",
+          "ref"
+        ],
         "type": "object"
       },
       "AssignmentFileRequest": {
@@ -382,6 +397,10 @@
             "type": "string"
           }
         },
+        "required": [
+          "documentRole",
+          "isDone"
+        ],
         "type": "object"
       },
       "Audience": {
@@ -1634,6 +1653,7 @@
             "type": "string"
           },
           "title": {
+            "minLength": 1,
             "type": "string"
           },
           "type": {
@@ -1644,6 +1664,17 @@
             "type": "string"
           }
         },
+        "required": [
+          "allowAdditionalDocumentSubmission",
+          "assignmentFiles",
+          "endTime",
+          "permissions",
+          "startTime",
+          "status",
+          "summary",
+          "title",
+          "type"
+        ],
         "type": "object"
       },
       "CreateQAEntryDTO": {
@@ -5345,11 +5376,16 @@
             "type": "string"
           }
         },
+        "required": [
+          "authority",
+          "role"
+        ],
         "type": "object"
       },
       "PermissionRequest": {
         "properties": {
           "authorityName": {
+            "minLength": 1,
             "type": "string"
           },
           "role": {
@@ -5360,6 +5396,10 @@
             "type": "string"
           }
         },
+        "required": [
+          "authorityName",
+          "role"
+        ],
         "type": "object"
       },
       "Person": {
@@ -7337,6 +7377,13 @@
             "type": "string"
           }
         },
+        "required": [
+          "assignee",
+          "properties",
+          "ref",
+          "submissionStatus",
+          "validationStatus"
+        ],
         "type": "object"
       },
       "SubmissionFile": {
@@ -7366,6 +7413,11 @@
             "type": "string"
           }
         },
+        "required": [
+          "properties",
+          "ref",
+          "validationStatus"
+        ],
         "type": "object"
       },
       "SubmissionFileUpload": {

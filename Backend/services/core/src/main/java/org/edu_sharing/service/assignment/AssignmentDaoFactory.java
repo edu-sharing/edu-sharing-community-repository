@@ -17,6 +17,7 @@ import org.edu_sharing.restservices.assignment.v1.model.Assignment;
 import org.edu_sharing.restservices.assignment.v1.model.AssignmentFile;
 import org.edu_sharing.restservices.assignment.v1.model.AssignmentFileRequest;
 import org.edu_sharing.restservices.assignment.v1.model.CreateAssignmentRequest;
+import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.UserSimple;
@@ -50,8 +51,9 @@ public class AssignmentDaoFactory {
 
     private final LazyProvider<RepositoryDao> repositoryDao = new LazyProvider<>(RepositoryDao::getHomeRepository);
 
-    @Bean
+    @Bean(autowireCandidate = false)
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public AssignmentDao getAssignment(String nodeId) {
         return new AssignmentDaoImpl(nodeId);
     }
@@ -63,7 +65,7 @@ public class AssignmentDaoFactory {
         private final LazyProvider<PropertyMapper> propertyMapper;
 
         private final LazyProvider<List<AssignmentFileDao>> assignmentFileRefs;
-
+        private final LazyProvider<List<Assignment.Permission>> permissions;
         private final LazyProvider<Optional<String>> submissionFolderRef;
 
         public AssignmentDaoImpl(String nodeId) {
@@ -82,6 +84,23 @@ public class AssignmentDaoFactory {
                         .map(x -> new AssignmentFileDaoImpl(this, x))
                         .map(AssignmentFileDao.class::cast)
                         .toList();
+            });
+            permissions = new LazyProvider<>(() -> {
+                validateExists();
+                try {
+                    return Arrays.stream(permissionService.getPermissions(getNodeId()).getAces())
+                            .map(ace -> new Assignment.Permission(new Authority(ace), switch (ace.getPermission()) {
+                                case CCConstants.PERMISSION_READ -> Assignment.Role.ASSIGNEE;
+                                case CCConstants.PERMISSION_COORDINATOR -> Assignment.Role.COORDINATOR;
+                                default -> {
+                                    log.error("Unknown permission {}", ace.getPermission());
+                                    yield null;
+                                }
+                            }))
+                            .toList();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             });
 
             submissionFolderRef = new LazyProvider<>(() -> {
@@ -269,8 +288,7 @@ public class AssignmentDaoFactory {
                     getType(),
                     getAllowAdditionalDocumentSubmissions(),
                     getModifiedDate(),
-
-                    null //TODO permissionService
+                    getPermissions()
             );
         }
 
@@ -335,6 +353,10 @@ public class AssignmentDaoFactory {
             return assignmentFileRefs.get();
         }
 
+
+        public List<Assignment.Permission> getPermissions() {
+            return permissions.get();
+        }
 
     }
 
@@ -465,7 +487,7 @@ public class AssignmentDaoFactory {
 
             try {
                 log.debug("Copying reference node {}", assignmentFileRequest.refId());
-                org.alfresco.service.cmr.repository.NodeRef nodeRef = nodeService.copyNode(assignmentFileRequest.refId(), nodeId, true);
+                org.alfresco.service.cmr.repository.NodeRef nodeRef = nodeService.copyNode(assignmentFileRequest.refId(), nodeId, CCConstants.CCM_ASSOC_ASSIGNMENT_FILE_COPY, true);
                 log.debug("Copied reference node {}", nodeRef.getId());
                 properties.put(CCConstants.CCM_PROP_ASSIGNMENTFILE_REFERTO, nodeRef);
             } catch (Throwable t) {

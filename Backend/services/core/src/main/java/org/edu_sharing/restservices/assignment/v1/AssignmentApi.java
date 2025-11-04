@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 
 import java.io.InputStream;
@@ -63,7 +64,7 @@ public class AssignmentApi {
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
     )
-    public Response createOrUpdateAssignment(CreateAssignmentRequest request) {
+    public Response createOrUpdateAssignment(@Valid CreateAssignmentRequest request) {
         AssignmentDao assignment = assignmentDaoFactory.getAssignment(request.id());
         assignment.createOrUpdate(request);
         return Response.ok().entity(assignment.getAssignment()).build();

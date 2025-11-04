@@ -24,6 +24,8 @@ public interface NodeService {
 
     void createAssoc(String parentId, String childId, String assocName);
 
+    NodeRef copyNode(String nodeId, String toNodeId, String assocType, boolean copyChildren);
+
     String createNode(String parentId, String nodeType, Map<String, String[]> props) throws Throwable;
 
     default String createNode(String parentId, String nodeType, HashMap<String, String[]> props, String childAssociation) throws Throwable {

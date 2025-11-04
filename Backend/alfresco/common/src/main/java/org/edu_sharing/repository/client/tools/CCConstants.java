@@ -1475,9 +1475,11 @@ public class CCConstants {
     public final static String CCM_PROP_ASSIGNMENTFILE_REFERTO = "{http://www.campuscontent.de/model/1.0}assigmentfile_referTo";
 
 
-    public final static String CCM_ASSOC_ASSIGNMENTFILE_COPY = "{http://www.campuscontent.de/model/1.0}assignment_file_copy";
     public final static String CCM_ASSOC_ASSIGNMENT_SUBMISSIONS = "{http://www.campuscontent.de/model/1.0}assignment_submissions";
     public final static String CCM_ASSOC_ASSIGNMENT_FILES = "{http://www.campuscontent.de/model/1.0}assignment_files";
+    public final static String CCM_ASSOC_ASSIGNMENT_FILE_COPY = "{http://www.campuscontent.de/model/1.0}assignment_file_copy";
+
+
     /**
      * this property comes from alfresco when calling queryChildren
      */

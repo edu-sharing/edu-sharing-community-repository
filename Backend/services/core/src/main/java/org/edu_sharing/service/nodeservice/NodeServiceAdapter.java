@@ -36,7 +36,8 @@ public class NodeServiceAdapter implements NodeService {
 
 	}
 
-	@Override
+
+    @Override
 	public String createNode(String parentId, String nodeType, Map<String, String[]> props) throws Throwable {
 		return null;
 	}
@@ -55,6 +56,11 @@ public class NodeServiceAdapter implements NodeService {
 	public NodeRef copyNode(String sourceId, String nodeId, boolean withChildren) throws Throwable {
 		return null;
 	}
+
+    @Override
+    public NodeRef copyNode(String nodeId, String toNodeId, String assocType, boolean copyChildren) {
+        return null;
+    }
 
 	@Override
 	public String getCompanyHome() {
