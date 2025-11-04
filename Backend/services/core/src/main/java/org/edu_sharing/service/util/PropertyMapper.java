@@ -2,6 +2,8 @@ package org.edu_sharing.service.util;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.edu_sharing.restservices.RepositoryDao;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.OffsetDateTime;
@@ -264,6 +266,23 @@ public class PropertyMapper {
         }
 
         throw new IllegalStateException("Cannot convert " + value.getClass().getName() + " to Date");
+    }
+
+    public NodeRef getNodeRef(String name) {
+        Object value = getAsSingleValue(name, null);
+        if (value == null) {
+            return null;
+        }
+
+        if(value instanceof NodeRef nodeRef){
+            return nodeRef;
+        }
+
+        if(value instanceof String stringValue){
+            return new NodeRef(stringValue);
+        }
+
+        throw new IllegalStateException("Cannot convert " + value.getClass().getName() + " to NodeRef");
     }
 
     @NotNull

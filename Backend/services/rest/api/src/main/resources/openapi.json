@@ -14831,7 +14831,7 @@
         },
         "summary": "Create or update an assignment",
         "tags": [
-          "Assignment"
+          "Assignment v1"
         ]
       }
     },
@@ -14916,7 +14916,7 @@
         },
         "summary": "Delete a assignment",
         "tags": [
-          "Assignment"
+          "Assignment v1"
         ]
       },
       "get": {
@@ -15006,7 +15006,7 @@
         },
         "summary": "get an assignment",
         "tags": [
-          "Assignment"
+          "Assignment v1"
         ]
       }
     },
@@ -15101,7 +15101,7 @@
         },
         "summary": "get assignment files",
         "tags": [
-          "Assignment"
+          "Assignment v1"
         ]
       }
     },
@@ -15196,7 +15196,7 @@
         },
         "summary": "get submissions",
         "tags": [
-          "Assignment"
+          "Assignment v1"
         ]
       }
     },
@@ -15290,7 +15290,7 @@
         },
         "summary": "Delete a submission",
         "tags": [
-          "Assignment"
+          "Assignment v1"
         ]
       },
       "get": {
@@ -15389,7 +15389,7 @@
         },
         "summary": "get submissions",
         "tags": [
-          "Assignment"
+          "Assignment v1"
         ]
       },
       "put": {
@@ -15497,7 +15497,7 @@
         },
         "summary": "edut submission",
         "tags": [
-          "Assignment"
+          "Assignment v1"
         ]
       }
     },
@@ -15601,7 +15601,7 @@
         },
         "summary": "get submission files",
         "tags": [
-          "Assignment"
+          "Assignment v1"
         ]
       },
       "put": {
@@ -15726,7 +15726,7 @@
         },
         "summary": "Create or edit submission file",
         "tags": [
-          "Assignment"
+          "Assignment v1"
         ]
       }
     },
@@ -15829,7 +15829,7 @@
         },
         "summary": "Delete a submission file",
         "tags": [
-          "Assignment"
+          "Assignment v1"
         ]
       }
     },
@@ -15942,7 +15942,7 @@
         },
         "summary": "edut submission status",
         "tags": [
-          "Assignment"
+          "Assignment v1"
         ]
       }
     },
@@ -44500,7 +44500,7 @@
   "tags": [
     {
       "description": "Assignment API",
-      "name": "Assignment"
+      "name": "Assignment v1"
     },
     {
       "description": "Question answers storage endpoint",

@@ -37,7 +37,7 @@ import java.util.Objects;
 
 @Slf4j
 @Path("/assignment/v1")
-@Tag(name = "Assignment", description = "Assignment API")
+@Tag(name = "Assignment v1", description = "Assignment API")
 @ApiService(value = "ASSIGNMENT", major = 1, minor = 0)
 @Consumes({"application/json"})
 @Produces({"application/json"})

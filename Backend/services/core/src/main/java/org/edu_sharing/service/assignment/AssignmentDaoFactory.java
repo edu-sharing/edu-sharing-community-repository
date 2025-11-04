@@ -3,6 +3,7 @@ package org.edu_sharing.service.assignment;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AuthorityType;
@@ -98,6 +99,8 @@ public class AssignmentDaoFactory {
                                 }
                             }))
                             .toList();
+                }catch (AccessDeniedException ignore) {
+                     return Collections.emptyList();
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -115,7 +118,7 @@ public class AssignmentDaoFactory {
 
         private void validateExists() {
             if (!exists()) {
-                throw new IllegalStateException("Assignment with id " + nodeId + " does not exist.");
+                throw new IllegalArgumentException("Assignment with id " + nodeId + " does not exist.");
             }
         }
 
@@ -205,7 +208,7 @@ public class AssignmentDaoFactory {
                             )
                             .toList();
                     log.debug("Setting permissions for submissions folder {}: {}", submissionsNodeId, aceList);
-                    permissionService.setPermissions(nodeId, aceList, false);
+                    permissionService.setPermissions(submissionsNodeId, aceList, false);
                 } catch (Exception t) {
                     log.error("Error while setting permissions for submissions", t);
                     throw new RuntimeException(t);
@@ -379,8 +382,7 @@ public class AssignmentDaoFactory {
             }));
             referNode = new LazyProvider<>(CheckedSupplier.wrap(() -> {
                 validateExists();
-                return Optional.ofNullable(propertyMapper.get().getString(CCConstants.CCM_PROP_ASSIGNMENTFILE_REFERTO))
-                        .map(x -> new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, x))
+                return Optional.ofNullable(propertyMapper.get().getNodeRef(CCConstants.CCM_PROP_ASSIGNMENTFILE_REFERTO))
                         .map(NodeDao::getAsNodeSimple)
                         .orElse(null);
             }));
@@ -412,7 +414,7 @@ public class AssignmentDaoFactory {
 
         private void validateExists() {
             if (!exists()) {
-                throw new IllegalStateException("Assignment with id " + nodeId + " does not exist.");
+                throw new IllegalArgumentException("Assignment with id " + nodeId + " does not exist.");
             }
         }
 
@@ -447,7 +449,7 @@ public class AssignmentDaoFactory {
 
         @Override
         public String getReferNodeId() {
-            return propertyMapper.get().getString(CCConstants.CCM_PROP_ASSIGNMENTFILE_REFERTO);
+            return propertyMapper.get().getNodeRef(CCConstants.CCM_PROP_ASSIGNMENTFILE_REFERTO).getId();
         }
 
 
@@ -484,6 +486,10 @@ public class AssignmentDaoFactory {
                 nodeService.removeNode(currentReferNodeId, nodeId, false);
             }
 
+            if(Boolean.parseBoolean(nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), assignmentFileRequest.refId(), CCConstants.CCM_PROP_RESTRICTED_ACCESS))){
+                log.debug("Skipping reference copy for restricted access document");
+                return;
+            }
 
             try {
                 log.debug("Copying reference node {}", assignmentFileRequest.refId());

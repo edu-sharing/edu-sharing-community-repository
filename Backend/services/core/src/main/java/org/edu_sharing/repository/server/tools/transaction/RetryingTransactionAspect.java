@@ -16,7 +16,7 @@ import java.lang.reflect.Method;
 @Aspect
 @Component
 @RequiredArgsConstructor
-@Order(Ordered.HIGHEST_PRECEDENCE+101)
+@Order(Ordered.HIGHEST_PRECEDENCE + 101)
 public class RetryingTransactionAspect {
 
     private final RetryingTransactionHelper retryingTransactionHelper;
@@ -31,6 +31,8 @@ public class RetryingTransactionAspect {
         return retryingTransactionHelper.doInTransaction(() -> {
             try {
                 return joinPoint.proceed();
+            } catch (RuntimeException e) {
+                throw e;
             } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
