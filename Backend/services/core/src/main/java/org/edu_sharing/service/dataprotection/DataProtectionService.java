@@ -295,10 +295,11 @@ public class DataProtectionService{
             //reportData.schoolName(allEduGroups.stream().map(e -> (e.getGroupDisplayName() +"("+e.getGroupId()+")")).collect(Collectors.joining(",")));
             reportData.schoolDisplayName(allEduGroups.stream()
                     .map(e -> {
-                            if(e.getGroupDisplayName() != null && e.getGroupDisplayName().contains(e.getGroupname())){
+                            String groupName = e.getGroupname().replace("GROUP_ORG_","");
+                            if(e.getGroupDisplayName() != null && e.getGroupDisplayName().contains(groupName)){
                                 return e.getGroupDisplayName();
                             }else{
-                                return (e.getGroupDisplayName() +"("+e.getGroupname()+")");
+                                return (e.getGroupDisplayName() +"("+groupName+")");
                             }
                         }
                     )
