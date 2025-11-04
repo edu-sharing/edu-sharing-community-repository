@@ -92,7 +92,7 @@ export class ManageAssignmentComponent {
             title: ['', [Validators.required]],
             summary: ['', [Validators.required]],
             useEndTime: [false, [Validators.required]],
-            allowAdditionalDocumentSubmissions: [false, [Validators.required]],
+            allowAdditionalDocumentSubmissions: [true, [Validators.required]],
         });
         this.editorialSidebarService.applyNodeEmitted.subscribe(({ nodes }) => {
             this.nodes.set(
