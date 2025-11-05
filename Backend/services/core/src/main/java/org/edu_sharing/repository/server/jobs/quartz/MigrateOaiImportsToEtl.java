@@ -37,6 +37,7 @@ import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+import org.apache.tika.utils.StringUtils;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.importer.PersistentHandlerEdusharing;
@@ -190,6 +191,10 @@ public class MigrateOaiImportsToEtl extends AbstractInterruptableJob{
 			} else {
 				if (newId instanceof Collection) {
 					newId = (Serializable) ((Collection<?>) newId).iterator().next();
+				}
+				if(newId instanceof String && StringUtils.isBlank((String) newId)) {
+					logger.warn("Node " + nodeRef + " has empty string ata for the new property id in field " + propertyId + ", will not move this node. Check it and migrate it later. " + nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID)));
+					return;
 				}
 				nodeService.setProperty(
 						nodeRef,
