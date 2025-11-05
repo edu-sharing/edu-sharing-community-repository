@@ -2490,10 +2490,6 @@
           <type>d:boolean</type>
           <multiple>false</multiple>
         </property>
-        <property name="ccm:assignment_startdate">
-          <type>d:date</type>
-          <multiple>false</multiple>
-        </property>
         <property name="ccm:assignment_enddate">
           <type>d:date</type>
           <multiple>false</multiple>

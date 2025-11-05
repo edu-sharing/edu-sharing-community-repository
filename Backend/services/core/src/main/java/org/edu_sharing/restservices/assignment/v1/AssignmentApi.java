@@ -18,15 +18,21 @@ import java.io.InputStream;
 
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.assignment.v1.model.*;
+import org.edu_sharing.restservices.search.v1.model.SearchParameters;
 import org.edu_sharing.restservices.shared.ErrorResponse;
+import org.edu_sharing.restservices.shared.SearchResult;
 import org.edu_sharing.service.assignment.AssignmentDao;
 import org.edu_sharing.service.assignment.AssignmentFileDao;
 import org.edu_sharing.service.assignment.AssignmentDaoFactory;
+import org.edu_sharing.service.search.SearchService;
+import org.edu_sharing.service.search.model.SearchToken;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -69,6 +75,51 @@ public class AssignmentApi {
         assignment.createOrUpdate(request);
         return Response.ok().entity(assignment.getAssignment()).build();
     }
+
+    @Data
+    @EqualsAndHashCode(callSuper = true)
+    public class AssignmentSearchResult extends SearchResult<Assignment> {
+    }
+
+    @POST
+    @Path("/search")
+    @Operation(summary = "Create or update an assignment", description = "Create or update an assignment.")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = AssignmentSearchResult.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            }
+    )
+    public Response search(
+            @Parameter(description = "search parameters", required = false) SearchParameters parameters,
+            @Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue = "25")) @QueryParam("maxItems") Integer maxItems,
+            @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount
+    ) throws Throwable {
+        SearchToken token = new SearchToken();
+        token.setFacets(parameters.getFacets());
+        token.setFacetLimit((parameters.getFacetLimit() != null && parameters.getFacetLimit() > 0)
+                ? parameters.getFacetLimit() : 10);
+        token.setFacetsMinCount((parameters.getFacetMinCount() != null && parameters.getFacetMinCount() >= 0)
+                ? parameters.getFacetMinCount() : 5);
+        token.setQueryString(parameters.getFacetSuggest());
+        token.setPermissions(parameters.getPermissions());
+        token.setResolveCollections(parameters.isResolveCollections());
+        token.setReturnSuggestion(parameters.isReturnSuggestions());
+        token.setExcludes(parameters.getExcludes());
+        token.setFrom(skipCount != null ? skipCount : 0);
+        token.setMaxResult(maxItems != null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS);
+        token.setContentType(SearchService.ContentType.ALL);
+
+        SearchResult<AssignmentDao> assignmentDaoSearchResult = assignmentDaoFactory.searchAssignments(parameters.getCriteria(), token);
+        AssignmentSearchResult result = assignmentDaoSearchResult.map(AssignmentDao::getAssignment, AssignmentSearchResult::new);
+        return Response.ok().entity(result).build();
+    }
+
 
     @GET
     @Path("/{assignmentId}")

@@ -9,8 +9,11 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
+import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
 import org.edu_sharing.restservices.NodeDao;
@@ -19,14 +22,13 @@ import org.edu_sharing.restservices.assignment.v1.model.Assignment;
 import org.edu_sharing.restservices.assignment.v1.model.AssignmentFile;
 import org.edu_sharing.restservices.assignment.v1.model.AssignmentFileRequest;
 import org.edu_sharing.restservices.assignment.v1.model.CreateAssignmentRequest;
-import org.edu_sharing.restservices.shared.Authority;
-import org.edu_sharing.restservices.shared.Node;
-import org.edu_sharing.restservices.shared.NodeRef;
-import org.edu_sharing.restservices.shared.UserSimple;
+import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
+import org.edu_sharing.service.search.SearchService;
+import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.util.PropertyMapper;
 import org.edu_sharing.util.CheckedSupplier;
 import org.edu_sharing.util.LazyProvider;
@@ -50,6 +52,7 @@ public class AssignmentDaoFactory {
     private final UserEnvironmentTool userEnvironmentTool;
     private final AuthorityService authorityService;
     private final PermissionService permissionService;
+    private final SearchService searchService;
 
     private final LazyProvider<RepositoryDao> repositoryDao = new LazyProvider<>(RepositoryDao::getHomeRepository);
 
@@ -68,12 +71,25 @@ public class AssignmentDaoFactory {
         return new AssignmentDaoImpl(nodeId);
     }
 
+    public SearchResult<AssignmentDao> searchAssignments(List<MdsQueryCriteria> searchCriteria, SearchToken searchToken) throws Throwable {
+        Map<String, String[]> criteriaMap = MetadataSearchHelper.convertCriterias(searchCriteria);
+        SearchResultNodeRef result = searchService.search(MetadataHelper.getLocalDefaultMetadataset(), "assignments", criteriaMap, searchToken);
+        SearchResult<AssignmentDao> converted = new SearchResult<>();
+        Pagination pagination = new Pagination();
+        pagination.setFrom(result.getStartIDX());
+        pagination.setTotal(result.getNodeCount());
+        pagination.setCount(result.getData().size());
+        converted.setFacets(result.getFacets());
+        converted.setPagination(pagination);
+        converted.setNodes(result.getData().stream().map(x -> new AssignmentDaoImpl(x.getNodeId())).collect(Collectors.toList()));
+        return converted;
+    }
+
     private final class AssignmentDaoImpl implements AssignmentDao {
 
         private String nodeId;
 
         private final LazyProvider<PropertyMapper> propertyMapper;
-
         private final LazyProvider<List<AssignmentFileDao>> assignmentFileRefs;
         private final LazyProvider<List<Assignment.Permission>> permissions;
         private final LazyProvider<Optional<String>> submissionFolderRef;
@@ -108,8 +124,8 @@ public class AssignmentDaoFactory {
                                 }
                             }))
                             .toList();
-                }catch (AccessDeniedException ignore) {
-                     return Collections.emptyList();
+                } catch (AccessDeniedException ignore) {
+                    return Collections.emptyList();
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -141,7 +157,6 @@ public class AssignmentDaoFactory {
                     CCConstants.CCM_PROP_ASSIGNMENT_TYPE, request.type().name(),
                     CCConstants.CCM_PROP_ASSIGNMENT_STATUS, request.status().name(),
                     CCConstants.CCM_PROP_ASSIGNMENT_ALLOWADDITIONALDOCUMENTSUBMISSION, request.allowAdditionalDocumentSubmission(),
-                    CCConstants.CCM_PROP_ASSIGNMENT_STARTDATE, request.startTime(),
                     CCConstants.CCM_PROP_ASSIGNMENT_ENDDATE, request.endTime()
             );
 
@@ -294,7 +309,6 @@ public class AssignmentDaoFactory {
                     getSummary(),
                     UserSimple.create(authorityService.getUser(creator), creator),
                     getCreateDate(),
-                    getStartDate(),
                     getEndDate(),
                     getStatus(),
                     getType(),
@@ -337,11 +351,6 @@ public class AssignmentDaoFactory {
         @Override
         public Date getEndDate() {
             return propertyMapper.get().getDate(CCConstants.CCM_PROP_ASSIGNMENT_ENDDATE);
-        }
-
-        @Override
-        public Date getStartDate() {
-            return propertyMapper.get().getDate(CCConstants.CCM_PROP_ASSIGNMENT_STARTDATE);
         }
 
         @Override
@@ -495,7 +504,7 @@ public class AssignmentDaoFactory {
                 nodeService.removeNode(currentReferNodeId, nodeId, false);
             }
 
-            if(Boolean.parseBoolean(nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), assignmentFileRequest.refId(), CCConstants.CCM_PROP_RESTRICTED_ACCESS))){
+            if (Boolean.parseBoolean(nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), assignmentFileRequest.refId(), CCConstants.CCM_PROP_RESTRICTED_ACCESS))) {
                 log.debug("Skipping reference copy for restricted access document");
                 return;
             }

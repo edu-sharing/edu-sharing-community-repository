@@ -314,10 +314,6 @@
           "ref": {
             "$ref": "#/components/schemas/NodeRef"
           },
-          "startTime": {
-            "format": "date-time",
-            "type": "string"
-          },
           "status": {
             "enum": [
               "OPEN",
@@ -394,12 +390,51 @@
             "type": "boolean"
           },
           "refId": {
+            "minLength": 1,
             "type": "string"
           }
         },
         "required": [
           "documentRole",
-          "isDone"
+          "isDone",
+          "refId"
+        ],
+        "type": "object"
+      },
+      "AssignmentSearchResult": {
+        "properties": {
+          "facets": {
+            "items": {
+              "$ref": "#/components/schemas/Facet"
+            },
+            "type": "array"
+          },
+          "ignored": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/Assignment"
+            },
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          },
+          "suggests": {
+            "items": {
+              "$ref": "#/components/schemas/Suggest"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "facets",
+          "nodes",
+          "pagination"
         ],
         "type": "object"
       },
@@ -1636,10 +1671,6 @@
             },
             "type": "array"
           },
-          "startTime": {
-            "format": "date-time",
-            "type": "string"
-          },
           "status": {
             "enum": [
               "OPEN",
@@ -1667,9 +1698,7 @@
         "required": [
           "allowAdditionalDocumentSubmission",
           "assignmentFiles",
-          "endTime",
           "permissions",
-          "startTime",
           "status",
           "summary",
           "title",
@@ -14763,6 +14792,120 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Assignment"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Create or update an assignment",
+        "tags": [
+          "Assignment v1"
+        ]
+      }
+    },
+    "/assignment/v1/search": {
+      "post": {
+        "description": "Create or update an assignment.",
+        "operationId": "search",
+        "parameters": [
+          {
+            "description": "maximum items per page",
+            "in": "query",
+            "name": "maxItems",
+            "schema": {
+              "default": 25,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "skip a number of items",
+            "in": "query",
+            "name": "skipCount",
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchParameters"
+              }
+            }
+          },
+          "description": "search parameters"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentSearchResult"
                 }
               }
             },
@@ -38860,7 +39003,7 @@
     "/search/v1/queries/{repository}/{metadataset}/{query}": {
       "post": {
         "description": "Perform queries based on metadata sets.",
-        "operationId": "search",
+        "operationId": "search_1",
         "parameters": [
           {
             "description": "ID of repository (or \"-home-\" for home repository)",
@@ -42310,7 +42453,7 @@
     },
     "/stream/v1/search/{repository}": {
       "post": {
-        "operationId": "search_1",
+        "operationId": "search_2",
         "parameters": [
           {
             "description": "ID of repository (or \"-home-\" for home repository)",

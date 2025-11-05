@@ -7,7 +7,6 @@ import lombok.Setter;
 import org.edu_sharing.metadataset.v2.SearchCriterias;
 import org.edu_sharing.repository.client.rpc.Result;
 import org.edu_sharing.restservices.shared.NodeSearch;
-import org.edu_sharing.service.model.NodeRef;
 
 import java.util.List;
 import java.util.Map;

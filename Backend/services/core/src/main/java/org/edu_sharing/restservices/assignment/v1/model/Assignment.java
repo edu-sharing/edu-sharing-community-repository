@@ -19,7 +19,6 @@ import java.util.List;
  * @param creator                      The creator of the assignment, represented by a UserSimple object.
  *                                     This field is mandatory.
  * @param created                      The mandatory date of creation for the assignment.
- * @param startTime                    The optional start time of the assignment.
  * @param endTime                      The optional end time of the assignment.
  * @param status                       The current status of the assignment. This field is mandatory
  *                                     and based on predefined statuses in the Status enum.
@@ -43,7 +42,6 @@ public record Assignment(
         UserSimple creator,
         @JsonProperty(required = true)
         Date created,
-        Date startTime,
         Date endTime,
         @JsonProperty(required = true)
         Status status,
@@ -62,6 +60,7 @@ public record Assignment(
         FINISHED,
         CANCELED
     }
+
     public enum Type {
         DEFAULT,
         SUBMISSION,

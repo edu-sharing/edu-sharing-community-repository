@@ -109,14 +109,6 @@ public interface AssignmentDao {
     Date getEndDate();
 
     /**
-     * Retrieves the start date of the assignment.
-     *
-     * @return a {@code Date} object representing the start date of the assignment,
-     *         or {@code null} if no start date is set.
-     */
-    Date getStartDate();
-
-    /**
      * Retrieves the creation date of the assignment.
      *
      * @return a {@code Date} object representing the creation date of the assignment,
