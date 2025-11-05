@@ -259,7 +259,10 @@ public class DataProtectionService{
         AuthorityService authorityService = AuthorityServiceFactory.getLocalService();
         Set<String> groupSet = authorityService.getMemberships(userName);
         ArrayList<EduGroup> allEduGroups = AuthenticationUtil.runAsSystem(() -> authorityService.getAllEduGroups(userName));
-        List<String> groupList = groupSet.stream().map(g ->  (String)authorityService.getAuthorityProperty(g,CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME)).collect(Collectors.toList());
+        List<String> groupList = groupSet.stream()
+                .filter(g -> !g.startsWith("GROUP_ORG"))
+                .map(g ->  (String)authorityService.getAuthorityProperty(g,CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME))
+                .collect(Collectors.toList());
         User user = authorityService.getUser(userName);
 
         /**
