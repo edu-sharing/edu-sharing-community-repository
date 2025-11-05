@@ -8,6 +8,7 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
@@ -52,6 +53,14 @@ public class AssignmentDaoFactory {
 
     private final LazyProvider<RepositoryDao> repositoryDao = new LazyProvider<>(RepositoryDao::getHomeRepository);
 
+    /**
+     * Retrieves an instance of {@link AssignmentDao} based on the provided node identifier.
+     * The method creates and returns a prototype-scoped {@link AssignmentDao} implementation
+     * initialized with the specified node ID.
+     *
+     * @param nodeId the unique identifier of the node for which the {@link AssignmentDao} is to be created
+     * @return an instance of {@link AssignmentDao}, specific to the provided node ID
+     */
     @Bean(autowireCandidate = false)
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
@@ -136,7 +145,7 @@ public class AssignmentDaoFactory {
                     CCConstants.CCM_PROP_ASSIGNMENT_ENDDATE, request.endTime()
             );
 
-            if (nodeId != null) {
+            if (StringUtils.isNotBlank(nodeId)) {
                 validateExists();
                 log.debug("Update assignment node {} with {}", nodeId, properties);
                 nodeService.updateNodeNative(nodeId, properties);
@@ -258,7 +267,7 @@ public class AssignmentDaoFactory {
 
         @Override
         public boolean exists() {
-            return nodeId != null && nodeService.exists(nodeId);
+            return StringUtils.isNotBlank(nodeId) && nodeService.exists(nodeId);
         }
 
         @Override
@@ -394,7 +403,7 @@ public class AssignmentDaoFactory {
 
 
         public void create(AssignmentFileRequest request) {
-            if (nodeId != null) {
+            if (StringUtils.isBlank(nodeId)) {
                 throw new IllegalStateException("AssignmentFile with id " + nodeId + " already exists.");
             }
 
@@ -426,7 +435,7 @@ public class AssignmentDaoFactory {
 
         @Override
         public boolean exists() {
-            return nodeId != null && nodeService.exists(nodeId);
+            return StringUtils.isNotBlank(nodeId) && nodeService.exists(nodeId);
         }
 
         @Override
@@ -481,7 +490,7 @@ public class AssignmentDaoFactory {
                 return;
             }
 
-            if (currentReferNodeId != null && nodeService.exists(currentReferNodeId)) {
+            if (StringUtils.isNotBlank(currentReferNodeId) && nodeService.exists(currentReferNodeId)) {
                 log.debug("Deleting old reference node {}", currentReferNodeId);
                 nodeService.removeNode(currentReferNodeId, nodeId, false);
             }
