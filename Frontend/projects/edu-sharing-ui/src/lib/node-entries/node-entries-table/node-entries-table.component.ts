@@ -239,7 +239,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
                     this.hasHiddenSortColumns$.next(
                         this.entriesService
                             .getSortColumns()
-                            .some((c) => !columns.some((c2) => c2.name === c.name)),
+                            ?.some((c) => !columns?.some((c2) => c2.name === c.name)),
                     );
                 }),
                 shareReplay(1),
