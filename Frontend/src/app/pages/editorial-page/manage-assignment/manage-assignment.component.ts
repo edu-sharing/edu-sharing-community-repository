@@ -11,6 +11,7 @@ import {
 } from '../manage-assignment-nodes/manage-assignment-nodes.component';
 import {
     Assignment,
+    AssignmentFileRequest,
     AssignmentV1Service,
     Authority,
     CreateAssignmentRequest,
@@ -157,23 +158,27 @@ export class ManageAssignmentComponent {
                 role: a.role,
             };
         });
-        const files = this.nodes()?.map((n) => {
-            return {
-                ref: n.ref.id,
-                documentRole: n.documentRole,
-            };
-        });
-        const assignment = {
+        const assignmentFiles =
+            this.nodes()?.map((n) => {
+                return {
+                    refId: n.ref.id,
+                    isDone: false,
+                    documentRole: n.documentRole,
+                } as AssignmentFileRequest;
+            }) || [];
+        const assignment: CreateAssignmentRequest = {
             ...this.assignment(),
             title: this.mainDataFormGroup.get('title').value,
             summary: this.mainDataFormGroup.get('summary').value,
-            allowAdditionalDocumentSubmissions: this.mainDataFormGroup.get(
+            allowAdditionalDocumentSubmission: this.mainDataFormGroup.get(
                 'allowAdditionalDocumentSubmissions',
             ).value,
-            endTime: this.mainDataFormGroup.get('useEndTime').value ? (this.dateTime as any) : null,
+            endTime: this.mainDataFormGroup.get('useEndTime').value
+                ? new Date(this.dateTime).toISOString()
+                : null,
             permissions,
-            files,
-        } as CreateAssignmentRequest;
+            assignmentFiles,
+        };
         await firstValueFrom(
             this.assignmentService.createOrUpdateAssignment({
                 body: assignment,

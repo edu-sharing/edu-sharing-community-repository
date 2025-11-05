@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
 import {
+    Assignment,
+    AssignmentV1Service,
     InviteEvent,
     LabeledValue,
     MdsIdentifier,
@@ -60,7 +62,7 @@ export type DidYouMeanSuggestion = Pick<Suggest, 'highlighted' | 'text'>;
 export type SearchRequestParams = (Parameters<SearchV1Service['search']>[0] &
     Partial<Parameters<SearchV1Service['getRecentUserShares']>[0]> &
     Partial<Parameters<SearchV1Service['getRecentUserEvents']>[0]>) & {
-    type?: 'search' | 'shares' | 'recentActivity';
+    type?: 'search' | 'shares' | 'recentActivity' | 'assignments';
     /**
      * the metadataset id
      * Note: This will also be used to resolve facet labels!
@@ -74,7 +76,7 @@ export type SearchRequestParams = (Parameters<SearchV1Service['search']>[0] &
     criteriaFlat?: MdsQueryCriteria[];
 };
 
-export type SearchResultGeneric<T extends Node> = Omit<SearchResults, 'nodes'> & {
+export type SearchResultGeneric<T extends Node | Assignment> = Omit<SearchResults, 'nodes'> & {
     nodes: Array<T>;
 };
 export type NodeShare = Node & { share: Omit<InviteEvent, 'node'> };
@@ -83,6 +85,7 @@ export type NodeEvent = Node & { event: Omit<UserEvent, 'node'> };
 export type GenericSearchResults =
     | SearchResultGeneric<Node>
     | SearchResultGeneric<NodeShare>
+    | SearchResultGeneric<Assignment>
     | SearchResultGeneric<NodeEvent>;
 
 interface CompletedRequest {
@@ -121,6 +124,7 @@ export class SearchService {
         private mdsLabel: MdsLabelService,
         private network: NetworkService,
         private searchV1: SearchV1Service,
+        private assignmentV1Service: AssignmentV1Service,
     ) {
         this.registerFacetsSubject();
         this.registerDidYouMeanSuggestionSubject();
@@ -187,6 +191,8 @@ export class SearchService {
                     return r as SearchResultGeneric<NodeEvent>;
                 }),
             );
+        } else if (params.type === 'assignments') {
+            return this.assignmentV1Service.searchAssignments(params);
         }
         throw new Error('invalid type: ' + params.type);
     }

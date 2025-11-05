@@ -5,6 +5,7 @@ import { PaginationStrategy } from './node-entries-global.service';
 import { Sort } from '@angular/material/sort';
 import { SortPanel } from '../types/list-item';
 import { MatPaginator } from '@angular/material/paginator';
+import { NodeEntriesDataType } from './entries-model';
 
 export interface PaginationConfig {
     defaultPageSize: number;
@@ -12,7 +13,7 @@ export interface PaginationConfig {
 }
 
 export abstract class NodeDataSourceRemote<
-    T extends Node | GenericAuthority = Node,
+    T extends NodeEntriesDataType = Node,
     P extends MatPaginator = MatPaginator,
 > extends NodeDataSource<T> {
     abstract get paginator(): P | null;

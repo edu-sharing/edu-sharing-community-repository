@@ -8,7 +8,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { GenericAuthority, Node } from 'ngx-edu-sharing-api';
+import { Node } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
     ColumnType,
@@ -22,6 +22,7 @@ import {
     ListSortConfig,
     NodeClickEvent,
     NodeDataSource,
+    NodeEntriesDataType,
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
     OptionItem,
@@ -281,7 +282,7 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
         this.dataSource.isLoading = false;
     }
 
-    click(event: NodeClickEvent<Node | GenericAuthority>) {
+    click(event: NodeClickEvent<NodeEntriesDataType>) {
         this.list.getSelection().toggle(event.element as Node);
     }
 

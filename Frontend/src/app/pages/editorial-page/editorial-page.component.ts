@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import {
+    Assignment,
     AuthenticationService,
     ConfigService,
     DEFAULT,
@@ -11,8 +12,6 @@ import {
     Node,
     NodeEvent,
     NodeShare,
-    SearchResultEvent,
-    SearchResultInvite,
     SearchResults,
     SearchService,
     SearchServiceUnwrapped,
@@ -124,7 +123,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
      */
     firstNavigation$ = new BehaviorSubject<boolean>(false);
     mdsDefinition$ = new BehaviorSubject<MdsDefinition>(null);
-    readonly dataSource = new NodeDataSource<Node | NodeShare | NodeEvent>();
+    readonly dataSource = new NodeDataSource<Node | NodeShare | NodeEvent | Assignment>();
     columns = signal<ColumnType>(null);
     displayType = signal(NodeEntriesDisplayType.Table);
     selection = signal<SelectionModel<Node | null>>(null);
@@ -522,7 +521,27 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                     this.dataSource.setData(events.nodes, events.pagination);
                 });
         } else if (routeConfig.primaryMode === 'assignment') {
-            // @TODO: Search for assignments
+            this.searchService
+                .search({
+                    type: 'assignments',
+                    metadataset: DEFAULT,
+                    query: null,
+                    repository: HOME_REPOSITORY,
+                    contentType: 'ALL',
+                    direction: this.editorialPageService.buildSearchCriteria(
+                        this.tabSelection$.value,
+                    )[this.TabWidgetShares] as any,
+                    ...pagination,
+                    body: {
+                        facetLimit: 5,
+                        facetMinCount: 1,
+                        criteria: searchCriteria,
+                    },
+                })
+                .subscribe((events) => {
+                    this.dataSource.isLoading = false;
+                    this.dataSource.setData(events.nodes, events.pagination);
+                });
         } else {
             this.searchService
                 .search<SearchResults>({

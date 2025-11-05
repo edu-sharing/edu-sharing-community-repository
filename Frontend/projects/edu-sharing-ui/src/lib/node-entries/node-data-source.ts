@@ -1,8 +1,9 @@
 import { DataSource } from '@angular/cdk/collections';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { ItemsCap } from './items-cap';
-import { GenericAuthority, Node, Pagination } from 'ngx-edu-sharing-api';
+import { Node, Pagination } from 'ngx-edu-sharing-api';
 import { Helper } from '../util/helper';
+import { NodeEntriesDataType } from './entries-model';
 
 export type LoadingState =
     // The data source is loading data for the first time.
@@ -14,7 +15,7 @@ export type LoadingState =
     // Loading done.
     | false;
 
-export class NodeDataSource<T extends Node | GenericAuthority> extends DataSource<T> {
+export class NodeDataSource<T extends NodeEntriesDataType> extends DataSource<T> {
     protected dataStream = new BehaviorSubject<T[]>([]);
     private pagination$ = new BehaviorSubject<Pagination>(null);
     // Include `LoadingState` to be type-compatible to `NodeDataSourceRemote` although not used

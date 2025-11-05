@@ -4,7 +4,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { CustomOptions, OptionItem, Target } from '../types/option-item';
 import { ListItem, ListItemSort } from '../types/list-item';
 import { CanDrop, DragData, DropAction } from '../types/drag-drop';
-import { GenericAuthority, Node } from 'ngx-edu-sharing-api';
+import { Assignment, GenericAuthority, Node } from 'ngx-edu-sharing-api';
 import { ActionbarComponent } from '../actionbar/actionbar.component';
 import { Observable } from 'rxjs';
 
@@ -83,7 +83,7 @@ export type FetchEvent = {
      */
     reset?: boolean;
 };
-export type NodeEntriesDataType = Node | GenericAuthority;
+export type NodeEntriesDataType = Node | GenericAuthority | Assignment;
 export type GridLayout = 'grid' | 'scroll';
 export type GridConfig = {
     /**
