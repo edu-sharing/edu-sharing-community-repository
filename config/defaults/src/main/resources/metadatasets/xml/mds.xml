@@ -689,6 +689,15 @@
         <entry>unlimited</entry>
       </values>
     </widget>
+    <widget>
+      <id>virtual:assignmentType</id>
+      <caption>cp_virtual_assignmentType</caption>
+      <valuespace_i18n_prefix>assignmentType_</valuespace_i18n_prefix>
+      <values>
+        <entry icon="place_item">assigned</entry>
+        <entry icon="ios_share">created</entry>
+      </values>
+    </widget>
   </widgets>
   <templates>
     <template>
@@ -1667,6 +1676,17 @@
         ]
         }}
       </basequery>
+      <property name="virtual:assignmentType">
+        <statement value="created">
+          {"match": {"properties.cm:creator.keyword": "${user.cm:userName}" }},
+        </statement>
+        <statement value="assigned">
+          {"bool":{
+          "must_not":[
+          {"match": {"properties.cm:creator.keyword": "${user.cm:userName}" }},
+          }}
+        </statement>
+      </property>
     </query>
     <query join="AND" id="collections">
       <basequery propertyNull="ngsearchword">
