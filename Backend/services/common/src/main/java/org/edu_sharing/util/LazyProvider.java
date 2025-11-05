@@ -32,6 +32,20 @@ public class LazyProvider<T> {
     }
 
     /**
+     * Constructs a new {@code LazyProvider} with the provided supplier and an initial value.
+     * The supplier is used to lazily initialize the value when it is accessed for the first time,
+     * if the value is not already initialized. This constructor ensures thread-safe lazy initialization.
+     *
+     * @param supplier the supplier to provide the value when first accessed
+     *                 (must not be {@code null})
+     * @param initialValue the initial value of type {@code T}
+     */
+    public LazyProvider(@NotNull @NonNull Supplier<T> supplier, T initialValue) {
+        this.supplier = supplier;
+        this.value = new AtomicReference<>(initialValue);
+    }
+
+    /**
      * Returns the lazily initialized value, creating it if it has not already been initialized.
      * The value is created using the provided {@link Supplier} and is thread-safe.
      *

@@ -256,6 +256,10 @@ public class PropertyMapper {
             return (Date) value;
         }
 
+        if(value instanceof Long longValue) {
+            return new Date(longValue);
+        }
+
         if (value instanceof String stringValue) {
             try {
                 return new Date(Long.parseLong(stringValue));

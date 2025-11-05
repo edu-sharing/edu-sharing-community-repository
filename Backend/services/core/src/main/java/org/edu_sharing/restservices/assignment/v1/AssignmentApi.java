@@ -83,7 +83,7 @@ public class AssignmentApi {
 
     @POST
     @Path("/search")
-    @Operation(summary = "Create or update an assignment", description = "Create or update an assignment.")
+    @Operation(summary = "Search assignments", description = "Searches for assignments.")
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = AssignmentSearchResult.class))),
@@ -95,7 +95,7 @@ public class AssignmentApi {
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
     )
-    public Response search(
+    public Response searchAssignments(
             @Parameter(description = "search parameters", required = false) SearchParameters parameters,
             @Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue = "25")) @QueryParam("maxItems") Integer maxItems,
             @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount

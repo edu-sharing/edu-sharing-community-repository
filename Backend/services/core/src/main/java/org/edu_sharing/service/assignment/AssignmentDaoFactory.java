@@ -81,7 +81,7 @@ public class AssignmentDaoFactory {
         pagination.setCount(result.getData().size());
         converted.setFacets(result.getFacets());
         converted.setPagination(pagination);
-        converted.setNodes(result.getData().stream().map(x -> new AssignmentDaoImpl(x.getNodeId())).collect(Collectors.toList()));
+        converted.setNodes(result.getData().stream().map(x -> new AssignmentDaoImpl(x)).collect(Collectors.toList()));
         return converted;
     }
 
@@ -95,12 +95,21 @@ public class AssignmentDaoFactory {
         private final LazyProvider<Optional<String>> submissionFolderRef;
 
         public AssignmentDaoImpl(String nodeId) {
+            this(nodeId, Optional.empty());
+        }
+
+        public AssignmentDaoImpl(org.edu_sharing.service.model.NodeRef nodeRef) {
+            this(nodeRef.getNodeId(), Optional.of(nodeRef));
+        }
+
+        private AssignmentDaoImpl(String nodeId, Optional<org.edu_sharing.service.model.NodeRef> nodeRef) {
             this.nodeId = nodeId;
             propertyMapper = new LazyProvider<>(CheckedSupplier.wrap(() -> {
                 validateExists();
                 Map<String, Object> properties = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), getNodeId());
                 return new PropertyMapper(properties);
-            }));
+            }), nodeRef.map(x -> new PropertyMapper(x.getProperties())).orElse(null));
+
             assignmentFileRefs = new LazyProvider<>(() -> {
                 validateExists();
                 return nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_ASSIGNMENT_FILE)
@@ -111,6 +120,7 @@ public class AssignmentDaoFactory {
                         .map(AssignmentFileDao.class::cast)
                         .toList();
             });
+
             permissions = new LazyProvider<>(() -> {
                 validateExists();
                 try {
@@ -140,6 +150,7 @@ public class AssignmentDaoFactory {
                         .map(org.alfresco.service.cmr.repository.NodeRef::getId);
             });
         }
+
 
         private void validateExists() {
             if (!exists()) {
