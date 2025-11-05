@@ -1660,6 +1660,14 @@
         <statement>{"bool":{"must":[{"wildcard":{"nodeRef.id":{"value":"${value}","case_insensitive":true}}}]}}</statement>
       </property>
     </query>
+    <query join="AND" id="assignments">
+      <basequery>{"bool":{
+        "must":[
+        {"term":{"type":"ccm:assignment"}}
+        ]
+        }}
+      </basequery>
+    </query>
     <query join="AND" id="collections">
       <basequery propertyNull="ngsearchword">
         {"bool":{
