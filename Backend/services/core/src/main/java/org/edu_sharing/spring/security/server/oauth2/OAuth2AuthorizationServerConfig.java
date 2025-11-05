@@ -4,7 +4,7 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import lombok.extern.slf4j.Slf4j;
 import org.edu_sharing.spring.conditions.ConditionalOnProperty;
-import org.edu_sharing.spring.security.openid.SecurityConfigurationOpenIdConnect;
+import org.edu_sharing.spring.security.oauth2.SecurityConfigurationOAuth2;
 import org.edu_sharing.spring.security.saml2.SecurityConfigurationSaml;
 import org.edu_sharing.spring.security.server.oauth2.config.OAuth2ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +71,7 @@ public class OAuth2AuthorizationServerConfig {
         if(Arrays.asList(env.getActiveProfiles()).contains(SecurityConfigurationSaml.PROFILE_ID)){
             return SecurityConfigurationSaml.getLoginPath();
         }
-        if(Arrays.asList(env.getActiveProfiles()).contains(SecurityConfigurationOpenIdConnect.PROFILE_ID)){
+        if(Arrays.asList(env.getActiveProfiles()).contains(SecurityConfigurationOAuth2.PROFILE_ID)){
             return "/shibboleth";
         }
         return "/components/login?next=/shibboleth";
