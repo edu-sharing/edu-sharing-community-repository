@@ -161,15 +161,15 @@ public class AssignmentDaoFactory {
         @Override
         @RetryingTransaction
         public void createOrUpdate(CreateAssignmentRequest request) {
-            Map<String, Object> properties = Map.of(
-                    CCConstants.CM_NAME, UUID.randomUUID().toString(),
-                    CCConstants.CM_PROP_TITLE, request.title(),
-                    CCConstants.CM_PROP_DESCRIPTION, request.summary(),
-                    CCConstants.CCM_PROP_ASSIGNMENT_TYPE, request.type().name(),
-                    CCConstants.CCM_PROP_ASSIGNMENT_STATUS, request.status().name(),
-                    CCConstants.CCM_PROP_ASSIGNMENT_ALLOWADDITIONALDOCUMENTSUBMISSION, request.allowAdditionalDocumentSubmission(),
-                    CCConstants.CCM_PROP_ASSIGNMENT_ENDDATE, request.endTime()
-            );
+            Map<String, Object> properties = new HashMap<>() {{
+                put(CCConstants.CM_NAME, UUID.randomUUID().toString());
+                put(CCConstants.CM_PROP_TITLE, request.title());
+                put(CCConstants.CM_PROP_DESCRIPTION, request.summary());
+                put(CCConstants.CCM_PROP_ASSIGNMENT_TYPE, request.type().name());
+                put(CCConstants.CCM_PROP_ASSIGNMENT_STATUS, request.status().name());
+                put(CCConstants.CCM_PROP_ASSIGNMENT_ALLOWADDITIONALDOCUMENTSUBMISSION, request.allowAdditionalDocumentSubmission());
+                put(CCConstants.CCM_PROP_ASSIGNMENT_ENDDATE, request.endTime());
+            }};
 
             if (StringUtils.isNotBlank(nodeId)) {
                 validateExists();
