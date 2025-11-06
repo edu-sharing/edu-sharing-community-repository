@@ -25,6 +25,21 @@
     {{ $any(getNode())[item.name] }}
   </span>
 </ng-container>
+<ng-container [ngSwitch]="item.name" *ngIf="item.type === 'ASSIGNMENT'">
+  <span *ngSwitchCase="'title'">
+    {{ $any(getNode()).title }}
+  </span>
+  <span *ngSwitchCase="'summary'" [innerHTML]="$any(getNode()).summary"> </span>
+  <span *ngSwitchCase="'status'">
+    {{
+      'ASSIGNMENT.STATUS.' + $any(getNode()).status
+        | translate : { fallback: $any(getNode()).status }
+    }}
+  </span>
+  <span *ngSwitchCase="'type'">
+    {{ 'ASSIGNMENT.TYPE.' + $any(getNode()).type | translate : { fallback: $any(getNode()).type } }}
+  </span>
+</ng-container>
 <ng-container [ngSwitch]="item.name" *ngIf="item.type === 'EVENT' || item.type === 'SHARE'">
   <span *ngSwitchCase="'eventType'">
     {{

@@ -9,6 +9,7 @@ export type ListItemType =
     | 'GROUP'
     | 'USER'
     | 'EVENT'
+    | 'ASSIGNMENT'
     | 'SHARE';
 
 /**

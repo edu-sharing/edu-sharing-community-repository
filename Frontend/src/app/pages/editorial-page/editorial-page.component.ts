@@ -306,8 +306,10 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             } else if (p.primaryMode === 'assignment') {
                 this.columns.set({
                     Default: [
-                        new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
-                        new ListItem('NODE', RestConstants.LOM_PROP_DESCRIPTION),
+                        new ListItem('ASSIGNMENT', 'title'),
+                        new ListItem('ASSIGNMENT', 'type'),
+                        new ListItem('ASSIGNMENT', 'status'),
+                        new ListItem('ASSIGNMENT', 'summary'),
                     ],
                 });
                 this.mdsDefinition$.next(

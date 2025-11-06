@@ -67,6 +67,7 @@ export class ManageAssignmentComponent {
     @ViewChild('dateChooser') dateChooserRef: ShareDialogChooseDateComponent;
     @Input() assignment = signal<CreateAssignmentRequest>({
         type: 'SUBMISSION',
+        status: 'OPEN',
     } as CreateAssignmentRequest);
     authorities = signal<AuthorityWithSubmission[]>(null);
     mainDataFormGroup: FormGroup;
@@ -189,6 +190,7 @@ export class ManageAssignmentComponent {
             queryParamsHandling: 'merge',
             queryParams: {
                 mainComponent: null,
+                filters: JSON.stringify({ 'virtual:assignmentType': ['created'] }),
             },
         });
     }

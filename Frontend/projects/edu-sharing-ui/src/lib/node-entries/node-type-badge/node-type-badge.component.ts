@@ -1,8 +1,9 @@
 import { Component, Input, OnChanges, Optional } from '@angular/core';
-import { Node } from 'ngx-edu-sharing-api';
+import { Assignment, GenericAuthority, Node } from 'ngx-edu-sharing-api';
 import { CustomFieldSpecialType, NodeEntriesGlobalService } from '../node-entries-global.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { NodeEntriesService } from '../../services/node-entries.service';
+import { NodeEntriesDataType } from '../entries-model';
 
 /**
  * A small circular badge that depicts the node's type.
@@ -16,7 +17,7 @@ import { NodeEntriesService } from '../../services/node-entries.service';
     standalone: false,
 })
 export class NodeTypeBadgeComponent implements OnChanges {
-    @Input() node: Node;
+    @Input() node: NodeEntriesDataType;
     /**
      * when true, collection icons will resolve based on their type (editorial, private...)
      * When false, the generic svg image is used
@@ -32,13 +33,25 @@ export class NodeTypeBadgeComponent implements OnChanges {
     ) {}
 
     ngOnChanges(): void {
-        this.isCollection = this.nodeHelper.isNodeCollection(this.node);
+        this.isCollection = this.nodeHelper.isNodeCollection(this.node as Node);
     }
 
     getCustomTemplate() {
         return this.nodeEntriesGlobalService.getCustomFieldTemplate(
             { type: 'NODE', name: CustomFieldSpecialType.type },
-            this.node,
+            this.node as Node,
         );
+    }
+
+    materialIcon() {
+        if ((this.node as GenericAuthority).authorityType === 'USER') {
+            return 'person';
+        } else if ((this.node as GenericAuthority).authorityType === 'GROUP') {
+            return 'group';
+        } else if ((this.node as Assignment).allowAdditionalDocumentSubmissions !== undefined) {
+            return 'task';
+        }
+
+        return null;
     }
 }

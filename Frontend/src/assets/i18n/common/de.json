@@ -327,6 +327,21 @@
     "sharedBy": "Geteilt von",
     "timestamp": "Zeitpunkt"
   },
+  "ASSIGNMENT": {
+    "title": "Titel",
+    "status": "Status",
+    "type": "Aufgabentyp",
+    "summary": "Beschreibung",
+    "TYPE": {
+      "DEFAULT": "Standard",
+      "SUBMISSION": "Abgabe"
+    },
+    "STATUS": {
+      "OPEN": "Offen",
+      "PROGRESS": "In Bearbeitung",
+      "FINISHED": "Abgeschlossen"
+    }
+  },
   "EVENT": {
     "eventType": "Aktion",
     "timestamp": "Zeitpunkt",
