@@ -17,6 +17,7 @@ import {
     Authority,
     CreateAssignmentRequest,
     PermissionRequest,
+    Submission,
 } from 'ngx-edu-sharing-api';
 import { NodeHelperService } from '../../../services/node-helper.service';
 import { EditorComponent } from '@tinymce/tinymce-angular';
@@ -74,6 +75,7 @@ export class ManageAssignmentComponent {
     authorities = signal<AuthorityWithSubmission[]>(null);
     mainDataFormGroup: FormGroup;
     nodes = signal<NodeWithRole[]>(null);
+    submissions = signal<Submission[]>(null);
     validateMainForm() {
         this.mainDataFormGroup.markAllAsTouched();
         if (!this.mainDataFormGroup.valid) {
@@ -116,11 +118,15 @@ export class ManageAssignmentComponent {
                         this.assignmentService.getAssignmentFiles({
                             assignmentId,
                         }),
+                        this.assignmentService.getSubmissions({
+                            assignmentId,
+                        }),
                     ]),
                 ),
             )
-            .subscribe(([assignment, files]) => {
+            .subscribe(([assignment, files, submissions]) => {
                 this.assignment.set(assignment);
+                this.submissions.set(submissions);
                 this.mainDataFormGroup.setValue({
                     title: assignment.title,
                     summary: assignment.summary,

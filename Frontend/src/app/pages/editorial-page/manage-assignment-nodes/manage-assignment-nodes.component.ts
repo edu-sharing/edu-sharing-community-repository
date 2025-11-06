@@ -6,6 +6,9 @@ import { NodeHelperService, NodesRightMode } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { MatSelectChange } from '@angular/material/select';
 import { AssignmentBase } from '../manage-assignment/manage-assignment.component';
+import { TranslateService } from '@ngx-translate/core';
+import { map } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
 
 type Role = 'SUPPLEMENTARY' | 'SUBMITTABLE';
 export type NodeWithRole = Node &
@@ -21,14 +24,23 @@ export type NodeWithRole = Node &
 })
 export class ManageAssignmentNodesComponent {
     readonly ChangePermissions = RestConstants.ACCESS_CHANGE_PERMISSIONS;
+    readonly = input<boolean>(false);
     assignment = model.required<AssignmentBase>();
     nodes = model.required<NodeWithRole[]>();
+    readonly translateReady$ = new BehaviorSubject<boolean>(false);
+
     drop(event: CdkDragDrop<NodeWithRole[]>) {
         moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
         this.nodes.set(this.nodes());
     }
 
-    constructor(public nodeHelperService: NodeHelperService) {}
+    constructor(private translate: TranslateService, public nodeHelperService: NodeHelperService) {
+        // dirty hack for https://github.com/angular/components/issues/7923
+        this.translate
+            .get('ANY')
+            .pipe(map(() => true))
+            .subscribe(this.translateReady$);
+    }
 
     remove(item: NodeWithRole) {
         this.nodes().splice(this.nodes().indexOf(item), 1);
@@ -36,6 +48,9 @@ export class ManageAssignmentNodesComponent {
     }
 
     protected readonly NodesRightMode = NodesRightMode;
+    compare(o1: any, o2: any) {
+        return false;
+    }
 
     setRole(item: NodeWithRole, $event: MatSelectChange<Role>) {
         item.documentRole = $event.value;

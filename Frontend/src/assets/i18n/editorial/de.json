@@ -94,6 +94,7 @@
         "GROUP_MULTIPLY": "Beim Austeilen der Aufgabe werden alle Mitglieder der Gruppe als Einzel-Personen zugewiesen",
         "FILES": "Angehängte Dateien",
         "AUTHORITIES_EMPTY": "Noch nicht zugewiesen",
+        "HAS_SUBMISSIONS": "Es gibt bereits Abgaben. Die Dateien können daher nicht mehr geändert werden",
         "FILES_EMPTY": "Noch keine angehängten Dateien",
         "FILES_INVITE": "Für die Personen dieser Aufgabe wird automatsich eine Freigabe an dem Element hinzugefügt",
         "FILES_NO_ACCESS": "Ggf. haben nicht alle Personen auf dieses Element Zugriff.",
