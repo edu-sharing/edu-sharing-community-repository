@@ -423,7 +423,7 @@ public class AssignmentDaoFactory {
 
 
         public void create(AssignmentFileRequest request) {
-            if (StringUtils.isBlank(nodeId)) {
+            if (StringUtils.isNotBlank(nodeId)) {
                 throw new IllegalStateException("AssignmentFile with id " + nodeId + " already exists.");
             }
 
