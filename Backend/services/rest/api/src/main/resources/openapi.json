@@ -1649,7 +1649,7 @@
       },
       "CreateAssignmentRequest": {
         "properties": {
-          "allowAdditionalDocumentSubmission": {
+          "allowAdditionalDocumentSubmissions": {
             "type": "boolean"
           },
           "assignmentFiles": {
@@ -1696,7 +1696,7 @@
           }
         },
         "required": [
-          "allowAdditionalDocumentSubmission",
+          "allowAdditionalDocumentSubmissions",
           "assignmentFiles",
           "permissions",
           "status",

@@ -2486,7 +2486,7 @@
           <type>d:text</type>
           <multiple>false</multiple>
         </property>
-        <property name="ccm:assignment_allowadditionaldocumentsubmission">
+        <property name="ccm:assignment_allowadditionaldocumentsubmissions">
           <type>d:boolean</type>
           <multiple>false</multiple>
         </property>

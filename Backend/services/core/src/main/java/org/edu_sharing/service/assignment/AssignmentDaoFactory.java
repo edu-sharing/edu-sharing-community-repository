@@ -81,7 +81,7 @@ public class AssignmentDaoFactory {
         pagination.setCount(result.getData().size());
         converted.setFacets(result.getFacets());
         converted.setPagination(pagination);
-        converted.setNodes(result.getData().stream().map(x -> new AssignmentDaoImpl(x)).collect(Collectors.toList()));
+        converted.setNodes(result.getData().stream().map(AssignmentDaoImpl::new).collect(Collectors.toList()));
         return converted;
     }
 
@@ -117,8 +117,7 @@ public class AssignmentDaoFactory {
                         .map(ChildAssociationRef::getChildRef)
                         .map(org.alfresco.service.cmr.repository.NodeRef::getId)
                         .map(x -> new AssignmentFileDaoImpl(this, x))
-                        .map(AssignmentFileDao.class::cast)
-                        .toList();
+                        .collect(Collectors.toList());
             });
 
             permissions = new LazyProvider<>(() -> {
@@ -167,7 +166,7 @@ public class AssignmentDaoFactory {
                 put(CCConstants.CM_PROP_DESCRIPTION, request.summary());
                 put(CCConstants.CCM_PROP_ASSIGNMENT_TYPE, request.type().name());
                 put(CCConstants.CCM_PROP_ASSIGNMENT_STATUS, request.status().name());
-                put(CCConstants.CCM_PROP_ASSIGNMENT_ALLOWADDITIONALDOCUMENTSUBMISSION, request.allowAdditionalDocumentSubmission());
+                put(CCConstants.CCM_PROP_ASSIGNMENT_ALLOWADDITIONALDOCUMENTSUBMISSIONS, request.allowAdditionalDocumentSubmissions());
                 put(CCConstants.CCM_PROP_ASSIGNMENT_ENDDATE, request.endTime());
             }};
 
@@ -346,7 +345,7 @@ public class AssignmentDaoFactory {
 
         @Override
         public Boolean getAllowAdditionalDocumentSubmissions() {
-            return propertyMapper.get().getBoolean(CCConstants.CCM_PROP_ASSIGNMENT_ALLOWADDITIONALDOCUMENTSUBMISSION, false);
+            return propertyMapper.get().getBoolean(CCConstants.CCM_PROP_ASSIGNMENT_ALLOWADDITIONALDOCUMENTSUBMISSIONS, false);
         }
 
         @Override

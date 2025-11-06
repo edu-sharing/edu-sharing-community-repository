@@ -23,7 +23,7 @@ import java.util.List;
  *               statuses from the `Assignment.Status` enum.
  * @param type The type of the assignment, which defines its nature (e.g., DEFAULT or SUBMISSION).
  *             This field is mandatory and uses the `Assignment.Type` enum.
- * @param allowAdditionalDocumentSubmission A flag indicating whether participants are permitted
+ * @param allowAdditionalDocumentSubmissions A flag indicating whether participants are permitted
  *                                          to submit additional documents for this assignment.
  *                                          This field is mandatory.
  * @param permissions A list of permissions associated with the assignment. Each `PermissionRequest`
@@ -46,7 +46,7 @@ public record CreateAssignmentRequest(
         @NotNull
         Assignment.Type type,
         @NotNull
-        boolean allowAdditionalDocumentSubmission,
+        boolean allowAdditionalDocumentSubmissions,
         @NotNull
         List<PermissionRequest> permissions,
         @NotNull

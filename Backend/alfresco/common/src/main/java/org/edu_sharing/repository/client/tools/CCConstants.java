@@ -4,6 +4,7 @@ import java.util.*;
 
 import static java.util.Collections.unmodifiableSet;
 
+@SuppressWarnings("HttpUrlsUsage")
 public class CCConstants {
 
     public final static String DIV = "CC_SEARCH";
@@ -1466,7 +1467,7 @@ public class CCConstants {
      */
     public final static String CCM_PROP_ASSIGNMENT_TYPE = "{http://www.campuscontent.de/model/1.0}assignment_type";
     public final static String CCM_PROP_ASSIGNMENT_STATUS = "{http://www.campuscontent.de/model/1.0}assignment_status";
-    public final static String CCM_PROP_ASSIGNMENT_ALLOWADDITIONALDOCUMENTSUBMISSION = "{http://www.campuscontent.de/model/1.0}assignment_allowadditionaldocumentsubmission";
+    public final static String CCM_PROP_ASSIGNMENT_ALLOWADDITIONALDOCUMENTSUBMISSIONS = "{http://www.campuscontent.de/model/1.0}assignment_allowadditionaldocumentsubmissions";
     public final static String CCM_PROP_ASSIGNMENT_ENDDATE = "{http://www.campuscontent.de/model/1.0}assigment_enddate";
 
     public final static String CCM_PROP_ASSIGNMENTFILE_ISDONE = "{http://www.campuscontent.de/model/1.0}assigmentfile_isdone";
