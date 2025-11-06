@@ -29,6 +29,7 @@
         matTooltip="{{ 'EDITORIAL.ASSIGNMENT.FORM.FILES_INVITE' | translate }}"
         *ngIf="
           !item.isPublic &&
+          assignment().type !== 'SUBMISSION' &&
           nodeHelperService.getNodesRight([item], ChangePermissions, NodesRightMode.Effective)
         "
       >
@@ -40,8 +41,17 @@
         matTooltip="{{ 'EDITORIAL.ASSIGNMENT.FORM.FILES_NO_ACCESS' | translate }}"
         *ngIf="
           !item.isPublic &&
+          !isLicenseMedia(item) &&
+          assignment().type !== 'SUBMISSION' &&
           !nodeHelperService.getNodesRight([item], ChangePermissions, NodesRightMode.Effective)
         "
+      >
+        <i esIcon="warning"></i>
+      </div>
+      <div
+        class="not-public-no-invite"
+        matTooltip="{{ 'EDITORIAL.ASSIGNMENT.FORM.FILES_LICENSE_MEDIA' | translate }}"
+        *ngIf="!item.isPublic && isLicenseMedia(item)"
       >
         <i esIcon="warning"></i>
       </div>

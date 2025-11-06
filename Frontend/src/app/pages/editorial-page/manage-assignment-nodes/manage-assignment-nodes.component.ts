@@ -5,6 +5,7 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { NodeHelperService, NodesRightMode } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { MatSelectChange } from '@angular/material/select';
+import { AssignmentBase } from '../manage-assignment/manage-assignment.component';
 
 type Role = 'SUPPLEMENTARY' | 'SUBMITTABLE';
 export type NodeWithRole = Node &
@@ -20,6 +21,7 @@ export type NodeWithRole = Node &
 })
 export class ManageAssignmentNodesComponent {
     readonly ChangePermissions = RestConstants.ACCESS_CHANGE_PERMISSIONS;
+    assignment = model.required<AssignmentBase>();
     nodes = model.required<NodeWithRole[]>();
     drop(event: CdkDragDrop<NodeWithRole[]>) {
         moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
@@ -38,5 +40,9 @@ export class ManageAssignmentNodesComponent {
     setRole(item: NodeWithRole, $event: MatSelectChange<Role>) {
         item.documentRole = $event.value;
         this.nodes.set(this.nodes());
+    }
+
+    isLicenseMedia(item: NodeWithRole) {
+        return item.properties?.[RestConstants.CCM_PROP_RESTRICTED_ACCESS]?.[0] === 'true';
     }
 }

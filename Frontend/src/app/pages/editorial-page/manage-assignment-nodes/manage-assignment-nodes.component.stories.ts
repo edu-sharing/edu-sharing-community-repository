@@ -1,14 +1,16 @@
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { TranslateService } from '@ngx-translate/core';
 import { applicationConfig, type Meta, moduleMetadata, type StoryObj } from '@storybook/angular';
-import { EduSharingApiModule, Node, RestConstants } from 'ngx-edu-sharing-api';
+import { EduSharingApiModule, Node } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule, Helper, Toast } from 'ngx-edu-sharing-ui';
-import { ManageAssignmentNodesComponent } from './manage-assignment-nodes.component';
+import { ManageAssignmentNodesComponent, NodeWithRole } from './manage-assignment-nodes.component';
 import {
     DummyNode,
     ToastMock,
     translateProvider,
 } from 'src/app/features/mds/mds-editor/storybook-utils';
+import { AssignmentBase } from '../manage-assignment/manage-assignment.component';
+import { RestConstants } from 'src/app/core-module/core.module';
 
 const dummyNode = DummyNode;
 const list: Meta<ManageAssignmentNodesComponent> = {
@@ -33,7 +35,11 @@ const list: Meta<ManageAssignmentNodesComponent> = {
             ],
         }),
     ],
-    args: {},
+    args: {
+        assignment: {
+            type: 'SUBMISSION',
+        } as AssignmentBase,
+    },
     argTypes: {},
     tags: ['autodocs'],
 };
@@ -45,14 +51,19 @@ export const ListEntries: Story = {
         nodes: Array(10)
             .fill(DummyNode)
             .map((n: Node, i) => {
-                n = Helper.deepCopy(n);
-                n.ref.id = 'id_' + i;
-                n.title += ' ' + i;
-                n.isPublic = Math.random() > 0.5;
+                const node = Helper.deepCopy(n) as NodeWithRole;
+                node.documentRole = 'SUPPLEMENTARY';
+                node.isDone = false;
+                node.ref.id = 'id_' + i;
+                node.title += ' ' + i;
+                node.isPublic = Math.random() > 0.5;
                 if (Math.random() > 0.5) {
-                    n.accessEffective = [RestConstants.ACCESS_CHANGE_PERMISSIONS];
+                    node.accessEffective = [RestConstants.ACCESS_CHANGE_PERMISSIONS];
                 }
-                return n;
+                node.properties[RestConstants.CCM_PROP_RESTRICTED_ACCESS] = [
+                    (Math.random() > 0.5) + '',
+                ];
+                return node;
             }),
     },
 };

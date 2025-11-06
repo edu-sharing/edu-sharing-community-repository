@@ -97,6 +97,7 @@
         "FILES_EMPTY": "Noch keine angehängten Dateien",
         "FILES_INVITE": "Für die Personen dieser Aufgabe wird automatsich eine Freigabe an dem Element hinzugefügt",
         "FILES_NO_ACCESS": "Ggf. haben nicht alle Personen auf dieses Element Zugriff.",
+        "FILES_LICENSE_MEDIA": "Lizenziertes Medium. Weitergabe des Zugriffs nicht möglich. Nur für Personen abrufbar, welche Zugriff darauf besitzen",
         "FILES_ROLE": "Materialtyp",
         "FILES_ALLOW_ADDITIONAL": "zusätzliche Materialien",
         "FILES_ALLOW_ADDITIONAL_DETAILS": "Abgabe zusätzlicher Materialien ist erlaubt",

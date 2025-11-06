@@ -17,7 +17,10 @@
       <editor [init]="editorConfig" formControlName="summary"></editor>
       <mat-label>{{ 'EDITORIAL.ASSIGNMENT.FORM.FILES' | translate }}</mat-label>
       <div class="files">
-        <es-manage-assignment-nodes [nodes]="nodes()"></es-manage-assignment-nodes>
+        <es-manage-assignment-nodes
+          [assignment]="assignment()"
+          [nodes]="nodes()"
+        ></es-manage-assignment-nodes>
         <button mat-flat-button color="primary" (click)="showFileDialog()">
           <i esIcon="add"></i> {{ 'EDITORIAL.ASSIGNMENT.FORM.ADD_FILE' | translate }}
         </button>

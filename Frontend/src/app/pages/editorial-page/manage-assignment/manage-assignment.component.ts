@@ -211,7 +211,7 @@ export class ManageAssignmentComponent {
             type: this.assignment().type,
             title: this.mainDataFormGroup.get('title').value,
             summary: this.mainDataFormGroup.get('summary').value,
-            allowAdditionalDocumentSubmissions: this.mainDataFormGroup.get(
+            allowAdditionalDocumentSubmission: this.mainDataFormGroup.get(
                 'allowAdditionalDocumentSubmissions',
             ).value,
             endTime: this.mainDataFormGroup.get('useEndTime').value
@@ -219,7 +219,7 @@ export class ManageAssignmentComponent {
                 : null,
             permissions,
             assignmentFiles,
-        };
+        } as any;
         await firstValueFrom(
             this.assignmentService.createOrUpdateAssignment({
                 body: assignment,
