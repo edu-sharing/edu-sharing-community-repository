@@ -78,6 +78,8 @@ public interface AuthorityService {
 
 	NodeRef getAuthorityNodeRef(String authority);
 
+    Set<String> getMembershipsOfGroupRecursively(String groupName);
+
     void addMemberships(String groupName, String[] members);
 
 	void removeMemberships(String groupName, String[] members);
