@@ -11,10 +11,13 @@ import {
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
+    Assignment,
+    GenericAuthority,
     LtiPlatformService,
     Node,
     NodeListErrorResponses,
     NodeListService,
+    ProposalNode,
 } from 'ngx-edu-sharing-api';
 import {
     ClipboardObject,
@@ -25,6 +28,7 @@ import {
     HideMode,
     ListEventInterface,
     LocalEventsService,
+    NodeEntriesDataType,
     NodeEntriesDisplayType,
     NodesRightMode,
     OptionData,
@@ -444,30 +448,35 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         return [ElementType.NoneOrUnknown];
     }
 
-    private getTypeSingle(object: Node | any) {
-        if (object.authorityType === RestConstants.AUTHORITY_TYPE_GROUP) {
+    private getTypeSingle(object: NodeEntriesDataType) {
+        if ((object as GenericAuthority).authorityType === RestConstants.AUTHORITY_TYPE_GROUP) {
             return ElementType.Group;
-        } else if (object.authorityType === RestConstants.AUTHORITY_TYPE_USER) {
+        } else if (
+            (object as GenericAuthority).authorityType === RestConstants.AUTHORITY_TYPE_USER
+        ) {
             return ElementType.Person;
-        } else if (object.ref) {
-            if (object.type === RestConstants.CCM_TYPE_SAVED_SEARCH) {
+        } else if ((object as Assignment).allowAdditionalDocumentSubmissions !== undefined) {
+            return ElementType.Assignment;
+        } else if ((object as Node).ref) {
+            const node = object as Node;
+            if (node.type === RestConstants.CCM_TYPE_SAVED_SEARCH) {
                 return ElementType.SavedSearch;
-            } else if (object.aspects?.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) !== -1) {
+            } else if (node.aspects?.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) !== -1) {
                 return ElementType.NodeChild;
-            } else if (object.mediatype === 'folder-link') {
+            } else if (node.mediatype === 'folder-link') {
                 return ElementType.MapRef;
             } else if (
-                object.proposal ||
-                object.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL
+                (node as ProposalNode).proposal ||
+                node.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL
             ) {
                 return ElementType.NodeProposal;
             } else {
-                if (this.nodeHelper.isNodeRevoked(object)) {
+                if (this.nodeHelper.isNodeRevoked(node)) {
                     return ElementType.NodeRevoked;
-                } else if (this.nodeHelper.isNodePublishedCopy(object)) {
+                } else if (this.nodeHelper.isNodePublishedCopy(node)) {
                     return ElementType.NodePublishedCopy;
                 } else if (
-                    object.properties?.[RestConstants.CCM_PROP_IMPORT_BLOCKED]?.[0] === 'true'
+                    node.properties?.[RestConstants.CCM_PROP_IMPORT_BLOCKED]?.[0] === 'true'
                 ) {
                     return ElementType.NodeBlockedImport;
                 }
@@ -1357,6 +1366,16 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         relationNode.permissionsRightMode = NodesRightMode.Effective;
         relationNode.group = DefaultGroups.Edit;
         relationNode.priority = 70;
+        const editAssignment = new OptionItem('OPTIONS.ASSIGNMENT_EDIT', 'edit', (object) =>
+            this.uiService.goToAssignment(this.getObjects(object, data)[0], 'edit'),
+        );
+        editAssignment.elementType = [ElementType.Assignment];
+        editAssignment.constrains = [Constrain.NoBulk, Constrain.User];
+        //editAssignment.permissions = [RestConstants.PERMISSION_COORDINATOR];
+        editAssignment.permissionsMode = HideMode.Hide;
+        editAssignment.showAsAction = true;
+        editAssignment.group = DefaultGroups.Edit;
+        editAssignment.priority = 5;
 
         const editCollection = new OptionItem('OPTIONS.COLLECTION_EDIT', 'edit', (object) =>
             this.editCollection(this.getObjects(object, data)[0]),
@@ -1553,6 +1572,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         options.push(bookmarkNode);
         options.push(shortcutNode);
         options.push(editCollection);
+        options.push(editAssignment);
         options.push(pinCollection);
         options.push(feedbackMaterial);
         options.push(feedbackMaterialView);
@@ -1894,14 +1914,18 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         }
         if (constrains.indexOf(Constrain.NoCollectionReference) !== -1) {
             if (
-                objects.some((o) => o.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1)
+                objects.some(
+                    (o) => o.aspects?.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1,
+                )
             ) {
                 return Constrain.NoCollectionReference;
             }
         }
         if (constrains.indexOf(Constrain.CollectionReference) !== -1) {
             if (
-                objects.some((o) => o.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) === -1)
+                objects.some(
+                    (o) => o.aspects?.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) === -1,
+                )
             ) {
                 return Constrain.CollectionReference;
             }

@@ -29,7 +29,13 @@
   <span *ngSwitchCase="'title'">
     {{ $any(getNode()).title }}
   </span>
-  <span *ngSwitchCase="'summary'" [innerHTML]="$any(getNode()).summary"> </span>
+  <span
+    *ngSwitchCase="'summary'"
+    class="assignment-summary"
+    [innerHTML]="$any(getNode()).summary"
+    [matTooltip]="$any(getNode()).summary | htmlTextPipe"
+  >
+  </span>
   <span *ngSwitchCase="'status'">
     {{
       'ASSIGNMENT.STATUS.' + $any(getNode()).status

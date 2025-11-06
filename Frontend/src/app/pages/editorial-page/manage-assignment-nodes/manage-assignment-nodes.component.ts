@@ -1,5 +1,5 @@
 import { Component, input, model } from '@angular/core';
-import { Node } from 'ngx-edu-sharing-api';
+import { AssignmentFile, Node } from 'ngx-edu-sharing-api';
 import { SharedModule } from '../../../shared/shared.module';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { NodeHelperService, NodesRightMode } from 'ngx-edu-sharing-ui';
@@ -7,9 +7,10 @@ import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { MatSelectChange } from '@angular/material/select';
 
 type Role = 'SUPPLEMENTARY' | 'SUBMITTABLE';
-export type NodeWithRole = Node & {
-    documentRole?: Role;
-};
+export type NodeWithRole = Node &
+    Pick<AssignmentFile, 'documentRole' | 'isDone'> & {
+        refId?: string;
+    };
 
 @Component({
     selector: 'es-manage-assignment-nodes',

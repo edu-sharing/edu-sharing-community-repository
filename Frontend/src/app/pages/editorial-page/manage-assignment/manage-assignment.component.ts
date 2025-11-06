@@ -11,6 +11,7 @@ import {
 } from '../manage-assignment-nodes/manage-assignment-nodes.component';
 import {
     Assignment,
+    AssignmentFile,
     AssignmentFileRequest,
     AssignmentV1Service,
     Authority,
@@ -27,8 +28,9 @@ import {
 } from '../manage-assignment-authorities/manage-assignment-authorities.component';
 import { Toast } from 'ngx-edu-sharing-ui';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
-import { firstValueFrom } from 'rxjs';
+import { BehaviorSubject, combineLatest, filter, firstValueFrom } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
+import { distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
 
 export type AssignmentBase = Pick<Assignment, 'title' | 'type' | 'summary'>;
 @Component({
@@ -65,14 +67,13 @@ export class ManageAssignmentComponent {
     dateTime = new Date().getTime() + 1000 * 3600 * 24 * 5;
     @ViewChild(MatStepper) matStepper: MatStepper;
     @ViewChild('dateChooser') dateChooserRef: ShareDialogChooseDateComponent;
-    @Input() assignment = signal<CreateAssignmentRequest>({
+    assignment = signal<Assignment>({
         type: 'SUBMISSION',
         status: 'OPEN',
-    } as CreateAssignmentRequest);
+    } as Assignment);
     authorities = signal<AuthorityWithSubmission[]>(null);
     mainDataFormGroup: FormGroup;
     nodes = signal<NodeWithRole[]>(null);
-    private close = new EventEmitter<void>();
     validateMainForm() {
         this.mainDataFormGroup.markAllAsTouched();
         if (!this.mainDataFormGroup.valid) {
@@ -102,6 +103,43 @@ export class ManageAssignmentComponent {
         private translateService: TranslateService,
         private editorialSidebarService: EditorialSidebarService,
     ) {
+        this.route.queryParams
+            .pipe(
+                map((p) => p.assignment),
+                filter((p) => !!p),
+                distinctUntilChanged(),
+                switchMap((assignmentId) =>
+                    combineLatest([
+                        this.assignmentService.getAssignment({
+                            assignmentId,
+                        }),
+                        this.assignmentService.getAssignmentFiles({
+                            assignmentId,
+                        }),
+                    ]),
+                ),
+            )
+            .subscribe(([assignment, files]) => {
+                this.assignment.set(assignment);
+                this.mainDataFormGroup.setValue({
+                    title: assignment.title,
+                    summary: assignment.summary,
+                    useEndTime: assignment.endTime !== null,
+                    allowAdditionalDocumentSubmissions:
+                        assignment.allowAdditionalDocumentSubmissions,
+                });
+                this.nodes.set(
+                    files.map((f) => {
+                        return {
+                            ...f.referNode,
+                            documentRole: f.documentRole,
+                            isDone: f.isDone,
+                            refId: f.ref.id,
+                        } as NodeWithRole;
+                    }),
+                );
+            });
+
         this.mainDataFormGroup = this.formBuilder.group({
             title: ['', [Validators.required]],
             summary: ['', [Validators.required]],
@@ -162,13 +200,15 @@ export class ManageAssignmentComponent {
         const assignmentFiles =
             this.nodes()?.map((n) => {
                 return {
-                    refId: n.ref.id,
-                    isDone: false,
+                    refId: n.refId || n.ref.id,
+                    isDone: n.isDone || false,
                     documentRole: n.documentRole,
                 } as AssignmentFileRequest;
             }) || [];
         const assignment: CreateAssignmentRequest = {
-            ...this.assignment(),
+            id: this.assignment().ref?.id,
+            status: this.assignment().status,
+            type: this.assignment().type,
             title: this.mainDataFormGroup.get('title').value,
             summary: this.mainDataFormGroup.get('summary').value,
             allowAdditionalDocumentSubmission: this.mainDataFormGroup.get(
@@ -196,10 +236,22 @@ export class ManageAssignmentComponent {
     }
 
     async cancel() {
+        let close = false;
         if (this.mainDataFormGroup.dirty) {
             if (await this.dialogsService.openGenericConfirmCancelDialog()) {
-                this.close.emit();
+                close = true;
             }
+        } else {
+            close = true;
+        }
+        if (close) {
+            void this.router.navigate([], {
+                relativeTo: this.route,
+                queryParamsHandling: 'merge',
+                queryParams: {
+                    mainComponent: null,
+                },
+            });
         }
     }
 }

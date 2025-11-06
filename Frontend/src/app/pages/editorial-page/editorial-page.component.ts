@@ -396,6 +396,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                     relativeTo: this.route,
                     replaceUrl: !this.firstNavigation$.value,
                     queryParams,
+                    queryParamsHandling: 'merge',
                 });
                 this.firstNavigation$.next(true);
             });

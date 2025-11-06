@@ -49,6 +49,7 @@ export * from './node-url/node-url.component';
 export * from './pipes/authority-name.pipe';
 export * from './pipes/toolpermission.pipe';
 export * from './pipes/property-slug.pipe';
+export * from './pipes/html-text.pipe';
 export * from './pipes/file-size.pipe';
 export * from './pipes/format-date.pipe';
 export * from './pipes/mds-duration.pipe';

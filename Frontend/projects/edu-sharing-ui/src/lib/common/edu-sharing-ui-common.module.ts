@@ -36,6 +36,7 @@ import { SpinnerSmallComponent } from '../spinner-small/spinner-small.component'
 import { NodeUrlPipe } from '../pipes/node-url.pipe';
 import { ToolpermissionPipe } from '../pipes/toolpermission.pipe';
 import { AuthorityNamePipe } from '../pipes/authority-name.pipe';
+import { HtmlTextPipe } from '../pipes/html-text.pipe';
 
 @NgModule({
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -75,6 +76,7 @@ import { AuthorityNamePipe } from '../pipes/authority-name.pipe';
         SpinnerSmallComponent,
         ToolpermissionPipe,
         MatButtonModule,
+        HtmlTextPipe,
         MatTooltipModule,
         MatRippleModule,
         TranslateModule,
@@ -92,6 +94,7 @@ import { AuthorityNamePipe } from '../pipes/authority-name.pipe';
         FormatSizePipe,
         MdsDurationPipe,
         IconDirective,
+        HtmlTextPipe,
         InfiniteScrollDirective,
         InfoMessageComponent,
         PropertySlugPipe,

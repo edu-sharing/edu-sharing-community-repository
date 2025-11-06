@@ -62,6 +62,7 @@
           [class.display-none]="(observer.width$ | async) < 400"
         ></es-editorial-breadcrumb>
         <es-actionbar
+          [class.display-none]="(mainComponent$ | async) !== null"
           [numberOfAlwaysVisibleOptions]="2"
           [showCaptions]="(observer.width$ | async) > 700"
         ></es-actionbar>
