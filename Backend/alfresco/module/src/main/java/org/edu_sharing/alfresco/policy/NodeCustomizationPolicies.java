@@ -600,10 +600,18 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
                 //nodeService.setProperty(nodeRef, QName.createQName(CCConstants.LOM_PROP_GENERAL_TITLE), nameAfter);
 
                 if (verifyMimetypeEnabled() && nodeService.exists(nodeRef)) {
-                    if (nameBefore == null && !nodeService.getProperty(nodeRef, ContentModel.PROP_NODE_UUID)
-                            .equals(nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)))) {
-                        logger.info("will not verifyMimetypeEnabled for copy");
-                    } else {
+                    boolean verify = true;
+                    // ccm:original does not show on the current node ref
+                    if (!nodeRef.getId().equals(nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)))) {
+                        if(nameBefore == null) {
+                            logger.info("will not verifyMimetypeEnabled for copy");
+                            verify = false;
+                        } else if(nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))) {
+                            logger.debug("will not verifyMimetypeEnabled for collection ref content (i.e. move)");
+                            verify = false;
+                        }
+                    }
+                    if(verify) {
                         ContentReader reader = contentService.getReader(nodeRef, ContentModel.PROP_CONTENT);
                         if (reader != null && reader.exists()) {
                             try {
