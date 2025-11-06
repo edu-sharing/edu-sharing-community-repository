@@ -211,7 +211,7 @@ export class ManageAssignmentComponent {
             type: this.assignment().type,
             title: this.mainDataFormGroup.get('title').value,
             summary: this.mainDataFormGroup.get('summary').value,
-            allowAdditionalDocumentSubmission: this.mainDataFormGroup.get(
+            allowAdditionalDocumentSubmissions: this.mainDataFormGroup.get(
                 'allowAdditionalDocumentSubmissions',
             ).value,
             endTime: this.mainDataFormGroup.get('useEndTime').value
