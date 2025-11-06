@@ -1,10 +1,6 @@
 import type { DropdownComponent } from '../dropdown/dropdown.component';
 import type { ActionbarComponent } from '../actionbar/actionbar.component';
-import type {
-    ListEventInterface,
-    NodeEntriesDataType,
-    NodeEntriesDisplayType,
-} from '../node-entries/entries-model';
+import type { ListEventInterface, NodeEntriesDisplayType } from '../node-entries/entries-model';
 import { EventEmitter, Injectable, NgZone, OnDestroy, Optional } from '@angular/core';
 import { AuthenticationService, ME, NetworkService, Node, UserService } from 'ngx-edu-sharing-api';
 import { take, takeUntil } from 'rxjs/operators';
@@ -16,6 +12,7 @@ import { KeyboardShortcutsService } from './abstract/keyboard-shortcuts.service'
 import { ActivatedRoute } from '@angular/router';
 import { LocalEventsService } from './local-events.service';
 import { Toast } from './abstract/toast.service';
+import { NodeEntriesDataType } from '../node-entries/data-type';
 
 type DeleteEvent = {
     objects: Node[] | any;

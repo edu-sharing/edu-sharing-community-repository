@@ -30,12 +30,7 @@ import {
     takeUntil,
     tap,
 } from 'rxjs/operators';
-import {
-    ClickSource,
-    InteractionType,
-    NodeEntriesDataType,
-    NodeEntriesDisplayType,
-} from '../entries-model';
+import { ClickSource, InteractionType, NodeEntriesDisplayType } from '../entries-model';
 import { NodeEntriesGlobalService } from '../node-entries-global.service';
 import { NodeEntriesService } from '../../services/node-entries.service';
 import { UIService } from '../../services/ui.service';
@@ -51,6 +46,7 @@ import { TranslationsService } from '../../translations/translations.service';
 import { NodesDragDropService } from '../../services/nodes-drag-drop.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
+import { NodeEntriesDataType } from '../data-type';
 
 @Component({
     selector: 'es-node-entries-table',

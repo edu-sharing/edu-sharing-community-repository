@@ -1366,13 +1366,32 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         relationNode.permissionsRightMode = NodesRightMode.Effective;
         relationNode.group = DefaultGroups.Edit;
         relationNode.priority = 70;
+        const viewAssignmentSubmission = new OptionItem(
+            'OPTIONS.ASSIGNMENT_EDIT',
+            'edit',
+            (object) =>
+                this.uiService.goToAssignment(this.getObjects(object, data)[0], 'submission'),
+        );
+        viewAssignmentSubmission.customShowCallback = async (objects) => {
+            const assignment = objects[0] as Assignment;
+            return assignment.type === 'SUBMISSION';
+        };
+        viewAssignmentSubmission.elementType = [ElementType.Assignment];
+        viewAssignmentSubmission.constrains = [Constrain.NoBulk, Constrain.User];
+        viewAssignmentSubmission.showAsAction = true;
+        viewAssignmentSubmission.group = DefaultGroups.View;
+        viewAssignmentSubmission.priority = 5;
+
         const editAssignment = new OptionItem('OPTIONS.ASSIGNMENT_EDIT', 'edit', (object) =>
             this.uiService.goToAssignment(this.getObjects(object, data)[0], 'edit'),
         );
         editAssignment.elementType = [ElementType.Assignment];
         editAssignment.constrains = [Constrain.NoBulk, Constrain.User];
-        //editAssignment.permissions = [RestConstants.PERMISSION_COORDINATOR];
-        editAssignment.permissionsMode = HideMode.Hide;
+        editAssignment.customShowCallback = async (objects) => {
+            const assignment = objects[0] as Assignment;
+            // user has access to permissions => so it's a coordinator
+            return assignment.permissions.length > 0;
+        };
         editAssignment.showAsAction = true;
         editAssignment.group = DefaultGroups.Edit;
         editAssignment.priority = 5;
@@ -1426,7 +1445,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         // feedback is only shown for non-managers
         feedbackMaterial.customShowCallback = async (objects) =>
             !this.nodeHelper.getNodesRight(
-                objects,
+                objects as Node[],
                 RestConstants.ACCESS_WRITE,
                 NodesRightMode.Effective,
             );

@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { ItemsCap } from './items-cap';
 import { Node, Pagination } from 'ngx-edu-sharing-api';
 import { Helper } from '../util/helper';
-import { NodeEntriesDataType } from './entries-model';
+import { NodeEntriesDataType } from './data-type';
 
 export type LoadingState =
     // The data source is loading data for the first time.

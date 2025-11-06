@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { ListItem } from '../../types/list-item';
 import { Node } from 'ngx-edu-sharing-api';
-import { NodeEntriesDataType } from '../entries-model';
+import { NodeEntriesDataType } from '../data-type';
 
 @Component({
     selector: 'es-drag-preview',

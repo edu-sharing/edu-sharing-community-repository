@@ -7,10 +7,11 @@ import { ResizableSidenavDirective } from './resizable-sidenav.directive';
 import { EditorialBreadcrumbComponent } from './editorial-breadcrumb/editorial-breadcrumb.component';
 import { MdsModule } from '../../features/mds/mds.module';
 import { EditorialSidebarComponent } from './editorial-sidebar/editorial-sidebar.component';
-import { BorderBoxObserverDirective, EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
+import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 import { TranslateModule } from '@ngx-translate/core';
 import { ManageAssignmentComponent } from './manage-assignment/manage-assignment.component';
 import { ManageAssignmentNodesComponent } from './manage-assignment-nodes/manage-assignment-nodes.component';
+import { AssignmentSubmissionComponent } from './assignment-submission/assignment-submission.component';
 
 @NgModule({
     declarations: [EditorialPageComponent],
@@ -19,6 +20,7 @@ import { ManageAssignmentNodesComponent } from './manage-assignment-nodes/manage
         EditorialBreadcrumbComponent,
         EditorialSidebarComponent,
         ManageAssignmentComponent,
+        AssignmentSubmissionComponent,
         ManageAssignmentNodesComponent,
         MatToolbarModule,
         EditorialPageRoutingModule,

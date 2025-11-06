@@ -1,5 +1,5 @@
 import { SelectionModel } from '@angular/cdk/collections';
-import { ElementRef, EventEmitter, Injectable, Input, signal, WritableSignal } from '@angular/core';
+import { EventEmitter, Injectable, signal, WritableSignal } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
 import {
@@ -12,7 +12,6 @@ import {
     ListOptions,
     ListSortConfig,
     NodeClickEvent,
-    NodeEntriesDataType,
     NodeEntriesDisplayType,
     TableConfig,
 } from '../node-entries/entries-model';
@@ -29,6 +28,7 @@ import { NodeDataSourceRemote } from '../node-entries/node-data-source-remote';
 import { delay, map } from 'rxjs/operators';
 import { DropdownComponent } from '../dropdown/dropdown.component';
 import { Toast } from './abstract/toast.service';
+import { NodeEntriesDataType } from '../node-entries/data-type';
 
 /**
  Custom selection model which adds the click source of the selection.

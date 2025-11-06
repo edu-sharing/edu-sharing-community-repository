@@ -41,7 +41,6 @@ import {
     ListOptionsConfig,
     ListSortConfig,
     NodeClickEvent,
-    NodeEntriesDataType,
     NodeEntriesDisplayType,
     TableConfig,
 } from './entries-model';
@@ -64,6 +63,7 @@ import { OptionsHelperDataService } from '../services/options-helper-data.servic
 import { UIService } from '../services/ui.service';
 import { SelectionChange } from '@angular/cdk/collections';
 import { ColumnType } from '../mds/mds-helper.service';
+import { NodeEntriesDataType } from './data-type';
 
 @Component({
     selector: 'es-node-entries-wrapper',

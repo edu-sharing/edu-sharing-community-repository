@@ -67,11 +67,14 @@
           [showCaptions]="(observer.width$ | async) > 700"
         ></es-actionbar>
       </div>
-      <ng-container *ngIf="mainComponent$ | async as component" [ngSwitch]="component">
-        <span *ngSwitchCase="'manageAssignment'">
-          <es-manage-assignment></es-manage-assignment>
-        </span>
-        <span *ngSwitchDefault> Component "{{ component }}" not implemented </span>
+      <ng-container *ngIf="mainComponent$ | async as component">
+        @switch(component) { @case('manageAssignment') {
+        <es-manage-assignment></es-manage-assignment>
+        } @case('assignmentSubmission') {
+        <es-assignment-submission></es-assignment-submission>
+        } @default {
+        <span> Component "{{ component }}" not implemented </span>
+        } }
       </ng-container>
       <ng-container *ngIf="(mainComponent$ | async) === null">
         <mat-tab-group

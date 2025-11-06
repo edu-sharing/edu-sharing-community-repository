@@ -13,13 +13,14 @@ import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { firstValueFrom, Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
-import { NodeEntriesDataType, NodeEntriesDisplayType } from './entries-model';
+import { NodeEntriesDisplayType } from './entries-model';
 import { NodeEntriesGlobalService } from './node-entries-global.service';
 import { NodeEntriesTemplatesService } from './node-entries-templates.service';
 import { NodeEntriesService } from '../services/node-entries.service';
 import { KeyboardShortcutsService } from '../services/abstract/keyboard-shortcuts.service';
 import { NodeDataSourceRemote } from './node-data-source-remote';
 import { TranslationsService } from '../translations/translations.service';
+import { NodeEntriesDataType } from './data-type';
 
 @Component({
     selector: 'es-node-entries',

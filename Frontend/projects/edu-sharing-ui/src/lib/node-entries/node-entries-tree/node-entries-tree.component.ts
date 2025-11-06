@@ -21,10 +21,11 @@ import { NodesDragDropService } from '../../services/nodes-drag-drop.service';
 import { TranslationsService } from '../../translations/translations.service';
 import { CanDrop, DragData } from '../../types/drag-drop';
 import { Target } from '../../types/option-item';
-import { NodeEntriesDataType, NodeEntriesDisplayType } from '../entries-model';
+import { NodeEntriesDisplayType } from '../entries-model';
 import { DynamicDataSource } from './dynamic-data-source';
 import { DynamicFlatNode } from './dynamic-flat-node';
 import { TreeNodeService } from './tree-node.service';
+import { NodeEntriesDataType } from '../data-type';
 
 @Component({
     selector: 'es-node-entries-tree',

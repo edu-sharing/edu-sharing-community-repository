@@ -1,11 +1,11 @@
 import { NodeDataSource } from './node-data-source';
-import { GenericAuthority, Node } from 'ngx-edu-sharing-api';
+import { Node } from 'ngx-edu-sharing-api';
 import { ActivatedRoute } from '@angular/router';
 import { PaginationStrategy } from './node-entries-global.service';
 import { Sort } from '@angular/material/sort';
 import { SortPanel } from '../types/list-item';
 import { MatPaginator } from '@angular/material/paginator';
-import { NodeEntriesDataType } from './entries-model';
+import { NodeEntriesDataType } from './data-type';
 
 export interface PaginationConfig {
     defaultPageSize: number;

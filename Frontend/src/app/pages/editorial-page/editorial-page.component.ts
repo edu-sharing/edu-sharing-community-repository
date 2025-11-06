@@ -65,7 +65,7 @@ import { OptionsHelperService } from '../../services/options-helper.service';
 import { EditorialSidebarService } from './editorial-sidebar/editorial-sidebar.service';
 
 export type PrimaryMode = 'activity' | 'share' | 'assignment';
-export type MainComponentType = 'manageAssignment';
+export type MainComponentType = 'manageAssignment' | 'assignmentSubmission';
 type RouteConfig = {
     primaryMode: PrimaryMode;
 };

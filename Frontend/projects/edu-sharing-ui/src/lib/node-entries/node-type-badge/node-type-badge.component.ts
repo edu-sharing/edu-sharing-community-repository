@@ -3,7 +3,7 @@ import { Assignment, GenericAuthority, Node } from 'ngx-edu-sharing-api';
 import { CustomFieldSpecialType, NodeEntriesGlobalService } from '../node-entries-global.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { NodeEntriesService } from '../../services/node-entries.service';
-import { NodeEntriesDataType } from '../entries-model';
+import { NodeEntriesDataType } from '../data-type';
 
 /**
  * A small circular badge that depicts the node's type.
