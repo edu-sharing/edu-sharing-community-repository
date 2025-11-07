@@ -1456,7 +1456,16 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             this.infoToggle.isToggle = true;
             options.push(this.infoToggle);
          */
-        let metadataSidebarSubscription: Subscription;
+        components?.list?.getSelection().changed.subscribe((selection) => {
+            if (selection.source.selected.length === 0) {
+                return;
+            }
+            if (this.workspace.nodeSidebar) {
+                this.workspace.nodeSidebar = selection.source.selected[0] as Node;
+                this.workspace.nodeSidebarChange.emit(this.workspace.nodeSidebar);
+            }
+        });
+        this.workspace.nodeSidebarChange.emit(this.workspace.nodeSidebar);
         const metadataSidebar = new OptionItem('OPTIONS.METADATA_SIDEBAR', 'info', (object) => {
             this.workspace.nodeSidebarChange.subscribe((change: Node) => {
                 metadataSidebar.icon = change ? 'info' : 'info';
@@ -1464,24 +1473,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             this.workspace.nodeSidebar = this.workspace.nodeSidebar
                 ? null
                 : this.getObjects(object, data)[0];
-            if (this.workspace.nodeSidebar == null) {
-                metadataSidebarSubscription?.unsubscribe();
-            } else {
-                metadataSidebarSubscription = components.list
-                    ?.getSelection()
-                    .changed.subscribe((selection) => {
-                        if (selection.source.selected.length === 0) {
-                            return;
-                        }
-                        if (this.workspace.nodeSidebar == null) {
-                            metadataSidebarSubscription?.unsubscribe();
-                            return;
-                        }
-                        this.workspace.nodeSidebar = selection.source.selected[0] as Node;
-                        this.workspace.nodeSidebarChange.emit(this.workspace.nodeSidebar);
-                    });
-            }
-            this.workspace.nodeSidebarChange.emit(this.workspace.nodeSidebar);
         });
         metadataSidebar.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         metadataSidebar.scopes = [Scope.WorkspaceList];
