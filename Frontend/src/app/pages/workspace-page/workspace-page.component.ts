@@ -17,6 +17,7 @@ import {
     MdsDefinition,
     MdsService,
     Node,
+    NodeService,
     UserService,
 } from 'ngx-edu-sharing-api';
 import {
@@ -209,6 +210,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         private ngZone: NgZone,
         private applicationRef: ApplicationRef,
         private node: RestNodeService,
+        private nodeService: NodeService,
         private nodeHelper: NodeHelperService,
         private route: ActivatedRoute,
         private router: Router,
@@ -758,29 +760,38 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
                 this.selectedNodeTree = null;
                 this.path = [];
             } else {
-                this.node.getNodeParents(id, false, [RestConstants.ALL]).subscribe(
-                    (data: NodeList) => {
-                        if (this.root === 'RECYCLE') {
-                            this.path = [];
+                this.nodeService
+                    .getParents(id, {
+                        fullPath: false,
+                        // always try to resolve to the top
+                        ignoreAccessError: true,
+                    })
+                    .subscribe(
+                        (data: NodeList) => {
+                            if (this.root === 'RECYCLE') {
+                                this.path = [];
+                                this.breadcrumbsService.setNodePath(this.path);
+                                this.createAllowed = false;
+                            } else {
+                                this.path = data.nodes.reverse();
+                                this.breadcrumbsService.setNodePath(this.path);
+                            }
+                            this.selectedNodeTree = null;
+                        },
+                        (error: any) => {
+                            // no access to full path, try to "fake" current folder
+                            if (
+                                error.status === RestConstants.HTTP_FORBIDDEN &&
+                                this.currentFolder
+                            ) {
+                                this.path = [this.currentFolder];
+                            } else {
+                                this.path = [];
+                            }
+                            this.selectedNodeTree = null;
                             this.breadcrumbsService.setNodePath(this.path);
-                            this.createAllowed = false;
-                        } else {
-                            this.path = data.nodes.reverse();
-                            this.breadcrumbsService.setNodePath(this.path);
-                        }
-                        this.selectedNodeTree = null;
-                    },
-                    (error: any) => {
-                        // no access to full path, try to "fake" current folder
-                        if (error.status === RestConstants.HTTP_FORBIDDEN && this.currentFolder) {
-                            this.path = [this.currentFolder];
-                        } else {
-                            this.path = [];
-                        }
-                        this.selectedNodeTree = null;
-                        this.breadcrumbsService.setNodePath(this.path);
-                    },
-                );
+                        },
+                    );
             }
         }
         if (this.currentFolder?.ref.id !== id) {

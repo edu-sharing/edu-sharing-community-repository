@@ -32842,6 +32842,14 @@
             "schema": {
               "type": "boolean"
             }
+          },
+          {
+            "description": "if true, a 403 will not be thrown and the highest possible path will be resolved",
+            "in": "query",
+            "name": "ignoreAccessError",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {

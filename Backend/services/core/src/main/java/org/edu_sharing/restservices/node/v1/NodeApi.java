@@ -580,8 +580,11 @@ public class NodeApi  {
     	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
     	@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)") @QueryParam("propertyFilter") List<String> propertyFilter,
     	@Parameter(description = "activate to return the full alfresco path, otherwise the path for the user home is resolved") @QueryParam("fullPath") Boolean fullPath,
+    	@Parameter(description = "if true, a 403 will not be thrown and the highest possible path will be resolved") @QueryParam("ignoreAccessError") Boolean ignoreAccessError,
 		@Context HttpServletRequest req) {
-    	
+
+		ParentEntries response=new ParentEntries();
+		List<Node> parents=new ArrayList<>();
     	try {
     		
     		Filter filter = new Filter(propertyFilter);
@@ -592,8 +595,7 @@ public class NodeApi  {
     		}
 	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, filter);
 	    	
-	    	ParentEntries response=new ParentEntries();
-	    	List<Node> parents=new ArrayList<>();
+
 	    	Node last=nodeDao.asNode();
 	    	parents.add(last);
 	    	String userHome=repoDao.getUserHome();
@@ -603,8 +605,12 @@ public class NodeApi  {
 			} else {
 				List<NodeRef> shared = PersonDao.getPerson(repoDao, PersonDao.ME).asPerson().getSharedFolders();
 				boolean collection = last.getMediatype().equals("collection");
-				if (fullPath == null)
+				if (fullPath == null) {
 					fullPath = false;
+				}
+				if(ignoreAccessError == null) {
+					ignoreAccessError = false;
+				}
 				while (true) {
 					if (last == null || last.getParent() == null || last.getParent().getId() == null)
 						break;
@@ -636,6 +642,11 @@ public class NodeApi  {
 	    	return Response.status(Response.Status.OK).entity(response).build();
 	
     	} catch (Throwable t) {
+			if(t instanceof DAOSecurityException && ignoreAccessError) {
+				response.setScope("SHARED_FILES");
+				response.setNodes(parents);
+				return Response.status(Response.Status.OK).entity(response).build();
+			}
     		return ErrorResponse.createResponse(t);    		
     	}
 
