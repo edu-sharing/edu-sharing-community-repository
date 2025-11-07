@@ -16,7 +16,6 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.service.authority.AuthorityServiceImpl;
 
 import java.io.Serializable;
 import java.util.*;
@@ -135,6 +134,6 @@ public class InitHelper {
 
     public static void initProxyUser() {
         //init proxyuser
-        ((AuthorityServiceImpl) AuthorityServiceFactory.getInstance().getLocalService()).createProxyUser();
+        AuthorityServiceFactory.getInstance().getLocalService().createProxyUser();
     }
 }

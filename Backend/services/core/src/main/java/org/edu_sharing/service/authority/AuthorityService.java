@@ -116,7 +116,9 @@ public interface AuthorityService {
 	 */
 	void setCustomAttributes(String authorityName, Map<String, Serializable> customAttributes);
 
-	String[] searchGroupNames(String pattern) throws Exception;
+    void createProxyUser();
+
+    String[] searchGroupNames(String pattern) throws Exception;
 
 	String generate2FaCode(String username);
 

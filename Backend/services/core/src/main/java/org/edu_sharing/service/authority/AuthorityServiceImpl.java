@@ -42,8 +42,8 @@ import org.edu_sharing.service.authentication.totp.OneTimeTokenService;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Service;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
 import java.util.*;
@@ -752,6 +752,7 @@ public class AuthorityServiceImpl implements AuthorityService {
         }
     }
 
+    @Override
     public void createProxyUser() {
 
         if (personService.personExists(CCConstants.PROXY_USER)) {
