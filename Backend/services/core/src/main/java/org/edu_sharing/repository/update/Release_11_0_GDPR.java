@@ -33,9 +33,18 @@ public class Release_11_0_GDPR {
     public void execute() {
 
         ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
-        //language=SQL
+
         try (Connection connection = dbAlf.getConnection()) {
 
+            //language=SQL
+            java.sql.DatabaseMetaData dbm = connection.getMetaData();
+            java.sql.ResultSet tables = dbm.getTables(null, null, "edu_dataprotection_queue", null);
+            if (!tables.next()) {
+                log.info("No edu_dataprotection_queue table found, skipping");
+                return;
+            }
+
+            //language=SQL
             try (PreparedStatement statement = connection.prepareStatement("SELECT node_id FROM edu_dataprotection_queue WHERE node_id NOTNULL")) {
                 java.sql.ResultSet resultSet = statement.executeQuery();
 
@@ -46,7 +55,8 @@ public class Release_11_0_GDPR {
                 }
             }
 
-            try(PreparedStatement statement = connection.prepareStatement("DROP TABLE edu_dataprotection_queue")) {
+            //language=SQL
+            try (PreparedStatement statement = connection.prepareStatement("DROP TABLE edu_dataprotection_queue")) {
                 statement.execute();
                 connection.commit();
             }
