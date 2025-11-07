@@ -221,11 +221,11 @@ public class NodeDao {
 
             for (String prop : defaultProps) {
                 if (!props.containsKey(prop) && CCConstants.getValidGlobalName(prop) != null &&
-                    // protected publish props
-                    !Arrays.asList(
-                            CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL, CCConstants.CCM_PROP_IO_PUBLISHED_MODE,
-                            CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID, CCConstants.CCM_PROP_IO_PUBLISHED_DATE
-                    ).contains(CCConstants.getValidGlobalName(prop))
+                        // protected publish props
+                        !Arrays.asList(
+                                CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL, CCConstants.CCM_PROP_IO_PUBLISHED_MODE,
+                                CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID, CCConstants.CCM_PROP_IO_PUBLISHED_DATE
+                        ).contains(CCConstants.getValidGlobalName(prop))
                 ) {
                     // delete removed properties
                     nodeService.removeProperty(getStoreProtocol(), getStoreIdentifier(), getId(), CCConstants.getValidGlobalName(prop));
@@ -245,7 +245,7 @@ public class NodeDao {
             if (!Objects.equals(
                     nodeService.getPropertyNative(getStoreProtocol(), getStoreIdentifier(), getId(), CCConstants.CM_NAME),
                     newName
-                    )
+            )
             ) {
                 if(nodeService.findNodeByName(getParentId(), newName) != null) {
                     props.remove(CCConstants.getValidLocalName(CCConstants.CM_NAME));
@@ -760,7 +760,7 @@ public class NodeDao {
             } catch (RuntimeException ignored) {
             }
 
-             // call getProperties on demand
+            // call getProperties on demand
             if (nodeRef.getProperties() == null || nodeRef.getProperties().isEmpty()) {
                 this.nodeProps = this.nodeService.getProperties(this.storeProtocol, this.storeId, this.nodeId);
 
@@ -883,10 +883,16 @@ public class NodeDao {
         contributor.setFirstname((String) vcd.get(CCConstants.VCARD_GIVENNAME));
         contributor.setLastname((String) vcd.get(CCConstants.VCARD_SURNAME));
         contributor.setProperty(key);
-        contributor.setEmail(CCConstants.VCARD_EMAIL);
+        contributor.setEmail((String) vcd.get(CCConstants.VCARD_EMAIL));
         contributor.setOrg((String) vcd.get(CCConstants.VCARD_ORG));
         contributor.setVcard(v);
         return contributor;
+    }
+
+    private boolean canAccessVcardEmail() {
+        // either filter vcard is disabled OR user has write permissions
+        return !LightbendConfigLoader.get().getBoolean("repository.privacy.filterVCardEmail") ||
+                (access != null && access.contains(CCConstants.PERMISSION_WRITE));
     }
 
     public boolean isFromRemoteRepository() {
@@ -1494,7 +1500,7 @@ public class NodeDao {
         data.setLicense(getLicense());
         data.setSize(getSize(data));
 
-        data.setContributors(contributors);
+        data.setContributors(getFilteredContributors());
 
         data.setRating(getRating());
         try {
@@ -1523,6 +1529,16 @@ public class NodeDao {
             });
             data.setRelations(relationsConverted);
         }
+    }
+
+
+    private List<Contributor> getFilteredContributors() {
+        if(canAccessVcardEmail())
+            return contributors;
+        return contributors.stream().peek(c -> {
+            c.setEmail(null);
+            c.setVcard(VCardConverter.removeEMails(c.getVcard()));
+        }).collect(Collectors.toList());
     }
 
     public RepositoryDao getRepositoryDao() {
@@ -2269,14 +2285,12 @@ public class NodeDao {
         }
 
         Map<String, String[]> properties = new HashMap<>();
-        if (LightbendConfigCache.getBoolean("repository.privacy.filterVCardEmail")) {
+        if (!canAccessVcardEmail()) {
             List<String> cleanup = new ArrayList<>();
             for (Entry<String, Object> entry : props.entrySet()) {
                 if (CCConstants.getLifecycleContributerPropsMap().containsValue(entry.getKey()) || CCConstants.getMetadataContributerPropsMap().containsValue(entry.getKey())) {
-                    if (access == null || !access.contains(CCConstants.PERMISSION_WRITE)) {
-                        entry.setValue(VCardConverter.removeEMails(StringUtils.join(ValueTool.getMultivalue(entry.getValue().toString()), "\n")));
-                        cleanup.add(entry.getKey() + CCConstants.VCARD_EMAIL);
-                    }
+                    entry.setValue(filterVCardEmail(entry));
+                    cleanup.add(entry.getKey() + CCConstants.VCARD_EMAIL);
                 }
             }
             cleanup.forEach(props::remove);
@@ -2309,6 +2323,10 @@ public class NodeDao {
         }
 
         return properties;
+    }
+
+    private static String filterVCardEmail(Entry<String, Object> entry) {
+        return VCardConverter.removeEMails(StringUtils.join(ValueTool.getMultivalue(entry.getValue().toString()), "\n"));
     }
 
     private List<String> getPropertyValues(Object value) {
