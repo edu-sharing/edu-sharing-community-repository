@@ -9,7 +9,6 @@ import org.alfresco.service.namespace.QName;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.UserEnvironmentToolFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,14 +24,14 @@ import java.util.Map;
 @Scope("prototype")
 public class Protocol {
 
-	private final AuthenticationService authenticationService;
-	private final NodeService nodeService;
-	private final UserEnvironmentToolFactory userEnvironmentToolFactory;
+    private final AuthenticationService authenticationService;
+    private final NodeService alfNodeService;
+    private final UserEnvironmentToolFactory userEnvironmentToolFactory;
+    private final org.edu_sharing.service.nodeservice.NodeService nodeService;
+    MCAlfrescoBaseClient mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
 
-	MCAlfrescoBaseClient mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
 
-
-//	@Deprecated
+    //	@Deprecated
 //	public Protocol(){
 //		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 //		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
@@ -40,48 +39,49 @@ public class Protocol {
 //		authenticationService = serviceRegistry.getAuthenticationService();
 //		nodeService = serviceRegistry.getNodeService();
 //	}
-	@Autowired
-	public Protocol(AuthenticationService authenticationService, NodeService nodeService, UserEnvironmentToolFactory userEnvironmentToolFactory){
+    @Autowired
+    public Protocol(AuthenticationService authenticationService, NodeService alfNodeService, org.edu_sharing.service.nodeservice.NodeService nodeService, UserEnvironmentToolFactory userEnvironmentToolFactory) {
 
-		this.authenticationService = authenticationService;
-		this.nodeService = nodeService;
-		this.userEnvironmentToolFactory = userEnvironmentToolFactory;
-	}
-	
-	public NodeRef getSysUpdateEntry(String updaterId) throws Throwable{
-		
-		Map<String,String> authInfo = new HashMap<>();
-		authInfo.put(CCConstants.AUTH_USERNAME, authenticationService.getCurrentUserName());
-		authInfo.put(CCConstants.AUTH_TICKET, authenticationService.getCurrentTicket());
-		String eduSystemFolderUpdate;
-		NodeRef updateInfoRef;
-		eduSystemFolderUpdate = userEnvironmentToolFactory.createEnvironmentTool(authInfo)
-				.getEdu_SharingSystemFolderUpdate();
-		updateInfoRef = NodeServiceFactory.getInstance().getLocalService().getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
-				eduSystemFolderUpdate,
-				CCConstants.CCM_TYPE_SYSUPDATE,
-				CCConstants.CCM_PROP_SYSUPDATE_ID,
-				updaterId
-		);
+        this.authenticationService = authenticationService;
+        this.alfNodeService = alfNodeService;
+        this.nodeService = nodeService;
+        this.userEnvironmentToolFactory = userEnvironmentToolFactory;
+    }
 
-		
-		return updateInfoRef;
-	}
-	
-	public void writeSysUpdateEntry(String updaterId) throws Throwable{
-		Map<QName, Serializable> updateInfoProps = new HashMap<>();
-		
-		updateInfoProps.put(ContentModel.PROP_NAME, updaterId);
-		updateInfoProps.put(QName.createQName(CCConstants.CCM_PROP_SYSUPDATE_ID),updaterId);
-		updateInfoProps.put(QName.createQName(CCConstants.CCM_PROP_SYSUPDATE_DATE),new Date());
-		
-		Map<String,String> authInfo = new HashMap<>();
-		authInfo.put(CCConstants.AUTH_USERNAME, authenticationService.getCurrentUserName());
-		authInfo.put(CCConstants.AUTH_TICKET, authenticationService.getCurrentTicket());
-		
-		String eduSystemFolderUpdate = userEnvironmentToolFactory.createEnvironmentTool(authInfo)
-				.getEdu_SharingSystemFolderUpdate();
+    public NodeRef getSysUpdateEntry(String updaterId) throws Throwable {
 
-		nodeService.createNode(new NodeRef(MCAlfrescoAPIClient.storeRef,eduSystemFolderUpdate), QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS),QName.createQName(updaterId), QName.createQName(CCConstants.CCM_TYPE_SYSUPDATE), updateInfoProps);
-	}
+        Map<String, String> authInfo = new HashMap<>();
+        authInfo.put(CCConstants.AUTH_USERNAME, authenticationService.getCurrentUserName());
+        authInfo.put(CCConstants.AUTH_TICKET, authenticationService.getCurrentTicket());
+        String eduSystemFolderUpdate;
+        NodeRef updateInfoRef;
+        eduSystemFolderUpdate = userEnvironmentToolFactory.createEnvironmentTool(authInfo)
+                .getEdu_SharingSystemFolderUpdate();
+        updateInfoRef = nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+                eduSystemFolderUpdate,
+                CCConstants.CCM_TYPE_SYSUPDATE,
+                CCConstants.CCM_PROP_SYSUPDATE_ID,
+                updaterId
+        );
+
+
+        return updateInfoRef;
+    }
+
+    public void writeSysUpdateEntry(String updaterId) throws Throwable {
+        Map<QName, Serializable> updateInfoProps = new HashMap<>();
+
+        updateInfoProps.put(ContentModel.PROP_NAME, updaterId);
+        updateInfoProps.put(QName.createQName(CCConstants.CCM_PROP_SYSUPDATE_ID), updaterId);
+        updateInfoProps.put(QName.createQName(CCConstants.CCM_PROP_SYSUPDATE_DATE), new Date());
+
+        Map<String, String> authInfo = new HashMap<>();
+        authInfo.put(CCConstants.AUTH_USERNAME, authenticationService.getCurrentUserName());
+        authInfo.put(CCConstants.AUTH_TICKET, authenticationService.getCurrentTicket());
+
+        String eduSystemFolderUpdate = userEnvironmentToolFactory.createEnvironmentTool(authInfo)
+                .getEdu_SharingSystemFolderUpdate();
+
+        alfNodeService.createNode(new NodeRef(MCAlfrescoAPIClient.storeRef, eduSystemFolderUpdate), QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS), QName.createQName(updaterId), QName.createQName(CCConstants.CCM_TYPE_SYSUPDATE), updateInfoProps);
+    }
 }

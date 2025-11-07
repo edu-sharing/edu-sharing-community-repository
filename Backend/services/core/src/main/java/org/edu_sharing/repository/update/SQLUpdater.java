@@ -1,5 +1,6 @@
 package org.edu_sharing.repository.update;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.jdbc.ScriptRunner;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
@@ -8,6 +9,8 @@ import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.repository.server.update.UpdateFactory;
 import org.edu_sharing.repository.server.update.UpdateFactoryInfo;
 import org.edu_sharing.repository.server.update.UpdateInfo;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
@@ -20,9 +23,12 @@ import java.util.List;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class SQLUpdater implements UpdateFactory {
 
     public static final String ID = "SQLUpdater_";
+
+    private final LightbendConfigLoader configLoader;
 
     @Override
     public List<UpdateInfo> getUpdates() {
@@ -34,33 +40,35 @@ public class SQLUpdater implements UpdateFactory {
 
     private List<UpdateInfo> getUpdates(String property) {
         try {
-            List<String> sqlScripts = LightbendConfigLoader.get().getStringList(property);
+            List<String> sqlScripts = configLoader.getConfig().getStringList(property);
             ArrayList<UpdateInfo> updateInfos = new ArrayList<>(sqlScripts.size());
-            if (sqlScripts.size() > 0) {
-                for (int i = 0; i < sqlScripts.size(); i++) {
-                    String script = sqlScripts.get(i);
-                    UpdateFactoryInfo updateInfo = new UpdateFactoryInfo(
-                            ID + script,
-                            "SQLUpdater to run sql scripts defined in the repository.database.scripts config",
-                            true,
-                            100000 + i,
-                            true,
-                            false,
-                            (test) -> runSQLScript(script, test));
-                    updateInfos.add(updateInfo);
-                }
-            } else {
-                log.info("no scripts to execute defined in property " + property);
+            if (sqlScripts.isEmpty()) {
+                log.info("no scripts to execute defined in property {}", property);
+                return updateInfos;
             }
+
+            for (int i = 0; i < sqlScripts.size(); i++) {
+                String script = sqlScripts.get(i);
+                UpdateFactoryInfo updateInfo = new UpdateFactoryInfo(
+                        ID + script,
+                        "SQLUpdater to run sql scripts defined in the repository.database.scripts config",
+                        true,
+                        100000 + i,
+                        false, // we handle this in an explicit call before all other
+                        false,
+                        (test) -> runSQLScript(script, test));
+                updateInfos.add(updateInfo);
+            }
+
             return updateInfos;
         } catch (Throwable e) {
-            log.error("Error running one or more sql scripts defined in " + property, e);
+            log.error("Error running one or more sql scripts defined in {}", property, e);
             return new ArrayList<>();
         }
     }
 
     private void runSQLScript(String script, boolean test) {
-        if(test) {
+        if (test) {
             return;
         }
 
@@ -80,7 +88,7 @@ public class SQLUpdater implements UpdateFactory {
             connection.commit();
 
             dbAlf.cleanUp(connection);
-        }catch (Exception ex){
+        } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
     }
