@@ -52,6 +52,7 @@ public class Release_11_0_ShareInfos {
 
         runner.setFilter(nodeService::exists);
         runner.setTask(nodeRef -> {
+            log.info("Processing {}", nodeRef.getId());
             String creator = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_CREATOR);
 
             List<String> rawUsers = (List<String>) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS));
@@ -61,6 +62,8 @@ public class Release_11_0_ShareInfos {
 
             Set<String> users = new HashSet<>(rawUsers);
             Set<String> invited = new HashSet<>(rawInvited);
+            log.info("Found {} users for {}", users.size(), nodeRef.getId());
+            log.info("Found {} invited for {}", invited.size(), nodeRef.getId());
 
             // we don't really know who shared all materials. So by default, we use the creator of the node for the sharedBy user.
             // Except he doesn't share the material at all (not in the list of users) otherwise we take the first user in the list.
@@ -68,8 +71,10 @@ public class Release_11_0_ShareInfos {
             if (!rawUsers.isEmpty() && !users.contains(creator)) {
                 sharedBy = rawUsers.get(0);
             }
+            log.info("Using {} as sharedBy for {}", sharedBy, nodeRef.getId());
 
             Share[] shares = globalShareService.getShares(nodeRef.getId());
+            log.info("Found {} shares for {}", shares.length, nodeRef.getId());
             for (Share share : shares) {
                 String shareNodeId = share.getNodeId();
                 NodeRef nodeRefShare = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, shareNodeId);
@@ -94,6 +99,7 @@ public class Release_11_0_ShareInfos {
             nodeService.removeProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_INVITED));
             nodeService.removeProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_MODIFIED));
             nodeService.removeProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_ACTION));
+            log.info("ShareInfos for {} updated", nodeRef.getId());
         });
 
         log.info("Starting ShareInfos update");
