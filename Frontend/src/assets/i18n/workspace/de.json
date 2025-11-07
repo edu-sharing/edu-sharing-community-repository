@@ -198,6 +198,7 @@
         "MISSING_METADATA": "Es wurden noch nicht alle notwendigen Metadaten ausgefüllt ({{completed}} / {{total}}).\nBitte füllen Sie die für eine Veröffentlichung benötigten Metadaten vollständig aus.",
         "OPEN_METADATA": "Metadatendialog öffnen",
         "SET_LICENSE": "Lizenzdialog öffnen",
+        "PUBLISH_RESTRICTED_ACCESS": "Dieses Material wurde als lizenziert festgelegt. Durch eine öffentliche Freigabe würde die Lizenzierung keine Einschränkung erzeugen, da jeder das Material öffnen darf.",
         "INHERITED": "Das übergeordnete Element/Ordner ist bereits öffentlich. Bitte deaktivieren Sie die Vererbung oder ändern Sie die Berechtigungen am übergeordneten Element",
         "VERSIONS_PUBLISHED": "Aktuell veröffentlichte Versionen",
         "NO_VERSIONS_PUBLISHED": "Es wurden noch keine Versionen veröffentlicht",
