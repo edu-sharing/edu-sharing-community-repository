@@ -247,7 +247,7 @@ public class ShibbolethServlet extends SpringHttpServlet {
             ssoMap.put(SSOAuthorityMapper.PARAM_SSO_TYPE, SSOAuthorityMapper.SSO_TYPE_EXTERNAL);
             Config config = this.configLoader.getConfig().getConfig("security.sso.external.mapping.person");
             for(Map.Entry<String, ConfigValue> e : config.entrySet()){
-                ssoMap.put(e.getKey(), e.getValue().toString());
+                ssoMap.put(e.getKey(), e.getValue().unwrapped().toString());
             }
             //@TODO additional attributes
         }
