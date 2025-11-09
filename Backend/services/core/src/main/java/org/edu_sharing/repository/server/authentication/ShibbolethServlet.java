@@ -27,6 +27,8 @@
  */
 package org.edu_sharing.repository.server.authentication;
 
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigValue;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -204,8 +206,9 @@ public class ShibbolethServlet extends SpringHttpServlet {
 	}
 
     private void mapAttributes(Map<String, String> ssoMap, HttpServletRequest request) {
+        boolean externalAuth = configLoader.getConfig().getBoolean("security.sso.external.enabled");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
+        if (!externalAuth && (authentication == null || !authentication.isAuthenticated())) {
             log.debug("no authentication found or is not authenticated");
             return;
         }
@@ -240,11 +243,13 @@ public class ShibbolethServlet extends SpringHttpServlet {
                     ssoMap.put(key, value.toString());
                 }
             });
-        } else if (configLoader.getConfig().getBoolean("security.sso.external.enabled")) {
+        } else if (externalAuth) {
             ssoMap.put(SSOAuthorityMapper.PARAM_SSO_TYPE, SSOAuthorityMapper.SSO_TYPE_EXTERNAL);
-            request.getAttributeNames().asIterator().forEachRemaining(name -> {
-                ssoMap.put(name, getShibValue(name, request));
-            });
+            Config config = this.configLoader.getConfig().getConfig("security.sso.external.mapping.person");
+            for(Map.Entry<String, ConfigValue> e : config.entrySet()){
+                ssoMap.put(e.getKey(), e.getValue().toString());
+            }
+            //@TODO additional attributes
         }
     }
 
