@@ -1,6 +1,7 @@
 package org.edu_sharing.service.authentication;
 
 import com.typesafe.config.Config;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import org.alfresco.service.transaction.TransactionService;
 import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -167,6 +169,19 @@ public class SSOAuthorityMapper {
         if (mappingConfig.isDebug()) {
             for (Map.Entry<String, String> ssoAttribute : ssoAttributes.entrySet()) {
                 log.debug("sso attribute: {} value: {}", ssoAttribute.getKey(), ssoAttribute.getValue());
+            }
+        }
+
+        if(mapping.isPreferRemoteUser()){
+            Context context = Context.getCurrentInstance();
+            if(context != null){
+                HttpServletRequest req = context.getRequest();
+                if(req != null){
+                    if(req.getRemoteUser() != null && !req.getRemoteUser().trim().isEmpty()) {
+                        log.info("using remoteuser:" + getSSOUsernameProp(ssoAttributes) + " " +req.getRemoteUser());
+                        ssoAttributes.put(getSSOUsernameProp(ssoAttributes),req.getRemoteUser());
+                    }
+                }
             }
         }
 

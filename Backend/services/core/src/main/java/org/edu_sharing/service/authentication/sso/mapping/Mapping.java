@@ -8,6 +8,8 @@ import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
 @Data
 public class Mapping {
+    @Optional
+    boolean preferRemoteUser = true;
     private final BidiMap<String, String> person = new DualHashBidiMap<>();
     private final BidiMap<String, Group> group = new DualHashBidiMap<>();
 
