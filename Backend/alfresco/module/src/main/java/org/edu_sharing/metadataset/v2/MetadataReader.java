@@ -483,7 +483,6 @@ public class MetadataReader {
             Node widgetNode = widgetsNode.item(i);
             NodeList list2 = widgetNode.getChildNodes();
             MetadataWidget widget = new MetadataWidget();
-            widget.setDefaults(defaults);
             widget.setI18n(i18nPath);
             String valuespaceI18n = i18nPath;
             String valuespaceI18nPrefix = "";
@@ -672,6 +671,7 @@ public class MetadataReader {
             } else if (valuespaces.size() == 1) {
                 widget.setValues(getValuespace(valuespaces.get(0), widget, valuespaceI18n, valuespaceI18nPrefix).getEntries());
             }
+            widget.setDefaults(defaults);
             widgets.add(widget);
         }
         return widgets;

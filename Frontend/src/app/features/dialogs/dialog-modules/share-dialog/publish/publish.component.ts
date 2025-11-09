@@ -44,6 +44,7 @@ import { DialogsService } from '../../../dialogs.service';
 import { OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
 import { YES_OR_NO } from '../../generic-dialog/generic-dialog-data';
 import { ExtendedAce } from '../share-dialog.component';
+import { ShareDialogRestrictedAccessComponent } from '../restricted-access/restricted-access.component';
 
 class PublishedNode extends Node {
     status?: 'new' | 'update' | null; // flag if this node is manually added later and didn't came from the repo
@@ -84,6 +85,7 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
     private initHasStarted = false;
     private destroyed = new Subject<void>();
     private about: About;
+    @Input() restrictedAccessComponent: ShareDialogRestrictedAccessComponent;
 
     constructor(
         private bridge: BridgeService,

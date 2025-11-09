@@ -4,6 +4,12 @@
     {{ 'WORKSPACE.SHARE.PUBLISH_' + getType() | translate }}
   </h4>
   <ng-container *ngIf="!node?.isDirectory">
+    <es-info-message
+      [mode]="shareModeDirect || shareModeCopy ? 'warning' : 'info'"
+      *ngIf="restrictedAccessComponent?.restrictedAccess"
+    >
+      {{ 'WORKSPACE.SHARE.PUBLISH.PUBLISH_RESTRICTED_ACCESS' | translate }}
+    </es-info-message>
     <es-info-message mode="info" *ngIf="getLicense()">
       {{ 'WORKSPACE.SHARE.PUBLISH.LICENSE_INFO' | translate : { license: getLicenseText() } }}
       {{ 'WORKSPACE.SHARE.PUBLISH.LICENSE_AUTHOR' | translate }}: {{ node | nodeAuthorName }}

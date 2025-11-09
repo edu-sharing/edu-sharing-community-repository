@@ -355,6 +355,7 @@
     <div class="publish-tab">
       <es-share-dialog-publish
         #publish
+        [restrictedAccessComponent]="restrictedAccessComponent"
         [node]="_nodes[0]"
         [permissions]="permissions"
         [inherited]="getPublishInherit()"
@@ -371,7 +372,10 @@
       <span class="tab-label">{{ 'WORKSPACE.TAB_RESTRICTED_ACCESS' | translate }}</span>
     </ng-template>
     <div class="restricted-access-tab">
-      <es-share-dialog-restricted-access [node]="_nodes[0]"></es-share-dialog-restricted-access>
+      <es-share-dialog-restricted-access
+        #restrictedAccessComponent
+        [node]="_nodes[0]"
+      ></es-share-dialog-restricted-access>
     </div>
   </mat-tab>
   <mat-tab *ngIf="isAdmin && permissionsUser && permissionsGroup" class="tabContent">

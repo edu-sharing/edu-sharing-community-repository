@@ -41,7 +41,9 @@ public class QueryUtils {
         }
 
         query = replacer.replaceString(query,"${educontext}", NodeCustomizationPolicies.getEduSharingContext());
-        query = replacer.replaceString(query, "${authority}", AuthenticationUtil.getFullyAuthenticatedUser());
+        if(query.contains("${authority}")) {
+            query = replacer.replaceString(query, "${authority}", AuthenticationUtil.getFullyAuthenticatedUser());
+        }
         if(query.contains("${authorities}")) {
             ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
             ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);

@@ -224,11 +224,8 @@ public class MetadataTemplateRenderer {
 						String rawValue = value;
 						Map<String, Object> vcardData = null;
 						if ("vcard".equals(widget.getType())) {
-							ArrayList<Map<String, Object>> map = VCardConverter.vcardToMap(
-									// html in vcards gets escaped beforehand for security reason, unescape special chars to not break the format
-									org.apache.commons.lang.StringEscapeUtils.unescapeHtml(value)
-							);
-							if (map.size() > 0) {
+							ArrayList<Map<String, Object>> map = VCardConverter.vcardToMap(value);
+							if (!map.isEmpty()) {
 								vcardData = map.get(0);
 							}
 						}
@@ -337,7 +334,7 @@ public class MetadataTemplateRenderer {
 							widgetHtml.append("<a href=\"").append(value).append("\" target=\"").append(widget.getLink()).append("\">");
 							isLink = true;
 						} else if (vcardData != null) {
-							value = VCardConverter.getNameForVCard("", vcardData);
+							value = cleanupText(MetadataWidget.TextEscapingPolicy.all, VCardConverter.getNameForVCard("", vcardData));
 						}
 						if (renderingMode.equals(RenderingMode.HTML)) {
 							widgetHtml
