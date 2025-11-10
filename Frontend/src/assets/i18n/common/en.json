@@ -868,6 +868,7 @@
     "SAVED": "Saved changes"
   },
   "RENDERING": {
+    "GO_TO_COURSE": "Go to course",
     "AUTHORED_BY": "by",
     "CONVERTING": "Converting",
     "QUEUED": "Queued",
