@@ -249,7 +249,8 @@ public class ShibbolethServlet extends SpringHttpServlet {
             for(Map.Entry<String, ConfigValue> e : config.entrySet()){
                 ssoMap.put(e.getKey(), (String)request.getAttribute(e.getKey()));
             }
-            //@TODO additional attributes
+            List<String> additional = this.configLoader.getConfig().getStringList("security.sso.external.mapping.additionalAttributes");
+            additional.forEach(a -> ssoMap.put(a, (String)request.getAttribute(a)));
         }
     }
 
