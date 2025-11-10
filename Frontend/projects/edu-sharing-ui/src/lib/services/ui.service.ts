@@ -207,4 +207,11 @@ export class UIService {
         }, delay);
         return component;
     }
+
+    /**
+     * returns true if the current browser is safari running
+     */
+    static isSafari() {
+        return /AppleWebKit/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent);
+    }
 }
