@@ -32,6 +32,7 @@ export * from './lib/wrappers/search.service';
 export * from './lib/wrappers/session-storage.service';
 export * from './lib/wrappers/user.service';
 export * from './lib/features-helper.service';
+export * from './lib/api-state.service';
 export * from './lib/rest-constants';
 
 // Unwrapped API services.

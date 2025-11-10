@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { delay, first, map, startWith, switchMap } from 'rxjs/operators';
+import { delay, filter, first, map, startWith, switchMap } from 'rxjs/operators';
 import { BridgeService } from '../../services/bridge.service';
 import {
     ConfigurationService,
@@ -267,8 +267,15 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
         UIHelper.openUrl(url, this.bridge, OPEN_URL_MODE.Current);
     }
 
-    login(password = this.password, code2Fa?: string) {
+    async login(password = this.password, code2Fa?: string) {
         this.isLoading = true;
+        if (this.scope) {
+            // before we're converting to a safe session, we need to make sure all previous requests are finished
+            // otherwise, we're may getting HTTP_FORBIDDEN/401
+            await firstValueFrom(
+                this.connector.getCurrentRequestCount().pipe(filter((c) => c === 0)),
+            );
+        }
         this.connector.login(this.username, password, this.scope, code2Fa).subscribe(
             (data) => {
                 if (data.statusCode === RestConstants.STATUS_CODE_OK) {
@@ -447,7 +454,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
         if (result === 'NEXT' && this.faConfirm.status === 'VALID') {
             // do login
             this.isLoading = true;
-            this.login(password, this.faConfirm.get('code').value);
+            void this.login(password, this.faConfirm.get('code').value);
         }
     }
 }
