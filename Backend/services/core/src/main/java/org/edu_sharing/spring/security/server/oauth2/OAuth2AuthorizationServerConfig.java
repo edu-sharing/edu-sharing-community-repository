@@ -89,7 +89,7 @@ public class OAuth2AuthorizationServerConfig {
                                         .clientAuthenticationMethod(new ClientAuthenticationMethod(c.getClientAuthenticationMethod()));
                                 if(!c.getRedirectUri().isEmpty()) builder.redirectUri(c.getRedirectUri());
                                 if(!c.getExpires().isEmpty()) builder.tokenSettings(TokenSettings.builder()
-                                        .accessTokenTimeToLive(Duration.ofHours(Integer.parseInt(c.getExpires())))
+                                        .accessTokenTimeToLive(Duration.parse(c.getExpires()))
                                         .build());
                                 c.getAuthorizationGrantTypes().forEach(gt -> builder.authorizationGrantType(new AuthorizationGrantType(gt)));
                                 c.getScopes().forEach(builder::scope);
