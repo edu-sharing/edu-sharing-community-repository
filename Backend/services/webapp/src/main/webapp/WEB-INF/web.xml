@@ -132,12 +132,11 @@
     <filter-class>org.edu_sharing.repository.server.DisableCacheFilter</filter-class>
   </filter>
 
-  <!-- SAML
+
   <filter>
       <filter-name>springSecurityFilterChain</filter-name>
       <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
   </filter>
-  SAML -->
 
   <filter>
     <filter-name>SameSiteCookieFilter</filter-name>
@@ -189,7 +188,6 @@
     <url-pattern>/*</url-pattern>
   </filter-mapping>
 
-    <!-- SAML
     <filter-mapping>
       <filter-name>springSecurityFilterChain</filter-name>
       <url-pattern>/shibboleth</url-pattern>
@@ -226,7 +224,6 @@
         <filter-name>springSecurityFilterChain</filter-name>
         <url-pattern>/eduservlet/*</url-pattern>
      </filter-mapping>
-     SAML -->
 
   <filter-mapping>
     <filter-name>DisableCacheFilter</filter-name>

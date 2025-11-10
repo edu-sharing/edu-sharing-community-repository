@@ -533,26 +533,19 @@ xmlstarlet ed -L \
         ${eduCConf}
     fi
   else
-    sed -i -r 's|<!--\s*SAML||g' tomcat/webapps/edu-sharing/WEB-INF/web.xml
-    sed -i -r 's|SAML\s*-->||g' tomcat/webapps/edu-sharing/WEB-INF/web.xml
-
-
-
-    if [[ "${my_home_auth}" != "basic" ]]; then
-      xmlstarlet ed -L \
-        -s '/config/values' -t elem -n 'loginUrl' -v '' \
-        -d '/config/values/loginUrl[position() != 1]' \
-        -u '/config/values/loginUrl' -v "${my_path_external}/shibboleth" \
-        -s '/config/values' -t elem -n 'logout' -v '' \
-        -d '/config/values/logout[position() != 1]' \
-        -s '/config/values/logout' -t elem -n 'url' -v '' \
-        -d '/config/values/logout/url[position() != 1]' \
-        -u '/config/values/logout/url' -v "${my_path_external}/logout" \
-        -s '/config/values/logout' -t elem -n 'destroySession' -v '' \
-        -d '/config/values/logout/destroySession[position() != 1]' \
-        -u '/config/values/logout/destroySession' -v 'false' \
-        ${eduCConf}
-    fi
+    xmlstarlet ed -L \
+      -s '/config/values' -t elem -n 'loginUrl' -v '' \
+      -d '/config/values/loginUrl[position() != 1]' \
+      -u '/config/values/loginUrl' -v "${my_path_external}/shibboleth" \
+      -s '/config/values' -t elem -n 'logout' -v '' \
+      -d '/config/values/logout[position() != 1]' \
+      -s '/config/values/logout' -t elem -n 'url' -v '' \
+      -d '/config/values/logout/url[position() != 1]' \
+      -u '/config/values/logout/url' -v "${my_path_external}/logout" \
+      -s '/config/values/logout' -t elem -n 'destroySession' -v '' \
+      -d '/config/values/logout/destroySession[position() != 1]' \
+      -u '/config/values/logout/destroySession' -v 'false' \
+      ${eduCConf}
   fi
 }
 
