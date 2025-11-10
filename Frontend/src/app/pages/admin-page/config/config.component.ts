@@ -69,19 +69,39 @@ export class AdminConfigComponent {
             .subscribe((base) => (this.configs.reference = base));
         this.adminService
             .getConfigFile(AdminConfigComponent.EXTENSION_CONFIG_FILE, 'DEFAULTS')
-            .subscribe((deployment) => (this.configs.extension = deployment));
+            .subscribe(
+                (deployment) => (this.configs.extension = deployment),
+                (ignored) => {
+                    ignored.defaultPrevented = true;
+                },
+            );
         this.adminService
             .getConfigFile(AdminConfigComponent.CONFIG_DEPLOYMENT_FILE, 'CLUSTER')
             .subscribe((deployment) => (this.configs.clusterDeployment = deployment));
         this.adminService
             .getConfigFile(AdminConfigComponent.CONFIG_DEPLOYMENT_FILE, 'NODE')
-            .subscribe((deployment) => (this.configs.nodeDeployment = deployment));
+            .subscribe(
+                (deployment) => (this.configs.nodeDeployment = deployment),
+                (ignored) => {
+                    ignored.defaultPrevented = true;
+                },
+            );
         this.adminService
             .getConfigFile(AdminConfigComponent.OVERRIDE_CONFIG_FILE, 'DEFAULTS')
-            .subscribe((deployment) => (this.configs.defaultsOverride = deployment));
+            .subscribe(
+                (deployment) => (this.configs.defaultsOverride = deployment),
+                (ignored) => {
+                    ignored.defaultPrevented = true;
+                },
+            );
         this.adminService
             .getConfigFile(AdminConfigComponent.OVERRIDE_CONFIG_FILE, 'CLUSTER')
-            .subscribe((c) => (this.configs.clusterOverride = c));
+            .subscribe(
+                (c) => (this.configs.clusterOverride = c),
+                (ignored) => {
+                    ignored.defaultPrevented = true;
+                },
+            );
         this.adminService
             .getConfigFile(AdminConfigComponent.OVERRIDE_CONFIG_FILE, 'NODE')
             .subscribe((c) => (this.configs.nodeOverride = c));
