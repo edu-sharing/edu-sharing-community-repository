@@ -3,6 +3,7 @@
  */
 
 export {
+    EduSharingApiConfiguration,
     EduSharingApiConfigurationParams,
     EDU_SHARING_API_CONFIG,
 } from './lib/edu-sharing-api-configuration';
