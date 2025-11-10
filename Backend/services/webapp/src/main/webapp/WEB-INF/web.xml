@@ -212,6 +212,10 @@
       <filter-name>springSecurityFilterChain</filter-name>
       <url-pattern>/oauth2server/*</url-pattern>
      </filter-mapping>
+    <filter-mapping>
+      <filter-name>springSecurityFilterChain</filter-name>
+      <url-pattern>/.well-known/*</url-pattern>
+    </filter-mapping>
      <filter-mapping>
         <filter-name>springSecurityFilterChain</filter-name>
         <url-pattern>/rest/*</url-pattern>
