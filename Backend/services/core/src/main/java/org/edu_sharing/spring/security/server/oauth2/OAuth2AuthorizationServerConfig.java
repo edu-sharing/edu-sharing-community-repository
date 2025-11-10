@@ -119,6 +119,9 @@ public class OAuth2AuthorizationServerConfig {
                 .jwkSetEndpoint("/oauth2server/jwks")
                 .oidcUserInfoEndpoint("/oauth2server/userinfo")
                 .oidcClientRegistrationEndpoint("/oauth2server/register")
+                .deviceAuthorizationEndpoint("/oauth2server/device_authorization_endpoint")
+                .tokenRevocationEndpoint("/oauth2server/revoke")
+                .tokenIntrospectionEndpoint("/oauth2server/introspect")
                 .build();
     }
 
