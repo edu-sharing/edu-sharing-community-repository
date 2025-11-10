@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, signal, ViewChild } from '@angular/core';
+import { Component, signal, ViewChild } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { MatStepper, MatStepperModule } from '@angular/material/stepper';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -11,7 +11,6 @@ import {
 } from '../manage-assignment-nodes/manage-assignment-nodes.component';
 import {
     Assignment,
-    AssignmentFile,
     AssignmentFileRequest,
     AssignmentV1Service,
     Authority,
@@ -29,9 +28,9 @@ import {
 } from '../manage-assignment-authorities/manage-assignment-authorities.component';
 import { Toast } from 'ngx-edu-sharing-ui';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
-import { BehaviorSubject, combineLatest, filter, firstValueFrom } from 'rxjs';
+import { combineLatest, filter, firstValueFrom } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
-import { distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
+import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 
 export type AssignmentBase = Pick<Assignment, 'title' | 'type' | 'summary'>;
 @Component({
@@ -217,7 +216,7 @@ export class ManageAssignmentComponent {
             type: this.assignment().type,
             title: this.mainDataFormGroup.get('title').value,
             summary: this.mainDataFormGroup.get('summary').value,
-            allowAdditionalDocumentSubmission: this.mainDataFormGroup.get(
+            allowAdditionalDocumentSubmissions: this.mainDataFormGroup.get(
                 'allowAdditionalDocumentSubmissions',
             ).value,
             endTime: this.mainDataFormGroup.get('useEndTime').value
@@ -225,7 +224,7 @@ export class ManageAssignmentComponent {
                 : null,
             permissions,
             assignmentFiles,
-        } as any;
+        };
         await firstValueFrom(
             this.assignmentService.createOrUpdateAssignment({
                 body: assignment,
