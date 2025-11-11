@@ -139,7 +139,10 @@ public class MetadataWidget extends MetadataTranslatable {
 
     public void setDefaults(MetadataWidgetDefaults widgetDefaults) {
         this.widgetDefaults = widgetDefaults;
-        if(widgetDefaults != null) {
+        if("vcard".equals(type)) {
+            // vcard display value will be escaped directly inside MetadataTemplateRenderer
+            this.setTextEscapingPolicy(TextEscapingPolicy.none);
+        } else if(widgetDefaults != null) {
             if (widgetDefaults.getTextEscapingPolicy() != null) {
                 this.setTextEscapingPolicy(widgetDefaults.getTextEscapingPolicy());
             }

@@ -8,6 +8,7 @@ import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.policy.GuestCagePolicy;
+import org.edu_sharing.alfresco.service.config.model.Config;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -15,6 +16,7 @@ import org.edu_sharing.repository.server.tools.cache.EduSharingRatingCache;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.config.ConfigService;
 import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -25,10 +27,10 @@ import org.edu_sharing.service.notification.Status;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
+import org.edu_sharing.spring.ApplicationContextFactory;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -47,6 +49,7 @@ public class RatingServiceImpl extends RatingServiceAdapter {
     private AuthorityService authorityService;
     private NodeService nodeService;
     private NotificationService notificationService;
+    private ConfigService configService;
 
     public RatingServiceImpl() {
         super(ApplicationInfoList.getHomeRepository().getAppId());
@@ -57,6 +60,7 @@ public class RatingServiceImpl extends RatingServiceAdapter {
         this.authorityService = AuthorityServiceFactory.getLocalService();
         this.permissionService = PermissionServiceFactory.getLocalService();
         this.notificationService = NotificationServiceFactoryUtility.getLocalService();
+        this.configService = ApplicationContextFactory.getApplicationContext().getBean(ConfigService.class);
     }
 
     @Override
@@ -75,19 +79,7 @@ public class RatingServiceImpl extends RatingServiceAdapter {
             invalidateCache(nodeId);
 
 
-            String nodeType = null;
-            List<String> nodeAspects;
-            Map<String, Object> nodeProps;
-            try {
-                nodeType = nodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
-                nodeAspects = Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId));
-                nodeProps = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
-            } catch (Throwable e) {
-                nodeAspects = new ArrayList<>();
-                nodeProps = new HashMap<>();
-            }
-            RatingDetails accumulatedRatings = getAccumulatedRatings(new NodeRefImpl(nodeId), null);
-            notificationService.notifyRatingChanged(nodeId, nodeType, nodeAspects, nodeProps, rating, accumulatedRatings, Status.ADDED);
+            handleRatingNotification(nodeId, Status.ADDED, rating);
             return null;
         });
     }
@@ -128,23 +120,12 @@ public class RatingServiceImpl extends RatingServiceAdapter {
     public void deleteRating(String nodeId) throws Exception {
         checkPreconditions(nodeId);
         AuthenticationUtil.runAsSystem(() -> {
-            Rating rating = getRatingForUser(nodeId);
-            if (rating != null) {
-                nodeService.removeNode(rating.getRef().getId(), nodeId, false);
+            Rating currentRating = getRatingForUser(nodeId);
+            if (currentRating != null) {
+                nodeService.removeNode(currentRating.getRef().getId(), nodeId, false);
+                double rating = currentRating.getRating();
 
-                String nodeType = null;
-                List<String> nodeAspects;
-                Map<String, Object> nodeProps;
-                try {
-                    nodeType = nodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
-                    nodeAspects = Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId));
-                    nodeProps = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
-                } catch (Throwable e) {
-                    nodeAspects = new ArrayList<>();
-                    nodeProps = new HashMap<>();
-                }
-                RatingDetails accumulatedRatings = getAccumulatedRatings(new NodeRefImpl(nodeId), null);
-                notificationService.notifyRatingChanged(nodeId, nodeType,  nodeAspects, nodeProps, rating.getRating(), accumulatedRatings, Status.REMOVED);
+                handleRatingNotification(nodeId, Status.REMOVED, rating);
             } else {
                 throw new IllegalArgumentException("No rating for current user found for the given node");
             }
@@ -153,12 +134,31 @@ public class RatingServiceImpl extends RatingServiceAdapter {
         });
     }
 
+    private void handleRatingNotification(String nodeId, Status removed, double rating) throws Exception {
+        String nodeType = null;
+        List<String> nodeAspects;
+        Map<String, Object> nodeProps;
+        try {
+            nodeType = nodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
+            nodeAspects = Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId));
+            nodeProps = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
+        } catch (Throwable e) {
+            nodeAspects = new ArrayList<>();
+            nodeProps = new HashMap<>();
+        }
+        RatingDetails accumulatedRatings = getAccumulatedRatings(new NodeRefImpl(nodeId), null);
+
+        Config config = configService.getConfig();
+        notificationService.notifyRatingChanged(nodeId, nodeType, nodeAspects, nodeProps, config.values.rating.mode, rating, accumulatedRatings, removed);
+    }
+
     /**
      * Get the accumulated ratings data
-     * @param after  the date which the ratings should have at least. Use null (default) to use ratings of all times and also use the cache
+     *
+     * @param after the date which the ratings should have at least. Use null (default) to use ratings of all times and also use the cache
      */
     @Override
-    public RatingDetails getAccumulatedRatings(org.edu_sharing.service.model.NodeRef nodeRef, Date after){
+    public RatingDetails getAccumulatedRatings(org.edu_sharing.service.model.NodeRef nodeRef, Date after) {
         String nodeId = nodeRef.getNodeId();
         if (after == null) {
             try {

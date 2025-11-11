@@ -1,5 +1,6 @@
 package org.edu_sharing.service.nodeservice;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -28,7 +29,9 @@ public class NodeServiceBrockhausImpl extends NodeServiceAdapterCached{
 		if (props == null) {
 			props = new HashMap<>();
 		}
-		String url=SearchServiceBrockhausImpl.buildUrl(appInfo, nodeId);
+		String url = SearchServiceBrockhausImpl.buildUrl(appInfo, nodeId);
+		String name = StringUtils.substringAfterLast(nodeId, "%2f");
+		props.put(CCConstants.CM_NAME,name);
 		props.put(CCConstants.CONTENTURL,url);
 		props.put(CCConstants.CCM_PROP_IO_WWWURL,url);
 

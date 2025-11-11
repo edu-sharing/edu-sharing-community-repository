@@ -3,10 +3,7 @@ package org.edu_sharing.metadataset.v2;
 import org.apache.log4j.Logger;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class MetadataQueryBase implements Serializable{
@@ -37,7 +34,8 @@ public abstract class MetadataQueryBase implements Serializable{
             if (e.getKey() == null) {
                 return false;
             }
-            return existingParameters!=null && !existingParameters.contains(e.getKey());
+            // when A+B => neithjer of them must exists as a property
+            return existingParameters!=null && Arrays.stream(e.getKey().split("\\+")).noneMatch(existingParameters::contains);
         }).collect(Collectors.toList());
         if(filter.size() == 0) {
             return QueryUtils.replaceCommonQueryParams(basequery.get(null), QueryUtils.replacerFromSyntax(syntax, true));
