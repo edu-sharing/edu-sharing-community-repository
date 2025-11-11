@@ -7373,15 +7373,6 @@
           "feedback": {
             "type": "string"
           },
-          "properties": {
-            "additionalProperties": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            "type": "object"
-          },
           "ref": {
             "$ref": "#/components/schemas/NodeRef"
           },
@@ -7408,7 +7399,6 @@
         },
         "required": [
           "assignee",
-          "properties",
           "ref",
           "submissionStatus",
           "validationStatus"
@@ -7420,14 +7410,8 @@
           "assignmentFile": {
             "$ref": "#/components/schemas/AssignmentFile"
           },
-          "properties": {
-            "additionalProperties": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            "type": "object"
+          "content": {
+            "$ref": "#/components/schemas/Node"
           },
           "ref": {
             "$ref": "#/components/schemas/NodeRef"
@@ -7443,7 +7427,7 @@
           }
         },
         "required": [
-          "properties",
+          "content",
           "ref",
           "validationStatus"
         ],
@@ -15800,7 +15784,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AssignmentFile"
+                  "$ref": "#/components/schemas/SubmissionFile"
                 }
               }
             },

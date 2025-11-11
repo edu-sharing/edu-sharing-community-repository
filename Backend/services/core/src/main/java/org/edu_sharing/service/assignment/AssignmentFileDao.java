@@ -1,5 +1,7 @@
 package org.edu_sharing.service.assignment;
 
+import org.edu_sharing.repository.server.tools.security.RunAsSystem;
+import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
 import org.edu_sharing.restservices.assignment.v1.model.AssignmentFile;
 import org.edu_sharing.restservices.assignment.v1.model.AssignmentFileRequest;
 
@@ -8,20 +10,17 @@ import org.edu_sharing.restservices.assignment.v1.model.AssignmentFileRequest;
  * Provides methods for performing CRUD operations and retrieving metadata associated
  * with an AssignmentFile.
  */
-public interface AssignmentFileDao {
+public interface AssignmentFileDao extends BasicNodeDao {
+    @RunAsSystem
+    @RetryingTransaction
+    void create(AssignmentFileRequest request);
+
     /**
      * Reloads the current state of the AssignmentFile from the underlying data storage.
      * This method ensures that any changes in the data store related to the AssignmentFile
      * are updated and reflected in the current object.
      */
     void refresh();
-
-    /**
-     * Checks if the corresponding entity or resource exists in the underlying data storage.
-     *
-     * @return true if the entity exists, false otherwise
-     */
-    boolean exists();
 
     /**
      * Retrieves the current AssignmentFile associated with this instance.
@@ -32,16 +31,6 @@ public interface AssignmentFileDao {
      */
     AssignmentFile getAssignmentFile();
 
-    /**
-     * Deletes the current AssignmentFile from the underlying data storage.
-     * This operation removes any associated data or references related to
-     * the AssignmentFile in the data store.
-     *
-     * The behavior of this method depends on the implementation; if the
-     * AssignmentFile does not exist, it might result in a no-op or an error.
-     * It is expected that this method is called only when a valid AssignmentFile exists.
-     */
-    void delete();
 
     /**
      * Retrieves the reference node identifier associated with the current AssignmentFile.
@@ -63,12 +52,6 @@ public interface AssignmentFileDao {
      */
     void update(AssignmentFileRequest assignmentFileRequest);
 
-    /**
-     * Retrieves the unique identifier for a node.
-     *
-     * @return a string representing the unique node ID
-     */
-    String getNodeId();
 
     /**
      * Determines whether the AssignmentFile is marked as completed or finished.

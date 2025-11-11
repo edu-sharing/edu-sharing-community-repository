@@ -569,12 +569,12 @@
         <child-association name="ccm:assignment_files">
           <source>
             <mandatory>false</mandatory>
-            <many>true</many>
+            <many>false</many>
           </source>
           <target>
             <class>ccm:assignment_file</class>
             <mandatory>false</mandatory>
-            <many>false</many>
+            <many>true</many>
           </target>
           <duplicate>false</duplicate>
           <propagateTimestamps>true</propagateTimestamps>
@@ -627,23 +627,69 @@
       <title>Campus Content Submissions Folder</title>
       <parent>cm:cmobject</parent>
       <includedInSuperTypeQuery>true</includedInSuperTypeQuery>
-<!--      <associations>-->
-<!--        <child-association name="ccm:submission_files">-->
-<!--          <source>-->
-<!--            <mandatory>false</mandatory>-->
-<!--            <many>true</many>-->
-<!--          </source>-->
-<!--          <target>-->
-<!--            <class>ccm:assignment_file</class>-->
-<!--            <mandatory>false</mandatory>-->
-<!--            <many>false</many>-->
-<!--          </target>-->
-<!--          <duplicate>false</duplicate>-->
-<!--          <propagateTimestamps>true</propagateTimestamps>-->
-<!--        </child-association>-->
-<!--      </associations>-->
+      <associations>
+        <child-association name="ccm:submissions_submission">
+          <source>
+            <mandatory>false</mandatory>
+            <many>true</many>
+          </source>
+          <target>
+            <class>ccm:submission</class>
+            <mandatory>false</mandatory>
+            <many>false</many>
+          </target>
+          <duplicate>false</duplicate>
+          <propagateTimestamps>true</propagateTimestamps>
+        </child-association>
+      </associations>
+    </type>
+
+    <type name="ccm:submission">
+      <title>Campus Content Submission</title>
+      <parent>cm:cmobject</parent>
+      <includedInSuperTypeQuery>true</includedInSuperTypeQuery>
+      <associations>
+        <child-association name="ccm:submission_files">
+          <source>
+            <mandatory>false</mandatory>
+            <many>false</many>
+          </source>
+          <target>
+            <class>ccm:submission_file</class>
+            <mandatory>false</mandatory>
+            <many>true</many>
+          </target>
+          <duplicate>false</duplicate>
+          <propagateTimestamps>true</propagateTimestamps>
+        </child-association>
+      </associations>
       <mandatory-aspects>
-        <aspect>cm:titled</aspect>
+        <aspect>ccm:submission_metadata</aspect>
+      </mandatory-aspects>
+    </type>
+
+    <type name="ccm:submission_file">
+      <title>Campus Content Submission File</title>
+      <parent>ccm:io</parent>
+      <includedInSuperTypeQuery>true</includedInSuperTypeQuery>
+      <associations>
+        <child-association name="ccm:submission_file_data">
+          <source>
+            <mandatory>false</mandatory>
+            <many>false</many>
+          </source>
+          <target>
+            <class>ccm:io</class>
+            <mandatory>false</mandatory>
+            <many>false</many>
+          </target>
+          <duplicate>false</duplicate>
+          <propagateTimestamps>true</propagateTimestamps>
+        </child-association>
+      </associations>
+
+      <mandatory-aspects>
+        <aspect>ccm:submission_file_metadata</aspect>
       </mandatory-aspects>
     </type>
 
@@ -2432,7 +2478,9 @@
       </properties>
     </aspect>
     <aspect name="ccm:page_variant">
-      <title>aspect for extending an io to hold page related data for individual page variants (referenced by a page) (for external web components)</title>
+      <title>aspect for extending an io to hold page related data for individual page variants (referenced by a page)
+        (for external web components)
+      </title>
       <properties>
         <!-- internal configuration storage (json object) of the page -->
         <property name="ccm:page_variant_config">
@@ -2474,7 +2522,7 @@
     <aspect name="ccm:gdpr">
       <title>General Data Protection Regulation</title>
     </aspect>
-    
+
     <aspect name="ccm:assignment_metadata">
       <title>Data for asignment objects</title>
       <properties>
@@ -2486,11 +2534,11 @@
           <type>d:text</type>
           <multiple>false</multiple>
         </property>
-        <property name="ccm:assignment_allowadditionaldocumentsubmissions">
+        <property name="ccm:assignment_allow_additional_document_submissions">
           <type>d:boolean</type>
           <multiple>false</multiple>
         </property>
-        <property name="ccm:assignment_enddate">
+        <property name="ccm:assigment_end_date">
           <type>d:date</type>
           <multiple>false</multiple>
         </property>
@@ -2500,19 +2548,68 @@
     <aspect name="ccm:assignment_file_metadata">
       <title>Data for assignment objects</title>
       <properties>
-        <property name="ccm:assigmentfile_isdone">
+        <property name="ccm:assigmentfile_is_done">
           <type>d:boolean</type>
           <multiple>false</multiple>
         </property>
-        <property name="ccm:assigmentfile_documenttype">
+        <property name="ccm:assigmentfile_document_type">
           <type>d:text</type>
           <multiple>false</multiple>
         </property>
-        <property name="ccm:assigmentfile_referTo">
+        <property name="ccm:assigmentfile_refer_to">
           <type>d:noderef</type>
           <multiple>false</multiple>
         </property>
       </properties>
     </aspect>
+
+    <aspect name="ccm:assigment_file_deep_copy">
+      <title>Labels a binary of an assignment file to be a deep copy of a material. Uses to hide in search</title>
+    </aspect>
+
+    <aspect name="ccm:submission_metadata">
+      <title>Data for submission objects</title>
+      <properties>
+        <property name="ccm:submission_status">
+          <type>d:text</type>
+          <multiple>false</multiple>
+        </property>
+        <property name="ccm:submission_validation_status">
+          <type>d:text</type>
+          <multiple>false</multiple>
+        </property>
+        <property name="ccm:submission_validation_notes">
+          <type>d:text</type>
+          <multiple>false</multiple>
+        </property>
+        <property name="ccm:submission_feedback">
+          <type>d:text</type>
+          <multiple>false</multiple>
+        </property>
+      </properties>
+    </aspect>
+
+    <aspect name="ccm:submission_file_metadata">
+      <title>Data for submission file objects</title>
+      <properties>
+        <property name="ccm:submission_file_refer_to_assignment_file">
+          <type>d:noderef</type>
+          <multiple>true</multiple>
+        </property>
+        <property name="ccm:submission_file_validation_status">
+          <type>d:text</type>
+          <multiple>false</multiple>
+        </property>
+        <property name="ccm:submission_file_validation_comment">
+          <type>d:text</type>
+          <multiple>false</multiple>
+        </property>
+        <property name="ccm:submission_file_feedback">
+          <type>d:text</type>
+          <multiple>false</multiple>
+        </property>
+      </properties>
+    </aspect>
+
   </aspects>
 </model>

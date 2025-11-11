@@ -273,6 +273,9 @@ public class CCConstants {
     public final static String CCM_TYPE_ASSIGNMENT_FILE = "{http://www.campuscontent.de/model/1.0}assignment_file";
 
     public final static String CCM_TYPE_SUBMISSIONS = "{http://www.campuscontent.de/model/1.0}submissions";
+    public final static String CCM_TYPE_SUBMISSION = "{http://www.campuscontent.de/model/1.0}submission";
+    public final static String CCM_TYPE_SUBMISSION_FILE = "{http://www.campuscontent.de/model/1.0}submission_file";
+    public final static String CCM_TYPE_SUBMISSION_FILE_VALIDATION = "{http://www.campuscontent.de/model/1.0}submission_file_validation";
 
     public final static String LOM_TYPE_IDENTIFIER = "{http://www.campuscontent.de/model/lom/1.0}identifier";
 
@@ -1463,21 +1466,38 @@ public class CCConstants {
 
 
     /**
-     * Assignemnts & Submission
+     * Assignments & Submission
      */
     public final static String CCM_PROP_ASSIGNMENT_TYPE = "{http://www.campuscontent.de/model/1.0}assignment_type";
     public final static String CCM_PROP_ASSIGNMENT_STATUS = "{http://www.campuscontent.de/model/1.0}assignment_status";
-    public final static String CCM_PROP_ASSIGNMENT_ALLOWADDITIONALDOCUMENTSUBMISSIONS = "{http://www.campuscontent.de/model/1.0}assignment_allowadditionaldocumentsubmissions";
-    public final static String CCM_PROP_ASSIGNMENT_ENDDATE = "{http://www.campuscontent.de/model/1.0}assigment_enddate";
+    public final static String CCM_PROP_ASSIGNMENT_ALLOW_ADDITIONAL_DOCUMENT_SUBMISSIONS = "{http://www.campuscontent.de/model/1.0}assignment_allow_additional_document_submissions";
+    public final static String CCM_PROP_ASSIGNMENT_END_DATE = "{http://www.campuscontent.de/model/1.0}assigment_end_date";
 
-    public final static String CCM_PROP_ASSIGNMENTFILE_ISDONE = "{http://www.campuscontent.de/model/1.0}assigmentfile_isdone";
-    public final static String CCM_PROP_ASSIGNMENTFILE_DOCUMENTTYPE = "{http://www.campuscontent.de/model/1.0}assigmentfile_documenttype";
-    public final static String CCM_PROP_ASSIGNMENTFILE_REFERTO = "{http://www.campuscontent.de/model/1.0}assigmentfile_referTo";
+    public final static String CCM_PROP_ASSIGNMENT_FILE_IS_DONE = "{http://www.campuscontent.de/model/1.0}assigment_file_is_done";
+    public final static String CCM_PROP_ASSIGNMENT_FILE_DOCUMENT_TYPE = "{http://www.campuscontent.de/model/1.0}assigment_file_document_type";
+    public final static String CCM_PROP_ASSIGNMENT_FILE_REFER_TO = "{http://www.campuscontent.de/model/1.0}assigment_file_refer_to";
 
+    public final static String CCM_PROP_SUBMISSION_STATUS = "{http://www.campuscontent.de/model/1.0}submission_status";
+    public final static String CCM_PROP_SUBMISSION_VALIDATION_STATUS = "{http://www.campuscontent.de/model/1.0}submission_validation_status";
+    public final static String CCM_PROP_SUBMISSION_VALIDATION_NOTES = "{http://www.campuscontent.de/model/1.0}submission_validation_notes";
+    public final static String CCM_PROP_SUBMISSION_FEEDBACK= "{http://www.campuscontent.de/model/1.0}submission_feedback";
+
+    public final static String CCM_PROP_SUBMISSION_FILE_REFER_TO_ASSIGNMENT_FIlE = "{http://www.campuscontent.de/model/1.0}submission_file_refer_to_assignment_file";
+    public final static String CCM_PROP_SUBMISSION_FILE_VALIDATION_STATUS = "{http://www.campuscontent.de/model/1.0}submission_file_validation_status";
+    public final static String CCM_PROP_SUBMISSION_FILE_VALIDATION_COMMENT = "{http://www.campuscontent.de/model/1.0}submission_file_validation_comment";
+    public final static String CCM_PROP_SUBMISSION_FILE_FEEDBACK = "{http://www.campuscontent.de/model/1.0}submission_file_feedback";
 
     public final static String CCM_ASSOC_ASSIGNMENT_SUBMISSIONS = "{http://www.campuscontent.de/model/1.0}assignment_submissions";
     public final static String CCM_ASSOC_ASSIGNMENT_FILES = "{http://www.campuscontent.de/model/1.0}assignment_files";
     public final static String CCM_ASSOC_ASSIGNMENT_FILE_COPY = "{http://www.campuscontent.de/model/1.0}assignment_file_copy";
+    public final static String CCM_ASSOC_SUBMISSIONS_SUBMISSION = "{http://www.campuscontent.de/model/1.0}submissions_submission";
+    public final static String CCM_ASSOC_SUBMISSION_FILES = "{http://www.campuscontent.de/model/1.0}submission_files";
+    public final static String CCM_ASSOC_SUBMISSION_FILE_DATA = "{http://www.campuscontent.de/model/1.0}submission_file_data";
+
+
+    public final static String CCM_ASPECT_ASSIGNMENT_FILE_DEEP_COPY = "{http://www.campuscontent.de/model/1.0}assigment_file_deep_copy";
+    public final static String CCM_ASPECT_SUBMISSION_FILE_CONTENT= "{http://www.campuscontent.de/model/1.0}submission_file_content";
+
 
 
     /**
@@ -1855,6 +1875,10 @@ public class CCConstants {
 
     public final static String PERMISSION_ES_CHILD_MANAGER = "ESChildManager";
 
+    // assignment permissions
+    public final static String PERMISSION_ASSIGNMENT_COORDINATOR = "AssignmentCoordinator";
+    public final static String PERMISSION_ASSIGNEE = "Assignee";
+
     /**
      * this is used for the strange alfresco behavior:
      * <p>
@@ -1869,6 +1893,7 @@ public class CCConstants {
     public final static String PERMISSION_READPERMISSIONS = "ReadPermissions";
 
     public final static String PERMISSION_ALL = "All";
+
 
     public final static String LICENSE_NO_LICENSE = "no-license";
 

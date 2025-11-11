@@ -11,11 +11,12 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
+import jakarta.validation.*;
 import jakarta.ws.rs.*;
 
 import java.io.InputStream;
 
+import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.Data;
@@ -28,9 +29,7 @@ import org.edu_sharing.restservices.assignment.v1.model.*;
 import org.edu_sharing.restservices.search.v1.model.SearchParameters;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.SearchResult;
-import org.edu_sharing.service.assignment.AssignmentDao;
-import org.edu_sharing.service.assignment.AssignmentFileDao;
-import org.edu_sharing.service.assignment.AssignmentDaoFactory;
+import org.edu_sharing.service.assignment.*;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
@@ -38,8 +37,10 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Slf4j
 @Path("/assignment/v1")
@@ -71,7 +72,7 @@ public class AssignmentApi {
             }
     )
     public Response createOrUpdateAssignment(@Valid CreateAssignmentRequest request) {
-        AssignmentDao assignment = assignmentDaoFactory.getAssignment(request.id());
+        AssignmentDao assignment = assignmentDaoFactory.assignment(request.id());
         assignment.createOrUpdate(request);
         return Response.ok().entity(assignment.getAssignment()).build();
     }
@@ -136,7 +137,7 @@ public class AssignmentApi {
             }
     )
     public Response getAssignment(@PathParam("assignmentId") String assignmentId) {
-        AssignmentDao assignment = assignmentDaoFactory.getAssignment(assignmentId);
+        AssignmentDao assignment = assignmentDaoFactory.assignment(assignmentId);
         return Response.ok().entity(assignment.getAssignment()).build();
     }
 
@@ -155,7 +156,7 @@ public class AssignmentApi {
             }
     )
     public Response deleteAssignment(@PathParam("assignmentId") String assignmentId) {
-        AssignmentDao assignment = assignmentDaoFactory.getAssignment(assignmentId);
+        AssignmentDao assignment = assignmentDaoFactory.assignment(assignmentId);
         assignment.delete();
         return Response.ok().build();
     }
@@ -179,7 +180,7 @@ public class AssignmentApi {
             }
     )
     public Response getAssignmentFiles(@PathParam("assignmentId") String assignmentId) {
-        List<AssignmentFile> assignmentFiles = assignmentDaoFactory.getAssignment(assignmentId)
+        List<AssignmentFile> assignmentFiles = assignmentDaoFactory.assignment(assignmentId)
                 .getAssignmentFiles()
                 .stream()
                 .map(AssignmentFileDao::getAssignmentFile)
@@ -208,8 +209,9 @@ public class AssignmentApi {
             }
     )
     public Response getSubmissions(@PathParam("assignmentId") String assignmentId) {
-        List<Submission> submissions = null;
-        return Response.ok().entity(submissions).build();
+        AssignmentDao assignment = assignmentDaoFactory.assignment(assignmentId);
+        Collection<SubmissionDao> submissions = assignment.getSubmissions();
+        return Response.ok().entity(submissions.stream().map(SubmissionDao::getSubmission).toList()).build();
     }
 
     @GET
@@ -229,8 +231,9 @@ public class AssignmentApi {
     public Response getSubmission(@PathParam("assignmentId") String assignmentId,
                                   @Parameter(description = "id or -me- to get submission from current assignee")
                                   @PathParam("submissionId") String submissionId) {
-        List<Submission> submissions = null;
-        return Response.ok().entity(submissions).build();
+        AssignmentDao assignment = assignmentDaoFactory.assignment(assignmentId);
+        SubmissionDao submission = assignment.getSubmission(submissionId);
+        return Response.ok().entity(submission.getSubmission()).build();
     }
 
     @PUT
@@ -251,8 +254,10 @@ public class AssignmentApi {
                                    @Parameter(description = "id or -me- to get submission from current assignee")
                                    @PathParam("submissionId") String submissionId,
                                    EditSubmissionRequest request) {
-        Submission submission = null;
-        return Response.ok().entity(submission).build();
+        AssignmentDao assignment = assignmentDaoFactory.assignment(assignmentId);
+        SubmissionDao submission = assignment.getSubmission(submissionId);
+        submission.update(request);
+        return Response.ok().entity(submission.getSubmission()).build();
     }
 
     @PUT
@@ -273,8 +278,10 @@ public class AssignmentApi {
                                    @Parameter(description = "id or -me- to get submission from current assignee")
                                    @PathParam("submissionId") String submissionId,
                                    @QueryParam("status") Submission.Status status) {
-        Submission submission = null;
-        return Response.ok().entity(submission).build();
+        AssignmentDao assignment = assignmentDaoFactory.assignment(assignmentId);
+        SubmissionDao submission = assignment.getSubmission(submissionId);
+        submission.setStatus(status);
+        return Response.ok().entity(submission.getSubmission()).build();
     }
 
     @DELETE
@@ -294,6 +301,9 @@ public class AssignmentApi {
     public Response deleteSubmission(@PathParam("assignmentId") String assignmentId,
                                      @Parameter(description = "id or -me- to get submission from current assignee")
                                      @PathParam("submissionId") String submissionId) {
+        AssignmentDao assignment = assignmentDaoFactory.assignment(assignmentId);
+        SubmissionDao submission = assignment.getSubmission(submissionId);
+        submission.delete();
         return Response.ok().build();
     }
 
@@ -319,8 +329,10 @@ public class AssignmentApi {
     public Response getSubmissionFiles(@PathParam("assignmentId") String assignmentId,
                                        @Parameter(description = "id or -me- to get submission from current assignee")
                                        @PathParam("submissionId") String submissionId) {
-        List<SubmissionFile> submissionFiles = null;
-        return Response.ok().entity(submissionFiles).build();
+        AssignmentDao assignment = assignmentDaoFactory.assignment(assignmentId);
+        SubmissionDao submission = assignment.getSubmission(submissionId);
+        List<SubmissionFileDao> submissionFiles = submission.getSubmissionFiles();
+        return Response.ok().entity(submissionFiles.stream().map(SubmissionFileDao::getSubmissionFile).toList()).build();
     }
 
     /**
@@ -363,7 +375,7 @@ public class AssignmentApi {
     )
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = AssignmentFile.class))),
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SubmissionFile.class))),
                     @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -384,11 +396,22 @@ public class AssignmentApi {
 
         metadataPart.setMediaType(MediaType.APPLICATION_JSON_TYPE);
         SubmissionFileRequest submissionFileRequest = metadataPart.getValueAs(SubmissionFileRequest.class);
+
+        try (ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory()) {
+            Validator validator = validatorFactory.getValidator();
+            Set<ConstraintViolation<SubmissionFileRequest>> violations = validator.validate(submissionFileRequest);
+            if (!violations.isEmpty()) {
+                throw new ConstraintViolationException(violations);
+            }
+        }
+
         log.debug("Received metadata: {}", submissionFileRequest);
         log.debug("Received file: {}", fileMetaData.getFileName());
 
-        SubmissionFile submissionFile = null;
-        return Response.ok().entity(submissionFile).build();
+        AssignmentDao assignment = assignmentDaoFactory.assignment(assignmentId);
+        SubmissionDao submission = assignment.getOrCreateSubmission(submissionId);
+        SubmissionFileDao submissionFile = submission.createOrUpdateSubmissionFile(submissionFileId, submissionFileRequest, fileInputStream, fileMetaData);
+        return Response.ok().entity(submissionFile.getSubmissionFile()).build();
     }
 
 
@@ -411,6 +434,10 @@ public class AssignmentApi {
                                          @PathParam("submissionId") String submissionId,
                                          @Parameter(description = "id of the submission file")
                                          @PathParam("submissionFileId") String submissionFileId) {
+        AssignmentDao assignment = assignmentDaoFactory.assignment(assignmentId);
+        SubmissionDao submission = assignment.getSubmission(submissionId);
+        SubmissionFileDao submissionFile = submission.getSubmissionFile(submissionFileId);
+        submissionFile.delete();
         return Response.ok().build();
     }
 

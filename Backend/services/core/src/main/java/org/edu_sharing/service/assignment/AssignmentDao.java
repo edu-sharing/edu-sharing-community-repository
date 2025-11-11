@@ -3,8 +3,8 @@ package org.edu_sharing.service.assignment;
 import org.edu_sharing.restservices.assignment.v1.model.Assignment;
 import org.edu_sharing.restservices.assignment.v1.model.CreateAssignmentRequest;
 
+import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Interface representing a Data Access Object (DAO) for managing assignments.
@@ -12,7 +12,7 @@ import java.util.List;
  * refreshing, and deleting assignments, along with retrieving assignment details
  * such as creator, dates, files, and status.
  */
-public interface AssignmentDao {
+public interface AssignmentDao extends BasicNodeDao {
     /**
      * Creates a new assignment or updates an existing one based on the provided request.
      *
@@ -28,52 +28,11 @@ public interface AssignmentDao {
     void refresh();
 
     /**
-     * Checks if the assignment exists in the underlying data storage.
-     *
-     * @return true if the assignment exists, false otherwise
-     */
-    boolean exists();
-
-    /**
-     * Deletes the current assignment from the underlying data storage.
-     * This method will remove any associated data or references to the assignment
-     * in the storage system.
-     *
-     * It is expected that this method will only be called if a valid assignment exists.
-     * If the assignment does not exist, the behavior is implementation-specific and
-     * may result in a no-op or an error.
-     */
-    void delete();
-
-    /**
      * Retrieves the current assignment associated with this instance.
      *
      * @return the current Assignment object, or null if no assignment exists
      */
     Assignment getAssignment();
-
-    /**
-     * Retrieves the unique identifier associated with the current node.
-     *
-     * @return a string representing the unique ID of the node
-     */
-    String getNodeId();
-
-
-    /**
-     * Retrieves the identifier of the creator associated with the assignment.
-     *
-     * @return a string representing the creator's identifier, or null if no creator is set
-     */
-    String getCreator();
-
-    /**
-     * Retrieves the last modified date of the assignment.
-     *
-     * @return a {@code Date} object representing the last modified date of the assignment,
-     *         or {@code null} if no modification date is available
-     */
-    Date getModifiedDate();
 
     /**
      * Determines whether additional document submissions are allowed for the assignment.
@@ -109,14 +68,6 @@ public interface AssignmentDao {
     Date getEndDate();
 
     /**
-     * Retrieves the creation date of the assignment.
-     *
-     * @return a {@code Date} object representing the creation date of the assignment,
-     *         or {@code null} if no creation date is available.
-     */
-    Date getCreateDate();
-
-    /**
      * Retrieves the summary information of the assignment.
      *
      * @return a string representing the summary of the assignment, or null if no summary is set
@@ -134,7 +85,17 @@ public interface AssignmentDao {
      * Retrieves a list of assignment files associated with the current assignment.
      *
      * @return a list of {@code AssignmentFileDao} objects representing the files linked to the assignment,
-     *         or an empty list if no files are associated.
+     * or an empty list if no files are associated.
      */
-    List<AssignmentFileDao> getAssignmentFiles();
+    Collection<AssignmentFileDao> getAssignmentFiles();
+
+    Collection<SubmissionDao> getSubmissions();
+
+    SubmissionDao getSubmission(String submissionId);
+
+    SubmissionDao getOrCreateSubmission(String submissionId);
+
+    String getSubmissionRefId();
+
+    AssignmentFileDao getAssignmentFile(String id);
 }

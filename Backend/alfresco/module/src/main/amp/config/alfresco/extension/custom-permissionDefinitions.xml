@@ -535,6 +535,23 @@
       </permission>      
       
    </permissionSet>
+
+  <!-- ================================================== -->
+  <!-- Permission related to assignments and submissions. -->
+  <!-- ================================================== -->
+
+  <permissionSet type="cm:assignment" expose="selected">
+    <permissionGroup name="AssignmentCoordinator" allowFullControl="false" expose="true" >
+      <includePermissionGroup type="cm:cmobject" permissionGroup="Consumer"/>
+    </permissionGroup>
+
+
+    <permission name="_AssignmentCoordinator" expose="false">
+      <grantedToGroup permissionGroup="AssignmentCoordinator" />
+    </permission>
+
+    <permission name="Assignee" expose="true"/>
+  </permissionSet>
    
    <!-- ================== -->
    <!-- Global permissions -->

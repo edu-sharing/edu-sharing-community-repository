@@ -11,8 +11,6 @@ public record Submission(
         @JsonProperty(required = true)
         NodeRef ref,
         @JsonProperty(required = true)
-        Map<String, String[]> properties,
-        @JsonProperty(required = true)
         UserSimple assignee,
         @Schema(description = "internal note (not visible for assignee)")
         String validationNotes,
@@ -21,9 +19,6 @@ public record Submission(
         Status submissionStatus,
         @JsonProperty(required = true)
         Status validationStatus
-
-
-
 ) {
     public enum Status {
         NOT_STARTET,
