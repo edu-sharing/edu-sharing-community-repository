@@ -80,7 +80,6 @@ public interface AuthorityService {
 
 	NodeRef getAuthorityNodeRef(String authority);
 
-    @RetryingTransaction(readonly = true)
     Set<String> getMembershipsOfGroupRecursively(String groupName);
 
     void addMemberships(String groupName, Collection<String> members);

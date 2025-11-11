@@ -9,6 +9,7 @@ import {
     ME,
     Notification,
     NotificationV1Service,
+    RestConstants,
 } from 'ngx-edu-sharing-api';
 import { DialogsService } from '../../../../../features/dialogs/dialogs.service';
 import { MatMenuTrigger } from '@angular/material/menu';
@@ -41,7 +42,9 @@ export class NotificationListComponent implements OnInit {
         this.dataSource.isLoading = true;
         await this.translations.waitForInit().toPromise();
         this.authenticationService.observeLoginInfo().subscribe(async (login) => {
-            this.show = await this.aboutService.hasPlugin('kafka-notification-plugin');
+            this.show =
+                login.statusCode === RestConstants.STATUS_CODE_OK &&
+                (await this.aboutService.hasPlugin('kafka-notification-plugin'));
             if (this.show) {
                 void this.loadNotifications();
             }

@@ -215,6 +215,13 @@ export class UIService {
     }
 
     /**
+     * returns true if the current browser is safari running
+     */
+    static isSafari() {
+        return /AppleWebKit/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent);
+    }
+
+    /**
      * dynamically inject an angular component into a regular html dom element
      * @param componentFactoryResolver The resolver service
      * @param viewContainerRef The viewContainerRef service

@@ -198,6 +198,7 @@
         "MISSING_METADATA": "You have not yet filled in all the necessary metadata fields ({{completed}} / {{total}}).\nPlease fill in the metadata required for publication completely.",
         "OPEN_METADATA": "Open metadata dialog",
         "SET_LICENSE": "Open license dialog",
+        "PUBLISH_RESTRICTED_ACCESS": "This material is configured as restricted access (licensed material). By publishing this material this limitation will be ignored since anyone can then access it.",
         "INHERITED": "The parent item/folder has already been published. Please disable inheritance or change the permissions of the parent item.",
         "VERSIONS_PUBLISHED": "Currently published versions",
         "NO_VERSIONS_PUBLISHED": "No versions have been published yet",

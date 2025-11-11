@@ -633,8 +633,8 @@ public class AuthorityServiceImpl implements AuthorityService {
         return authorityService.getContainedAuthorities(null, key, true);
     }
 
-    @RetryingTransaction(readonly = true)
     @Override
+    @RetryingTransaction(readonly = true)
     public Set<String> getMembershipsOfGroupRecursively(String groupName) {
         String key = groupName.startsWith(PermissionService.GROUP_PREFIX) ? groupName : PermissionService.GROUP_PREFIX + groupName;
         Set<String> authorities = authorityService.getContainedAuthorities(null, key, true);
@@ -651,7 +651,6 @@ public class AuthorityServiceImpl implements AuthorityService {
 
         return result;
     }
-
 
     @Override
     public void addMemberships(String groupName, Collection<String> members) {

@@ -3,6 +3,7 @@ package org.edu_sharing.service.notification;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.edu_sharing.alfresco.service.config.model.ConfigRating;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.rest.notification.data.StatusDTO;
 import org.edu_sharing.rest.notification.event.NotificationEventDTO;
@@ -49,7 +50,7 @@ public interface NotificationService {
 
     void notifyProposeForCollection(String collectionId, String nodeId, String collectionNodeType, List<String> collectionAspects, Map<String, Object> collectionProperties, String nodeType, List<String> nodeAspects, Map<String, Object> nodeProperties, Status status);
 
-    void notifyRatingChanged(String nodeId, String nodeType, List<String> aspects, Map<String, Object> nodeProps, Double rating, RatingDetails accumulatedRatings, Status removed);
+    void notifyRatingChanged(String nodeId, String nodeType, List<String> aspects, Map<String, Object> nodeProps, ConfigRating.RatingMode ratingMode, Double rating, RatingDetails accumulatedRatings, Status removed);
 
     void notifyMaterialAddedToInbox(String nodeId, String nodeType, List<String> aspects, Map<String, Object> nodeProperties, String comment, String senderAuthority, String receiverAuthority);
 

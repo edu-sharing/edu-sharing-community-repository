@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.edu_sharing.alfresco.service.config.model.ConfigRating;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -73,8 +74,8 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyRatingChanged(String nodeId, String nodeType, List<String> aspects, Map<String, Object> nodeProps, Double rating, RatingDetails accumulatedRatings, Status removed) {
-        applicationEventPublisher.publishEvent(new RatingChangedEvent(nodeId, nodeType, aspects, nodeProps, rating, accumulatedRatings, removed));
+    public void notifyRatingChanged(String nodeId, String nodeType, List<String> aspects, Map<String, Object> nodeProps, ConfigRating.RatingMode ratingMode, Double rating, RatingDetails accumulatedRatings, Status removed) {
+        applicationEventPublisher.publishEvent(new RatingChangedEvent(nodeId, nodeType, aspects, nodeProps, ratingMode, rating, accumulatedRatings, removed));
     }
 
     @Override
