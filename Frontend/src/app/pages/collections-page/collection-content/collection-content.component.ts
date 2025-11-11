@@ -249,7 +249,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        if (changes.collection.currentValue) {
+        if (changes.collection?.currentValue) {
             this.dataSourceCollections.reset();
             this.dataSourceReferences.reset();
 
