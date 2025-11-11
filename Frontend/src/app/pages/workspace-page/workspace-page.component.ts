@@ -615,6 +615,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         this.setSelection([node]);
         this.parameterNode = node;
         this.workspace.nodeSidebar = node;
+        this.workspace.nodeSidebarChange.emit(node);
     }
 
     resetWorkspace() {

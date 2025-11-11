@@ -415,6 +415,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 		RessourceInfoTool ressourceInfoTool = new RessourceInfoTool();
 		Document doc = ressourceInfoTool.loadFromStream(is);
 		if ((contentreader.getMimetype().equals("application/zip")
+                || contentreader.getMimetype().equals("application/gzip")
 				|| contentreader.getMimetype().equals("application/save-as")
 				|| contentreader.getMimetype().equals("application/x-zip-compressed")) && doc != null) {
 			try {
@@ -451,6 +452,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 	private void processMoodle2_0(InputStream is, ContentReader contentreader, NodeRef actionedUponNodeRef) {
 		Document doc = new RessourceInfoTool().loadFromStream(is);
 		if ((contentreader.getMimetype().equals("application/zip")
+                || contentreader.getMimetype().equals("application/gzip")
 				|| contentreader.getMimetype().equals("application/save-as")
 				|| contentreader.getMimetype().equals("application/x-zip-compressed")
 				|| contentreader.getMimetype().equals("application/vnd.moodle.backup")) && doc != null) {

@@ -975,6 +975,7 @@
     "SAVED": "Änderungen wurden gespeichert."
   },
   "RENDERING": {
+    "GO_TO_COURSE": "Zum Kurs springen",
     "AUTHORED_BY": "von",
     "CONVERTING": "Konvertierung",
     "QUEUED": "Warteschlange",
