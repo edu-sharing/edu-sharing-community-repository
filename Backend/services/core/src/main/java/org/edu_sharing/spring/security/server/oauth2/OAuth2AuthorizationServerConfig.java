@@ -4,6 +4,7 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import lombok.extern.slf4j.Slf4j;
 import org.edu_sharing.spring.conditions.ConditionalOnProperty;
+import org.edu_sharing.spring.scope.refresh.annotations.RefreshScope;
 import org.edu_sharing.spring.security.oauth2.SecurityConfigurationOAuth2;
 import org.edu_sharing.spring.security.saml2.SecurityConfigurationSaml;
 import org.edu_sharing.spring.security.server.oauth2.config.OAuth2ConfigService;
@@ -77,6 +78,8 @@ public class OAuth2AuthorizationServerConfig {
         return "/components/login?next=/shibboleth";
     }
 
+
+    @RefreshScope
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
         try {
