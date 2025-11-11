@@ -31,11 +31,10 @@ public class OAuth2ConfigService {
 
     public static final String CONFIG_PATH = "security.authentication.oauth2";
 
-    Config rootConfig = LightbendConfigLoader.get();
     KeyStoreService keyStoreService = new KeyStoreService();
 
     public OAuth2Config getDefaultConfig() {
-        Config config = rootConfig.getConfig(CONFIG_PATH);
+        Config config = LightbendConfigLoader.get().getConfig(CONFIG_PATH);
         return ConfigBeanFactory.create(config, OAuth2Config.class);
     }
 
