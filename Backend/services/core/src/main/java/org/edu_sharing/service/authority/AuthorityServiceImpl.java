@@ -23,7 +23,6 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
-import org.apache.log4j.Logger;
 import org.apache.tika.utils.StringUtils;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.guest.GuestService;
@@ -635,7 +634,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 
     @Override
     public Set<String> getMembershipsOfGroupRecursively(String groupName) {
-        return serviceRegistry.getTransactionService()
+        return transactionService
                 .getRetryingTransactionHelper()
                 .doInTransaction(() -> getMembershipsOfGroupRecursively_Internal(groupName), true);
 
