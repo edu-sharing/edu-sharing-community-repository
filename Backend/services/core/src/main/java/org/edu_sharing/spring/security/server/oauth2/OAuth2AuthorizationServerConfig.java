@@ -57,9 +57,16 @@ public class OAuth2AuthorizationServerConfig {
         OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
                 new OAuth2AuthorizationServerConfigurer();
 
+        /*authorizationServerConfigurer
+                .oidc(Customizer.withDefaults())
+                .deviceAuthorizationEndpoint(Customizer.withDefaults());*/
+
         http
                 .securityMatcher(authorizationServerConfigurer.getEndpointsMatcher()) // nur OAuth2 Endpunkte
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+
+                .authorizeHttpRequests(auth -> auth
+                        //.requestMatchers(new AntPathRequestMatcher("/oauth2server/device_authorization_endpoint")).permitAll()
+                        .anyRequest().authenticated())
                 .csrf(csrf -> csrf.ignoringRequestMatchers(authorizationServerConfigurer.getEndpointsMatcher()))
                 .exceptionHandling(e ->
                         e.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint(getLoginPath())))
@@ -88,8 +95,10 @@ public class OAuth2AuthorizationServerConfig {
                     .map(c -> {
                                 RegisteredClient.Builder builder = RegisteredClient.withId(c.getClientId())
                                         .clientId(c.getClientId())
-                                        .clientSecret(c.getClientSecret())
                                         .clientAuthenticationMethod(new ClientAuthenticationMethod(c.getClientAuthenticationMethod()));
+                                if(!c.getClientSecret().isEmpty()){
+                                    builder.clientSecret(c.getClientSecret());
+                                }
                                 if(!c.getRedirectUri().isEmpty()) builder.redirectUri(c.getRedirectUri());
                                 if(!c.getExpires().isEmpty()) builder.tokenSettings(TokenSettings.builder()
                                         .accessTokenTimeToLive(Duration.parse(c.getExpires()))
