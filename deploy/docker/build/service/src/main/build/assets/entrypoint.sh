@@ -828,4 +828,5 @@ done
 
 ########################################################################################################################
 
-exec /opt/bitnami/scripts/tomcat/entrypoint.sh "$@"
+#exec /opt/bitnami/scripts/tomcat/entrypoint.sh "$@"
+exec "$@"

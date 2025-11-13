@@ -78,9 +78,9 @@ USER worker
 EXPOSE 8009 8080 8081
 
 ENTRYPOINT ["entrypoint.sh"]
-CMD [ "/opt/bitnami/scripts/tomcat/run.sh" ]
+CMD ["catalina.sh", "run"]
 
-VOLUME [ "/opt/alfresco/alf_data", "/opt/alfresco/alf_safe", "/opt/bitnami/tomcat/shared/classes/config/cluster", "/opt/bitnami/tomcat/shared/classes/config/node" ]
+VOLUME [ "/opt/alfresco/alf_data", "/opt/alfresco/alf_safe", "/usr/local/tomcat/shared/classes/config/cluster", "/usr/local/tomcat/shared/classes/config/node" ]
 
 ########################################################################################################################
 
