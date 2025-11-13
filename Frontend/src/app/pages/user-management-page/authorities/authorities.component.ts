@@ -1107,7 +1107,9 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     private refresh() {
         this.dataSource.reset();
         this.nodeEntries.getSelection().clear();
-        void this.optionsHelperService.refreshComponents();
+        if (this.optionsHelperService.getData()) {
+            void this.optionsHelperService.refreshComponents();
+        }
         this.loadAuthorities();
     }
 
