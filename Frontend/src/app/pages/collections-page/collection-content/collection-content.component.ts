@@ -693,6 +693,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                                     n.override = false;
                                     return n;
                                 }),
+                                { select: false },
                             );
                         }
                         this.finishCollectionLoading();

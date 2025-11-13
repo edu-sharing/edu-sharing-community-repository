@@ -117,7 +117,7 @@ export interface ListEventInterface<T extends NodeEntriesDataType> {
 
     showReorderColumnsDialog(): void;
 
-    addVirtualNodes(virtual: T[]): void;
+    addVirtualNodes(virtual: T[], options?: { select: boolean }): void;
 
     setOptions(options: ListOptions): void;
 

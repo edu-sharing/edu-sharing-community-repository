@@ -386,7 +386,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
 
     showReorderColumnsDialog(): void {}
 
-    addVirtualNodes(virtual: T[]): void {
+    addVirtualNodes(virtual: T[], options?: { select: boolean }): void {
         virtual = virtual.map((o) => {
             (o as VirtualNode).virtual = true;
             return o;
@@ -423,8 +423,10 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
                     });
             }
         });
-        this.entriesService.selection.clear();
-        this.entriesService.selection.select(...virtual);
+        if (options?.select !== false) {
+            this.entriesService.selection.clear();
+            this.entriesService.selection.select(...virtual);
+        }
         this.virtualNodesAdded.emit(virtual as Node[]);
         this.changeDetectorRef.detectChanges();
     }
