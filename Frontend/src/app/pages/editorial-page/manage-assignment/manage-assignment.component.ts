@@ -29,6 +29,7 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { combineLatest, filter, firstValueFrom } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
+import { EditorialBreadcrumbService } from '../editorial-breadcrumb/editorial-breadcrumb.service';
 
 export type AssignmentBase = Pick<Assignment, 'title' | 'type' | 'summary'>;
 @Component({
@@ -101,6 +102,7 @@ export class ManageAssignmentComponent {
         private platformLocation: PlatformLocation,
         private translateService: TranslateService,
         private editorialSidebarService: EditorialSidebarService,
+        private editorialBreadcrumbService: EditorialBreadcrumbService,
     ) {
         this.route.queryParams
             .pipe(
@@ -122,6 +124,7 @@ export class ManageAssignmentComponent {
                 ),
             )
             .subscribe(([assignment, files, submissions]) => {
+                this.editorialBreadcrumbService.path.set([assignment.title]);
                 this.assignment.set(assignment);
                 this.submissions.set(submissions);
                 this.authorities.set(assignment.permissions);

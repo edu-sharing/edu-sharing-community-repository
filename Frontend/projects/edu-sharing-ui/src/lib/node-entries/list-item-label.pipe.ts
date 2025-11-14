@@ -23,6 +23,7 @@ export class ListItemLabelPipe implements PipeTransform {
             USER: 'USER',
             EVENT: 'EVENT',
             ASSIGNMENT: 'ASSIGNMENT',
+            SUBMISSION: 'SUBMISSION',
             SHARE: 'SHARE',
         };
         if (item.label) {

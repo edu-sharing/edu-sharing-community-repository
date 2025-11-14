@@ -58,7 +58,6 @@
     <div class="main-content" esBorderBoxObserver #observer="borderBoxObserver">
       <div class="top-area">
         <es-editorial-breadcrumb
-          [mode]="(params$ | async).primaryMode"
           [class.display-none]="(observer.width$ | async) < 400"
         ></es-editorial-breadcrumb>
         <es-actionbar
@@ -101,7 +100,7 @@
               (fetchData)="fetchEvent($event)"
               (selectionChange)="selection.set($any($event.source))"
               [columns]="columns()"
-              [displayType]="displayType()"
+              [displayType]="editorialPageService.displayType()"
             >
               <ng-template #empty>
                 <div class="empty">

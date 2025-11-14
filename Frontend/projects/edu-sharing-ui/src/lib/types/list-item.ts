@@ -10,6 +10,7 @@ export type ListItemType =
     | 'USER'
     | 'EVENT'
     | 'ASSIGNMENT'
+    | 'SUBMISSION'
     | 'SHARE';
 
 /**

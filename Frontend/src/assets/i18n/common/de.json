@@ -342,6 +342,11 @@
       "FINISHED": "Abgeschlossen"
     }
   },
+  "SUBMISSION": {
+    "assignee": "Name",
+    "submissionStatus": "Abgabestatus",
+    "validationStatus": "Korrekturstatus"
+  },
   "EVENT": {
     "eventType": "Aktion",
     "timestamp": "Zeitpunkt",

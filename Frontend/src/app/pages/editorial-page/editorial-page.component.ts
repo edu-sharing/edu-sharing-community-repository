@@ -63,6 +63,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { OptionsHelperService } from '../../services/options-helper.service';
 import { EditorialSidebarService } from './editorial-sidebar/editorial-sidebar.service';
+import { EditorialBreadcrumbService } from './editorial-breadcrumb/editorial-breadcrumb.service';
 
 export type PrimaryMode = 'activity' | 'share' | 'assignment';
 export type MainComponentType = 'manageAssignment' | 'assignmentSubmission';
@@ -125,7 +126,6 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     mdsDefinition$ = new BehaviorSubject<MdsDefinition>(null);
     readonly dataSource = new NodeDataSource<Node | NodeShare | NodeEvent | Assignment>();
     columns = signal<ColumnType>(null);
-    displayType = signal(NodeEntriesDisplayType.Table);
     selection = signal<SelectionModel<Node | null>>(null);
     private sidebarOptionToggle: OptionItemToggle;
     private pagination$ = new BehaviorSubject<{
@@ -150,6 +150,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         private ui: UIService,
         private authenticationService: AuthenticationService,
         public editorialPageService: EditorialPageService,
+        public editorialBreadcrumbService: EditorialBreadcrumbService,
     ) {
         this.isMobile$.pipe(first()).subscribe((mobile) => {
             this.editorialSidebarService.sidebarOpened.set(!mobile);
@@ -249,6 +250,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     private registerMode() {
         this.params$.subscribe(async (p) => {
             console.log(p);
+            this.editorialBreadcrumbService.mode.set(p.primaryMode);
             if (p.primaryMode === 'activity') {
                 this.columns.set({
                     Default: [

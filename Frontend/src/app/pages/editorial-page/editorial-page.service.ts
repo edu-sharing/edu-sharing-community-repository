@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { MdsWidget } from 'ngx-edu-sharing-api';
-import { Values } from 'ngx-edu-sharing-ui';
+import { NodeEntriesDisplayType, Values } from 'ngx-edu-sharing-ui';
 
 export type EditorialTab = {
     id: string;
@@ -10,6 +10,7 @@ export type EditorialTab = {
 };
 @Injectable()
 export class EditorialPageService {
+    readonly displayType = signal(NodeEntriesDisplayType.Table);
     private tabs$ = new BehaviorSubject<EditorialTab[]>(null);
     private tabWidgetId$ = new BehaviorSubject<string>(null);
 

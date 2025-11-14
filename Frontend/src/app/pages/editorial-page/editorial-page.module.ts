@@ -12,6 +12,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { ManageAssignmentComponent } from './manage-assignment/manage-assignment.component';
 import { ManageAssignmentNodesComponent } from './manage-assignment-nodes/manage-assignment-nodes.component';
 import { AssignmentSubmissionComponent } from './assignment-submission/assignment-submission.component';
+import { EditorialBreadcrumbService } from './editorial-breadcrumb/editorial-breadcrumb.service';
 
 @NgModule({
     declarations: [EditorialPageComponent],
@@ -29,5 +30,6 @@ import { AssignmentSubmissionComponent } from './assignment-submission/assignmen
         MdsModule,
         TranslateModule,
     ],
+    providers: [EditorialBreadcrumbService],
 })
 export class EditorialPageModule {}

@@ -87,6 +87,9 @@
         "MISSING_AUTHORITIES": "Bitte die Aufgabe zuweisen",
         "MISSING_AUTHORITIES_ASSIGNEE": "Für diesen Aufgabentyp muss mindestens eine Person oder Gruppe in der Rolle \"Erledigen\" eingeladen werden"
       },
+      "SUBMISSIONS": {
+        "EMPTY": "Für diese Aufgabe wurden noch keine Abgaben angelegt"
+      },
       "FORM": {
         "TITLE": "Titel",
         "SUMMARY": "Beschreibung",

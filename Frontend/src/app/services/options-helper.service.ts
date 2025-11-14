@@ -1367,14 +1367,14 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         relationNode.group = DefaultGroups.Edit;
         relationNode.priority = 70;
         const viewAssignmentSubmission = new OptionItem(
-            'OPTIONS.ASSIGNMENT_EDIT',
-            'edit',
+            'OPTIONS.ASSIGNMENT_SUBMISSION',
+            'inbox',
             (object) =>
                 this.uiService.goToAssignment(this.getObjects(object, data)[0], 'submission'),
         );
         viewAssignmentSubmission.customShowCallback = async (objects) => {
             const assignment = objects[0] as Assignment;
-            return assignment.type === 'SUBMISSION';
+            return assignment.type === 'SUBMISSION' && assignment.permissions.length > 0;
         };
         viewAssignmentSubmission.elementType = [ElementType.Assignment];
         viewAssignmentSubmission.constrains = [Constrain.NoBulk, Constrain.User];
@@ -1591,6 +1591,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         options.push(bookmarkNode);
         options.push(shortcutNode);
         options.push(editCollection);
+        options.push(viewAssignmentSubmission);
         options.push(editAssignment);
         options.push(pinCollection);
         options.push(feedbackMaterial);

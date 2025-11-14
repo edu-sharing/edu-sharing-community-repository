@@ -1,3 +1,3 @@
-import { Assignment, GenericAuthority, Node } from 'ngx-edu-sharing-api';
+import { Assignment, GenericAuthority, Node, Submission } from 'ngx-edu-sharing-api';
 
-export type NodeEntriesDataType = Node | GenericAuthority | Assignment;
+export type NodeEntriesDataType = Node | GenericAuthority | Assignment | Submission;
