@@ -9,6 +9,7 @@ import {
 } from '@storybook/angular';
 import {
     ApiRequestConfiguration,
+    Assignment,
     AuthenticationService,
     EduSharingApiModule,
     Node,
@@ -30,6 +31,7 @@ import {
 } from './node-entries-card/node-entries-card.component.stories';
 import {
     DefaultColumns,
+    DummyAssignment,
     DummyNode,
     ToastMock,
     translateProvider,
@@ -40,6 +42,18 @@ const dummyDataSource = new NodeDataSource<Node>(
     Array(16)
         .fill(DummyNode)
         .map((n: Node, i) => {
+            n = Helper.deepCopy(n);
+            n.ref.id = 'id_' + i;
+            n.title += ' ' + i;
+            console.log(n);
+            return n;
+        }),
+);
+
+const dummyDataSourceAssignments = new NodeDataSource<Assignment>(
+    Array(16)
+        .fill(DummyAssignment)
+        .map((n: Assignment, i) => {
             n = Helper.deepCopy(n);
             n.ref.id = 'id_' + i;
             n.title += ' ' + i;
@@ -163,6 +177,12 @@ export const EntriesHorizontalGridLoadingWithAction: Story = {
 };
 export const EntriesSmallGrid: Story = {
     args: {
+        displayType: NodeEntriesDisplayType.SmallGrid,
+    },
+};
+export const EntriesSmallGridAssignments: Story = {
+    args: {
+        dataSource: dummyDataSourceAssignments as any,
         displayType: NodeEntriesDisplayType.SmallGrid,
     },
 };

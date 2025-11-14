@@ -1567,6 +1567,9 @@
         "Older": "älter"
       }
     },
+    "assignments": {
+      "TITLE": "Aufgaben"
+    },
     "SHARE": {
       "EMPTY": "Keine Freigaben",
       "INFO_MESSAGE": "freigegeben"

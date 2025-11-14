@@ -15,6 +15,8 @@ import {
     InteractionType,
     MdsHelperService,
     NodeDataSource,
+    NodeEntriesData,
+    NodeEntriesDataType,
     NodeEntriesDisplayType,
     NodeEntriesModule,
     NodeEntriesService,
@@ -28,29 +30,24 @@ import { SwimlaneEntry } from '../../pages/landing-page/landing-page.component';
 import { MatButtonModule } from '@angular/material/button';
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import {
+    AssignmentV1Service,
     DEFAULT,
     HOME_REPOSITORY,
     Node,
-    NodeEntries,
     NodeEvent,
     NodeService,
     NodeShare,
     ROOT,
-    SearchResultEvent,
     SearchResultGeneric,
-    SearchResultInvite,
     SearchResultNode,
     SearchService,
-    SearchServiceUnwrapped,
     SearchSortModifiers,
     SessionStorageService,
-    UserEvent,
 } from 'ngx-edu-sharing-api';
 import { trigger } from '@angular/animations';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { RestConstants } from '../../core-module/rest/rest-constants';
 import { Params, Router, RouterLink } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, first } from 'rxjs/operators';
 import { DashboardInteractivityStreamComponent } from './dashboard-interactivity-stream/dashboard-interactivity-stream.component';
 
@@ -92,7 +89,7 @@ export class DashboardSwimlaneComponent {
     readonly Scope = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
-    readonly dataSource = new NodeDataSource<Node | NodeShare | NodeEvent>();
+    readonly dataSource = new NodeDataSource<NodeEntriesDataType>();
     /**
      * max items per swimlane
      */
@@ -110,7 +107,7 @@ export class DashboardSwimlaneComponent {
         layout: 'scroll',
         maxRows: 1,
     };
-    private nodes = signal<NodeEntries>(null);
+    private nodes = signal<NodeEntriesData>(null);
     constructor(
         private storage: SessionStorageService,
         private translate: TranslateService,
@@ -118,6 +115,7 @@ export class DashboardSwimlaneComponent {
         private router: Router,
         private searchService: SearchService,
         private nodeService: NodeService,
+        private assignmentService: AssignmentV1Service,
         private mdsHelperService: MdsHelperService,
     ) {
         this.open
@@ -170,6 +168,18 @@ export class DashboardSwimlaneComponent {
             this.routerQueryParams.set({});
             void this.fetch(
                 this.nodeService.getChildren(RestConstants.NODES_FRONTPAGE, {
+                    maxItems: this.maxItems,
+                }),
+            );
+        } else if (this.swimlane().id === 'assignments') {
+            this.displayType.set(NodeEntriesDisplayType.SmallGrid);
+            this.routerLink.set('/' + UIConstants.ROUTER_PREFIX + 'editorial/assignment');
+            this.routerQueryParams.set({});
+            void this.fetch(
+                this.assignmentService.searchAssignments({
+                    body: {
+                        criteria: [],
+                    },
                     maxItems: this.maxItems,
                 }),
             );
@@ -269,7 +279,7 @@ export class DashboardSwimlaneComponent {
         }
     }
 
-    private async fetch(observable: Observable<NodeEntries>) {
+    private async fetch(observable: Observable<NodeEntriesData>) {
         this.nodes.set(await firstValueFrom(observable));
         // this.nodes.set({nodes: [], pagination: {} as any});
         void this.nodeNodeEntriesWrapperComponent?.initOptionsGenerator({});

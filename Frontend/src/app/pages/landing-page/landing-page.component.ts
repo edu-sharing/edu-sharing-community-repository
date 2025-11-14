@@ -1,4 +1,4 @@
-import { Component, computed, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { AuthenticationService, ConfigService } from 'ngx-edu-sharing-api';
 import { firstValueFrom } from 'rxjs';
 import { RestConstants } from '../../core-module/rest/rest-constants';
@@ -6,7 +6,12 @@ import { Router } from '@angular/router';
 import { UIService } from 'ngx-edu-sharing-ui';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 
-export type SwimlaneTypes = 'featured-media' | 'collections' | 'recent-activities' | 'shares';
+export type SwimlaneTypes =
+    | 'featured-media'
+    | 'collections'
+    | 'recent-activities'
+    | 'shares'
+    | 'assignments';
 export type SwimlaneEntry = {
     id: SwimlaneTypes;
     defaultExpanded: boolean;
@@ -51,9 +56,13 @@ export class LandingPageComponent implements OnInit {
             return;
         }
         this.swimlanes.set(
-            await this.configService.get<SwimlaneEntry[]>('frontpage.dashbaord.swimlanes', [
+            await this.configService.get<SwimlaneEntry[]>('frontpage.dashboard.swimlanes', [
                 {
                     id: 'recent-activities',
+                    defaultExpanded: true,
+                },
+                {
+                    id: 'assignments',
                     defaultExpanded: true,
                 },
                 {

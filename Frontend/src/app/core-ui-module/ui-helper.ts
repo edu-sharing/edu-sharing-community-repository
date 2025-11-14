@@ -4,35 +4,16 @@ import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Ace, LoginInfo, Node } from 'ngx-edu-sharing-api';
 import { ListItem, OPEN_URL_MODE, UIConstants } from 'ngx-edu-sharing-ui';
-import { concatMap, from, Observable, Observer, of } from 'rxjs';
-import { catchError, first, take, toArray } from 'rxjs/operators';
+import { Observable, Observer } from 'rxjs';
+import { first, take } from 'rxjs/operators';
 import { BridgeService } from '../services/bridge.service';
-import {
-    CollectionReference,
-    Connector,
-    Filetype,
-    MdsInfo,
-    NodeLock,
-    ParentList,
-} from '../core-module/rest/data-object';
+import { MdsInfo, ParentList } from '../core-module/rest/data-object';
 import { Helper } from '../core-module/rest/helper';
 import { RestConstants } from '../core-module/rest/rest-constants';
-import { RestHelper } from '../core-module/rest/rest-helper';
 import { ConfigurationService } from '../core-module/rest/services/configuration.service';
-import { FrameEventsService } from '../core-module/rest/services/frame-events.service';
-import { RestCollectionService } from '../core-module/rest/services/rest-collection.service';
 import { RestConnectorService } from '../core-module/rest/services/rest-connector.service';
-import { RestConnectorsService } from '../core-module/rest/services/rest-connectors.service';
-import { RestIamService } from '../core-module/rest/services/rest-iam.service';
 import { RestNodeService } from '../core-module/rest/services/rest-node.service';
-import { MessageType } from '../util/message-type';
-import {
-    OK,
-    YES_OR_NO,
-} from '../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
-import { NodeHelperService } from '../services/node-helper.service';
 import { RouterHelper } from '../util/router.helper';
-import { Toast } from '../services/toast';
 import { ExtendedAce } from '../features/dialogs/dialog-modules/share-dialog/share-dialog.component';
 
 export class UIHelper {
@@ -351,6 +332,9 @@ export class UIHelper {
         }
     }
 
+    static getDefaultAssignmentColumns() {
+        return [new ListItem('ASSIGNMENT', 'title'), new ListItem('ASSIGNMENT', 'endTime')];
+    }
     static getDefaultCollectionColumns() {
         let columns = [];
         columns.push(new ListItem('COLLECTION', 'title'));

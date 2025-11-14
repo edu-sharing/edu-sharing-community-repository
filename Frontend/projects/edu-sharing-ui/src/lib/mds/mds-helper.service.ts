@@ -85,6 +85,8 @@ export class MdsHelperService {
                 defaultColumns.push(new ListItem('COLLECTION', 'title'));
                 defaultColumns.push(new ListItem('COLLECTION', 'info'));
                 defaultColumns.push(new ListItem('COLLECTION', 'scope'));
+            } else if (name === 'swimlane_assignments') {
+                defaultColumns.push(new ListItem('ASSIGNMENT', null));
             } else if (
                 name === 'search' ||
                 name === 'collectionReferences' ||

@@ -10,6 +10,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { TranslateService } from '@ngx-translate/core';
 import {
+    Assignment,
     ClientConfig,
     ConfigService,
     DashboardShortcutEntry,
@@ -413,6 +414,11 @@ export class DummyUser implements Partial<User> {
     };
 }
 
+export const DummyAssignment: Partial<Assignment> = {
+    title: 'Assignment title',
+    summary: 'Assignment description.<br /><b>lorem</b> ipsum dolor sit amet',
+    status: 'OPEN',
+};
 export const DummyNode: Partial<Node> = {
     ref: {
         id: 'nodeid',
