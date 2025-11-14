@@ -328,6 +328,7 @@
     "timestamp": "Zeitpunkt"
   },
   "ASSIGNMENT": {
+    "CARD_TYPE": "Aufgabe",
     "title": "Titel",
     "status": "Status",
     "type": "Aufgabentyp",

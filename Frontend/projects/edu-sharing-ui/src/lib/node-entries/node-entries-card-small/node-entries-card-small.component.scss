@@ -1,4 +1,5 @@
 @use '../../../../assets/scss/mixins' as *;
+@use '../../../../assets/scss/variables-scss' as vars;
 $imageHeight: 100px;
 $entriesCardPaddingHorizontal: 15px;
 $entriesCardPaddingVertical: 8px;
@@ -40,6 +41,42 @@ $collectionIconSize: 25px;
     &.grid-card-collection {
         // default fallback color
         background-color: rgb(var(--palette-primary-200));
+    }
+    .card-assignment {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        .type {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            gap: 8px;
+            > span {
+                flex-grow: 1;
+                font-size: var(--fontSizeXSmall);
+            }
+            > i {
+                font-size: 14px;
+            }
+        }
+        .title {
+            font-size: vars.$fontSizeXLarge;
+        }
+        .badges {
+            display: flex;
+            justify-content: space-between;
+            > div {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 4px 6px;
+                border-radius: var(--borderRadiusSmall);
+                background-color: var(--palette-primary-200);
+            }
+        }
+        .summary {
+            @include limitLineCount(3, 1.25);
+        }
     }
     .card-meta {
         background-color: rgba(255, 255, 255, 0.8);

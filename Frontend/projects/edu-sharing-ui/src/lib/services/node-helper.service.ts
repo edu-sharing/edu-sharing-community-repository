@@ -1,11 +1,13 @@
 import { Injectable, Optional } from '@angular/core';
 import {
     ApiHelpersService,
+    Assignment,
     ConfigService,
     NetworkService,
     Node,
     ProposalNode,
     RestConstants,
+    ROOT,
     User,
 } from 'ngx-edu-sharing-api';
 import { TranslateService } from '@ngx-translate/core';
@@ -17,8 +19,8 @@ import { of } from 'rxjs';
 import { NodesRightMode } from '../types/option-item';
 import { PlatformLocation } from '@angular/common';
 import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
-import { ROOT } from 'ngx-edu-sharing-api';
 import { Sort } from '@angular/material/sort';
+import { NodeEntriesDataType } from '../node-entries/data-type';
 
 @Injectable({
     providedIn: 'root',
@@ -243,6 +245,9 @@ export class NodeHelperService {
     }
     isNodeCollection(node: Node): boolean {
         return node.aspects?.includes(RestConstants.CCM_ASPECT_COLLECTION) || !!node.collection;
+    }
+    isNodeAssignment(node: NodeEntriesDataType): boolean {
+        return (node as Assignment).allowAdditionalDocumentSubmissions !== undefined;
     }
     public getSourceIconPath(src: string) {
         return (

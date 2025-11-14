@@ -6,6 +6,7 @@ import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
 import { NodeEntriesService } from '../../services/node-entries.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { Node } from 'ngx-edu-sharing-api';
+import { DropdownComponent } from '../../dropdown/dropdown.component';
 
 @Component({
     selector: 'es-node-entries-card-small',
@@ -18,6 +19,8 @@ export class NodeEntriesCardSmallComponent<T extends Node> {
     readonly InteractionType = InteractionType;
     readonly Target = Target;
     @Input() node: T;
+    @Input() dropdown: DropdownComponent;
+
     constructor(
         public entriesService: NodeEntriesService<T>,
         public nodeHelper: NodeHelperService,
@@ -32,7 +35,9 @@ export class NodeEntriesCardSmallComponent<T extends Node> {
         }
         return options.filter((o) => o.showAsAction && o.showCallback([this.node])).slice(0, 3);
     }
-
+    async openMenu(node: T) {
+        this.entriesService.openDropdown(this.dropdown, node);
+    }
     openContextmenu(event: MouseEvent | Event) {
         event.preventDefault();
         event.stopPropagation();

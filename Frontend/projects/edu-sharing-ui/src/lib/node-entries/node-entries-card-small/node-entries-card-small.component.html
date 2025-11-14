@@ -58,10 +58,12 @@
         source: ClickSource.Preview,
       })
     "
+    *ngIf="!nodeHelper.isNodeAssignment(node)"
   >
     <div *ngIf="nodeHelper.isNodeCollection(node) && node.collection.pinned" class="collection-pin">
       <i esIcon="edu-pin"></i>
     </div>
+
     <es-preview-image
       *ngIf="!(nodeHelper.isNodeCollection(node) && node.preview.isIcon)"
       [node]="node"
@@ -85,26 +87,55 @@
       })
     "
   >
-    <div
-      *ngFor="let displayPart of entriesService.columns; let first = first"
-      class="card-meta-row"
-    >
-      <ng-container *ngIf="first">
-        <es-node-url
-          *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
-          [node]="node"
-          #link
+    <div *ngIf="nodeHelper.isNodeAssignment(node)" class="card-assignment">
+      <div class="type">
+        <i esIcon="task"></i>
+        <span>{{ 'ASSIGNMENT.CARD_TYPE' | translate }}</span>
+        <button
+          *ngIf="dropdown"
+          mat-icon-button
+          color="primary"
+          (click)="openMenu(node)"
+          [matMenuTriggerFor]="dropdown.menu"
+          [attr.aria-label]="'OPTIONS_FOR' | translate : { element: (node | nodeTitle) }"
+          data-test="card-options-button"
         >
-          <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
-        </es-node-url>
-        <div *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink">
-          <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
+          <i esIcon="more_vert"></i>
+        </button>
+      </div>
+      <div class="title">
+        {{ node | nodeTitle }}
+      </div>
+      <div class="summary" [innerHTML]="$any(node).summary"></div>
+      <div class="badges">
+        <div class="status status-{{ $any(node).status }}">
+          {{ 'ASSIGNMENT.STATUS.' + $any(node).status | translate }}
         </div>
-      </ng-container>
-      <ng-container *ngIf="!first">
-        <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
-      </ng-container>
+        <div class="endTime" *ngIf="$any(node).endTime as endTime">{{ endTime | formatDate }}</div>
+      </div>
     </div>
+    <ng-container *ngIf="!nodeHelper.isNodeAssignment(node)">
+      <div
+        *ngFor="let displayPart of entriesService.columns; let first = first"
+        class="card-meta-row"
+      >
+        <ng-container *ngIf="first">
+          <es-node-url
+            *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
+            [node]="node"
+            #link
+          >
+            <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
+          </es-node-url>
+          <div *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink">
+            <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="!first">
+          <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
+        </ng-container>
+      </div>
+    </ng-container>
   </div>
   <ng-container
     *ngTemplateOutlet="templatesService.actionArea; context: { element: node }"
