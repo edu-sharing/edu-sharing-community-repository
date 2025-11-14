@@ -1,15 +1,11 @@
 import { Component, input, model } from '@angular/core';
-import { Authority, CreateAssignmentRequest } from 'ngx-edu-sharing-api';
 import { SharedModule } from '../../../shared/shared.module';
-import { Assignment } from 'ngx-edu-sharing-api';
 import { NodeHelperService, NodesRightMode } from 'ngx-edu-sharing-ui';
 import { MatSelectChange } from '@angular/material/select';
 import { AssignmentBase } from '../manage-assignment/manage-assignment.component';
+import { Permission } from 'ngx-edu-sharing-api';
 
 type Role = 'ASSIGNEE' | 'COORDINATOR';
-export type AuthorityWithSubmission = Authority & {
-    role?: Role;
-};
 
 @Component({
     selector: 'es-manage-assignment-authorities',
@@ -19,18 +15,18 @@ export type AuthorityWithSubmission = Authority & {
 })
 export class ManageAssignmentAuthoritiesComponent {
     assignment = input.required<AssignmentBase>();
-    authorities = model.required<AuthorityWithSubmission[]>();
+    authorities = model.required<Permission[]>();
 
     constructor(public nodeHelperService: NodeHelperService) {}
 
-    remove(item: AuthorityWithSubmission) {
+    remove(item: Permission) {
         this.authorities().splice(this.authorities().indexOf(item), 1);
         this.authorities.set(this.authorities());
     }
 
     protected readonly NodesRightMode = NodesRightMode;
 
-    setRole(item: AuthorityWithSubmission, $event: MatSelectChange<Role>) {
+    setRole(item: Permission, $event: MatSelectChange<Role>) {
         item.role = $event.value;
         this.authorities.set(this.authorities());
     }

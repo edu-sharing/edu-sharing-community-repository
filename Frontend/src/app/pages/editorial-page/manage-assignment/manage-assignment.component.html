@@ -6,7 +6,9 @@
     [stepControl]="mainDataFormGroup"
   >
     <h2 class="mat-heading-4">
-      <mat-label>{{ 'EDITORIAL.ASSIGNMENT.MAIN_TITLE' | translate }}</mat-label>
+      <mat-label>{{
+        'EDITORIAL.ASSIGNMENT.MAIN_TITLE_' + (assignment().ref?.id ? 'EDIT' : 'CREATE') | translate
+      }}</mat-label>
     </h2>
     <form [formGroup]="mainDataFormGroup" class="main-form">
       <mat-form-field>
@@ -29,7 +31,7 @@
           mat-flat-button
           color="primary"
           (click)="showFileDialog()"
-          [disabled]="submissions()?.length"
+          [disabled]="submissions()?.length > 0"
         >
           <i esIcon="add"></i> {{ 'EDITORIAL.ASSIGNMENT.FORM.ADD_FILE' | translate }}
         </button>

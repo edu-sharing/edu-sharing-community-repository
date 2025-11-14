@@ -15,6 +15,7 @@ import {
     AssignmentV1Service,
     Authority,
     CreateAssignmentRequest,
+    Permission,
     PermissionRequest,
     Submission,
 } from 'ngx-edu-sharing-api';
@@ -22,10 +23,7 @@ import { NodeHelperService } from '../../../services/node-helper.service';
 import { EditorComponent } from '@tinymce/tinymce-angular';
 import { PlatformLocation } from '@angular/common';
 import { TranslateService } from '@ngx-translate/core';
-import {
-    AuthorityWithSubmission,
-    ManageAssignmentAuthoritiesComponent,
-} from '../manage-assignment-authorities/manage-assignment-authorities.component';
+import { ManageAssignmentAuthoritiesComponent } from '../manage-assignment-authorities/manage-assignment-authorities.component';
 import { Toast } from 'ngx-edu-sharing-ui';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { combineLatest, filter, firstValueFrom } from 'rxjs';
@@ -71,7 +69,7 @@ export class ManageAssignmentComponent {
         type: 'SUBMISSION',
         status: 'OPEN',
     } as Assignment);
-    authorities = signal<AuthorityWithSubmission[]>(null);
+    authorities = signal<Permission[]>(null);
     mainDataFormGroup: FormGroup;
     nodes = signal<NodeWithRole[]>(null);
     submissions = signal<Submission[]>(null);
@@ -126,6 +124,7 @@ export class ManageAssignmentComponent {
             .subscribe(([assignment, files, submissions]) => {
                 this.assignment.set(assignment);
                 this.submissions.set(submissions);
+                this.authorities.set(assignment.permissions);
                 this.mainDataFormGroup.setValue({
                     title: assignment.title,
                     summary: assignment.summary,
@@ -177,11 +176,19 @@ export class ManageAssignmentComponent {
     }
 
     addAuthority(authority: Authority) {
-        if ((this.authorities() || []).some((n) => n.authorityName === authority.authorityName)) {
+        if (
+            (this.authorities() || []).some(
+                (n) => n.authority.authorityName === authority.authorityName,
+            )
+        ) {
             return;
         }
-        (authority as AuthorityWithSubmission).role = 'ASSIGNEE';
-        this.authorities.set((this.authorities() || []).concat(authority));
+        this.authorities.set(
+            (this.authorities() || []).concat({
+                authority,
+                role: 'ASSIGNEE',
+            }),
+        );
     }
 
     async submit() {
@@ -196,9 +203,10 @@ export class ManageAssignmentComponent {
             this.toast.error(null, 'EDITORIAL.ASSIGNMENT.ERROR.MISSING_AUTHORITIES_ASSIGNEE');
             return;
         }
+        console.log(this.authorities());
         const permissions: PermissionRequest[] = this.authorities().map((a) => {
             return {
-                authorityName: a.authorityName,
+                authorityName: a.authority.authorityName,
                 role: a.role,
             };
         });

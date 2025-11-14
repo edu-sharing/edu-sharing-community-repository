@@ -4,8 +4,8 @@
 <div class="node-list" *ngIf="authorities()?.length">
   @for (item of authorities(); track item) {
   <div>
-    <es-user-avatar [user]="item" size="xsmall"></es-user-avatar>
-    <div class="title">{{ item | authorityName }}</div>
+    <es-user-avatar [user]="item.authority" size="xsmall"></es-user-avatar>
+    <div class="title">{{ item.authority | authorityName }}</div>
     <mat-form-field appearance="fill">
       <mat-label>{{ 'EDITORIAL.ASSIGNMENT.FORM.AUTHORITY_ROLE' | translate }}</mat-label>
       <mat-select [value]="item.role" (selectionChange)="setRole(item, $event)">
@@ -13,8 +13,9 @@
         <mat-option [value]="role">{{
           'EDITORIAL.ASSIGNMENT.FORM.PERMISSION_ROLE.' +
             role +
-            (role === 'ASSIGNEE' ? '_' + (item.authorityType === 'USER' ? 'USER' : 'GROUP') : '')
-            | translate
+            (role === 'ASSIGNEE'
+              ? '_' + (item.authority.authorityType === 'USER' ? 'USER' : 'GROUP')
+              : '') | translate
         }}</mat-option>
         }
       </mat-select>
@@ -24,7 +25,7 @@
         class="multiply-group"
         matTooltip="{{ 'EDITORIAL.ASSIGNMENT.FORM.GROUP_MULTIPLY' | translate }}"
         *ngIf="
-          item.authorityType !== 'USER' &&
+          item.authority.authorityType !== 'USER' &&
           item.role === 'ASSIGNEE' &&
           assignment().type === 'SUBMISSION'
         "

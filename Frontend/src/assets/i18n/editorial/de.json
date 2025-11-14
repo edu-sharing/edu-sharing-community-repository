@@ -77,7 +77,8 @@
         "INVITE": "Zuweisen"
       },
       "EMPTY": "Keine Aufgaben gefunden",
-      "MAIN_TITLE": "Neue Aufgabe erstellen",
+      "MAIN_TITLE_CREATE": "Neue Aufgabe erstellen",
+      "MAIN_TITLE_EDIT": "Aufgabe bearbeiten",
       "PERMISSIONS_TITLE": "Aufgabe zuweisen",
       "SUBMIT": "Aufgabe austeilen",
       "ERROR": {
