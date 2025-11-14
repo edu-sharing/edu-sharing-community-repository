@@ -146,6 +146,10 @@ public class OAuth2ClientProperties {
          */
         @Optional
         private String clientName;
+
+        @Optional
+        private Boolean allowThirdPartyLoginPlugin;
+
     }
 }
 

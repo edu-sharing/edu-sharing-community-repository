@@ -20,6 +20,6 @@ public class PrimaryLogin extends AbstractLogin {
     }
 
 
-    public record OAuthEntry(String name, String registrationId) {
+    public record OAuthEntry(String name, String registrationId, String clientId, boolean allowThirdPartyLoginPlugin) {
     }
 }

@@ -117,7 +117,10 @@ public class LoginApi {
                 .map(x -> new PrimaryLogin.OAuthEntry(
                         Optional.of(x.getValue())
                                 .map(OAuth2ClientProperties.Registration::getClientName)
-                                .orElse(x.getKey()), config.getRegistrationId(x.getKey())))
+                                .orElse(x.getKey()),
+                        config.getRegistrationId(x.getKey()),
+                        x.getValue().getClientId(),
+                        x.getValue().getAllowThirdPartyLoginPlugin() == Boolean.TRUE))
                 .toList();
 
         PrimaryLogin login = new PrimaryLogin(authenticated, authTool.getScope(), null, req.getSession(), status, oAuthEntries);
