@@ -49,10 +49,10 @@ import { Toast } from './services/toast';
 import { SharedModule } from './shared/shared.module';
 import { BApiModule } from 'ngx-edu-sharing-b-api';
 import { WrapperComponent } from './web-components/wrapper/app/wrapper.component';
-import { MockLocationStrategy } from '@angular/common/testing';
 import { WebComponentService } from './main/web-component.service';
 import { PreviewSidebarComponent } from './features/preview-sidebar/preview-sidebar.component';
 import { WebComponentLocationStrategy } from './main/web-component.utils';
+import { GlobalLoginComponent } from './main/global-login-trigger/global-login.component';
 
 const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     showDelay: 500,
@@ -74,6 +74,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         CoreModule,
         DialogsModule,
         DragDropModule,
+        GlobalLoginComponent,
         // forRoot is empty; It is initalized via useFactory!
         EduSharingApiModule.forRoot({}),
         EduSharingUiModule.forRoot({ production: environment.production }, extensionUiProviders),
