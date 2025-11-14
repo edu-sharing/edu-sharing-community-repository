@@ -6,7 +6,9 @@ import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @Data
@@ -15,6 +17,7 @@ public class Mapping {
     boolean preferRemoteUser = true;
     private final BidiMap<String, String> person = new DualHashBidiMap<>();
     private final BidiMap<String, Group> group = new DualHashBidiMap<>();
+    private final Map<String, String> additionalKeyValues = new HashMap<>();
 
     /**
      * used by external auth (i.e. shibboleth serviceprovider) where attributes are provided over ajp.

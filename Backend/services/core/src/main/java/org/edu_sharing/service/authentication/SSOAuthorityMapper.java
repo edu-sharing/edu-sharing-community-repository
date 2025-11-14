@@ -311,6 +311,7 @@ public class SSOAuthorityMapper {
                 personProperties.put(alfrescoProperty, ssoAttribute.getValue());
             }
 
+
             if (!personProperties.isEmpty()) {
                 // TODO can be deleted?
                 // if (mappingConfig.getPersonMappingCondition() != null && !mappingConfig.getPersonMappingCondition().isTrue(ssoAttributes)) {
@@ -334,6 +335,11 @@ public class SSOAuthorityMapper {
                 }
 
                 if (!personExists) {
+                    mapping.getAdditionalKeyValues().forEach((key, value) -> {
+                        QName alfrescoProperty = QName.createQName(key);
+                        personProperties.put(alfrescoProperty, value);
+                    });
+
                     authenticationService.createAuthentication(userName, new KeyTool().getRandomPassword().toCharArray());
                     //authenticationDao.createUser(userName, new KeyTool().getRandomPassword().toCharArray());
 

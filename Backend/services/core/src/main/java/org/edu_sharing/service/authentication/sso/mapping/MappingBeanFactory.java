@@ -1,9 +1,6 @@
 package org.edu_sharing.service.authentication.sso.mapping;
 
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigBeanFactory;
-import com.typesafe.config.ConfigObject;
-import com.typesafe.config.ConfigValueType;
+import com.typesafe.config.*;
 
 public class MappingBeanFactory {
 
@@ -12,6 +9,10 @@ public class MappingBeanFactory {
 
         if(config.hasPath("person")){
             config.getObject("person").forEach((key, value) -> {
+                if(key.equals("additionalKeyValues")){
+                    handleAdditionValues(mapping, value);
+                    return;
+                }
                 if(value.valueType().equals(ConfigValueType.OBJECT)){
                     throw new IllegalStateException("person mapping must be a native type");
                 }
@@ -42,5 +43,25 @@ public class MappingBeanFactory {
 
 
         return mapping;
+    }
+
+    private static void handleAdditionValues(Mapping mapping, ConfigValue configValue) {
+        if(!configValue.valueType().equals(ConfigValueType.OBJECT)){
+            throw new IllegalStateException("additionalValues must be an object");
+        }
+
+        ((ConfigObject) configValue).forEach((key, value) -> {
+            if(value.valueType().equals(ConfigValueType.OBJECT)){
+                throw new IllegalStateException("additionalValues must be a native type");
+            }
+            if(value.valueType().equals(ConfigValueType.LIST)){
+                throw new IllegalStateException("additionalValues must be a native type");
+            }
+            if(value.valueType().equals(ConfigValueType.NULL)){
+                return;
+            }
+
+            mapping.getAdditionalKeyValues().put(key, value.unwrapped().toString());
+        });
     }
 }
