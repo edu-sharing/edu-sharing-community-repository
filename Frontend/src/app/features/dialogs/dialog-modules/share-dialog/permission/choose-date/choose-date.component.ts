@@ -15,6 +15,7 @@ import { MatInput } from '@angular/material/input';
 import { Toast, TranslationsService } from 'ngx-edu-sharing-ui';
 import { DateAdapter } from '@angular/material/core';
 import { SharedModule } from '../../../../../../shared/shared.module';
+import moment from 'moment';
 
 @Component({
     selector: 'es-share-dialog-choose-date',
@@ -36,7 +37,11 @@ export class ShareDialogChooseDateComponent implements OnInit, OnChanges {
         private translationsService: TranslationsService,
         private dateAdapter: DateAdapter<any>,
     ) {
-        this.dateAdapter.setLocale(this.translationsService.getLocale());
+        if (this.translationsService.getLocale()) {
+            this.dateAdapter.setLocale(this.translationsService.getLocale());
+        } else {
+            this.dateAdapter.setLocale('de-DE');
+        }
     }
     toDate(value: number) {
         return value ? new Date(value) : null;
@@ -68,7 +73,12 @@ export class ShareDialogChooseDateComponent implements OnInit, OnChanges {
     }
 
     updateDate(event: MatDatepickerInputEvent<Date, any>) {
+        console.log(event);
         const currentDate = new Date(this.dateTime);
+        if (!event.value && (event.targetElement as HTMLInputElement).value) {
+            const value = (event.targetElement as HTMLInputElement).value;
+            event.value = moment(value, 'DD.MM.YYYY').toDate();
+        }
         if (
             !event.value ||
             (this.from && event.value?.getTime() < this.from) ||
@@ -76,6 +86,7 @@ export class ShareDialogChooseDateComponent implements OnInit, OnChanges {
         ) {
             this.toast.error(null, 'WORKSPACE.SHARE.TIMEBASED.INVALID_DATE');
             this.matInput.value = this.toDate(this.dateTime);
+            this.dateTimeChange.emit(this.dateTime);
             return;
         }
         // keep the hour + minutes so only update the yy-mm-dd

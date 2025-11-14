@@ -636,6 +636,13 @@ public class AuthorityServiceImpl implements AuthorityService {
     @Override
     @RetryingTransaction(readonly = true)
     public Set<String> getMembershipsOfGroupRecursively(String groupName) {
+        return transactionService
+                .getRetryingTransactionHelper()
+                .doInTransaction(() -> getMembershipsOfGroupRecursively_Internal(groupName), true);
+
+    }
+
+    private Set<String> getMembershipsOfGroupRecursively_Internal(String groupName) {
         String key = groupName.startsWith(PermissionService.GROUP_PREFIX) ? groupName : PermissionService.GROUP_PREFIX + groupName;
         Set<String> authorities = authorityService.getContainedAuthorities(null, key, true);
         Set<String> result = authorities
