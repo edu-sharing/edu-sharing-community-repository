@@ -7,12 +7,13 @@ import org.edu_sharing.repository.client.tools.Theme;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.tools.URLHelper;
-import org.edu_sharing.restservices.shared.Node;
-import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.spring.ApplicationContextFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class MimeTypesV2 {
@@ -128,7 +129,7 @@ public class MimeTypesV2 {
 
 	}
 	public static boolean isDirectory(Map<String,Object> properties, String nodeType){
-		if(Arrays.asList(CCConstants.CCM_TYPE_MAP, CCConstants.CM_TYPE_FOLDER, CCConstants.SYS_STORE_ROOT).contains(CCConstants.getValidGlobalName(nodeType))) {
+		if(Arrays.asList(CCConstants.CCM_TYPE_MAP, CCConstants.CM_TYPE_FOLDER, CCConstants.CCM_TYPE_ASSIGNMENT, CCConstants.SYS_STORE_ROOT).contains(CCConstants.getValidGlobalName(nodeType))) {
 			return true;
 		}
 

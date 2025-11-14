@@ -9,7 +9,7 @@
   (cdkDropListDropped)="drop($event)"
 >
   @for (item of nodes(); track item) {
-  <div cdkDrag [cdkDragDisabled]="readonly">
+  <div cdkDrag [cdkDragDisabled]="readonly()">
     <div class="handle" cdkDragHandle><i esIcon="reorder"></i></div>
     <es-node-type-badge [node]="item"></es-node-type-badge>
     <div class="title">{{ item | nodeTitle }}</div>
@@ -18,7 +18,7 @@
       <mat-select
         [value]="item.documentRole || 'SUPPLEMENTARY'"
         (selectionChange)="setRole(item, $event)"
-        [disabled]="readonly"
+        [disabled]="readonly()"
       >
         <ng-container *ngIf="translateReady$ | async">
           <mat-option [value]="role" *ngFor="let role of ['SUPPLEMENTARY', 'SUBMITTABLE']">{{
@@ -60,7 +60,7 @@
         <i esIcon="warning"></i>
       </div>
     </div>
-    <button mat-icon-button class="delete" (click)="remove(item)" [disabled]="readonly">
+    <button mat-icon-button class="delete" (click)="remove(item)" [disabled]="readonly()">
       <i esIcon="close"></i>
     </button>
   </div>

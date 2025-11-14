@@ -4,6 +4,8 @@ import { NodeHelperService, NodesRightMode } from 'ngx-edu-sharing-ui';
 import { MatSelectChange } from '@angular/material/select';
 import { AssignmentBase } from '../manage-assignment/manage-assignment.component';
 import { Permission } from 'ngx-edu-sharing-api';
+import { TranslateService } from '@ngx-translate/core';
+import { BehaviorSubject } from 'rxjs';
 
 type Role = 'ASSIGNEE' | 'COORDINATOR';
 
@@ -16,9 +18,12 @@ type Role = 'ASSIGNEE' | 'COORDINATOR';
 export class ManageAssignmentAuthoritiesComponent {
     assignment = input.required<AssignmentBase>();
     authorities = model.required<Permission[]>();
+    readonly translateReady$ = new BehaviorSubject<boolean>(false);
 
-    constructor(public nodeHelperService: NodeHelperService) {}
-
+    constructor(private translate: TranslateService, public nodeHelperService: NodeHelperService) {
+        // dirty hack for https://github.com/angular/components/issues/7923
+        this.translate.get('ANY').subscribe(() => this.translateReady$.next(true));
+    }
     remove(item: Permission) {
         this.authorities().splice(this.authorities().indexOf(item), 1);
         this.authorities.set(this.authorities());

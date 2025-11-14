@@ -7,7 +7,6 @@ import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { MatSelectChange } from '@angular/material/select';
 import { AssignmentBase } from '../manage-assignment/manage-assignment.component';
 import { TranslateService } from '@ngx-translate/core';
-import { map } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
 
 type Role = 'SUPPLEMENTARY' | 'SUBMITTABLE';
@@ -36,10 +35,7 @@ export class ManageAssignmentNodesComponent {
 
     constructor(private translate: TranslateService, public nodeHelperService: NodeHelperService) {
         // dirty hack for https://github.com/angular/components/issues/7923
-        this.translate
-            .get('ANY')
-            .pipe(map(() => true))
-            .subscribe(this.translateReady$);
+        this.translate.get('ANY').subscribe(() => this.translateReady$.next(true));
     }
 
     remove(item: NodeWithRole) {

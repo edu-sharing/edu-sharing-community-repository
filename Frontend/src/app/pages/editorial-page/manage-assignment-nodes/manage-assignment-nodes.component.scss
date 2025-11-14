@@ -16,7 +16,8 @@
     }
     .handle {
         cursor: move;
-        width: 8px;
+        min-width: 8px;
+        max-width: 8px;
         overflow: hidden;
         opacity: 0.3;
         display: flex;

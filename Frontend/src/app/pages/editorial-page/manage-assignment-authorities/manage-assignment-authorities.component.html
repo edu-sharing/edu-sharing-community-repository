@@ -8,6 +8,7 @@
     <div class="title">{{ item.authority | authorityName }}</div>
     <mat-form-field appearance="fill">
       <mat-label>{{ 'EDITORIAL.ASSIGNMENT.FORM.AUTHORITY_ROLE' | translate }}</mat-label>
+      @if (translateReady$ | async) {
       <mat-select [value]="item.role" (selectionChange)="setRole(item, $event)">
         @for (role of ['ASSIGNEE', 'COORDINATOR']; track role) {
         <mat-option [value]="role">{{
@@ -19,6 +20,7 @@
         }}</mat-option>
         }
       </mat-select>
+      }
     </mat-form-field>
     <div class="warn-area">
       <div

@@ -131,7 +131,7 @@ public class AssignmentDaoFactory {
     }
 
     protected boolean isAssignmentCoordinator(String nodeId) {
-        if (AuthorityServiceHelper.isAdmin()) {
+        if (AuthorityServiceHelper.isAdmin(AuthenticationUtil.getFullyAuthenticatedUser())) {
             return true;
         }
 
@@ -229,7 +229,7 @@ public class AssignmentDaoFactory {
             super(nodeId, nodeRef);
             assignmentFileRefs = new LazyProvider<>(() -> {
                 validateExists();
-                return nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_ASSOC_ASSIGNMENT_FILES)
+                return nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_ASSIGNMENT_FILE)
                         .stream()
                         .map(ChildAssociationRef::getChildRef)
                         .map(org.alfresco.service.cmr.repository.NodeRef::getId)

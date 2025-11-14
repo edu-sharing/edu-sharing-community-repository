@@ -40,8 +40,8 @@ import org.edu_sharing.restservices.collection.v1.model.CollectionReference;
 import org.edu_sharing.restservices.collection.v1.model.CollectionRelationReference;
 import org.edu_sharing.restservices.node.v1.model.*;
 import org.edu_sharing.restservices.search.v1.model.SearchFacet;
-import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.*;
+import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.SearchResult;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityService;
@@ -54,8 +54,8 @@ import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.model.CollectionRef;
 import org.edu_sharing.service.model.NodeRefImpl;
-import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.*;
+import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.notification.NotificationService;
 import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.service.permission.HandleParam;
@@ -83,9 +83,9 @@ import org.springframework.context.ApplicationContext;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
@@ -1825,7 +1825,7 @@ public class NodeDao {
     }
 
     public boolean isDirectory() {
-        return MimeTypesV2.isDirectory(nodeProps, type);
+        return MimeTypesV2.isDirectory(nodeProps, CCConstants.getValidLocalName(type));
     }
 
     public boolean isCollection() {

@@ -19,7 +19,7 @@
       <editor [init]="editorConfig" formControlName="summary"></editor>
       <mat-label>{{ 'EDITORIAL.ASSIGNMENT.FORM.FILES' | translate }}</mat-label>
       <div class="files">
-        <es-info-message class="submissions" *ngIf="submissions()?.length">{{
+        <es-info-message class="submissions" *ngIf="submissions()?.length > 0">{{
           'EDITORIAL.ASSIGNMENT.FORM.HAS_SUBMISSIONS' | translate
         }}</es-info-message>
         <es-manage-assignment-nodes
