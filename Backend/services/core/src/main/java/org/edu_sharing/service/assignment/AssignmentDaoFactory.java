@@ -242,13 +242,16 @@ public class AssignmentDaoFactory {
                 try {
                     return Arrays.stream(permissionService.getPermissions(getNodeId()).getAces())
                             .map(ace -> new Assignment.Permission(new Authority(ace), switch (ace.getPermission()) {
+                                // filter consumer role
+                                case CCConstants.PERMISSION_CONSUMER -> null;
                                 case CCConstants.PERMISSION_ASSIGNEE -> Assignment.Role.ASSIGNEE;
                                 case CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR -> Assignment.Role.COORDINATOR;
                                 default -> {
-                                    log.error("Unknown permission {}", ace.getPermission());
+                                    log.error("Unknown permission for assignment {} {}", nodeId, ace.getPermission());
                                     yield null;
                                 }
                             }))
+                            .filter(p -> Objects.nonNull(p.role()))
                             .toList();
                 } catch (AccessDeniedException ignore) {
                     return Collections.emptyList();
