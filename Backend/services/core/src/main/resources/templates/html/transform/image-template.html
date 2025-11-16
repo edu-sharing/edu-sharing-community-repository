@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title></title>
+    <style>
+        @page {
+            size: [[${pageWidth}]]px [[${pageHeight}]]px;
+            margin: 0;
+        }
+        img{
+            width:100%;
+            border-collapse: collapse;
+            margin:0;
+            padding:0;
+        }
+    </style>
+</head>
+<body><img th:src="'data:' + ${mimeType} + ';base64,' + ${imageData}"/></body>
+</html>

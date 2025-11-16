@@ -9,12 +9,14 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Properties;
@@ -57,19 +59,16 @@ public class TransformServiceStatic {
     }
 
     public <T> T callTransformer(InputStream inputStream, long contentLength, String sourceMimetype, String targetMimetype, TransformerId transformerId, Class<T> clazz) {
-        InputStreamResource resource = getInputStreamResource(inputStream, contentLength);
+        MultiValueMap<String, Object> body = getMultiValueMap(inputStream, contentLength, sourceMimetype, targetMimetype);
 
-        RestTemplate restTemplate = new RestTemplate();
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("file", resource);
-        body.add("sourceMimetype", sourceMimetype);
-        body.add("targetMimetype", targetMimetype);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
         // Send it
+        RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<T> response = restTemplate.exchange(
                 globalProperties.getProperty("localTransform." + transformerId.getValue() + ".url")+"transform",
                 HttpMethod.POST,
@@ -78,6 +77,52 @@ public class TransformServiceStatic {
         );
 
         return response.getBody();
+    }
+
+    public InputStream callTransformerForStream(
+            InputStream inputStream,
+            long contentLength,
+            String sourceMimetype,
+            String targetMimetype,
+            TransformerId transformerId) {
+
+        MultiValueMap<String, Object> body = getMultiValueMap(inputStream, contentLength, sourceMimetype, targetMimetype);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        // IMPORTANT: Accept binary stream
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_OCTET_STREAM));
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity =
+                new HttpEntity<>(body, headers);
+
+        // Expect a Resource as response
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<Resource> response = restTemplate.exchange(
+                globalProperties.getProperty("localTransform." + transformerId.getValue() + ".url") + "transform",
+                HttpMethod.POST,
+                requestEntity,
+                Resource.class
+        );
+
+        // Convert the returned Resource to InputStream
+        try {
+            return response.getBody().getInputStream();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read transformer response stream", e);
+        }
+    }
+
+    @NotNull
+    private static MultiValueMap<String, Object> getMultiValueMap(InputStream inputStream, long contentLength, String sourceMimetype, String targetMimetype) {
+        InputStreamResource resource = getInputStreamResource(inputStream, contentLength);
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", resource);
+        body.add("sourceMimetype", sourceMimetype);
+        body.add("targetMimetype", targetMimetype);
+        return body;
     }
 
 

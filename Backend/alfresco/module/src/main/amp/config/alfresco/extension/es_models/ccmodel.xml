@@ -2610,6 +2610,10 @@
         </property>
       </properties>
     </aspect>
+    
+    <aspect name="ccm:representation">
+      <title>generated sub object with transformed content</title>
+    </aspect>
 
   </aspects>
 </model>
