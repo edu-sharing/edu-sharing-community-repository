@@ -1,0 +1,15 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+
+.heading {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    > span {
+        flex-grow: 1;
+        font-size: vars.$fontSizeXLarge;
+        font-weight: bold;
+    }
+    border-bottom: 1px solid vars.$cardSeparatorLineColor;
+}

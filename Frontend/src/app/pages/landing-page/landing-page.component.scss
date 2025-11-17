@@ -1,13 +1,15 @@
 .swimlanes {
     display: flex;
     flex-direction: column;
-    padding: 10px 10px;
+    background: #e4e4e4;
+    padding: 30px 20px;
+    gap: 30px;
     es-dashboard-swimlane {
+        border-radius: var(--borderRadiusCards);
+        background-color: #fcfcfc;
         &:nth-child(even) {
-            background-color: color-mix(in srgb, var(--workspaceTopBarBackground), 95% transparent);
         }
         &:nth-child(odd) {
-            background-color: color-mix(in srgb, var(--workspaceTopBarBackground), 85% transparent);
         }
     }
 }

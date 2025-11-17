@@ -71,7 +71,9 @@
         <es-manage-assignment></es-manage-assignment>
         } @case('assignmentSubmission') {
         <es-assignment-submission></es-assignment-submission>
-        } @default {
+        } @case('submitAssignment') {
+        <es-submit-assignment></es-submit-assignment>
+        }@default {
         <span> Component "{{ component }}" not implemented </span>
         } }
       </ng-container>

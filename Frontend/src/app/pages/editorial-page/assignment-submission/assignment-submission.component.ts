@@ -17,6 +17,9 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { EditorialPageService } from '../editorial-page.service';
 
+/**
+ * lists all submissions (for teacher view)
+ */
 @Component({
     selector: 'es-assignment-submission',
     templateUrl: 'assignment-submission.component.html',

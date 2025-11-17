@@ -1,0 +1,16 @@
+<mat-tab-group>
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <i esIcon="inbox"></i>
+      {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.TAB_ASSIGNMENT' | translate }}
+    </ng-template>
+    <ng-template matTabContent>
+      <ng-container *ngIf="assignment()">
+        <div class="heading">
+          <span>{{ assignment() | nodeTitle }}</span>
+          <button mat-icon-button click="close()"><i esIcon="close"></i></button>
+        </div>
+      </ng-container>
+    </ng-template>
+  </mat-tab>
+</mat-tab-group>

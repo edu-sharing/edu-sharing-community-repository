@@ -13,6 +13,7 @@ import { ManageAssignmentComponent } from './manage-assignment/manage-assignment
 import { ManageAssignmentNodesComponent } from './manage-assignment-nodes/manage-assignment-nodes.component';
 import { AssignmentSubmissionComponent } from './assignment-submission/assignment-submission.component';
 import { EditorialBreadcrumbService } from './editorial-breadcrumb/editorial-breadcrumb.service';
+import { SubmitAssignmentComponent } from './submit-assignment/submit-assignment.component';
 
 @NgModule({
     declarations: [EditorialPageComponent],
@@ -23,6 +24,7 @@ import { EditorialBreadcrumbService } from './editorial-breadcrumb/editorial-bre
         ManageAssignmentComponent,
         AssignmentSubmissionComponent,
         ManageAssignmentNodesComponent,
+        SubmitAssignmentComponent,
         MatToolbarModule,
         EditorialPageRoutingModule,
         EduSharingUiCommonModule,

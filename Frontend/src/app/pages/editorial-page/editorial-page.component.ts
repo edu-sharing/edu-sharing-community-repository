@@ -66,7 +66,7 @@ import { EditorialSidebarService } from './editorial-sidebar/editorial-sidebar.s
 import { EditorialBreadcrumbService } from './editorial-breadcrumb/editorial-breadcrumb.service';
 
 export type PrimaryMode = 'activity' | 'share' | 'assignment';
-export type MainComponentType = 'manageAssignment' | 'assignmentSubmission';
+export type MainComponentType = 'manageAssignment' | 'assignmentSubmission' | 'submitAssignment';
 type RouteConfig = {
     primaryMode: PrimaryMode;
 };
