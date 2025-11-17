@@ -44,6 +44,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { HttpClient, HttpContext } from '@angular/common/http';
 import { catchError, map, shareReplay, tap } from 'rxjs/operators';
+import { ActivatedRoute } from '@angular/router';
 
 @Injectable()
 export class translateProvider {
@@ -254,12 +255,15 @@ export const DefaultColumns = {
         new ListItem('NODE', 'cclom:general_description'),
     ],
 } as ColumnType;
+class ActivatedRouteMock extends ActivatedRoute {}
 
 export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
     { provide: MdsEditorInstanceService, useClass: MdsEditorInstanceServiceMock },
     { provide: MdsViewerService, useClass: MdsViewerServiceMock },
     { provide: MdsService, useFactory: () => new MdsServiceMock(null) },
+    { provide: ActivatedRoute, useClass: ActivatedRouteMock },
+
     ViewInstanceService,
     CordovaService,
     ToastService,

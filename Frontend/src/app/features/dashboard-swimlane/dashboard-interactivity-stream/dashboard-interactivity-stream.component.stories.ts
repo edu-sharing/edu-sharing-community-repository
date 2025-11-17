@@ -13,6 +13,7 @@ import { DashboardInteractivityStreamComponent } from './dashboard-interactivity
 import {
     DummyNode,
     DummyUser,
+    mdsStorybookProviders,
     ToastMock,
     translateProvider,
 } from '../../mds/mds-editor/storybook-utils';
@@ -26,8 +27,7 @@ const stream: Meta<DashboardInteractivityStreamComponent> = {
             declarations: [],
         }),
         applicationConfig({
-            providers: [
-                provideAnimations(),
+            providers: mdsStorybookProviders.concat([
                 {
                     provide: ApiRequestConfiguration,
                     useValue: {},
@@ -40,10 +40,11 @@ const stream: Meta<DashboardInteractivityStreamComponent> = {
                     provide: Toast,
                     useValue: ToastMock,
                 },
-            ],
+            ]),
         }),
     ],
     args: {
+        type: 'activity',
         events: Array.from({ length: 6 }, () => {
             return {
                 ...DummyNode,

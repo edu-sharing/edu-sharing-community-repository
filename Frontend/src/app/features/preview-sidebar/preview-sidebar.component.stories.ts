@@ -7,7 +7,6 @@ import { DummyNode, mdsStorybookProviders, ToastMock } from '../mds/mds-editor/s
 import { PreviewSidebarModule } from './preview-sidebar.module';
 import { Toast } from 'ngx-edu-sharing-ui';
 import { ActivatedRoute } from '@angular/router';
-class ActivatedRouteMock extends ActivatedRoute {}
 
 const sidebar: Meta<PreviewSidebarComponent> = {
     title: 'Preview/Sidebar',
@@ -17,10 +16,7 @@ const sidebar: Meta<PreviewSidebarComponent> = {
             imports: [PreviewSidebarModule, SharedModule],
         }),
         applicationConfig({
-            providers: mdsStorybookProviders.concat([
-                { provide: ActivatedRoute, useClass: ActivatedRouteMock },
-                { provide: Toast, useClass: ToastMock },
-            ]),
+            providers: mdsStorybookProviders.concat([{ provide: Toast, useClass: ToastMock }]),
         }),
     ],
     args: {
