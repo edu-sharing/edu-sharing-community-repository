@@ -14,15 +14,20 @@ export class FormatDatePipe implements PipeTransform {
 
     transform(
         value: Date | number | string,
-        args?: { time?: boolean; date?: boolean; relative?: boolean },
+        args?: { time?: boolean | 'auto'; date?: boolean | 'auto'; relative?: boolean },
     ): string;
     transform(
         value: Date | number | string,
-        args: { time?: boolean; date?: boolean; relative?: boolean; async: true },
+        args: { time?: boolean | 'auto'; date?: boolean | 'auto'; relative?: boolean; async: true },
     ): Observable<string>;
     transform(
         value: Date | number | string,
-        args: { time?: boolean; date?: boolean; relative?: boolean; async?: boolean } = null,
+        args: {
+            time?: boolean | 'auto';
+            date?: boolean | 'auto';
+            relative?: boolean;
+            async?: boolean;
+        } = null,
     ): string | Observable<string> {
         if (!value) {
             return args?.async ? rxjs.of('') : '';

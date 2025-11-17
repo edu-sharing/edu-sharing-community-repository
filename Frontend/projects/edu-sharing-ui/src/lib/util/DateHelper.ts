@@ -1,5 +1,6 @@
 import { TranslateService } from '@ngx-translate/core';
 import { isNumeric } from './isNumeric';
+
 export enum RelativeMode {
     off,
     short,
@@ -8,8 +9,16 @@ export enum RelativeMode {
     all,
 }
 export class FormatOptions {
-    showDate? = true;
-    showAlwaysTime? = false;
+    /**
+     * show the time of the date
+     * when auto, only shows date when it's not today
+     */
+    showDate?: boolean | 'auto' = true;
+    /**
+     * show the time of the date
+     * when auto, only shows time when it's today
+     */
+    showAlwaysTime?: boolean | 'auto' = false;
     showSeconds? = false;
     // @Deprecated
     // this will be mapped to relativeLabels = MEDIUM
@@ -62,7 +71,7 @@ export class DateHelper {
      */
     public static formatDate(
         translation: TranslateService,
-        date: number | any,
+        date: number | string | any,
         options: FormatOptions = new FormatOptions(),
     ): string {
         try {
@@ -131,7 +140,8 @@ export class DateHelper {
                 addDate = false;
                 if (!options.showAlwaysTime) timeFormat = '';
             } else {
-                if (!options.showAlwaysTime) timeFormat = '';
+                if (!options.showAlwaysTime || (options.showAlwaysTime === 'auto' && !isToday))
+                    timeFormat = '';
             }
 
             // ng2's dateformatter is super slow, but it doesn't matter, we just iterate it once :)
@@ -155,7 +165,7 @@ export class DateHelper {
                 }
                 //str += DateFormatter.format(dateObject, Translation.getLanguage(), dateFormat).trim();
             }
-            if (options.showDate == false) {
+            if (options.showDate == false || (options.showDate === 'auto' && isToday)) {
                 str = prefix;
             }
             // ie fixes, timeFormat not working

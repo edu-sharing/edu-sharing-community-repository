@@ -49,7 +49,6 @@ const dummyDataSource = new NodeDataSource<Node>(
             return n;
         }),
 );
-
 const dummyDataSourceAssignments = new NodeDataSource<Assignment>(
     Array(16)
         .fill(DummyAssignment)
@@ -57,6 +56,13 @@ const dummyDataSourceAssignments = new NodeDataSource<Assignment>(
             n = Helper.deepCopy(n);
             n.ref.id = 'id_' + i;
             n.title += ' ' + i;
+            const status: Assignment['status'][] = ['OPEN', 'PROGRESS', 'CANCELED', 'FINISHED'];
+            n.status = status[Math.floor(Math.random() * status.length)];
+            if (Math.random() > 0.5) {
+                n.endTime = new Date(
+                    new Date().getTime() + 1000 * 86400 * 7 * Math.random(),
+                ).toISOString();
+            }
             console.log(n);
             return n;
         }),

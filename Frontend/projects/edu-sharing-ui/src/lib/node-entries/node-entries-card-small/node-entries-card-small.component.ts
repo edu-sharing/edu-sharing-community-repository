@@ -5,7 +5,7 @@ import { ClickSource, InteractionType } from '../entries-model';
 import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
 import { NodeEntriesService } from '../../services/node-entries.service';
 import { NodeHelperService } from '../../services/node-helper.service';
-import { Node } from 'ngx-edu-sharing-api';
+import { Assignment, Node } from 'ngx-edu-sharing-api';
 import { DropdownComponent } from '../../dropdown/dropdown.component';
 
 @Component({
@@ -41,5 +41,24 @@ export class NodeEntriesCardSmallComponent<T extends Node> {
     openContextmenu(event: MouseEvent | Event) {
         event.preventDefault();
         event.stopPropagation();
+    }
+
+    readonly AssignmentStatusIcon: { [key in Assignment['status']]: string } = {
+        OPEN: 'news',
+        PROGRESS: 'schedule_send',
+        CANCELED: 'cancel',
+        FINISHED: 'done',
+    };
+
+    assignmentEndTimePriority(endTime: string) {
+        const now = new Date().getTime();
+        const delayUntil = Date.parse(endTime) - now;
+        console.log(delayUntil);
+        if (delayUntil > 3600 * 1000 * 24 * 5) {
+            return 'low';
+        } else if (delayUntil > 3600 * 1000 * 24 * 2) {
+            return 'medium';
+        }
+        return 'high';
     }
 }

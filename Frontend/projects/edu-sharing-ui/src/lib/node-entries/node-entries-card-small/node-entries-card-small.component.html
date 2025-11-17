@@ -94,7 +94,6 @@
         <button
           *ngIf="dropdown"
           mat-icon-button
-          color="primary"
           (click)="openMenu(node)"
           [matMenuTriggerFor]="dropdown.menu"
           [attr.aria-label]="'OPTIONS_FOR' | translate : { element: (node | nodeTitle) }"
@@ -107,11 +106,19 @@
         {{ node | nodeTitle }}
       </div>
       <div class="summary" [innerHTML]="$any(node).summary"></div>
-      <div class="badges">
+      <div class="badges" *ngIf="$any(node).type === 'SUBMISSION'">
         <div class="status status-{{ $any(node).status }}">
+          <i [esIcon]="$any(AssignmentStatusIcon)[$any(node).status]"></i>
           {{ 'ASSIGNMENT.STATUS.' + $any(node).status | translate }}
         </div>
-        <div class="endTime" *ngIf="$any(node).endTime as endTime">{{ endTime | formatDate }}</div>
+        <div
+          class="endTime endTime-{{ assignmentEndTimePriority(endTime) }}"
+          *ngIf="$any(node).endTime as endTime"
+          [matTooltip]="endTime | formatDate : { relative: false, date: true, time: true }"
+        >
+          <i esIcon="timer"></i
+          >{{ endTime | formatDate : { relative: false, date: 'auto', time: 'auto' } }}
+        </div>
       </div>
     </div>
     <ng-container *ngIf="!nodeHelper.isNodeAssignment(node)">

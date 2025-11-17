@@ -69,9 +69,58 @@ $collectionIconSize: 25px;
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                padding: 4px 6px;
-                border-radius: var(--borderRadiusSmall);
-                background-color: var(--palette-primary-200);
+                padding: 7px 6px;
+                border-radius: var(--borderRadiusBadges);
+                background-color: var(--palette-primary-100);
+                gap: 5px;
+                &.endTime-low {
+                    background-color: color-mix(
+                        in srgb,
+                        var(--colorStatusPositive),
+                        60% transparent
+                    );
+                }
+                &.endTime-medium {
+                    background-color: color-mix(
+                        in srgb,
+                        var(--colorStatusWarning),
+                        60% transparent
+                    );
+                }
+                &.endTime-high {
+                    background-color: color-mix(
+                        in srgb,
+                        var(--colorStatusNegative),
+                        60% transparent
+                    );
+                }
+                &.status-OPEN {
+                    background-color: #ddd;
+                }
+                &.status-CANCELED {
+                    background-color: color-mix(
+                        in srgb,
+                        var(--colorStatusNegative),
+                        60% transparent
+                    );
+                }
+                &.status-PROGRESS {
+                    background-color: color-mix(
+                        in srgb,
+                        var(--colorStatusWarning),
+                        60% transparent
+                    );
+                }
+                &.status-FINISHED {
+                    background-color: color-mix(
+                        in srgb,
+                        var(--colorStatusPositive),
+                        60% transparent
+                    );
+                }
+                > i {
+                    font-size: 18px;
+                }
             }
         }
         .summary {

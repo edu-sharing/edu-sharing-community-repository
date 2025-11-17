@@ -340,6 +340,7 @@
     "STATUS": {
       "OPEN": "Offen",
       "PROGRESS": "In Bearbeitung",
+      "CANCELED": "Abgebrochen",
       "FINISHED": "Abgeschlossen"
     }
   },

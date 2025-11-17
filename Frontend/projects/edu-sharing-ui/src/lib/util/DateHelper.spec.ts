@@ -15,6 +15,26 @@ describe('testing relative dates', () => {
     date_2_months_before.setMonth(date_2_months_before.getMonth() - 2);
     const date_1_year_before = new Date();
     date_1_year_before.setFullYear(date_1_year_before.getFullYear() - 1);
+
+    it('testing absolute modes', () => {
+        const optionsAbsAuto: FormatOptions = {
+            relativeLabels: RelativeMode.off,
+            showDate: 'auto',
+            showAlwaysTime: 'auto',
+        };
+        expect(DateHelper.formatDate(translateServiceMock, date_now, optionsAbsAuto)).toContain(
+            ':',
+        );
+        expect(DateHelper.formatDate(translateServiceMock, date_now, optionsAbsAuto)).not.toContain(
+            '.',
+        );
+        expect(
+            DateHelper.formatDate(translateServiceMock, date_7_days_before, optionsAbsAuto),
+        ).toContain('.');
+        expect(
+            DateHelper.formatDate(translateServiceMock, date_7_days_before, optionsAbsAuto),
+        ).not.toContain(':');
+    });
     for (const mode of [
         RelativeMode.short,
         RelativeMode.medium,
