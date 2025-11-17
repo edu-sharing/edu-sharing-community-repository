@@ -175,6 +175,18 @@ export class DashboardSwimlaneComponent {
             this.displayType.set(NodeEntriesDisplayType.SmallGrid);
             this.routerLink.set('/' + UIConstants.ROUTER_PREFIX + 'editorial/assignment');
             this.routerQueryParams.set({});
+            this.globalOptions.set([
+                new OptionItem('OPTIONS.NEW_ASSIGNMENT', 'add', () => {
+                    void this.router.navigate(
+                        [UIConstants.ROUTER_PREFIX + 'editorial/assignment'],
+                        {
+                            queryParams: {
+                                mainComponent: 'manageAssignment',
+                            },
+                        },
+                    );
+                }),
+            ]);
             void this.fetch(
                 this.assignmentService.searchAssignments({
                     body: {

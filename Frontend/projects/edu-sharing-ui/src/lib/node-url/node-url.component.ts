@@ -7,8 +7,9 @@ import {
     Output,
     ViewChild,
 } from '@angular/core';
-import { Node } from 'ngx-edu-sharing-api';
+import { Assignment, Node } from 'ngx-edu-sharing-api';
 import { NodeHelperService } from '../services/node-helper.service';
+import { UIHelper } from '../../../../../src/app/core-ui-module/ui-helper';
 
 // TODO: Decide if providing focus highlights and ripples with this component is a good idea. When
 // using `app-node-url` for cards, we might need highlights and ripples for the whole card while
@@ -26,7 +27,7 @@ const NODE_URL_TAG_NAME = 'es-node-url';
 export class NodeUrlComponent implements AfterViewInit {
     @ViewChild('link') link: ElementRef<HTMLAnchorElement>;
 
-    @Input() node: Node;
+    @Input() node: Node | Assignment;
     @Input() nodes: Node[];
     @Input() target: string;
     @Input() scope: string;

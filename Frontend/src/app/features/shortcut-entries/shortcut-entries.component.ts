@@ -131,10 +131,8 @@ export class ShortcutEntriesComponent implements OnInit {
         });
         // retrieve client config
         this.clientConfig = await firstValueFrom(this.configService.observeConfig());
-        console.log('clientConfig', this.clientConfig);
         if (this.clientConfig.frontpage?.dashboard?.shortcuts) {
             const shortcuts: ShortcutConfig = this.clientConfig.frontpage.dashboard.shortcuts;
-            console.log('clientConfig shortcuts', shortcuts);
             if (shortcuts.maxEntries > 0) {
                 this.maxItems = shortcuts.maxEntries;
             }

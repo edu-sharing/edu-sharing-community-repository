@@ -12,7 +12,7 @@
     [queryParams]="get('queryParams')"
     queryParamsHandling="merge"
     cdkMonitorElementFocus
-    [attr.aria-label]="ariaLabel ? node.name : null"
+    [attr.aria-label]="ariaLabel ? (node | nodeTitle) : null"
     [attr.aria-describedby]="ariaDescribedby"
   >
     <ng-container *ngTemplateOutlet="content"></ng-container>

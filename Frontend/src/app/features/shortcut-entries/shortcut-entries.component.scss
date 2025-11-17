@@ -205,7 +205,7 @@ $tileSize: 124px;
             font-weight: 600;
             line-height: 1.4;
             text-align: center;
-            color: var(--primary);
+            color: var(--textMain);
 
             input {
                 max-width: 100px;
@@ -219,7 +219,7 @@ $tileSize: 124px;
         top: 0;
         right: 0;
         z-index: 2;
-        background-color: rgba(128, 128, 128, 0.5);
+        background-color: rgba(128, 128, 128, 0.3);
         width: 32px;
         height: 32px;
         padding: 0;
@@ -227,12 +227,12 @@ $tileSize: 124px;
         align-items: center;
         justify-content: center;
         opacity: 0;
-        //transition: opacity 0.2s ease;
+        transition: var(--transitionNormal) all;
         pointer-events: none; // verhindert versehentliche Klicks im Normalzustand
 
         .mat-icon {
             font-size: 20px;
-            color: var(--primary);
+            color: var(--textMain);
         }
     }
 }

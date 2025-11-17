@@ -94,7 +94,7 @@
         <button
           *ngIf="dropdown"
           mat-icon-button
-          (click)="openMenu(node)"
+          (click)="openMenu($event, node)"
           [matMenuTriggerFor]="dropdown.menu"
           [attr.aria-label]="'OPTIONS_FOR' | translate : { element: (node | nodeTitle) }"
           data-test="card-options-button"

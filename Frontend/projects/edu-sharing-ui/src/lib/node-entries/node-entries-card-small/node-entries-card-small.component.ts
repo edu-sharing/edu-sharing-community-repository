@@ -35,7 +35,8 @@ export class NodeEntriesCardSmallComponent<T extends Node> {
         }
         return options.filter((o) => o.showAsAction && o.showCallback([this.node])).slice(0, 3);
     }
-    async openMenu(node: T) {
+    async openMenu(event: MouseEvent, node: T) {
+        event.stopPropagation();
         this.entriesService.openDropdown(this.dropdown, node);
     }
     openContextmenu(event: MouseEvent | Event) {
@@ -53,9 +54,10 @@ export class NodeEntriesCardSmallComponent<T extends Node> {
     assignmentEndTimePriority(endTime: string) {
         const now = new Date().getTime();
         const delayUntil = Date.parse(endTime) - now;
-        console.log(delayUntil);
+        // > 5 days == low delay
         if (delayUntil > 3600 * 1000 * 24 * 5) {
             return 'low';
+            // > 2 days == medium delay
         } else if (delayUntil > 3600 * 1000 * 24 * 2) {
             return 'medium';
         }

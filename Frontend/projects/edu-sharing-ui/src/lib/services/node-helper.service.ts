@@ -258,14 +258,29 @@ export class NodeHelperService {
         );
     }
 
-    getNodeLink(mode: 'routerLink' | 'queryParams' | 'plain', node: Node, short = false) {
+    getNodeLink(
+        mode: 'routerLink' | 'queryParams' | 'plain',
+        node: Node | Assignment,
+        short = false,
+    ) {
         if (!node?.ref) {
             return null;
         }
         let data: { routerLink: string; queryParams: Params } = null;
-        if (this.isNodeCollection(node)) {
-            const scope = node.collection?.scope;
-            const type = node.collection?.type;
+        if (this.isNodeAssignment(node)) {
+            data = {
+                routerLink: UIConstants.ROUTER_PREFIX + 'editorial/assignment',
+                queryParams: {
+                    mainComponent:
+                        (node as Assignment).permissions?.length > 0
+                            ? 'manageAssignment'
+                            : 'submitAssignment',
+                    assignment: node.ref.id,
+                },
+            };
+        } else if (this.isNodeCollection(node as Node)) {
+            const scope = (node as Node).collection?.scope;
+            const type = (node as Node).collection?.type;
             const queryParams: Params = {
                 id: node.ref.id,
             };
@@ -281,10 +296,10 @@ export class NodeHelperService {
                 queryParams,
             };
         } else {
-            if (node.isDirectory) {
+            if ((node as Node).isDirectory) {
                 let path;
                 if (
-                    node.properties?.[RestConstants.CCM_PROP_EDUSCOPENAME]?.[0] ===
+                    (node as Node).properties?.[RestConstants.CCM_PROP_EDUSCOPENAME]?.[0] ===
                     RestConstants.SAFE_SCOPE
                 ) {
                     path = UIConstants.ROUTER_PREFIX + 'workspace/safe';
@@ -296,7 +311,7 @@ export class NodeHelperService {
                     queryParams: { id: node.ref.id },
                 };
             } else if (node.ref) {
-                const fromHome = this.networkService.isFromHomeRepository(node);
+                const fromHome = this.networkService.isFromHomeRepository(node as Node);
                 data = {
                     routerLink: short
                         ? UIConstants.ROUTER_PREFIX_SHORT + node.ref.id
