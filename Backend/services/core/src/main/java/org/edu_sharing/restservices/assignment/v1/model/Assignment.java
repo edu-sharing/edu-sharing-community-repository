@@ -43,6 +43,12 @@ public record Assignment(
         @JsonProperty(required = true)
         Date created,
         Date endTime,
+
+        /**
+         * @TODO: We also need an personalStatus or similar field which reflects the status for the current fetching
+         * user. I.e. if he already submitted his data if it is of type SUBMITTABLE
+         */
+
         @JsonProperty(required = true)
         Status status,
         @JsonProperty(required = true)
