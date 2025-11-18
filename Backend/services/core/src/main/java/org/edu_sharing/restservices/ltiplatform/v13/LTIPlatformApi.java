@@ -701,6 +701,7 @@ public class LTIPlatformApi {
                         throw new Exception("wrong nodeId found in validated jwt");
                     }
                 }
+                if(AuthenticationUtil.getFullyAuthenticatedUser() == null) AuthenticationUtil.setFullyAuthenticatedUser(CCConstants.PROXY_USER);
                 return AuthenticationUtil.runAsSystem(() -> generateLoginInitationResouceLinkRaw(nodeId, editMode, version, launchPresentation, req));
             } else {
                 return generateLoginInitationResouceLinkRaw(nodeId, editMode, version, launchPresentation, req);
