@@ -145,6 +145,7 @@
     "TOOLPERMISSION_UNCHECKEDCONTENT": "Show sources like YouTube in your search",
     "TOOLPERMISSION_WORKSPACE": "Access to the workspace",
     "TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS": "Create folders",
+    "TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS": "Create assignments",
     "TOOLPERMISSION_CREATE_ELEMENTS_FILES": "Create/upload files",
     "TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS": "Create collections",
     "TOOLPERMISSION_HANDLESERVICE": "Resolve unique ids from a handle service for materials",

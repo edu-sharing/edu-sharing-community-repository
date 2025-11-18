@@ -23,6 +23,7 @@ import {
     NodeEntriesWrapperComponent,
     OptionItem,
     Scope,
+    ToolpermissionPipe,
     UIAnimation,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
@@ -31,6 +32,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import {
     AssignmentV1Service,
+    AuthenticationService,
     DEFAULT,
     HOME_REPOSITORY,
     Node,
@@ -113,6 +115,7 @@ export class DashboardSwimlaneComponent {
         private translate: TranslateService,
         private ref: ApplicationRef,
         private router: Router,
+        private authenticationService: AuthenticationService,
         private searchService: SearchService,
         private nodeService: NodeService,
         private assignmentService: AssignmentV1Service,
@@ -175,18 +178,24 @@ export class DashboardSwimlaneComponent {
             this.displayType.set(NodeEntriesDisplayType.SmallGrid);
             this.routerLink.set('/' + UIConstants.ROUTER_PREFIX + 'editorial/assignment');
             this.routerQueryParams.set({});
-            this.globalOptions.set([
-                new OptionItem('OPTIONS.NEW_ASSIGNMENT', 'add', () => {
-                    void this.router.navigate(
-                        [UIConstants.ROUTER_PREFIX + 'editorial/assignment'],
-                        {
-                            queryParams: {
-                                mainComponent: 'manageAssignment',
+            if (
+                await this.authenticationService.hasToolpermission(
+                    RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS,
+                )
+            ) {
+                this.globalOptions.set([
+                    new OptionItem('OPTIONS.NEW_ASSIGNMENT', 'add', () => {
+                        void this.router.navigate(
+                            [UIConstants.ROUTER_PREFIX + 'editorial/assignment'],
+                            {
+                                queryParams: {
+                                    mainComponent: 'manageAssignment',
+                                },
                             },
-                        },
-                    );
-                }),
-            ]);
+                        );
+                    }),
+                ]);
+            }
             void this.fetch(
                 this.assignmentService.searchAssignments({
                     body: {

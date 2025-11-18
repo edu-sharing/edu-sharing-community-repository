@@ -66,6 +66,7 @@ export class ToolpermissionManagerComponent {
                 RestConstants.TOOLPERMISSION_WORKSPACE,
                 RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES,
                 RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS,
+                RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS,
                 RestConstants.TOOLPERMISSION_CREATE_MAP_LINK,
                 RestConstants.TOOLPERMISSION_UNCHECKEDCONTENT,
                 RestConstants.TOOLPERMISSION_COMMENT_WRITE,

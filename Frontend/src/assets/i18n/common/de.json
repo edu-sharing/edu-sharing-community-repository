@@ -153,6 +153,7 @@
     "TOOLPERMISSION_WORKSPACE": "Zugriff auf den Workspace.",
     "TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS": "Ordner anlegen.",
     "TOOLPERMISSION_CREATE_ELEMENTS_FILES": "Dateien anlegen/hochladen.",
+    "TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS": "Aufgaben anlegen.",
     "TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS": "Sammlungen anlegen.",
     "TOOLPERMISSION_HANDLESERVICE": "Eindeutige Ids für Materialien beim Handleservice anfordern.",
     "TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS": "Explizite Rechteprüfung steuern. D.h. Materialien als lizenziert markieren, um einen Zugriff ohne Rechte am Originalobjekt verbieten und eine Weiternutzung (z.B. innerhalb von Sammlungen) zu kontrollieren.",

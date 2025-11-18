@@ -381,6 +381,7 @@ public class ToolPermissionBaseService {
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_FILES);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS);
+        toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CONFIDENTAL);
 
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CHANGE_OWNER);
@@ -416,6 +417,7 @@ public class ToolPermissionBaseService {
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PROPOSAL);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_TIMEBASED);
+
 
         addConnectorToolpermissions(toInit);
         return toInit;

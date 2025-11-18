@@ -32,6 +32,7 @@ import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
+import org.edu_sharing.service.permission.annotation.Permission;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.util.PropertyMapper;
@@ -282,6 +283,7 @@ public class AssignmentDaoFactory {
         }
 
         @Override
+        @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS, requiresUser = true)
         @RunAsSystem
         @RetryingTransaction
         public void createOrUpdate(CreateAssignmentRequest request) {
@@ -775,6 +777,7 @@ public class AssignmentDaoFactory {
         }
 
         @Override
+        @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS, requiresUser = true)
         @RunAsSystem
         @RetryingTransaction
         public SubmissionFileDao createOrUpdateSubmissionFile(String submissionFileId, SubmissionFileRequest submissionFileRequest, InputStream fileInputStream, FormDataContentDisposition fileMetaData) {
@@ -782,6 +785,7 @@ public class AssignmentDaoFactory {
         }
 
         @Override
+        @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS, requiresUser = true)
         @RunAsSystem
         @RetryingTransaction
         public void create() {
@@ -869,6 +873,7 @@ public class AssignmentDaoFactory {
 
 
         @Override
+        @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS, requiresUser = true)
         @RunAsSystem
         @RetryingTransaction
         public void create(SubmissionFileRequest request, InputStream fileInputStream) {
