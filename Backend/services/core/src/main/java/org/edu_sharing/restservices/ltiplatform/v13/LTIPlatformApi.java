@@ -16,6 +16,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
+import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
@@ -182,7 +183,7 @@ public class LTIPlatformApi {
                 context.put("id", loginInitiationSessionObject.getContextId());
                 context.put("label", nodeService
                         .getProperty(contextNodeRef, ContentModel.PROP_NAME));
-            } catch (AccessDeniedException e) {
+            } catch (AccessDeniedException | AuthenticationCredentialsNotFoundException e) {
                 // user has no permission on context node ( parent folder)
             }
 
@@ -241,7 +242,7 @@ public class LTIPlatformApi {
             }
 
 
-            if (appInfo.hasLtiToolCustomContentOption() && loginInitiationSessionObject.getContentUrlNodeId() != null) {
+            if (AuthenticationUtil.getFullyAuthenticatedUser() != null && appInfo.hasLtiToolCustomContentOption() && loginInitiationSessionObject.getContentUrlNodeId() != null) {
                 NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, loginInitiationSessionObject.getContentUrlNodeId());
                 AccessStatus accessStatus = permissionService.hasPermission(nodeRef, PermissionService.WRITE_CONTENT);
                 if (AuthenticationUtil.runAsSystem(() -> nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)))) {
