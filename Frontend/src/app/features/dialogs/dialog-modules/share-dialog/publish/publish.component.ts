@@ -426,7 +426,8 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
     canBePublished() {
         // it either has all required metadata or is already published anyway
         return (
-            this.mdsCompletion?.completed === this.mdsCompletion?.total ||
+            (this.mdsCompletion?.completed === this.mdsCompletion?.total &&
+                this.restrictedAccessComponent?.restrictedAccess !== true) ||
             this.initialState.copy ||
             this.initialState.direct
         );
