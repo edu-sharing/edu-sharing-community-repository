@@ -79,19 +79,36 @@
 <ng-template #toggle let-optionsToggle="optionsToggle">
   <ng-container *ngFor="let option of optionsToggle">
     <button
-      *ngIf="option.isToggleVisible"
+      *ngIf="option.isToggleVisible && option.toggleType === 'default'"
       mat-icon-button
       matTooltip="{{ option.name | translate }}"
       [attr.aria-label]="option.ariaLabel || option.name | translate"
       (click)="click(option)"
       [class]="
-        'toggle-' +
+        'toggle-default toggle-' +
         (option.name | replaceChars : { search: '.', replace: '-' }) +
         (option.isEnabled ? '' : ' disabled')
       "
       attr.data-test="toggle-{{ option.name }}"
     >
       <i [esIcon]="option.icon" [aria]="false"></i>
+    </button>
+    <button
+      *ngIf="option.isToggleVisible && option.toggleType === 'primary'"
+      mat-flat-button
+      color="primary"
+      matTooltip="{{ option.name | translate }}"
+      [attr.aria-label]="option.ariaLabel || option.name | translate"
+      (click)="click(option)"
+      [class]="
+        'toggle-primary toggle-' +
+        (option.name | replaceChars : { search: '.', replace: '-' }) +
+        (option.isEnabled ? '' : ' disabled')
+      "
+      attr.data-test="toggle-{{ option.name }}"
+    >
+      <i [esIcon]="option.icon" [aria]="false"></i>
+      <span class="action-always-caption"> {{ option.name | translate }}</span>
     </button>
   </ng-container>
 </ng-template>
