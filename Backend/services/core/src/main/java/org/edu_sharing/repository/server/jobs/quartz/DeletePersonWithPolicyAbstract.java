@@ -23,12 +23,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 @JobDescription(description = "Base class to automatically delete persons which are marked for deletion (this job class must be overridden to use it)")
-public abstract class DeletePersonWithPolicyAbstract extends AbstractInterruptableJob{
+public class DeletePersonWithPolicyAbstract extends AbstractInterruptableJob{
 
 	protected Logger logger = Logger.getLogger(DeletePersonWithPolicyAbstract.class);
 
 	@Override
 	public void executeInterruptable(JobExecutionContext context) throws JobExecutionException {
+		int i = 0;
+		while(i < 1000){
+			logger.info("still running");
+			try {
+				Thread.sleep(5000);
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+				throw new RuntimeException(e);
+			}
+		}
 		AuthenticationUtil.runAsSystem(() -> {
 			Map<String, String> properties = new HashMap<>();
 			properties.put(
@@ -85,7 +95,7 @@ public abstract class DeletePersonWithPolicyAbstract extends AbstractInterruptab
 	 * @param personDao
 	 * @return
 	 */
-	protected abstract PersonDeleteOptions shouldDelete(PersonDao personDao);
+	protected PersonDeleteOptions shouldDelete(PersonDao personDao) {return null;}
 
 	public void run() {
 

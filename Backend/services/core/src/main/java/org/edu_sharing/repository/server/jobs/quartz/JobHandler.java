@@ -47,6 +47,10 @@ public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEven
     //public final static SimpleCache<String, List<JobInfo>> jobs = (SimpleCache)  AlfAppContextGate.getApplicationContext().getBean("eduSharingJobsListCache");
     public final static Map<String, List<JobInfo>> jobs = new ConcurrentHashMap<>();
     private static final String JOB_LIST_KEY = "jobs";
+    /**
+     * holds the random uuid of this unique job instance
+     */
+    static final String JOB_DATA_MAP_JOB_UUID = "JOB_DATA_MAP_JOB_UUID";
 
     //private final ApplicationContext eduApplicationContext = null;
 
@@ -628,7 +632,6 @@ public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEven
                         .withRepeatCount(0))
                 .build();
 
-        final String jobListenerName = jobName;
 
         JobDetail jobDetail = newJob(jobClass).withIdentity(jobName).setJobData(jdm).build();
 
@@ -639,7 +642,7 @@ public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEven
 			}
 		};*/
 
-        ImmediateJobListener iJobListener = new ImmediateJobListener(jobListenerName);
+        ImmediateJobListener iJobListener = new ImmediateJobListener(jobDetail);
         quartzScheduler.getListenerManager().addJobListener(iJobListener);
         quartzScheduler.scheduleJob(jobDetail, trigger);
         /**
@@ -669,6 +672,7 @@ public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEven
                 jdm.put(entry.getKey(), entry.getValue());
             }
         }
+        jdm.put(JobHandler.JOB_DATA_MAP_JOB_UUID, UUID.randomUUID().toString());
         return jdm;
     }
 
