@@ -141,12 +141,15 @@ public class LTIPlatformApi {
 
             String username = AuthenticationUtil.getFullyAuthenticatedUser();
 
+            LoginInitiationSessionObject loginInitiationSessionObject = AllSessions.getUserLTISessions().get(URLDecoder.decode(ltiMessageHint));
+
+            if(username == null){
+                username = loginInitiationSessionObject.getUser();
+            }
+
             if (!username.equals(loginHint)) {
                 throw new Exception("wrong login_hint. does not match session login");
             }
-
-
-            LoginInitiationSessionObject loginInitiationSessionObject = AllSessions.getUserLTISessions().get(URLDecoder.decode(ltiMessageHint));
 
             ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(loginInitiationSessionObject.getAppId());
             if (appInfo == null) {
