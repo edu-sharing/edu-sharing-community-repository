@@ -129,7 +129,7 @@
       ></es-option-button>
       <div class="card-options-spacer"></div>
       <button
-        *ngIf="dropdown"
+        *ngIf="dropdown && hasDropdownOptions()"
         mat-icon-button
         color="primary"
         (click)="openMenu(node)"

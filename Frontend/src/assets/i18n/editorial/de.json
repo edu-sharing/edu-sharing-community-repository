@@ -76,7 +76,8 @@
       "SUBMIT_DETAILS": "Abgabeinformationen",
       "START_TIME": "Ausgegeben",
       "END_TIME": "Abgabe bis",
-      "SUBMITTABLE": "Arbeitsmaterial"
+      "SUBMITTABLE": "Arbeitsmaterial",
+      "SUPPLEMENTARY": "Begleitmaterial"
     },
     "ASSIGNMENT": {
       "STEP": {

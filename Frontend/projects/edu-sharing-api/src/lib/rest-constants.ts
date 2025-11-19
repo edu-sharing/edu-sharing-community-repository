@@ -42,6 +42,7 @@ export class RestConstants {
     public static CCM_ASPECT_CCLOM_GENERAL = 'cclom:general';
     public static CCM_ASPECT_IO_CHILDOBJECT = 'ccm:io_childobject';
     public static CCM_ASPECT_REMOTEREPOSITORY = 'ccm:remoterepository';
+    public static CCM_ASPECT_LTITOOL_NODE = 'ccm:ltitool_node';
 
     public static CCM_TYPE_TOOLPERMISSION = 'ccm:toolpermission';
     public static CCM_TYPE_REMOTEOBJECT = 'ccm:remoteobject';

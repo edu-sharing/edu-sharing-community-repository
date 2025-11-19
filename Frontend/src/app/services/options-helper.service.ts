@@ -12,6 +12,7 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
     Assignment,
+    AssignmentFile,
     AuthenticationService,
     GenericAuthority,
     LtiPlatformService,
@@ -413,18 +414,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             }
             void this.dialogs.openNodeInfoDialog({ nodes });
         });
-        debugNode.elementType = [
-            ElementType.Node,
-            ElementType.NodePublishedCopy,
-            ElementType.NodeRevoked,
-            ElementType.NodeBlockedImport,
-            ElementType.Group,
-            ElementType.Person,
-            ElementType.SavedSearch,
-            ElementType.NodeChild,
-            ElementType.NodeProposal,
-            ElementType.MapRef,
-        ];
+        debugNode.elementType = [];
         debugNode.onlyDesktop = true;
         debugNode.constrains = [Constrain.AdminOrDebug];
         debugNode.group = DefaultGroups.View;
@@ -585,21 +575,10 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         openNode.priority = 30;
 
         const editConnectorNode = new OptionItem('OPTIONS.OPEN', 'launch', (node) => {
-            void this.editConnector(this.getObjects(node, data)[0]);
+            void this.uiService.editConnector(this.getObjects(node, data)[0]);
         });
         editConnectorNode.customShowCallback = async (nodes) => {
-            let n = nodes ? nodes[0] : null;
-            if (n?.aspects?.includes('ccm:ltitool_node')) {
-                return true;
-            }
-            // simple connector node;
-            if (n?.properties?.[RestConstants.CCM_PROP_CCRESSOURCETYPE]?.[0] === 'connector') {
-                return true;
-            }
-            return (
-                this.connectors.connectorSupportsEdit(n) != null ||
-                (await this.ltiPlatformService.toolForNode(n)) != null
-            );
+            return await this.uiService.hasAvailableConnector(nodes ? nodes[0] : null);
         };
         editConnectorNode.elementType = [
             ElementType.Node,
@@ -1472,7 +1451,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         return options;
     }
 
-    private getDownloadOption(data: OptionData, safe = false) {
+    getDownloadOption(data: OptionData, safe = false) {
         const downloadNode = new OptionItem(
             'OPTIONS.DOWNLOAD' + (safe ? '_SAFE' : ''),
             'cloud_download',
@@ -1497,7 +1476,11 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 return false;
             }
 
-            for (const item of nodes) {
+            for (let item of nodes) {
+                if ((item as AssignmentFile).referNode) {
+                    item = (item as AssignmentFile).referNode;
+                }
+                console.log(item, item.downloadUrl);
                 // if at least one is allowed -> allow download (download servlet will later filter invalid files)
                 if (
                     item.downloadUrl != null &&
@@ -1530,22 +1513,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 this.localEvents.nodesChanged.emit([result.node]);
             }
         });
-    }
-
-    private async editConnector(
-        node: Node | any,
-        type: Filetype = null,
-        win: any = null,
-        connectorType: Connector = null,
-    ) {
-        const ltiTool = await this.ltiPlatformService.toolForNode(node);
-        if (node.properties[RestConstants.CCM_PROP_CCRESSOURCETYPE]?.[0] === 'connector') {
-            UIHelper.openWindow(win, node.properties[RestConstants.CCM_PROP_IO_WWWURL]?.[0]);
-        } else if (node.aspects?.includes('ccm:ltitool_node') || ltiTool) {
-            UIHelper.openLTIResourceLink(win, node);
-        } else {
-            this.uiService.openConnector(node, type, win, connectorType);
-        }
     }
 
     private addVirtualObjects(components: OptionsHelperComponents, objects: any[]) {

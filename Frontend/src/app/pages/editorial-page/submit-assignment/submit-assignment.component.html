@@ -38,11 +38,29 @@
             {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.SUBMITTABLE' | translate }}</label
           >
           <div>
+            <!-- @TODO: When in submit mode, show these as temporary nodes and allow an upload selector + create any upload if submission allows it -->
             <es-node-entries-wrapper
-              [displayType]="NodeEntriesDisplayType.SmallGrid"
+              [displayType]="NodeEntriesDisplayType.Grid"
               [checkbox]="false"
+              [initConfig]="submittableConfig"
               [elementInteractionType]="InteractionType.Emitter"
               [dataSource]="submittableFiles"
+              [columns]="columns"
+            ></es-node-entries-wrapper>
+          </div>
+        </div>
+        <div class="block files">
+          <label
+            >{{ supplementaryFiles.getTotal() }}x
+            {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.SUPPLEMENTARY' | translate }}</label
+          >
+          <div>
+            <es-node-entries-wrapper
+              [displayType]="NodeEntriesDisplayType.Grid"
+              [checkbox]="false"
+              [initConfig]="supplementaryConfig"
+              [elementInteractionType]="InteractionType.Emitter"
+              [dataSource]="supplementaryFiles"
               [columns]="columns"
             ></es-node-entries-wrapper>
           </div>

@@ -9,6 +9,7 @@ import {
 } from '../../types/option-item';
 import {
     Assignment,
+    AssignmentFile,
     AuthenticationService,
     GenericAuthority,
     NetworkService,
@@ -124,6 +125,8 @@ export abstract class OptionsHelperService {
             return ElementType.Person;
         } else if ((object as Assignment).allowAdditionalDocumentSubmissions !== undefined) {
             return ElementType.Assignment;
+        } else if ((object as AssignmentFile).referNode !== undefined) {
+            return ElementType.AssignmentFile;
         } else if ((object as Node).ref) {
             const node = object as Node;
             if (node.type === RestConstants.CCM_TYPE_SAVED_SEARCH) {

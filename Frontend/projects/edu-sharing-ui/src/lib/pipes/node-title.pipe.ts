@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { Assignment, Node, RestConstants } from 'ngx-edu-sharing-api';
+import { Assignment, AssignmentFile, Node, RestConstants } from 'ngx-edu-sharing-api';
 import { RestHelper } from '../util/rest-helper';
 import { NodeRoot } from '../node-entries/entries-model';
 import { isString } from 'lodash-es';
@@ -11,9 +11,12 @@ import { isString } from 'lodash-es';
 })
 export class NodeTitlePipe implements PipeTransform {
     transform(
-        node: Node | Assignment | NodeRoot | 'HOME',
+        node: Node | Assignment | AssignmentFile | NodeRoot | 'HOME',
         args?: { type: 'name' | 'title' },
     ): string {
+        if ((node as AssignmentFile).referNode) {
+            node = (node as AssignmentFile).referNode;
+        }
         if (!(node as Node)?.name && isString(node)) {
             if (node === 'HOME') {
                 return this.translate.instant('WORKSPACE.' + node);

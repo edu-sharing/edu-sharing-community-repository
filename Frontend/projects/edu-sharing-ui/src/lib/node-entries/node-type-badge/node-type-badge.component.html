@@ -19,7 +19,7 @@
     <i *ngIf="materialIcon() as icon" [esIcon]="icon"></i>
     <ng-container *ngIf="!materialIcon()">
       <img
-        *ngIf="$any(node).relations?.Original || node as n"
+        *ngIf="$any(node).relations?.Original || $any(node).referNode || node as n"
         [src]="n | esNodeIcon | async"
         [alt]="
           n.mediatype

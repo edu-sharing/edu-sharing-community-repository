@@ -2,6 +2,7 @@ import { Injectable, Optional } from '@angular/core';
 import {
     ApiHelpersService,
     Assignment,
+    AssignmentFile,
     ConfigService,
     NetworkService,
     Node,
@@ -365,9 +366,19 @@ export class NodeHelperService {
      *   Local: check only rights of the node itself
      *   Effective: check only rights of the original node this refers to (collection ref). If it is not a collection ref, fallback to local
      */
-    public getNodesRight(nodes: Node[], right: string, mode = NodesRightMode.Local) {
+    public getNodesRight(
+        nodes: (Node | AssignmentFile)[],
+        right: string,
+        mode = NodesRightMode.Local,
+    ) {
         if (nodes == null) return true;
-        for (const node of nodes) {
+        for (let n of nodes) {
+            let node: Node;
+            if ((n as AssignmentFile).referNode) {
+                node = (n as AssignmentFile).referNode;
+            } else {
+                node = n as Node;
+            }
             let currentMode = mode;
             // if no access effective present and not a collection ref. use the local data
             if (

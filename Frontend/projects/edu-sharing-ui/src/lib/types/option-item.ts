@@ -249,6 +249,7 @@ export enum ElementType {
     Node,
     NodeChild, // Child object
     Assignment,
+    AssignmentFile,
     MapRef, // Map ref (link to another map)
     NodePublishedCopy,
     NodeRevoked, // revoked copy / revoked published node

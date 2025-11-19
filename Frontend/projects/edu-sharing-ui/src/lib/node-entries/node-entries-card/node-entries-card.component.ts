@@ -62,6 +62,11 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
             ? '#000'
             : '#fff';
     }
+    hasDropdownOptions() {
+        return this.entriesService.options?.[Target.List]?.some(
+            (o) => o.isEnabled && !o.showAlways,
+        );
+    }
     optionsOnCard() {
         const options = this.entriesService.options?.[Target.List];
         const always = options?.filter((o) => o.showAlways);
