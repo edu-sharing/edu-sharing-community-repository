@@ -314,9 +314,9 @@ public class LTIPlatformApi {
         toolPlatform.put("description", homeApp.getAppCaption());
 
 
-        String firstName = (String) nodeService.getProperty(personService.getPerson(username), ContentModel.PROP_FIRSTNAME);
-        String lastName = (String) nodeService.getProperty(personService.getPerson(username), ContentModel.PROP_LASTNAME);
-        String email = (String) nodeService.getProperty(personService.getPerson(username), ContentModel.PROP_EMAIL);
+        String firstName = AuthenticationUtil.runAsSystem(() -> (String) nodeService.getProperty(personService.getPerson(username), ContentModel.PROP_FIRSTNAME));
+        String lastName = AuthenticationUtil.runAsSystem(() -> (String) nodeService.getProperty(personService.getPerson(username), ContentModel.PROP_LASTNAME));
+        String email = AuthenticationUtil.runAsSystem(() -> (String) nodeService.getProperty(personService.getPerson(username), ContentModel.PROP_EMAIL));
 
         Date now = new Date();
         JwtBuilder jwtBuilder = Jwts.builder()
