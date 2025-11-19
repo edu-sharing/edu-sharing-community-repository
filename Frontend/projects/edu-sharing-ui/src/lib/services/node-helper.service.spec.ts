@@ -16,6 +16,7 @@ describe('Test NodeHelper', () => {
             null,
             null,
             null,
+            null,
         );
         it('cc by 4.0', async () => {
             translateServiceMock.currentLang = 'de';

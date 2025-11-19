@@ -58,10 +58,11 @@ export class ManageAssignmentComponent {
         plugins: ['lists'],
         default_link_target: '_blank',
         link_title: false,
+        newline_behavior: 'invert',
         link_assume_external_targets: true,
         toolbar: 'bold | bullist numlist | undo redo',
         language: this.translateService.getDefaultLang(),
-    };
+    } as any;
     now = new Date().getTime();
     dateTime = new Date().getTime() + 1000 * 3600 * 24 * 5;
     @ViewChild(MatStepper) matStepper: MatStepper;

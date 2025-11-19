@@ -9,6 +9,13 @@ $collectionIconSize: 25px;
 
 @import '../node-entries-card/node-entries-card.main';
 
+@mixin assignmentSummary() {
+    // the first p is a wrapper from tinymce
+    > p:first-of-type {
+        margin-block: 0;
+    }
+}
+
 .collection-pin {
     background: rgba(255, 255, 255, 0.5);
     border-radius: 50px;
@@ -124,7 +131,7 @@ $collectionIconSize: 25px;
             }
         }
         .summary {
-            @include limitLineCount(3, 1.25);
+            @include limitLineCount(4, 1.25);
         }
     }
     .card-meta {
@@ -150,5 +157,11 @@ $collectionIconSize: 25px;
                 }
             }
         }
+    }
+}
+:host ::ng-deep {
+    .card-assignment .summary {
+        @include limitLineCount(4, 1.25);
+        @include assignmentSummary();
     }
 }
