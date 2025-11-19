@@ -36,6 +36,7 @@ import org.edu_sharing.service.permission.annotation.Permission;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.util.PropertyMapper;
+import org.edu_sharing.util.CheckedFunction;
 import org.edu_sharing.util.CheckedSupplier;
 import org.edu_sharing.util.LazyProvider;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -564,7 +565,7 @@ public class AssignmentDaoFactory {
             referNode = new LazyProvider<>(CheckedSupplier.wrap(() -> {
                 validateExists();
                 return Optional.ofNullable(propertyMapper.get().getNodeRef(CCConstants.CCM_PROP_ASSIGNMENT_FILE_REFER_TO))
-                        .map(NodeDao::getAsNodeSimple)
+                        .map(CheckedFunction.wrap(n -> NodeDao.getNode(n).asNode()))
                         .orElse(null);
             }));
         }

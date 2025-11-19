@@ -362,6 +362,11 @@ public class NodeDao {
         return new NodeDao(repoDao, nodeRef, Filter.createShowAllFilter());
     }
 
+    public static NodeDao getNode(org.alfresco.service.cmr.repository.NodeRef nodeRef)
+            throws Throwable {
+        return new NodeDao(RepositoryDao.getHomeRepository(), nodeRef.getId(), Filter.createShowAllFilter());
+    }
+
     /**
      * get node via shared link
      **/
