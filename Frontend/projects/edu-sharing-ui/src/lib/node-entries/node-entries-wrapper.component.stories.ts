@@ -45,7 +45,6 @@ const dummyDataSource = new NodeDataSource<Node>(
             n = Helper.deepCopy(n);
             n.ref.id = 'id_' + i;
             n.title += ' ' + i;
-            console.log(n);
             return n;
         }),
 );
@@ -63,7 +62,6 @@ const dummyDataSourceAssignments = new NodeDataSource<Assignment>(
                     new Date().getTime() + 1000 * 86400 * 7 * Math.random(),
                 ).toISOString();
             }
-            console.log(n);
             return n;
         }),
 );

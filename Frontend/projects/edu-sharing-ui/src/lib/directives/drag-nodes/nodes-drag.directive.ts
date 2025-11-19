@@ -17,7 +17,6 @@ export class NodesDragDirective {
 
     constructor(private cdkDrag: CdkDrag<Node[]>, private nodesDragDrop: NodesDragDropService) {
         this.cdkDrag.started.subscribe((event) => {
-            console.log(event, (event.source as any)._dragRef as any);
             this.nodesDragDrop.draggedNodes = event.source.data;
             this.nodesDragDrop.origin = null;
             // wait one tick because the element is null otherwise

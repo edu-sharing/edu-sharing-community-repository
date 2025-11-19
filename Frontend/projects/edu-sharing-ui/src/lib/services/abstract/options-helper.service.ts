@@ -81,7 +81,6 @@ export abstract class OptionsHelperService {
     }
 
     private async isOptionEnabled(option: OptionItem, objects: Node[] | any) {
-        console.log(option, objects);
         if (
             option.permissionsMode === HideMode.Disable &&
             option.permissions &&

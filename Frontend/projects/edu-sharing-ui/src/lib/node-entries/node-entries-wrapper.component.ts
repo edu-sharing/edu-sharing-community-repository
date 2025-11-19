@@ -285,7 +285,6 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
                 ),
             );
             await this.uiService.updateOptionEnabledState(globalOptions$);
-            console.log(globalOptions$.value);
             this.globalOptions = globalOptions$.value;
         }
         this.entriesService.globalOptions = this.globalOptions;

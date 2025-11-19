@@ -70,7 +70,7 @@ export class RenderHelperService {
             };
         }
         console.info(about.renderingService2?.url);
-        this.prepareRootUrl();
+        void this.prepareRootUrl();
         console.info(this.injector.get(RSApiConfiguration));
         const token = securedNode.jwt;
         console.info(token, node);

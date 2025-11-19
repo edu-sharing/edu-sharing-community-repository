@@ -15,9 +15,6 @@ class BridgeServiceStub {
 class InjectorStub {
     sessionStorageServiceStub = new SessionStorageServiceStub();
     get<T>(service: ProviderToken<T>): T {
-        console.log(service);
-        if (service) {
-        }
         return this.sessionStorageServiceStub as unknown as T;
     }
 }
