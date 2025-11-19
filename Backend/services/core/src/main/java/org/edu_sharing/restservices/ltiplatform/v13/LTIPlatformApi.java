@@ -242,13 +242,13 @@ public class LTIPlatformApi {
             }
 
 
-            if (AuthenticationUtil.getFullyAuthenticatedUser() != null && appInfo.hasLtiToolCustomContentOption() && loginInitiationSessionObject.getContentUrlNodeId() != null) {
+            if (appInfo.hasLtiToolCustomContentOption() && loginInitiationSessionObject.getContentUrlNodeId() != null) {
                 NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, loginInitiationSessionObject.getContentUrlNodeId());
-                AccessStatus accessStatus = permissionService.hasPermission(nodeRef, PermissionService.WRITE_CONTENT);
+                AccessStatus accessStatus = AuthenticationUtil.runAs(()->permissionService.hasPermission(nodeRef, PermissionService.WRITE_CONTENT),username);
                 if (AuthenticationUtil.runAsSystem(() -> nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)))) {
-                    NodeRef nodeRefOriginal = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
-                            (String) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)));
+
                     try {
+                        NodeRef nodeRefOriginal = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)));
                         accessStatus = permissionService.hasPermission(nodeRefOriginal, PermissionService.WRITE_CONTENT);
                     } catch (Exception e) {
                         accessStatus = AccessStatus.DENIED;
