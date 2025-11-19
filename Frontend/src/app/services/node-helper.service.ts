@@ -17,6 +17,7 @@ import {
 import { Helper } from '../core-module/rest/helper';
 import { HttpClient } from '@angular/common/http';
 import { MessageType } from '../util/message-type';
+import { Toast as ToastUi } from 'ngx-edu-sharing-ui';
 import { Toast } from './toast';
 import {
     ComponentFactoryResolver,
@@ -52,7 +53,6 @@ import {
 } from 'ngx-edu-sharing-api';
 import { DialogsService } from '../features/dialogs/dialogs.service';
 import { DialogButton } from '../util/dialog-button';
-import { isArray } from 'lodash';
 
 export interface ConfigEntry {
     name: string;
@@ -100,7 +100,8 @@ export class NodeHelperService extends NodeHelperServiceBase {
         private http: HttpClient,
         private connector: RestConnectorService,
         private nodeService: RestNodeService,
-        private toast: Toast,
+        toast: ToastUi,
+        private toastGlobal: Toast,
         router: Router,
         platformLocation: PlatformLocation,
         private sessionStorage: SessionStorageService,
@@ -116,30 +117,12 @@ export class NodeHelperService extends NodeHelperServiceBase {
             configuration,
             repoUrlService,
             platformLocation,
+            toast,
             router,
         );
     }
     setViewContainerRef(viewContainerRef: ViewContainerRef) {
         this.viewContainerRef = viewContainerRef;
-    }
-    public handleNodeError(name: string, error: any): number {
-        if (error.status === RestConstants.DUPLICATE_NODE_RESPONSE) {
-            this.bridge.showTemporaryMessage(MessageType.error, 'WORKSPACE.TOAST.DUPLICATE_NAME', {
-                name,
-            });
-            return error.status;
-        } else if (
-            error.error?.message?.includes(
-                'org.alfresco.service.cmr.repository.CyclicChildRelationshipException',
-            )
-        ) {
-            this.bridge.showTemporaryMessage(MessageType.error, 'WORKSPACE.TOAST.CYCLIC_NODE', {
-                name,
-            });
-            return error.status;
-        }
-        this.bridge.showTemporaryMessage(MessageType.error, null, null, null, error);
-        return error.status;
     }
 
     public downloadUrl(
@@ -316,18 +299,18 @@ export class NodeHelperService extends NodeHelperServiceBase {
                             window.open(url);
                             return;
                         }
-                        this.toast.showProgressSpinner();
+                        this.toastGlobal.showProgressSpinner();
                         this.http.get(url).subscribe(
                             (data: any) => {
                                 if (data.success)
-                                    this.toast.error(
+                                    this.toastGlobal.error(
                                         data.success,
                                         null,
                                         data.message ? data.success : data.message,
                                         data.message,
                                     );
                                 else if (data.error)
-                                    this.toast.error(
+                                    this.toastGlobal.error(
                                         null,
                                         data.error,
                                         null,
@@ -335,11 +318,11 @@ export class NodeHelperService extends NodeHelperServiceBase {
                                         data.message,
                                     );
                                 else this.toast.error(null);
-                                this.toast.closeProgressSpinner();
+                                this.toastGlobal.closeProgressSpinner();
                             },
                             (error: any) => {
                                 this.toast.error(error);
-                                this.toast.closeProgressSpinner();
+                                this.toastGlobal.closeProgressSpinner();
                             },
                         );
                     };
@@ -422,7 +405,7 @@ export class NodeHelperService extends NodeHelperServiceBase {
     }
 
     async addNodesToLTIPlatform(nodes: Node[]) {
-        this.toast.showProgressSpinner();
+        this.toastGlobal.showProgressSpinner();
         try {
             // prepare usages in case of remote refs
             nodes = await forkJoin(
@@ -448,7 +431,7 @@ export class NodeHelperService extends NodeHelperServiceBase {
         } catch (e) {
             this.toast.error(e);
         }
-        this.toast.closeProgressSpinner();
+        this.toastGlobal.closeProgressSpinner();
     }
 
     private postLtiDeepLinkResponse(jwt: string, url: string) {
@@ -657,15 +640,6 @@ export class NodeHelperService extends NodeHelperServiceBase {
             prop[RestConstants.CCM_PROP_EDITOR_TYPE] = [event.type.editorType];
         }
         return prop;
-    }
-    static getActionbarNodes<T>(listNodes: T[], externalNode: T | T[]): T[] {
-        return externalNode
-            ? isArray(externalNode)
-                ? externalNode
-                : [externalNode]
-            : listNodes && listNodes.length
-            ? listNodes
-            : null;
     }
 
     referenceOriginalExists(node: Node | CollectionReference) {

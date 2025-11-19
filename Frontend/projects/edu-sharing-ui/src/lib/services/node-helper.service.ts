@@ -21,6 +21,8 @@ import { PlatformLocation } from '@angular/common';
 import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
 import { Sort } from '@angular/material/sort';
 import { NodeEntriesDataType } from '../node-entries/data-type';
+import { isArray } from 'lodash';
+import { Toast } from './abstract/toast.service';
 
 @Injectable({
     providedIn: 'root',
@@ -50,6 +52,7 @@ export class NodeHelperService {
         protected configuration: EduSharingUiConfiguration,
         protected repoUrlService: RepoUrlService,
         protected platformLocation: PlatformLocation,
+        protected toast: Toast,
         @Optional() protected router: Router,
     ) {}
 
@@ -434,5 +437,35 @@ export class NodeHelperService {
                 : refMode) || RestConstants.CM_MODIFIED_DATE) as any,
             direction: refAscending ? 'asc' : 'desc',
         };
+    }
+
+    public handleNodeError(name: string, error: any): number {
+        if (error.status === RestConstants.DUPLICATE_NODE_RESPONSE) {
+            this.toast.error(null, 'WORKSPACE.TOAST.DUPLICATE_NAME', {
+                name,
+            });
+            return error.status;
+        } else if (
+            error.error?.message?.includes(
+                'org.alfresco.service.cmr.repository.CyclicChildRelationshipException',
+            )
+        ) {
+            this.toast.error(null, 'WORKSPACE.TOAST.CYCLIC_NODE', {
+                name,
+            });
+            return error.status;
+        }
+        this.toast.error(error);
+        return error.status;
+    }
+
+    static getActionbarNodes<T>(listNodes: T[], externalNode: T | T[]): T[] {
+        return externalNode
+            ? isArray(externalNode)
+                ? externalNode
+                : [externalNode]
+            : listNodes && listNodes.length
+            ? listNodes
+            : null;
     }
 }

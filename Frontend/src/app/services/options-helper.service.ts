@@ -12,8 +12,10 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
     Assignment,
+    AuthenticationService,
     GenericAuthority,
     LtiPlatformService,
+    NetworkService,
     Node,
     NodeListErrorResponses,
     NodeListService,
@@ -84,6 +86,7 @@ import { BridgeService } from './bridge.service';
 import { KeyboardShortcutsService } from './keyboard-shortcuts.service';
 import { MessageType } from '../util/message-type';
 import { forkJoinWithErrors } from '../util/rxjs/forkJoinWithErrors';
+import { NodeHelperService as NodeHelperServiceUi } from 'ngx-edu-sharing-ui';
 import { ConfigOptionItem, NodeHelperService } from './node-helper.service';
 import { Toast } from './toast';
 import { UIHelper } from '../core-ui-module/ui-helper';
@@ -107,11 +110,15 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     private keyboardShortcutsSubscription: Subscription;
     private globalOptions: OptionItem[];
     private subscriptions: Subscription[] = [];
-    private queryParams: Params;
     private destroyed = new Subject<void>();
-    enabledCache: { [key in string]: { [key in string]: BehaviorSubject<boolean> } } = {};
 
     constructor(
+        nodeHelperService: NodeHelperServiceUi,
+        authenticationService: AuthenticationService,
+        storage: TemporaryStorageService,
+        networkService: NetworkService,
+        route: ActivatedRoute,
+        private nodeHelper: NodeHelperService,
         private bridge: BridgeService,
         private collectionService: RestCollectionService,
         private configService: ConfigurationService,
@@ -126,20 +133,16 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         private mainNavService: MainNavService,
         private ngZone: NgZone,
         private injector: Injector,
-        private nodeHelper: NodeHelperService,
         private nodeList: NodeListService,
         private nodeService: RestNodeService,
-        private route: ActivatedRoute,
         private router: Router,
-        private storage: TemporaryStorageService,
         private toast: Toast,
         private ltiPlatformService: LtiPlatformService,
         private translate: TranslateService,
         private uiService: UIService,
         private workspace: WorkspaceService,
     ) {
-        super();
-        this.route.queryParams.subscribe((queryParams) => (this.queryParams = queryParams));
+        super(nodeHelperService, authenticationService, storage, networkService, route);
     }
 
     ngOnDestroy(): void {
@@ -261,41 +264,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         }
     }
 
-    private async isOptionEnabled(option: OptionItem, objects: Node[] | any) {
-        if (
-            option.permissionsMode === HideMode.Disable &&
-            option.permissions &&
-            !this.validatePermissions(option, objects)
-        ) {
-            return false;
-        }
-        if (option.toolpermissions != null) {
-            if (!this.validateToolpermissions(option)) {
-                return false;
-            }
-        }
-        if (option.customEnabledCallback) {
-            if (!this.enabledCache[option.name]) {
-                this.enabledCache[option.name] = {};
-            }
-            if (this.enabledCache[option.name]?.[objects?.[0]?.ref?.id] !== undefined) {
-                return await this.enabledCache[option.name][objects?.[0]?.ref?.id]
-                    .pipe(
-                        filter((f) => f !== null),
-                        first(),
-                    )
-                    .toPromise();
-            }
-            this.enabledCache[option.name][objects?.[0]?.ref?.id] = new BehaviorSubject<boolean>(
-                null,
-            );
-            const status = await option.customEnabledCallback(objects);
-            this.enabledCache[option.name][objects?.[0]?.ref?.id].next(status);
-            return status;
-        }
-        return true;
-    }
-
     /**
      * get all available default options
      * usefull for duplicating specific options for custom use cases
@@ -366,141 +334,8 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         return this.uiService.filterValidOptions(options) as OptionItem[];
     }
 
-    private async handleCallbackStates(
-        options: OptionItem[],
-        target: Target,
-        data: OptionData,
-        objects: Node[] | any[] = null,
-    ) {
-        this.handleCallbacks(options, objects, data);
-        const showState = await Promise.all(
-            options.map((o) =>
-                o.showCallback(target === Target.List && objects && objects[0] ? objects[0] : null),
-            ),
-        );
-        options = options.filter((o, i) => showState[i]);
-        options = options.map((o) => {
-            // disable them because the callback will later decide the state
-            o.isEnabled = o.customEnabledCallback == null;
-            return o;
-        });
-        return options;
-    }
-
-    private async isOptionAvailable(option: OptionItem, objects: Node[] | any[], data: OptionData) {
-        if (
-            option.elementType?.length > 0 &&
-            !this.getType(objects).every((t) => option.elementType.includes(t))
-        ) {
-            // console.log('types not matching', objects, this.getType(objects), option);
-            return false;
-        }
-        if (option.scopes) {
-            if (data.scope == null) {
-                console.warn('Scope for options was not set, some may missing', option.name);
-                return false;
-            }
-            if (option.scopes.indexOf(data.scope) === -1) {
-                // console.log('scopes not matching', objects, option);
-                return false;
-            }
-        }
-        if (option.customShowCallback) {
-            if ((await option.customShowCallback(objects)) === false) {
-                // console.log('customShowCallback  was false', option, objects);
-                return false;
-            }
-        }
-        if (option.toolpermissions != null && option.toolpermissionsMode === HideMode.Hide) {
-            if (!this.validateToolpermissions(option)) {
-                // console.log('toolpermissions missing', option, objects);
-                return false;
-            }
-        }
-        if (option.permissions != null && option.permissionsMode === HideMode.Hide) {
-            if (!this.validatePermissions(option, objects)) {
-                // console.log('permissions missing', option, objects);
-                return false;
-            }
-        }
-        if (option.constrains != null) {
-            const matched = this.objectsMatchesConstrains(option.constrains, data, objects);
-            if (matched != null) {
-                // console.log('Constrain failed: ' + matched, option, objects);
-                return false;
-            }
-        }
-        // console.log('display option', option, objects);
-        return true;
-    }
-
     private hasSelection(data: OptionData) {
         return data.selectedObjects && data.selectedObjects.length;
-    }
-
-    private getType(objects: Node[]): ElementType[] {
-        if (objects) {
-            const types = Array.from(new Set(objects.map((o) => this.getTypeSingle(o))));
-            if (types.length > 0) {
-                return types;
-            }
-        }
-        return [ElementType.NoneOrUnknown];
-    }
-
-    private getTypeSingle(object: NodeEntriesDataType) {
-        if ((object as GenericAuthority).authorityType === RestConstants.AUTHORITY_TYPE_GROUP) {
-            return ElementType.Group;
-        } else if (
-            (object as GenericAuthority).authorityType === RestConstants.AUTHORITY_TYPE_USER
-        ) {
-            return ElementType.Person;
-        } else if ((object as Assignment).allowAdditionalDocumentSubmissions !== undefined) {
-            return ElementType.Assignment;
-        } else if ((object as Node).ref) {
-            const node = object as Node;
-            if (node.type === RestConstants.CCM_TYPE_SAVED_SEARCH) {
-                return ElementType.SavedSearch;
-            } else if (node.aspects?.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) !== -1) {
-                return ElementType.NodeChild;
-            } else if (node.mediatype === 'folder-link') {
-                return ElementType.MapRef;
-            } else if (
-                (node as ProposalNode).proposal ||
-                node.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL
-            ) {
-                return ElementType.NodeProposal;
-            } else {
-                if (this.nodeHelper.isNodeRevoked(node)) {
-                    return ElementType.NodeRevoked;
-                } else if (this.nodeHelper.isNodePublishedCopy(node)) {
-                    return ElementType.NodePublishedCopy;
-                } else if (
-                    node.properties?.[RestConstants.CCM_PROP_IMPORT_BLOCKED]?.[0] === 'true'
-                ) {
-                    return ElementType.NodeBlockedImport;
-                }
-                return ElementType.Node;
-            }
-        }
-        return ElementType.NoneOrUnknown;
-    }
-
-    private validateToolpermissions(option: OptionItem) {
-        return (
-            option.toolpermissions.filter((p) => !this.connector.hasToolPermissionInstant(p))
-                .length === 0
-        );
-    }
-
-    private validatePermissions(option: OptionItem, objects: Node[] | any[]) {
-        return (
-            option.permissions.filter(
-                (p) =>
-                    this.nodeHelper.getNodesRight(objects, p, option.permissionsRightMode) ===
-                    false,
-            ).length === 0
-        );
     }
 
     private prepareOptions(
@@ -1713,13 +1548,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         }
     }
 
-    private canAddObjects(data: OptionData) {
-        return (
-            data.parent &&
-            this.nodeHelper.getNodesRight([data.parent], RestConstants.ACCESS_ADD_CHILDREN)
-        );
-    }
-
     private addVirtualObjects(components: OptionsHelperComponents, objects: any[]) {
         objects = objects.map((o: any) => {
             o.virtual = true;
@@ -1770,28 +1598,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                     return of(void 0);
                 }),
             );
-    }
-
-    /**
-     * overwrite all the show callbacks by using the internal constrains + permission handlers
-     * isOptionAvailable will check if customShowCallback exists and will also call it
-     */
-    private handleCallbacks(options: OptionItem[], objects: Node[] | any, data: OptionData) {
-        options.forEach((o) => {
-            if (data?.scope === Scope.DebugShowAll) {
-                o.showCallback = async () => true;
-                o.enabledCallback = async () => true;
-                return;
-            }
-            o.showCallback = async (object) => {
-                const list = NodeHelperService.getActionbarNodes(objects, object);
-                return await this.isOptionAvailable(o, list, data);
-            };
-            o.enabledCallback = async (object) => {
-                const list = NodeHelperService.getActionbarNodes(objects, object);
-                return await this.isOptionEnabled(o, list);
-            };
-        });
     }
 
     private goToWorkspace(node: Node | any) {
@@ -1848,13 +1654,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         return nodes;
     }
 
-    getObjects(object: Node | any, data: OptionData) {
-        return NodeHelperService.getActionbarNodes(
-            data.selectedObjects || data.activeObjects,
-            object,
-        );
-    }
-
     applyExternalOptions(options: OptionItem[], customOptionsIn: CustomOptions) {
         if (!customOptionsIn) {
             return options;
@@ -1887,176 +1686,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             }
         }
         return options;
-    }
-
-    wrapOptionCallbacks(data: OptionData) {
-        if (data.customOptions?.addOptions) {
-            for (const option of data.customOptions.addOptions) {
-                if (!(option as any).originalCallback) {
-                    (option as any).originalCallback = option.callback;
-                }
-                option.callback = (node) =>
-                    (option as any).originalCallback(node, this.getObjects(node, data));
-            }
-        }
-        return data;
-    }
-
-    private sortOptionsByGroup(options: OptionItem[]) {
-        if (!options) {
-            return null;
-        }
-        let result: OptionItem[] = [];
-        let groups = Array.from(new Set(options.map((o) => o.group)));
-        groups = groups.sort((o1, o2) => (o1.priority > o2.priority ? 1 : -1));
-        for (const group of groups) {
-            const groupOptions = options.filter((o) => o.group === group);
-            if (group == null) {
-                console.warn(
-                    'There are options not assigned to a group. All options should be assigned to a group',
-                    groupOptions,
-                );
-            }
-            groupOptions.sort((o1, o2) => (o1.priority > o2.priority ? 1 : -1));
-            result = result.concat(groupOptions);
-        }
-        return result;
-    }
-
-    private objectsMatchesConstrains(
-        constrains: Constrain[],
-        data: OptionData = null,
-        objects: Node[] | any[] = null,
-    ) {
-        // allow all options in debug scope
-        if (data?.scope === Scope.DebugShowAll) {
-            return null;
-        }
-        if (constrains.indexOf(Constrain.NoCollectionReference) !== -1) {
-            if (
-                objects.some(
-                    (o) => o.aspects?.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1,
-                )
-            ) {
-                return Constrain.NoCollectionReference;
-            }
-        }
-        if (constrains.indexOf(Constrain.CollectionReference) !== -1) {
-            if (
-                objects.some(
-                    (o) => o.aspects?.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) === -1,
-                )
-            ) {
-                return Constrain.CollectionReference;
-            }
-        }
-        if (constrains.indexOf(Constrain.NoBulk) !== -1) {
-            if (objects.length > 1) {
-                return Constrain.NoBulk;
-            }
-        }
-        if (constrains.indexOf(Constrain.Directory) !== -1) {
-            if (objects.some((o) => !o.isDirectory || o.collection)) {
-                return Constrain.Directory;
-            }
-        }
-        if (constrains.indexOf(Constrain.Collections) !== -1) {
-            if (
-                objects.some(
-                    (o) =>
-                        !(o.collection && o.aspects?.includes(RestConstants.CCM_ASPECT_COLLECTION)),
-                )
-            ) {
-                return Constrain.Collections;
-            }
-        }
-        if (constrains.indexOf(Constrain.Files) !== -1) {
-            if (objects.some((o) => o.isDirectory || o.type !== RestConstants.CCM_TYPE_IO)) {
-                return Constrain.Files;
-            }
-        }
-        if (constrains.indexOf(Constrain.FilesAndDirectories) !== -1) {
-            if (
-                objects.some(
-                    (o) =>
-                        o.collection ||
-                        (o.type !== RestConstants.CCM_TYPE_IO &&
-                            o.type !== RestConstants.CCM_TYPE_MAP),
-                )
-            ) {
-                return Constrain.FilesAndDirectories;
-            }
-        }
-        if (constrains.indexOf(Constrain.Admin) !== -1) {
-            if (!this.connectors.getRestConnector().getCurrentLogin().isAdmin) {
-                return Constrain.Admin;
-            }
-        }
-        if (constrains.indexOf(Constrain.AdminOrDebug) !== -1) {
-            if (
-                !this.connectors.getRestConnector().getCurrentLogin().isAdmin &&
-                !(window as any).esDebug
-            ) {
-                return Constrain.AdminOrDebug;
-            }
-        }
-        if (constrains.indexOf(Constrain.User) !== -1) {
-            if (
-                this.connectors.getRestConnector().getCurrentLogin() &&
-                this.connectors.getRestConnector().getCurrentLogin().statusCode !==
-                    RestConstants.STATUS_CODE_OK
-            ) {
-                return Constrain.User;
-            }
-        }
-        if (constrains.indexOf(Constrain.GuestOrNotLoggedIn) !== -1) {
-            if (
-                this.connectors.getRestConnector().getCurrentLogin() &&
-                this.connectors.getRestConnector().getCurrentLogin().statusCode ===
-                    RestConstants.STATUS_CODE_OK
-            ) {
-                return Constrain.GuestOrNotLoggedIn;
-            }
-        }
-        if (constrains.indexOf(Constrain.LTIMode) !== -1) {
-            if (!this.connectors.getRestConnector().getCurrentLogin()?.ltiSession) {
-                return Constrain.LTIMode;
-            }
-        }
-        if (constrains.indexOf(Constrain.NoScope) !== -1) {
-            if (
-                this.connectors.getRestConnector().getCurrentLogin() &&
-                !!this.connectors.getRestConnector().getCurrentLogin().currentScope
-            ) {
-                return Constrain.NoScope;
-            }
-        }
-        if (constrains.indexOf(Constrain.NoSelection) !== -1) {
-            if (objects && objects.length) {
-                return Constrain.NoSelection;
-            }
-        }
-        if (constrains.indexOf(Constrain.ClipboardContent) !== -1) {
-            if (this.storage.get('workspace_clipboard') == null) {
-                return Constrain.ClipboardContent;
-            }
-        }
-        if (constrains.indexOf(Constrain.AddObjects) !== -1) {
-            if (!this.canAddObjects(data)) {
-                return Constrain.AddObjects;
-            }
-        }
-        if (constrains.indexOf(Constrain.HomeRepository) !== -1) {
-            if (!RestNetworkService.allFromHomeRepo(objects)) {
-                return Constrain.HomeRepository;
-            }
-        }
-        if (constrains.indexOf(Constrain.ReurlMode) !== -1) {
-            if (!this.queryParams.reurl) {
-                return Constrain.ReurlMode;
-            }
-        }
-        return null;
     }
 
     /**
@@ -2102,32 +1731,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
 
     private editCollection(object: Node | any) {
         this.uiService.goToCollection(object, 'edit');
-    }
-
-    /**
-     * Filter options, can be also used externally
-     * @param options
-     * @param target
-     * @param objects
-     */
-    async filterOptions(
-        options: OptionItem[],
-        target: Target,
-        data: OptionData = null,
-        objects: Node[] | any = null,
-    ) {
-        if (target === Target.List) {
-            /*let optionsAlways = options.filter((o) => o.showAlways);
-            const optionsOthers = options.filter((o) => !o.showAlways);
-            optionsAlways = this.handleCallbackStates(options, target, objects);
-            options = optionsAlways.concat(optionsOthers);*/
-            // attach the show callbacks
-            this.handleCallbacks(options, target, data);
-        } else {
-            options = await this.handleCallbackStates(options, target, data, objects);
-        }
-        options = this.sortOptionsByGroup(options);
-        return options;
     }
 
     private unblockImportedNodes(nodes: Node[]) {

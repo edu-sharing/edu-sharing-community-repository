@@ -329,8 +329,9 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                     'task',
                     () => this.mainComponent$.next('manageAssignment'),
                 );
-                // @TODO: Define toolpermission for create assignment!
-                createAssigment.toolpermissions = [];
+                createAssigment.toolpermissions = [
+                    RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS,
+                ];
                 this.updateCreateOptions([createAssigment]);
                 this.mdsGroup.set('editorial_assignment');
                 if (widget == null) {

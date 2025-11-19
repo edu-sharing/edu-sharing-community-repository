@@ -54,7 +54,7 @@
     .swimlane-options {
         ::ng-deep {
             .card-grid.card-grid-layout-scroll {
-                grid-template-columns: 50px repeat(auto-fit, var(--cardWidth));
+                grid-template-columns: 56px repeat(auto-fit, var(--cardWidth));
                 .global-option .label {
                     display: none;
                 }

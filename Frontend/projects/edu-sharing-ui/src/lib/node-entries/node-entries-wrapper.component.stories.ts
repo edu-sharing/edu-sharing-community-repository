@@ -161,6 +161,18 @@ export const EntriesHorizontalGridEmpty: Story = {
         },
     },
 };
+const DisabledOption = new OptionItem('OPTIONS.ADD', 'add', () => {});
+DisabledOption.isEnabled = false;
+export const EntriesHorizontalGridEmptyWithDisabledAction: Story = {
+    args: {
+        globalOptions: [DisabledOption],
+        dataSource: emptyDataSource as any,
+        gridConfig: {
+            layout: 'scroll',
+            maxRows: 1,
+        },
+    },
+};
 export const EntriesHorizontalGridEmptyWithAction: Story = {
     args: {
         globalOptions: [new OptionItem('OPTIONS.ADD', 'add', () => {})],

@@ -12,7 +12,7 @@ import {
     TemplateRef,
     ViewChild,
 } from '@angular/core';
-import { Node } from 'ngx-edu-sharing-api';
+import { Node, RestConstants } from 'ngx-edu-sharing-api';
 import {
     Constrain,
     EduSharingUiCommonModule,
@@ -22,11 +22,12 @@ import {
     OptionsHelperDataService,
     Target,
     UIConstants,
+    UIService,
 } from 'ngx-edu-sharing-ui';
 import { TranslateModule } from '@ngx-translate/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { MainComponentType, PrimaryMode } from '../editorial-page.component';
@@ -34,6 +35,7 @@ import { NodesSelectorComponent } from '../nodes-selector/nodes-selector.compone
 import { MetadataSidebarComponent } from '../../workspace-page/metadata/metadata-sidebar.component';
 import { PreviewSidebarModule } from '../../../features/preview-sidebar/preview-sidebar.module';
 import { EditorialSidebarService } from './editorial-sidebar.service';
+import { CdkMonitorFocus } from '@angular/cdk/a11y';
 export type SidebarContext = PrimaryMode | 'collections' | 'workspace' | 'search';
 export type EditorialSidebarOption = 'WORKSPACE_METADATA' | 'SHARE_QR' | 'PREVIEW' | 'SORT_INTO';
 export type OptionState = {
@@ -47,6 +49,7 @@ export type OptionState = {
     styleUrls: ['editorial-sidebar.component.scss'],
     imports: [
         EduSharingUiCommonModule,
+        CdkMonitorFocus,
         CommonModule,
         MatButtonModule,
         TranslateModule,
@@ -85,6 +88,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
 
     constructor(
         private dialogs: DialogsService,
+        private uiService: UIService,
         private nodeHelperService: NodeHelperService,
         private editorialSidebarService: EditorialSidebarService,
         private optionsHelperDataService: OptionsHelperDataService,
@@ -152,8 +156,9 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
                 this.close();
             },
         );
-        // @TODO: Define toolpermission for create assignment!
-        createAssignment.toolpermissions = [];
+        createAssignment.toolpermissions = [
+            RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS,
+        ];
         createAssignment.elementType = [ElementType.NoneOrUnknown];
         createAssignment.scopes = ['assignment'];
         // only show when no main component is active
@@ -179,7 +184,11 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
                 addOptions: options,
             },
         });
-        this.options.set(await this.optionsHelperDataService.getAvailableOptions(Target.Actionbar));
+        const options$ = new BehaviorSubject(
+            await this.optionsHelperDataService.getAvailableOptions(Target.Actionbar),
+        );
+        void this.uiService.updateOptionEnabledState(options$);
+        this.options.set(options$.value);
         return options;
     }
 

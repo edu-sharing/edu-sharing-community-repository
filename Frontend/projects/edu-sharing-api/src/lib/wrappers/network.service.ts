@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
 import { NetworkV1Service } from '../api/services';
 import { HOME_REPOSITORY } from '../constants';
@@ -8,6 +8,7 @@ import { Node } from '../models';
 import { shareReplayReturnValue } from '../utils/decorators/share-replay-return-value';
 import { AuthenticationService } from './authentication.service';
 import { Repo } from '../api/models/repo';
+import { RestConstants } from '../rest-constants';
 
 type Repository = Repo;
 
@@ -69,5 +70,33 @@ export class NetworkService {
         } else {
             return this.getRepository(node.ref.repo);
         }
+    }
+
+    async allFromHomeRepo(nodes: Node[]) {
+        if (!nodes) return true;
+        const repositories = await firstValueFrom(this.getRepositories());
+        for (let node of nodes) {
+            if (!node.ref.isHomeRepo && !this.isHomeRepo(node.ref.repo, repositories)) return false;
+        }
+        return true;
+    }
+
+    private isHomeRepo(repositoryId: string, repositories: Repo[]) {
+        if (repositoryId == HOME_REPOSITORY) return true;
+        if (!repositories) return false;
+        let repository = this.getRepositoryById(repositoryId, repositories);
+        if (repository) {
+            return repository.isHomeRepo;
+        }
+        return false;
+    }
+
+    private getRepositoryById(id: string, repositories: Repo[]) {
+        let i = repositories.findIndex((r) => r.id === id);
+        if (id == HOME_REPOSITORY) {
+            i = repositories.findIndex((r) => r.isHomeRepo);
+        }
+        if (i == -1) return null;
+        return repositories[i];
     }
 }

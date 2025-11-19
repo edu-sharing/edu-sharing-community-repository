@@ -19,7 +19,7 @@ import {
     ViewChild,
     ViewContainerRef,
 } from '@angular/core';
-import { interval, Subject } from 'rxjs';
+import { BehaviorSubject, interval, Subject } from 'rxjs';
 import {
     debounceTime,
     distinctUntilChanged,
@@ -47,7 +47,7 @@ import {
 import { NodeDataSource } from './node-data-source';
 import { Helper } from '../util/helper';
 import { CustomSelectionModel, NodeEntriesService } from '../services/node-entries.service';
-import { OptionItem, Scope } from '../types/option-item';
+import { OptionItem, Scope, Target } from '../types/option-item';
 import { NodeHelperService } from '../services/node-helper.service';
 import { ListItem } from '../types/list-item';
 import { TemporaryStorageService } from '../services/temporary-storage.service';
@@ -59,11 +59,12 @@ import {
     User,
 } from 'ngx-edu-sharing-api';
 import { VirtualNode } from '../types/api-models';
-import { OptionsHelperDataService } from '../services/options-helper-data.service';
 import { UIService } from '../services/ui.service';
 import { SelectionChange } from '@angular/cdk/collections';
 import { ColumnType } from '../mds/mds-helper.service';
 import { NodeEntriesDataType } from './data-type';
+import { OptionsHelperService } from '../services/abstract/options-helper.service';
+import { OptionsHelperDataService } from '../services/options-helper-data.service';
 
 @Component({
     selector: 'es-node-entries-wrapper',
@@ -182,6 +183,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         private entriesService: NodeEntriesService<T>,
         private nodeService: NodeService,
         public optionsHelper: OptionsHelperDataService,
+        private optionsHelperService: OptionsHelperService,
         private nodeHelperService: NodeHelperService,
         private uiService: UIService,
         // @TODO
@@ -223,7 +225,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
             .subscribe((c) => this.columnsChange.emit(c.columns));
     }
 
-    ngOnChanges(changes: { [key: string]: SimpleChange } = {}) {
+    async ngOnChanges(changes: { [key: string]: SimpleChange } = {}) {
         if (!this.componentRef) {
             this.init();
         }
@@ -272,6 +274,20 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
             this.entriesService.tableConfig = this.tableConfig;
         }
         this.entriesService.options = this.options;
+        if (this.globalOptions) {
+            const globalOptions$ = new BehaviorSubject(
+                await this.optionsHelper.filterOptions(
+                    this.globalOptions.map((g) => {
+                        g.elementType = [];
+                        return g;
+                    }),
+                    Target.ListGlobalOption,
+                ),
+            );
+            await this.uiService.updateOptionEnabledState(globalOptions$);
+            console.log(globalOptions$.value);
+            this.globalOptions = globalOptions$.value;
+        }
         this.entriesService.globalOptions = this.globalOptions;
         this.entriesService.sort = this.sort;
         this.entriesService.sortChange = this.sortChange;
@@ -438,7 +454,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
 
     setOptions(options: ListOptions): void {
         this.options = options;
-        this.ngOnChanges();
+        void this.ngOnChanges();
     }
 
     selectAll() {

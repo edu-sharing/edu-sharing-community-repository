@@ -1,5 +1,6 @@
 export class RestConstants {
     public static USERHOME = '-userhome-';
+    public static DUPLICATE_NODE_RESPONSE = 409;
 
     public static COLLECTIONSCOPE_MY = 'MY';
     public static COLLECTIONSCOPE_ORGA = 'EDU_GROUPS';
@@ -32,7 +33,20 @@ export class RestConstants {
     public static CCM_ASPECT_IO_REFERENCE = 'ccm:collection_io_reference';
     public static CCM_ASPECT_PUBLISHED = 'ccm:published';
     public static CCM_ASPECT_REVOKED = 'ccm:revoked';
+    public static CCM_ASPECT_TOOL_DEFINITION = 'ccm:tool_definition';
+    public static CCM_ASPECT_TOOL_OBJECT = 'ccm:tool_object';
+    public static CCM_ASPECT_TOOL_INSTANCE_LINK = 'ccm:tool_instance_link';
+    public static CCM_ASPECT_METADATA_PRESETTING = 'ccm:metadataPresetting';
+    public static CCM_ASPECT_MAP_REF = 'ccm:map_ref';
+    public static CCM_ASPECT_LOMREPLICATION = 'ccm:lomreplication';
+    public static CCM_ASPECT_CCLOM_GENERAL = 'cclom:general';
+    public static CCM_ASPECT_IO_CHILDOBJECT = 'ccm:io_childobject';
+    public static CCM_ASPECT_REMOTEREPOSITORY = 'ccm:remoterepository';
 
+    public static CCM_TYPE_TOOLPERMISSION = 'ccm:toolpermission';
+    public static CCM_TYPE_REMOTEOBJECT = 'ccm:remoteobject';
+    public static CCM_TYPE_TOOL_INSTANCE = 'ccm:tool_instance';
+    public static CCM_TYPE_SAVED_SEARCH = 'ccm:saved_search';
     public static TOOLPERMISSION_INVITE = 'TOOLPERMISSION_INVITE';
     public static TOOLPERMISSION_INVITE_TIMEBASED = 'TOOLPERMISSION_INVITE_TIMEBASED';
     public static TOOLPERMISSION_INVITE_STREAM = 'TOOLPERMISSION_INVITE_STREAM';

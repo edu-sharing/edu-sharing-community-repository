@@ -52,7 +52,16 @@
         padding: 10px 20px;
         //color: var(--primary);
         gap: 20px;
-        @include mixins.clickable();
+        &.cdk-keyboard-focused {
+            @include mixins.setGlobalKeyboardFocus('border');
+        }
+        &:not(.disabled) {
+            @include mixins.clickable();
+        }
+        &.disabled {
+            pointer-events: none;
+            opacity: 0.75;
+        }
         &:hover {
             background-color: var(--palette-primary-50);
         }

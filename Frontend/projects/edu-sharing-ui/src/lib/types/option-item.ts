@@ -300,8 +300,15 @@ export enum Constrain {
 }
 
 export enum Target {
-    List, // Target is the ListTableComponent
+    /**
+     * Target is the ListTableComponent
+     */
+    List,
     ListDropdown,
     Actionbar,
+    /**
+     * global option element in the list (i.e. a virtual card)
+     */
+    ListGlobalOption,
     CreateMenu,
 }

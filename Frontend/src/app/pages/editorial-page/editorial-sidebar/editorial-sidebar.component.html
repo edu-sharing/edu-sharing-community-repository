@@ -33,7 +33,15 @@
 
     <div class="entries" *ngIf="!enabledOption()">
       <ng-container *ngIf="options()?.length">
-        <div class="entry" (click)="option.callback(nodes())" *ngFor="let option of options()">
+        <div
+          class="entry"
+          *ngFor="let option of options()"
+          [tabindex]="option.isEnabled ? 0 : -1"
+          cdkMonitorElementFocus
+          (click)="option.callback(nodes())"
+          [attr.aria-disabled]="!option.isEnabled"
+          [class.disabled]="!option.isEnabled"
+        >
           <i class="icon" [esIcon]="option.icon"></i>
           <div class="text">
             <div class="title">{{ option.name | translate }}</div>

@@ -23,7 +23,6 @@ import {
     NodeEntriesWrapperComponent,
     OptionItem,
     Scope,
-    ToolpermissionPipe,
     UIAnimation,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
@@ -178,24 +177,18 @@ export class DashboardSwimlaneComponent {
             this.displayType.set(NodeEntriesDisplayType.SmallGrid);
             this.routerLink.set('/' + UIConstants.ROUTER_PREFIX + 'editorial/assignment');
             this.routerQueryParams.set({});
-            if (
-                await this.authenticationService.hasToolpermission(
-                    RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS,
-                )
-            ) {
-                this.globalOptions.set([
-                    new OptionItem('OPTIONS.NEW_ASSIGNMENT', 'add', () => {
-                        void this.router.navigate(
-                            [UIConstants.ROUTER_PREFIX + 'editorial/assignment'],
-                            {
-                                queryParams: {
-                                    mainComponent: 'manageAssignment',
-                                },
-                            },
-                        );
-                    }),
-                ]);
-            }
+            const createAssignment = new OptionItem('OPTIONS.NEW_ASSIGNMENT', 'add', () => {
+                void this.router.navigate([UIConstants.ROUTER_PREFIX + 'editorial/assignment'], {
+                    queryParams: {
+                        mainComponent: 'manageAssignment',
+                    },
+                });
+            });
+            createAssignment.toolpermissions = [
+                'TEST' + RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS,
+            ];
+            this.globalOptions.set([createAssignment]);
+
             void this.fetch(
                 this.assignmentService.searchAssignments({
                     body: {
