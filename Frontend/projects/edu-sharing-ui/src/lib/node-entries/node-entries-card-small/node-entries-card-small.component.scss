@@ -9,6 +9,39 @@ $collectionIconSize: 25px;
 
 @import '../node-entries-card/node-entries-card.main';
 
+@mixin assignmentBadge() {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 7px 6px;
+    border-radius: var(--borderRadiusBadges);
+    background-color: var(--palette-primary-100);
+    gap: 5px;
+    &.endTime-low {
+        background-color: color-mix(in srgb, var(--colorStatusPositive), 60% transparent);
+    }
+    &.endTime-medium {
+        background-color: color-mix(in srgb, var(--colorStatusWarning), 60% transparent);
+    }
+    &.endTime-high {
+        background-color: color-mix(in srgb, var(--colorStatusNegative), 60% transparent);
+    }
+    &.status-OPEN {
+        background-color: #ddd;
+    }
+    &.status-CANCELED {
+        background-color: color-mix(in srgb, var(--colorStatusNegative), 60% transparent);
+    }
+    &.status-PROGRESS {
+        background-color: color-mix(in srgb, var(--colorStatusWarning), 60% transparent);
+    }
+    &.status-FINISHED {
+        background-color: color-mix(in srgb, var(--colorStatusPositive), 60% transparent);
+    }
+    > i {
+        font-size: 18px;
+    }
+}
 @mixin assignmentSummary() {
     // the first p is a wrapper from tinymce
     > p:first-of-type {
@@ -73,61 +106,7 @@ $collectionIconSize: 25px;
             display: flex;
             justify-content: space-between;
             > div {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                padding: 7px 6px;
-                border-radius: var(--borderRadiusBadges);
-                background-color: var(--palette-primary-100);
-                gap: 5px;
-                &.endTime-low {
-                    background-color: color-mix(
-                        in srgb,
-                        var(--colorStatusPositive),
-                        60% transparent
-                    );
-                }
-                &.endTime-medium {
-                    background-color: color-mix(
-                        in srgb,
-                        var(--colorStatusWarning),
-                        60% transparent
-                    );
-                }
-                &.endTime-high {
-                    background-color: color-mix(
-                        in srgb,
-                        var(--colorStatusNegative),
-                        60% transparent
-                    );
-                }
-                &.status-OPEN {
-                    background-color: #ddd;
-                }
-                &.status-CANCELED {
-                    background-color: color-mix(
-                        in srgb,
-                        var(--colorStatusNegative),
-                        60% transparent
-                    );
-                }
-                &.status-PROGRESS {
-                    background-color: color-mix(
-                        in srgb,
-                        var(--colorStatusWarning),
-                        60% transparent
-                    );
-                }
-                &.status-FINISHED {
-                    background-color: color-mix(
-                        in srgb,
-                        var(--colorStatusPositive),
-                        60% transparent
-                    );
-                }
-                > i {
-                    font-size: 18px;
-                }
+                @include assignmentBadge();
             }
         }
         .summary {

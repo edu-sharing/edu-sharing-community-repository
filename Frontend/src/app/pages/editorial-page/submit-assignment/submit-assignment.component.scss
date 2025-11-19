@@ -1,15 +1,57 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+@use 'projects/edu-sharing-ui/src/lib/node-entries/node-entries-card-small/node-entries-card-small.component'
+    as card;
 
-.heading {
-    width: 100%;
+.assignment-view {
     display: flex;
+    flex-direction: column;
     gap: 10px;
-    align-items: center;
-    > span {
-        flex-grow: 1;
-        font-size: vars.$fontSizeXLarge;
-        font-weight: bold;
+    .heading {
+        width: 100%;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 10px;
+
+        > span {
+            flex-grow: 1;
+            font-size: vars.$fontSizeXLarge;
+            font-weight: bold;
+        }
+
+        border-bottom: 1px solid vars.$cardSeparatorLineColor;
     }
-    border-bottom: 1px solid vars.$cardSeparatorLineColor;
+    .block {
+        padding: 0 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid vars.$cardSeparatorLineColor;
+        > label {
+            font-size: vars.$fontSizeLarge;
+            font-weight: bold;
+        }
+        > div {
+            padding: 0 10px;
+            &.time {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+            }
+            &.start-time {
+                color: var(--textLight);
+            }
+            .badge {
+                @include card.assignmentBadge();
+            }
+        }
+    }
+}
+
+:host ::ng-deep {
+    .summary {
+        @include card.assignmentSummary();
+    }
 }

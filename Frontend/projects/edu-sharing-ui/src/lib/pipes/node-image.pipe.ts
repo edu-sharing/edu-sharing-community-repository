@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { NetworkService, Node, RestConstants } from 'ngx-edu-sharing-api';
+import { AssignmentFile, NetworkService, Node, RestConstants } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -27,17 +27,26 @@ export class NodeImagePipe implements PipeTransform {
         private networkApi: NetworkService,
     ) {}
 
-    transform(node: Node, preferences: NodeImagePreferences = {}): Observable<SafeResourceUrl> {
-        if (this.nodeHelper.isNodeCollection(node) && node.preview.isIcon) {
+    transform(
+        node: Node | AssignmentFile,
+        preferences: NodeImagePreferences = {},
+    ): Observable<SafeResourceUrl> {
+        if ((node as AssignmentFile).referNode) {
+            node = (node as AssignmentFile).referNode;
+        }
+        if (this.nodeHelper.isNodeCollection(node as Node) && (node as Node).preview.isIcon) {
             return null;
-        } else if (node.preview.data) {
+        } else if ((node as Node).preview.data) {
             return rxjs.of(
                 this.sanitizer.bypassSecurityTrustResourceUrl(
-                    'data:' + node.preview.mimetype + ';base64,' + node.preview.data,
+                    'data:' +
+                        (node as Node).preview.mimetype +
+                        ';base64,' +
+                        (node as Node).preview.data,
                 ),
             );
         } else {
-            return this.getPreviewUrl(node, preferences);
+            return this.getPreviewUrl(node as Node, preferences);
         }
     }
 

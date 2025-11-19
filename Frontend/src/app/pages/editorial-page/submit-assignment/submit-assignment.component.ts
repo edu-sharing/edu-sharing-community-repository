@@ -1,36 +1,18 @@
-import { Component, signal, ViewChild } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
-import { MatStepper, MatStepperModule } from '@angular/material/stepper';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { ShareDialogChooseDateComponent } from '../../../features/dialogs/dialog-modules/share-dialog/permission/choose-date/choose-date.component';
-import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
-import {
-    ManageAssignmentNodesComponent,
-    NodeWithRole,
-} from '../manage-assignment-nodes/manage-assignment-nodes.component';
-import {
-    Assignment,
-    AssignmentFileRequest,
-    AssignmentV1Service,
-    Authority,
-    CreateAssignmentRequest,
-    Permission,
-    PermissionRequest,
-    Submission,
-} from 'ngx-edu-sharing-api';
-import { NodeHelperService } from '../../../services/node-helper.service';
-import { EditorComponent } from '@tinymce/tinymce-angular';
-import { PlatformLocation } from '@angular/common';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { ManageAssignmentAuthoritiesComponent } from '../manage-assignment-authorities/manage-assignment-authorities.component';
-import { Toast } from 'ngx-edu-sharing-ui';
-import { DialogsService } from '../../../features/dialogs/dialogs.service';
-import { combineLatest, filter, firstValueFrom } from 'rxjs';
+import { Assignment, AssignmentFile, AssignmentV1Service } from 'ngx-edu-sharing-api';
+import { TranslateModule } from '@ngx-translate/core';
+import { combineLatest, filter } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { EditorialBreadcrumbService } from '../editorial-breadcrumb/editorial-breadcrumb.service';
-import { EditorialPageService } from '../editorial-page.service';
+import {
+    ColumnType,
+    InteractionType,
+    ListItem,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+} from 'ngx-edu-sharing-ui';
 
 /**
  * submits an invdividual assignment (for student)
@@ -42,7 +24,12 @@ import { EditorialPageService } from '../editorial-page.service';
     imports: [SharedModule, TranslateModule],
 })
 export class SubmitAssignmentComponent {
+    columns: ColumnType = {
+        Default: [new ListItem('NODE', 'title')],
+    };
     assignment = signal<Assignment>(null);
+    submittableFiles = new NodeDataSource<AssignmentFile>();
+    supplementaryFiles = new NodeDataSource<AssignmentFile>();
     constructor(
         private route: ActivatedRoute,
         private router: Router,
@@ -59,11 +46,20 @@ export class SubmitAssignmentComponent {
                         this.assignmentService.getAssignment({
                             assignmentId,
                         }),
+                        this.assignmentService.getAssignmentFiles({
+                            assignmentId,
+                        }),
                     ]),
                 ),
             )
-            .subscribe(([assignment]) => {
+            .subscribe(([assignment, files]) => {
                 this.assignment.set(assignment);
+                this.submittableFiles.setData(
+                    files.filter((f) => f.documentRole === 'SUBMITTABLE'),
+                );
+                this.supplementaryFiles.setData(
+                    files.filter((f) => f.documentRole === 'SUPPLEMENTARY'),
+                );
                 this.editorialBreadcrumbService.path.set([assignment.title]);
             });
     }
@@ -76,4 +72,7 @@ export class SubmitAssignmentComponent {
             },
         });
     }
+
+    protected readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    protected readonly InteractionType = InteractionType;
 }
