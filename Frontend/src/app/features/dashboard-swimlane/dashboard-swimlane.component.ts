@@ -185,7 +185,7 @@ export class DashboardSwimlaneComponent {
                 });
             });
             createAssignment.toolpermissions = [
-                'TEST' + RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS,
+                RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS,
             ];
             this.globalOptions.set([createAssignment]);
 
