@@ -50,7 +50,7 @@ public class SecurityConfigGoogleOneTap {
 
         http
                 .csrf(csrf -> csrf.disable())
-                .securityMatcher("/login/**","/logout/**","/shibboleth","/rest/authentication/v1/validateSSOSession/**")
+                .securityMatcher("/login/google/**","/shibboleth")
                 .authorizeHttpRequests((authorize) -> authorize
                         //   .requestMatchers("/shibboleth").authenticated()
                         //   .requestMatchers("/**").permitAll()

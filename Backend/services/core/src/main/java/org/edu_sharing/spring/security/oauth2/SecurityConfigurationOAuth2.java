@@ -63,7 +63,7 @@ public class SecurityConfigurationOAuth2 {
     @Bean
     public SecurityFilterChain app(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository, SilentLoginAuthorizationRequestResolver silentLoginAuthorizationRequestResolver, EduAuthSuccsessHandler eduAuthSuccsessHandler, OidcUserSessionMapper mapper) throws Exception {
         http
-                .securityMatcher("/login/**","/logout/**","/oauth2","/oauth2/**","/shibboleth","/rest/authentication/v1/validateSSOSession/**")
+                .securityMatcher("/login/oauth2/**","/logout/**","/oauth2","/oauth2/**","/shibboleth","/rest/authentication/v1/validateSSOSession/**")
                 .authorizeHttpRequests((authorize) -> authorize
                         //   .requestMatchers("/shibboleth").authenticated()
                         //   .requestMatchers("/**").permitAll()
@@ -114,7 +114,7 @@ public class SecurityConfigurationOAuth2 {
 
 
                 String idpRedirectUrl;
-                String successTarget = "/shibboleth";
+                String successTarget = "/";
                 try {
                     successTarget = ConfigServiceFactory.getCurrentConfig(request).getValue("logout.next", successTarget);
                 } catch (Exception e) {
