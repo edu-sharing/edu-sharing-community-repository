@@ -21,7 +21,7 @@
               [displayType]="NodeEntriesDisplayType.Grid"
               [checkbox]="false"
               [dragDrop]="{ dragAllowed: false }"
-              [initConfig]="submittableConfig"
+              [initConfig]="submittableConfigRO"
               [elementInteractionType]="InteractionType.Emitter"
               [dataSource]="submittableFiles"
               [columns]="columns"
@@ -57,7 +57,7 @@
       <div *ngIf="assignment()" class="assignment-submit">
         <ng-container *ngTemplateOutlet="heading"></ng-container>
         <ng-container *ngTemplateOutlet="summary"></ng-container>
-        <form [formGroup]="submitFormGroup" class="main-form">
+        <form [formGroup]="submitFormGroup" class="main-form block">
           <editor [init]="editorConfig" formControlName="submitComment"></editor>
         </form>
         <ng-container *ngTemplateOutlet="submitDetails"></ng-container>
@@ -84,10 +84,12 @@
               <ng-template #overlay let-element="element">
                 <div class="no-submission" *ngIf="!hasSubmissionFor(element)">
                   <button mat-button class="overlay" (click)="showFileDialog(null, element)">
-                    <i esIcon="cloud_upload"></i>
-                    <span>{{
-                      'EDITORIAL.SUBMIT_ASSIGNMENT.REPLACE_ASSIGNMENT_MATERIAL' | translate
-                    }}</span>
+                    <div class="upload">
+                      <i esIcon="cloud_upload"></i>
+                      <span>{{
+                        'EDITORIAL.SUBMIT_ASSIGNMENT.REPLACE_ASSIGNMENT_MATERIAL' | translate
+                      }}</span>
+                    </div>
                   </button>
                 </div>
               </ng-template>
@@ -101,6 +103,11 @@
 <ng-template #heading>
   <div class="heading">
     <span>{{ assignment() | nodeTitle }}</span>
+    <es-spinner-small *ngIf="loading()"></es-spinner-small>
+    <button mat-flat-button color="primary" [disabled]="!canSubmit()" (click)="submit()">
+      <i esIcon="send"></i>
+      {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.SUBMIT' }}
+    </button>
     <button mat-icon-button click="close()"><i esIcon="close"></i></button>
   </div>
 </ng-template>

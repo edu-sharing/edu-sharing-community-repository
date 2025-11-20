@@ -22,6 +22,7 @@
       "CREATE_ASSIGNMENT": "Neue Aufgabe",
       "CREATE_ASSIGNMENT_DESCRIPTION": "Anlegen einer neuen Aufgabe",
       "PREVIEW": "Vorschau anzeigen",
+      "SUBMISSION_REMOVE": "Element entfernen",
       "PREVIEW_DESCRIPTION": "Eine Vorschau des Inhalts inkl. der wichtigsten Metadaten anzeigen",
       "WORKSPACE_METADATA": "Statistik, Versionen & Details",
       "WORKSPACE_METADATA_DESCRIPTION": "Verwendungsstatistiken, Versionsverwaltung und allgemeine Details anzeigen",
@@ -78,7 +79,7 @@
       "START_TIME": "Ausgegeben",
       "END_TIME": "Abgabe bis",
       "ADD_ASSIGNMENT_MATERIAL": "Weiteres Material anfügen",
-      "REPLACE_ASSIGNMENT_MATERIAL": "Dieses Material abgeben",
+      "REPLACE_ASSIGNMENT_MATERIAL": "Dieses Material einreichen",
       "SUBMITTABLE": "Arbeitsmaterial",
       "SUPPLEMENTARY": "Begleitmaterial"
     },

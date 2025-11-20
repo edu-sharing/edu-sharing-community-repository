@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import {
     Assignment,
@@ -9,7 +9,7 @@ import {
     AssignmentFile,
 } from 'ngx-edu-sharing-api';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { combineLatest, filter, of, throwError } from 'rxjs';
+import { combineLatest, filter, firstValueFrom, of, throwError } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { EditorialBreadcrumbService } from '../editorial-breadcrumb/editorial-breadcrumb.service';
@@ -64,15 +64,28 @@ export class SubmitAssignmentComponent {
     );
     submitFormGroup: FormGroup;
     submittableConfig: ListOptionsConfig;
+    submittableConfigRO: ListOptionsConfig;
     supplementaryConfig: ListOptionsConfig;
     files = signal<AssignmentFile[]>(null);
+    loading = signal(false);
     assignment = signal<Assignment>(null);
     submission = signal<Submission>(null);
+    /**
+     * files that the student wants to submit
+     */
     submissionFiles = signal<SubmissionFile[]>(null);
     submissionAssignmentRefFile = signal<AssignmentFile>(null);
     submissionReplaceFile = signal<SubmissionFile | AssignmentFile>(null);
+    canSubmit = computed(
+        () =>
+            !this.loading() &&
+            this.files().every(
+                (f) => f.documentRole === 'SUPPLEMENTARY' || this.hasSubmissionFor(f.referNode),
+            ),
+    );
     submittableFiles = new NodeDataSource<Node>();
     supplementaryFiles = new NodeDataSource<Node>();
+
     constructor(
         private route: ActivatedRoute,
         private router: Router,
@@ -87,21 +100,20 @@ export class SubmitAssignmentComponent {
         private uiService: UIService,
     ) {
         this.initOptions();
-        this.editorialSidebarService.applyNodeEmitted.subscribe(({ nodes }) => {
+        this.editorialSidebarService.applyNodeEmitted.subscribe(async ({ nodes }) => {
             if (this.submissionReplaceFile()) {
             } else {
-                this.submissionFiles.set(
-                    (this.submissionFiles() || []).concat(
-                        nodes.map((node) => {
-                            return {
-                                assignmentFile: this.submissionAssignmentRefFile(),
-                                content: node,
-                                ref: node.ref,
-                                validationStatus: 'NOT_STARTET',
-                            } as SubmissionFile;
-                        }),
-                    ),
-                );
+                const newFiles = nodes.map((node) => {
+                    return {
+                        assignmentFile: this.submissionAssignmentRefFile(),
+                        content: node,
+                        ref: node.ref,
+                        validationStatus: 'NOT_STARTET',
+                    } as SubmissionFile;
+                });
+                await this.saveSubmissionFiles(newFiles);
+                this.submissionFiles.set((this.submissionFiles() || []).concat(newFiles));
+                this.syncSubmissionDataSource();
             }
         });
         this.submitFormGroup = this.formBuilder.group({
@@ -156,15 +168,14 @@ export class SubmitAssignmentComponent {
                 this.files.set(files);
                 this.submission.set(submission);
                 this.submissionFiles.set(submissionFiles);
-                this.submittableFiles.setData(
-                    files.filter((f) => f.documentRole === 'SUBMITTABLE').map((n) => n.referNode),
-                );
+                this.syncSubmissionDataSource();
                 this.supplementaryFiles.setData(
                     files.filter((f) => f.documentRole === 'SUPPLEMENTARY').map((n) => n.referNode),
                 );
                 this.editorialBreadcrumbService.path.set([assignment.title]);
             });
     }
+
     close() {
         void this.router.navigate([], {
             relativeTo: this.route,
@@ -174,10 +185,13 @@ export class SubmitAssignmentComponent {
             },
         });
     }
+
     showFileDialog(replaceFile?: SubmissionFile, assignmentFile?: Node) {
         this.submissionReplaceFile.set(replaceFile);
         this.submissionAssignmentRefFile.set(
-            this.files().find((f) => f.referNode.ref.id === assignmentFile.ref.id),
+            assignmentFile
+                ? this.files().find((f) => f.referNode.ref.id === assignmentFile.ref.id)
+                : null,
         );
         this.editorialSidebarService.showOption({
             option: 'SORT_INTO',
@@ -187,6 +201,7 @@ export class SubmitAssignmentComponent {
                 nodes.every((n) => !this.nodeHelperService.isNodeCollection(n) && !n.isDirectory),
         });
     }
+
     protected readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     protected readonly InteractionType = InteractionType;
 
@@ -225,14 +240,34 @@ export class SubmitAssignmentComponent {
         download.constrains = [];
         download.showAlways = true;
 
+        const remove = new OptionItem(
+            'EDITORIAL.OPTIONS.SUBMISSION_REMOVE',
+            'close',
+            async (node) => {
+                await this.deleteSubmissionFiles(this.hasSubmissionFor(node));
+                this.submissionFiles().splice(
+                    this.submissionFiles().indexOf(this.hasSubmissionFor(node)),
+                    1,
+                );
+                this.syncSubmissionDataSource();
+            },
+        );
+        remove.group = DefaultGroups.Delete;
+        remove.priority = 10;
+        remove.showAlways = true;
+        remove.customShowCallback = async (nodes) => !!this.hasSubmissionFor(nodes?.[0]);
+
+        this.submittableConfigRO = {
+            customOptions: {
+                useDefaultOptions: false,
+                addOptions: [download],
+            },
+        };
+
         this.submittableConfig = {
             customOptions: {
                 useDefaultOptions: false,
-                addOptions: [
-                    download,
-                    // editConnectorNode,
-                    // uploadManually
-                ],
+                addOptions: [download, remove],
             },
         };
 
@@ -246,7 +281,57 @@ export class SubmitAssignmentComponent {
 
     hasSubmissionFor(element: Node) {
         return this.submissionFiles()?.find(
-            (n) => n.assignmentFile.referNode.ref.id === element.ref.id,
+            (n) =>
+                n.assignmentFile?.referNode.ref.id === element.ref.id ||
+                n.content?.ref.id === element.ref.id,
         );
     }
+
+    private syncSubmissionDataSource() {
+        const nodes = this.files()
+            .filter((f) => f.documentRole === 'SUBMITTABLE')
+            .map((n) => n.referNode)
+            .concat(
+                (this.submissionFiles() || [])
+                    .filter((f) => !f.assignmentFile)
+                    .map((f) => f.content),
+            );
+        this.submittableFiles.setData(nodes);
+        this.initOptions();
+    }
+
+    async deleteSubmissionFiles(file: SubmissionFile) {
+        this.loading.set(true);
+        await firstValueFrom(
+            this.assignmentService.deleteSubmissionFile({
+                assignmentId: this.assignment().ref.id,
+                submissionId: this.submission()?.ref.id || ME,
+                submissionFileId: file.ref.id,
+            }),
+        );
+        this.loading.set(false);
+    }
+
+    private async saveSubmissionFiles(newFiles: SubmissionFile[]) {
+        this.loading.set(true);
+        for (let file of newFiles) {
+            await firstValueFrom(
+                this.assignmentService.createOrUpdateSubmissionFile({
+                    assignmentId: this.assignment().ref.id,
+                    submissionId: this.submission()?.ref.id || ME,
+                    submissionFileId: file.assignmentFile?.ref.id,
+                    body: {
+                        metadata: {
+                            originalFile: file.ref.id,
+                            validationStatus: 'NOT_STARTET',
+                            properties: {},
+                        },
+                    },
+                }),
+            );
+        }
+        this.loading.set(false);
+    }
+
+    submit() {}
 }
