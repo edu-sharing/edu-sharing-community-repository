@@ -17,48 +17,55 @@ export class GlobalLoginComponent {
         private ngZone: NgZone,
         @Inject(DOCUMENT) private document: Document,
     ) {
-        this.ngZone.runOutsideAngular(() => {
-            this.authenticationService.observeLoginInfo().subscribe((login) => {
+        this.authenticationService.observeLoginInfo().subscribe((login) => {
+            if (login.statusCode !== RestConstants.STATUS_CODE_OK) {
                 console.log(login);
-                if (login.statusCode !== RestConstants.STATUS_CODE_OK) {
-                    const googleEntry = (login as PrimaryLogin).oauthEntries.find(
-                        (e) => e.name === 'google',
-                    );
-                    if (googleEntry?.clientId && googleEntry.allowThirdPartyLoginPlugin) {
-                        const newScriptElement = document.createElement('script');
-                        newScriptElement.src = 'https://accounts.google.com/gsi/client';
-                        newScriptElement.async = true;
-                        newScriptElement.onload = () => {
-                            UIHelper.waitForComponent(this.ngZone, window, 'google').subscribe(
-                                () => {
-                                    (window as any).google.accounts.id.initialize({
-                                        client_id: googleEntry.clientId,
-                                        color_scheme: 'light',
-                                        ux_mode: 'redirect',
-                                        login_uri:
-                                            this.platformLocation.getBaseHrefFromDOM() +
-                                            'login/oauth2/code/' +
-                                            encodeURI(googleEntry.registrationId),
-                                        callback: (data: {
-                                            credential: string;
-                                            select_by: string;
-                                        }) => {
-                                            console.log('got data', data);
-                                            // @TODO: An endpoint or api endpoint is required to handle the credential
-                                            /*window.open(
-                                            this.platformLocation.getBaseHrefFromDOM() + 'login/oauth2/code/' + encodeURI(googleEntry.registrationId) + '?state=' + encodeURIComponent(data.credential),
-                                            '_SELF'
-                                        );*/
-                                        },
-                                    });
-                                    (window as any).google.accounts.id.prompt();
-                                },
-                            );
-                        };
-                        this.document.head.appendChild(newScriptElement);
-                    }
+                const googleEntry = (login as PrimaryLogin).oauthEntries.find(
+                    (e) => e.name === 'google',
+                );
+                console.log('Test ge:' + JSON.stringify(googleEntry));
+                if (googleEntry?.clientId && googleEntry?.allowThirdPartyLoginPlugin) {
+                    console.log('clientID:' + googleEntry.clientId);
+                    this.loadGoogleScript(googleEntry.clientId);
                 }
+            }
+        });
+    }
+
+    private loadGoogleScript(clientId: string) {
+        const script = document.createElement('script');
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.async = true;
+        script.defer = true;
+        script.onload = () => {
+            console.log('GLOBAL google script loaded');
+            UIHelper.waitForComponent(this.ngZone, window, 'google').subscribe(() => {
+                console.log('google loaded');
+                (window as any).handleCredentialResponse = (response: any) => {
+                    console.log('Received token: ', response);
+                    this.sendToBackend(response.credential);
+                };
+
+                (window as any).google.accounts.id.initialize({
+                    client_id: clientId,
+                    callback: (window as any).handleCredentialResponse,
+                });
+
+                (window as any).google.accounts.id.prompt();
             });
+        };
+        document.body.appendChild(script);
+    }
+
+    sendToBackend(token: string) {
+        fetch(this.platformLocation.getBaseHrefFromDOM() + 'login/google', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ credential: token }),
+        }).then((r) => {
+            if (r.ok)
+                window.location.href = this.platformLocation.getBaseHrefFromDOM() + 'shibboleth';
+            else console.error('Login failed:', r.status);
         });
     }
 }

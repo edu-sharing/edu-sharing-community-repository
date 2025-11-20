@@ -49,6 +49,7 @@ import org.edu_sharing.service.authentication.EduAuthentication;
 import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
+import org.edu_sharing.spring.security.google.GoogleOneTapAuthenticationToken;
 import org.edu_sharing.spring.security.oauth2.config.OAuth2ClientProperties;
 import org.edu_sharing.spring.servlet.SpringHttpServlet;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -243,7 +244,21 @@ public class ShibbolethServlet extends SpringHttpServlet {
                     ssoMap.put(key, value.toString());
                 }
             });
-        } else if (externalAuth) {
+        }else if(authentication instanceof GoogleOneTapAuthenticationToken authToken){
+
+            String clientId = "google";
+            String context = OAuth2ClientProperties.getContextId(clientId);
+            String registrationKey = OAuth2ClientProperties.getRegistrationKey(clientId);
+
+            ssoMap.put(SSOAuthorityMapper.PARAM_SSO_TYPE, SSOAuthorityMapper.SSO_TYPE_OAUTH);
+            ssoMap.put(SSOAuthorityMapper.PARAM_SSO_OAUTH_CONTEXT, context);
+            ssoMap.put(SSOAuthorityMapper.PARAM_SSO_OAUTH_REG_KEY, registrationKey);
+
+            OAuth2User oAuth2User = (OAuth2User)authToken.getPrincipal();
+
+            oAuth2User.getAttributes().forEach((key, value) -> {ssoMap.put(key, value.toString());});
+
+        }  else if (externalAuth) {
             ssoMap.put(SSOAuthorityMapper.PARAM_SSO_TYPE, SSOAuthorityMapper.SSO_TYPE_EXTERNAL);
             Config config = this.configLoader.getConfig().getConfig("security.sso.external.mapping.person");
             for(Map.Entry<String, ConfigValue> e : config.entrySet()){

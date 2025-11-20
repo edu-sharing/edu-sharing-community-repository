@@ -32,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.spring.security.google.SecurityConfigGoogleOneTap;
 import org.edu_sharing.spring.security.oauth2.SecurityConfigurationOAuth2;
 import org.springframework.stereotype.Component;
 
@@ -71,7 +72,7 @@ public class AuthMethodSSO implements AuthMethodInterface {
                 : null;
         if (SSOAuthorityMapper.isShibbolethAuthType(paramAuthType)
                 && springProfiles != null
-                && (springProfiles.contains(SecurityConfigurationOAuth2.PROFILE_ID) || springProfiles.contains("samlEnabled"))) {
+                && (springProfiles.contains(SecurityConfigurationOAuth2.PROFILE_ID) || springProfiles.contains("samlEnabled") || springProfiles.contains(SecurityConfigGoogleOneTap.PROFILE_ID))) {
             return ssoAuthorityMapper.mapAuthority(params);
         } else if (SSOAuthorityMapper.isShibbolethAuthType(paramAuthType)
                 && config.getBoolean("security.sso.external.enabled")) {
