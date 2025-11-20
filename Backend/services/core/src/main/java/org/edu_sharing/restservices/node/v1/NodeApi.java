@@ -376,6 +376,7 @@ public class NodeApi  {
     	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
     	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
     	@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-")) ) @QueryParam("propertyFilter") List<String> propertyFilter,
+        @Parameter(description = "version of the node") @QueryParam("version") String version,
 		@Context HttpServletRequest req) {
     	
     	try {
@@ -388,8 +389,13 @@ public class NodeApi  {
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			node=NodeDao.mapNodeConstants(repoDao,node);
 
-			NodeDao nodeDao = NodeDao.getNode(repoDao, node, filter);
-	    	
+            NodeDao nodeDao;
+            if (version != null && !version.equals("-1")) {
+                nodeDao = NodeDao.getNodeWithVersion(repoDao, node, version);
+            } else {
+                nodeDao = NodeDao.getNode(repoDao, node, filter);
+            }
+
 	    	NodeEntry response = new NodeEntry();
 	    	response.setNode(nodeDao.asNode());
 	    	
@@ -419,7 +425,8 @@ public class NodeApi  {
 	public Response getMetadataSigned(
 			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
 			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-			@Context HttpServletRequest req) {
+            @Parameter(description = "Version of the node") @QueryParam("version") String version,
+            @Context HttpServletRequest req) {
 
 		try {
 			RepoProxy.RemoteRepoDetails remote = RepoProxyFactory.getRepoProxy().myTurn(repository, node);
@@ -429,7 +436,7 @@ public class NodeApi  {
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			node=NodeDao.mapNodeConstants(repoDao,node);
 
-			NodeDao nodeDao = NodeDao.getNode(repoDao, node, Filter.createShowAllFilter());
+            NodeDao nodeDao = NodeDao.getNodeWithVersion(repoDao, node, version);
 
 			Base64.Encoder encoder = Base64.getEncoder();
 			SignedNode signedNode = nodeDao.getSignedNode();
