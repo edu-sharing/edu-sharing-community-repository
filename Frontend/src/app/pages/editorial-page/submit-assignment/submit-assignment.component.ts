@@ -1,10 +1,10 @@
 import { Component, signal } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
-import { Assignment, Node, AssignmentV1Service } from 'ngx-edu-sharing-api';
-import { TranslateModule } from '@ngx-translate/core';
-import { combineLatest, filter } from 'rxjs';
+import { Assignment, Node, AssignmentV1Service, ME, Submission } from 'ngx-edu-sharing-api';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { combineLatest, filter, of, throwError } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
-import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
+import { catchError, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { EditorialBreadcrumbService } from '../editorial-breadcrumb/editorial-breadcrumb.service';
 import {
     ColumnType,
@@ -21,34 +21,53 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { UIService } from '../../../core-module/rest/services/ui.service';
 import { OptionsHelperService } from '../../../services/options-helper.service';
+import { EditorComponent } from '@tinymce/tinymce-angular';
+import { AssignmentEditorConfig } from '../manage-assignment/manage-assignment.component';
+import { PlatformLocation } from '@angular/common';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { RestConstants } from '../../../core-module/rest/rest-constants';
 
 /**
- * submits an invdividual assignment (for student)
+ * submits an individual assignment (for student)
  */
 @Component({
     selector: 'es-submit-assignment',
     templateUrl: 'submit-assignment.component.html',
     styleUrls: ['submit-assignment.component.scss'],
-    imports: [SharedModule, TranslateModule],
+    imports: [SharedModule, TranslateModule, EditorComponent],
 })
 export class SubmitAssignmentComponent {
+    readonly editorConfig = {
+        ...AssignmentEditorConfig,
+        base_url: this.platformLocation.getBaseHrefFromDOM() + 'tinymce',
+        language: this.translateService.getDefaultLang(),
+    };
     columns: ColumnType = {
         Default: [new ListItem('NODE', 'title')],
     };
+    uploadOption = new OptionItem('EDITORIAL.SUBMIT_ASSIGNMENT.TAB_SUBMIT', 'add', () => {});
+    submitFormGroup: FormGroup;
     submittableConfig: ListOptionsConfig;
     supplementaryConfig: ListOptionsConfig;
     assignment = signal<Assignment>(null);
+    submission = signal<Submission>(null);
     submittableFiles = new NodeDataSource<Node>();
     supplementaryFiles = new NodeDataSource<Node>();
     constructor(
         private route: ActivatedRoute,
         private router: Router,
         private editorialBreadcrumbService: EditorialBreadcrumbService,
+        private translateService: TranslateService,
+        private platformLocation: PlatformLocation,
         private assignmentService: AssignmentV1Service,
         private optionsHelperService: OptionsHelperService,
+        private formBuilder: FormBuilder,
         private uiService: UIService,
     ) {
         this.initOptions();
+        this.submitFormGroup = this.formBuilder.group({
+            submitComment: ['', [Validators.required]],
+        });
         this.route.queryParams
             .pipe(
                 map((p) => p.assignment),
@@ -62,11 +81,26 @@ export class SubmitAssignmentComponent {
                         this.assignmentService.getAssignmentFiles({
                             assignmentId,
                         }),
+                        this.assignmentService
+                            .getSubmission({
+                                assignmentId,
+                                submissionId: ME,
+                            })
+                            .pipe(
+                                catchError((err) => {
+                                    if (err.status === RestConstants.HTTP_NOT_FOUND || true) {
+                                        err.preventDefault();
+                                        return of(null);
+                                    }
+                                    return throwError(() => err);
+                                }),
+                            ),
                     ]),
                 ),
             )
-            .subscribe(([assignment, files]) => {
+            .subscribe(([assignment, files, submission]) => {
                 this.assignment.set(assignment);
+                this.submission.set(submission);
                 this.submittableFiles.setData(
                     files.filter((f) => f.documentRole === 'SUBMITTABLE').map((n) => n.referNode),
                 );

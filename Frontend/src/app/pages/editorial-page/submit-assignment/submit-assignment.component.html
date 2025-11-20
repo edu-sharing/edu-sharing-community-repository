@@ -6,32 +6,10 @@
     </ng-template>
     <ng-template matTabContent>
       <div *ngIf="assignment()" class="assignment-view">
-        <div class="heading">
-          <span>{{ assignment() | nodeTitle }}</span>
-          <button mat-icon-button click="close()"><i esIcon="close"></i></button>
-        </div>
-        <div class="block">
-          <label for="summary">{{ 'EDITORIAL.ASSIGNMENT.FORM.SUMMARY' | translate }}</label>
-          <div id="summary" class="summary" [innerHTML]="assignment().summary"></div>
-        </div>
-        <div class="block">
-          <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.SUBMIT_DETAILS' | translate }}</label>
-          <div class="time start-time">
-            <label for="startTime">{{
-              'EDITORIAL.SUBMIT_ASSIGNMENT.START_TIME' | translate
-            }}</label>
-            <div id="startTime">
-              {{ assignment().created | formatDate : { relative: false, time: true, date: true } }}
-            </div>
-          </div>
-          <div class="time end-time" *ngIf="assignment().endTime as endTime">
-            <label for="endTime">{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.END_TIME' | translate }}</label>
-            <div id="endTime" class="badge">
-              <i esIcon="alarm"></i>
-              {{ endTime | formatDate : { relative: false, time: true, date: true } }}
-            </div>
-          </div>
-        </div>
+        <ng-container *ngTemplateOutlet="heading"></ng-container>
+        <ng-container *ngTemplateOutlet="summary"></ng-container>
+        <ng-container *ngTemplateOutlet="submitDetails"></ng-container>
+
         <div class="block files">
           <label
             >{{ submittableFiles.getTotal() }}x
@@ -68,4 +46,71 @@
       </div>
     </ng-template>
   </mat-tab>
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <i esIcon="send"></i>
+      {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.TAB_SUBMIT' | translate }}
+    </ng-template>
+    <ng-template matTabContent>
+      <div *ngIf="assignment()" class="assignment-submit">
+        <ng-container *ngTemplateOutlet="heading"></ng-container>
+        <ng-container *ngTemplateOutlet="summary"></ng-container>
+        <form [formGroup]="submitFormGroup" class="main-form">
+          <editor [init]="editorConfig" formControlName="submitComment"></editor>
+        </form>
+        <ng-container *ngTemplateOutlet="submitDetails"></ng-container>
+
+        <div class="block files">
+          <label
+            >{{ submittableFiles.getTotal() }}x
+            {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.SUBMITTABLE' | translate }}</label
+          >
+          <div>
+            <!-- @TODO: When in submit mode, show these as temporary nodes and allow an upload selector + create any upload if submission allows it -->
+            <es-node-entries-wrapper
+              [displayType]="NodeEntriesDisplayType.Grid"
+              [checkbox]="false"
+              [globalOptions]="
+                assignment().allowAdditionalDocumentSubmissions ? [uploadOption] : []
+              "
+              [initConfig]="submittableConfig"
+              [elementInteractionType]="InteractionType.Emitter"
+              [dataSource]="submittableFiles"
+              [columns]="columns"
+            ></es-node-entries-wrapper>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </mat-tab>
 </mat-tab-group>
+<ng-template #heading>
+  <div class="heading">
+    <span>{{ assignment() | nodeTitle }}</span>
+    <button mat-icon-button click="close()"><i esIcon="close"></i></button>
+  </div>
+</ng-template>
+<ng-template #summary>
+  <div class="block">
+    <label for="summary">{{ 'EDITORIAL.ASSIGNMENT.FORM.SUMMARY' | translate }}</label>
+    <div id="summary" class="summary" [innerHTML]="assignment().summary"></div>
+  </div>
+</ng-template>
+<ng-template #submitDetails>
+  <div class="block">
+    <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.SUBMIT_DETAILS' | translate }}</label>
+    <div class="time start-time">
+      <label for="startTime">{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.START_TIME' | translate }}</label>
+      <div id="startTime">
+        {{ assignment().created | formatDate : { relative: false, time: true, date: true } }}
+      </div>
+    </div>
+    <div class="time end-time" *ngIf="assignment().endTime as endTime">
+      <label for="endTime">{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.END_TIME' | translate }}</label>
+      <div id="endTime" class="badge">
+        <i esIcon="alarm"></i>
+        {{ endTime | formatDate : { relative: false, time: true, date: true } }}
+      </div>
+    </div>
+  </div>
+</ng-template>

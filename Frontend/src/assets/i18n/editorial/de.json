@@ -73,6 +73,7 @@
     },
     "SUBMIT_ASSIGNMENT": {
       "TAB_ASSIGNMENT": "Aufgabe",
+      "TAB_SUBMIT": "Abgaben",
       "SUBMIT_DETAILS": "Abgabeinformationen",
       "START_TIME": "Ausgegeben",
       "END_TIME": "Abgabe bis",

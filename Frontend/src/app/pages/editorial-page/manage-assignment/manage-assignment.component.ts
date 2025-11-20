@@ -32,6 +32,20 @@ import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { EditorialBreadcrumbService } from '../editorial-breadcrumb/editorial-breadcrumb.service';
 
 export type AssignmentBase = Pick<Assignment, 'title' | 'type' | 'summary'>;
+export const AssignmentEditorConfig = {
+    branding: false,
+    height: 200,
+    suffix: '.min',
+    menubar: false,
+    statusbar: false,
+    resize: true,
+    plugins: ['lists'],
+    default_link_target: '_blank',
+    link_title: false,
+    newline_behavior: 'invert',
+    link_assume_external_targets: true,
+    toolbar: 'bold | bullist numlist | undo redo',
+} as any;
 @Component({
     selector: 'es-manage-assignment',
     templateUrl: 'manage-assignment.component.html',
@@ -48,21 +62,10 @@ export type AssignmentBase = Pick<Assignment, 'title' | 'type' | 'summary'>;
 })
 export class ManageAssignmentComponent {
     readonly editorConfig = {
-        branding: false,
-        height: 200,
+        ...AssignmentEditorConfig,
         base_url: this.platformLocation.getBaseHrefFromDOM() + 'tinymce',
-        suffix: '.min',
-        menubar: false,
-        statusbar: false,
-        resize: true,
-        plugins: ['lists'],
-        default_link_target: '_blank',
-        link_title: false,
-        newline_behavior: 'invert',
-        link_assume_external_targets: true,
-        toolbar: 'bold | bullist numlist | undo redo',
         language: this.translateService.getDefaultLang(),
-    } as any;
+    };
     now = new Date().getTime();
     dateTime = new Date().getTime() + 1000 * 3600 * 24 * 5;
     @ViewChild(MatStepper) matStepper: MatStepper;
