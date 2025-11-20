@@ -342,7 +342,7 @@ public class AssignmentApi {
     @Schema(name = "SubmissionFileUpload", description = "Multipart upload for submission files")
     public static class SubmissionFileUpload {
         @Schema(description = "JSON-Metadaten")
-        public AssignmentFileRequest metadata;
+        public SubmissionFileRequest metadata;
 
         @Schema(type = "string", format = "binary", description = "File content")
         public InputStream binary;
@@ -406,7 +406,7 @@ public class AssignmentApi {
         }
 
         log.debug("Received metadata: {}", submissionFileRequest);
-        log.debug("Received file: {}", fileMetaData.getFileName());
+        log.debug("Received file: {}", fileMetaData != null ? fileMetaData.getFileName() : null);
 
         AssignmentDao assignment = assignmentDaoFactory.assignment(assignmentId);
         SubmissionDao submission = assignment.getOrCreateSubmission(submissionId);

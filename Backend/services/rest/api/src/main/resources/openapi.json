@@ -377,7 +377,6 @@
         "type": "object"
       },
       "AssignmentFileRequest": {
-        "description": "JSON-Metadaten",
         "properties": {
           "documentRole": {
             "enum": [
@@ -7439,6 +7438,44 @@
         ],
         "type": "object"
       },
+      "SubmissionFileRequest": {
+        "description": "JSON-Metadaten",
+        "properties": {
+          "assignmentFile": {
+            "description": "id of the original assignment file (if applicable)",
+            "type": "string"
+          },
+          "originalFile": {
+            "description": "id of an other file (this must create a full copy of this file)",
+            "type": "string"
+          },
+          "properties": {
+            "additionalProperties": {
+              "description": "properties applied to the submitted file",
+              "items": {
+                "description": "properties applied to the submitted file",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "description": "properties applied to the submitted file",
+            "type": "object"
+          },
+          "validationStatus": {
+            "description": "only editable by the coordinator of the task",
+            "enum": [
+              "NOT_STARTET",
+              "PENDING",
+              "FINISHED"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "properties"
+        ],
+        "type": "object"
+      },
       "SubmissionFileUpload": {
         "description": "Multipart upload for submission files",
         "properties": {
@@ -7448,7 +7485,7 @@
             "type": "string"
           },
           "metadata": {
-            "$ref": "#/components/schemas/AssignmentFileRequest"
+            "$ref": "#/components/schemas/SubmissionFileRequest"
           }
         },
         "type": "object"
