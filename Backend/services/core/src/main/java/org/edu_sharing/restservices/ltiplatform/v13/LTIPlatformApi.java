@@ -242,13 +242,13 @@ public class LTIPlatformApi {
             }
 
 
-            if (AuthenticationUtil.getFullyAuthenticatedUser() != null && appInfo.hasLtiToolCustomContentOption() && loginInitiationSessionObject.getContentUrlNodeId() != null) {
+            if (appInfo.hasLtiToolCustomContentOption() && loginInitiationSessionObject.getContentUrlNodeId() != null) {
                 NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, loginInitiationSessionObject.getContentUrlNodeId());
-                AccessStatus accessStatus = permissionService.hasPermission(nodeRef, PermissionService.WRITE_CONTENT);
+                AccessStatus accessStatus = AuthenticationUtil.runAs(()->permissionService.hasPermission(nodeRef, PermissionService.WRITE_CONTENT),username);
                 if (AuthenticationUtil.runAsSystem(() -> nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)))) {
-                    NodeRef nodeRefOriginal = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
-                            (String) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)));
+
                     try {
+                        NodeRef nodeRefOriginal = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)));
                         accessStatus = permissionService.hasPermission(nodeRefOriginal, PermissionService.WRITE_CONTENT);
                     } catch (Exception e) {
                         accessStatus = AccessStatus.DENIED;
@@ -314,9 +314,9 @@ public class LTIPlatformApi {
         toolPlatform.put("description", homeApp.getAppCaption());
 
 
-        String firstName = (String) nodeService.getProperty(personService.getPerson(username), ContentModel.PROP_FIRSTNAME);
-        String lastName = (String) nodeService.getProperty(personService.getPerson(username), ContentModel.PROP_LASTNAME);
-        String email = (String) nodeService.getProperty(personService.getPerson(username), ContentModel.PROP_EMAIL);
+        String firstName = AuthenticationUtil.runAsSystem(() -> (String) nodeService.getProperty(personService.getPerson(username), ContentModel.PROP_FIRSTNAME));
+        String lastName = AuthenticationUtil.runAsSystem(() -> (String) nodeService.getProperty(personService.getPerson(username), ContentModel.PROP_LASTNAME));
+        String email = AuthenticationUtil.runAsSystem(() -> (String) nodeService.getProperty(personService.getPerson(username), ContentModel.PROP_EMAIL));
 
         Date now = new Date();
         JwtBuilder jwtBuilder = Jwts.builder()
