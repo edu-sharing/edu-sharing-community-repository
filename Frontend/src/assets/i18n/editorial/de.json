@@ -77,6 +77,8 @@
       "SUBMIT_DETAILS": "Abgabeinformationen",
       "START_TIME": "Ausgegeben",
       "END_TIME": "Abgabe bis",
+      "ADD_ASSIGNMENT_MATERIAL": "Weiteres Material anfügen",
+      "REPLACE_ASSIGNMENT_MATERIAL": "Dieses Material abgeben",
       "SUBMITTABLE": "Arbeitsmaterial",
       "SUPPLEMENTARY": "Begleitmaterial"
     },

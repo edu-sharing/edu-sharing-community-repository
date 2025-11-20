@@ -110,6 +110,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
      */
     @Output() columnsChange = new EventEmitter<ListItem[]>();
     @Input() globalOptions: OptionItem[];
+    @Input() globalOptionsPosition: 'before' | 'after' = 'before';
     @Input() displayType = NodeEntriesDisplayType.Grid;
     @Output() displayTypeChange = new EventEmitter<NodeEntriesDisplayType>();
     @Output() selectionChange = new EventEmitter<SelectionChange<T>>();
@@ -288,6 +289,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
             this.globalOptions = globalOptions$.value;
         }
         this.entriesService.globalOptions = this.globalOptions;
+        this.entriesService.globalOptionsPosition = this.globalOptionsPosition;
         this.entriesService.sort = this.sort;
         this.entriesService.sortChange = this.sortChange;
         this.entriesService.dragDrop = this.dragDrop;

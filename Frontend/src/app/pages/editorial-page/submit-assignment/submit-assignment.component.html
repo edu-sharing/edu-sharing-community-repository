@@ -20,6 +20,7 @@
             <es-node-entries-wrapper
               [displayType]="NodeEntriesDisplayType.Grid"
               [checkbox]="false"
+              [dragDrop]="{ dragAllowed: false }"
               [initConfig]="submittableConfig"
               [elementInteractionType]="InteractionType.Emitter"
               [dataSource]="submittableFiles"
@@ -36,6 +37,7 @@
             <es-node-entries-wrapper
               [displayType]="NodeEntriesDisplayType.Grid"
               [checkbox]="false"
+              [dragDrop]="{ dragAllowed: false }"
               [initConfig]="supplementaryConfig"
               [elementInteractionType]="InteractionType.Emitter"
               [dataSource]="supplementaryFiles"
@@ -66,10 +68,11 @@
             {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.SUBMITTABLE' | translate }}</label
           >
           <div>
-            <!-- @TODO: When in submit mode, show these as temporary nodes and allow an upload selector + create any upload if submission allows it -->
             <es-node-entries-wrapper
               [displayType]="NodeEntriesDisplayType.Grid"
               [checkbox]="false"
+              [dragDrop]="{ dragAllowed: false }"
+              globalOptionsPosition="after"
               [globalOptions]="
                 assignment().allowAdditionalDocumentSubmissions ? [uploadOption] : []
               "
@@ -77,7 +80,18 @@
               [elementInteractionType]="InteractionType.Emitter"
               [dataSource]="submittableFiles"
               [columns]="columns"
-            ></es-node-entries-wrapper>
+            >
+              <ng-template #overlay let-element="element">
+                <div class="no-submission" *ngIf="!hasSubmissionFor(element)">
+                  <button mat-button class="overlay" (click)="showFileDialog(null, element)">
+                    <i esIcon="cloud_upload"></i>
+                    <span>{{
+                      'EDITORIAL.SUBMIT_ASSIGNMENT.REPLACE_ASSIGNMENT_MATERIAL' | translate
+                    }}</span>
+                  </button>
+                </div>
+              </ng-template>
+            </es-node-entries-wrapper>
           </div>
         </div>
       </div>

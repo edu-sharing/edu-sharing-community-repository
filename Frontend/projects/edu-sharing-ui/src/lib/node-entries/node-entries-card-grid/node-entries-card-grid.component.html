@@ -103,7 +103,10 @@
       (scrolled)="!visibleItemsLimited && loadData('scroll')"
     >
       <es-node-entries-global-options
-        *ngIf="(entriesService.globalOptionsSubject | async)?.length"
+        *ngIf="
+          (entriesService.globalOptionsSubject | async)?.length &&
+          entriesService.globalOptionsPosition === 'before'
+        "
         [displayType]="displayType"
       >
       </es-node-entries-global-options>
@@ -184,6 +187,14 @@
           </div>
         </div>
       </ng-container>
+      <es-node-entries-global-options
+        *ngIf="
+          (entriesService.globalOptionsSubject | async)?.length &&
+          entriesService.globalOptionsPosition === 'after'
+        "
+        [displayType]="displayType"
+      >
+      </es-node-entries-global-options>
     </div>
   </div>
 </ng-container>

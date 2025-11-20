@@ -1,6 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
-import { Assignment, Node, AssignmentV1Service, ME, Submission } from 'ngx-edu-sharing-api';
+import {
+    Assignment,
+    Node,
+    AssignmentV1Service,
+    ME,
+    Submission,
+    AssignmentFile,
+} from 'ngx-edu-sharing-api';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { combineLatest, filter, of, throwError } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -16,6 +23,7 @@ import {
     ListOptionsConfig,
     NodeDataSource,
     NodeEntriesDisplayType,
+    NodeHelperService,
     OptionData,
     OptionItem,
 } from 'ngx-edu-sharing-ui';
@@ -26,6 +34,10 @@ import { AssignmentEditorConfig } from '../manage-assignment/manage-assignment.c
 import { PlatformLocation } from '@angular/common';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
+import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
+import { NodeWithRole } from '../manage-assignment-nodes/manage-assignment-nodes.component';
+import { SubmissionFile } from '../../../../../dist/edu-sharing-api/lib/api/models/submission-file';
+import { TabType } from '../nodes-selector/nodes-selector.component';
 
 /**
  * submits an individual assignment (for student)
@@ -45,18 +57,28 @@ export class SubmitAssignmentComponent {
     columns: ColumnType = {
         Default: [new ListItem('NODE', 'title')],
     };
-    uploadOption = new OptionItem('EDITORIAL.SUBMIT_ASSIGNMENT.TAB_SUBMIT', 'add', () => {});
+    uploadOption = new OptionItem(
+        'EDITORIAL.SUBMIT_ASSIGNMENT.ADD_ASSIGNMENT_MATERIAL',
+        'add',
+        () => this.showFileDialog(),
+    );
     submitFormGroup: FormGroup;
     submittableConfig: ListOptionsConfig;
     supplementaryConfig: ListOptionsConfig;
+    files = signal<AssignmentFile[]>(null);
     assignment = signal<Assignment>(null);
     submission = signal<Submission>(null);
+    submissionFiles = signal<SubmissionFile[]>(null);
+    submissionAssignmentRefFile = signal<AssignmentFile>(null);
+    submissionReplaceFile = signal<SubmissionFile | AssignmentFile>(null);
     submittableFiles = new NodeDataSource<Node>();
     supplementaryFiles = new NodeDataSource<Node>();
     constructor(
         private route: ActivatedRoute,
         private router: Router,
         private editorialBreadcrumbService: EditorialBreadcrumbService,
+        private editorialSidebarService: EditorialSidebarService,
+        private nodeHelperService: NodeHelperService,
         private translateService: TranslateService,
         private platformLocation: PlatformLocation,
         private assignmentService: AssignmentV1Service,
@@ -65,6 +87,23 @@ export class SubmitAssignmentComponent {
         private uiService: UIService,
     ) {
         this.initOptions();
+        this.editorialSidebarService.applyNodeEmitted.subscribe(({ nodes }) => {
+            if (this.submissionReplaceFile()) {
+            } else {
+                this.submissionFiles.set(
+                    (this.submissionFiles() || []).concat(
+                        nodes.map((node) => {
+                            return {
+                                assignmentFile: this.submissionAssignmentRefFile(),
+                                content: node,
+                                ref: node.ref,
+                                validationStatus: 'NOT_STARTET',
+                            } as SubmissionFile;
+                        }),
+                    ),
+                );
+            }
+        });
         this.submitFormGroup = this.formBuilder.group({
             submitComment: ['', [Validators.required]],
         });
@@ -95,12 +134,28 @@ export class SubmitAssignmentComponent {
                                     return throwError(() => err);
                                 }),
                             ),
+                        this.assignmentService
+                            .getSubmissionFiles({
+                                assignmentId,
+                                submissionId: ME,
+                            })
+                            .pipe(
+                                catchError((err) => {
+                                    if (err.status === RestConstants.HTTP_NOT_FOUND || true) {
+                                        err.preventDefault();
+                                        return of(null);
+                                    }
+                                    return throwError(() => err);
+                                }),
+                            ),
                     ]),
                 ),
             )
-            .subscribe(([assignment, files, submission]) => {
+            .subscribe(([assignment, files, submission, submissionFiles]) => {
                 this.assignment.set(assignment);
+                this.files.set(files);
                 this.submission.set(submission);
+                this.submissionFiles.set(submissionFiles);
                 this.submittableFiles.setData(
                     files.filter((f) => f.documentRole === 'SUBMITTABLE').map((n) => n.referNode),
                 );
@@ -119,7 +174,19 @@ export class SubmitAssignmentComponent {
             },
         });
     }
-
+    showFileDialog(replaceFile?: SubmissionFile, assignmentFile?: Node) {
+        this.submissionReplaceFile.set(replaceFile);
+        this.submissionAssignmentRefFile.set(
+            this.files().find((f) => f.referNode.ref.id === assignmentFile.ref.id),
+        );
+        this.editorialSidebarService.showOption({
+            option: 'SORT_INTO',
+            optionState: TabType.UPLOAD,
+            trap: true,
+            applyCallback: (nodes) =>
+                nodes.every((n) => !this.nodeHelperService.isNodeCollection(n) && !n.isDirectory),
+        });
+    }
     protected readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     protected readonly InteractionType = InteractionType;
 
@@ -175,5 +242,11 @@ export class SubmitAssignmentComponent {
                 addOptions: [download],
             },
         };
+    }
+
+    hasSubmissionFor(element: Node) {
+        return this.submissionFiles()?.find(
+            (n) => n.assignmentFile.referNode.ref.id === element.ref.id,
+        );
     }
 }

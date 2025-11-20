@@ -83,6 +83,7 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
      * This is used for additional config injection based on the scope
      */
     scope: Scope;
+    globalOptionsPosition: 'before' | 'after';
     get dataSource(): NodeDataSource<T> {
         return this.dataSource$.value;
     }

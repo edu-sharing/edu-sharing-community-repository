@@ -2,9 +2,11 @@ import {
     Component,
     computed,
     Input,
+    OnChanges,
     OnInit,
     Signal,
     signal,
+    SimpleChanges,
     ViewChild,
     WritableSignal,
 } from '@angular/core';
@@ -57,7 +59,7 @@ import { SharedModule } from '../../../shared/shared.module';
 import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
 import { OptionState } from '../editorial-sidebar/editorial-sidebar.component';
 
-enum TabType {
+export enum TabType {
     SEARCH = 'search',
     COLLECTIONS = 'collections',
     WORKSPACE = 'workspace',
@@ -76,14 +78,18 @@ enum StepType {
     imports: [SharedModule, AddMaterialDialogModule],
     providers: [NodeEntriesService],
 })
-export class NodesSelectorComponent implements OnInit {
+export class NodesSelectorComponent implements OnInit, OnChanges {
     protected readonly i18nPrefix: string = 'EDITORIAL.OPTIONS.SORT_INTO_TAB.';
     protected readonly idPrefix: string = 'nodes-selector-tab';
-
     @Input() parent: Node;
     @Input() option!: OptionState;
 
     selectedTab: WritableSignal<TabType> = signal(TabType.SEARCH);
+    selectedTabId = computed(() =>
+        (
+            [TabType.SEARCH, TabType.COLLECTIONS, TabType.WORKSPACE, TabType.UPLOAD] as TabType[]
+        ).indexOf(this.selectedTab()),
+    );
     selectedNodes: WritableSignal<Partial<Node>[]> = signal([]);
     private currentStep: WritableSignal<StepType> = signal(StepType.SELECT);
     isSelectStep: Signal<boolean> = computed((): boolean => this.currentStep() === StepType.SELECT);
@@ -134,6 +140,14 @@ export class NodesSelectorComponent implements OnInit {
         private toast: Toast,
         private translate: TranslateService,
     ) {}
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes.option) {
+            if (this.option.optionState) {
+                this.selectedTab.set(this.option.optionState);
+            }
+        }
+    }
 
     /**
      * Initializes the component by definition the default columns for the collections data source.

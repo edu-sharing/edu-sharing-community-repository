@@ -40,6 +40,11 @@ export type SidebarContext = PrimaryMode | 'collections' | 'workspace' | 'search
 export type EditorialSidebarOption = 'WORKSPACE_METADATA' | 'SHARE_QR' | 'PREVIEW' | 'SORT_INTO';
 export type OptionState = {
     option: EditorialSidebarOption;
+    /**
+     * additional, optional state for the option
+     * This might vary by the specific option
+     */
+    optionState?: any;
     trap: boolean;
     applyCallback?: (selected: Node[]) => boolean;
 };

@@ -1,5 +1,9 @@
 <!-- TABS WITH CONTENT -->
-<mat-tab-group class="tab-main-view" (selectedTabChange)="onTabChange($event)">
+<mat-tab-group
+  class="tab-main-view"
+  [selectedIndex]="selectedTabId()"
+  (selectedTabChange)="onTabChange($event)"
+>
   <!-- SEARCH TAB -->
   <mat-tab [id]="idPrefix + TabType.SEARCH">
     <ng-template mat-tab-label>
