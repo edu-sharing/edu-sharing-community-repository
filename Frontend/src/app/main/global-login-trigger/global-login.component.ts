@@ -19,13 +19,10 @@ export class GlobalLoginComponent {
     ) {
         this.authenticationService.observeLoginInfo().subscribe((login) => {
             if (login.statusCode !== RestConstants.STATUS_CODE_OK) {
-                console.log(login);
                 const googleEntry = (login as PrimaryLogin).oauthEntries.find(
                     (e) => e.name === 'google',
                 );
-                console.log('Test ge:' + JSON.stringify(googleEntry));
                 if (googleEntry?.clientId && googleEntry?.allowThirdPartyLoginPlugin) {
-                    console.log('clientID:' + googleEntry.clientId);
                     this.loadGoogleScript(googleEntry.clientId);
                 }
             }
@@ -38,11 +35,8 @@ export class GlobalLoginComponent {
         script.async = true;
         script.defer = true;
         script.onload = () => {
-            console.log('GLOBAL google script loaded');
             UIHelper.waitForComponent(this.ngZone, window, 'google').subscribe(() => {
-                console.log('google loaded');
                 (window as any).handleCredentialResponse = (response: any) => {
-                    console.log('Received token: ', response);
                     this.sendToBackend(response.credential);
                 };
 
