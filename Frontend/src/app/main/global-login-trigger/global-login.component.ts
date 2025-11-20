@@ -24,7 +24,7 @@ export class GlobalLoginComponent {
                     const googleEntry = (login as PrimaryLogin).oauthEntries.find(
                         (e) => e.name === 'google',
                     );
-                    if (googleEntry?.clientId) {
+                    if (googleEntry?.clientId && googleEntry.allowThirdPartyLoginPlugin) {
                         const newScriptElement = document.createElement('script');
                         newScriptElement.src = 'https://accounts.google.com/gsi/client';
                         newScriptElement.async = true;
