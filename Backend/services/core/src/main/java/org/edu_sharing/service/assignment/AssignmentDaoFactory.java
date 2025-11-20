@@ -51,6 +51,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.edu_sharing.restservices.MissingResourceException;
+
 
 @Slf4j
 @Configuration
@@ -59,7 +61,6 @@ public class AssignmentDaoFactory {
 
     private final AssignmentConfig assignmentConfig;
     private final NodeService nodeService;
-    private final org.alfresco.service.cmr.repository.NodeService alfNodeService;
     private final UserEnvironmentTool userEnvironmentTool;
     private final AuthorityService authorityService;
     private final PermissionService permissionService;
@@ -301,6 +302,10 @@ public class AssignmentDaoFactory {
             if (StringUtils.isNotBlank(nodeId)) {
                 validateExists();
                 validateIsAssignmentCoordinator(nodeId);
+                if(getStatus() != Assignment.Status.OPEN) {
+                    throw new InsufficientPermissionException("Assignment with id " + nodeId + " is not in status OPEN, cannot update");
+                }
+
                 log.debug("Update assignment node {} with {}", nodeId, properties);
                 nodeService.updateNodeNative(nodeId, properties);
             } else {
@@ -490,7 +495,7 @@ public class AssignmentDaoFactory {
             if ("-me-".equalsIgnoreCase(submissionId)) {
                 String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
                 return getSubmissionByCreator(currentUser)
-                        .orElseThrow(() -> new IllegalArgumentException("No submission found for user " + currentUser));
+                        .orElseThrow(() -> new MissingResourceException("No submission found for user " + currentUser));
             }
 
             SubmissionDao submissionDao = submissions.get().get(submissionId);
@@ -570,9 +575,6 @@ public class AssignmentDaoFactory {
             }));
         }
 
-        public AssignmentFileDaoImpl(AssignmentDaoImpl assignmentDao) {
-            this(assignmentDao, null);
-        }
 
         @Override
         @RunAsSystem
@@ -686,10 +688,6 @@ public class AssignmentDaoFactory {
     protected final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao {
 
         private final AssignmentDao assignmentDao;
-
-        public SubmissionDaoImpl(AssignmentDao assignmentDao) {
-            this(assignmentDao, null);
-        }
 
         public SubmissionDaoImpl(AssignmentDao assignmentDao, String nodeId) {
             super(nodeId);
