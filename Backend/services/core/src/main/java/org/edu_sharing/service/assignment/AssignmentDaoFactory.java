@@ -265,7 +265,7 @@ public class AssignmentDaoFactory {
 
             submissionFolderRef = new LazyProvider<>(() -> {
                 validateExists();
-                return nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_ASSOC_ASSIGNMENT_SUBMISSIONS)
+                return nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_SUBMISSIONS)
                         .stream()
                         .findFirst()
                         .map(ChildAssociationRef::getChildRef)
@@ -275,7 +275,7 @@ public class AssignmentDaoFactory {
             submissions = new LazyProvider<>(() -> {
                 validateExists();
                 return submissionFolderRef.get()
-                        .map(subFolderId -> nodeService.getChildrenChildAssociationRefType(subFolderId, CCConstants.CCM_ASSOC_SUBMISSIONS_SUBMISSION)
+                        .map(subFolderId -> nodeService.getChildrenChildAssociationRefType(subFolderId, CCConstants.CCM_TYPE_SUBMISSION)
                                 .stream()
                                 .map(ChildAssociationRef::getChildRef)
                                 .map(org.alfresco.service.cmr.repository.NodeRef::getId)
@@ -776,7 +776,6 @@ public class AssignmentDaoFactory {
         }
 
         @Override
-        @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS, requiresUser = true)
         @RunAsSystem
         @RetryingTransaction
         public SubmissionFileDao createOrUpdateSubmissionFile(String submissionFileId, SubmissionFileRequest submissionFileRequest, InputStream fileInputStream, FormDataContentDisposition fileMetaData) {

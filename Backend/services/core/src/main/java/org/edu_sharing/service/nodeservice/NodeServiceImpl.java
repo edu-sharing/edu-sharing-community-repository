@@ -1174,6 +1174,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentID);
     }
 
+    /**
+     * get assocs based on a particular child type
+     * @param parentID Parent node
+     * @param childType child type (Note: THis is the type of the child and NOT the assoc type!)
+     * @return Lists with ChildAssociationRef
+     */
     @Override
     public List<ChildAssociationRef> getChildrenChildAssociationRefType(String parentID, String childType) {
         NodeRef parentNodeRef = getParentRef(parentID);

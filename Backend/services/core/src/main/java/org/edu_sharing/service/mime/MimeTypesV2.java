@@ -129,7 +129,12 @@ public class MimeTypesV2 {
 
 	}
 	public static boolean isDirectory(Map<String,Object> properties, String nodeType){
-		if(Arrays.asList(CCConstants.CCM_TYPE_MAP, CCConstants.CM_TYPE_FOLDER, CCConstants.CCM_TYPE_ASSIGNMENT, CCConstants.SYS_STORE_ROOT).contains(CCConstants.getValidGlobalName(nodeType))) {
+		if(Arrays.asList(
+				CCConstants.CCM_TYPE_MAP,
+				CCConstants.CM_TYPE_FOLDER,
+				CCConstants.CCM_TYPE_ASSIGNMENT,
+				CCConstants.CCM_TYPE_SUBMISSIONS,
+				CCConstants.SYS_STORE_ROOT).contains(CCConstants.getValidGlobalName(nodeType))) {
 			return true;
 		}
 
