@@ -31,6 +31,11 @@ export class OptionItem {
      */
     public isToggle = false;
     /**
+     * toggle type. Default is a flat, grayish
+     * primary is a primary colored button with label (if space is available)
+     */
+    public toggleType: 'default' | 'primary' = 'default';
+    /**
      * Only when @isToggle. is the toggle currently visible
      */
     public isToggleVisible = true;

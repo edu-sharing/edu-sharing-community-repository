@@ -2804,6 +2804,9 @@
             "format": "int64",
             "type": "integer"
           },
+          "uniqueId": {
+            "type": "string"
+          },
           "worstLevel": {
             "$ref": "#/components/schemas/Level"
           }
@@ -29424,6 +29427,14 @@
               },
               "type": "array"
             }
+          },
+          {
+            "description": "version of the node",
+            "in": "query",
+            "name": "version",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -29889,6 +29900,14 @@
             "in": "path",
             "name": "node",
             "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Version of the node",
+            "in": "query",
+            "name": "version",
             "schema": {
               "type": "string"
             }

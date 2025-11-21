@@ -16,7 +16,7 @@
     class="order-panel"
     [active]="entriesService.sort.active"
     [direction]="entriesService.sort.direction"
-    [columns]="getSortColumns()"
+    [columns]="entriesService.getSortColumns()"
     (sortChange)="onSortChange($event)"
     [(customSortingInProgress)]="entriesService.sort.customSortingInProgress"
     (customSortingInProgressChange)="onCustomSortingInProgressChange()"

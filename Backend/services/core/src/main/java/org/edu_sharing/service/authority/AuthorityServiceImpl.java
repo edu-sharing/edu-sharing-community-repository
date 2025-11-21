@@ -23,7 +23,6 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
-import org.apache.log4j.Logger;
 import org.apache.tika.utils.StringUtils;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.guest.GuestService;
@@ -48,6 +47,7 @@ import org.springframework.stereotype.Component;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -630,6 +630,31 @@ public class AuthorityServiceImpl implements AuthorityService {
             return authorityService.getContainedAuthorities(null, key, true).toArray(new String[0]);
         }, true);
 
+    }
+
+    @Override
+    public Set<String> getMembershipsOfGroupRecursively(String groupName) {
+        return transactionService
+                .getRetryingTransactionHelper()
+                .doInTransaction(() -> getMembershipsOfGroupRecursively_Internal(groupName), true);
+
+    }
+
+    private Set<String> getMembershipsOfGroupRecursively_Internal(String groupName) {
+        String key = groupName.startsWith(PermissionService.GROUP_PREFIX) ? groupName : PermissionService.GROUP_PREFIX + groupName;
+        Set<String> authorities = authorityService.getContainedAuthorities(null, key, true);
+        Set<String> result = authorities
+                .stream()
+                .filter(x -> AuthorityType.getAuthorityType(x) != AuthorityType.GROUP)
+                .collect(Collectors.toSet());
+
+
+        authorities.stream()
+                .filter(authority -> AuthorityType.getAuthorityType(authority) == AuthorityType.GROUP)
+                .map(this::getMembershipsOfGroupRecursively_Internal)
+                .forEach(result::addAll);
+
+        return result;
     }
 
     @Override

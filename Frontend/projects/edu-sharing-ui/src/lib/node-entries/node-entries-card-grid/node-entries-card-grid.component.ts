@@ -266,37 +266,6 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
             .split(' ').length;
     }
 
-    getSortColumns() {
-        return this.entriesService.sort?.columns?.filter((c) => {
-            const result = this.entriesService.columns
-                .concat(
-                    new ListItemSort('NODE', 'score'),
-                    new ListItemSort('NODE', RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION),
-                    new ListItemSort('NODE', RestConstants.CM_PROP_TITLE),
-                    new ListItemSort('NODE', RestConstants.CM_NAME),
-                    new ListItemSort('NODE', RestConstants.CM_PROP_C_CREATED),
-                    new ListItemSort('NODE', RestConstants.CM_MODIFIED_DATE),
-                    new ListItemSort('NODE', RestConstants.CCM_PROP_REPLICATIONMODIFIED),
-                    new ListItemSort('NODE', RestConstants.CCM_PROP_REPLICATIONSOURCETIMESTAMP),
-                )
-                .some((c2) => c.type === c2.type && c2.name === c.name);
-            if (!result && !this.entriesService.configureColumns) {
-                return this.entriesService.sort?.columns;
-                /*
-                    const warning =
-                        'Sort field ' +
-                        c.name +
-                        ' was specified but is not present as a column. ' +
-                        'It will be ignored. Please also configure this field in the <lists> section';
-                    if (!displayedWarnings.includes(warning)) {
-                        console.warn(warning);
-                        displayedWarnings.push(warning);
-                    }*/
-            }
-            return result;
-        });
-    }
-
     canDropNodes = (dragData: DragData<T>) => this.entriesService.dragDrop.dropAllowed?.(dragData);
 
     onNodesDropped(dragData: DragData<Node>) {

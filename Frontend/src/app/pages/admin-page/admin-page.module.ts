@@ -35,7 +35,9 @@ import { AdminContextComponent } from './context/context.component';
         SharedModule,
         AdminPageRoutingModule,
         MdsModule,
-        MonacoEditorModule.forRoot({ baseUrl: './assets/monaco/min/vs' }),
+        MonacoEditorModule.forRoot({
+            baseUrl: window.location.origin + '/edu-sharing/assets/monaco/min/vs',
+        }),
     ],
     exports: [CodeEditorComponent],
 })

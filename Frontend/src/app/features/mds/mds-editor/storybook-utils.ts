@@ -60,6 +60,13 @@ export class MdsServiceMock extends MdsService {
         return of(DefaultMds);
     }
 }
+
+export class ToastMock extends Toast {
+    error(errorObject: any, message?: string): void {}
+
+    toast(message: string, translationParameters?: any): void {}
+}
+
 export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
     { provide: MdsEditorInstanceService, useClass: MdsEditorInstanceServiceMock },

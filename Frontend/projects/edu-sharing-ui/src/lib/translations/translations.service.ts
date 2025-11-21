@@ -246,6 +246,6 @@ export class TranslationsService {
     }
 
     getLocale(): string {
-        return this.getISOLanguage().replace('_', '-');
+        return this.getISOLanguage()?.replace('_', '-');
     }
 }

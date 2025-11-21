@@ -16,19 +16,22 @@
     ></ng-container>
   </ng-container>
   <ng-container *ngIf="!getCustomTemplate()">
-    <img
-      *ngIf="node.relations?.Original || node as n"
-      [src]="node | esNodeIcon | async"
-      [alt]="
-        n.mediatype
-          ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + n.mediatype | translate)
-          : ''
-      "
-      [matTooltip]="
-        n.mediatype
-          ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + n.mediatype | translate)
-          : ''
-      "
-    />
+    <i *ngIf="materialIcon() as icon" [esIcon]="icon"></i>
+    <ng-container *ngIf="!materialIcon()">
+      <img
+        *ngIf="$any(node).relations?.Original || node as n"
+        [src]="n | esNodeIcon | async"
+        [alt]="
+          n.mediatype
+            ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + n.mediatype | translate)
+            : ''
+        "
+        [matTooltip]="
+          n.mediatype
+            ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + n.mediatype | translate)
+            : ''
+        "
+      />
+    </ng-container>
   </ng-container>
 </ng-container>

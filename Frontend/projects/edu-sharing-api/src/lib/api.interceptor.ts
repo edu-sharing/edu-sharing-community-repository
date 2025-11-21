@@ -10,7 +10,8 @@ import { Observable } from 'rxjs';
 import { ApiRequestConfiguration } from './api-request-configuration';
 import { EduSharingApiConfiguration } from './edu-sharing-api-configuration';
 import { handleError } from './utils/rxjs-operators/handle-error';
-import { tap } from 'rxjs/operators';
+import { finalize, tap } from 'rxjs/operators';
+import { ApiStateService } from './api-state.service';
 
 @Injectable()
 export class ApiInterceptor implements HttpInterceptor {
@@ -21,6 +22,7 @@ export class ApiInterceptor implements HttpInterceptor {
     constructor(
         private apiRequestConfiguration: ApiRequestConfiguration,
         private configuration: EduSharingApiConfiguration,
+        private apiStateService: ApiStateService,
     ) {}
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
@@ -32,7 +34,9 @@ export class ApiInterceptor implements HttpInterceptor {
         if (isApiRequest) {
             // Apply the headers
             req = this.apiRequestConfiguration.apply(req);
-
+            this.apiStateService.ongoingRequestsCount$.next(
+                this.apiStateService.ongoingRequestsCount$.value + 1,
+            );
             return next.handle(req).pipe(
                 tap((event) => {
                     if (event instanceof HttpResponseBase) {
@@ -43,6 +47,11 @@ export class ApiInterceptor implements HttpInterceptor {
                 }),
                 // Handle errors globally
                 handleError((err) => this.configuration.onError?.(err, req)),
+                finalize(() =>
+                    this.apiStateService.ongoingRequestsCount$.next(
+                        this.apiStateService.ongoingRequestsCount$.value - 1,
+                    ),
+                ),
             );
         } else {
             return next.handle(req);

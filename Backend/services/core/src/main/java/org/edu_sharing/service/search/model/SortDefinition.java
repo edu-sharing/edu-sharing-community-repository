@@ -200,7 +200,7 @@ public class SortDefinition implements Serializable {
 				// vcard/contributor displayname sort
 				if(CCConstants.getLifecycleContributerPropsMap().containsValue(property) || CCConstants.getMetadataContributerPropsMap().containsValue(property)) {
 					builder.sort(sort -> sort.field(field -> field
-							.field("contributor..displayname.keyword")
+							.field("contributor.displayname.keyword")
 							.nested(n -> n
 									.path("contributor")
 									.filter(f -> f.term(t -> t.field("contributor.property.keyword").value(CCConstants.getValidLocalName(property))))

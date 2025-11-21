@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.edu_sharing.alfresco.service.config.model.ConfigRating;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -56,7 +57,7 @@ public interface NotificationService {
     void notifyAddCollection(String collectionId, String nodeId, String collectionNodeType, List<String> collectionAspects, Map<String, Object> collectionProperties, String nodeType, List<String> nodeAspects, Map<String, Object> nodeProperties, Status status);
     void notifyProposeForCollection(String collectionId, String nodeId, String collectionNodeType, List<String> collectionAspects, Map<String, Object> collectionProperties, String nodeType, List<String> nodeAspects, Map<String, Object> nodeProperties, Status status);
 
-    void notifyRatingChanged(String nodeId, String nodeType, List<String> aspects, Map<String, Object> nodeProps, Double rating, RatingDetails accumulatedRatings, Status removed);
+    void notifyRatingChanged(String nodeId, String nodeType, List<String> aspects, Map<String, Object> nodeProps, ConfigRating.RatingMode ratingMode, Double rating, RatingDetails accumulatedRatings, Status removed);
 
     @Permission(requiresUser = true)
     default NotificationConfig getConfig() throws Exception {
