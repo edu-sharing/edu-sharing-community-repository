@@ -78,6 +78,11 @@
                 margin-bottom: 5px;
             }
         }
+        &:disabled {
+            .upload {
+                color: var(--buttonDisabled);
+            }
+        }
     }
     border: $border dashed var(--primary);
     color: var(--primary);

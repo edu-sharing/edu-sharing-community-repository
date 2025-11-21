@@ -70,14 +70,31 @@ export class SubmitAssignmentComponent {
     loading = signal(false);
     assignment = signal<Assignment>(null);
     submission = signal<Submission>(null);
+    isOpenForSubmission = computed(() => ['OPEN', 'PROGRESS'].includes(this.assignment().status));
+    isBeforeEndDate = computed(() => {
+        // @TODO check endTime format vs delivered type
+        return (
+            !this.assignment().endTime ||
+            (Date.parse(this.assignment().endTime) ||
+                (this.assignment().endTime as unknown as number)) > new Date().getTime()
+        );
+    });
     /**
      * files that the student wants to submit
      */
     submissionFiles = signal<SubmissionFile[]>(null);
     submissionAssignmentRefFile = signal<AssignmentFile>(null);
     submissionReplaceFile = signal<SubmissionFile | AssignmentFile>(null);
-    canSubmit = computed(
+    canSubmitMaterials = computed(
+        () => this.isOpenForSubmission() && this.isBeforeEndDate() && !this.submissionSent(),
+    );
+    submissionSent = computed(
+        () => this.submission() && this.submission()?.submissionStatus !== 'NOT_STARTET',
+    );
+    canSendSubmission = computed(
         () =>
+            this.isOpenForSubmission() &&
+            this.isBeforeEndDate() &&
             !this.loading() &&
             this.files().every(
                 (f) => f.documentRole === 'SUPPLEMENTARY' || this.hasSubmissionFor(f.referNode),

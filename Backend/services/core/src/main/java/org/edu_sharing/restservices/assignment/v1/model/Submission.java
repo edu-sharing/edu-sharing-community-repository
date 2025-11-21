@@ -19,6 +19,12 @@ public record Submission(
         Status submissionStatus,
         @JsonProperty(required = true)
         Status validationStatus
+
+        /**
+         * @TODO: We would need a date of at least
+         * the date of submission (from the student)
+         * The date of getting it back (from the teacher)
+         */
 ) {
     public enum Status {
         NOT_STARTET,
