@@ -23,6 +23,7 @@ const PROXY_CONFIG = [
             '/edu-sharing/shibboleth',
             '/edu-sharing/sso',
             '/edu-sharing/services',
+            '/edu-sharing/login/google',
         ],
         target: process.env.BACKEND_URL,
         secure: false,
