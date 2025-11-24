@@ -266,7 +266,7 @@ public class DataProtectionService{
         User user = authorityService.getUser(userName);
 
         List<String> mediacenterList = groupSet.stream()
-                .filter(g -> g.startsWith("GROUP_MEDIA_CENTER"))
+                .filter(g -> g.startsWith("GROUP_MEDIA_CENTER") && !g.contains("_PROXY_"))
                 .map(g -> (String)authorityService.getAuthorityProperty(g,CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME))
                 .collect(Collectors.toList());
 
