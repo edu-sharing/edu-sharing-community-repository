@@ -260,10 +260,15 @@ public class DataProtectionService{
         Set<String> groupSet = authorityService.getMemberships(userName);
         ArrayList<EduGroup> allEduGroups = AuthenticationUtil.runAsSystem(() -> authorityService.getAllEduGroups(userName));
         List<String> groupList = groupSet.stream()
-                .filter(g -> !g.startsWith("GROUP_ORG"))
+                .filter(g -> (!g.startsWith("GROUP_ORG") && !g.startsWith("GROUP_MEDIA_CENTER")))
                 .map(g ->  (String)authorityService.getAuthorityProperty(g,CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME))
                 .collect(Collectors.toList());
         User user = authorityService.getUser(userName);
+
+        List<String> mediacenterList = groupSet.stream()
+                .filter(g -> g.startsWith("GROUP_MEDIA_CENTER"))
+                .map(g -> (String)authorityService.getAuthorityProperty(g,CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME))
+                .collect(Collectors.toList());
 
         /**
          * @TODO use profile data or something dynamic determine locale and timezone
@@ -292,7 +297,8 @@ public class DataProtectionService{
                 .ratings(List.of())
                 .feedbacks(getNameList(feedBacks))
                 .comments(getNameList(comments))
-                .groupList(groupList);
+                .groupList(groupList)
+                .mediacenterList(mediacenterList);
 
         if(allEduGroups != null && !allEduGroups.isEmpty()) {
             //reportData.schoolName(allEduGroups.stream().map(e -> (e.getGroupDisplayName() +"("+e.getGroupId()+")")).collect(Collectors.joining(",")));

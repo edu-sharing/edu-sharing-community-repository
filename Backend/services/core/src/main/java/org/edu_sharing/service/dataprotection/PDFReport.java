@@ -79,6 +79,7 @@ public class PDFReport {
         String schoolDisplayName;
         String schoolName;
         List<String> groupList;
+        List<String> mediacenterList;
         String firstLogin;
         String lastLogin;
         String currentDate;
