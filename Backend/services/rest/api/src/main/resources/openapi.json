@@ -6328,8 +6328,20 @@
       },
       "RevokeDetails": {
         "properties": {
+          "cleanupCollections": {
+            "type": "boolean"
+          },
+          "cleanupUsages": {
+            "type": "boolean"
+          },
           "reason": {
             "type": "string"
+          },
+          "removeContent": {
+            "type": "boolean"
+          },
+          "unpublish": {
+            "type": "boolean"
           }
         },
         "type": "object"
@@ -31661,8 +31673,8 @@
     },
     "/node/v1/nodes/{repository}/{node}/publish/revoke": {
       "delete": {
-        "description": "Revoke a previously published copy. The content of this copy will be irrevocable removed, only the metadata will remain",
-        "operationId": "revokeCopy",
+        "description": "Revoke a previously published copy or a regular. The content of this copy will be irrevocable removed, only the metadata will remain",
+        "operationId": "revokeNode",
         "parameters": [
           {
             "description": "ID of repository (or \"-home-\" for home repository)",
@@ -31757,7 +31769,7 @@
             "description": "Fatal error occured."
           }
         },
-        "summary": "Revoke published copy",
+        "summary": "Revoke published copy or regular node",
         "tags": [
           "NODE v1"
         ]

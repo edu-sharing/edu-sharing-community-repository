@@ -122,7 +122,7 @@
   <div class="revoked">
     <h1 class="mat-heading-1">{{ _node | nodeTitle }}</h1>
     <es-info-message mode="warning" class="details-message">{{
-      'RENDERING.REVOKED.DETAILS' | translate
+      'RENDERING.REVOKED.DETAILS' + (_node.size === '0' ? '_EMPTY' : '') | translate
     }}</es-info-message>
     <div class="details">
       <div class="date">

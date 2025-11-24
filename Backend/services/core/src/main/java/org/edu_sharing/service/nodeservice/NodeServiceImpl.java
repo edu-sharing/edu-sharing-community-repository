@@ -44,7 +44,10 @@ import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.repository.tools.URLHelper;
+import org.edu_sharing.restservices.RepositoryDao;
+import org.edu_sharing.restservices.UsageDao;
 import org.edu_sharing.restservices.node.v1.model.RevokeDetails;
+import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.handleservice.FeatureInfoHandleService;
 import org.edu_sharing.service.handleservice.HandleService;
 import org.edu_sharing.service.handleservice.HandleServiceFactory;
@@ -54,10 +57,13 @@ import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.service.permission.HandleParam;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.permission.annotation.NodePermission;
+import org.edu_sharing.service.permission.annotation.Permission;
 import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.service.search.Suggestion;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
+import org.edu_sharing.service.usage.Usage2Service;
 import org.edu_sharing.spring.ApplicationContextFactory;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -1278,23 +1284,39 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         });
     }
 
-    public void revokeNode(String storeProtocol, String storeId, String nodeId, RevokeDetails details) throws Throwable {
+    @Permission(requiresUser = true)
+    public void revokeNode(String storeProtocol, String storeId, @NodePermission(CCConstants.PERMISSION_COORDINATOR) String nodeId, RevokeDetails details) throws Throwable {
         if (!getType(storeProtocol, storeId, nodeId).equals(CCConstants.CCM_TYPE_IO)) {
             throw new IllegalArgumentException("Only allowed for elements of type " + CCConstants.CCM_TYPE_IO);
         }
         if (hasAspect(storeProtocol, storeId, nodeId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
             nodeId = getProperty(storeProtocol, storeId, nodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
         }
-        if (!hasAspect(storeProtocol, storeId, nodeId, CCConstants.CCM_ASPECT_PUBLISHED)) {
-            throw new IllegalArgumentException("Only allowed for elements with aspect " + CCConstants.CCM_ASPECT_PUBLISHED);
+        if (!hasAspect(storeProtocol, storeId, nodeId, CCConstants.CCM_ASPECT_PUBLISHED) && details.isRemoveContent()) {
+            throw new IllegalArgumentException("Only allowed for elements with aspect {} if removeContent is set true", CCConstants.CCM_ASPECT_PUBLISHED);
         }
         String finalNodeId = nodeId;
         serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
-            removeContent(new NodeRef(new StoreRef(storeProtocol, storeId), finalNodeId), CCConstants.CM_PROP_CONTENT);
-            removeContent(new NodeRef(new StoreRef(storeProtocol, storeId), finalNodeId), CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
-            // remove childs like childobjects or preview images
-            for (ChildAssociationRef child : getChildAssocs(new NodeRef(new StoreRef(storeProtocol, storeId), finalNodeId))) {
-                removeNode(child.getChildRef().getId(), finalNodeId, false);
+            NodeRef ref = new NodeRef(new StoreRef(storeProtocol, storeId), finalNodeId);
+            if(details.isRemoveContent()) {
+                removeContent(ref, CCConstants.CM_PROP_CONTENT);
+                removeContent(ref, CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
+                // remove childs like childobjects or preview images
+                for (ChildAssociationRef child : getChildAssocs(new NodeRef(new StoreRef(storeProtocol, storeId), finalNodeId))) {
+                    removeNode(child.getChildRef().getId(), finalNodeId, false);
+                }
+            }
+            if(details.isUnpublish()) {
+                this.serviceRegistry.getPermissionService().clearPermission(ref, CCConstants.AUTHORITY_GROUP_EVERYONE);
+            }
+            if(details.isCleanupCollections()) {
+                AuthenticationUtil.runAsSystem(() -> {
+                    cleanupAllCollections(ref);
+                    return null;
+                });
+            }
+            if(details.isCleanupUsages()) {
+                AuthenticationUtil.runAsSystem(() -> new Usage2Service().deleteUsages(ref.getId()));
             }
             Map<String, Serializable> props = new HashMap<>();
             props.put(CCConstants.CCM_PROP_IO_CREATE_VERSION, false);
@@ -1312,6 +1334,16 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         } catch (NoSuchBeanDefinitionException e) {
             logger.info("doi service not enabled");
         }
+    }
+
+    /**
+     *
+     * @param nodeId
+     */
+    private void cleanupAllCollections(NodeRef ref) {
+        new UsageDao(RepositoryDao.getRepository(RepositoryDao.HOME)).getUsagesByNodeCollection(ref.getId()).forEach(
+                u -> CollectionServiceFactory.getLocalService().removeFromCollection(u.getCollection().getRef().getId(), u.getResourceId())
+        );
     }
 
     private void removeContent(NodeRef nodeRef, String contentProperty) {
