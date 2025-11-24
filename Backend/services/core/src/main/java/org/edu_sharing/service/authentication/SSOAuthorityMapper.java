@@ -190,7 +190,7 @@ public class SSOAuthorityMapper {
 				return transactionService.getRetryingTransactionHelper().doInTransaction(txnWork, false);
 			}
 		};
-		return AuthenticationUtil.runAsSystem(runAs);
+		return AuthenticationUtil.runAs(runAs,ApplicationInfoList.getHomeRepository().getUsername());
 	}
 	
 	
