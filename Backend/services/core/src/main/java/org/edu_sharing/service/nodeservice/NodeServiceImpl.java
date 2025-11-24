@@ -1293,7 +1293,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
             nodeId = getProperty(storeProtocol, storeId, nodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
         }
         if (!hasAspect(storeProtocol, storeId, nodeId, CCConstants.CCM_ASPECT_PUBLISHED) && details.isRemoveContent()) {
-            throw new IllegalArgumentException("Only allowed for elements with aspect {} if removeContent is set true", CCConstants.CCM_ASPECT_PUBLISHED);
+            throw new IllegalArgumentException("Only allowed for elements with aspect " + CCConstants.CCM_ASPECT_PUBLISHED + " if removeContent is set true");
         }
         String finalNodeId = nodeId;
         serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
