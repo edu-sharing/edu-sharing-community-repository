@@ -179,18 +179,23 @@ public class SSOAuthorityMapper {
 	 *         user does not exist and can not be created
 	 */
 	public String mapAuthority(final Map<String, String> ssoAttributes) {
-		RunAsWork<String> runAs = new RunAsWork<String>() {
-			@Override
-			public String doWork() throws Exception {
-				RetryingTransactionCallback<String> txnWork = new RetryingTransactionCallback<String>() {
-					public String execute() throws Exception {
-						return mapAuthorityInternal(ssoAttributes);
-					}
-				};
-				return transactionService.getRetryingTransactionHelper().doInTransaction(txnWork, false);
+		String fullyAuthenticatedUser = null;
+		try {
+			fullyAuthenticatedUser = AuthenticationUtil.getFullyAuthenticatedUser();
+			AuthenticationUtil.setFullyAuthenticatedUser(ApplicationInfoList.getHomeRepository().getUsername());
+
+			RunAsWork<String> runAs = () -> {
+                RetryingTransactionCallback<String> txnWork = () -> mapAuthorityInternal(ssoAttributes);
+                return transactionService.getRetryingTransactionHelper().doInTransaction(txnWork, false);
+            };
+			return AuthenticationUtil.runAsSystem(runAs);
+		}finally {
+			if(fullyAuthenticatedUser == null){
+				AuthenticationUtil.clearCurrentSecurityContext();
+			}else{
+				AuthenticationUtil.setFullyAuthenticatedUser(fullyAuthenticatedUser);
 			}
-		};
-		return AuthenticationUtil.runAs(runAs,ApplicationInfoList.getHomeRepository().getUsername());
+		}
 	}
 	
 	
