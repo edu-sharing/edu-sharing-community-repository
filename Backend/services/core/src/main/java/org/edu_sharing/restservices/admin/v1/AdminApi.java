@@ -1272,7 +1272,6 @@ public class AdminApi {
 			}
 			token.setElasticQuery(QueryBuilders.wrapper().query(new String(Base64.getEncoder().encode(query.getBytes()))).build());
 		}else{
-			logger.info("using solr");
 			token.setLuceneString(query);
 		}
 	}

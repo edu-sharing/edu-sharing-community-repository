@@ -591,10 +591,13 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
                             this.specialTemplate = null;
                             if (this.nodeHelper.isNodeRevoked(this._node)) {
                                 this.specialTemplate = 'revoked';
-                                const element = document.getElementsByClassName(
-                                    'edusharing_rendering_content_wrapper',
-                                )?.[0];
-                                element.parentElement?.removeChild(element);
+                                // revoked type have NO content if they've been published nodes
+                                if (this._node.size === '0') {
+                                    const element = document.getElementsByClassName(
+                                        'edusharing_rendering_content_wrapper',
+                                    )?.[0];
+                                    element.parentElement?.removeChild(element);
+                                }
                             }
                         };
                         this.getSequence(() => {

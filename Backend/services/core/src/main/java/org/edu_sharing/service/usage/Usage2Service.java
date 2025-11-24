@@ -322,6 +322,23 @@ public class Usage2Service {
 		}
 	}
 
+	/**
+	 * remove all usages for this node
+	 * Please note to wrap this in runAsSystem or make sure the user has the permissions to do it
+	 * @param parentNodeId
+	 * @return
+	 * @throws UsageException
+	 */
+	public boolean deleteUsages(String parentNodeId) throws UsageException {
+		boolean result = false;
+		try {
+			result = usageDao.removeAllUsages(parentNodeId);
+		} catch (Exception e) {
+			throw new UsageException(e.getMessage(), e);
+		}
+		new RepositoryCache().remove(parentNodeId);
+		return result;
+	}
 	public boolean deleteUsage(String repoId, String user, String lmsId, String courseId, String parentNodeId, String resourceId) throws UsageException {
     	logger.info("starting");
 		

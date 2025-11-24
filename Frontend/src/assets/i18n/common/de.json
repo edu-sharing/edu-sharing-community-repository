@@ -923,7 +923,8 @@
     "QUEUED": "Warteschlange",
     "QUEUE_POSITION": "Position in der Warteschlange",
     "REVOKED": {
-      "DETAILS": "Der Herausgebende bzw. die Redaktion hat dieses Objekt zurückgezogen. Es sind nur noch die Metadaten des ursprünglichen Elements verfügbar.\n\nWeitere Details finden Sie in der Begründung unten.",
+      "DETAILS_EMPTY": "Der Herausgebende bzw. die Redaktion hat dieses Objekt zurückgezogen. Es sind nur noch die Metadaten des ursprünglichen Elements verfügbar.\n\nWeitere Details finden Sie in der Begründung unten.",
+      "DETAILS": "Der Herausgebende bzw. die Redaktion hat dieses Objekt zurückgezogen. \n\nWeitere Details finden Sie in der Begründung unten.",
       "DATE": "Datum der Löschung",
       "REASON": "Begründung der Löschung",
       "FEEDBACK": "Redaktion kontaktieren"
