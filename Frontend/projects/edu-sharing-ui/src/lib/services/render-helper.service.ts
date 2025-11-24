@@ -39,6 +39,7 @@ export class RenderHelperService {
             this.nodeApiUnwrapped.getMetadataSigned({
                 repository: repository || HOME_REPOSITORY,
                 node: nodeId,
+                version: version || RestConstants.NODE_VERSION_CURRENT,
             }),
         );
         const node = securedNode.node;
