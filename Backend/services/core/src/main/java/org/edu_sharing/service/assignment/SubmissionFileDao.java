@@ -24,6 +24,10 @@ public interface SubmissionFileDao extends BasicNodeDao {
 
     String getContentNodeId();
 
+    @RunAsSystem
+    @RetryingTransaction
+    void update(SubmissionFileRequest request, InputStream fileInputStream);
+
     void setValidationStatus(Submission.Status validationStatus);
 
     void refresh();

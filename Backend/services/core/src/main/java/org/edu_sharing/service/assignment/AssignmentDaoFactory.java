@@ -20,7 +20,6 @@ import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
-import org.edu_sharing.repository.server.tools.security.RunAsSystem;
 import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
@@ -80,14 +79,14 @@ public class AssignmentDaoFactory {
     @Bean(autowireCandidate = false)
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    public AssignmentDao assignment(String nodeId) {
+    public AssignmentDao assignmentDao(String nodeId) {
         return new AssignmentDaoImpl(nodeId);
     }
 
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    protected AssignmentFileDao assignmentFile(AssignmentDao assignmentDao, String nodeId) {
+    protected AssignmentFileDao assignmentFileDao(AssignmentDao assignmentDao, String nodeId) {
         return new AssignmentFileDaoImpl(assignmentDao, nodeId);
     }
 
@@ -236,7 +235,7 @@ public class AssignmentDaoFactory {
                         .stream()
                         .map(ChildAssociationRef::getChildRef)
                         .map(org.alfresco.service.cmr.repository.NodeRef::getId)
-                        .map(x -> assignmentFile(this, x))
+                        .map(x -> assignmentFileDao(this, x))
                         .collect(Collectors.toMap(AssignmentFileDao::getNodeId, x -> x));
             });
 
@@ -285,9 +284,8 @@ public class AssignmentDaoFactory {
         }
 
         @Override
-        @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS, requiresUser = true)
-        @RunAsSystem
         @RetryingTransaction
+        @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS, requiresUser = true)
         public void createOrUpdate(CreateAssignmentRequest request) {
             Map<String, Object> properties = new HashMap<>() {{
                 put(CCConstants.CM_NAME, UUID.randomUUID().toString());
@@ -302,7 +300,7 @@ public class AssignmentDaoFactory {
             if (StringUtils.isNotBlank(nodeId)) {
                 validateExists();
                 validateIsAssignmentCoordinator(nodeId);
-                if(getStatus() != Assignment.Status.OPEN) {
+                if (getStatus() != Assignment.Status.OPEN) {
                     throw new InsufficientPermissionException("Assignment with id " + nodeId + " is not in status OPEN, cannot update");
                 }
 
@@ -415,7 +413,7 @@ public class AssignmentDaoFactory {
             AssignmentDaoImpl assignmentDao = new AssignmentDaoImpl(nodeId);
             newAssignmentFileRequestMap.keySet().removeAll(assignmentFileDaoMap.keySet());
             log.debug("Added assignment files: {}", newAssignmentFileRequestMap.keySet());
-            newAssignmentFileRequestMap.values().forEach(x -> assignmentFile(assignmentDao, null).create(x));
+            newAssignmentFileRequestMap.values().forEach(x -> assignmentFileDao(assignmentDao, null).create(x));
         }
 
         @Override
@@ -447,7 +445,6 @@ public class AssignmentDaoFactory {
                     getPermissions()
             );
         }
-
 
         @Override
         public Boolean getAllowAdditionalDocumentSubmissions() {
@@ -517,21 +514,28 @@ public class AssignmentDaoFactory {
         public SubmissionDao getOrCreateSubmission(String submissionId) {
             submissions.invalidate();
 
-            if ("-me-".equalsIgnoreCase(submissionId)) {
+            SubmissionDao submissionDao = null;
+            if (StringUtils.isBlank(submissionId)) {
+                submissionDao = submissionDao(this, null);
+                submissionDao.create();
+                submissions.get().put(submissionDao.getNodeId(), submissionDao);
+            } else if ("-me-".equalsIgnoreCase(submissionId)) {
                 String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
                 Optional<SubmissionDao> submissionByCreator = getSubmissionByCreator(currentUser);
                 if (submissionByCreator.isEmpty()) {
-                    SubmissionDao submissionDao = submissionDao(this, null);
+                    submissionDao = submissionDao(this, null);
                     submissionDao.create();
                     submissions.get().put(submissionDao.getNodeId(), submissionDao);
                 }
+            } else {
+                submissionDao = submissions.get().get(submissionId);
             }
 
-            return submissions.get().computeIfAbsent(submissionId, x -> {
-                SubmissionDao submissionDao = submissionDao(this, x);
-                submissionDao.create();
-                return submissionDao;
-            });
+            if (submissionDao == null) {
+                throw new IllegalArgumentException("Submission with id " + submissionId + " does not exist.");
+            }
+
+            return submissionDao;
         }
 
 
@@ -552,7 +556,6 @@ public class AssignmentDaoFactory {
     }
 
     protected final class AssignmentFileDaoImpl extends BasicNodeDaoImpl implements AssignmentFileDao {
-        private String nodeId;
         private final AssignmentDao assignmentDao;
 
         private final LazyProvider<PropertyMapper> propertyMapper;
@@ -567,6 +570,7 @@ public class AssignmentDaoFactory {
                 Map<String, Object> properties = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), getNodeId());
                 return new PropertyMapper(properties);
             }));
+
             referNode = new LazyProvider<>(CheckedSupplier.wrap(() -> {
                 validateExists();
                 return Optional.ofNullable(propertyMapper.get().getNodeRef(CCConstants.CCM_PROP_ASSIGNMENT_FILE_REFER_TO))
@@ -577,7 +581,6 @@ public class AssignmentDaoFactory {
 
 
         @Override
-        @RunAsSystem
         @RetryingTransaction
         public void create(AssignmentFileRequest request) {
             validateIsAssignmentCoordinator(assignmentDao.getNodeId());
@@ -626,6 +629,7 @@ public class AssignmentDaoFactory {
 
 
         @Override
+        @RetryingTransaction
         public void update(@NonNull AssignmentFileRequest assignmentFileRequest) {
             validateExists();
             validateIsAssignmentCoordinator(nodeId);
@@ -688,10 +692,21 @@ public class AssignmentDaoFactory {
     protected final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao {
 
         private final AssignmentDao assignmentDao;
+        private final LazyProvider<Map<String, SubmissionFileDao>> submissionFileRefs;
 
         public SubmissionDaoImpl(AssignmentDao assignmentDao, String nodeId) {
             super(nodeId);
             this.assignmentDao = assignmentDao;
+
+            submissionFileRefs = new LazyProvider<>(() -> {
+                validateExists();
+                return nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_SUBMISSION_FILE)
+                        .stream()
+                        .map(ChildAssociationRef::getChildRef)
+                        .map(org.alfresco.service.cmr.repository.NodeRef::getId)
+                        .map(x -> submissionFileDao(assignmentDao, this, x))
+                        .collect(Collectors.toMap(SubmissionFileDao::getNodeId, x -> x));
+            });
         }
 
         @Override
@@ -732,6 +747,7 @@ public class AssignmentDaoFactory {
         }
 
         @Override
+        @RetryingTransaction
         public void update(EditSubmissionRequest request) {
             validateExists();
             refresh();
@@ -767,25 +783,38 @@ public class AssignmentDaoFactory {
 
         @Override
         public List<SubmissionFileDao> getSubmissionFiles() {
-            return List.of();
+            return submissionFileRefs.get().values().stream().toList();
         }
 
         @Override
         public SubmissionFileDao getSubmissionFile(String submissionFileId) {
-            return null;
+            SubmissionFileDao submissionFileDao = submissionFileRefs.get().get(submissionFileId);
+            if (submissionFileDao == null) {
+                throw new IllegalArgumentException("Submission file with id " + submissionFileId + " does not exist.");
+            }
+            return submissionFileDao;
         }
 
         @Override
-        @RunAsSystem
         @RetryingTransaction
         public SubmissionFileDao createOrUpdateSubmissionFile(String submissionFileId, SubmissionFileRequest submissionFileRequest, InputStream fileInputStream, FormDataContentDisposition fileMetaData) {
-            return null;
+            submissionFileRefs.invalidate();
+            SubmissionFileDao submissionFileDao;
+            if (submissionFileId != null) {
+                submissionFileDao = getSubmissionFile(submissionFileId);
+                submissionFileDao.update(submissionFileRequest, fileInputStream);
+            } else {
+                submissionFileDao = submissionFileDao(assignmentDao, this, null);
+                submissionFileDao.create(submissionFileRequest, fileInputStream);
+                submissionFileRefs.get().put(submissionFileId, submissionFileDao);
+            }
+
+            return submissionFileDao;
         }
 
         @Override
-        @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS, requiresUser = true)
-        @RunAsSystem
         @RetryingTransaction
+        @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS, requiresUser = true)
         public void create() {
             if (StringUtils.isNotBlank(nodeId)) {
                 throw new IllegalStateException("Submission with id " + getNodeId() + " already exists.");
@@ -835,7 +864,7 @@ public class AssignmentDaoFactory {
         private final AssignmentDao assignmentDao;
         private final SubmissionDao submissionDao;
 
-        private final LazyProvider<org.alfresco.service.cmr.repository.NodeRef> contentNodeId;
+        private final LazyProvider<Optional<org.alfresco.service.cmr.repository.NodeRef>> contentNodeId;
         private final LazyProvider<Node> contentNode;
 
 
@@ -849,13 +878,12 @@ public class AssignmentDaoFactory {
                 return nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_ASSOC_SUBMISSION_FILE_DATA)
                         .stream()
                         .map(ChildAssociationRef::getChildRef)
-                        .findFirst()
-                        .orElseThrow(() -> new IllegalStateException("No content node found for submission file " + nodeId));
+                        .findFirst();
             });
 
             contentNode = new LazyProvider<>(CheckedSupplier.wrap(() -> {
                 validateExists();
-                return Optional.ofNullable(contentNodeId.get())
+                return contentNodeId.get()
                         .map(NodeDao::getAsNodeSimple)
                         .orElse(null);
             }));
@@ -869,11 +897,9 @@ public class AssignmentDaoFactory {
         }
 
 
-
         @Override
-        @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS, requiresUser = true)
-        @RunAsSystem
         @RetryingTransaction
+        @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS, requiresUser = true)
         public void create(SubmissionFileRequest request, InputStream fileInputStream) {
             validateCanAssigneeChangeSubmission();
 
@@ -891,7 +917,7 @@ public class AssignmentDaoFactory {
             handleSubmissionFile(request, fileInputStream);
         }
 
-        @RunAsSystem
+        @Override
         @RetryingTransaction
         public void update(SubmissionFileRequest request, InputStream fileInputStream) {
             refresh();
@@ -913,7 +939,7 @@ public class AssignmentDaoFactory {
                 throw new IllegalArgumentException("Cannot create submission file with original file and file input stream");
             }
 
-            if (StringUtils.isNotBlank(getContentNodeId()) && nodeService.exists(getContentNodeId())) {
+            if (StringUtils.isNotBlank(getContentNodeId_Internal()) && nodeService.exists(getContentNodeId_Internal())) {
                 log.debug("Deleting old content node {}", getContentNodeId());
                 nodeService.removeNode(getContentNodeId(), nodeId, false);
             }
@@ -931,7 +957,7 @@ public class AssignmentDaoFactory {
                 return;
             }
 
-            if (permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), request.originalFile(), CCConstants.PERMISSION_DOWNLOAD_CONTENT)) {
+            if (!permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), request.originalFile(), CCConstants.PERMISSION_DOWNLOAD_CONTENT)) {
                 throw new InsufficientPermissionException("You do not have permission to copy the original file. Required permission: " + CCConstants.PERMISSION_DOWNLOAD_CONTENT);
             }
 
@@ -987,7 +1013,7 @@ public class AssignmentDaoFactory {
         }
 
         private void validateCanAssigneeChangeSubmission() {
-            validateIsAssignee(nodeId);
+            validateIsAssignee(submissionDao.getNodeId());
 
             if (assignmentDao.getEndDate() != null && assignmentDao.getEndDate().before(new Date())) {
                 throw new InsufficientPermissionException("Assignment with id " + assignmentDao.getNodeId() + " has already ended.");
@@ -1014,6 +1040,7 @@ public class AssignmentDaoFactory {
         public void setValidationStatus(Submission.Status validationStatus) {
             validateExists();
             validateCanCoordinatorChangeSubmission();
+
             refresh();
 
             nodeService.updateNodeNative(nodeId, Map.of(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, validationStatus.name()));
@@ -1051,7 +1078,12 @@ public class AssignmentDaoFactory {
 
         @Override
         public String getContentNodeId() {
-            return contentNodeId.get().getId();
+            return contentNodeId.get().map(org.alfresco.service.cmr.repository.NodeRef::getId)
+                    .orElseThrow(() -> new IllegalStateException("No content node found for submission file " + nodeId));
+        }
+
+        private String getContentNodeId_Internal() {
+            return contentNodeId.get().map(org.alfresco.service.cmr.repository.NodeRef::getId).orElse(null);
         }
 
     }
