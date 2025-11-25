@@ -84,12 +84,15 @@ import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { MdsEditorInstanceService } from '../../features/mds/mds-editor/mds-editor-instance.service';
 import { RouterHelper } from '../../util/router.helper';
 import { SharedModule } from '../../shared/shared.module';
+import { RenderRevokedComponent } from './nodes-render-revoked/render-revoked.component';
+
+export type SpecialRenderTemplate = 'revoked' | null;
 
 @Component({
     selector: 'es-render-legacy-page',
     templateUrl: 'render-legacy-page.component.html',
     styleUrls: ['render-legacy-page.component.scss'],
-    imports: [SharedModule],
+    imports: [SharedModule, RenderRevokedComponent],
     providers: [
         OptionsHelperDataService,
         RenderHelperService,
@@ -101,7 +104,7 @@ import { SharedModule } from '../../shared/shared.module';
 export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestroy, AfterViewInit {
     readonly DisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
-    specialTemplate: 'revoked' | null;
+    specialTemplate: SpecialRenderTemplate;
     @Input() set node(node: Node | string) {
         const id = (node as Node).ref ? (node as Node).ref.id : (node as string);
         $('#nodeRenderContent').html('');
@@ -954,13 +957,5 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
         style.attr(styleAttr, '');
         $(document.head).append(style);
         this.destroyed$.subscribe(() => style.remove());
-    }
-
-    reportRevokeFeedback() {
-        void this.dialogsService.openNodeReportDialog({
-            node: this._node,
-            mode: 'REVOKE_FEEDBACK',
-            showOptions: false,
-        });
     }
 }
