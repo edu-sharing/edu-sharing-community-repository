@@ -75,7 +75,6 @@ services:
       VIRTUAL_PORT: 8080
       VIRTUAL_DEST: /edu-sharing/
       VIRTUAL_PATH: "${REPOSITORY_SERVICE_PATH:-/edu-sharing}/"
-      ALLOW_EMPTY_PASSWORD: "yes"
       CACHE_CLUSTER: "false"
       CACHE_DATABASE: "0"
       CACHE_HOST: redis-cache
@@ -154,7 +153,6 @@ services:
       REPOSITORY_TRANSFORM_AIO_PORT: "8090"
       REPOSITORY_TRANSFORM_ES_HOST: repository-transform-edu-sharing
       REPOSITORY_TRANSFORM_ES_PORT: "8091"
-      TOMCAT_INSTALL_DEFAULT_WEBAPPS: "no"
     expose:
       - "7199"
       - "8080"
