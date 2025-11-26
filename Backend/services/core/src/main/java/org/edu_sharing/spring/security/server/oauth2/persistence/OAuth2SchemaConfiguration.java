@@ -7,7 +7,10 @@ import org.edu_sharing.spring.security.server.oauth2.config.OAuth2ConfigService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsent;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 
@@ -32,5 +35,11 @@ public class OAuth2SchemaConfiguration {
 
         log.info("Initializing OAuth2AuthorizationService");
         return new AlfrescoOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository, transactionHelper);
+    }
+
+    @DependsOn("oAuth2SchemaInitializer")
+    @Bean
+    public OAuth2AuthorizationConsentService auth2AuthorizationConsentService(JdbcOperations jdbcOperations,RegisteredClientRepository registeredClientRepository, RetryingTransactionHelper transactionHelper) {
+        return new AlfrescoOAuth2AuthorizationConsentService(jdbcOperations, registeredClientRepository, transactionHelper);
     }
 }

@@ -18,6 +18,7 @@ import { AuthenticationV1Service as AuthenticationApiService } from '../api/serv
 import { switchReplay } from '../utils/rxjs-operators/switch-replay';
 import { PrimaryLogin } from '../api/models/primary-login';
 import { ScopeLogin } from '../api/models/scope-login';
+import { OAuth2Consent } from '../api/models/o-auth-2-consent';
 
 export type LoginInfo = PrimaryLogin | ScopeLogin;
 
@@ -170,6 +171,10 @@ export class AuthenticationService {
             ticket,
         });
         return this.loginInfo$.pipe(first());
+    }
+
+    public getOauthConsent(): Observable<OAuth2Consent> {
+        return this.authentication.getOauth2Consent().pipe();
     }
 
     /**

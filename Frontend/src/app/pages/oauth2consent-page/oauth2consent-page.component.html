@@ -1,0 +1,23 @@
+<div *ngIf="oauth2Consent" style="width: 90%; margin: 0 auto">
+  <h2>{{ 'LOGIN.OAUTH2SERVER.CONSENT.TITLE' | translate }}</h2>
+  {{ 'LOGIN.OAUTH2SERVER.CONSENT.DESCRIPTION' | translate : { clientId: oauth2Consent.clientId } }}
+
+  <input type="hidden" name="client_id" [value]="oauth2Consent.clientId" />
+  <input type="hidden" name="state" [value]="oauth2Consent.state" />
+
+  <h2>{{ 'LOGIN.OAUTH2SERVER.CONSENT.SCOPES' | translate }}</h2>
+  <div class="space-y-2 mb-6">
+    <div *ngFor="let scope of scopes">
+      <mat-checkbox
+        [(ngModel)]="scope.checked"
+        [ngModelOptions]="{ standalone: true }"
+        name="scope"
+        [value]="scope.name"
+        >{{ scope.name }}</mat-checkbox
+      >
+    </div>
+  </div>
+  <button type="button" mat-raised-button name="consent_action" (click)="validateAndSubmit()">
+    {{ 'LOGIN.OAUTH2SERVER.CONSENT.SUBMIT' | translate }}
+  </button>
+</div>

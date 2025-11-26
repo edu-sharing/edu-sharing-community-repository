@@ -19,5 +19,6 @@ public class OAuth2Config {
         String redirectUri;
         List<String> scopes;
         String expires;
+        boolean requireConsent;
     }
 }

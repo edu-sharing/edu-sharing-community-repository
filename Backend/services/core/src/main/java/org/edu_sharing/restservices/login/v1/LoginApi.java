@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
@@ -28,11 +29,13 @@ import org.edu_sharing.repository.server.tools.security.ShibbolethSessions;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions.SessionInfo;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.RestConstants;
+import org.edu_sharing.restservices.iam.v1.model.UserEntry;
 import org.edu_sharing.restservices.login.v1.model.*;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.UserProfileAppAuth;
 import org.edu_sharing.service.authentication.*;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.lti13.LTIConstants;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.spring.security.oauth2.SilentLoginModeRedirect;
 import org.edu_sharing.spring.security.oauth2.config.OAuth2ClientProperties;
@@ -40,6 +43,8 @@ import org.edu_sharing.spring.security.oauth2.config.OAuth2ConfigProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 
 @Path("/authentication/v1")
@@ -345,6 +350,71 @@ public class LoginApi {
         } catch (Throwable e) {
             return ErrorResponse.createResponse(e);
         }
+    }
+
+    @GET
+    @Path("/oauth2consent")
+    @Consumes({"text/html"})
+    @Produces({"text/html"})
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class)))
+            })
+
+
+    public Response oauth2Consent(@Parameter(description = "client_id", required=true) @QueryParam("client_id") String clientId,
+                                  @Parameter(description = "state", required=true) @QueryParam("state") String state,
+                                  @Parameter(description = "scope", required=true) @QueryParam("scope") List<String> scopes,
+                                  @Context HttpServletRequest req) throws URISyntaxException {
+
+        HttpSession session = req.getSession(true);
+
+        session.setAttribute(OAuth2Consent.SESS_ATT_CLIENT_ID, clientId);
+        session.setAttribute(OAuth2Consent.SESS_ATT_STATE, state);
+        session.setAttribute(OAuth2Consent.SESS_ATT_SCOPES, scopes);
+
+        return Response.status(302).location(new URI("/edu-sharing/components/oauth2consent")).build();
+    }
+
+    @GET
+    @Path("/oauth2consent/data")
+    @Operation(summary = "gets the required oauth2consent data.", description = "oauth2 consent data for confirmations")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = OAuth2Consent.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+    public Response getOauth2Consent(@Context HttpServletRequest req) {
+        HttpSession session = req.getSession(false);
+        if(session == null){
+            return Response.status(Response.Status.BAD_REQUEST).entity("session is null").build();
+        }
+        String clientId = (String)session.getAttribute(OAuth2Consent.SESS_ATT_CLIENT_ID);
+        String state = (String)session.getAttribute(OAuth2Consent.SESS_ATT_STATE);
+        List<String> scopes = (List<String>)session.getAttribute(OAuth2Consent.SESS_ATT_SCOPES);
+        if(clientId == null){
+            return Response.status(Response.Status.BAD_REQUEST).entity("missing data: clientId").build();
+        }
+        if(state == null){
+            return Response.status(Response.Status.BAD_REQUEST).entity("missing data: state").build();
+        }
+        if(scopes == null ){
+            return Response.status(Response.Status.BAD_REQUEST).entity("missing data: scopes").build();
+        }
+        OAuth2Consent c = new OAuth2Consent();
+        c.setClientId(clientId);
+        c.setState(state);
+        c.setScopes(scopes);
+        return Response.status(200).entity(c).build();
     }
 }
 

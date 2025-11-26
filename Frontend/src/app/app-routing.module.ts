@@ -186,6 +186,15 @@ const routes: Routes = [
         path: UIConstants.ROUTER_PREFIX + 'lti',
         loadChildren: () => import('./pages/lti-page/lti-page.module').then((m) => m.LtiPageModule),
     },
+
+    {
+        path: UIConstants.ROUTER_PREFIX + 'oauth2consent',
+        loadChildren: () =>
+            import('./pages/oauth2consent-page/oauth2consent-page.module').then(
+                (m) => m.Oauth2consentPageModule,
+            ),
+    },
+
     // simple loading spinner (i.e. for connector redirects)
     {
         path: UIConstants.ROUTER_PREFIX + 'loading',

@@ -42,6 +42,16 @@
       "CONFIRM_CODE": "Bitte mithilfe der Authentifikations-App den zweiten Faktor bestätigen",
       "CODE": "Code",
       "WRONG_CODE": "Falscher Code"
+    },
+    "OAUTH2SERVER":{
+      "CONSENT": {
+        "TITLE": "Anwendung benötigt Berechtigung",
+        "DESCRIPTION": "Die Anwendung \"{{clientId}}\" benötigt bestimmte Berechtigungen um auf edu-sharing zuzugreifen.",
+        "SCOPES": "Liste der Berechtigungen",
+        "SUBMIT": "Bestätigen",
+        "VALIDATE_SCOPES": "Bitte wähle alle Berechtigungen.",
+        "ERROR": "Berechtigungsanfrage abgelaufen."
+      }
     }
   },
   "LOGIN_APP": {

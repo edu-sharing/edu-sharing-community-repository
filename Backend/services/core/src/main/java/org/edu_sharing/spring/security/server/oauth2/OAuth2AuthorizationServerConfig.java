@@ -22,6 +22,7 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
+import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -71,6 +72,8 @@ public class OAuth2AuthorizationServerConfig {
                 .exceptionHandling(e ->
                         e.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint(getLoginPath())))
                 .with(authorizationServerConfigurer, Customizer.withDefaults());
+        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+                .authorizationEndpoint(a ->a.consentPage("/rest/authentication/v1/oauth2consent"));
         return http.build();
     }
 
@@ -99,6 +102,7 @@ public class OAuth2AuthorizationServerConfig {
                                 if(!c.getClientSecret().isEmpty()){
                                     builder.clientSecret(c.getClientSecret());
                                 }
+                                builder.clientSettings(ClientSettings.builder().requireAuthorizationConsent(c.isRequireConsent()).build());
                                 if(!c.getRedirectUri().isEmpty()) builder.redirectUri(c.getRedirectUri());
                                 if(!c.getExpires().isEmpty()) builder.tokenSettings(TokenSettings.builder()
                                         .accessTokenTimeToLive(Duration.parse(c.getExpires()))

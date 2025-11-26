@@ -42,6 +42,16 @@
       "CONFIRM_CODE": "Please confirm the second factor using your authentication app",
       "CODE": "Code",
       "WRONG_CODE": "Incorrect code"
+    },
+    "OAUTH2SERVER":{
+      "CONSENT": {
+        "TITLE": "Application needs permissions",
+        "DESCRIPTION": "Application \"{{clientId}}\" requests permissions to work.",
+        "SCOPES": "List of permissions",
+        "SUBMIT": "submit",
+        "VALIDATE_SCOPES": "Please choose all permissions.",
+        "ERROR": "Permission request expired"
+      }
     }
   },
   "LOGIN_APP": {
