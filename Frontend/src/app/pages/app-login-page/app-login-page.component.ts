@@ -15,6 +15,7 @@ import { CordovaService } from '../../services/cordova.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { BridgeService } from '../../services/bridge.service';
 import { PlatformLocation } from '@angular/common';
+import { MainNavService } from '../../main/navigation/main-nav.service';
 
 // possible states this UI component can be in
 enum StateUI {
@@ -55,12 +56,16 @@ export class AppLoginPageComponent {
         private platformLocation: PlatformLocation,
         private cordova: CordovaService,
         private connector: RestConnectorService,
+        private mainNavService: MainNavService,
         private bridge: BridgeService,
         private configService: ConfigurationService,
         private locator: RestLocatorService,
     ) {
         console.info('startup app');
         this.isLoading = true;
+        this.mainNavService.patchMainNavConfig({
+            show: false,
+        });
 
         // WHEN RUNNING ON DESKTOP --> FORWARD TO BASIC LOGIN PAGE
         if (!this.cordova.isRunningCordova()) {

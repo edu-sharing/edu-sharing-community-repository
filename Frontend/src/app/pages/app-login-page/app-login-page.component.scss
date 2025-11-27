@@ -15,21 +15,21 @@
 }
 .infoTop {
     position: absolute;
-    top: 6%;
+    top: calc(6%);
     left: 50%;
     margin-left: -265px;
     max-width: 530px;
     padding: 20px;
     padding-top: 0;
     div {
-        color: $textVeryLight;
+        color: var(--textMediumLight);
     }
     h1 {
         font-size: 120%;
         font-weight: bold;
         margin: 0;
         margin-bottom: 5px;
-        color: #fff;
+        color: var(--textMain);
     }
 }
 .register {

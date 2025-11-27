@@ -1,6 +1,6 @@
 <es-global-progress *ngIf="isLoading"></es-global-progress>
 <div class="appLogin" *ngIf="!isLoading">
-  <div class="infoTop" style="margin-top: -10px">
+  <div class="infoTop">
     <h1>{{ 'LOGIN_APP.LOGIN' | translate }}</h1>
     <div>{{ 'LOGIN_APP.LOGIN_INFO' | translate }}</div>
   </div>
@@ -8,7 +8,7 @@
     modal="auto"
     title="{{ 'LOGIN_APP.LOGIN_TITLE' | translate }}"
     width="mlarge"
-    height="large"
+    height="auto"
     avatar="assets/images/app-icon.svg"
     [isCancelable]="true"
     (cancel)="buttonLoginBack()"
