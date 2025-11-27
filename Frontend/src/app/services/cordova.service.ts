@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthenticationService, LoginInfo } from 'ngx-edu-sharing-api';
 import { AppService as AppServiceAbstract, DateHelper, UIConstants } from 'ngx-edu-sharing-ui';
-import { BehaviorSubject, Observable, Observer } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Observable, Observer } from 'rxjs';
 import { first, map, share } from 'rxjs/operators';
 import { RestLocatorService } from '../core-module/core.module';
 import { OAuthResult } from '../core-module/rest/data-object';
@@ -30,13 +30,54 @@ export class CordovaService extends AppServiceAbstract {
     platform: 'ios' | 'android';
     private lastValidLogin: number;
 
-    oauthRequestData: string;
+    oauthRequestData: {
+        mode: 'password' | 'client_credentials';
+        authorization?: {
+            username?: string;
+            password?: string;
+        };
+        data: string;
+    };
     oauthRequest$ = new Observable<OAuthResult>((observer: Observer<OAuthResult>) => {
-        const url = this.injector.get(RestLocatorService).endpointUrl + '../oauth2/token';
-        const headers = { 'Content-Type': 'application/x-www-form-urlencoded', Accept: '*/*' };
+        let url = this.injector.get(RestLocatorService).endpointUrl + '../oauth2server/';
+        const headers: { [key in string]: string } = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Authorization: 'Basic ' + btoa('eduApp:123Test'),
+            Accept: '*/*',
+        };
         const options = { headers, withCredentials: false };
+        if (this.oauthRequestData.authorization) {
+            this.authenticationService
+                .login(
+                    this.oauthRequestData.authorization.username,
+                    this.oauthRequestData.authorization.password,
+                )
+                .subscribe((login) => {
+                    if (login.statusCode !== RestConstants.STATUS_CODE_OK) {
+                        console.warn('error login', login.statusCode);
+                        observer.error('LOGIN.ERROR');
+                        observer.complete();
+                    } else {
+                        this.sendToOauthApi(url, options, observer);
+                    }
+                });
+            return;
+        }
+        this.sendToOauthApi(url, options, observer);
+    }).pipe(share());
 
-        this.http.post<OAuthResult>(url, this.oauthRequestData, options).subscribe(
+    private sendToOauthApi(
+        url: string,
+        options: {
+            headers: { [p: string]: string };
+            withCredentials: boolean;
+        },
+        observer: Observer<OAuthResult>,
+    ) {
+        if (this.oauthRequestData.mode === 'password') {
+            url += 'device_authorization_endpoint';
+        }
+        this.http.post<OAuthResult>(url, this.oauthRequestData.data, options).subscribe(
             async (oauth: OAuthResult) => {
                 if (oauth == null) {
                     observer.error('INVALID_CREDENTIALS');
@@ -62,7 +103,7 @@ export class CordovaService extends AppServiceAbstract {
                 observer.complete();
             },
         );
-    }).pipe(share());
+    }
 
     get oauth() {
         return this.oauth$.value;
@@ -1241,22 +1282,17 @@ export class CordovaService extends AppServiceAbstract {
         password: string = '',
         grantType: 'password' | 'client_credentials' = 'password',
     ): Observable<OAuthResult> {
-        const url = endpointUrl + '../oauth2/token';
-        const headers = { 'Content-Type': 'application/x-www-form-urlencoded', Accept: '*/*' };
-        const options = { headers, withCredentials: true };
-
-        let data =
-            'client_id=eduApp&client_secret=secret&grant_type=' + encodeURIComponent(grantType);
+        let data = 'scope=read&grant_type=' + encodeURIComponent(grantType);
         if (grantType === 'password') {
-            data +=
-                '&username=' +
-                encodeURIComponent(username) +
-                '&password=' +
-                encodeURIComponent(password);
+            this.oauthRequestData = {
+                mode: grantType,
+                authorization: { username, password },
+                data,
+            };
         } else if (grantType === 'client_credentials') {
             // nothing is needed, session will be sent automatically
         }
-        this.oauthRequestData = data;
+
         return this.oauthRequest$;
     }
     public reinitStatus(
@@ -1319,10 +1355,13 @@ export class CordovaService extends AppServiceAbstract {
     refreshOAuth(
         endpointUrl = this.injector.get(RestLocatorService).endpointUrl,
     ): Observable<OAuthResult> {
-        this.oauthRequestData =
-            'grant_type=refresh_token&client_id=eduApp&client_secret=secret' +
-            '&refresh_token=' +
-            encodeURIComponent(this.oauth.refresh_token);
+        this.oauthRequestData = {
+            mode: 'client_credentials',
+            data:
+                'grant_type=refresh_token&client_secret=secret' +
+                '&refresh_token=' +
+                encodeURIComponent(this.oauth.refresh_token),
+        };
         return this.oauthRequest$;
     }
 
@@ -1486,10 +1525,17 @@ export class CordovaService extends AppServiceAbstract {
         if (cordova.isRunningCordova()) {
             if (await cordova.hasValidConfig()) {
                 console.info('oauth present');
-                await this.injector
-                    .get(AuthenticationService)
-                    .loginToken((await cordova.refreshOAuth().toPromise()).access_token)
-                    .toPromise();
+                try {
+                    await this.injector
+                        .get(AuthenticationService)
+                        .loginToken((await cordova.refreshOAuth().toPromise()).access_token)
+                        .toPromise();
+                } catch (e) {
+                    console.warn(e);
+                    this.setPermanentStorage(RestConstants.CORDOVA_STORAGE_OAUTHTOKENS, null);
+                    this.clearAllCookies();
+                    cordova.reinitStatus();
+                }
                 if (reload) {
                     console.info('login done, reloading page', window.location.href);
                     window.location.reload();
