@@ -73,6 +73,7 @@ public class OAuth2AuthorizationServerConfig {
                         e.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint(getLoginPath())))
                 .with(authorizationServerConfigurer, Customizer.withDefaults());
         http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+                .deviceAuthorizationEndpoint(d -> d.verificationUri("/oauth2server/device_verification"))
                 .authorizationEndpoint(a ->a.consentPage("/rest/authentication/v1/oauth2consent"));
         return http.build();
     }
@@ -136,6 +137,7 @@ public class OAuth2AuthorizationServerConfig {
                 .oidcUserInfoEndpoint("/oauth2server/userinfo")
                 .oidcClientRegistrationEndpoint("/oauth2server/register")
                 .deviceAuthorizationEndpoint("/oauth2server/device_authorization_endpoint")
+                .deviceVerificationEndpoint("/oauth2server/device_verification")
                 .tokenRevocationEndpoint("/oauth2server/revoke")
                 .tokenIntrospectionEndpoint("/oauth2server/introspect")
                 .build();
