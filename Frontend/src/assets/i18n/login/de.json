@@ -43,7 +43,7 @@
       "CODE": "Code",
       "WRONG_CODE": "Falscher Code"
     },
-    "OAUTH2SERVER":{
+    "OAUTH2SERVER": {
       "CONSENT": {
         "TITLE": "Anwendung benötigt Berechtigung",
         "DESCRIPTION": "Die Anwendung \"{{clientId}}\" benötigt bestimmte Berechtigungen um auf edu-sharing zuzugreifen.",

@@ -43,7 +43,7 @@
       "CODE": "Code",
       "WRONG_CODE": "Incorrect code"
     },
-    "OAUTH2SERVER":{
+    "OAUTH2SERVER": {
       "CONSENT": {
         "TITLE": "Application needs permissions",
         "DESCRIPTION": "Application \"{{clientId}}\" requests permissions to work.",
