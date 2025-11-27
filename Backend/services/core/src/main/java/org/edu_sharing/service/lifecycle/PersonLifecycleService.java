@@ -179,7 +179,6 @@ public class PersonLifecycleService {
 		PersonDeleteResult result=new PersonDeleteResult();
 		String status = (String)nodeService.getProperty(personNodeRef,
 				QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS));
-		String role = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION));
 		String userName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 		result.authorityName=userName;
 
