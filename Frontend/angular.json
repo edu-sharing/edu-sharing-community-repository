@@ -77,6 +77,14 @@
             "browser": "src/main.ts"
           },
           "configurations": {
+            "app": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.app.ts"
+                }
+              ]
+            },
             "production": {
               "budgets": [
                 {
@@ -146,6 +154,9 @@
             "buildTarget": "angular-edusharing:build"
           },
           "configurations": {
+            "app": {
+              "buildTarget": "angular-edusharing:build:app"
+            },
             "production": {
               "buildTarget": "angular-edusharing:build:production"
             }

@@ -9,7 +9,7 @@ export const environment = {
     // When doing this, also add an import statement for `zone.js/dist/long-stack-trace-zone`
     // in `polyfills.ts` after the import of `zone.js`.
     traceChangeDetection: false,
-    forceCordovaMode: false,
+    forceCordovaMode: true,
     webComponentMode: false,
     eduSharingApiUrl: '/edu-sharing/rest',
     bApiUrl: null as string,

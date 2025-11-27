@@ -11,6 +11,7 @@ import { RestLocatorService } from '../core-module/core.module';
 import { OAuthResult } from '../core-module/rest/data-object';
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { FrameEventsService } from '../core-module/rest/services/frame-events.service';
+import { environment } from '../../environments/environment';
 
 declare var cordova: any;
 
@@ -211,7 +212,7 @@ export class CordovaService extends AppServiceAbstract {
     public static TEST_OK = 'OK';
 
     // change this during development for testing true, but false is default
-    private forceCordovaMode = false;
+    private forceCordovaMode = environment.forceCordovaMode;
 
     private deviceIsReady = false;
 
