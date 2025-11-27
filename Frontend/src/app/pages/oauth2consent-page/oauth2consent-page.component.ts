@@ -44,36 +44,46 @@ export class Oauth2consentPageComponent {
             return;
         }
 
-        const body = new URLSearchParams();
-        body.set('client_id', this.oauth2Consent.clientId);
-        body.set('state', this.oauth2Consent.state);
+        const url = '/edu-sharing/oauth2server/authorize';
 
-        selectedScopes.forEach((scope) => body.append('scope', scope));
-        body.set('consent_action', 'approve');
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = url;
 
-        console.log('xhr stuff....');
-        this.http
-            .post('/edu-sharing/oauth2server/authorize', body.toString(), {
-                responseType: 'text',
-                observe: 'response',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            })
-            .subscribe({
-                next: (res) => {
-                    if (res.status === 302) {
-                        // extract redirect URL
-                        const redirect = res.headers.get('Location');
-                        window.location.href = redirect!;
-                    } else {
-                        console.log('OK:', res);
-                    }
-                },
-                error: (err) => {
-                    this.toast.error(
-                        err,
-                        this.translate.instant('LOGIN.OAUTH2SERVER.CONSENT.ERROR'),
-                    );
-                },
-            });
+        form.appendChild(
+            Object.assign(document.createElement('input'), {
+                type: 'hidden',
+                name: 'client_id',
+                value: this.oauth2Consent.clientId,
+            }),
+        );
+        form.appendChild(
+            Object.assign(document.createElement('input'), {
+                type: 'hidden',
+                name: 'state',
+                value: this.oauth2Consent.state,
+            }),
+        );
+
+        this.oauth2Consent.scopes.forEach((s) => {
+            form.appendChild(
+                Object.assign(document.createElement('input'), {
+                    type: 'hidden',
+                    name: 'scope',
+                    value: s,
+                }),
+            );
+        });
+
+        form.appendChild(
+            Object.assign(document.createElement('input'), {
+                type: 'hidden',
+                name: 'consent_action',
+                value: 'approve',
+            }),
+        );
+
+        document.body.appendChild(form);
+        form.submit();
     }
 }
