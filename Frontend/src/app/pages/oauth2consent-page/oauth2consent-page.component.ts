@@ -1,10 +1,8 @@
 import { Component } from '@angular/core';
-import { AuthenticationService } from 'ngx-edu-sharing-api';
-import { OAuth2Consent } from '../../../../projects/edu-sharing-api/src/lib/api/models/o-auth-2-consent';
+import { AuthenticationService, OAuth2Consent } from 'ngx-edu-sharing-api';
 import { ScopeEntry } from './scope-entry';
 import { TranslateService } from '@ngx-translate/core';
 import { HttpClient } from '@angular/common/http';
-import { ToastMessageComponent } from '../../main/toast-message/toast-message.component';
 import { Toast, ToastMessage, ToastType } from '../../services/toast';
 
 @Component({

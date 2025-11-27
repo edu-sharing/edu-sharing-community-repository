@@ -6,6 +6,7 @@
   "scripts": {
     "prestart": "npm run build:edu-sharing-api:dev && npm run build:edu-sharing-ui && npm run build:b-api",
     "start": "ng serve",
+    "start-app": "npm run prestart && ng serve -c=app",
     "start-public": "npm run prestart && ng serve --host 0.0.0.0 --disable-host-check",
     "serve-dist": "node scripts/server.js",
     "build:edu-sharing-api": "(cd projects/edu-sharing-api && npm run update-if-needed) && node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build edu-sharing-api",

@@ -103,6 +103,7 @@ export { Pagination } from './api/models/pagination';
 export { Person } from './api/models/person';
 export { RelationData } from './api/models/relation-data';
 export { ReferenceEntries } from './api/models/reference-entries';
+export { OAuth2Consent } from './api/models/o-auth-2-consent';
 export { SearchResultNode as SearchResults } from './api/models/search-result-node';
 export { SearchResultInvite } from './api/models/search-result-invite';
 export { InviteEvent } from './api/models/invite-event';
