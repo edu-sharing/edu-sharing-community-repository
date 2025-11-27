@@ -53,6 +53,7 @@ import { MdsEditorWidgetCommentsComponent } from './mds-editor/widgets/mds-edito
 import { CommentsListComponent } from './mds-editor/widgets/mds-editor-widget-comments/comments-list/comments-list.component';
 import { MdsNodeRelationsWidgetComponent } from './mds-editor/widgets/mds-editor-widget-relations/node-relations/node-relations-widget.component';
 import { MdsEditorWidgetRelationsComponent } from './mds-editor/widgets/mds-editor-widget-relations/mds-editor-widget-relations.component';
+import { MdsEditorGlobalService } from './mds-editor/mds-editor-global.service';
 
 @NgModule({
     declarations: [
@@ -109,6 +110,7 @@ import { MdsEditorWidgetRelationsComponent } from './mds-editor/widgets/mds-edit
         CommentsListComponent,
         MdsNodeRelationsWidgetComponent,
     ],
+    providers: [MdsEditorGlobalService],
     exports: [
         AiPreviewImagesOverlayComponent,
         LicenseDetailsComponent,
@@ -121,6 +123,7 @@ import { MdsEditorWidgetRelationsComponent } from './mds-editor/widgets/mds-edit
         MdsEditorCoreComponent,
         MdsEditorSingleWidgetComponent,
         SearchFieldFacetsComponent,
+        MdsEditorWidgetContainerComponent,
     ],
 })
 export class MdsModule {}

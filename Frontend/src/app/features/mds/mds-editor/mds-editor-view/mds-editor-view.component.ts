@@ -4,7 +4,6 @@ import {
     ApplicationRef,
     Component,
     ComponentFactoryResolver,
-    computed,
     ElementRef,
     HostBinding,
     Injector,
@@ -21,17 +20,8 @@ import {
     ViewContainerRef,
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import {
-    BehaviorSubject,
-    combineLatest,
-    forkJoin,
-    merge,
-    Observable,
-    of,
-    ReplaySubject,
-    Subject,
-} from 'rxjs';
-import { filter, first, map, startWith, take, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subject } from 'rxjs';
+import { filter, first, map, take, takeUntil } from 'rxjs/operators';
 import { JUMP_MARK_POSTFIX } from '../../../dialogs/card-dialog/card-dialog-container/jump-marks-handler.directive';
 import { NativeWidgets, WidgetComponents } from '../../types/mds-types';
 import {
@@ -61,7 +51,7 @@ import {
     UIService,
     ViewInstanceService,
 } from 'ngx-edu-sharing-ui';
-import { MdsEditorWidgetBase } from '../widgets/mds-editor-widget-base';
+import { MdsEditorGlobalService } from '../mds-editor-global.service';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;
@@ -133,6 +123,7 @@ export class MdsEditorViewComponent
         private containerRef: ViewContainerRef,
         private applicationRef: ApplicationRef,
         private mdsEditorInstance: MdsEditorInstanceService,
+        private mdsEditorGlobalService: MdsEditorGlobalService,
         private ngZone: NgZone,
         private viewInstance: ViewInstanceService,
         private uiService: UIService,
@@ -142,6 +133,7 @@ export class MdsEditorViewComponent
         this.isEmbedded = this.mdsEditorInstance.isEmbedded;
         this.knownWidgetTags = [
             ...Object.values(NativeWidgetType),
+            ...this.mdsEditorGlobalService.getCustomNativeWidgets().map((w) => w.id),
             ...this.mdsEditorInstance.mdsDefinition$.value.widgets.map((w) => w.id),
         ];
     }
@@ -231,11 +223,11 @@ export class MdsEditorViewComponent
             const tagName = element.localName;
 
             const widgets = this.mdsEditorInstance.getWidgetsByTagName(tagName, this.view.id);
-            if (Object.values(NativeWidgetType).includes(tagName as NativeWidgetType)) {
+            if (this.findNativeWidget(tagName as NativeWidgetType)) {
                 const widgetName = tagName as NativeWidgetType;
                 // Native widgets don't support dynamic conditions yet and don't necessarily have a
                 // `widget` object.
-                const WidgetComponent = MdsEditorViewComponent.nativeWidgets[widgetName];
+                const WidgetComponent = this.findNativeWidget(widgetName);
                 if (
                     ['inline'].includes(this.mdsEditorInstance.editorMode) &&
                     !WidgetComponent?.constraints?.supportsInlineEditing
@@ -277,6 +269,14 @@ export class MdsEditorViewComponent
         }
     }
 
+    private findNativeWidget(widgetName: NativeWidgetType) {
+        return (
+            MdsEditorViewComponent.nativeWidgets[widgetName] ||
+            this.mdsEditorGlobalService.getCustomNativeWidgets().find((w) => w.id === widgetName)
+                ?.component
+        );
+    }
+
     private injectMissingWidgetWarning(widgetName: string, element: Element): void {
         // Property names are no valid names for autonomous custom elements as by the W3C
         // specification.
@@ -308,7 +308,7 @@ export class MdsEditorViewComponent
         attributes: Attributes,
     ): void {
         element = replaceElementWithDiv(element);
-        const WidgetComponent = NativeWidgets[widgetName];
+        const WidgetComponent = this.findNativeWidget(widgetName);
         if (!WidgetComponent) {
             this.uiService.injectAngularComponent(
                 this.containerRef,
@@ -382,6 +382,9 @@ export class MdsEditorViewComponent
             }
             return MdsWidgetComponent;
         } else {
+            if (this.mdsEditorGlobalService.getCustomWidgetComponent(widget.definition.type)) {
+                return this.mdsEditorGlobalService.getCustomWidgetComponent(widget.definition.type);
+            }
             return WidgetComponents[widget.definition.type as MdsWidgetType];
         }
     }

@@ -33,6 +33,13 @@
         </tr>
         <tr th:if="${data.schoolDisplayName}"><td th:text="#{dataprotection_general_schoolname}"></td><td th:text="${data.schoolDisplayName}"></td></tr>
         <tr th:if="${data.schoolName}"><td th:text="#{dataprotection_general_schoolnumber}"></td><td th:text="${data.schoolName}"></td></tr>
+        <tr th:if="${!#lists.isEmpty(data.mediacenterList)}"><td th:text="#{dataprotection_general_mediacenter_list}"></td>
+            <td>
+                <ul>
+                    <li th:each="group, iterStat : ${data.mediacenterList}" th:text="${group}"></li>
+                </ul>
+            </td>
+        </tr>
         <tr th:if="${!#lists.isEmpty(data.groupList)}"><td th:text="#{dataprotection_general_group_list}"></td>
             <td>
                 <ul>

@@ -570,8 +570,14 @@ public class PreviewServlet extends HttpServlet {
 						scale=false;
 					}
 				}
-				if(!scale && !svg)
+				if(!scale && !svg && quality >= 1.0f) {
 					return null;
+				}
+				if(!scale) {
+					// we will not increase size
+					width = img.getWidth();
+					height = img.getHeight();
+				}
 				BufferedImage cropped=new BufferedImage(width,height, BufferedImage.TYPE_INT_ARGB); // getType() sometimes return 0
 				float aspectCrop=(float)width/(float)height;
 				Graphics g=cropped.getGraphics();

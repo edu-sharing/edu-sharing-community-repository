@@ -252,7 +252,7 @@ public class NodeApi  {
 	@DELETE
 	@Path("/nodes/{repository}/{node}/publish/revoke")
 
-	@Operation(summary = "Revoke published copy", description = "Revoke a previously published copy. The content of this copy will be irrevocable removed, only the metadata will remain")
+	@Operation(summary = "Revoke published copy or regular node", description = "Revoke a previously published copy or a regular. The content of this copy will be irrevocable removed, only the metadata will remain")
 
 	@ApiResponses(
 			value = {
@@ -264,7 +264,7 @@ public class NodeApi  {
 					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 
-	public Response revokeCopy(
+	public Response revokeNode(
 			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
 			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) RevokeDetails details,

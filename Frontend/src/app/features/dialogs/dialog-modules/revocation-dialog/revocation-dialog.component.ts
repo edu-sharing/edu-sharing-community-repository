@@ -8,6 +8,7 @@ import { NodeHelperService } from '../../../../services/node-helper.service';
 import { DialogButton } from '../../../../util/dialog-button';
 import { HOME_REPOSITORY, NodeServiceUnwrapped } from 'ngx-edu-sharing-api';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
     imports: [SharedModule],
@@ -61,15 +62,16 @@ export class RevocationDialogComponent {
         this.dialogRef.patchState({
             isLoading: true,
         });
-        const node = await this.nodeService
-            .revokeCopy({
+        const node = await firstValueFrom(
+            this.nodeService.revokeNode({
                 repository: HOME_REPOSITORY,
                 node: this.data.node.ref.id,
                 body: {
                     reason: this.reasonControl.value,
+                    removeContent: true,
                 },
-            })
-            .toPromise();
+            }),
+        );
         this.dialogRef.close({
             reason: this.reasonControl.value,
             node,
