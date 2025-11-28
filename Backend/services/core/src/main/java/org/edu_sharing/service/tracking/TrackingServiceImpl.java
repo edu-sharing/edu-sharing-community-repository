@@ -639,8 +639,8 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
 
     @Override
     public void reassignUserData(String oldUsername, String newUsername) {
-        if (getUserTrackingMode().equals(UserTrackingMode.none)) {
-            logger.info("User tracking is set to none, reassignUserData will do nothing");
+        if (Arrays.asList(UserTrackingMode.none, UserTrackingMode.session).contains(getUserTrackingMode())) {
+            logger.info("User tracking is set to none or session, reassignUserData will do nothing");
             return;
         }
         execDatabaseQuery(TRACKING_UPDATE_NODE, (statement) -> {
