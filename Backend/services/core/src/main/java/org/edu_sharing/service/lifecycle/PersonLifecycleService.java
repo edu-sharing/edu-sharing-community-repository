@@ -233,6 +233,7 @@ public class PersonLifecycleService {
 	}
 
 	public void processRatings(PersonDeleteResult result, String userName, boolean delete) {
+		logger.info("processing ratings");
 		if(delete) {
 			RatingServiceFactory.getLocalService().deleteUserData(userName);
 		} else {
@@ -240,6 +241,7 @@ public class PersonLifecycleService {
 		}
 	}
 	public void processFeedback(PersonDeleteResult result, String userName, boolean delete) {
+		logger.info("processing feedback");
 		if(delete) {
 			FeedbackServiceFactory.getLocalService().deleteUserData(userName);
 		} else {
@@ -292,7 +294,7 @@ public class PersonLifecycleService {
 		String username = (String)nodeService.getProperty(personNodeRef,
 				QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 		List<NodeRef> refs = getAllNodeRefs(username,type, scope);
-		logger.info("Deleting all files of type "+type);
+		logger.info("Deleting all files of type " + type + "( " + refs.size() + " files)");
 		deleteAllRefs(refs);
 		return refs;
 	}
