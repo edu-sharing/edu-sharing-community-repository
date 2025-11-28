@@ -696,6 +696,12 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
         props.addAll(MetadataReader.getWidgetsByNode(ref, "de_DE").stream().
                 map(MetadataWidget::getId).map(CCConstants::getValidGlobalName).
                 collect(Collectors.toList()));
+
+        props.addAll(MetadataReader.getWidgetsByNode(ref, "de_DE").stream().
+                filter(w ->  "range".equals(w.getType())).
+                flatMap(w -> Stream.of(w.getId() + "_from", w.getId() + "_to")).
+                map(CCConstants::getValidGlobalName).
+                collect(Collectors.toList()));
         props.addAll(MetadataReader.getWidgetsByNode(ref, "de_DE").stream().
                 map(MetadataWidget::getSuggestDisplayProperty).filter(Objects::nonNull).map(CCConstants::getValidGlobalName).
                 collect(Collectors.toList()));
