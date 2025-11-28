@@ -49,6 +49,7 @@ export class CordovaService extends AppServiceAbstract {
         const url = this.injector.get(RestLocatorService).endpointUrl + '../oauth2server/' + path;
         return await firstValueFrom(
             this.http.post<OAuthResult | OAuthDeviceAuthorizationResult>(url, data, {
+                withCredentials: false,
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     Authorization: 'Basic ' + btoa(CordovaService.DEFAULT_CREDENTIALS),
@@ -1244,6 +1245,7 @@ export class CordovaService extends AppServiceAbstract {
             throw new Error('LOGIN.ERROR');
         }
 
+        // @TODO: This must be called AFTER comming back from the oauthGrant redirect
         const device = (await this.sendToOauthApi(
             'device_authorization_endpoint',
             'scope=read&grant_type=client_credentials',
@@ -1253,7 +1255,7 @@ export class CordovaService extends AppServiceAbstract {
             const result = (await this.sendToOauthApi(
                 'token',
                 'grant_type=urn:ietf:params:oauth:grant-type:device_code&device_code=' +
-                    encodeURIComponent(device.device_code),
+                    device.device_code,
             )) as OAuthResult;
             console.log(result);
         } catch (e: HttpErrorResponse | any) {
