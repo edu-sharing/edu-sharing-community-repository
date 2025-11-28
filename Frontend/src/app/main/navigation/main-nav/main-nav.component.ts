@@ -487,6 +487,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                         '',
                         () => (window.location.href = login.url),
                     );
+                    loginOption.priority = 10;
                     loginOption.group = mainGroup;
                     this.userMenuOptions.push(loginOption);
                 }
@@ -494,6 +495,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                 const loginOption = new OptionItem('SIDEBAR.LOGIN', 'person', () =>
                     this.login(true),
                 );
+                loginOption.priority = 10;
                 loginOption.group = mainGroup;
                 this.userMenuOptions.push(loginOption);
             }
