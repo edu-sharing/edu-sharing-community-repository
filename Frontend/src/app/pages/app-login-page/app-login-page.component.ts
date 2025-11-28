@@ -5,7 +5,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import {
     ConfigurationService,
     DialogButton,
-    OAuthResult,
     RestConnectorService,
     RestConstants,
     RestLocatorService,
@@ -118,7 +117,7 @@ export class AppLoginPageComponent {
         //(navigator as any).app.loadUrl(this.cordova.getIndexPath()+"?reset=true");
     }
 
-    login() {
+    async login() {
         /*
         // test camera
         this.cordova.getPhotoFromCamera(
@@ -147,25 +146,17 @@ export class AppLoginPageComponent {
         */
         this.isLoading = true;
         // APP: oAuth Login
-        this.cordova.loginOAuth(this.locator.endpointUrl, this.username, this.password).subscribe(
-            (oauthTokens: OAuthResult) => {
-                this.cordova.setPermanentStorage(
-                    RestConstants.CORDOVA_STORAGE_OAUTHTOKENS,
-                    JSON.stringify(oauthTokens),
-                );
-                // continue to within the app
-                this.goToDefaultLocation();
-            },
-            (error) => {
-                console.warn(error);
-                this.isLoading = false;
-                if (typeof error == 'string') {
-                    this.toast.error(null, error);
-                } else {
-                    this.toast.error(null, 'LOGIN.ERROR');
-                }
-            },
-        );
+        try {
+            const oauthTokens = await this.cordova.loginOAuth(this.username, this.password);
+        } catch (error: any) {
+            console.warn(error);
+            this.isLoading = false;
+            if ((error as Error).message) {
+                this.toast.error(null, error.message);
+            } else {
+                this.toast.error(null, 'LOGIN.ERROR');
+            }
+        }
         /*
         this.cordova.setServerURL(this.currentServer.url+"rest/",true).subscribe(()=> {
 
@@ -244,16 +235,6 @@ export class AppLoginPageComponent {
             (data) => {
                 console.info('app login status', data);
                 if (data.statusCode === RestConstants.STATUS_CODE_OK) {
-                    this.cordova
-                        .loginOAuth(this.locator.endpointUrl, null, null, 'client_credentials')
-                        .subscribe((oauthTokens: OAuthResult) => {
-                            this.cordova.setPermanentStorage(
-                                RestConstants.CORDOVA_STORAGE_OAUTHTOKENS,
-                                JSON.stringify(oauthTokens),
-                            );
-                            // continue to within the app
-                            this.goToDefaultLocation();
-                        });
                 } else {
                     this.checkLoginUrl();
                 }

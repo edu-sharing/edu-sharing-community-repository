@@ -1,5 +1,5 @@
 import { Location } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, Injector, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -8,7 +8,6 @@ import { AppService as AppServiceAbstract, DateHelper, UIConstants } from 'ngx-e
 import { BehaviorSubject, firstValueFrom, Observable, Observer } from 'rxjs';
 import { first, map, share } from 'rxjs/operators';
 import { RestLocatorService } from '../core-module/core.module';
-import { OAuthResult } from '../core-module/rest/data-object';
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { FrameEventsService } from '../core-module/rest/services/frame-events.service';
 import { environment } from '../../environments/environment';
@@ -19,7 +18,22 @@ export enum OnBackBehaviour {
     default,
     closeApp,
 }
+export type OAuthDeviceAuthorizationResult = {
+    device_code: string;
+    expires_in: number;
+    user_code: string;
+    verification_uri: string;
+    verification_uri_complete: string;
+};
+export type OAuthResult = {
+    // set by server
+    access_token: string;
+    refresh_token: string;
+    expires_in: number;
 
+    // for local use
+    expires_ts?: number;
+};
 /**
  * All services that touch the mobile app or cordova plugins are available here.
  */
@@ -29,79 +43,17 @@ export class CordovaService extends AppServiceAbstract {
     private onBackBehaviour = OnBackBehaviour.default;
     platform: 'ios' | 'android';
     private lastValidLogin: number;
+    private static DEFAULT_CREDENTIALS = 'eduApp:123Test';
 
-    oauthRequestData: {
-        mode: 'password' | 'client_credentials';
-        authorization?: {
-            username?: string;
-            password?: string;
-        };
-        data: string;
-    };
-    oauthRequest$ = new Observable<OAuthResult>((observer: Observer<OAuthResult>) => {
-        let url = this.injector.get(RestLocatorService).endpointUrl + '../oauth2server/';
-        const headers: { [key in string]: string } = {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            Authorization: 'Basic ' + btoa('eduApp:123Test'),
-            Accept: '*/*',
-        };
-        const options = { headers, withCredentials: false };
-        if (this.oauthRequestData.authorization) {
-            this.authenticationService
-                .login(
-                    this.oauthRequestData.authorization.username,
-                    this.oauthRequestData.authorization.password,
-                )
-                .subscribe((login) => {
-                    if (login.statusCode !== RestConstants.STATUS_CODE_OK) {
-                        console.warn('error login', login.statusCode);
-                        observer.error('LOGIN.ERROR');
-                        observer.complete();
-                    } else {
-                        this.sendToOauthApi(url, options, observer);
-                    }
-                });
-            return;
-        }
-        this.sendToOauthApi(url, options, observer);
-    }).pipe(share());
-
-    private sendToOauthApi(
-        url: string,
-        options: {
-            headers: { [p: string]: string };
-            withCredentials: boolean;
-        },
-        observer: Observer<OAuthResult>,
-    ) {
-        if (this.oauthRequestData.mode === 'password') {
-            url += 'device_authorization_endpoint';
-        }
-        this.http.post<OAuthResult>(url, this.oauthRequestData.data, options).subscribe(
-            async (oauth: OAuthResult) => {
-                if (oauth == null) {
-                    observer.error('INVALID_CREDENTIALS');
-                    observer.complete();
-                    return;
-                }
-
-                // set local expire ts on token
-                this.oauth = oauth;
-                // force a renew to consum the token
-                this.injector.get(AuthenticationService).loginToken(oauth.access_token);
-                observer.next(this.oauth);
-                observer.complete();
-            },
-            (error: any) => {
-                if (error.status == 401) {
-                    observer.error('LOGIN.ERROR');
-                    observer.complete();
-                    return;
-                }
-
-                observer.error(error);
-                observer.complete();
-            },
+    private async sendToOauthApi(path: string, data: string) {
+        const url = this.injector.get(RestLocatorService).endpointUrl + '../oauth2server/' + path;
+        return await firstValueFrom(
+            this.http.post<OAuthResult | OAuthDeviceAuthorizationResult>(url, data, {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    Authorization: 'Basic ' + btoa(CordovaService.DEFAULT_CREDENTIALS),
+                },
+            }),
         );
     }
 
@@ -1275,25 +1227,45 @@ export class CordovaService extends AppServiceAbstract {
         }
     }
 
-    // oAuth login that is used when running as mobile app
-    public loginOAuth(
-        endpointUrl: string,
-        username: string = '',
-        password: string = '',
-        grantType: 'password' | 'client_credentials' = 'password',
-    ): Observable<OAuthResult> {
-        let data = 'scope=read&grant_type=' + encodeURIComponent(grantType);
-        if (grantType === 'password') {
-            this.oauthRequestData = {
-                mode: grantType,
-                authorization: { username, password },
-                data,
-            };
-        } else if (grantType === 'client_credentials') {
-            // nothing is needed, session will be sent automatically
+    /**
+     * first time: we need to let the user grant access via oauth
+     */
+    private async oauthGrant(oauth: OAuthDeviceAuthorizationResult) {
+        const verificationUrl = URL.parse(oauth.verification_uri);
+        console.log(verificationUrl, verificationUrl.pathname);
+        window.location.assign(
+            verificationUrl.pathname + '?user_code=' + encodeURIComponent(oauth.user_code),
+        );
+    }
+    public async loginOAuth(username: string = '', password: string = '') {
+        const login = await firstValueFrom(this.authenticationService.login(username, password));
+        if (login.statusCode !== RestConstants.STATUS_CODE_OK) {
+            console.warn('error login', login.statusCode);
+            throw new Error('LOGIN.ERROR');
         }
 
-        return this.oauthRequest$;
+        const device = (await this.sendToOauthApi(
+            'device_authorization_endpoint',
+            'scope=read&grant_type=client_credentials',
+        )) as OAuthDeviceAuthorizationResult;
+        console.log(device);
+        try {
+            const result = (await this.sendToOauthApi(
+                'token',
+                'grant_type=urn:ietf:params:oauth:grant-type:device_code&device_code=' +
+                    encodeURIComponent(device.device_code),
+            )) as OAuthResult;
+            console.log(result);
+        } catch (e: HttpErrorResponse | any) {
+            console.log(e, e.error.error);
+            if (e.status === 400 && e.error.error === 'authorization_pending') {
+                await this.oauthGrant(device);
+            } else {
+                throw e;
+            }
+        }
+
+        return null as OAuthResult;
     }
     public reinitStatus(
         endpointUrl = this.injector.get(RestLocatorService).endpointUrl,
@@ -1355,14 +1327,7 @@ export class CordovaService extends AppServiceAbstract {
     refreshOAuth(
         endpointUrl = this.injector.get(RestLocatorService).endpointUrl,
     ): Observable<OAuthResult> {
-        this.oauthRequestData = {
-            mode: 'client_credentials',
-            data:
-                'grant_type=refresh_token&client_secret=secret' +
-                '&refresh_token=' +
-                encodeURIComponent(this.oauth.refresh_token),
-        };
-        return this.oauthRequest$;
+        return null;
     }
 
     /**
@@ -1474,7 +1439,7 @@ export class CordovaService extends AppServiceAbstract {
         return cordova.file.applicationDirectory + 'www/';
     }
 
-    private goToLogin(next: string) {
+    goToLogin(next?: string) {
         console.info('navigating to app login', next);
         void this.router.navigate([UIConstants.ROUTER_PREFIX, 'app'], {
             replaceUrl: true,
@@ -1534,7 +1499,7 @@ export class CordovaService extends AppServiceAbstract {
                     console.warn(e);
                     this.setPermanentStorage(RestConstants.CORDOVA_STORAGE_OAUTHTOKENS, null);
                     this.clearAllCookies();
-                    cordova.reinitStatus();
+                    this.goToLogin();
                 }
                 if (reload) {
                     console.info('login done, reloading page', window.location.href);

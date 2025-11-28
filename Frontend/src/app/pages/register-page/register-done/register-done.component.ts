@@ -109,18 +109,7 @@ export class RegisterDoneComponent {
                 () => {
                     this.activated = true;
                     if (this.cordova.isRunningCordova()) {
-                        this.locator.createOAuthFromSession().subscribe(
-                            () => {
-                                UIHelper.goToDefaultLocation(
-                                    this.router,
-                                    this.platformLocation,
-                                    this.config,
-                                );
-                            },
-                            (error) => {
-                                this.toast.error(error);
-                            },
-                        );
+                        this.cordova.goToLogin();
                     } else {
                         UIHelper.goToDefaultLocation(
                             this.router,
