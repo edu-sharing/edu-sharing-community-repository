@@ -13,9 +13,9 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -46,10 +46,10 @@ public class SecurityConfigGoogleOneTap {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, GoogleOneTapAuthenticationFilter googleFilter, AuthenticationManager authenticationManager) throws Exception {
+    public SecurityFilterChain googleOneTapFilterChain(HttpSecurity http, GoogleOneTapAuthenticationFilter googleFilter, AuthenticationManager authenticationManager) throws Exception {
 
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .securityMatcher("/login/google/**","/shibboleth")
                 .authorizeHttpRequests((authorize) -> authorize
                         //   .requestMatchers("/shibboleth").authenticated()
@@ -71,11 +71,6 @@ public class SecurityConfigGoogleOneTap {
                 .formLogin(Customizer.withDefaults());
 
         return http.build();
-    }
-
-    @Bean
-    public SecurityContextRepository securityContextRepository() {
-        return new HttpSessionSecurityContextRepository();
     }
 
     @Bean

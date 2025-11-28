@@ -49,20 +49,21 @@ import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.spring.ApplicationContextFactory;
-import org.edu_sharing.spring.security.basic.SecurityConfigurationBasic;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Primary;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Primary
@@ -115,181 +116,182 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
         return returnval;
     }
 
-    public void addToSpringContext(String userName, HttpSession session) {
-        UserDetails user = User.withUsername(userName)
-                .password("N/A")   // Password not longer needed
-                .roles("USER")
-                .build();
+    public void addToSpringSecurityContext(HttpSession session) {
+            net.sf.acegisecurity.Authentication acegiAuth = AuthenticationUtil.getFullAuthentication();
+            if (acegiAuth != null && (SecurityContextHolder.getContext().getAuthentication() == null || SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken)) {
+                List<GrantedAuthority> springAuthorities =
+                        acegiAuth.getAuthorities() == null
+                                ? List.of()
+                                : Arrays.stream(acegiAuth.getAuthorities())
+                                .map(net.sf.acegisecurity.GrantedAuthority::getAuthority)
+                                .map(SimpleGrantedAuthority::new)
+                                .collect(Collectors.toList());
 
-        Authentication auth = new UsernamePasswordAuthenticationToken(
-                user, null, user.getAuthorities()
-        );
+                Object principal = acegiAuth.getPrincipal();
+                Object credentials = acegiAuth.getCredentials();
+                UsernamePasswordAuthenticationToken springAuth = new UsernamePasswordAuthenticationToken(principal, credentials, springAuthorities);
+                springAuth.setDetails(acegiAuth.getDetails());
+                if(!acegiAuth.isAuthenticated()) {
+                    // we can only unset authenticated here because it is set to true in the constructor
+                    springAuth.setAuthenticated(acegiAuth.isAuthenticated());
+                }
+                SecurityContextHolder.getContext().setAuthentication(springAuth);
 
-        // set auth in SecurityContext
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(auth);
-        SecurityContextHolder.setContext(context);
-
-        // set Session-Attribut
-        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
-    }
-
-    @Override
-    public Map<String, String> getUserInfo(String userName, String ticket) throws Exception {
-        authenticationService.validate(ticket);
-        Map<String, String> returnval = new HashMap<>();
-        returnval.put(CCConstants.AUTH_USERNAME, authenticationService.getCurrentUserName());
-        returnval.put(CCConstants.AUTH_TICKET, authenticationService.getCurrentTicket());
-
-        addClientUserInfo(returnval);
-
-        return returnval;
-    }
-
-    /**
-     * Gets the current scope of the session, or null for the default workspace
-     */
-    public String getScope() {
-        if (Context.getCurrentInstance() == null) return null;
-        if (Context.getCurrentInstance().getRequest() == null) return null;
-        HttpSession session = Context.getCurrentInstance().getRequest().getSession();
-        if (session == null) return null;
-        return (String) session.getAttribute(CCConstants.AUTH_SCOPE);
-    }
-
-    private void addClientUserInfo(Map<String, String> authInfo) throws Exception {
-
-        MCAlfrescoAPIClient mcAlfrescoAPIClient = new MCAlfrescoAPIClient(authInfo);
-        Map<String, String> repositoryUseInfo = mcAlfrescoAPIClient.getUserInfo(authenticationService.getCurrentUserName());
-        String userNameCaption = repositoryUseInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
-
-        if (StringUtils.isBlank(userNameCaption)) {
-            userNameCaption = authInfo.get(CCConstants.AUTH_USERNAME);
+                // set Session-Attribut
+                session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
+            }
         }
-        authInfo.put(CCConstants.AUTH_USERNAME_CAPTION, userNameCaption);
 
-        String homeFolderId = mcAlfrescoAPIClient.getHomeFolderID(authInfo.get(CCConstants.AUTH_USERNAME));
-        authInfo.put(CCConstants.AUTH_USER_HOMEDIR, homeFolderId);
+        @Override
+        public Map<String, String> getUserInfo (String userName, String ticket) throws Exception {
+            authenticationService.validate(ticket);
+            Map<String, String> returnval = new HashMap<>();
+            returnval.put(CCConstants.AUTH_USERNAME, authenticationService.getCurrentUserName());
+            returnval.put(CCConstants.AUTH_TICKET, authenticationService.getCurrentTicket());
 
-        boolean isAdmin = mcAlfrescoAPIClient.isAdmin(authInfo.get(CCConstants.AUTH_USERNAME));
-        authInfo.put(CCConstants.AUTH_USER_ISADMIN, Boolean.valueOf(isAdmin).toString());
-    }
+            addClientUserInfo(returnval);
 
-    public String setUser(String authorityName) {
-        if (!AuthorityServiceHelper.isAdmin()) {
-            throw new NotAnAdminException();
+            return returnval;
         }
-        if (authenticationComponent.setCurrentUser(authorityName) != null) {
-            return authenticationService.getCurrentTicket();
+
+        /**
+         * Gets the current scope of the session, or null for the default workspace
+         */
+        public String getScope () {
+            if (Context.getCurrentInstance() == null) return null;
+            if (Context.getCurrentInstance().getRequest() == null) return null;
+            HttpSession session = Context.getCurrentInstance().getRequest().getSession();
+            if (session == null) return null;
+            return (String) session.getAttribute(CCConstants.AUTH_SCOPE);
         }
-        throw new RuntimeException("Authentication failed for " + authorityName);
-    }
 
-    @Override
-    public void logout(final String ticket) {
-        try {
-            authenticationService.invalidateTicket(ticket);
-            authenticationService.clearCurrentSecurityContext();
-        } catch (AuthenticationCredentialsNotFoundException e) {
-            log.debug("it seems there is a logout call with a ticket without a security context:");
-            log.debug(e.getMessage());
-            logoutWithoutSecurityContext(ticket);
+        private void addClientUserInfo (Map < String, String > authInfo) throws Exception {
+
+            MCAlfrescoAPIClient mcAlfrescoAPIClient = new MCAlfrescoAPIClient(authInfo);
+            Map<String, String> repositoryUseInfo = mcAlfrescoAPIClient.getUserInfo(authenticationService.getCurrentUserName());
+            String userNameCaption = repositoryUseInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
+
+            if (StringUtils.isBlank(userNameCaption)) {
+                userNameCaption = authInfo.get(CCConstants.AUTH_USERNAME);
+            }
+            authInfo.put(CCConstants.AUTH_USERNAME_CAPTION, userNameCaption);
+
+            String homeFolderId = mcAlfrescoAPIClient.getHomeFolderID(authInfo.get(CCConstants.AUTH_USERNAME));
+            authInfo.put(CCConstants.AUTH_USER_HOMEDIR, homeFolderId);
+
+            boolean isAdmin = mcAlfrescoAPIClient.isAdmin(authInfo.get(CCConstants.AUTH_USERNAME));
+            authInfo.put(CCConstants.AUTH_USER_ISADMIN, Boolean.valueOf(isAdmin).toString());
         }
-    }
 
-    public void logoutWithoutSecurityContext(final String ticket) {
+        public String setUser (String authorityName){
+            if (!AuthorityServiceHelper.isAdmin()) {
+                throw new NotAnAdminException();
+            }
+            if (authenticationComponent.setCurrentUser(authorityName) != null) {
+                return authenticationService.getCurrentTicket();
+            }
+            throw new RuntimeException("Authentication failed for " + authorityName);
+        }
 
-        RunAsWork<Void> ra = () -> {
-            authenticationService.invalidateTicket(ticket);
-            authenticationService.clearCurrentSecurityContext();
-            log.debug("none security context ticket invalidation done");
-            return null;
-        };
-
-        AuthenticationUtil.runAs(ra, "admin");
-    }
-
-    /**
-     * - tries to find a alfresco ticket in session
-     * - if there is one it will be validated
-     * - when it's valid the corresponding user will be determined
-     * - ticket and username will be returned
-     *
-     * @return null when no valid ticket was found else user name / ticket as Map<String,String>
-     */
-    public Map<String, String> validateAuthentication(HttpSession session) {
-        Map<String, String> result = null;
-        String currentTicket = (String) session.getAttribute(CCConstants.AUTH_TICKET);
-        log.debug("session id{} ticketId:{}", session.getId(), currentTicket);
-        if (currentTicket != null) {
+        @Override
+        public void logout ( final String ticket){
             try {
-                authenticationService.validate(currentTicket);
-                result = new HashMap<>();
-                result.put(CCConstants.AUTH_USERNAME, authenticationService.getCurrentUserName());
-                result.put(CCConstants.AUTH_TICKET, currentTicket);
-            } catch (AuthenticationException e) {
-                log.warn(e.getMessage());
+                authenticationService.invalidateTicket(ticket);
+                authenticationService.clearCurrentSecurityContext();
+            } catch (AuthenticationCredentialsNotFoundException e) {
+                log.debug("it seems there is a logout call with a ticket without a security context:");
+                log.debug(e.getMessage());
+                logoutWithoutSecurityContext(ticket);
             }
         }
-        return result;
-    }
 
-    @Override
-    public boolean validateTicket(String ticket) {
-        try {
-            if (ticket == null) {
-                return false;
+        public void logoutWithoutSecurityContext ( final String ticket){
+
+            RunAsWork<Void> ra = () -> {
+                authenticationService.invalidateTicket(ticket);
+                authenticationService.clearCurrentSecurityContext();
+                log.debug("none security context ticket invalidation done");
+                return null;
+            };
+
+            AuthenticationUtil.runAs(ra, "admin");
+        }
+
+        /**
+         * - tries to find a alfresco ticket in session
+         * - if there is one it will be validated
+         * - when it's valid the corresponding user will be determined
+         * - ticket and username will be returned
+         *
+         * @return null when no valid ticket was found else user name / ticket as Map<String,String>
+         */
+        public Map<String, String> validateAuthentication (HttpSession session){
+            Map<String, String> result = null;
+            String currentTicket = (String) session.getAttribute(CCConstants.AUTH_TICKET);
+            log.debug("session id{} ticketId:{}", session.getId(), currentTicket);
+            if (currentTicket != null) {
+                try {
+                    authenticationService.validate(currentTicket);
+                    result = new HashMap<>();
+                    result.put(CCConstants.AUTH_USERNAME, authenticationService.getCurrentUserName());
+                    result.put(CCConstants.AUTH_TICKET, currentTicket);
+                } catch (AuthenticationException e) {
+                    log.warn(e.getMessage());
+                }
             }
+            return result;
+        }
+
+        @Override
+        public boolean validateTicket (String ticket){
+            try {
+                if (ticket == null) {
+                    return false;
+                }
+                authenticationService.validate(ticket);
+
+                log.info("User logged in: {}, ticket: {}", authenticationService.getCurrentUserName(), ticket);
+                return true;
+            } catch (AuthenticationException e) {
+                log.info("{}, ticket: {}", e.getMessage(), ticket);
+            }
+            return false;
+        }
+
+        /**
+         * ignores user name param and takes the one it gets from authentication service
+         */
+        @Override
+        public void storeAuthInfoInSession (String username, String ticket, String authType, HttpSession session){
+
+            authenticationService.validate(ticket);
+            super.storeAuthInfoInSession(authenticationService.getCurrentUserName(), ticket, authType, session);
+
+            //validate a second time cause super.storeAuthInfoInSession makes a logout when another tickets is in session
+            //i.e jession with ticket + basic auth in ApiAuthenticationFilter
             authenticationService.validate(ticket);
 
-            log.info("User logged in: {}, ticket: {}", authenticationService.getCurrentUserName(), ticket);
-            return true;
-        } catch (AuthenticationException e) {
-            log.info("{}, ticket: {}", e.getMessage(), ticket);
-        }
-        return false;
-    }
+            try {
+                Map<String, String> userInfo = getUserInfo(authenticationService.getCurrentUserName(), ticket);
+                session.setAttribute(CCConstants.AUTH_USERNAME_CAPTION, userInfo.get(CCConstants.AUTH_USERNAME_CAPTION));
+            } catch (Exception ignored) {
 
-    /**
-     * ignores user name param and takes the one it gets from authentication service
-     */
-    @Override
-    public void storeAuthInfoInSession(String username, String ticket, String authType, HttpSession session) {
-
-        authenticationService.validate(ticket);
-        super.storeAuthInfoInSession(authenticationService.getCurrentUserName(), ticket, authType, session);
-
-        //validate a second time cause super.storeAuthInfoInSession makes a logout when another tickets is in session
-        //i.e jession with ticket + basic auth in ApiAuthenticationFilter
-        authenticationService.validate(ticket);
-
-        try {
-            Map<String, String> userInfo = getUserInfo(authenticationService.getCurrentUserName(), ticket);
-            session.setAttribute(CCConstants.AUTH_USERNAME_CAPTION, userInfo.get(CCConstants.AUTH_USERNAME_CAPTION));
-        } catch (Exception ignored) {
-
-        }
-
-        String locale = (String) session.getAttribute(CCConstants.AUTH_LOCALE);
-        if (locale == null) {
-            Object localeObj = nodeService.getProperty(personService.getPerson(authenticationService.getCurrentUserName()), ContentModel.PROP_LOCALE);
-            if (localeObj != null) {
-                session.setAttribute(CCConstants.AUTH_LOCALE, localeObj.toString());
             }
-        }
 
-        ApplicationContext eduAppContext = ApplicationContextFactory.getApplicationContext();
-        if(eduAppContext != null){
-            String profiles = eduAppContext.getEnvironment().getProperty("spring.profiles.active");
-            if(profiles != null && profiles.contains(SecurityConfigurationBasic.PROFILE_ID)){
-                addToSpringContext(username,session);
+            String locale = (String) session.getAttribute(CCConstants.AUTH_LOCALE);
+            if (locale == null) {
+                Object localeObj = nodeService.getProperty(personService.getPerson(authenticationService.getCurrentUserName()), ContentModel.PROP_LOCALE);
+                if (localeObj != null) {
+                    session.setAttribute(CCConstants.AUTH_LOCALE, localeObj.toString());
+                }
             }
+
+            addToSpringSecurityContext(session);
         }
-    }
 
-    public void authenticateUser(String username, HttpSession session) {
-        authenticationComponent.setCurrentUser(username);
-        storeAuthInfoInSession(username, authenticationService.getCurrentTicket(), CCConstants.AUTH_TYPE_DEFAULT, session);
-    }
+        public void authenticateUser (String username, HttpSession session){
+            authenticationComponent.setCurrentUser(username);
+            storeAuthInfoInSession(username, authenticationService.getCurrentTicket(), CCConstants.AUTH_TYPE_DEFAULT, session);
+        }
 
-}
+    }

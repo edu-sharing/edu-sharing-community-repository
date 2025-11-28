@@ -57,7 +57,7 @@ public class SecurityConfigurationSaml {
     EduAuthSuccsessHandler eduAuthSuccsessHandler;
 
     @Bean
-    SecurityFilterChain app(HttpSecurity http) throws Exception {
+    SecurityFilterChain samlFilterChain(HttpSecurity http) throws Exception {
 
         http
                 .securityMatcher("/login/**","/logout/**","/saml2","/saml2/**","/shibboleth")

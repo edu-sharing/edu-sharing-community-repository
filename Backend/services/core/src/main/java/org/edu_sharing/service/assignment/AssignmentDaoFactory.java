@@ -51,6 +51,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.edu_sharing.restservices.MissingResourceException;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 
 @Slf4j
@@ -286,6 +287,7 @@ public class AssignmentDaoFactory {
         @Override
         @RetryingTransaction
         @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS, requiresUser = true)
+        @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
         public void createOrUpdate(CreateAssignmentRequest request) {
             Map<String, Object> properties = new HashMap<>() {{
                 put(CCConstants.CM_NAME, UUID.randomUUID().toString());

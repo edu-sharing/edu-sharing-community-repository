@@ -18,7 +18,8 @@
     
    <namespaces>
       <namespace uri="http://www.alfresco.org/model/system/1.0" prefix="sys"/>
-      <namespace uri="http://www.alfresco.org/model/content/1.0" prefix="cm"/>
+       <namespace uri="http://www.alfresco.org/model/content/1.0" prefix="cm"/>
+       <namespace uri="http://www.campuscontent.de/model/1.0" prefix="ccm"/>
    </namespaces>
 
    <!--                                                                                   -->
@@ -540,7 +541,7 @@
   <!-- Permission related to assignments and submissions. -->
   <!-- ================================================== -->
 
-  <permissionSet type="cm:assignment" expose="selected">
+  <permissionSet type="ccm:assignment" expose="selected">
     <permissionGroup name="AssignmentCoordinator" allowFullControl="false" expose="true" >
       <includePermissionGroup type="cm:cmobject" permissionGroup="Consumer"/>
     </permissionGroup>

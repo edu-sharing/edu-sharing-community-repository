@@ -18,6 +18,8 @@ import org.edu_sharing.spring.security.openid.persistence.OidcUserSessionMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -34,11 +36,8 @@ import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequ
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
-import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
-import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.util.UrlUtils;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -61,7 +60,8 @@ public class SecurityConfigurationOAuth2 {
     }
 
     @Bean
-    public SecurityFilterChain app(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository, SilentLoginAuthorizationRequestResolver silentLoginAuthorizationRequestResolver, EduAuthSuccsessHandler eduAuthSuccsessHandler, OidcUserSessionMapper mapper) throws Exception {
+    @Order(Ordered.HIGHEST_PRECEDENCE)
+    public SecurityFilterChain oAuth2FilterChain(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository, SilentLoginAuthorizationRequestResolver silentLoginAuthorizationRequestResolver, EduAuthSuccsessHandler eduAuthSuccsessHandler, OidcUserSessionMapper mapper) throws Exception {
         http
                 .securityMatcher("/login/oauth2/**","/logout/**","/oauth2","/oauth2/**","/shibboleth","/rest/authentication/v1/validateSSOSession/**")
                 .authorizeHttpRequests((authorize) -> authorize

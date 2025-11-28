@@ -3,6 +3,7 @@ package org.edu_sharing.spring.security.basic;
 import com.typesafe.config.Config;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 
+
 public class EduWebSecurityCustomizer {
 
 

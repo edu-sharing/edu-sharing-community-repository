@@ -154,18 +154,16 @@ public class ContextManagementFilter implements jakarta.servlet.Filter {
 
 			logger.debug("thread:"+Thread.currentThread().getId() +" "+((HttpServletRequest)req).getServletPath()+" cleaning up");
 
-			NodeServiceInterceptor.setEduSharingScope((String)null);
+			NodeServiceInterceptor.setEduSharingScope(null);
 			NodeCustomizationPolicies.setEduSharingContext(null);
 			QueryUtils.setUserInfo(null);
 			NodeDao.setIsGlobalAdmin(null);
-			SubsystemChainingAuthenticationService.setSuccessFullAuthenticationMethod((String)null);
-			SubsystemChainingAuthenticationService.setCurrentPath((String)null);
+			SubsystemChainingAuthenticationService.setSuccessFullAuthenticationMethod(null);
+			SubsystemChainingAuthenticationService.setCurrentPath(null);
 
 			HttpContext.setCurrentMetadataSet(null);
 
-			/**
-			 * OAuth kill Session
-			 */
+            // OAuth kill Session
 			HttpServletRequest request = (HttpServletRequest)req;
 
 
@@ -187,7 +185,6 @@ public class ContextManagementFilter implements jakarta.servlet.Filter {
 			AuthenticationUtils.setAuthenticationDetails(null);
 
 			ThreadContext.clearAll();
-
 		}
 
 	}
