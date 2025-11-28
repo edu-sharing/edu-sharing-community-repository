@@ -7,14 +7,13 @@ import { DatePipe } from '@angular/common';
 import { FormatSizePipe } from '../pipes/file-size.pipe';
 import { VCardNamePipe } from '../pipes/vcard-name.pipe';
 import { DateHelper } from '../util/DateHelper';
-import { TranslationsService } from '../translations/translations.service';
 
 @Injectable()
 export class MdsViewerService {
     @ViewChildren('container') container: QueryList<ElementRef>;
     values$ = new BehaviorSubject<Values>(undefined);
     mds$ = new BehaviorSubject<MdsDefinition>(undefined);
-    constructor(private translate: TranslateService, private translations: TranslationsService) {}
+    constructor(private translate: TranslateService) {}
     getFormattedValue(value: string[], definition: MdsWidget, basicType: string): string[] {
         switch (basicType) {
             case 'date':
@@ -39,10 +38,7 @@ export class MdsViewerService {
         return value.map((v) => {
             if (definition.format) {
                 try {
-                    return new DatePipe(this.translations.getISOLanguage()).transform(
-                        v,
-                        definition.format,
-                    );
+                    return new DatePipe('en-US').transform(v, definition.format);
                 } catch (e) {
                     console.warn('Could not format date', e, definition);
                 }
