@@ -1,4 +1,4 @@
-package org.edu_sharing.restservices;
+package org.edu_sharing.restservices.exception_mapper;
 
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;

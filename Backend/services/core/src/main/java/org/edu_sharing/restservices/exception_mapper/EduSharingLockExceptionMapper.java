@@ -1,8 +1,9 @@
-package org.edu_sharing.restservices;
+package org.edu_sharing.restservices.exception_mapper;
 
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import org.edu_sharing.repository.server.tools.EduSharingLockException;
+import org.edu_sharing.restservices.ExtendedStatus;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.springframework.stereotype.Component;
 

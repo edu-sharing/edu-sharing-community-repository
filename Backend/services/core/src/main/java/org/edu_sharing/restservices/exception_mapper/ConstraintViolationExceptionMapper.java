@@ -1,17 +1,15 @@
-package org.edu_sharing.restservices;
+package org.edu_sharing.restservices.exception_mapper;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import lombok.Value;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.service.util.ViolationUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
