@@ -14,8 +14,6 @@ public interface SubmissionFileDao extends BasicNodeDao {
 
     void delete();
 
-    @RunAsSystem
-    @RetryingTransaction
     void create(SubmissionFileRequest submissionFileRequest, InputStream fileInputStream);
 
     Submission.Status getValidationStatus();
@@ -24,8 +22,6 @@ public interface SubmissionFileDao extends BasicNodeDao {
 
     String getContentNodeId();
 
-    @RunAsSystem
-    @RetryingTransaction
     void update(SubmissionFileRequest request, InputStream fileInputStream);
 
     void setValidationStatus(Submission.Status validationStatus);

@@ -256,7 +256,7 @@ public class AssignmentApi {
                                    EditSubmissionRequest request) {
         AssignmentDao assignment = assignmentDaoFactory.assignmentDao(assignmentId);
         SubmissionDao submission = assignment.getSubmission(submissionId);
-        submission.update(request);
+        submission.updateValidationInfo(request);
         return Response.ok().entity(submission.getSubmission()).build();
     }
 

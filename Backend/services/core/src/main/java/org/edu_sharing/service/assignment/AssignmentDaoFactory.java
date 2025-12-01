@@ -87,21 +87,21 @@ public class AssignmentDaoFactory {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    protected AssignmentFileDao assignmentFileDao(AssignmentDao assignmentDao, String nodeId) {
+    protected AssignmentFileDao assignmentFileDao(AssignmentDaoImpl assignmentDao, String nodeId) {
         return new AssignmentFileDaoImpl(assignmentDao, nodeId);
     }
 
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    protected SubmissionDao submissionDao(AssignmentDao assignmentDao, String nodeId) {
+    protected SubmissionDao submissionDao(AssignmentDaoImpl assignmentDao, String nodeId) {
         return new SubmissionDaoImpl(assignmentDao, nodeId);
     }
 
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    protected SubmissionFileDao submissionFileDao(AssignmentDao assignmentDao, SubmissionDao submissionDao, String nodeId) {
+    protected SubmissionFileDao submissionFileDao(AssignmentDaoImpl assignmentDao, SubmissionDaoImpl submissionDao, String nodeId) {
         return new SubmissionFileDaoImpl(assignmentDao, submissionDao, nodeId);
     }
 
@@ -121,32 +121,12 @@ public class AssignmentDaoFactory {
     }
 
 
-    protected void validateIsAssignmentCoordinator(String nodeId) {
-        if (!isAssignmentCoordinator(nodeId)) {
-            throw new AccessDeniedException("User is not allowed to perform this action");
-        }
-    }
-
-    protected void validateIsAssignee(String nodeId) {
-        if (!isAssignee(nodeId)) {
-            throw new AccessDeniedException("User is not allowed to perform this action");
-        }
-    }
-
     protected boolean isAssignmentCoordinator(String nodeId) {
         if (AuthorityServiceHelper.isAdmin(AuthenticationUtil.getFullyAuthenticatedUser())) {
             return true;
         }
 
         return permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR);
-    }
-
-    protected boolean isAssignee(String nodeId) {
-        if (AuthorityServiceHelper.isAdmin()) {
-            return true;
-        }
-
-        return permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.PERMISSION_ASSIGNEE);
     }
 
 
@@ -301,9 +281,10 @@ public class AssignmentDaoFactory {
 
             if (StringUtils.isNotBlank(nodeId)) {
                 validateExists();
-                validateIsAssignmentCoordinator(nodeId);
+
+                // TODO who can change this and under which conditions?
                 if (getStatus() != Assignment.Status.OPEN) {
-                    throw new InsufficientPermissionException("Assignment with id " + nodeId + " is not in status OPEN, cannot update");
+                    throw new IllegalStateException("Assignment with id " + nodeId + " is not in status OPEN, cannot update");
                 }
 
                 log.debug("Update assignment node {} with {}", nodeId, properties);
@@ -558,12 +539,12 @@ public class AssignmentDaoFactory {
     }
 
     protected final class AssignmentFileDaoImpl extends BasicNodeDaoImpl implements AssignmentFileDao {
-        private final AssignmentDao assignmentDao;
+        private final AssignmentDaoImpl assignmentDao;
 
         private final LazyProvider<PropertyMapper> propertyMapper;
         private final LazyProvider<Node> referNode;
 
-        public AssignmentFileDaoImpl(AssignmentDao assignmentDao, String nodeId) {
+        public AssignmentFileDaoImpl(AssignmentDaoImpl assignmentDao, String nodeId) {
             super(nodeId);
             this.assignmentDao = assignmentDao;
 
@@ -584,12 +565,13 @@ public class AssignmentDaoFactory {
 
         @Override
         @RetryingTransaction
+        @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
         public void create(AssignmentFileRequest request) {
-            validateIsAssignmentCoordinator(assignmentDao.getNodeId());
-
             if (StringUtils.isNotBlank(nodeId)) {
                 throw new IllegalStateException("AssignmentFile with id " + nodeId + " already exists.");
             }
+
+            validateCanChangeAssignment();
 
             log.debug("Creating new assignment file");
             Map<String, Object> properties = new HashMap<>() {{
@@ -632,9 +614,11 @@ public class AssignmentDaoFactory {
 
         @Override
         @RetryingTransaction
+        @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
         public void update(@NonNull AssignmentFileRequest assignmentFileRequest) {
             validateExists();
-            validateIsAssignmentCoordinator(nodeId);
+
+            validateCanChangeAssignment();
 
             Map<String, Object> properties = new HashMap<>();
             if (!Objects.equals(assignmentFileRequest.refId(), getReferNodeId())) {
@@ -689,14 +673,25 @@ public class AssignmentDaoFactory {
         public AssignmentFile.Role getDocumentRole() {
             return propertyMapper.get().getEnum(CCConstants.CCM_PROP_ASSIGNMENT_FILE_DOCUMENT_TYPE, AssignmentFile.Role.class);
         }
+
+        private void validateCanChangeAssignment() {
+            // TODO who can change this and under which conditions?
+            if(assignmentDao.getStatus() != Assignment.Status.OPEN) {
+                throw new IllegalStateException("Cannot create assignment file for assignment in status " + assignmentDao.getStatus());
+            }
+
+            if(isDone()){
+                throw new IllegalStateException("Cannot create assignment file for assignment in status done");
+            }
+        }
     }
 
     protected final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao {
 
-        private final AssignmentDao assignmentDao;
+        private final AssignmentDaoImpl assignmentDao;
         private final LazyProvider<Map<String, SubmissionFileDao>> submissionFileRefs;
 
-        public SubmissionDaoImpl(AssignmentDao assignmentDao, String nodeId) {
+        public SubmissionDaoImpl(AssignmentDaoImpl assignmentDao, String nodeId) {
             super(nodeId);
             this.assignmentDao = assignmentDao;
 
@@ -737,24 +732,27 @@ public class AssignmentDaoFactory {
                         getNodeRef(),
                         UserSimple.create(authorityService.getUser(creator), creator),
                         null,
-                        returned() ? getFeedback() : null,
+                        isReturned() ? getFeedback() : null,
                         getStatus(),
-                        returned() ? getValidationStatus() : Submission.Status.PENDING
+                        isReturned() ? getValidationStatus() : Submission.Status.PENDING
                 );
             }
         }
 
-        public boolean returned() {
+        @Override
+        public boolean isReturned() {
             return getValidationStatus() == Submission.Status.FINISHED;
         }
 
         @Override
         @RetryingTransaction
-        public void update(EditSubmissionRequest request) {
+        @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
+        public void updateValidationInfo(EditSubmissionRequest request) {
             validateExists();
             refresh();
+            validateCanCoordinatorChangeSubmission();
 
-            validateIsAssignmentCoordinator(assignmentDao.getNodeId());
+
             Map<String, Object> properties = new HashMap<>() {{
                 put(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, request.validationStatus().name());
                 put(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_NOTES, request.validationNotes());
@@ -769,15 +767,14 @@ public class AssignmentDaoFactory {
         public void setStatus(Submission.Status status) {
             validateExists();
             refresh();
+
             Submission.Status currentStatus = getStatus();
             if (currentStatus == status) {
                 log.debug("Submission status of {}, is already set to {}", nodeId, status);
                 return;
             }
 
-            if (currentStatus == Submission.Status.FINISHED && !isAssignmentCoordinator(nodeId)) {
-                throw new IllegalStateException("Submission with id " + nodeId + " is already finished.");
-            }
+            validateAssigneeCanChangeSubmission();
 
             nodeService.updateNodeNative(nodeId, Map.of(CCConstants.CCM_PROP_SUBMISSION_STATUS, status.name()));
             refresh();
@@ -799,8 +796,11 @@ public class AssignmentDaoFactory {
 
         @Override
         @RetryingTransaction
+        @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
         public SubmissionFileDao createOrUpdateSubmissionFile(String submissionFileId, SubmissionFileRequest submissionFileRequest, InputStream fileInputStream, FormDataContentDisposition fileMetaData) {
             submissionFileRefs.invalidate();
+            validateAssigneeCanChangeSubmission();
+
             SubmissionFileDao submissionFileDao;
             if (submissionFileId != null) {
                 submissionFileDao = getSubmissionFile(submissionFileId);
@@ -816,13 +816,13 @@ public class AssignmentDaoFactory {
 
         @Override
         @RetryingTransaction
-        @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS, requiresUser = true)
+        @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
         public void create() {
             if (StringUtils.isNotBlank(nodeId)) {
                 throw new IllegalStateException("Submission with id " + getNodeId() + " already exists.");
             }
 
-            validateIsAssignee(assignmentDao.getNodeId());
+            validateAssigneeCanChangeSubmission();
 
             log.debug("Creating new submission");
             Map<String, Object> properties = new HashMap<>() {{
@@ -847,30 +847,68 @@ public class AssignmentDaoFactory {
 
         @Override
         public Submission.Status getValidationStatus() {
+            if (!isAssignmentCoordinator(nodeId) && !isReturned()) {
+                return Submission.Status.PENDING;
+            }
             return propertyMapper.get().getEnum(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, Submission.Status.class);
         }
 
         @Override
         public String getFeedback() {
+            if (!isAssignmentCoordinator(nodeId) && !isReturned()) {
+                return null;
+            }
+
             return propertyMapper.get().getString(CCConstants.CCM_PROP_SUBMISSION_FEEDBACK);
         }
 
         @Override
         public String getValidationNotes() {
+            if (!isAssignmentCoordinator(nodeId)) {
+                return null;
+            }
             return propertyMapper.get().getString(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_NOTES);
+        }
+
+        private void validateCanCoordinatorChangeSubmission() {
+            if(isAssignmentCoordinator(nodeId)) {
+                return;
+            }
+
+            if (getStatus() == Submission.Status.FINISHED) {
+                return;
+            }
+
+            if (assignmentDao.getEndDate() != null && assignmentDao.getEndDate().before(new Date())) {
+                throw new InsufficientPermissionException("Assignment with id " + assignmentDao.getNodeId() + " has not yet been completed.");
+            }
+        }
+
+        private void validateAssigneeCanChangeSubmission() {
+            if(isAssignmentCoordinator(nodeId)){
+                return;
+            }
+
+            if (assignmentDao.getEndDate() != null && assignmentDao.getEndDate().after(new Date())) {
+                throw new InsufficientPermissionException("Assignment with id " + assignmentDao.getNodeId() + " has already ended.");
+            }
+
+            if (getStatus() == Submission.Status.FINISHED || isReturned()) {
+                throw new InsufficientPermissionException("Submission with id " + getNodeId() + " has already been finished.");
+            }
         }
     }
 
     protected final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements SubmissionFileDao {
 
-        private final AssignmentDao assignmentDao;
-        private final SubmissionDao submissionDao;
+        private final AssignmentDaoImpl assignmentDao;
+        private final SubmissionDaoImpl submissionDao;
 
         private final LazyProvider<Optional<org.alfresco.service.cmr.repository.NodeRef>> contentNodeId;
         private final LazyProvider<Node> contentNode;
 
 
-        public SubmissionFileDaoImpl(AssignmentDao assignmentDao, SubmissionDao submissionDao, String nodeId) {
+        public SubmissionFileDaoImpl(AssignmentDaoImpl assignmentDao, SubmissionDaoImpl submissionDao, String nodeId) {
             super(nodeId);
             this.assignmentDao = assignmentDao;
             this.submissionDao = submissionDao;
@@ -901,9 +939,9 @@ public class AssignmentDaoFactory {
 
         @Override
         @RetryingTransaction
-        @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS, requiresUser = true)
+        @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
         public void create(SubmissionFileRequest request, InputStream fileInputStream) {
-            validateCanAssigneeChangeSubmission();
+            submissionDao.validateAssigneeCanChangeSubmission();
 
             if (StringUtils.isNotBlank(nodeId)) {
                 throw new IllegalStateException("Submission file with id " + nodeId + " already exists.");
@@ -921,11 +959,12 @@ public class AssignmentDaoFactory {
 
         @Override
         @RetryingTransaction
+        @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
         public void update(SubmissionFileRequest request, InputStream fileInputStream) {
             refresh();
             validateExists();
 
-            validateCanAssigneeChangeSubmission();
+            submissionDao.validateAssigneeCanChangeSubmission();
 
             Map<String, Object> properties = new HashMap<>() {{
                 put(CCConstants.CM_NAME, UUID.randomUUID().toString());
@@ -1014,34 +1053,11 @@ public class AssignmentDaoFactory {
             log.debug("Added consumer permission for {} to submission file {}", currentUser, contentNodeId);
         }
 
-        private void validateCanAssigneeChangeSubmission() {
-            validateIsAssignee(submissionDao.getNodeId());
-
-            if (assignmentDao.getEndDate() != null && assignmentDao.getEndDate().before(new Date())) {
-                throw new InsufficientPermissionException("Assignment with id " + assignmentDao.getNodeId() + " has already ended.");
-            }
-
-            if (submissionDao.getStatus() == Submission.Status.FINISHED) {
-                throw new InsufficientPermissionException("Submission with id " + submissionDao.getNodeId() + " has already been finished.");
-            }
-        }
-
-        private void validateCanCoordinatorChangeSubmission() {
-            validateIsAssignmentCoordinator(nodeId);
-
-            if (submissionDao.getStatus() == Submission.Status.FINISHED) {
-                return;
-            }
-
-            if (assignmentDao.getEndDate() != null && assignmentDao.getEndDate().after(new Date())) {
-                throw new InsufficientPermissionException("Assignment with id " + assignmentDao.getNodeId() + " has not yet been completed.");
-            }
-        }
-
         @Override
+        @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
         public void setValidationStatus(Submission.Status validationStatus) {
             validateExists();
-            validateCanCoordinatorChangeSubmission();
+            submissionDao.validateCanCoordinatorChangeSubmission();
 
             refresh();
 
@@ -1050,9 +1066,10 @@ public class AssignmentDaoFactory {
         }
 
         @Override
+        @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
         public void delete() {
             validateExists();
-            validateCanCoordinatorChangeSubmission();
+            submissionDao.validateAssigneeCanChangeSubmission();
         }
 
         @Override
@@ -1087,8 +1104,6 @@ public class AssignmentDaoFactory {
         private String getContentNodeId_Internal() {
             return contentNodeId.get().map(org.alfresco.service.cmr.repository.NodeRef::getId).orElse(null);
         }
-
     }
-
 }
 

@@ -1,7 +1,5 @@
 package org.edu_sharing.service.assignment;
 
-import org.edu_sharing.repository.server.tools.security.RunAsSystem;
-import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
 import org.edu_sharing.restservices.assignment.v1.model.EditSubmissionRequest;
 import org.edu_sharing.restservices.assignment.v1.model.Submission;
 import org.edu_sharing.restservices.assignment.v1.model.SubmissionFileRequest;
@@ -15,7 +13,9 @@ public interface SubmissionDao extends BasicNodeDao {
 
     Submission getSubmission();
 
-    void update(EditSubmissionRequest request);
+    boolean isReturned();
+
+    void updateValidationInfo(EditSubmissionRequest request);
 
     void setStatus(Submission.Status status);
 
@@ -27,8 +27,6 @@ public interface SubmissionDao extends BasicNodeDao {
 
     SubmissionFileDao createOrUpdateSubmissionFile(String submissionFileId, SubmissionFileRequest submissionFileRequest, InputStream fileInputStream, FormDataContentDisposition fileMetaData);
 
-    @RunAsSystem
-    @RetryingTransaction
     void create();
 
     Submission.Status getStatus();

@@ -15,6 +15,13 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+
+/**
+ * AssignmentProxy is an aspect responsible for handling access control checks
+ * and permission validations on methods of the AssignmentDao classes. It ensures
+ * that certain operations are performed under the context of a system-level user
+ * and validates permissions for the current user before proceeding with specific actions.
+ */
 @Aspect
 @Component
 @RequiredArgsConstructor
@@ -35,7 +42,6 @@ public class AssignmentProxy {
             }
         });
     }
-
 
     @Order(Ordered.HIGHEST_PRECEDENCE + 1)
     @Before(value = "execution(* org.edu_sharing.service.assignment.AssignmentDaoFactory.*.*(..)) && target(basicNodeDao)")
