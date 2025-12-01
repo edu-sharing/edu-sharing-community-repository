@@ -23,7 +23,13 @@ public class SilentLoginModeRedirect {
             return false;
         }
 
-        if(request.getServletPath().equals("/rest")){
+        //http://localhost:8080/edu-sharing/components/login?local=true
+        if (isLocalLoginForced(request)) {
+            return false;
+        }
+
+        // preview redirect is problematic since browser seem to load random images from cache on 302 responses
+        if (request.getServletPath().equals("/rest") || request.getServletPath().equals("/preview")) {
             log.debug("path is rest");
             return false;
         }
@@ -45,8 +51,13 @@ public class SilentLoginModeRedirect {
         return true;
     }
 
-    public static boolean processError(HttpServletRequest request, HttpServletResponse response) throws Exception{
-        if(!checkConditions(request,response)){
+    private static boolean isLocalLoginForced(HttpServletRequest request) {
+        return request.getRequestURI().equals(request.getContextPath() + AuthenticationFilter.PATH_LOGIN_ANGULAR)
+                && "true".equalsIgnoreCase(request.getParameter("local"));
+    }
+
+    public static boolean processError(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        if (!checkConditions(request, response)) {
             log.debug("processError: conditions not given");
             return false;
         }
