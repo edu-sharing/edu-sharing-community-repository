@@ -26,6 +26,7 @@ import org.springframework.security.oauth2.server.authorization.settings.ClientS
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -74,6 +75,9 @@ public class OAuth2AuthorizationServerConfig {
                 .with(authorizationServerConfigurer, Customizer.withDefaults());
         http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
                 .deviceAuthorizationEndpoint(d -> d.verificationUri("/oauth2server/device_verification"))
+                .deviceVerificationEndpoint(v -> v
+                        .deviceVerificationResponseHandler(new SimpleUrlAuthenticationSuccessHandler("/components/app?device_verification_success=true"))
+                )
                 .authorizationEndpoint(a ->a.consentPage("/rest/authentication/v1/oauth2consent"));
         return http.build();
     }
