@@ -733,7 +733,7 @@ export class CordovaService extends AppServiceAbstract {
      */
     async loadStorage() {
         const data = await this.getPermanentStorage(CordovaService.CORDOVA_STORAGE_OAUTHTOKENS);
-        this.oauth = data != null ? JSON.parse(data) : null;
+        this.oauth$.next(data != null ? JSON.parse(data) : null);
         this.serviceIsReady = true;
     }
 
@@ -1445,11 +1445,12 @@ export class CordovaService extends AppServiceAbstract {
         if (cordova.isRunningCordova()) {
             if (await cordova.hasValidConfig()) {
                 console.info('oauth present');
+                // @TODO: Wait for implementation
                 try {
-                    await this.injector
+                    /*await this.injector
                         .get(AuthenticationService)
                         .loginToken((await cordova.refreshOAuth().toPromise()).access_token)
-                        .toPromise();
+                        .toPromise();*/
                 } catch (e) {
                     console.warn(e);
                     this.setPermanentStorage(CordovaService.CORDOVA_STORAGE_OAUTHTOKENS, null);
