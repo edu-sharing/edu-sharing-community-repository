@@ -5,8 +5,8 @@ import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthenticationService, LoginInfo } from 'ngx-edu-sharing-api';
 import { AppService as AppServiceAbstract, DateHelper, UIConstants } from 'ngx-edu-sharing-ui';
-import { BehaviorSubject, firstValueFrom, Observable, Observer } from 'rxjs';
-import { first, map, share } from 'rxjs/operators';
+import { BehaviorSubject, firstValueFrom, Observable, Observer, of } from 'rxjs';
+import { first, map } from 'rxjs/operators';
 import { RestLocatorService } from '../core-module/core.module';
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { FrameEventsService } from '../core-module/rest/services/frame-events.service';
@@ -40,6 +40,13 @@ export type OAuthResult = {
 @Injectable({ providedIn: 'root' })
 // tslint:disable:no-console
 export class CordovaService extends AppServiceAbstract {
+    /**
+     * cordova oauth storage
+     */
+    public static CORDOVA_STORAGE_OAUTHTOKENS: string = 'oauth';
+    public static CORDOVA_STORAGE_DEVICE_CODE: string = 'oauth_device_code';
+    public static CORDOVA_STORAGE_SERVER_OWN: string = 'server_own';
+
     private onBackBehaviour = OnBackBehaviour.default;
     platform: 'ios' | 'android';
     private lastValidLogin: number;
@@ -66,7 +73,7 @@ export class CordovaService extends AppServiceAbstract {
         if (oauth) {
             oauth.expires_ts = Date.now() + oauth.expires_in * 1000;
             this.setPermanentStorage(
-                RestConstants.CORDOVA_STORAGE_OAUTHTOKENS,
+                CordovaService.CORDOVA_STORAGE_OAUTHTOKENS,
                 JSON.stringify(oauth),
             );
             this.oauth$.next(oauth);
@@ -556,7 +563,7 @@ export class CordovaService extends AppServiceAbstract {
     }
 
     restartCordova(parameters = ''): void {
-        this.setPermanentStorage(RestConstants.CORDOVA_STORAGE_OAUTHTOKENS, null);
+        this.setPermanentStorage(CordovaService.CORDOVA_STORAGE_OAUTHTOKENS, null);
         if (parameters) parameters = '&' + parameters;
         if (navigator.userAgent.includes('ionic / edu-sharing-app')) {
             // go to ionic local server
@@ -591,95 +598,42 @@ export class CordovaService extends AppServiceAbstract {
     /**
      * load permanent key/value
      * @param key the key to request value
-     * @param callback function callback with value as parameter - null if not available
      */
-    getPermanentStorage(key: string, callback: Function): void {
-        // callback - to sync with ios sharescreen
-        const callbackWrapper: Function = (val: any) => {
-            /*
-      if (this.isReallyRunningCordova() & this.isIOS()) {
-        if (key==CordovaService.STORAGE_OAUTHTOKENS) {
+    async getPermanentStorage(key: string): Promise<string> {
+        return new Promise((resolve) => {
+            // callback - to sync with ios sharescreen
+            // get value from HTML5 local storage
+            const value = window.localStorage.getItem(key);
 
-              // see what was the last ios share oauth expire date
-              this.iosShareScreenLoadValue(CordovaService.IOSSHARE_EXPIRES, (shareExpire:any) => {
-
-                // if there is no value continue with local
-                if (shareExpire==null) {
-                  callback(val);
-                } else {
-
-                  // check if expire is newer in share then local
-                  try {
-                    let oAuthLocal:any = null;
-                    if (val!=null) oAuthLocal = JSON.parse(val);
-                    if ((oAuthLocal==null) || (+shareExpire>oAuthLocal.expires_ts)) {
-
-                      // OK share has more up to date oauth
-                      // --> update local from share
-                      oAuthLocal.expires_ts = +shareExpire;
-                      this.iosShareScreenLoadValue(CordovaService.IOSSHARE_ACCESS,(shareAccess:string)=>{
-                        oAuthLocal.access_token = shareAccess;
-                        this.iosShareScreenLoadValue(CordovaService.IOSSHARE_REFRESH, (shareRefresh:string)=>{
-                          oAuthLocal.refresh_token = shareRefresh;
-                          let oAuthLocalJSON = JSON.stringify(oAuthLocal);
-                          this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS, oAuthLocalJSON);
-                          callback(oAuthLocalJSON);
-                        });
-                      });
-
-                    } else {
-                      callback(val);
-                    }
-
-                  } catch (e) {
-                    console.error("EXCEPTION on sync with ios share extension", e);
-                    callback(val);
-                  }
-
+            // just iun case - check if backup is available from nativestorage plugin
+            if (
+                (typeof value == 'undefined' || value == null) &&
+                this.isIOS() &&
+                (window as any).NativeStorage
+            ) {
+                try {
+                    // window['NativeStorage'].getItem("reference_to_value",<success-callback>, <error-callback>);
+                    (window as any).NativeStorage.getItem(
+                        key,
+                        (valueNative: any) => {
+                            // WIN
+                            if (typeof valueNative == 'undefined') valueNative = null;
+                            resolve(valueNative);
+                        },
+                        (error: any) => {
+                            // FAIL (also when key not available)
+                            resolve(null);
+                        },
+                    );
+                } catch (e) {
+                    console.error('Plugin Fail', e);
+                    resolve(null);
                 }
-
-              });
-
-        } else {
-          callback(val);
-        }
-      } else {*/
-            callback(val);
-            // }
-        };
-
-        // get value from HTML5 local storage
-        const value = window.localStorage.getItem(key);
-
-        // just iun case - check if backup is available from nativestorage plugin
-        if (
-            (typeof value == 'undefined' || value == null) &&
-            this.isIOS() &&
-            (window as any).NativeStorage
-        ) {
-            try {
-                // window['NativeStorage'].getItem("reference_to_value",<success-callback>, <error-callback>);
-                (window as any).NativeStorage.getItem(
-                    key,
-                    (valueNative: any) => {
-                        // WIN
-                        if (typeof valueNative == 'undefined') valueNative = null;
-                        callbackWrapper(valueNative);
-                    },
-                    (error: any) => {
-                        // FAIL (also when key not available)
-                        callbackWrapper(null);
-                    },
-                );
-            } catch (e) {
-                console.error('Plugin Fail', e);
-                callbackWrapper(null);
+            } else {
+                resolve(value);
             }
-        } else {
-            callbackWrapper(value);
-        }
+        });
     }
-
     /**
      * save permament key/value
      * @param key
@@ -709,7 +663,7 @@ export class CordovaService extends AppServiceAbstract {
         }
 
         // if a oauth relevant key - sync with sharescreen
-        if (key == RestConstants.CORDOVA_STORAGE_OAUTHTOKENS && this.isIOS()) {
+        if (key == CordovaService.CORDOVA_STORAGE_OAUTHTOKENS && this.isIOS()) {
             try {
                 const oauthData: any = JSON.parse(value);
                 this.iosShareScreenStoreValue(
@@ -730,7 +684,7 @@ export class CordovaService extends AppServiceAbstract {
         }
 
         // if server address - sync with sharescreen
-        if (key == RestConstants.CORDOVA_STORAGE_SERVER_OWN && this.isIOS()) {
+        if (key == CordovaService.CORDOVA_STORAGE_SERVER_OWN && this.isIOS()) {
             try {
                 this.iosShareScreenStoreValue(CordovaService.IOSSHARE_SERVER, value);
             } catch (e) {
@@ -777,11 +731,10 @@ export class CordovaService extends AppServiceAbstract {
     /**
      * after init, load the stored info from the cordova storage and save it as class members for access of other services
      */
-    loadStorage() {
-        this.getPermanentStorage(RestConstants.CORDOVA_STORAGE_OAUTHTOKENS, (data: string) => {
-            this.oauth = data != null ? JSON.parse(data) : null;
-            this.serviceIsReady = true;
-        });
+    async loadStorage() {
+        const data = await this.getPermanentStorage(CordovaService.CORDOVA_STORAGE_OAUTHTOKENS);
+        this.oauth = data != null ? JSON.parse(data) : null;
+        this.serviceIsReady = true;
     }
 
     clearAllCookies(): void {
@@ -1245,29 +1198,29 @@ export class CordovaService extends AppServiceAbstract {
             throw new Error('LOGIN.ERROR');
         }
 
-        // @TODO: This must be called AFTER comming back from the oauthGrant redirect
         const device = (await this.sendToOauthApi(
             'device_authorization_endpoint',
             'scope=read&grant_type=client_credentials',
         )) as OAuthDeviceAuthorizationResult;
         console.log(device);
+        await this.oauthGrant(device);
+        this.setPermanentStorage(CordovaService.CORDOVA_STORAGE_DEVICE_CODE, device.device_code);
+        return device;
+    }
+    public async finalizeOAuthGrant() {
         try {
+            // @TODO: This must be called AFTER comming back from the oauthGrant redirect
             const result = (await this.sendToOauthApi(
                 'token',
                 'grant_type=urn:ietf:params:oauth:grant-type:device_code&device_code=' +
-                    device.device_code,
+                    (await this.getPermanentStorage(CordovaService.CORDOVA_STORAGE_DEVICE_CODE)),
             )) as OAuthResult;
             console.log(result);
+            this.oauth = result;
         } catch (e: HttpErrorResponse | any) {
-            console.log(e, e.error.error);
-            if (e.status === 400 && e.error.error === 'authorization_pending') {
-                await this.oauthGrant(device);
-            } else {
-                throw e;
-            }
+            console.error(e, e.error.error);
+            throw e;
         }
-
-        return null as OAuthResult;
     }
     public reinitStatus(
         endpointUrl = this.injector.get(RestLocatorService).endpointUrl,
@@ -1320,7 +1273,7 @@ export class CordovaService extends AppServiceAbstract {
     }
 
     private resetAndGoToServerlist(parameters = '') {
-        this.setPermanentStorage(RestConstants.CORDOVA_STORAGE_OAUTHTOKENS, null);
+        this.setPermanentStorage(CordovaService.CORDOVA_STORAGE_OAUTHTOKENS, null);
         this.clearAllCookies();
         this.restartCordova(parameters);
     }
@@ -1329,7 +1282,7 @@ export class CordovaService extends AppServiceAbstract {
     refreshOAuth(
         endpointUrl = this.injector.get(RestLocatorService).endpointUrl,
     ): Observable<OAuthResult> {
-        return null;
+        return of(null);
     }
 
     /**
@@ -1499,7 +1452,7 @@ export class CordovaService extends AppServiceAbstract {
                         .toPromise();
                 } catch (e) {
                     console.warn(e);
-                    this.setPermanentStorage(RestConstants.CORDOVA_STORAGE_OAUTHTOKENS, null);
+                    this.setPermanentStorage(CordovaService.CORDOVA_STORAGE_OAUTHTOKENS, null);
                     this.clearAllCookies();
                     this.goToLogin();
                 }
@@ -1517,5 +1470,16 @@ export class CordovaService extends AppServiceAbstract {
 
     isRunningApp(): boolean {
         return this.isRunningCordova();
+    }
+
+    async authenticateViaOauth() {
+        console.log('authenticateViaOauth', this.oauth.access_token);
+        const login = await firstValueFrom(
+            this.authenticationService.loginToken(this.oauth.access_token),
+        );
+        if (login.statusCode !== RestConstants.STATUS_CODE_OK) {
+            throw new Error(login.statusCode);
+        }
+        return login;
     }
 }

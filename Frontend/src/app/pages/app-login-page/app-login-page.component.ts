@@ -15,6 +15,7 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
 import { BridgeService } from '../../services/bridge.service';
 import { PlatformLocation } from '@angular/common';
 import { MainNavService } from '../../main/navigation/main-nav.service';
+import { AuthenticationService } from 'ngx-edu-sharing-api';
 
 // possible states this UI component can be in
 enum StateUI {
@@ -72,8 +73,17 @@ export class AppLoginPageComponent {
             return;
         }
 
-        this.route.queryParams.subscribe((params) => {
-            this.locationNext = params['next'];
+        this.route.queryParams.subscribe(async (params) => {
+            this.locationNext = params.next;
+            if (params.device_verification_success === 'true') {
+                this.isLoading = true;
+                try {
+                    await this.cordova.finalizeOAuthGrant();
+                    this.goToDefaultLocation();
+                } catch (e) {
+                    this.toast.error(e);
+                }
+            }
         });
 
         // 1. Wait until Cordova is Ready
@@ -82,9 +92,8 @@ export class AppLoginPageComponent {
             // -> go to default location (this will check oauth)
             if (await this.cordova.hasValidConfig()) {
                 console.info('app config valid, continuing to default location');
-                this.cordova.refreshOAuth().subscribe(() => {
-                    this.goToDefaultLocation();
-                });
+                await this.cordova.authenticateViaOauth();
+                this.goToDefaultLocation();
                 return;
             }
 
