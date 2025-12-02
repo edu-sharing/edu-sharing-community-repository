@@ -45,7 +45,9 @@ public class SSORegistrationsDispatcherServlet extends SpringHttpServlet {
             }
 
             if (config.getRegistration().size() > 1) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "id is required for multiple registrations.");
+                log.warn("id is required for multiple registrations. redirecting to components/login");
+                //resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "id is required for multiple registrations.");
+                resp.sendRedirect("/edu-sharing/components/login");
                 return;
             }
 
