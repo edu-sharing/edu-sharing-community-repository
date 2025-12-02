@@ -38,6 +38,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.util.UrlUtils;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -63,7 +64,13 @@ public class SecurityConfigurationOAuth2 {
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain oAuth2FilterChain(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository, SilentLoginAuthorizationRequestResolver silentLoginAuthorizationRequestResolver, EduAuthSuccsessHandler eduAuthSuccsessHandler, OidcUserSessionMapper mapper) throws Exception {
         http
-                .securityMatcher("/login/oauth2/**","/logout/**","/oauth2","/oauth2/**","/shibboleth","/rest/authentication/v1/validateSSOSession/**")
+                .securityMatcher(new OrRequestMatcher(new AntPathRequestMatcher("/login/oauth2/**"),
+                        new AntPathRequestMatcher("/logout/**"),
+                        new AntPathRequestMatcher("/oauth2"),
+                        new AntPathRequestMatcher("/oauth2/**"),
+                        new AntPathRequestMatcher("/shibboleth"),
+                        new AntPathRequestMatcher("/rest/authentication/v1/validateSSOSession/**")))
+                //.securityMatcher("/login/oauth2/**","/logout/**","/oauth2","/oauth2/**","/shibboleth","/rest/authentication/v1/validateSSOSession/**")
                 .authorizeHttpRequests((authorize) -> authorize
                         //   .requestMatchers("/shibboleth").authenticated()
                         //   .requestMatchers("/**").permitAll()
