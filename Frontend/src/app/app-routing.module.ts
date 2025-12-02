@@ -12,15 +12,6 @@ const routes: Routes = [
     // Entrypoint
     { path: '', component: StartupComponent },
 
-    // App login
-    {
-        path: UIConstants.ROUTER_PREFIX + 'app',
-        loadChildren: () =>
-            import('./pages/app-login-page/app-login-page.module').then(
-                (m) => m.AppLoginPageModule,
-            ),
-    },
-
     // App share
     {
         path: UIConstants.ROUTER_PREFIX + 'app/share',

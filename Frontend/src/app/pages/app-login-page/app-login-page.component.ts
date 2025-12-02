@@ -25,6 +25,9 @@ enum StateUI {
     NOINTERNET = 3,
 }
 
+/**
+ * @Deprecated moved into the general login
+ */
 @Component({
     selector: 'es-app-login-page',
     templateUrl: 'app-login-page.component.html',
@@ -92,8 +95,14 @@ export class AppLoginPageComponent {
             // -> go to default location (this will check oauth)
             if (await this.cordova.hasValidConfig()) {
                 console.info('app config valid, continuing to default location');
-                await this.cordova.authenticateViaOauth();
-                this.goToDefaultLocation();
+                try {
+                    await this.cordova.authenticateViaOauth();
+                    this.goToDefaultLocation();
+                } catch (e) {
+                    this.toast.error(e);
+                    console.warn(e);
+                }
+                this.init();
                 return;
             }
 

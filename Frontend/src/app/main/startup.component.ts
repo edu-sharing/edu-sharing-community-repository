@@ -26,7 +26,9 @@ export class StartupComponent implements OnInit {
             // wait until cordova device init is ready
             this.cordova.subscribeServiceReady().subscribe(() => {
                 // per default go to app
-                void this.router.navigate([UIConstants.ROUTER_PREFIX, 'app'], { replaceUrl: true });
+                void this.router.navigate([UIConstants.ROUTER_PREFIX, 'login'], {
+                    replaceUrl: true,
+                });
             });
         } else {
             if (environment.production) {

@@ -194,6 +194,9 @@ export class AppComponent implements OnInit, DoCheck, AfterViewInit {
      * Redirects the user to the login page in case they don't have a valid session.
      */
     private registerRedirectToLogin(): void {
+        if (this.bridge.isRunningCordova()) {
+            return;
+        }
         this.authentication.observeLoginInfo().subscribe(async (loginInfo) => {
             // dirty hack: location + router components return null values
             const route = window.location.pathname.substring(

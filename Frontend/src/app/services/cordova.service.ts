@@ -149,7 +149,7 @@ export class CordovaService extends AppServiceAbstract {
         };
 
         if (this.isRunningCordova()) {
-            this.registerSessionListener();
+            // this.registerSessionListener();
             // deviceready may not work, because cordova is already loaded, so try to set it ready after some time
             const checkInterval = setInterval(() => {
                 if ((window as any).plugins) {
@@ -1191,13 +1191,24 @@ export class CordovaService extends AppServiceAbstract {
             verificationUrl.pathname + '?user_code=' + encodeURIComponent(oauth.user_code),
         );
     }
+
+    /**
+     * login via oauth
+     * note: on success, this will trigger an redirect to make sure the user has granted it
+     */
     public async loginOAuth(username: string = '', password: string = '') {
         const login = await firstValueFrom(this.authenticationService.login(username, password));
         if (login.statusCode !== RestConstants.STATUS_CODE_OK) {
-            console.warn('error login', login.statusCode);
             throw new Error('LOGIN.ERROR');
         }
+        return await this.getOAuthGrant();
+    }
 
+    /**
+     * handle the oauth grant
+     * The user must already be logged int
+     */
+    public async getOAuthGrant() {
         const device = (await this.sendToOauthApi(
             'device_authorization_endpoint',
             'scope=read&grant_type=client_credentials',
@@ -1207,6 +1218,7 @@ export class CordovaService extends AppServiceAbstract {
         this.setPermanentStorage(CordovaService.CORDOVA_STORAGE_DEVICE_CODE, device.device_code);
         return device;
     }
+
     public async finalizeOAuthGrant() {
         try {
             // @TODO: This must be called AFTER comming back from the oauthGrant redirect
@@ -1222,11 +1234,7 @@ export class CordovaService extends AppServiceAbstract {
             throw e;
         }
     }
-    public reinitStatus(
-        endpointUrl = this.injector.get(RestLocatorService).endpointUrl,
-        goToLogin = true,
-        loginNext = window.location.href,
-    ): Observable<void> {
+    public reinitStatus(goToLogin = true, loginNext = window.location.href): Observable<void> {
         return new Observable<void>((observer: Observer<void>) => {
             console.info('cordova: reinit', this.reiniting, this.oauth$.value, goToLogin);
 
@@ -1241,7 +1249,7 @@ export class CordovaService extends AppServiceAbstract {
                 return;
             }
             // FIXME: this will always be false.
-            if (!this.oauth$) {
+            if (!this.oauth$.value) {
                 if (goToLogin) {
                     this.goToLogin(loginNext);
                 }
@@ -1250,7 +1258,7 @@ export class CordovaService extends AppServiceAbstract {
                 return;
             }
             this.reiniting = true;
-            this.refreshOAuth(endpointUrl).subscribe(
+            this.refreshOAuth().subscribe(
                 async (oauth) => {
                     console.info('cordova: oauth OK');
                     this.reiniting = false;
@@ -1279,9 +1287,7 @@ export class CordovaService extends AppServiceAbstract {
     }
 
     // oAuth refresh tokens
-    refreshOAuth(
-        endpointUrl = this.injector.get(RestLocatorService).endpointUrl,
-    ): Observable<OAuthResult> {
+    refreshOAuth(): Observable<OAuthResult> {
         return of(null);
     }
 
@@ -1396,7 +1402,7 @@ export class CordovaService extends AppServiceAbstract {
 
     goToLogin(next?: string) {
         console.info('navigating to app login', next);
-        void this.router.navigate([UIConstants.ROUTER_PREFIX, 'app'], {
+        void this.router.navigate([UIConstants.ROUTER_PREFIX, 'login'], {
             replaceUrl: true,
             queryParams: { next },
         });
@@ -1411,10 +1417,7 @@ export class CordovaService extends AppServiceAbstract {
                 if (!this.lastValidLogin) {
                     return;
                 }
-                const info = await this.authenticationService
-                    .observeLoginInfo()
-                    .pipe(first())
-                    .toPromise();
+                const info = await firstValueFrom(this.authenticationService.observeLoginInfo());
                 const timeDiff = (Date.now() - this.lastValidLogin) / 1000;
                 if (timeDiff > info.sessionTimeout / 10) {
                     console.info(
@@ -1424,7 +1427,7 @@ export class CordovaService extends AppServiceAbstract {
                     );
                     await this.handleAppReAuthentication();
                 }
-            }, 30000);
+            }, 60000);
         });
     }
     async handleLoginState(login: LoginInfo) {
@@ -1444,7 +1447,7 @@ export class CordovaService extends AppServiceAbstract {
         const cordova = this.injector.get(CordovaService);
         if (cordova.isRunningCordova()) {
             if (await cordova.hasValidConfig()) {
-                console.info('oauth present');
+                console.info('oauth present', reload);
                 // @TODO: Wait for implementation
                 try {
                     /*await this.injector
@@ -1473,11 +1476,12 @@ export class CordovaService extends AppServiceAbstract {
         return this.isRunningCordova();
     }
 
-    async authenticateViaOauth() {
+    async authenticateViaOauth(refreshToken = true) {
         console.log('authenticateViaOauth', this.oauth.access_token);
         const login = await firstValueFrom(
             this.authenticationService.loginToken(this.oauth.access_token),
         );
+        console.log('authenticateViaOauth', login);
         if (login.statusCode !== RestConstants.STATUS_CODE_OK) {
             throw new Error(login.statusCode);
         }

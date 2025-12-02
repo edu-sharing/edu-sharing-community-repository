@@ -46,6 +46,7 @@ import {
     NEXT,
 } from '../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { CardDialogRef } from '../../features/dialogs/card-dialog/card-dialog-ref';
+import { CordovaService } from '../../services/cordova.service';
 
 @Component({
     selector: 'es-login-page',
@@ -99,7 +100,8 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
         private translations: TranslationsService,
         private configService: ConfigurationService,
         private route: ActivatedRoute,
-        private bridge: BridgeService,
+        public bridge: BridgeService,
+        private cordova: CordovaService,
         private authentication: AuthenticationService,
         private themeService: ThemeService,
         private loadingScreen: LoadingScreenService,
@@ -119,18 +121,21 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                     // default register mode: allow local registration if not disabled
                     this.config.register = { local: true };
                 }
-                if (this.bridge.getCordova().isRunningCordova()) {
-                    void this.router.navigate([UIConstants.ROUTER_PREFIX, 'app'], {
-                        replaceUrl: true,
-                    });
-                    return;
-                }
                 this.updateButtons();
                 this.username = this.configService.instant('defaultUsername', '');
                 this.password = this.configService.instant('defaultPassword', '');
-                void this.route.queryParams.forEach((params: Params) => {
+                void this.route.queryParams.forEach(async (params: Params) => {
                     if (params.username) {
                         this.username = params.username;
+                    }
+                    if (params.device_verification_success === 'true') {
+                        this.isLoading = true;
+                        try {
+                            await this.cordova.finalizeOAuthGrant();
+                            this.goToNext();
+                        } catch (e) {
+                            this.toast.error(e);
+                        }
                     }
                     this.next = params.next;
                     this.connector.onAllRequestsReady().subscribe(() => {
@@ -163,7 +168,15 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                                 // force redirect when local was NOT requested or redirectFromSSO was enforced
                                 (params.local !== 'true' || params.redirectFromSSO === 'true')
                             ) {
-                                this.goToNext(data);
+                                if (this.cordova.isRunningCordova()) {
+                                    // when there is no valid config -> handle initial oauth grant to get the first token
+                                    // this call shall return in the param device_verification_success to be set
+                                    if (!(await this.cordova.hasValidConfig())) {
+                                        await this.cordova.getOAuthGrant();
+                                    }
+                                } else {
+                                    this.goToNext(data);
+                                }
                                 return;
                             }
                         }
@@ -288,6 +301,21 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
             await firstValueFrom(
                 this.connector.getCurrentRequestCount().pipe(filter((c) => c === 0)),
             );
+        } else {
+            if (this.cordova.isRunningCordova()) {
+                try {
+                    const oauthTokens = await this.cordova.loginOAuth(this.username, this.password);
+                } catch (error: any) {
+                    console.warn(error);
+                    this.isLoading = false;
+                    if ((error as Error).message) {
+                        this.toast.error(null, error.message);
+                    } else {
+                        this.toast.error(null, 'LOGIN.ERROR');
+                    }
+                }
+                return;
+            }
         }
         this.connector.login(this.username, password, this.scope, code2Fa).subscribe(
             (data) => {
@@ -373,11 +401,11 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
         return filtered;
     }
 
-    private goToNext(data: LoginInfo) {
+    private goToNext(data?: LoginInfo) {
         if (this.next) {
             this.next = Helper.addGetParameter('fromLogin', 'true', this.next);
             RouterHelper.navigateToAbsoluteUrl(this.platformLocation, this.router, this.next);
-        } else if (data.currentScope === RestConstants.SAFE_SCOPE) {
+        } else if (data?.currentScope === RestConstants.SAFE_SCOPE) {
             void this.router.navigate([UIConstants.ROUTER_PREFIX, 'workspace', 'safe']);
         } else {
             UIHelper.goToDefaultLocation(this.router, this.platformLocation, this.configService);
@@ -472,4 +500,8 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     protected readonly encodeURIComponent = encodeURIComponent;
+
+    appBack() {
+        this.cordova.restartCordova();
+    }
 }

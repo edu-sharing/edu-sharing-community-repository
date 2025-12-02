@@ -76,7 +76,7 @@ public class OAuth2AuthorizationServerConfig {
         http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
                 .deviceAuthorizationEndpoint(d -> d.verificationUri("/oauth2server/device_verification"))
                 .deviceVerificationEndpoint(v -> v
-                        .deviceVerificationResponseHandler(new SimpleUrlAuthenticationSuccessHandler("/components/app?device_verification_success=true"))
+                        .deviceVerificationResponseHandler(new SimpleUrlAuthenticationSuccessHandler("/components/login?device_verification_success=true"))
                 )
                 .authorizationEndpoint(a ->a.consentPage("/rest/authentication/v1/oauth2consent"));
         return http.build();
