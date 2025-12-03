@@ -417,7 +417,7 @@ public class AssignmentDaoFactory {
 
         @Override
         public Assignment getAssignment() {
-            if(!exists()){
+            if (!exists()) {
                 return null;
             }
 
@@ -543,7 +543,11 @@ public class AssignmentDaoFactory {
 
         @Override
         public AssignmentFileDao getAssignmentFile(String id) {
-            return assignmentFileRefs.get().get(id);
+            AssignmentFileDao assignmentFileDao = assignmentFileRefs.get().get(id);
+            if(assignmentFileDao == null){
+                throw new IllegalArgumentException("AssignmentFile with id " + id + " does not exist.");
+            }
+            return assignmentFileDao;
         }
 
     }
@@ -814,7 +818,7 @@ public class AssignmentDaoFactory {
             } else {
                 submissionFileDao = submissionFileDao(assignmentDao, this, null);
                 submissionFileDao.create(submissionFileRequest, fileInputStream);
-                submissionFileRefs.get().put(submissionFileId, submissionFileDao);
+                submissionFileRefs.get().put(submissionFileDao.getNodeId(), submissionFileDao);
             }
 
             return submissionFileDao;
@@ -960,15 +964,27 @@ public class AssignmentDaoFactory {
             // TODO Check if a submission file to the same submission file already exists
             submissionDao.validateAssigneeCanChangeSubmission();
 
+            if(submissionDao.getSubmissionFiles()
+                    .stream()
+                    .anyMatch(x -> x.getReferToAssigmentFile()
+                            .map(BasicNodeDao::getNodeId)
+                            .map(y -> y.equals(request.assignmentFile()))
+                            .orElse(false))) {
+                throw new IllegalStateException("A submission file to the same assignment file already exists.");
+            }
+
             if (StringUtils.isNotBlank(nodeId)) {
                 throw new IllegalStateException("Submission file with id " + nodeId + " already exists.");
             }
+
+            // validates if assignment file exists otherwise throws exception
+            assignmentDao.getAssignmentFile(request.assignmentFile());
+
             log.debug("Creating new submission file");
             Map<String, Object> properties = new HashMap<>() {{
                 put(CCConstants.CM_NAME, UUID.randomUUID().toString());
                 put(CCConstants.CCM_PROP_SUBMISSION_FILE_REFER_TO_ASSIGNMENT_FIlE, new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, request.assignmentFile()));
             }};
-
 
             AuthenticationUtil.runAsSystem(() -> {
                 nodeId = nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, submissionDao.getNodeId(), CCConstants.CCM_TYPE_SUBMISSION_FILE, CCConstants.CCM_ASSOC_SUBMISSION_FILES, properties);
@@ -984,11 +1000,22 @@ public class AssignmentDaoFactory {
 //        @RetryingTransaction // node does not exists after return, because rollback is performed for no reason
         @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
         public void update(SubmissionFileRequest request, InputStream fileInputStream) {
-            // TODO Check if a submission file to the same submission file already exists
             refresh();
             validateExists();
 
             submissionDao.validateAssigneeCanChangeSubmission();
+
+            if(submissionDao.getSubmissionFiles()
+                    .stream()
+                    .anyMatch(x -> !x.getNodeId().equals(getNodeId()) && x.getReferToAssigmentFile()
+                            .map(BasicNodeDao::getNodeId)
+                            .map(y -> y.equals(request.assignmentFile()))
+                            .orElse(false))) {
+                throw new IllegalStateException("A submission file to the same assignment file already exists.");
+            }
+
+            // validates if assignment file exists otherwise throws exception
+            assignmentDao.getAssignmentFile(request.assignmentFile());
 
             AuthenticationUtil.runAsSystem(() -> {
 
