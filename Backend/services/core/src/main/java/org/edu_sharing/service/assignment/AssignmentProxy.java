@@ -1,11 +1,8 @@
 package org.edu_sharing.service.assignment;
 
 import lombok.RequiredArgsConstructor;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -30,7 +27,7 @@ public class AssignmentProxy {
     private final PermissionService permissionService;
 
 //   @Order(Ordered.LOWEST_PRECEDENCE)
-//    @Around(value = "execution(* org.edu_sharing.service.assignment.AssignmentDaoFactory.*.*(..))")
+//    @Around(value = "execution(* org.edu_sharing.service.assignment.dao.AssignmentDaoFactory.*.*(..))")
 //    public Object around(ProceedingJoinPoint pjp) {
 //        return AuthenticationUtil.runAsSystem(() -> {
 //            try {
@@ -44,7 +41,7 @@ public class AssignmentProxy {
 //    }
 
     @Order(Ordered.HIGHEST_PRECEDENCE + 1)
-    @Before(value = "execution(* org.edu_sharing.service.assignment.AssignmentDaoFactory.*.*(..)) && target(basicNodeDao)")
+    @Before(value = "execution(* org.edu_sharing.service.assignment.dao.*DaoImpl.*(..)) && target(basicNodeDao)")
     public void basicPermissionCheckAdvice(BasicNodeDao basicNodeDao) {
         if(basicNodeDao.getNodeId() == null) {
             return;
