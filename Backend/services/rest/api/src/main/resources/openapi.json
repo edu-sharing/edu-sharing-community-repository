@@ -16333,9 +16333,9 @@
         "operationId": "oauth2Consent",
         "parameters": [
           {
-            "description": "clientId",
+            "description": "client_id",
             "in": "query",
-            "name": "clientId",
+            "name": "client_id",
             "required": true,
             "schema": {
               "type": "string"
@@ -16351,9 +16351,9 @@
             }
           },
           {
-            "description": "scopes",
+            "description": "scope",
             "in": "query",
-            "name": "scopes",
+            "name": "scope",
             "required": true,
             "schema": {
               "items": {
