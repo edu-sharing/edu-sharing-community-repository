@@ -29,19 +29,19 @@ public class AssignmentProxy {
 
     private final PermissionService permissionService;
 
-    @Order(Ordered.HIGHEST_PRECEDENCE)
-    @Around(value = "execution(* org.edu_sharing.service.assignment.AssignmentDaoFactory.*.*(..))")
-    public Object around(ProceedingJoinPoint pjp) {
-        return AuthenticationUtil.runAsSystem(() -> {
-            try {
-                return pjp.proceed();
-            } catch (RuntimeException e) {
-                throw e;
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
+//   @Order(Ordered.LOWEST_PRECEDENCE)
+//    @Around(value = "execution(* org.edu_sharing.service.assignment.AssignmentDaoFactory.*.*(..))")
+//    public Object around(ProceedingJoinPoint pjp) {
+//        return AuthenticationUtil.runAsSystem(() -> {
+//            try {
+//                return pjp.proceed();
+//            } catch (RuntimeException e) {
+//                throw e;
+//            } catch (Throwable e) {
+//                throw new RuntimeException(e);
+//            }
+//        });
+//    }
 
     @Order(Ordered.HIGHEST_PRECEDENCE + 1)
     @Before(value = "execution(* org.edu_sharing.service.assignment.AssignmentDaoFactory.*.*(..)) && target(basicNodeDao)")

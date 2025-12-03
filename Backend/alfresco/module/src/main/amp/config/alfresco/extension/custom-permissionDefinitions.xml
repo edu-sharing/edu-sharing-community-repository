@@ -541,7 +541,7 @@
   <!-- Permission related to assignments and submissions. -->
   <!-- ================================================== -->
 
-  <permissionSet type="ccm:assignment" expose="selected">
+  <permissionSet type="ccm:assignment_base" expose="selected">
     <permissionGroup name="AssignmentCoordinator" allowFullControl="false" expose="true" >
       <includePermissionGroup type="cm:cmobject" permissionGroup="Consumer"/>
     </permissionGroup>

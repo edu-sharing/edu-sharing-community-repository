@@ -561,9 +561,15 @@
         </type>
 
 
+        <type name="ccm:assignment_base">
+            <title>Campus Content Assignment Base Type</title>
+            <parent>cm:cmobject</parent>
+            <includedInSuperTypeQuery>true</includedInSuperTypeQuery>
+        </type>
+
         <type name="ccm:assignment">
             <title>Campus Content Assignment</title>
-            <parent>cm:cmobject</parent>
+            <parent>ccm:assignment_base</parent>
             <includedInSuperTypeQuery>true</includedInSuperTypeQuery>
             <associations>
                 <child-association name="ccm:assignment_files">
@@ -601,7 +607,7 @@
 
         <type name="ccm:assignment_file">
             <title>Campus Content Assignment File</title>
-            <parent>cm:cmobject</parent>
+            <parent>ccm:assignment_base</parent>
             <includedInSuperTypeQuery>true</includedInSuperTypeQuery>
             <associations>
                 <child-association name="ccm:assignment_file_copy">
@@ -625,7 +631,7 @@
 
         <type name="ccm:submissions">
             <title>Campus Content Submissions Folder</title>
-            <parent>cm:cmobject</parent>
+            <parent>ccm:assignment_base</parent>
             <includedInSuperTypeQuery>true</includedInSuperTypeQuery>
             <associations>
                 <child-association name="ccm:submissions_submission">
@@ -646,7 +652,7 @@
 
         <type name="ccm:submission">
             <title>Campus Content Submission</title>
-            <parent>cm:cmobject</parent>
+            <parent>ccm:assignment_base</parent>
             <includedInSuperTypeQuery>true</includedInSuperTypeQuery>
             <associations>
                 <child-association name="ccm:submission_files">
@@ -670,7 +676,7 @@
 
         <type name="ccm:submission_file">
             <title>Campus Content Submission File</title>
-            <parent>cm:cmobject</parent>
+            <parent>ccm:assignment_base</parent>
             <includedInSuperTypeQuery>true</includedInSuperTypeQuery>
             <associations>
                 <child-association name="ccm:submission_file_data">

@@ -490,7 +490,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
     }
 
     @Override
-    public void setPermissionInherit(String nodeId, boolean inheritPermission) throws Exception {
+    public void setPermissionInherit(String nodeId, boolean inheritPermission) {
         NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
         permissionService.setInheritParentPermissions(nodeRef, inheritPermission);
     }

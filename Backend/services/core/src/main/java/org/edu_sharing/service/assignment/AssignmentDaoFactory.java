@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.ContentWriter;
@@ -19,7 +18,9 @@ import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
+import org.edu_sharing.repository.server.tools.security.RunAsSystem;
 import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
@@ -36,6 +37,7 @@ import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.util.PropertyMapper;
 import org.edu_sharing.util.CheckedFunction;
+import org.edu_sharing.util.CheckedRunAsWork;
 import org.edu_sharing.util.CheckedSupplier;
 import org.edu_sharing.util.LazyProvider;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -143,7 +145,8 @@ public class AssignmentDaoFactory {
             this.nodeId = nodeId;
             propertyMapper = new LazyProvider<>(CheckedSupplier.wrap(() -> {
                 validateExists();
-                Map<String, Object> properties = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), getNodeId());
+                Map<String, Object> properties = AuthenticationUtil.runAsSystem(CheckedRunAsWork.wrap(() ->
+                        nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), getNodeId())));
                 return new PropertyMapper(properties);
             }), nodeRef.map(x -> new PropertyMapper(x.getProperties())).orElse(null));
         }
@@ -181,7 +184,7 @@ public class AssignmentDaoFactory {
 
         protected void validateExists() {
             if (!exists()) {
-                throw new IllegalArgumentException("Assignment with id " + nodeId + " does not exist.");
+                throw new IllegalArgumentException("Node with id " + nodeId + " does not exist.");
             }
         }
 
@@ -212,59 +215,60 @@ public class AssignmentDaoFactory {
             super(nodeId, nodeRef);
             assignmentFileRefs = new LazyProvider<>(() -> {
                 validateExists();
-                return nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_ASSIGNMENT_FILE)
+                return AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_ASSIGNMENT_FILE)
                         .stream()
                         .map(ChildAssociationRef::getChildRef)
                         .map(org.alfresco.service.cmr.repository.NodeRef::getId)
                         .map(x -> assignmentFileDao(this, x))
-                        .collect(Collectors.toMap(AssignmentFileDao::getNodeId, x -> x));
+                        .collect(Collectors.toMap(AssignmentFileDao::getNodeId, x -> x)));
             });
 
             permissions = new LazyProvider<>(() -> {
                 validateExists();
-                try {
-                    return Arrays.stream(permissionService.getPermissions(getNodeId()).getAces())
-                            .map(ace -> new Assignment.Permission(new Authority(ace), switch (ace.getPermission()) {
-                                // filter consumer role
-                                case CCConstants.PERMISSION_CONSUMER -> null;
-                                case CCConstants.PERMISSION_ASSIGNEE -> Assignment.Role.ASSIGNEE;
-                                case CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR -> Assignment.Role.COORDINATOR;
-                                default -> {
-                                    log.error("Unknown permission for assignment {} {}", nodeId, ace.getPermission());
-                                    yield null;
-                                }
-                            }))
-                            .filter(p -> Objects.nonNull(p.role()))
-                            .toList();
-                } catch (AccessDeniedException ignore) {
+                if (!isAssignmentCoordinator(getNodeId())) {
                     return Collections.emptyList();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
                 }
+
+                return AuthenticationUtil.runAsSystem(CheckedRunAsWork.wrap(() ->
+                        Arrays.stream(permissionService.getPermissions(getNodeId()).getAces())
+                                .map(ace -> new Assignment.Permission(new Authority(ace), switch (ace.getPermission()) {
+                                    // filter consumer role
+                                    case CCConstants.PERMISSION_CONSUMER -> null;
+                                    case CCConstants.PERMISSION_ASSIGNEE -> Assignment.Role.ASSIGNEE;
+                                    case CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR -> Assignment.Role.COORDINATOR;
+                                    default -> {
+                                        log.error("Unknown permission for assignment {} {}", nodeId, ace.getPermission());
+                                        yield null;
+                                    }
+                                }))
+                                .filter(p -> Objects.nonNull(p.role()))
+                                .toList()
+                ));
             });
 
             submissionFolderRef = new LazyProvider<>(() -> {
                 validateExists();
-                return nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_SUBMISSIONS)
+                return AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_SUBMISSIONS)
                         .stream()
                         .findFirst()
                         .map(ChildAssociationRef::getChildRef)
-                        .map(org.alfresco.service.cmr.repository.NodeRef::getId);
+                        .map(org.alfresco.service.cmr.repository.NodeRef::getId));
             });
 
             submissions = new LazyProvider<>(() -> {
                 validateExists();
-                return submissionFolderRef.get()
+                return AuthenticationUtil.runAsSystem(() -> submissionFolderRef.get()
                         .map(subFolderId -> nodeService.getChildrenChildAssociationRefType(subFolderId, CCConstants.CCM_TYPE_SUBMISSION)
                                 .stream()
                                 .map(ChildAssociationRef::getChildRef)
                                 .map(org.alfresco.service.cmr.repository.NodeRef::getId)
                                 .collect(Collectors.toMap(x -> x, x -> (SubmissionDao) new SubmissionDaoImpl(this, x))))
-                        .orElse(Collections.emptyMap());
+                        .orElse(Collections.emptyMap()));
             });
         }
 
         @Override
+        @RunAsSystem
         @RetryingTransaction
         @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS, requiresUser = true)
         @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
@@ -294,6 +298,7 @@ public class AssignmentDaoFactory {
                     String assignmentFolder = userEnvironmentTool.getEdu_SharingAssignmentFolder();
                     String parentFolder = NodeServiceHelper.getContainerId(assignmentFolder, assignmentConfig.getNodePattern());
                     nodeId = nodeService.createNodeBasic(parentFolder, CCConstants.CCM_TYPE_ASSIGNMENT, properties);
+                    nodeService.setOwner(nodeId, ApplicationInfoList.getHomeRepository().getUsername());
                     log.debug("Created assignment node {}", nodeId);
 
                     // subfolder for submissions + permission only for type SUBMISSION
@@ -303,6 +308,7 @@ public class AssignmentDaoFactory {
                                 CCConstants.CM_PROP_TITLE, "Submissions"
                         );
                         String submissionId = nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId, CCConstants.CCM_TYPE_SUBMISSIONS, CCConstants.CCM_ASSOC_ASSIGNMENT_SUBMISSIONS, submissionsProperties);
+                        nodeService.setOwner(submissionId, ApplicationInfoList.getHomeRepository().getUsername());
                         log.debug("Created submissions node {}", submissionId);
                     }
 
@@ -320,7 +326,7 @@ public class AssignmentDaoFactory {
             }
 
             try {
-                List<ACE> aceList = request.permissions()
+                List<ACE> aceList = new ArrayList<>(request.permissions()
                         .stream()
                         .flatMap(x -> switch (x.role()) {
                             case ASSIGNEE -> {
@@ -337,7 +343,8 @@ public class AssignmentDaoFactory {
                             case COORDINATOR ->
                                     Stream.of(new ACE(CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR, x.authorityName()));
                         })
-                        .toList();
+                        .toList());
+                aceList.add(new ACE(CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR, AuthenticationUtil.getFullyAuthenticatedUser()));
                 log.debug("Setting permissions for assignment {}: {}", nodeId, aceList);
                 permissionService.setPermissions(nodeId, aceList, false);
             } catch (Exception t) {
@@ -346,7 +353,7 @@ public class AssignmentDaoFactory {
 
             submissionFolderRef.get().ifPresent(submissionsNodeId -> {
                 try {
-                    List<ACE> aceList = request.permissions()
+                    List<ACE> aceList = new ArrayList<>(request.permissions()
                             .stream()
                             .filter(x -> x.role() != Assignment.Role.ASSIGNEE)
                             .map(x ->
@@ -357,7 +364,8 @@ public class AssignmentDaoFactory {
                                                 new ACE(CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR, x.authorityName());
                                     }
                             )
-                            .toList();
+                            .toList());
+                    aceList.add(new ACE(CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR, AuthenticationUtil.getFullyAuthenticatedUser()));
                     log.debug("Setting permissions for submissions folder {}: {}", submissionsNodeId, aceList);
                     permissionService.setPermissions(submissionsNodeId, aceList, false);
                 } catch (Exception t) {
@@ -409,7 +417,7 @@ public class AssignmentDaoFactory {
 
         @Override
         public Assignment getAssignment() {
-            if (!exists()) {
+            if(!exists()){
                 return null;
             }
 
@@ -497,7 +505,7 @@ public class AssignmentDaoFactory {
         public SubmissionDao getOrCreateSubmission(String submissionId) {
             submissions.invalidate();
 
-            SubmissionDao submissionDao = null;
+            SubmissionDao submissionDao;
             if (StringUtils.isBlank(submissionId)) {
                 submissionDao = submissionDao(this, null);
                 submissionDao.create();
@@ -509,6 +517,8 @@ public class AssignmentDaoFactory {
                     submissionDao = submissionDao(this, null);
                     submissionDao.create();
                     submissions.get().put(submissionDao.getNodeId(), submissionDao);
+                } else {
+                    submissionDao = submissionByCreator.get();
                 }
             } else {
                 submissionDao = submissions.get().get(submissionId);
@@ -540,26 +550,19 @@ public class AssignmentDaoFactory {
 
     protected final class AssignmentFileDaoImpl extends BasicNodeDaoImpl implements AssignmentFileDao {
         private final AssignmentDaoImpl assignmentDao;
-
-        private final LazyProvider<PropertyMapper> propertyMapper;
         private final LazyProvider<Node> referNode;
 
         public AssignmentFileDaoImpl(AssignmentDaoImpl assignmentDao, String nodeId) {
             super(nodeId);
             this.assignmentDao = assignmentDao;
 
-            propertyMapper = new LazyProvider<>(CheckedSupplier.wrap(() -> {
-                validateExists();
-                Map<String, Object> properties = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), getNodeId());
-                return new PropertyMapper(properties);
-            }));
 
-            referNode = new LazyProvider<>(CheckedSupplier.wrap(() -> {
+            referNode = new LazyProvider<>(() -> {
                 validateExists();
                 return Optional.ofNullable(propertyMapper.get().getNodeRef(CCConstants.CCM_PROP_ASSIGNMENT_FILE_REFER_TO))
                         .map(CheckedFunction.wrap(n -> NodeDao.getNode(n).asNode()))
                         .orElse(null);
-            }));
+            });
         }
 
 
@@ -581,6 +584,8 @@ public class AssignmentDaoFactory {
             }};
 
             nodeId = nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, assignmentDao.getNodeId(), CCConstants.CCM_TYPE_ASSIGNMENT_FILE, CCConstants.CCM_ASSOC_ASSIGNMENT_FILES, properties);
+            nodeService.setOwner(nodeId, ApplicationInfoList.getHomeRepository().getUsername());
+            permissionService.setPermissionInherit(nodeId, true);
             log.debug("Created new assignment file {} to {}", nodeId, assignmentDao.getNodeId());
             handleReferenceCopy(request, null, properties);
             log.debug("Updated properties for new assignment file {} with {}", nodeId, properties);
@@ -658,6 +663,7 @@ public class AssignmentDaoFactory {
 
             log.debug("Copying reference node {}", assignmentFileRequest.refId());
             org.alfresco.service.cmr.repository.NodeRef nodeRef = nodeService.copyNode(assignmentFileRequest.refId(), nodeId, CCConstants.CCM_ASSOC_ASSIGNMENT_FILE_COPY, true);
+            nodeService.setOwner(nodeRef.getId(), ApplicationInfoList.getHomeRepository().getUsername());
             log.debug("Copied reference node {}", nodeRef.getId());
             properties.put(CCConstants.CCM_PROP_ASSIGNMENT_FILE_REFER_TO, nodeRef);
             nodeService.addAspect(nodeRef.getId(), CCConstants.CCM_ASPECT_ASSIGNMENT_FILE_DEEP_COPY);
@@ -676,12 +682,12 @@ public class AssignmentDaoFactory {
 
         private void validateCanChangeAssignment() {
             // TODO who can change this and under which conditions?
-            if(assignmentDao.getStatus() != Assignment.Status.OPEN) {
+            if (assignmentDao.getStatus() != Assignment.Status.OPEN) {
                 throw new IllegalStateException("Cannot create assignment file for assignment in status " + assignmentDao.getStatus());
             }
 
-            if(isDone()){
-                throw new IllegalStateException("Cannot create assignment file for assignment in status done");
+            if (exists() && isDone()) {
+                throw new IllegalStateException("Cannot change assignment file for assignment in status done");
             }
         }
     }
@@ -697,12 +703,12 @@ public class AssignmentDaoFactory {
 
             submissionFileRefs = new LazyProvider<>(() -> {
                 validateExists();
-                return nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_SUBMISSION_FILE)
+                return AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_SUBMISSION_FILE)
                         .stream()
                         .map(ChildAssociationRef::getChildRef)
                         .map(org.alfresco.service.cmr.repository.NodeRef::getId)
                         .map(x -> submissionFileDao(assignmentDao, this, x))
-                        .collect(Collectors.toMap(SubmissionFileDao::getNodeId, x -> x));
+                        .collect(Collectors.toMap(SubmissionFileDao::getNodeId, x -> x)));
             });
         }
 
@@ -741,7 +747,7 @@ public class AssignmentDaoFactory {
 
         @Override
         public boolean isReturned() {
-            return getValidationStatus() == Submission.Status.FINISHED;
+            return propertyMapper.get().getEnum(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, Submission.Status.class) == Submission.Status.FINISHED;
         }
 
         @Override
@@ -795,7 +801,7 @@ public class AssignmentDaoFactory {
         }
 
         @Override
-        @RetryingTransaction
+//        @RetryingTransaction // node does not exists after return, because rollback is performed for no reason
         @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
         public SubmissionFileDao createOrUpdateSubmissionFile(String submissionFileId, SubmissionFileRequest submissionFileRequest, InputStream fileInputStream, FormDataContentDisposition fileMetaData) {
             submissionFileRefs.invalidate();
@@ -815,7 +821,7 @@ public class AssignmentDaoFactory {
         }
 
         @Override
-        @RetryingTransaction
+//        @RetryingTransaction // node does not exists after return, because rollback is performed for no reason
         @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
         public void create() {
             if (StringUtils.isNotBlank(nodeId)) {
@@ -833,11 +839,17 @@ public class AssignmentDaoFactory {
 
             String fullyAuthenticatedUser = AuthenticationUtil.getFullyAuthenticatedUser();
 
-            nodeId = nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, assignmentDao.getSubmissionRefId(), CCConstants.CCM_TYPE_SUBMISSION, CCConstants.CCM_ASSOC_SUBMISSIONS_SUBMISSION, properties);
-            log.debug("Created new submission for {}({}) to {}", fullyAuthenticatedUser, nodeId, assignmentDao.getSubmissionRefId());
+            AuthenticationUtil.runAsSystem(() -> {
+                nodeId = nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, assignmentDao.getSubmissionRefId(), CCConstants.CCM_TYPE_SUBMISSION, CCConstants.CCM_ASSOC_SUBMISSIONS_SUBMISSION, properties);
+                nodeService.setOwner(nodeId, ApplicationInfoList.getHomeRepository().getUsername());
+                log.debug("Created new submission for {}({}) to {}", fullyAuthenticatedUser, nodeId, assignmentDao.getSubmissionRefId());
 
-            permissionService.setPermission(nodeId, fullyAuthenticatedUser, CCConstants.PERMISSION_ASSIGNEE);
-            log.debug("Added permission {} for {} to submission {}", CCConstants.PERMISSION_ASSIGNEE, fullyAuthenticatedUser, nodeId);
+                permissionService.setPermission(nodeId, fullyAuthenticatedUser, CCConstants.PERMISSION_ASSIGNEE);
+                // TODO do we need to set the permission inherit to true?
+                permissionService.setPermissionInherit(nodeId, true);
+                log.debug("Added permission {} for {} to submission {}", CCConstants.PERMISSION_ASSIGNEE, fullyAuthenticatedUser, nodeId);
+                return null;
+            });
         }
 
         @Override
@@ -871,7 +883,7 @@ public class AssignmentDaoFactory {
         }
 
         private void validateCanCoordinatorChangeSubmission() {
-            if(isAssignmentCoordinator(nodeId)) {
+            if (isAssignmentCoordinator(nodeId)) {
                 return;
             }
 
@@ -885,12 +897,16 @@ public class AssignmentDaoFactory {
         }
 
         private void validateAssigneeCanChangeSubmission() {
-            if(isAssignmentCoordinator(nodeId)){
+            if (isAssignmentCoordinator(assignmentDao.getNodeId())) {
                 return;
             }
 
             if (assignmentDao.getEndDate() != null && assignmentDao.getEndDate().after(new Date())) {
                 throw new InsufficientPermissionException("Assignment with id " + assignmentDao.getNodeId() + " has already ended.");
+            }
+
+            if (!exists()) {
+                return;
             }
 
             if (getStatus() == Submission.Status.FINISHED || isReturned()) {
@@ -915,10 +931,10 @@ public class AssignmentDaoFactory {
 
             contentNodeId = new LazyProvider<>(() -> {
                 validateExists();
-                return nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_ASSOC_SUBMISSION_FILE_DATA)
+                return AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_ASSOC_SUBMISSION_FILE_DATA)
                         .stream()
                         .map(ChildAssociationRef::getChildRef)
-                        .findFirst();
+                        .findFirst());
             });
 
             contentNode = new LazyProvider<>(CheckedSupplier.wrap(() -> {
@@ -938,41 +954,53 @@ public class AssignmentDaoFactory {
 
 
         @Override
-        @RetryingTransaction
+//        @RetryingTransaction
         @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
         public void create(SubmissionFileRequest request, InputStream fileInputStream) {
+            // TODO Check if a submission file to the same submission file already exists
             submissionDao.validateAssigneeCanChangeSubmission();
 
             if (StringUtils.isNotBlank(nodeId)) {
                 throw new IllegalStateException("Submission file with id " + nodeId + " already exists.");
             }
-
             log.debug("Creating new submission file");
             Map<String, Object> properties = new HashMap<>() {{
                 put(CCConstants.CM_NAME, UUID.randomUUID().toString());
                 put(CCConstants.CCM_PROP_SUBMISSION_FILE_REFER_TO_ASSIGNMENT_FIlE, new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, request.assignmentFile()));
             }};
-            nodeId = nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, submissionDao.getNodeId(), CCConstants.CCM_TYPE_SUBMISSION_FILE, CCConstants.CCM_ASSOC_SUBMISSION_FILES, properties);
+
+
+            AuthenticationUtil.runAsSystem(() -> {
+                nodeId = nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, submissionDao.getNodeId(), CCConstants.CCM_TYPE_SUBMISSION_FILE, CCConstants.CCM_ASSOC_SUBMISSION_FILES, properties);
+                nodeService.setOwner(nodeId, ApplicationInfoList.getHomeRepository().getUsername());
+                return null;
+            });
+
             log.debug("Created new submission file for {} to {}", nodeId, submissionDao.getNodeId());
             handleSubmissionFile(request, fileInputStream);
         }
 
         @Override
-        @RetryingTransaction
+//        @RetryingTransaction // node does not exists after return, because rollback is performed for no reason
         @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
         public void update(SubmissionFileRequest request, InputStream fileInputStream) {
+            // TODO Check if a submission file to the same submission file already exists
             refresh();
             validateExists();
 
             submissionDao.validateAssigneeCanChangeSubmission();
 
-            Map<String, Object> properties = new HashMap<>() {{
-                put(CCConstants.CM_NAME, UUID.randomUUID().toString());
-                put(CCConstants.CCM_PROP_SUBMISSION_FILE_REFER_TO_ASSIGNMENT_FIlE, new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, request.assignmentFile()));
-            }};
+            AuthenticationUtil.runAsSystem(() -> {
 
-            nodeService.updateNodeNative(nodeId, properties);
-            handleSubmissionFile(request, fileInputStream);
+                Map<String, Object> properties = new HashMap<>() {{
+                    put(CCConstants.CM_NAME, UUID.randomUUID().toString());
+                    put(CCConstants.CCM_PROP_SUBMISSION_FILE_REFER_TO_ASSIGNMENT_FIlE, new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, request.assignmentFile()));
+                }};
+
+                nodeService.updateNodeNative(nodeId, properties);
+                handleSubmissionFile(request, fileInputStream);
+                return null;
+            });
         }
 
         private void handleSubmissionFile(SubmissionFileRequest request, InputStream fileInputStream) {
@@ -982,7 +1010,10 @@ public class AssignmentDaoFactory {
 
             if (StringUtils.isNotBlank(getContentNodeId_Internal()) && nodeService.exists(getContentNodeId_Internal())) {
                 log.debug("Deleting old content node {}", getContentNodeId());
-                nodeService.removeNode(getContentNodeId(), nodeId, false);
+                AuthenticationUtil.runAsSystem(() -> {
+                    nodeService.removeNode(getContentNodeId(), nodeId, false);
+                    return null;
+                });
             }
 
             if (StringUtils.isNotBlank(request.originalFile())) {
@@ -1002,55 +1033,62 @@ public class AssignmentDaoFactory {
                 throw new InsufficientPermissionException("You do not have permission to copy the original file. Required permission: " + CCConstants.PERMISSION_DOWNLOAD_CONTENT);
             }
 
-            log.debug("Copying reference node {}", request.originalFile());
-            org.alfresco.service.cmr.repository.NodeRef contentNodeRef = nodeService.copyNode(request.originalFile(), nodeId, CCConstants.CCM_ASSOC_SUBMISSION_FILE_DATA, true);
-            log.debug("Copied reference node {}", contentNodeRef.getId());
+            AuthenticationUtil.runAsSystem(() -> {
+                log.debug("Copying reference node {}", request.originalFile());
+                org.alfresco.service.cmr.repository.NodeRef contentNodeRef = nodeService.copyNode(request.originalFile(), nodeId, CCConstants.CCM_ASSOC_SUBMISSION_FILE_DATA, true);
+                nodeService.setOwner(contentNodeRef.getId(), ApplicationInfoList.getHomeRepository().getUsername());
+                log.debug("Copied reference node {}", contentNodeRef.getId());
 
 
-            try {
-                Map<String, String[]> contentProperties = new HashMap<>(request.properties()) {{
-                    put(CCConstants.CCM_PROP_IO_ORIGINAL, new String[]{request.originalFile()});
-                }};
-                nodeService.updateNode(contentNodeRef.getId(), contentProperties, false);
-                log.debug("Updated properties for new submission file {} with {}", nodeId, contentProperties);
-            } catch (RuntimeException e) {
-                throw e;
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
-            }
+                try {
+                    Map<String, String[]> contentProperties = new HashMap<>(request.properties()) {{
+                        put(CCConstants.CCM_PROP_IO_ORIGINAL, new String[]{request.originalFile()});
+                    }};
+                    nodeService.updateNode(contentNodeRef.getId(), contentProperties, false);
+                    log.debug("Updated properties for new submission file {} with {}", nodeId, contentProperties);
+                } catch (RuntimeException e) {
+                    throw e;
+                } catch (Throwable e) {
+                    throw new RuntimeException(e);
+                }
 
-            nodeService.addAspect(contentNodeRef.getId(), CCConstants.CCM_ASPECT_SUBMISSION_FILE_CONTENT);
-            log.debug("Added content aspect to content node {}", contentNodeRef.getId());
+                nodeService.addAspect(contentNodeRef.getId(), CCConstants.CCM_ASPECT_SUBMISSION_FILE_CONTENT);
+                log.debug("Added content aspect to content node {}", contentNodeRef.getId());
 
-            String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
-            permissionService.setPermission(contentNodeRef.getId(), currentUser, CCConstants.PERMISSION_CONSUMER);
-            log.debug("Added consumer permission for {} to submission file {}", currentUser, contentNodeRef.getId());
+                String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
+                permissionService.setPermission(contentNodeRef.getId(), currentUser, CCConstants.PERMISSION_CONSUMER);
+                log.debug("Added consumer permission for {} to submission file {}", currentUser, contentNodeRef.getId());
+                return null;
+            });
         }
 
         private void handleFileUpload(SubmissionFileRequest request, InputStream fileInputStream) {
-            String contentNodeId;
-            try {
-                Map<String, String[]> contentProperties = new HashMap<>(request.properties()) {{
-                    put(CCConstants.CCM_PROP_SUBMISSION_FILE_REFER_TO_ASSIGNMENT_FIlE, new String[]{request.assignmentFile()});
-                }};
-                contentNodeId = nodeService.createNode(nodeId, CCConstants.CCM_TYPE_SUBMISSION_FILE, contentProperties, CCConstants.CCM_ASSOC_SUBMISSION_FILES, true);
-                log.debug("Created new submission file content node {} for {}", contentNodeId, nodeId);
+            AuthenticationUtil.runAsSystem(() -> {
+                String contentNodeId;
+                try {
+                    Map<String, String[]> contentProperties = new HashMap<>(request.properties()) {{
+                        put(CCConstants.CCM_PROP_SUBMISSION_FILE_REFER_TO_ASSIGNMENT_FIlE, new String[]{request.assignmentFile()});
+                    }};
+                    contentNodeId = nodeService.createNode(nodeId, CCConstants.CCM_TYPE_SUBMISSION_FILE, contentProperties, CCConstants.CCM_ASSOC_SUBMISSION_FILES, true);
+                    log.debug("Created new submission file content node {} for {}", contentNodeId, nodeId);
 
-                ContentWriter writer = contentService.getWriter(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), ContentModel.PROP_CONTENT, true);
-                writer.putContent(fileInputStream);
-                log.debug("Uploaded submission file content for {} to {}", nodeId, contentNodeId);
-            } catch (RuntimeException e) {
-                throw e;
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
-            }
+                    ContentWriter writer = contentService.getWriter(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), ContentModel.PROP_CONTENT, true);
+                    writer.putContent(fileInputStream);
+                    log.debug("Uploaded submission file content for {} to {}", nodeId, contentNodeId);
+                } catch (RuntimeException e) {
+                    throw e;
+                } catch (Throwable e) {
+                    throw new RuntimeException(e);
+                }
 
-            nodeService.addAspect(contentNodeId, CCConstants.CCM_ASPECT_SUBMISSION_FILE_CONTENT);
-            log.debug("Added content aspect to content node {}", contentNodeId);
+                nodeService.addAspect(contentNodeId, CCConstants.CCM_ASPECT_SUBMISSION_FILE_CONTENT);
+                log.debug("Added content aspect to content node {}", contentNodeId);
 
-            String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
-            permissionService.setPermission(contentNodeId, AuthenticationUtil.getFullyAuthenticatedUser(), CCConstants.PERMISSION_CONSUMER);
-            log.debug("Added consumer permission for {} to submission file {}", currentUser, contentNodeId);
+                String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
+                permissionService.setPermission(contentNodeId, AuthenticationUtil.getFullyAuthenticatedUser(), CCConstants.PERMISSION_CONSUMER);
+                log.debug("Added consumer permission for {} to submission file {}", currentUser, contentNodeId);
+                return null;
+            });
         }
 
         @Override
@@ -1074,6 +1112,10 @@ public class AssignmentDaoFactory {
 
         @Override
         public SubmissionFile getSubmissionFile() {
+            if (!exists()) {
+                return null;
+            }
+
             return new SubmissionFile(
                     getNodeRef(),
                     contentNode.get(),

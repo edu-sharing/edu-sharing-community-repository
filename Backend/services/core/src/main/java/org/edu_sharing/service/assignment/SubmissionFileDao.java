@@ -1,7 +1,5 @@
 package org.edu_sharing.service.assignment;
 
-import org.edu_sharing.repository.server.tools.security.RunAsSystem;
-import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
 import org.edu_sharing.restservices.assignment.v1.model.Submission;
 import org.edu_sharing.restservices.assignment.v1.model.SubmissionFile;
 import org.edu_sharing.restservices.assignment.v1.model.SubmissionFileRequest;

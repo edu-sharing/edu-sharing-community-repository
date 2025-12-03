@@ -70,7 +70,7 @@ public interface PermissionService {
 	
 	 void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission) throws Exception;
 
-	void setPermissionInherit(String nodeId, boolean inheritPermission) throws Exception;
+	void setPermissionInherit(String nodeId, boolean inheritPermission);
 
 	 void addPermissions(String nodeId, ACE[] aces) throws Exception;
 	

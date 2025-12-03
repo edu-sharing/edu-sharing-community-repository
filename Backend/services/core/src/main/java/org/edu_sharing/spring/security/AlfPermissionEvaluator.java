@@ -10,6 +10,9 @@ import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @Component
 @RequiredArgsConstructor
@@ -38,28 +41,11 @@ public class AlfPermissionEvaluator implements PermissionEvaluator {
         if (permission instanceof String permissionString) {
             return permissionService.hasPermission(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(), permissionString);
         } else if (permission instanceof String[] permissionStrings) {
-            for (String permissionString : permissionStrings) {
-                if(!permissionService.hasPermission(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(), permissionString)){
-                    return false;
-                }
-            }
-            return true;
-        } else if (permission instanceof Iterable<?>) {
-            int i = 0;
-            for (Object permissionObject : (Collection<?>) permission) {
-                if (permissionObject instanceof String permissionString) {
-                    if(!permissionService.hasPermission(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(), permissionString)){
-                        return false;
-                    }
-                } else {
-                    throw new IllegalArgumentException("Unsupported permission type: " + permissionObject.getClass() + " at index " + i);
-                }
-                i++;
-            }
-            return true;
+            return permissionService.hasAllPermissions(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(), permissionStrings).values().stream().anyMatch(v -> !v);
+        } else if (permission instanceof Iterable<?> iterablePermissions) {
+            String[] permissionStrings = StreamSupport.stream(iterablePermissions.spliterator(), false).map(Object::toString).toArray(String[]::new);
+            return permissionService.hasAllPermissions(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(), permissionStrings).values().stream().anyMatch(v -> !v);
         }
-
-
         return false;
     }
 
