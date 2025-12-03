@@ -3,20 +3,32 @@ package org.edu_sharing.spring.security.oauth2;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.HttpMethod;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfresco.service.config.model.Config;
 import org.edu_sharing.alfresco.service.config.model.LoginSilentMode;
 import org.edu_sharing.repository.server.authentication.AuthenticationFilter;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.spring.ApplicationContextFactory;
+import org.edu_sharing.spring.security.oauth2.config.OAuth2ClientProperties;
+import org.edu_sharing.spring.security.oauth2.config.OAuth2ConfigProvider;
 import org.springframework.core.env.Profiles;
+import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
+
+@RequiredArgsConstructor
 @Slf4j
+@Service
 public class SilentLoginModeRedirect {
     public static String SESS_ATT_SILENT_LOGIN_TARGET = "SILENT_LOGIN_TARGET";
     public static String SESS_ATT_SILENT_LOGIN_RESULT = "SILENT_LOGIN_RESULT";
 
-    public static boolean process(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    private final OAuth2ConfigProvider configService;
+
+    public boolean process(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         if (!checkConditions(request, response)) {
             log.debug("conditions not given");
@@ -42,22 +54,38 @@ public class SilentLoginModeRedirect {
             return false;
         }
 
-        request.getSession().setAttribute(SESS_ATT_SILENT_LOGIN_TARGET, (request.getContextPath()
+        String targetPath = request.getContextPath()
                 + request.getServletPath()
                 + (request.getPathInfo() != null ? request.getPathInfo() : "")
-                + (request.getQueryString() != null ? ("?" + request.getQueryString()) : ""))
-        );
+                + (request.getQueryString() != null ? ("?" + request.getQueryString()) : "");
+        request.getSession().setAttribute(SESS_ATT_SILENT_LOGIN_TARGET, targetPath);
+
+        if(targetPath.contains("components/error")){
+            log.debug("target path "+targetPath);
+            return false;
+        }
+
         log.debug("SILENT_LOGIN_TARGET:"+request.getSession().getAttribute(SESS_ATT_SILENT_LOGIN_TARGET));
-        response.sendRedirect(request.getContextPath() + SilentLoginAuthorizationRequestResolver.DEFAULT_SILENT_LOGIN_PATH);
+        //response.sendRedirect(request.getContextPath() + SilentLoginAuthorizationRequestResolver.DEFAULT_SILENT_LOGIN_PATH);
+
+        String context = NodeCustomizationPolicies.getEduSharingContext();
+        OAuth2ClientProperties config = configService.getConfig(context);
+        Optional<String> registrationId = config.getRegistration().keySet().stream().filter(s -> s.contains("openIdConnect")).findFirst();
+
+        if(!registrationId.isPresent()){
+            return false;
+        }
+
+        response.sendRedirect("/edu-sharing/oauth2/authorization/"+context+"_"+registrationId.get()+"?prompt=none");
         return true;
     }
 
-    private static boolean isLocalLoginForced(HttpServletRequest request) {
+    private boolean isLocalLoginForced(HttpServletRequest request) {
         return request.getRequestURI().equals(request.getContextPath() + AuthenticationFilter.PATH_LOGIN_ANGULAR)
                 && "true".equalsIgnoreCase(request.getParameter("local"));
     }
 
-    public static boolean processError(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public boolean processError(HttpServletRequest request, HttpServletResponse response) throws Exception {
         if (!checkConditions(request, response)) {
             log.debug("processError: conditions not given");
             return false;
@@ -70,10 +98,11 @@ public class SilentLoginModeRedirect {
         request.getSession().setAttribute(SESS_ATT_SILENT_LOGIN_RESULT, "login_required");
         log.debug("processError: redirecting to "+target);
         response.sendRedirect(target);
+        request.getSession().removeAttribute(SESS_ATT_SILENT_LOGIN_TARGET);
         return true;
     }
 
-    public static boolean processSuccess(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public boolean processSuccess(HttpServletRequest request, HttpServletResponse response) throws Exception {
         if (!checkConditions(request, response)) {
             log.debug("processSuccess: conditions not given");
             return false;
@@ -90,7 +119,7 @@ public class SilentLoginModeRedirect {
         return true;
     }
 
-    private static boolean checkConditions(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    private boolean checkConditions(HttpServletRequest request, HttpServletResponse response) throws Exception {
         if (!HttpMethod.GET.equals(request.getMethod())) {
             return false;
         }

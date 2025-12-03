@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -16,13 +17,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+@RequiredArgsConstructor
 @Slf4j
 public class CustomErrorHandler implements AuthenticationFailureHandler {
+
+    private final SilentLoginModeRedirect silentLoginModeRedirect;
+
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
         log.info("authentication failure. url: {}", request.getRequestURI(), exception);
         try {
-            if(SilentLoginModeRedirect.processError(request,response)){
+            if(silentLoginModeRedirect.processError(request,response)){
                 return;
             }
         } catch (Exception e) {

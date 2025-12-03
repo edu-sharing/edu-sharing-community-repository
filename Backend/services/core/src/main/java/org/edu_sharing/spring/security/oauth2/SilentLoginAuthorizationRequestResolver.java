@@ -1,15 +1,12 @@
 package org.edu_sharing.spring.security.oauth2;
 
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
+import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
-import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -21,25 +18,24 @@ import java.util.Map;
 @Slf4j
 public class SilentLoginAuthorizationRequestResolver implements OAuth2AuthorizationRequestResolver {
 
-    OAuth2AuthorizationRequestResolver defaultAuthorizationRequestResolver;
+    OAuth2AuthorizationRequestResolver defaultAuthorizationRequestResolver;;
 
-    public static String DEFAULT_SILENT_LOGIN_PATH = "/rest/authentication/v1/validateSSOSession";
+    GuestService guestService;
 
-    @Getter
-    private final String silentLoginPath = DEFAULT_SILENT_LOGIN_PATH;
-
-    public SilentLoginAuthorizationRequestResolver(ClientRegistrationRepository clientRegistration) {
+    public SilentLoginAuthorizationRequestResolver(ClientRegistrationRepository clientRegistration,GuestService guestService) {
         this.defaultAuthorizationRequestResolver = new DefaultOAuth2AuthorizationRequestResolver(
                 clientRegistration, "/oauth2/authorization");
+        this.guestService = guestService;
     }
 
     @Override
     public OAuth2AuthorizationRequest resolve(HttpServletRequest request) {
         OAuth2AuthorizationRequest authorizationRequest =
                 this.defaultAuthorizationRequestResolver.resolve(request);
-        String combinedPath = getCombinedPath(request);
-        log.debug("Combined path: {} authorizationRequest != null: {}", combinedPath,authorizationRequest != null);
-        if(silentLoginPath.equals(combinedPath) && authorizationRequest != null){
+
+        boolean isSilentLogin = request.getParameter("prompt") != null && "none".equals(request.getParameter("prompt"));
+
+        if(isSilentLogin && (authorizationRequest != null)){
             return customAuthorizationRequest(authorizationRequest);
         }
         return authorizationRequest;
@@ -50,39 +46,14 @@ public class SilentLoginAuthorizationRequestResolver implements OAuth2Authorizat
         OAuth2AuthorizationRequest authorizationRequest =
                 this.defaultAuthorizationRequestResolver.resolve(
                         request, clientRegistrationId);
-        String combinedPath = getCombinedPath(request);
-        log.debug("Combined path: {} authorizationRequest != null: {}, clientRegistrationId:{}", combinedPath,authorizationRequest != null, clientRegistrationId);
-        if(silentLoginPath.equals(combinedPath) && authorizationRequest != null){
+        boolean isSilentLogin = request.getParameter("prompt") != null && "none".equals(request.getParameter("prompt"));
+
+        if(isSilentLogin && (authorizationRequest != null)){
             return customAuthorizationRequest(authorizationRequest);
         }
 
         return authorizationRequest;
     }
-
-    public String getCombinedPath(HttpServletRequest request){
-        DefaultSavedRequest r = (DefaultSavedRequest)request.getSession().getAttribute("SPRING_SECURITY_SAVED_REQUEST");
-        if(r != null) return getCombinedPath(r);
-
-        String combinedPath = request.getServletPath();
-        if (request.getPathInfo() != null) {
-            combinedPath += request.getPathInfo();
-        }
-        return combinedPath;
-    }
-
-
-    private String getCombinedPath(DefaultSavedRequest r){
-        String combinedPath = r.getServletPath();
-        if (r.getPathInfo() != null) {
-            combinedPath += r.getPathInfo();
-        }
-        return combinedPath;
-    }
-
-    public boolean protectedPathNeedsSilentLogin(HttpServletRequest request){
-        return getCombinedPath(request).equals(getSilentLoginPath());
-    }
-
 
 
     private OAuth2AuthorizationRequest customAuthorizationRequest(

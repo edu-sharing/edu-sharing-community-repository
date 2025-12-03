@@ -16,24 +16,12 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class EduAuthSuccsessHandler extends SimpleUrlAuthenticationSuccessHandler {
-
-    private SilentLoginAuthorizationRequestResolver silentLoginAuthorizationRequestResolver;
-
-    @Autowired(required = false)
-    public void setSilentLoginAuthorizationRequestResolver(SilentLoginAuthorizationRequestResolver silentLoginAuthorizationRequestResolver) {
-        this.silentLoginAuthorizationRequestResolver = silentLoginAuthorizationRequestResolver;
-    }
-
     public EduAuthSuccsessHandler(){
         super("/shibboleth");
     }
 
     @Override
     protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response) {
-        if(silentLoginAuthorizationRequestResolver != null && silentLoginAuthorizationRequestResolver.protectedPathNeedsSilentLogin(request)){
-            return silentLoginAuthorizationRequestResolver.getSilentLoginPath();
-        }else {
-            return super.determineTargetUrl(request, response);
-        }
+        return super.determineTargetUrl(request, response);
     }
 }

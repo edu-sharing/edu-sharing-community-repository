@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
@@ -29,15 +28,12 @@ import org.edu_sharing.repository.server.tools.security.ShibbolethSessions;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions.SessionInfo;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.RestConstants;
-import org.edu_sharing.restservices.iam.v1.model.UserEntry;
 import org.edu_sharing.restservices.login.v1.model.*;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.UserProfileAppAuth;
 import org.edu_sharing.service.authentication.*;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.service.lti13.LTIConstants;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
-import org.edu_sharing.spring.security.oauth2.SilentLoginModeRedirect;
 import org.edu_sharing.spring.security.oauth2.config.OAuth2ClientProperties;
 import org.edu_sharing.spring.security.oauth2.config.OAuth2ConfigProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +41,10 @@ import org.springframework.context.ApplicationContext;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Path("/authentication/v1")
 @Tag(name = "AUTHENTICATION v1")
@@ -130,31 +129,6 @@ public class LoginApi {
 
         PrimaryLogin login = new PrimaryLogin(authenticated, authTool.getScope(), null, req.getSession(), status, oAuthEntries);
         return Response.ok(login).build();
-    }
-
-    @GET
-    @Path("/validateSSOSession")
-    @Operation(summary = "Validates if an provider (idp) session exists.", description = "If no provider session exists an 401 with 'login required' message is delivered. If true the current Login Object is shown.")
-
-    @ApiResponses(
-            value = {
-                    @ApiResponse(responseCode = "200",
-                            description = "Successfully authenticated.\n The session ID is returned in a cookie named `JSESSIONID`. You need to include this cookie in subsequent requests.",
-                            headers = {@Header(name = "Set-Cookie", schema = @Schema(type = "string", example = "JSESSIONID=abcde12345; PATH=/; HttpOnly"))},
-                            content = @Content(schema = @Schema(implementation = PrimaryLogin.class))),
-            })
-
-    public Response validateSSOSession(@Context HttpServletRequest req, @Context HttpServletResponse resp) {
-
-        try {
-            if (SilentLoginModeRedirect.processSuccess(req, resp)) {
-                return Response.ok().build();
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        return this.login(req);
     }
 
 

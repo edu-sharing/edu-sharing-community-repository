@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
+import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.config.ConfigServiceFactory;
@@ -38,7 +39,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.util.UrlUtils;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -62,14 +62,16 @@ public class SecurityConfigurationOAuth2 {
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
-    public SecurityFilterChain oAuth2FilterChain(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository, SilentLoginAuthorizationRequestResolver silentLoginAuthorizationRequestResolver, EduAuthSuccsessHandler eduAuthSuccsessHandler, OidcUserSessionMapper mapper) throws Exception {
+    public SecurityFilterChain oAuth2FilterChain(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository, SilentLoginAuthorizationRequestResolver silentLoginAuthorizationRequestResolver, EduAuthSuccsessHandler eduAuthSuccsessHandler, OidcUserSessionMapper mapper, CustomErrorHandler customErrorHandler) throws Exception {
         http
-                .securityMatcher(new OrRequestMatcher(new AntPathRequestMatcher("/login/oauth2/**"),
-                        new AntPathRequestMatcher("/logout/**"),
-                        new AntPathRequestMatcher("/oauth2"),
-                        new AntPathRequestMatcher("/oauth2/**"),
-                        new AntPathRequestMatcher("/shibboleth"),
-                        new AntPathRequestMatcher("/rest/authentication/v1/validateSSOSession/**")))
+                .securityMatchers(matchers -> matchers
+                        .requestMatchers(new AntPathRequestMatcher("/login/oauth2/**"))
+                        .requestMatchers(new AntPathRequestMatcher("/logout/**"))
+                        .requestMatchers(new AntPathRequestMatcher("/oauth2"))
+                        .requestMatchers(new AntPathRequestMatcher("/oauth2/**"))
+                        .requestMatchers(new AntPathRequestMatcher("/shibboleth"))
+                        .requestMatchers(new AntPathRequestMatcher("/rest/authentication/v1/validateSSOSession/**"))
+                )
                 //.securityMatcher("/login/oauth2/**","/logout/**","/oauth2","/oauth2/**","/shibboleth","/rest/authentication/v1/validateSSOSession/**")
                 .authorizeHttpRequests((authorize) -> authorize
                         //   .requestMatchers("/shibboleth").authenticated()
@@ -82,7 +84,6 @@ public class SecurityConfigurationOAuth2 {
                          * org.springframework.security.config.annotation.web.AbstractRequestMatcherRegistry diff 6.1 vs 6.2
                          */
                         .requestMatchers(new AntPathRequestMatcher("/shibboleth")).authenticated()
-                        .requestMatchers(new AntPathRequestMatcher(silentLoginAuthorizationRequestResolver.getSilentLoginPath())).authenticated()
                         .requestMatchers(new AntPathRequestMatcher("/**")).permitAll()
                 )
 
@@ -90,7 +91,7 @@ public class SecurityConfigurationOAuth2 {
                         //redirect to login page with angular does fallback to default domain, so request attributes not longer available
                         //so it's not useabe in angular dev mode at the moment
                         .loginPage("/sso")
-                        .failureHandler(new CustomErrorHandler())
+                        .failureHandler(customErrorHandler)
                         .successHandler(eduAuthSuccsessHandler)
                         .authorizationEndpoint(ae -> ae
                                 .authorizationRequestResolver(silentLoginAuthorizationRequestResolver)
@@ -149,11 +150,16 @@ public class SecurityConfigurationOAuth2 {
         };
     }
 
+    @Bean
+    CustomErrorHandler customErrorHandler(SilentLoginModeRedirect silentLoginModeRedirect) {
+        return new CustomErrorHandler(silentLoginModeRedirect);
+    }
+
 
     @Bean
-    public SilentLoginAuthorizationRequestResolver silentLoginAuthorizationRequestResolver(ClientRegistrationRepository clientRegistrationRepository) {
+    public SilentLoginAuthorizationRequestResolver silentLoginAuthorizationRequestResolver(ClientRegistrationRepository clientRegistrationRepository, GuestService guestService) {
         log.info("starting init silentLoginAuthorizationRequestResolver");
-        return new SilentLoginAuthorizationRequestResolver(clientRegistrationRepository);
+        return new SilentLoginAuthorizationRequestResolver(clientRegistrationRepository,guestService);
     }
 
     @Bean

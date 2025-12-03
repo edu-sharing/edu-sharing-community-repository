@@ -21,6 +21,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.edu_sharing.spring.ApplicationContextFactory;
 import org.edu_sharing.spring.security.oauth2.SilentLoginModeRedirect;
 
 public class GuestFilter implements jakarta.servlet.Filter {
@@ -28,10 +29,12 @@ public class GuestFilter implements jakarta.servlet.Filter {
     Logger logger = Logger.getLogger(GuestFilter.class);
 
     private GuestService guestService;
+    private SilentLoginModeRedirect silentLoginModeRedirect;
 
     @Override
     public void init(jakarta.servlet.FilterConfig arg0) throws ServletException {
         guestService = AlfAppContextGate.getApplicationContext().getBean(GuestService.class);
+        silentLoginModeRedirect = ApplicationContextFactory.getApplicationContext().getBean(SilentLoginModeRedirect.class);
     }
 
     @Override
@@ -72,7 +75,7 @@ public class GuestFilter implements jakarta.servlet.Filter {
                         logger.debug("guest filter disabled for context " + ConfigServiceFactory.getCurrentDomain());
 					}
 					else {
-						if(SilentLoginModeRedirect.process(httpRequest, httpresponse)){
+						if(silentLoginModeRedirect.process(httpRequest, httpresponse)){
 							return;
 						}
 						Map<String, String> authInfoGuest = authTool.createNewSession(currentGuestConfig.getUsername());
@@ -86,7 +89,7 @@ public class GuestFilter implements jakarta.servlet.Filter {
                 }
 			}else if(authentication != null){
 				if(AuthorityServiceFactory.getInstance().getLocalService().isGuest()){
-					if(SilentLoginModeRedirect.process(httpRequest, httpresponse)){
+					if(silentLoginModeRedirect.process(httpRequest, httpresponse)){
 						return;
 					}
 				}
