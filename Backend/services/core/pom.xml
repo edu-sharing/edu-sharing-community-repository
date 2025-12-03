@@ -404,7 +404,7 @@
           <groupId>org.testcontainers</groupId>
           <artifactId>testcontainers</artifactId>
           <version>1.20.6</version>
-          <scope>compile</scope>
+          <scope>test</scope>
       </dependency>
   </dependencies>
 
