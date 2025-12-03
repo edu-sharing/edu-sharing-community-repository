@@ -52,5 +52,5 @@ done
 if [[ ${#duplicates[@]} != 0 ]] ; then
   echo "ERROR duplicated libraries found:"
   printf "%s\n" "${duplicates[@]}"
-  # exit 1
+  exit 1
 fi
