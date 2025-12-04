@@ -180,7 +180,6 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                                 return;
                             } else if (this.cordova.isRunningCordova()) {
                                 if (await this.cordova.hasValidConfig()) {
-                                    console.log('re-init session via oauth');
                                     try {
                                         await this.cordova.startSessionViaOauthRefreshToken();
                                         this.goToNext(data);
