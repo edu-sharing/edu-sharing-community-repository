@@ -1487,4 +1487,13 @@ export class CordovaService extends AppServiceAbstract {
         }
         return login;
     }
+
+    async startSessionViaOauthRefreshToken() {
+        const oauth = (await this.sendToOauthApi(
+            'token',
+            'grant_type=refresh_token&refresh_token=' + this.oauth.refresh_token,
+        )) as OAuthResult;
+        this.oauth = oauth;
+        return await firstValueFrom(this.authenticationService.loginToken(oauth.access_token));
+    }
 }

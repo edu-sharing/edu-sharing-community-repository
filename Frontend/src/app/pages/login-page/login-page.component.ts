@@ -173,11 +173,23 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                                     // this call shall return in the param device_verification_success to be set
                                     if (!(await this.cordova.hasValidConfig())) {
                                         await this.cordova.getOAuthGrant();
+                                        return;
                                     }
-                                } else {
-                                    this.goToNext(data);
                                 }
+                                this.goToNext(data);
                                 return;
+                            } else if (this.cordova.isRunningCordova()) {
+                                if (await this.cordova.hasValidConfig()) {
+                                    console.log('re-init session via oauth');
+                                    try {
+                                        await this.cordova.startSessionViaOauthRefreshToken();
+                                        this.goToNext(data);
+                                        return;
+                                    } catch (e) {
+                                        this.toast.error(e);
+                                        this.cordova.oauth = null;
+                                    }
+                                }
                             }
                         }
                         // when there is a request to go into safe mode, first, the user needs to log in regularly
