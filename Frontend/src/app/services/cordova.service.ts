@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthenticationService, LoginInfo } from 'ngx-edu-sharing-api';
 import { AppService as AppServiceAbstract, DateHelper, UIConstants } from 'ngx-edu-sharing-ui';
-import { BehaviorSubject, firstValueFrom, Observable, Observer, of } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Observable, Observer } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { RestLocatorService } from '../core-module/core.module';
 import { RestConstants } from '../core-module/rest/rest-constants';
@@ -106,13 +106,7 @@ export class CordovaService extends AppServiceAbstract {
             const splitted = userAgent.split('/');
             const version =
                 splitted
-                    .filter((s) => {
-                        const versionRegExp = new RegExp('\\d\\.\\d(\\.\\d)?');
-                        if (versionRegExp.test(s.trim())) {
-                            return true;
-                        }
-                        return false;
-                    })?.[0]
+                    .filter((s) => new RegExp('\\d\\.\\d(\\.\\d)?').test(s.trim()))?.[0]
                     .trim() || '0.0.0';
 
             const script = document.createElement('script');
@@ -126,7 +120,6 @@ export class CordovaService extends AppServiceAbstract {
             document.getElementsByTagName('head')[0].appendChild(script);
             console.info('ionic user agent, add cordova.js to header', this.platform, version);
         }
-        this.initialHref = window.location.href;
 
         // CORDOVA EVENT: Pause (App is put into Background)
         const whenDeviceGoesBackground = () => {
@@ -149,7 +142,7 @@ export class CordovaService extends AppServiceAbstract {
         };
 
         if (this.isRunningCordova()) {
-            // this.registerSessionListener();
+            this.registerSessionListener();
             // deviceready may not work, because cordova is already loaded, so try to set it ready after some time
             const checkInterval = setInterval(() => {
                 if ((window as any).plugins) {
@@ -192,26 +185,6 @@ export class CordovaService extends AppServiceAbstract {
     public static IOSSHARE_EXPIRES = 'expires_in';
     public static IOSSHARE_SERVER = 'eduserver';
 
-    /**********************************************************
-     * OAUTH Server Communication
-     **********************************************************
-     * The REST-Services depend on Configuration Service that already need config from a fixed server.
-     * To seperate the app login from those dependencies .. the cordova service provides all the HTTP
-     * tools to select a server, make oAuth logins/management, get JSession .. from there on the
-     * regular REST-Services can handle all the communication.
-     */
-
-    // errors results that can result when testing a server url
-    public static TEST_ERROR_NOTFOUND = 'APINOTFOUND';
-    public static TEST_ERROR_NOINTERNET = 'NOINTERNET';
-    public static TEST_ERROR_INCORRECTVERSION = 'INCORRECTVERSION';
-    public static TEST_ERROR_UNKNOWN = 'UNKOWN';
-
-    // success results that can result when testing a server url
-    public static TEST_WARNING_NOHTTPS = 'NOHTTPS';
-    public static TEST_TESTSKIPPED = 'TESTSKIPPED';
-    public static TEST_OK = 'OK';
-
     // change this during development for testing true, but false is default
     private forceCordovaMode = environment.forceCordovaMode;
 
@@ -227,14 +200,6 @@ export class CordovaService extends AppServiceAbstract {
     private serviceIsReady = false;
 
     private lastIntent: any;
-
-    initialHref: string;
-
-    /**
-     * Called when the current status is logged out
-     * Cordova needs to refresh tokens
-     */
-    private reiniting = false;
 
     /**
      * get the last android/ios intent
@@ -257,7 +222,7 @@ export class CordovaService extends AppServiceAbstract {
         // window.open = cordova.InAppBrowser.open;
 
         // load basic data from storage
-        this.loadStorage();
+        void this.loadStorage();
 
         // --> navigation issues exist anyway, need to check that later
         document.addEventListener('backbutton', () => this.onBackKeyDown(), false);
@@ -265,16 +230,16 @@ export class CordovaService extends AppServiceAbstract {
         const shareInterval = setInterval(async () => {
             if (await this.hasValidConfig()) {
                 clearInterval(shareInterval);
-                this.onNewShareContent().subscribe(
-                    async (data: any) => {
+                this.onNewShareContent().subscribe({
+                    next: async (data: any) => {
                         await this.ngZone.run(() =>
                             this.router.navigate([UIConstants.ROUTER_PREFIX, 'app', 'share'], {
                                 queryParams: data,
                             }),
                         );
                     },
-                    (error) => {},
-                );
+                    error: (_: any) => {},
+                });
             }
         }, 1000);
 
@@ -357,8 +322,8 @@ export class CordovaService extends AppServiceAbstract {
                 console.info('cordova: android new intent', intent);
                 if (intent && intent.action == 'android.intent.action.VIEW') {
                     const hit = '/edu-sharing';
-                    const target = intent.data.substr(0, intent.data.indexOf(hit));
-                    const current = window.location.href.substr(
+                    const target = intent.data.slice(0, intent.data.indexOf(hit));
+                    const current = window.location.href.slice(
                         0,
                         window.location.href.indexOf(hit),
                     );
@@ -577,12 +542,6 @@ export class CordovaService extends AppServiceAbstract {
                 'http://app-registry.edu-sharing.com/ng/?reset=true' + parameters,
             );
         }
-        /*
-    try {
-      (navigator as any).splashscreen.show();
-    } catch (e) {}
-    document.location.href = this.initialHref;
-    */
     }
 
     /**********************************************************
@@ -620,7 +579,7 @@ export class CordovaService extends AppServiceAbstract {
                             if (typeof valueNative == 'undefined') valueNative = null;
                             resolve(valueNative);
                         },
-                        (error: any) => {
+                        (_: any) => {
                             // FAIL (also when key not available)
                             resolve(null);
                         },
@@ -742,7 +701,7 @@ export class CordovaService extends AppServiceAbstract {
         for (let i = 0; i < cookies.length; i++) {
             const cookie = cookies[i];
             const eqPos = cookie.indexOf('=');
-            const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+            const name = eqPos > -1 ? cookie.slice(0, eqPos) : cookie;
             document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT';
         }
     }
@@ -794,7 +753,7 @@ export class CordovaService extends AppServiceAbstract {
                         key,
                         value,
                     },
-                    function (win: any) {},
+                    function (_: any) {},
                     function (fail: any) {
                         console.error(
                             'PLUGIN FAIL info.protonet.appgroupsuserdefaults SAVE: ',
@@ -954,7 +913,7 @@ export class CordovaService extends AppServiceAbstract {
         try {
             this.makeSurePermission(
                 'WRITE_EXTERNAL_STORAGE',
-                (win: any) => {
+                (_: any) => {
                     // add oauth token if not alreafy in URL
                     if (downloadURL.indexOf('accessToken=') < 0 && this.oauth !== null) {
                         if (downloadURL.indexOf('?') < 0) {
@@ -999,7 +958,7 @@ export class CordovaService extends AppServiceAbstract {
            });*/
                     }
                 },
-                (error: any) => {
+                (_: any) => {
                     status = -1;
                 },
             );
@@ -1234,51 +1193,6 @@ export class CordovaService extends AppServiceAbstract {
             throw e;
         }
     }
-    public reinitStatus(goToLogin = true, loginNext = window.location.href): Observable<void> {
-        return new Observable<void>((observer: Observer<void>) => {
-            console.info('cordova: reinit', this.reiniting, this.oauth$.value, goToLogin);
-
-            if (this.reiniting) {
-                const interval = setInterval(() => {
-                    if (!this.reiniting) {
-                        clearInterval(interval);
-                        observer.next(null);
-                        observer.complete();
-                    }
-                }, 50);
-                return;
-            }
-            // FIXME: this will always be false.
-            if (!this.oauth$.value) {
-                if (goToLogin) {
-                    this.goToLogin(loginNext);
-                }
-                observer.error(null);
-                observer.complete();
-                return;
-            }
-            this.reiniting = true;
-            this.refreshOAuth().subscribe(
-                async (oauth) => {
-                    console.info('cordova: oauth OK');
-                    this.reiniting = false;
-                    const auth = this.injector.get(AuthenticationService);
-                    auth.loginToken(oauth.access_token);
-                    auth.forceLoginInfoRefresh();
-                    observer.next(null);
-                    observer.complete();
-                },
-                (error: any) => {
-                    console.warn(error);
-                    console.warn('cordova: invalid oauth, go back to server selection');
-                    this.reiniting = false;
-                    this.resetAndGoToServerlist();
-                    observer.error(null);
-                    observer.complete();
-                },
-            );
-        });
-    }
 
     private resetAndGoToServerlist(parameters = '') {
         this.setPermanentStorage(CordovaService.CORDOVA_STORAGE_OAUTHTOKENS, null);
@@ -1286,83 +1200,17 @@ export class CordovaService extends AppServiceAbstract {
         this.restartCordova(parameters);
     }
 
-    // oAuth refresh tokens
-    refreshOAuth(): Observable<OAuthResult> {
-        return of(null);
-    }
-
-    /**
-     * If the user has a set of oAuth tokens (after login or when starting the app again)
-     * then use this method to get a cookie/session and subscribe on refreshes on oAuth tokens.
-     * When the Observable an error mit "INVALID" - oAuth tokens are outdated and new login is needed.
-     */
-    /*
-  public initOAuthSession(oauth: OAuthResult): Observable<OAuthResult> {
-
-      return new Observable<OAuthResult>((observer: Observer<OAuthResult>) => {
-
-        let localErrorHandling = (error: any, tag: string = "") => {
-          if ((typeof error != "string") && (error.status == 401)) {
-            // oauth tokens are invalid
-            observer.error("INVALID");
-            observer.complete();
-          } else {
-            // on all other errors (server, internet, etc)
-            observer.error(error);
-            observer.complete();
-          }
-        };
-        if ((Date.now() + 60000) > oauth.expires_ts || true) {
-            // oAuth needs refresh first
-            this.refreshOAuth(oauth).subscribe(
-                (win) => {
-
-                    // now oauth is fresh - continue with init session
-                    this.oauth = win;
-                    observer.next(this.oauth);
-                    observer.complete();
-
-                },
-                (error) => {
-                    localErrorHandling(error, "(on planned refresh)");
-                }
-            );
-        }
-      });
-
-    }
-    */
-
     hasValidConfig(): Promise<Boolean> {
-        return this.oauth$
-            .pipe(
+        return firstValueFrom(
+            this.oauth$.pipe(
                 first((f) => f !== undefined),
                 map((f) => f !== null),
-            )
-            .toPromise();
+            ),
+        );
     }
 
-    getLanguage() {
-        return new Promise<string>((resolve) => {
-            resolve(navigator.language.split('-')[0]);
-            /*try {
-          (navigator as any).globalization.getPreferredLanguage(
-            (lang:any)=>{
-              // WIN
-              let code = (lang.value as string).substr(0,2);
-              observer.next(code);
-              observer.complete();
-          },(error:any)=>{
-              // ERROR - go with default
-              observer.next("de");
-              observer.complete();
-          });
-        } catch(e) {
-          observer.next("de");
-          observer.complete();
-        }
-        */
-        });
+    async getLanguage() {
+        return navigator.language.split('-')[0];
     }
     setOnBackBehaviour(behaviour: OnBackBehaviour) {
         this.onBackBehaviour = behaviour;
@@ -1396,9 +1244,6 @@ export class CordovaService extends AppServiceAbstract {
             (navigator as any).app.exitApp();
         }*/
     }
-    getIndexPath() {
-        return cordova.file.applicationDirectory + 'www/';
-    }
 
     goToLogin(next?: string) {
         console.info('navigating to app login', next);
@@ -1419,7 +1264,7 @@ export class CordovaService extends AppServiceAbstract {
                 }
                 const info = await firstValueFrom(this.authenticationService.observeLoginInfo());
                 const timeDiff = (Date.now() - this.lastValidLogin) / 1000;
-                if (timeDiff > info.sessionTimeout / 10) {
+                if (timeDiff > info.sessionTimeout / 5) {
                     console.info(
                         'Last login diff is old, will refetch auth for app',
                         timeDiff,
@@ -1435,11 +1280,6 @@ export class CordovaService extends AppServiceAbstract {
             this.lastValidLogin = Date.now();
             return;
         }
-        /*if(this.activeComponent instanceof LoginAppComponent) {
-            console.log('handle state canceled, in login process');
-            return;
-        }*/
-        // handle re-login from cordova app
         await this.handleAppReAuthentication();
     }
 
@@ -1450,10 +1290,7 @@ export class CordovaService extends AppServiceAbstract {
                 console.info('oauth present', reload);
                 // @TODO: Wait for implementation
                 try {
-                    /*await this.injector
-                        .get(AuthenticationService)
-                        .loginToken((await cordova.refreshOAuth().toPromise()).access_token)
-                        .toPromise();*/
+                    await this.startSessionViaOauthRefreshToken();
                 } catch (e) {
                     console.warn(e);
                     this.setPermanentStorage(CordovaService.CORDOVA_STORAGE_OAUTHTOKENS, null);
@@ -1467,25 +1304,14 @@ export class CordovaService extends AppServiceAbstract {
             } else {
                 // this also navigates to the login if required
                 console.info('Invalid/Broken oauth cordova config, forcing init');
-                cordova.reinitStatus();
+                this.oauth = null;
+                this.goToLogin();
             }
         }
     }
 
     isRunningApp(): boolean {
         return this.isRunningCordova();
-    }
-
-    async authenticateViaOauth(refreshToken = true) {
-        console.log('authenticateViaOauth', this.oauth.access_token);
-        const login = await firstValueFrom(
-            this.authenticationService.loginToken(this.oauth.access_token),
-        );
-        console.log('authenticateViaOauth', login);
-        if (login.statusCode !== RestConstants.STATUS_CODE_OK) {
-            throw new Error(login.statusCode);
-        }
-        return login;
     }
 
     async startSessionViaOauthRefreshToken() {
