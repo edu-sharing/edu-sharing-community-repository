@@ -31,6 +31,7 @@ import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -52,7 +53,7 @@ public class OAuth2AuthorizationServerConfig {
 
     @Bean
     //@Order(1)
-    public SecurityFilterChain authServerSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain authServerSecurityFilterChain(HttpSecurity http,LoginUrlAuthenticationEntryPoint loginUrlAuthenticationEntryPoint,GuestBlockingFilter guestBlockingFilter) throws Exception {
         log.info("SecurityFilterChain server oauth2 config");
 
 
@@ -64,14 +65,15 @@ public class OAuth2AuthorizationServerConfig {
                 .deviceAuthorizationEndpoint(Customizer.withDefaults());*/
 
         http
-                .securityMatcher(authorizationServerConfigurer.getEndpointsMatcher()) // nur OAuth2 Endpunkte
-
+                .addFilterAfter(guestBlockingFilter, org.springframework.security.web.context.SecurityContextHolderFilter.class)
+                .securityMatcher(new OrRequestMatcher(authorizationServerConfigurer.getEndpointsMatcher(),
+                        new AntPathRequestMatcher("/rest/authentication/v1/oauth2consent"),
+                        new AntPathRequestMatcher("/components/oauth2consent")))
                 .authorizeHttpRequests(auth -> auth
-                        //.requestMatchers(new AntPathRequestMatcher("/oauth2server/device_authorization_endpoint")).permitAll()
                         .anyRequest().authenticated())
                 .csrf(csrf -> csrf.ignoringRequestMatchers(authorizationServerConfigurer.getEndpointsMatcher()))
                 .exceptionHandling(e ->
-                        e.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint(getLoginPath())))
+                        e.authenticationEntryPoint(loginUrlAuthenticationEntryPoint))
                 .with(authorizationServerConfigurer, Customizer.withDefaults());
         http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
                 .deviceAuthorizationEndpoint(d -> d.verificationUri("/oauth2server/device_verification"))
@@ -91,6 +93,12 @@ public class OAuth2AuthorizationServerConfig {
             return "/shibboleth";
         }
         return "/components/login?next=/shibboleth";
+    }
+
+
+    @Bean
+    LoginUrlAuthenticationEntryPoint loginUrlAuthenticationEntryPoint(){
+        return new LoginUrlAuthenticationEntryPoint(getLoginPath());
     }
 
 
