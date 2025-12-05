@@ -36,6 +36,7 @@ import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
+import org.alfresco.repo.security.authentication.RepositoryAuthenticatedUser;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AuthenticationService;
@@ -49,6 +50,7 @@ import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.spring.ApplicationContextFactory;
+import org.edu_sharing.spring.security.basic.EduSharingPrincipal;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -118,7 +120,12 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 
     public void addToSpringSecurityContext(HttpSession session) {
             net.sf.acegisecurity.Authentication acegiAuth = AuthenticationUtil.getFullAuthentication();
-            if (acegiAuth != null && (SecurityContextHolder.getContext().getAuthentication() == null || SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken)) {
+            if(acegiAuth == null) return;
+            RepositoryAuthenticatedUser alfrescoPrincipal = (RepositoryAuthenticatedUser) acegiAuth.getPrincipal();
+            if (SecurityContextHolder.getContext().getAuthentication() == null
+                    || SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken
+                    || !SecurityContextHolder.getContext().getAuthentication().getName().equals(alfrescoPrincipal.getUsername())
+            ) {
                 List<GrantedAuthority> springAuthorities =
                         acegiAuth.getAuthorities() == null
                                 ? List.of()
@@ -127,10 +134,10 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
                                 .map(SimpleGrantedAuthority::new)
                                 .collect(Collectors.toList());
 
-                Object principal = acegiAuth.getPrincipal();
+                EduSharingPrincipal principal = new EduSharingPrincipal(alfrescoPrincipal);
                 Object credentials = acegiAuth.getCredentials();
                 UsernamePasswordAuthenticationToken springAuth = new UsernamePasswordAuthenticationToken(principal, credentials, springAuthorities);
-                springAuth.setDetails(acegiAuth.getDetails());
+                springAuth.setDetails(principal);
                 if(!acegiAuth.isAuthenticated()) {
                     // we can only unset authenticated here because it is set to true in the constructor
                     springAuth.setAuthenticated(acegiAuth.isAuthenticated());
