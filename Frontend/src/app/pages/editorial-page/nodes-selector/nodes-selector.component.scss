@@ -124,6 +124,11 @@ es-info-message {
     }
 }
 
+es-info-message.no-config-alert {
+    margin-top: 16px;
+    display: block;
+}
+
 .checklist {
     margin-top: 8px;
     display: flex;
