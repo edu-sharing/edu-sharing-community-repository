@@ -109,5 +109,5 @@ public interface CollectionService {
 	 */
 	List<NodeRef> getCollectionProposals(String nodeId, CCConstants.PROPOSAL_STATUS status);
 
-	CopyResult copy(NodeRef src, NodeRef dst, boolean copyRoot, boolean copyRefs, boolean copyPermissions) throws Throwable;
+	CopyResult copy(NodeRef src, NodeRef dst, boolean copyRoot, boolean copyRefs, boolean copyPermissions, boolean copyChildCollections) throws Throwable;
 }

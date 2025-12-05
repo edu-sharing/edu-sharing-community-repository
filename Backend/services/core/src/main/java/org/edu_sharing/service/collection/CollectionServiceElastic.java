@@ -1177,34 +1177,40 @@ public class CollectionServiceElastic implements CollectionService {
      * @return if copyRoot == true it returns copied root NodeRef else ds
      * @throws Throwable
      */
-    public CopyResult copy(NodeRef src, NodeRef dst, boolean copyRoot, boolean copyRefs, boolean copyPermissions) throws Throwable {
+    public CopyResult copy(NodeRef src, NodeRef dst, boolean copyRoot, boolean copyRefs, boolean copyPermissions, boolean copyChildCollections) throws Throwable {
         if(src == null) throw new IllegalArgumentException("src is null");
         if(!copyRoot) {
             if (dst == null) {
                 throw new IllegalArgumentException("dst is null");
             }
         }
+        if(copyRoot == false && copyChildCollections == false && copyRefs == true){
+            throw new IllegalArgumentException("refs only can not be copied");
+        }
         CopyResult copyResult = new CopyResult();
-        copyResult.root = copyInternal(copyResult,null,src, dst, copyRoot, copyRefs, copyPermissions);
+        copyResult.root = copyInternal(copyResult,null,src, dst, copyRoot, copyRefs, copyPermissions,copyChildCollections);
         return copyResult;
     }
 
-    private NodeRef copyInternal(CopyResult copyResult, NodeRef parent, NodeRef src, NodeRef dst, boolean copySrc, boolean copyRefs, boolean copyPermissions) throws Throwable {
+    private NodeRef copyInternal(CopyResult copyResult, NodeRef parent, NodeRef src, NodeRef dst, boolean copySrc, boolean copyRefs, boolean copyPermissions, boolean copyChildCollections) throws Throwable {
         String parentNodeId = (copySrc) ? copy(copyResult,parent,src,dst,copyPermissions) : dst.getId();
         List<ChildAssociationRef> childrenChildAssociationRef = eduNodeService.getChildrenChildAssociationRef(src.getId());
         for (ChildAssociationRef childAssociationRef : childrenChildAssociationRef) {
-            if(!allowedToCopy(childAssociationRef.getChildRef(),copyRefs)){
+            if(!allowedToCopy(childAssociationRef.getChildRef(),copyRefs,copyChildCollections)){
                 continue;
             }
-            copyInternal(copyResult,new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentNodeId), childAssociationRef.getChildRef(), new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentNodeId),true, copyRefs,copyPermissions);
+            copyInternal(copyResult,new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentNodeId), childAssociationRef.getChildRef(), new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentNodeId),true, copyRefs,copyPermissions,copyChildCollections);
         }
         return (parentNodeId == null) ? null : new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentNodeId);
     }
 
-    private boolean allowedToCopy(NodeRef src, boolean copyRefs){
+    private boolean allowedToCopy(NodeRef src, boolean copyRefs, boolean copyChildCollections){
         List<String> aspects = Arrays.asList(eduNodeService.getAspects(src.getStoreRef().getProtocol(),
                 src.getStoreRef().getIdentifier(),src.getId()));
-        List<String> allowedAspects = new ArrayList<>(List.of(CCConstants.CCM_ASPECT_COLLECTION));
+        List<String> allowedAspects = new ArrayList<>(List.of());
+        if(copyChildCollections){
+            allowedAspects.add(CCConstants.CCM_ASPECT_COLLECTION);
+        }
         if(copyRefs){
             allowedAspects.add(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
         }

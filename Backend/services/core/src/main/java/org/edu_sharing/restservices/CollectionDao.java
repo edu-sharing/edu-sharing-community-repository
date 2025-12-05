@@ -373,10 +373,10 @@ public class CollectionDao {
 		}
 	}
 
-	public static CopyResult copyCollection(RepositoryDao repoDao, String srcId, String dstId, boolean copyRoot, boolean copyRefs, boolean copyPermissions) throws DAOException {
+	public static CopyResult copyCollection(RepositoryDao repoDao, String srcId, String dstId, boolean copyRoot, boolean copyRefs, boolean copyPermissions, boolean copyChildCollections) throws DAOException {
 		try {
 			NodeRef dstNodeRef = dstId == null ? null : new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, dstId);
-			return CollectionServiceFactory.getInstance().getLocalService().copy(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, srcId), dstNodeRef, copyRoot, copyRefs, copyPermissions);
+			return CollectionServiceFactory.getInstance().getLocalService().copy(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, srcId), dstNodeRef, copyRoot, copyRefs, copyPermissions,copyChildCollections);
 		} catch (Throwable t) {
 			throw DAOException.mapping(t);
 		}

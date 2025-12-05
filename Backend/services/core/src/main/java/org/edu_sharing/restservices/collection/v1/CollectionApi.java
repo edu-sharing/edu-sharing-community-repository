@@ -499,11 +499,12 @@ public class CollectionApi {
 			@Parameter(description = "if true sourceCollection will be copied, else only the children", required = false, schema = @Schema(defaultValue="true")) @QueryParam("copyRoot") boolean copyRoot,
 			@Parameter(description = "if true reference object will be copied",  schema = @Schema(defaultValue="false")) @QueryParam("copyRefs") boolean copyRefs,
 			@Parameter(description = "if true permissions will be copied", schema = @Schema(defaultValue="false")) @QueryParam("copyPermissions") boolean copyPermissions,
+            @Parameter(description = "if true child collections will be copied", schema = @Schema(defaultValue="true")) @QueryParam("copyChildCollections") boolean copyChildCollections,
 			@Context HttpServletRequest req) {
 		try{
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 
-			CopyResult copyResult = CollectionDao.copyCollection(repoDao, sourceCollection, targetCollection, copyRoot, copyRefs, copyPermissions);
+			CopyResult copyResult = CollectionDao.copyCollection(repoDao, sourceCollection, targetCollection, copyRoot, copyRefs, copyPermissions, copyChildCollections);
 			Copy copy = new Copy();
 			copy.setRoot(NodeDao.getNode(repoDao,copyResult.getRoot().getId()).asNode());
 
