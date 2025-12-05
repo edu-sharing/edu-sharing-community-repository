@@ -4,6 +4,7 @@ package org.edu_sharing.spring.security.google;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.edu_sharing.spring.security.basic.GuestCleanupFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -46,9 +47,10 @@ public class SecurityConfigGoogleOneTap {
     }
 
     @Bean
-    public SecurityFilterChain googleOneTapFilterChain(HttpSecurity http, GoogleOneTapAuthenticationFilter googleFilter, AuthenticationManager authenticationManager) throws Exception {
+    public SecurityFilterChain googleOneTapFilterChain(HttpSecurity http, GuestCleanupFilter guestCleanupFilter, GoogleOneTapAuthenticationFilter googleFilter, AuthenticationManager authenticationManager) throws Exception {
 
         http
+                .addFilterAfter(guestCleanupFilter, org.springframework.security.web.context.SecurityContextHolderFilter.class)
                 .csrf(AbstractHttpConfigurer::disable)
                 .securityMatcher("/login/google/**","/shibboleth")
                 .authorizeHttpRequests((authorize) -> authorize

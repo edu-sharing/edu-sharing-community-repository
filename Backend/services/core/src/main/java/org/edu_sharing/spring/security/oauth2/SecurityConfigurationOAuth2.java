@@ -9,10 +9,7 @@ import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.spring.scope.refresh.annotations.RefreshScope;
-import org.edu_sharing.spring.security.basic.CSRFConfig;
-import org.edu_sharing.spring.security.basic.EduAuthSuccsessHandler;
-import org.edu_sharing.spring.security.basic.EduWebSecurityCustomizer;
-import org.edu_sharing.spring.security.basic.HeadersConfig;
+import org.edu_sharing.spring.security.basic.*;
 import org.edu_sharing.spring.security.oauth2.config.OAuth2ConfigProvider;
 import org.edu_sharing.spring.security.openid.persistence.MyBatisOidcSessionRegistry;
 import org.edu_sharing.spring.security.openid.persistence.OidcUserSessionMapper;
@@ -62,8 +59,9 @@ public class SecurityConfigurationOAuth2 {
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
-    public SecurityFilterChain oAuth2FilterChain(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository, SilentLoginAuthorizationRequestResolver silentLoginAuthorizationRequestResolver, EduAuthSuccsessHandler eduAuthSuccsessHandler, OidcUserSessionMapper mapper, CustomErrorHandler customErrorHandler) throws Exception {
+    public SecurityFilterChain oAuth2FilterChain(HttpSecurity http, GuestCleanupFilter guestCleanupFilter, ClientRegistrationRepository clientRegistrationRepository, SilentLoginAuthorizationRequestResolver silentLoginAuthorizationRequestResolver, EduAuthSuccsessHandler eduAuthSuccsessHandler, OidcUserSessionMapper mapper, CustomErrorHandler customErrorHandler) throws Exception {
         http
+                .addFilterAfter(guestCleanupFilter, org.springframework.security.web.context.SecurityContextHolderFilter.class)
                 .securityMatchers(matchers -> matchers
                         .requestMatchers(new AntPathRequestMatcher("/login/oauth2/**"))
                         .requestMatchers(new AntPathRequestMatcher("/logout/**"))

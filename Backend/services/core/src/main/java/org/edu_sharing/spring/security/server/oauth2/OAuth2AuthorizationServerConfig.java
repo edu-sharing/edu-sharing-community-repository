@@ -5,6 +5,7 @@ import com.nimbusds.jose.proc.SecurityContext;
 import lombok.extern.slf4j.Slf4j;
 import org.edu_sharing.spring.conditions.ConditionalOnProperty;
 import org.edu_sharing.spring.scope.refresh.annotations.RefreshScope;
+import org.edu_sharing.spring.security.basic.GuestCleanupFilter;
 import org.edu_sharing.spring.security.oauth2.SecurityConfigurationOAuth2;
 import org.edu_sharing.spring.security.saml2.SecurityConfigurationSaml;
 import org.edu_sharing.spring.security.server.oauth2.config.OAuth2ConfigService;
@@ -53,7 +54,7 @@ public class OAuth2AuthorizationServerConfig {
 
     @Bean
     //@Order(1)
-    public SecurityFilterChain authServerSecurityFilterChain(HttpSecurity http,LoginUrlAuthenticationEntryPoint loginUrlAuthenticationEntryPoint,GuestBlockingFilter guestBlockingFilter) throws Exception {
+    public SecurityFilterChain authServerSecurityFilterChain(HttpSecurity http, LoginUrlAuthenticationEntryPoint loginUrlAuthenticationEntryPoint, GuestCleanupFilter guestCleanupFilter) throws Exception {
         log.info("SecurityFilterChain server oauth2 config");
 
 
@@ -65,7 +66,7 @@ public class OAuth2AuthorizationServerConfig {
                 .deviceAuthorizationEndpoint(Customizer.withDefaults());*/
 
         http
-                .addFilterAfter(guestBlockingFilter, org.springframework.security.web.context.SecurityContextHolderFilter.class)
+                .addFilterAfter(guestCleanupFilter, org.springframework.security.web.context.SecurityContextHolderFilter.class)
                 .securityMatcher(new OrRequestMatcher(authorizationServerConfigurer.getEndpointsMatcher(),
                         new AntPathRequestMatcher("/rest/authentication/v1/oauth2consent"),
                         new AntPathRequestMatcher("/components/oauth2consent")))

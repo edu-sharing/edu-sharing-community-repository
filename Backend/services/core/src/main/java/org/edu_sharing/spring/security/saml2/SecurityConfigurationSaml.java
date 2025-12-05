@@ -5,10 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.edu_sharing.service.config.ConfigServiceFactory;
-import org.edu_sharing.spring.security.basic.CSRFConfig;
-import org.edu_sharing.spring.security.basic.EduAuthSuccsessHandler;
-import org.edu_sharing.spring.security.basic.EduWebSecurityCustomizer;
-import org.edu_sharing.spring.security.basic.HeadersConfig;
+import org.edu_sharing.spring.security.basic.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -57,9 +54,10 @@ public class SecurityConfigurationSaml {
     EduAuthSuccsessHandler eduAuthSuccsessHandler;
 
     @Bean
-    SecurityFilterChain samlFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain samlFilterChain(HttpSecurity http, GuestCleanupFilter guestCleanupFilter) throws Exception {
 
         http
+                .addFilterAfter(guestCleanupFilter, org.springframework.security.web.context.SecurityContextHolderFilter.class)
                 .securityMatcher("/login/**","/logout/**","/saml2","/saml2/**","/shibboleth")
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(new AntPathRequestMatcher("/shibboleth")).authenticated()
