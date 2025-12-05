@@ -45,6 +45,7 @@ import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 import org.springframework.context.ApplicationContext;
 import org.apache.logging.log4j.ThreadContext;
 import org.edu_sharing.service.version.VersionService;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 
 public class ContextManagementFilter implements jakarta.servlet.Filter {
@@ -183,6 +184,8 @@ public class ContextManagementFilter implements jakarta.servlet.Filter {
 
 			//for soap api
 			AuthenticationUtils.setAuthenticationDetails(null);
+
+            SecurityContextHolder.clearContext();
 
 			ThreadContext.clearAll();
 		}
