@@ -76,13 +76,9 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
             if (
                 this.treeNodeService.emptyFolders.includes(node.item.ref.id) &&
                 element &&
-                element.style.display !== 'none'
+                !element.classList.contains('hidden')
             ) {
                 element.classList.add('hidden');
-                element.addEventListener('transitionend', function handleTransition() {
-                    element.style.display = 'none';
-                    element.removeEventListener('transitionend', handleTransition);
-                });
             }
             // non-working approach:
             // if (this.treeNodeService.emptyFolders.includes(node.item.ref.id)) {
@@ -95,16 +91,15 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
             node.isLoading.set(false);
             return;
         }
-        // remove potentially existing display: none, when dragging into an empty collection
+        // remove potentially existing class "hidden", when dragging into an empty collection
         else if (children.length) {
             const element = document.getElementById('toggle-' + node.item.ref.id);
             if (
                 !this.treeNodeService.emptyFolders.includes(node.item.ref.id) &&
                 element &&
-                element.style.display === 'none'
+                element.classList.contains('hidden')
             ) {
                 element.classList.remove('hidden');
-                element.style.display = 'block';
             }
         }
 
