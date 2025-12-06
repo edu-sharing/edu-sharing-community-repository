@@ -4,6 +4,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { TranslateService } from '@ngx-translate/core';
 import {
+    About,
     AboutService,
     AuthenticationService,
     ConfigService,
@@ -12,12 +13,15 @@ import {
     MdsDefinition,
     MdsIdentifier,
     MdsService,
-    About,
     MdsWidget,
     Node,
     NodeService,
+    NodeSuggestionResponseDto,
     RestConstants,
     SuggestionResponseDto,
+    SuggestionsByNodeIdParams,
+    SuggestionsV1Service,
+    UserSimple,
     Variables,
 } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
@@ -33,6 +37,12 @@ import {
     VCard,
     ViewInstanceService,
 } from 'ngx-edu-sharing-ui';
+import {
+    EduSharingLlmService,
+    SuggestionResponseDto as SuggestionLlm,
+    Suggestions$Params,
+} from 'ngx-edu-sharing-b-api';
+import { HttpContext } from '@angular/common/http';
 
 export const translateProvider = {
     instant: (v: string) => v,
@@ -66,7 +76,10 @@ export class AuthenticationServiceMock extends AuthenticationService {
         return of({
             isValidLogin: true,
             authorityName: 'sample-authority',
-            toolPermissions: [RestConstants.TOOLPERMISSION_LICENSE],
+            toolPermissions: [
+                RestConstants.TOOLPERMISSION_LICENSE,
+                RestConstants.TOOLPERMISSION_BAPI,
+            ],
             statusCode: RestConstants.STATUS_CODE_OK,
             isAdmin: false,
             isGuest: false,
@@ -102,6 +115,14 @@ export class AboutServiceMock extends AboutService {
     getAbout(): Observable<About> {
         return of({
             services: [],
+            plugins: [
+                {
+                    id: 'b-api',
+                },
+                {
+                    id: 'mongo-plugin',
+                },
+            ],
             version: {
                 repository: '10.0.0',
                 major: 1,
@@ -110,11 +131,59 @@ export class AboutServiceMock extends AboutService {
         });
     }
 }
-
+@Injectable()
 export class ToastMock extends Toast {
     error(errorObject: any, message?: string): void {}
-
     toast(message: string, translationParameters?: any): void {}
+}
+@Injectable()
+export class EduSharingLlmServiceMock extends EduSharingLlmService {
+    suggestions(
+        params: Suggestions$Params,
+        context?: HttpContext,
+    ): Observable<Array<SuggestionLlm>> {
+        console.log('test');
+        return of([]);
+    }
+}
+@Injectable()
+export class SuggestionsV1ServiceMock extends SuggestionsV1Service {
+    readonly BaseSuggestion = (nodeId: string, values: string[]) =>
+        values.map((value) => {
+            return {
+                created: new Date().toISOString(),
+                createdBy: {
+                    authorityName: 'Sample Api',
+                } as UserSimple,
+                propertyId: 'cclom:title',
+                status: 'PENDING',
+                version: '1.0',
+                id: '' + Math.random(),
+                type: 'AI',
+                confidence: 1,
+                nodeId,
+                value: [value],
+            } as SuggestionResponseDto;
+        });
+    getSuggestionsByNodeId(
+        params: SuggestionsByNodeIdParams,
+        context?: HttpContext,
+    ): Observable<NodeSuggestionResponseDto> {
+        return of({
+            nodeId: params.node,
+            suggestions: {
+                'cclom:title': this.BaseSuggestion(params.node, ['KI Vorschlag Titel']),
+                'ccm:educationallearningresourcetype': this.BaseSuggestion(params.node, [
+                    'other',
+                    'table',
+                ]),
+                'cclom:general_keyword': this.BaseSuggestion(params.node, [
+                    'AI Keyword 1',
+                    'AI Keyword 2',
+                ]),
+            },
+        });
+    }
 }
 
 export const mdsStorybookProviders: ApplicationConfig['providers'] = [
@@ -125,6 +194,8 @@ export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     { provide: ConfigService, useClass: ConfigServiceMock },
     { provide: AboutService, useClass: AboutServiceMock },
     { provide: NodeService, useClass: NodeServiceMock },
+    { provide: EduSharingLlmService, useClass: EduSharingLlmServiceMock },
+    { provide: SuggestionsV1Service, useClass: SuggestionsV1ServiceMock },
     { provide: MdsService, useFactory: () => new MdsServiceMock(null) },
     ViewInstanceService,
     CordovaService,

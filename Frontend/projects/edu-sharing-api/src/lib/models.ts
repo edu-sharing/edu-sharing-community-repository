@@ -13,6 +13,7 @@ import {
 } from './api/models';
 import { HttpErrorResponse } from '@angular/common/http';
 import { SuggestionsV1Service } from './api/services/suggestions-v-1.service';
+import { GetSuggestionsByNodeId$Params } from './api/fn/suggestions-v-1/get-suggestions-by-node-id';
 
 export {
     About,
@@ -86,6 +87,7 @@ export {
     UpdateQaEntryDto,
     QaEntry,
     User,
+    UserSimple,
     UserProfile,
     UserQuota,
     UserStatus,
@@ -97,7 +99,11 @@ export type Mediacenter = MediacenterApi & {
         mediacenter: MediacenterProfileExtension;
     };
 };
+
 export type SuggestionStatus = Parameters<SuggestionsV1Service['updateStatus']>[0]['status'];
+export type SuggestionsByNodeIdParams = Parameters<
+    SuggestionsV1Service['getSuggestionsByNodeId']
+>[0];
 export type MdsViewRelation = MdsView['rel'];
 export type GenericAuthority = Organization | Group | User;
 export type ApiErrorResponse = HttpErrorResponse & {
