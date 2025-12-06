@@ -29,7 +29,7 @@ const meta: Meta<MdsEditorWrapperComponent> = {
 
 export default meta;
 type Story = StoryObj<MdsEditorWrapperComponent>;
-export const MdsIo: Story = {
+export const MdsIOTemplate: Story = {
     args: {
         groupId: 'io',
     },
