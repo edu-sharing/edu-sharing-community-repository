@@ -50,8 +50,12 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent {
             .subscribe(([nodes]) => {
                 if (nodes?.length === 1) {
                     this.node = nodes[0];
-                    this.nodeSrc =
-                        this.node.preview.url + '&crop=true&width=400&height=300&dontcache=:cache';
+                    this.nodeSrc = this.node.preview.url
+                        ? this.node.preview.url + '&crop=true&width=400&height=300&dontcache=:cache'
+                        : 'data:' +
+                          this.node.preview.mimetype +
+                          ';base64,' +
+                          this.node.preview.data;
                     void this.updateSrc();
                     // we need to reload the image since we don't know if the image (e.g. video file) is still being processed
                     interval(5000)
