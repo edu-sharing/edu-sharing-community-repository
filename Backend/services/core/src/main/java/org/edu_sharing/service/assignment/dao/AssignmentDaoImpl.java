@@ -348,11 +348,11 @@ final class AssignmentDaoImpl extends BasicNodeDaoImpl implements AssignmentDao 
     }
 
     private Optional<SubmissionDao> getSubmissionByCreator(String creator) {
-        return submissions.get()
+        return AuthenticationUtil.runAsSystem(() -> submissions.get()
                 .values()
                 .stream()
                 .filter(x -> x.getCreator().equals(creator))
-                .findFirst();
+                .findFirst());
     }
 
     @Override
