@@ -15,6 +15,7 @@
     "build:edu-sharing-api:dev": "(cd projects/edu-sharing-api && npm run update-if-needed) && node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build edu-sharing-api --configuration development",
     "publish:edu-sharing-api": "npm run build:edu-sharing-api && cd dist/edu-sharing-api && npm publish",
     "prebuild": "(npm run build:edu-sharing-api & npm run build:b-api & wait) && npm run build:edu-sharing-ui",
+    "analyze-build-bundle-size": "npm run prebuild && ng build --configuration production --stats-json && jq -r '.inputs | to_entries[] | \"\\(.value.bytes/1024 | floor) KB \\(.key)\"' dist/stats.json | sort -nr\n",
     "build": "(npm run build:app-as-component & npm run build:components & wait) && node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build --configuration production --delete-output-path false --base-href /edu-sharing/",
     "build:app-as-component": "node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build --configuration web-component --delete-output-path false --base-href /edu-sharing/web-components/app/",
     "build:components": "npm run build:components:default & npm run build:components:amd & wait",
