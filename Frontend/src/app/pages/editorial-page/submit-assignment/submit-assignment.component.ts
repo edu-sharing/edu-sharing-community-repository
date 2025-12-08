@@ -333,14 +333,13 @@ export class SubmitAssignmentComponent {
         this.loading.set(true);
         for (let file of newFiles) {
             await firstValueFrom(
-                this.assignmentService.createOrUpdateSubmissionFile({
+                this.assignmentService.createSubmissionFile({
                     assignmentId: this.assignment().ref.id,
                     submissionId: this.submission()?.ref.id || ME,
-                    submissionFileId: file.assignmentFile?.ref.id,
                     body: {
                         metadata: {
                             originalFile: file.ref.id,
-                            validationStatus: 'NOT_STARTET',
+                            assignmentFile: file.assignmentFile?.ref.id,
                             properties: {},
                         },
                     },
