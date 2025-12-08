@@ -24,30 +24,27 @@ public class AuthorityServiceHelper {
      * when username is null serviceRegistry.getAuthorityService().getAuthorities() is used.
      * This can be called by NON admin user while calling serviceRegistry.getAuthorityService().getAuthoritiesForUser(username)
      * you need to be an admin.
-     * @see public-services-security-context.xml:
-     * getAuthorities=ACL_ALLOW
-     * getAuthoritiesForUser=ACL_METHOD.ROLE_ADMINISTRATOR
      *
      * @param username
      * @return
+     * @see public-services-security-context.xml:
+     * getAuthorities=ACL_ALLOW
+     * getAuthoritiesForUser=ACL_METHOD.ROLE_ADMINISTRATOR
      */
     public static boolean isAdmin(String username) {
-        try {
+        return AuthenticationUtil.runAsSystem(() -> {
             ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
             ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
             Set<String> testUsetAuthorities = (username == null)
-                    ? serviceRegistry.getAuthorityService().getAuthorities()
+                    ? serviceRegistry.getAuthorityService().getAuthoritiesForUser(AuthenticationUtil.getFullyAuthenticatedUser())
                     : serviceRegistry.getAuthorityService().getAuthoritiesForUser(username);
             return testUsetAuthorities.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS);
-        } catch (org.alfresco.repo.security.permissions.AccessDeniedException e) {
-
-        }
-        return false;
+        });
     }
 
     public static Map<String, Double> getDefaultAuthoritySearchFields() {
         Map<String, Double> fields = new HashMap<>();
-        if(isAdmin()) {
+        if (isAdmin()) {
             fields.put("userName", 1.);
         }
         fields.put("email", 2.);
