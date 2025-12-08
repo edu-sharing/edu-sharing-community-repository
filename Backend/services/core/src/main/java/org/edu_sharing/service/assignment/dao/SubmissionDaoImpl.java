@@ -8,6 +8,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
 import org.edu_sharing.restservices.assignment.v1.model.SubmissionValidationRequest;
 import org.edu_sharing.restservices.assignment.v1.model.Submission;
 import org.edu_sharing.restservices.assignment.v1.model.SubmissionFileRequest;
@@ -93,7 +94,7 @@ final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao 
     }
 
     @Override
-//        @RetryingTransaction // node does not exists after return, because rollback is performed for no reason
+    @RetryingTransaction // node does not exists after return, because rollback is performed for no reason
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
     public void updateValidationInfo(SubmissionValidationRequest request) {
         validateExists();
@@ -176,7 +177,7 @@ final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao 
     }
 
     @Override
-//        @RetryingTransaction // node does not exists after return, because rollback is performed for no reason
+    @RetryingTransaction // node does not exists after return, because rollback is performed for no reason
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
     public SubmissionFileDao createSubmissionFile(SubmissionFileRequest submissionFileRequest, InputStream fileInputStream, FormDataContentDisposition fileMetaData) {
         submissionFileRefs.invalidate();
@@ -190,7 +191,7 @@ final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao 
     }
 
     @Override
-//        @RetryingTransaction // node does not exists after return, because rollback is performed for no reason
+    @RetryingTransaction // node does not exists after return, because rollback is performed for no reason
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
     public void create() {
         if (StringUtils.isNotBlank(nodeId)) {
@@ -214,8 +215,8 @@ final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao 
             log.debug("Created new submission for {}({}) to {}", fullyAuthenticatedUser, nodeId, assignmentDao.getSubmissionRefId());
 
             permissionService.setPermission(nodeId, fullyAuthenticatedUser, CCConstants.PERMISSION_ASSIGNEE);
-            // TODO do we need to set the permission inherit to true?
-            permissionService.setPermissionInherit(nodeId, true);
+            permissionService.setPermission(nodeId, fullyAuthenticatedUser, CCConstants.PERMISSION_COMMENT);
+
             log.debug("Added permission {} for {} to submission {}", CCConstants.PERMISSION_ASSIGNEE, fullyAuthenticatedUser, nodeId);
             return null;
         });

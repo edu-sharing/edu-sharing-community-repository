@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.assignment.v1.model.Submission;
 import org.edu_sharing.restservices.assignment.v1.model.SubmissionFile;
@@ -99,7 +100,7 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
 
 
     @Override
-//        @RetryingTransaction
+    @RetryingTransaction
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
     public void create(SubmissionFileRequest request, InputStream fileInputStream) {
         submissionDao.validateAssigneeCanChangeSubmission();
@@ -147,7 +148,7 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
     }
 
     @Override
-//        @RetryingTransaction // node does not exists after return, because rollback is performed for no reason
+    @RetryingTransaction
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
     public void updateCorrectionFile(InputStream fileInputStream) {
         refresh();
