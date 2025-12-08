@@ -7,6 +7,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang.StringUtils;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -48,7 +49,12 @@ public class CommentServiceImpl implements CommentService{
 		}
 
 		String nodeId = AuthenticationUtil.runAsSystem(() -> {
-			String nodeId1 = nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node, CCConstants.CCM_TYPE_COMMENT, CCConstants.CCM_ASSOC_COMMENT, props);
+            String type = nodeService.getType(node);
+            String childAssoc = CCConstants.CCM_ASSOC_COMMENT;
+            if(!Objects.equals(type, CCConstants.CCM_TYPE_IO)){
+                childAssoc = CCConstants.getValidLocalName(type) + "_comment";
+            }
+            String nodeId1 = nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node, CCConstants.CCM_TYPE_COMMENT, childAssoc, props);
 			permissionService.setPermissions(nodeId1, null, true);
 			repositoryCache.remove(node);
 			return nodeId1;
