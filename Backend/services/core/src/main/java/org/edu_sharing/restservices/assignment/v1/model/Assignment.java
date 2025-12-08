@@ -1,6 +1,7 @@
 package org.edu_sharing.restservices.assignment.v1.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.UserSimple;
@@ -8,29 +9,31 @@ import org.edu_sharing.restservices.shared.UserSimple;
 import java.util.Date;
 import java.util.List;
 
+
 /**
  * Represents an assignment with associated metadata, statuses, and permissions.
  * This record serves as the primary structure for handling assignments.
  *
- * @param ref                          The unique identifier of the assignment represented by a NodeRef.
- *                                     This field is mandatory.
- * @param title                        The title of the assignment. This field is mandatory.
- * @param summary                      The optional summary or description of the assignment.
- * @param creator                      The creator of the assignment, represented by a UserSimple object.
- *                                     This field is mandatory.
- * @param created                      The mandatory date of creation for the assignment.
- * @param endTime                      The optional end time of the assignment.
- * @param status                       The current status of the assignment. This field is mandatory
- *                                     and based on predefined statuses in the Status enum.
- * @param type                         The type of the assignment (e.g., DEFAULT, SUBMISSION).
- *                                     This is mandatory and defined in the Type enum.
- * @param allowAdditionalDocumentSubmissions
- *                                     A flag indicating whether additional document submissions are allowed
- *                                     for the assignment. This field is mandatory.
- * @param modified                     The optional last modified timestamp of the assignment.
- * @param permissions                  A list of permissions associated with the assignment.
- *                                     Each permission maps a specific Authority to a Role.
- *                                     This field is mandatory.
+ * @param ref                                The unique identifier of the assignment represented by a NodeRef.
+ *                                           This field is mandatory.
+ * @param title                              The title of the assignment. This field is mandatory.
+ * @param summary                            The optional summary or description of the assignment.
+ * @param creator                            The creator of the assignment, represented by a UserSimple object.
+ *                                           This field is mandatory.
+ * @param created                            The mandatory date of creation for the assignment.
+ * @param endTime                            The optional end time of the assignment.
+ * @param status                             The current status of the assignment. This field is mandatory
+ *                                           and based on predefined statuses in the Status enum.
+ * @param type                               The type of the assignment (e.g., DEFAULT, SUBMISSION).
+ *                                           This is mandatory and defined in the Type enum.
+ * @param allowAdditionalDocumentSubmissions A flag indicating whether additional document submissions are allowed
+ *                                           for the assignment. This field is mandatory.
+ * @param modified                           The optional last modified timestamp of the assignment.
+ * @param permissions                        A list of permissions associated with the assignment.
+ *                                           Each permission maps a specific Authority to a Role.
+ *                                           This field is mandatory.
+ * @param submissions                        A list of submissions associated with this assignment.
+ *                                           This field is mandatory.
  */
 public record Assignment(
         @JsonProperty(required = true)
@@ -57,21 +60,44 @@ public record Assignment(
         boolean allowAdditionalDocumentSubmissions,
         Date modified,
         @JsonProperty(required = true)
-        List<Permission> permissions
+        List<Permission> permissions,
+        @JsonProperty(required = true)
+        List<Submission> submissions
 ) {
 
+    @Schema(description = """
+            Status of the assignment
+            * DRAFT: Assignment is in draft state, only visible to creator
+            * ASSIGNED: Assignment is assigned and visible to all users with assignee permission
+            * FINISHED: Assignment has been completed
+            * CANCELED: Assignment has been canceled
+            """
+    )
     public enum Status {
-        OPEN,
-        PROGRESS,
+        DRAFT,
+        ASSIGNED,
         FINISHED,
         CANCELED
     }
 
+    @Schema(description = """
+            Type of the assignment
+            * DEFAULT: Standard assignment type without specific submission requirements
+            * SUBMISSION: Assignment that requires participants to submit documents or materials
+            """
+    )
     public enum Type {
         DEFAULT,
         SUBMISSION,
     }
 
+
+    @Schema(description = """
+            Role within an assignment context
+            * ASSIGNEE: User who is assigned to complete or participate in the assignment (only valid for assignments of type SUBMISSION)
+            * COORDINATOR: User who can manage and oversee the assignment, including monitoring progress and managing participants
+            """
+    )
     public enum Role {
         ASSIGNEE,
         COORDINATOR
@@ -95,6 +121,6 @@ public record Assignment(
             Authority authority,
             @JsonProperty(required = true)
             Role role
-    ){
+    ) {
     }
 }

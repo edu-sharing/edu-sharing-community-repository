@@ -54,6 +54,7 @@ final class AssignmentFileDaoImpl extends BasicNodeDaoImpl implements Assignment
             throw new IllegalStateException("AssignmentFile with id " + nodeId + " already exists.");
         }
 
+
         validateCanChangeAssignment();
 
         log.debug("Creating new assignment file");
@@ -162,8 +163,12 @@ final class AssignmentFileDaoImpl extends BasicNodeDaoImpl implements Assignment
 
     private void validateCanChangeAssignment() {
         // TODO who can change this and under which conditions?
-        if (assignmentDao.getStatus() != Assignment.Status.OPEN) {
+        if (assignmentDao.getStatus() != Assignment.Status.DRAFT) {
             throw new IllegalStateException("Cannot create assignment file for assignment in status " + assignmentDao.getStatus());
+        }
+
+        if (!assignmentDao.getSubmissions().isEmpty()) {
+            throw new IllegalStateException("Cannot create assignment file for assignment with submissions.");
         }
 
         if (exists() && isDone()) {

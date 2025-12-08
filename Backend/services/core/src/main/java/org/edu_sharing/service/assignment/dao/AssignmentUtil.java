@@ -15,4 +15,16 @@ public final class AssignmentUtil {
 
         return permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR);
     }
+
+    static boolean isAssignee(PermissionService permissionService, String nodeId) {
+        if (AuthorityServiceHelper.isAdmin(AuthenticationUtil.getFullyAuthenticatedUser())) {
+            return true;
+        }
+
+        return permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.PERMISSION_ASSIGNEE);
+    }
+
+    static boolean hasAccessTo(PermissionService permissionService, String nodeId) {
+      return isAssignmentCoordinator(permissionService, nodeId) || isAssignee(permissionService, nodeId);
+    }
 }

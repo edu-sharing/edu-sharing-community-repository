@@ -18,6 +18,7 @@ import org.edu_sharing.restservices.MissingResourceException;
 import org.edu_sharing.restservices.assignment.v1.model.Assignment;
 import org.edu_sharing.restservices.assignment.v1.model.AssignmentFileRequest;
 import org.edu_sharing.restservices.assignment.v1.model.CreateAssignmentRequest;
+import org.edu_sharing.restservices.assignment.v1.model.Submission;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.restservices.shared.UserSimple;
 import org.edu_sharing.service.assignment.AssignmentConfig;
@@ -68,6 +69,8 @@ final class AssignmentDaoImpl extends BasicNodeDaoImpl implements AssignmentDao 
     private AssignmentDaoImpl(String nodeId, Optional<NodeRef> nodeRef) {
         super(nodeId, nodeRef);
 
+        // TODO tracker submissions as nested
+        // TODO user relations from nodeRef?
         assignmentFileRefs = new LazyProvider<>(() -> {
             validateExists();
             return AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_ASSIGNMENT_FILE)
@@ -112,13 +115,16 @@ final class AssignmentDaoImpl extends BasicNodeDaoImpl implements AssignmentDao 
 
         submissions = new LazyProvider<>(() -> {
             validateExists();
-            return AuthenticationUtil.runAsSystem(() -> submissionFolderRef.get()
-                    .map(subFolderId -> nodeService.getChildrenChildAssociationRefType(subFolderId, CCConstants.CCM_TYPE_SUBMISSION)
-                            .stream()
-                            .map(ChildAssociationRef::getChildRef)
-                            .map(org.alfresco.service.cmr.repository.NodeRef::getId)
-                            .collect(Collectors.toMap(x -> x, x -> assignmentDaoFactory.submissionDao(this, x))))
-                    .orElse(Collections.emptyMap()));
+
+            List<ChildAssociationRef> childAssociationRefs = AuthenticationUtil.runAsSystem(() -> submissionFolderRef.get()
+                    .map(subFolderId -> nodeService.getChildrenChildAssociationRefType(subFolderId, CCConstants.CCM_TYPE_SUBMISSION))
+                    .orElse(Collections.emptyList()));
+
+            return childAssociationRefs.stream()
+                    .map(ChildAssociationRef::getChildRef)
+                    .map(org.alfresco.service.cmr.repository.NodeRef::getId)
+                    .filter(id -> AssignmentUtil.hasAccessTo(permissionService, id))
+                    .collect(Collectors.toMap(x -> x, x -> assignmentDaoFactory.submissionDao(this, x)));
         });
     }
 
@@ -141,9 +147,10 @@ final class AssignmentDaoImpl extends BasicNodeDaoImpl implements AssignmentDao 
         if (StringUtils.isNotBlank(nodeId)) {
             validateExists();
 
-            // TODO who can change this and under which conditions?
-            if (getStatus() != Assignment.Status.OPEN) {
-                throw new IllegalStateException("Assignment with id " + nodeId + " is not in status OPEN, cannot update");
+            switch (getStatus()) {
+                case FINISHED:
+                case CANCELED:
+                    throw new IllegalStateException("Assignment with id " + nodeId + " is not in status OPEN, cannot update");
             }
 
             log.debug("Update assignment node {} with {}", nodeId, properties);
@@ -276,6 +283,7 @@ final class AssignmentDaoImpl extends BasicNodeDaoImpl implements AssignmentDao 
         }
 
         String creator = getCreator();
+        List<Submission> submissions = getSubmissions().stream().map(SubmissionDao::getSubmission).toList();
         return new Assignment(
                 getNodeRef(),
                 getTitle(),
@@ -287,7 +295,9 @@ final class AssignmentDaoImpl extends BasicNodeDaoImpl implements AssignmentDao 
                 getType(),
                 getAllowAdditionalDocumentSubmissions(),
                 getModifiedDate(),
-                getPermissions()
+                getPermissions(),
+                // TODO filter by permission
+                submissions
         );
     }
 
