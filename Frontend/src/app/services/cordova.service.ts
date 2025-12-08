@@ -39,7 +39,7 @@ export type OAuthResult = {
  */
 @Injectable({ providedIn: 'root' })
 // tslint:disable:no-console
-export class CordovaService extends AppServiceAbstract {
+export class CordovaService {
     /**
      * cordova oauth storage
      */
@@ -51,8 +51,10 @@ export class CordovaService extends AppServiceAbstract {
     platform: 'ios' | 'android';
     private lastValidLogin: number;
     private static DEFAULT_CREDENTIALS = 'eduApp:123Test';
+    private authenticationInterval: NodeJS.Timeout;
 
     private async sendToOauthApi(path: string, data: string) {
+        console.log(path, new Date().getTime());
         const url = this.injector.get(RestLocatorService).endpointUrl + '../oauth2server/' + path;
         return await firstValueFrom(
             this.http.post<OAuthResult | OAuthDeviceAuthorizationResult>(url, data, {
@@ -94,7 +96,6 @@ export class CordovaService extends AppServiceAbstract {
         private authenticationService: AuthenticationService,
         private events: FrameEventsService,
     ) {
-        super();
         const userAgent = navigator.userAgent;
         if (userAgent?.includes('ionic / edu-sharing-app')) {
             if (userAgent.includes('ios')) {
@@ -1272,7 +1273,7 @@ export class CordovaService extends AppServiceAbstract {
                     );
                     await this.handleAppReAuthentication();
                 }
-            }, 60000);
+            }, 10000);
         });
     }
     async handleLoginState(login: LoginInfo) {
@@ -1287,7 +1288,7 @@ export class CordovaService extends AppServiceAbstract {
         const cordova = this.injector.get(CordovaService);
         if (cordova.isRunningCordova()) {
             if (await cordova.hasValidConfig()) {
-                console.info('oauth present', reload);
+                console.info('oauth present');
                 // @TODO: Wait for implementation
                 try {
                     await this.startSessionViaOauthRefreshToken();

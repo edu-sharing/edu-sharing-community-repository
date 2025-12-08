@@ -53,6 +53,7 @@ import { WebComponentService } from './main/web-component.service';
 import { PreviewSidebarComponent } from './features/preview-sidebar/preview-sidebar.component';
 import { WebComponentLocationStrategy } from './main/web-component.utils';
 import { GlobalLoginComponent } from './main/global-login-trigger/global-login.component';
+import { AppService } from './services/app.service';
 
 const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     showDelay: 500,
@@ -93,7 +94,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         { provide: ToastAbstract, useClass: Toast },
         { provide: OptionsHelperServiceAbstract, useClass: OptionsHelperService },
         { provide: KeyboardShortcutsServiceAbstract, useClass: KeyboardShortcutsService },
-        { provide: AppServiceAbstract, useClass: CordovaService },
+        { provide: AppServiceAbstract, useClass: AppService },
         {
             provide: EDU_SHARING_API_CONFIG,
             deps: [ErrorHandlerService],
