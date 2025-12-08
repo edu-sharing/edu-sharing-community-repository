@@ -315,13 +315,20 @@
             "$ref": "#/components/schemas/NodeRef"
           },
           "status": {
+            "description": "Status of the assignment\n* DRAFT: Assignment is in draft state, only visible to creator\n* ASSIGNED: Assignment is assigned and visible to all users with assignee permission\n* FINISHED: Assignment has been completed\n* CANCELED: Assignment has been canceled\n",
             "enum": [
-              "OPEN",
-              "PROGRESS",
+              "DRAFT",
+              "ASSIGNED",
               "FINISHED",
               "CANCELED"
             ],
             "type": "string"
+          },
+          "submissions": {
+            "items": {
+              "$ref": "#/components/schemas/Submission"
+            },
+            "type": "array"
           },
           "summary": {
             "type": "string"
@@ -330,6 +337,7 @@
             "type": "string"
           },
           "type": {
+            "description": "Type of the assignment\n* DEFAULT: Standard assignment type without specific submission requirements\n* SUBMISSION: Assignment that requires participants to submit documents or materials\n",
             "enum": [
               "DEFAULT",
               "SUBMISSION"
@@ -344,6 +352,7 @@
           "permissions",
           "ref",
           "status",
+          "submissions",
           "title",
           "type"
         ],
@@ -1671,9 +1680,10 @@
             "type": "array"
           },
           "status": {
+            "description": "Status of the assignment\n* DRAFT: Assignment is in draft state, only visible to creator\n* ASSIGNED: Assignment is assigned and visible to all users with assignee permission\n* FINISHED: Assignment has been completed\n* CANCELED: Assignment has been canceled\n",
             "enum": [
-              "OPEN",
-              "PROGRESS",
+              "DRAFT",
+              "ASSIGNED",
               "FINISHED",
               "CANCELED"
             ],
@@ -1687,6 +1697,7 @@
             "type": "string"
           },
           "type": {
+            "description": "Type of the assignment\n* DEFAULT: Standard assignment type without specific submission requirements\n* SUBMISSION: Assignment that requires participants to submit documents or materials\n",
             "enum": [
               "DEFAULT",
               "SUBMISSION"
@@ -5401,6 +5412,7 @@
             "$ref": "#/components/schemas/Authority"
           },
           "role": {
+            "description": "Role within an assignment context\n* ASSIGNEE: User who is assigned to complete or participate in the assignment (only valid for assignments of type SUBMISSION)\n* COORDINATOR: User who can manage and oversee the assignment, including monitoring progress and managing participants\n",
             "enum": [
               "ASSIGNEE",
               "COORDINATOR"
@@ -5421,6 +5433,7 @@
             "type": "string"
           },
           "role": {
+            "description": "Role within an assignment context\n* ASSIGNEE: User who is assigned to complete or participate in the assignment (only valid for assignments of type SUBMISSION)\n* COORDINATOR: User who can manage and oversee the assignment, including monitoring progress and managing participants\n",
             "enum": [
               "ASSIGNEE",
               "COORDINATOR"
