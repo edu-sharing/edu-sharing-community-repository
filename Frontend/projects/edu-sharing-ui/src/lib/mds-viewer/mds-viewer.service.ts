@@ -38,7 +38,7 @@ export class MdsViewerService {
         return value.map((v) => {
             if (definition.format) {
                 try {
-                    return new DatePipe(this.translate.currentLang).transform(v, definition.format);
+                    return new DatePipe('en-US').transform(v, definition.format);
                 } catch (e) {
                     console.warn('Could not format date', e, definition);
                 }

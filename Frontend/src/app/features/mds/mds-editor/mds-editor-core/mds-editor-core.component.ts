@@ -9,6 +9,7 @@ import { Toast, ToastType } from '../../../../services/toast';
 import { DialogsService } from '../../../dialogs/dialogs.service';
 import { EduSharingLlmService, MdsConfig, WidgetAiConfigInfo } from 'ngx-edu-sharing-b-api';
 import { MdsEditorCommonService } from '../mds-editor-common.service';
+import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 
 @Component({
     selector: 'es-mds-editor-core',
@@ -126,6 +127,13 @@ export class MdsEditorCoreComponent {
             subtype: ToastType.InfoAction,
         });
         this.aiLoading.next(false);
+    }
+
+    setAiSuggestions(change: MatSlideToggleChange) {
+        this.mdsEditorInstance.showAiSuggestions.next(change.checked);
+        if (change.checked) {
+            void this.generateSuggestions();
+        }
     }
 }
 

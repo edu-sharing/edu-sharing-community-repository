@@ -8,6 +8,7 @@ import { filter } from 'rxjs/operators';
 import { Toast } from '../../../../../services/toast';
 import { Widget } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
     selector: 'es-mds-editor-widget-text',
@@ -27,6 +28,7 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
     formControl: UntypedFormControl;
     fileNameChecker: FileNameChecker;
     suggestions: SuggestionResponseDto[];
+    aiSuggestion$ = new BehaviorSubject<SuggestionResponseDto>(null);
 
     async ngOnInit() {
         this.formControl = new UntypedFormControl(null, this.getValidators());
@@ -40,6 +42,10 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
                 filter((value) => value !== null && this.mdsEditorInstance.editorMode !== 'search'),
             )
             .subscribe((value) => {
+                if (this.aiSuggestion$.value) {
+                    this.setSuggestionState(this.aiSuggestion$.value, 'DECLINED');
+                    this.aiSuggestion$.next(this.aiSuggestion$.value);
+                }
                 this.setValue([value]);
             });
         this.widget.observeBulkMode().subscribe(() => {
@@ -63,6 +69,17 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
                 this.translate,
             );
         }
+        this.widget.getShowAiSuggestions().subscribe(([show, suggestions]) => {
+            const suggestion = suggestions?.find((s) => s.type === 'AI' && s.status === 'PENDING');
+            if (suggestion && this.aiSuggestion$.value?.status !== 'DECLINED') {
+                if (show) {
+                    this.applySuggestion(suggestion);
+                    this.aiSuggestion$.next(suggestion);
+                } else if (!initialValue[0] && !show) {
+                    this.clearSuggestion(suggestion);
+                }
+            }
+        });
         this.registerValueChanges(this.formControl);
     }
 
@@ -115,7 +132,11 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
         this.mdsEditorInstance.updateSuggestionState(this.widget.definition.id, suggestion);
         this.widget.markSuggestionChanged();
     }
-
+    clearSuggestion(suggestion: SuggestionResponseDto) {
+        this.formControl.setValue('');
+        this.setValue(['']);
+        this.setSuggestionState(suggestion, 'PENDING');
+    }
     applySuggestion(suggestion: SuggestionResponseDto) {
         this.formControl.setValue(suggestion.value as string);
         this.setValue([suggestion.value as string]);

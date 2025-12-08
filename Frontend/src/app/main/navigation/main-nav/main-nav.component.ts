@@ -462,7 +462,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             !this.connector.getCurrentLogin()?.isGuest &&
             !this.connector.getCurrentLogin()?.currentScope
         ) {
-            const manageProfile = new OptionItem('EDIT_ACCOUNT', 'assignment_ind', () =>
+            const manageProfile = new OptionItem('EDIT_ACCOUNT', 'manage_accounts', () =>
                 this.openProfile(),
             );
             manageProfile.group = mainGroup;
@@ -487,6 +487,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                         '',
                         () => (window.location.href = login.url),
                     );
+                    loginOption.priority = 10;
                     loginOption.group = mainGroup;
                     this.userMenuOptions.push(loginOption);
                 }
@@ -494,6 +495,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                 const loginOption = new OptionItem('SIDEBAR.LOGIN', 'person', () =>
                     this.login(true),
                 );
+                loginOption.priority = 10;
                 loginOption.group = mainGroup;
                 this.userMenuOptions.push(loginOption);
             }
@@ -555,7 +557,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
 
         if (!this.connector.getCurrentLogin()?.isGuest) {
             const logoutGroup = new OptionGroup('logout', 40);
-            const logout = new OptionItem('LOGOUT', 'undo', () => this.logout());
+            const logout = new OptionItem('LOGOUT', 'logout', () => this.logout());
             logout.group = logoutGroup;
             this.userMenuOptions.push(logout);
         }

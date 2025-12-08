@@ -252,11 +252,11 @@ public class NodeDao {
                     newName
             )
             ) {
-                if(nodeService.findNodeByName(getParentId(), newName) != null) {
+                if (nodeService.findNodeByName(getParentId(), newName) != null) {
                     props.remove(CCConstants.getValidLocalName(CCConstants.CM_NAME));
-                    for(int i = 1; i < 50; i++) {
+                    for (int i = 1; i < 50; i++) {
                         String testName = NodeServiceHelper.renameNode(newName, i);
-                        if(nodeService.findNodeByName(getParentId(), testName) == null) {
+                        if (nodeService.findNodeByName(getParentId(), testName) == null) {
                             props.put(CCConstants.getValidLocalName(CCConstants.CM_NAME), new String[]{testName});
                             break;
                         }
@@ -1536,7 +1536,7 @@ public class NodeDao {
 
 
     private List<Contributor> getFilteredContributors() {
-        if(canAccessVcardEmail())
+        if (canAccessVcardEmail())
             return contributors;
         return contributors.stream().peek(c -> {
             c.setEmail(null);
@@ -1587,7 +1587,7 @@ public class NodeDao {
     private Content getContent(Node data) throws DAOException {
         Content content = new Content();
         content.setUrl(getContentUrl());
-        if(isCollectionReference()) {
+        if (isCollectionReference()) {
             content.setOriginalUrl(URLHelper.getNgRenderNodeUrl(getReferenceOriginalId(), null));
         }
         // skip hash + version for search cause of performance penalties
@@ -1944,7 +1944,7 @@ public class NodeDao {
      * Check if normal USER has permision to see email
      * ADMIN can see the email even if the email is private for specific USER
      *
-     * @param userName  of Person,
+     * @param userName of Person,
      * @return true || false
      */
     public boolean checkUserHasPermissionToSeeMail(String userName) {
@@ -2348,20 +2348,38 @@ public class NodeDao {
     }
 
     public String getJWT() throws GeneralSecurityException {
-        org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getLocalService();
-
-//        ToolPermissionService toolPermissionService = ToolPermissionServiceFactory.getInstance();
         String user = AuthenticationUtil.getFullyAuthenticatedUser();
-        List<String> nodePermissions = null;
-        try {
-            nodePermissions = permissionService.getPermissionsForAuthority(nodeId, user);
-        } catch (InsufficientPermissionException e) {
-            throw new RuntimeException(e);
+
+        Node node = asNode();
+
+        java.util.Collection<String> permissions;
+        if (node instanceof CollectionReference) {
+            CollectionReference collectionReference = (CollectionReference) node;
+            // is it a licensed node? check the original for access (new since 5.1)
+            if (collectionReference.isOriginalRestrictedAccess()) {
+                permissions = collectionReference.getAccessOriginal();
+            }
+            //Has the user alf permissions on the node? -> check if he also has read_all permissions
+            // LEGACY! Remove this Behaviour in future releases, only included for back compat
+            else if (node.getAccessEffective() != null && !node.getAccessEffective().isEmpty()) {
+                permissions = node.getAccessEffective();
+            } else {
+                permissions = node.getAccess();
+            }
+        } else {
+            // access effective might also provided for regular nodes since they have enhanced access via collection shares
+            if (node.getAccessEffective() != null && !node.getAccessEffective().isEmpty()) {
+                permissions = node.getAccessEffective();
+            } else {
+                permissions = node.getAccess();
+            }
         }
-//        java.util.Collection<String> toolPermissions = toolPermissionService.getAllToolPermissions(false);
+
+        node.getAccessEffective();
+
 
         String replicationSource = Arrays.stream(getProperties()
-                .getOrDefault(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE), new String[0]))
+                        .getOrDefault(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE), new String[0]))
                 .findFirst()
                 .orElse(null);
 
@@ -2369,7 +2387,7 @@ public class NodeDao {
                 .findFirst()
                 .orElse(null);
 
-        return JwtTokenUtil.generateToken(user, nodeId, nodePermissions, getMimetype(), getMediatype(), replicationSource, resourceType);
+        return JwtTokenUtil.generateToken(user, nodeId, permissions, getMimetype(), getMediatype(), replicationSource, resourceType);
     }
 
     private String getMimetype() {
@@ -2867,10 +2885,10 @@ public class NodeDao {
         ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
         return serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
             org.alfresco.service.cmr.repository.NodeRef publishedCopy = nodeService.getPublishedCopy(this.nodeId);
-            if(publishedCopy == null){
+            if (publishedCopy == null) {
                 throw new RuntimeException("Could not find published copy");
             }
-            NodeDao publishedNodeDao = NodeDao.getNode(this.repoDao,publishedCopy.getId());
+            NodeDao publishedNodeDao = NodeDao.getNode(this.repoDao, publishedCopy.getId());
             publishedNodeDao.copyProperties(this);
             nodeService.syncPublished(publishedCopy.getId(), handleParam);
             return publishedNodeDao;

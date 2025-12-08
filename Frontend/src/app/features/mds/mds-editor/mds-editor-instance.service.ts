@@ -339,8 +339,22 @@ export class MdsEditorInstanceService
         getInitialValues(): InitialValues {
             return this.initialValues;
         }
+        getShowAiSuggestions() {
+            return combineLatest([
+                this.mdsEditorInstanceService.showAiSuggestions,
+                this.suggestionValuesSubject,
+            ]);
+        }
+
+        /**
+         * @Deprecated
+         * Use getShowAiSuggestions
+         */
         getSuggestions() {
             return this.suggestionValuesSubject;
+        }
+        setSuggestions(value: SuggestionResponseDto[]) {
+            return this.suggestionValuesSubject.next(value);
         }
 
         getBasicType(flat: boolean = true): string {
@@ -682,6 +696,10 @@ export class MdsEditorInstanceService
      */
     suggestionMetadata$ = new BehaviorSubject<NodeSuggestionResponseDto[]>(null);
     hasAi = new BehaviorSubject<boolean>(false);
+    /**
+     * is the ai suggestion toggle set to true?
+     */
+    showAiSuggestions = new BehaviorSubject<boolean>(false);
 
     /** MDS Views of the relevant group (in order). */
     views: MdsView[];

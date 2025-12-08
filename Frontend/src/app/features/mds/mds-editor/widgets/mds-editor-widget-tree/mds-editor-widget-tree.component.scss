@@ -26,10 +26,10 @@ mat-form-field {
 }
 .chip-is-suggestion {
     &.chip-is-suggestion-ai {
-        --mdc-chip-label-text-color: var(--aiColorText);
-        --mdc-chip-with-icon-icon-color: var(--aiColorText);
-        --primary: var(--aiColorText);
-        --palette-primary-100: var(--aiColor);
+        --mdc-chip-label-text-color: var(--aiColor);
+        --mdc-chip-with-icon-icon-color: var(aiColor);
+        --primary: var(--aiColor);
+        --palette-primary-100: var(--aiColorChipBg);
     }
 }
 .input-wrapper {
