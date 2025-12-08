@@ -148,7 +148,7 @@ public class StatisticApi {
                                 @Parameter(description = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom
     ) {
         if (!AuthorityServiceHelper.isAdmin()) {
-            throw DAOException.mapping(new NotAnAdminException(), id);
+            throw new NotAnAdminException();
         }
         List<NodeData> tracks = trackingDAO.getNodeData(id, new Date(dateFrom));
         return Response.ok().entity(tracks).build();
