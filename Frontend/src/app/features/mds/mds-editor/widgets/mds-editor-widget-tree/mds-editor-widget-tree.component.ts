@@ -197,6 +197,15 @@ export class MdsEditorWidgetTreeComponent
         this.indeterminateValues$.subscribe((indeterminateValues) =>
             this.widget.setIndeterminateValues(indeterminateValues),
         );
+
+        this.widget.getShowAiSuggestions().subscribe(([show, suggestions]) => {
+            if (show) {
+                suggestions
+                    ?.filter((s) => s.type === 'AI' && s.status === 'PENDING')
+                    .map((s) => this.addSuggestion(s));
+            }
+        });
+
         this.registerValueChanges(this.chipsControl);
     }
 

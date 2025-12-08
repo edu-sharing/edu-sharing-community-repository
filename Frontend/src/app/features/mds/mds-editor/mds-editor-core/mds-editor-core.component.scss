@@ -32,14 +32,18 @@
             font-weight: bold;
         }
     }
-    button {
-        background-color: #fff;
-        color: var(--aiColor);
-        &:focus {
-            background-color: #fff;
-        }
-        &:disabled {
-            background-color: rgba(255, 255, 255, 0.9);
-        }
+    mat-slide-toggle {
+        display: flex;
+        --textLight: var(--aiColorText);
+        --mdc-switch-unselected-handle-color: var(--aiColorText);
+        --mdc-switch-unselected-focus-handle-color: var(--aiColorText);
+        --mdc-switch-unselected-hover-handle-color: var(--aiColorText);
+        --mdc-switch-unselected-pressed-handle-color: var(--aiColorText);
+        --mdc-switch-unselected-icon-color: var(--aiColorChipBg);
+        --mdc-switch-selected-handle-color: var(--aiColorText);
+        --mdc-switch-selected-focus-handle-color: var(--aiColorText);
+        --mdc-switch-selected-hover-handle-color: var(--aiColorText);
+        --mdc-switch-selected-pressed-handle-color: var(--aiColorText);
+        --mdc-switch-selected-icon-color: var(--aiColorChipBg);
     }
 }

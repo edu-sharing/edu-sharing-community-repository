@@ -5,7 +5,7 @@ import { MdsEditorWidgetCore } from '../mds-editor-widget-core.directive';
 import { SuggestionResponseDto, SuggestionStatus } from 'ngx-edu-sharing-api';
 import { DisplayValue } from './DisplayValues';
 import { AuthorityNamePipe } from '../../../../shared/pipes/authority-name.pipe';
-import { map, Observable } from 'rxjs';
+import { firstValueFrom, map, Observable } from 'rxjs';
 import { Toast, ToastType } from '../../../../services/toast';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 import { TranslateService } from '@ngx-translate/core';
@@ -106,11 +106,11 @@ export abstract class MdsEditorWidgetChipsSuggestionBase extends MdsEditorWidget
             .pipe(map((suggestions) => suggestions?.filter((s) => s.status === 'PENDING')));
     }
     removeSuggestion(toBeRemoved: SuggestionResponseDto): void {
-        this.updateSuggestionState(toBeRemoved, 'DECLINED');
+        void this.updateSuggestionState(toBeRemoved, 'DECLINED');
     }
     addSuggestion(suggestion: SuggestionResponseDto) {
         this.add(this.toDisplayValue(suggestion.value as string));
-        this.updateSuggestionState(suggestion, 'ACCEPTED');
+        void this.updateSuggestionState(suggestion, 'ACCEPTED');
     }
     getSuggestionTooltip(suggestion: SuggestionResponseDto): string | null {
         return `${this.translate.instant('MDS.SUGGESTION_TOOLTIP', {
@@ -119,21 +119,25 @@ export abstract class MdsEditorWidgetChipsSuggestionBase extends MdsEditorWidget
             creator: new AuthorityNamePipe(this.translate).transform(suggestion.createdBy),
         })}`;
     }
-    updateSuggestionState(modified: SuggestionResponseDto, status: SuggestionStatus) {
+
+    async updateSuggestionState(modified: SuggestionResponseDto, status: SuggestionStatus) {
         modified.status = status;
         this.mdsEditorInstance.updateSuggestionState(this.widget.definition.id, modified);
         //this.chipsSuggestions.splice(this.chipsSuggestions.indexOf(suggestion), 1);
         this.widget.getSuggestions();
         this.widget.markSuggestionChanged();
         this.mdsEditorInstance.updateHasChanges();
-        const suggestion = this.widget.getSuggestions().value.find((s) => s.id === modified.id);
+        const suggestions = await firstValueFrom(this.widget.getSuggestions());
+        const suggestion = suggestions?.find((s) => s.id === modified.id);
         suggestion.status = status;
-        this.widget.getSuggestions().next(this.widget.getSuggestions().value);
+        this.widget.setSuggestions(suggestions);
+        /*
         this.toast.show({
             type: 'info',
             subtype: ToastType.InfoSimple,
             message: 'AI.TOAST.' + status,
         });
+         */
     }
 
     getSuggestions(): Observable<SuggestionResponseDto[]> {

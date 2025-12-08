@@ -142,7 +142,6 @@ export class EduSharingLlmServiceMock extends EduSharingLlmService {
         params: Suggestions$Params,
         context?: HttpContext,
     ): Observable<Array<SuggestionLlm>> {
-        console.log('test');
         return of([]);
     }
 }
@@ -162,7 +161,7 @@ export class SuggestionsV1ServiceMock extends SuggestionsV1Service {
                 type: 'AI',
                 confidence: 1,
                 nodeId,
-                value: [value],
+                value,
             } as SuggestionResponseDto;
         });
     getSuggestionsByNodeId(

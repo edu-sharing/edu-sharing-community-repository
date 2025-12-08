@@ -22,7 +22,10 @@ const meta: Meta<MdsEditorWrapperComponent> = {
         embedded: true,
         setId: DEFAULT,
         editorMode: 'nodes',
-        nodes: [DummyNode as Node],
+        nodes: [DummyNode as Node].map((n) => {
+            delete n.properties['cclom:title'];
+            return n;
+        }),
     },
     tags: ['autodocs'],
 };
