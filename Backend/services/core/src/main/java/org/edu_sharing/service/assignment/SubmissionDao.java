@@ -1,6 +1,6 @@
 package org.edu_sharing.service.assignment;
 
-import org.edu_sharing.restservices.assignment.v1.model.EditSubmissionRequest;
+import org.edu_sharing.restservices.assignment.v1.model.SubmissionValidationRequest;
 import org.edu_sharing.restservices.assignment.v1.model.Submission;
 import org.edu_sharing.restservices.assignment.v1.model.SubmissionFileRequest;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -15,7 +15,7 @@ public interface SubmissionDao extends BasicNodeDao {
 
     boolean isReturned();
 
-    void updateValidationInfo(EditSubmissionRequest request);
+    void updateValidationInfo(SubmissionValidationRequest request);
 
     void setStatus(Submission.Status status);
 
@@ -25,7 +25,7 @@ public interface SubmissionDao extends BasicNodeDao {
 
     SubmissionFileDao getSubmissionFile(String submissionFileId);
 
-    SubmissionFileDao createOrUpdateSubmissionFile(String submissionFileId, SubmissionFileRequest submissionFileRequest, InputStream fileInputStream, FormDataContentDisposition fileMetaData);
+    SubmissionFileDao createSubmissionFile(SubmissionFileRequest submissionFileRequest, InputStream fileInputStream, FormDataContentDisposition fileMetaData);
 
     void create();
 

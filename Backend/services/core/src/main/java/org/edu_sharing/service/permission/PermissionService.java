@@ -95,7 +95,8 @@ public interface PermissionService {
 	}
 
 
-	void setPermission(String nodeId, String authority, String permission);
+    void setPermission(String nodeId, String authority, String permission);
+    void removePermission(String nodeId, String authority, String permission);
 
 
 	List<String> getExplicitPermissionsForAuthority(String nodeId, String authorityId) throws InsufficientPermissionException;

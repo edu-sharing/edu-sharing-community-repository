@@ -1911,25 +1911,6 @@
         },
         "type": "object"
       },
-      "EditSubmissionRequest": {
-        "properties": {
-          "feedback": {
-            "type": "string"
-          },
-          "validationNotes": {
-            "type": "string"
-          },
-          "validationStatus": {
-            "enum": [
-              "NOT_STARTET",
-              "PENDING",
-              "FINISHED"
-            ],
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
       "Element": {
         "properties": {
           "id": {
@@ -7435,6 +7416,9 @@
           "content": {
             "$ref": "#/components/schemas/Node"
           },
+          "correction": {
+            "$ref": "#/components/schemas/Node"
+          },
           "ref": {
             "$ref": "#/components/schemas/NodeRef"
           },
@@ -7453,6 +7437,20 @@
           "ref",
           "validationStatus"
         ],
+        "type": "object"
+      },
+      "SubmissionFileContentUpload": {
+        "description": "Multipart upload for submission files",
+        "properties": {
+          "binary": {
+            "description": "File content",
+            "format": "binary",
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/SubmissionFileRequest"
+          }
+        },
         "type": "object"
       },
       "SubmissionFileRequest": {
@@ -7477,9 +7475,17 @@
             },
             "description": "properties applied to the submitted file",
             "type": "object"
-          },
+          }
+        },
+        "required": [
+          "properties"
+        ],
+        "type": "object"
+      },
+      "SubmissionFileValidationRequest": {
+        "description": "JSON-Metadaten",
+        "properties": {
           "validationStatus": {
-            "description": "only editable by the coordinator of the task",
             "enum": [
               "NOT_STARTET",
               "PENDING",
@@ -7488,13 +7494,10 @@
             "type": "string"
           }
         },
-        "required": [
-          "properties"
-        ],
         "type": "object"
       },
-      "SubmissionFileUpload": {
-        "description": "Multipart upload for submission files",
+      "SubmissionFileValidationUpload": {
+        "description": "Multipart upload for submission file corrections and validation",
         "properties": {
           "binary": {
             "description": "File content",
@@ -7502,7 +7505,26 @@
             "type": "string"
           },
           "metadata": {
-            "$ref": "#/components/schemas/SubmissionFileRequest"
+            "$ref": "#/components/schemas/SubmissionFileValidationRequest"
+          }
+        },
+        "type": "object"
+      },
+      "SubmissionValidationRequest": {
+        "properties": {
+          "feedback": {
+            "type": "string"
+          },
+          "validationNotes": {
+            "type": "string"
+          },
+          "validationStatus": {
+            "enum": [
+              "NOT_STARTET",
+              "PENDING",
+              "FINISHED"
+            ],
+            "type": "string"
           }
         },
         "type": "object"
@@ -15578,114 +15600,6 @@
         "tags": [
           "Assignment v1"
         ]
-      },
-      "put": {
-        "description": "edit submission (only as coordinator of the task)",
-        "operationId": "editSubmission",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "assignmentId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "id or -me- to get submission from current assignee",
-            "in": "path",
-            "name": "submissionId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/EditSubmissionRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Submission"
-                }
-              }
-            },
-            "description": "OK."
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Preconditions are not present."
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Authorization failed."
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Session user has insufficient rights to perform this operation."
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Ressources are not found."
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Fatal error occured."
-          }
-        },
-        "summary": "edut submission",
-        "tags": [
-          "Assignment v1"
-        ]
       }
     },
     "/assignment/v1/{assignmentId}/submissions/{submissionId}/files": {
@@ -15791,9 +15705,9 @@
           "Assignment v1"
         ]
       },
-      "put": {
-        "description": "Create or edit submission file",
-        "operationId": "createOrUpdateSubmissionFile",
+      "post": {
+        "description": "Create a submission file",
+        "operationId": "createSubmissionFile",
         "parameters": [
           {
             "in": "path",
@@ -15811,14 +15725,6 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "description": "id or null if a new submission file shall be created",
-            "in": "query",
-            "name": "submissionFileId",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "requestBody": {
@@ -15833,7 +15739,7 @@
                 }
               },
               "schema": {
-                "$ref": "#/components/schemas/SubmissionFileUpload"
+                "$ref": "#/components/schemas/SubmissionFileContentUpload"
               }
             }
           },
@@ -15911,7 +15817,7 @@
             "description": "Fatal error occured."
           }
         },
-        "summary": "Create or edit submission file",
+        "summary": "Create a submission file",
         "tags": [
           "Assignment v1"
         ]
@@ -16020,10 +15926,138 @@
         ]
       }
     },
+    "/assignment/v1/{assignmentId}/submissions/{submissionId}/files/{submissionFileId}/validation": {
+      "put": {
+        "description": "Update correction file for submission file",
+        "operationId": "updateSubmissionFileValidation",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignmentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "id or -me- to get submission from current assignee",
+            "in": "path",
+            "name": "submissionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "id of the submission file",
+            "in": "path",
+            "name": "submissionFileId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "encoding": {
+                "binary": {
+                  "contentType": "application/octet-stream"
+                },
+                "metadata": {
+                  "contentType": "application/json"
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/SubmissionFileValidationUpload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionFile"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Update correction file for submission file",
+        "tags": [
+          "Assignment v1"
+        ]
+      }
+    },
     "/assignment/v1/{assignmentId}/submissions/{submissionId}/submissionStatus": {
       "put": {
         "description": "edut submission status",
-        "operationId": "editSubmission_1",
+        "operationId": "editSubmission",
         "parameters": [
           {
             "in": "path",
@@ -16128,6 +16162,116 @@
           }
         },
         "summary": "edut submission status",
+        "tags": [
+          "Assignment v1"
+        ]
+      }
+    },
+    "/assignment/v1/{assignmentId}/submissions/{submissionId}/validation": {
+      "put": {
+        "description": "edit submission (only as coordinator of the task)",
+        "operationId": "editSubmission_1",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignmentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "id or -me- to get submission from current assignee",
+            "in": "path",
+            "name": "submissionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmissionValidationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Submission"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "edit submission",
         "tags": [
           "Assignment v1"
         ]

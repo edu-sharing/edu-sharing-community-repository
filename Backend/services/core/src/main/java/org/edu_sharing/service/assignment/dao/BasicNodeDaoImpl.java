@@ -88,4 +88,9 @@ abstract class BasicNodeDaoImpl implements BasicNodeDao {
     public NodeRef getNodeRef() {
         return new NodeRef(repositoryDao.get(), nodeId);
     }
+
+    @Override
+    public org.alfresco.service.cmr.repository.NodeRef getAlfrescoNodeRef() {
+        return new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+    }
 }

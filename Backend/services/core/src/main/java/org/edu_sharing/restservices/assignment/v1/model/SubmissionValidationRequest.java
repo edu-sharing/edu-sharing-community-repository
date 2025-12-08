@@ -1,6 +1,6 @@
 package org.edu_sharing.restservices.assignment.v1.model;
 
-public record EditSubmissionRequest(
+public record SubmissionValidationRequest(
         String validationNotes,
         String feedback,
         Submission.Status validationStatus

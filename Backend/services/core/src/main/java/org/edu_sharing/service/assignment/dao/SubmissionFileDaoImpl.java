@@ -2,11 +2,11 @@ package org.edu_sharing.service.assignment.dao;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.*;
 import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.assignment.v1.model.Submission;
@@ -18,6 +18,7 @@ import org.edu_sharing.service.assignment.AssignmentFileDao;
 import org.edu_sharing.service.assignment.BasicNodeDao;
 import org.edu_sharing.service.assignment.SubmissionFileDao;
 import org.edu_sharing.service.permission.PermissionService;
+import org.edu_sharing.service.transform.RepresentationService;
 import org.edu_sharing.util.CheckedSupplier;
 import org.edu_sharing.util.LazyProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 @Slf4j
 final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements SubmissionFileDao {
@@ -35,14 +35,19 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
     private final AssignmentDaoImpl assignmentDao;
     private final SubmissionDaoImpl submissionDao;
 
-    private final LazyProvider<Optional<NodeRef>> contentNodeId;
+    private final LazyProvider<Optional<NodeRef>> contentNodeRef;
+    private final LazyProvider<Optional<NodeRef>> correctionNodeRef;
+
     private final LazyProvider<Node> contentNode;
+    private final LazyProvider<Node> correctionNode;
 
     @Setter(onMethod_ = @Autowired)
     private PermissionService permissionService;
 
     @Setter(onMethod_ = @Autowired)
-    private ContentService contentService;
+    private RepresentationService representationService;
+
+    private final MCAlfrescoAPIClient apiClient = new MCAlfrescoAPIClient();
 
 
     public SubmissionFileDaoImpl(AssignmentDaoImpl assignmentDao, SubmissionDaoImpl submissionDao, String nodeId) {
@@ -50,17 +55,34 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
         this.assignmentDao = assignmentDao;
         this.submissionDao = submissionDao;
 
-        contentNodeId = new LazyProvider<>(() -> {
+        contentNodeRef = new LazyProvider<>(() -> {
             validateExists();
-            return AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_ASSOC_SUBMISSION_FILE_DATA)
+            return AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_IO)
                     .stream()
+                    .filter(x -> x.getTypeQName().toString().equals(CCConstants.CCM_ASSOC_SUBMISSION_FILE_CONTENT))
+                    .map(ChildAssociationRef::getChildRef)
+                    .findFirst());
+        });
+
+        correctionNodeRef = new LazyProvider<>(() -> {
+            validateExists();
+            return AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_IO)
+                    .stream()
+                    .filter(x -> x.getTypeQName().toString().equals(CCConstants.CCM_ASSOC_SUBMISSION_FILE_CORRECTION))
                     .map(ChildAssociationRef::getChildRef)
                     .findFirst());
         });
 
         contentNode = new LazyProvider<>(CheckedSupplier.wrap(() -> {
             validateExists();
-            return contentNodeId.get()
+            return contentNodeRef.get()
+                    .map(NodeDao::getAsNodeSimple)
+                    .orElse(null);
+        }));
+
+        correctionNode = new LazyProvider<>(CheckedSupplier.wrap(() -> {
+            validateExists();
+            return correctionNodeRef.get()
                     .map(NodeDao::getAsNodeSimple)
                     .orElse(null);
         }));
@@ -69,8 +91,10 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
     @Override
     public void refresh() {
         propertyMapper.invalidate();
-        contentNodeId.invalidate();
+        contentNodeRef.invalidate();
+        correctionNodeRef.invalidate();
         contentNode.invalidate();
+        correctionNode.invalidate();
     }
 
 
@@ -78,7 +102,6 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
 //        @RetryingTransaction
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
     public void create(SubmissionFileRequest request, InputStream fileInputStream) {
-        // TODO Check if a submission file to the same submission file already exists
         submissionDao.validateAssigneeCanChangeSubmission();
 
         if (submissionDao.getSubmissionFiles()
@@ -87,11 +110,11 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
                         .map(BasicNodeDao::getNodeId)
                         .map(y -> y.equals(request.assignmentFile()))
                         .orElse(false))) {
-            throw new IllegalStateException("A submission file to the same assignment file already exists.");
+            throw new IllegalArgumentException("A submission file to the same assignment file already exists.");
         }
 
         if (StringUtils.isNotBlank(nodeId)) {
-            throw new IllegalStateException("Submission file with id " + nodeId + " already exists.");
+            throw new IllegalStateException("Submission file id must be empty, but is: " + nodeId);
         }
 
         // validates if assignment file exists otherwise throws exception
@@ -99,7 +122,7 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
 
         log.debug("Creating new submission file");
         Map<String, Object> properties = new HashMap<>() {{
-            put(CCConstants.CM_NAME, UUID.randomUUID().toString());
+            put(CCConstants.CM_NAME, "content");
             put(CCConstants.CCM_PROP_SUBMISSION_FILE_REFER_TO_ASSIGNMENT_FIlE, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, request.assignmentFile()));
         }};
 
@@ -111,38 +134,36 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
 
         log.debug("Created new submission file for {} to {}", nodeId, submissionDao.getNodeId());
         handleSubmissionFile(request, fileInputStream);
+        refresh();
+        AuthenticationUtil.runAsSystem(() -> {
+            NodeRef nodeRef = representationService.updateChildPdf(getAlfrescoContentNodeRef(), getAlfrescoNodeRef(), getAlfrescoCorrectionNodeRef(), "correction", CCConstants.CCM_TYPE_IO, CCConstants.CCM_ASSOC_SUBMISSION_FILE_CORRECTION);
+            if (nodeRef != null) {
+                nodeService.setOwner(nodeRef.getId(), ApplicationInfoList.getHomeRepository().getUsername());
+            }
+            return null;
+        });
+
+        refresh();
     }
 
     @Override
 //        @RetryingTransaction // node does not exists after return, because rollback is performed for no reason
-    @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
-    public void update(SubmissionFileRequest request, InputStream fileInputStream) {
+    @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
+    public void updateCorrectionFile(InputStream fileInputStream) {
         refresh();
         validateExists();
 
-        submissionDao.validateAssigneeCanChangeSubmission();
-
-        if (submissionDao.getSubmissionFiles()
-                .stream()
-                .anyMatch(x -> !x.getNodeId().equals(getNodeId()) && x.getReferToAssigmentFile()
-                        .map(BasicNodeDao::getNodeId)
-                        .map(y -> y.equals(request.assignmentFile()))
-                        .orElse(false))) {
-            throw new IllegalStateException("A submission file to the same assignment file already exists.");
-        }
-
-        // validates if assignment file exists otherwise throws exception
-        assignmentDao.getAssignmentFile(request.assignmentFile());
+        submissionDao.validateCanCoordinatorChangeSubmission();
 
         AuthenticationUtil.runAsSystem(() -> {
-
-            Map<String, Object> properties = new HashMap<>() {{
-                put(CCConstants.CM_NAME, UUID.randomUUID().toString());
-                put(CCConstants.CCM_PROP_SUBMISSION_FILE_REFER_TO_ASSIGNMENT_FIlE, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, request.assignmentFile()));
-            }};
-
-            nodeService.updateNodeNative(nodeId, properties);
-            handleSubmissionFile(request, fileInputStream);
+            NodeRef alfrescoCorrectionNodeRef = getAlfrescoCorrectionNodeRef();
+            if (alfrescoCorrectionNodeRef == null) {
+                log.debug("Creating new correction node for {}", nodeId);
+                nodeId = nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, submissionDao.getNodeId(), CCConstants.CCM_TYPE_IO, CCConstants.CCM_ASSOC_SUBMISSION_FILE_CORRECTION, Map.of(CCConstants.CM_NAME, "correction"));
+                nodeService.setOwner(nodeId, ApplicationInfoList.getHomeRepository().getUsername());
+                alfrescoCorrectionNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+            }
+            apiClient.writeContent(alfrescoCorrectionNodeRef.getStoreRef(), alfrescoCorrectionNodeRef.getId(), fileInputStream, null, null, CCConstants.CM_PROP_CONTENT);
             return null;
         });
     }
@@ -179,7 +200,7 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
 
         AuthenticationUtil.runAsSystem(() -> {
             log.debug("Copying reference node {}", request.originalFile());
-            NodeRef contentNodeRef = nodeService.copyNode(request.originalFile(), nodeId, CCConstants.CCM_ASSOC_SUBMISSION_FILE_DATA, true);
+            NodeRef contentNodeRef = nodeService.copyNode(request.originalFile(), nodeId, CCConstants.CCM_ASSOC_SUBMISSION_FILE_CONTENT, true);
             nodeService.setOwner(contentNodeRef.getId(), ApplicationInfoList.getHomeRepository().getUsername());
             log.debug("Copied reference node {}", contentNodeRef.getId());
 
@@ -213,11 +234,10 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
                 Map<String, String[]> contentProperties = new HashMap<>(request.properties()) {{
                     put(CCConstants.CCM_PROP_SUBMISSION_FILE_REFER_TO_ASSIGNMENT_FIlE, new String[]{request.assignmentFile()});
                 }};
-                contentNodeId = nodeService.createNode(nodeId, CCConstants.CCM_TYPE_SUBMISSION_FILE, contentProperties, CCConstants.CCM_ASSOC_SUBMISSION_FILES, true);
+                contentNodeId = nodeService.createNode(nodeId, CCConstants.CCM_TYPE_IO, contentProperties, CCConstants.CCM_ASPECT_SUBMISSION_FILE_CONTENT, true);
                 log.debug("Created new submission file content node {} for {}", contentNodeId, nodeId);
 
-                ContentWriter writer = contentService.getWriter(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), ContentModel.PROP_CONTENT, true);
-                writer.putContent(fileInputStream);
+                apiClient.writeContent(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, contentNodeId, fileInputStream, null, null, CCConstants.CM_PROP_CONTENT);
                 log.debug("Uploaded submission file content for {} to {}", nodeId, contentNodeId);
             } catch (RuntimeException e) {
                 throw e;
@@ -252,6 +272,8 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
     public void delete() {
         validateExists();
         submissionDao.validateAssigneeCanChangeSubmission();
+        nodeService.removeNode(getNodeId(), null, false);
+        refresh();
     }
 
     @Override
@@ -260,9 +282,17 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
             return null;
         }
 
+
+        Node contentNode = null;
+        if (AssignmentUtil.isAssignmentCoordinator(permissionService, getCorrectionNodeId()) || submissionDao.isReturned()) {
+            contentNode = this.contentNode.get();
+        }
+
+
         return new SubmissionFile(
                 getNodeRef(),
-                contentNode.get(),
+                this.contentNode.get(),
+                contentNode,
                 getReferToAssigmentFile().map(AssignmentFileDao::getAssignmentFile).orElse(null),
                 getValidationStatus());
     }
@@ -283,11 +313,30 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
 
     @Override
     public String getContentNodeId() {
-        return contentNodeId.get().map(NodeRef::getId)
+        return contentNodeRef.get().map(NodeRef::getId)
                 .orElseThrow(() -> new IllegalStateException("No content node found for submission file " + nodeId));
     }
 
+    @Override
+    public String getCorrectionNodeId() {
+        return correctionNodeRef.get().map(NodeRef::getId)
+                .orElse(null);
+    }
+
+
+    @Override
+    public NodeRef getAlfrescoContentNodeRef() {
+        return contentNodeRef.get()
+                .orElseThrow(() -> new IllegalStateException("No content node found for submission file " + nodeId));
+    }
+
+    @Override
+    public NodeRef getAlfrescoCorrectionNodeRef() {
+        return correctionNodeRef.get()
+                .orElse(null);
+    }
+
     private String getContentNodeId_Internal() {
-        return contentNodeId.get().map(NodeRef::getId).orElse(null);
+        return contentNodeRef.get().map(NodeRef::getId).orElse(null);
     }
 }

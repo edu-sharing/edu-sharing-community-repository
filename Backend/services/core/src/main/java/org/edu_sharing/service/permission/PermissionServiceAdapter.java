@@ -4,7 +4,6 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.repository.client.rpc.*;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -113,7 +112,12 @@ public class PermissionServiceAdapter implements PermissionService {
 		
 	}
 
-	@Override
+    @Override
+    public void removePermission(String nodeId, String authority, String permission) {
+
+    }
+
+    @Override
 	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String authority, String permission) {
 		return false;
 	}

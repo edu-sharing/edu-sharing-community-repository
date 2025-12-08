@@ -1138,4 +1138,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
     public void setPermission(String nodeId, String authority, String permission) {
         permissionService.setPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), authority, permission, true);
     }
+
+    @Override
+    public void removePermission(String nodeId, String authority, String permission) {
+        permissionService.deletePermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), authority, permission);
+    }
 }

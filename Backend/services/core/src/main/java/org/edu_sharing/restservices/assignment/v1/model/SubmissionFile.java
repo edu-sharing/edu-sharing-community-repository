@@ -2,7 +2,6 @@ package org.edu_sharing.restservices.assignment.v1.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.apache.el.parser.SimpleNode;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.NodeRef;
 
@@ -13,6 +12,8 @@ public record SubmissionFile(
         NodeRef ref,
         @JsonProperty(required = true)
         Node content,
+        @Schema(description ="A pdf overlay document for a corrected content representation")
+        Node correction,
         @Schema(description ="object of the original assignment file (if applicable)")
         AssignmentFile assignmentFile,
         @JsonProperty(required = true)

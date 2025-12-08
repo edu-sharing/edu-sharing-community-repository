@@ -59,4 +59,6 @@ public interface BasicNodeDao {
     Date getCreateDate();
 
     @NotNull NodeRef getNodeRef();
+
+    org.alfresco.service.cmr.repository.NodeRef getAlfrescoNodeRef();
 }

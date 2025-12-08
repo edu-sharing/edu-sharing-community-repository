@@ -238,8 +238,8 @@ public class AssignmentApi {
     }
 
     @PUT
-    @Path("/{assignmentId}/submissions/{submissionId}")
-    @Operation(summary = "edut submission", description = "edit submission (only as coordinator of the task)")
+    @Path("/{assignmentId}/submissions/{submissionId}/validation")
+    @Operation(summary = "edit submission", description = "edit submission (only as coordinator of the task)")
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Submission.class))),
@@ -254,7 +254,7 @@ public class AssignmentApi {
     public Response editSubmission(@PathParam("assignmentId") String assignmentId,
                                    @Parameter(description = "id or -me- to get submission from current assignee")
                                    @PathParam("submissionId") String submissionId,
-                                   EditSubmissionRequest request) {
+                                   SubmissionValidationRequest request) {
         AssignmentDao assignment = assignmentDaoFactory.assignmentDaoByNodeId(assignmentId);
         SubmissionDao submission = assignment.getSubmission(submissionId);
         submission.updateValidationInfo(request);
@@ -340,8 +340,8 @@ public class AssignmentApi {
      * Only used for Swagger UI / OpenApi Specification.
      * To use this as a parameter, we need to register a MessageBodyReader for multipart/form-data.
      */
-    @Schema(name = "SubmissionFileUpload", description = "Multipart upload for submission files")
-    public static class SubmissionFileUpload {
+    @Schema(name = "SubmissionFileContentUpload", description = "Multipart upload for submission files")
+    public static class SubmissionFileContentUpload {
         @Schema(description = "JSON-Metadaten")
         public SubmissionFileRequest metadata;
 
@@ -350,17 +350,17 @@ public class AssignmentApi {
     }
 
 
-    @PUT
+    @POST
     @Path("/{assignmentId}/submissions/{submissionId}/files")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Operation(
-            summary = "Create or edit submission file",
-            description = "Create or edit submission file",
+            summary = "Create a submission file",
+            description = "Create a submission file",
             requestBody = @RequestBody(
                     required = true,
                     content = @Content(
                             mediaType = MediaType.MULTIPART_FORM_DATA,
-                            schema = @Schema(implementation = SubmissionFileUpload.class),
+                            schema = @Schema(implementation = SubmissionFileContentUpload.class),
                             encoding = {
                                     @Encoding(
                                             name = "metadata",
@@ -385,15 +385,13 @@ public class AssignmentApi {
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
     )
-    public Response createOrUpdateSubmissionFile(@PathParam("assignmentId") String assignmentId,
-                                                 @Parameter(description = "id or -me- to get submission from current assignee")
-                                                 @PathParam("submissionId") String submissionId,
-                                                 @Parameter(description = "id or null if a new submission file shall be created")
-                                                 @QueryParam("submissionFileId") String submissionFileId,
-                                                 @Schema(implementation = SubmissionFileRequest.class)
-                                                 @FormDataParam("metadata") FormDataBodyPart metadataPart,
-                                                 @FormDataParam("binary") InputStream fileInputStream,
-                                                 @FormDataParam("binary") FormDataContentDisposition fileMetaData) {
+    public Response createSubmissionFile(@PathParam("assignmentId") String assignmentId,
+                                         @Parameter(description = "id or -me- to get submission from current assignee")
+                                         @PathParam("submissionId") String submissionId,
+                                         @Schema(implementation = SubmissionFileRequest.class)
+                                         @FormDataParam("metadata") FormDataBodyPart metadataPart,
+                                         @FormDataParam("binary") InputStream fileInputStream,
+                                         @FormDataParam("binary") FormDataContentDisposition fileMetaData) {
 
         metadataPart.setMediaType(MediaType.APPLICATION_JSON_TYPE);
         SubmissionFileRequest submissionFileRequest = metadataPart.getValueAs(SubmissionFileRequest.class);
@@ -411,10 +409,95 @@ public class AssignmentApi {
 
         AssignmentDao assignment = assignmentDaoFactory.assignmentDaoByNodeId(assignmentId);
         SubmissionDao submission = assignment.getOrCreateSubmission(submissionId);
-        SubmissionFileDao submissionFile = submission.createOrUpdateSubmissionFile(submissionFileId, submissionFileRequest, fileInputStream, fileMetaData);
+        SubmissionFileDao submissionFile = submission.createSubmissionFile(submissionFileRequest, fileInputStream, fileMetaData);
         return Response.ok().entity(submissionFile.getSubmissionFile()).build();
     }
 
+    /**
+     * Only used for Swagger UI / OpenApi Specification.
+     * To use this as a parameter, we need to register a MessageBodyReader for multipart/form-data.
+     */
+    @Schema(name = "SubmissionFileValidationUpload", description = "Multipart upload for submission file corrections and validation")
+    public static class SubmissionFileValidationUpload {
+        @Schema(description = "JSON-Metadaten")
+        public SubmissionFileValidationRequest metadata;
+
+        @Schema(type = "string", format = "binary", description = "File content")
+        public InputStream binary;
+    }
+
+    @PUT
+    @Path("/{assignmentId}/submissions/{submissionId}/files/{submissionFileId}/validation")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Operation(
+            summary = "Update correction file for submission file",
+            description = "Update correction file for submission file",
+            requestBody = @RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.MULTIPART_FORM_DATA,
+                            schema = @Schema(implementation = SubmissionFileValidationUpload.class),
+                            encoding = {
+                                    @Encoding(
+                                            name = "metadata",
+                                            contentType = "application/json"
+                                    ),
+                                    @Encoding(
+                                            name = "binary",
+                                            contentType = "application/octet-stream"
+                                    )
+                            }
+                    )
+            )
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SubmissionFile.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            }
+    )
+    public Response updateSubmissionFileValidation(@PathParam("assignmentId") String assignmentId,
+                                                   @Parameter(description = "id or -me- to get submission from current assignee")
+                                                   @PathParam("submissionId") String submissionId,
+                                                   @Parameter(description = "id of the submission file")
+                                                   @PathParam("submissionFileId") String submissionFileId,
+                                                   @Schema(implementation = SubmissionFileRequest.class)
+                                                   @FormDataParam("metadata") FormDataBodyPart metadataPart,
+                                                   @FormDataParam("binary") InputStream fileInputStream,
+                                                   @FormDataParam("binary") FormDataContentDisposition fileMetaData) {
+
+        metadataPart.setMediaType(MediaType.APPLICATION_JSON_TYPE);
+        SubmissionFileValidationRequest submissionFileValidationRequest = metadataPart.getValueAs(SubmissionFileValidationRequest.class);
+
+        try (ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory()) {
+            Validator validator = validatorFactory.getValidator();
+            Set<ConstraintViolation<SubmissionFileValidationRequest>> violations = validator.validate(submissionFileValidationRequest);
+            if (!violations.isEmpty()) {
+                throw new ConstraintViolationException(violations);
+            }
+        }
+
+        log.debug("Received metadata: {}", submissionFileValidationRequest);
+        log.debug("Received file: {}", fileMetaData != null ? fileMetaData.getFileName() : null);
+
+        AssignmentDao assignment = assignmentDaoFactory.assignmentDaoByNodeId(assignmentId);
+        SubmissionDao submission = assignment.getSubmission(submissionId);
+        SubmissionFileDao submissionFile = submission.getSubmissionFile(submissionFileId);
+        if(fileInputStream != null) {
+            submissionFile.updateCorrectionFile(fileInputStream);
+        }
+
+        if(submissionFileValidationRequest.validationStatus() != null) {
+            submissionFile.setValidationStatus(submissionFileValidationRequest.validationStatus());
+        }
+
+        return Response.ok().entity(submissionFile.getSubmissionFile()).build();
+    }
 
     @DELETE
     @Path("/{assignmentId}/submissions/{submissionId}/files/{submissionFileId}")

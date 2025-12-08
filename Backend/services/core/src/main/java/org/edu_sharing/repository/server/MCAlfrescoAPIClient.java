@@ -1537,7 +1537,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
     }
 
 
-    public void writeContent(String nodeID, byte[] content, String mimetype, String encoding, String property) throws Exception {
+    public void writeContent(String nodeID, byte[] content, String mimetype, String encoding, String property) {
         this.writeContent(storeRef, nodeID, content, mimetype, encoding, property);
     }
 
@@ -1546,14 +1546,13 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
      * large files
      * so its better to use the method with InputStream or file as content
      */
-    public void writeContent(final StoreRef store, final String nodeID, final byte[] content, final String mimetype, String _encoding, final String property)
-            throws Exception {
+    public void writeContent(final StoreRef store, final String nodeID, final byte[] content, final String mimetype, String _encoding, final String property) {
         ByteArrayInputStream is = new ByteArrayInputStream(content);
         this.writeContent(store, nodeID, is, mimetype, _encoding, property);
     }
 
     public void writeContent(final StoreRef store, final String nodeID, final File content, final String mimetype, String _encoding, final String property)
-            throws Exception {
+            throws FileNotFoundException {
         FileInputStream fis = new FileInputStream(content);
         this.writeContent(store, nodeID, fis, mimetype, _encoding, property);
     }
@@ -1570,11 +1569,11 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 
     public void writeContent(final StoreRef store, final String nodeID, final InputStream content, final String mimetype, String _encoding,
-                             final String property) throws Exception {
+                             final String property) {
         writeContent(store,nodeID, content,mimetype, _encoding,property, null);
     }
     public void writeContent(final StoreRef store, final String nodeID, final InputStream content, final String mimetype, String _encoding,
-                             final String property, final Runnable onComplete) throws Exception {
+                             final String property, final Runnable onComplete) {
 
         final String encoding = (_encoding == null) ? "UTF-8" : _encoding;
         log.debug("called nodeID:{} store:{} mimetype:{} property:{}", nodeID, store, mimetype, property);

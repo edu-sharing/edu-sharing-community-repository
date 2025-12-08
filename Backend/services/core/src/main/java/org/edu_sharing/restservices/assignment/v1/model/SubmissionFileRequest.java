@@ -2,7 +2,6 @@ package org.edu_sharing.restservices.assignment.v1.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
 
@@ -14,8 +13,6 @@ public record SubmissionFileRequest(
         String originalFile,
         @Schema(description ="id of the original assignment file (if applicable)")
         String assignmentFile,
-        @Schema(description ="only editable by the coordinator of the task")
-        Submission.Status validationStatus,
         @NotNull
         @JsonProperty(required = true)
         @Schema(description ="properties applied to the submitted file")

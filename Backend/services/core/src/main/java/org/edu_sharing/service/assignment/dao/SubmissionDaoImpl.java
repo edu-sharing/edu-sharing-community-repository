@@ -8,8 +8,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
-import org.edu_sharing.restservices.assignment.v1.model.EditSubmissionRequest;
+import org.edu_sharing.restservices.assignment.v1.model.SubmissionValidationRequest;
 import org.edu_sharing.restservices.assignment.v1.model.Submission;
 import org.edu_sharing.restservices.assignment.v1.model.SubmissionFileRequest;
 import org.edu_sharing.restservices.shared.UserSimple;
@@ -94,22 +93,52 @@ final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao 
     }
 
     @Override
-    @RetryingTransaction
+//        @RetryingTransaction // node does not exists after return, because rollback is performed for no reason
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
-    public void updateValidationInfo(EditSubmissionRequest request) {
+    public void updateValidationInfo(SubmissionValidationRequest request) {
         validateExists();
         refresh();
         validateCanCoordinatorChangeSubmission();
 
+        AuthenticationUtil.runAsSystem(() -> {
+            boolean statusChanged = false;
+            Map<String, Object> properties = new HashMap<>();
+            if (request.validationStatus() != null) {
+                properties.put(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, request.validationStatus().name());
+                statusChanged = true;
+            }
 
-        Map<String, Object> properties = new HashMap<>() {{
-            put(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, request.validationStatus().name());
-            put(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_NOTES, request.validationNotes());
-            put(CCConstants.CCM_PROP_SUBMISSION_FEEDBACK, request.feedback());
-        }};
+            if (request.validationNotes() != null) {
+                properties.put(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_NOTES, request.validationNotes());
+            }
 
-        nodeService.updateNodeNative(nodeId, properties);
-        refresh();
+            if (request.feedback() != null) {
+                properties.put(CCConstants.CCM_PROP_SUBMISSION_FEEDBACK, request.feedback());
+            }
+
+            nodeService.updateNodeNative(nodeId, properties);
+            refresh();
+
+            // we also have to set status of submissionfiles
+            if (statusChanged) {
+                getSubmissionFiles()
+                        .stream()
+                        .map(SubmissionFileDao::getCorrectionNodeId).filter(Objects::nonNull)
+                        .forEach(x -> {
+                            try {
+                                if (getValidationStatus() == Submission.Status.FINISHED) {
+                                    permissionService.setPermission(x, getCreator(), CCConstants.PERMISSION_CONSUMER);
+                                } else {
+                                    permissionService.removePermission(x, getCreator(), CCConstants.PERMISSION_CONSUMER);
+                                }
+                            } catch (Exception e) {
+                                log.error(e.getMessage(), e);
+                            }
+                        });
+            }
+            return null;
+        });
+
     }
 
     @Override
@@ -125,7 +154,10 @@ final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao 
 
         validateAssigneeCanChangeSubmission();
 
-        nodeService.updateNodeNative(nodeId, Map.of(CCConstants.CCM_PROP_SUBMISSION_STATUS, status.name()));
+        AuthenticationUtil.runAsSystem(() -> {
+            nodeService.updateNodeNative(nodeId, Map.of(CCConstants.CCM_PROP_SUBMISSION_STATUS, status.name()));
+            return null;
+        });
         refresh();
     }
 
@@ -146,19 +178,13 @@ final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao 
     @Override
 //        @RetryingTransaction // node does not exists after return, because rollback is performed for no reason
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
-    public SubmissionFileDao createOrUpdateSubmissionFile(String submissionFileId, SubmissionFileRequest submissionFileRequest, InputStream fileInputStream, FormDataContentDisposition fileMetaData) {
+    public SubmissionFileDao createSubmissionFile(SubmissionFileRequest submissionFileRequest, InputStream fileInputStream, FormDataContentDisposition fileMetaData) {
         submissionFileRefs.invalidate();
         validateAssigneeCanChangeSubmission();
 
-        SubmissionFileDao submissionFileDao;
-        if (submissionFileId != null) {
-            submissionFileDao = getSubmissionFile(submissionFileId);
-            submissionFileDao.update(submissionFileRequest, fileInputStream);
-        } else {
-            submissionFileDao = assignmentDaoFactory.submissionFileDao(assignmentDao, this, null);
-            submissionFileDao.create(submissionFileRequest, fileInputStream);
-            submissionFileRefs.get().put(submissionFileDao.getNodeId(), submissionFileDao);
-        }
+        SubmissionFileDao submissionFileDao = assignmentDaoFactory.submissionFileDao(assignmentDao, this, null);
+        submissionFileDao.create(submissionFileRequest, fileInputStream);
+        submissionFileRefs.get().put(submissionFileDao.getNodeId(), submissionFileDao);
 
         return submissionFileDao;
     }

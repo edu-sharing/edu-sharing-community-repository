@@ -1494,7 +1494,8 @@ public class CCConstants {
     public final static String CCM_ASSOC_ASSIGNMENT_FILE_COPY = "{http://www.campuscontent.de/model/1.0}assignment_file_copy";
     public final static String CCM_ASSOC_SUBMISSIONS_SUBMISSION = "{http://www.campuscontent.de/model/1.0}submissions_submission";
     public final static String CCM_ASSOC_SUBMISSION_FILES = "{http://www.campuscontent.de/model/1.0}submission_files";
-    public final static String CCM_ASSOC_SUBMISSION_FILE_DATA = "{http://www.campuscontent.de/model/1.0}submission_file_data";
+    public final static String CCM_ASSOC_SUBMISSION_FILE_CONTENT = "{http://www.campuscontent.de/model/1.0}submission_file_content";
+    public final static String CCM_ASSOC_SUBMISSION_FILE_CORRECTION = "{http://www.campuscontent.de/model/1.0}submission_file_correction";
 
 
     public final static String CCM_ASPECT_ASSIGNMENT_FILE_DEEP_COPY = "{http://www.campuscontent.de/model/1.0}assigment_file_deep_copy";
