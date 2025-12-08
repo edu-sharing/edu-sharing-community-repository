@@ -2,6 +2,7 @@ import {
     Component,
     computed,
     Input,
+    model,
     OnChanges,
     OnInit,
     Signal,
@@ -13,6 +14,7 @@ import {
 import { MatTabChangeEvent } from '@angular/material/tabs';
 import { TranslateService } from '@ngx-translate/core';
 import {
+    CollectionService as ApiCollectionService,
     HOME_REPOSITORY,
     MdsQueryCriteria,
     Node,
@@ -32,6 +34,7 @@ import {
     FetchEvent,
     InteractionType,
     ListItem,
+    LocalEventsService,
     MdsHelperService,
     NodeClickEvent,
     NodeDataSource,
@@ -51,11 +54,12 @@ import { RestCollectionService } from '../../../core-module/rest/services/rest-c
 import { UIService } from '../../../core-module/rest/services/ui.service';
 import { AddMaterialDialogResult } from '../../../features/dialogs/dialog-modules/add-material-dialog/add-material-dialog-data';
 import { AddMaterialDialogModule } from '../../../features/dialogs/dialog-modules/add-material-dialog/add-material-dialog.module';
-
+import { BridgeService } from '../../../services/bridge.service';
 import { NodeHelperService } from '../../../services/node-helper.service';
 import { Toast } from '../../../services/toast';
 import { UploadDialogService } from '../../../services/upload-dialog.service';
 import { SharedModule } from '../../../shared/shared.module';
+import { MessageType } from '../../../util/message-type';
 import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
 import { OptionState } from '../editorial-sidebar/editorial-sidebar.component';
 
@@ -103,11 +107,13 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
             (!this.option.applyCallback ||
                 this.option.applyCallback(this.selectedNodes() as Node[])),
     );
-    configOption = {
-        includeMain: false,
-        includeSub: false,
-        includeItems: false,
-    };
+    copyRoot = model(false);
+    copyChildCollections = model(false);
+    copyRefs = model(false);
+    // either copying root or child collections must be selected
+    atLeastRootOrChildrenSelected = computed(() => {
+        return this.copyRoot() || this.copyChildCollections();
+    });
 
     // search tab
     searchColumns: ColumnType;
@@ -129,7 +135,10 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     inboxNode: Node;
 
     constructor(
+        private apiCollectionService: ApiCollectionService,
+        private bridge: BridgeService,
         private collectionService: RestCollectionService,
+        private localEventsService: LocalEventsService,
         private mdsHelperService: MdsHelperService,
         public nodeHelperService: NodeHelperService,
         public editorialSidebarService: EditorialSidebarService,
@@ -400,8 +409,36 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
                     this.toast.error({}, this.i18nPrefix + 'COPY.ERROR');
                 });
             }
-        } else {
+        } else if (this.currentStep() === StepType.SELECT) {
             this.currentStep.set(StepType.CONFIGURE);
+        } else if (
+            this.currentStep() === StepType.CONFIGURE &&
+            this.atLeastRootOrChildrenSelected()
+        ) {
+            try {
+                this.toast.showProgressSpinner();
+                const copyParams = {
+                    repository: HOME_REPOSITORY,
+                    sourceCollection: this.selectedNodes()[0].ref.id,
+                    targetCollection: this.parent.ref.id,
+                    copyRoot: this.copyRoot(),
+                    copyChildCollections: this.copyChildCollections(),
+                    copyRefs: this.copyRefs(),
+                    copyPermissions: true,
+                };
+                await firstValueFrom(this.apiCollectionService.copyCollection(copyParams));
+                this.bridge.showTemporaryMessage(MessageType.info, 'COLLECTIONS.TOAST.COPIED');
+                this.localEventsService.nodesChanged.emit([this.parent]);
+                this.toast.closeProgressSpinner();
+            } catch (e) {
+                this.toast.closeProgressSpinner();
+                setTimeout(() => {
+                    this.bridge.showTemporaryMessage(
+                        MessageType.error,
+                        this.i18nPrefix + 'COPY.ERROR',
+                    );
+                });
+            }
         }
     }
 

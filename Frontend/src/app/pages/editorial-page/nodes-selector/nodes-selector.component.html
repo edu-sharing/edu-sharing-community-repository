@@ -191,13 +191,12 @@
             else noConfigOptions
           "
         >
-          <mat-checkbox [(ngModel)]="configOption.includeMain" disabled>
+          <mat-checkbox [(ngModel)]="copyRoot">
             {{ i18nPrefix + 'CONFIGURE_CONFIG.INCLUDE_MAIN' | translate }}
           </mat-checkbox>
 
           <mat-checkbox
-            [(ngModel)]="configOption.includeSub"
-            disabled
+            [(ngModel)]="copyChildCollections"
             *ngIf="selectedNode.collection?.childCollectionsCount"
           >
             <ng-container
@@ -214,8 +213,7 @@
           </mat-checkbox>
 
           <mat-checkbox
-            [(ngModel)]="configOption.includeItems"
-            disabled
+            [(ngModel)]="copyRefs"
             *ngIf="selectedNode.collection?.childReferencesCount"
           >
             <ng-container
@@ -250,10 +248,11 @@
     </button>
   </ng-container>
   <ng-container>
+    <!-- disable in second step, if root or child collections are not selected -->
     <button
       mat-flat-button
       color="primary"
-      [disabled]="!isValidSelection() || !isSelectStep()"
+      [disabled]="!isValidSelection() || (!isSelectStep() && !atLeastRootOrChildrenSelected())"
       (click)="copyNodes()"
     >
       {{

@@ -93,6 +93,7 @@
     "TOAST": {
       "DUPLICATE_NAME": "Une collection portant le même nom existe déjà",
       "CREATED": "La collection a été créée",
+      "COPIED": "La collection a été copiée",
       "INVALID_NAME": "Le nom donné n'est pas valide. N'utilisez pas de caractères spéciaux",
       "ERROR_IMAGE_APPLY": "Malheureusement, l'image sélectionnée n'a pas pu être lue. Veuillez essayer un autre élément.",
       "SORT_SAVED_TYPE": "Le tri sélectionné par \"{{type}}\" s'appliquera à l'avenir à tous les utilisateurs de la collection.",

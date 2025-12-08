@@ -7,6 +7,7 @@ import { Node } from '../models';
 import { cachedShareReplay, KeyCache } from '../utils/decorators/cached-share-replay';
 import { ReferenceEntries } from '../api/models/reference-entries';
 import { CollectionEntries } from '../api/models/collection-entries';
+import { CollectionEntry } from '../api/models/collection-entry';
 
 @Injectable({
     providedIn: 'root',
@@ -66,6 +67,48 @@ export class CollectionService {
                 maxItems: 65535,
             })
             .pipe(map((collectionsEntry) => collectionsEntry.collections));
+    }
+
+    /**
+     * Copy a collection.
+     */
+    copyCollection(params: {
+        /**
+         * ID of repository (or "-home-" for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of parent collection (or "-root-" for level0 collections)
+         */
+        sourceCollection: string;
+
+        /**
+         * target nodeId. if not set collection will be copied in root
+         */
+        targetCollection?: string;
+
+        /**
+         * if true sourceCollection will be copied, else only the children
+         */
+        copyRoot?: boolean;
+
+        /**
+         * if true reference object will be copied
+         */
+        copyRefs?: boolean;
+
+        /**
+         * if true permissions will be copied
+         */
+        copyPermissions?: boolean;
+
+        /**
+         * if true child collections will be copied
+         */
+        copyChildCollections?: boolean;
+    }): Observable<CollectionEntry> {
+        return this.collectionV1.copyCollection(params);
     }
 }
 

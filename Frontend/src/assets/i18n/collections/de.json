@@ -94,6 +94,7 @@
       "DUPLICATE_NAME": "Eine Sammlung mit diesen Namen existiert bereits",
       "ERROR_IMAGE_APPLY": "Das ausgewählte Bild konnte leider nicht gelesen werden. Bitte versuchen Sie es mit einem anderen Element.",
       "CREATED": "Sammlung wurde erstellt",
+      "COPIED": "Sammlung wurde kopiert",
       "INVALID_NAME": "Der Name ist unzulässig. Bitte keine Sonderzeichen verwenden.",
       "SORT_SAVED_TYPE": "Die gewählte Sortierung nach \"{{type}}\" gilt zukünftig für alle Betrachter der Sammlung",
       "SORT_SAVED_CUSTOM": "Die festgelegte Reihenfolge gilt zukünftig für alle Betrachter der Sammlung"
