@@ -47,11 +47,10 @@ export class TreeNodeService {
             .pipe(takeUntilDestroyed())
             .subscribe((nodes: Node[]) => this.refreshTree(nodes));
         this.localEventsService.nodesDeleted
-            .pipe(
-                takeUntilDestroyed(),
-                tap((r) => console.log(r)),
-            )
-            .subscribe((nodes: Node[]) => this.refreshTree(nodes, true));
+            .pipe(takeUntilDestroyed())
+            .subscribe((nodes: Node[]) => {
+                this.refreshTree(nodes, true);
+            });
     }
 
     /**
@@ -280,11 +279,12 @@ export class TreeNodeService {
      * @param deleted
      */
     private async refreshTree(nodes: Node[], deleted: boolean = false): Promise<void> {
-        for (let i = 0; i < nodes.length; i++) {
-            const node: Node = nodes[i];
+        const updatedNodes: Node[] = [];
+        for (const node of nodes) {
             const nodeId: string = node.ref.id;
 
             if (this.nodeHelperService.isNodeCollection(node)) {
+                // if a collection was updated, reload its children
                 if (!deleted) {
                     // remove node ID from helper structures
                     this.parentIdToLastLoadedNodeId.delete(nodeId);
@@ -300,7 +300,48 @@ export class TreeNodeService {
                             collection: nodeId,
                         }),
                     );
-                    nodes[i].collection.childReferencesCount = references.pagination.total;
+                    node.collection.childReferencesCount = references.pagination.total;
+                    updatedNodes.push(node);
+                }
+                // if a collection was deleted, reload its parents' children
+                else {
+                    // iterate over dataMap and find the parent node
+                    const parentId = node.parent.id;
+                    let parentNode: Partial<Node> | undefined;
+                    for (const [mapKey, children] of this.dataMap.entries()) {
+                        const foundParent = children.find((child) => child.ref.id === parentId);
+                        if (foundParent) {
+                            parentNode = foundParent;
+                            break;
+                        }
+                    }
+                    if (parentNode) {
+                        // remove node ID from helper structures
+                        this.parentIdToLastLoadedNodeId.delete(parentId);
+                        this.emptyFolders = this.emptyFolders.filter((id) => id !== parentId);
+                        // retrieve updated children (also updates the helper structures)
+                        this.dataMap.delete(parentId);
+                        await this.getChildren(parentNode);
+                        // workaround for updating the number of references
+                        // note: update is not done automatically, so reloading the references is necessary
+                        const references = await firstValueFrom(
+                            this.collectionService.getReferences({
+                                repository: HOME_REPOSITORY,
+                                collection: parentId,
+                            }),
+                        );
+                        parentNode.collection.childReferencesCount = references.pagination.total;
+                        // also update the number of child collections
+                        parentNode.collection.childCollectionsCount =
+                            this.dataMap
+                                .get(parentId)
+                                ?.filter((child) =>
+                                    this.nodeHelperService.isNodeCollection(child as Node),
+                                ).length ?? 0;
+                        updatedNodes.push(parentNode as Node);
+                    } else {
+                        updatedNodes.push(node);
+                    }
                 }
             } else {
                 if (deleted) {
@@ -313,9 +354,10 @@ export class TreeNodeService {
                         console.log(this.dataMap, entry[0]);
                     }
                 }
+                updatedNodes.push(node);
             }
         }
         // emit the changed nodes
-        this.nodesChanged.emit(nodes);
+        this.nodesChanged.emit(updatedNodes);
     }
 }
