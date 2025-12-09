@@ -1,6 +1,6 @@
 import { Location } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Injectable, Injector, NgZone } from '@angular/core';
+import { Injectable, Injector, NgZone, Optional } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthenticationService, LoginInfo } from 'ngx-edu-sharing-api';
@@ -106,7 +106,6 @@ export class CordovaService {
      */
     constructor(
         private router: Router,
-        private route: ActivatedRoute,
         private ngZone: NgZone,
         private http: HttpClient,
         private location: Location,
