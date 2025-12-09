@@ -37,11 +37,11 @@ rs-root {
             }
             &.module-IMAGE,
             &.module-DDB {
+                width: 50%;
+                height: 100%;
                 @media screen and (max-width: ($mobileWidth)) {
                     width: 90%;
                 }
-                width: 50%;
-                height: 100%;
             }
             &.module-PDF ngx-extended-pdf-viewer .zoom {
                 height: $minHeight !important;
