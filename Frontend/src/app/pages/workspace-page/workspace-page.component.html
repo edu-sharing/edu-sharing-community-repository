@@ -54,16 +54,13 @@
           >
           <a
             class="collection-item"
-            [class.rootSelected]="root === 'MY_SHARED_FILES'"
-            (click)="showSelectRoot = false; setRoot('MY_SHARED_FILES')"
-            ><i esIcon="share"></i> {{ 'WORKSPACE.MY_SHARED_FILES' | translate }}</a
+            [routerLink]="'/' + UIConstants.ROUTER_PREFIX + 'editorial/share'"
+            data-test="workspace-tree-shared-files-link"
           >
-          <a
-            class="collection-item"
-            [class.rootSelected]="root === 'TO_ME_SHARED_FILES'"
-            (click)="showSelectRoot = false; setRoot('TO_ME_SHARED_FILES')"
-            ><i esIcon="send"></i> {{ 'WORKSPACE.TO_ME_SHARED_FILES' | translate }}</a
-          >
+            <i class="material-icons typeIcon">send</i
+            >{{ 'WORKSPACE.SHARED_FILES_LINK' | translate }}
+            <i class="material-icons"> open_in_new </i>
+          </a>
           <a
             class="collection-item"
             [class.rootSelected]="root === 'WORKFLOW_RECEIVE'"

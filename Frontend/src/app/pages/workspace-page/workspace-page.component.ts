@@ -117,6 +117,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         '-to_me_shared_files-',
         '-workflow_receive-',
     ];
+    readonly UIConstants = UIConstants;
 
     @ViewChild('explorer') explorer: WorkspaceExplorerComponent;
 
