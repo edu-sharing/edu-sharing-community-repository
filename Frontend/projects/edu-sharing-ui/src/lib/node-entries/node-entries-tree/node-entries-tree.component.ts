@@ -76,11 +76,11 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
         private translations: TranslationsService,
         private treeNodeService: TreeNodeService,
     ) {
-        // listening to selection changed subject
+        // listening to the selection changed subject
         this.entriesService.selection.changed
             .pipe(takeUntil(this.destroyed), debounceTime(0))
             .subscribe(() => this.changeDetectorRef.detectChanges());
-        // listening to loading subject
+        // listening to the loading subject
         this.entriesService.dataSource.isLoadingSubject
             .pipe(takeUntil(this.destroyed))
             .subscribe(async (isLoading) => {
@@ -166,15 +166,27 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     }
 
     /**
-     * Handle the click event on a node by toggling its selection.
+     * Handle the click event on a node by toggling its selection and expanding its children.
      *
      * @param flatNode
      */
-    updateSelectedNodes(flatNode: DynamicFlatNode): void {
+    async updateSelectedNodes(flatNode: DynamicFlatNode): Promise<void> {
         if (flatNode.level === 0) {
             return;
         }
         this.entriesService.selection.toggle(flatNode.item as T);
+        if (this.entriesService.selection.isSelected(flatNode.item as T)) {
+            // check for children being selected, too, before expanding the node
+            flatNode.isLoading.set(true);
+            const nodeChildren = await this.treeNodeService.getChildren(flatNode.item);
+            nodeChildren.forEach((child) => {
+                if (child && !this.entriesService.selection.isSelected(child as T)) {
+                    this.entriesService.selection.toggle(child as T);
+                }
+            });
+            flatNode.isLoading.set(false);
+            this.treeControl.expand(flatNode);
+        }
     }
 
     canDrop = (dragData: DragData<T>): CanDrop => {
