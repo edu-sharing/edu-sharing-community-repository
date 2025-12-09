@@ -105,7 +105,7 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
     public void create(SubmissionFileRequest request, InputStream fileInputStream) {
         submissionDao.validateAssigneeCanChangeSubmission();
 
-        if (submissionDao.getSubmissionFiles()
+        if (!assignmentDao.getAllowAdditionalDocumentSubmissions() && submissionDao.getSubmissionFiles()
                 .stream()
                 .anyMatch(x -> x.getReferToAssigmentFile()
                         .map(BasicNodeDao::getNodeId)
