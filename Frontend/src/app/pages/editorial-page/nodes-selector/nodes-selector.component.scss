@@ -60,6 +60,10 @@
     flex: 1 1 0;
     // fix taking margins into account
     box-sizing: border-box;
+
+    &.actionbar-visible {
+        padding-bottom: 54px;
+    }
 }
 
 .tab-action-bar {
