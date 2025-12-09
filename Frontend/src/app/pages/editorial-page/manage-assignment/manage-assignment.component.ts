@@ -72,7 +72,7 @@ export class ManageAssignmentComponent {
     @ViewChild('dateChooser') dateChooserRef: ShareDialogChooseDateComponent;
     assignment = signal<Assignment>({
         type: 'SUBMISSION',
-        status: 'OPEN',
+        status: 'DRAFT',
     } as Assignment);
     authorities = signal<Permission[]>(null);
     mainDataFormGroup: FormGroup;
