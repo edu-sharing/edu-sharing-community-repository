@@ -1,14 +1,15 @@
 <div class="sidebar-header">
   <button
     mat-icon-button
-    color="primary"
     *ngIf="enabledOption() && !enabledOption().trap"
     (click)="enabledOption.set(null)"
   >
     <i esIcon="keyboard_arrow_left"></i>
   </button>
-  <div>{{ title() | translate }}</div>
-  <button mat-icon-button color="primary" (click)="closeTrigger.emit()">
+  <div>
+    {{ title() | translate }}
+  </div>
+  <button mat-icon-button (click)="closeTrigger.emit()">
     <i esIcon="close"></i>
   </button>
 </div>
