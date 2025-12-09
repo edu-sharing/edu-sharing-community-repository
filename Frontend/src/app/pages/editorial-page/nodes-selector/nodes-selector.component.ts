@@ -512,6 +512,7 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
                 this.bridge.showTemporaryMessage(MessageType.info, 'COLLECTIONS.TOAST.COPIED');
                 this.localEventsService.nodesChanged.emit([this.parent]);
                 this.toast.closeProgressSpinner();
+                this.goBack();
             } catch (e) {
                 this.toast.closeProgressSpinner();
                 setTimeout(() => {
