@@ -45,8 +45,8 @@ export class NodeEntriesCardSmallComponent<T extends Node> {
     }
 
     readonly AssignmentStatusIcon: { [key in Assignment['status']]: string } = {
-        OPEN: 'news',
-        PROGRESS: 'schedule_send',
+        DRAFT: 'news',
+        ASSIGNED: 'schedule_send',
         CANCELED: 'cancel',
         FINISHED: 'done',
     };
