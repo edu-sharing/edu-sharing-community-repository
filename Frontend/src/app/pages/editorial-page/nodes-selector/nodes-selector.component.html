@@ -212,19 +212,14 @@
             </ng-template>
           </mat-checkbox>
 
-          <mat-checkbox
-            [(ngModel)]="copyRefs"
-            *ngIf="selectedNode.collection?.childReferencesCount"
-          >
-            <ng-container
-              *ngIf="selectedNode.collection.childReferencesCount === 1; else includeMultipleItems"
-            >
+          <mat-checkbox [(ngModel)]="copyRefs" *ngIf="numberOfRefs()">
+            <ng-container *ngIf="numberOfRefs() === 1; else includeMultipleItems">
               {{ i18nPrefix + 'CONFIGURE_CONFIG.INCLUDE_ITEMS.SINGLE' | translate }}
             </ng-container>
             <ng-template #includeMultipleItems>
               {{
                 i18nPrefix + 'CONFIGURE_CONFIG.INCLUDE_ITEMS.MULTIPLE'
-                  | translate : { count: selectedNode.collection.childReferencesCount }
+                  | translate : { count: numberOfRefs() }
               }}
             </ng-template>
           </mat-checkbox>

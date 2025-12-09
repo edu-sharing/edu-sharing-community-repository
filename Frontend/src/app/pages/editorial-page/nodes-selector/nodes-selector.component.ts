@@ -97,22 +97,94 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     selectedNodes: WritableSignal<Partial<Node>[]> = signal([]);
     private currentStep: WritableSignal<StepType> = signal(StepType.SELECT);
     isSelectStep: Signal<boolean> = computed((): boolean => this.currentStep() === StepType.SELECT);
-    onlyOneSelected: Signal<boolean> = computed(() => this.selectedNodes().length === 1);
+    onlyOneTopLevelCollectionSelected: Signal<boolean> = computed((): boolean => {
+        const selectedNodes: Partial<Node>[] = this.selectedNodes();
+        // early return for empty or single selection
+        if (selectedNodes.length === 0) {
+            return false;
+        }
+        if (selectedNodes.length === 1) {
+            return this.nodeHelperService.isNodeCollection(selectedNodes[0] as Node);
+        }
+        // helper structures
+        const selectedNodeIds = new Set<string>();
+        const files: Partial<Node>[] = [];
+        const collections: Partial<Node>[] = [];
+        // fill those structures
+        selectedNodes.forEach((node) => {
+            selectedNodeIds.add(node.ref.id);
+
+            if (node.type === RestConstants.CCM_TYPE_IO) {
+                files.push(node);
+            } else if (this.nodeHelperService.isNodeCollection(node as Node)) {
+                collections.push(node);
+            }
+        });
+        // files must have a parent ID within the selection
+        const everyFileBelongsToSelectedCollection = files.every((f) =>
+            selectedNodeIds.has(f.parent.id),
+        );
+        // return collections without a selected parent
+        const collectionsWithoutSelectedParent = collections.filter(
+            (c) => !selectedNodeIds.has(c.parent.id),
+        );
+        return (
+            collectionsWithoutSelectedParent.length === 1 && everyFileBelongsToSelectedCollection
+        );
+    });
     onlyFilesSelected: Signal<boolean> = computed((): boolean =>
         this.selectedNodes().every((node) => node.type === RestConstants.CCM_TYPE_IO),
     );
     isValidSelection: Signal<boolean> = computed(
         (): boolean =>
-            (this.onlyOneSelected() || this.onlyFilesSelected()) &&
+            (this.onlyOneTopLevelCollectionSelected() || this.onlyFilesSelected()) &&
             (!this.option.applyCallback ||
                 this.option.applyCallback(this.selectedNodes() as Node[])),
     );
-    copyRoot = model(false);
-    copyChildCollections = model(false);
-    copyRefs = model(false);
+    // initialize collection copy variables with true
+    copyRoot = model(true);
+    copyChildCollections = model(true);
+    copyRefs = model(true);
     // either copying root or child collections must be selected
     atLeastRootOrChildrenSelected = computed(() => {
         return this.copyRoot() || this.copyChildCollections();
+    });
+    numberOfRefs = computed(() => {
+        // read model signals at the beginning to evaluate those
+        const shouldCopyRoot = this.copyRoot();
+        const shouldCopyChildCollections = this.copyChildCollections();
+        // console.log('recalculate numberOfRefs', shouldCopyRoot, shouldCopyChildCollections);
+
+        const collectionToCopy = this.selectedNodes()?.[0];
+        if (!collectionToCopy) {
+            return 0;
+        }
+        const initialNumberOfRefs = collectionToCopy.collection.childReferencesCount;
+        const collectionChildren = this.selectedNodes().filter(
+            (n) => n.parent.id === collectionToCopy.ref.id,
+        );
+        // console.log('collectionChildren', this.selectedNodes());
+        if (!collectionChildren.length) {
+            return initialNumberOfRefs;
+        }
+        // sum up the number of references of all children
+        const sumOfChildReferences = collectionChildren
+            .filter((child) => child.collection?.childReferencesCount)
+            .reduce((sum, child) => sum + child.collection.childReferencesCount, 0);
+        // console.log('sumOfChildReferences', sumOfChildReferences);
+        const numberOfRootReferences =
+            initialNumberOfRefs - sumOfChildReferences > 0
+                ? initialNumberOfRefs - sumOfChildReferences
+                : 0;
+        // console.log('numberOfRootReferences', numberOfRootReferences);
+        let sumOfReferences = 0;
+        if (shouldCopyRoot) {
+            sumOfReferences += numberOfRootReferences;
+        }
+        if (shouldCopyChildCollections) {
+            sumOfReferences += sumOfChildReferences;
+        }
+        return sumOfReferences;
     });
 
     // search tab
@@ -417,13 +489,21 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         ) {
             try {
                 this.toast.showProgressSpinner();
+                const selectedNode: Partial<Node> = this.selectedNodes()[0];
+                if (!selectedNode) {
+                    return;
+                }
+                // make sure to override the default values, if the necessary data does not exist
+                const copyChildCollections =
+                    selectedNode.collection.childCollectionsCount && this.copyChildCollections();
+                const copyRefs = selectedNode.collection.childReferencesCount && this.copyRefs();
                 const copyParams = {
                     repository: HOME_REPOSITORY,
-                    sourceCollection: this.selectedNodes()[0].ref.id,
+                    sourceCollection: selectedNode.ref.id,
                     targetCollection: this.parent.ref.id,
                     copyRoot: this.copyRoot(),
-                    copyChildCollections: this.copyChildCollections(),
-                    copyRefs: this.copyRefs(),
+                    copyChildCollections,
+                    copyRefs,
                     copyPermissions: true,
                 };
                 await firstValueFrom(this.apiCollectionService.copyCollection(copyParams));
