@@ -110,6 +110,21 @@
     }
 }
 
+// collections tab related styles
+.tree-search-container {
+    display: flex;
+    align-items: center;
+
+    .search-field {
+        flex: 1;
+        display: flex;
+    }
+
+    .filter-button {
+        margin-left: 8px;
+    }
+}
+
 // fix actionbar layout buttons do not align with search field
 es-actionbar {
     display: flex;

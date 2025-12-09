@@ -118,6 +118,33 @@
 
       <!-- COLLECTIONS TAB -->
       <ng-container *ngSwitchCase="TabType.COLLECTIONS">
+        <!-- search field + filter button -->
+        <div class="tree-search-container">
+          <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
+            <i esIcon="search" matPrefix></i>
+            <input
+              matInput
+              placeholder="Suche in Sammlungen"
+              [(ngModel)]="searchText"
+              [disabled]="true"
+            />
+            <button
+              *ngIf="searchText"
+              matSuffix
+              mat-icon-button
+              aria-label="Clear"
+              (click)="clearSearch()"
+              [disabled]="true"
+            >
+              <i esIcon="close"></i>
+            </button>
+          </mat-form-field>
+
+          <button mat-icon-button class="filter-button" [disabled]="true">
+            <i esIcon="filter_list"></i>
+          </button>
+        </div>
+        <!-- tree component -->
         <es-node-entries-wrapper
           *ngIf="selectedTab() === TabType.COLLECTIONS"
           [columns]="collectionsColumns"

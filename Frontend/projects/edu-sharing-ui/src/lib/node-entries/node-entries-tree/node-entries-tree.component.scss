@@ -15,20 +15,6 @@
     --mdc-outlined-text-field-container-shape: 28px;
 }
 
-.tree-search-container {
-    display: flex;
-    align-items: center;
-
-    .search-field {
-        flex: 1;
-        display: flex;
-    }
-
-    .filter-button {
-        margin-left: 8px;
-    }
-}
-
 .tree-toolbar {
     display: flex;
     align-items: center;
@@ -56,7 +42,6 @@ mat-tree-node.selected {
         min-height: 48px;
 
         .toggle-button {
-            margin-left: 8px;
             cursor: pointer;
             color: inherit;
             display: inline-flex;
@@ -94,7 +79,6 @@ mat-tree-node.selected {
 }
 
 .node-information {
-    padding-left: 8px;
     padding-right: 8px;
     display: flex;
     justify-content: space-between;
@@ -125,7 +109,7 @@ mat-tree-node.selected {
     .container {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
 
         img {
             width: 20px;

@@ -1,25 +1,3 @@
-<!-- search field + filter button -->
-<div class="tree-search-container">
-  <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
-    <i esIcon="search" matPrefix></i>
-    <input matInput placeholder="Suche in Sammlungen" [(ngModel)]="searchText" [disabled]="true" />
-    <button
-      *ngIf="searchText"
-      matSuffix
-      mat-icon-button
-      aria-label="Clear"
-      (click)="clearSearch()"
-      [disabled]="true"
-    >
-      <i esIcon="close"></i>
-    </button>
-  </mat-form-field>
-
-  <button mat-icon-button class="filter-button" [disabled]="true">
-    <i esIcon="filter_list"></i>
-  </button>
-</div>
-
 <!-- dropdown button for expand/collapse + settings button -->
 <div class="tree-toolbar">
   <button
@@ -65,9 +43,11 @@
     *ngIf="dataSource && treeControl && dataSource.data?.length"
   >
     <!-- child nodes -->
+    <!-- matTreeNodePaddingIndent 28 = 24 (width of icon) + 4 (gap between icon and text) -->
     <mat-tree-node
       *matTreeNodeDef="let node"
       matTreeNodePadding
+      matTreeNodePaddingIndent="28"
       [class.selected]="entriesService.selection.isSelected(node.item)"
       cdkDrag
       esNodesDrag
@@ -89,7 +69,11 @@
     </mat-tree-node>
 
     <!-- load more button for leaf nodes -->
-    <mat-tree-node *matTreeNodeDef="let node; when: isLoadMoreNode" matTreeNodePadding>
+    <mat-tree-node
+      *matTreeNodeDef="let node; when: isLoadMoreNode"
+      matTreeNodePadding
+      matTreeNodePaddingIndent="28"
+    >
       <div class="load-more-container">
         <button mat-button color="primary" (click)="loadFurtherChildren(node)">
           <i esIcon="refresh"></i>
@@ -105,6 +89,7 @@
       [class.selected]="entriesService.selection.isSelected(node.item)"
       *matTreeNodeDef="let node; when: hasChild"
       matTreeNodePadding
+      matTreeNodePaddingIndent="28"
       [cdkTreeNodeTypeaheadLabel]="node.item"
       cdkDrag
       cdkDragDisabled

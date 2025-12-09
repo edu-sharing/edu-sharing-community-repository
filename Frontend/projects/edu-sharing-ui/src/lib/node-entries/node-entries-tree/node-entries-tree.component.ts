@@ -64,7 +64,6 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
                 node.item.ref.id
         );
     };
-    searchText: string = '';
     treeInitialized: WritableSignal<boolean> = signal(false);
 
     constructor(
@@ -114,13 +113,6 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     ngOnDestroy(): void {
         this.destroyed.next();
         this.destroyed.complete();
-    }
-
-    /**
-     * Clears the search text.
-     */
-    clearSearch(): void {
-        this.searchText = '';
     }
 
     /**

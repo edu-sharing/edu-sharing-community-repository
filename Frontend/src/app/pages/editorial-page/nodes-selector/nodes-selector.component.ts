@@ -191,7 +191,6 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     searchColumns: ColumnType;
     dataSourceSearch: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
     searchDisplayType: NodeEntriesDisplayType = NodeEntriesDisplayType.Table;
-    searchText: string = '';
     searchSent: WritableSignal<boolean> = signal(false);
     @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
 
@@ -205,6 +204,9 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
 
     // upload tab
     inboxNode: Node;
+
+    // shared among tabs
+    searchText: string = '';
 
     constructor(
         private apiCollectionService: ApiCollectionService,
