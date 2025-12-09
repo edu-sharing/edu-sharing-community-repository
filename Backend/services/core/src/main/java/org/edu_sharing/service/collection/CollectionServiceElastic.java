@@ -1231,7 +1231,7 @@ public class CollectionServiceElastic implements CollectionService {
                 && nodeService.hasAspect(src,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
             try {
                 String original = (String) nodeService.getProperty(src, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL));
-                result = this.addToCollection(parent.getId(), original, false);
+                result = this.addToCollection(parent.getId(), original, true);
             } catch (Exception e) {
                 if("collection_no_publish_permission".equals(e.getMessage())){
                     copyResult.entries.add(new CopyResult.Entry(src.getId(), CopyResult.ErrorCode.NO_PUBLISH_PERMISSION));
