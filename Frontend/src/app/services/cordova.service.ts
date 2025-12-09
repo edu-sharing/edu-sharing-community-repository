@@ -1,12 +1,21 @@
 import { Location } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, Injector, NgZone } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthenticationService, LoginInfo } from 'ngx-edu-sharing-api';
 import { AppService as AppServiceAbstract, DateHelper, UIConstants } from 'ngx-edu-sharing-ui';
-import { BehaviorSubject, firstValueFrom, Observable, Observer } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { BehaviorSubject, firstValueFrom, from, Observable, Observer, Subject } from 'rxjs';
+import {
+    debounceTime,
+    delay,
+    distinctUntilChanged,
+    filter,
+    first,
+    map,
+    shareReplay,
+    switchMap,
+} from 'rxjs/operators';
 import { RestLocatorService } from '../core-module/core.module';
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { FrameEventsService } from '../core-module/rest/services/frame-events.service';
@@ -53,8 +62,16 @@ export class CordovaService {
     private static DEFAULT_CREDENTIALS = 'eduApp:123Test';
     private authenticationInterval: NodeJS.Timeout;
 
+    /**
+     * trigger to begin a new session via oauth token
+     */
+    startSession$ = new Subject<void>();
+    public debouncedStartSession$ = this.startSession$.pipe(
+        debounceTime(1000),
+        switchMap(() => from(this._startSessionViaOauthRefreshToken())),
+        shareReplay({ bufferSize: 1, refCount: true }),
+    );
     private async sendToOauthApi(path: string, data: string) {
-        console.log(path, new Date().getTime());
         const url = this.injector.get(RestLocatorService).endpointUrl + '../oauth2server/' + path;
         return await firstValueFrom(
             this.http.post<OAuthResult | OAuthDeviceAuthorizationResult>(url, data, {
@@ -89,6 +106,7 @@ export class CordovaService {
      */
     constructor(
         private router: Router,
+        private route: ActivatedRoute,
         private ngZone: NgZone,
         private http: HttpClient,
         private location: Location,
@@ -148,7 +166,7 @@ export class CordovaService {
             const checkInterval = setInterval(() => {
                 if ((window as any).plugins) {
                     console.info('cordova: plugins object found, setting device ready');
-                    this.deviceIsReady = true;
+                    this.deviceIsReady$.next(true);
                     clearInterval(checkInterval);
                 }
             }, 100);
@@ -157,7 +175,7 @@ export class CordovaService {
         document.addEventListener(
             'deviceready',
             () => {
-                this.deviceIsReady = true;
+                this.deviceIsReady$.next(true);
             },
             false,
         );
@@ -166,10 +184,14 @@ export class CordovaService {
 
         // just for simulation on forced cordova mode
         if (this.forceCordovaMode && !this.isReallyRunningCordova()) {
-            setTimeout(this.whenDeviceIsReady, 500 + Math.random() * 1000);
-        } else if (this.isReallyRunningCordova()) {
-            this.deviceReadyLoop(1);
+            setTimeout(() => this.deviceIsReady$.next(true), 500 + Math.random() * 1000);
         }
+        this.deviceIsReady$
+            .pipe(
+                filter((f) => f),
+                first(),
+            )
+            .subscribe(() => this.whenDeviceIsReady());
     }
 
     /**********************************************************
@@ -189,7 +211,7 @@ export class CordovaService {
     // change this during development for testing true, but false is default
     private forceCordovaMode = environment.forceCordovaMode;
 
-    private deviceIsReady = false;
+    private deviceIsReady$ = new BehaviorSubject(false);
 
     private deviceResumeCallback: Function = null;
 
@@ -208,22 +230,13 @@ export class CordovaService {
     public getLastIntent() {
         return this.lastIntent;
     }
-    private deviceReadyLoop(counter: number): void {
-        setTimeout(() => {
-            if (this.deviceIsReady) {
-                this.whenDeviceIsReady();
-            } else {
-                this.deviceReadyLoop(++counter);
-            }
-        }, 250);
-    }
 
     // CORDOVA EVENT: Device is Ready (on App StartUp)
-    private whenDeviceIsReady = () => {
+    private whenDeviceIsReady = async () => {
         // window.open = cordova.InAppBrowser.open;
 
         // load basic data from storage
-        void this.loadStorage();
+        await this.loadStorage();
 
         // --> navigation issues exist anyway, need to check that later
         document.addEventListener('backbutton', () => this.onBackKeyDown(), false);
@@ -255,9 +268,6 @@ export class CordovaService {
             }
         }, 1500);
 
-        // flag that device is ready
-        this.deviceIsReady = true;
-
         // check if to register on share events
         if (this.observerShareContent != null) this.registerOnShareContent();
     };
@@ -273,7 +283,7 @@ export class CordovaService {
             this.observerShareContent = observer;
 
             // if device is already ready -> register now, otherwise wait
-            if (this.deviceIsReady) this.registerOnShareContent();
+            if (this.deviceIsReady$.value) this.registerOnShareContent();
         });
     }
     public getFileAsBlob(file: string, mimetype: string) {
@@ -484,7 +494,7 @@ export class CordovaService {
      * If angular is running in a cordova environment - make sure that device is ready befor using plugin tools.
      */
     isDeviceReady(): boolean {
-        return this.deviceIsReady;
+        return this.deviceIsReady$.value;
     }
 
     /*
@@ -1257,6 +1267,7 @@ export class CordovaService {
     private registerSessionListener() {
         this.authenticationService
             .observeLoginInfo()
+            .pipe(distinctUntilChanged())
             .subscribe((info) => this.handleLoginState(info));
         this.ngZone.runOutsideAngular(() => {
             setInterval(async () => {
@@ -1301,10 +1312,15 @@ export class CordovaService {
                 if (reload) {
                     console.info('login done, reloading page', window.location.href);
                     window.location.reload();
+                } else {
+                    console.info('oauth renewed');
                 }
             } else {
                 // this also navigates to the login if required
-                console.info('Invalid/Broken oauth cordova config, forcing init');
+                console.info(
+                    'Invalid/Broken oauth cordova config, forcing init',
+                    this.oauth$.value,
+                );
                 this.oauth = null;
                 this.goToLogin();
             }
@@ -1314,13 +1330,17 @@ export class CordovaService {
     isRunningApp(): boolean {
         return this.isRunningCordova();
     }
-
-    async startSessionViaOauthRefreshToken() {
+    private async _startSessionViaOauthRefreshToken() {
         const oauth = (await this.sendToOauthApi(
             'token',
             'grant_type=refresh_token&refresh_token=' + this.oauth.refresh_token,
         )) as OAuthResult;
         this.oauth = oauth;
+        console.info('set oauth', oauth);
         return await firstValueFrom(this.authenticationService.loginToken(oauth.access_token));
+    }
+    async startSessionViaOauthRefreshToken() {
+        this.startSession$.next();
+        return await firstValueFrom(this.debouncedStartSession$);
     }
 }
