@@ -164,10 +164,8 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         return this.copyRoot() || this.copyChildCollections();
     });
     numberOfRefs = computed(() => {
-        // read model signals at the beginning to evaluate those
-        const shouldCopyRoot = this.copyRoot();
+        // read model signal at the beginning to evaluate it
         const shouldCopyChildCollections = this.copyChildCollections();
-        // console.log('recalculate numberOfRefs', shouldCopyRoot, shouldCopyChildCollections);
 
         const collectionToCopy = this.selectedNodes()?.[0];
         if (!collectionToCopy) {
@@ -177,7 +175,6 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         const collectionChildren = this.selectedNodes().filter(
             (n) => n.parent.id === collectionToCopy.ref.id,
         );
-        // console.log('collectionChildren', this.selectedNodes());
         if (!collectionChildren.length) {
             return initialNumberOfRefs;
         }
@@ -185,16 +182,11 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         const sumOfChildReferences = collectionChildren
             .filter((child) => child.collection?.childReferencesCount)
             .reduce((sum, child) => sum + child.collection.childReferencesCount, 0);
-        // console.log('sumOfChildReferences', sumOfChildReferences);
-        const numberOfRootReferences =
+        // initialize with the number of root references, as those are always copied
+        let sumOfReferences =
             initialNumberOfRefs - sumOfChildReferences > 0
                 ? initialNumberOfRefs - sumOfChildReferences
                 : 0;
-        // console.log('numberOfRootReferences', numberOfRootReferences);
-        let sumOfReferences = 0;
-        if (shouldCopyRoot) {
-            sumOfReferences += numberOfRootReferences;
-        }
         if (shouldCopyChildCollections) {
             sumOfReferences += sumOfChildReferences;
         }
