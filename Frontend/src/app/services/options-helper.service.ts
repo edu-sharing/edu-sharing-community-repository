@@ -1430,7 +1430,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         toggleViewType.constrains = [];
         toggleViewType.group = DefaultGroups.Toggles;
         toggleViewType.elementType = [];
-        toggleViewType.priority = 10;
+        toggleViewType.priority = 15;
         toggleViewType.isToggle = true;
         toggleViewType.togglePosition = 'before';
 
