@@ -24,7 +24,7 @@
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <alfresco.transform-core.version>5.2.0</alfresco.transform-core.version>
+        <alfresco.transform-core.version>5.2.2</alfresco.transform-core.version>
     </properties>
 
     <build>
