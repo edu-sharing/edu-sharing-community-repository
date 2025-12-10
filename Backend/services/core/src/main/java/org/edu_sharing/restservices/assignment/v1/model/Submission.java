@@ -5,8 +5,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.UserSimple;
 
-import java.util.Map;
-
 public record Submission(
         @JsonProperty(required = true)
         NodeRef ref,
@@ -27,7 +25,7 @@ public record Submission(
          */
 ) {
     public enum Status {
-        NOT_STARTET,
+        NOT_STARTED,
         PENDING,
         FINISHED
     }

@@ -142,6 +142,7 @@ final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao 
 
     }
 
+
     @Override
     public void setStatus(Submission.Status status) {
         validateExists();
@@ -154,6 +155,7 @@ final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao 
         }
 
         validateAssigneeCanChangeSubmission();
+        validateAssignmentCoordinatorCanChangeState(status);
 
         AuthenticationUtil.runAsSystem(() -> {
             nodeService.updateNodeNative(nodeId, Map.of(CCConstants.CCM_PROP_SUBMISSION_STATUS, status.name()));
@@ -203,8 +205,8 @@ final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao 
         log.debug("Creating new submission");
         Map<String, Object> properties = new HashMap<>() {{
             put(CCConstants.CM_NAME, UUID.randomUUID().toString());
-            put(CCConstants.CCM_PROP_SUBMISSION_STATUS, Submission.Status.NOT_STARTET.name());
-            put(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, Submission.Status.NOT_STARTET.name());
+            put(CCConstants.CCM_PROP_SUBMISSION_STATUS, Submission.Status.NOT_STARTED.name());
+            put(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, Submission.Status.NOT_STARTED.name());
         }};
 
         String fullyAuthenticatedUser = AuthenticationUtil.getFullyAuthenticatedUser();
@@ -220,6 +222,18 @@ final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao 
             log.debug("Added permission {} for {} to submission {}", CCConstants.PERMISSION_ASSIGNEE, fullyAuthenticatedUser, nodeId);
             return null;
         });
+    }
+
+
+    @Override
+    @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
+    public void delete() {
+        if(!exists()){
+            return;
+        }
+        validateAssigneeCanChangeSubmission();
+        doDelete();
+        refresh();
     }
 
     @Override
@@ -281,6 +295,17 @@ final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao 
 
         if (getStatus() == Submission.Status.FINISHED || isReturned()) {
             throw new InsufficientPermissionException("Submission with id " + getNodeId() + " has already been finished.");
+        }
+    }
+
+
+    private void validateAssignmentCoordinatorCanChangeState(Submission.Status newStatus) {
+        if(!AssignmentUtil.isAssignmentCoordinator(permissionService, nodeId)){
+            return;
+        }
+
+        if(getStatus() != Submission.Status.FINISHED && newStatus != Submission.Status.PENDING) {
+            throw new InsufficientPermissionException("Submission status can only be changed from FINISHED to PENDING by assignment coordinator");
         }
     }
 }
