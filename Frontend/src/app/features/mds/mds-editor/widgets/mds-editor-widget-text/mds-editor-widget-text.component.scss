@@ -1,4 +1,5 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use '../../mds-mixins' as mds;
 
 .mat-form-textarea {
     width: 100%;
@@ -6,13 +7,7 @@
 :host ::ng-deep {
     input.isAiSuggestion,
     textarea.isAiSuggestion {
-        //background-color: var(--aiColorChipBg);
-        $shadow: ();
-        @for $i from 1 through 5 {
-            $shadow: append($shadow, 0 0 15px var(--aiColorChipBg), comma);
-        }
-        color: var(--aiColor) !important;
-        text-shadow: $shadow;
+        @include mds.highlightAiText();
     }
 }
 .suggestions {

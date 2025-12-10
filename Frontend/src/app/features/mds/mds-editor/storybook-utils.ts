@@ -190,6 +190,9 @@ export class SuggestionsV1ServiceMock extends SuggestionsV1Service {
                     'AI Keyword 1',
                     'AI Keyword 2',
                 ]),
+                'ccm:tool_category': this.BaseSuggestion('ccm:tool_category', params.node, [
+                    'communication',
+                ]),
             },
         });
     }

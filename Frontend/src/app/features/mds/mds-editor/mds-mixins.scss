@@ -1,0 +1,9 @@
+@mixin highlightAiText {
+    //background-color: var(--aiColorChipBg);
+    $shadow: ();
+    @for $i from 1 through 5 {
+        $shadow: append($shadow, 0 0 15px var(--aiColorChipBg), comma);
+    }
+    color: var(--aiColor) !important;
+    text-shadow: $shadow;
+}

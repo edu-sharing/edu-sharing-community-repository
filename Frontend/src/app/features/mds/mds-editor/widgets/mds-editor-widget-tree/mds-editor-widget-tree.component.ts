@@ -207,7 +207,7 @@ export class MdsEditorWidgetTreeComponent
                             s.status === 'PENDING' &&
                             !this.widget.getValue().includes(s.value as string),
                     )
-                    .forEach((s) => this.addSuggestion(s));
+                    .forEach((s) => this.addSuggestion(new BehaviorSubject(s)));
             } else {
                 const values: DisplayValue[] = this.chipsControl.value;
                 suggestions
@@ -217,7 +217,7 @@ export class MdsEditorWidgetTreeComponent
                             values.find((v) => v.key === s.value),
                             false,
                         );
-                        void this.updateSuggestionState(s, 'PENDING');
+                        void this.updateSuggestionState(new BehaviorSubject(s), 'PENDING');
                     });
             }
         });
@@ -329,7 +329,7 @@ export class MdsEditorWidgetTreeComponent
         if (removeSuggestion) {
             const suggestion = await firstValueFrom(this.isSuggestion(toBeRemoved));
             if (suggestion) {
-                this.removeSuggestion(suggestion);
+                this.removeSuggestion(new BehaviorSubject(suggestion));
             }
         }
         this.preventOverlayOpen = true;

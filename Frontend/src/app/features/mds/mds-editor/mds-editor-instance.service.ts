@@ -25,6 +25,7 @@ import {
     NodeSuggestionResponseDto,
     Suggestion,
     SuggestionResponseDto,
+    SuggestionStatus,
     SuggestionsV1Service,
 } from 'ngx-edu-sharing-api';
 import {
@@ -435,6 +436,19 @@ export class MdsEditorInstanceService
 
         getIsDirty(): boolean {
             return this.isDirty;
+        }
+
+        setSuggestionState(
+            suggestion: BehaviorSubject<SuggestionResponseDto>,
+            status: SuggestionStatus,
+        ) {
+            suggestion.value.status = status;
+            this.mdsEditorInstanceService.updateSuggestionState(
+                this.definition.id,
+                suggestion.value,
+            );
+            this.markSuggestionChanged();
+            suggestion.next(suggestion.value);
         }
 
         markSuggestionChanged() {
