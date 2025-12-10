@@ -39,6 +39,8 @@ import {
     zip,
 } from 'rxjs';
 import {
+    debounce,
+    debounceTime,
     distinctUntilChanged,
     filter,
     first,
@@ -343,7 +345,7 @@ export class MdsEditorInstanceService
             return combineLatest([
                 this.mdsEditorInstanceService.showAiSuggestions,
                 this.suggestionValuesSubject,
-            ]);
+            ]).pipe(debounceTime(0));
         }
 
         /**

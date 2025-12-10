@@ -147,14 +147,14 @@ export class EduSharingLlmServiceMock extends EduSharingLlmService {
 }
 @Injectable()
 export class SuggestionsV1ServiceMock extends SuggestionsV1Service {
-    readonly BaseSuggestion = (nodeId: string, values: string[]) =>
+    readonly BaseSuggestion = (propertyId: string, nodeId: string, values: string[]) =>
         values.map((value) => {
             return {
                 created: new Date().toISOString(),
                 createdBy: {
                     authorityName: 'Sample Api',
                 } as UserSimple,
-                propertyId: 'cclom:title',
+                propertyId: propertyId,
                 status: 'PENDING',
                 version: '1.0',
                 id: '' + Math.random(),
@@ -171,12 +171,22 @@ export class SuggestionsV1ServiceMock extends SuggestionsV1Service {
         return of({
             nodeId: params.node,
             suggestions: {
-                'cclom:title': this.BaseSuggestion(params.node, ['KI Vorschlag Titel']),
-                'ccm:educationallearningresourcetype': this.BaseSuggestion(params.node, [
-                    'other',
-                    'table',
+                'cclom:title': this.BaseSuggestion('cclom:title', params.node, [
+                    'KI Vorschlag Titel',
                 ]),
-                'cclom:general_keyword': this.BaseSuggestion(params.node, [
+                'cclom:general_description': this.BaseSuggestion(
+                    'cclom:general_description',
+                    params.node,
+                    [
+                        'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.',
+                    ],
+                ),
+                'ccm:educationallearningresourcetype': this.BaseSuggestion(
+                    'ccm:educationallearningresourcetype',
+                    params.node,
+                    ['other', 'table'],
+                ),
+                'cclom:general_keyword': this.BaseSuggestion('cclom:general_keyword', params.node, [
                     'AI Keyword 1',
                     'AI Keyword 2',
                 ]),
@@ -16876,7 +16886,7 @@ export const DefaultMds: MdsDefinition = {
             id: 'node_general',
             caption: 'Allg. Informationen',
             icon: 'description',
-            html: '\n\t\t\t  <preview>\n              <ccm:wwwurl>\n              <cm:name>\n              <cclom:title>\n              <ccm:educationallearningresourcetype>\n              <cclom:general_keyword>\n              <cclom:general_description>\n              <author>\n              <license>\n              <version>\n              <childobjects>\n\t\t\t\t',
+            html: '\n\t\t\t  <preview>\n              <ccm:wwwurl>\n              <cm:name>\n              <cclom:title><ccm:tool_category>\n              <ccm:educationallearningresourcetype>\n              <cclom:general_keyword>\n              <cclom:general_description>\n              <author>\n              <license>\n              <version>\n              <childobjects>\n\t\t\t\t',
             rel: null,
             hideIfEmpty: false,
             isExtended: false,

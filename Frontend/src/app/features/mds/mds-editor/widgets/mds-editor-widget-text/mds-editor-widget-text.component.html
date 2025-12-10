@@ -64,6 +64,7 @@
       *ngIf="!showBulkMixedValues()"
       [placeholder]="widget.definition.placeholder"
       [formControl]="formControl"
+      [class.isAiSuggestion]="(aiSuggestion$ | async)?.status === 'ACCEPTED'"
       (blur)="blur()"
       (keydown.enter)="submit()"
     ></textarea>

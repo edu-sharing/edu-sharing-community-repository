@@ -4,7 +4,8 @@
     width: 100%;
 }
 :host ::ng-deep {
-    input.isAiSuggestion {
+    input.isAiSuggestion,
+    textarea.isAiSuggestion {
         //background-color: var(--aiColorChipBg);
         $shadow: ();
         @for $i from 1 through 5 {

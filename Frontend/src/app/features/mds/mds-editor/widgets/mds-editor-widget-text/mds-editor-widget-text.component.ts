@@ -9,6 +9,7 @@ import { Toast } from '../../../../../services/toast';
 import { Widget } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { BehaviorSubject } from 'rxjs';
+import { init } from 'jasmine-spec-reporter/built/display/colors-display';
 
 @Component({
     selector: 'es-mds-editor-widget-text',
@@ -49,12 +50,6 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
                 this.setValue([value]);
             });
         this.widget.observeBulkMode().subscribe(() => {
-            console.log(
-                'bulk',
-                this.widget.definition.id,
-                this.widget.getBulkMode(),
-                this.showBulkMixedValues(),
-            );
             if (this.showBulkMixedValues()) {
                 this.formControl.disable();
             } else {
@@ -71,12 +66,13 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
         }
         this.widget.getShowAiSuggestions().subscribe(([show, suggestions]) => {
             const suggestion = suggestions?.find((s) => s.type === 'AI' && s.status === 'PENDING');
-            if (suggestion && this.aiSuggestion$.value?.status !== 'DECLINED') {
-                if (show) {
+            if (this.aiSuggestion$.value?.status !== 'DECLINED') {
+                if (suggestion && show) {
                     this.applySuggestion(suggestion);
                     this.aiSuggestion$.next(suggestion);
                 } else if (!initialValue[0] && !show) {
-                    this.clearSuggestion(suggestion);
+                    this.clearSuggestion(this.aiSuggestion$.value);
+                    this.aiSuggestion$.next(this.aiSuggestion$.value);
                 }
             }
         });
@@ -133,12 +129,12 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
         this.widget.markSuggestionChanged();
     }
     clearSuggestion(suggestion: SuggestionResponseDto) {
-        this.formControl.setValue('');
+        this.formControl.setValue('', { emitEvent: false });
         this.setValue(['']);
         this.setSuggestionState(suggestion, 'PENDING');
     }
     applySuggestion(suggestion: SuggestionResponseDto) {
-        this.formControl.setValue(suggestion.value as string);
+        this.formControl.setValue(suggestion.value as string, { emitEvent: false });
         this.setValue([suggestion.value as string]);
         this.setSuggestionState(suggestion, 'ACCEPTED');
     }
