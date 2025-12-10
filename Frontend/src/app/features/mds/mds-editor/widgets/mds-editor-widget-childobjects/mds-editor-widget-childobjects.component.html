@@ -1,4 +1,4 @@
-<div class="childobject-wrapper" *ngIf="isSupported">
+<div class="childobject-wrapper" *ngIf="isSupported && mdsEditorValues.editorMode !== 'viewer'">
   <div class="loading" *ngIf="loading$ | async">
     <es-spinner-small [diameter]="30"></es-spinner-small>
   </div>
