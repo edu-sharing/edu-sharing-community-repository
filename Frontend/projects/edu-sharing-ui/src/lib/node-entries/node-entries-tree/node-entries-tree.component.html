@@ -110,9 +110,9 @@
           [attr.id]="'toggle-' + node.item.ref.id"
           class="toggle-button fade"
           role="button"
-          matTreeNodeToggle
           tabindex="0"
           [attr.aria-label]="'Toggle ' + node.item.title"
+          (click)="toggleNode(node, $event)"
         >
           <i [esIcon]="treeControl.isExpanded(node) ? 'expand_less' : 'chevron_right'"></i>
         </a>

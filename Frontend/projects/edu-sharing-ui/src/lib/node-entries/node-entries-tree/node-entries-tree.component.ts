@@ -143,6 +143,57 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     }
 
     /**
+     * Toggles the expansion state of a given node.
+     *
+     * @param flatNode
+     * @param event
+     */
+    async toggleNode(flatNode: DynamicFlatNode, event: Event): Promise<void> {
+        event.preventDefault();
+        event.stopPropagation();
+        // if the node is not already expanded, check for its children being selected before expanding it
+        if (!this.treeControl.isExpanded(flatNode)) {
+            await this.selectNodeChildren(flatNode);
+            this.treeControl.expand(flatNode);
+        } else {
+            this.treeControl.collapse(flatNode);
+        }
+    }
+
+    /**
+     * Handle the click event on a node by toggling its selection and expanding its children.
+     *
+     * @param flatNode
+     */
+    async updateSelectedNodes(flatNode: DynamicFlatNode): Promise<void> {
+        if (flatNode.level === 0) {
+            return;
+        }
+        this.entriesService.selection.toggle(flatNode.item as T);
+        await this.selectNodeChildren(flatNode);
+        this.treeControl.expand(flatNode);
+    }
+
+    /**
+     * Helper function to select the node children in a tree if the given node is selected.
+     *
+     * @param flatNode
+     */
+    private async selectNodeChildren(flatNode: DynamicFlatNode): Promise<void> {
+        if (this.entriesService.selection.isSelected(flatNode.item as T)) {
+            // check for children being selected, too, before expanding the node
+            flatNode.isLoading.set(true);
+            const nodeChildren = await this.treeNodeService.getChildren(flatNode.item);
+            nodeChildren.forEach((child) => {
+                if (child && !this.entriesService.selection.isSelected(child as T)) {
+                    this.entriesService.selection.toggle(child as T);
+                }
+            });
+            flatNode.isLoading.set(false);
+        }
+    }
+
+    /**
      * Loads further children of a node parent.
      *
      * @param node
@@ -157,37 +208,13 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
         }
     }
 
-    /**
-     * Handle the click event on a node by toggling its selection and expanding its children.
-     *
-     * @param flatNode
-     */
-    async updateSelectedNodes(flatNode: DynamicFlatNode): Promise<void> {
-        if (flatNode.level === 0) {
-            return;
-        }
-        this.entriesService.selection.toggle(flatNode.item as T);
-        if (this.entriesService.selection.isSelected(flatNode.item as T)) {
-            // check for children being selected, too, before expanding the node
-            flatNode.isLoading.set(true);
-            const nodeChildren = await this.treeNodeService.getChildren(flatNode.item);
-            nodeChildren.forEach((child) => {
-                if (child && !this.entriesService.selection.isSelected(child as T)) {
-                    this.entriesService.selection.toggle(child as T);
-                }
-            });
-            flatNode.isLoading.set(false);
-            this.treeControl.expand(flatNode);
-        }
-    }
-
     canDrop = (dragData: DragData<T>): CanDrop => {
         return this.entriesService.dragDrop.dropAllowed?.(
             this.nodesDragDropService.convertDragData(this.elementRef, dragData),
         );
     };
 
-    async drop(dragData: DragData<Node>) {
+    async drop(dragData: DragData<Node>): Promise<void> {
         this.entriesService.dragDrop.dropped(dragData.target, {
             element: dragData.draggedNodes,
             mode: dragData.action,
