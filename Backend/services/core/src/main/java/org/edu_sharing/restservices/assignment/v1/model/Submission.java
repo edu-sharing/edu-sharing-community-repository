@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.UserSimple;
 
+import java.util.Date;
+
 public record Submission(
         @JsonProperty(required = true)
         NodeRef ref,
@@ -16,13 +18,11 @@ public record Submission(
         @JsonProperty(required = true)
         Status submissionStatus,
         @JsonProperty(required = true)
-        Status validationStatus
-
-        /**
-         * @TODO: We would need a date of at least
-         * the date of submission (from the student)
-         * The date of getting it back (from the teacher)
-         */
+        Status validationStatus,
+        @Schema(description = "The date of submission (from the assignee)")
+        Date submissionDate,
+        @Schema(description = "The date of getting it back (from the coordinator)")
+        Date returnDate
 ) {
     public enum Status {
         NOT_STARTED,

@@ -330,6 +330,10 @@
             },
             "type": "array"
           },
+          "submitted": {
+            "description": "For Assignee: Shows whether the the assignee has submitted the assignment or not.\nFor Coordinator: Shows whether all assignees have submitted the assignment or not.\nOnly valid for Assignments of type SUBMISSION\n",
+            "type": "boolean"
+          },
           "summary": {
             "type": "string"
           },
@@ -7383,6 +7387,16 @@
           },
           "ref": {
             "$ref": "#/components/schemas/NodeRef"
+          },
+          "returnDate": {
+            "description": "The date of getting it back (from the coordinator)",
+            "format": "date-time",
+            "type": "string"
+          },
+          "submissionDate": {
+            "description": "The date of submission (from the assignee)",
+            "format": "date-time",
+            "type": "string"
           },
           "submissionStatus": {
             "enum": [

@@ -346,6 +346,7 @@ public class SubmissionAssignmentDaoImpl extends BasicNodeDaoImpl implements Ass
                 UserSimple.create(authorityService.getUser(creator), creator),
                 getCreateDate(),
                 getEndDate(),
+                submissions.stream().allMatch(x->x.submissionStatus().equals(Submission.Status.FINISHED)),
                 getStatus(),
                 getType(),
                 getAllowAdditionalDocumentSubmissions(),

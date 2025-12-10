@@ -4,9 +4,6 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.security.AuthorityType;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -14,11 +11,9 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.security.RunAsSystem;
 import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
-import org.edu_sharing.restservices.MissingResourceException;
 import org.edu_sharing.restservices.assignment.v1.model.Assignment;
 import org.edu_sharing.restservices.assignment.v1.model.AssignmentFileRequest;
 import org.edu_sharing.restservices.assignment.v1.model.CreateAssignmentRequest;
-import org.edu_sharing.restservices.assignment.v1.model.Submission;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.restservices.shared.UserSimple;
 import org.edu_sharing.service.assignment.AssignmentConfig;
@@ -35,7 +30,6 @@ import org.edu_sharing.util.LazyProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 
-import javax.naming.OperationNotSupportedException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -227,6 +221,7 @@ final class AssignmentDaoImpl extends BasicNodeDaoImpl implements AssignmentDao 
                 UserSimple.create(authorityService.getUser(creator), creator),
                 getCreateDate(),
                 getEndDate(),
+                null,
                 getStatus(),
                 getType(),
                 getAllowAdditionalDocumentSubmissions(),

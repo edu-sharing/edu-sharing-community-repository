@@ -2614,6 +2614,14 @@
                     <type>d:text</type>
                     <multiple>false</multiple>
                 </property>
+                <property name="ccm:submission_submission_date">
+                    <type>d:date</type>
+                    <multiple>false</multiple>
+                </property>
+                <property name="ccm:submission_return_date">
+                    <type>d:date</type>
+                    <multiple>false</multiple>
+                </property>
                 <property name="ccm:submission_validation_status">
                     <type>d:text</type>
                     <multiple>false</multiple>

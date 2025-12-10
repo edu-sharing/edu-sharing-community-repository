@@ -52,10 +52,12 @@ public record Assignment(
         Date created,
         Date endTime,
 
-        /**
-         * @TODO: We also need an personalStatus or similar field which reflects the status for the current fetching
-         * user. I.e. if he already submitted his data if it is of type SUBMITTABLE
-         */
+        @Schema(description = """
+                For Assignee: Shows whether the the assignee has submitted the assignment or not.
+                For Coordinator: Shows whether all assignees have submitted the assignment or not.
+                Only valid for Assignments of type SUBMISSION
+                """)
+        Boolean submitted,
 
         @NotNull
         @JsonProperty(required = true)

@@ -74,7 +74,9 @@ final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao 
                     getValidationNotes(),
                     getFeedback(),
                     getStatus(),
-                    getValidationStatus()
+                    getValidationStatus(),
+                    getSubmissionDate(),
+                    getReturnDate()
             );
         } else {
             return new Submission(
@@ -83,9 +85,19 @@ final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao 
                     null,
                     isReturned() ? getFeedback() : null,
                     getStatus(),
-                    isReturned() ? getValidationStatus() : Submission.Status.PENDING
+                    isReturned() ? getValidationStatus() : Submission.Status.PENDING,
+                    getSubmissionDate(),
+                    getReturnDate()
             );
         }
+    }
+
+    private Date getReturnDate() {
+        return propertyMapper.get().getDate(CCConstants.CCM_PROP_SUBMISSION_RETURN_DATE);
+    }
+
+    private Date getSubmissionDate() {
+        return propertyMapper.get().getDate(CCConstants.CCM_PROP_SUBMISSION_SUBMISSION_DATE);
     }
 
     @Override
@@ -106,6 +118,7 @@ final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao 
             Map<String, Object> properties = new HashMap<>();
             if (request.validationStatus() != null) {
                 properties.put(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, request.validationStatus().name());
+                properties.put(CCConstants.CCM_PROP_SUBMISSION_RETURN_DATE, request.validationStatus() == Submission.Status.FINISHED ? new Date() : null);
                 statusChanged = true;
             }
 
@@ -157,8 +170,13 @@ final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao 
         validateAssigneeCanChangeSubmission();
         validateAssignmentCoordinatorCanChangeState(status);
 
+        Map<String, Object> properties = new HashMap<>() {{
+            put(CCConstants.CCM_PROP_SUBMISSION_STATUS, status.name());
+            put(CCConstants.CCM_PROP_SUBMISSION_SUBMISSION_DATE, status == Submission.Status.FINISHED ? new Date() : null);
+        }};
+
         AuthenticationUtil.runAsSystem(() -> {
-            nodeService.updateNodeNative(nodeId, Map.of(CCConstants.CCM_PROP_SUBMISSION_STATUS, status.name()));
+            nodeService.updateNodeNative(nodeId, properties);
             return null;
         });
         refresh();
@@ -228,7 +246,7 @@ final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao 
     @Override
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
     public void delete() {
-        if(!exists()){
+        if (!exists()) {
             return;
         }
         validateAssigneeCanChangeSubmission();
@@ -300,11 +318,11 @@ final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao 
 
 
     private void validateAssignmentCoordinatorCanChangeState(Submission.Status newStatus) {
-        if(!AssignmentUtil.isAssignmentCoordinator(permissionService, nodeId)){
+        if (!AssignmentUtil.isAssignmentCoordinator(permissionService, nodeId)) {
             return;
         }
 
-        if(getStatus() != Submission.Status.FINISHED && newStatus != Submission.Status.PENDING) {
+        if (getStatus() != Submission.Status.FINISHED && newStatus != Submission.Status.PENDING) {
             throw new InsufficientPermissionException("Submission status can only be changed from FINISHED to PENDING by assignment coordinator");
         }
     }
