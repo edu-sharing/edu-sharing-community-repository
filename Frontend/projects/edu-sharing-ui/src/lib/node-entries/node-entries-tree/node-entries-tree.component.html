@@ -1,24 +1,3 @@
-<!-- dropdown button for expand/collapse + settings button -->
-<div class="tree-toolbar">
-  <button
-    mat-stroked-button
-    [matMenuTriggerFor]="menu"
-    [disabled]="!dataSource || !treeControl || !dataSource.data?.length"
-  >
-    ausklappen
-    <i esIcon="arrow_drop_down" matIconSuffix></i>
-  </button>
-
-  <mat-menu #menu="matMenu">
-    <button mat-menu-item (click)="collapseNodes()">einklappen</button>
-    <button mat-menu-item (click)="expandNodes()">ausklappen</button>
-  </mat-menu>
-
-  <button mat-icon-button aria-label="Settings" [disabled]="true">
-    <i esIcon="settings"></i>
-  </button>
-</div>
-
 <!-- tree component -->
 <div class="tree-container" cdkDropList [cdkDropListSortingDisabled]="true">
   <es-dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></es-dropdown>

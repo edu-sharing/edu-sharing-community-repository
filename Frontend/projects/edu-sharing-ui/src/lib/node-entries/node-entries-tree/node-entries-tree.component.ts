@@ -125,24 +125,6 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     }
 
     /**
-     * Collapses all nodes of the tree.
-     */
-    collapseNodes(): void {
-        this.treeControl.collapseAll();
-    }
-
-    /**
-     * Expands the first level of the tree.
-     */
-    expandNodes(): void {
-        this.treeControl.dataNodes?.forEach((node) => {
-            if (node.level === 0 && node.expandable) {
-                this.treeControl.expand(node);
-            }
-        });
-    }
-
-    /**
      * Toggles the expansion state of a given node.
      *
      * @param flatNode
