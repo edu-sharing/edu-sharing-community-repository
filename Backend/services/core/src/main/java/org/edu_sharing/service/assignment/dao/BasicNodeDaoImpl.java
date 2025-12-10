@@ -50,15 +50,9 @@ abstract class BasicNodeDaoImpl implements BasicNodeDao {
         return StringUtils.isNotBlank(nodeId) && nodeService.exists(nodeId);
     }
 
-    @Override
-    public void delete() {
-        try {
-            log.debug("Deleting {} {}", this.getClass().getSimpleName(), nodeId);
-            nodeService.removeNode(nodeId, null, true);
-        } catch (Throwable t) {
-            log.error("Error while deleting {}", this.getClass().getSimpleName(), t);
-            throw new RuntimeException(t);
-        }
+    protected void doDelete() {
+        log.debug("Deleting {} {}", this.getClass().getSimpleName(), nodeId);
+        nodeService.removeNode(nodeId, null, true);
     }
 
 

@@ -169,6 +169,7 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
         });
     }
 
+
     private void handleSubmissionFile(SubmissionFileRequest request, InputStream fileInputStream) {
         if (StringUtils.isNotBlank(request.originalFile()) && fileInputStream != null) {
             throw new IllegalArgumentException("Cannot create submission file with original file and file input stream");
@@ -271,9 +272,11 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
     @Override
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
     public void delete() {
-        validateExists();
+        if(!exists()){
+            return;
+        }
         submissionDao.validateAssigneeCanChangeSubmission();
-        nodeService.removeNode(getNodeId(), null, false);
+        doDelete();
         refresh();
     }
 
@@ -299,6 +302,7 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
     }
 
     @Override
+    @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
     public Submission.Status getValidationStatus() {
         return propertyMapper.get().getEnum(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, Submission.Status.class);
     }

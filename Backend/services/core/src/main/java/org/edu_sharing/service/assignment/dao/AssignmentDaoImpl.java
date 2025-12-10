@@ -147,10 +147,12 @@ final class AssignmentDaoImpl extends BasicNodeDaoImpl implements AssignmentDao 
         if (StringUtils.isNotBlank(nodeId)) {
             validateExists();
 
-            switch (getStatus()) {
-                case FINISHED:
-                case CANCELED:
-                    throw new IllegalStateException("Assignment with id " + nodeId + " is not in status OPEN, cannot update");
+            if(getType() == Assignment.Type.SUBMISSION) {
+                switch (getStatus()) {
+                    case FINISHED:
+                    case CANCELED:
+                        throw new IllegalStateException("Assignment with id " + nodeId + " is not in status OPEN, cannot update");
+                }
             }
 
             log.debug("Update assignment node {} with {}", nodeId, properties);
@@ -236,8 +238,21 @@ final class AssignmentDaoImpl extends BasicNodeDaoImpl implements AssignmentDao 
             }
         });
 
-
         updateAssignmentFiles(request);
+
+        refresh();
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
+    public void delete() {
+        if(!exists()){
+            return;
+        }
+
+        // TODO can the user do this action
+
+        doDelete();
         refresh();
     }
 
@@ -413,5 +428,4 @@ final class AssignmentDaoImpl extends BasicNodeDaoImpl implements AssignmentDao 
         }
         return assignmentFileDao;
     }
-
 }
