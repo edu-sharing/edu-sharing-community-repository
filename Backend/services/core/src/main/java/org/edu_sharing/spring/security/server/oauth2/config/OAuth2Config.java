@@ -18,7 +18,8 @@ public class OAuth2Config {
         List<String> authorizationGrantTypes;
         String redirectUri;
         List<String> scopes;
-        String expires;
+        String accessTokenExpires;
+        String refreshTokenExpires;
         boolean requireConsent;
     }
 }

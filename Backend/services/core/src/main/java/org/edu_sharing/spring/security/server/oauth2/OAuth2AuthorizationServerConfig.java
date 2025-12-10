@@ -118,9 +118,14 @@ public class OAuth2AuthorizationServerConfig {
                                 }
                                 builder.clientSettings(ClientSettings.builder().requireAuthorizationConsent(c.isRequireConsent()).build());
                                 if(!c.getRedirectUri().isEmpty()) builder.redirectUri(c.getRedirectUri());
-                                if(!c.getExpires().isEmpty()) builder.tokenSettings(TokenSettings.builder()
-                                        .accessTokenTimeToLive(Duration.parse(c.getExpires()))
-                                        .build());
+                                TokenSettings.Builder tokenSettings = TokenSettings.builder();
+                                if(!c.getAccessTokenExpires().isEmpty()) {
+                                    tokenSettings.accessTokenTimeToLive(Duration.parse(c.getAccessTokenExpires()));
+                                }
+                                if(!c.getRefreshTokenExpires().isEmpty()) {
+                                    tokenSettings.accessTokenTimeToLive(Duration.parse(c.getRefreshTokenExpires()));
+                                }
+                                builder.tokenSettings(tokenSettings.build());
                                 c.getAuthorizationGrantTypes().forEach(gt -> builder.authorizationGrantType(new AuthorizationGrantType(gt)));
                                 c.getScopes().forEach(builder::scope);
                                 return builder.build();
