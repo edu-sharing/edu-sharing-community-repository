@@ -129,6 +129,50 @@
     }
 }
 
+.collection-display-type {
+    margin-top: 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    // remove group border
+    border: none;
+
+    .mat-button-toggle {
+        border: none;
+        border-radius: 50%;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+
+        .mat-icon {
+            font-size: 18px;
+        }
+
+        &::ng-deep {
+            .mat-button-toggle-button {
+                height: 100%;
+            }
+
+            .mat-button-toggle-label-content {
+                padding: 0;
+                line-height: 100%;
+            }
+        }
+    }
+
+    .mat-button-toggle-unchecked {
+        border: 1px solid red;
+        color: inherit;
+        background: inherit;
+    }
+
+    .mat-button-toggle-checked {
+        border: 1px solid var(--primary);
+        color: inherit;
+        background: inherit;
+    }
+}
+
 // fix actionbar layout buttons do not align with search field
 es-actionbar {
     display: flex;

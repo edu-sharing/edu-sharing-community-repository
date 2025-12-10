@@ -31,7 +31,6 @@ import { NodeEntriesDataType } from '../data-type';
     selector: 'es-node-entries-tree',
     templateUrl: './node-entries-tree.component.html',
     styleUrls: ['./node-entries-tree.component.scss'],
-    providers: [TreeNodeService],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false,
 })

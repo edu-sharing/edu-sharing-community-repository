@@ -42,6 +42,8 @@ export * from './node-entries/node-data-source';
 export * from './node-entries/node-data-source-remote';
 export * from './node-entries/node-entries-global.service';
 export * from './node-entries/node-entries-card/node-entries-card.component';
+export * from './node-entries/node-entries-tree/dynamic-flat-node';
+export * from './node-entries/node-entries-tree/tree-node.service';
 export * from './node-entries/node-entries-wrapper.component';
 export * from './node-entries/node-entries.module';
 export * from './mds-viewer/mds-viewer.component';

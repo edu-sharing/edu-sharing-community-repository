@@ -11,6 +11,7 @@ import {
     ViewChild,
     WritableSignal,
 } from '@angular/core';
+import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { MatTabChangeEvent } from '@angular/material/tabs';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -42,6 +43,7 @@ import {
     NodeEntriesService,
     NodeEntriesWrapperComponent,
     Scope,
+    TreeNodeService,
 } from 'ngx-edu-sharing-ui';
 import { firstValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
@@ -80,7 +82,7 @@ enum StepType {
     templateUrl: 'nodes-selector.component.html',
     styleUrls: ['nodes-selector.component.scss'],
     imports: [SharedModule, AddMaterialDialogModule],
-    providers: [NodeEntriesService],
+    providers: [NodeEntriesService, TreeNodeService],
 })
 export class NodesSelectorComponent implements OnInit, OnChanges {
     protected readonly i18nPrefix: string = 'EDITORIAL.OPTIONS.SORT_INTO_TAB.';
@@ -202,7 +204,11 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
 
     // collections tab
     collectionsColumns: ColumnType;
-    dataSourceCollections: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
+    collectionsDisplayType: WritableSignal<NodeEntriesDisplayType> = signal(
+        NodeEntriesDisplayType.Tree,
+    );
+    dataSourceCollectionsTree: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
+    dataSourceCollectionsFlat: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
 
     // workspace tab
     workspaceColumns: ColumnType;
@@ -228,6 +234,7 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         private searchService: SearchService,
         private toast: Toast,
         private translate: TranslateService,
+        private treeNodeService: TreeNodeService,
     ) {}
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -339,6 +346,39 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     clearSearch(): void {
         this.searchText = '';
         void this.executeSearch();
+    }
+
+    /**
+     * Manually trigger the collections display type change.
+     *
+     * @param event
+     */
+    async onCollectionsDisplayTypeChange(event: MatButtonToggleChange): Promise<void> {
+        const nextDisplayType = event.value;
+        const existingDisplayType = this.collectionsDisplayType();
+        // switching from tree view into a flat view -> find the deepest level of the tree to be displayed
+        if (
+            existingDisplayType === NodeEntriesDisplayType.Tree &&
+            [NodeEntriesDisplayType.Grid, NodeEntriesDisplayType.Table].includes(nextDisplayType)
+        ) {
+            // reset the flat datasource
+            this.dataSourceCollectionsFlat = new NodeDataSource<Node | any>();
+            this.dataSourceCollectionsFlat.isLoading = true;
+            const deepestNode = this.findDeepestNodeFromDataMap(this.treeNodeService.dataMap)?.node;
+            if (!deepestNode) {
+                this.dataSourceCollectionsFlat.isLoading = false;
+                return;
+            }
+            // retrieve the children of the deepestNode to retrieve the level to be displayed
+            const nodes = this.treeNodeService.dataMap.get(deepestNode.parent.id);
+            if (!nodes?.length) {
+                this.dataSourceCollectionsFlat.isLoading = false;
+                return;
+            }
+            this.dataSourceCollectionsFlat.setData(nodes);
+            this.dataSourceCollectionsFlat.isLoading = false;
+        }
+        this.collectionsDisplayType.set(nextDisplayType);
     }
 
     /**
@@ -574,10 +614,10 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
      */
     private async updateCollectionsDataSource(): Promise<void> {
         // return, if dataSource is already initialized
-        if (!this.dataSourceCollections.isEmpty()) {
+        if (!this.dataSourceCollectionsTree.isEmpty()) {
             return;
         }
-        this.dataSourceCollections.isLoading = true;
+        this.dataSourceCollectionsTree.isLoading = true;
         let initialData: Partial<Node>[] = [];
         const request = {
             sortBy: [this.nodeHelperService.getSortByForCollection(ROOT).active],
@@ -625,8 +665,8 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         });
         initialData.push(editorialCollectionsNode);
         initialData = initialData.concat(subEditorialCollections.collections);
-        this.dataSourceCollections.setData(initialData);
-        this.dataSourceCollections.isLoading = false;
+        this.dataSourceCollectionsTree.setData(initialData);
+        this.dataSourceCollectionsTree.isLoading = false;
     }
 
     /**
@@ -748,6 +788,42 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
                 resolveCollections: true,
             },
         };
+    }
+
+    /**
+     * Helper function to find the deepest node in a map containing refId to node children.
+     *
+     * @param dataMap
+     */
+    private findDeepestNodeFromDataMap(
+        dataMap: Map<string, Partial<Node>[]>,
+    ): { node: Partial<Node>; level: number } | null {
+        const rootNodes = dataMap.get('__root__') || [];
+        if (rootNodes.length === 0) return null;
+
+        let deepestNode: Partial<Node> | null = null;
+        let maxLevel = -1;
+
+        // BFS queue: [node, level]
+        const queue: [Partial<Node>, number][] = rootNodes.map((node) => [node, 0]);
+
+        while (queue.length > 0) {
+            const [currentNode, level] = queue.shift()!;
+
+            // update deepest if current is deeper
+            if (level > maxLevel) {
+                maxLevel = level;
+                deepestNode = currentNode;
+            }
+
+            // add children to queue
+            const children = dataMap.get(currentNode.ref.id) || [];
+            for (const child of children) {
+                queue.push([child, level + 1]);
+            }
+        }
+
+        return deepestNode ? { node: deepestNode, level: maxLevel } : null;
     }
 
     protected readonly InteractionType = InteractionType;

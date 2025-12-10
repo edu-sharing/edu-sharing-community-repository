@@ -148,12 +148,35 @@
             <i esIcon="filter_list"></i>
           </button>
         </div>
+        <!-- TODO: move into actionbar -->
+        <mat-button-toggle-group
+          class="collection-display-type"
+          hideSingleSelectionIndicator
+          [value]="collectionsDisplayType()"
+          (change)="onCollectionsDisplayTypeChange($event)"
+        >
+          <mat-button-toggle [value]="NodeEntriesDisplayType.Grid">
+            <i esIcon="grid_view"></i>
+          </mat-button-toggle>
+
+          <mat-button-toggle [value]="NodeEntriesDisplayType.Table">
+            <i esIcon="list"></i>
+          </mat-button-toggle>
+
+          <mat-button-toggle [value]="NodeEntriesDisplayType.Tree">
+            <i esIcon="account_tree"></i>
+          </mat-button-toggle>
+        </mat-button-toggle-group>
         <!-- tree component -->
         <es-node-entries-wrapper
           *ngIf="selectedTab() === TabType.COLLECTIONS"
+          [displayType]="collectionsDisplayType()"
           [columns]="collectionsColumns"
-          [dataSource]="dataSourceCollections"
-          [displayType]="NodeEntriesDisplayType.Tree"
+          [dataSource]="
+            collectionsDisplayType() === NodeEntriesDisplayType.Tree
+              ? dataSourceCollectionsTree
+              : dataSourceCollectionsFlat
+          "
           [dragDrop]="{
             dragAllowed: true,
             dropAllowed: canDropOnCollection,
