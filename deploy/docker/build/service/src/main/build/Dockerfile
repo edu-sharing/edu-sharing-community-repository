@@ -30,6 +30,7 @@ RUN set -eux \
         tomcat/webapps/alfresco/WEB-INF/lib/oauth2-oidc-sdk-* \
         tomcat/webapps/alfresco/WEB-INF/lib/tika-* \
         tomcat/webapps/alfresco/WEB-INF/lib/bcutil-jdk18on-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/commons-collections4-* \
         tomcat/webapps/alfresco/WEB-INF/lib/commons-exec-* \
         tomcat/webapps/alfresco/WEB-INF/lib/dd-plist-* \
         tomcat/webapps/alfresco/WEB-INF/lib/jackcess-4* \
