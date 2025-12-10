@@ -88,8 +88,7 @@ final class AssignmentFileDaoImpl extends BasicNodeDaoImpl implements Assignment
         return new AssignmentFile(
                 getNodeRef(),
                 referNode.get(),
-                getDocumentRole(),
-                isDone());
+                getDocumentRole());
     }
 
     @Override
@@ -116,14 +115,21 @@ final class AssignmentFileDaoImpl extends BasicNodeDaoImpl implements Assignment
             properties.put(CCConstants.CCM_PROP_ASSIGNMENT_FILE_DOCUMENT_TYPE, assignmentFileRequest.documentRole().name());
         }
 
-        if (!Objects.equals(assignmentFileRequest.isDone(), isDone())) {
-            properties.put(CCConstants.CCM_PROP_ASSIGNMENT_FILE_IS_DONE, assignmentFileRequest.isDone());
-        }
-
         if (!properties.isEmpty()) {
             nodeService.updateNodeNative(nodeId, properties);
             refresh();
         }
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
+    public void delete() {
+        if(!exists()){
+            return;
+        }
+        validateCanChangeAssignment();
+        doDelete();
+        refresh();
     }
 
     private void handleReferenceCopy(@NotNull AssignmentFileRequest assignmentFileRequest, String currentReferNodeId, Map<String, Object> properties) {
@@ -152,27 +158,22 @@ final class AssignmentFileDaoImpl extends BasicNodeDaoImpl implements Assignment
     }
 
     @Override
-    public Boolean isDone() {
-        return propertyMapper.get().getBoolean(CCConstants.CCM_PROP_ASSIGNMENT_FILE_IS_DONE, false);
-    }
-
-    @Override
     public AssignmentFile.Role getDocumentRole() {
         return propertyMapper.get().getEnum(CCConstants.CCM_PROP_ASSIGNMENT_FILE_DOCUMENT_TYPE, AssignmentFile.Role.class);
     }
 
     private void validateCanChangeAssignment() {
-        // TODO who can change this and under which conditions?
-        if (assignmentDao.getStatus() != Assignment.Status.DRAFT) {
-            throw new IllegalStateException("Cannot create assignment file for assignment in status " + assignmentDao.getStatus());
+        switch (assignmentDao.getStatus()) {
+            case DRAFT -> {
+            }
+            case ASSIGNED -> {
+                if (!assignmentDao.getSubmissions().isEmpty()) {
+                    throw new IllegalStateException("Cannot edit assignment with existing submissions.");
+                }
+            }
+            case FINISHED -> throw new IllegalStateException("Cannot edit assignment for finished assignment.");
+            case CANCELED -> throw new IllegalStateException("Cannot edit assignment for canceled assignment.");
         }
 
-        if (!assignmentDao.getSubmissions().isEmpty()) {
-            throw new IllegalStateException("Cannot create assignment file for assignment with submissions.");
-        }
-
-        if (exists() && isDone()) {
-            throw new IllegalStateException("Cannot change assignment file for assignment in status done");
-        }
     }
 }

@@ -54,15 +54,6 @@ public interface AssignmentFileDao extends BasicNodeDao {
 
 
     /**
-     * Determines whether the AssignmentFile is marked as completed or finished.
-     *
-     * @return a {@code Boolean} indicating the completion status of the AssignmentFile.
-     *         Returns {@code true} if the AssignmentFile is completed, {@code false} otherwise.
-     *         May also return {@code null} if the status is not explicitly set.
-     */
-    Boolean isDone();
-
-    /**
      * Retrieves the role of the document associated with the current AssignmentFile.
      *
      * @return the document role as an {@code AssignmentFile.Role} enumeration value.

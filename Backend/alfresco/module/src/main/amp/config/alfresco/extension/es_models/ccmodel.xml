@@ -2592,10 +2592,6 @@
         <aspect name="ccm:assignment_file_metadata">
             <title>Data for assignment objects</title>
             <properties>
-                <property name="ccm:assigmentfile_is_done">
-                    <type>d:boolean</type>
-                    <multiple>false</multiple>
-                </property>
                 <property name="ccm:assigmentfile_document_type">
                     <type>d:text</type>
                     <multiple>false</multiple>

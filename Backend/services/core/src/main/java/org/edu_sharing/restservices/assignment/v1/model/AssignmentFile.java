@@ -12,16 +12,13 @@ import org.edu_sharing.restservices.shared.NodeRef;
  * @param referNode    The node object that this file refers to, providing further details about the file if available.
  * @param documentRole The role of the document in the context of the assignment, which can either be SUPPLEMENTARY
  *                     or SUBMITTABLE. This is required.
- * @param isDone       Indicates whether the associated task for this file is complete. This is required.
  */
 public record AssignmentFile(
         @JsonProperty(required = true)
         NodeRef ref,
         Node referNode,
         @JsonProperty(required = true)
-        Role documentRole,
-        @JsonProperty(required = true)
-        boolean isDone
+        Role documentRole
 ) {
     public enum Role {
         SUPPLEMENTARY,
