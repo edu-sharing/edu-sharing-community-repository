@@ -1,4 +1,10 @@
-import { ApplicationConfig, EventEmitter, importProvidersFrom, Injectable } from '@angular/core';
+import {
+    ApplicationConfig,
+    EventEmitter,
+    importProvidersFrom,
+    Injectable,
+    NgModule,
+} from '@angular/core';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -7,6 +13,7 @@ import {
     About,
     AboutService,
     AuthenticationService,
+    ClientConfig,
     ConfigService,
     HOME_REPOSITORY,
     LoginInfo,
@@ -24,15 +31,18 @@ import {
     UserSimple,
     Variables,
 } from 'ngx-edu-sharing-api';
-import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
+import { BehaviorSubject, forkJoin, Observable, of, Subject } from 'rxjs';
 import { CordovaService } from '../../../services/cordova.service';
-import { Toast } from '../../../services/toast';
+import { Toast as ToastService } from '../../../services/toast';
 import { InputStatus, MdsWidgetValue } from '../types/types';
 import { MdsEditorInstanceService } from './mds-editor-instance.service';
 import {
+    Helper,
     InitialValues,
     MdsValueList,
     MdsViewerService,
+    Toast,
+    TRANSLATION_LIST,
     Values,
     VCard,
     ViewInstanceService,
@@ -42,15 +52,58 @@ import {
     SuggestionResponseDto as SuggestionLlm,
     Suggestions$Params,
 } from 'ngx-edu-sharing-b-api';
-import { HttpContext } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
+import { catchError, map, shareReplay, tap } from 'rxjs/operators';
 
-export const translateProvider = {
-    instant: (v: string) => v,
-    get: (v: string) => of(v),
-    onTranslationChange: of({ lang: 'none' }),
-    onDefaultLangChange: of({ lang: 'none' }),
-    onLangChange: of({}),
-};
+@Injectable()
+export class translateProvider {
+    private translation$: Observable<any> | null = null;
+    private cache$ = new BehaviorSubject(null);
+
+    constructor(private httpClient: HttpClient) {}
+
+    instant(v: string, args: any = {}) {
+        let str = Helper.getDotPathFromNestedObject(this.cache$?.value, v)?.replace(
+            /{{GENDER_SEPARATOR}}/g,
+            '*',
+        );
+        for (const k of Object.keys(args)) {
+            str = (str || v).replace(new RegExp('{{\\s*' + k + '\\s*}}', 'g'), args[k]);
+        }
+
+        return str;
+    }
+
+    get(v: string, args: any = {}): Observable<any> {
+        if (!this.translation$) {
+            const sources = TRANSLATION_LIST.map((s) => s + '/de.json');
+
+            const requests = sources.map((file) =>
+                this.httpClient
+                    .get(`/assets/i18n/${file}`)
+                    .pipe(
+                        catchError(() =>
+                            this.httpClient
+                                .get(`http://localhost:4200/edu-sharing/assets/i18n/${file}`)
+                                .pipe(catchError(() => of({}))),
+                        ),
+                    ),
+            );
+
+            this.translation$ = forkJoin(requests).pipe(
+                map((results) => results.reduce((acc, cur) => ({ ...acc, ...cur }), {})),
+                tap((merged) => this.cache$.next(merged)),
+                shareReplay(1),
+            );
+        }
+
+        return this.translation$.pipe(map((_) => this.instant(v, args)));
+    }
+
+    onTranslationChange = of({ lang: 'none' });
+    onDefaultLangChange = of({ lang: 'none' });
+    onLangChange = of({});
+}
 @Injectable()
 export class MdsEditorInstanceServiceMock extends MdsEditorInstanceService {
     nodes$ = new BehaviorSubject<Node[]>([
@@ -64,6 +117,21 @@ export class MdsEditorInstanceServiceMock extends MdsEditorInstanceService {
     ] as Node[]);
     widgets = new BehaviorSubject([(window as any).widget]);
 }
+@NgModule()
+export class I18nModule {
+    constructor(translate: TranslateService) {
+        translate.setDefaultLang('de');
+        translate.use('de');
+    }
+}
+
+@Injectable()
+export class ToastMock implements Toast {
+    error(errorObject: any, message?: string): void {}
+
+    toast(message: string, translationParameters?: any): void {}
+}
+
 @Injectable()
 export class MdsViewerServiceMock extends MdsViewerService {
     values$ = new BehaviorSubject({
@@ -103,6 +171,82 @@ export class ConfigServiceMock extends ConfigService {
     observeVariables(): Observable<Variables | null> {
         return of(null);
     }
+
+    observeConfig(): Observable<ClientConfig | any> {
+        const DEFAULT_SUPPORTED_LANGUAGES = [
+            'de',
+            'de-informal',
+            'de-no-binnen-i',
+            'en',
+            'fr',
+            'it',
+            'none',
+        ];
+
+        // @ts-ignore
+        const config: ClientConfig | any = {
+            frontpage: {
+                dashboard: {
+                    shortcuts: {
+                        maxEntries: 6,
+                        entries: [
+                            {
+                                id: 'search',
+                                icon: 'search',
+                                url: '/edu-sharing/components/search',
+                                toolPermission: null,
+                                defaultVisibility: 'visible',
+                            },
+                            {
+                                id: 'workspace',
+                                icon: 'cloud',
+                                url: '/edu-sharing/components/workspace',
+                                toolPermission: 'TOOLPERMISSION_WORKSPACE',
+                                defaultVisibility: 'visible',
+                            },
+                            {
+                                id: 'mycollections',
+                                icon: 'layers',
+                                url: '/edu-sharing/components/collections?scope=MY',
+                                toolPermission: null,
+                                defaultVisibility: 'visible',
+                            },
+                            {
+                                id: 'invitedcollections',
+                                icon: 'group',
+                                url: '/edu-sharing/components/collections?scope=EDU_GROUPS',
+                                toolPermission: null,
+                                defaultVisibility: 'visible',
+                            },
+                            {
+                                id: 'publiccollections',
+                                icon: 'language',
+                                url: '/edu-sharing/components/collections?scope=EDU_ALL',
+                                toolPermission: null,
+                                defaultVisibility: 'hidden',
+                            },
+                            {
+                                id: 'aboutme',
+                                icon: 'person',
+                                url: '/edu-sharing/components/profiles/-me-',
+                                toolPermission: null,
+                                defaultVisibility: 'hidden',
+                            },
+                            {
+                                id: 'documentation',
+                                icon: 'book',
+                                url: 'https://docs.edu-sharing.com/de/edu-sharing-documentation',
+                                toolPermission: null,
+                                defaultVisibility: 'hidden',
+                            },
+                        ],
+                    },
+                },
+            },
+            supportedLanguages: DEFAULT_SUPPORTED_LANGUAGES,
+        };
+        return of(config);
+    }
 }
 @Injectable()
 export class NodeServiceMock extends NodeService {
@@ -130,11 +274,6 @@ export class AboutServiceMock extends AboutService {
             },
         });
     }
-}
-@Injectable()
-export class ToastMock extends Toast {
-    error(errorObject: any, message?: string): void {}
-    toast(message: string, translationParameters?: any): void {}
 }
 @Injectable()
 export class EduSharingLlmServiceMock extends EduSharingLlmService {
@@ -193,6 +332,16 @@ export class SuggestionsV1ServiceMock extends SuggestionsV1Service {
                 'ccm:tool_category': this.BaseSuggestion('ccm:tool_category', params.node, [
                     'communication',
                 ]),
+                'ccm:educationaltypicallearningtime': this.BaseSuggestion(
+                    'ccm:educationaltypicallearningtime',
+                    params.node,
+                    ['' + 3600_000],
+                ),
+                'ccm:educationaltypicalagerange': this.BaseSuggestion(
+                    'ccm:educationaltypicalagerange',
+                    params.node,
+                    ['6-12'],
+                ),
             },
         });
     }
@@ -211,10 +360,10 @@ export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     { provide: MdsService, useFactory: () => new MdsServiceMock(null) },
     ViewInstanceService,
     CordovaService,
-    Toast,
+    ToastService,
     {
         provide: TranslateService,
-        useValue: translateProvider,
+        useClass: translateProvider,
     },
     MatSnackBar,
     provideAnimations(),
@@ -342,7 +491,8 @@ export const Data: Values = {
     ['cclom:size']: ['1337'],
     ['cm:created']: [new Date().getTime() + ''],
     ['cm:modified']: [new Date().getTime() + ''],
-    ['ccm:educationaltypicalagerange_from']: ['1'],
+    ['ccm:educationaltypicallearningtime']: ['' + 600_000],
+    ['ccm:educationaltypicalagerange_from']: ['0'],
     ['ccm:educationaltypicalagerange_to']: ['99'],
     ['ccm:taxonid']: ['0200105', '0200101'],
     ['ccm:educationalcontext']: ['vocational education'],
@@ -1470,6 +1620,42 @@ export const DefaultMds: MdsDefinition = {
             format: null,
             min: null,
             max: null,
+            defaultMin: null,
+            defaultMax: null,
+            step: null,
+            allowValuespaceSuggestions: false,
+            hideIfEmpty: false,
+            allowempty: false,
+            defaultvalue: null,
+            countDefaultvalueAsFilter: false,
+            condition: null,
+            maxlength: 0,
+            interactionType: 'Input',
+            filterMode: 'disabled',
+            expandable: 'disabled',
+            aiConfigs: [],
+            isExtended: false,
+            isRequired: 'optional',
+            isSearchable: false,
+        },
+        {
+            ids: {},
+            id: 'ccm:educationaltypicallearningtime',
+            caption: 'Lernzeit',
+            bottomCaption: null,
+            icon: null,
+            type: 'duration',
+            link: null,
+            template: null,
+            configuration: null,
+            hasValues: false,
+            values: null,
+            subwidgets: null,
+            placeholder: null,
+            unit: null,
+            format: null,
+            min: 0,
+            max: 60 * 12,
             defaultMin: null,
             defaultMax: null,
             step: null,
@@ -16889,7 +17075,7 @@ export const DefaultMds: MdsDefinition = {
             id: 'node_general',
             caption: 'Allg. Informationen',
             icon: 'description',
-            html: '\n\t\t\t  <preview>\n              <ccm:wwwurl>\n              <cm:name>\n              <cclom:title><ccm:tool_category>\n              <ccm:educationallearningresourcetype>\n              <cclom:general_keyword>\n              <cclom:general_description>\n              <author>\n              <license>\n              <version>\n              <childobjects>\n\t\t\t\t',
+            html: '\n\t\t\t  <preview>\n              <ccm:wwwurl>\n              <cm:name>\n              <cclom:title><ccm:educationaltypicallearningtime><ccm:educationaltypicalagerange><ccm:tool_category>\n              <ccm:educationallearningresourcetype>\n              <cclom:general_keyword>\n              <cclom:general_description>\n              <author>\n              <license>\n              <version>\n              <childobjects>\n\t\t\t\t',
             rel: null,
             hideIfEmpty: false,
             isExtended: false,

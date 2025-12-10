@@ -63,7 +63,7 @@ export class MdsEditorWidgetSelectComponent extends MdsEditorWidgetBase implemen
             // skip first because the init state will cause a trigger
             this.formControl.valueChanges.subscribe((value) => {
                 this.setValue(value ? [value.id] : [null]);
-                if (this.aiSuggestion$.value && value.id !== this.aiSuggestion$.value.value) {
+                if (this.aiSuggestion$.value && value?.id !== this.aiSuggestion$.value.value) {
                     this.widget.setSuggestionState(this.aiSuggestion$, 'DECLINED');
                 }
             });
@@ -85,7 +85,7 @@ export class MdsEditorWidgetSelectComponent extends MdsEditorWidgetBase implemen
                             this.widget.definition.values,
                         );
                     }
-                } else if (!initialValue && !show) {
+                } else if (!initialValue && !show && this.aiSuggestion$.value) {
                     this.widget.setSuggestionState(this.aiSuggestion$, 'PENDING');
                     this.setValue(null);
                     this.formControl.setValue(null, { emitEvent: false });

@@ -6,7 +6,8 @@
 >
   <ngx-slider
     *ngIf="isRange"
-    class="ngx-slider-small"
+    class="ngx-slider-small mds-slider"
+    [class.isAiSuggestion]="(aiSuggestion$ | async)?.status === 'ACCEPTED'"
     [value]="currentValue[0]"
     [highValue]="currentValue[1]"
     [options]="sliderOptions"
