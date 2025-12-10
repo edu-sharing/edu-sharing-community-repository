@@ -14,7 +14,7 @@ import { RenderDataRequestWithToken } from 'ngx-rendering-service-api';
 import { PdfComponent } from 'ngx-rendering-service-lib';
 
 @Component({
-    selector: 'app-root',
+    selector: 'edu-sharing-render',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],
     standalone: false,
