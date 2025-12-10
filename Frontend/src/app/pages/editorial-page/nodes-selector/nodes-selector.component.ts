@@ -490,6 +490,12 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
                 });
             }
         } else if (this.currentStep() === StepType.SELECT) {
+            const selectedNode: Partial<Node> = this.highestSelectedNode();
+            // reset the default configuration and sync it with the view
+            this.copyRoot.set(true);
+            this.copyChildCollections.set(selectedNode.collection.childCollectionsCount > 0);
+            this.copyRefs.set(selectedNode.collection.childReferencesCount > 0);
+            // switch into configuration step
             this.currentStep.set(StepType.CONFIGURE);
         } else if (
             this.currentStep() === StepType.CONFIGURE &&
@@ -497,21 +503,17 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         ) {
             try {
                 this.toast.showProgressSpinner();
-                const selectedNode: Partial<Node> = this.selectedNodes()[0];
+                const selectedNode: Partial<Node> = this.highestSelectedNode();
                 if (!selectedNode) {
                     return;
                 }
-                // make sure to override the default values, if the necessary data does not exist
-                const copyChildCollections =
-                    selectedNode.collection.childCollectionsCount && this.copyChildCollections();
-                const copyRefs = selectedNode.collection.childReferencesCount && this.copyRefs();
                 const copyParams = {
                     repository: HOME_REPOSITORY,
                     sourceCollection: selectedNode.ref.id,
                     targetCollection: this.parent.ref.id,
                     copyRoot: this.copyRoot(),
-                    copyChildCollections,
-                    copyRefs,
+                    copyChildCollections: this.copyChildCollections(),
+                    copyRefs: this.copyRefs(),
                     copyPermissions: true,
                 };
                 await firstValueFrom(this.apiCollectionService.copyCollection(copyParams));
