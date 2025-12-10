@@ -170,12 +170,12 @@ export class RenderHelperService {
             {
                 groupId,
                 nodes: [node],
-                editorMode: 'inline',
+                editorMode: 'viewer',
                 embedded: true,
             },
         );
         // enforce to render all widgets, since rendering does not support extended state
-        component.instance.getInstanceService().shouldShowExtendedWidgets$.next(true);
+        // component.instance.getInstanceService().shouldShowExtendedWidgets$.next(true);
         return component;
     }
 
