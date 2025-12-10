@@ -55,7 +55,7 @@ const dummyDataSourceAssignments = new NodeDataSource<Assignment>(
             n = Helper.deepCopy(n);
             n.ref.id = 'id_' + i;
             n.title += ' ' + i;
-            const status: Assignment['status'][] = ['OPEN', 'PROGRESS', 'CANCELED', 'FINISHED'];
+            const status: Assignment['status'][] = ['DRAFT', 'ASSIGNED', 'CANCELED', 'FINISHED'];
             n.status = status[Math.floor(Math.random() * status.length)];
             if (Math.random() > 0.5) {
                 n.endTime = new Date(
