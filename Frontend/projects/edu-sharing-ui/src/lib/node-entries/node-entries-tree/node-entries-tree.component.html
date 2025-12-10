@@ -135,65 +135,82 @@
   </mat-tree>
 </div>
 
-<ng-template #nodeInformation let-node="node">
+<ng-template #nodeInformation let-flatNode="node">
   <div
     class="node-information"
-    [class.cursor-pointer]="node.level > 0"
-    (click)="updateSelectedNodes(node)"
+    [class.cursor-pointer]="flatNode.level > 0"
+    (click)="updateSelectedNodes(flatNode)"
   >
     <div class="general-information container">
-      <ng-container *ngIf="node.item.iconURL; else previewIcon">
-        <img [src]="node.item.iconURL" />
-      </ng-container>
-      <ng-template #previewIcon>
-        <ng-container *ngIf="node.item.preview?.isIcon; else previewImage">
-          <i [esIcon]="node.item.preview.url"></i>
+      <!-- special case for collections, if the preview does not contain the default icon -->
+      <ng-container *ngIf="nodeHelper.isNodeCollection(flatNode.item); else defaultPreview">
+        <ng-container *ngIf="!flatNode.item.preview.isIcon; else defaultPreview">
+          <ng-container *ngTemplateOutlet="nodeImage"></ng-container>
         </ng-container>
-        <ng-template #previewImage>
-          <img
-            [src]="node.item | esNodeImage : { maxWidth: 20, maxHeight: 20, crop: true } | async"
-          />
-        </ng-template>
+      </ng-container>
+      <ng-template #nodeImage>
+        <img
+          [src]="
+            flatNode.item | esNodeImage : { maxWidth: 100, maxHeight: 100, crop: true } | async
+          "
+        />
+      </ng-template>
+      <ng-template #defaultPreview>
+        <ng-container *ngIf="flatNode.item.iconURL; else fallbackImage">
+          <img [src]="flatNode.item.iconURL" />
+        </ng-container>
+      </ng-template>
+      <ng-template #fallbackImage>
+        <!-- special case for faked nodes: a material icon should be used instead of an image -->
+        <ng-container
+          *ngIf="flatNode.item.preview && !flatNode.item.preview?.url.includes('/'); else nodeImage"
+        >
+          <i [esIcon]="flatNode.item.preview.url"></i>
+        </ng-container>
       </ng-template>
       <span
         class="node-title"
-        [class.font-bold]="node.level === 0"
+        [class.font-bold]="flatNode.level === 0"
         [matTooltip]="
-          node.item && titleWrapper.offsetWidth < title.offsetWidth ? title.innerText : null
+          flatNode.item && titleWrapper.offsetWidth < title.offsetWidth ? title.innerText : null
         "
         #titleWrapper
       >
         <span #title>
-          {{ node.item | nodeTitle }}
+          {{ flatNode.item | nodeTitle }}
         </span>
       </span>
     </div>
     <div
       class="action-buttons container"
       *ngIf="
-        (nodeHelper.isNodeCollection(node.item) &&
-          (node.item.collection?.childCollectionsCount ||
-            node.item.collection?.childReferencesCount)) ||
-        (node.level > 0 &&
-          nodeHelper.getCollectionScopeInfo($any(node.item))?.scopeName !== 'UNKNOWN')
+        (nodeHelper.isNodeCollection(flatNode.item) &&
+          (flatNode.item.collection?.childCollectionsCount ||
+            flatNode.item.collection?.childReferencesCount)) ||
+        (flatNode.level > 0 &&
+          nodeHelper.getCollectionScopeInfo($any(flatNode.item))?.scopeName !== 'UNKNOWN')
       "
     >
       <div
         class="node-detail"
         *ngIf="
-          nodeHelper.isNodeCollection(node.item) && node.item.collection?.childCollectionsCount
+          nodeHelper.isNodeCollection(flatNode.item) &&
+          flatNode.item.collection?.childCollectionsCount
         "
       >
-        <i esIcon="layers"></i> {{ node.item.collection.childCollectionsCount }}
+        <i esIcon="layers"></i> {{ flatNode.item.collection.childCollectionsCount }}
       </div>
       <div
         class="node-detail"
-        *ngIf="nodeHelper.isNodeCollection(node.item) && node.item.collection?.childReferencesCount"
+        *ngIf="
+          nodeHelper.isNodeCollection(flatNode.item) &&
+          flatNode.item.collection?.childReferencesCount
+        "
       >
-        <i esIcon="insert_drive_file"></i> {{ node.item.collection.childReferencesCount }}
+        <i esIcon="insert_drive_file"></i> {{ flatNode.item.collection.childReferencesCount }}
       </div>
-      <ng-container *ngIf="nodeHelper.getCollectionScopeInfo($any(node.item)) as scopeInfo">
-        <div class="node-detail" *ngIf="node.level > 0 && scopeInfo.scopeName !== 'UNKNOWN'">
+      <ng-container *ngIf="nodeHelper.getCollectionScopeInfo($any(flatNode.item)) as scopeInfo">
+        <div class="node-detail" *ngIf="flatNode.level > 0 && scopeInfo.scopeName !== 'UNKNOWN'">
           <i
             class="collectionScope"
             [esIcon]="scopeInfo.icon"
