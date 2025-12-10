@@ -318,7 +318,7 @@
             "description": "Status of the assignment\n* DRAFT: Assignment is in draft state, only visible to creator\n* ASSIGNED: Assignment is assigned and visible to all users with assignee permission\n* FINISHED: Assignment has been completed\n* CANCELED: Assignment has been canceled\n",
             "enum": [
               "DRAFT",
-              "ASSIGNED",
+              "INPROGRESS",
               "FINISHED",
               "CANCELED"
             ],
@@ -368,9 +368,6 @@
             ],
             "type": "string"
           },
-          "isDone": {
-            "type": "boolean"
-          },
           "ref": {
             "$ref": "#/components/schemas/NodeRef"
           },
@@ -380,7 +377,6 @@
         },
         "required": [
           "documentRole",
-          "isDone",
           "ref"
         ],
         "type": "object"
@@ -394,9 +390,6 @@
             ],
             "type": "string"
           },
-          "isDone": {
-            "type": "boolean"
-          },
           "refId": {
             "minLength": 1,
             "type": "string"
@@ -404,7 +397,6 @@
         },
         "required": [
           "documentRole",
-          "isDone",
           "refId"
         ],
         "type": "object"
@@ -1683,7 +1675,7 @@
             "description": "Status of the assignment\n* DRAFT: Assignment is in draft state, only visible to creator\n* ASSIGNED: Assignment is assigned and visible to all users with assignee permission\n* FINISHED: Assignment has been completed\n* CANCELED: Assignment has been canceled\n",
             "enum": [
               "DRAFT",
-              "ASSIGNED",
+              "INPROGRESS",
               "FINISHED",
               "CANCELED"
             ],
@@ -7394,7 +7386,7 @@
           },
           "submissionStatus": {
             "enum": [
-              "NOT_STARTET",
+              "NOT_STARTED",
               "PENDING",
               "FINISHED"
             ],
@@ -7406,7 +7398,7 @@
           },
           "validationStatus": {
             "enum": [
-              "NOT_STARTET",
+              "NOT_STARTED",
               "PENDING",
               "FINISHED"
             ],
@@ -7438,7 +7430,7 @@
           "validationStatus": {
             "description": "only visible by the coordinator of the task",
             "enum": [
-              "NOT_STARTET",
+              "NOT_STARTED",
               "PENDING",
               "FINISHED"
             ],
@@ -7447,8 +7439,7 @@
         },
         "required": [
           "content",
-          "ref",
-          "validationStatus"
+          "ref"
         ],
         "type": "object"
       },
@@ -7500,7 +7491,7 @@
         "properties": {
           "validationStatus": {
             "enum": [
-              "NOT_STARTET",
+              "NOT_STARTED",
               "PENDING",
               "FINISHED"
             ],
@@ -7533,7 +7524,7 @@
           },
           "validationStatus": {
             "enum": [
-              "NOT_STARTET",
+              "NOT_STARTED",
               "PENDING",
               "FINISHED"
             ],
@@ -16094,7 +16085,7 @@
             "name": "status",
             "schema": {
               "enum": [
-                "NOT_STARTET",
+                "NOT_STARTED",
                 "PENDING",
                 "FINISHED"
               ],
