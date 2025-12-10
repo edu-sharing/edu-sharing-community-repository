@@ -207,7 +207,7 @@
       <h3>
         {{ i18nPrefix + 'CONFIGURE_CONFIG.CONFIG_HEADING' | translate }}
       </h3>
-      <ng-container *ngIf="selectedNodes()[0] as selectedNode">
+      <ng-container *ngIf="highestSelectedNode() as selectedNode">
         {{ i18nPrefix + 'CONFIGURE_CONFIG.COPY' | translate }} "{{ selectedNode.title }}"
         <ng-container
           *ngIf="nodeHelperService.isNodeCollection(partialAsNode(selectedNode)); else folderType"

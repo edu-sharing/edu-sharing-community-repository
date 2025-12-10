@@ -95,6 +95,20 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         ).indexOf(this.selectedTab()),
     );
     selectedNodes: WritableSignal<Partial<Node>[]> = signal([]);
+    highestSelectedNode: Signal<Partial<Node> | null> = computed((): Partial<Node> | null => {
+        const selectedNodes: Partial<Node>[] = this.selectedNodes();
+        // early return for empty or single selection
+        if (selectedNodes.length === 0) {
+            return null;
+        }
+        if (selectedNodes.length === 1) {
+            return selectedNodes[0];
+        }
+        const selectedNodeIds = selectedNodes.map((n) => n.ref.id);
+        return (
+            selectedNodes.find((n) => !selectedNodeIds.includes(n.parent.id)) ?? selectedNodes[0]
+        );
+    });
     private currentStep: WritableSignal<StepType> = signal(StepType.SELECT);
     isSelectStep: Signal<boolean> = computed((): boolean => this.currentStep() === StepType.SELECT);
     onlyOneTopLevelCollectionSelected: Signal<boolean> = computed((): boolean => {
