@@ -123,7 +123,7 @@ public class OAuth2AuthorizationServerConfig {
                                     tokenSettings.accessTokenTimeToLive(Duration.parse(c.getAccessTokenExpires()));
                                 }
                                 if(!c.getRefreshTokenExpires().isEmpty()) {
-                                    tokenSettings.accessTokenTimeToLive(Duration.parse(c.getRefreshTokenExpires()));
+                                    tokenSettings.refreshTokenTimeToLive(Duration.parse(c.getRefreshTokenExpires()));
                                 }
                                 builder.tokenSettings(tokenSettings.build());
                                 c.getAuthorizationGrantTypes().forEach(gt -> builder.authorizationGrantType(new AuthorizationGrantType(gt)));
