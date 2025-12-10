@@ -65,7 +65,7 @@ public class Preview implements Serializable {
 	  */
   }
 
-  public Preview(String storeProtocol, String storeIdentifier, String nodeId, NodeRef.Preview previewData) {
+  public Preview(String storeProtocol, String storeIdentifier, String nodeId, String nodeType, NodeRef.Preview previewData) {
     setUrl(NodeServiceFactory.getLocalService().getPreviewUrl(
             storeProtocol,
             storeIdentifier,
@@ -75,12 +75,16 @@ public class Preview implements Serializable {
     if(previewData.getIcon() != null) {
       setIsIcon(previewData.getIcon());
     } else {
-      Logger.getLogger(Preview.class).warn("no preview icon info in elastic index for node " + nodeId);
+        if(!nodeType.equals(CCConstants.CCM_TYPE_MAP)) {
+            Logger.getLogger(Preview.class).warn("no preview icon info in elastic index for node " + nodeId);
+        }
     }
     if(previewData.getType() != null) {
       setType(previewData.getType());
     } else {
-      Logger.getLogger(Preview.class).warn("no preview type info in elastic index for node " + nodeId);
+        if(!nodeType.equals(CCConstants.CCM_TYPE_MAP)) {
+            Logger.getLogger(Preview.class).warn("no preview type info in elastic index for node " + nodeId);
+        }
     }
     setMimetype(previewData.getMimetype());
     setData(previewData.getData());
