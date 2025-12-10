@@ -422,7 +422,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
         return notifyList;
     }
 
-    public void setPermissions(String nodeId, List<ACE> aces) throws Exception {
+    public void setPermissions(String nodeId, List<ACE> aces) {
         setPermissions(nodeId, aces, null);
     }
 
@@ -430,7 +430,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
      * set's all local permissions contained in the aces array, removes all
      * permissions that are not in the ace array
      */
-    public void setPermissions(String nodeId, List<ACE> aces, Boolean inheritPermission) throws Exception {
+    public void setPermissions(String nodeId, List<ACE> aces, Boolean inheritPermission) {
 
         if (inheritPermission != null) {
             if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE) && !isSharedNode(nodeId)) {
@@ -453,7 +453,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
                 if (!authorityService.authorityExists(ace.getAuthority())
                         && !"GROUP_EVERYONE".equals(ace.getAuthority())) {
-                    throw new Exception("authority " + ace.getAuthority() + " does not exist!");
+                    throw new RuntimeException("authority " + ace.getAuthority() + " does not exist!");
                 }
                 String permission = ace.getPermission();
                 // prevent authorityAdministrator ace is changed
@@ -790,7 +790,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
      * set's permission for one authority, leaves permissions already set for the
      * authority
      */
-    public void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission) throws Exception {
+    public void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission) {
         checkCanManagePermissions(nodeId, authority);
 
         NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);

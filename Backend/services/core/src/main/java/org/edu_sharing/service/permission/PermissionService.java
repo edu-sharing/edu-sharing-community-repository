@@ -64,11 +64,11 @@ public interface PermissionService {
     List<Notify> getNotifyList(String nodeId) throws Throwable;
 		
 	
-	 void setPermissions(String nodeId, List<ACE> aces, Boolean inheritPermission) throws Exception;
+	 void setPermissions(String nodeId, List<ACE> aces, Boolean inheritPermission);
 	
-	 void setPermissions(String nodeId, List<ACE> aces) throws Exception;
+	 void setPermissions(String nodeId, List<ACE> aces);
 	
-	 void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission) throws Exception;
+	 void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission);
 
 	void setPermissionInherit(String nodeId, boolean inheritPermission);
 

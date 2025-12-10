@@ -138,13 +138,12 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
      * sometimes this behavior is not what we want for example getting the real
      * RemoteObject Properties so you can use this prop. see getPropertiesBridge
      * -- GETTER --
-     *
-     *
+     * <p>
+     * <p>
      * -- SETTER --
      *
-     @return the resolveRemoteObjects
-      * @param resolveRemoteObjects the resolveRemoteObjects to set
-
+     * @return the resolveRemoteObjects
+     * @param resolveRemoteObjects the resolveRemoteObjects to set
      */
     @Setter
     @Getter
@@ -325,7 +324,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
             return result == null ? null : result.toString();
         } else if (_value instanceof List && ((List) _value).isEmpty()) {
             // cause empty list toString returns "[]"
-			return null;
+            return null;
         } else if (_value instanceof String) {
             return (String) _value;
         } else if (_value instanceof Number) {
@@ -1041,7 +1040,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
         // we can cache primary parent here, instead of parentid which differs
         // from the content
-		if (nodeType.equals(CCConstants.CCM_TYPE_IO) || nodeType.equals(CCConstants.CCM_TYPE_MAP) || nodeType.equals(CCConstants.CM_TYPE_FOLDER) || nodeType.equals(CCConstants.CCM_TYPE_TOOL_INSTANCE) || nodeType.equals(CCConstants.CCM_TYPE_COLLECTION_PROPOSAL)) {
+        if (nodeType.equals(CCConstants.CCM_TYPE_IO) || nodeType.equals(CCConstants.CCM_TYPE_MAP) || nodeType.equals(CCConstants.CM_TYPE_FOLDER) || nodeType.equals(CCConstants.CCM_TYPE_TOOL_INSTANCE) || nodeType.equals(CCConstants.CCM_TYPE_COLLECTION_PROPOSAL)) {
             ChildAssociationRef parentNodeRef = nodeService.getPrimaryParent(nodeRef);
             properties.put(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID, parentNodeRef.getParentRef().getId());
         }
@@ -1570,8 +1569,9 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
     public void writeContent(final StoreRef store, final String nodeID, final InputStream content, final String mimetype, String _encoding,
                              final String property) {
-        writeContent(store,nodeID, content,mimetype, _encoding,property, null);
+        writeContent(store, nodeID, content, mimetype, _encoding, property, null);
     }
+
     public void writeContent(final StoreRef store, final String nodeID, final InputStream content, final String mimetype, String _encoding,
                              final String property, final Runnable onComplete) {
 
@@ -1595,7 +1595,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                 //finalMimeType = MCAlfrescoAPIClient.this.guessMimetype(MCAlfrescoAPIClient.this.getProperty(storeRef, nodeID, CCConstants.CM_NAME));
 
                 Files.copy(content, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                try(InputStream in = Files.newInputStream(tempFile.toPath()) ){
+                try (InputStream in = Files.newInputStream(tempFile.toPath())) {
                     String filename = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
                     MediaType mediaType = NodeCustomizationPolicies.getMediaType(filename, in);
                     finalMimeType = mediaType.toString();
@@ -1603,7 +1603,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                 finalContent = Files.newInputStream(tempFile.toPath());
             }
 
-            try(InputStream in = finalContent){
+            try (InputStream in = finalContent) {
                 contentWriter.setMimetype(finalMimeType);
                 contentWriter.putContent(in);
             }
@@ -1611,9 +1611,9 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         };
         TransactionService transactionService = serviceRegistry.getTransactionService();
         NodeRef nodeRef = transactionService.getRetryingTransactionHelper().doInTransaction(callback, false);
-        log.debug("finished content writing tx:"+nodeRef);
+        log.debug("finished content writing tx:" + nodeRef);
         tempFile.delete();
-        if(onComplete != null && nodeRef != null) {
+        if (onComplete != null && nodeRef != null) {
             onComplete.run();
         }
     }
@@ -1807,7 +1807,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
     }
 
     @Override
-    public String getHomeFolderID(String username) throws Exception {
+    public String getHomeFolderID(String username) {
         if (NodeServiceInterceptor.getEduSharingScope() == null || StringUtils.isBlank(NodeServiceInterceptor.getEduSharingScope())) {
             NodeRef person = serviceRegistry.getPersonService().getPersonOrNull(username);
             if (person != null) {
@@ -2665,9 +2665,9 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                 (String) nodeService.getProperty(
                         new NodeRef(storeRef, nodeId),
                         QName.createQName(CCConstants.CM_NAME));
-		String extension = FilenameUtils.getExtension(originalName);
-		// keep the filename so that a possible mimetype verification is valid
-		nodeService.setProperty(new NodeRef(storeRef, nodeId), QName.createQName(CCConstants.CM_NAME), UUID.randomUUID().toString() +(StringUtils.isEmpty(extension) ? "" : ("." + extension)));
+        String extension = FilenameUtils.getExtension(originalName);
+        // keep the filename so that a possible mimetype verification is valid
+        nodeService.setProperty(new NodeRef(storeRef, nodeId), QName.createQName(CCConstants.CM_NAME), UUID.randomUUID().toString() + (StringUtils.isEmpty(extension) ? "" : ("." + extension)));
         try {
             nodeService.moveNode(
                     new NodeRef(storeRef, nodeId),
@@ -2696,8 +2696,8 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 
     /**
-     * @param nodeId       : the id of the node to copy
-     * @param toNodeId     : the id of the target folder
+     * @param nodeId   : the id of the node to copy
+     * @param toNodeId : the id of the target folder
      */
     public String copyNode(String nodeId, String toNodeId, boolean copyChildren) throws Exception {
         NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId);
@@ -2803,19 +2803,11 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         }
     }
 
-    public boolean isAdmin(String username) throws Exception {
-        try {
-            Set<String> testUsetAuthorities = serviceRegistry.getAuthorityService().getAuthoritiesForUser(username);
-            for (String testAuth : testUsetAuthorities) {
-
-                if (testAuth.equals("GROUP_ALFRESCO_ADMINISTRATORS")) {
-                    return true;
-                }
-            }
-        } catch (org.alfresco.repo.security.permissions.AccessDeniedException e) {
-            log.debug(username + " is no admin!!!");
-        }
-        return false;
+    public boolean isAdmin(String username) {
+        return AuthenticationUtil.runAsSystem(() -> {
+            Set<String> testUserAuthorities = serviceRegistry.getAuthorityService().getAuthoritiesForUser(username);
+            return testUserAuthorities.contains("GROUP_ALFRESCO_ADMINISTRATORS");
+        });
     }
 
     /**
@@ -2824,8 +2816,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
      * AuthenticationUtil.RunAsWork<Result> it differs
      *
      */
-    public boolean isAdmin() throws Exception {
-
+    public boolean isAdmin() {
         String username = AuthenticationUtil.getRunAsUser();
         return isAdmin(username);
     }
