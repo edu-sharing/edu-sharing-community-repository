@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.UserSimple;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
 import java.util.List;
@@ -36,13 +37,17 @@ import java.util.List;
  *                                           This field is mandatory.
  */
 public record Assignment(
+        @NotNull
         @JsonProperty(required = true)
         NodeRef ref,
+        @NotNull
         @JsonProperty(required = true)
         String title,
         String summary,
+        @NotNull
         @JsonProperty(required = true)
         UserSimple creator,
+        @NotNull
         @JsonProperty(required = true)
         Date created,
         Date endTime,
@@ -52,15 +57,19 @@ public record Assignment(
          * user. I.e. if he already submitted his data if it is of type SUBMITTABLE
          */
 
+        @NotNull
         @JsonProperty(required = true)
         Status status,
+        @NotNull
         @JsonProperty(required = true)
         Type type,
         @JsonProperty(required = true)
         boolean allowAdditionalDocumentSubmissions,
         Date modified,
+        @NotNull
         @JsonProperty(required = true)
         List<Permission> permissions,
+        @NotNull
         @JsonProperty(required = true)
         List<Submission> submissions
 ) {
@@ -75,7 +84,7 @@ public record Assignment(
     )
     public enum Status {
         DRAFT,
-        ASSIGNED,
+        INPROGRESS,
         FINISHED,
         CANCELED
     }
@@ -117,8 +126,10 @@ public record Assignment(
      *                  actions or responsibilities granted. This field is mandatory.
      */
     public record Permission(
+            @NotNull
             @JsonProperty(required = true)
             Authority authority,
+            @NotNull
             @JsonProperty(required = true)
             Role role
     ) {

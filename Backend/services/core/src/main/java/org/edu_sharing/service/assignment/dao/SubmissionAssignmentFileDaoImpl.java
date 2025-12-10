@@ -25,14 +25,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.*;
 
 @Slf4j
-final class AssignmentFileDaoImpl extends BasicNodeDaoImpl implements AssignmentFileDao {
-    private final AssignmentDaoImpl assignmentDao;
+final class SubmissionAssignmentFileDaoImpl extends BasicNodeDaoImpl implements AssignmentFileDao {
+    private final SubmissionAssignmentDaoImpl assignmentDao;
     private final LazyProvider<Node> referNode;
 
     @Setter(onMethod_ = @Autowired)
     private PermissionService permissionService;
 
-    public AssignmentFileDaoImpl(AssignmentDaoImpl assignmentDao, String nodeId) {
+    public SubmissionAssignmentFileDaoImpl(SubmissionAssignmentDaoImpl assignmentDao, String nodeId) {
         super(nodeId);
         this.assignmentDao = assignmentDao;
 
@@ -53,7 +53,6 @@ final class AssignmentFileDaoImpl extends BasicNodeDaoImpl implements Assignment
         if (StringUtils.isNotBlank(nodeId)) {
             throw new IllegalStateException("AssignmentFile with id " + nodeId + " already exists.");
         }
-
 
         validateCanChangeAssignment();
 
@@ -133,11 +132,6 @@ final class AssignmentFileDaoImpl extends BasicNodeDaoImpl implements Assignment
     }
 
     private void handleReferenceCopy(@NotNull AssignmentFileRequest assignmentFileRequest, String currentReferNodeId, Map<String, Object> properties) {
-        if (assignmentDao.getType() != Assignment.Type.SUBMISSION) {
-            log.debug("Skipping reference copy for non-submission assignment");
-            return;
-        }
-
         if (StringUtils.isNotBlank(currentReferNodeId) && nodeService.exists(currentReferNodeId)) {
             log.debug("Deleting old reference node {}", currentReferNodeId);
             nodeService.removeNode(currentReferNodeId, nodeId, false);
@@ -163,20 +157,8 @@ final class AssignmentFileDaoImpl extends BasicNodeDaoImpl implements Assignment
     }
 
     private void validateCanChangeAssignment() {
-        if (assignmentDao.getType() != Assignment.Type.SUBMISSION) {
-            return;
+        if(!assignmentDao.canChangeAssignment()){
+            throw new IllegalStateException("Cannot edit assignment for assignment with type " + assignmentDao.getType());
         }
-
-        switch (assignmentDao.getStatus()) {
-            case DRAFT -> { }
-            case INPROGRESS -> {
-                if (!assignmentDao.getSubmissions().isEmpty()) {
-                    throw new IllegalStateException("Cannot edit assignment with existing submissions.");
-                }
-            }
-            case FINISHED -> throw new IllegalStateException("Cannot edit assignment for finished assignment.");
-            case CANCELED -> throw new IllegalStateException("Cannot edit assignment for canceled assignment.");
-        }
-
     }
 }

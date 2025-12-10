@@ -5,6 +5,7 @@ import org.edu_sharing.restservices.assignment.v1.model.CreateAssignmentRequest;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Interface representing a Data Access Object (DAO) for managing assignments.
@@ -94,6 +95,8 @@ public interface AssignmentDao extends BasicNodeDao {
     SubmissionDao getSubmission(String submissionId);
 
     SubmissionDao getOrCreateSubmission(String submissionId);
+
+    List<Assignment.Permission> getPermissions();
 
     String getSubmissionRefId();
 

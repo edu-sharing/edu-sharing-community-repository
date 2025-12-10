@@ -2,12 +2,16 @@ package org.edu_sharing.service.assignment.dao;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.commons.lang3.NotImplementedException;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.edu_sharing.restservices.assignment.v1.model.Assignment;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.assignment.*;
-import org.edu_sharing.service.permission.PermissionService;
+import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -24,6 +28,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AssignmentDaoFactory {
 
+    private final NodeService nodeService;
     private final SearchService searchService;
 
     /**
@@ -38,14 +43,21 @@ public class AssignmentDaoFactory {
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public AssignmentDao assignmentDaoByNodeId(String nodeId) {
-        return new AssignmentDaoImpl(nodeId);
+        String type = nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.CCM_PROP_ASSIGNMENT_TYPE);
+        return switch (Enum.valueOf(Assignment.Type.class, type)) {
+            case SUBMISSION -> new SubmissionAssignmentDaoImpl(nodeId);
+            case DEFAULT -> new AssignmentDaoImpl(nodeId);
+        };
     }
 
     @Bean(autowireCandidate = false)
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    public AssignmentDao assignmentDaoByNodeRef(org.edu_sharing.service.model.NodeRef nodeId) {
-        return new AssignmentDaoImpl(nodeId);
+    public AssignmentDao assignmentDaoByNodeRef(org.edu_sharing.service.model.NodeRef nodeRef) {
+        String type = (String) nodeRef.getProperties().get(CCConstants.CCM_PROP_ASSIGNMENT_TYPE);
+        return switch (Enum.valueOf(Assignment.Type.class, type)) {
+            case SUBMISSION -> new SubmissionAssignmentDaoImpl(nodeRef);
+            case DEFAULT -> new AssignmentDaoImpl(nodeRef);
+        };
     }
 
 
@@ -60,14 +72,21 @@ public class AssignmentDaoFactory {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    SubmissionDao submissionDao(AssignmentDaoImpl assignmentDao, String nodeId) {
+    AssignmentFileDao submissionAssignmentFileDao(SubmissionAssignmentDaoImpl assignmentDao, String nodeId) {
+        return new SubmissionAssignmentFileDaoImpl(assignmentDao, nodeId);
+    }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    SubmissionDao submissionDao(SubmissionAssignmentDaoImpl assignmentDao, String nodeId) {
         return new SubmissionDaoImpl(this, assignmentDao, nodeId);
     }
 
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    SubmissionFileDao submissionFileDao(AssignmentDaoImpl assignmentDao, SubmissionDaoImpl submissionDao, String nodeId) {
+    SubmissionFileDao submissionFileDao(SubmissionAssignmentDaoImpl assignmentDao, SubmissionDaoImpl submissionDao, String nodeId) {
         return new SubmissionFileDaoImpl(assignmentDao, submissionDao, nodeId);
     }
 

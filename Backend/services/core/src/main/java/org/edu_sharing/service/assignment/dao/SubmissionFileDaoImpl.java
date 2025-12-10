@@ -33,7 +33,7 @@ import java.util.Optional;
 @Slf4j
 final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements SubmissionFileDao {
 
-    private final AssignmentDaoImpl assignmentDao;
+    private final SubmissionAssignmentDaoImpl assignmentDao;
     private final SubmissionDaoImpl submissionDao;
 
     private final LazyProvider<Optional<NodeRef>> contentNodeRef;
@@ -51,7 +51,7 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
     private final MCAlfrescoAPIClient apiClient = new MCAlfrescoAPIClient();
 
 
-    public SubmissionFileDaoImpl(AssignmentDaoImpl assignmentDao, SubmissionDaoImpl submissionDao, String nodeId) {
+    public SubmissionFileDaoImpl(SubmissionAssignmentDaoImpl assignmentDao, SubmissionDaoImpl submissionDao, String nodeId) {
         super(nodeId);
         this.assignmentDao = assignmentDao;
         this.submissionDao = submissionDao;
@@ -272,7 +272,7 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
     @Override
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
     public void delete() {
-        if(!exists()){
+        if (!exists()) {
             return;
         }
         submissionDao.validateAssigneeCanChangeSubmission();
@@ -302,9 +302,12 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
     }
 
     @Override
-    @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
     public Submission.Status getValidationStatus() {
-        return propertyMapper.get().getEnum(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, Submission.Status.class);
+        if (AssignmentUtil.isAssignmentCoordinator(permissionService, getCorrectionNodeId())) {
+            return propertyMapper.get().getEnum(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, Submission.Status.class);
+        } else {
+            return null;
+        }
     }
 
     @Override

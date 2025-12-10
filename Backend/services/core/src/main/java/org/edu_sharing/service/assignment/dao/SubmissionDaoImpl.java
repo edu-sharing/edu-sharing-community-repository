@@ -36,10 +36,10 @@ final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao 
     @Setter(onMethod_ = @Autowired)
     private AuthorityService authorityService;
 
-    private final AssignmentDaoImpl assignmentDao;
+    private final SubmissionAssignmentDaoImpl assignmentDao;
     private final LazyProvider<Map<String, SubmissionFileDao>> submissionFileRefs;
 
-    public SubmissionDaoImpl(AssignmentDaoFactory assignmentDaoFactory, AssignmentDaoImpl assignmentDao, String nodeId) {
+    public SubmissionDaoImpl(AssignmentDaoFactory assignmentDaoFactory, SubmissionAssignmentDaoImpl assignmentDao, String nodeId) {
         super(nodeId);
         this.assignmentDaoFactory = assignmentDaoFactory;
         this.assignmentDao = assignmentDao;
