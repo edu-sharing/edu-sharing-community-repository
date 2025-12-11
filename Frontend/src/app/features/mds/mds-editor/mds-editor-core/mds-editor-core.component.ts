@@ -133,14 +133,14 @@ export class MdsEditorCoreComponent {
                     }]
                 }
             }])*/
+            this.toast.show({
+                message: 'MDS.AI.GENERATE_ASYNC_FINISHED',
+                type: 'info',
+                subtype: ToastType.InfoAction,
+            });
         } catch (e) {
             console.warn('Could not fetch suggestion data', e);
         }
-        this.toast.show({
-            message: 'MDS.AI.GENERATE_ASYNC_FINISHED',
-            type: 'info',
-            subtype: ToastType.InfoAction,
-        });
         this.aiLoading.next(false);
     }
 
