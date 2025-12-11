@@ -95,6 +95,13 @@ export class MdsEditorCoreComponent {
                         aiConfigId: 'default', //w.definition.aiConfigs[0].id,
                     };
                 });
+            if (!this.mdsEditorInstance.widgets.value.some((w) => w.definition.aiConfigs?.length)) {
+                console.info(
+                    'No widget in the current mds template found that has an ai config. Check the mds and include one aiConfig with id default',
+                );
+                return;
+            }
+            console.info(widgets, this.mdsEditorInstance.nodes$.value?.length);
             const values = await this.mdsEditorInstance.getValues(null, false);
             const mdsConfig: MdsConfig = {
                 type: 'mds',
