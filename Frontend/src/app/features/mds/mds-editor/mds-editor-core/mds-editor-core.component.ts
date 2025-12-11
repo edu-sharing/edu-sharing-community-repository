@@ -1,6 +1,6 @@
 import { Component, QueryList, ViewChildren } from '@angular/core';
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { filter, first, map } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 import { EditorMode, MdsView } from '../../types/types';
 import { MdsEditorViewComponent } from '../mds-editor-view/mds-editor-view.component';
@@ -38,6 +38,14 @@ export class MdsEditorCoreComponent {
         this.shouldShowExtendedWidgets$ = this.mdsEditorInstance.shouldShowExtendedWidgets$;
         this.editorMode = this.mdsEditorInstance.editorMode;
         this.mdsEditorInstance.mdsInitDone.subscribe(() => this.init());
+        this.mdsEditorInstance.showAiSuggestions
+            .pipe(
+                filter((f) => f),
+                first(),
+            )
+            .subscribe(() => {
+                void this.generateSuggestions();
+            });
         this.hasExtendedWidgets$ = this.mdsEditorInstance.widgets.pipe(
             map((widgets) => widgets?.some((widget) => widget.definition.isExtended)),
         );
@@ -131,9 +139,6 @@ export class MdsEditorCoreComponent {
 
     setAiSuggestions(change: MatSlideToggleChange) {
         this.mdsEditorInstance.showAiSuggestions.next(change.checked);
-        if (change.checked) {
-            void this.generateSuggestions();
-        }
     }
 }
 
