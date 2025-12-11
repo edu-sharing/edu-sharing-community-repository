@@ -11,7 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 
 type Role = 'SUPPLEMENTARY' | 'SUBMITTABLE';
 export type NodeWithRole = Node &
-    Pick<AssignmentFile, 'documentRole' | 'isDone'> & {
+    Pick<AssignmentFile, 'documentRole'> & {
         refId?: string;
     };
 

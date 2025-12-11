@@ -17,7 +17,6 @@ import {
     ColumnType,
     Constrain,
     DefaultGroups,
-    ElementType,
     InteractionType,
     ListItem,
     ListOptionsConfig,
@@ -35,7 +34,6 @@ import { PlatformLocation } from '@angular/common';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
-import { NodeWithRole } from '../manage-assignment-nodes/manage-assignment-nodes.component';
 import { SubmissionFile } from '../../../../../dist/edu-sharing-api/lib/api/models/submission-file';
 import { TabType } from '../nodes-selector/nodes-selector.component';
 
@@ -89,7 +87,7 @@ export class SubmitAssignmentComponent {
         () => this.isOpenForSubmission() && this.isBeforeEndDate() && !this.submissionSent(),
     );
     submissionSent = computed(
-        () => this.submission() && this.submission()?.submissionStatus !== 'NOT_STARTET',
+        () => this.submission() && this.submission()?.submissionStatus !== 'NOT_STARTED',
     );
     canSendSubmission = computed(
         () =>
@@ -125,7 +123,7 @@ export class SubmitAssignmentComponent {
                         assignmentFile: this.submissionAssignmentRefFile(),
                         content: node,
                         ref: node.ref,
-                        validationStatus: 'NOT_STARTET',
+                        validationStatus: 'NOT_STARTED',
                     } as SubmissionFile;
                 });
                 await this.saveSubmissionFiles(newFiles);
