@@ -10,6 +10,7 @@ import org.springframework.validation.annotation.Validated;
  *
  * @param refId - The unique identifier of the file reference. This field cannot be empty.
  * @param documentRole - The role of the file within the assignment, such as supplementary or submittable. This field cannot be null.
+ * @param isDone - Indicates whether the associated file's task has been marked as completed. This field cannot be null.
  *
  * This request is used in operations where assignment files need to be created, modified, or managed.
  */
@@ -18,6 +19,8 @@ public record AssignmentFileRequest(
         @NotEmpty
         String refId,
         @NotNull
-        AssignmentFile.Role documentRole
+        AssignmentFile.Role documentRole,
+        @NotNull
+        boolean isDone
 ) {
 }

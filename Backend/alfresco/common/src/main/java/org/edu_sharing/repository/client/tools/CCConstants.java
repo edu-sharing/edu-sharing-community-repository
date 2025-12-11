@@ -1475,6 +1475,7 @@ public class CCConstants {
     public final static String CCM_PROP_ASSIGNMENT_ALLOW_ADDITIONAL_DOCUMENT_SUBMISSIONS = "{http://www.campuscontent.de/model/1.0}assignment_allow_additional_document_submissions";
     public final static String CCM_PROP_ASSIGNMENT_END_DATE = "{http://www.campuscontent.de/model/1.0}assigment_end_date";
 
+    public final static String CCM_PROP_ASSIGNMENT_FILE_IS_DONE = "{http://www.campuscontent.de/model/1.0}assigment_file_is_done";
     public final static String CCM_PROP_ASSIGNMENT_FILE_DOCUMENT_TYPE = "{http://www.campuscontent.de/model/1.0}assigment_file_document_type";
     public final static String CCM_PROP_ASSIGNMENT_FILE_REFER_TO = "{http://www.campuscontent.de/model/1.0}assigment_file_refer_to";
 

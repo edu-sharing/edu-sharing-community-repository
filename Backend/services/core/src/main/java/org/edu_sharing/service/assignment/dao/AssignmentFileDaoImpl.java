@@ -88,7 +88,8 @@ final class AssignmentFileDaoImpl extends BasicNodeDaoImpl implements Assignment
         return new AssignmentFile(
                 getNodeRef(),
                 referNode.get(),
-                getDocumentRole());
+                getDocumentRole(),
+                isDone());
     }
 
     @Override
@@ -113,6 +114,10 @@ final class AssignmentFileDaoImpl extends BasicNodeDaoImpl implements Assignment
 
         if (!Objects.equals(assignmentFileRequest.documentRole(), getDocumentRole())) {
             properties.put(CCConstants.CCM_PROP_ASSIGNMENT_FILE_DOCUMENT_TYPE, assignmentFileRequest.documentRole().name());
+        }
+
+        if (!Objects.equals(assignmentFileRequest.isDone(), isDone())) {
+            properties.put(CCConstants.CCM_PROP_ASSIGNMENT_FILE_IS_DONE, assignmentFileRequest.isDone());
         }
 
         if (!properties.isEmpty()) {
@@ -158,6 +163,11 @@ final class AssignmentFileDaoImpl extends BasicNodeDaoImpl implements Assignment
     }
 
     @Override
+    public Boolean isDone() {
+        return propertyMapper.get().getBoolean(CCConstants.CCM_PROP_ASSIGNMENT_FILE_IS_DONE, false);
+    }
+
+    @Override
     public AssignmentFile.Role getDocumentRole() {
         return propertyMapper.get().getEnum(CCConstants.CCM_PROP_ASSIGNMENT_FILE_DOCUMENT_TYPE, AssignmentFile.Role.class);
     }
@@ -177,6 +187,5 @@ final class AssignmentFileDaoImpl extends BasicNodeDaoImpl implements Assignment
             case FINISHED -> throw new IllegalStateException("Cannot edit assignment for finished assignment.");
             case CANCELED -> throw new IllegalStateException("Cannot edit assignment for canceled assignment.");
         }
-
     }
 }
