@@ -1,5 +1,6 @@
 package org.edu_sharing.restservices.assignment.v1.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
@@ -20,7 +21,11 @@ public record AssignmentFileRequest(
         String refId,
         @NotNull
         AssignmentFile.Role documentRole,
-        @NotNull
-        boolean isDone
+
+        @Schema(description = """
+        Indicates whether the associated task for this file is complete.
+        Only valid for Assignments of type DEFAULT
+        """)
+        Boolean isDone
 ) {
 }

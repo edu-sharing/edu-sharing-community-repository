@@ -144,6 +144,7 @@ export class ManageAssignmentComponent {
                         return {
                             ...f.referNode,
                             documentRole: f.documentRole,
+                            isDone: f.isDone,
                             refId: f.ref.id,
                         } as NodeWithRole;
                     }),
@@ -220,6 +221,7 @@ export class ManageAssignmentComponent {
             this.nodes()?.map((n) => {
                 return {
                     refId: n.refId || n.ref.id,
+                    isDone: n.isDone || false,
                     documentRole: n.documentRole,
                 } as AssignmentFileRequest;
             }) || [];

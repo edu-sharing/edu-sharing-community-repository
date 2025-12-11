@@ -1,6 +1,7 @@
 package org.edu_sharing.restservices.assignment.v1.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.NodeRef;
 
@@ -20,8 +21,11 @@ public record AssignmentFile(
         Node referNode,
         @JsonProperty(required = true)
         Role documentRole,
-        @JsonProperty(required = true)
-        boolean isDone
+        @Schema(description = """
+        Indicates whether the associated task for this file is complete.
+        Only valid for Assignments of type DEFAULT
+        """)
+        Boolean isDone
 ) {
     public enum Role {
         SUPPLEMENTARY,

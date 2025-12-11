@@ -372,6 +372,10 @@
             ],
             "type": "string"
           },
+          "isDone": {
+            "description": "Indicates whether the associated task for this file is complete.\nOnly valid for Assignments of type DEFAULT\n",
+            "type": "boolean"
+          },
           "ref": {
             "$ref": "#/components/schemas/NodeRef"
           },
@@ -393,6 +397,10 @@
               "SUBMITTABLE"
             ],
             "type": "string"
+          },
+          "isDone": {
+            "description": "Indicates whether the associated task for this file is complete.\nOnly valid for Assignments of type DEFAULT\n",
+            "type": "boolean"
           },
           "refId": {
             "minLength": 1,

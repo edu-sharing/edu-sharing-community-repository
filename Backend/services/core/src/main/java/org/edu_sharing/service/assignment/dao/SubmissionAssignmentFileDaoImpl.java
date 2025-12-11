@@ -87,7 +87,8 @@ final class SubmissionAssignmentFileDaoImpl extends BasicNodeDaoImpl implements 
         return new AssignmentFile(
                 getNodeRef(),
                 referNode.get(),
-                getDocumentRole());
+                getDocumentRole(),
+                null);
     }
 
     @Override
@@ -118,6 +119,11 @@ final class SubmissionAssignmentFileDaoImpl extends BasicNodeDaoImpl implements 
             nodeService.updateNodeNative(nodeId, properties);
             refresh();
         }
+    }
+
+    @Override
+    public Boolean isDone() {
+        return null;
     }
 
     @Override
