@@ -11,7 +11,7 @@ import {
     WritableSignal,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
-import { Node } from 'ngx-edu-sharing-api';
+import { Node, RestConstants } from 'ngx-edu-sharing-api';
 import { combineLatest, Subject } from 'rxjs';
 import { debounceTime, startWith, takeUntil } from 'rxjs/operators';
 import { DropdownComponent } from '../../dropdown/dropdown.component';
@@ -221,6 +221,12 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
         // retrieve the current nodes from the data source and initialize the tree with it
         const nodes: Node[] = this.entriesService.dataSource.getData() as Node[];
         this.dataSource.data = await this.treeNodeService.getInitialData(nodes);
+        // find a first level element that can be expanded and expand it
+        const firstLevelElement = this.dataSource.data.find((d) => d.level === 0 && d.expandable);
+        if (firstLevelElement) {
+            this.treeControl.expand(firstLevelElement);
+            await this.updateTree([firstLevelElement.item as Node]);
+        }
         this.treeInitialized.set(true);
         this.changeDetectorRef.detectChanges();
     }
@@ -231,7 +237,9 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     private async updateTree(nodes: Node[]): Promise<void> {
         for (const node of nodes) {
             await this.triggerNodeUpdate(
-                this.nodeHelper.isNodeCollection(node) ? node.ref.id : node.parent.id,
+                [RestConstants.CM_TYPE_FOLDER, RestConstants.CCM_TYPE_MAP].includes(node.type)
+                    ? node.ref.id
+                    : node.parent?.id ?? node.ref.id,
             );
         }
         this.changeDetectorRef.detectChanges();
