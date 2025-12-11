@@ -725,8 +725,6 @@ export class MdsEditorInstanceService
     // Not used any more?
     // valueChanged = new EventEmitter<{ property: string; newValue: string[] }>();
 
-    // Mutable state
-    shouldShowExtendedWidgets$ = new BehaviorSubject(false);
     /**
      * Fires when (a different) MDS definition was loaded and widgets and views were updated
      * accordingly.
