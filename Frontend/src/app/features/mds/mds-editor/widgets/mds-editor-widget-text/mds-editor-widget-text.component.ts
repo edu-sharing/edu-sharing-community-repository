@@ -9,6 +9,7 @@ import { Toast } from '../../../../../services/toast';
 import { Widget } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { BehaviorSubject } from 'rxjs';
+import { init } from 'jasmine-spec-reporter/built/display/colors-display';
 
 @Component({
     selector: 'es-mds-editor-widget-text',
@@ -27,7 +28,6 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
     readonly valueType: ValueType = ValueType.String;
     formControl: UntypedFormControl;
     fileNameChecker: FileNameChecker;
-    suggestions: SuggestionResponseDto[];
     aiSuggestion$ = new BehaviorSubject<SuggestionResponseDto>(null);
 
     async ngOnInit() {
@@ -43,18 +43,11 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
             )
             .subscribe((value) => {
                 if (this.aiSuggestion$.value) {
-                    this.setSuggestionState(this.aiSuggestion$.value, 'DECLINED');
-                    this.aiSuggestion$.next(this.aiSuggestion$.value);
+                    this.widget.setSuggestionState(this.aiSuggestion$, 'DECLINED');
                 }
                 this.setValue([value]);
             });
         this.widget.observeBulkMode().subscribe(() => {
-            console.log(
-                'bulk',
-                this.widget.definition.id,
-                this.widget.getBulkMode(),
-                this.showBulkMixedValues(),
-            );
             if (this.showBulkMixedValues()) {
                 this.formControl.disable();
             } else {
@@ -71,12 +64,12 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
         }
         this.widget.getShowAiSuggestions().subscribe(([show, suggestions]) => {
             const suggestion = suggestions?.find((s) => s.type === 'AI' && s.status === 'PENDING');
-            if (suggestion && this.aiSuggestion$.value?.status !== 'DECLINED') {
-                if (show) {
-                    this.applySuggestion(suggestion);
+            if (this.aiSuggestion$.value?.status !== 'DECLINED') {
+                if (!this.formControl.value?.trim() && suggestion && show) {
                     this.aiSuggestion$.next(suggestion);
-                } else if (!initialValue[0] && !show) {
-                    this.clearSuggestion(suggestion);
+                    this.applySuggestion(this.aiSuggestion$);
+                } else if (!initialValue[0] && !show && this.aiSuggestion$.value) {
+                    this.clearSuggestion(this.aiSuggestion$);
                 }
             }
         });
@@ -127,20 +120,15 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
         }
     }
 
-    setSuggestionState(suggestion: SuggestionResponseDto, status: SuggestionStatus) {
-        suggestion.status = status;
-        this.mdsEditorInstance.updateSuggestionState(this.widget.definition.id, suggestion);
-        this.widget.markSuggestionChanged();
-    }
-    clearSuggestion(suggestion: SuggestionResponseDto) {
-        this.formControl.setValue('');
+    clearSuggestion(suggestion: BehaviorSubject<SuggestionResponseDto>) {
+        this.formControl.setValue('', { emitEvent: false });
         this.setValue(['']);
-        this.setSuggestionState(suggestion, 'PENDING');
+        this.widget.setSuggestionState(suggestion, 'PENDING');
     }
-    applySuggestion(suggestion: SuggestionResponseDto) {
-        this.formControl.setValue(suggestion.value as string);
-        this.setValue([suggestion.value as string]);
-        this.setSuggestionState(suggestion, 'ACCEPTED');
+    applySuggestion(suggestion: BehaviorSubject<SuggestionResponseDto>) {
+        this.formControl.setValue(suggestion.value.value as string, { emitEvent: false });
+        this.setValue([suggestion.value.value as string]);
+        this.widget.setSuggestionState(suggestion, 'ACCEPTED');
     }
 }
 

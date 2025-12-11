@@ -5,6 +5,8 @@ import { MdsWidget, MdsWidgetValue } from '../../../types/types';
 import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { MatSelect } from '@angular/material/select';
 import { ValueType } from 'ngx-edu-sharing-ui';
+import { BehaviorSubject } from 'rxjs';
+import { SuggestionResponseDto } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-mds-editor-widget-select',
@@ -18,6 +20,7 @@ export class MdsEditorWidgetSelectComponent extends MdsEditorWidgetBase implemen
 
     values: Promise<MdsWidgetValue[]>;
     formControl: UntypedFormControl;
+    aiSuggestion$ = new BehaviorSubject<SuggestionResponseDto>(null);
 
     readonly showTooltip = (() => {
         let previousTooltip: MatTooltip;
@@ -50,15 +53,45 @@ export class MdsEditorWidgetSelectComponent extends MdsEditorWidgetBase implemen
                     );
                 }
             });
-            this.formControl.valueChanges.subscribe((value) =>
-                this.setValue(value ? [value.id] : [null]),
-            );
+            this.formControl.valueChanges.subscribe((value) => {
+                this.setValue(value ? [value.id] : [null]);
+                if (this.aiSuggestion$.value && value.id !== this.aiSuggestion$.value.value) {
+                    this.widget.setSuggestionState(this.aiSuggestion$, 'DECLINED');
+                }
+            });
         } else {
             // skip first because the init state will cause a trigger
-            this.formControl.valueChanges.subscribe((value) =>
-                this.setValue(value ? [value.id] : [null]),
-            );
+            this.formControl.valueChanges.subscribe((value) => {
+                this.setValue(value ? [value.id] : [null]);
+                if (this.aiSuggestion$.value && value?.id !== this.aiSuggestion$.value.value) {
+                    this.widget.setSuggestionState(this.aiSuggestion$, 'DECLINED');
+                }
+            });
         }
+        this.widget.getShowAiSuggestions().subscribe(async ([show, suggestions]) => {
+            const suggestion = suggestions?.find((s) => s.type === 'AI' && s.status === 'PENDING');
+            if (this.aiSuggestion$.value?.status !== 'DECLINED') {
+                if (!this.formControl.value && suggestion && show) {
+                    const value = (await this.values).find((v) => v.id === suggestion.value);
+                    if (value) {
+                        this.aiSuggestion$.next(suggestion);
+                        this.widget.setSuggestionState(this.aiSuggestion$, 'ACCEPTED');
+                        this.setValue([suggestion.value as string]);
+                        this.formControl.setValue(value, { emitEvent: false });
+                    } else {
+                        console.warn(
+                            `Invalid suggestion value ${suggestion.value} for widget`,
+                            this.widget.definition.id,
+                            this.widget.definition.values,
+                        );
+                    }
+                } else if (!initialValue && !show && this.aiSuggestion$.value) {
+                    this.widget.setSuggestionState(this.aiSuggestion$, 'PENDING');
+                    this.setValue(null);
+                    this.formControl.setValue(null, { emitEvent: false });
+                }
+            }
+        });
         this.registerValueChanges(this.formControl);
     }
 

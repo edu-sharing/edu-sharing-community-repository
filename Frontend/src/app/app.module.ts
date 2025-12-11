@@ -53,6 +53,7 @@ import { MockLocationStrategy } from '@angular/common/testing';
 import { WebComponentService } from './main/web-component.service';
 import { PreviewSidebarComponent } from './features/preview-sidebar/preview-sidebar.component';
 import { WebComponentLocationStrategy } from './main/web-component.utils';
+import { RenderingServiceApiModule } from 'ngx-rendering-service-api';
 
 const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     showDelay: 500,
@@ -75,6 +76,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DialogsModule,
         DragDropModule,
         // forRoot is empty; It is initalized via useFactory!
+        RenderingServiceApiModule.forRoot({}),
         EduSharingApiModule.forRoot({}),
         EduSharingUiModule.forRoot({ production: environment.production }, extensionUiProviders),
         BApiModule.forRoot({ rootUrl: environment.bApiUrl || '/edu-sharing/rest/bapi' }),

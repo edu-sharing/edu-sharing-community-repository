@@ -4,6 +4,8 @@ import { Options } from '@angular-slider/ngx-slider';
 import { MdsWidget, MdsWidgetValue } from '../../../types/types';
 import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { MdsWidgetType, ValueType } from 'ngx-edu-sharing-ui';
+import { BehaviorSubject, firstValueFrom, timer } from 'rxjs';
+import { SuggestionResponseDto } from 'ngx-edu-sharing-api';
 
 @Component({
     templateUrl: './mds-editor-widget-slider.component.html',
@@ -12,7 +14,7 @@ import { MdsWidgetType, ValueType } from 'ngx-edu-sharing-ui';
 })
 export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implements OnInit {
     readonly valueType: ValueType = ValueType.String;
-
+    aiSuggestion$ = new BehaviorSubject<SuggestionResponseDto>(null);
     sliderOptions: Options = {
         floor: 0,
         ceil: 0,
@@ -49,6 +51,23 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
                 this.setStatus('DISABLED');
             } else {
                 this.setStatus('VALID');
+            }
+        });
+        this.widget.getShowAiSuggestions().subscribe(async ([show, suggestions]) => {
+            const suggestion = suggestions?.find((s) => s.type === 'AI' && s.status === 'PENDING');
+            if (this.aiSuggestion$.value?.status !== 'DECLINED') {
+                if (suggestion && show) {
+                    this.currentValue = (suggestion.value as string)
+                        .split('-')
+                        .map((s) => parseInt(s, 10));
+                    // delay so 'slider' can trigger its own event first
+                    await firstValueFrom(timer(1));
+                    this.aiSuggestion$.next(suggestion);
+                    this.widget.setSuggestionState(this.aiSuggestion$, 'ACCEPTED');
+                } else if (!show && this.aiSuggestion$.value) {
+                    this.widget.setSuggestionState(this.aiSuggestion$, 'PENDING');
+                    this.currentValue = await this.getInitialValue_();
+                }
             }
         });
     }
@@ -107,6 +126,9 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
             this.setSliderValue([value]);
         } else {
             this.setSliderValue([value, this.currentValue?.[1]]);
+        }
+        if (this.aiSuggestion$.value?.status === 'ACCEPTED') {
+            this.widget.setSuggestionState(this.aiSuggestion$, 'DECLINED');
         }
     }
     setSliderValue(value: number[]) {

@@ -27,7 +27,9 @@
       mat-flat-button
       color="primary"
       [disabled]="!option.isEnabled"
-      [class.display-none]="!option.isEnabled && !showDisabled"
+      [class]="
+        (!option.isEnabled && !showDisabled ? 'display-none ' : '') + (option.name | propertySlug)
+      "
       matTooltip="{{ option | optionTooltip | async }}"
       [matTooltipPosition]="tooltipPosition"
       [attr.aria-label]="option.ariaLabel || option.name | translate"
@@ -43,7 +45,9 @@
       mat-button
       color="primary"
       [disabled]="!option.isEnabled"
-      [class.display-none]="!option.isEnabled && !showDisabled"
+      [class]="
+        (!option.isEnabled && !showDisabled ? 'display-none ' : '') + (option.name | propertySlug)
+      "
       matTooltip="{{ option | optionTooltip | async }}"
       [matTooltipPosition]="tooltipPosition"
       [attr.aria-label]="option.ariaLabel || option.name | translate"

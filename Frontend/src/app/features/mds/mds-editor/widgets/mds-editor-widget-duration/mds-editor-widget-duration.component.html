@@ -4,7 +4,10 @@
   [label]="widget.definition.caption"
   [valueType]="valueType"
 >
-  <div class="duration-group">
+  <div
+    class="duration-group"
+    [class.isAiSuggestion]="(aiSuggestion$ | async)?.status === 'ACCEPTED'"
+  >
     <mat-form-field>
       <mat-label>{{ 'INPUT_HOURS' | translate }}</mat-label>
       <input

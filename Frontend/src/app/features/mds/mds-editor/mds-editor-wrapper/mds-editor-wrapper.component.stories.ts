@@ -24,6 +24,7 @@ const meta: Meta<MdsEditorWrapperComponent> = {
         editorMode: 'nodes',
         nodes: [DummyNode as Node].map((n) => {
             delete n.properties['cclom:title'];
+            delete n.properties['cclom:general_description'];
             return n;
         }),
     },

@@ -4,3 +4,16 @@ es-mds-editor-widget-container {
         margin-bottom: 10px;
     }
 }
+:host ::ng-deep {
+    .mds-slider.isAiSuggestion {
+        .ngx-slider-selection-bar .ngx-slider-bar {
+            background: var(--aiColor);
+        }
+        .ngx-slider-pointer {
+            background: var(--aiColor);
+        }
+        .ngx-slider-bubble {
+            color: var(--aiColor);
+        }
+    }
+}

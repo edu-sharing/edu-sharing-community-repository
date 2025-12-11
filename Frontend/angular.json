@@ -200,6 +200,9 @@
         "storybook": {
           "builder": "@storybook/angular:start-storybook",
           "options": {
+            "assets": [
+              "src/assets"
+            ],
             "configDir": ".storybook",
             "browserTarget": "angular-edusharing:build",
             "compodoc": false,
@@ -209,6 +212,9 @@
         "build-storybook": {
           "builder": "@storybook/angular:build-storybook",
           "options": {
+            "assets": [
+              "src/assets"
+            ],
             "configDir": ".storybook",
             "browserTarget": "angular-edusharing:build",
             "compodoc": false,
