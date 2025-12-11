@@ -88,7 +88,7 @@
             ></es-actionbar>
           </div>
           <es-node-entries-wrapper
-            #wrapperRef
+            #searchWrapperRef
             *ngIf="
               (selectedTab() === TabType.SEARCH && dataSourceSearch.isLoading) ||
               !dataSourceSearch.isEmpty()
@@ -107,7 +107,7 @@
               customOptions: { supportedOptions: ['OPTIONS.SWITCH_TO_CARDS_VIEW'] }
             }"
             [scope]="Scope.Search"
-            (clickItem)="selectOnClick(wrapperRef, $event)"
+            (clickItem)="selectOnClick(searchWrapperRef, $event)"
             (fetchData)="loadMore($event)"
             (selectionChange)="onNodeSelectionChange($event)"
           ></es-node-entries-wrapper>
@@ -169,6 +169,7 @@
         </mat-button-toggle-group>
         <!-- tree component -->
         <es-node-entries-wrapper
+          #collectionsWrapperRef
           *ngIf="selectedTab() === TabType.COLLECTIONS"
           [displayType]="collectionsDisplayType()"
           [columns]="collectionsColumns"
@@ -189,6 +190,7 @@
       <!-- WORKSPACE TAB -->
       <ng-container *ngSwitchCase="TabType.WORKSPACE">
         <es-node-entries-wrapper
+          #workspaceWrapperRef
           *ngIf="selectedTab() === TabType.WORKSPACE"
           [columns]="workspaceColumns"
           [dataSource]="dataSourceWorkspace"

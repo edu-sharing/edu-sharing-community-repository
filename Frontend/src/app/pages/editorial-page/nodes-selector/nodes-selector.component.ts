@@ -201,6 +201,7 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     searchDisplayType: NodeEntriesDisplayType = NodeEntriesDisplayType.Table;
     searchSent: WritableSignal<boolean> = signal(false);
     @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
+    @ViewChild('searchWrapperRef') searchWrapper!: NodeEntriesWrapperComponent<Node>;
 
     // collections tab
     collectionsColumns: ColumnType;
@@ -209,10 +210,12 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     );
     dataSourceCollectionsTree: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
     dataSourceCollectionsFlat: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
+    @ViewChild('collectionsWrapperRef') collectionsWrapper!: NodeEntriesWrapperComponent<Node>;
 
     // workspace tab
     workspaceColumns: ColumnType;
     dataSourceWorkspace: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
+    @ViewChild('workspaceWrapperRef') workspaceWrapper!: NodeEntriesWrapperComponent<Node>;
 
     // upload tab
     inboxNode: Node;
@@ -356,6 +359,10 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     async onCollectionsDisplayTypeChange(event: MatButtonToggleChange): Promise<void> {
         const nextDisplayType = event.value;
         const existingDisplayType = this.collectionsDisplayType();
+        // reset the selected nodes due to view change
+        this.collectionsWrapper?.getSelection().clear();
+        this.searchWrapper?.getSelection().clear();
+        this.workspaceWrapper?.getSelection().clear();
         // switching from tree view into a flat view -> find the deepest level of the tree to be displayed
         if (
             existingDisplayType === NodeEntriesDisplayType.Tree &&
