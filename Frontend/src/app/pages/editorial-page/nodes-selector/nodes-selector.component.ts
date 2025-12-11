@@ -113,47 +113,13 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     });
     private currentStep: WritableSignal<StepType> = signal(StepType.SELECT);
     isSelectStep: Signal<boolean> = computed((): boolean => this.currentStep() === StepType.SELECT);
-    onlyOneTopLevelCollectionSelected: Signal<boolean> = computed((): boolean => {
-        const selectedNodes: Partial<Node>[] = this.selectedNodes();
-        // early return for empty or single selection
-        if (selectedNodes.length === 0) {
-            return false;
-        }
-        if (selectedNodes.length === 1) {
-            return this.nodeHelperService.isNodeCollection(selectedNodes[0] as Node);
-        }
-        // helper structures
-        const selectedNodeIds = new Set<string>();
-        const files: Partial<Node>[] = [];
-        const collections: Partial<Node>[] = [];
-        // fill those structures
-        selectedNodes.forEach((node) => {
-            selectedNodeIds.add(node.ref.id);
-
-            if (node.type === RestConstants.CCM_TYPE_IO) {
-                files.push(node);
-            } else if (this.nodeHelperService.isNodeCollection(node as Node)) {
-                collections.push(node);
-            }
-        });
-        // files must have a parent ID within the selection
-        const everyFileBelongsToSelectedCollection = files.every((f) =>
-            selectedNodeIds.has(f.parent.id),
-        );
-        // return collections without a selected parent
-        const collectionsWithoutSelectedParent = collections.filter(
-            (c) => !selectedNodeIds.has(c.parent.id),
-        );
-        return (
-            collectionsWithoutSelectedParent.length === 1 && everyFileBelongsToSelectedCollection
-        );
-    });
+    onlyOneSelected: Signal<boolean> = computed(() => this.selectedNodes().length === 1);
     onlyFilesSelected: Signal<boolean> = computed((): boolean =>
         this.selectedNodes().every((node) => node.type === RestConstants.CCM_TYPE_IO),
     );
     isValidSelection: Signal<boolean> = computed(
         (): boolean =>
-            (this.onlyOneTopLevelCollectionSelected() || this.onlyFilesSelected()) &&
+            (this.onlyOneSelected() || this.onlyFilesSelected()) &&
             (!this.option.applyCallback ||
                 this.option.applyCallback(this.selectedNodes() as Node[])),
     );

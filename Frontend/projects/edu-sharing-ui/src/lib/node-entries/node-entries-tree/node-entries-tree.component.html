@@ -86,12 +86,12 @@
       <div class="child-tree-node-container">
         <a
           matIconButton
+          matTreeNodeToggle
           [attr.id]="'toggle-' + node.item.ref.id"
           class="toggle-button fade"
           role="button"
           tabindex="0"
           [attr.aria-label]="'Toggle ' + node.item.title"
-          (click)="toggleNode(node, $event)"
         >
           <i [esIcon]="treeControl.isExpanded(node) ? 'expand_less' : 'chevron_right'"></i>
         </a>
@@ -118,7 +118,7 @@
   <div
     class="node-information"
     [class.cursor-pointer]="flatNode.level > 0"
-    (click)="updateSelectedNodes(flatNode)"
+    (click)="updateSelectedNodes(flatNode, $event)"
   >
     <div class="general-information container">
       <!-- special case for collections, if the preview does not contain the default icon -->

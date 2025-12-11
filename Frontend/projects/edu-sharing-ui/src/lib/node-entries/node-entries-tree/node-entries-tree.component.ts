@@ -124,41 +124,34 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     }
 
     /**
-     * Toggles the expansion state of a given node.
+     * Handle the click event on a node by toggling its selection and expanding its children.
      *
      * @param flatNode
      * @param event
      */
-    async toggleNode(flatNode: DynamicFlatNode, event: Event): Promise<void> {
-        event.preventDefault();
-        event.stopPropagation();
-        // if the node is not already expanded, check for its children being selected before expanding it
-        if (!this.treeControl.isExpanded(flatNode)) {
-            if (this.entriesService.selection.isSelected(flatNode.item as T)) {
-                await this.selectNodeChildren(flatNode);
-            }
-            this.treeControl.expand(flatNode);
-        } else {
-            this.treeControl.collapse(flatNode);
-        }
-    }
-
-    /**
-     * Handle the click event on a node by toggling its selection and expanding its children.
-     *
-     * @param flatNode
-     */
-    async updateSelectedNodes(flatNode: DynamicFlatNode): Promise<void> {
+    async updateSelectedNodes(flatNode: DynamicFlatNode, event?: MouseEvent): Promise<void> {
         if (flatNode.level === 0) {
             return;
         }
-        if (!this.entriesService.selection.isSelected(flatNode.item as T)) {
-            this.entriesService.selection.select(flatNode.item as T);
-            await this.selectNodeChildren(flatNode);
-            this.treeControl.expand(flatNode);
+        const node: T = flatNode.item as T;
+        // detect cmd / strg
+        if (event && (event.ctrlKey || event.metaKey)) {
+            // multi-select: add or remove the node from the selection
+            if (this.entriesService.selection.isSelected(node)) {
+                this.entriesService.selection.deselect(node);
+            } else {
+                this.entriesService.selection.select(node);
+            }
+            return;
         } else {
-            this.entriesService.selection.deselect(flatNode.item as T);
-            await this.deselectNodeChildren(flatNode);
+            // only one node can be selected at a time, so deselect all other nodes before selecting the new one
+            const nodeAlreadySelected = this.entriesService.selection.isSelected(node);
+            // if multiple nodes are selected, the node should be selected again
+            const multipleNodesSelected = this.entriesService.selection.selected.length > 1;
+            this.entriesService.selection.clear();
+            if (!nodeAlreadySelected || multipleNodesSelected) {
+                this.entriesService.selection.select(node);
+            }
         }
     }
 
@@ -256,118 +249,6 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
             const isExpanded = this.treeControl.isExpanded(treeElement);
             await this.dataSource.toggleNode(treeElement, !isExpanded);
             await this.dataSource.toggleNode(treeElement, isExpanded);
-        }
-    }
-
-    /**
-     * Helper function to select the node children in a tree.
-     * Recursively selects all nested children using only dataMap entries.
-     *
-     * @param flatNode
-     */
-    private async selectNodeChildren(flatNode: DynamicFlatNode): Promise<void> {
-        flatNode.isLoading.set(true);
-
-        // only call getChildren once for the initial node to avoid requesting invisible children
-        const initialChildren: Partial<Node>[] = await this.treeNodeService.getChildren(
-            flatNode.item,
-        );
-
-        if (initialChildren?.length) {
-            for (const child of initialChildren) {
-                if (child) {
-                    this.selectNodeChildrenRecursive(child, new Set<string>());
-                }
-            }
-        }
-
-        flatNode.isLoading.set(false);
-    }
-
-    /**
-     * Recursively selects children using only dataMap entries.
-     *
-     * @param node
-     * @param visitedNodes
-     */
-    private selectNodeChildrenRecursive(node: Partial<Node>, visitedNodes: Set<string>): void {
-        const nodeId: string = node.ref.id;
-
-        // prevent infinite loops
-        if (visitedNodes.has(nodeId)) {
-            return;
-        }
-        visitedNodes.add(nodeId);
-
-        // select if not selected
-        if (!this.entriesService.selection.isSelected(node as T)) {
-            this.entriesService.selection.select(node as T);
-        }
-
-        // check if this node has children in the dataMap
-        const childrenInDataMap: Partial<Node>[] = this.treeNodeService.dataMap.get(nodeId);
-        if (childrenInDataMap?.length) {
-            for (const child of childrenInDataMap) {
-                if (child) {
-                    this.selectNodeChildrenRecursive(child, visitedNodes);
-                }
-            }
-        }
-    }
-
-    /**
-     * Helper function to deselect the node children in a tree if the given node is selected.
-     * Recursively deselects all nested children using only dataMap entries.
-     *
-     * @param flatNode
-     */
-    private async deselectNodeChildren(flatNode: DynamicFlatNode): Promise<void> {
-        flatNode.isLoading.set(true);
-
-        // only call getChildren once for the initial node to avoid requesting invisible children
-        const initialChildren: Partial<Node>[] = await this.treeNodeService.getChildren(
-            flatNode.item,
-        );
-
-        if (initialChildren?.length) {
-            for (const child of initialChildren) {
-                if (child) {
-                    this.deselectNodeChildrenRecursive(child, new Set<string>());
-                }
-            }
-        }
-
-        flatNode.isLoading.set(false);
-    }
-
-    /**
-     * Recursively deselects children using only dataMap entries.
-     *
-     * @param node
-     * @param visitedNodes
-     */
-    private deselectNodeChildrenRecursive(node: Partial<Node>, visitedNodes: Set<string>): void {
-        const nodeId: string = node.ref.id;
-
-        // prevent infinite loops
-        if (visitedNodes.has(nodeId)) {
-            return;
-        }
-        visitedNodes.add(nodeId);
-
-        // deselect if selected
-        if (this.entriesService.selection.isSelected(node as T)) {
-            this.entriesService.selection.deselect(node as T);
-        }
-
-        // check if this node has children in the dataMap
-        const childrenInDataMap: Partial<Node>[] = this.treeNodeService.dataMap.get(nodeId);
-        if (childrenInDataMap?.length) {
-            for (const child of childrenInDataMap) {
-                if (child) {
-                    this.deselectNodeChildrenRecursive(child, visitedNodes);
-                }
-            }
         }
     }
 }
