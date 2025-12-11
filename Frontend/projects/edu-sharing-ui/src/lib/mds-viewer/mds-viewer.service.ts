@@ -81,6 +81,8 @@ export class MdsViewerService {
             case 'color':
             case 'textarea':
             case 'singleoption':
+            case 'radioVertical':
+            case 'radioHorizontal':
                 return 'text';
             case 'number':
                 return 'number';
