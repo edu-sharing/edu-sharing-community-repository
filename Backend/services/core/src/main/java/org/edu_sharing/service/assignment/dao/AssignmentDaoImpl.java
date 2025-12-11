@@ -51,6 +51,11 @@ final class AssignmentDaoImpl extends BasicNodeDaoImpl implements AssignmentDao 
     @Setter(onMethod_ = @Autowired)
     private AuthorityService authorityService;
 
+
+    public AssignmentDaoImpl() {
+        this(null, Optional.empty());
+    }
+
     public AssignmentDaoImpl(String nodeId) {
         this(nodeId, Optional.empty());
     }

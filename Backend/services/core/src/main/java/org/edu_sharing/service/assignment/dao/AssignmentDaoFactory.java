@@ -1,9 +1,9 @@
 package org.edu_sharing.service.assignment.dao;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.apache.commons.lang3.NotImplementedException;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -14,6 +14,7 @@ import org.edu_sharing.service.assignment.*;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.model.SearchToken;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,7 +43,7 @@ public class AssignmentDaoFactory {
     @Bean(autowireCandidate = false)
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    public AssignmentDao assignmentDaoByNodeId(String nodeId) {
+    public AssignmentDao assignmentDaoByNodeId(@NotNull @NonNull String nodeId) {
         String type = nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.CCM_PROP_ASSIGNMENT_TYPE);
         return switch (Enum.valueOf(Assignment.Type.class, type)) {
             case SUBMISSION -> new SubmissionAssignmentDaoImpl(nodeId);
@@ -52,11 +53,21 @@ public class AssignmentDaoFactory {
 
     @Bean(autowireCandidate = false)
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public AssignmentDao assignmentDaoByNodeRef(org.edu_sharing.service.model.NodeRef nodeRef) {
+    public AssignmentDao assignmentDaoByNodeRef(@NotNull @NonNull org.edu_sharing.service.model.NodeRef nodeRef) {
         String type = (String) nodeRef.getProperties().get(CCConstants.CCM_PROP_ASSIGNMENT_TYPE);
         return switch (Enum.valueOf(Assignment.Type.class, type)) {
             case SUBMISSION -> new SubmissionAssignmentDaoImpl(nodeRef);
             case DEFAULT -> new AssignmentDaoImpl(nodeRef);
+        };
+    }
+
+    @Bean(autowireCandidate = false)
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    public AssignmentDao assignemntDaoByType(Assignment.Type type) {
+        return switch (type) {
+            case SUBMISSION -> new SubmissionAssignmentDaoImpl();
+            case DEFAULT -> new AssignmentDaoImpl();
         };
     }
 

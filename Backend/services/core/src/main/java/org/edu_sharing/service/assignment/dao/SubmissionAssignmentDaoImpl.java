@@ -56,6 +56,10 @@ public class SubmissionAssignmentDaoImpl extends BasicNodeDaoImpl implements Ass
     private AuthorityService authorityService;
 
 
+    public SubmissionAssignmentDaoImpl() {
+        this(null, Optional.empty());
+    }
+
     public SubmissionAssignmentDaoImpl(String nodeId) {
         this(nodeId, Optional.empty());
     }

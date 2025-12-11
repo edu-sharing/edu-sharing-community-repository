@@ -73,7 +73,9 @@ public class AssignmentApi {
             }
     )
     public Response createOrUpdateAssignment(@Valid CreateAssignmentRequest request) {
-        AssignmentDao assignment = assignmentDaoFactory.assignmentDaoByNodeId(request.id());
+        AssignmentDao assignment = Objects.isNull(request.id())
+                ? assignmentDaoFactory.assignemntDaoByType(request.type())
+                : assignmentDaoFactory.assignmentDaoByNodeId(request.id());
         assignment.createOrUpdate(request);
         return Response.ok().entity(assignment.getAssignment()).build();
     }
@@ -488,11 +490,11 @@ public class AssignmentApi {
         AssignmentDao assignment = assignmentDaoFactory.assignmentDaoByNodeId(assignmentId);
         SubmissionDao submission = assignment.getSubmission(submissionId);
         SubmissionFileDao submissionFile = submission.getSubmissionFile(submissionFileId);
-        if(fileInputStream != null) {
+        if (fileInputStream != null) {
             submissionFile.updateCorrectionFile(fileInputStream);
         }
 
-        if(submissionFileValidationRequest.validationStatus() != null) {
+        if (submissionFileValidationRequest.validationStatus() != null) {
             submissionFile.setValidationStatus(submissionFileValidationRequest.validationStatus());
         }
 
