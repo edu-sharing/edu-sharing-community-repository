@@ -155,7 +155,7 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
     private temporaryValue: string[] = undefined;
 
     constructor(
-        @Optional() private mdsEditorInstance: MdsEditorInstanceServiceAbstract,
+        @Optional() public mdsEditorInstance: MdsEditorInstanceServiceAbstract,
         public translate: TranslateService,
         private ui: UIService,
         private viewInstance: ViewInstanceService,

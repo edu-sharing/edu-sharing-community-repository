@@ -11,7 +11,12 @@
 >
   <div class="edit-wrapper">
     <div
-      *ngIf="!isEmpty() || !widget.definition.hideIfEmpty || isEditable()"
+      *ngIf="
+        (!isEmpty() || !widget.definition.hideIfEmpty || isEditable()) &&
+        (!widget.definition.isExtended ||
+          !mdsEditorInstance ||
+          (mdsEditorInstance?.shouldShowExtendedWidgets$ | async))
+      "
       class="widget-wrapper"
     >
       <div

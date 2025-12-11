@@ -18,6 +18,9 @@ export abstract class MdsEditorInstanceServiceAbstract {
     /** Nodes with updated and complete metadata. */
     nodes$ = new BehaviorSubject<Node[]>(null);
 
+    // Mutable state
+    shouldShowExtendedWidgets$ = new BehaviorSubject(false);
+
     abstract saveWidgetValue(widget: any): Promise<void>;
 
     abstract fetchDisplayValues(widget: any, additionalKeys?: string[]): Promise<void>;
