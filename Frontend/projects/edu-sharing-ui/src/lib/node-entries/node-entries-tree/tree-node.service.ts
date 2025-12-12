@@ -26,6 +26,8 @@ export class TreeNodeService {
         RestConstants.CM_TYPE_FOLDER,
         RestConstants.CCM_TYPE_MAP,
     ];
+    // holds information on the initial data
+    initialData: DynamicFlatNode[] = [];
     // holds information on the last loaded children node ID, which is used for pagination
     parentIdToLastLoadedNodeId = new Map<string, string>();
     // avoid empty (faked) parents from being toggled, as the IDs do not exist
@@ -54,10 +56,10 @@ export class TreeNodeService {
     }
 
     /**
-     * Retrieves the initial data by iterating the nodes and ordering them into a tree structure.
-     * Returns the first level of dynamic flat nodes.
+     * Initializes the data by iterating the nodes and ordering them into a tree structure.
+     * Stores the initial data.
      */
-    async getInitialData(nodes: Node[]): Promise<DynamicFlatNode[]> {
+    async initializeTreeData(nodes: Node[]): Promise<void> {
         // initial data
         const initialData: DynamicFlatNode[] = [];
 
@@ -134,7 +136,14 @@ export class TreeNodeService {
                 }
             });
         });
-        return initialData;
+        this.initialData = initialData;
+    }
+
+    /**
+     * Retrieves the initial data for the tree.
+     */
+    getInitialData(): DynamicFlatNode[] {
+        return this.initialData;
     }
 
     /**
@@ -359,5 +368,16 @@ export class TreeNodeService {
         }
         // emit the changed nodes
         this.nodesChanged.emit(updatedNodes);
+    }
+
+    /**
+     * Resets all data loaded for the tree.
+     */
+    resetData(): void {
+        this.dataMap = new Map<string, Partial<Node>[]>();
+        this.emptyFolders = [];
+        this.initialData = [];
+        this.parentIdToLastLoadedNodeId = new Map<string, string>();
+        this.emptyParentIds = [];
     }
 }

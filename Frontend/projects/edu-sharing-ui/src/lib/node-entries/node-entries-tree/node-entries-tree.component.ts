@@ -212,8 +212,11 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
         this.treeControl = new FlatTreeControl<DynamicFlatNode>(this.getLevel, this.isExpandable);
         this.dataSource = new DynamicDataSource(this.treeControl, this.treeNodeService);
         // retrieve the current nodes from the data source and initialize the tree with it
-        const nodes: Node[] = this.entriesService.dataSource.getData() as Node[];
-        this.dataSource.data = await this.treeNodeService.getInitialData(nodes);
+        if (!this.treeNodeService.dataMap.size) {
+            const nodes: Node[] = this.entriesService.dataSource.getData() as Node[];
+            await this.treeNodeService.initializeTreeData(nodes);
+        }
+        this.dataSource.data = this.treeNodeService.getInitialData();
         // find a first level element that can be expanded and expand it
         const firstLevelElement = this.dataSource.data.find((d) => d.level === 0 && d.expandable);
         if (firstLevelElement) {

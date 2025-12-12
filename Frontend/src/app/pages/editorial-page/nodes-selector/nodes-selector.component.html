@@ -171,13 +171,13 @@
         <es-node-entries-wrapper
           #collectionsWrapperRef
           *ngIf="selectedTab() === TabType.COLLECTIONS"
-          [displayType]="collectionsDisplayType()"
           [columns]="collectionsColumns"
           [dataSource]="
             collectionsDisplayType() === NodeEntriesDisplayType.Tree
               ? dataSourceCollectionsTree
               : dataSourceCollectionsFlat
           "
+          [displayType]="collectionsDisplayType()"
           [dragDrop]="{
             dragAllowed: true,
             dropAllowed: canDropOnCollection,
