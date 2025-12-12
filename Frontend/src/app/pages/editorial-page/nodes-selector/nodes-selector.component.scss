@@ -178,3 +178,10 @@ es-info-message.no-config-alert {
     display: flex;
     flex-direction: column;
 }
+
+// fix: node-entries-table should not reserve space for empty actions
+:host ::ng-deep es-node-entries ::ng-deep es-node-entries-table {
+    .mat-column-actions {
+        display: none;
+    }
+}
