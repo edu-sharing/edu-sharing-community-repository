@@ -76,7 +76,7 @@
           (keydown.enter)="executeSearch()"
         />
         <button
-          *ngIf="searchText"
+          *ngIf="searchText()"
           matSuffix
           mat-icon-button
           [attr.aria-label]="'SEARCH_CLEAR' | translate"
@@ -106,7 +106,7 @@
               dropAllowed: canDropOnSearchRef,
               dropped: dropped
             }"
-            [columns]="searchColumns"
+            [columns]="flatNodeEntriesColumns"
             [dataSource]="dataSourceSearch"
             [(displayType)]="searchDisplayType"
             [elementInteractionType]="InteractionType.Emitter"
@@ -119,12 +119,9 @@
             (fetchData)="loadMore($event)"
             (selectionChange)="onNodeSelectionChange($event)"
           ></es-node-entries-wrapper>
-          <es-info-message
-            mode="info"
-            *ngIf="dataSourceSearch.isEmpty() && !dataSourceSearch.isLoading && searchSent()"
-          >
-            {{ i18nPrefix + 'SEARCH.NO_RESULTS' | translate }}
-          </es-info-message>
+          <ng-container
+            *ngTemplateOutlet="noSearchResults; context: { dataSource: dataSourceSearch }"
+          ></ng-container>
         </div>
       </ng-container>
 
@@ -133,6 +130,7 @@
         <!-- TODO: move into actionbar -->
         <mat-button-toggle-group
           class="collection-display-type"
+          [disabled]="collectionsDisplayTypeToggleDisabled()"
           hideSingleSelectionIndicator
           [value]="collectionsDisplayType()"
           (change)="onCollectionsDisplayTypeChange($event)"
@@ -149,11 +147,17 @@
             <i esIcon="account_tree"></i>
           </mat-button-toggle>
         </mat-button-toggle-group>
-        <!-- tree component -->
+        <!-- tree or flat node entries component -->
         <es-node-entries-wrapper
           #collectionsWrapperRef
-          *ngIf="selectedTab() === TabType.COLLECTIONS"
-          [columns]="collectionsColumns"
+          *ngIf="
+            selectedTab() === TabType.COLLECTIONS &&
+            !(
+              collectionsDisplayType() !== NodeEntriesDisplayType.Tree &&
+              dataSourceCollectionsFlat.isEmpty()
+            )
+          "
+          [columns]="flatNodeEntriesColumns"
           [dataSource]="
             collectionsDisplayType() === NodeEntriesDisplayType.Tree
               ? dataSourceCollectionsTree
@@ -165,8 +169,14 @@
             dropAllowed: canDropOnCollection,
             dropped: dropOnCollection
           }"
+          (fetchData)="loadMore($event, true)"
           (selectionChange)="onNodeSelectionChange($event)"
         ></es-node-entries-wrapper>
+        <ng-container *ngIf="collectionsDisplayType() !== NodeEntriesDisplayType.Tree">
+          <ng-container
+            *ngTemplateOutlet="noSearchResults; context: { dataSource: dataSourceCollectionsFlat }"
+          ></ng-container>
+        </ng-container>
       </ng-container>
 
       <!-- WORKSPACE TAB -->
@@ -174,7 +184,7 @@
         <es-node-entries-wrapper
           #workspaceWrapperRef
           *ngIf="selectedTab() === TabType.WORKSPACE"
-          [columns]="workspaceColumns"
+          [columns]="flatNodeEntriesColumns"
           [dataSource]="dataSourceWorkspace"
           [displayType]="NodeEntriesDisplayType.Tree"
           [dragDrop]="{
@@ -200,6 +210,16 @@
           (dialogResult)="uploadMaterialDialogResult($event)"
         ></es-add-material-dialog>
       </ng-container>
+
+      <ng-template #noSearchResults let-dataSource="dataSource">
+        <es-info-message
+          mode="info"
+          class="info-message"
+          *ngIf="dataSource.isEmpty() && !dataSource.isLoading && searchSent()"
+        >
+          {{ i18nPrefix + 'NO_SEARCH_RESULTS' | translate }}
+        </es-info-message>
+      </ng-template>
 
       <!-- FALLBACK -->
       <ng-container *ngSwitchDefault> No view defined for tab {{ selectedTab() }}. </ng-container>

@@ -34,7 +34,6 @@ import {
     DropSource,
     FetchEvent,
     InteractionType,
-    ListItem,
     LocalEventsService,
     MdsHelperService,
     NodeClickEvent,
@@ -162,7 +161,6 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     });
 
     // search tab
-    searchColumns: ColumnType;
     dataSourceSearch: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
     searchDisplayType: NodeEntriesDisplayType = NodeEntriesDisplayType.Table;
     searchSent: WritableSignal<boolean> = signal(false);
@@ -170,16 +168,20 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     @ViewChild('searchWrapperRef') searchWrapper!: NodeEntriesWrapperComponent<Node>;
 
     // collections tab
-    collectionsColumns: ColumnType;
     collectionsDisplayType: WritableSignal<NodeEntriesDisplayType> = signal(
         NodeEntriesDisplayType.Tree,
+    );
+    collectionsDisplayTypeToggleDisabled = computed(
+        () =>
+            this.selectedTab() === TabType.COLLECTIONS &&
+            this.searchSent() &&
+            this.searchText() !== '',
     );
     dataSourceCollectionsTree: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
     dataSourceCollectionsFlat: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
     @ViewChild('collectionsWrapperRef') collectionsWrapper!: NodeEntriesWrapperComponent<Node>;
 
     // workspace tab
-    workspaceColumns: ColumnType;
     dataSourceWorkspace: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
     @ViewChild('workspaceWrapperRef') workspaceWrapper!: NodeEntriesWrapperComponent<Node>;
 
@@ -187,7 +189,8 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     inboxNode: Node;
 
     // shared among tabs
-    searchText: string = '';
+    flatNodeEntriesColumns: ColumnType;
+    searchText = model('');
 
     constructor(
         private apiCollectionService: ApiCollectionService,
@@ -218,15 +221,9 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
      * Initializes the component by definition the default columns for the collections data source.
      */
     async ngOnInit(): Promise<void> {
-        this.searchColumns = await this.mdsHelperService.getColumnsByMdsId('search', {
+        this.flatNodeEntriesColumns = await this.mdsHelperService.getColumnsByMdsId('search', {
             repository: HOME_REPOSITORY,
         });
-        this.collectionsColumns = {
-            Default: ListItem.getCollectionDefaults(),
-        };
-        this.workspaceColumns = {
-            Default: ListItem.getCollectionDefaults(),
-        };
         this.inboxNode = await firstValueFrom(this.nodeService.getNode(RestConstants.INBOX));
     }
 
@@ -257,8 +254,9 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     async onTabChange(event: MatTabChangeEvent) {
         // reset step information and individual variables
         this.currentStep.set(StepType.SELECT);
+        this.collectionsDisplayType.set(NodeEntriesDisplayType.Tree);
         this.selectedNodes.update(() => []);
-        this.searchText = '';
+        this.searchText.set('');
         this.searchSent.set(false);
         this.treeNodeService.resetData();
         // execute tab-specific actions
@@ -287,36 +285,57 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
      * Executes the search query and updates the search datasource.
      */
     async executeSearch() {
-        this.dataSourceSearch.isLoading = true;
         this.searchSent.set(true);
-        this.selectedNodes.update(() => []);
-
-        // reset the search datasource, if it is already initialized
-        if (!this.dataSourceSearch.isEmpty()) {
-            this.dataSourceSearch.reset();
-        }
-
-        if (!this.searchText) {
-            this.dataSourceSearch.setData([]);
+        this.resetNodeEntriesSelections();
+        if (this.selectedTab() === TabType.SEARCH) {
+            this.dataSourceSearch.isLoading = true;
+            // reset the search datasource if it is already initialized
+            if (!this.dataSourceSearch.isEmpty()) {
+                this.dataSourceSearch.reset();
+            }
+            if (!this.searchText()) {
+                this.dataSourceSearch.setData([]);
+                this.dataSourceSearch.isLoading = false;
+                return;
+            }
+            const request = this.createSearchRequest();
+            const searchResult: SearchResults = await firstValueFrom(
+                this.searchService.search(request),
+            );
+            this.dataSourceSearch.setData(searchResult.nodes, searchResult.pagination);
             this.dataSourceSearch.isLoading = false;
-            return;
+        } else if (this.selectedTab() === TabType.COLLECTIONS) {
+            this.dataSourceCollectionsFlat.isLoading = true;
+            // reset the flat datasource if it is already initialized
+            if (!this.dataSourceCollectionsFlat.isEmpty()) {
+                this.dataSourceCollectionsFlat.reset();
+            }
+            if (!this.searchText()) {
+                this.dataSourceCollectionsFlat.setData([]);
+            } else {
+                const request = this.createSearchRequest(0, true);
+                const searchResult: SearchResults = await firstValueFrom(
+                    this.searchService.search(request),
+                );
+                this.dataSourceCollectionsFlat.setData(searchResult.nodes, searchResult.pagination);
+            }
+            this.collectionsDisplayType.set(NodeEntriesDisplayType.Table);
+            this.dataSourceCollectionsFlat.isLoading = false;
         }
-
-        const request = this.createSearchRequest();
-        const searchResult: SearchResults = await firstValueFrom(
-            this.searchService.search(request),
-        );
-
-        this.dataSourceSearch.setData(searchResult.nodes, searchResult.pagination);
-        this.dataSourceSearch.isLoading = false;
     }
 
     /**
      * Clears the search text and executes the search again.
      */
     clearSearch(): void {
-        this.searchText = '';
-        void this.executeSearch();
+        this.searchText.set('');
+        if (this.selectedTab() === TabType.SEARCH) {
+            void this.executeSearch();
+        } else if (this.selectedTab() === TabType.COLLECTIONS) {
+            // reset type to tree view and reset variables
+            this.collectionsDisplayType.set(NodeEntriesDisplayType.Tree);
+            this.searchSent.set(false);
+        }
     }
 
     /**
@@ -327,10 +346,7 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     async onCollectionsDisplayTypeChange(event: MatButtonToggleChange): Promise<void> {
         const nextDisplayType = event.value;
         const existingDisplayType = this.collectionsDisplayType();
-        // reset the selected nodes due to view change
-        this.collectionsWrapper?.getSelection().clear();
-        this.searchWrapper?.getSelection().clear();
-        this.workspaceWrapper?.getSelection().clear();
+        this.resetNodeEntriesSelections();
         // switching from tree view into a flat view -> find the deepest level of the tree to be displayed
         if (
             existingDisplayType === NodeEntriesDisplayType.Tree &&
@@ -456,20 +472,24 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
      * Reacts to fetchData output of search datasource by loading further results.
      *
      * @param event
+     * @param searchForCollections
      */
-    async loadMore(event: FetchEvent): Promise<void> {
-        if (!this.dataSourceSearch.hasMore() || this.dataSourceSearch.isLoading) {
+    async loadMore(event: FetchEvent, searchForCollections: boolean = false): Promise<void> {
+        const dataSource = searchForCollections
+            ? this.dataSourceCollectionsFlat
+            : this.dataSourceSearch;
+        if (!dataSource.hasMore() || dataSource.isLoading) {
             return;
         }
 
-        this.dataSourceSearch.isLoading = true;
-        const request = this.createSearchRequest(event.offset);
+        dataSource.isLoading = true;
+        const request = this.createSearchRequest(event.offset, searchForCollections);
         const searchResult: SearchResults = await firstValueFrom(
             this.searchService.search(request),
         );
 
-        this.dataSourceSearch.appendData(searchResult.nodes);
-        this.dataSourceSearch.isLoading = false;
+        dataSource.appendData(searchResult.nodes);
+        dataSource.isLoading = false;
     }
 
     /**
@@ -739,17 +759,25 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
 
     /**
      * Helper function to retrieve the base search request parameters.
+     *
+     * @param skipCount
+     * @param searchForCollections
      */
-    private createSearchRequest(skipCount: number = 0): SearchRequestParams {
+    private createSearchRequest(
+        skipCount: number = 0,
+        searchForCollections: boolean = false,
+    ): SearchRequestParams {
         const criteria: MdsQueryCriteria[] = [
             {
                 property: 'ngsearchword',
-                values: [this.searchText],
+                values: [this.searchText()],
             },
         ];
 
         return {
-            query: 'ngsearch',
+            query: searchForCollections
+                ? RestConstants.QUERY_NAME_COLLECTIONS
+                : RestConstants.DEFAULT_QUERY_NAME,
             repository: HOME_REPOSITORY,
             maxItems: 51,
             skipCount,
@@ -799,6 +827,15 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         }
 
         return deepestNode ? { node: deepestNode, level: maxLevel } : null;
+    }
+
+    /**
+     * Helper function to reset the selections of the node-entries-wrapper components.
+     */
+    private resetNodeEntriesSelections(): void {
+        this.collectionsWrapper?.getSelection().clear();
+        this.searchWrapper?.getSelection().clear();
+        this.workspaceWrapper?.getSelection().clear();
     }
 
     protected readonly InteractionType = InteractionType;

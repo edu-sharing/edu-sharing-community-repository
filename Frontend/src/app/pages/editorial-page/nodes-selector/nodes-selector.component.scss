@@ -94,14 +94,19 @@
 }
 
 .search-container {
-    margin-top: 16px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
 
     .actionbar-search {
+        margin-top: 16px;
         margin-left: auto;
     }
+}
+
+.info-message {
+    margin-top: 16px;
+    display: block;
 }
 
 // collections tab related styles

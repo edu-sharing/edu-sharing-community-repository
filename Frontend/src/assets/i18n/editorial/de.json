@@ -27,9 +27,9 @@
       "WORKSPACE_METADATA": "Statistik, Versionen & Details",
       "WORKSPACE_METADATA_DESCRIPTION": "Verwendungsstatistiken, Versionsverwaltung und allgemeine Details anzeigen",
       "SORT_INTO_TAB": {
+        "NO_SEARCH_RESULTS": "Es konnten keine Ergebnisse gefunden werden.",
         "SEARCH": {
-          "PLACEHOLDER": "Suche nach Inhalten",
-          "NO_RESULTS": "Es konnten keine Ergebnisse gefunden werden."
+          "PLACEHOLDER": "Suche nach Inhalten"
         },
         "COLLECTIONS": {
           "PLACEHOLDER": "Suche nach Sammlungen",
