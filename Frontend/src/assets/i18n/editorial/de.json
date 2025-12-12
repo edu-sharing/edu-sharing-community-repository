@@ -32,6 +32,7 @@
           "NO_RESULTS": "Es konnten keine Ergebnisse gefunden werden."
         },
         "COLLECTIONS": {
+          "PLACEHOLDER": "Suche nach Sammlungen",
           "MY_COLLECTIONS": "Meine Sammlungen",
           "EDITORIAL_COLLECTIONS": "Redaktionelle Sammlungen"
         },
