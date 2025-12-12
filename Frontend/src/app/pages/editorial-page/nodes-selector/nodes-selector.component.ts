@@ -505,9 +505,9 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         } else if (this.currentStep() === StepType.SELECT) {
             const selectedNode: Partial<Node> = this.highestSelectedNode();
             // reset the default configuration and sync it with the view
-            this.copyRoot.set(true);
-            this.copyChildCollections.set(selectedNode.collection.childCollectionsCount > 0);
-            this.copyRefs.set(selectedNode.collection.childReferencesCount > 0);
+            this.copyRoot.set(!!selectedNode.collection);
+            this.copyChildCollections.set(selectedNode.collection?.childCollectionsCount > 0);
+            this.copyRefs.set(selectedNode.collection?.childReferencesCount > 0);
             // switch into configuration step
             this.currentStep.set(StepType.CONFIGURE);
         } else if (
