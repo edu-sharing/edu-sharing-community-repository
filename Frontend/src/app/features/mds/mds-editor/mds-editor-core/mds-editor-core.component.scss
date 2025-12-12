@@ -15,12 +15,19 @@
         }
     }
 }
+$toggleHeight: 39px;
 .extended-toggle-container {
     position: sticky;
     width: 100%;
     display: flex;
     justify-content: flex-end;
     padding: 10px 20px 0 20px;
+    height: $toggleHeight;
+}
+.mds-views {
+    &.mds-views-has-extended {
+        margin-top: -$toggleHeight;
+    }
 }
 .ai-info {
     position: sticky;
