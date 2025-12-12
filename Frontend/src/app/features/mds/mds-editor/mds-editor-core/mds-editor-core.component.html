@@ -1,4 +1,4 @@
-<div *ngIf="true" class="ai-info">
+<div *ngIf="mdsEditorInstance.hasAi | async" class="ai-info">
   <div>
     <div class="title">{{ 'MDS.AI.GENERATE_ALL_TITLE' | translate }}</div>
     <div class="details">{{ 'MDS.AI.GENERATE_ALL_INFO' | translate }}</div>
