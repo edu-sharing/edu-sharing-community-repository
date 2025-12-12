@@ -1,1 +1,5 @@
-<es-render-wrapper-component *ngIf="nodeId()" [nodeId]="nodeId()"></es-render-wrapper-component>
+<es-render-wrapper-component
+  *ngIf="nodeId() && version()"
+  [nodeId]="nodeId()"
+  [version]="version()"
+></es-render-wrapper-component>

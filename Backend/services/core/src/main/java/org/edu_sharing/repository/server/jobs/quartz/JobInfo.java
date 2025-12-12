@@ -1,6 +1,7 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 import org.apache.log4j.Level;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -16,7 +17,8 @@ import java.util.UUID;
 
 public class JobInfo implements Serializable {
     private static final Logger log = LoggerFactory.getLogger(JobInfo.class);
-    private final String uniqueId;
+    @Getter
+    private final String uniqueId = UUID.randomUUID().toString();
     private Class jobClass;
     private Key jobKey;
     private JobDataMap jobDataMap;
@@ -25,7 +27,6 @@ public class JobInfo implements Serializable {
     private long threadId = -1;
 
     public JobInfo(JobDetail jobDetail) {
-        uniqueId = UUID.randomUUID().toString();
         setJobDetail(jobDetail);
         setStartTime(System.currentTimeMillis());
         setStatus(Status.Running);
@@ -41,6 +42,7 @@ public class JobInfo implements Serializable {
 
     public boolean equalsDetail(JobDetail other) {
         return
+                Objects.equals(other.getJobDataMap().get(JobHandler.JOB_DATA_MAP_JOB_UUID), getJobDataMap().get(JobHandler.JOB_DATA_MAP_JOB_UUID)) &&
                 Objects.equals(((JobDetailImpl)other).getName(), jobName) &&
                         Objects.equals(((JobDetailImpl)other).getGroup(), jobGroup);
     }

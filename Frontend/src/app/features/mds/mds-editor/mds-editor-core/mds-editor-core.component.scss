@@ -15,7 +15,20 @@
         }
     }
 }
-
+$toggleHeight: 39px;
+.extended-toggle-container {
+    position: sticky;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 20px $toggleHeight + 10px 20px;
+    height: $toggleHeight;
+}
+.mds-views {
+    &.mds-views-has-extended {
+        margin-top: -$toggleHeight;
+    }
+}
 .ai-info {
     position: sticky;
     display: flex;
@@ -23,7 +36,7 @@
     padding: 10px 20px;
     color: var(--aiColorText);
     background-color: var(--aiColor);
-    gap: 10px;
+    gap: 20px;
     > div {
         display: flex;
         flex-grow: 1;
@@ -32,14 +45,18 @@
             font-weight: bold;
         }
     }
-    button {
-        background-color: #fff;
-        color: var(--aiColor);
-        &:focus {
-            background-color: #fff;
-        }
-        &:disabled {
-            background-color: rgba(255, 255, 255, 0.9);
-        }
+    mat-slide-toggle {
+        display: flex;
+        --textLight: var(--aiColorText);
+        --mdc-switch-unselected-handle-color: var(--aiColorText);
+        --mdc-switch-unselected-focus-handle-color: var(--aiColorText);
+        --mdc-switch-unselected-hover-handle-color: var(--aiColorText);
+        --mdc-switch-unselected-pressed-handle-color: var(--aiColorText);
+        --mdc-switch-unselected-icon-color: var(--aiColor);
+        --mdc-switch-selected-handle-color: var(--aiColorText);
+        --mdc-switch-selected-focus-handle-color: var(--aiColorText);
+        --mdc-switch-selected-hover-handle-color: var(--aiColorText);
+        --mdc-switch-selected-pressed-handle-color: var(--aiColorText);
+        --mdc-switch-selected-icon-color: var(--aiColor);
     }
 }

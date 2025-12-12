@@ -8,15 +8,15 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
 import java.security.GeneralSecurityException;
 import java.security.Key;
+import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 
 @Slf4j
 public class JwtTokenUtil {
 
-    public static String generateToken(String username, String nodeId, List<String> permissions, String mimeType, String mediaType, String replicationSource, String resourceType) throws GeneralSecurityException {
+    public static String generateToken(String username, String nodeId, Collection<String> permissions, String mimeType, String mediaType, String replicationSource, String resourceType) throws GeneralSecurityException {
         Key privateKey = new Signing().getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM);
 
         Date date = new Date();

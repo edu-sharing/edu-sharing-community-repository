@@ -27,7 +27,10 @@
  */
 package org.edu_sharing.repository.server.jobs.quartz;
 
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.apache.log4j.Logger;
+import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.quartz.JobListener;
@@ -38,24 +41,20 @@ import org.quartz.JobListener;
  * @author rudi
  *
  */
+@RequiredArgsConstructor
 public class ImmediateJobListener implements JobListener {
-	
-	String jobName = null;
-	
+	final JobDetail jobDetail;
+
 	boolean vetoed = false;
 	
 	boolean wasExecuted = false;
 	
 	String vetoBy = null;
-	
-	public ImmediateJobListener(String name){
-		this.jobName = name;
-	}
-	
+
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
-		return this.jobName;
+		return this.jobDetail.getKey().getName();
 	}
 	
 	@Override
@@ -64,10 +63,10 @@ public class ImmediateJobListener implements JobListener {
 		try{
 			System.out.println("ImmediateJobListener VETOED!");
 			vetoBy = (String)jobExecutionContext.getJobDetail().getJobDataMap().get(JobHandler.VETO_BY_KEY);
-			Logger.getLogger(jobExecutionContext.getJobDetail().getJobClass()).error("Job was vetoed by "+vetoBy);
-            JobHandler.getInstance().finishJob(jobExecutionContext.getJobDetail(),JobInfo.Status.Aborted);
-			jobExecutionContext.getScheduler().deleteJob(JobKey.jobKey(this.jobName));
-			jobExecutionContext.getScheduler().getListenerManager().removeJobListener(this.jobName);
+			Logger.getLogger(jobDetail.getJobClass()).error("Job was vetoed by "+vetoBy);
+            JobHandler.getInstance().finishJob(jobDetail,JobInfo.Status.Aborted);
+			jobExecutionContext.getScheduler().deleteJob(jobDetail.getKey());
+			jobExecutionContext.getScheduler().getListenerManager().removeJobListener(this.jobDetail.getKey().getName());
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -80,8 +79,8 @@ public class ImmediateJobListener implements JobListener {
 	public void jobWasExecuted(JobExecutionContext jobExecutionContext, org.quartz.JobExecutionException arg1) {
 		wasExecuted = true;
 		try{
-			jobExecutionContext.getScheduler().deleteJob(JobKey.jobKey(this.jobName));
-			jobExecutionContext.getScheduler().getListenerManager().removeJobListener(this.jobName);
+			jobExecutionContext.getScheduler().deleteJob(JobKey.jobKey(this.jobDetail.getKey().getName()));
+			jobExecutionContext.getScheduler().getListenerManager().removeJobListener(this.jobDetail.getKey().getName());
 		}catch(Exception e){
 			e.printStackTrace();
 		}

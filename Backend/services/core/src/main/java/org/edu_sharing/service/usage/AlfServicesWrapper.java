@@ -1,46 +1,43 @@
 /**
  *
- *  
- * 
- * 
- *	
  *
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
  *
  */
 package org.edu_sharing.service.usage;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.NumberRangeQuery;
-import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
-import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.OwnableService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
-import org.alfresco.util.ISO8601DateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.mail2.core.EmailException;
@@ -168,16 +165,16 @@ public class AlfServicesWrapper implements UsageDAO{
 					&& objectNodeId != null
 					&& objectNodeId.equals(tmpObjectNodeId)
 					&& ((resourceId == null && tmpResourceId == null) || (resourceId != null && resourceId
-							.equals(tmpResourceId)))) {
+					.equals(tmpResourceId)))) {
 				return usageNode;
 			}
 		}
 		return null;
 	}
-	
+
 	@Override
 	public Map<String, Object> getUsage(String usageId) throws Exception {
-		
+
 		return getProperties(new NodeRef(storeRef,usageId));
 	}
 
@@ -217,7 +214,7 @@ public class AlfServicesWrapper implements UsageDAO{
 
 		return result;
 	}
-	
+
 	@Override
 	public Map<String, Map<String, Object>> getUsagesByAppId(String appId, Long from, Long to) throws Exception {
 		Map<String, Map<String, Object>> result = new HashMap<>();
@@ -254,31 +251,31 @@ public class AlfServicesWrapper implements UsageDAO{
 
 		return result;
 	}
-	
+
 	@Override
 	public Map<String, Map<String, Object>> getUsages(String repositoryId, String nodeId, Long from, Long to) throws Exception {
 		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(repositoryId);
 		if(appInfo == null) {
 			throw new Exception("unknown application " +repositoryId);
 		}
-		
+
 		if(!ApplicationInfo.TYPE_REPOSITORY.equals(appInfo.getType())) {
 			throw new Exception("application " + repositoryId +" is not an repository");
 		}
-			
+
 		if(repositoryId.equals("-home-")) {
 			repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
 		}
-		
+
 		final String repositoryIdF = repositoryId;
-		
-		
-		
+
+
+
 		RunAsWork<Map<String, Map<String, Object>>> runAs = () -> {
 
-            Map<String, Map<String, Object>> result = new HashMap<>();
+			Map<String, Map<String, Object>> result = new HashMap<>();
 
-            if(ApplicationInfoList.getHomeRepository().getAppId().equals(appInfo.getAppId())) {
+			if(ApplicationInfoList.getHomeRepository().getAppId().equals(appInfo.getAppId())) {
 				SearchToken searchToken = new SearchToken();
 				searchToken.setFrom(0);
 				searchToken.setMaxResult(Integer.MAX_VALUE);
@@ -308,7 +305,7 @@ public class AlfServicesWrapper implements UsageDAO{
 					}
 				});
 
-            }else {
+			}else {
 				SearchToken searchToken = new SearchToken();
 				searchToken.setFrom(0);
 				searchToken.setMaxResult(Integer.MAX_VALUE);
@@ -316,9 +313,9 @@ public class AlfServicesWrapper implements UsageDAO{
 				queryBuilder.must(m -> m.term(t -> t.field("type").value("ccm:remoteobject")));
 				queryBuilder.must(m -> m.term(t -> t.field("properties.ccm:remoterepositoryid.keyword").value(repositoryIdF)));
 
-                if(nodeId != null && nodeId.trim().length() > 0) {
+				if(nodeId != null && nodeId.trim().length() > 0) {
 					queryBuilder.must(m -> m.term(t -> t.field("properties.ccm:remotenodeid.keyword").value(nodeId)));
-                }
+				}
 
 				applyDateQuery(from, to, queryBuilder);
 
@@ -344,11 +341,11 @@ public class AlfServicesWrapper implements UsageDAO{
 						logger.error("nodeRef: "+nodeRef+" does not exist. maybe an archived usage node:"+e.getMessage());
 					}
 				});
-            }
+			}
 
-            return result;
-        };
-		
+			return result;
+		};
+
 		return AuthenticationUtil.runAsSystem(runAs);
 	}
 
@@ -378,17 +375,17 @@ public class AlfServicesWrapper implements UsageDAO{
 		}
 		return result;
 	}
-	
+
 	public static String formatData(String key, Object value) {
 		String returnValue = null;
 		if (key != null && value != null) {
-						
+
 			if (value instanceof Date) {
 				logger.info("value is instanceof date");
 				DateFormat df = DateFormat.getDateInstance(DateFormat.LONG, Locale.GERMANY);
-				
+
 				try {
-					
+
 					if (value instanceof Date) {
 						returnValue = df.format((Date) value);
 					}
@@ -415,28 +412,28 @@ public class AlfServicesWrapper implements UsageDAO{
 
 		Map<String, Boolean> hasPResult = null;
 		try {
-			
+
 			ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 			ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 			OwnableService ownableService = serviceRegistry.getOwnableService();
 			PermissionService permissionService = serviceRegistry.getPermissionService();
-			
+
 			String userId = authority;
-			
+
 			if (userId.equals(PermissionService.OWNER_AUTHORITY)) {
 				userId = ownableService.getOwner(new NodeRef(storeRef, nodeId));
 				logger.info(PermissionService.OWNER_AUTHORITY + " mapping on userId:" + userId);
 			}
 
 			hasPResult = AuthenticationUtil.runAs(new HasPermissionsWork(permissionService, userId, permissions, nodeId), userId);
-			
+
 			for (String permission : permissions) {
 				Boolean tmpBool = hasPResult.get(permission);
 				if (tmpBool == null || tmpBool.booleanValue() == false) {
 					return false;
 				}
 			}
-			
+
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			throw e;
@@ -476,7 +473,7 @@ public class AlfServicesWrapper implements UsageDAO{
 	}
 
 	public String createNode(StoreRef store, String parentID, String nodeTypeString, String childAssociation,
-			Map<String, String> _props) {
+							 Map<String, String> _props) {
 
 		Map<QName, Serializable> properties = transformPropMap(_props);
 
@@ -488,7 +485,7 @@ public class AlfServicesWrapper implements UsageDAO{
 	}
 
 	public String createPersonAccessElement(String personId, String username, String applicationId, Boolean accessAllowed,
-			String accesskey){
+											String accesskey){
 		logger.info("starting... personId:" + personId + " username:" + username + " applicationId:" + applicationId
 				+ " accessAllowed:" + accessAllowed + " accesskey:" + accesskey);
 		Map<String, String> persAccEleProps = new HashMap<>();
@@ -512,25 +509,25 @@ public class AlfServicesWrapper implements UsageDAO{
 			throws EmailException {
 		logger.info("start sending ActivationReauestMail...");
 		ApplicationInfo homerepository = ApplicationInfoList.getHomeRepository();
-		
+
 		String domain = homerepository.getDomain();
 		if(domain == null || domain.trim().equals("")){
 			domain = homerepository.getHost();
 		}
-		
+
 		String activateApplicationLink = homerepository.getClientprotocol()+"://" + domain + ":" + homerepository.getClientport() + "/"
 				+ homerepository.getWebappname()+"/appactivation?appId=" + applicationId + "&appUserId=" + username + "&key=" + accesskey + "&mail="
 				+ receivermail;
-		
+
 		logger.info("activateApplicationLink:" +activateApplicationLink);
-		
+
 		Mail mail = new Mail();
 
 		ApplicationInfo appInfoRemoteApp = ApplicationInfoList.getRepositoryInfoById(applicationId);
 		String appCaption = appInfoRemoteApp.getAppCaption();
-		
+
 		if(appCaption == null) appCaption = appInfoRemoteApp.getAppId();
-		
+
 		String messageText = CCConstants.getSendActivationRequestMailText(username, receivermail, appCaption, homerepository
 				.getAppCaption(), activateApplicationLink);
 
@@ -538,18 +535,18 @@ public class AlfServicesWrapper implements UsageDAO{
 
 		logger.info("... return");
 	}
-	
+
 	@Override
 	public String createUsage(String parentId, Map<String, Object> properties) {
 		String usageId = this.createNode(parentId, CCConstants.CCM_TYPE_USAGE, CCConstants.CCM_ASSOC_USAGEASPECT_USAGES,(Map)properties);
 		return usageId;
 	}
-	
+
 	@Override
 	public void updateUsage(String usageNodeId, Map<String, Object> properties) {
-		this.updateNode(usageNodeId, properties);		
+		this.updateNode(usageNodeId, properties);
 	}
-	
+
 	@Override
 	public void removeUsage(String appId, String courseId, String parentNodeId, String resourceId) throws Exception {
 		logger.info("appId:"+appId +" courseId:"+courseId+ " parentNodeId:"+parentNodeId+" resourceId:"+resourceId);
@@ -563,13 +560,13 @@ public class AlfServicesWrapper implements UsageDAO{
 			throw new Exception("no usage found for appId:"+appId +" courseId:"+courseId+ " parentNodeId:"+parentNodeId+" resourceId:"+resourceId);
 		}
 	}
-	
+
 	@Override
 	public boolean removeUsages(String appId, String courseId) throws Exception {
 		Map<String, Map<String, Object>> usages = this.getUsagesByCourse(appId, courseId);
-		
+
 		boolean allDeleted = true;
-		
+
 		for(String key: usages.keySet()){
 			Map<String,Object> props = usages.get(key);
 			String tmpCourseId = (String)props.get(CCConstants.CCM_PROP_USAGE_COURSEID);
@@ -587,8 +584,27 @@ public class AlfServicesWrapper implements UsageDAO{
 				allDeleted = (allDeleted && removeNodeSuccess);
 			}
 		}
-		
+
 		return allDeleted;
 	}
-	
+
+	@Override
+	public boolean removeAllUsages(String nodeId) throws Exception {
+		Map<String, Map<String, Object>> usages = this.getUsages(nodeId);
+
+		boolean allDeleted = true;
+
+		for(String key: usages.keySet()){
+			Map<String,Object> props = usages.get(key);
+			String tmpPrimaryParentId = (String)props.get(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID);
+			try{
+				this.removeNode(key, tmpPrimaryParentId);
+			}catch(Exception e) {
+				logger.error(e.getMessage(), e);
+				allDeleted = false;
+			}
+		}
+
+		return allDeleted;
+	}
 }

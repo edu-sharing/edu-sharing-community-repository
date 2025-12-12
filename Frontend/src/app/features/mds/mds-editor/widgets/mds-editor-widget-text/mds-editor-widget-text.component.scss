@@ -1,7 +1,14 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use '../../mds-mixins' as mds;
 
 .mat-form-textarea {
     width: 100%;
+}
+:host ::ng-deep {
+    input.isAiSuggestion,
+    textarea.isAiSuggestion {
+        @include mds.highlightAiText();
+    }
 }
 .suggestions {
     display: flex;

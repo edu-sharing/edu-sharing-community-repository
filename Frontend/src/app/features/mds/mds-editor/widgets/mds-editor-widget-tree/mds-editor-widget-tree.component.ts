@@ -12,8 +12,8 @@ import {
 } from '@angular/core';
 import { FormControl, UntypedFormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, ReplaySubject } from 'rxjs';
-import { debounceTime, filter, map, startWith, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, firstValueFrom, ReplaySubject } from 'rxjs';
+import { debounceTime, filter, map, shareReplay, startWith, takeUntil } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsWidget, MdsWidgetValue } from '../../../types/types';
 import { MdsWidgetType, ValueType } from 'ngx-edu-sharing-ui';
@@ -197,6 +197,31 @@ export class MdsEditorWidgetTreeComponent
         this.indeterminateValues$.subscribe((indeterminateValues) =>
             this.widget.setIndeterminateValues(indeterminateValues),
         );
+
+        this.widget.getShowAiSuggestions().subscribe(([show, suggestions]) => {
+            if (show) {
+                suggestions
+                    ?.filter(
+                        (s) =>
+                            s.type === 'AI' &&
+                            s.status === 'PENDING' &&
+                            !this.widget.getValue().includes(s.value as string),
+                    )
+                    .forEach((s) => this.addSuggestion(new BehaviorSubject(s)));
+            } else {
+                const values: DisplayValue[] = this.chipsControl.value;
+                suggestions
+                    ?.filter((s) => s.type === 'AI' && s.status === 'ACCEPTED')
+                    .forEach((s) => {
+                        void this.remove(
+                            values.find((v) => v.key === s.value),
+                            false,
+                        );
+                        void this.updateSuggestionState(new BehaviorSubject(s), 'PENDING');
+                    });
+            }
+        });
+
         this.registerValueChanges(this.chipsControl);
     }
 
@@ -285,7 +310,7 @@ export class MdsEditorWidgetTreeComponent
         }
     }
 
-    remove(toBeRemoved: DisplayValue): void {
+    async remove(toBeRemoved: DisplayValue, removeSuggestion = true): Promise<void> {
         const treeNode = this.tree.findById(toBeRemoved.key);
         // old values are may not available in tree, so check for null
         if (treeNode) {
@@ -300,6 +325,12 @@ export class MdsEditorWidgetTreeComponent
             this.indeterminateValues$.next(
                 this.indeterminateValues$.value.filter((value) => value !== toBeRemoved.key),
             );
+        }
+        if (removeSuggestion) {
+            const suggestion = await firstValueFrom(this.isSuggestion(toBeRemoved));
+            if (suggestion) {
+                this.removeSuggestion(new BehaviorSubject(suggestion));
+            }
         }
         this.preventOverlayOpen = true;
         setTimeout(() => {
@@ -359,13 +390,12 @@ export class MdsEditorWidgetTreeComponent
     }
 
     isSuggestion(value: DisplayValue) {
-        return this.widget.getSuggestions().pipe(
-            map((suggestions) => {
-                const s = suggestions?.find(
-                    (s) => s.value === value.key && s.status === 'ACCEPTED',
-                );
-                return s?.type;
-            }),
-        );
+        return this.widget
+            .getSuggestions()
+            .pipe(
+                map((suggestions) =>
+                    suggestions?.find((s) => s.value === value.key && s.status === 'ACCEPTED'),
+                ),
+            );
     }
 }

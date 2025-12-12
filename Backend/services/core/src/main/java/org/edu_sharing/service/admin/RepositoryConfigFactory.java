@@ -36,6 +36,7 @@ public class RepositoryConfigFactory {
             NodeServiceHelper.writeContentText(node,json);
         } catch (Throwable t) {
             logger.warn(t.getMessage(),t);
+            throw new RuntimeException(t);
         }
     }
 }

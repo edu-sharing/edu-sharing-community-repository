@@ -1,39 +1,109 @@
-import { ApplicationConfig, EventEmitter, importProvidersFrom, Injectable } from '@angular/core';
+import {
+    ApplicationConfig,
+    EventEmitter,
+    importProvidersFrom,
+    Injectable,
+    NgModule,
+} from '@angular/core';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { TranslateService } from '@ngx-translate/core';
 import {
+    About,
+    AboutService,
+    AuthenticationService,
+    ClientConfig,
+    ConfigService,
     HOME_REPOSITORY,
+    LoginInfo,
     MdsDefinition,
     MdsIdentifier,
     MdsService,
     MdsWidget,
     Node,
+    NodeService,
+    NodeSuggestionResponseDto,
     RestConstants,
     SuggestionResponseDto,
+    SuggestionsByNodeIdParams,
+    SuggestionsV1Service,
+    UserSimple,
+    Variables,
 } from 'ngx-edu-sharing-api';
-import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
+import { BehaviorSubject, forkJoin, Observable, of, Subject } from 'rxjs';
 import { CordovaService } from '../../../services/cordova.service';
-import { Toast } from '../../../services/toast';
+import { Toast as ToastService } from '../../../services/toast';
 import { InputStatus, MdsWidgetValue } from '../types/types';
 import { MdsEditorInstanceService } from './mds-editor-instance.service';
 import {
+    Helper,
     InitialValues,
     MdsValueList,
     MdsViewerService,
+    Toast,
+    TRANSLATION_LIST,
     Values,
     VCard,
     ViewInstanceService,
 } from 'ngx-edu-sharing-ui';
+import {
+    EduSharingLlmService,
+    SuggestionResponseDto as SuggestionLlm,
+    Suggestions$Params,
+} from 'ngx-edu-sharing-b-api';
+import { HttpClient, HttpContext } from '@angular/common/http';
+import { catchError, map, shareReplay, tap } from 'rxjs/operators';
 
-export const translateProvider = {
-    instant: (v: string) => v,
-    get: (v: string) => of(v),
-    onTranslationChange: of({ lang: 'none' }),
-    onDefaultLangChange: of({ lang: 'none' }),
-    onLangChange: of({}),
-};
+@Injectable()
+export class translateProvider {
+    private translation$: Observable<any> | null = null;
+    private cache$ = new BehaviorSubject(null);
+
+    constructor(private httpClient: HttpClient) {}
+
+    instant(v: string, args: any = {}) {
+        let str = Helper.getDotPathFromNestedObject(this.cache$?.value, v)?.replace(
+            /{{GENDER_SEPARATOR}}/g,
+            '*',
+        );
+        for (const k of Object.keys(args)) {
+            str = (str || v).replace(new RegExp('{{\\s*' + k + '\\s*}}', 'g'), args[k]);
+        }
+
+        return str;
+    }
+
+    get(v: string, args: any = {}): Observable<any> {
+        if (!this.translation$) {
+            const sources = TRANSLATION_LIST.map((s) => s + '/de.json');
+
+            const requests = sources.map((file) =>
+                this.httpClient
+                    .get(`/assets/i18n/${file}`)
+                    .pipe(
+                        catchError(() =>
+                            this.httpClient
+                                .get(`http://localhost:4200/edu-sharing/assets/i18n/${file}`)
+                                .pipe(catchError(() => of({}))),
+                        ),
+                    ),
+            );
+
+            this.translation$ = forkJoin(requests).pipe(
+                map((results) => results.reduce((acc, cur) => ({ ...acc, ...cur }), {})),
+                tap((merged) => this.cache$.next(merged)),
+                shareReplay(1),
+            );
+        }
+
+        return this.translation$.pipe(map((_) => this.instant(v, args)));
+    }
+
+    onTranslationChange = of({ lang: 'none' });
+    onDefaultLangChange = of({ lang: 'none' });
+    onLangChange = of({});
+}
 @Injectable()
 export class MdsEditorInstanceServiceMock extends MdsEditorInstanceService {
     nodes$ = new BehaviorSubject<Node[]>([
@@ -47,11 +117,43 @@ export class MdsEditorInstanceServiceMock extends MdsEditorInstanceService {
     ] as Node[]);
     widgets = new BehaviorSubject([(window as any).widget]);
 }
+@NgModule()
+export class I18nModule {
+    constructor(translate: TranslateService) {
+        translate.setDefaultLang('de');
+        translate.use('de');
+    }
+}
+
+@Injectable()
+export class ToastMock implements Toast {
+    error(errorObject: any, message?: string): void {}
+
+    toast(message: string, translationParameters?: any): void {}
+}
+
 @Injectable()
 export class MdsViewerServiceMock extends MdsViewerService {
     values$ = new BehaviorSubject({
         [RestConstants.CCM_PROP_LICENSE]: ['CC_0'],
     });
+}
+@Injectable()
+export class AuthenticationServiceMock extends AuthenticationService {
+    observeLoginInfo(): Observable<LoginInfo> {
+        return of({
+            isValidLogin: true,
+            authorityName: 'sample-authority',
+            toolPermissions: [
+                RestConstants.TOOLPERMISSION_LICENSE,
+                RestConstants.TOOLPERMISSION_BAPI,
+            ],
+            statusCode: RestConstants.STATUS_CODE_OK,
+            isAdmin: false,
+            isGuest: false,
+            sessionTimeout: 3600,
+        });
+    }
 }
 @Injectable()
 export class MdsServiceMock extends MdsService {
@@ -60,24 +162,208 @@ export class MdsServiceMock extends MdsService {
         return of(DefaultMds);
     }
 }
+@Injectable()
+export class ConfigServiceMock extends ConfigService {
+    async get<T = string>(name: string, defaultValue?: T): Promise<T> {
+        return defaultValue;
+    }
 
-export class ToastMock extends Toast {
-    error(errorObject: any, message?: string): void {}
+    observeVariables(): Observable<Variables | null> {
+        return of(null);
+    }
 
-    toast(message: string, translationParameters?: any): void {}
+    observeConfig(): Observable<ClientConfig | any> {
+        const DEFAULT_SUPPORTED_LANGUAGES = [
+            'de',
+            'de-informal',
+            'de-no-binnen-i',
+            'en',
+            'fr',
+            'it',
+            'none',
+        ];
+
+        // @ts-ignore
+        const config: ClientConfig | any = {
+            frontpage: {
+                dashboard: {
+                    shortcuts: {
+                        maxEntries: 6,
+                        entries: [
+                            {
+                                id: 'search',
+                                icon: 'search',
+                                url: '/edu-sharing/components/search',
+                                toolPermission: null,
+                                defaultVisibility: 'visible',
+                            },
+                            {
+                                id: 'workspace',
+                                icon: 'cloud',
+                                url: '/edu-sharing/components/workspace',
+                                toolPermission: 'TOOLPERMISSION_WORKSPACE',
+                                defaultVisibility: 'visible',
+                            },
+                            {
+                                id: 'mycollections',
+                                icon: 'layers',
+                                url: '/edu-sharing/components/collections?scope=MY',
+                                toolPermission: null,
+                                defaultVisibility: 'visible',
+                            },
+                            {
+                                id: 'invitedcollections',
+                                icon: 'group',
+                                url: '/edu-sharing/components/collections?scope=EDU_GROUPS',
+                                toolPermission: null,
+                                defaultVisibility: 'visible',
+                            },
+                            {
+                                id: 'publiccollections',
+                                icon: 'language',
+                                url: '/edu-sharing/components/collections?scope=EDU_ALL',
+                                toolPermission: null,
+                                defaultVisibility: 'hidden',
+                            },
+                            {
+                                id: 'aboutme',
+                                icon: 'person',
+                                url: '/edu-sharing/components/profiles/-me-',
+                                toolPermission: null,
+                                defaultVisibility: 'hidden',
+                            },
+                            {
+                                id: 'documentation',
+                                icon: 'book',
+                                url: 'https://docs.edu-sharing.com/de/edu-sharing-documentation',
+                                toolPermission: null,
+                                defaultVisibility: 'hidden',
+                            },
+                        ],
+                    },
+                },
+            },
+            supportedLanguages: DEFAULT_SUPPORTED_LANGUAGES,
+        };
+        return of(config);
+    }
+}
+@Injectable()
+export class NodeServiceMock extends NodeService {
+    getNode(id: string, { repository = HOME_REPOSITORY } = {}): Observable<Node> {
+        return of(DummyNode as Node);
+    }
+}
+@Injectable()
+export class AboutServiceMock extends AboutService {
+    getAbout(): Observable<About> {
+        return of({
+            services: [],
+            plugins: [
+                {
+                    id: 'b-api',
+                },
+                {
+                    id: 'mongo-plugin',
+                },
+            ],
+            version: {
+                repository: '10.0.0',
+                major: 1,
+                minor: 0,
+            },
+        });
+    }
+}
+@Injectable()
+export class EduSharingLlmServiceMock extends EduSharingLlmService {
+    suggestions(
+        params: Suggestions$Params,
+        context?: HttpContext,
+    ): Observable<Array<SuggestionLlm>> {
+        return of([]);
+    }
+}
+@Injectable()
+export class SuggestionsV1ServiceMock extends SuggestionsV1Service {
+    readonly BaseSuggestion = (propertyId: string, nodeId: string, values: string[]) =>
+        values.map((value) => {
+            return {
+                created: new Date().toISOString(),
+                createdBy: {
+                    authorityName: 'Sample Api',
+                } as UserSimple,
+                propertyId: propertyId,
+                status: 'PENDING',
+                version: '1.0',
+                id: '' + Math.random(),
+                type: 'AI',
+                confidence: 1,
+                nodeId,
+                value,
+            } as SuggestionResponseDto;
+        });
+    getSuggestionsByNodeId(
+        params: SuggestionsByNodeIdParams,
+        context?: HttpContext,
+    ): Observable<NodeSuggestionResponseDto> {
+        return of({
+            nodeId: params.node,
+            suggestions: {
+                'cclom:title': this.BaseSuggestion('cclom:title', params.node, [
+                    'KI Vorschlag Titel',
+                ]),
+                'cclom:general_description': this.BaseSuggestion(
+                    'cclom:general_description',
+                    params.node,
+                    [
+                        'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.',
+                    ],
+                ),
+                'ccm:educationallearningresourcetype': this.BaseSuggestion(
+                    'ccm:educationallearningresourcetype',
+                    params.node,
+                    ['other', 'table'],
+                ),
+                'cclom:general_keyword': this.BaseSuggestion('cclom:general_keyword', params.node, [
+                    'AI Keyword 1',
+                    'AI Keyword 2',
+                ]),
+                'ccm:tool_category': this.BaseSuggestion('ccm:tool_category', params.node, [
+                    'communication',
+                ]),
+                'ccm:educationaltypicallearningtime': this.BaseSuggestion(
+                    'ccm:educationaltypicallearningtime',
+                    params.node,
+                    ['' + 3600_000],
+                ),
+                'ccm:educationaltypicalagerange': this.BaseSuggestion(
+                    'ccm:educationaltypicalagerange',
+                    params.node,
+                    ['6-12'],
+                ),
+            },
+        });
+    }
 }
 
 export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
     { provide: MdsEditorInstanceService, useClass: MdsEditorInstanceServiceMock },
     { provide: MdsViewerService, useClass: MdsViewerServiceMock },
+    { provide: AuthenticationService, useClass: AuthenticationServiceMock },
+    { provide: ConfigService, useClass: ConfigServiceMock },
+    { provide: AboutService, useClass: AboutServiceMock },
+    { provide: NodeService, useClass: NodeServiceMock },
+    { provide: EduSharingLlmService, useClass: EduSharingLlmServiceMock },
+    { provide: SuggestionsV1Service, useClass: SuggestionsV1ServiceMock },
     { provide: MdsService, useFactory: () => new MdsServiceMock(null) },
     ViewInstanceService,
     CordovaService,
-    Toast,
+    ToastService,
     {
         provide: TranslateService,
-        useValue: translateProvider,
+        useClass: translateProvider,
     },
     MatSnackBar,
     provideAnimations(),
@@ -205,7 +491,8 @@ export const Data: Values = {
     ['cclom:size']: ['1337'],
     ['cm:created']: [new Date().getTime() + ''],
     ['cm:modified']: [new Date().getTime() + ''],
-    ['ccm:educationaltypicalagerange_from']: ['1'],
+    ['ccm:educationaltypicallearningtime']: ['' + 600_000],
+    ['ccm:educationaltypicalagerange_from']: ['0'],
     ['ccm:educationaltypicalagerange_to']: ['99'],
     ['ccm:taxonid']: ['0200105', '0200101'],
     ['ccm:educationalcontext']: ['vocational education'],
@@ -225,8 +512,9 @@ export const DummyNode: Partial<Node> = {
     },
     preview: {
         type: 'default',
-        url: 'https://edu-sharing.com/wp-content/uploads/sites/17/2015/07/hackathon.jpg',
+        data: 'UklGRrQaAABXRUJQVlA4WAoAAAAsAAAAXQEAxAAASUNDUKACAAAAAAKgbGNtcwRAAABtbnRyUkdCIFhZWiAH6QAGAB4ACwAsADdhY3NwQVBQTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWxjbXMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1kZXNjAAABIAAAAEBjcHJ0AAABYAAAADZ3dHB0AAABmAAAABRjaGFkAAABrAAAACxyWFlaAAAB2AAAABRiWFlaAAAB7AAAABRnWFlaAAACAAAAABRyVFJDAAACFAAAACBnVFJDAAACFAAAACBiVFJDAAACFAAAACBjaHJtAAACNAAAACRkbW5kAAACWAAAACRkbWRkAAACfAAAACRtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACQAAAAcAEcASQBNAFAAIABiAHUAaQBsAHQALQBpAG4AIABzAFIARwBCbWx1YwAAAAAAAAABAAAADGVuVVMAAAAaAAAAHABQAHUAYgBsAGkAYwAgAEQAbwBtAGEAaQBuAABYWVogAAAAAAAA9tYAAQAAAADTLXNmMzIAAAAAAAEMQgAABd7///MlAAAHkwAA/ZD///uh///9ogAAA9wAAMBuWFlaIAAAAAAAAG+gAAA49QAAA5BYWVogAAAAAAAAJJ8AAA+EAAC2xFhZWiAAAAAAAABilwAAt4cAABjZcGFyYQAAAAAAAwAAAAJmZgAA8qcAAA1ZAAAT0AAACltjaHJtAAAAAAADAAAAAKPXAABUfAAATM0AAJmaAAAmZwAAD1xtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAEcASQBNAFBtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJWUDggHgoAANBOAJ0BKl4BxQA/da7NXjU/vjsrUotz8C6JZm4OMFmGJ057otfnt5VD09d8Sav6f5s3Qwkb2myIEZcJmxpmHBuL9Kmri86TIEgV+wKGEDqQMLdeJ0eAhp8zKPt+neBWavO+mrCcAXzAKqIYDa3rn7VVehnWj8ubEHhg/VIk1+RpOOaftHovPDGMR9XxKfwrSw3qw42YzOteGAK4JH8eYBDT4Dt11y/hfi+13GUDv4O/cRmuUaxEjnNYs078FkSfFdPavzX7vgY1gVY/MuqLZ+etAbn1EihcN4vP7XubqLcqM9mAaGhijsenL6msUGY4fZtGs733NoHVNUlUNHuHlfIL6tkLj59eocWphUNsVRg9wOpXxvba6yBdnhol0qRWbqYUhGyqWUDrkkz+dJAekjBJpyJ4VPUS1iDfgCS8d3zF02Cshp0BSjOk1ZiAcyIzI4gFq5lyiJAq4pXY0VUByVSnjR7k0/9Ge0I+2PBcCehSdT/HQ7xcMsAWkOh/HQcfvU/pJNDThn+8AtQ1I2Sxdsz0wPxFC9quUqvgSyEKTQLUOR0GsBKXrWwU72XFmWU4ya+XGl9UjOawzHpY0OO+GFdlFRZRFiiu5b5d+yMRKfOC2yT7hUaqh4saRqix5nx0uPmjkiWMg8Pww+fv7ycHNuRd+h7ZKDx8GB6ohcJ1tR5De84KnImTQAMxXg2qsj04BLFiwW3GjkHMffMcJ0bCWKkKR2Hq9moZXb8kPBuAMgqejGSS+or8uX4+eUFe1NcE5eDeTwnzA08vXXrv5mMFwneB08sBt5GFjxwMnZSRmAT6hiLAiWtCDRTL7cPqmwV9eEzKUP/nHA7cRpBsodlVwAD+o3IwkcXsKQr617WlAcuCICE8dy5Psec3J3uudyK5txtTDeUZpf6YUtxnkj2uCuQ1TMAUsLxHyAQAtUo9RR1vmSxV8v4Pvn+aYyOUrH2poOANMJvwrk/6XMouHo3g08VqfVG/6O+i1iYuIenExMwcJi9tR3hPHE03im/gZSWIBl2ZU+oXJR4+7PkcuKggc1r2aqqVrd+AI8MkMelwVYfhEO97GHKv4lUnca7sg8mJEqYblnleNCVkia6xvTrdzMi0ZFXF4+xAePCunxcAwGgt1N6YrQ5kDKvdTD/O6wkWrSeEWTt8d8Wi95WXO1uxUGAAT9HLMzojiocEaZW7NE4EzoSxzSg9ENGzaMXWoGr2ivjP+yJWfcfdknDVKikW0JgdTv5OAfCXKVe8e0TuT5uWMQI/fY6zVsi2tk677bHKtMtHs+BsGg4a4iq2S8nF2o7Pe4rs8T3QizTKPG6E4UnNjU3HiBt7cjugWMezMn3E4GeESDrwPO5bX3bgTO4uvghHPjKwejo7FrQetV6tDTJK7a33jCZhEBBNi6S3h5G5U/linZkGBp7YdkbaEe0wt5KhwsLLg3CoBB4UmKfjeLusC8aoRfobnpSHE33hH0r6H/uEIN9utrBahS4Cn/xiaZLhPAcN70NQkiPaFjEsEhYwz1dlTqa8K48epkgrmUpNX1yZkrcsTOORwjCdinhjUpDBKyqIskKnQcN9lhLL9Ya+VdTfdTBH4RDw9QWlgCVkIrzEnnEoJNMFCihdd4tY/db7nPcUM+8A9ALXvmvhb7FkEL5lBllen2aKOivSHj+7uSA2Wreuyw0cxamuLtPKTp/iKFRaLicalFDz+pqqHfHNC+44NDi64Q2wRDrWKwFWbDFDRZDoh6LUNkIeAWloblzFox5A06US1I9Bmu7OobBQw8OD1OP/pXQFpyZcznO2n8cFvwkDoIkUZ1PLkZWwroNGZ/aZEH2rWImEck2nEWcT0ShtZHOFc3bSzs9o4faSkHY2Zr5f+w9ojD/jaVJXPwYTf8KINsXmBo144/MBJD0IxNGwyl1gmMImmOIxRG4yHab4LOpTfky3YOURkBzT1+wQB/0/WNcojMrbPDVMomdzHMsLuj6AziB9YHtVC/YzIJFEZub1ssJr5gFRLY1+fwlHlZOEl4m/deCLHrCaJS/tdv1hG4wMHbwgdrOlmGobU42swD25/HYhEMvPQVT63S6Hc7ANQWZD3D4qM+vAP06QNyDt0X6tmh+hjKPbRv1o0cQhpthm2PBSfuaS5WFEBK1S6Y0eeqV83LNiWee3v6iPjZtaL5m9xZFvmzlOiQBq+VVAU+J7LiPtJTr8C+TJxBAHay66FnK/MxhCmAP1jl7D/+cZj96VP8jHToV+mZfrT03eCH5/YGBlNMxBeFEVVCqTUuKX/P1ZGhuC+00QUUPeLnd3lgcRndQs0Do0OQGqnceQx61WYi8JVmeE+OYw+LrycXC8g4YO0ZDjQ2fgXCHouOEV9djFlnwDOwWsPoHif8zFoN8zP405I9xarpcu0aMIenxGATXPFvDm74SDvF4F8hUA4CJDGvAY5UX0QooOD+MeyWXTC00Rk//OiLtDKUD6cp4HRJ9f1l5fqbyCXineDHyupomnTPDPi4ddwJXGqxOXIu4wrgGydt1YoV9cde/zCuc+AnKXXVSjBm3Z4KK/+e7+izHgHjHp7+oQ3t2Fh1e7d0Du7ucoItv0ZeGY/a3dmJaPTIJ5rBl8lM+7ErGB67kOeac88m+ZC94kxS24lf5KbmNAPSk8f+h8hTe0EK1+dTQ7VEgIpdS0xduw5Fljz5ohG6fpu/XQxtqSj8mRKpV6q30il9v907shFJ6nOmahkkSrw2c6bgpv5azzuKtXK8HkMoK/lKpTx1UfOdvcOvdSdCdF7UDcwEve6DBNWUUqeckCiqSt813W0ElkpBC/efbESD0eF0d8oVyUTxb3vgwVovYJEfjyeksjqCOBW/1BXSi2zUYQpbdiBmpRE1Q/W8+vPqEYVwqRRvBMsyk1/OdKVs2lzGVcTLCnYlHCRP8bfTZP7e4YCkMobaWF0E1/aVO5N50wDuuLtr9RaQaBNJ8Yd6kbGXEwYMQ/hocRq1MjXH4u4K2wep/5nWP4OmKTZXkxSVgLubZ632pF/BxWApJs9eBi6sJ7oouNxm69TtwBokcQq2y2o+tAN8kz/7YrZcUmzYk1kHWVn1WFpI3ZExQBQ9jAyiYWLDLxhhFoAbCiWZj9DiQtJQ5nFErdY0IUwJJyBZ0XbRExnvRA0Ws81E8VDdzSOi25t7x4YOULcHb3EOcdd86yA+EJmQY7SFVE7//Kohj6mrwXAkEdyqjhUlSP+16X0xBxkMquWdOeV39+guy0WYIORxf3fZSONklGQE/iOMWkVt220hxyoHhaoc6MxYcgXRkD2a7KlGGDUGAYxdNnc03OA7tpTjzqib74EKVsvlwAAkE0znJTCNTxSqoFJ8VpBTyq6AMLVj3Rn0iQ7DF7XmBGmC5nEoe+fIeOWuXrWD8UulBoNwWaiY6LMUpmb3a2hG3UFjXVwyZYJdVf1yurHGzJbs4Ncp+FOPHRjudd8emUz5abjGHgAABFWElG0AAAAElJKgAIAAAACgAAAQQAAQAAAF4BAAABAQQAAQAAAMUAAAACAQMAAwAAAIYAAAASAQMAAQAAAAEAAAAaAQUAAQAAAIwAAAAbAQUAAQAAAJQAAAAoAQMAAQAAAAIAAAAxAQIADQAAAJwAAAAyAQIAFAAAAKoAAABphwQAAQAAAL4AAAAAAAAACAAIAAgALAEAAAEAAAAsAQAAAQAAAEdJTVAgMi4xMC4zOAAAMjAyNTowNjozMCAxMzo0NjoxOAABAAGgAwABAAAAAQAAAAAAAABYTVAg8AwAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDQuNC4wLUV4aXYyIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0RXZ0PSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VFdmVudCMiIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6R0lNUD0iaHR0cDovL3d3dy5naW1wLm9yZy94bXAvIiB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bXBNTTpEb2N1bWVudElEPSJnaW1wOmRvY2lkOmdpbXA6YzRiZTg0OGMtODI0MS00MjNmLTkwYzQtMTI3MGFhNzIwZDE0IiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjU1MGViZTQyLTVlN2UtNDBiZS04YjRiLWI1ZjU0MWI1NDFkOCIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ4bXAuZGlkOjFlMjA3MDk0LWQ4ODktNDQzNC05MjA0LWY1ZDczYjNlYzZhNiIgZGM6Rm9ybWF0PSJpbWFnZS93ZWJwIiBHSU1QOkFQST0iMi4wIiBHSU1QOlBsYXRmb3JtPSJMaW51eCIgR0lNUDpUaW1lU3RhbXA9IjE3NTEyODM5ODA0ODcxNTQiIEdJTVA6VmVyc2lvbj0iMi4xMC4zOCIgdGlmZjpPcmllbnRhdGlvbj0iMSIgeG1wOkNyZWF0b3JUb29sPSJHSU1QIDIuMTAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMjU6MDY6MzBUMTM6NDY6MTgrMDI6MDAiIHhtcDpNb2RpZnlEYXRlPSIyMDI1OjA2OjMwVDEzOjQ2OjE4KzAyOjAwIj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0OmNoYW5nZWQ9Ii8iIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6YTMzYzRkODEtYzlmZS00NDIxLWFmNzAtOWU4ODNkYmVmNTNkIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJHaW1wIDIuMTAgKExpbnV4KSIgc3RFdnQ6d2hlbj0iMjAyNS0wNi0zMFQxMzo0NjoyMCswMjowMCIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPD94cGFja2V0IGVuZD0idyI/Pg==',
         isIcon: true,
+        mimetype: 'image/webp',
     },
     name: 'Node Name',
     title: 'Node Title',
@@ -1332,6 +1620,42 @@ export const DefaultMds: MdsDefinition = {
             format: null,
             min: null,
             max: null,
+            defaultMin: null,
+            defaultMax: null,
+            step: null,
+            allowValuespaceSuggestions: false,
+            hideIfEmpty: false,
+            allowempty: false,
+            defaultvalue: null,
+            countDefaultvalueAsFilter: false,
+            condition: null,
+            maxlength: 0,
+            interactionType: 'Input',
+            filterMode: 'disabled',
+            expandable: 'disabled',
+            aiConfigs: [],
+            isExtended: false,
+            isRequired: 'optional',
+            isSearchable: false,
+        },
+        {
+            ids: {},
+            id: 'ccm:educationaltypicallearningtime',
+            caption: 'Lernzeit',
+            bottomCaption: null,
+            icon: null,
+            type: 'duration',
+            link: null,
+            template: null,
+            configuration: null,
+            hasValues: false,
+            values: null,
+            subwidgets: null,
+            placeholder: null,
+            unit: null,
+            format: null,
+            min: 0,
+            max: 60 * 12,
             defaultMin: null,
             defaultMax: null,
             step: null,
@@ -16751,7 +17075,7 @@ export const DefaultMds: MdsDefinition = {
             id: 'node_general',
             caption: 'Allg. Informationen',
             icon: 'description',
-            html: '\n\t\t\t  <preview>\n              <ccm:wwwurl>\n              <cm:name>\n              <cclom:title>\n              <ccm:educationallearningresourcetype>\n              <cclom:general_keyword>\n              <cclom:general_description>\n              <author>\n              <license>\n              <version>\n              <childobjects>\n\t\t\t\t',
+            html: '\n\t\t\t  <preview>\n              <ccm:wwwurl>\n              <cm:name>\n              <cclom:title><ccm:educationaltypicallearningtime><ccm:educationaltypicalagerange><ccm:tool_category>\n              <ccm:educationallearningresourcetype>\n              <cclom:general_keyword>\n              <cclom:general_description>\n              <author>\n              <license>\n              <version>\n              <childobjects> <ccm:tool_instance_params>\n\t\t\t\t',
             rel: null,
             hideIfEmpty: false,
             isExtended: false,

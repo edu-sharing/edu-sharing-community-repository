@@ -1,17 +1,16 @@
-<div *ngIf="mdsEditorInstance.hasAi | async" class="ai-info">
+<div *ngIf="true" class="ai-info">
   <div>
     <div class="title">{{ 'MDS.AI.GENERATE_ALL_TITLE' | translate }}</div>
     <div class="details">{{ 'MDS.AI.GENERATE_ALL_INFO' | translate }}</div>
   </div>
-  <button
-    mat-flat-button
+  <mat-slide-toggle
     color="primary"
-    (click)="generateSuggestions()"
+    (change)="setAiSuggestions($event)"
     [disabled]="aiLoading | async"
   >
     <es-spinner-small *ngIf="aiLoading | async"></es-spinner-small>
-    {{ 'MDS.AI.GENERATE_ALL_BUTTON' | translate }}
-  </button>
+    <!--{{ 'MDS.AI.GENERATE_ALL_BUTTON' | translate }}-->
+  </mat-slide-toggle>
 </div>
 
 <div *ngIf="hasExtendedWidgets$ | async" class="extended-toggle-container">
@@ -29,15 +28,17 @@
     }}</mat-slide-toggle
   >
 </div>
-<es-mds-editor-view
-  #view
-  *ngFor="let view of views"
-  class="mds-editor-view-{{ view.id }}"
-  [view]="view"
-  [core]="this"
-></es-mds-editor-view>
-<es-mds-editor-view
-  *ngFor="let view of suggestionsViews"
-  [view]="view"
-  [core]="this"
-></es-mds-editor-view>
+<div class="mds-views" [class.mds-views-has-extended]="hasExtendedWidgets$ | async">
+  <es-mds-editor-view
+    #view
+    *ngFor="let view of views"
+    class="mds-editor-view-{{ view.id }}"
+    [view]="view"
+    [core]="this"
+  ></es-mds-editor-view>
+  <es-mds-editor-view
+    *ngFor="let view of suggestionsViews"
+    [view]="view"
+    [core]="this"
+  ></es-mds-editor-view>
+</div>

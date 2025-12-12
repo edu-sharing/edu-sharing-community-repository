@@ -47,7 +47,7 @@
       <mat-icon matChipRemove>cancel</mat-icon>
     </mat-chip-row>
     <ng-container *ngIf="(getSuggestions() | async)?.length">
-      <mat-chip-set class="mat-chip-suggestions">
+      <!--<mat-chip-set class="mat-chip-suggestions">
         <mat-chip
           class="mat-chip-suggestion"
           *ngFor="let suggestion of chipsSuggestionsSubject | async"
@@ -69,7 +69,7 @@
           </button>
           <mat-icon matChipRemove class="decline">cancel</mat-icon>
         </mat-chip>
-      </mat-chip-set>
+      </mat-chip-set>-->
     </ng-container>
     <div class="input-wrapper">
       <input

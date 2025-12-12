@@ -141,8 +141,12 @@
             [ngModelOptions]="{ standalone: true }"
           >
             <mat-label>{{ 'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_NEGATE' | translate }}</mat-label>
-            <mat-radio-button [value]="false">true</mat-radio-button>
-            <mat-radio-button [value]="true">false</mat-radio-button>
+            <mat-radio-button [value]="false" [checked]="query.condition.negate === false"
+              >true</mat-radio-button
+            >
+            <mat-radio-button [value]="true" [checked]="query.condition.negate === true"
+              >false</mat-radio-button
+            >
           </mat-radio-group>
           <!--
           <div class="negate">

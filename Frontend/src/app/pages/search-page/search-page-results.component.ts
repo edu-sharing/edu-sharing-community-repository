@@ -1,9 +1,12 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import {
     ActionbarComponent,
+    CustomOptions,
+    DefaultGroups,
     InteractionType,
     ListSortConfig,
     NodeEntriesDisplayType,
+    OptionItem,
     Scope,
     TemporaryStorageService,
 } from 'ngx-edu-sharing-ui';
@@ -46,7 +49,7 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
     readonly onDblClick = this.results.onDblClick;
     readonly addToCollectionMode = this.searchPage.addToCollectionMode;
     readonly customTemplates = this.globalSearchPageInternal.customTemplates;
-
+    defaultCustomOptions: CustomOptions;
     constructor(
         private globalSearchPageInternal: GlobalSearchPageServiceInternal,
         private results: SearchPageResultsService,
@@ -67,6 +70,22 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
             .subscribe((elementsLoadedTranslation) => {
                 void this.announcer.announce(elementsLoadedTranslation);
             });
+
+        const toggleSearchFilter = new OptionItem('SEARCH.FILTERS', 'filter_list', () =>
+            this.toggleFilters(),
+        );
+        toggleSearchFilter.scopes = [Scope.Search];
+        toggleSearchFilter.constrains = [];
+        toggleSearchFilter.group = DefaultGroups.Toggles;
+        toggleSearchFilter.elementType = [];
+        toggleSearchFilter.priority = 30;
+        toggleSearchFilter.isToggle = true;
+        toggleSearchFilter.toggleType = 'primary';
+        toggleSearchFilter.togglePosition = 'before';
+        this.defaultCustomOptions = {
+            useDefaultOptions: true,
+            addOptions: [toggleSearchFilter],
+        };
     }
 
     async ngOnInit() {

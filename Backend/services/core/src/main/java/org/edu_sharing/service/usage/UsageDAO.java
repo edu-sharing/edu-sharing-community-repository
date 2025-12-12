@@ -29,5 +29,6 @@ public interface UsageDAO {
 	void removeUsage(String appId, String courseId, String parentNodeId, String resourceId) throws Exception;
 	
 	boolean removeUsages(String appId, String courseId) throws Exception;
-	
+
+    boolean removeAllUsages(String nodeId) throws Exception;
 }

@@ -6,8 +6,16 @@
     align-items: center;
     gap: 10px;
 }
-.actionToggle > button {
-    color: var(--textLight);
+.actionToggle {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    > button.toggle-default {
+        color: var(--textLight);
+    }
+    > button.toggle-primary {
+        margin: 0 6px;
+    }
 }
 button {
     min-width: unset;

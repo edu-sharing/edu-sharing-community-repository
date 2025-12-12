@@ -155,7 +155,7 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
     private temporaryValue: string[] = undefined;
 
     constructor(
-        @Optional() private mdsEditorInstance: MdsEditorInstanceServiceAbstract,
+        @Optional() public mdsEditorInstance: MdsEditorInstanceServiceAbstract,
         public translate: TranslateService,
         private ui: UIService,
         private viewInstance: ViewInstanceService,
@@ -269,7 +269,11 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
     click() {
         if (this.getDefinition().link === '_BLANK') {
             window.open(
-                this.mdsViewerService.getFormattedValue(this.value(), this.definition, 'text')[0],
+                this.mdsViewerService.getFormattedValue(
+                    this.value(),
+                    this.getDefinition(),
+                    'text',
+                )[0],
             );
         } else if (this.getDefinition().link === '_SELF') {
             window.location.href = this.mdsViewerService.getFormattedValue(

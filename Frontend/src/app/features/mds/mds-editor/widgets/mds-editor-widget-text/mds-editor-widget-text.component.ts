@@ -3,11 +3,13 @@ import { UntypedFormControl, ValidatorFn, Validators } from '@angular/forms';
 import { MAT_FORM_FIELD } from '@angular/material/form-field';
 import { TranslateService } from '@ngx-translate/core';
 import { SuggestionResponseDto, SuggestionStatus } from 'ngx-edu-sharing-api';
-import { DateHelper, ValueType } from 'ngx-edu-sharing-ui';
+import { DateHelper, UIService, ValueType } from 'ngx-edu-sharing-ui';
 import { filter } from 'rxjs/operators';
 import { Toast } from '../../../../../services/toast';
-import { Widget } from '../../mds-editor-instance.service';
+import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
+import { BehaviorSubject } from 'rxjs';
+import { init } from 'jasmine-spec-reporter/built/display/colors-display';
 
 @Component({
     selector: 'es-mds-editor-widget-text',
@@ -26,8 +28,15 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
     readonly valueType: ValueType = ValueType.String;
     formControl: UntypedFormControl;
     fileNameChecker: FileNameChecker;
-    suggestions: SuggestionResponseDto[];
-
+    aiSuggestion$ = new BehaviorSubject<SuggestionResponseDto>(null);
+    constructor(
+        toast: Toast,
+        mdsEditorInstance: MdsEditorInstanceService,
+        translate: TranslateService,
+        private uiService: UIService,
+    ) {
+        super(toast, mdsEditorInstance, translate);
+    }
     async ngOnInit() {
         this.formControl = new UntypedFormControl(null, this.getValidators());
         let initialValue = (await this.widget.getInitalValuesAsync()).jointValues;
@@ -40,15 +49,12 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
                 filter((value) => value !== null && this.mdsEditorInstance.editorMode !== 'search'),
             )
             .subscribe((value) => {
+                if (this.aiSuggestion$.value) {
+                    this.widget.setSuggestionState(this.aiSuggestion$, 'DECLINED');
+                }
                 this.setValue([value]);
             });
         this.widget.observeBulkMode().subscribe(() => {
-            console.log(
-                'bulk',
-                this.widget.definition.id,
-                this.widget.getBulkMode(),
-                this.showBulkMixedValues(),
-            );
             if (this.showBulkMixedValues()) {
                 this.formControl.disable();
             } else {
@@ -63,6 +69,17 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
                 this.translate,
             );
         }
+        this.widget.getShowAiSuggestions().subscribe(([show, suggestions]) => {
+            const suggestion = suggestions?.find((s) => s.type === 'AI' && s.status === 'PENDING');
+            if (this.aiSuggestion$.value?.status !== 'DECLINED') {
+                if (!this.formControl.value?.trim() && suggestion && show) {
+                    this.aiSuggestion$.next(suggestion);
+                    this.applySuggestion(this.aiSuggestion$);
+                } else if (!initialValue[0] && !show && this.aiSuggestion$.value) {
+                    this.clearSuggestion(this.aiSuggestion$);
+                }
+            }
+        });
         this.registerValueChanges(this.formControl);
     }
 
@@ -110,16 +127,24 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
         }
     }
 
-    setSuggestionState(suggestion: SuggestionResponseDto, status: SuggestionStatus) {
-        suggestion.status = status;
-        this.mdsEditorInstance.updateSuggestionState(this.widget.definition.id, suggestion);
-        this.widget.markSuggestionChanged();
+    clearSuggestion(suggestion: BehaviorSubject<SuggestionResponseDto>) {
+        this.formControl.setValue('', { emitEvent: false });
+        this.setValue(['']);
+        this.widget.setSuggestionState(suggestion, 'PENDING');
+    }
+    applySuggestion(suggestion: BehaviorSubject<SuggestionResponseDto>) {
+        this.formControl.setValue(suggestion.value.value as string, { emitEvent: false });
+        this.setValue([suggestion.value.value as string]);
+        this.widget.setSuggestionState(suggestion, 'ACCEPTED');
     }
 
-    applySuggestion(suggestion: SuggestionResponseDto) {
-        this.formControl.setValue(suggestion.value as string);
-        this.setValue([suggestion.value as string]);
-        this.setSuggestionState(suggestion, 'ACCEPTED');
+    fieldGotFocus(element: HTMLInputElement | HTMLTextAreaElement) {
+        if (
+            this.aiSuggestion$.value?.status === 'ACCEPTED' &&
+            !this.uiService.isTouchSubject.value
+        ) {
+            element?.select();
+        }
     }
 }
 

@@ -1427,11 +1427,13 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         });
         setDisplayType(components?.list?.getDisplayType(), false);
         toggleViewType.scopes = [Scope.WorkspaceList, Scope.Search, Scope.CollectionsReferences];
-        toggleViewType.constrains = [Constrain.NoSelection];
+        toggleViewType.constrains = [];
         toggleViewType.group = DefaultGroups.Toggles;
-        toggleViewType.elementType = [ElementType.Unknown];
-        toggleViewType.priority = 10;
+        toggleViewType.elementType = [];
+        toggleViewType.priority = 15;
         toggleViewType.isToggle = true;
+        toggleViewType.togglePosition = 'before';
+
         /*
         const reorder = new OptionItem('OPTIONS.LIST_SETTINGS', 'settings', (node: Node) => this.reorderDialog = true);
         reorder.isToggle = true;
