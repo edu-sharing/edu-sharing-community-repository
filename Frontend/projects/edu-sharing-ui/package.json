@@ -1,6 +1,6 @@
 {
   "name": "ngx-edu-sharing-ui",
-  "version": "10.0.25",
+  "version": "10.0.27",
   "license": "GNU GPL v2",
   "description": "Angular components for Edu-Sharing UX parts",
   "scripts": {
@@ -14,7 +14,7 @@
     "material-design-icons": "^3.0.1",
     "ngx-rendering-service-api": ">=0.0.41",
     "@ngx-translate/core": ">=15.0.0",
-    "angular-material-css-vars": "^6.0.0 || ^7.0.0",
+    "angular-material-css-vars": ">=7.0.0",
     "rxjs": "^6.6.7 || ^7.0.0",
     "lodash-es": "^4.17.21"
   },
