@@ -577,13 +577,22 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     }
 
     /**
-     * Callback for the node click event that toggles the selection of the clicked node.
+     * Callback for the node click event that selects or deselects the clicked node.
+     * Only one element can be selected at a time.
+     * Multi-selection using strg/ctrl key is handled separately.
      *
      * @param source
      * @param event
      */
     selectOnClick(source: NodeEntriesWrapperComponent<Node>, event: NodeClickEvent<Node>) {
-        source.getSelection().toggle(event.element);
+        // only one node can be selected at a time, so deselect all other nodes before selecting the new one
+        const nodeAlreadySelected = source.getSelection().isSelected(event.element);
+        // if multiple nodes are selected, the node should be selected again
+        const multipleNodesSelected = source.getSelection().selected.length > 1;
+        source.getSelection().clear();
+        if (!nodeAlreadySelected || multipleNodesSelected) {
+            source.getSelection().select(event.element);
+        }
     }
 
     /**

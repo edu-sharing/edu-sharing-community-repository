@@ -169,6 +169,8 @@
             dropAllowed: canDropOnCollection,
             dropped: dropOnCollection
           }"
+          [elementInteractionType]="InteractionType.Emitter"
+          (clickItem)="selectOnClick(collectionsWrapperRef, $event)"
           (fetchData)="loadMore($event, true)"
           (selectionChange)="onNodeSelectionChange($event)"
         ></es-node-entries-wrapper>
