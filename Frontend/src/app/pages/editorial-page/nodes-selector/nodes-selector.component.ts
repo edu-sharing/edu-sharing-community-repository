@@ -259,6 +259,7 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         this.currentStep.set(StepType.SELECT);
         this.selectedNodes.update(() => []);
         this.searchText = '';
+        this.searchSent.set(false);
         this.treeNodeService.resetData();
         // execute tab-specific actions
         switch (event.tab.id) {

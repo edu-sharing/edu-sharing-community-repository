@@ -94,23 +94,13 @@
 }
 
 .search-container {
+    margin-top: 16px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
     overflow: hidden;
 
-    .search-actions {
-        display: flex;
-        justify-content: space-between;
-        gap: 8px;
-
-        .search-field {
-            flex: 1 1 auto;
-        }
-
-        .actionbar-search {
-            flex: 0 0 auto;
-        }
+    .actionbar-search {
+        margin-left: auto;
     }
 }
 
@@ -118,15 +108,6 @@
 .tree-search-container {
     display: flex;
     align-items: center;
-
-    .search-field {
-        flex: 1;
-        display: flex;
-    }
-
-    .filter-button {
-        margin-left: 8px;
-    }
 }
 
 .collection-display-type {

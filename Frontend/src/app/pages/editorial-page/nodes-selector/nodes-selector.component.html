@@ -58,35 +58,43 @@
     [class.actionbar-visible]="selectedNodes().length"
     *ngIf="tabType === selectedTab()"
   >
+    <!-- search field + filter button -->
+    <div
+      class="tree-search-container"
+      *ngIf="[TabType.SEARCH, TabType.COLLECTIONS].includes(selectedTab())"
+    >
+      <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
+        <i esIcon="search" matPrefix></i>
+        <input
+          matInput
+          [placeholder]="
+            i18nPrefix +
+              (selectedTab() === TabType.SEARCH ? 'SEARCH.PLACEHOLDER' : 'COLLECTIONS.PLACEHOLDER')
+              | translate
+          "
+          [(ngModel)]="searchText"
+          (keydown.enter)="executeSearch()"
+        />
+        <button
+          *ngIf="searchText"
+          matSuffix
+          mat-icon-button
+          [attr.aria-label]="'SEARCH_CLEAR' | translate"
+          (click)="clearSearch()"
+        >
+          <i esIcon="close"></i>
+        </button>
+      </mat-form-field>
+    </div>
     <ng-container [ngSwitch]="selectedTab()" *ngIf="isSelectStep(); else configureCopy">
       <!-- SEARCH TAB -->
       <ng-container *ngSwitchCase="TabType.SEARCH">
         <div class="search-container">
-          <div class="search-actions">
-            <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
-              <i esIcon="search" matPrefix></i>
-              <input
-                matInput
-                [placeholder]="i18nPrefix + 'SEARCH.PLACEHOLDER' | translate"
-                [(ngModel)]="searchText"
-                (keydown.enter)="executeSearch()"
-              />
-              <button
-                *ngIf="searchText"
-                matSuffix
-                mat-icon-button
-                [attr.aria-label]="'SEARCH_CLEAR' | translate"
-                (click)="clearSearch()"
-              >
-                <i esIcon="close"></i>
-              </button>
-            </mat-form-field>
-            <es-actionbar
-              #actionbarSearchTab
-              class="actionbar-search"
-              [class.display-none]="dataSourceSearch.isEmpty() || dataSourceSearch.isLoading"
-            ></es-actionbar>
-          </div>
+          <es-actionbar
+            #actionbarSearchTab
+            class="actionbar-search"
+            [class.display-none]="dataSourceSearch.isEmpty() || dataSourceSearch.isLoading"
+          ></es-actionbar>
           <es-node-entries-wrapper
             #searchWrapperRef
             *ngIf="
@@ -122,32 +130,6 @@
 
       <!-- COLLECTIONS TAB -->
       <ng-container *ngSwitchCase="TabType.COLLECTIONS">
-        <!-- search field + filter button -->
-        <div class="tree-search-container">
-          <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
-            <i esIcon="search" matPrefix></i>
-            <input
-              matInput
-              placeholder="Suche in Sammlungen"
-              [(ngModel)]="searchText"
-              [disabled]="true"
-            />
-            <button
-              *ngIf="searchText"
-              matSuffix
-              mat-icon-button
-              aria-label="Clear"
-              (click)="clearSearch()"
-              [disabled]="true"
-            >
-              <i esIcon="close"></i>
-            </button>
-          </mat-form-field>
-
-          <button mat-icon-button class="filter-button" [disabled]="true">
-            <i esIcon="filter_list"></i>
-          </button>
-        </div>
         <!-- TODO: move into actionbar -->
         <mat-button-toggle-group
           class="collection-display-type"
