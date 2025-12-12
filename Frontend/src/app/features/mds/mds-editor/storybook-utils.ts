@@ -139,7 +139,10 @@ export class MdsViewerServiceMock extends MdsViewerService {
     });
 }
 @Injectable()
-export class AuthenticationServiceMock extends AuthenticationService {
+export class AuthenticationServiceMock {
+    observeUserChanges(): Observable<void> {
+        return of();
+    }
     observeLoginInfo(): Observable<LoginInfo> {
         return of({
             isValidLogin: true,
@@ -163,7 +166,7 @@ export class MdsServiceMock extends MdsService {
     }
 }
 @Injectable()
-export class ConfigServiceMock extends ConfigService {
+export class ConfigServiceMock {
     async get<T = string>(name: string, defaultValue?: T): Promise<T> {
         return defaultValue;
     }
@@ -249,13 +252,13 @@ export class ConfigServiceMock extends ConfigService {
     }
 }
 @Injectable()
-export class NodeServiceMock extends NodeService {
+export class NodeServiceMock {
     getNode(id: string, { repository = HOME_REPOSITORY } = {}): Observable<Node> {
         return of(DummyNode as Node);
     }
 }
 @Injectable()
-export class AboutServiceMock extends AboutService {
+export class AboutServiceMock {
     getAbout(): Observable<About> {
         return of({
             services: [],
@@ -276,7 +279,7 @@ export class AboutServiceMock extends AboutService {
     }
 }
 @Injectable()
-export class EduSharingLlmServiceMock extends EduSharingLlmService {
+export class EduSharingLlmServiceMock {
     suggestions(
         params: Suggestions$Params,
         context?: HttpContext,
@@ -285,7 +288,7 @@ export class EduSharingLlmServiceMock extends EduSharingLlmService {
     }
 }
 @Injectable()
-export class SuggestionsV1ServiceMock extends SuggestionsV1Service {
+export class SuggestionsV1ServiceMock {
     readonly BaseSuggestion = (propertyId: string, nodeId: string, values: string[]) =>
         values.map((value) => {
             return {
