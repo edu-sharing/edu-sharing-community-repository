@@ -65,7 +65,7 @@
     "@angular/youtube-player": "^19.2.18",
     "@ngx-translate/core": "^15.0.0",
     "@tinymce/tinymce-angular": "^7.0.0",
-    "angular-material-css-vars": "^7.0.0",
+    "angular-material-css-vars": "^8.0.1",
     "angular-resizable-element": "^7.0.2",
     "angularx-qrcode": "^19.0.0",
     "chart.js": "^4.4.2",
