@@ -15,7 +15,13 @@
         }
     }
 }
-
+.extended-toggle-container {
+    position: sticky;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 20px 0 20px;
+}
 .ai-info {
     position: sticky;
     display: flex;
@@ -23,7 +29,7 @@
     padding: 10px 20px;
     color: var(--aiColorText);
     background-color: var(--aiColor);
-    gap: 10px;
+    gap: 20px;
     > div {
         display: flex;
         flex-grow: 1;
