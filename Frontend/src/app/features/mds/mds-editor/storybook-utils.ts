@@ -53,7 +53,7 @@ import {
     Suggestions$Params,
 } from 'ngx-edu-sharing-b-api';
 import { HttpClient, HttpContext } from '@angular/common/http';
-import { catchError, map, shareReplay, tap } from 'rxjs/operators';
+import { catchError, map, shareReplay, take, tap } from 'rxjs/operators';
 
 @Injectable()
 export class translateProvider {
@@ -84,7 +84,7 @@ export class translateProvider {
                     .pipe(
                         catchError(() =>
                             this.httpClient
-                                .get(`http://localhost:4200/edu-sharing/assets/i18n/${file}`)
+                                .get(`/edu-sharing/storybook/assets/i18n/${file}`)
                                 .pipe(catchError(() => of({}))),
                         ),
                     ),
@@ -140,6 +140,14 @@ export class MdsViewerServiceMock extends MdsViewerService {
 }
 @Injectable()
 export class AuthenticationServiceMock {
+    hasToolpermission(toolpermission: string) {
+        return this.observeLoginInfo()
+            .pipe(
+                map((login) => login.toolPermissions?.includes(toolpermission)),
+                take(1),
+            )
+            .toPromise() as Promise<boolean>;
+    }
     observeUserChanges(): Observable<void> {
         return of();
     }
