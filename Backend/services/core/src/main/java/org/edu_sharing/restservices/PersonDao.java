@@ -469,6 +469,7 @@ public class PersonDao {
 		return NodeServiceHelper.getPreview(avatar).getUrl();
 	}
 	public void removeAvatar() throws DAOException {
+		throwIfNotAllowedToModify();
 		try {
 			org.alfresco.service.cmr.repository.NodeRef currentAvatar = getAvatarNode();
 			if(currentAvatar!=null) {
@@ -479,6 +480,7 @@ public class PersonDao {
 		}
 	}
 	public void changeAvatar(InputStream is) throws DAOException {
+		throwIfNotAllowedToModify();
 		try {
 		org.alfresco.service.cmr.repository.NodeRef currentAvatar = getAvatarNode();
 		ImageTool.VerifyResult result = ImageTool.verifyAndPreprocessImage(is, ImageTool.MAX_THUMB_SIZE);
