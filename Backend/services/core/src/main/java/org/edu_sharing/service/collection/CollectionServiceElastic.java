@@ -746,8 +746,8 @@ public class CollectionServiceElastic implements CollectionService {
             return;
         }
         AuthenticationUtil.runAsSystem((AuthenticationUtil.RunAsWork<Void>) () -> {
-            if (nodeRef.getPublic() != null) {
-                if (nodeRef.getPublic().equals(true)) {
+            if (nodeRef.getIsPublic() != null) {
+                if (nodeRef.getIsPublic().equals(true)) {
                     collection.setScope(CollectionDao.Scope.CUSTOM_PUBLIC.name());
                 }
                 return null;

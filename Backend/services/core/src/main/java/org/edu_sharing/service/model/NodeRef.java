@@ -3,85 +3,93 @@ package org.edu_sharing.service.model;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.restservices.shared.Contributor;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public interface NodeRef {
 
     String getOwner();
+
+    String getType();
     default org.alfresco.service.cmr.repository.NodeRef asAlfrescoNodeRef() {
-		return new org.alfresco.service.cmr.repository.NodeRef(new StoreRef(
-				getStoreProtocol(), getStoreId()
-		), getNodeId());
-	}
+        return new org.alfresco.service.cmr.repository.NodeRef(new StoreRef(
+                getStoreProtocol(), getStoreId()
+        ), getNodeId());
+    }
 
-	Origin getOrigin();
-	void setOrigin(Origin origin);
-	void setOwner(String owner);
+    Origin getOrigin();
 
-	Map<NodeRefImpl.Relation, NodeRef> getRelations();
+    void setOrigin(Origin origin);
 
-	void setRelations(Map<NodeRefImpl.Relation, NodeRef> relations);
+    void setOwner(String owner);
 
-	void setContributors(List<Contributor> contributors);
+    Map<NodeRefImpl.Relation, NodeRef> getRelations();
 
-	List<Contributor> getContributors();
+    void setRelations(Map<NodeRefImpl.Relation, NodeRef> relations);
 
-	interface Preview{
-		String getMimetype();
-		byte[] getData();
+    void setContributors(List<Contributor> contributors);
 
-		String getType();
+    List<Contributor> getContributors();
 
-		Boolean getIcon();
-	}
+    void setChildren(List<NodeRef> children);
 
-	 String getRepositoryId();
+    List<NodeRef> getChildren();
 
-	 void setRepositoryId(String repositoryId);
+    interface Preview {
+        String getMimetype();
 
-	 String getStoreProtocol();
+        byte[] getData();
 
-	 void setStoreProtocol(String storeProtocol);
+        String getType();
 
-	 String getStoreId();
+        Boolean getIcon();
+    }
 
-	 void setStoreId(String storeId);
+    String getRepositoryId();
 
-	 String getNodeId();
+    void setRepositoryId(String repositoryId);
 
-	 void setNodeId(String nodeId);
+    String getStoreProtocol();
 
-	 Map<String,Object> getProperties();
+    void setStoreProtocol(String storeProtocol);
 
-	 void setProperties(Map<String,Object> properties);
+    String getStoreId();
 
-	 void setPreview(Preview preview);
+    void setStoreId(String storeId);
 
-	 Preview getPreview();
+    String getNodeId();
 
-	 Map<String,Boolean> getPermissions();
+    void setNodeId(String nodeId);
 
-	 void setPermissions(Map<String,Boolean> permissions);
+    Map<String, Object> getProperties();
 
-	public Boolean getPublic();
+    void setProperties(Map<String, Object> properties);
 
-	void setPublic(Boolean aPublic);
+    void setPreview(Preview preview);
 
-	void setAspects(List<String> aspects);
+    Preview getPreview();
 
-	 List<String> getAspects();
+    Map<String, Boolean> getPermissions();
 
-	 void setUsedInCollections(List<CollectionRef> usedInCollections);
+    void setPermissions(Map<String, Boolean> permissions);
 
-	 List<CollectionRef> getUsedInCollections();
+    Boolean getIsPublic();
 
-	/**
-	 * origin this ref was fetched from
-	 */
-	enum Origin {
-		Alfresco,
-		Elasticsearch,
-	}
+    void setIsPublic(Boolean aPublic);
+
+    void setAspects(List<String> aspects);
+
+    List<String> getAspects();
+
+    void setUsedInCollections(List<CollectionRef> usedInCollections);
+
+    List<CollectionRef> getUsedInCollections();
+
+    /**
+     * origin this ref was fetched from
+     */
+    enum Origin {
+        Alfresco,
+        Elasticsearch,
+    }
 }

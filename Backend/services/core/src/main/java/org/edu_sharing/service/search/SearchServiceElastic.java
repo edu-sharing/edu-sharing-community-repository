@@ -86,6 +86,7 @@ import org.edu_sharing.service.search.model.*;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.edu_sharing.service.util.AlfrescoDaoHelper;
+import org.edu_sharing.util.CheckedFunction;
 import org.elasticsearch.client.HttpAsyncResponseConsumerFactory;
 import org.elasticsearch.client.Request;
 import org.elasticsearch.client.RequestOptions;
@@ -100,7 +101,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -263,11 +263,11 @@ public class SearchServiceElastic implements SearchService {
     }
 
     public BoolQuery.Builder getPermissionsQuery(BoolQuery.Builder audienceQueryBuilder, String field, Set<String> authorities) {
-        audienceQueryBuilder.must(m-> m.bool(b -> {
+        audienceQueryBuilder.must(m -> m.bool(b -> {
             b.minimumShouldMatch("1");
-            authorities.forEach(a->b.should(s -> s.match(m2 -> m2.field(field).query(a))));
+            authorities.forEach(a -> b.should(s -> s.match(m2 -> m2.field(field).query(a))));
             return b;
-        }) );
+        }));
         return audienceQueryBuilder;
     }
 
@@ -284,7 +284,7 @@ public class SearchServiceElastic implements SearchService {
     }
 
     public BoolQuery.Builder getPublishedPermissionsQuery(BoolQuery.Builder builder) {
-        return builder.must(m -> m.term(t->t.field("permissions.read").value(CCConstants.AUTHORITY_GROUP_EVERYONE)));
+        return builder.must(m -> m.term(t -> t.field("permissions.read").value(CCConstants.AUTHORITY_GROUP_EVERYONE)));
     }
 
     public BoolQuery.Builder getCoordinatorPermissionsQuery(BoolQuery.Builder builder) {
@@ -295,7 +295,7 @@ public class SearchServiceElastic implements SearchService {
         String user = authenticationService.getCurrentUserName();
         return builder
                 .minimumShouldMatch("1")
-                .should(s-> s.bool(b->getPermissionsQuery(b, "permissions.coordinator")))
+                .should(s -> s.bool(b -> getPermissionsQuery(b, "permissions.coordinator")))
                 .should(q -> q.match(m -> m.field("owner").query(user)));
     }
 
@@ -312,7 +312,7 @@ public class SearchServiceElastic implements SearchService {
 
         return builder
                 .minimumShouldMatch("1")
-                .should(s-> s.bool(b->getPermissionsQuery(b, "permissions.read")))
+                .should(s -> s.bool(b -> getPermissionsQuery(b, "permissions.read")))
                 .should(q -> q.match(m -> m.field("owner").query(user)))
                 .should(audienceQueryBuilderCollections -> audienceQueryBuilderCollections
                         .bool(b -> b
@@ -384,19 +384,19 @@ public class SearchServiceElastic implements SearchService {
                             {
                                 try {
 
-                        MetadataQueryParameter parameter = queryData.findParameterByName(facet.getProperty());
-                        Optional<MetadataQueryParameter.MetadataQueryFacet> metadataQueryFacet = Optional.ofNullable(parameter)
-                                .map(MetadataQueryParameter::getFacet);
-                        if(metadataQueryFacet.isPresent() && metadataQueryFacet.get().getType().equals(MetadataQueryParameter.MetadataQueryFacet.Type.geo_grid)) {
-                            return true;
-                        }
+                                    MetadataQueryParameter parameter = queryData.findParameterByName(facet.getProperty());
+                                    Optional<MetadataQueryParameter.MetadataQueryFacet> metadataQueryFacet = Optional.ofNullable(parameter)
+                                            .map(MetadataQueryParameter::getFacet);
+                                    if (metadataQueryFacet.isPresent() && metadataQueryFacet.get().getType().equals(MetadataQueryParameter.MetadataQueryFacet.Type.geo_grid)) {
+                                        return true;
+                                    }
                                     String value = s.getValue();
                                     try {
                                         // map to i18n value if available
                                         value = mds.findWidget(facet.getProperty()).getValuesAsMap().get(value).getCaption();
                                     } catch (Throwable ignored) {
                                     }
-                        return searchToken.getQueryString() != null && value.toLowerCase().contains(searchToken.getQueryString().toLowerCase());
+                                    return searchToken.getQueryString() != null && value.toLowerCase().contains(searchToken.getQueryString().toLowerCase());
                                 } catch (IllegalArgumentException e) {
                                     throw new RuntimeException(e);
                                 }
@@ -579,7 +579,7 @@ public class SearchServiceElastic implements SearchService {
         return fetchAllFromRequest(mds, queryData, searchToken, searchRequest, null).getData();
     }
 
-    private @NotNull SearchResultNodeRef fetchAllFromRequest(MetadataSet mds, MetadataQuery queryData, SearchToken searchToken, SearchRequest.Builder searchRequest,Map<SearchFacet,Aggregation> aggregations) throws IOException {
+    private @NotNull SearchResultNodeRef fetchAllFromRequest(MetadataSet mds, MetadataQuery queryData, SearchToken searchToken, SearchRequest.Builder searchRequest, Map<SearchFacet, Aggregation> aggregations) throws IOException {
         SearchResultNodeRef sr = new SearchResultNodeRef();
         List<NodeRef> data = new ArrayList<>();
         sr.setData(data);
@@ -595,7 +595,7 @@ public class SearchServiceElastic implements SearchService {
                             .withTransportOptions(this::getRequestOptions)
                             .search(searchRequest.build(), Map.class);
                     if (aggregations != null) {
-                        sr.setFacets(getFacets(mds,queryData,convertSearchFacetAggregations(aggregations),searchResponse));
+                        sr.setFacets(getFacets(mds, queryData, convertSearchFacetAggregations(aggregations), searchResponse));
                     }
                 } else {
                     final String usedScrollId = scrollId;
@@ -838,6 +838,7 @@ public class SearchServiceElastic implements SearchService {
         ).collect(Collectors.toList()));
         return facet;
     }
+
     private NodeSearch.Facet getFacet(MetadataSet mds, MetadataQuery queryData, String name, StringTermsAggregate pst, Aggregation builder) {
         NodeSearch.Facet facet = new NodeSearch.Facet();
         facet.setProperty(name);
@@ -1105,24 +1106,32 @@ public class SearchServiceElastic implements SearchService {
         }
         props.put(CCConstants.NODETYPE, sourceAsMap.get("type"));
 
-        List<Map<String, Serializable>> children = (List) sourceAsMap.get("children");
+
+        // add children as NodeRefs to NodeRef (TODO KEEP ATTENTION TO PERMISSIONS ON CHILDREN! THEY ARE NOT PROVED)
+        List<Map<String, Object>> childrenProperties = Optional.ofNullable((List<Map<String, Object>>) sourceAsMap.get("children"))
+                .orElse(Collections.emptyList());
+
+        List<NodeRef> children = childrenProperties.stream()
+                .map(CheckedFunction.wrap(x -> transform(NodeRefImpl.class, isAdmin, authorities, user, x, false), null))
+                .filter(Objects::nonNull)
+                .map(NodeRef.class::cast)
+                .toList();
+
         int childIOCount = 0;
         int usageCount = 0;
         int commentCount = 0;
-        if (children != null) {
-            for (Map<String, Serializable> child : children) {
-                String type = (String) child.get("type");
-                List<String> aspects = (List<String>) child.get("aspects");
-                if (CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO).equals(type)
-                        && aspects.contains(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT))) {
-                    childIOCount++;
-                }
-                if (CCConstants.getValidLocalName(CCConstants.CCM_TYPE_USAGE).equals(type)) {
-                    usageCount++;
-                }
-                if (CCConstants.getValidLocalName(CCConstants.CCM_TYPE_COMMENT).equals(type)) {
-                    commentCount++;
-                }
+        for (Map<String, Object> child : childrenProperties) {
+            String type = (String) child.get("type");
+            List<String> aspects = (List<String>) child.get("aspects");
+            if (CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO).equals(type)
+                    && aspects.contains(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT))) {
+                childIOCount++;
+            }
+            if (CCConstants.getValidLocalName(CCConstants.CCM_TYPE_USAGE).equals(type)) {
+                usageCount++;
+            }
+            if (CCConstants.getValidLocalName(CCConstants.CCM_TYPE_COMMENT).equals(type)) {
+                commentCount++;
             }
         }
         if (childIOCount > 0) {
@@ -1150,12 +1159,13 @@ public class SearchServiceElastic implements SearchService {
         }
 
         T eduNodeRef = clazz.getConstructor().newInstance();
+        eduNodeRef.setType(CCConstants.getValidGlobalName((String)sourceAsMap.get("type")));
         eduNodeRef.setOrigin(NodeRef.Origin.Elasticsearch);
         eduNodeRef.setRepositoryId(ApplicationInfoList.getHomeRepository().getAppId());
         eduNodeRef.setStoreProtocol(protocol);
         eduNodeRef.setStoreId(identifier);
         eduNodeRef.setNodeId(nodeId);
-
+        eduNodeRef.setChildren(children);
         eduNodeRef.setAspects(((List<String>) sourceAsMap.get("aspects")).
                 stream().map(CCConstants::getValidGlobalName).filter(Objects::nonNull).collect(Collectors.toList()));
 
@@ -1163,7 +1173,7 @@ public class SearchServiceElastic implements SearchService {
         permissions.put(CCConstants.PERMISSION_READ, true);
         GuestConfig guestConfig = guestService.getCurrentGuestConfig();
         long millis = System.currentTimeMillis();
-        eduNodeRef.setPublic(false);
+        eduNodeRef.setIsPublic(false);
         Map<String, List<String>> permissionsElastic = (Map) sourceAsMap.get("permissions");
         String owner = (String) sourceAsMap.get("owner");
         if (permissionsElastic != null) {
@@ -1171,10 +1181,10 @@ public class SearchServiceElastic implements SearchService {
                 if ("read".equals(entry.getKey())) {
                     continue;
                 }
-                if (!eduNodeRef.getPublic() && guestConfig != null && guestConfig.isEnabled() && entry.getValue().contains(CCConstants.AUTHORITY_GROUP_EVERYONE)) {
+                if (!eduNodeRef.getIsPublic() && guestConfig != null && guestConfig.isEnabled() && entry.getValue().contains(CCConstants.AUTHORITY_GROUP_EVERYONE)) {
                     PermissionReference pr = permissionsModelDAO.getPermissionReference(null, entry.getKey());
                     Set<PermissionReference> granteePermissions = permissionsModelDAO.getGranteePermissions(pr);
-                    eduNodeRef.setPublic(granteePermissions.stream().anyMatch(p -> p.getName().equals(CCConstants.PERMISSION_READ_ALL)));
+                    eduNodeRef.setIsPublic(granteePermissions.stream().anyMatch(p -> p.getName().equals(CCConstants.PERMISSION_READ_ALL)));
                 }
                 if (isAdmin || authorities.stream().anyMatch(s -> entry.getValue().contains(s))
                         || entry.getValue().contains(user)) {
@@ -1685,7 +1695,7 @@ public class SearchServiceElastic implements SearchService {
                                     if (maxAge != null) {
                                         b = b.must(m -> m.range(t -> t
                                                 .date(td -> td.field("share.timestamp").gte("now-" + maxAge + "s")
-                                        )));
+                                                )));
                                     }
                                     if (direction.equals(UserShareDirection.fromUser)) {
                                         b = b.must(m -> m.term(t -> t
@@ -2011,7 +2021,7 @@ public class SearchServiceElastic implements SearchService {
         return searchByQuery(query, skipCount, maxItems, sortDefinition, null, null);
     }
 
-    private SearchResultNodeRef searchByQuery(QueryVariant query, int skipCount, int maxItems, SortDefinition sortDefinition, String index, Map<SearchFacet,Aggregation> aggregations) throws IOException {
+    private SearchResultNodeRef searchByQuery(QueryVariant query, int skipCount, int maxItems, SortDefinition sortDefinition, String index, Map<SearchFacet, Aggregation> aggregations) throws IOException {
         if (index == null) index = WORKSPACE_INDEX;
 
         if ((maxItems - skipCount) > 10000) {
@@ -2045,7 +2055,7 @@ public class SearchServiceElastic implements SearchService {
         sr.setNodeCount((int) hits.total().value());
 
         if (aggregations != null) {
-            sr.setFacets(getFacets(null,null, convertSearchFacetAggregations(aggregations),searchResponse));
+            sr.setFacets(getFacets(null, null, convertSearchFacetAggregations(aggregations), searchResponse));
         }
 
         return sr;
@@ -2573,7 +2583,7 @@ public class SearchServiceElastic implements SearchService {
 
     }
 
-    private SearchResultNodeRef searchAllByQuery(QueryVariant query, SortDefinition sortDefinition, String index, Map<SearchFacet,Aggregation> aggregations) throws IOException {
+    private SearchResultNodeRef searchAllByQuery(QueryVariant query, SortDefinition sortDefinition, String index, Map<SearchFacet, Aggregation> aggregations) throws IOException {
         checkClient();
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder().index(index)
                 .query(query._toQuery())
@@ -2812,7 +2822,7 @@ public class SearchServiceElastic implements SearchService {
         }
         BoolQuery.Builder globalConditions = getGlobalConditions(null, null, null, null, true);
         globalConditions.must(m -> m.bool(b.build()));
-        if(searchToken.getContentType() != null){
+        if (searchToken.getContentType() != null) {
             globalConditions.must(getContentTypeQuery(searchToken.getContentType()));
         }
 
@@ -2832,13 +2842,13 @@ public class SearchServiceElastic implements SearchService {
             BoolQuery.Builder globalConditions = getGlobalConditions(searchToken.getAuthorityScope(), null, null, storeRef, scoped);
             globalConditions.must(searchToken.getElasticQuery()._toQuery());
 
-            Map<SearchFacet,Aggregation> aggregations = null;
+            Map<SearchFacet, Aggregation> aggregations = null;
             if (searchToken.getFacets() != null && !searchToken.getFacets().isEmpty()) {
                 aggregations = searchToken.getFacets()
                         .stream()
                         .collect(Collectors.toMap(s -> s, s ->
                                 AggregationBuilders.terms()
-                                        .field((MetadataElasticSearchHelper.nonKeywordFacets.contains(s.getProperty())) ? "properties."+s.getProperty() : "properties."+s.getProperty()+".keyword")
+                                        .field((MetadataElasticSearchHelper.nonKeywordFacets.contains(s.getProperty())) ? "properties." + s.getProperty() : "properties." + s.getProperty() + ".keyword")
                                         .size(searchToken.getFacetLimit())
                                         .minDocCount(searchToken.getFacetsMinCount())
                                         .build()._toAggregation()));

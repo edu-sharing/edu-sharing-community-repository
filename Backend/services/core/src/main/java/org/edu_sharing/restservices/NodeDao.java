@@ -909,8 +909,8 @@ public class NodeDao {
     public void refreshPermissions(org.edu_sharing.service.model.NodeRef nodeRef) {
         boolean isRemoteCopy = !this.isCollectionReference() && aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY);
         org.edu_sharing.service.permission.PermissionService usedPermissionService = isRemoteCopy ? PermissionServiceFactory.getInstance().getLocalService() : permissionService;
-        if (nodeRef != null && nodeRef.getPublic() != null) {
-            this.isPublic = nodeRef.getPublic();
+        if (nodeRef != null && nodeRef.getIsPublic() != null) {
+            this.isPublic = nodeRef.getIsPublic();
         } else {
             GuestConfig guestConfig = guestService.getCurrentGuestConfig();
             if (guestConfig != null && guestConfig.isEnabled()) {
