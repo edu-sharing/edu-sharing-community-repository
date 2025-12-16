@@ -61,7 +61,7 @@
     <!-- search field + filter button -->
     <div
       class="tree-search-container"
-      *ngIf="[TabType.SEARCH, TabType.COLLECTIONS].includes(selectedTab())"
+      *ngIf="[TabType.SEARCH, TabType.COLLECTIONS].includes(selectedTab()) && isSelectStep()"
     >
       <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
         <i esIcon="search" matPrefix></i>
