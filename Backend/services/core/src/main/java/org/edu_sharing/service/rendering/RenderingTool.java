@@ -272,7 +272,7 @@ public class RenderingTool {
         private RequestUserData userData;
 
         @Builder.Default
-        private String eventType = "VIEW_MATERIAL";
+        private String eventType = "PRERENDER";
     }
 
     @Data
