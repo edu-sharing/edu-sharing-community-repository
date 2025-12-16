@@ -95,6 +95,7 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
             [TabType.SEARCH, TabType.COLLECTIONS, TabType.WORKSPACE, TabType.UPLOAD] as TabType[]
         ).indexOf(this.selectedTab()),
     );
+    selectedNodeChildren: WritableSignal<Partial<Node>[]> = signal([]);
     selectedNodes: WritableSignal<Partial<Node>[]> = signal([]);
     highestSelectedNode: Signal<Partial<Node> | null> = computed((): Partial<Node> | null => {
         const selectedNodes: Partial<Node>[] = this.selectedNodes();
@@ -133,15 +134,12 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     numberOfRefs = computed(() => {
         // read model signal at the beginning to evaluate it
         const shouldCopyChildCollections = this.copyChildCollections();
-
-        const collectionToCopy = this.selectedNodes()?.[0];
+        const collectionToCopy = this.highestSelectedNode();
         if (!collectionToCopy) {
             return 0;
         }
         const initialNumberOfRefs = collectionToCopy.collection.childReferencesCount;
-        const collectionChildren = this.selectedNodes().filter(
-            (n) => n.parent.id === collectionToCopy.ref.id,
-        );
+        const collectionChildren = this.selectedNodeChildren();
         if (!collectionChildren.length) {
             return initialNumberOfRefs;
         }
@@ -530,8 +528,11 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
             this.copyRoot.set(!!selectedNode.collection);
             this.copyChildCollections.set(selectedNode.collection?.childCollectionsCount > 0);
             this.copyRefs.set(selectedNode.collection?.childReferencesCount > 0);
-            // switch into configuration step
+            // switch into the configuration step
             this.currentStep.set(StepType.CONFIGURE);
+            // load the children of the selected node to be able to update the number of references
+            const selectedNodeChildren = await this.treeNodeService.getChildren(selectedNode);
+            this.selectedNodeChildren.set(selectedNodeChildren);
         } else if (
             this.currentStep() === StepType.CONFIGURE &&
             this.atLeastRootOrChildrenSelected()
@@ -574,6 +575,7 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     goBack() {
         this.currentStep.set(StepType.SELECT);
         this.selectedNodes.update(() => []);
+        this.selectedNodeChildren.set([]);
     }
 
     /**
