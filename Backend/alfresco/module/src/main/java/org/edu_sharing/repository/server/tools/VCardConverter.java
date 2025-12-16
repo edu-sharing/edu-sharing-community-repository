@@ -140,8 +140,10 @@ public class VCardConverter {
                     .filter(StringUtils::isNotBlank)
                     .collect(Collectors.joining(" "));
         }
-
-        if(data.containsKey(prefix+CCConstants.VCARD_ORG)) {
+		if(StringUtils.isNotEmpty((String)data.get(prefix+CCConstants.VCARD_T_FN))) {
+			return (String) data.get(prefix+CCConstants.VCARD_T_FN);
+		}
+        if(StringUtils.isNotEmpty((String)data.get(prefix+CCConstants.VCARD_ORG))) {
             return (String) data.get(prefix+CCConstants.VCARD_ORG);
         }
 
