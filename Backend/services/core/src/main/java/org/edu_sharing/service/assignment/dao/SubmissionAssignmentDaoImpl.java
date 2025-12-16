@@ -57,22 +57,11 @@ public class SubmissionAssignmentDaoImpl extends BasicNodeDaoImpl implements Ass
 
 
     public SubmissionAssignmentDaoImpl() {
-        this(null, Optional.empty());
+        this((String) null);
     }
 
     public SubmissionAssignmentDaoImpl(String nodeId) {
-        this(nodeId, Optional.empty());
-    }
-
-    public SubmissionAssignmentDaoImpl(org.edu_sharing.service.model.NodeRef nodeRef) {
-        this(nodeRef.getNodeId(), Optional.of(nodeRef));
-    }
-
-    private SubmissionAssignmentDaoImpl(String nodeId, Optional<NodeRef> nodeRef) {
-        super(nodeId, nodeRef);
-
-        // TODO tracker submissions as nested
-        // TODO user relations from nodeRef?
+        super(nodeId);
         assignmentFileRefs = new LazyProvider<>(() -> {
             validateExists();
             return AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_ASSIGNMENT_FILE)
@@ -92,18 +81,9 @@ public class SubmissionAssignmentDaoImpl extends BasicNodeDaoImpl implements Ass
             return AuthenticationUtil.runAsSystem(CheckedRunAsWork.wrap(() ->
                     Arrays.stream(permissionService.getPermissions(getNodeId()).getAces())
                             .map(ace -> {
-                                Assignment.Role role = switch (ace.getPermission()) {
-                                    // filter consumer role
-                                    case CCConstants.PERMISSION_CONSUMER -> null;
-                                    case CCConstants.PERMISSION_ASSIGNEE -> Assignment.Role.ASSIGNEE;
-                                    case CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR -> Assignment.Role.COORDINATOR;
-                                    default -> {
-                                        log.error("Unknown permission for assignment {} {}", nodeId, ace.getPermission());
-                                        yield null;
-                                    }
-                                };
-
+                                Assignment.Role role = mapPermissionToRole(ace.getPermission());
                                 if (role == null) {
+                                    log.error("Unknown permission for assignment {} {}", nodeId, ace.getPermission());
                                     return null;
                                 }
 
@@ -133,8 +113,72 @@ public class SubmissionAssignmentDaoImpl extends BasicNodeDaoImpl implements Ass
                     .map(ChildAssociationRef::getChildRef)
                     .map(org.alfresco.service.cmr.repository.NodeRef::getId)
                     .filter(id -> AssignmentUtil.hasAccessTo(permissionService, id))
-                    .collect(Collectors.toMap(x -> x, x -> assignmentDaoFactory.submissionDao(this, x)));
+                    .collect(Collectors.toMap(x -> x, x -> assignmentDaoFactory.submissionDaoByNodeId(this, x)));
         });
+
+    }
+
+    public SubmissionAssignmentDaoImpl(org.edu_sharing.service.model.NodeRef nodeRef) {
+        super(nodeRef);
+        assignmentFileRefs = new LazyProvider<>(() -> {
+            validateExists();
+            return AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_ASSIGNMENT_FILE)
+                    .stream()
+                    .map(ChildAssociationRef::getChildRef)
+                    .map(org.alfresco.service.cmr.repository.NodeRef::getId)
+                    .map(x -> assignmentDaoFactory.submissionAssignmentFileDao(this, x))
+                    .collect(Collectors.toMap(AssignmentFileDao::getNodeId, x -> x)));
+        });
+
+        permissions = new LazyProvider<>(() ->
+                nodeRef.getPermissions()
+                        .entrySet()
+                        .stream()
+                        .filter(Map.Entry::getValue)
+                        .map(Map.Entry::getKey)
+                        .map(y -> {
+                            Assignment.Role role = mapPermissionToRole(y);
+                            if (role == null) {
+                                return null;
+                            }
+
+                            return new Assignment.Permission(new Authority(AuthenticationUtil.getFullyAuthenticatedUser(), y), role);
+                        })
+                        .filter(Objects::nonNull)
+                        .toList()
+        );
+
+        submissionFolderRef = new LazyProvider<>(() -> {
+            validateExists();
+            return nodeRef.getChildren()
+                    .stream()
+                    .filter(y -> CCConstants.CCM_TYPE_SUBMISSIONS.equals(y.getType()))
+                    .findFirst()
+                    .map(NodeRef::getNodeId)
+                    .orElse(null);
+        });
+
+        submissions = new LazyProvider<>(() -> {
+            validateExists();
+            return nodeRef.getChildren()
+                    .stream()
+                    .filter(y -> CCConstants.CCM_TYPE_SUBMISSIONS.equals(y.getType()))
+                    .findFirst()
+                    .map(x -> x.getChildren().stream()
+                            .filter(AssignmentUtil::hasAccessTo)
+                            .collect(Collectors.toMap(NodeRef::getNodeId, y -> assignmentDaoFactory.submissionDaoByNodeRef(this, y))))
+                    .orElse(Collections.emptyMap());
+        });
+    }
+
+    private static Assignment.Role mapPermissionToRole(String permission) {
+        return switch (permission) {
+            // filter consumer role
+            case CCConstants.PERMISSION_CONSUMER -> null;
+            case CCConstants.PERMISSION_ASSIGNEE -> Assignment.Role.ASSIGNEE;
+            case CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR -> Assignment.Role.COORDINATOR;
+            default -> null;
+        };
     }
 
     @Override
@@ -350,7 +394,7 @@ public class SubmissionAssignmentDaoImpl extends BasicNodeDaoImpl implements Ass
                 UserSimple.create(authorityService.getUser(creator), creator),
                 getCreateDate(),
                 getEndDate(),
-                submissions.stream().allMatch(x->x.submissionStatus().equals(Submission.Status.FINISHED)),
+                submissions.stream().allMatch(x -> x.submissionStatus().equals(Submission.Status.FINISHED)),
                 getStatus(),
                 getType(),
                 getAllowAdditionalDocumentSubmissions(),
@@ -435,14 +479,14 @@ public class SubmissionAssignmentDaoImpl extends BasicNodeDaoImpl implements Ass
 
         SubmissionDao submissionDao;
         if (StringUtils.isBlank(submissionId)) {
-            submissionDao = assignmentDaoFactory.submissionDao(this, null);
+            submissionDao = assignmentDaoFactory.submissionDaoByNodeId(this, null);
             submissionDao.create();
             submissions.get().put(submissionDao.getNodeId(), submissionDao);
         } else if ("-me-".equalsIgnoreCase(submissionId)) {
             String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
             Optional<SubmissionDao> submissionByCreator = getSubmissionByCreator(currentUser);
             if (submissionByCreator.isEmpty()) {
-                submissionDao = assignmentDaoFactory.submissionDao(this, null);
+                submissionDao = assignmentDaoFactory.submissionDaoByNodeId(this, null);
                 submissionDao.create();
                 submissions.get().put(submissionDao.getNodeId(), submissionDao);
             } else {

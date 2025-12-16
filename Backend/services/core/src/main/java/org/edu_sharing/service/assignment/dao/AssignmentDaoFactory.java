@@ -90,8 +90,15 @@ public class AssignmentDaoFactory {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    SubmissionDao submissionDao(SubmissionAssignmentDaoImpl assignmentDao, String nodeId) {
+    SubmissionDao submissionDaoByNodeId(SubmissionAssignmentDaoImpl assignmentDao, String nodeId) {
         return new SubmissionDaoImpl(this, assignmentDao, nodeId);
+    }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    SubmissionDao submissionDaoByNodeRef(SubmissionAssignmentDaoImpl assignmentDao, org.edu_sharing.service.model.NodeRef nodeRef) {
+        return new SubmissionDaoImpl(this, assignmentDao, nodeRef);
     }
 
     @Bean

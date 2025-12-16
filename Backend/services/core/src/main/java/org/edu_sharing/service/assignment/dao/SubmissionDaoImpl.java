@@ -1,5 +1,7 @@
 package org.edu_sharing.service.assignment.dao;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -17,6 +19,7 @@ import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.assignment.SubmissionDao;
 import org.edu_sharing.service.assignment.SubmissionFileDao;
 import org.edu_sharing.service.authority.AuthorityService;
+import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.util.LazyProvider;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -30,30 +33,36 @@ import java.util.stream.Collectors;
 @Slf4j
 final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao {
 
-    private final AssignmentDaoFactory assignmentDaoFactory;
     @Setter(onMethod_ = @Autowired)
     private PermissionService permissionService;
     @Setter(onMethod_ = @Autowired)
     private AuthorityService authorityService;
 
-    private final SubmissionAssignmentDaoImpl assignmentDao;
-    private final LazyProvider<Map<String, SubmissionFileDao>> submissionFileRefs;
+    private AssignmentDaoFactory assignmentDaoFactory;
+    private SubmissionAssignmentDaoImpl assignmentDao;
+
+    private final LazyProvider<Map<String, SubmissionFileDao>> submissionFileRefs = new LazyProvider<>(() -> {
+        validateExists();
+        return AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_SUBMISSION_FILE)
+                .stream()
+                .map(ChildAssociationRef::getChildRef)
+                .map(org.alfresco.service.cmr.repository.NodeRef::getId)
+                .map(x -> assignmentDaoFactory.submissionFileDao(assignmentDao, this, x))
+                .collect(Collectors.toMap(SubmissionFileDao::getNodeId, x -> x)));
+    });
 
     public SubmissionDaoImpl(AssignmentDaoFactory assignmentDaoFactory, SubmissionAssignmentDaoImpl assignmentDao, String nodeId) {
         super(nodeId);
         this.assignmentDaoFactory = assignmentDaoFactory;
         this.assignmentDao = assignmentDao;
-
-        submissionFileRefs = new LazyProvider<>(() -> {
-            validateExists();
-            return AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_SUBMISSION_FILE)
-                    .stream()
-                    .map(ChildAssociationRef::getChildRef)
-                    .map(org.alfresco.service.cmr.repository.NodeRef::getId)
-                    .map(x -> assignmentDaoFactory.submissionFileDao(assignmentDao, this, x))
-                    .collect(Collectors.toMap(SubmissionFileDao::getNodeId, x -> x)));
-        });
     }
+
+    public SubmissionDaoImpl(AssignmentDaoFactory assignmentDaoFactory, SubmissionAssignmentDaoImpl assignmentDao, NodeRef nodeRef) {
+        super(nodeRef);
+        this.assignmentDaoFactory = assignmentDaoFactory;
+        this.assignmentDao = assignmentDao;
+    }
+
 
     @Override
     public void refresh() {

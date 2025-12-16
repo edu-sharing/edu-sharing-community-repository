@@ -27,6 +27,7 @@ import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.annotation.Permission;
 import org.edu_sharing.util.CheckedRunAsWork;
 import org.edu_sharing.util.LazyProvider;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -37,8 +38,6 @@ import java.util.stream.Stream;
 @Slf4j
 final class AssignmentDaoImpl extends BasicNodeDaoImpl implements AssignmentDao {
 
-    private final LazyProvider<Map<String, AssignmentFileDao>> assignmentFileRefs;
-    private final LazyProvider<List<Assignment.Permission>> permissions;
 
     @Setter(onMethod_ = @Autowired)
     private AssignmentDaoFactory assignmentDaoFactory;
@@ -51,32 +50,25 @@ final class AssignmentDaoImpl extends BasicNodeDaoImpl implements AssignmentDao 
     @Setter(onMethod_ = @Autowired)
     private AuthorityService authorityService;
 
+    private final LazyProvider<Map<String, AssignmentFileDao>> assignmentFileRefs = new LazyProvider<>(() -> {
+        validateExists();
+        return AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_ASSIGNMENT_FILE)
+                .stream()
+                .map(ChildAssociationRef::getChildRef)
+                .map(org.alfresco.service.cmr.repository.NodeRef::getId)
+                .map(x -> assignmentDaoFactory.assignmentFileDao(this, x))
+                .collect(Collectors.toMap(AssignmentFileDao::getNodeId, x -> x)));
+    });
+
+
+    private final LazyProvider<List<Assignment.Permission>> permissions;
 
     public AssignmentDaoImpl() {
-        this(null, Optional.empty());
+        this((String)null);
     }
 
     public AssignmentDaoImpl(String nodeId) {
-        this(nodeId, Optional.empty());
-    }
-
-    public AssignmentDaoImpl(org.edu_sharing.service.model.NodeRef nodeRef) {
-        this(nodeRef.getNodeId(), Optional.of(nodeRef));
-    }
-
-    private AssignmentDaoImpl(String nodeId, Optional<NodeRef> nodeRef) {
-        super(nodeId, nodeRef);
-
-        // TODO user relations from nodeRef?
-        assignmentFileRefs = new LazyProvider<>(() -> {
-            validateExists();
-            return AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_ASSIGNMENT_FILE)
-                    .stream()
-                    .map(ChildAssociationRef::getChildRef)
-                    .map(org.alfresco.service.cmr.repository.NodeRef::getId)
-                    .map(x -> assignmentDaoFactory.assignmentFileDao(this, x))
-                    .collect(Collectors.toMap(AssignmentFileDao::getNodeId, x -> x)));
-        });
+        super(nodeId);
 
         permissions = new LazyProvider<>(() -> {
             validateExists();
@@ -87,20 +79,10 @@ final class AssignmentDaoImpl extends BasicNodeDaoImpl implements AssignmentDao 
             return AuthenticationUtil.runAsSystem(CheckedRunAsWork.wrap(() ->
                     Arrays.stream(permissionService.getPermissions(getNodeId()).getAces())
                             .map(ace -> {
-                                Assignment.Role role = switch (ace.getPermission()) {
-                                    // filter consumer role
-                                    case CCConstants.PERMISSION_CONSUMER -> null;
-                                    case CCConstants.PERMISSION_ASSIGNEE -> {
-                                        log.debug(CCConstants.PERMISSION_ASSIGNEE + " should not be set for assignment {} of type {}", getNodeId(), Assignment.Type.DEFAULT);
-                                        yield null;
-                                    }
-                                    case CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR -> Assignment.Role.COORDINATOR;
-                                    default -> {
-                                        log.error("Unknown permission for assignment {} {}", nodeId, ace.getPermission());
-                                        yield null;
-                                    }
-                                };
+                                String permission = ace.getPermission();
+                                Assignment.Role role = mapPermissionToRole(permission);
                                 if (role == null) {
+                                    log.error("Unknown permission for assignment {} {}", nodeId, permission);
                                     return null;
                                 }
                                 return new Assignment.Permission(new Authority(ace), role);
@@ -111,6 +93,44 @@ final class AssignmentDaoImpl extends BasicNodeDaoImpl implements AssignmentDao 
         });
     }
 
+    public AssignmentDaoImpl(org.edu_sharing.service.model.NodeRef nodeRef) {
+        super(nodeRef);
+        permissions = new LazyProvider<>(() -> {
+            validateExists();
+            if (!AssignmentUtil.isAssignmentCoordinator(permissionService, getNodeId())) {
+                return Collections.emptyList();
+            }
+
+            return nodeRef.getPermissions()
+                    .entrySet()
+                    .stream()
+                    .filter(Map.Entry::getValue)
+                    .map(Map.Entry::getKey)
+                    .map(y -> {
+                        Assignment.Role role = mapPermissionToRole(y);
+                        if (role == null) {
+                            return null;
+                        }
+
+                        return new Assignment.Permission(new Authority(AuthenticationUtil.getFullyAuthenticatedUser(), y), role);
+                    })
+                    .filter(Objects::nonNull)
+                    .toList();
+        });
+    }
+
+    private Assignment.Role mapPermissionToRole(String permission) {
+        return switch (permission) {
+            // filter consumer role
+            case CCConstants.PERMISSION_CONSUMER -> null;
+            case CCConstants.PERMISSION_ASSIGNEE -> {
+                log.debug(CCConstants.PERMISSION_ASSIGNEE + " should not be set for assignment {} of type {}", getNodeId(), Assignment.Type.DEFAULT);
+                yield null;
+            }
+            case CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR -> Assignment.Role.COORDINATOR;
+            default -> null;
+        };
+    }
 
     @Override
     @RunAsSystem
@@ -150,7 +170,8 @@ final class AssignmentDaoImpl extends BasicNodeDaoImpl implements AssignmentDao 
             List<ACE> aceList = new ArrayList<>(request.permissions()
                     .stream()
                     .flatMap(x -> switch (x.role()) {
-                        case ASSIGNEE -> throw new IllegalArgumentException(Assignment.Role.ASSIGNEE + " cannot be set for assignment of type " + Assignment.Type.DEFAULT);
+                        case ASSIGNEE ->
+                                throw new IllegalArgumentException(Assignment.Role.ASSIGNEE + " cannot be set for assignment of type " + Assignment.Type.DEFAULT);
                         case COORDINATOR ->
                                 Stream.of(new ACE(CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR, x.authorityName()));
                     })
@@ -275,7 +296,7 @@ final class AssignmentDaoImpl extends BasicNodeDaoImpl implements AssignmentDao 
 
     @Override
     public Collection<SubmissionDao> getSubmissions() {
-       throw new UnsupportedOperationException("Submissions are not supported for assignment of type " + getType());
+        throw new UnsupportedOperationException("Submissions are not supported for assignment of type " + getType());
     }
 
     @Override

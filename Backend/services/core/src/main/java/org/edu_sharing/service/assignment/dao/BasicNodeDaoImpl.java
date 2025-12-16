@@ -33,17 +33,21 @@ abstract class BasicNodeDaoImpl implements BasicNodeDao {
     protected NodeService nodeService;
 
     public BasicNodeDaoImpl(String nodeId) {
-        this(nodeId, Optional.empty());
-    }
-
-    public BasicNodeDaoImpl(String nodeId, Optional<org.edu_sharing.service.model.NodeRef> nodeRef) {
         this.nodeId = nodeId;
         propertyMapper = new LazyProvider<>(CheckedSupplier.wrap(() -> {
             validateExists();
             Map<String, Object> properties = AuthenticationUtil.runAsSystem(CheckedRunAsWork.wrap(() ->
                     nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), getNodeId())));
             return new PropertyMapper(properties);
-        }), nodeRef.map(x -> new PropertyMapper(x.getProperties())).orElse(null));
+        }));
+    }
+
+    public BasicNodeDaoImpl(org.edu_sharing.service.model.NodeRef nodeRef) {
+        this.nodeId = nodeRef.getNodeId();
+        propertyMapper = new LazyProvider<>(CheckedSupplier.wrap(() -> {
+            validateExists();
+            return new PropertyMapper(nodeRef.getProperties());
+        }));
     }
 
     public boolean exists() {
