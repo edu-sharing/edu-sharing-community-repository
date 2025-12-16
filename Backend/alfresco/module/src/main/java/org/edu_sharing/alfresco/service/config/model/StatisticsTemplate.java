@@ -4,8 +4,8 @@ import jakarta.xml.bind.annotation.XmlElement;
 import java.io.Serializable;
 
 public class StatisticsTemplate implements Serializable {
-    @XmlElement String name;
-    @XmlElement String group;
-    @XmlElement String unfold;
-    @XmlElement String type;
+    @XmlElement public String name;
+    @XmlElement public String group;
+    @XmlElement public String unfold;
+    @XmlElement public String type;
 }
