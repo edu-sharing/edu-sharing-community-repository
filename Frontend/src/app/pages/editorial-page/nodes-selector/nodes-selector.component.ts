@@ -241,7 +241,7 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
                 selectedNodes.splice(selectedIndex, 1);
             }
         });
-        this.selectedNodes.update(() => [...selectedNodes]);
+        this.selectedNodes.set([...selectedNodes]);
     }
 
     /**
@@ -253,7 +253,7 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         // reset step information and individual variables
         this.currentStep.set(StepType.SELECT);
         this.collectionsDisplayType.set(NodeEntriesDisplayType.Tree);
-        this.selectedNodes.update(() => []);
+        this.selectedNodes.set([]);
         this.searchText.set('');
         this.searchSent.set(false);
         this.treeNodeService.resetData();
@@ -574,7 +574,7 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
      */
     goBack() {
         this.currentStep.set(StepType.SELECT);
-        this.selectedNodes.update(() => []);
+        this.selectedNodes.set([]);
         this.selectedNodeChildren.set([]);
     }
 
