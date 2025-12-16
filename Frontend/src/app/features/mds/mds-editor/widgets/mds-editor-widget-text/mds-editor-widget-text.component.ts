@@ -3,10 +3,10 @@ import { UntypedFormControl, ValidatorFn, Validators } from '@angular/forms';
 import { MAT_FORM_FIELD } from '@angular/material/form-field';
 import { TranslateService } from '@ngx-translate/core';
 import { SuggestionResponseDto, SuggestionStatus } from 'ngx-edu-sharing-api';
-import { DateHelper, ValueType } from 'ngx-edu-sharing-ui';
+import { DateHelper, UIService, ValueType } from 'ngx-edu-sharing-ui';
 import { filter } from 'rxjs/operators';
 import { Toast } from '../../../../../services/toast';
-import { Widget } from '../../mds-editor-instance.service';
+import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { BehaviorSubject } from 'rxjs';
 import { init } from 'jasmine-spec-reporter/built/display/colors-display';
@@ -29,7 +29,14 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
     formControl: UntypedFormControl;
     fileNameChecker: FileNameChecker;
     aiSuggestion$ = new BehaviorSubject<SuggestionResponseDto>(null);
-
+    constructor(
+        toast: Toast,
+        mdsEditorInstance: MdsEditorInstanceService,
+        translate: TranslateService,
+        private uiService: UIService,
+    ) {
+        super(toast, mdsEditorInstance, translate);
+    }
     async ngOnInit() {
         this.formControl = new UntypedFormControl(null, this.getValidators());
         let initialValue = (await this.widget.getInitalValuesAsync()).jointValues;
@@ -129,6 +136,15 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
         this.formControl.setValue(suggestion.value.value as string, { emitEvent: false });
         this.setValue([suggestion.value.value as string]);
         this.widget.setSuggestionState(suggestion, 'ACCEPTED');
+    }
+
+    fieldGotFocus(element: HTMLInputElement | HTMLTextAreaElement) {
+        if (
+            this.aiSuggestion$.value?.status === 'ACCEPTED' &&
+            !this.uiService.isTouchSubject.value
+        ) {
+            element?.select();
+        }
     }
 }
 

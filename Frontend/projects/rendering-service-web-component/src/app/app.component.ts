@@ -75,7 +75,6 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
             data.node.preview.url = this.previewUrl;
             this.node.set(data.node);
             this.request.set(data.request);
-            console.log(data);
         }
     }
 

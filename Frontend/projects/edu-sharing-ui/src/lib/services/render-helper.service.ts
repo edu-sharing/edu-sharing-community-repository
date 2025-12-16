@@ -70,11 +70,8 @@ export class RenderHelperService {
                 error: 'RENDERING.ERROR.RS2_NOT_CONFIGURED',
             };
         }
-        console.info(about.renderingService2?.url);
         this.prepareRootUrl();
-        console.info(this.injector.get(RSApiConfiguration));
         const token = securedNode.jwt;
-        console.info(token, node);
         const request = {
             nodeId: node.ref.id,
             repoId: node.ref.repo,
@@ -103,9 +100,9 @@ export class RenderHelperService {
         encodedUser: string,
     ): Promise<CombinedRenderData> {
         this.injector.get(RSApiConfiguration).rootUrl = renderUrl;
-        const decodedNodeString = atob(encodedNode);
+        const decodedNodeString = this.base64ToUtf8(encodedNode);
         const node = JSON.parse(decodedNodeString) as Node;
-        const userData = JSON.parse(atob(encodedUser));
+        const userData = JSON.parse(this.base64ToUtf8(encodedUser));
         const request = {
             nodeId: node.ref.id,
             repoId: node.ref.repo,
@@ -138,5 +135,17 @@ export class RenderHelperService {
             this.injector.get(RSApiConfiguration).rootUrl = '/rendering2';
         }
         console.info(this.injector.get(RSApiConfiguration));
+    }
+
+    private base64ToUtf8(b64: string): string {
+        // Support Base64URL and missing padding
+        const normalized = b64.replace(/-/g, '+').replace(/_/g, '/');
+        const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
+
+        const binary = atob(padded);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+        return new TextDecoder('utf-8', { fatal: false }).decode(bytes);
     }
 }

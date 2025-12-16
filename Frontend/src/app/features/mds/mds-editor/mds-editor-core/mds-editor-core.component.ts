@@ -1,6 +1,6 @@
 import { Component, QueryList, ViewChildren } from '@angular/core';
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { filter, first, map } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 import { EditorMode, MdsView } from '../../types/types';
 import { MdsEditorViewComponent } from '../mds-editor-view/mds-editor-view.component';
@@ -38,6 +38,14 @@ export class MdsEditorCoreComponent {
         this.shouldShowExtendedWidgets$ = this.mdsEditorInstance.shouldShowExtendedWidgets$;
         this.editorMode = this.mdsEditorInstance.editorMode;
         this.mdsEditorInstance.mdsInitDone.subscribe(() => this.init());
+        this.mdsEditorInstance.showAiSuggestions
+            .pipe(
+                filter((f) => f),
+                first(),
+            )
+            .subscribe(() => {
+                void this.generateSuggestions();
+            });
         this.hasExtendedWidgets$ = this.mdsEditorInstance.widgets.pipe(
             map((widgets) => widgets?.some((widget) => widget.definition.isExtended)),
         );
@@ -87,6 +95,13 @@ export class MdsEditorCoreComponent {
                         aiConfigId: 'default', //w.definition.aiConfigs[0].id,
                     };
                 });
+            if (!this.mdsEditorInstance.widgets.value.some((w) => w.definition.aiConfigs?.length)) {
+                console.info(
+                    'No widget in the current mds template found that has an ai config. Check the mds and include one aiConfig with id default',
+                );
+                return;
+            }
+            console.info(widgets, this.mdsEditorInstance.nodes$.value?.length);
             const values = await this.mdsEditorInstance.getValues(null, false);
             const mdsConfig: MdsConfig = {
                 type: 'mds',
@@ -118,22 +133,19 @@ export class MdsEditorCoreComponent {
                     }]
                 }
             }])*/
+            this.toast.show({
+                message: 'MDS.AI.GENERATE_ASYNC_FINISHED',
+                type: 'info',
+                subtype: ToastType.InfoAction,
+            });
         } catch (e) {
             console.warn('Could not fetch suggestion data', e);
         }
-        this.toast.show({
-            message: 'MDS.AI.GENERATE_ASYNC_FINISHED',
-            type: 'info',
-            subtype: ToastType.InfoAction,
-        });
         this.aiLoading.next(false);
     }
 
     setAiSuggestions(change: MatSlideToggleChange) {
         this.mdsEditorInstance.showAiSuggestions.next(change.checked);
-        if (change.checked) {
-            void this.generateSuggestions();
-        }
     }
 }
 
