@@ -22,6 +22,7 @@ import {
     NodeEntriesDisplayType,
     Scope,
     UIAnimation,
+    VCard,
 } from 'ngx-edu-sharing-ui';
 import { CsvHelper } from '../../../core-module/csv.helper';
 import { NodeStatistics, Statistics } from '../../../core-module/rest/data-object';
@@ -940,6 +941,11 @@ export class AdminStatisticsComponent implements OnInit {
                     const c: any = {};
                     for (const prop of properties) {
                         c[prop] = n.properties ? n.properties[prop] : n.ref.id;
+                        if (RestConstants.getAllVCardFields().includes(prop)) {
+                            c[prop] = n.properties?.[prop]
+                                .map((v: string) => new VCard(v).getDisplayName())
+                                .join(', ');
+                        }
                         for (const idx of countHeaders) {
                             c[idx] = ListCountsComponent.getCount(n, idx);
                         }
