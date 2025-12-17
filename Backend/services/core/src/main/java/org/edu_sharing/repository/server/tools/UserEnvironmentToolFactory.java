@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.annotation.SessionScope;
+import org.springframework.web.context.annotation.RequestScope;
 
 import java.util.Map;
 
@@ -15,7 +15,7 @@ public class UserEnvironmentToolFactory {
     private final NodeService nodeService;
 
     @Bean
-    @SessionScope
+    @RequestScope
     public UserEnvironmentTool createUserEnvironmentTool(){
         return new UserEnvironmentTool(nodeService);
     }
