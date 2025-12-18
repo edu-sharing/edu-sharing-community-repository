@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
-import { Options } from '@angular-slider/ngx-slider';
+import { ChangeContext, Options } from '@angular-slider/ngx-slider';
 import { MdsWidget, MdsWidgetValue } from '../../../types/types';
 import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { MdsWidgetType, ValueType } from 'ngx-edu-sharing-ui';
@@ -56,6 +56,9 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
         this.widget.getShowAiSuggestions().subscribe(async ([show, suggestions]) => {
             const suggestion = suggestions?.find((s) => s.type === 'AI' && s.status === 'PENDING');
             if (this.aiSuggestion$.value?.status !== 'DECLINED') {
+                if (this.widget.getIsDirty()) {
+                    return;
+                }
                 if (suggestion && show) {
                     this.currentValue = (suggestion.value as string)
                         .split('-')
@@ -117,15 +120,16 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
         return (value + ' ' + (this.widget.definition.unit ?? '')).trim();
     }
 
-    updateValue(value: number) {
-        if (isNaN(value)) {
+    updateValue(value: ChangeContext) {
+        console.log(value);
+        if (isNaN(value.value)) {
             return;
         }
         if (this.widget.definition.type === 'slider') {
             // emit single value
-            this.setSliderValue([value]);
+            this.setSliderValue([value.value]);
         } else {
-            this.setSliderValue([value, this.currentValue?.[1]]);
+            this.setSliderValue([value.value, value.highValue]);
         }
         if (this.aiSuggestion$.value?.status === 'ACCEPTED') {
             this.widget.setSuggestionState(this.aiSuggestion$, 'DECLINED');
@@ -137,13 +141,6 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
             value.map((v) => v?.toString()),
             true,
         );
-    }
-
-    updateHighValue(value: number) {
-        if (isNaN(value)) {
-            return;
-        }
-        this.setValue([this.currentValue?.[0]?.toString(), value.toString()], true);
     }
 }
 @Component({

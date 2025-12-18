@@ -212,6 +212,28 @@ export class MdsEditorWidgetTreeComponent
                         (obj, index, self) =>
                             index === self.findIndex((o) => o.value === obj.value),
                     )
+                    .filter(
+                        // validate valuespace
+                        (obj) => {
+                            if (this.widget.definition.values) {
+                                if (
+                                    !this.widget.definition.values.some((v) => v.id === obj.value)
+                                ) {
+                                    console.warn(
+                                        'Invalid suggestion "' +
+                                            obj.value +
+                                            '" received for ' +
+                                            this.widget.definition.id +
+                                            ', not in valuespace',
+                                        obj,
+                                        this.widget.definition.values,
+                                    );
+                                    return false;
+                                }
+                            }
+                            return true;
+                        },
+                    )
                     .forEach((s) => this.addSuggestion(new BehaviorSubject(s)));
             } else {
                 const values: DisplayValue[] = this.chipsControl.value;

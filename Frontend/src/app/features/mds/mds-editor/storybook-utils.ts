@@ -54,6 +54,7 @@ import {
 } from 'ngx-edu-sharing-b-api';
 import { HttpClient, HttpContext } from '@angular/common/http';
 import { catchError, map, shareReplay, take, tap } from 'rxjs/operators';
+import { ActivatedRoute } from '@angular/router';
 
 @Injectable()
 export class translateProvider {
@@ -264,6 +265,18 @@ export class NodeServiceMock {
     getNode(id: string, { repository = HOME_REPOSITORY } = {}): Observable<Node> {
         return of(DummyNode as Node);
     }
+    editNodeMetadata(
+        id: string,
+        properties: { [key: string]: string[] },
+        {
+            versionComment,
+            repository = HOME_REPOSITORY,
+            obeyMds = true,
+        }: { versionComment?: string; repository?: string; obeyMds?: boolean } = {},
+    ): Observable<Node> {
+        console.log('editNodeMetadata', properties);
+        return of({ properties } as Node);
+    }
 }
 @Injectable()
 export class AboutServiceMock {
@@ -334,7 +347,7 @@ export class SuggestionsV1ServiceMock {
                 'ccm:educationallearningresourcetype': this.BaseSuggestion(
                     'ccm:educationallearningresourcetype',
                     params.node,
-                    ['other', 'table', 'table'],
+                    ['other', 'table', 'table', 'wrong_key'],
                 ),
                 'cclom:general_keyword': this.BaseSuggestion('cclom:general_keyword', params.node, [
                     'ABC',
@@ -359,6 +372,8 @@ export class SuggestionsV1ServiceMock {
         });
     }
 }
+@Injectable()
+export class ActivatedRouteMock {}
 
 export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
@@ -373,7 +388,8 @@ export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     { provide: MdsService, useFactory: () => new MdsServiceMock(null) },
     ViewInstanceService,
     CordovaService,
-    ToastService,
+    { provide: Toast, useClass: ToastService },
+    { provide: ActivatedRoute, useClass: ActivatedRouteMock },
     {
         provide: TranslateService,
         useClass: translateProvider,
