@@ -91,6 +91,7 @@ import { SortSelectPanelComponent } from './sort-select-panel/sort-select-panel.
         NodesDropTargetDirective,
         NodeStatsBadgesComponent,
         NodeTypeBadgeComponent,
+        OptionButtonComponent,
     ],
 })
 export class NodeEntriesModule {}
