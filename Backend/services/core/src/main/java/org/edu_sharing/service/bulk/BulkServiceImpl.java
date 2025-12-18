@@ -385,7 +385,7 @@ public class BulkServiceImpl implements BulkService, ApplicationListener<Refresh
 		List<NodeRef> result = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO,
 				NodeServiceHelper.getPropertiesSinglevalue(
 						NodeServiceHelper.transformShortToLongProperties(properties)
-				),data);
+				), null, data, Integer.MAX_VALUE, null);
 		return CMISSearchHelper.filterCMISResult(result, primaryFolder);
 	}
 	@Override
