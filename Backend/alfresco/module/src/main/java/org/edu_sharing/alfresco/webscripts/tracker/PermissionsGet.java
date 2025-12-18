@@ -7,6 +7,7 @@ import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
 import org.alfresco.repo.web.scripts.solr.AclsReadersGet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.text.StringEscapeUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -87,14 +88,14 @@ public class PermissionsGet extends DeclarativeWebScript {
             acl.setAces(aces);
             for(AccessControlEntry entry : accessControlList.getEntries()){
                 Ace ace = new Ace();
-                ace.setAuthority(entry.getAuthority().trim());
+                ace.setAuthority(StringEscapeUtils.escapeJson(entry.getAuthority()));
                 ace.setPermission(entry.getPermission().getName());
                 aces.add(ace);
                 Set<String> subPermissions = new HashSet<>();
                 getSubPermissions(entry.getPermission().getName(),subPermissions);
                 for(String subPermission : subPermissions){
                     Ace subAce = new Ace();
-                    subAce.setAuthority(entry.getAuthority());
+                    subAce.setAuthority(StringEscapeUtils.escapeJson(entry.getAuthority()));
                     subAce.setPermission(subPermission);
                     aces.add(subAce);
                 }
