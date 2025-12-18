@@ -207,6 +207,11 @@ export class MdsEditorWidgetTreeComponent
                             s.status === 'PENDING' &&
                             !this.widget.getValue().includes(s.value as string),
                     )
+                    .filter(
+                        // filter for non duplicate values
+                        (obj, index, self) =>
+                            index === self.findIndex((o) => o.value === obj.value),
+                    )
                     .forEach((s) => this.addSuggestion(new BehaviorSubject(s)));
             } else {
                 const values: DisplayValue[] = this.chipsControl.value;

@@ -334,11 +334,13 @@ export class SuggestionsV1ServiceMock {
                 'ccm:educationallearningresourcetype': this.BaseSuggestion(
                     'ccm:educationallearningresourcetype',
                     params.node,
-                    ['other', 'table'],
+                    ['other', 'table', 'table'],
                 ),
                 'cclom:general_keyword': this.BaseSuggestion('cclom:general_keyword', params.node, [
+                    'ABC',
                     'AI Keyword 1',
                     'AI Keyword 2',
+                    'AI Keyword 1',
                 ]),
                 'ccm:tool_category': this.BaseSuggestion('ccm:tool_category', params.node, [
                     'communication',
