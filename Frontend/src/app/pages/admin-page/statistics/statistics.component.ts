@@ -22,6 +22,7 @@ import {
     NodeEntriesDisplayType,
     Scope,
     UIAnimation,
+    VCard,
 } from 'ngx-edu-sharing-ui';
 import { CsvHelper } from '../../../core-module/csv.helper';
 import { NodeStatistics, Statistics } from '../../../core-module/rest/data-object';
@@ -49,6 +50,7 @@ import {
     Title,
     Tooltip,
 } from 'chart.js';
+import { firstValueFrom } from 'rxjs';
 
 Chart.register(
     BarController,
@@ -269,7 +271,7 @@ export class AdminStatisticsComponent implements OnInit {
         private config: ConfigurationService,
         private nodeHelperService: NodeHelperService,
     ) {
-        this.initColumns();
+        void this.initColumns();
         this.groupedStart = new Date(
             new Date().getTime() - AdminStatisticsComponent.DEFAULT_OFFSET,
         );
@@ -804,9 +806,10 @@ export class AdminStatisticsComponent implements OnInit {
         let from: Date;
         let to: Date;
         // node export
+        const tabOffset = this._mediacenter ? 1 : 0;
         switch (this.currentTab) {
             // chart per day/month/year data
-            case 0: {
+            case tabOffset + 0: {
                 from = this.groupedStart;
                 to = this.groupedEnd;
                 if (this.groupedChartData.node) {
@@ -843,7 +846,7 @@ export class AdminStatisticsComponent implements OnInit {
                 }
                 break;
             }
-            case 1: {
+            case tabOffset + 1: {
                 // grouped / folded data
                 from = this.customGroupStart;
                 to = this.customGroupEnd;
@@ -915,7 +918,7 @@ export class AdminStatisticsComponent implements OnInit {
                 console.info(csvHeadersTranslated, csvHeadersMapping, csvData);
                 break;
             }
-            case 2: {
+            case tabOffset + 2: {
                 from = this.nodesStart;
                 to = this.nodesEnd;
                 // counts by node including custom properties
@@ -938,6 +941,11 @@ export class AdminStatisticsComponent implements OnInit {
                     const c: any = {};
                     for (const prop of properties) {
                         c[prop] = n.properties ? n.properties[prop] : n.ref.id;
+                        if (RestConstants.getAllVCardFields().includes(prop)) {
+                            c[prop] = n.properties?.[prop]
+                                .map((v: string) => new VCard(v).getDisplayName())
+                                .join(', ');
+                        }
                         for (const idx of countHeaders) {
                             c[idx] = ListCountsComponent.getCount(n, idx);
                         }
@@ -996,8 +1004,11 @@ export class AdminStatisticsComponent implements OnInit {
         );
     }
 
-    private initColumns() {
-        const columns: string[] = this.config.instant('admin.statistics.nodeColumns');
+    private async initColumns() {
+        const columns: string[] = await firstValueFrom(
+            this.config.get('admin.statistics.nodeColumns'),
+        );
+        console.log(columns);
         if (columns) {
             this.columns = { Default: columns.map((c) => new ListItem('NODE', c)) };
         } else {

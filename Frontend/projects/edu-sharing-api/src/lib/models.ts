@@ -91,6 +91,7 @@ export {
     UserProfile,
     UserQuota,
     UserStatus,
+    UserStats,
     WebsiteInformation,
     RegisterInformation,
 } from './api/models';

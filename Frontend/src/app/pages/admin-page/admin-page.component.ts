@@ -1357,7 +1357,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         ) {
             this.buttons.splice(1, 0, {
                 id: 'STATISTICS',
-                icon: 'finance',
+                icon: 'equalizer',
             });
         }
         if (

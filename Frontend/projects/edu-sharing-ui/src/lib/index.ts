@@ -41,6 +41,7 @@ export * from './node-entries/node-data-source-remote';
 export * from './node-entries/node-entries-global.service';
 export * from './node-entries/node-entries-wrapper.component';
 export * from './node-entries/node-entries.module';
+export * from './node-entries/option-button/option-button.component';
 export * from './mds-viewer/mds-viewer.component';
 export * from './mds-viewer/replace-element-with-div';
 export * from './node-url/node-url.component';

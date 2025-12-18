@@ -70,8 +70,8 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
         boolean json;
     }
 
-    private static final String SESSION_AUTHORITY_MEDIACENTERS = "SESSION_AUTHORITY_MEDIACENTERS";
-    private static final String SESSION_AUTHORITY_ORGANIZATIONS = "SESSION_AUTHORITY_ORGANIZATIONS";
+    public static final String SESSION_AUTHORITY_MEDIACENTERS = "SESSION_AUTHORITY_MEDIACENTERS";
+    public static final String SESSION_AUTHORITY_ORGANIZATIONS = "SESSION_AUTHORITY_ORGANIZATIONS";
     public static Logger logger = Logger.getLogger(TrackingServiceImpl.class);
 
     public static String TRACKING_NODE_TABLE_ID = "edu_tracking_node";
