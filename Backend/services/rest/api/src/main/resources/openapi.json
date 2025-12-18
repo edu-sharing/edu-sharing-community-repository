@@ -6982,6 +6982,23 @@
         },
         "type": "object"
       },
+      "StatisticsTemplate": {
+        "properties": {
+          "group": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "unfold": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "StatisticsUser": {
         "properties": {
           "count": {
