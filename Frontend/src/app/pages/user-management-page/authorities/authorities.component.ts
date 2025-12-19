@@ -779,7 +779,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 const profile = this.edit.profile;
                 if (this._mode == 'ORG') {
                     this.toast.showProgressSpinner();
-                    this.organization.createOrganization(name).subscribe(
+                    this.organization.createOrganization(name.trim()).subscribe(
                         (result) => {
                             this.edit = null;
                             this.iam.editGroup(result.authorityName, profile).subscribe(
@@ -801,7 +801,11 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 } else {
                     this.toast.showProgressSpinner();
                     this.iam
-                        .createGroup(name, this.edit.profile, this.org ? this.org.groupName : '')
+                        .createGroup(
+                            name.trim(),
+                            this.edit.profile,
+                            this.org ? this.org.groupName : '',
+                        )
                         .subscribe(
                             (group) => {
                                 this.edit = null;
@@ -845,7 +849,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             this.toast.showProgressSpinner();
             if (this.editId == null) {
                 const name = this.editDetails.authorityName;
-                this.iam.createUser(name, password, editStore.profile).subscribe(
+                this.iam.createUser(name.trim(), password, editStore.profile).subscribe(
                     (user) => {
                         this.edit = null;
                         this.toast.closeProgressSpinner();
