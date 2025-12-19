@@ -52,7 +52,7 @@ public class CommentServiceImpl implements CommentService{
             String type = nodeService.getType(node);
             String childAssoc = CCConstants.CCM_ASSOC_COMMENT;
             if(!Objects.equals(type, CCConstants.CCM_TYPE_IO)){
-                childAssoc = CCConstants.getValidLocalName(type) + "_comment";
+                childAssoc = type + "_comment";
             }
             String nodeId1 = nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node, CCConstants.CCM_TYPE_COMMENT, childAssoc, props);
 			permissionService.setPermissions(nodeId1, null, true);
