@@ -57,9 +57,9 @@ public class Usage2Service {
 		ApplicationContext applicationContext =  AlfAppContextGate.getApplicationContext();
 		serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		repositoryCache = applicationContext.getBean(RepositoryCache.class);
-		nodeService = applicationContext.getBean(NodeService.class);
-		permissionService = applicationContext.getBean(org.edu_sharing.service.permission.PermissionService.class);
-		collectionService = applicationContext.getBean(CollectionService.class);
+		nodeService = NodeServiceFactory.getInstance().getService();
+		permissionService = PermissionServiceFactory.getInstance().getService();
+		collectionService = CollectionServiceFactory.getInstance().getService();
 		usageDao = new AlfServicesWrapper();
 	}
 
