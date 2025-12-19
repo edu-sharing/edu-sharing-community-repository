@@ -44,6 +44,9 @@
             &.start-time {
                 color: var(--textLight);
             }
+            &.submit-time {
+                font-weight: bold;
+            }
             .badge {
                 @include card.assignmentBadge();
             }

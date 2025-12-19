@@ -2,11 +2,13 @@ import { Component, computed, signal } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import {
     Assignment,
-    Node,
-    AssignmentV1Service,
-    ME,
-    Submission,
     AssignmentFile,
+    AssignmentV1Service,
+    HOME_REPOSITORY,
+    ME,
+    Node,
+    CommentV1Service,
+    Submission,
 } from 'ngx-edu-sharing-api';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { combineLatest, filter, firstValueFrom, of, throwError } from 'rxjs';
@@ -36,6 +38,9 @@ import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
 import { SubmissionFile } from '../../../../../dist/edu-sharing-api/lib/api/models/submission-file';
 import { TabType } from '../nodes-selector/nodes-selector.component';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { Toast, ToastType } from '../../../services/toast';
+import { CommentsListComponent } from '../../../features/mds/mds-editor/widgets/mds-editor-widget-comments/comments-list/comments-list.component';
 
 /**
  * submits an individual assignment (for student)
@@ -44,7 +49,7 @@ import { TabType } from '../nodes-selector/nodes-selector.component';
     selector: 'es-submit-assignment',
     templateUrl: 'submit-assignment.component.html',
     styleUrls: ['submit-assignment.component.scss'],
-    imports: [SharedModule, TranslateModule, EditorComponent],
+    imports: [SharedModule, TranslateModule, EditorComponent, CommentsListComponent],
 })
 export class SubmitAssignmentComponent {
     readonly editorConfig = {
@@ -68,6 +73,7 @@ export class SubmitAssignmentComponent {
     loading = signal(false);
     assignment = signal<Assignment>(null);
     submission = signal<Submission>(null);
+    submissionNode = signal<Node>(null);
     isOpenForSubmission = computed(() =>
         ['DRAFT', 'INPROGRESS'].includes(this.assignment().status),
     );
@@ -89,11 +95,12 @@ export class SubmitAssignmentComponent {
         () => this.isOpenForSubmission() && this.isBeforeEndDate() && !this.submissionSent(),
     );
     submissionSent = computed(
-        () => this.submission() && this.submission()?.submissionStatus !== 'NOT_STARTED',
+        () => this.submission() && this.submission()?.submissionStatus === 'FINISHED',
     );
     canSendSubmission = computed(
         () =>
             this.isOpenForSubmission() &&
+            !this.submissionSent() &&
             this.isBeforeEndDate() &&
             !this.loading() &&
             this.files().every(
@@ -111,7 +118,10 @@ export class SubmitAssignmentComponent {
         private nodeHelperService: NodeHelperService,
         private translateService: TranslateService,
         private platformLocation: PlatformLocation,
+        private commentV1Service: CommentV1Service,
         private assignmentService: AssignmentV1Service,
+        private dialogs: DialogsService,
+        private toast: Toast,
         private optionsHelperService: OptionsHelperService,
         private formBuilder: FormBuilder,
         private uiService: UIService,
@@ -120,7 +130,7 @@ export class SubmitAssignmentComponent {
         this.editorialSidebarService.applyNodeEmitted.subscribe(async ({ nodes }) => {
             if (this.submissionReplaceFile()) {
             } else {
-                const newFiles = nodes.map((node) => {
+                let newFiles = nodes.map((node) => {
                     return {
                         assignmentFile: this.submissionAssignmentRefFile(),
                         content: node,
@@ -128,7 +138,7 @@ export class SubmitAssignmentComponent {
                         validationStatus: 'NOT_STARTED',
                     } as SubmissionFile;
                 });
-                await this.saveSubmissionFiles(newFiles);
+                newFiles = await this.saveSubmissionFiles(newFiles);
                 this.submissionFiles.set((this.submissionFiles() || []).concat(newFiles));
                 this.syncSubmissionDataSource();
             }
@@ -272,7 +282,8 @@ export class SubmitAssignmentComponent {
         remove.group = DefaultGroups.Delete;
         remove.priority = 10;
         remove.showAlways = true;
-        remove.customShowCallback = async (nodes) => !!this.hasSubmissionFor(nodes?.[0]);
+        remove.customShowCallback = async (nodes) =>
+            this.canSubmitMaterials() && !!this.hasSubmissionFor(nodes?.[0]);
 
         this.submittableConfigRO = {
             customOptions: {
@@ -331,23 +342,74 @@ export class SubmitAssignmentComponent {
 
     private async saveSubmissionFiles(newFiles: SubmissionFile[]) {
         this.loading.set(true);
+        const files = [];
         for (let file of newFiles) {
-            await firstValueFrom(
-                this.assignmentService.createSubmissionFile({
-                    assignmentId: this.assignment().ref.id,
-                    submissionId: this.submission()?.ref.id || ME,
-                    body: {
-                        metadata: {
-                            originalFile: file.ref.id,
-                            assignmentFile: file.assignmentFile?.ref.id,
-                            properties: {},
+            files.push(
+                await firstValueFrom(
+                    this.assignmentService.createSubmissionFile({
+                        assignmentId: this.assignment().ref.id,
+                        submissionId: this.submission()?.ref.id || ME,
+                        body: {
+                            metadata: {
+                                originalFile: file.ref.id,
+                                assignmentFile: file.assignmentFile?.ref.id,
+                                properties: {},
+                            },
                         },
-                    },
-                }),
+                    }),
+                ),
             );
         }
         this.loading.set(false);
+        return files;
     }
 
-    submit() {}
+    async submit() {
+        const result = await firstValueFrom(
+            (
+                await this.dialogs.openGenericDialog({
+                    title: 'EDITORIAL.SUBMIT_ASSIGNMENT.SUBMIT_CONFIRM_TITLE',
+                    message: 'EDITORIAL.SUBMIT_ASSIGNMENT.SUBMIT_CONFIRM_INFO',
+                    buttons: [
+                        { label: 'CANCEL', config: { color: 'standard' } },
+                        {
+                            label: 'EDITORIAL.SUBMIT_ASSIGNMENT.SUBMIT',
+                            config: { color: 'danger' },
+                        },
+                    ],
+                })
+            ).afterClosed(),
+        );
+        if (result === 'EDITORIAL.SUBMIT_ASSIGNMENT.SUBMIT') {
+            this.loading.set(true);
+            await firstValueFrom(
+                this.assignmentService.editSubmission({
+                    assignmentId: this.assignment().ref.id,
+                    submissionId: this.submission().ref.id,
+                    status: 'FINISHED',
+                }),
+            );
+            this.submission.set({ ...this.submission(), submissionStatus: 'FINISHED' });
+            this.toast.show({
+                type: 'info',
+                subtype: ToastType.InfoSimple,
+                message: 'EDITORIAL.SUBMIT_ASSIGNMENT.SUBMITTED',
+            });
+            this.loading.set(false);
+        }
+    }
+
+    async addComment() {
+        const control = this.submitFormGroup.get('submitComment');
+        control.disable();
+        await firstValueFrom(
+            this.commentV1Service.addComment({
+                repository: HOME_REPOSITORY,
+                node: this.submission().ref.id,
+                body: control.value,
+            }),
+        );
+        control.reset();
+        control.enable();
+    }
 }

@@ -52,6 +52,7 @@ export {
     TrackingV1Service,
     NotificationV1Service,
     FeedbackV1Service,
+    CommentV1Service,
     IamV1Service,
     OrganizationV1Service,
     QuestionAnswerV1Service,

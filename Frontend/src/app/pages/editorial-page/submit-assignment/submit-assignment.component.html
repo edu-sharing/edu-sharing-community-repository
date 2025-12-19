@@ -58,7 +58,14 @@
         <ng-container *ngTemplateOutlet="heading"></ng-container>
         <ng-container *ngTemplateOutlet="summary"></ng-container>
         <form [formGroup]="submitFormGroup" class="main-form block">
+          <es-comments-list
+            *ngIf="submission().ref?.id"
+            [node]="submissionNode()"
+          ></es-comments-list>
           <editor [init]="editorConfig" formControlName="submitComment"></editor>
+          <button mat-flat-button color="primary" (click)="addComment()">
+            {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.ADD_COMMENT' | translate }}
+          </button>
         </form>
         <ng-container *ngTemplateOutlet="submitDetails"></ng-container>
 
@@ -70,9 +77,6 @@
           <div>
             <es-info-message *ngIf="!isOpenForSubmission() && !isBeforeEndDate()">
               {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.ASSIGNMENT_CLOSED_OR_ENDED' | translate }}
-            </es-info-message>
-            <es-info-message *ngIf="submissionSent()">
-              {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.ASSIGNMENT_SUBMITTED' | translate }}
             </es-info-message>
             <es-node-entries-wrapper
               [displayType]="NodeEntriesDisplayType.Grid"
@@ -119,10 +123,13 @@
     <es-spinner-small *ngIf="loading()"></es-spinner-small>
     <button mat-flat-button color="primary" [disabled]="!canSendSubmission()" (click)="submit()">
       <i esIcon="send"></i>
-      {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.SUBMIT' }}
+      {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.SUBMIT' | translate }}
     </button>
     <button mat-icon-button click="close()"><i esIcon="close"></i></button>
   </div>
+  <es-info-message *ngIf="submissionSent()">
+    {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.SUBMISSION_SENT' | translate }}
+  </es-info-message>
 </ng-template>
 <ng-template #summary>
   <div class="block">
@@ -144,6 +151,14 @@
       <div id="endTime" class="badge">
         <i esIcon="alarm"></i>
         {{ endTime | formatDate : { relative: false, time: true, date: true } }}
+      </div>
+    </div>
+    <div class="time submit-time" *ngIf="submission().submissionDate as endTime">
+      <label for="submitTime">{{
+        'EDITORIAL.SUBMIT_ASSIGNMENT.SUBMISSION_TIME' | translate
+      }}</label>
+      <div id="submitTime">
+        {{ submission().submissionDate | formatDate : { relative: false, time: true, date: true } }}
       </div>
     </div>
   </div>
