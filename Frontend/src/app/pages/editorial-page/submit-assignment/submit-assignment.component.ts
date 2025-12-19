@@ -68,7 +68,9 @@ export class SubmitAssignmentComponent {
     loading = signal(false);
     assignment = signal<Assignment>(null);
     submission = signal<Submission>(null);
-    isOpenForSubmission = computed(() => ['OPEN', 'PROGRESS'].includes(this.assignment().status));
+    isOpenForSubmission = computed(() =>
+        ['DRAFT', 'INPROGRESS'].includes(this.assignment().status),
+    );
     isBeforeEndDate = computed(() => {
         // @TODO check endTime format vs delivered type
         return (
