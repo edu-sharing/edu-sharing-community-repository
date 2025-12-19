@@ -345,7 +345,7 @@ export class MdsEditorInstanceService
         getShowAiSuggestions() {
             return combineLatest([
                 this.mdsEditorInstanceService.showAiSuggestions,
-                this.suggestionValuesSubject,
+                this.suggestionValuesSubject.pipe(distinctUntilChanged()),
             ]).pipe(debounceTime(0));
         }
 

@@ -54,6 +54,7 @@ import {
 } from 'ngx-edu-sharing-b-api';
 import { HttpClient, HttpContext } from '@angular/common/http';
 import { catchError, map, shareReplay, take, tap } from 'rxjs/operators';
+import { ActivatedRoute } from '@angular/router';
 
 @Injectable()
 export class translateProvider {
@@ -264,6 +265,18 @@ export class NodeServiceMock {
     getNode(id: string, { repository = HOME_REPOSITORY } = {}): Observable<Node> {
         return of(DummyNode as Node);
     }
+    editNodeMetadata(
+        id: string,
+        properties: { [key: string]: string[] },
+        {
+            versionComment,
+            repository = HOME_REPOSITORY,
+            obeyMds = true,
+        }: { versionComment?: string; repository?: string; obeyMds?: boolean } = {},
+    ): Observable<Node> {
+        console.log('editNodeMetadata', properties);
+        return of({ properties } as Node);
+    }
 }
 @Injectable()
 export class AboutServiceMock {
@@ -334,11 +347,13 @@ export class SuggestionsV1ServiceMock {
                 'ccm:educationallearningresourcetype': this.BaseSuggestion(
                     'ccm:educationallearningresourcetype',
                     params.node,
-                    ['other', 'table'],
+                    ['other', 'table', 'table', 'wrong_key'],
                 ),
                 'cclom:general_keyword': this.BaseSuggestion('cclom:general_keyword', params.node, [
+                    'ABC',
                     'AI Keyword 1',
                     'AI Keyword 2',
+                    'AI Keyword 1',
                 ]),
                 'ccm:tool_category': this.BaseSuggestion('ccm:tool_category', params.node, [
                     'communication',
@@ -346,17 +361,26 @@ export class SuggestionsV1ServiceMock {
                 'ccm:educationaltypicallearningtime': this.BaseSuggestion(
                     'ccm:educationaltypicallearningtime',
                     params.node,
-                    ['' + 3600_000],
+                    ['' + 3660_000],
                 ),
                 'ccm:educationaltypicalagerange': this.BaseSuggestion(
                     'ccm:educationaltypicalagerange',
                     params.node,
                     ['6-12'],
                 ),
+                'ccm:commonlicense_ai_tool': this.BaseSuggestion(
+                    'ccm:commonlicense_ai_tool',
+                    params.node,
+                    [
+                        'http://w3id.org/edu-sharing/vocabs/aiTools/4dd60dfa-9f8a-4cc9-b733-0125448f77a3',
+                    ],
+                ),
             },
         });
     }
 }
+@Injectable()
+export class ActivatedRouteMock {}
 
 export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
@@ -371,7 +395,8 @@ export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     { provide: MdsService, useFactory: () => new MdsServiceMock(null) },
     ViewInstanceService,
     CordovaService,
-    ToastService,
+    { provide: Toast, useClass: ToastService },
+    { provide: ActivatedRoute, useClass: ActivatedRouteMock },
     {
         provide: TranslateService,
         useClass: translateProvider,
@@ -17086,7 +17111,7 @@ export const DefaultMds: MdsDefinition = {
             id: 'node_general',
             caption: 'Allg. Informationen',
             icon: 'description',
-            html: '\n\t\t\t  <preview>\n              <ccm:wwwurl>\n              <cm:name>\n              <cclom:title><ccm:educationaltypicallearningtime><ccm:educationaltypicalagerange><ccm:tool_category>\n              <ccm:educationallearningresourcetype>\n              <cclom:general_keyword>\n              <cclom:general_description>\n              <author>\n              <license>\n              <version>\n              <childobjects> <ccm:tool_instance_params>\n\t\t\t\t',
+            html: '\n\t\t\t  <preview>\n              <ccm:wwwurl>\n              <cm:name>\n              <cclom:title><ccm:educationaltypicallearningtime><ccm:educationaltypicalagerange><ccm:commonlicense_ai_tool caption="Test AI Tool" type="radioVertical"><ccm:tool_category>\n              <ccm:educationallearningresourcetype>\n              <cclom:general_keyword>\n              <cclom:general_description>\n              <author>\n              <license>\n              <version>\n              <childobjects> <ccm:tool_instance_params>\n\t\t\t\t',
             rel: null,
             hideIfEmpty: false,
             isExtended: false,

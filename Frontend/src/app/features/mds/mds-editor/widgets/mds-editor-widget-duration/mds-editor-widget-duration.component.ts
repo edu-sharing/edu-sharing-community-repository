@@ -48,6 +48,9 @@ export class MdsEditorWidgetDurationComponent extends MdsEditorWidgetBase implem
         this.widget.getShowAiSuggestions().subscribe(async ([show, suggestions]) => {
             const suggestion = suggestions?.find((s) => s.type === 'AI' && s.status === 'PENDING');
             if (this.aiSuggestion$.value?.status !== 'DECLINED') {
+                if (this.widget.getIsDirty()) {
+                    return;
+                }
                 if (suggestion && show) {
                     this.currentValue = this.msToMin(
                         parseInt(suggestion.value as string, 10),
@@ -74,7 +77,7 @@ export class MdsEditorWidgetDurationComponent extends MdsEditorWidgetBase implem
         if (src !== 'suggestion' && this.aiSuggestion$.value?.status === 'ACCEPTED') {
             this.widget.setSuggestionState(this.aiSuggestion$, 'DECLINED');
         }
-        this.setValue_();
+        this.setValue_(src !== 'suggestion');
     }
 
     updateInput() {
@@ -110,7 +113,7 @@ export class MdsEditorWidgetDurationComponent extends MdsEditorWidgetBase implem
         return { valueMin: valueMs / 60000 };
     }
 
-    private setValue_(): void {
-        this.setValue([(this.currentValue * 60000).toString()]);
+    private setValue_(dirty = true): void {
+        this.setValue([(this.currentValue * 60000).toString()], dirty);
     }
 }

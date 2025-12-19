@@ -18,6 +18,17 @@ const meta: Meta<MdsEditorWrapperComponent> = {
             providers: mdsStorybookProviders,
         }),
     ],
+    render: (args) => ({
+        props: {
+            ...args,
+            save: async (mds: MdsEditorWrapperComponent) =>
+                alert(JSON.stringify(await mds.onSave(), null, 2)), // <-- your callback
+        },
+        template: `
+      <es-mds-editor-wrapper #mds [embedded]="embedded" [setId]="setId" [groupId]="groupId" [editorMode]="editorMode" [nodes]="nodes"></es-mds-editor-wrapper>
+      <button mat-flat-button color="primary" (click)="save(mds)">Test: Save</button>
+    `,
+    }),
     args: {
         embedded: true,
         setId: DEFAULT,
