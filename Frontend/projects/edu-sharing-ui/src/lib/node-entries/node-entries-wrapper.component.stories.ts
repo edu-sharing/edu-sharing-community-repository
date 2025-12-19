@@ -63,6 +63,9 @@ const Assignments = Array(16)
             {
                 role: 'COORDINATOR',
             } as Permission,
+            {
+                role: 'ASSIGNEE',
+            } as Permission,
         ];
         if (Math.random() > 0.5) {
             n.endTime = new Date(
@@ -75,7 +78,7 @@ const dummyDataSourceAssignments = new NodeDataSource<Assignment>(Helper.deepCop
 const dummyDataSourceAssignmentsSubmission = new NodeDataSource<Assignment>(
     Helper.deepCopy(Assignments).map((a: Assignment) => {
         const status: Submission['submissionStatus'][] = ['NOT_STARTED', 'PENDING', 'FINISHED'];
-        a.permissions = [];
+        a.permissions = a.permissions.filter((a) => a.role !== 'COORDINATOR');
         a.submissions = [
             {
                 submissionStatus: status[Math.floor(Math.random() * status.length)],

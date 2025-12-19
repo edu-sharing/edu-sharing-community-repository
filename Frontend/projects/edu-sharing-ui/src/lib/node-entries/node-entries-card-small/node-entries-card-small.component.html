@@ -108,14 +108,14 @@
       <div class="summary" [innerHTML]="$any(node).summary"></div>
       <div class="badges" *ngIf="$any(node).type === 'SUBMISSION'">
         <div
-          *ngIf="$any(node).permissions?.length > 0"
+          *ngIf="($any(node) | assignment : { mode: 'permissions' }) === 'COORDINATOR'"
           class="status status-{{ $any(node).status }}"
         >
           <i [esIcon]="$any(AssignmentStatusIcon)[$any(node).status]"></i>
           {{ 'ASSIGNMENT.STATUS.' + $any(node).status | translate }}
         </div>
         <div
-          *ngIf="!$any(node).permissions?.length"
+          *ngIf="($any(node) | assignment : { mode: 'permissions' }) === 'ASSIGNEE'"
           class="submission-status submission-status-{{ ($any(node).submissions?.[0]?.submissionStatus || 'NOT_STARTED') }}"
         >
           <i

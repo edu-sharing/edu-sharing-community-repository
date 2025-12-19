@@ -24,6 +24,7 @@ import { Sort } from '@angular/material/sort';
 import { NodeEntriesDataType } from '../node-entries/data-type';
 import { isArray } from 'lodash';
 import { Toast } from './abstract/toast.service';
+import { AssignmentPipe } from '../pipes/assignment.pipe';
 
 @Injectable({
     providedIn: 'root',
@@ -276,7 +277,9 @@ export class NodeHelperService {
                 routerLink: UIConstants.ROUTER_PREFIX + 'editorial/assignment',
                 queryParams: {
                     mainComponent:
-                        (node as Assignment).permissions?.length > 0
+                        new AssignmentPipe().transform(node as Assignment, {
+                            mode: 'permissions',
+                        }) === 'COORDINATOR'
                             ? 'manageAssignment'
                             : 'submitAssignment',
                     assignment: node.ref.id,

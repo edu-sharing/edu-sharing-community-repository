@@ -37,6 +37,7 @@ import { NodeUrlPipe } from '../pipes/node-url.pipe';
 import { ToolpermissionPipe } from '../pipes/toolpermission.pipe';
 import { AuthorityNamePipe } from '../pipes/authority-name.pipe';
 import { HtmlTextPipe } from '../pipes/html-text.pipe';
+import { AssignmentPipe } from '../pipes/assignment.pipe';
 
 @NgModule({
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -63,6 +64,7 @@ import { HtmlTextPipe } from '../pipes/html-text.pipe';
         NodeLicensePipe,
         NodePersonNamePipe,
         NodeTitlePipe,
+        AssignmentPipe,
         NodeUrlComponent,
         OptionTooltipPipe,
         ReplaceCharsPipe,
@@ -105,6 +107,7 @@ import { HtmlTextPipe } from '../pipes/html-text.pipe';
         NodeImageSizePipe,
         NodePersonNamePipe,
         NodeTitlePipe,
+        AssignmentPipe,
         NodeUrlComponent,
         ToolpermissionPipe,
         SortDropdownComponent,

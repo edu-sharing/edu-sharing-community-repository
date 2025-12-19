@@ -210,7 +210,7 @@ export class ManageAssignmentComponent {
             this.toast.error(null, 'EDITORIAL.ASSIGNMENT.ERROR.MISSING_AUTHORITIES_ASSIGNEE');
             return;
         }
-        console.log(this.authorities());
+        console.log(this.authorities(), this.nodes());
         const permissions: PermissionRequest[] = this.authorities().map((a) => {
             return {
                 authorityName: a.authority.authorityName,
@@ -220,7 +220,7 @@ export class ManageAssignmentComponent {
         const assignmentFiles =
             this.nodes()?.map((n) => {
                 return {
-                    refId: n.refId || n.ref.id,
+                    refId: n.ref.id || n.refId,
                     isDone: n.isDone || false,
                     documentRole: n.documentRole,
                 } as AssignmentFileRequest;
