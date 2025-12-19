@@ -26,13 +26,13 @@ $collectionIconSize: 25px;
     &.endTime-high {
         background-color: color-mix(in srgb, var(--colorStatusNegative), 60% transparent);
     }
-    &.status-OPEN {
+    &.status-DRAFT {
         background-color: #ddd;
     }
     &.status-CANCELED {
         background-color: color-mix(in srgb, var(--colorStatusNegative), 60% transparent);
     }
-    &.status-PROGRESS {
+    &.status-INPROGRESS {
         background-color: color-mix(in srgb, var(--colorStatusWarning), 60% transparent);
     }
     &.status-FINISHED {

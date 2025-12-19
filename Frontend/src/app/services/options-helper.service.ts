@@ -418,7 +418,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         debugNode.onlyDesktop = true;
         debugNode.constrains = [Constrain.AdminOrDebug];
         debugNode.group = DefaultGroups.View;
-        debugNode.priority = 10;
+        debugNode.priority = -100;
 
         const acceptProposal = new OptionItem(
             'OPTIONS.COLLECTION_PROPOSAL_ACCEPT',

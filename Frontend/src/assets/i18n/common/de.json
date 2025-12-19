@@ -339,8 +339,8 @@
       "SUBMISSION": "Abgabe"
     },
     "STATUS": {
-      "OPEN": "Offen",
-      "PROGRESS": "In Bearbeitung",
+      "DRAFT": "Entwurf",
+      "INPROGRESS": "In Bearbeitung",
       "CANCELED": "Abgebrochen",
       "FINISHED": "Abgeschlossen"
     }
