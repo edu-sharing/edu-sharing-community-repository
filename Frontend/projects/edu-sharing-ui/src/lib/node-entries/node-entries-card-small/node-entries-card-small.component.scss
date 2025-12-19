@@ -38,6 +38,15 @@ $collectionIconSize: 25px;
     &.status-FINISHED {
         background-color: color-mix(in srgb, var(--colorStatusPositive), 60% transparent);
     }
+    &.submission-status-NOT_STARTED {
+        background-color: color-mix(in srgb, var(--colorStatusNegative), 60% transparent);
+    }
+    &.submission-status-PENDING {
+        background-color: color-mix(in srgb, var(--colorStatusWarning), 60% transparent);
+    }
+    &.submission-status-FINISHED {
+        background-color: color-mix(in srgb, var(--colorStatusPositive), 60% transparent);
+    }
     > i {
         font-size: 18px;
     }

@@ -107,9 +107,21 @@
       </div>
       <div class="summary" [innerHTML]="$any(node).summary"></div>
       <div class="badges" *ngIf="$any(node).type === 'SUBMISSION'">
-        <div class="status status-{{ $any(node).status }}">
+        <div
+          *ngIf="$any(node).permissions?.length > 0"
+          class="status status-{{ $any(node).status }}"
+        >
           <i [esIcon]="$any(AssignmentStatusIcon)[$any(node).status]"></i>
           {{ 'ASSIGNMENT.STATUS.' + $any(node).status | translate }}
+        </div>
+        <div
+          *ngIf="!$any(node).permissions?.length"
+          class="submission-status submission-status-{{ ($any(node).submissions?.[0]?.submissionStatus || 'NOT_STARTED') }}"
+        >
+          <i
+            [esIcon]="$any(AssignmentSubmissionStatusIcon)[($any(node).submissions?.[0]?.submissionStatus || 'NOT_STARTED')]"
+          ></i>
+          {{ 'ASSIGNMENT.SUBMISSION_STATUS.' + ($any(node).submissions?.[0]?.submissionStatus || 'NOT_STARTED') | translate }}
         </div>
         <div
           class="endTime endTime-{{ assignmentEndTimePriority(endTime) }}"

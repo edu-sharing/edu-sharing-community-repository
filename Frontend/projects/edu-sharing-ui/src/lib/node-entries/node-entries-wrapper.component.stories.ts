@@ -13,6 +13,8 @@ import {
     AuthenticationService,
     EduSharingApiModule,
     Node,
+    Permission,
+    Submission,
 } from 'ngx-edu-sharing-api';
 
 import {
@@ -33,6 +35,7 @@ import {
     DefaultColumns,
     DummyAssignment,
     DummyNode,
+    mdsStorybookProviders,
     ToastMock,
     translateProvider,
 } from 'src/app/features/mds/mds-editor/storybook-utils';
@@ -48,24 +51,39 @@ const dummyDataSource = new NodeDataSource<Node>(
             return n;
         }),
 );
-const dummyDataSourceAssignments = new NodeDataSource<Assignment>(
-    Array(16)
-        .fill(DummyAssignment)
-        .map((n: Assignment, i) => {
-            n = Helper.deepCopy(n);
-            n.ref.id = 'id_' + i;
-            n.title += ' ' + i;
-            const status: Assignment['status'][] = ['DRAFT', 'INPROGRESS', 'CANCELED', 'FINISHED'];
-            n.status = status[Math.floor(Math.random() * status.length)];
-            if (Math.random() > 0.5) {
-                n.endTime = new Date(
-                    new Date().getTime() + 1000 * 86400 * 7 * Math.random(),
-                ).toISOString();
-            }
-            return n;
-        }),
+const Assignments = Array(16)
+    .fill(DummyAssignment)
+    .map((n: Assignment, i) => {
+        n = Helper.deepCopy(n);
+        n.ref.id = 'id_' + i;
+        n.title += ' ' + i;
+        const status: Assignment['status'][] = ['DRAFT', 'INPROGRESS', 'CANCELED', 'FINISHED'];
+        n.status = status[Math.floor(Math.random() * status.length)];
+        n.permissions = [
+            {
+                role: 'COORDINATOR',
+            } as Permission,
+        ];
+        if (Math.random() > 0.5) {
+            n.endTime = new Date(
+                new Date().getTime() + 1000 * 86400 * 7 * Math.random(),
+            ).toISOString();
+        }
+        return n;
+    });
+const dummyDataSourceAssignments = new NodeDataSource<Assignment>(Helper.deepCopy(Assignments));
+const dummyDataSourceAssignmentsSubmission = new NodeDataSource<Assignment>(
+    Helper.deepCopy(Assignments).map((a: Assignment) => {
+        const status: Submission['submissionStatus'][] = ['NOT_STARTED', 'PENDING', 'FINISHED'];
+        a.permissions = [];
+        a.submissions = [
+            {
+                submissionStatus: status[Math.floor(Math.random() * status.length)],
+            } as Submission,
+        ];
+        return a;
+    }),
 );
-
 const emptyDataSource = new NodeDataSource<Node>([]);
 const loadingDataSource = new NodeDataSource<Node>([]);
 loadingDataSource.isLoading = true;
@@ -78,7 +96,7 @@ const entries: Meta<NodeEntriesWrapperComponent<any>> = {
             declarations: [],
         }),
         applicationConfig({
-            providers: [
+            providers: mdsStorybookProviders.concat([
                 provideAnimations(),
                 {
                     provide: ApiRequestConfiguration,
@@ -88,19 +106,7 @@ const entries: Meta<NodeEntriesWrapperComponent<any>> = {
                     provide: AuthenticationService,
                     useClass: AuthenticationServiceMock,
                 },
-                {
-                    provide: NodeEntriesService,
-                    useClass: NodeEntriesServiceMock,
-                },
-                {
-                    provide: TranslateService,
-                    useClass: translateProvider,
-                },
-                {
-                    provide: Toast,
-                    useValue: ToastMock,
-                },
-            ],
+            ]),
         }),
     ],
     args: {
@@ -199,6 +205,12 @@ export const EntriesSmallGrid: Story = {
 export const EntriesSmallGridAssignments: Story = {
     args: {
         dataSource: dummyDataSourceAssignments as any,
+        displayType: NodeEntriesDisplayType.SmallGrid,
+    },
+};
+export const EntriesSmallGridAssignmentsSubmission: Story = {
+    args: {
+        dataSource: dummyDataSourceAssignmentsSubmission as any,
         displayType: NodeEntriesDisplayType.SmallGrid,
     },
 };

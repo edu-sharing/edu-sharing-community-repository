@@ -54,6 +54,10 @@ import {
     ListItem,
     MdsValueList,
     MdsViewerService,
+    OptionData,
+    OptionItem,
+    OptionsHelperService,
+    Target,
     Toast,
     TRANSLATION_LIST,
     TranslationsService,
@@ -204,6 +208,9 @@ export class MdsServiceMock extends MdsService {
 @Injectable()
 export class ConfigServiceMock {
     async get<T = string>(name: string, defaultValue?: T): Promise<T> {
+        return defaultValue;
+    }
+    instant<T = string>(name: string, defaultValue?: T): T {
         return defaultValue;
     }
 
@@ -449,6 +456,21 @@ export class IamServiceMock extends IamV1Service {
 @Injectable()
 export class ActivatedRouteMock {}
 
+@Injectable()
+export class OptionsHelperServiceMock {
+    async filterOptions(
+        options: OptionItem[],
+        target: Target,
+        data: OptionData = null,
+        objects: Node[] | any = null,
+    ) {
+        options.forEach((o) => {
+            o.showCallback = async () => true;
+            o.enabledCallback = async () => true;
+        });
+        return options;
+    }
+}
 export const DefaultColumns = {
     Default: [
         new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
@@ -465,6 +487,7 @@ export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     { provide: AuthenticationService, useClass: AuthenticationServiceMock },
     { provide: ConfigService, useClass: ConfigServiceMock },
     { provide: AboutService, useClass: AboutServiceMock },
+    { provide: OptionsHelperService, useClass: OptionsHelperServiceMock },
     { provide: NodeService, useClass: NodeServiceMock },
     { provide: EduSharingLlmService, useClass: EduSharingLlmServiceMock },
     { provide: SuggestionsV1Service, useClass: SuggestionsV1ServiceMock },

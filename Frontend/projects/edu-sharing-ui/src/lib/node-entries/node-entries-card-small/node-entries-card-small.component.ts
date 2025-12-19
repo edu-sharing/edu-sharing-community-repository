@@ -5,7 +5,7 @@ import { ClickSource, InteractionType } from '../entries-model';
 import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
 import { NodeEntriesService } from '../../services/node-entries.service';
 import { NodeHelperService } from '../../services/node-helper.service';
-import { Assignment, Node } from 'ngx-edu-sharing-api';
+import { Assignment, Node, Submission } from 'ngx-edu-sharing-api';
 import { DropdownComponent } from '../../dropdown/dropdown.component';
 
 @Component({
@@ -44,6 +44,11 @@ export class NodeEntriesCardSmallComponent<T extends Node> {
         event.stopPropagation();
     }
 
+    readonly AssignmentSubmissionStatusIcon: { [key in Submission['submissionStatus']]: string } = {
+        NOT_STARTED: 'inbox',
+        PENDING: 'timer',
+        FINISHED: 'done',
+    };
     readonly AssignmentStatusIcon: { [key in Assignment['status']]: string } = {
         DRAFT: 'news',
         INPROGRESS: 'schedule_send',
