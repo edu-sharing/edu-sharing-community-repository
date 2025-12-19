@@ -265,7 +265,7 @@ public class AssignmentApi {
 
     @PUT
     @Path("/{assignmentId}/submissions/{submissionId}/submissionStatus")
-    @Operation(summary = "edut submission status", description = "edut submission status")
+    @Operation(summary = "edit submission status", description = "edit submission status")
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Submission.class))),
@@ -282,7 +282,7 @@ public class AssignmentApi {
                                    @PathParam("submissionId") String submissionId,
                                    @QueryParam("status") Submission.Status status) {
         AssignmentDao assignment = assignmentDaoFactory.assignmentDaoByNodeId(assignmentId);
-        SubmissionDao submission = assignment.getSubmission(submissionId);
+        SubmissionDao submission = assignment.getOrCreateSubmission(submissionId);
         submission.setStatus(status);
         return Response.ok().entity(submission.getSubmission()).build();
     }
