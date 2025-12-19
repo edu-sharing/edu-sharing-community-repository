@@ -29,7 +29,7 @@ import { trigger } from '@angular/animations';
 import { Helper } from '../../core-module/rest/helper';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
-import { catchError, take, takeUntil } from 'rxjs/operators';
+import { catchError, first, take, takeUntil } from 'rxjs/operators';
 import {
     ConfigService,
     HOME_REPOSITORY,
@@ -37,7 +37,8 @@ import {
     ME,
     NodeEntry,
     User,
-    UserProfile,
+    UserService,
+    UserStats,
     UserStatsGroup,
 } from 'ngx-edu-sharing-api';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
@@ -58,6 +59,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     // dummy parameter to refetch the avatar
     avatarCache = '';
     gdprExport: NodeEntry;
+    params: any;
     constructor(
         private toast: Toast,
         private route: ActivatedRoute,
@@ -74,13 +76,14 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
         private optionsHelperDataService: OptionsHelperDataService,
         private loadingScreen: LoadingScreenService,
         private iamService: IamV1Service,
+        private userService: UserService,
     ) {
         this.translations.waitForInit().subscribe(() => {
             route.params.subscribe((params) => {
+                this.params = params;
                 this.editProfileUrl = this.config.instant('editProfileUrl');
                 this.editProfile = this.config.instant('editProfile', true);
                 this.loadUser(params.authority);
-                this.getProfileSetting(params.authority);
             });
         });
         this.editAction = new OptionItem('PROFILES.EDIT', 'edit', () => this.beginEdit());
@@ -90,8 +93,8 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     }
     private static PASSWORD_MIN_LENGTH = 5;
     public user: User;
-    public userEdit: UserLegacy;
     public userStats: UserStatsGroup;
+    public userEdit: UserLegacy;
     public isMe: boolean;
     public edit: boolean;
     public avatarFile: any;
@@ -127,7 +130,8 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     public loadUser(authority: string) {
         this.toast.showProgressSpinner();
         this.connector.isLoggedIn().subscribe((login) => {
-            observableForkJoin(
+            observableForkJoin([
+                this.userService.observeCurrentUser().pipe(first()),
                 this.iamService.getUser({
                     repository: HOME_REPOSITORY,
                     person: authority,
@@ -136,12 +140,20 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
                     repository: HOME_REPOSITORY,
                     person: authority,
                 }),
-            ).subscribe(
-                ([profile, stats]) => {
-                    this.user = profile.person;
-                    this.userStats = stats.allStats;
-                    this.userEditProfile = profile.editProfile;
+            ]).subscribe(
+                ([me, profile, stats]) => {
+                    if (!this.loadingTask.isDone) {
+                        this.loadingTask.done();
+                    }
                     this.toast.closeProgressSpinner();
+                    this.isMe = profile.person.authorityName === me.person.authorityName;
+                    if (this.isMe && login.isGuest) {
+                        this.ui.goToLogin();
+                        return;
+                    }
+                    this.user = profile.person;
+                    this.userStats = stats.publicStats;
+                    this.userEditProfile = profile.editProfile;
                     this.userEdit = Helper.deepCopy(this.user);
                     if (!((this.user.profile.vcard as any) instanceof VCard)) {
                         this.user.profile.vcard = new VCard(
@@ -151,49 +163,34 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
                     this.userEdit.profile.vcard = (
                         this.user.profile.vcard as unknown as VCard
                     )?.copy() as any;
-                    if (!this.loadingTask.isDone) {
-                        this.loadingTask.done();
+                    if (this.isMe) {
+                        this.getProfileSetting(this.params.authority);
+                        this.iamService
+                            .getDataProtectionExport({
+                                person: ME,
+                                repository: HOME_REPOSITORY,
+                            })
+                            .pipe(
+                                catchError((e) => {
+                                    e.preventDefault();
+                                    return of(null);
+                                }),
+                            )
+                            .subscribe((gdpr) => (this.gdprExport = gdpr?.nodeEntry));
                     }
-                    void firstValueFrom(
-                        this.iamService.getUser({
-                            repository: HOME_REPOSITORY,
-                            person: RestConstants.ME,
-                        }),
-                    ).then((me) => {
-                        this.isMe = profile.person.authorityName === me.person.authorityName;
-                        if (this.isMe && login.isGuest) {
-                            this.ui.goToLogin();
-                        }
-                        if (this.isMe) {
-                            this.iamService
-                                .requestDataProtectionExport({
-                                    person: ME,
-                                    repository: HOME_REPOSITORY,
-                                })
-                                .pipe(
-                                    catchError((e) => {
-                                        e.preventDefault();
-                                        return of(null);
-                                    }),
-                                )
-                                .subscribe((gdpr) => (this.gdprExport = (gdpr as any)?.nodeEntry));
-                        }
 
-                        setTimeout(() => {
-                            this.editAction.customEnabledCallback = async () =>
-                                this.editProfile && !!(this.userEditProfile || this.editProfileUrl);
-                            this.optionsHelperDataService.setData({
-                                scope: Scope.UserProfile,
-                                customOptions: {
-                                    useDefaultOptions: false,
-                                    addOptions: [this.editAction],
-                                },
-                            });
-                            void this.optionsHelperDataService.initComponents(
-                                this.actionbarComponent,
-                            );
-                            void this.optionsHelperDataService.refreshComponents();
+                    setTimeout(() => {
+                        this.editAction.customEnabledCallback = async () =>
+                            this.editProfile && !!(this.userEditProfile || this.editProfileUrl);
+                        this.optionsHelperDataService.setData({
+                            scope: Scope.UserProfile,
+                            customOptions: {
+                                useDefaultOptions: false,
+                                addOptions: [this.editAction],
+                            },
                         });
+                        void this.optionsHelperDataService.initComponents(this.actionbarComponent);
+                        void this.optionsHelperDataService.refreshComponents();
                     });
                 },
                 (error: any) => {
@@ -217,7 +214,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
                     this.profileSettings = res;
                 },
                 (error) => {
-                    this.profileSettings = null;
+                    this.profileSettings = { showEmail: true };
                 },
             );
     }
@@ -304,7 +301,10 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
             .changeUserProfile({
                 repository: HOME_REPOSITORY,
                 person: this.user.authorityName,
-                body: this.userEdit.profile as unknown as UserProfile,
+                body: {
+                    ...this.userEdit.profile,
+                    vcard: this.userEdit.profile.vcard.toVCardString(),
+                },
             })
             .subscribe(
                 () => {

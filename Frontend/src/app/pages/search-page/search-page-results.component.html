@@ -70,19 +70,9 @@
           </ng-container>
         </ng-container>
       </h2>
-      <es-actionbar *ngIf="!addToCollectionMode.value"></es-actionbar>
-      <button
-        *ngIf="nodeEntriesResults.getSelection().isEmpty()"
-        mat-flat-button
-        color="primary"
-        class="filters-button"
-        [attr.aria-label]="'SEARCH.FILTERS' | translate"
-        matTooltip="{{ 'TOGGLE_SEARCH_FILTERS' | translate }}"
-        (click)="toggleFilters()"
-      >
-        <i esIcon="filter_list"></i>
-        <span>{{ 'SEARCH.FILTERS' | translate }}</span>
-      </button>
+      <div class="right">
+        <es-actionbar *ngIf="!addToCollectionMode.value"></es-actionbar>
+      </div>
     </div>
   </ng-template>
   <ng-template #empty>

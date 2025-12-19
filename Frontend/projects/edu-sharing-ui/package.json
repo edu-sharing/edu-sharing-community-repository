@@ -15,7 +15,7 @@
     "ngx-edu-sharing-api": ">=11.0.0",
     "ngx-rendering-service-api": ">=0.0.41",
     "@ngx-translate/core": ">=15.0.0",
-    "angular-material-css-vars": "^6.0.0 || ^7.0.0",
+    "angular-material-css-vars": ">=7.0.0",
     "rxjs": "^6.6.7 || ^7.0.0",
     "lodash-es": "^4.17.21"
   },

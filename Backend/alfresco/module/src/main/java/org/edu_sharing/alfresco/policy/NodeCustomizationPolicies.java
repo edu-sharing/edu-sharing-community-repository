@@ -400,6 +400,10 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
             }
             InputStream inputStream = reader.getContentInputStream();
             MediaType mediaType = getMediaType(filename, inputStream);
+            // we allow the text content for the repository config object
+            if(Objects.equals(filename, CCConstants.CCM_VALUE_IO_NAME_CONFIG_NODE_NAME) && mediaType.equals(MediaType.TEXT_PLAIN)) {
+                return;
+            }
             if (mediaType.equals(MediaType.OCTET_STREAM) && !allowUnknownMimetypes) {
                 throw new NodeMimetypeUnknownValidationException();
             }

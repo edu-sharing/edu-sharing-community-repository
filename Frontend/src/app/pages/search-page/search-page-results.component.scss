@@ -1,4 +1,6 @@
 @use './common' as *;
+@use 'variables-scss' as vars;
+@use '../../../../projects/edu-sharing-ui/src/lib/actionbar/actionbar.component' as actionbar;
 
 .add-to-collection-banner {
     @include addToCollectionBanner;
@@ -25,6 +27,24 @@
         min-height: 36px;
         span {
             display: none;
+        }
+    }
+}
+
+/**
+hack! May we can resolve this dynamically in 11.0
+ */
+:host ::ng-deep {
+    es-actionbar {
+        @media screen and (max-width: (vars.$mobileWidth + vars.$mobileStage * 6)) {
+            .action-always-caption {
+                display: none;
+            }
+            @include actionbar.icon-button();
+        }
+
+        .actionbar-icon-button {
+            @include actionbar.icon-button();
         }
     }
 }

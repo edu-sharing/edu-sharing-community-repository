@@ -66,6 +66,7 @@ import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.edu_sharing.service.tracking.ActivityStatisticService;
 import org.edu_sharing.service.version.RepositoryVersionInfo;
 import org.edu_sharing.service.version.VersionService;
 import org.edu_sharing.spring.ApplicationContextFactory;
@@ -1119,6 +1120,8 @@ public class AdminServiceImpl implements AdminService {
     public void switchAuthentication(String authorityName) {
         HttpSession session = Context.getCurrentInstance().getRequest().getSession(true);
         ToolPermissionServiceFactory.getInstance().invalidateSessionCache();
+        session.removeAttribute(ActivityStatisticService.SESSION_AUTHORITY_MEDIACENTERS);
+        session.removeAttribute(ActivityStatisticService.SESSION_AUTHORITY_ORGANIZATIONS);
         //session.setMaxInactiveInterval(30);
         String ticket = authTool.setUser(authorityName);
         authTool.storeAuthInfoInSession(

@@ -166,6 +166,11 @@ export class OptionItemToggle extends OptionItem {
      */
     public isToggleVisible = true;
     /**
+     * toggle type. Default is a flat, grayish
+     * primary is a primary colored button with label (if space is available)
+     */
+    public toggleType: 'default' | 'primary' = 'default';
+    /**
      * Where to place the toggle, before or after all other actions
      * @type {boolean}
      */

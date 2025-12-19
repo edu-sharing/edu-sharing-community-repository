@@ -1,4 +1,7 @@
-<es-mds-editor-widget-container *ngIf="show" [label]="'WORKSPACE.EDITOR.VERSION' | translate">
+<es-mds-editor-widget-container
+  *ngIf="show && mdsEditorValues.editorMode !== 'viewer'"
+  [label]="'WORKSPACE.EDITOR.VERSION' | translate"
+>
   <div class="loading" *ngIf="loading$ | async">
     <es-spinner-small [diameter]="30"></es-spinner-small>
   </div>

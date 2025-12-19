@@ -285,7 +285,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         for (SearchFacet name : facets) {
             MetadataQueryParameter parameter = query.findParameterByName(name.getProperty());
             if (parameter == null) continue;
-            if ((parameter.getMultiplejoin() != null && parameter.getMultiplejoin().equals("OR")))
+            if ((parameter.getMultiplejoin() != null && parameter.getMultiplejoin().equals(MetadataQueryParameter.ParameterJoinStrategy.OR)))
                 excludeOwn.add(parameter);
         }
         return excludeOwn;

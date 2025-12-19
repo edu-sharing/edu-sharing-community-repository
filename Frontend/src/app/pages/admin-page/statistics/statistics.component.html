@@ -239,6 +239,7 @@
         *ngIf="!(nodesNoData && !nodesDataSource.isLoading)"
         [scope]="Scope.Admin"
         [dataSource]="nodesDataSource"
+        [tableConfig]="{ dataColumnLayout: 'scroll' }"
         [elementInteractionType]="InteractionType.Emitter"
         [checkbox]="false"
         [displayType]="NodeEntriesDisplayType.Table"

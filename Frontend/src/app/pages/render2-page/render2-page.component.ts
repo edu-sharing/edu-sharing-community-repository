@@ -5,6 +5,7 @@ import { combineLatest } from 'rxjs';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { CommonModule } from '@angular/common';
 import { RenderWrapperComponent } from './render-wrapper-component/render-wrapper.component';
+import { RestConstants } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-render2-page',
@@ -15,6 +16,7 @@ import { RenderWrapperComponent } from './render-wrapper-component/render-wrappe
 })
 export class Render2PageComponent {
     @Input() nodeId = signal<string>(null);
+    version = signal<string>(null);
     constructor(private route: ActivatedRoute, private mainNav: MainNavService) {
         this.mainNav.setMainNavConfig({
             show: true,
@@ -24,6 +26,7 @@ export class Render2PageComponent {
         combineLatest([this.route.params, this.route.queryParams]).subscribe(
             ([params, queryParams]) => {
                 this.nodeId.set(params.node);
+                this.version.set(params.version || RestConstants.NODE_VERSION_CURRENT);
             },
         );
     }

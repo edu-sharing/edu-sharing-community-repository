@@ -8,6 +8,7 @@ import { translateProvider } from '../../../../../src/app/features/mds/mds-edito
 import { EduSharingUiCommonModule } from '../common/edu-sharing-ui-common.module';
 import { OptionItem } from '../types/option-item';
 import { ActionbarComponent } from './actionbar.component';
+import { OptionItemToggle } from 'ngx-edu-sharing-ui';
 
 let defaultOptions = [
     new OptionItem('Option 1', 'home', () => {}),
@@ -73,6 +74,34 @@ export const ActionbarPrimary: Story = {
 export const ActionbarPrimaryOneOption: Story = {
     args: {
         options: [new OptionItem('Option 1', 'home', () => {})],
+    },
+};
+const toggle1 = new OptionItemToggle(
+    { enabled: 'Toggle 1 enabled', disabled: 'Toggle 1 disabled' },
+    { enabled: 'info', disabled: 'cancel' },
+    true,
+    () => {},
+);
+toggle1.togglePosition = 'before';
+const toggle2 = new OptionItemToggle(
+    { enabled: 'Toggle 2 enabled', disabled: 'Toggle 2 disabled' },
+    { enabled: 'home', disabled: 'cancel' },
+    true,
+    () => {},
+);
+toggle2.toggleType = 'primary';
+toggle2.togglePosition = 'before';
+const toggle3 = new OptionItemToggle(
+    { enabled: 'Toggle 3 enabled', disabled: 'Toggle 3 disabled' },
+    { enabled: 'help', disabled: 'cancel' },
+    true,
+    () => {},
+);
+toggle3.togglePosition = 'after';
+export const ActionbarPrimaryToggles: Story = {
+    args: {
+        backgroundType: 'bright',
+        options: [toggle1, toggle2, toggle3],
     },
 };
 export const ActionbarPrimaryTwoOptions: Story = {

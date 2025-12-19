@@ -2,7 +2,7 @@ import { ApplicationRef, DoBootstrap, Injector, NgModule } from '@angular/core';
 import { createCustomElement } from '@angular/elements';
 import { AppComponent } from './app.component';
 import { BrowserModule } from '@angular/platform-browser';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { EduSharingApiModule } from 'ngx-edu-sharing-api';
 import {
     EduSharingUiModule,
@@ -19,11 +19,13 @@ import {
 import { environment } from '../environments/environment';
 import { CdkConnectedOverlay, CdkOverlayOrigin } from '@angular/cdk/overlay';
 import { MatButtonModule } from '@angular/material/button';
+import { RenderingServiceApiModule } from 'ngx-rendering-service-api';
 
 @NgModule({
     declarations: [AppComponent],
     imports: [
         BrowserModule,
+        RenderingServiceApiModule.forRoot({}),
         // no credentials mode since we're fetching only public data from the repository
         EduSharingApiModule.forRoot({
             rootUrl: environment.eduSharingApiUrl,
@@ -44,7 +46,7 @@ import { MatButtonModule } from '@angular/material/button';
         PdfComponent,
     ],
     providers: [
-        provideHttpClient(),
+        provideHttpClient(withInterceptorsFromDi()),
         // we do not read the user profile since we don't have a repository user present in lms contexts
         { provide: I18N_CONFIG, useValue: { readUserProfile: false } as I18nConfig },
         RenderHelperService,

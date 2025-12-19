@@ -4,6 +4,8 @@ import { filter } from 'rxjs/operators';
 import { DisplayValue, DisplayValues } from '../DisplayValues';
 import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { MdsWidgetType, ValueType } from 'ngx-edu-sharing-ui';
+import { BehaviorSubject, firstValueFrom, timer } from 'rxjs';
+import { SuggestionResponseDto } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-mds-editor-widget-radio-button',
@@ -16,6 +18,7 @@ export class MdsEditorWidgetRadioButtonComponent extends MdsEditorWidgetBase imp
     values: DisplayValues;
     formControl: UntypedFormControl;
     mode: 'horizontal' | 'vertical';
+    aiSuggestion$ = new BehaviorSubject<SuggestionResponseDto>(null);
 
     async ngOnInit() {
         this.formControl = new UntypedFormControl(
@@ -33,8 +36,35 @@ export class MdsEditorWidgetRadioButtonComponent extends MdsEditorWidgetBase imp
             .pipe(filter((value) => value !== null))
             .subscribe((value: DisplayValue) => {
                 this.setValue([value.key]);
+                if (this.aiSuggestion$.value && value?.key !== this.aiSuggestion$.value.value) {
+                    this.widget.setSuggestionState(this.aiSuggestion$, 'DECLINED');
+                }
             });
         this.registerValueChanges(this.formControl);
+        this.widget.getShowAiSuggestions().subscribe(async ([show, suggestions]) => {
+            const suggestion = suggestions?.find((s) => s.type === 'AI' && s.status === 'PENDING');
+            if (this.aiSuggestion$.value?.status !== 'DECLINED') {
+                if (!this.formControl.value && suggestion && show) {
+                    const value = this.values.values.find((v) => v.key === suggestion.value);
+                    if (value) {
+                        this.aiSuggestion$.next(suggestion);
+                        this.widget.setSuggestionState(this.aiSuggestion$, 'ACCEPTED');
+                        this.setValue([suggestion.value as string], false);
+                        this.formControl.setValue(value, { emitEvent: false });
+                    } else {
+                        console.warn(
+                            `Invalid suggestion value ${suggestion.value} for widget`,
+                            this.widget.definition.id,
+                            this.widget.definition.values,
+                        );
+                    }
+                } else if (!initialValue?.length && !show && this.aiSuggestion$.value) {
+                    this.widget.setSuggestionState(this.aiSuggestion$, 'PENDING');
+                    this.setValue(null, false);
+                    this.formControl.setValue(null, { emitEvent: false });
+                }
+            }
+        });
     }
 
     private getMode(): 'horizontal' | 'vertical' {

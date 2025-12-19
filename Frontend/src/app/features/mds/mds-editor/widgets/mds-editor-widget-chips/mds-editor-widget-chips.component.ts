@@ -39,6 +39,10 @@ import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-containe
 import { Helper } from '../../../../../core-module/rest/helper';
 import { MdsWidgetType, ValueType } from 'ngx-edu-sharing-ui';
 
+/**
+ * @Deprecated
+ * Replaced by the universal use of MdsEditorWidgetTreeComponent
+ */
 @Component({
     selector: 'es-mds-editor-widget-chips',
     templateUrl: './mds-editor-widget-chips.component.html',

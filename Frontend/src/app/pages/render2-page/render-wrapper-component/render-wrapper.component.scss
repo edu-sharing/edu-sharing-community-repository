@@ -31,7 +31,9 @@ rs-root {
                 aspect-ratio: 16 / 9;
             }
             &.module-VIDEO,
-            &.module-url,
+            &.module-url {
+                width: 40%;
+            }
             &.module-AUDIO {
                 width: 70%;
             }

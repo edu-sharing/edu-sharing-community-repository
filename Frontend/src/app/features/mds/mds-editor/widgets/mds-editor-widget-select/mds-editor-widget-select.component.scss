@@ -1,3 +1,8 @@
+@use '../../mds-mixins' as mds;
+
 mat-form-field {
     width: 100%;
+}
+.isAiSuggestion {
+    @include mds.highlightAiText();
 }

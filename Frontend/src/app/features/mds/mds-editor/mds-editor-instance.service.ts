@@ -25,6 +25,7 @@ import {
     NodeSuggestionResponseDto,
     Suggestion,
     SuggestionResponseDto,
+    SuggestionStatus,
     SuggestionsV1Service,
 } from 'ngx-edu-sharing-api';
 import {
@@ -39,6 +40,8 @@ import {
     zip,
 } from 'rxjs';
 import {
+    debounce,
+    debounceTime,
     distinctUntilChanged,
     filter,
     first,
@@ -339,8 +342,22 @@ export class MdsEditorInstanceService
         getInitialValues(): InitialValues {
             return this.initialValues;
         }
+        getShowAiSuggestions() {
+            return combineLatest([
+                this.mdsEditorInstanceService.showAiSuggestions,
+                this.suggestionValuesSubject.pipe(distinctUntilChanged()),
+            ]).pipe(debounceTime(0));
+        }
+
+        /**
+         * @Deprecated
+         * Use getShowAiSuggestions
+         */
         getSuggestions() {
             return this.suggestionValuesSubject;
+        }
+        setSuggestions(value: SuggestionResponseDto[]) {
+            return this.suggestionValuesSubject.next(value);
         }
 
         getBasicType(flat: boolean = true): string {
@@ -419,6 +436,19 @@ export class MdsEditorInstanceService
 
         getIsDirty(): boolean {
             return this.isDirty;
+        }
+
+        setSuggestionState(
+            suggestion: BehaviorSubject<SuggestionResponseDto>,
+            status: SuggestionStatus,
+        ) {
+            suggestion.value.status = status;
+            this.mdsEditorInstanceService.updateSuggestionState(
+                this.definition.id,
+                suggestion.value,
+            );
+            this.markSuggestionChanged();
+            suggestion.next(suggestion.value);
         }
 
         markSuggestionChanged() {
@@ -682,6 +712,10 @@ export class MdsEditorInstanceService
      */
     suggestionMetadata$ = new BehaviorSubject<NodeSuggestionResponseDto[]>(null);
     hasAi = new BehaviorSubject<boolean>(false);
+    /**
+     * is the ai suggestion toggle set to true?
+     */
+    showAiSuggestions = new BehaviorSubject<boolean>(false);
 
     /** MDS Views of the relevant group (in order). */
     views: MdsView[];
@@ -691,8 +725,6 @@ export class MdsEditorInstanceService
     // Not used any more?
     // valueChanged = new EventEmitter<{ property: string; newValue: string[] }>();
 
-    // Mutable state
-    shouldShowExtendedWidgets$ = new BehaviorSubject(false);
     /**
      * Fires when (a different) MDS definition was loaded and widgets and views were updated
      * accordingly.

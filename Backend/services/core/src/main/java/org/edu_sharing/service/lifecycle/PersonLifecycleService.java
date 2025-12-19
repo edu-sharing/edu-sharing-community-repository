@@ -177,7 +177,6 @@ public class PersonLifecycleService {
 		PersonDeleteResult result=new PersonDeleteResult();
 		String status = (String)nodeService.getProperty(personNodeRef,
 				QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS));
-		String role = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION));
 		String userName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 		result.authorityName=userName;
 
@@ -232,6 +231,7 @@ public class PersonLifecycleService {
 	}
 
 	public void processRatings(PersonDeleteResult result, String userName, boolean delete) {
+		logger.info("processing ratings");
 		if(delete) {
 			RatingServiceFactory.getInstance().getLocalService().deleteUserData(userName);
 		} else {
@@ -239,6 +239,7 @@ public class PersonLifecycleService {
 		}
 	}
 	public void processFeedback(PersonDeleteResult result, String userName, boolean delete) {
+		logger.info("processing feedback");
 		if(delete) {
 			FeedbackServiceFactory.getInstance().getLocalService().deleteUserData(userName);
 		} else {
@@ -291,7 +292,7 @@ public class PersonLifecycleService {
 		String username = (String)nodeService.getProperty(personNodeRef,
 				QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 		List<NodeRef> refs = getAllNodeRefs(username,type, scope);
-		logger.info("Deleting all files of type "+type);
+		logger.info("Deleting all files of type " + type + "( " + refs.size() + " files)");
 		deleteAllRefs(refs);
 		return refs;
 	}

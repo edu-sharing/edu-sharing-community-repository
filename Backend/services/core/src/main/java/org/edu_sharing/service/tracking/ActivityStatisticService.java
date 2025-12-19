@@ -57,6 +57,8 @@ public class ActivityStatisticService {
         boolean json;
     }
 
+    public static final String SESSION_AUTHORITY_MEDIACENTERS = "SESSION_AUTHORITY_MEDIACENTERS";
+    public static final String SESSION_AUTHORITY_ORGANIZATIONS = "SESSION_AUTHORITY_ORGANIZATIONS";
 
     public static String TRACKING_NODE_TABLE_ID = "edu_tracking_node";
     public static String TRACKING_USER_TABLE_ID = "edu_tracking_user";
@@ -454,8 +456,8 @@ public class ActivityStatisticService {
      * It will only do something if the mode is NOT set to "none"
      */
     public void reassignUserData(String oldUsername, String newUsername) {
-        if (config.getUserMode().equals(UserTrackingMode.none)) {
-            log.info("User tracking is set to none, reassignUserData will do nothing");
+        if (Arrays.asList(UserTrackingMode.none, UserTrackingMode.session).contains(config.getUserMode())) {
+            log.info("User tracking is set to none or session, reassignUserData will do nothing");
             return;
         }
 

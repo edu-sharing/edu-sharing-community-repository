@@ -6,6 +6,7 @@ import { Values } from '../types/types';
 import {
     HOME_REPOSITORY,
     Node,
+    NodeService,
     NodeSuggestionResponseDto,
     SuggestionsV1Service,
 } from 'ngx-edu-sharing-api';
@@ -33,6 +34,7 @@ export class UserPresentableError extends Error {
 export class MdsEditorCommonService {
     constructor(
         private restNode: RestNodeService,
+        private nodeService: NodeService,
         private mdsService: RestMdsService,
         private suggestionsV1Service: SuggestionsV1Service,
     ) {}
@@ -44,9 +46,7 @@ export class MdsEditorCommonService {
     async fetchNodesMetadata(nodes: Node[]): Promise<Node[]> {
         return forkJoin(
             nodes.map((node) =>
-                this.restNode
-                    .getNodeMetadata(node.ref.id, [RestConstants.ALL])
-                    .pipe(map((nodeWrapper) => nodeWrapper.node)),
+                this.nodeService.getNode(node.ref.id, { repository: node.ref.repo }),
             ),
         ).toPromise();
     }
@@ -58,13 +58,11 @@ export class MdsEditorCommonService {
         return forkJoin(
             pairs.map(({ id, node, values }) => {
                 if (versionComment) {
-                    return this.restNode
-                        .editNodeMetadataNewVersion(node?.ref?.id || id, versionComment, values)
-                        .pipe(map((nodeWrapper) => nodeWrapper.node));
+                    return this.nodeService.editNodeMetadata(node?.ref?.id || id, values, {
+                        versionComment,
+                    });
                 } else {
-                    return this.restNode
-                        .editNodeMetadata(node?.ref?.id || id, values)
-                        .pipe(map((nodeWrapper) => nodeWrapper.node));
+                    return this.nodeService.editNodeMetadata(node?.ref?.id || id, values);
                 }
             }),
         ).toPromise();
@@ -88,7 +86,9 @@ export class MdsEditorCommonService {
         values: string[],
         //versionComment?: string,
     ): Promise<void> {
-        void this.restNode.editNodeProperty(node.ref.id, property, values).toPromise();
+        await firstValueFrom(
+            this.nodeService.setProperty(node.ref.repo, node.ref.id, property, values),
+        );
     }
 
     /**

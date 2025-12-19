@@ -477,27 +477,4 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
             (n) => !this.values?.find((v) => v.key === n.id),
         );
     }
-    addSuggestion(toBeAdded: SuggestionResponseDto): void {
-        this.component.updateSuggestionState(toBeAdded, 'ACCEPTED');
-        const id = this.tree.findById(toBeAdded.value as string);
-        if (id) {
-            this.toggleNode(id, true, true, false);
-        } else if (this.widget.definition.type === 'multivalueSuggestBadges') {
-            this.toggleNode(
-                {
-                    id: toBeAdded.value,
-                    caption: toBeAdded.value,
-                } as TreeNode,
-                true,
-                true,
-                false,
-            );
-        } else {
-            console.warn('invalid suggestion value', id, this.tree);
-            this.toast.error(null, 'MDS.SUGGESTIONS.TOAST.INVALID_VALUE');
-        }
-    }
-    removeSuggestion(toBeRemoved: SuggestionResponseDto): void {
-        this.component.updateSuggestionState(toBeRemoved, 'DECLINED');
-    }
 }

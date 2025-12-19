@@ -4,12 +4,14 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.service.config.ConfigServiceFactory;
@@ -68,7 +70,7 @@ public class RenderingTool {
 		}
 		renderingService = UrlTool.setParam(renderingService, "ts",""+timestamp);
 		try{
-			renderingService = UrlTool.setParam(renderingService, "language",AuthenticationToolAPI.getInstance().getCurrentLanguage());
+			renderingService = UrlTool.setParam(renderingService, "language", AlfAppContextGate.getApplicationContext().getBean(AuthenticationToolAPI.class).getCurrentLanguage());
 		}catch(Throwable t){}
 
 		renderingService = UrlTool.setParam(renderingService, "sig", getSignatureSigned(appId,nodeId,timestamp));
@@ -169,7 +171,7 @@ public class RenderingTool {
 						return null;
 					}
 					// @TODO: May we need to build up caches just for particular file types?
-					RenderingService service = RenderingServiceFactory.getInstance().getLocalService();
+					RenderingService service = AlfAppContextGate.getApplicationContext().getBean(RenderingService.class);
 					return service.getDetails(ApplicationInfoList.getHomeRepository().getAppId(), nodeId, null, DISPLAY_PRERENDER, null);
 				} catch (Exception e) {
 					logger.warn("Error building rendering cache for node " + nodeId + ": " + e.getMessage(), e);

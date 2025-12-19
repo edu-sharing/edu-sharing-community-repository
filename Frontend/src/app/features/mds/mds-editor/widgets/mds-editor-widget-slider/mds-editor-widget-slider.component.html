@@ -6,18 +6,18 @@
 >
   <ngx-slider
     *ngIf="isRange"
-    class="ngx-slider-small"
+    class="ngx-slider-small mds-slider"
+    [class.isAiSuggestion]="(aiSuggestion$ | async)?.status === 'ACCEPTED'"
     [value]="currentValue[0]"
     [highValue]="currentValue[1]"
     [options]="sliderOptions"
-    (valueChange)="updateValue($event)"
-    (highValueChange)="updateHighValue($event)"
+    (userChange)="updateValue($event)"
   ></ngx-slider>
   <ngx-slider
     *ngIf="!isRange"
     class="ngx-slider-small"
     [value]="currentValue[0]"
     [options]="sliderOptions"
-    (valueChange)="updateValue($event)"
+    (userChange)="updateValue($event)"
   ></ngx-slider>
 </es-mds-editor-widget-container>

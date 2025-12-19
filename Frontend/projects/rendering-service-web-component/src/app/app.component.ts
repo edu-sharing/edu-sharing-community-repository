@@ -14,7 +14,7 @@ import { RenderDataRequestWithToken } from 'ngx-rendering-service-api';
 import { PdfComponent } from 'ngx-rendering-service-lib';
 
 @Component({
-    selector: 'app-root',
+    selector: 'edu-sharing-render',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],
     standalone: false,
@@ -75,7 +75,6 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
             data.node.preview.url = this.previewUrl;
             this.node.set(data.node);
             this.request.set(data.request);
-            console.log(data);
         }
     }
 

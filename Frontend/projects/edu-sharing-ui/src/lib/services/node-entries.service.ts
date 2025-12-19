@@ -256,7 +256,7 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     getSortColumns() {
         return this.sort?.columns?.filter((c) => {
             const result = this.columns
-                .concat(
+                ?.concat(
                     new ListItemSort('NODE', 'score'),
                     new ListItemSort('NODE', RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION),
                     new ListItemSort('NODE', RestConstants.CM_PROP_TITLE),

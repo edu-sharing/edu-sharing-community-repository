@@ -46,6 +46,7 @@ export * from './node-entries/node-entries-tree/dynamic-flat-node';
 export * from './node-entries/node-entries-tree/tree-node.service';
 export * from './node-entries/node-entries-wrapper.component';
 export * from './node-entries/node-entries.module';
+export * from './node-entries/option-button/option-button.component';
 export * from './mds-viewer/mds-viewer.component';
 export * from './mds-viewer/replace-element-with-div';
 export * from './node-url/node-url.component';

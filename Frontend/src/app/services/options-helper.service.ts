@@ -1324,10 +1324,12 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             },
         );
         toggleViewType.scopes = [Scope.WorkspaceList, Scope.Search, Scope.CollectionsReferences];
-        toggleViewType.constrains = [Constrain.NoSelection];
+        toggleViewType.constrains = [];
         toggleViewType.group = DefaultGroups.Toggles;
-        toggleViewType.elementType = [ElementType.NoneOrUnknown];
-        toggleViewType.priority = 10;
+        toggleViewType.elementType = [];
+        toggleViewType.priority = 15;
+        toggleViewType.togglePosition = 'before';
+
         /*
         const reorder = new OptionItem('OPTIONS.LIST_SETTINGS', 'settings', (node: Node) => this.reorderDialog = true);
         reorder.isToggle = true;

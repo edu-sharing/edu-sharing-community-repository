@@ -80,6 +80,11 @@ check linting:
   script:
     - npm run check:lint
 
+npm security audit:
+  <<: *frontend_job
+  allow_failure: true
+  script:
+    - npm audit --audit-level=high
 
 unittest frontend:
   <<: *frontend_job

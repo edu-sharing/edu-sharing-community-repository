@@ -15,15 +15,17 @@
       matInput
       #inputElement
       [type]="widget.definition.type"
+      [class.isAiSuggestion]="(aiSuggestion$ | async)?.status === 'ACCEPTED'"
       [placeholder]="
         showBulkMixedValues() ? ('MDS.DIFFERENT_VALUES' | translate) : widget.definition.placeholder
       "
       [formControl]="formControl"
+      (focus)="fieldGotFocus(inputElement)"
       (blur)="blur()"
       (keydown.enter)="submit()"
     />
   </es-mds-editor-widget-container>
-  <ng-container *ngTemplateOutlet="suggestions; context: { container }"></ng-container>
+  <!--<ng-container *ngTemplateOutlet="suggestions; context: { container }"></ng-container>-->
 </ng-container>
 
 <!-- es-mds-editor-widget-container causes issues with textarea -->
@@ -63,6 +65,8 @@
       *ngIf="!showBulkMixedValues()"
       [placeholder]="widget.definition.placeholder"
       [formControl]="formControl"
+      [class.isAiSuggestion]="(aiSuggestion$ | async)?.status === 'ACCEPTED'"
+      (focus)="fieldGotFocus(textAreaElement)"
       (blur)="blur()"
       (keydown.enter)="submit()"
     ></textarea>
@@ -73,9 +77,10 @@
       ><ng-container *ngTemplateOutlet="error"></ng-container
     ></mat-error>
   </mat-form-field>
-  <ng-container *ngTemplateOutlet="suggestions; context: { container }"></ng-container>
+  <!--<ng-container *ngTemplateOutlet="suggestions; context: { container }"></ng-container>-->
 </es-mds-editor-widget-container>
 
+<!--
 <ng-template #suggestions let-container="container">
   <div class="suggestions" *ngIf="(widget.getSuggestions() | async)?.length && !container.isHidden">
     <h5 class="mat-heading-5">{{ 'MDS.SUGGESTIONS.LIST_TITLE' | translate }}</h5>
@@ -116,6 +121,7 @@
     </div>
   </div>
 </ng-template>
+-->
 <ng-template #error>
   <ng-container *ngIf="widget.definition.isRequired === 'mandatory'">
     {{ 'MDS.REQUIRED_MESSAGE' | translate }}

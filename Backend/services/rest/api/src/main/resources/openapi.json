@@ -1828,6 +1828,31 @@
         "properties": {
           "nodeEntry": {
             "$ref": "#/components/schemas/NodeEntry"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DataProtectionQueueEntry"
+          }
+        },
+        "type": "object"
+      },
+      "DataProtectionQueueEntry": {
+        "properties": {
+          "finished": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "requested": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "user": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -6316,8 +6341,20 @@
       },
       "RevokeDetails": {
         "properties": {
+          "cleanupCollections": {
+            "type": "boolean"
+          },
+          "cleanupUsages": {
+            "type": "boolean"
+          },
           "reason": {
             "type": "string"
+          },
+          "removeContent": {
+            "type": "boolean"
+          },
+          "unpublish": {
+            "type": "boolean"
           }
         },
         "type": "object"
@@ -32205,6 +32242,14 @@
               },
               "type": "array"
             }
+          },
+          {
+            "description": "version of the node",
+            "in": "query",
+            "name": "version",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -34440,8 +34485,8 @@
     },
     "/node/v1/nodes/{repository}/{node}/publish/revoke": {
       "delete": {
-        "description": "Revoke a previously published copy. The content of this copy will be irrevocable removed, only the metadata will remain",
-        "operationId": "revokeCopy",
+        "description": "Revoke a previously published copy or a regular. The content of this copy will be irrevocable removed, only the metadata will remain",
+        "operationId": "revokeNode",
         "parameters": [
           {
             "description": "ID of repository (or \"-home-\" for home repository)",

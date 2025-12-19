@@ -1,8 +1,9 @@
 import { applicationConfig, type Meta, moduleMetadata, type StoryObj } from '@storybook/angular';
-import { ConfigService, IamV1Service, Node } from 'ngx-edu-sharing-api';
-import { Toast } from 'ngx-edu-sharing-ui';
+import { AuthenticationService, ConfigService, IamV1Service, Node } from 'ngx-edu-sharing-api';
+import { I18N_CONFIG, I18nConfig, Toast } from 'ngx-edu-sharing-ui';
 import { SharedModule } from '../../shared/shared.module';
 import {
+    AuthenticationServiceMock,
     ConfigServiceMock,
     DummyNode,
     IamServiceMock,
@@ -12,11 +13,7 @@ import {
 import { ShortcutEntriesComponent } from './shortcut-entries.component';
 
 // Additional providers necessary for selected components
-const additionalProviders = [
-    { provide: Toast, useClass: ToastMock }, // required for NodeEntriesService
-    { provide: ConfigService, useFactory: () => new ConfigServiceMock(null, null) },
-    { provide: IamV1Service, useFactory: () => new IamServiceMock(null, null) },
-];
+const additionalProviders = [{ provide: IamV1Service, useClass: IamServiceMock }];
 
 // More on how to set up stories at: https://storybook.js.org/docs/angular/writing-stories/introduction
 const shortcutEntries: Meta<ShortcutEntriesComponent> = {

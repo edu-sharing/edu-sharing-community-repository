@@ -54,6 +54,7 @@ import { PreviewSidebarComponent } from './features/preview-sidebar/preview-side
 import { WebComponentLocationStrategy } from './main/web-component.utils';
 import { GlobalLoginComponent } from './main/global-login-trigger/global-login.component';
 import { AppService } from './services/app.service';
+import { RenderingServiceApiModule } from 'ngx-rendering-service-api';
 
 const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     showDelay: 500,
@@ -77,6 +78,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DragDropModule,
         GlobalLoginComponent,
         // forRoot is empty; It is initalized via useFactory!
+        RenderingServiceApiModule.forRoot({}),
         EduSharingApiModule.forRoot({}),
         EduSharingUiModule.forRoot({ production: environment.production }, extensionUiProviders),
         BApiModule.forRoot({ rootUrl: environment.bApiUrl || '/edu-sharing/rest/bapi' }),

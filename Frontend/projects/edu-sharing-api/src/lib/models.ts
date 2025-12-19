@@ -10,13 +10,18 @@ import { User } from './api/models/user';
 
 import { HttpErrorResponse } from '@angular/common/http';
 import { SuggestionsV1Service } from './api/services/suggestions-v-1.service';
+import { GetSuggestionsByNodeId$Params } from './api/fn/suggestions-v-1/get-suggestions-by-node-id';
 
 export type Mediacenter = MediacenterApi & {
     profile: GroupProfile & {
         mediacenter: MediacenterProfileExtension;
     };
 };
+
 export type SuggestionStatus = Parameters<SuggestionsV1Service['updateStatus']>[0]['status'];
+export type SuggestionsByNodeIdParams = Parameters<
+    SuggestionsV1Service['getSuggestionsByNodeId']
+>[0];
 export type MdsViewRelation = MdsView['rel'];
 export type GenericAuthority = Organization | Group | User;
 export type ApiErrorResponse = HttpErrorResponse & {
@@ -125,6 +130,7 @@ export { CreateQaEntryDto } from './api/models/create-qa-entry-dto';
 export { UpdateQaEntryDto } from './api/models/update-qa-entry-dto';
 export { QaEntry } from './api/models/qa-entry';
 export { User } from './api/models/user';
+export { UserSimple } from './api/models/user-simple';
 export { UserProfile } from './api/models/user-profile';
 export { UserQuota } from './api/models/user-quota';
 export { UserStats } from './api/models/user-stats';

@@ -1,12 +1,7 @@
 <div class="tree">
-  <div class="suggestions" *ngIf="(suggestions | async)?.length">
+  <!-- <div class="suggestions" *ngIf="(suggestions | async)?.length">
     <label>{{ 'MDS.SUGGESTIONS.TOP_LABEL' | translate }}</label>
     <div *ngIf="suggestions | async as s" #chipList>
-      <!-- @TODO removed in angular 15
-          [multiple]="true"
-    -->
-      <!-- We mark all chips as selected because NVDA will announce "not selected" for each item
-      otherwise. It announces nothing (!) for selected items. Same as MdsEditorWidgetChips. -->
       <mat-chip
         #chip
         *ngFor="let value of s"
@@ -35,17 +30,17 @@
         <mat-icon matChipRemove>cancel</mat-icon>
       </mat-chip>
     </div>
-    <button
-      *ngIf="isTree"
-      mat-flat-button
-      color="primary"
-      (click)="treeOpen = !treeOpen"
-      class="toggle-all"
-    >
-      {{ 'MDS.SUGGESTIONS.SHOW_ALL_VALUES' | translate
-      }}<i [esIcon]="'keyboard_arrow_' + (treeOpen ? 'up' : 'down')"></i>
-    </button>
-  </div>
+  <button
+    *ngIf="isTree"
+    mat-flat-button
+    color="primary"
+    (click)="treeOpen = !treeOpen"
+    class="toggle-all"
+  >
+    {{ 'MDS.SUGGESTIONS.SHOW_ALL_VALUES' | translate
+    }}<i [esIcon]="'keyboard_arrow_' + (treeOpen ? 'up' : 'down')"></i>
+  </button>
+</div> -->
   <ng-container *ngIf="!isTree || !(suggestions | async)?.length || treeOpen">
     <div class="tree-header" *ngIf="isTree">
       <mat-form-field floatLabel="always">

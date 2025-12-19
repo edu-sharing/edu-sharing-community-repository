@@ -6,7 +6,8 @@
 :root {
     --primary: var(--palette-primary-500);
     --warning: #cd2457;
-    --aiColor: #2f0b9b;
+    --aiColor: #2c0799;
+    --aiColorChipBg: color-mix(in srgb, var(--aiColor), #fff 75%);
     --aiColorText: #fff;
     --aiColorChip: #fff;
     --defaultBackground: #fff;

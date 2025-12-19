@@ -33,6 +33,11 @@ class VCardConverterTest {
             put(CCConstants.VCARD_ORG, "Org");
         }};
         Assertions.assertEquals("Org", VCardConverter.getNameForVCard("", data));
+        data = new HashMap<>() {{
+            put(CCConstants.VCARD_T_FN, "FN Name");
+            put(CCConstants.VCARD_ORG, "Org");
+        }};
+        Assertions.assertEquals("FN Name", VCardConverter.getNameForVCard("", data));
     }
 
 }

@@ -27,7 +27,9 @@
       mat-flat-button
       color="primary"
       [disabled]="!option.isEnabled"
-      [class.display-none]="!option.isEnabled && !showDisabled"
+      [class]="
+        (!option.isEnabled && !showDisabled ? 'display-none ' : '') + (option.name | propertySlug)
+      "
       matTooltip="{{ option | optionTooltip | async }}"
       [matTooltipPosition]="tooltipPosition"
       [attr.aria-label]="option.ariaLabel || option.name | translate"
@@ -47,7 +49,9 @@
       mat-button
       color="primary"
       [disabled]="!option.isEnabled"
-      [class.display-none]="!option.isEnabled && !showDisabled"
+      [class]="
+        (!option.isEnabled && !showDisabled ? 'display-none ' : '') + (option.name | propertySlug)
+      "
       matTooltip="{{ option | optionTooltip | async }}"
       [matTooltipPosition]="tooltipPosition"
       [attr.aria-label]="option.ariaLabel || option.name | translate"
@@ -87,7 +91,7 @@
 <ng-template #toggle let-optionsToggle="optionsToggle">
   <ng-container *ngFor="let option of optionsToggle">
     <button
-      *ngIf="option.isToggleVisible"
+      *ngIf="option.isToggleVisible && option.toggleType === 'default'"
       mat-icon-button
       matTooltip="{{
         ($any(option).toggleNames
@@ -98,7 +102,7 @@
       [attr.aria-label]="option.ariaLabel || option.name | translate"
       (click)="click(option)"
       [class]="
-        'toggle-' +
+        'toggle-default' +
         (($any(option).toggleNames
           ? $any(option).toggleNames[option.toggleState ? 'enabled' : 'disabled']
           : option.name
@@ -115,6 +119,45 @@
         "
         [aria]="false"
       ></i>
+    </button>
+    <button
+      *ngIf="option.isToggleVisible && option.toggleType === 'primary'"
+      mat-flat-button
+      color="primary"
+      matTooltip="{{
+        ($any(option).toggleNames
+          ? $any(option).toggleNames[option.toggleState ? 'enabled' : 'disabled']
+          : option.name
+        ) | translate
+      }}"
+      [attr.aria-label]="option.ariaLabel || option.name | translate"
+      (click)="click(option)"
+      [class]="
+        'toggle-primary' +
+        (($any(option).toggleNames
+          ? $any(option).toggleNames[option.toggleState ? 'enabled' : 'disabled']
+          : option.name
+        ) | replaceChars : { search: '.', replace: '-' }) +
+        (option.isEnabled ? '' : ' disabled')
+      "
+      attr.data-test="toggle-{{ option.name }}"
+    >
+      <i
+        [esIcon]="
+          $any(option).toggleIcons
+            ? $any(option).toggleIcons[option.toggleState ? 'enabled' : 'disabled']
+            : option.icon
+        "
+        [aria]="false"
+      ></i>
+      <span class="action-always-caption">
+        {{
+          ($any(option).toggleNames
+            ? $any(option).toggleNames[option.toggleState ? 'enabled' : 'disabled']
+            : option.name
+          ) | translate
+        }}
+      </span>
     </button>
   </ng-container>
 </ng-template>

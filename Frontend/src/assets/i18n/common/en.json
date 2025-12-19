@@ -888,7 +888,8 @@
     "QUEUED": "Queued",
     "QUEUE_POSITION": "Queue position",
     "REVOKED": {
-      "DETAILS": "The publisher or editorial team has revoked this object. Only the metadata are available.\n\nCheck the reason below for more details",
+      "DETAILS_EMPTY": "The publisher or editorial team has revoked this object. Only the metadata are available.\n\nCheck the reason below for more details",
+      "DETAILS": "The publisher or editorial team has revoked this object.\n\nCheck the reason below for more details",
       "DATE": "Date of revocation",
       "REASON": "Reason for revocation",
       "FEEDBACK": "Contact editorial team"

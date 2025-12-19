@@ -1,31 +1,46 @@
 import {
     ApplicationConfig,
+    ApplicationRef,
     EventEmitter,
     importProvidersFrom,
+    Inject,
     Injectable,
+    Injector,
     NgModule,
+    Optional,
 } from '@angular/core';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { TranslateService } from '@ngx-translate/core';
 import {
+    About,
+    AboutService,
     Assignment,
+    AuthenticationService,
     ClientConfig,
     ConfigService,
     DashboardShortcutEntry,
     HOME_REPOSITORY,
     IamV1Service,
+    LoginInfo,
     MdsDefinition,
     MdsIdentifier,
     MdsService,
     MdsWidget,
     Node,
+    NodeService,
+    NodeSuggestionResponseDto,
     RestConstants,
+    SessionStorageService,
     SuggestionResponseDto,
+    SuggestionsByNodeIdParams,
+    SuggestionsV1Service,
     User,
+    UserSimple,
+    Variables,
 } from 'ngx-edu-sharing-api';
-import { BehaviorSubject, forkJoin, Observable, of, Subject } from 'rxjs';
+import { BehaviorSubject, forkJoin, from, Observable, of as observableOf, of, Subject } from 'rxjs';
 import { CordovaService } from '../../../services/cordova.service';
 import { Toast as ToastService } from '../../../services/toast';
 import { InputStatus, MdsWidgetValue } from '../types/types';
@@ -33,45 +48,58 @@ import { MdsEditorInstanceService } from './mds-editor-instance.service';
 import {
     ColumnType,
     Helper,
+    I18N_CONFIG,
+    I18nConfig,
     InitialValues,
     ListItem,
     MdsValueList,
     MdsViewerService,
     Toast,
+    TRANSLATION_LIST,
+    TranslationsService,
     Values,
     VCard,
     ViewInstanceService,
 } from 'ngx-edu-sharing-ui';
 import { HttpClient, HttpContext } from '@angular/common/http';
-import { catchError, map, shareReplay, tap } from 'rxjs/operators';
+import { catchError, first, map, shareReplay, take, tap } from 'rxjs/operators';
 import { ActivatedRoute } from '@angular/router';
+import {
+    EduSharingLlmService,
+    SuggestionResponseDto as SuggestionLlm,
+    Suggestions$Params,
+} from 'ngx-edu-sharing-b-api';
 
 @Injectable()
 export class translateProvider {
     private translation$: Observable<any> | null = null;
-    private cache$ = new BehaviorSubject(null);
+    cache$ = new BehaviorSubject(null);
 
     constructor(private httpClient: HttpClient) {}
 
     instant(v: string, args: any = {}) {
-        let str = Helper.getDotPathFromNestedObject(this.cache$?.value, v);
+        let str = Helper.getDotPathFromNestedObject(this.cache$?.value, v)?.replace(
+            /{{GENDER_SEPARATOR}}/g,
+            '*',
+        );
         for (const k of Object.keys(args)) {
             str = (str || v).replace(new RegExp('{{\\s*' + k + '\\s*}}', 'g'), args[k]);
         }
+
         return str;
     }
 
     get(v: string, args: any = {}): Observable<any> {
         if (!this.translation$) {
-            const sources = ['common/de.json', 'workspace/de.json', 'editorial/de.json'];
+            const sources = TRANSLATION_LIST.map((s) => s + '/de.json');
 
             const requests = sources.map((file) =>
                 this.httpClient
-                    .get(`/edu-sharing/assets/i18n/${file}`)
+                    .get(`/assets/i18n/${file}`)
                     .pipe(
                         catchError(() =>
                             this.httpClient
-                                .get(`http://localhost:4200/edu-sharing/assets/i18n/${file}`)
+                                .get(`/edu-sharing/storybook/assets/i18n/${file}`)
                                 .pipe(catchError(() => of({}))),
                         ),
                     ),
@@ -90,6 +118,17 @@ export class translateProvider {
     onTranslationChange = of({ lang: 'none' });
     onDefaultLangChange = of({ lang: 'none' });
     onLangChange = of({});
+}
+
+@Injectable()
+export class TranslationsServiceMock {
+    constructor(private translateProvider: TranslateService) {}
+    waitForInit(): Observable<void> {
+        return (this.translateProvider as unknown as translateProvider).cache$.pipe(
+            first((languageLoaded: any) => !!languageLoaded),
+            map(() => undefined as void),
+        );
+    }
 }
 @Injectable()
 export class MdsEditorInstanceServiceMock extends MdsEditorInstanceService {
@@ -126,14 +165,52 @@ export class MdsViewerServiceMock extends MdsViewerService {
     });
 }
 @Injectable()
+export class AuthenticationServiceMock {
+    hasToolpermission(toolpermission: string) {
+        return this.observeLoginInfo()
+            .pipe(
+                map((login) => login.toolPermissions?.includes(toolpermission)),
+                take(1),
+            )
+            .toPromise() as Promise<boolean>;
+    }
+    observeUserChanges(): Observable<void> {
+        return of();
+    }
+    observeLoginInfo(): Observable<LoginInfo> {
+        return of({
+            isValidLogin: true,
+            authorityName: 'sample-authority',
+            toolPermissions: [
+                RestConstants.TOOLPERMISSION_LICENSE,
+                RestConstants.TOOLPERMISSION_BAPI,
+            ],
+            statusCode: RestConstants.STATUS_CODE_OK,
+            isAdmin: false,
+            isGuest: false,
+            sessionTimeout: 3600,
+        });
+    }
+}
+
+@Injectable()
 export class MdsServiceMock extends MdsService {
     getMetadataSet({ repository, metadataSet }: Partial<MdsIdentifier>): Observable<MdsDefinition> {
         console.log('mock mds');
         return of(DefaultMds);
     }
 }
+
 @Injectable()
-export class ConfigServiceMock extends ConfigService {
+export class ConfigServiceMock {
+    async get<T = string>(name: string, defaultValue?: T): Promise<T> {
+        return defaultValue;
+    }
+
+    observeVariables(): Observable<Variables | null> {
+        return of(null);
+    }
+
     observeConfig(): Observable<ClientConfig | any> {
         const DEFAULT_SUPPORTED_LANGUAGES = [
             'de',
@@ -146,7 +223,7 @@ export class ConfigServiceMock extends ConfigService {
         ];
 
         // @ts-ignore
-        const config: ClientConfig | any = {
+        const config: ClientConfig = {
             frontpage: {
                 dashboard: {
                     shortcuts: {
@@ -207,9 +284,130 @@ export class ConfigServiceMock extends ConfigService {
             },
             supportedLanguages: DEFAULT_SUPPORTED_LANGUAGES,
         };
+        console.log(config);
         return of(config);
     }
 }
+@Injectable()
+export class NodeServiceMock {
+    getNode(id: string, { repository = HOME_REPOSITORY } = {}): Observable<Node> {
+        return of(DummyNode as Node);
+    }
+    editNodeMetadata(
+        id: string,
+        properties: { [key: string]: string[] },
+        {
+            versionComment,
+            repository = HOME_REPOSITORY,
+            obeyMds = true,
+        }: { versionComment?: string; repository?: string; obeyMds?: boolean } = {},
+    ): Observable<Node> {
+        console.log('editNodeMetadata', properties);
+        return of({ properties } as Node);
+    }
+}
+@Injectable()
+export class AboutServiceMock {
+    getAbout(): Observable<About> {
+        return of({
+            services: [],
+            plugins: [
+                {
+                    id: 'b-api',
+                },
+                {
+                    id: 'mongo-plugin',
+                },
+            ],
+            version: {
+                repository: '10.0.0',
+                major: 1,
+                minor: 0,
+            },
+        });
+    }
+}
+@Injectable()
+export class EduSharingLlmServiceMock {
+    suggestions(
+        params: Suggestions$Params,
+        context?: HttpContext,
+    ): Observable<Array<SuggestionLlm>> {
+        return of([]);
+    }
+}
+@Injectable()
+export class SuggestionsV1ServiceMock {
+    readonly BaseSuggestion = (propertyId: string, nodeId: string, values: string[]) =>
+        values.map((value) => {
+            return {
+                created: new Date().toISOString(),
+                createdBy: {
+                    authorityName: 'Sample Api',
+                } as UserSimple,
+                propertyId: propertyId,
+                status: 'PENDING',
+                version: '1.0',
+                id: '' + Math.random(),
+                type: 'AI',
+                confidence: 1,
+                nodeId,
+                value,
+            } as SuggestionResponseDto;
+        });
+    getSuggestionsByNodeId(
+        params: SuggestionsByNodeIdParams,
+        context?: HttpContext,
+    ): Observable<NodeSuggestionResponseDto> {
+        return of({
+            nodeId: params.node,
+            suggestions: {
+                'cclom:title': this.BaseSuggestion('cclom:title', params.node, [
+                    'KI Vorschlag Titel',
+                ]),
+                'cclom:general_description': this.BaseSuggestion(
+                    'cclom:general_description',
+                    params.node,
+                    [
+                        'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.',
+                    ],
+                ),
+                'ccm:educationallearningresourcetype': this.BaseSuggestion(
+                    'ccm:educationallearningresourcetype',
+                    params.node,
+                    ['other', 'table', 'table', 'wrong_key'],
+                ),
+                'cclom:general_keyword': this.BaseSuggestion('cclom:general_keyword', params.node, [
+                    'ABC',
+                    'AI Keyword 1',
+                    'AI Keyword 2',
+                    'AI Keyword 1',
+                ]),
+                'ccm:tool_category': this.BaseSuggestion('ccm:tool_category', params.node, [
+                    'communication',
+                ]),
+                'ccm:educationaltypicallearningtime': this.BaseSuggestion(
+                    'ccm:educationaltypicallearningtime',
+                    params.node,
+                    ['' + 3660_000],
+                ),
+                'ccm:educationaltypicalagerange': this.BaseSuggestion(
+                    'ccm:educationaltypicalagerange',
+                    params.node,
+                    ['6-12'],
+                ),
+                'ccm:commonlicense_ai_tool': this.BaseSuggestion(
+                    'ccm:commonlicense_ai_tool',
+                    params.node,
+                    [
+                        'http://w3id.org/edu-sharing/vocabs/aiTools/4dd60dfa-9f8a-4cc9-b733-0125448f77a3',
+                    ],
+                ),
+            },
+        });
+    }
+}
+
 @Injectable()
 export class IamServiceMock extends IamV1Service {
     getDashboardShortcuts(
@@ -248,6 +446,9 @@ export class IamServiceMock extends IamV1Service {
         return of(void 0);
     }
 }
+@Injectable()
+export class ActivatedRouteMock {}
+
 export const DefaultColumns = {
     Default: [
         new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
@@ -255,21 +456,30 @@ export const DefaultColumns = {
         new ListItem('NODE', 'cclom:general_description'),
     ],
 } as ColumnType;
-class ActivatedRouteMock extends ActivatedRoute {}
 
 export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
     { provide: MdsEditorInstanceService, useClass: MdsEditorInstanceServiceMock },
     { provide: MdsViewerService, useClass: MdsViewerServiceMock },
+    { provide: I18N_CONFIG, useValue: { obeyUserProfile: false } as I18nConfig },
+    { provide: AuthenticationService, useClass: AuthenticationServiceMock },
+    { provide: ConfigService, useClass: ConfigServiceMock },
+    { provide: AboutService, useClass: AboutServiceMock },
+    { provide: NodeService, useClass: NodeServiceMock },
+    { provide: EduSharingLlmService, useClass: EduSharingLlmServiceMock },
+    { provide: SuggestionsV1Service, useClass: SuggestionsV1ServiceMock },
     { provide: MdsService, useFactory: () => new MdsServiceMock(null) },
-    { provide: ActivatedRoute, useClass: ActivatedRouteMock },
-
     ViewInstanceService,
     CordovaService,
-    ToastService,
+    { provide: Toast, useClass: ToastMock },
+    { provide: ActivatedRoute, useClass: ActivatedRouteMock },
     {
         provide: TranslateService,
         useClass: translateProvider,
+    },
+    {
+        provide: TranslationsService,
+        useClass: TranslationsServiceMock,
     },
     MatSnackBar,
     provideAnimations(),
@@ -397,7 +607,8 @@ export const Data: Values = {
     ['cclom:size']: ['1337'],
     ['cm:created']: [new Date().getTime() + ''],
     ['cm:modified']: [new Date().getTime() + ''],
-    ['ccm:educationaltypicalagerange_from']: ['1'],
+    ['ccm:educationaltypicallearningtime']: ['' + 600_000],
+    ['ccm:educationaltypicalagerange_from']: ['0'],
     ['ccm:educationaltypicalagerange_to']: ['99'],
     ['ccm:taxonid']: ['0200105', '0200101'],
     ['ccm:educationalcontext']: ['vocational education'],
@@ -1552,6 +1763,42 @@ export const DefaultMds: MdsDefinition = {
             format: null,
             min: null,
             max: null,
+            defaultMin: null,
+            defaultMax: null,
+            step: null,
+            allowValuespaceSuggestions: false,
+            hideIfEmpty: false,
+            allowempty: false,
+            defaultvalue: null,
+            countDefaultvalueAsFilter: false,
+            condition: null,
+            maxlength: 0,
+            interactionType: 'Input',
+            filterMode: 'disabled',
+            expandable: 'disabled',
+            aiConfigs: [],
+            isExtended: false,
+            isRequired: 'optional',
+            isSearchable: false,
+        },
+        {
+            ids: {},
+            id: 'ccm:educationaltypicallearningtime',
+            caption: 'Lernzeit',
+            bottomCaption: null,
+            icon: null,
+            type: 'duration',
+            link: null,
+            template: null,
+            configuration: null,
+            hasValues: false,
+            values: null,
+            subwidgets: null,
+            placeholder: null,
+            unit: null,
+            format: null,
+            min: 0,
+            max: 60 * 12,
             defaultMin: null,
             defaultMax: null,
             step: null,
@@ -16971,7 +17218,7 @@ export const DefaultMds: MdsDefinition = {
             id: 'node_general',
             caption: 'Allg. Informationen',
             icon: 'description',
-            html: '\n\t\t\t  <preview>\n              <ccm:wwwurl>\n              <cm:name>\n              <cclom:title>\n              <ccm:educationallearningresourcetype>\n              <cclom:general_keyword>\n              <cclom:general_description>\n              <author>\n              <license>\n              <version>\n              <childobjects>\n\t\t\t\t',
+            html: '\n\t\t\t  <preview>\n              <ccm:wwwurl>\n              <cm:name>\n              <cclom:title><ccm:educationaltypicallearningtime><ccm:educationaltypicalagerange><ccm:commonlicense_ai_tool caption="Test AI Tool" type="radioVertical"><ccm:tool_category>\n              <ccm:educationallearningresourcetype>\n              <cclom:general_keyword>\n              <cclom:general_description>\n              <author>\n              <license>\n              <version>\n              <childobjects> <ccm:tool_instance_params>\n\t\t\t\t',
             rel: null,
             hideIfEmpty: false,
             isExtended: false,

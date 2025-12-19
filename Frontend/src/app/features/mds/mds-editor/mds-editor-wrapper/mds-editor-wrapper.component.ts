@@ -212,14 +212,14 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
         }
     }
 
-    async onSave(): Promise<void> {
+    async onSave(): Promise<Node[] | Values | 'no-changes' | 'validation-error'> {
         this.isLoading = true;
         try {
             if (!this.mdsEditorInstance.getCanSave()) {
                 // no changes, behave like close
                 if (this.mdsEditorInstance.getIsValid()) {
                     this.done.emit(this.nodes);
-                    return;
+                    return 'no-changes';
                 } else {
                     console.warn(
                         "The following widgets are required but don't have a value: ",
@@ -230,13 +230,14 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
                     );
                     this.mdsEditorInstance.showMissingRequiredWidgets();
                 }
-                return;
+                return 'validation-error';
             }
             const updatedNodes = await this.mdsEditorInstance.save();
             if (this.toastOnSave) {
                 this.toast.toast(this.toastOnSave);
             }
             this.done.emit(updatedNodes);
+            return updatedNodes;
         } catch (error) {
             if (
                 error?.error?.error?.endsWith(
@@ -249,6 +250,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
             } else {
                 this.handleError(error);
             }
+            return 'validation-error';
         } finally {
             this.isLoading = false;
         }

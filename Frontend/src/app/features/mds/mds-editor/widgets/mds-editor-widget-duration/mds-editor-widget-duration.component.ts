@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Options } from '@angular-slider/ngx-slider';
 import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { ValueType } from 'ngx-edu-sharing-ui';
+import { BehaviorSubject, firstValueFrom, timer } from 'rxjs';
+import { SuggestionResponseDto } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-mds-editor-widget-duration',
@@ -25,6 +27,7 @@ export class MdsEditorWidgetDurationComponent extends MdsEditorWidgetBase implem
     currentValue: number; // Total minutes
     hours: string;
     minutes: string;
+    aiSuggestion$ = new BehaviorSubject<SuggestionResponseDto>(null);
 
     async ngOnInit() {
         await this.initCurrentValue();
@@ -42,15 +45,39 @@ export class MdsEditorWidgetDurationComponent extends MdsEditorWidgetBase implem
                 this.setStatus('VALID');
             }
         });
+        this.widget.getShowAiSuggestions().subscribe(async ([show, suggestions]) => {
+            const suggestion = suggestions?.find((s) => s.type === 'AI' && s.status === 'PENDING');
+            if (this.aiSuggestion$.value?.status !== 'DECLINED') {
+                if (this.widget.getIsDirty()) {
+                    return;
+                }
+                if (suggestion && show) {
+                    this.currentValue = this.msToMin(
+                        parseInt(suggestion.value as string, 10),
+                    ).valueMin;
+                    // delay so 'slider' can trigger its own event first
+                    await firstValueFrom(timer(1));
+                    this.aiSuggestion$.next(suggestion);
+                    this.widget.setSuggestionState(this.aiSuggestion$, 'ACCEPTED');
+                    this.update('suggestion');
+                } else if (!show && this.aiSuggestion$.value) {
+                    this.widget.setSuggestionState(this.aiSuggestion$, 'PENDING');
+                    void this.initCurrentValue();
+                }
+            }
+        });
     }
 
-    update(src: 'slider' | 'input') {
-        if (src === 'slider') {
+    update(src: 'suggestion' | 'slider' | 'input') {
+        if (src === 'slider' || src === 'suggestion') {
             this.updateInput();
         } else {
             this.currentValue = parseInt(this.hours, 10) * 60 + parseInt(this.minutes, 10);
         }
-        this.setValue_();
+        if (src !== 'suggestion' && this.aiSuggestion$.value?.status === 'ACCEPTED') {
+            this.widget.setSuggestionState(this.aiSuggestion$, 'DECLINED');
+        }
+        this.setValue_(src !== 'suggestion');
     }
 
     updateInput() {
@@ -86,7 +113,7 @@ export class MdsEditorWidgetDurationComponent extends MdsEditorWidgetBase implem
         return { valueMin: valueMs / 60000 };
     }
 
-    private setValue_(): void {
-        this.setValue([(this.currentValue * 60000).toString()]);
+    private setValue_(dirty = true): void {
+        this.setValue([(this.currentValue * 60000).toString()], dirty);
     }
 }

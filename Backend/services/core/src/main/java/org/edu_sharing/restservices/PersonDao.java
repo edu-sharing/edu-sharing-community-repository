@@ -232,7 +232,7 @@ public class PersonDao {
     }
 
     public void changeProfile(UserProfileEdit profile) throws DAOException {
-
+		throwIfNotAllowedToModify();
         try {
 
             Map<String, Serializable> newUserInfo = profileToMap(profile);
@@ -286,8 +286,22 @@ public class PersonDao {
         return response;
     }
 
+	public void throwIfNotAllowedToModify() {
+		if(authorityService.isGlobalAdmin()) {
+			return;
+		}
+		String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
+		if (!currentUser.equals(getUserName())) {
+			throw new DAOSecurityException(
+					new SecurityException("user can not be modified without admin."));
+		}
+		if (authorityService.isGuest()) {
+			throw new DAOSecurityException(
+					new SecurityException("not allowed for guest"));
+		}
+	}
     public void changePassword(String oldPassword, String newPassword) throws DAOException {
-
+		throwIfNotAllowedToModify();
         try {
             if (Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")) {
                 throw new AccessDeniedException("It's not allowed to change password of external managed users. Please contact your system administrator.");
@@ -307,6 +321,7 @@ public class PersonDao {
 
     public void delete(boolean force) throws DAOException {
         try {
+			throwIfNotAllowedToModify();
             String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
             if (currentUser.equals(getUserName())) {
                 throw new DAOValidationException(
@@ -517,6 +532,7 @@ public class PersonDao {
     }
 
     public void removeAvatar() throws DAOException {
+		throwIfNotAllowedToModify();
         try {
             org.alfresco.service.cmr.repository.NodeRef currentAvatar = getAvatarNode();
             if (currentAvatar != null) {
@@ -528,6 +544,7 @@ public class PersonDao {
     }
 
     public void changeAvatar(InputStream is) throws DAOException {
+		throwIfNotAllowedToModify();
         try {
             org.alfresco.service.cmr.repository.NodeRef currentAvatar = getAvatarNode();
             ImageTool.VerifyResult result = ImageTool.verifyAndPreprocessImage(is, ImageTool.MAX_THUMB_SIZE);

@@ -843,9 +843,9 @@
     <template>
       <id>search</id>
       <html><![CDATA[
-			  <ccm:educationallearningresourcetype>
-              <cclom:general_keyword>
-              <license>
+          <ccm:educationallearningresourcetype type="facetList" expandable="expanded">
+          <cclom:general_keyword type="facetList" expandable="expanded">
+          <license>
 				]]></html>
     </template>
     <template>

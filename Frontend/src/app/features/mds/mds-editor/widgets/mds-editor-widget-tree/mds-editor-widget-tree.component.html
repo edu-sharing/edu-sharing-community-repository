@@ -1,6 +1,6 @@
-<div *ngIf="(chipsSuggestionsSubject | async)?.length as count" class="suggestion-badge">
+<!--<div *ngIf="(chipsSuggestionsSubject | async)?.length as count" class="suggestion-badge">
   {{ count }}
-</div>
+</div>-->
 <div
   cdkOverlayOrigin
   #trigger="cdkOverlayOrigin"
@@ -44,13 +44,12 @@
         matTooltipPosition="above"
         [class.indeterminate]="(indeterminateValues$ | async)?.includes(value.key)"
         [class.mat-chip-selected]="false"
-        [class.chip-is-suggestion]="isSuggestion(value) | async"
-        [class.chip-is-suggestion-ai]="(isSuggestion(value) | async) === 'AI'"
+        [class.chip-is-suggestion]="(isSuggestion(value) | async)?.type"
+        [class.chip-is-suggestion-ai]="(isSuggestion(value) | async)?.type === 'AI'"
         (click)="revealInTree(value)"
         (keydown.enter)="revealInTree(value)"
         (removed)="remove(value)"
       >
-        <i matChipAvatar esIcon="settings" *ngIf="(isSuggestion(value) | async) === 'AI'"></i>
         <span class="mat-chip-label">{{ getChipsValue(value).label }}</span>
         <mat-icon matChipRemove>cancel</mat-icon>
       </mat-chip-row>
