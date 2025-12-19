@@ -314,6 +314,8 @@ public class SubmissionAssignmentDaoImpl extends BasicNodeDaoImpl implements Ass
         Map<String, AssignmentFileRequest> newAssignmentFileRequestMap = assignmentFiles
                 .stream()
                 .collect(Collectors.toMap(AssignmentFileRequest::refId, x -> x));
+        // keep initial data to reuse later for update
+        Map<String, AssignmentFileRequest> newAssignmentFileRequestMapInitial = new HashMap<>(newAssignmentFileRequestMap);
 
         // delete assignment files that are not in the request
         Map<String, AssignmentFileDao> assignmentFileDaoToDelete = new HashMap<>(existingAssignmentFileDaoMap);
@@ -336,7 +338,7 @@ public class SubmissionAssignmentDaoImpl extends BasicNodeDaoImpl implements Ass
 
         if (canChangeAssignment()) {
             log.debug("Updated assignment files: {}", existingAssignmentFileDaoMap.keySet());
-            existingAssignmentFileDaoMap.forEach((refId, dao) -> dao.update(newAssignmentFileRequestMap.get(refId)));
+            existingAssignmentFileDaoMap.forEach((refId, dao) -> dao.update(newAssignmentFileRequestMapInitial.get(refId)));
         }
 
         log.debug("Added assignment files: {}", newAssignmentFileRequestMap.keySet());
