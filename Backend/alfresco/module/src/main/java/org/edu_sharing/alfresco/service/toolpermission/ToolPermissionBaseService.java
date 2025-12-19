@@ -355,6 +355,7 @@ public class ToolPermissionBaseService {
         toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_PUBLISH_COPY);
         toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_MAP_LINK);
         toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_TIMEBASED);
+        toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS);
         toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_BAPI);
         return toInit;
     }
