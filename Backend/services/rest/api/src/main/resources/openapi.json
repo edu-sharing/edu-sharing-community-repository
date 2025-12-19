@@ -1828,31 +1828,6 @@
         "properties": {
           "nodeEntry": {
             "$ref": "#/components/schemas/NodeEntry"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DataProtectionQueueEntry"
-          }
-        },
-        "type": "object"
-      },
-      "DataProtectionQueueEntry": {
-        "properties": {
-          "finished": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "node_id": {
-            "type": "string"
-          },
-          "requested": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "user": {
-            "type": "string"
           }
         },
         "type": "object"
@@ -2904,6 +2879,9 @@
           "threadId": {
             "format": "int64",
             "type": "integer"
+          },
+          "uniqueId": {
+            "type": "string"
           },
           "worstLevel": {
             "$ref": "#/components/schemas/Level"
@@ -7247,6 +7225,23 @@
             "type": "array"
           },
           "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StatisticsTemplate": {
+        "properties": {
+          "group": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "unfold": {
             "type": "string"
           }
         },
@@ -32718,6 +32713,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "description": "Version of the node",
+            "in": "query",
+            "name": "version",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -34581,7 +34584,7 @@
             "description": "Fatal error occured."
           }
         },
-        "summary": "Revoke published copy",
+        "summary": "Revoke published copy or regular node",
         "tags": [
           "NODE v1"
         ]
