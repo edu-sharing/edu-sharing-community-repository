@@ -1,6 +1,6 @@
 <es-dropdown #dropdown [options]="options"></es-dropdown>
 <div *ngIf="_node" class="group">
-  <div class="new" *ngIf="canComment()">
+  <div class="new" *ngIf="canComment() && mode !== 'view'">
     <div class="left">
       <es-user-avatar [size]="'small'" [user]="user"></es-user-avatar>
     </div>
@@ -22,7 +22,7 @@
       </form>
     </div>
   </div>
-  <div class="new-no-permission" *ngIf="!canComment()">
+  <div class="new-no-permission" *ngIf="!canComment() && mode !== 'view'">
     <div class="no-permission">
       {{
         'NODE_COMMENTS.' +
@@ -61,7 +61,14 @@
               ></i>
             </button>
           </div>
-          <div class="commentText" *ngIf="comment !== editComment">{{ comment.comment }}</div>
+          <div class="commentText" *ngIf="comment !== editComment && text === 'plain'">
+            {{ comment.comment }}
+          </div>
+          <div
+            class="commentText"
+            *ngIf="comment !== editComment && text === 'html'"
+            [innerHTML]="comment.comment"
+          ></div>
           <div class="commentTextEdit" *ngIf="comment === editComment">
             <form (ngSubmit)="saveEditComment()">
               <mat-form-field>

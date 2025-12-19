@@ -1,6 +1,6 @@
 import { trigger } from '@angular/animations';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { NetworkService, Node, RestConstants } from 'ngx-edu-sharing-api';
+import { HOME_REPOSITORY, NetworkService, Node, RestConstants } from 'ngx-edu-sharing-api';
 import { OptionItem, UIAnimation } from 'ngx-edu-sharing-ui';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { RestCommentsService } from '../../../../../../core-module/rest/services/rest-comments.service';
@@ -16,6 +16,7 @@ import { DialogsService } from '../../../../../dialogs/dialogs.service';
 import { Toast } from '../../../../../../services/toast';
 import { YES_OR_NO } from '../../../../../dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { first } from 'rxjs/operators';
+import { isString } from 'lodash-es';
 
 @Component({
     selector: 'es-comments-list',
@@ -43,8 +44,23 @@ export class CommentsListComponent {
     hasPermission: boolean;
     isFromHomeRepo: boolean;
 
-    @Input() set node(node: Node) {
-        this._node = node;
+    @Input() mode: 'view' | 'edit' = 'edit';
+    /**
+     * render comments as html content or text
+     */
+    @Input() text: 'plain' | 'html' = 'plain';
+    @Input() set node(node: Node | string) {
+        if (isString(node)) {
+            this._node = {
+                ref: {
+                    id: node,
+                    repo: HOME_REPOSITORY,
+                },
+                access: [],
+            } as Node;
+        } else {
+            this._node = node;
+        }
         void this.refresh();
     }
     @Output() cancelComment = new EventEmitter<void>();
@@ -95,41 +111,43 @@ export class CommentsListComponent {
     getOptions(comment: Comment) {
         let options: OptionItem[] = [];
         let isAuthor = this.user && this.user.authorityName == comment.creator.authorityName;
-        if (isAuthor) {
-            options.push(
-                new OptionItem('NODE_COMMENTS.OPTION_EDIT', 'edit', () => {
-                    this.editComment = comment;
-                    this.editCommentText = comment.comment;
-                }),
-            );
-        }
-        if (isAuthor || this._node.access.indexOf(RestConstants.ACCESS_WRITE) != -1) {
-            options.push(
-                new OptionItem('NODE_COMMENTS.OPTION_DELETE', 'delete', async () => {
-                    const dialogRef = await this.dialogs.openGenericDialog({
-                        title: 'NODE_COMMENTS.DELETE_COMMENT',
-                        message: 'NODE_COMMENTS.DELETE_COMMENT_MESSAGE',
-                        buttons: YES_OR_NO,
-                    });
-                    dialogRef.afterClosed().subscribe((response) => {
-                        if (response === 'YES') {
-                            this.loading.emit(true);
-                            this.toast.closeProgressSpinner();
-                            this.commentsApi.deleteComment(comment.ref.id).subscribe(
-                                () => {
-                                    void this.refresh();
-                                    this.changeComment.emit();
-                                    this.loading.emit(false);
-                                },
-                                (error: any) => {
-                                    this.toast.error(error);
-                                    this.loading.emit(false);
-                                },
-                            );
-                        }
-                    });
-                }),
-            );
+        if (this.mode === 'edit') {
+            if (isAuthor) {
+                options.push(
+                    new OptionItem('NODE_COMMENTS.OPTION_EDIT', 'edit', () => {
+                        this.editComment = comment;
+                        this.editCommentText = comment.comment;
+                    }),
+                );
+            }
+            if (isAuthor || this._node.access.indexOf(RestConstants.ACCESS_WRITE) != -1) {
+                options.push(
+                    new OptionItem('NODE_COMMENTS.OPTION_DELETE', 'delete', async () => {
+                        const dialogRef = await this.dialogs.openGenericDialog({
+                            title: 'NODE_COMMENTS.DELETE_COMMENT',
+                            message: 'NODE_COMMENTS.DELETE_COMMENT_MESSAGE',
+                            buttons: YES_OR_NO,
+                        });
+                        dialogRef.afterClosed().subscribe((response) => {
+                            if (response === 'YES') {
+                                this.loading.emit(true);
+                                this.toast.closeProgressSpinner();
+                                this.commentsApi.deleteComment(comment.ref.id).subscribe(
+                                    () => {
+                                        void this.refresh();
+                                        this.changeComment.emit();
+                                        this.loading.emit(false);
+                                    },
+                                    (error: any) => {
+                                        this.toast.error(error);
+                                        this.loading.emit(false);
+                                    },
+                                );
+                            }
+                        });
+                    }),
+                );
+            }
         }
         return options;
     }

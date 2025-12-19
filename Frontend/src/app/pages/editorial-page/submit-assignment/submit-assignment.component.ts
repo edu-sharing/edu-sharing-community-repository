@@ -9,6 +9,7 @@ import {
     Node,
     CommentV1Service,
     Submission,
+    NodeService,
 } from 'ngx-edu-sharing-api';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { combineLatest, filter, firstValueFrom, of, throwError } from 'rxjs';
@@ -73,7 +74,6 @@ export class SubmitAssignmentComponent {
     loading = signal(false);
     assignment = signal<Assignment>(null);
     submission = signal<Submission>(null);
-    submissionNode = signal<Node>(null);
     isOpenForSubmission = computed(() =>
         ['DRAFT', 'INPROGRESS'].includes(this.assignment().status),
     );
@@ -118,6 +118,7 @@ export class SubmitAssignmentComponent {
         private nodeHelperService: NodeHelperService,
         private translateService: TranslateService,
         private platformLocation: PlatformLocation,
+        private nodeService: NodeService,
         private commentV1Service: CommentV1Service,
         private assignmentService: AssignmentV1Service,
         private dialogs: DialogsService,
@@ -166,7 +167,7 @@ export class SubmitAssignmentComponent {
                             })
                             .pipe(
                                 catchError((err) => {
-                                    if (err.status === RestConstants.HTTP_NOT_FOUND || true) {
+                                    if (err.status === RestConstants.HTTP_NOT_FOUND) {
                                         err.preventDefault();
                                         return of(null);
                                     }
@@ -189,6 +190,23 @@ export class SubmitAssignmentComponent {
                             ),
                     ]),
                 ),
+                switchMap((data) => {
+                    if (data[2]) {
+                        return of(data);
+                    }
+                    return this.assignmentService
+                        .editSubmission({
+                            assignmentId: data[0].ref.id,
+                            submissionId: ME,
+                            status: 'PENDING',
+                        })
+                        .pipe(
+                            map((submission) => {
+                                data[2] = submission;
+                                return data;
+                            }),
+                        );
+                }),
             )
             .subscribe(([assignment, files, submission, submissionFiles]) => {
                 this.assignment.set(assignment);

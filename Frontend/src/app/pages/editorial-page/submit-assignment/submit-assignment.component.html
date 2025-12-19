@@ -59,8 +59,10 @@
         <ng-container *ngTemplateOutlet="summary"></ng-container>
         <form [formGroup]="submitFormGroup" class="main-form block">
           <es-comments-list
-            *ngIf="submission().ref?.id"
-            [node]="submissionNode()"
+            *ngIf="submission()?.ref?.id"
+            mode="view"
+            text="html"
+            [node]="submission()?.ref?.id"
           ></es-comments-list>
           <editor [init]="editorConfig" formControlName="submitComment"></editor>
           <button mat-flat-button color="primary" (click)="addComment()">
@@ -153,12 +155,12 @@
         {{ endTime | formatDate : { relative: false, time: true, date: true } }}
       </div>
     </div>
-    <div class="time submit-time" *ngIf="submission().submissionDate as endTime">
+    <div class="time submit-time" *ngIf="submission()?.submissionDate as submissionDate">
       <label for="submitTime">{{
         'EDITORIAL.SUBMIT_ASSIGNMENT.SUBMISSION_TIME' | translate
       }}</label>
       <div id="submitTime">
-        {{ submission().submissionDate | formatDate : { relative: false, time: true, date: true } }}
+        {{ submissionDate | formatDate : { relative: false, time: true, date: true } }}
       </div>
     </div>
   </div>
