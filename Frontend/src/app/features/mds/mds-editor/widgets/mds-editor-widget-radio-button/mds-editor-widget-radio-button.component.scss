@@ -1,3 +1,4 @@
+@use '../../mds-mixins' as mds;
 $button-margin-horizontal: 20px;
 $button-margin-vertical: 10px;
 
@@ -12,6 +13,12 @@ mat-radio-group {
     &.expandable {
         margin-top: -8px;
         padding: 0 8px;
+    }
+    mat-radio-button {
+        &.isAiSuggestion {
+            --mat-radio-label-text-color: var(--aiColor);
+            @include mds.highlightAiText();
+        }
     }
 }
 

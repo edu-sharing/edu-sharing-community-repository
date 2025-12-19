@@ -14,7 +14,15 @@
     [attr.aria-describedby]="container.descriptionId"
     [class]="mode"
   >
-    <mat-radio-button *ngFor="let value of values.values" [value]="value" color="primary">
+    <mat-radio-button
+      *ngFor="let value of values.values"
+      [class.isAiSuggestion]="
+        (aiSuggestion$ | async)?.value === value.key &&
+        (aiSuggestion$ | async)?.status === 'ACCEPTED'
+      "
+      [value]="value"
+      color="primary"
+    >
       {{ value.label }}
     </mat-radio-button>
   </mat-radio-group>

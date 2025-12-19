@@ -361,12 +361,19 @@ export class SuggestionsV1ServiceMock {
                 'ccm:educationaltypicallearningtime': this.BaseSuggestion(
                     'ccm:educationaltypicallearningtime',
                     params.node,
-                    ['' + 3600_000],
+                    ['' + 3660_000],
                 ),
                 'ccm:educationaltypicalagerange': this.BaseSuggestion(
                     'ccm:educationaltypicalagerange',
                     params.node,
                     ['6-12'],
+                ),
+                'ccm:commonlicense_ai_tool': this.BaseSuggestion(
+                    'ccm:commonlicense_ai_tool',
+                    params.node,
+                    [
+                        'http://w3id.org/edu-sharing/vocabs/aiTools/4dd60dfa-9f8a-4cc9-b733-0125448f77a3',
+                    ],
                 ),
             },
         });
@@ -17104,7 +17111,7 @@ export const DefaultMds: MdsDefinition = {
             id: 'node_general',
             caption: 'Allg. Informationen',
             icon: 'description',
-            html: '\n\t\t\t  <preview>\n              <ccm:wwwurl>\n              <cm:name>\n              <cclom:title><ccm:educationaltypicallearningtime><ccm:educationaltypicalagerange><ccm:tool_category>\n              <ccm:educationallearningresourcetype>\n              <cclom:general_keyword>\n              <cclom:general_description>\n              <author>\n              <license>\n              <version>\n              <childobjects> <ccm:tool_instance_params>\n\t\t\t\t',
+            html: '\n\t\t\t  <preview>\n              <ccm:wwwurl>\n              <cm:name>\n              <cclom:title><ccm:educationaltypicallearningtime><ccm:educationaltypicalagerange><ccm:commonlicense_ai_tool caption="Test AI Tool" type="radioVertical"><ccm:tool_category>\n              <ccm:educationallearningresourcetype>\n              <cclom:general_keyword>\n              <cclom:general_description>\n              <author>\n              <license>\n              <version>\n              <childobjects> <ccm:tool_instance_params>\n\t\t\t\t',
             rel: null,
             hideIfEmpty: false,
             isExtended: false,
