@@ -12,6 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
+import org.edu_sharing.repository.server.tools.security.RunAsSystem;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.notification.NotificationService;
@@ -66,7 +67,11 @@ public class CommentServiceImpl implements CommentService{
 
 	@Override
 	public List<ChildAssociationRef> getComments(String node) {
-		return this.nodeService.getChildrenChildAssociationRefType(node,CCConstants.CCM_TYPE_COMMENT);
+		boolean permission = permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),node,CCConstants.PERMISSION_COMMENT);
+		if(!permission) {
+			throw new InsufficientPermissionException("No permission '"+CCConstants.PERMISSION_COMMENT+"' to add comments to node "+node);
+		}
+		return AuthenticationUtil.runAsSystem(() -> this.nodeService.getChildrenChildAssociationRefType(node,CCConstants.CCM_TYPE_COMMENT));
 	}
 
 	@Override
