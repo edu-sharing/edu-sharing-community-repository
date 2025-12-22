@@ -147,6 +147,12 @@ export class IconDirective implements OnInit, OnDestroy {
                 svgElement.classList.add('svg-icons');
                 this.svg = svgElement;
 
+                // remove possible existing SVG element to avoid duplicate icons
+                const existingSvg = this.element.nativeElement.querySelector('.svg-icons');
+                if (existingSvg) {
+                    this.renderer.removeChild(this.element.nativeElement, existingSvg);
+                }
+
                 this.renderer.appendChild(this.element.nativeElement, this.svg);
 
                 if (this._aria) {
