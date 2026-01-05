@@ -93,7 +93,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 
 		Tika tika = new Tika();
 		String type = tika.detect(is);
-		logger.info("type:" + type);
+		logger.debug("type:" + type);
 
 		if(type == null) {
 
@@ -113,7 +113,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 			// allowStoredEntriesWithDataDescriptor = true because some h5p might have this
 			return new ZipArchiveInputStream(is, contentreader.getEncoding(), true, true);
 		}else {
-			logger.info("unknown format:" +  type);
+			logger.debug("unknown format:" +  type);
 		}
 		is.close();
 		return null;
@@ -125,7 +125,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 
 		if (contentreader != null) {
 			try{
-				logger.info(contentreader.getMimetype());
+				logger.debug(contentreader.getMimetype());
 
 				ArchiveInputStream zip = getZipInputStream(contentreader);
 				ArchiveEntry current = null;
