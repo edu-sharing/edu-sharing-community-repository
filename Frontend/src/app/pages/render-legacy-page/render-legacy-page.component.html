@@ -50,7 +50,10 @@
 <div>
   <div id="nodeRenderContentWrapper">
     <div *ngIf="specialTemplate !== null" class="specialTemplate">
-      <es-render-revoked [node]="_node" *ngIf="specialTemplate === 'revoked'"> </es-render-revoked>
+      <div *ngIf="specialTemplate === 'revoked'" class="revoked">
+        <h1>{{ _node | nodeTitle }}</h1>
+        <rs-revoked [node]="_node"> </rs-revoked>
+      </div>
     </div>
     <div *ngIf="sequence" id="sequence" #sequencediv>
       <div

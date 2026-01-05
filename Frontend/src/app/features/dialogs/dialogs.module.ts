@@ -7,6 +7,8 @@ import { CardHeaderComponent } from './card-dialog/card-dialog-container/card-he
 import { CardJumpMarksComponent } from './card-dialog/card-dialog-container/card-jump-marks/card-jump-marks.component';
 import { JumpMarksHandlerDirective } from './card-dialog/card-dialog-container/jump-marks-handler.directive';
 import {} from './dialog-modules/node-embed-dialog/node-embed-dialog.component';
+import { DialogsService } from './dialogs.service';
+import { DialogsService as DialogsServiceAbstract } from 'ngx-rendering-service-lib';
 
 @NgModule({
     declarations: [
@@ -17,5 +19,6 @@ import {} from './dialog-modules/node-embed-dialog/node-embed-dialog.component';
         JumpMarksHandlerDirective,
     ],
     imports: [SharedModule, PortalModule],
+    providers: [{ provide: DialogsServiceAbstract, useClass: DialogsService }],
 })
 export class DialogsModule {}
