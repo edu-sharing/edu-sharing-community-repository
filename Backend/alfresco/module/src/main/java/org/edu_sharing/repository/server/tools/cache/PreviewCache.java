@@ -26,7 +26,7 @@ public class PreviewCache {
 	public static final int MAX_IMAGE_SIZE = 1200;
 
 	private static final String STORE_LOCATION = "previewCache";
-	private static File getCacheStore(){
+	static File getCacheStore(){
 		File cacheStore = new File(getRootLocation(), STORE_LOCATION);
 		if (! cacheStore.exists()) {
 			cacheStore.mkdir();
