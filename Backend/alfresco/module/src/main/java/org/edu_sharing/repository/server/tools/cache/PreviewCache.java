@@ -1,10 +1,11 @@
 package org.edu_sharing.repository.server.tools.cache;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.content.ContentStore;
-import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -14,13 +15,15 @@ import org.alfresco.service.namespace.QName;
 import org.apache.commons.io.FileUtils;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.context.ApplicationContext;
 
+@Slf4j
 public class PreviewCache {
     public static int[] CACHE_SIZES_WIDTH=new int[] {200,200,250,320,400,400,400,600,200,400};
     public static int[] CACHE_SIZES_HEIGHT=new int[]{150,200,200,240,300,350,400,450,200,400};
 
-    public static int[] CACHE_SIZES_MAX_WIDTH=new int[]{200,300,400};
+	public static int[] CACHE_SIZES_MAX_WIDTH=new int[]{200,300,400};
 	public static int[] CACHE_SIZES_MAX_HEIGHT=new int[]{200,300,400};
 
 	public static final int MAX_IMAGE_SIZE = 1200;
@@ -41,18 +44,9 @@ public class PreviewCache {
 		return new File(store.getRootLocation()).getParentFile();
     }
 	public static File getFileForNode(String nodeId,int width,int height,int maxWidth,int maxHeight,boolean createDirectories){
-		String folderName=width==-1 ? "full_"+MAX_IMAGE_SIZE : (width+"x"+height);
-		if(maxWidth>0 && maxHeight>0){
-			folderName="m_"+maxWidth+"x"+maxHeight;
-		}
-		File folder=new File(getCacheStore(),folderName);
-		if(!folder.exists()){
-			if(createDirectories)
-				folder.mkdir();
-			else
-				return null;
-		}
-		
+		File folder = getFolder(width, height, maxWidth, maxHeight, createDirectories);
+		if (folder == null) return null;
+
 		folder=new File(folder,nodeId.substring(0,4));
 		if(!folder.exists() && createDirectories){
 			if(createDirectories)
@@ -62,12 +56,50 @@ public class PreviewCache {
 		}
 		return new File(folder,nodeId+".jpg");
 	}
+
+	@Nullable
+	private static File getFolder(int width, int height, int maxWidth, int maxHeight, boolean createDirectories) {
+		String folderName= width ==-1 ? "full_"+MAX_IMAGE_SIZE : (width +"x"+ height);
+		if(maxWidth >0 && maxHeight >0){
+			folderName="m_"+ maxWidth +"x"+ maxHeight;
+		}
+		File folder=new File(getCacheStore(),folderName);
+		if(!folder.exists()){
+			if(createDirectories)
+				folder.mkdir();
+			else
+				return null;
+		}
+		return folder;
+	}
+
 	/**
-	 * Removes all previews from the given node from cache
-	 * The system will automatically rebuild the cache on the next preview request
-	 * Call this method if the content has changed
-	 * @param nodeId
+	 * purges a whole cache folder
+	 * @param width
+	 * @param height
+	 * @param maxWidth
+	 * @param maxHeight
 	 */
+	public static boolean purgeCacheFolder(int width, int height, int maxWidth, int maxHeight){
+		File folder = getFolder(width, height, maxWidth, maxHeight, false);
+		if(folder == null) {
+			log.info("cache folder does not exist");
+			return false;
+		}
+        try {
+            FileUtils.deleteDirectory(folder);
+			return true;
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+			return false;
+        }
+    }
+		/**
+         * Removes all previews from the given node from cache
+         * The system will automatically rebuild the cache on the next preview request
+         * Call this method if the content has changed
+         * @param nodeId
+         */
 	public static void purgeCache(String nodeId){
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
