@@ -28,6 +28,14 @@ class PreviewCacheTest {
                             anyInt(),
                             anyBoolean()
                     )).thenCallRealMethod();
+            mockedStatic.when(() ->
+                        PreviewCache.getFolder(
+                            anyInt(),
+                            anyInt(),
+                            anyInt(),
+                            anyInt(),
+                            anyBoolean()
+                    )).thenCallRealMethod();
 
             assertEquals("/tmp/200x100/abcd/abcd1234.jpg", PreviewCache.getFileForNode(
                     "abcd1234",
