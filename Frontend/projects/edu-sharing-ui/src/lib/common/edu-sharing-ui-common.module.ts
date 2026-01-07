@@ -32,6 +32,7 @@ import { MdsWidgetComponent } from '../mds-viewer/widget/mds-widget.component';
 import { MdsDurationPipe } from '../pipes/mds-duration.pipe';
 import { MdsViewerComponent } from '../mds-viewer/mds-viewer.component';
 import { SpinnerSmallComponent } from '../spinner-small/spinner-small.component';
+import { InfoMessageComponent } from '../info-message/info-message.component';
 
 @NgModule({
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -45,7 +46,6 @@ import { SpinnerSmallComponent } from '../spinner-small/spinner-small.component'
         FocusStateDirective,
         FormatDatePipe,
         FormatSizePipe,
-        IconDirective,
         MdsDurationPipe,
         InfiniteScrollDirective,
         PropertySlugPipe,
@@ -65,7 +65,9 @@ import { SpinnerSmallComponent } from '../spinner-small/spinner-small.component'
         CommonModule,
         MatMenuModule,
         SpinnerComponent,
+        IconDirective,
         SpinnerSmallComponent,
+        InfoMessageComponent,
         MatButtonModule,
         MatTooltipModule,
         MatRippleModule,
@@ -85,6 +87,7 @@ import { SpinnerSmallComponent } from '../spinner-small/spinner-small.component'
         MdsDurationPipe,
         IconDirective,
         InfiniteScrollDirective,
+        InfoMessageComponent,
         PropertySlugPipe,
         NodeIconPipe,
         NodeImagePipe,

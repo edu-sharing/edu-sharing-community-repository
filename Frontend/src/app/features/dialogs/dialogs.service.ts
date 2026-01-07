@@ -81,7 +81,6 @@ import {
     NodeRelationsDialogData,
     NodeRelationsDialogResult,
 } from './dialog-modules/node-relations-dialog/node-relations-dialog-data';
-import { NodeReportDialogData } from './dialog-modules/node-report-dialog/node-report-dialog.component';
 import {
     NodeTemplateDialogData,
     NodeTemplateDialogResult,
@@ -143,6 +142,7 @@ import {
     NodePreviewMediaDialogData,
     NodePreviewMediaDialogResult,
 } from './dialog-modules/node-preview-media-dialog/node-preview-media-dialog-data';
+import { NodeReportDialogData } from 'ngx-rendering-service-lib';
 
 export enum DialogTemplate {
     AddMaterialDialogBelow,

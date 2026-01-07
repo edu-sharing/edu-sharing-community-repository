@@ -48,7 +48,8 @@ public class BApiProxyService {
 
     @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_BAPI)
     public Response forwardRequest(String path, String body, HttpHeaders headers, HttpMethod method) {
-        String apiKey = guestService.isGuestUser(AuthenticationUtil.getFullyAuthenticatedUser()) ?
+        String authenticatedUser = AuthenticationUtil.getFullyAuthenticatedUser();
+        String apiKey = guestService.isGuestUser(authenticatedUser) ?
                 guestUserApiKey : authUserApiKey;
 
         if (StringUtils.isBlank(bapiUri) || StringUtils.isBlank(apiKey)) {
@@ -78,6 +79,7 @@ public class BApiProxyService {
         });
 
         requestBuilder.header("X-API-KEY", apiKey);
+        requestBuilder.header("X-Edu-User-Id", authenticatedUser);
 
         try (okhttp3.Response response = okHttpClient.newCall(requestBuilder.build()).execute()) {
             Response.ResponseBuilder result = Response.status(response.code());
