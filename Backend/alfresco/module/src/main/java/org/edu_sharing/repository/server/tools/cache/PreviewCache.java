@@ -58,7 +58,7 @@ public class PreviewCache {
 	}
 
 	@Nullable
-	private static File getFolder(int width, int height, int maxWidth, int maxHeight, boolean createDirectories) {
+	static File getFolder(int width, int height, int maxWidth, int maxHeight, boolean createDirectories) {
 		String folderName= width ==-1 ? "full_"+MAX_IMAGE_SIZE : (width +"x"+ height);
 		if(maxWidth >0 && maxHeight >0){
 			folderName="m_"+ maxWidth +"x"+ maxHeight;
