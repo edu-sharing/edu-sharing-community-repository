@@ -1,7 +1,7 @@
 import { TranslateModule } from '@ngx-translate/core';
 import { moduleMetadata, type Meta, type StoryObj } from '@storybook/angular';
-import { SharedModule } from '../../shared.module';
 import { InfoMessageComponent } from './info-message.component';
+import { IconDirective } from '../directives/icon.directive';
 
 // More on how to set up stories at: https://storybook.js.org/docs/angular/writing-stories/introduction
 const meta: Meta<InfoMessageComponent> = {
@@ -10,7 +10,7 @@ const meta: Meta<InfoMessageComponent> = {
     decorators: [
         moduleMetadata({
             declarations: [], // Prevent duplicate declaration of InfoMessageComponent
-            imports: [SharedModule, TranslateModule.forRoot()],
+            imports: [IconDirective, TranslateModule.forRoot()],
         }),
     ],
     tags: ['autodocs'],
