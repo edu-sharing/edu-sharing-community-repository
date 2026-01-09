@@ -1,3 +1,4 @@
+@use '@angular/material' as mat;
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 
 $iconContainerHeight: 80px;
@@ -29,6 +30,7 @@ $tileSize: 124px;
     color: var(--workspaceTopBarFontColor);
     // center tiles-wrapper with text-align, as inline-flex is used
     text-align: center;
+    box-shadow: 0 2px 2px 0 #0000001a;
 
     .entries-wrapper {
         // the padding is important to not be able to scroll at every dimension
@@ -75,7 +77,9 @@ $tileSize: 124px;
     position: relative;
     width: $tileSize;
     height: $tileSize;
-    background-color: #fff;
+    color: var(--landingPageShortcutTileColor);
+    background-color: var(--landingPageShortcutTileBackground);
+    border-radius: 8px;
     box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.4);
 
     &.drag-indicator {
@@ -100,7 +104,7 @@ $tileSize: 124px;
 
     // on hover, change the background color and slightly move the title
     &:hover {
-        background-color: #f4f4f4;
+        //background-color: #f4f4f4;
 
         .entry-title-wrapper {
             padding-top: 4px;
@@ -123,7 +127,7 @@ $tileSize: 124px;
     &.empty {
         background: unset;
         border: 2px dashed var(--landingPageShortcutNewColor);
-        border-radius: 4px;
+        border-radius: 8px;
         box-shadow: none;
         cursor: pointer;
         user-select: none;
@@ -173,7 +177,6 @@ $tileSize: 124px;
             // height + width are necessary for img to be resized properly
             height: 1em;
             width: 1em;
-            color: var(--primary);
         }
     }
 
@@ -206,12 +209,39 @@ $tileSize: 124px;
             -webkit-box-orient: vertical;
             font-size: $fontSizeSmall;
             font-weight: 700;
-            line-height: 1.4;
+            line-height: 1.2;
+            // fix line-height cuts off text on last row
+            padding-bottom: 2px;
             text-align: center;
-            color: var(--primary);
+            color: var(--landingPageShortcutTileColor);
 
-            input {
-                max-width: 100px;
+            .rename-node-title {
+                @include mat.form-field-overrides(
+                    (
+                        outlined-label-text-color: var(--landingPageShortcutTileColor),
+                        outlined-hover-label-text-color: var(--landingPageShortcutTileColor),
+                        outlined-focus-label-text-color: var(--landingPageShortcutTileColor),
+                        outlined-input-text-color: var(--landingPageShortcutTileColor),
+                        outlined-outline-color: var(--landingPageShortcutTileColor),
+                        outlined-hover-outline-color: var(--landingPageShortcutTileColor),
+                        outlined-focus-outline-color: var(--landingPageShortcutTileColor),
+                    )
+                );
+
+                input {
+                    max-width: 100px;
+                    caret-color: var(--landingPageShortcutTileColor);
+                    color: var(--landingPageShortcutTileColor);
+                    font-size: $fontSizeSmall;
+                    font-weight: 700;
+                    line-height: 1.2;
+                }
+
+                // guarantee floating label stays in the correct color + font weight
+                &:not(.mat-form-field-disabled) ::ng-deep .mdc-floating-label {
+                    font-weight: 700;
+                    color: var(--landingPageShortcutTileColor) !important;
+                }
             }
         }
     }
@@ -235,7 +265,6 @@ $tileSize: 124px;
 
         .mat-icon {
             font-size: 20px;
-            color: var(--primary);
         }
     }
 }

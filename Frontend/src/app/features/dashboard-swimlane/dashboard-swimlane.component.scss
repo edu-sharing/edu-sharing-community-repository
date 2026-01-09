@@ -11,7 +11,6 @@
     align-items: center;
     transition: all vars.$transitionNormal;
     > h2 {
-        color: var(--primary);
         font-weight: bold;
         // flex-grow: 1;
     }
@@ -27,6 +26,11 @@
     &:focus {
         // background-color: color-mix(in srgb, var(--workspaceTopBarBackground), 90% transparent);
     }
+    .toggle-button {
+        color: var(--textMain);
+        position: absolute;
+        right: 20px;
+    }
 }
 .no-results-message {
     color: var(--textMediumLight);
@@ -34,9 +38,9 @@
     font-size: vars.$fontSizeXLarge;
 }
 .swimlane {
+    padding: 16px 24px;
     display: flex;
     flex-direction: column;
-    padding: 10px 20px;
     position: relative;
     border-radius: var(--borderRadiusCards);
     // @include mixins.materialShadowBottom();

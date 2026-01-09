@@ -58,11 +58,11 @@ export class LandingPageComponent implements OnInit {
         this.swimlanes.set(
             await this.configService.get<SwimlaneEntry[]>('frontpage.dashboard.swimlanes', [
                 {
-                    id: 'recent-activities',
+                    id: 'assignments',
                     defaultExpanded: true,
                 },
                 {
-                    id: 'assignments',
+                    id: 'recent-activities',
                     defaultExpanded: true,
                 },
                 {
