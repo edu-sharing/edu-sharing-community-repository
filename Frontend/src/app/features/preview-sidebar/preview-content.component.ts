@@ -1,7 +1,17 @@
-import { AfterViewInit, Component, Input, OnDestroy, signal, ViewChild } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    Input,
+    OnChanges,
+    OnDestroy,
+    signal,
+    SimpleChanges,
+    ViewChild,
+} from '@angular/core';
 import { AboutService, Node } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
+    CustomOptions,
     NodeHelperService,
     OptionsHelperDataService,
     RenderHelperService,
@@ -27,7 +37,7 @@ import { PreviewSidebarTemplateService } from './preview-sidebar-template.servic
     providers: [OptionsHelperDataService],
     standalone: false,
 })
-export class PreviewContentComponent implements AfterViewInit, OnDestroy {
+export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChanges {
     /**
      all modules in this list will be automatically rendered without confirmation
      */
@@ -37,17 +47,21 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy {
      * always render the node, do not wait for click
      */
     @Input() autoRender = false;
+
+    @Input() customOptions: CustomOptions;
     @ViewChild(ActionbarComponent) actionbar: ActionbarComponent;
     @ViewChild(MdsEditorWrapperComponent) mdsRef: MdsEditorWrapperComponent;
 
     private readonly destroyed = new Subject<void>();
     private _node: Node;
     renderNode = signal<Node>(null);
+
     /** The node to preview. */
     @Input()
     get node(): Node {
         return this._node;
     }
+
     set node(node: Node) {
         this._node = node;
         this.renderNode.set(null);
@@ -68,6 +82,7 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy {
             }
         });
     }
+
     allDetailsLink: string;
 
     constructor(
@@ -80,7 +95,13 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy {
         public router: Router,
         public about: AboutService,
     ) {
-        this.renderHelperService.prepareRootUrl();
+        void this.renderHelperService.prepareRootUrl();
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes.customOptions) {
+            void this.updateOptions();
+        }
     }
 
     ngAfterViewInit(): void {
@@ -129,7 +150,8 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy {
         this.optionsHelper.setData({
             scope: Scope.Search,
             activeObjects: [this.node],
+            customOptions: this.customOptions,
         });
-        this.optionsHelper.refreshComponents();
+        void this.optionsHelper.refreshComponents();
     }
 }

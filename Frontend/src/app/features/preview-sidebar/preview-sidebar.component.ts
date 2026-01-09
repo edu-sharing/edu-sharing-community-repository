@@ -18,6 +18,7 @@ import { DialogsService } from '../dialogs/dialogs.service';
 import { PreviewContentComponent } from './preview-content.component';
 import { GenericDialogData } from '../dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { PreviewSidebarService } from './preview-sidebar.service';
+import { CustomOptions } from 'ngx-edu-sharing-ui';
 
 /**
  * Sidebar component that previews an element with preview image and some metadata.
@@ -36,6 +37,10 @@ export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
 
     /** The node to preview. */
     @Input() node: Node;
+    /**
+     * custom options to configure the actionbar
+     */
+    @Input() customOptions: CustomOptions;
     /** Emits when the user clicked the "close" button. */
     @Output() closed = new EventEmitter<void>();
 
