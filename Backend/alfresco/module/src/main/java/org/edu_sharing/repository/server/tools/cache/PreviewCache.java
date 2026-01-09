@@ -23,8 +23,8 @@ public class PreviewCache {
     public static int[] CACHE_SIZES_WIDTH=new int[] {200,200,250,320,400,400,400,600,200,400};
     public static int[] CACHE_SIZES_HEIGHT=new int[]{150,200,200,240,300,350,400,450,200,400};
 
-	public static int[] CACHE_SIZES_MAX_WIDTH=new int[]{200,300,400};
-	public static int[] CACHE_SIZES_MAX_HEIGHT=new int[]{200,300,400};
+	public static int[] CACHE_SIZES_MAX_WIDTH=new int[]{200,300,400,1200};
+	public static int[] CACHE_SIZES_MAX_HEIGHT=new int[]{200,300,400,1200};
 
 	public static final int MAX_IMAGE_SIZE = 1200;
 

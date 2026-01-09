@@ -13,6 +13,7 @@ import { DialogsService } from '../dialogs/dialogs.service';
 import { Router } from '@angular/router';
 import { MdsEditorWrapperComponent } from '../mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { ModuleInfoService } from 'ngx-rendering-service-lib';
+import { PreviewSidebarTemplateService } from './preview-sidebar-template.service';
 
 /**
  * The inner part of the preview sidebar.
@@ -30,7 +31,7 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy {
     /**
      all modules in this list will be automatically rendered without confirmation
      */
-    readonly AutoRenderModules = ['image', 'video', 'audio', 'document', 'pdf'];
+    readonly AutoRenderModules = ['image', 'video', 'audio', 'document', 'pdf', 'url'];
 
     /**
      * always render the node, do not wait for click
@@ -62,6 +63,8 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy {
                 if (this.autoRender || this.AutoRenderModules.includes(module.module)) {
                     void this.onShowContentClick();
                 }
+            } else {
+                console.info('rs2 not present');
             }
         });
     }
@@ -72,6 +75,7 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy {
         private dialogs: DialogsService,
         public optionsHelper: OptionsHelperDataService,
         public moduleInfoService: ModuleInfoService,
+        public previewSidebarTemplateService: PreviewSidebarTemplateService,
         private renderHelperService: RenderHelperService,
         public router: Router,
         public about: AboutService,

@@ -91,6 +91,7 @@ import { InfoMessageComponent } from '../info-message/info-message.component';
         PropertySlugPipe,
         NodeIconPipe,
         NodeImagePipe,
+        NodeLicensePipe,
         NodeImageSizePipe,
         NodePersonNamePipe,
         NodeTitlePipe,
