@@ -248,7 +248,7 @@
             "messages": [
             {
             "role": "user",
-            "content": "Ordne das Material in einer der folgende Kategorien ein: {{widget(ccm:educationallearningresourcetype.values[*].{id:id, name:caption})}} nutze zur Einordnung den Namen aber gib die jeweilige id zurück."
+            "content": "Ordne das Material in einer der folgende Kategorien ein: {{widget(\"ccm:educationallearningresourcetype\".values[*].{id:id, name:caption})}} nutze zur Einordnung den Namen aber gib die jeweilige id zurück."
             }
             ]
             }
