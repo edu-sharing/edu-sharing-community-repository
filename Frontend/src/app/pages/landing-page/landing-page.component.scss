@@ -13,3 +13,18 @@
         }
     }
 }
+
+// custom style for global options (this may need to be moved to another location)
+::ng-deep .global-options .global-option-btn {
+    // fix: button overflows gap
+    min-width: unset;
+
+    // adjust style of global options button
+    .global-option {
+        box-shadow: none !important;
+        border-color: inherit !important;
+        border-radius: 8px;
+        border-width: 2px !important;
+        color: inherit !important;
+    }
+}
