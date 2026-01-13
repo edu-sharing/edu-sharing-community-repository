@@ -1,6 +1,12 @@
 @use 'variables-scss' as vars;
 @use 'mixins' as mixins;
 
+:host {
+    background: var(--es-dashboard-swimlane-background);
+}
+es-node-entries-wrapper {
+    --es-node-entries-scroll-gradient-color: var(--es-dashboard-swimlane-background);
+}
 .toggle {
     @include mixins.clickable();
     padding: 10px 20px;

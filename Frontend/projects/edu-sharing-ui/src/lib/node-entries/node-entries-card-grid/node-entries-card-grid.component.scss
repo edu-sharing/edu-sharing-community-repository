@@ -15,10 +15,6 @@ $horizontalScrollPadding: 1.5em;
     }
 }
 
-:host {
-    --scroll-gradient-color: white;
-}
-
 .order-panel {
     margin-left: auto;
 }
@@ -60,7 +56,7 @@ $horizontalScrollPadding: 1.5em;
         background: linear-gradient(
             to left,
             transparent 0,
-            var(--scroll-gradient-color) calc(100% - $horizontalScrollPadding)
+            var(--es-node-entries-scroll-gradient-color) calc(100% - $horizontalScrollPadding)
         );
         > button {
             margin-left: calc($horizontalScrollPadding - 8px);
@@ -72,7 +68,7 @@ $horizontalScrollPadding: 1.5em;
         background: linear-gradient(
             to right,
             transparent 0,
-            var(--scroll-gradient-color) calc(100% - $horizontalScrollPadding)
+            var(--es-node-entries-scroll-gradient-color) calc(100% - $horizontalScrollPadding)
         );
         > button {
             margin-right: calc($horizontalScrollPadding - 8px);

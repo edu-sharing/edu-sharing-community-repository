@@ -151,7 +151,6 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     singleClickHint: 'dynamic' | 'static';
     disableInfiniteScroll: boolean;
     showIconColumn = new BehaviorSubject(true);
-    scrollGradientColor: WritableSignal<string> = signal('fff');
 
     constructor(
         private uiService: UIService,

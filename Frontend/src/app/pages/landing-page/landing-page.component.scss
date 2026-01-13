@@ -5,11 +5,11 @@
 
     es-dashboard-swimlane {
         &:nth-child(even) {
-            background: #fefef9;
+            --es-dashboard-swimlane-background: #fefef9;
         }
 
         &:nth-child(odd) {
-            background: #fafbe6;
+            --es-dashboard-swimlane-background: #fafbe6;
         }
     }
 }

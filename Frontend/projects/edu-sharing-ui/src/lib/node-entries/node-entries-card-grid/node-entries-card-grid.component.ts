@@ -95,7 +95,6 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
     readonly itemsCap = new ItemsCap<T>();
     private globalCursorStyle: HTMLStyleElement;
     private destroyed = new Subject<void>();
-    @HostBinding('style.--scroll-gradient-color') scrollGradientColor: string;
 
     constructor(
         public entriesService: NodeEntriesService<T>,
@@ -121,7 +120,6 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
         this.entriesService.dataSource$.pipe(takeUntil(this.destroyed)).subscribe(() => {
             this.updateScrollState();
         });
-        effect(() => (this.scrollGradientColor = this.entriesService.scrollGradientColor()));
     }
 
     ngOnInit(): void {

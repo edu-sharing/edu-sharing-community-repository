@@ -119,13 +119,6 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @Input() dragDrop: ListDragGropConfig<T>;
     @Input() gridConfig: GridConfig;
     @Input() tableConfig: TableConfig;
-
-    /**
-     * This color defines the base color of gradients visually limiting a grid in scroll direction.
-     * Defaults to white.
-     */
-    @Input() scrollGradientColor: string = '#fff';
-
     /**
      * this can be set instead of calling initOptionsGenerator()
      */
@@ -302,7 +295,6 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         if (changes.showIconColumn) {
             this.entriesService.showIconColumn.next(this.showIconColumn);
         }
-        this.entriesService.scrollGradientColor.set(this.scrollGradientColor);
 
         if (changes['initConfig']) {
             void this.initOptionsGenerator(this.initConfig);
