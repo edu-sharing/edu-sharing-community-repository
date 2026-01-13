@@ -178,6 +178,11 @@ $tileSize: 124px;
             height: 1em;
             width: 1em;
         }
+
+        // convert SVG icons to white
+        img.entry-icon {
+            filter: brightness(0) invert(1);
+        }
     }
 
     // wrapper for the title of the entry
