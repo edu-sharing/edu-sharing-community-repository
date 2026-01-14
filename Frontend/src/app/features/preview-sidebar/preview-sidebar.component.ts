@@ -10,7 +10,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
-import { firstValueFrom, Subject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
 import { map, takeUntil, tap } from 'rxjs/operators';
 import { RestHelper } from '../../core-module/core.module';
 import { CardDialogRef } from '../dialogs/card-dialog/card-dialog-ref';
@@ -48,6 +48,7 @@ export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
 
     private readonly destroyed = new Subject<void>();
     private modalDialogRef: CardDialogRef<GenericDialogData<string>, string>;
+    private modalOpen$ = new BehaviorSubject<boolean>(false);
 
     constructor(
         private dialogs: DialogsService,
@@ -77,6 +78,10 @@ export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
                 await this.openAsDialog();
             });
         }
+    }
+
+    getModalOpenState(): BehaviorSubject<boolean> {
+        return this.modalOpen$;
     }
 
     private registerDialogOnMobile(): void {
@@ -112,8 +117,10 @@ export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
             minHeight: '100%',
             contentPadding: 0,
         });
+        this.modalOpen$.next(true);
         this.modalDialogRef.afterClosed().subscribe(() => {
             this.modalDialogRef = null;
+            this.modalOpen$.next(false);
             if (this.isMobileScreen && !this.destroyed.isStopped) {
                 this.closed.emit();
             }
