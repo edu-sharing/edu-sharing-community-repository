@@ -65,13 +65,12 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
     set node(node: Node) {
         this._node = node;
         this.renderNode.set(null);
+        const queryParamsArray = Object.entries(this.nodeHelper.getNodeLink('queryParams', node))
+            .filter((k) => !!k[1])
+            .map((k) => k[0] + '=' + encodeURIComponent(k[1]));
         this.allDetailsLink =
             (this.nodeHelper.getNodeLink('routerLink', node) as string) +
-            '?' +
-            Object.entries(this.nodeHelper.getNodeLink('queryParams', node))
-                .filter((k) => !!k[1])
-                .map((k) => k[0] + '=' + encodeURIComponent(k[1]))
-                .join('&');
+            (queryParamsArray.length > 0 ? '?' + queryParamsArray.join('&') : '');
         void this.mdsRef?.reInit();
         if (this.actionbar) {
             void this.updateOptions();
