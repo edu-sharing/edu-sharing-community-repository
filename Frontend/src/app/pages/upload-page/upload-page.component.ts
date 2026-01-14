@@ -59,7 +59,6 @@ export class UploadPageComponent {
             return;
         }
         this.nodeHelper.addNodeToLms(node[0], this.reurl);
-        window.close();
     }
 
     private _cancel() {
