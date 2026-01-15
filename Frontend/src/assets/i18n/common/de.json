@@ -1573,6 +1573,8 @@
   },
   "DASHBOARD_SWIMLANE": {
     "ACTIVITY": {
+      "ACTION_TEXT_PREFIX": "zuletzt",
+      "ACTION_TEXT_SUFFIX": "am",
       "EMPTY": "Keine kürzlichen Aktivitäten",
       "TIMEGROUP": {
         "Today": "heute",

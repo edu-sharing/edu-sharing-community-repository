@@ -1,60 +1,44 @@
 @use 'variables-scss' as vars;
 @use 'mixins' as mixins;
 
-:host {
+.events-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-}
-.time-wrapper {
-    display: flex;
-    .timeline {
-        position: relative;
+    gap: 8px;
+
+    .event ::ng-deep {
+        background: #fff;
+        box-shadow: 0 2px 2px 0 #0000001f;
+        border-radius: 8px;
         color: var(--textLight);
-        font-weight: bold;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        justify-content: space-between;
-        padding-right: 6px;
-        .timeline-line {
-            position: absolute;
-            right: -4px;
-            height: 100%;
-            width: 2px;
-            background-color: #666;
+
+        a {
+            padding: 14px 48px 14px 18px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            padding: 10px 0;
-            .timeline-dot {
-                background-color: #666;
-                position: relative;
-                left: -2px;
-                width: 6px;
-                height: 6px;
-                border-radius: 100%;
+            gap: 8px;
+            justify-content: center;
+            color: var(--textLight);
+        }
+
+        .node-title {
+            font-weight: bold;
+            font-size: vars.$fontSizeLarge;
+            @include mixins.limitLineCount(1, 1.25);
+        }
+
+        .action-text {
+            span {
+                font-size: vars.$fontSizeSmall;
+                font-weight: bold;
+                color: var(--primary);
             }
         }
-    }
-    gap: 5px;
-    > label {
-        display: flex;
-        font-weight: bold;
-        padding-bottom: 10px;
-    }
-    .event {
-        padding: 0 10px;
-        .timestamp {
+
+        .forward-btn {
+            position: absolute;
+            right: 16px;
             color: var(--textLight);
-            font-size: var(--fontSizeXSmall);
-        }
-        .info-group {
-            display: flex;
-            gap: 5px;
-        }
-        .action {
-            font-weight: bold;
         }
     }
 }

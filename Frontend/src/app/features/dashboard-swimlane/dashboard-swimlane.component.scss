@@ -83,8 +83,10 @@ es-node-entries-wrapper {
         flex-direction: row;
         flex-wrap: wrap;
         gap: 20px;
+        justify-content: space-around;
         > .stream-lane {
             min-width: 150px;
+            max-width: 450px;
             width: 0;
             flex-grow: 1;
             display: flex;
