@@ -1490,6 +1490,9 @@
       "references": "refers to (references)"
     }
   },
+  "LANDING_PAGE": {
+    "SEARCH_PLACEHOLDER": "Search in media library..."
+  },
   "SHORTCUT_ENTRIES": {
     "CHANGE_TITLE": "Change title",
     "EXPAND": "Expand tiles",

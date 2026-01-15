@@ -1545,6 +1545,9 @@
       "proposeForCollectionEvent": "Vorschläge für Sammlungen"
     }
   },
+  "LANDING_PAGE": {
+    "SEARCH_PLACEHOLDER": "In Mediathek suchen..."
+  },
   "SHORTCUT_ENTRIES": {
     "CHANGE_TITLE": "Titel ändern",
     "EXPAND": "Kacheln ausklappen",
