@@ -1,0 +1,17 @@
+@use 'variables-scss' as vars;
+
+footer {
+    padding: 36px 36px 48px 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    es-imprint-privacy {
+        display: flex;
+        gap: 32px;
+        text-align: center;
+        color: var(--textLight);
+        font-size: vars.$fontSizeLarge;
+        font-weight: bold;
+    }
+}

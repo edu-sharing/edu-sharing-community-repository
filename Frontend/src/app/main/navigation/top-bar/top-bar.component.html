@@ -1,6 +1,6 @@
 <es-create-menu
   #createMenu
-  [scope]="currentScope"
+  [scope]="currentScope()"
   [allowed]="isCreateAllowed"
   [allowBinary]="create.allowBinary"
   [parent]="create.parent"
@@ -15,7 +15,7 @@
     >
       <es-main-menu-sidebar
         #mainMenuSidebar
-        [currentScope]="currentScope"
+        [currentScope]="currentScope()"
         (closeSidebar)="closeScopeSelector.emit()"
         (showLicenses)="showLicenses.emit()"
       ></es-main-menu-sidebar>
@@ -23,7 +23,7 @@
         *ngTemplateOutlet="
           mainNavService.getCustomTemplateSlot(TemplateSlot.MainScopeButton);
           context: {
-            currentScope: currentScope,
+            currentScope: currentScope(),
             canOpen: canOpen,
             onClick: toggleSidebar,
           }
@@ -34,7 +34,7 @@
       <ng-container *ngSwitchCase="'dropdown'">
         <es-main-menu-dropdown
           #mainMenuDropdown
-          [currentScope]="currentScope"
+          [currentScope]="currentScope()"
           (closeDropdown)="closeScopeSelector.emit()"
         ></es-main-menu-dropdown>
         <button
@@ -55,7 +55,7 @@
       <ng-container *ngSwitchCase="'sidebar'">
         <es-main-menu-sidebar
           #mainMenuSidebar
-          [currentScope]="currentScope"
+          [currentScope]="currentScope()"
           (showLicenses)="showLicenses.emit()"
           (closeSidebar)="closeScopeSelector.emit()"
         ></es-main-menu-sidebar>
@@ -119,7 +119,7 @@
         *ngTemplateOutlet="
           mainNavService.getCustomTemplateSlot(TemplateSlot.AfterCreateMenu);
           context: {
-            currentScope: currentScope
+            currentScope: currentScope()
           }
         "
       ></ng-container>
@@ -141,12 +141,12 @@
         *ngTemplateOutlet="
           mainNavService.getCustomTemplateSlot(TemplateSlot.BeforeUserMenu);
           context: {
-            currentScope: currentScope,
+            currentScope: currentScope(),
           }
         "
       ></ng-container>
     </ng-container>
-    <es-imprint-privacy></es-imprint-privacy>
+    <es-imprint-privacy *ngIf="!footerVisible()"></es-imprint-privacy>
     <button
       mat-icon-button
       *ngIf="currentUser && showChat"
@@ -183,7 +183,7 @@
     *ngTemplateOutlet="
       mainNavService.getCustomTemplateSlot(TemplateSlot.BelowTopBar);
       context: {
-        currentScope: currentScope,
+        currentScope: currentScope(),
       }
     "
   ></ng-container>

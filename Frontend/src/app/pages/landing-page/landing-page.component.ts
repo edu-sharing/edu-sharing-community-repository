@@ -30,6 +30,7 @@ export type SwimlaneEntry = {
 export class LandingPageComponent implements OnInit, OnDestroy {
     private readonly destroyed$ = new Subject<void>();
     readonly i18nPrefix: string = 'LANDING_PAGE.';
+    landingPageScope: string = 'LANDING';
     searchEvent$: Observable<SearchEvent>;
 
     /**
@@ -49,7 +50,7 @@ export class LandingPageComponent implements OnInit, OnDestroy {
         this.mainNav.setMainNavConfig({
             showUser: true,
             showScope: true,
-            currentScope: 'LANDING',
+            currentScope: this.landingPageScope,
             title: 'SIDEBAR.LANDING',
             show: true,
             create: {

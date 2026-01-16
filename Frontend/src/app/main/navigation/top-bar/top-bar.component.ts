@@ -1,18 +1,25 @@
 import {
     Component,
+    computed,
     ContentChild,
     ElementRef,
     EventEmitter,
+    input,
     Input,
+    InputSignal,
     Output,
+    Signal,
+    signal,
     TemplateRef,
     ViewChild,
+    WritableSignal,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
-import { Node, User } from 'ngx-edu-sharing-api';
-import { Observable } from 'rxjs';
-import { ConfigurationService, RestConnectorService } from '../../../core-module/core.module';
+import { ConfigService, Node, User } from 'ngx-edu-sharing-api';
 import { OptionItem } from 'ngx-edu-sharing-ui';
+import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
+import { ConfigurationHelper, RestConnectorService } from '../../../core-module/core.module';
 import { CreateMenuComponent } from '../create-menu/create-menu.component';
 import { MainMenuDropdownComponent } from '../main-menu-dropdown/main-menu-dropdown.component';
 import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar.component';
@@ -38,7 +45,7 @@ export class TopBarComponent {
     @Input() chatCount: number;
     @Input() config: any;
     @Input() create: MainNavCreateConfig;
-    @Input() currentScope: string;
+    currentScope: InputSignal<string> = input<string>();
     @Input() currentUser: User;
     @Input() isCreateAllowed: boolean;
     @Input() isSafe: boolean;
@@ -58,15 +65,27 @@ export class TopBarComponent {
 
     createMenuX: number;
     createMenuY: number;
+    private footerScopes: WritableSignal<string[]> = signal([]);
+    footerVisible: Signal<boolean> = computed(() => {
+        return this.footerScopes().includes(this.currentScope());
+    });
+
     toggleSidebar = () => this.mainMenuSidebar.toggle();
 
     constructor(
         // FIXME: Required values should be passed as inputs.
         public connector: RestConnectorService,
-        private configService: ConfigurationService,
+        private configService: ConfigService,
         public mainNavService: MainNavService,
         public elementRef: ElementRef,
-    ) {}
+    ) {
+        this.configService
+            .observeConfig()
+            .pipe(take(1))
+            .subscribe(() => {
+                this.footerScopes.set(ConfigurationHelper.getFooter(this.config));
+            });
+    }
 
     getIconSource() {
         return this.configService.instant('mainnav.icon.url', 'assets/images/edu-white.svg');
