@@ -20,11 +20,14 @@
     --textMain: #383838;
     --buttonDisabled: #999;
     --workspaceTopBarBackground: #383838;
+    --workspaceTopBarFontColor: #fff;
+    --landingPageTopBarBackground: var(--workspaceTopBarBackground);
+    --landingPageTopBarFontColor: var(--workspaceTopBarFontColor);
+    --landingPageTopBarIconInvert: 0;
     --landingPageShortcutBackground: #fff;
     --landingPageShortcutNewColor: var(--palette-primary-700);
     --landingPageShortcutTileBackground: var(--palette-primary-700);
     --landingPageShortcutTileColor: var(--palette-primary-contrast-500);
-    --workspaceTopBarFontColor: #fff;
     --cardWidth: 270px;
     --borderRadiusCards: 20px;
     --borderRadiusBadges: 10px;

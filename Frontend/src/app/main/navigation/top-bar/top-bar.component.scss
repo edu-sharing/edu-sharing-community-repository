@@ -9,6 +9,15 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+
+    &.scope-landing {
+        background: var(--landingPageTopBarBackground, var(--workspaceTopBarBackground));
+        color: var(--landingPageTopBarFontColor, var(--workspaceTopBarFontColor));
+
+        .eduImage {
+            filter: invert(var(--landingPageTopBarIconInvert, 0));
+        }
+    }
 }
 
 .user span {
