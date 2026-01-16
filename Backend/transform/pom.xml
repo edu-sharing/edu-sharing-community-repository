@@ -19,12 +19,12 @@
     <name>edu_sharing-community-repository-backend-transform</name>
 
     <properties>
-        <spring.boot.version>3.4.7</spring.boot.version>
+        <spring.boot.version>3.5.7</spring.boot.version>
         <spring.version>6.2.8</spring.version>
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <alfresco.transform-core.version>5.2.2</alfresco.transform-core.version>
+        <alfresco.transform-core.version>5.2.4</alfresco.transform-core.version>
     </properties>
 
     <build>
@@ -141,7 +141,7 @@
         <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-core</artifactId>
-            <version>2.9.2</version>
+            <version>3.2.3</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
