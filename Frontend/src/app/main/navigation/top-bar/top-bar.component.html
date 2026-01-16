@@ -8,7 +8,10 @@
   (createElement)="created.emit($event)"
 ></es-create-menu>
 
-<div class="mobile-move-top2" [ngClass]="'scope-' + currentScope().toLowerCase()">
+<div
+  class="mobile-move-top2"
+  [ngClass]="currentScope() ? 'scope-' + currentScope().toLowerCase() : ''"
+>
   <div class="menuButtonOuter" [ngSwitch]="mainMenuStyle">
     <ng-container
       *ngIf="mainNavService.getCustomTemplateSlot(TemplateSlot.MainScopeButton) && showScope"
