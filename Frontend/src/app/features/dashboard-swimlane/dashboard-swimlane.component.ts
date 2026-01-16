@@ -95,7 +95,7 @@ export class DashboardSwimlaneComponent {
      * max items per swimlane
      */
     readonly maxItems = 25;
-    readonly maxItemsEvents = 6;
+    readonly maxItemsEvents = 4;
     columns = signal({} as ColumnType);
     streamEvents = signal(null as StreamDetails[]);
     sharesEvents = signal(null as ShareDetails[]);
