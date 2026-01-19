@@ -31,7 +31,10 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { MainComponentType, PrimaryMode } from '../editorial-page.component';
-import { NodesSelectorComponent } from '../nodes-selector/nodes-selector.component';
+import {
+    NodesSelectorComponent,
+    NodesSelectorConfig,
+} from '../nodes-selector/nodes-selector.component';
 import { MetadataSidebarComponent } from '../../workspace-page/metadata/metadata-sidebar.component';
 import { PreviewSidebarModule } from '../../../features/preview-sidebar/preview-sidebar.module';
 import { EditorialSidebarService } from './editorial-sidebar.service';
@@ -45,6 +48,10 @@ export type OptionState = {
      * This might vary by the specific option
      */
     optionState?: any;
+    /**
+     * any valid option config, varies for the selected option
+     */
+    optionConfig?: NodesSelectorConfig;
     trap: boolean;
     applyCallback?: (selected: Node[]) => boolean;
 };

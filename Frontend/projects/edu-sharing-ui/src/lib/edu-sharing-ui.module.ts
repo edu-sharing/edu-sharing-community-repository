@@ -11,7 +11,7 @@ import { FormatDatePipe } from './pipes/format-date.pipe';
 import { ListItemLabelPipe } from './node-entries/list-item-label.pipe';
 import { SortDropdownComponent } from './sort-dropdown/sort-dropdown.component';
 import { MdsModule } from './mds/mds.module';
-import { I18N_CONFIG } from '../public-api';
+import { I18N_CONFIG, UserAvatarComponent } from '../public-api';
 
 @NgModule({
     declarations: [],
@@ -20,6 +20,7 @@ import { I18N_CONFIG } from '../public-api';
         TranslateModule,
         EduSharingUiCommonModule,
         ListItemsModule,
+        UserAvatarComponent,
         NodeEntriesModule,
         // Loading the TranslationsModule here causes errors for lazy-loaded pages like the search
         // page. For usage outside the context of edu-sharing, we probably need to import the
@@ -33,6 +34,7 @@ import { I18N_CONFIG } from '../public-api';
         EduSharingUiCommonModule,
         ListItemsModule,
         NodeEntriesModule,
+        UserAvatarComponent,
         NodeImageSizePipe,
         FormatDatePipe,
         ListItemsModule,

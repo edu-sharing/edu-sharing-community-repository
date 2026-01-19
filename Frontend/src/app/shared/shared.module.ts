@@ -48,7 +48,6 @@ import { LinkComponent } from './components/link/link.component';
 import { MultiLineLabelComponent } from './components/multi-line-label/multi-line-label.component';
 import { PoweredByComponent } from './components/powered-by/powered-by.component';
 import { TutorialComponent } from './components/tutorial/tutorial.component';
-import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
 import { UserQuotaComponent } from './components/user-quota/user-quota.component';
 import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.component';
 import { ElementRefDirective } from './directives/element-ref.directive';
@@ -60,9 +59,7 @@ import { RegisterCustomPropertyDirective } from './directives/register-custom-pr
 import { SkipTargetDirective } from './directives/skip-target.directive';
 import { TitleDirective } from './directives/title.directive';
 import { ToolpermissionCheckDirective } from './directives/toolpermission-check.directive';
-import { AssetsPathPipe } from './pipes/assets-path.pipe';
 import { AuthorityAffiliationPipe } from './pipes/authority-affiliation.pipe';
-import { AuthorityColorPipe } from './pipes/authority-color.pipe';
 import { BitwisePipe } from './pipes/bitwise.pipe';
 import { PermissionNamePipe } from './pipes/permission-name.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
@@ -75,9 +72,7 @@ import { extensionUiProviders } from '../extension/extension-ui-providers';
 
 @NgModule({
     declarations: [
-        AssetsPathPipe,
         AuthorityAffiliationPipe,
-        AuthorityColorPipe,
         AuthorityRowComponent,
         AuthoritySearchInputComponent,
         BitwisePipe,
@@ -106,7 +101,6 @@ import { extensionUiProviders } from '../extension/extension-ui-providers';
         TitleDirective,
         ToolpermissionCheckDirective,
         TutorialComponent,
-        UserAvatarComponent,
         ImprintPrivacyComponent,
         UserQuotaComponent,
         VersionLabelPipe,
@@ -140,9 +134,7 @@ import { extensionUiProviders } from '../extension/extension-ui-providers';
     ],
     exports: [
         A11yModule,
-        AssetsPathPipe,
         AuthorityAffiliationPipe,
-        AuthorityColorPipe,
         AuthorityRowComponent,
         AuthoritySearchInputComponent,
         BitwisePipe,
@@ -209,7 +201,6 @@ import { extensionUiProviders } from '../extension/extension-ui-providers';
         TitleDirective,
         ToolpermissionCheckDirective,
         TutorialComponent,
-        UserAvatarComponent,
         UserQuotaComponent,
         VersionLabelPipe,
     ],

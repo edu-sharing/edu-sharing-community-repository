@@ -176,6 +176,9 @@ export class ManageAssignmentComponent {
     showFileDialog() {
         this.editorialSidebarService.showOption({
             option: 'SORT_INTO',
+            optionConfig: {
+                upload: 'fast',
+            },
             trap: true,
             applyCallback: (nodes) =>
                 nodes.every((n) => !this.nodeHelperService.isNodeCollection(n) && !n.isDirectory),

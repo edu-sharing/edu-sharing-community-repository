@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges, Optional } from '@angular/core';
-import { Assignment, GenericAuthority, Node } from 'ngx-edu-sharing-api';
+import { Assignment, GenericAuthority, Node, Submission } from 'ngx-edu-sharing-api';
 import { CustomFieldSpecialType, NodeEntriesGlobalService } from '../node-entries-global.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { NodeEntriesService } from '../../services/node-entries.service';
@@ -50,6 +50,8 @@ export class NodeTypeBadgeComponent implements OnChanges {
             return 'group';
         } else if ((this.node as Assignment).allowAdditionalDocumentSubmissions !== undefined) {
             return 'task';
+        } else if ((this.node as Submission).validationStatus !== undefined) {
+            return 'send';
         }
 
         return null;

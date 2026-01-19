@@ -26,7 +26,7 @@ with the W3C spec. -->
       </span>
       <span *ngIf="!_customImage">
         <img
-          *ngIf="_user?.profile?.avatar && !isSafe()"
+          *ngIf="_user?.profile?.avatar && (isSafe() | async) === false"
           [src]="_user.profile.avatar + '&crop=true&width=200&height=200'"
           class="userImage sizable"
           alt=""
@@ -35,8 +35,8 @@ with the W3C spec. -->
           class="user-letter"
           aria-hidden="true"
           style.background-color="{{ _user | authorityColor }}"
-          *ngIf="!icon && _user && !(_user?.profile?.avatar && !isSafe())"
-          >{{ getLetter(_user) }}</span
+          *ngIf="!icon && _user && !(_user?.profile?.avatar && (isSafe() | async) === false)"
+          >{{ getLetter(_user) | async }}</span
         >
         <i
           class="user-icon"

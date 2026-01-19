@@ -37,7 +37,13 @@ export class ListBaseComponent extends ListWidget implements OnChanges {
             if (this.customTemplate) {
                 this.widgetType = ListWidgetType.Custom;
             } else if (this.forceText) {
-                if (![ListWidgetType.NodeCounts, ListWidgetType.Text].includes(this.widgetType)) {
+                if (
+                    ![
+                        ListWidgetType.NodeCounts,
+                        ListWidgetType.NodeAssignment,
+                        ListWidgetType.Text,
+                    ].includes(this.widgetType)
+                ) {
                     this.widgetType = ListWidgetType.Text;
                 }
             }

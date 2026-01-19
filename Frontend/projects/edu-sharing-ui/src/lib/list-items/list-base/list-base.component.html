@@ -31,6 +31,12 @@
     [node]="node"
     [provideLabel]="provideLabel"
   ></es-list-counts>
+  <es-list-node-assignment
+    *ngSwitchCase="'NodeAssignment'"
+    [item]="item"
+    [node]="node"
+    [provideLabel]="provideLabel"
+  ></es-list-node-assignment>
   <es-list-node-license
     *ngSwitchCase="'NodeLicense'"
     [item]="item"

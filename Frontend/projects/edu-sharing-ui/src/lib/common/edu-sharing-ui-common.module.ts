@@ -38,6 +38,8 @@ import { ToolpermissionPipe } from '../pipes/toolpermission.pipe';
 import { AuthorityNamePipe } from '../pipes/authority-name.pipe';
 import { HtmlTextPipe } from '../pipes/html-text.pipe';
 import { AssignmentPipe } from '../pipes/assignment.pipe';
+import { AuthorityColorPipe } from '../pipes/authority-color.pipe';
+import { AssetsPathPipe } from '../pipes/assets-path.pipe';
 
 @NgModule({
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -59,6 +61,8 @@ import { AssignmentPipe } from '../pipes/assignment.pipe';
         NodeIconPipe,
         NodeUrlPipe,
         AuthorityNamePipe,
+        AuthorityColorPipe,
+        AssetsPathPipe,
         NodeImagePipe,
         NodeImageSizePipe,
         NodeLicensePipe,
@@ -103,6 +107,8 @@ import { AssignmentPipe } from '../pipes/assignment.pipe';
         NodeIconPipe,
         NodeUrlPipe,
         AuthorityNamePipe,
+        AuthorityColorPipe,
+        AssetsPathPipe,
         NodeImagePipe,
         NodeImageSizePipe,
         NodePersonNamePipe,

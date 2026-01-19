@@ -1,5 +1,5 @@
 import { Inject, Optional, Pipe, PipeTransform } from '@angular/core';
-import { EduSharingUiConfiguration } from 'ngx-edu-sharing-ui';
+import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
 
 /**
  * Prefixes a path to an asset with the assets base path, if configured.

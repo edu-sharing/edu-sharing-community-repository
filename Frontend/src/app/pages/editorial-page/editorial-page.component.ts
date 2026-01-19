@@ -414,6 +414,9 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         const criteria = JSON.parse(params.filters || '{}') as Values;
         const originalCriteria = Helper.deepCopy(criteria);
         this.mainComponent$.next(params.mainComponent || null);
+        if (!this.mainComponent$.value) {
+            this.editorialBreadcrumbService.path.set([]);
+        }
         const pagination = {
             skipCount: parseInt(params.offset) || 0,
             maxItems: parseInt(params.size) || this.PageCount,
@@ -455,6 +458,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         }
 
         console.log('processCurrentValues', params);
+        this.prepareOptions();
         this.dataSource.isLoading = true;
         this.dataSource.reset();
 

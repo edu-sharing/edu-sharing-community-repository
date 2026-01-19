@@ -75,7 +75,12 @@ enum StepType {
     SELECT = 'select',
     CONFIGURE = 'configure',
 }
-
+export type NodesSelectorConfig = {
+    /**
+     * fast skips metadata & question for duplicate behaviour
+     */
+    upload?: 'fast' | 'default';
+};
 @Component({
     selector: 'es-nodes-selector',
     templateUrl: 'nodes-selector.component.html',
@@ -382,10 +387,16 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         let createdNodes: Node[] | null;
         switch (result.kind) {
             case 'file':
-                createdNodes = await this.uploadDialogService.uploadFilesAndCreateNodes(result);
+                createdNodes = await this.uploadDialogService.uploadFilesAndCreateNodes(
+                    result,
+                    this.option.optionConfig?.upload !== 'fast',
+                );
                 break;
             case 'link':
-                createdNodes = await this.uploadDialogService.createLinkNode(result);
+                createdNodes = await this.uploadDialogService.createLinkNode(
+                    result,
+                    this.option.optionConfig?.upload !== 'fast',
+                );
                 break;
             default:
                 break;

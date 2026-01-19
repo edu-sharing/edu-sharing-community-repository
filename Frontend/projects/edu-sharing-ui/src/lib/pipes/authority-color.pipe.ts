@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { Helper } from '../../core-module/rest/helper';
-import { ColorHelper } from 'ngx-edu-sharing-ui';
+import { Helper } from '../util/helper';
+import { ColorHelper } from '../util/color-helper';
 
 @Pipe({
     name: 'authorityColor',

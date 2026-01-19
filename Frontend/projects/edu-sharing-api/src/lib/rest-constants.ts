@@ -181,6 +181,38 @@ export class RestConstants {
     public static AUTHORITY_TYPE_EVERYONE = 'EVERYONE';
     public static AUTHORITY_TYPE_UNKNOWN = 'UNKNOWN';
     public static AUTHORITY_EVERYONE = 'GROUP_EVERYONE';
+    public static GROUP_TYPE_ADMINISTRATORS = 'ORG_ADMINISTRATORS';
+    public static GROUP_TYPE_EDITORIAL = 'EDITORIAL';
+    public static GROUP_TYPE_TEACHER = 'TEACHER';
+    public static GROUP_TYPE_MEDIA_CENTER = 'MEDIA_CENTER';
+    public static GROUP_TYPE_MEDIACENTER_PROXY = 'MEDIA_CENTER_PROXY';
+    public static GROUP_TYPE_MEDIACENTER_ADMINISTRATORS = 'MEDIACENTER_ADMINISTRATORS';
+    public static GROUP_TYPE_CLASS = 'CLASS';
+    public static GROUP_TYPE_WORKING_GROUP = 'WORKING_GROUP';
+    public static GROUP_TYPE_LESSON = 'LESSON';
+    public static GROUP_TYPE_SCHOOL_NATIONAL = 'SCHOOL_NATIONAL';
+    public static GROUP_TYPE_SCHOOL_MUNICIPAL = 'SCHOOL_MUNICIPAL';
+    public static GROUP_TYPE_SCHOOL_PRIVATE = 'SCHOOL_PRIVATE';
+    public static VALID_GROUP_TYPES = [
+        null,
+        RestConstants.GROUP_TYPE_ADMINISTRATORS,
+        RestConstants.GROUP_TYPE_MEDIA_CENTER,
+        RestConstants.GROUP_TYPE_MEDIACENTER_PROXY,
+        RestConstants.GROUP_TYPE_MEDIACENTER_ADMINISTRATORS,
+        RestConstants.GROUP_TYPE_EDITORIAL,
+        RestConstants.GROUP_TYPE_TEACHER,
+        RestConstants.GROUP_TYPE_CLASS,
+        RestConstants.GROUP_TYPE_WORKING_GROUP,
+        RestConstants.GROUP_TYPE_LESSON,
+    ];
+    public static VALID_PERSON_STATUS_TYPES = ['active', 'blocked', 'todelete'];
+    public static VALID_GROUP_TYPES_ORG = [
+        null,
+        RestConstants.GROUP_TYPE_EDITORIAL,
+        RestConstants.GROUP_TYPE_SCHOOL_NATIONAL,
+        RestConstants.GROUP_TYPE_SCHOOL_MUNICIPAL,
+        RestConstants.GROUP_TYPE_SCHOOL_PRIVATE,
+    ];
 
     public static getAuthorityEveryone() {
         return {

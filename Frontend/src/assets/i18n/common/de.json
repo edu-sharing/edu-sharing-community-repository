@@ -348,7 +348,12 @@
     "SUBMISSION_STATUS": {
       "NOT_STARTED": "Abzugeben",
       "PENDING": "Gestartet",
-      "FINISHED": "Erledigt"
+      "FINISHED": "Abgegeben"
+    },
+    "VALIDATION_STATUS": {
+      "NOT_STARTED": "Zu korrigieren",
+      "PENDING": "In Korrektur",
+      "FINISHED": "Abgeschlossen"
     }
   },
   "SUBMISSION": {

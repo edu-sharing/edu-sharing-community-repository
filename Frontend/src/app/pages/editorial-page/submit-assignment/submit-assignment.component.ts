@@ -241,6 +241,9 @@ export class SubmitAssignmentComponent {
         this.editorialSidebarService.showOption({
             option: 'SORT_INTO',
             optionState: TabType.UPLOAD,
+            optionConfig: {
+                upload: 'fast',
+            },
             trap: true,
             applyCallback: (nodes) =>
                 nodes.every((n) => !this.nodeHelperService.isNodeCollection(n) && !n.isDirectory),

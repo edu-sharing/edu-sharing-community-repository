@@ -25,36 +25,6 @@
     {{ $any(getNode())[item.name] }}
   </span>
 </ng-container>
-<ng-container [ngSwitch]="item.name" *ngIf="item.type === 'ASSIGNMENT'">
-  <span *ngSwitchCase="'title'">
-    {{ $any(getNode()).title }}
-  </span>
-  <span
-    *ngSwitchCase="'summary'"
-    class="assignment-summary"
-    [innerHTML]="$any(getNode()).summary"
-    [matTooltip]="$any(getNode()).summary | htmlTextPipe"
-  >
-  </span>
-  <span *ngSwitchCase="'status'">
-    {{
-      'ASSIGNMENT.STATUS.' + $any(getNode()).status
-        | translate : { fallback: $any(getNode()).status }
-    }}
-  </span>
-  <span *ngSwitchCase="'submissionStatus'">
-    <ng-container *ngIf="($any(node) | assignment : { mode: 'permissions' }) === 'ASSIGNEE'">
-      {{ 'ASSIGNMENT.SUBMISSION_STATUS.' + ($any(node).submissions?.[0]?.submissionStatus || 'NOT_STARTED') | translate }}
-    </ng-container>
-    <ng-container *ngIf="($any(node) | assignment : { mode: 'permissions' }) === 'COORDINATOR'">
-      {{ $any(node) | assignment : { mode: 'submissionsDone' } }} /
-      {{ $any(node) | assignment : { mode: 'submissionsTotal' } }}
-    </ng-container>
-  </span>
-  <span *ngSwitchCase="'type'">
-    {{ 'ASSIGNMENT.TYPE.' + $any(getNode()).type | translate : { fallback: $any(getNode()).type } }}
-  </span>
-</ng-container>
 <ng-container [ngSwitch]="item.name" *ngIf="item.type === 'EVENT' || item.type === 'SHARE'">
   <span *ngSwitchCase="'eventType'">
     {{

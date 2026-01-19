@@ -4,18 +4,20 @@
 
 import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
-import { UIConstants } from 'ngx-edu-sharing-ui';
 import { DomSanitizer } from '@angular/platform-browser';
-import { RestConstants } from '../../../core-module/rest/rest-constants';
-import { Group, RestConnectorService, UserSimple } from '../../../core-module/core.module';
-import { TranslateService } from '@ngx-translate/core';
-import { AuthorityNamePipe } from 'ngx-edu-sharing-ui';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { AuthenticationService, Group, Person, RestConstants } from 'ngx-edu-sharing-api';
+import { map } from 'rxjs/operators';
+import { EduSharingUiCommonModule } from '../common/edu-sharing-ui-common.module';
+import { UIConstants } from '../util/ui-constants';
+import { CommonModule } from '@angular/common';
+import { AuthorityNamePipe } from '../pipes/authority-name.pipe';
 
 @Component({
     selector: 'es-user-avatar',
     templateUrl: 'user-avatar.component.html',
     styleUrls: ['user-avatar.component.scss'],
-    standalone: false,
+    imports: [TranslateModule, EduSharingUiCommonModule, CommonModule],
 })
 export class UserAvatarComponent {
     /**
@@ -23,9 +25,9 @@ export class UserAvatarComponent {
      * @type {boolean}
      */
     @Input() link = false;
-    @Input() _user: UserSimple | Group | any;
-    @Input() set user(data: UserSimple | Group | any) {
-        let result: UserSimple | Group | any = {};
+    @Input() _user: Person | Group | any;
+    @Input() set user(data: Person | Group | any) {
+        let result: Person | Group | any = {};
         // map elements comming from the permissions api to generic iam user/group
         if (data?.authority) {
             result.authorityName = data.authority.authorityName;
@@ -58,7 +60,7 @@ export class UserAvatarComponent {
     constructor(
         private router: Router,
         private translate: TranslateService,
-        private connector: RestConnectorService,
+        private authenticationService: AuthenticationService,
         private sanitizer: DomSanitizer,
     ) {}
     isEditorialUser() {
@@ -77,13 +79,23 @@ export class UserAvatarComponent {
         ]);
     }
 
-    getLetter(user: UserSimple) {
-        return this.connector.getCurrentLogin()?.isGuest
-            ? 'G'
-            : new AuthorityNamePipe(this.translate).transform(user, { avatarShortcut: true });
+    getLetter(user: Person) {
+        return this.authenticationService
+            .observeLoginInfo()
+            .pipe(
+                map((info) =>
+                    info?.isGuest
+                        ? 'G'
+                        : new AuthorityNamePipe(this.translate).transform(user, {
+                              avatarShortcut: true,
+                          }),
+                ),
+            );
     }
 
     isSafe() {
-        return this.connector.getCurrentLogin()?.currentScope !== null;
+        return this.authenticationService
+            .observeLoginInfo()
+            .pipe(map((info) => info?.currentScope !== null));
     }
 }

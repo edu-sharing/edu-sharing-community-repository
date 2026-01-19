@@ -31,7 +31,6 @@ export class ListTextComponent extends ListWidget implements OnInit {
         new ListItem('GROUP', '*'),
         new ListItem('USER', '*'),
         new ListItem('EVENT', '*'),
-        new ListItem('ASSIGNMENT', '*'),
         new ListItem('SHARE', '*'),
     ];
     readonly DATE_FIELDS = RestConstants.DATE_FIELDS;

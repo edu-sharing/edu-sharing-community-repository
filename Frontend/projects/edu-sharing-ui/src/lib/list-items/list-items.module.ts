@@ -13,6 +13,8 @@ import { CommonModule } from '@angular/common';
 import { EduSharingUiCommonModule } from '../common/edu-sharing-ui-common.module';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule } from '@ngx-translate/core';
+import { ListNodeAssignmentComponent } from './list-node-assignment/list-node-assignment.component';
+import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 
 @NgModule({
     declarations: [
@@ -20,6 +22,7 @@ import { TranslateModule } from '@ngx-translate/core';
         ListCollectionInfoComponent,
         ListNodeLicenseComponent,
         ListNodeReplicationSourceComponent,
+        ListNodeAssignmentComponent,
         ListNodeWorkflowComponent,
         ListTextComponent,
         ListCountsComponent,
@@ -27,7 +30,13 @@ import { TranslateModule } from '@ngx-translate/core';
         FormatDurationPipe,
         NodeRowComponent,
     ],
-    imports: [CommonModule, EduSharingUiCommonModule, MatTooltipModule, TranslateModule],
+    imports: [
+        CommonModule,
+        EduSharingUiCommonModule,
+        UserAvatarComponent,
+        MatTooltipModule,
+        TranslateModule,
+    ],
     exports: [ListBaseComponent, ListTextComponent, FormatDurationPipe, NodeRowComponent],
 })
 export class ListItemsModule {}

@@ -75,7 +75,7 @@ export class UploadDialogService {
     /**
      * Creates a new node for a web link in the repository.
      */
-    async createLinkNode(data: LinkData): Promise<Node[] | null> {
+    async createLinkNode(data: LinkData, showMetadataAfterUpload = true): Promise<Node[] | null> {
         const urlData = this._createUrlLink(data);
         this.toast.showProgressSpinner();
         const { node } = await this.nodeService
@@ -89,17 +89,28 @@ export class UploadDialogService {
             )
             .toPromise();
         this.toast.closeProgressSpinner();
-        return this._showMetadataAfterUpload([node]);
+        if (showMetadataAfterUpload) {
+            return this._showMetadataAfterUpload([node]);
+        } else {
+            return [node];
+        }
     }
 
     /**
      * Uploads new files and creates respective new nodes in the repository.
      */
-    async uploadFilesAndCreateNodes(data: FileData): Promise<Node[] | null> {
+    async uploadFilesAndCreateNodes(
+        data: FileData,
+        showMetadataAfterUpload = true,
+    ): Promise<Node[] | null> {
         const dialogRef = await this.dialogs.openFileUploadProgressDialog(data);
         const result = await dialogRef.afterClosed().toPromise();
         if (result.status === 'FINISHED' && result.nodes) {
-            return this._onFilesUploaded(result.nodes);
+            if (showMetadataAfterUpload) {
+                return this._onFilesUploaded(result.nodes);
+            } else {
+                return result.nodes;
+            }
         } else if (result.status === 'CANCELED' && result.nodes) {
             try {
                 await Promise.all(

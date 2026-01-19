@@ -1,0 +1,5 @@
+@use '../../node-entries/node-entries-card-small/node-entries-card-small.component' as badges;
+
+.status {
+    @include badges.assignmentBadge();
+}

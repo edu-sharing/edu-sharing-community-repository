@@ -5,12 +5,14 @@ import { ListNodeReplicationSourceComponent } from './list-node-replication-sour
 import { ListNodeWorkflowComponent } from './list-node-workflow/list-node-workflow.component';
 import { ListTextComponent } from './list-text/list-text.component';
 import { ListWidgetClass } from './list-widget';
+import { ListNodeAssignmentComponent } from './list-node-assignment/list-node-assignment.component';
 
 export enum ListWidgetType {
     CollectionInfo = 'CollectionInfo',
     Text = 'Text',
     Custom = 'Custom',
     NodeLicense = 'NodeLicense',
+    NodeAssignment = 'NodeAssignment',
     NodeReplicationSource = 'NodeReplicationSource',
     NodeWorkflow = 'NodeWorkflow',
     NodeCounts = 'NodeCounts',
@@ -20,6 +22,7 @@ export const AVAILABLE_LIST_WIDGETS: {
 } = {
     CollectionInfo: ListCollectionInfoComponent,
     NodeLicense: ListNodeLicenseComponent,
+    NodeAssignment: ListNodeAssignmentComponent,
     NodeReplicationSource: ListNodeReplicationSourceComponent,
     NodeWorkflow: ListNodeWorkflowComponent,
     NodeCounts: ListCountsComponent,
