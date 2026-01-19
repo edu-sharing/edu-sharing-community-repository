@@ -77,7 +77,7 @@ $tileSize: 124px;
     position: relative;
     width: $tileSize;
     height: $tileSize;
-    color: var(--landingPageShortcutTileColor);
+    color: var(--landingPageShortcutTileFontColor);
     background-color: var(--landingPageShortcutTileBackground);
     border-radius: 8px;
     box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.4);
@@ -179,9 +179,10 @@ $tileSize: 124px;
             width: 1em;
         }
 
-        // convert SVG icons to white
+        // convert SVG icons to specific color:
+        // https://codepen.io/sosuke/pen/Pjoqqp
         img.entry-icon {
-            filter: brightness(0) invert(1);
+            filter: var(--landingPageShortcutTileIconFilter, invert(0));
         }
     }
 
@@ -218,25 +219,25 @@ $tileSize: 124px;
             // fix line-height cuts off text on last row
             padding-bottom: 2px;
             text-align: center;
-            color: var(--landingPageShortcutTileColor);
+            color: var(--landingPageShortcutTileFontColor);
 
             .rename-node-title {
                 @include mat.form-field-overrides(
                     (
-                        outlined-label-text-color: var(--landingPageShortcutTileColor),
-                        outlined-hover-label-text-color: var(--landingPageShortcutTileColor),
-                        outlined-focus-label-text-color: var(--landingPageShortcutTileColor),
-                        outlined-input-text-color: var(--landingPageShortcutTileColor),
-                        outlined-outline-color: var(--landingPageShortcutTileColor),
-                        outlined-hover-outline-color: var(--landingPageShortcutTileColor),
-                        outlined-focus-outline-color: var(--landingPageShortcutTileColor),
+                        outlined-label-text-color: var(--landingPageShortcutTileFontColor),
+                        outlined-hover-label-text-color: var(--landingPageShortcutTileFontColor),
+                        outlined-focus-label-text-color: var(--landingPageShortcutTileFontColor),
+                        outlined-input-text-color: var(--landingPageShortcutTileFontColor),
+                        outlined-outline-color: var(--landingPageShortcutTileFontColor),
+                        outlined-hover-outline-color: var(--landingPageShortcutTileFontColor),
+                        outlined-focus-outline-color: var(--landingPageShortcutTileFontColor),
                     )
                 );
 
                 input {
                     max-width: 100px;
-                    caret-color: var(--landingPageShortcutTileColor);
-                    color: var(--landingPageShortcutTileColor);
+                    caret-color: var(--landingPageShortcutTileFontColor);
+                    color: var(--landingPageShortcutTileFontColor);
                     font-size: $fontSizeSmall;
                     font-weight: 700;
                     line-height: 1.2;
@@ -245,7 +246,7 @@ $tileSize: 124px;
                 // guarantee floating label stays in the correct color + font weight
                 &:not(.mat-form-field-disabled) ::ng-deep .mdc-floating-label {
                     font-weight: 700;
-                    color: var(--landingPageShortcutTileColor) !important;
+                    color: var(--landingPageShortcutTileFontColor) !important;
                 }
             }
         }

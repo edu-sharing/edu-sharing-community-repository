@@ -15,7 +15,7 @@
         color: var(--landingPageTopBarFontColor, var(--workspaceTopBarFontColor));
 
         .eduImage {
-            filter: invert(var(--landingPageTopBarIconInvert, 0));
+            filter: var(--landingPageTopBarIconFilter, invert(0));
         }
     }
 }
