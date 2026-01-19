@@ -310,14 +310,10 @@ $tileSize: 124px;
     position: fixed;
 }
 
-// quickfix for now - replace by es-dropdown, if possible
+// add a border-top to the last menu item
 ::ng-deep .add-shortcut-entry-menu {
-    .mat-mdc-menu-item .mat-icon {
-        font-size: 24px;
-    }
-    .mat-mdc-menu-item-text {
-        display: flex;
-        align-items: center;
+    ul li:last-of-type {
+        border-top: 1px solid var(--mat-menu-divider-color, var(--mat-sys-surface-variant));
     }
 }
 

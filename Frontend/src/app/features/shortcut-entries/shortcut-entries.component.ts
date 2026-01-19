@@ -14,7 +14,6 @@ import {
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
-import { MatDivider } from '@angular/material/divider';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
@@ -59,7 +58,6 @@ import { ShortcutEntryTitlePipe } from './shortcut-entry-title.pipe';
         FormsModule,
         MatButtonModule,
         MatCard,
-        MatDivider,
         MatInputModule,
         MatMenuModule,
         ShortcutEntryTitlePipe,
@@ -89,7 +87,7 @@ export class ShortcutEntriesComponent implements OnInit {
     maxItems: number = 4;
     mobileEditMode = false;
     nodeIncluded: WritableSignal<boolean> = signal(false);
-    remainingClientConfigEntries: ShortcutConfigEntry[] = [];
+    remainingEntryOptions: WritableSignal<OptionItem[]> = signal([]);
     renameEntryVisible: boolean = false;
     selectedEntryIndex: number = -1;
 
@@ -538,10 +536,22 @@ export class ShortcutEntriesComponent implements OnInit {
             }
         });
         // calculate the remaining client config entries that can be added
-        const entryDefaults: string[] = this.entries.filter((e) => !!e.id).map((e) => e.id);
-        this.remainingClientConfigEntries = this.clientConfigEntries.filter(
-            (entry) => !entryDefaults.includes(entry.id),
+        const entryDefaultIds = this.entries.filter((e) => e.id).map((e) => e.id);
+        const remainingEntries = this.clientConfigEntries.filter(
+            (entry) => !entryDefaultIds.includes(entry.id),
         );
+
+        const entryOptions = [
+            ...remainingEntries.map(
+                (item) =>
+                    new OptionItem(this.i18nPrefix + item.id, item.icon, () => this.addEntry(item)),
+            ),
+            new OptionItem(this.i18nPrefix + 'SELECT_ELEMENT', 'call_made', () =>
+                this.selectElement(),
+            ),
+        ];
+
+        this.remainingEntryOptions.set(entryOptions);
     }
 
     /**

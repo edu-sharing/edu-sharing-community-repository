@@ -123,19 +123,6 @@
   </button>
 </div>
 
-<!-- menu to add new shortcut entries -->
-<mat-menu #menu="matMenu" class="add-shortcut-entry-menu">
-  <button mat-menu-item (click)="addEntry(item)" *ngFor="let item of remainingClientConfigEntries">
-    <i *ngIf="item.icon" [esIcon]="item.icon"></i>
-    {{ i18nPrefix + item.id | translate }}
-  </button>
-  <mat-divider></mat-divider>
-  <button mat-menu-item (click)="selectElement()">
-    <i esIcon="call_made"></i>
-    {{ i18nPrefix + 'SELECT_ELEMENT' | translate }}
-  </button>
-</mat-menu>
-
 <!-- dropdown and dummy dropdown trigger to open it on specific positions -->
 <es-dropdown #dropdown [options]="entryOptions"></es-dropdown>
 <button
@@ -149,6 +136,14 @@
   aria-hidden="true"
 ></button>
 
+<!-- dropdown to add new shortcut entries -->
+<es-dropdown
+  #newEntryDropdown
+  menuClass="add-shortcut-entry-menu"
+  [options]="remainingEntryOptions()"
+  position="right"
+></es-dropdown>
+
 <!-- button to add new entries -->
 <ng-template #addNewEntry>
   <!-- when opened within a modal, execute a click event and when not, use the mat menu trigger -->
@@ -156,8 +151,7 @@
     *ngIf="entries.length < maxItems"
     class="entry-card empty"
     [class.disabled]="nodeIncluded()"
-    (click)="addEntryClicked()"
-    [matMenuTriggerFor]="openedInModal() ? null : menu"
+    [matMenuTriggerFor]="newEntryDropdown.menu"
   >
     <div class="entry-icon-wrapper">
       <i esIcon="add" class="entry-icon"></i>
