@@ -5,13 +5,17 @@ footer {
     display: flex;
     align-items: center;
     justify-content: center;
+    background: var(--footerBackground);
 
     es-imprint-privacy {
         display: flex;
         gap: 32px;
         text-align: center;
-        color: var(--textLight);
         font-size: vars.$fontSizeLarge;
         font-weight: bold;
+
+        &::ng-deep a {
+            color: var(--footerFontColor);
+        }
     }
 }
