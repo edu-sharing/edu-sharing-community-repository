@@ -290,7 +290,7 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
 
 
         Node contentNode = null;
-        if (AssignmentUtil.isAssignmentCoordinator(permissionService, getCorrectionNodeId()) || submissionDao.isReturned()) {
+        if (getCorrectionNodeId() != null && (AssignmentUtil.isAssignmentCoordinator(permissionService, getCorrectionNodeId()) || submissionDao.isReturned())) {
             contentNode = this.contentNode.get();
         }
 
@@ -305,7 +305,7 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
 
     @Override
     public Submission.Status getValidationStatus() {
-        if (AssignmentUtil.isAssignmentCoordinator(permissionService, getCorrectionNodeId())) {
+        if (getCorrectionNodeId() != null && AssignmentUtil.isAssignmentCoordinator(permissionService, getCorrectionNodeId())) {
             return propertyMapper.get().getEnum(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, Submission.Status.class);
         } else {
             return null;
