@@ -25,10 +25,10 @@
     --landingPageTopBarFontColor: var(--workspaceTopBarFontColor);
     --landingPageTopBarIconFilter: invert(0);
     --landingPageShortcutBackground: #fff;
-    --landingPageShortcutNewColor: var(--palette-primary-contrast-500);
-    --landingPageShortcutTileBackground: var(--palette-primary-contrast-500);
-    --landingPageShortcutTileFontColor: var(--palette-primary-700);
-    --landingPageShortcutTileIconFilter: invert(0);
+    --landingPageShortcutNewColor: var(--landingPageShortcutTileBackground);
+    --landingPageShortcutTileBackground: var(--palette-primary-700);
+    --landingPageShortcutTileFontColor: var(--palette-primary-contrast-500);
+    --landingPageShortcutTileIconFilter: brightness(0) invert(1);
     --cardWidth: 270px;
     --borderRadiusCards: 20px;
     --borderRadiusBadges: 10px;
