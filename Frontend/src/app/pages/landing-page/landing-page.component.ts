@@ -101,6 +101,8 @@ export class LandingPageComponent implements OnInit, OnDestroy {
     }
 
     async ngOnInit(): Promise<void> {
+        // reset the search field to an empty string, so the page navigation is not triggered again
+        this.searchFieldService.getCurrentInstance().setSearchString('');
         const login = await firstValueFrom(this.authenticationService.observeLoginInfo());
         if (login.statusCode !== RestConstants.STATUS_CODE_OK) {
             this.ui.goToLogin();
