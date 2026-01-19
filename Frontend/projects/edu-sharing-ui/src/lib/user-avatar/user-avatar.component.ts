@@ -80,17 +80,15 @@ export class UserAvatarComponent {
     }
 
     getLetter(user: Person) {
-        return this.authenticationService
-            .observeLoginInfo()
-            .pipe(
-                map((info) =>
-                    info?.isGuest
-                        ? 'G'
-                        : new AuthorityNamePipe(this.translate).transform(user, {
-                              avatarShortcut: true,
-                          }),
-                ),
-            );
+        return this.authenticationService.observeLoginInfo().pipe(
+            map((info) =>
+                info?.isGuest
+                    ? 'G'
+                    : new AuthorityNamePipe(this.translate).transform(user, {
+                          avatarShortcut: true,
+                      }),
+            ),
+        );
     }
 
     isSafe() {
