@@ -715,7 +715,12 @@ export class MdsEditorInstanceService
     /**
      * is the ai suggestion toggle set to true?
      */
-    showAiSuggestions = new BehaviorSubject<boolean>(false);
+    readonly showAiSuggestions = new BehaviorSubject<boolean>(false);
+
+    /**
+     * are ai suggestions currently generated
+     */
+    readonly aiLoading = new BehaviorSubject(false);
 
     /** MDS Views of the relevant group (in order). */
     views: MdsView[];
