@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 public interface EduTrackingMapper {
-    List<NodeResult> eduAlteredNodes(@Param("from") Date from);
+    List<NodeResult> eduAlteredNodes(@Param("from") Date from, @Param("to") Date to);
     List<NodeData> eduNodeData(@Param("id") String id, @Param("format") String format, @Param("from") Date from);
 
 }

@@ -34,7 +34,7 @@ public interface TrackingService {
         LOGOUT_USER_TIMEOUT,
         LOGOUT_USER_REGULAR
     }
-    List<String> getAlteredNodes(java.util.Date from);
+    List<String> getAlteredNodes(java.util.Date from, java.util.Date to);
     List<NodeData> getNodeData(String nodeId, java.util.Date from);
     boolean trackActivityOnUser(String authorityName,EventType type);
 

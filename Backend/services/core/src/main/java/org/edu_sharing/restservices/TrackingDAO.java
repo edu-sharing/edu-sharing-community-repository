@@ -89,8 +89,8 @@ public class TrackingDAO {
         return trackingAuthority;
     }
 
-    public static List<String> getNodesAltered(Date dateFrom) {
-        return TrackingServiceFactory.getTrackingService().getAlteredNodes(dateFrom);
+    public static List<String> getNodesAltered(Date dateFrom, Date dateTo) {
+        return TrackingServiceFactory.getTrackingService().getAlteredNodes(dateFrom, dateTo);
     }
 
     public static List<NodeData> getNodeData(String nodeId, Date dateFrom) {

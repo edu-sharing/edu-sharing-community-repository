@@ -4,7 +4,7 @@
 <!-- mybatis TransactionDao mapper configuration -->
 <mapper namespace="org.edu_sharing.service.tracking.ibatis.EduTrackingMapper">
     <select id="eduAlteredNodes" parameterType="java.util.Date" resultType="org.edu_sharing.service.tracking.ibatis.NodeResult">
-        select node_uuid as nodeid from edu_tracking_node where time >= #{from} GROUP BY node_uuid
+        select node_uuid as nodeid from edu_tracking_node where time >= #{from} and time &lt; #{to}  GROUP BY node_uuid
     </select>
     <!-- will combine both overall count by type as well as grouped by date for a given max range-->
     <select id="eduNodeData" resultType="org.edu_sharing.service.tracking.ibatis.NodeData">
