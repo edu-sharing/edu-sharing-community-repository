@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -26,6 +27,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.EduSharingLockHelper;
 import org.edu_sharing.repository.server.tools.ImageTool;
 import org.edu_sharing.repository.server.tools.cache.PersonCache;
+import org.edu_sharing.repository.server.tools.cache.UserCache;
 import org.edu_sharing.restservices.iam.v1.model.DashboardShortcutEntry;
 import org.edu_sharing.restservices.iam.v1.model.GroupEntries;
 import org.edu_sharing.restservices.iam.v1.model.ProfileSettings;
@@ -172,6 +174,7 @@ public class PersonDao {
     private final DashboardConfigService dashboardConfigService;
 
     private DataProtectionService dataProtectionService;
+    private final UserCache userCache;
 
 
     public PersonDao(RepositoryDao repoDao, String userName) throws DAOException {
@@ -198,6 +201,7 @@ public class PersonDao {
 			);*/
 
             dataProtectionService = ApplicationContextFactory.getApplicationContext().getBean(DataProtectionService.class);
+            userCache = AlfAppContextGate.getApplicationContext().getBean(UserCache.class);
 
         } catch (Throwable t) {
             throw DAOException.mapping(t);
@@ -423,7 +427,7 @@ public class PersonDao {
             profile.setEmail("");
         }
         profile.setPrimaryAffiliation(getPrimaryAffiliation());
-        profile.setAvatar(getAvatar());
+        profile.setAvatar(getAvatar(getAvatarNode()));
         profile.setAbout(getAbout());
         profile.setSkills(getSkills());
         profile.setVCard(getVCard());
@@ -515,20 +519,15 @@ public class PersonDao {
     }
 
     private org.alfresco.service.cmr.repository.NodeRef getAvatarNode() {
-        List<ChildAssociationRef> refs = this.nodeService.getChildrenChildAssociationRef(getNodeId());
-        for (ChildAssociationRef ref : refs) {
-            if (ref.getTypeQName().equals(QName.createQName(CCConstants.ASSOC_USER_PREFERENCEIMAGE))) {
-                return ref.getChildRef();
-            }
-        }
-        return null;
+        List<ChildAssociationRef> refs = this.nodeService.getChildrenChildAssociationRefAssoc(getNodeId(), CCConstants.ASSOC_USER_PREFERENCEIMAGE, null, null);
+        return refs.isEmpty() ? null : refs.get(0).getChildRef();
     }
 
-    private String getAvatar() {
-        org.alfresco.service.cmr.repository.NodeRef avatar = getAvatarNode();
-        if (avatar == null)
+    public static String getAvatar(org.alfresco.service.cmr.repository.NodeRef avatarNode) {
+        if (avatarNode == null || avatarNode.getId() == null) {
             return null;
-        return NodeServiceHelper.getPreview(avatar).getUrl();
+        }
+        return NodeServiceHelper.getPreview(avatarNode).getUrl();
     }
 
     public void removeAvatar() throws DAOException {
@@ -558,6 +557,7 @@ public class PersonDao {
             NodeServiceHelper.setCreateVersion(nodeId, false);
             nodeService.writeContent(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId, result.getInputStream(), result.getMediaType().toString(), null, CCConstants.CM_PROP_CONTENT);
             this.nodeService.setPermissions(nodeId, CCConstants.AUTHORITY_GROUP_EVERYONE, new String[]{CCConstants.PERMISSION_CONSUMER}, true);
+            this.userCache.refresh(getAuthorityName());
         } catch (Throwable t) {
             throw DAOException.mapping(t);
         }

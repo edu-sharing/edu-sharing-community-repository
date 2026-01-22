@@ -3,17 +3,21 @@ package org.edu_sharing.repository.server.tools.cache;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.alfresco.repo.cache.SimpleCache;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.service.namespace.RegexQNamePattern;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
@@ -58,6 +62,10 @@ public class UserCache {
             user.setGivenName((String) props.get(QName.createQName(CCConstants.CM_PROP_PERSON_FIRSTNAME)));
             user.setSurname(((String) props.get(QName.createQName(CCConstants.CM_PROP_PERSON_LASTNAME))));
             user.setNodeId(persNoderef.getId());
+            List<ChildAssociationRef> refs = this.nodeService.getChildAssocs(persNoderef,  QName.createQName(CCConstants.ASSOC_USER_PREFERENCEIMAGE), RegexQNamePattern.MATCH_ALL);
+            if(!refs.isEmpty()) {
+                user.setAvatarNodeId(refs.get(0).getChildRef().getId());
+            }
             Map<String, Serializable> userProperties = new HashMap<>();
             for (Map.Entry<QName, Serializable> entry : props.entrySet()) {
                 Serializable value = entry.getValue();

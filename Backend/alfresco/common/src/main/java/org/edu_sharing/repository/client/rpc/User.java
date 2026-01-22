@@ -12,6 +12,7 @@ import java.util.Map;
 public class User extends Authority {
 
 	private String nodeId;
+	private String avatarNodeId;
 	private String email;
 	private String givenName;
 	private String surname;
