@@ -17,7 +17,7 @@
         },
         {
         "role": "user",
-        "content": "Ich benötige hilfe bei diesem Material. Es hat die folgenden Eigenschaften \nTitel: {{var.cclom:title|-}}\nDateiname: {{var.cm:name|-}}\nLink: {{var.ccm:wwwwurl|-}}\nMaterialart: {{var.ccm:educationallearningresourcetype|-}}\nSchlagworte: {{var.cclom:general_keyword|-}}\nBeschreibung: {{var.cclom:general_description|-}}\nFormat: {{node.cclom:format|-}}\nMedientyp: {{node.virtual:mediatype|-}}"
+        "content": "Ich benötige hilfe bei diesem Material. Es hat die folgenden Eigenschaften \nTitel: {{var(cclom:title)|-}}\nDateiname: {{var(cm:name)|-}}\nLink: {{var(ccm:wwwwurl)|-}}\nMaterialart: {{var(ccm:educationallearningresourcetype)|-}}\nSchlagworte: {{var(cclom:general_keyword)|-}}\nBeschreibung: {{var(cclom:general_description)|-}}\nFormat: {{node(cclom:format)|-}}\nMedientyp: {{node(virtual:mediatype)|-}}"
         }
         ]
         }
@@ -33,7 +33,7 @@
         "size": "256x256",
         "n": 3,
         "response_format": "b64_json",
-        "prompt": "Ich benötige ein Bild für dieses Material. Es hat die folgenden Eigenschaften \nTitel: {{var.cclom:title|{{node.cclom:title|-}}}}\nDateiname: {{var.cm:name|{{node.cm:name|-}}}}\nLink: {{var.ccm:wwwwurl|{{node.ccm:wwwurl|-}}}}\nMaterialart: {{var.ccm:educationallearningresourcetype|{{node.ccm:educationallearningresourcetype||-}}}}\nSchlagworte: {{var.cclom:general_keyword|{{node.cclom:general_keyword|-}}}}\nBeschreibung: {{var.cclom:general_description|{{node.cclom:general_description|-}}}}. Erstelle das Bild im Stil {{var.preview.drawingStyle}}"
+        "prompt": "Ich benötige ein Bild für dieses Material. Es hat die folgenden Eigenschaften \nTitel: {{var(cclom:title)|node(cclom:title)|-}}\nDateiname: {{var(cm:name)|node(cm:name)|-}}\nLink: {{var(ccm:wwwwurl)|node(ccm:wwwurl)|-}}\nMaterialart: {{var(ccm:educationallearningresourcetype)|node(ccm:educationallearningresourcetype)||-}}\nSchlagworte: {{var(cclom:general_keyword)|node(cclom:general_keyword)|-}}\nBeschreibung: {{var(cclom:general_description)|node(cclom:general_description)|-}}. Erstelle das Bild im Stil {{var(preview.drawingStyle)}}"
         }
       </createImage>
     </aiConfig>
@@ -248,7 +248,7 @@
             "messages": [
             {
             "role": "user",
-            "content": "Ordne das Material in einer der folgende Kategorien ein: {{widget.$.ccm:educationallearningresourcetype.values..caption}}"
+            "content": "Ordne das Material in einer der folgende Kategorien ein: {{widget(\"ccm:educationallearningresourcetype\".values[*].{id:id, name:caption})}} nutze zur Einordnung den Namen aber gib die jeweilige id zurück."
             }
             ]
             }

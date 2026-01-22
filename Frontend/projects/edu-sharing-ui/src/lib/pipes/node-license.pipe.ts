@@ -1,7 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
 import { TranslateService } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 export type LicenseType = 'name';
 
@@ -11,7 +11,7 @@ export type LicenseType = 'name';
 })
 export class NodeLicensePipe implements PipeTransform {
     constructor(private translate: TranslateService) {}
-    transform(node: Node, args: { type: LicenseType }) {
+    transform(node: Node, args: { type: LicenseType }): Observable<string> {
         if (node.properties[RestConstants.CCM_PROP_LICENSE]?.[0]) {
             if (args?.type === 'name') {
                 return this.translate.get(

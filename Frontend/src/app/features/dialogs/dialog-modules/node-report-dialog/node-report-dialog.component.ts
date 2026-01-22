@@ -24,12 +24,7 @@ import {
 } from 'ngx-edu-sharing-api';
 import { UIAnimation } from 'ngx-edu-sharing-ui';
 import { forkJoin } from 'rxjs';
-
-export interface NodeReportDialogData {
-    node: Node;
-    mode: 'NODE_REPORT' | 'REVOKE_FEEDBACK';
-    showOptions: boolean;
-}
+import { NodeReportDialogData } from 'ngx-rendering-service-lib';
 
 @Component({
     selector: 'es-node-report-dialog',

@@ -54,6 +54,8 @@ import { WebComponentService } from './main/web-component.service';
 import { PreviewSidebarComponent } from './features/preview-sidebar/preview-sidebar.component';
 import { WebComponentLocationStrategy } from './main/web-component.utils';
 import { RenderingServiceApiModule } from 'ngx-rendering-service-api';
+import { DialogsService } from './features/dialogs/dialogs.service';
+import { DialogsService as DialogsServiceAbstract } from 'ngx-rendering-service-lib';
 
 const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     showDelay: 500,

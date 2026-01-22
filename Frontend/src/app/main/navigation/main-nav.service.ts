@@ -64,7 +64,7 @@ export class MainNavConfig {
     /**
      * Custom options that should be placed in the "New" menu
      */
-    customCreateOptions?: OptionItem[];
+    customCreateOptions?: CustomOptions;
     /**
      * custom options / options configuration for the user dropdown menu on the right
      */

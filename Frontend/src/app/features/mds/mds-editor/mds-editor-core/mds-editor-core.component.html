@@ -6,9 +6,9 @@
   <mat-slide-toggle
     color="primary"
     (change)="setAiSuggestions($event)"
-    [disabled]="aiLoading | async"
+    [disabled]="mdsEditorInstance.aiLoading | async"
   >
-    <es-spinner-small *ngIf="aiLoading | async"></es-spinner-small>
+    <es-spinner-small *ngIf="mdsEditorInstance.aiLoading | async"></es-spinner-small>
     <!--{{ 'MDS.AI.GENERATE_ALL_BUTTON' | translate }}-->
   </mat-slide-toggle>
 </div>

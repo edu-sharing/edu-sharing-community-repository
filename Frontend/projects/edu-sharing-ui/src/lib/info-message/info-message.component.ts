@@ -1,10 +1,12 @@
 import { Component, Input } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
+import { IconDirective } from '../directives/icon.directive';
 
 @Component({
     selector: 'es-info-message',
     templateUrl: 'info-message.component.html',
     styleUrls: ['info-message.component.scss'],
-    standalone: false,
+    imports: [TranslateModule, IconDirective],
 })
 export class InfoMessageComponent {
     /**

@@ -10,7 +10,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
-import { firstValueFrom, Subject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
 import { map, takeUntil, tap } from 'rxjs/operators';
 import { RestHelper } from '../../core-module/core.module';
 import { CardDialogRef } from '../dialogs/card-dialog/card-dialog-ref';
@@ -18,6 +18,7 @@ import { DialogsService } from '../dialogs/dialogs.service';
 import { PreviewContentComponent } from './preview-content.component';
 import { GenericDialogData } from '../dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { PreviewSidebarService } from './preview-sidebar.service';
+import { CustomOptions } from 'ngx-edu-sharing-ui';
 
 /**
  * Sidebar component that previews an element with preview image and some metadata.
@@ -36,6 +37,10 @@ export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
 
     /** The node to preview. */
     @Input() node: Node;
+    /**
+     * custom options to configure the actionbar
+     */
+    @Input() customOptions: CustomOptions;
     /** Emits when the user clicked the "close" button. */
     @Output() closed = new EventEmitter<void>();
 
@@ -43,6 +48,7 @@ export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
 
     private readonly destroyed = new Subject<void>();
     private modalDialogRef: CardDialogRef<GenericDialogData<string>, string>;
+    private modalOpen$ = new BehaviorSubject<boolean>(false);
 
     constructor(
         private dialogs: DialogsService,
@@ -72,6 +78,10 @@ export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
                 await this.openAsDialog();
             });
         }
+    }
+
+    getModalOpenState(): BehaviorSubject<boolean> {
+        return this.modalOpen$;
     }
 
     private registerDialogOnMobile(): void {
@@ -107,8 +117,10 @@ export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
             minHeight: '100%',
             contentPadding: 0,
         });
+        this.modalOpen$.next(true);
         this.modalDialogRef.afterClosed().subscribe(() => {
             this.modalDialogRef = null;
+            this.modalOpen$.next(false);
             if (this.isMobileScreen && !this.destroyed.isStopped) {
                 this.closed.emit();
             }

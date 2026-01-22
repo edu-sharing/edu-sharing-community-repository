@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.policy.OnUpdatePersonPropertiesPolicy;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -113,6 +114,7 @@ public class SSOAuthorityMapper {
 	boolean updateMemberships = true;
 	boolean debug = false;
 	String mappingGroupBuilderClass;
+    boolean setupHomeDir = true;
 
 	/**
 	 * prefer value for req.getRemoteUser() as username
@@ -385,8 +387,14 @@ public class SSOAuthorityMapper {
 						}
 					}
 
-
-					personService.createPerson(personProperties);
+                    try {
+                        if (!setupHomeDir) {
+                            OnUpdatePersonPropertiesPolicy.constructPersonFolders.set(false);
+                        }
+                        personService.createPerson(personProperties);
+                    }finally {
+                        OnUpdatePersonPropertiesPolicy.constructPersonFolders.set(null);
+                    }
 				} else if (updateUser) {
 
 					//don't update the username (this lead to lowercase username when lowercase username comes with sso data
@@ -828,4 +836,12 @@ public class SSOAuthorityMapper {
 	public boolean isAuthByAppCheckClientIp() {
 		return authByAppCheckClientIp;
 	}
+
+    public void setSetupHomeDir(boolean setupHomeDir) {
+        this.setupHomeDir = setupHomeDir;
+    }
+
+    public boolean isSetupHomeDir() {
+        return setupHomeDir;
+    }
 }

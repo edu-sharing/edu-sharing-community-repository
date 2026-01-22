@@ -38,6 +38,13 @@ a:active {
     font-size: 30px;
     color: #fff;
 }
+.revoked {
+    h1 {
+        margin: 0;
+        padding: 20px 20px;
+        text-align: center;
+    }
+}
 :host ::ng-deep {
     a.edusharing_rendering_content {
         background-color: var(--primary);

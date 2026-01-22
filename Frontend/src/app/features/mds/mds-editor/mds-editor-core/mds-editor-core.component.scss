@@ -48,6 +48,10 @@ $toggleHeight: 39px;
     mat-slide-toggle {
         display: flex;
         --textLight: var(--aiColorText);
+        --mdc-switch-selected-track-color: color-mix(in srgb, var(--aiColor), #fff 55%);
+        --mdc-switch-selected-focus-track-color: color-mix(in srgb, var(--aiColor), #fff 55%);
+        --mdc-switch-selected-hover-track-color: color-mix(in srgb, var(--aiColor), #fff 55%);
+        --mdc-switch-selected-pressed-track-color: color-mix(in srgb, var(--aiColor), #fff 55%);
         --mdc-switch-unselected-handle-color: var(--aiColorText);
         --mdc-switch-unselected-focus-handle-color: var(--aiColorText);
         --mdc-switch-unselected-hover-handle-color: var(--aiColorText);

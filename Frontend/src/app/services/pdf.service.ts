@@ -1,7 +1,7 @@
 import { Injectable, Injector } from '@angular/core';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
-import { Content, TDocumentDefinitions } from 'pdfmake/interfaces';
+import { Content, ContentText, TDocumentDefinitions } from 'pdfmake/interfaces';
 import { Node } from 'ngx-edu-sharing-api';
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { NodeHelperService } from './node-helper.service';
@@ -94,9 +94,10 @@ export class PdfService {
             color: getComputedStyle(document.documentElement).getPropertyValue('--primary'),
             margin: [0, 10, 0, 10],
             decoration: 'underline',
-            fontSize: 9,
+            fontSize: 10,
+            wordBreak: 'break-all',
             noWrap: false,
-        } as Content;
+        } as ContentText;
 
         const qrCodeData = await this.createQrCode(node);
         if (imageData && qrCodeData && imageDimensions) {

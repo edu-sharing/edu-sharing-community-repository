@@ -779,7 +779,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 const profile = this.edit.profile;
                 if (this._mode == 'ORG') {
                     this.toast.showProgressSpinner();
-                    this.organization.createOrganization(name).subscribe(
+                    this.organization.createOrganization(name.trim()).subscribe(
                         (result) => {
                             this.edit = null;
                             this.iam.editGroup(result.authorityName, profile).subscribe(
@@ -801,7 +801,11 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 } else {
                     this.toast.showProgressSpinner();
                     this.iam
-                        .createGroup(name, this.edit.profile, this.org ? this.org.groupName : '')
+                        .createGroup(
+                            name.trim(),
+                            this.edit.profile,
+                            this.org ? this.org.groupName : '',
+                        )
                         .subscribe(
                             (group) => {
                                 this.edit = null;
@@ -845,28 +849,35 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             this.toast.showProgressSpinner();
             if (this.editId == null) {
                 const name = this.editDetails.authorityName;
-                this.iam.createUser(name, password, editStore.profile).subscribe(
-                    (user) => {
-                        this.edit = null;
-                        this.toast.closeProgressSpinner();
-                        if (this.org) {
-                            this.iam.addGroupMember(this.org.authorityName, name).subscribe(
-                                () => {
-                                    this.toast.toast('PERMISSIONS.USER_CREATED');
-                                    this.addVirtualEntry(user);
-                                },
-                                (error: any) => this.toast.error(error),
-                            );
-                        } else {
-                            this.toast.toast('PERMISSIONS.USER_CREATED');
-                            this.addVirtualEntry(user);
-                        }
-                    },
-                    (error: any) => {
-                        this.handleError(error);
-                        this.toast.closeProgressSpinner();
-                    },
-                );
+                this.iamService
+                    .createUser({
+                        person: name.trim(),
+                        repository: HOME_REPOSITORY,
+                        password,
+                        body: editStore.profile,
+                    })
+                    .subscribe(
+                        (user) => {
+                            this.edit = null;
+                            this.toast.closeProgressSpinner();
+                            if (this.org) {
+                                this.iam.addGroupMember(this.org.authorityName, name).subscribe(
+                                    () => {
+                                        this.toast.toast('PERMISSIONS.USER_CREATED');
+                                        this.addVirtualEntry(user);
+                                    },
+                                    (error: any) => this.toast.error(error),
+                                );
+                            } else {
+                                this.toast.toast('PERMISSIONS.USER_CREATED');
+                                this.addVirtualEntry(user);
+                            }
+                        },
+                        (error: any) => {
+                            this.handleError(error);
+                            this.toast.closeProgressSpinner();
+                        },
+                    );
             } else {
                 this.iam.editUser(this.editId, editStore.profile).subscribe(
                     async () => {
