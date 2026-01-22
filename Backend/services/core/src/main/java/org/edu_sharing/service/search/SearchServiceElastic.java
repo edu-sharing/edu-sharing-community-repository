@@ -1668,7 +1668,7 @@ public class SearchServiceElastic implements SearchService {
                         )
                 )
         ));
-        return searchInternalWithChildQuery("recentUserEvents", searchCriteria, searchToken, childQuery, (data) -> {
+        return searchInternalWithChildQuery("recentUserEvents", searchCriteria, searchToken, null, childQuery, (data) -> {
             Map userEvent = (Map) data.getInnerHits().get("userEvent").hits().hits().get(0).source().to(Map.class).get("userEvent");
             return new SearchUserEvent(
                     data.getNodeRef(),
@@ -1755,7 +1755,7 @@ public class SearchServiceElastic implements SearchService {
                         )
                 ))
         ))._toQuery();
-        return searchInternalWithChildQuery("shared", searchCriteria, searchToken, childQuery, (data) -> {
+        return searchInternalWithChildQuery("shared", searchCriteria, searchToken, null, childQuery, (data) -> {
             Map share = (Map) data.getInnerHits().get("share").hits().hits().get(0).source().to(Map.class).get("share");
             return new SearchInviteEvent(
                     data.getNodeRef(),
@@ -1773,6 +1773,7 @@ public class SearchServiceElastic implements SearchService {
             String queryId,
             Map<String, String[]> searchCriteria,
             SearchToken searchToken,
+            String collapseField,
             Query childQuery,
             Function<ResultData, T> mapResult
     ) throws Exception {
@@ -1822,6 +1823,9 @@ public class SearchServiceElastic implements SearchService {
                         .index(WORKSPACE_INDEX)
                         .from(0)
                         .size(0);
+                if(StringUtils.isNotBlank(collapseField)) {
+                    searchSourceAggs.collapse(c -> c.field(collapseField));
+                }
                 Map<String, Aggregation> excludedOwnAggregations = MetadataElasticSearchHelper.applyAggregations(
                         searchSourceAggs,
                         mds,

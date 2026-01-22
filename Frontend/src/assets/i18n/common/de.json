@@ -367,6 +367,7 @@
     "TYPE": {
       "EDIT_MATERIAL": "bearbeitet",
       "VIEW_COLLECTION": "angesehen",
+      "VIEW_MATERIAL": "angesehen",
       "ARCHIVE_MATERIAL": "archiviert/gelöscht",
       "DELETE_MATERIAL": "gelöscht",
       "MOVE_MATERIAL": "verschoben",

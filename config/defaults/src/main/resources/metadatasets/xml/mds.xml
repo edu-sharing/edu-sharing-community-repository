@@ -1509,6 +1509,10 @@
         {"match":{"type":"ccm:io"}},
         {"match":{"type":"ccm:map"}}
         ],
+        "must_not": [
+        {"match":{"type":"ccm:notify"}},
+        {"match":{"aspects":"ccm:collection_io_reference"}}
+        ],
         "minimum_should_match": 1
         }}
       </basequery>
@@ -1540,6 +1544,10 @@
         "should":[
         {"match":{"type":"ccm:io"}},
         {"match":{"type":"ccm:map"}}
+        ],
+        "must_not": [
+        {"match":{"type":"ccm:notify"}},
+        {"match":{"aspects":"ccm:collection_io_reference"}}
         ],
         "minimum_should_match": 1
         }}
