@@ -28,6 +28,7 @@ export * from './list-items/list-counts/list-counts.component';
 export * from './list-items/list-items.module';
 export * from './list-items/list-text/list-text.component';
 export * from './list-items/node-row/node-row.component';
+export * from './list-items/list-node-assignment/list-node-assignment.component';
 export * from './user-avatar/user-avatar.component';
 export * from './node-entries/combined-data-source';
 export * from './node-entries/custom-templates-data-source';

@@ -27,9 +27,16 @@
       ></es-nodes-selector>
       <es-metadata-sidebar
         *ngIf="option === 'WORKSPACE_METADATA'"
-        [nodeSidebar]="nodes()?.[0]"
+        [nodeSidebar]="$any(nodes())?.[0]"
       ></es-metadata-sidebar>
-      <es-preview-sidebar *ngIf="option === 'PREVIEW'" [node]="nodes()?.[0]"></es-preview-sidebar>
+      <es-submission-sidebar
+        *ngIf="option === 'MANAGE_SUBMISSION'"
+        [data]="$any(enabledOption().optionConfig)"
+      ></es-submission-sidebar>
+      <es-preview-sidebar
+        *ngIf="option === 'PREVIEW'"
+        [node]="$any(nodes())?.[0]"
+      ></es-preview-sidebar>
     </div>
 
     <div class="entries" *ngIf="!enabledOption()">

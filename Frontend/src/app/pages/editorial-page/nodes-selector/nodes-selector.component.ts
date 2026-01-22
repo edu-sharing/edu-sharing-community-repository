@@ -92,7 +92,7 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     protected readonly i18nPrefix: string = 'EDITORIAL.OPTIONS.SORT_INTO_TAB.';
     protected readonly idPrefix: string = 'nodes-selector-tab';
     @Input() parent: Node;
-    @Input() option!: OptionState;
+    @Input() option!: OptionState<NodesSelectorConfig>;
 
     selectedTab: WritableSignal<TabType> = signal(TabType.SEARCH);
     selectedTabId = computed(() =>

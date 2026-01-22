@@ -1,20 +1,19 @@
-import { Input, Type, Directive } from '@angular/core';
-import { Person } from 'ngx-edu-sharing-api';
+import { Directive, Input, Type } from '@angular/core';
+import { Group, Node, Person, ProposalNode, Statistics, Submission } from 'ngx-edu-sharing-api';
 import { BehaviorSubject } from 'rxjs';
-import { Node, ProposalNode, Group, Statistics } from 'ngx-edu-sharing-api';
 import { ListItem } from '../types/list-item';
 
 @Directive()
 export class ListWidget {
     @Input()
-    get node(): Node | ProposalNode | Group | Person | Statistics {
+    get node(): Node | ProposalNode | Group | Person | Statistics | Submission {
         return this.nodeSubject.value;
     }
-    set node(value: Node | ProposalNode | Group | Person | Statistics) {
+    set node(value: Node | ProposalNode | Group | Person | Statistics | Submission) {
         this.nodeSubject.next(value);
     }
     protected readonly nodeSubject = new BehaviorSubject<
-        Node | ProposalNode | Group | Person | Statistics
+        Node | ProposalNode | Group | Person | Statistics | Submission
     >(null); // node (or group/user)
 
     @Input()

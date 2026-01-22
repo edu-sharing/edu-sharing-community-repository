@@ -126,7 +126,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     mdsDefinition$ = new BehaviorSubject<MdsDefinition>(null);
     readonly dataSource = new NodeDataSource<Node | NodeShare | NodeEvent | Assignment>();
     columns = signal<ColumnType>(null);
-    selection = signal<SelectionModel<Node | null>>(null);
+    selection = signal<SelectionModel<NodeEntriesDataType | null>>(null);
     private sidebarOptionToggle: OptionItemToggle;
     private pagination$ = new BehaviorSubject<{
         skipCount: number;

@@ -35,7 +35,8 @@ export class EditorialSidebarService {
         return this._editorialSidebar;
     }
 
-    showOption(state: OptionState) {
+    showOption(state: OptionState<unknown>) {
+        console.log(state);
         this._editorialSidebar.enabledOption.set(state);
         this.sidebarOpened.set(true);
     }

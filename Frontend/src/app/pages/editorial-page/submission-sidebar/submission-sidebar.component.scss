@@ -1,0 +1,43 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+@use '../nodes-selector/nodes-selector.component' as ns;
+
+:host ::ng-deep {
+    @include ns.tabLayout2Line();
+}
+
+.submission {
+    > div {
+        display: flex;
+        gap: 20px;
+    }
+    padding: 20px;
+    .left {
+        flex-grow: 1;
+        label {
+            font-size: vars.$fontSizeSmall;
+        }
+        .from {
+            font-size: vars.$fontSizeXLarge;
+            font-weight: bold;
+        }
+        > div {
+            padding-bottom: 20px;
+        }
+    }
+    .state {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        > span {
+            flex-grow: 1;
+            display: flex;
+            justify-content: flex-end;
+        }
+    }
+    .submissions {
+        padding-top: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+}

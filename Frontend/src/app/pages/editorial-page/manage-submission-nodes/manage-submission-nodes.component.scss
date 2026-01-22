@@ -5,10 +5,6 @@
 .empty {
     color: var(--textLight);
 }
-
-.cdk-drag-preview {
-    @include man.container();
-}
 .node-list {
     display: flex;
     flex-direction: column;

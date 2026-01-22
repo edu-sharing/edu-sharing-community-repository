@@ -37,6 +37,12 @@ import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
         MatTooltipModule,
         TranslateModule,
     ],
-    exports: [ListBaseComponent, ListTextComponent, FormatDurationPipe, NodeRowComponent],
+    exports: [
+        ListBaseComponent,
+        ListTextComponent,
+        ListNodeAssignmentComponent,
+        FormatDurationPipe,
+        NodeRowComponent,
+    ],
 })
 export class ListItemsModule {}

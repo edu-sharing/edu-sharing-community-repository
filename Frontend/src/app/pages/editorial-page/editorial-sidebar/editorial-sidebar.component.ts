@@ -12,11 +12,12 @@ import {
     TemplateRef,
     ViewChild,
 } from '@angular/core';
-import { Node, RestConstants } from 'ngx-edu-sharing-api';
+import { Node, RestConstants, Submission } from 'ngx-edu-sharing-api';
 import {
     Constrain,
     EduSharingUiCommonModule,
     ElementType,
+    NodeEntriesDataType,
     NodeHelperService,
     OptionItem,
     OptionsHelperDataService,
@@ -39,9 +40,18 @@ import { MetadataSidebarComponent } from '../../workspace-page/metadata/metadata
 import { PreviewSidebarModule } from '../../../features/preview-sidebar/preview-sidebar.module';
 import { EditorialSidebarService } from './editorial-sidebar.service';
 import { CdkMonitorFocus } from '@angular/cdk/a11y';
+import {
+    SubmissionConfig,
+    SubmissionSidebarComponent,
+} from '../submission-sidebar/submission-sidebar.component';
 export type SidebarContext = PrimaryMode | 'collections' | 'workspace' | 'search';
-export type EditorialSidebarOption = 'WORKSPACE_METADATA' | 'SHARE_QR' | 'PREVIEW' | 'SORT_INTO';
-export type OptionState = {
+export type EditorialSidebarOption =
+    | 'WORKSPACE_METADATA'
+    | 'SHARE_QR'
+    | 'PREVIEW'
+    | 'SORT_INTO'
+    | 'MANAGE_SUBMISSION';
+export type OptionState<T extends NodesSelectorConfig | SubmissionConfig> = {
     option: EditorialSidebarOption;
     /**
      * additional, optional state for the option
@@ -51,7 +61,10 @@ export type OptionState = {
     /**
      * any valid option config, varies for the selected option
      */
-    optionConfig?: NodesSelectorConfig;
+    optionConfig?: T;
+    /**
+     * when true, do not allow to navigate back to the overview of all actions
+     */
     trap: boolean;
     applyCallback?: (selected: Node[]) => boolean;
 };
@@ -65,6 +78,7 @@ export type OptionState = {
         CommonModule,
         MatButtonModule,
         TranslateModule,
+        SubmissionSidebarComponent,
         NodesSelectorComponent,
         MetadataSidebarComponent,
         PreviewSidebarModule,
@@ -78,9 +92,9 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
      * current main component (only for editorial page context)
      */
     component = input<MainComponentType>();
-    nodes = input<Node[]>();
+    nodes = input<NodeEntriesDataType[]>();
     primaryMode = input.required<SidebarContext>();
-    enabledOption = signal<OptionState>(null);
+    enabledOption = signal<OptionState<unknown>>(null);
     isModal = input<boolean>(false);
 
     @Output() closeTrigger = new EventEmitter<void>();

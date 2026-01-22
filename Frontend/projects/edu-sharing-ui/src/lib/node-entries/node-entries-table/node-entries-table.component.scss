@@ -113,7 +113,7 @@ mat-cell {
     }
     &.mat-row-selected {
         background: var(--listItemSelectedBackgroundEffect);
-        .mat-mdc-cell {
+        .mat-mdc-cell:not(:first-child) {
             background: var(--listItemSelectedBackground);
         }
     }

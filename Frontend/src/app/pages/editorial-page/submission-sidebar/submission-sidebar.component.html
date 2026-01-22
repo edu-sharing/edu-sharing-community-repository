@@ -1,0 +1,39 @@
+<mat-tab-group class="tab-main-view" *ngIf="submission()">
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <i esIcon="search_check" class="tab-icon"></i>
+      <span class="tab-label">{{ 'SIDEBAR.SUBMISSION.TAB_SUBMISSION' | translate }}</span>
+    </ng-template>
+    <div class="submission">
+      <div>
+        <div class="left">
+          <label>{{ 'SIDEBAR.SUBMISSION.SUBMISSION_FROM' | translate }}</label>
+          <div class="from">{{ submission().assignee | authorityName }}</div>
+          <label>{{ 'SIDEBAR.SUBMISSION.SUBMISSION_TITLE' | translate }}</label>
+          <div class="title">TODO: What is the title? Or do we duplicate it everytime?</div>
+        </div>
+        <es-user-avatar size="large" class="right" [user]="submission().assignee"></es-user-avatar>
+      </div>
+      <label>{{ 'SIDEBAR.SUBMISSION.SUBMISSION_STATE' | translate }}</label>
+      <div class="state">
+        <es-list-node-assignment
+          [node]="submission()"
+          [item]="submissionStatus"
+        ></es-list-node-assignment>
+        <es-list-node-assignment
+          [node]="submission()"
+          [item]="validationStatus"
+        ></es-list-node-assignment>
+        <span>{{
+          submission().submissionDate
+            ? (submission().submissionDate | formatDate : { time: true })
+            : '-'
+        }}</span>
+      </div>
+      <div class="submissions">
+        <label>{{ 'SIDEBAR.SUBMISSION.SUBMISSION_ATTACHMENT' | translate }}</label>
+        <es-manage-assignment-submissions [data]="data()"></es-manage-assignment-submissions>
+      </div>
+    </div>
+  </mat-tab>
+</mat-tab-group>

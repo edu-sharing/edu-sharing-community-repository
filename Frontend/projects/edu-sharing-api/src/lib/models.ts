@@ -79,6 +79,7 @@ export { MdsWidgetCondition } from './api/models/mds-widget-condition';
 export { MetadataSetInfo } from './api/models/metadata-set-info';
 export { NotificationEventDto as Notification } from './api/models/notification-event-dto';
 export { Config } from './api/models/config';
+export { SubmissionFile } from './api/models/submission-file';
 export { Values as ConfigValues } from './api/models/values';
 export { ConfigTutorial } from './api/models/config-tutorial';
 export { NotificationConfig } from './api/models/notification-config';

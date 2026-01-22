@@ -1,6 +1,22 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
+@mixin tabLayout2Line() {
+    mat-tab-header {
+        --mdc-secondary-navigation-tab-container-height: 55px;
+    }
+    .mdc-tab__text-label {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .mdc-tab-indicator--active {
+        .mdc-tab__text-label {
+            //font-weight: bold;
+        }
+    }
+}
+
 // workaround to set outer option height to 100%
 ::ng-deep .option-EDITORIAL_OPTIONS_SORT_INTO {
     height: 100%;
@@ -15,19 +31,7 @@
     overflow: hidden;
 
     ::ng-deep {
-        mat-tab-header {
-            --mdc-secondary-navigation-tab-container-height: 55px;
-        }
-        .mdc-tab__text-label {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        .mdc-tab-indicator--active {
-            .mdc-tab__text-label {
-                //font-weight: bold;
-            }
-        }
+        @include tabLayout2Line();
     }
 }
 
