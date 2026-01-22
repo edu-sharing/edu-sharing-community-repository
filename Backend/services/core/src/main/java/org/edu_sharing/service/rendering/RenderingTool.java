@@ -177,6 +177,17 @@ public class RenderingTool {
 	}
 
 	public static void buildRenderingCache(String nodeId) {
+        try{
+            // Deprecated, use the Lightbend config!
+            if(!ConfigServiceFactory.getCurrentConfig().getValue("rendering.prerender",true)) {
+                return;
+            }
+            if(!LightbendConfigCache.getBoolean("rendering.prerender")) {
+                return;
+            }
+        }catch (Exception e){
+            logger.error(e.getMessage(), e);
+        }
         AboutPlugins plugins = ApplicationContextFactory.getApplicationContext().getBean(AboutPlugins.class);
         Optional<PluginInfo> rs2 = plugins.getPlugins().stream().filter(p -> RenderingPluginInfo.RENDERING_SERVICE_2.equals(p.getId())).findFirst();
         if(rs2.isPresent()){
@@ -228,13 +239,6 @@ public class RenderingTool {
                 AuthenticationUtil.runAsSystem(()-> {
                     try {
                         Context.setInstance(context);
-                        // Deprecated, use the Lightbend config!
-                        if(!ConfigServiceFactory.getCurrentConfig().getValue("rendering.prerender",true)) {
-                            return null;
-                        }
-                        if(!LightbendConfigCache.getBoolean("rendering.prerender")) {
-                            return null;
-                        }
                         // @TODO: May we need to build up caches just for particular file types?
                         RenderingService service = RenderingServiceFactory.getLocalService();
                         return service.getDetails(ApplicationInfoList.getHomeRepository().getAppId(), nodeId, null, DISPLAY_PRERENDER, null);
