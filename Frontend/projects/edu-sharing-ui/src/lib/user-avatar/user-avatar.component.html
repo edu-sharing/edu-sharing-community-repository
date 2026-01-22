@@ -34,14 +34,14 @@ with the W3C spec. -->
         <span
           class="user-letter"
           aria-hidden="true"
-          style.background-color="{{ _user | authorityColor }}"
+          [style.background-color]="_user | authorityColor"
           *ngIf="!icon && _user && !(_user?.profile?.avatar && (isSafe() | async) === false)"
           >{{ getLetter(_user) | async }}</span
         >
         <i
           class="user-icon"
           [esIcon]="icon"
-          style.background-color="{{ _user | authorityColor }}"
+          [style.background-color]="_user | authorityColor"
           *ngIf="icon"
         ></i>
       </span>

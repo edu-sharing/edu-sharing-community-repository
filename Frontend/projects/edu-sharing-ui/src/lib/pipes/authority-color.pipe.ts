@@ -46,7 +46,6 @@ export class AuthorityColorPipe implements PipeTransform {
         }
         // if(authority.profile && authority.profile.avatar)
         //  return AuthorityColorPipe.COLORS[0];
-        const colors = AuthorityColorPipe.getColors();
         const id =
             Math.abs(AuthorityColorPipe.hash(authority.authorityName)) %
             AuthorityColorPipe.COLORS.length;

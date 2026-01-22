@@ -16,7 +16,7 @@ public class UserSimple extends Authority{
 
 	public UserSimple(){super();}
 	public UserSimple(org.edu_sharing.repository.client.rpc.User user) {
-		super(user.getAuthorityName(),user.getAuthorityType());
+		super(user.getUsername(),user.getAuthorityType());
 		userName=user.getAuthorityDisplayName();
 		profile=new UserProfile(user);
 	}
