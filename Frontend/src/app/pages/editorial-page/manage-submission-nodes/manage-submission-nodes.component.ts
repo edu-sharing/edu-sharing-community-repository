@@ -1,4 +1,12 @@
-import { Component, input, OnChanges, signal, SimpleChanges } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    input,
+    OnChanges,
+    Output,
+    signal,
+    SimpleChanges,
+} from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { Assignment, AssignmentV1Service, Submission, SubmissionFile } from 'ngx-edu-sharing-api';
 import { firstValueFrom } from 'rxjs';
@@ -13,6 +21,7 @@ import { SubmissionConfig } from '../submission-sidebar/submission-sidebar.compo
 export class ManageSubmissionNodesComponent implements OnChanges {
     data = input.required<SubmissionConfig>();
     files = signal<SubmissionFile[]>(null);
+    @Output() nodeClick = new EventEmitter<SubmissionFile>();
     constructor(private assignmentV1Service: AssignmentV1Service) {}
 
     async ngOnChanges(changes: SimpleChanges) {

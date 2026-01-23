@@ -1,5 +1,5 @@
 import { EventEmitter, Injectable, signal } from '@angular/core';
-import { Node } from 'ngx-edu-sharing-api';
+import { Node, SubmissionFile } from 'ngx-edu-sharing-api';
 import { EditorialSidebarComponent, OptionState } from './editorial-sidebar.component';
 import { Observable } from 'rxjs';
 
@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 })
 export class EditorialSidebarService {
     /**
-     * triggered when in the sidebar a copy / apply event was performed
+     * triggered when in the sidebar a copy / apply event was performed (mode SORT_INTO)
      */
     applyNodeEmitted = new EventEmitter<{ nodes: Node[]; parent?: Node }>();
     private _editorialSidebar: EditorialSidebarComponent;

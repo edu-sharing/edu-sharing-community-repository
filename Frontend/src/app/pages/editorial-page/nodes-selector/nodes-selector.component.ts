@@ -80,6 +80,7 @@ export type NodesSelectorConfig = {
      * fast skips metadata & question for duplicate behaviour
      */
     upload?: 'fast' | 'default';
+    applyCallback?: (selected: Node[]) => boolean;
 };
 @Component({
     selector: 'es-nodes-selector',
@@ -125,8 +126,8 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     isValidSelection: Signal<boolean> = computed(
         (): boolean =>
             (this.onlyOneSelected() || this.onlyFilesSelected()) &&
-            (!this.option.applyCallback ||
-                this.option.applyCallback(this.selectedNodes() as Node[])),
+            (!this.option.optionConfig?.applyCallback ||
+                this.option.optionConfig?.applyCallback(this.selectedNodes() as Node[])),
     );
     // initialize collection copy variables with true
     copyRoot = model(true);

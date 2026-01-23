@@ -66,7 +66,6 @@ export type OptionState<T extends NodesSelectorConfig | SubmissionConfig> = {
      * when true, do not allow to navigate back to the overview of all actions
      */
     trap: boolean;
-    applyCallback?: (selected: Node[]) => boolean;
 };
 @Component({
     selector: 'es-editorial-sidebar',

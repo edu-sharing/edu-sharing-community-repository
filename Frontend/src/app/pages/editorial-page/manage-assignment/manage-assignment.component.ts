@@ -30,6 +30,7 @@ import { combineLatest, filter, firstValueFrom } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { EditorialBreadcrumbService } from '../editorial-breadcrumb/editorial-breadcrumb.service';
+import { NodesSelectorConfig } from '../nodes-selector/nodes-selector.component';
 
 export type AssignmentBase = Pick<Assignment, 'title' | 'type' | 'summary'>;
 export const AssignmentEditorConfig = {
@@ -128,7 +129,7 @@ export class ManageAssignmentComponent {
                 ),
             )
             .subscribe(([assignment, files, submissions]) => {
-                this.editorialBreadcrumbService.path.set([assignment.title]);
+                this.editorialBreadcrumbService.path.set([{ title: assignment.title }]);
                 this.assignment.set(assignment);
                 this.submissions.set(submissions);
                 this.authorities.set(assignment.permissions);
@@ -178,10 +179,12 @@ export class ManageAssignmentComponent {
             option: 'SORT_INTO',
             optionConfig: {
                 upload: 'fast',
-            },
+                applyCallback: (nodes) =>
+                    nodes.every(
+                        (n) => !this.nodeHelperService.isNodeCollection(n) && !n.isDirectory,
+                    ),
+            } as NodesSelectorConfig,
             trap: true,
-            applyCallback: (nodes) =>
-                nodes.every((n) => !this.nodeHelperService.isNodeCollection(n) && !n.isDirectory),
         });
     }
 

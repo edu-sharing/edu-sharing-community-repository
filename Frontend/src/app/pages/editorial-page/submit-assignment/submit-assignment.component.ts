@@ -38,7 +38,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
 import { SubmissionFile } from '../../../../../dist/edu-sharing-api/lib/api/models/submission-file';
-import { TabType } from '../nodes-selector/nodes-selector.component';
+import { NodesSelectorConfig, TabType } from '../nodes-selector/nodes-selector.component';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { Toast, ToastType } from '../../../services/toast';
 import { CommentsListComponent } from '../../../features/mds/mds-editor/widgets/mds-editor-widget-comments/comments-list/comments-list.component';
@@ -217,7 +217,7 @@ export class SubmitAssignmentComponent {
                 this.supplementaryFiles.setData(
                     files.filter((f) => f.documentRole === 'SUPPLEMENTARY').map((n) => n.referNode),
                 );
-                this.editorialBreadcrumbService.path.set([assignment.title]);
+                this.editorialBreadcrumbService.path.set([{ title: assignment.title }]);
             });
     }
 
@@ -243,10 +243,12 @@ export class SubmitAssignmentComponent {
             optionState: TabType.UPLOAD,
             optionConfig: {
                 upload: 'fast',
-            },
+                applyCallback: (nodes) =>
+                    nodes.every(
+                        (n) => !this.nodeHelperService.isNodeCollection(n) && !n.isDirectory,
+                    ),
+            } as NodesSelectorConfig,
             trap: true,
-            applyCallback: (nodes) =>
-                nodes.every((n) => !this.nodeHelperService.isNodeCollection(n) && !n.isDirectory),
         });
     }
 

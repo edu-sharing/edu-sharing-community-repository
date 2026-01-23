@@ -1,17 +1,20 @@
-<es-node-entries-wrapper
-  [primaryInstance]="true"
-  [dataSource]="dataSource"
-  [checkbox]="false"
-  [elementInteractionType]="InteractionType.Emitter"
-  [scope]="Scope.EditorialPage"
-  singleClickHint="static"
-  (clickItem)="select($event)"
-  [columns]="columns"
-  [displayType]="editorialPageService.displayType()"
->
-  <ng-template #empty>
-    <div class="empty">
-      {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.EMPTY' | translate }}
-    </div>
-  </ng-template>
-</es-node-entries-wrapper>
+<ng-container *ngIf="!selectedSubmissionFile()">
+  <es-node-entries-wrapper
+    [primaryInstance]="true"
+    [dataSource]="dataSource"
+    [checkbox]="false"
+    [elementInteractionType]="InteractionType.Emitter"
+    [scope]="Scope.EditorialPage"
+    singleClickHint="static"
+    (clickItem)="select($event)"
+    [columns]="columns"
+    [displayType]="editorialPageService.displayType()"
+  >
+    <ng-template #empty>
+      <div class="empty">
+        {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.EMPTY' | translate }}
+      </div>
+    </ng-template>
+  </es-node-entries-wrapper>
+</ng-container>
+<ng-container *ngIf="selectedSubmissionFile()"> TODO </ng-container>

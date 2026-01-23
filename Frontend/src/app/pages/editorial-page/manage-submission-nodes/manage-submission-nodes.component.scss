@@ -11,5 +11,10 @@
     gap: 5px;
     > div {
         @include man.container();
+        @include mixins.clickable();
+        padding: 10px 20px;
+        &:hover {
+            background-color: var(--palette-primary-50);
+        }
     }
 }

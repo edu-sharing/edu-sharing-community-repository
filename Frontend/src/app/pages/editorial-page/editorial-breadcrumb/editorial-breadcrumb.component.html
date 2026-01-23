@@ -9,7 +9,7 @@
 </ng-container>
 <ng-container *ngFor="let e of editorialBreadcrumbService.path()">
   <i esIcon="keyboard_arrow_right"></i>
-  <a class="path-scope">
-    {{ e }}
+  <a class="path-scope" [class.clickable]="e.callback" (click)="e.callback ? e.callback() : null">
+    {{ e.title }}
   </a>
 </ng-container>

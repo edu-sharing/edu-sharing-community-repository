@@ -1,12 +1,21 @@
-import { AfterViewInit, Component, EventEmitter, Output, signal, ViewChild } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    effect,
+    EventEmitter,
+    Output,
+    signal,
+    ViewChild,
+} from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { EditorialBreadcrumbService } from '../editorial-breadcrumb/editorial-breadcrumb.service';
 import { combineLatest, distinctUntilChanged, filter } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
-import { Assignment, AssignmentV1Service, Submission } from 'ngx-edu-sharing-api';
+import { Assignment, AssignmentV1Service, Submission, SubmissionFile } from 'ngx-edu-sharing-api';
 import { map, switchMap } from 'rxjs/operators';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import {
+    AuthorityNamePipe,
     ColumnType,
     InteractionType,
     ListItem,
@@ -18,6 +27,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { EditorialPageService } from '../editorial-page.service';
 import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
+import { SubmissionConfig } from '../submission-sidebar/submission-sidebar.component';
 
 /**
  * lists all submissions (for teacher view)
@@ -39,13 +49,33 @@ export class AssignmentSubmissionComponent implements AfterViewInit {
         ],
     } as ColumnType;
     private assignment = signal<Assignment>(null);
+    selectedSubmissionFile = signal<SubmissionFile>(null);
+    private submission = signal<Submission>(null);
     constructor(
         private route: ActivatedRoute,
+        private translate: TranslateService,
         private editorialBreadcrumbService: EditorialBreadcrumbService,
         public editorialPageService: EditorialPageService,
         public editorialSidebarService: EditorialSidebarService,
         private assignmentService: AssignmentV1Service,
     ) {
+        effect(() => {
+            this.selectedSubmissionFile()
+                ? this.editorialBreadcrumbService.path.set([
+                      {
+                          title: this.assignment().title,
+                          callback: () => this.selectedSubmissionFile.set(null),
+                      },
+                      {
+                          title: new AuthorityNamePipe(this.translate).transform(
+                              this.submission().assignee,
+                          ),
+                      },
+                  ])
+                : this.assignment
+                ? this.editorialBreadcrumbService.path.set([{ title: this.assignment().title }])
+                : this.editorialBreadcrumbService.path.set([]);
+        });
         this.route.queryParams
             .pipe(
                 map((p) => p.assignment),
@@ -64,7 +94,6 @@ export class AssignmentSubmissionComponent implements AfterViewInit {
             )
             .subscribe(([assignment, files]) => {
                 this.assignment.set(assignment);
-                this.editorialBreadcrumbService.path.set([assignment.title]);
                 this.dataSource.setData(files);
             });
     }
@@ -77,13 +106,17 @@ export class AssignmentSubmissionComponent implements AfterViewInit {
 
     select(event: NodeClickEvent<Submission>) {
         this.nodeEntries.getSelection().setSelection(event.element);
+        this.submission.set(event.element);
         this.editorialSidebarService.showOption({
             option: 'MANAGE_SUBMISSION',
             trap: true,
             optionConfig: {
                 assignment: this.assignment(),
                 submission: event.element,
-            },
+                submissionFileCallback: (submission) => {
+                    this.selectedSubmissionFile.set(submission);
+                },
+            } as SubmissionConfig,
         });
     }
 }
