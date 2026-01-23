@@ -289,23 +289,23 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
         }
 
 
-        Node contentNode = null;
-        if (getCorrectionNodeId() != null && (AssignmentUtil.isAssignmentCoordinator(permissionService, getCorrectionNodeId()) || submissionDao.isReturned())) {
-            contentNode = this.contentNode.get();
+        Node correctionNode = null;
+        if (AssignmentUtil.isAssignmentCoordinator(permissionService, getCorrectionNodeId()) || submissionDao.isReturned()) {
+            correctionNode = this.correctionNode.get();
         }
 
 
         return new SubmissionFile(
                 getNodeRef(),
                 this.contentNode.get(),
-                contentNode,
+                correctionNode,
                 getReferToAssigmentFile().map(AssignmentFileDao::getAssignmentFile).orElse(null),
                 getValidationStatus());
     }
 
     @Override
     public Submission.Status getValidationStatus() {
-        if (getCorrectionNodeId() != null && AssignmentUtil.isAssignmentCoordinator(permissionService, getCorrectionNodeId())) {
+        if (AssignmentUtil.isAssignmentCoordinator(permissionService, getCorrectionNodeId())) {
             return propertyMapper.get().getEnum(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, Submission.Status.class);
         } else {
             return null;
