@@ -24,10 +24,12 @@ import {
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
     Scope,
+    TranslationsService,
 } from 'ngx-edu-sharing-ui';
 import { EditorialPageService } from '../editorial-page.service';
 import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
 import { SubmissionConfig } from '../submission-sidebar/submission-sidebar.component';
+import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 
 /**
  * lists all submissions (for teacher view)
@@ -36,11 +38,12 @@ import { SubmissionConfig } from '../submission-sidebar/submission-sidebar.compo
     selector: 'es-assignment-submission',
     templateUrl: 'assignment-submission.component.html',
     styleUrls: ['assignment-submission.component.scss'],
-    imports: [SharedModule, TranslateModule],
+    imports: [SharedModule, TranslateModule, NgxExtendedPdfViewerModule],
 })
 export class AssignmentSubmissionComponent implements AfterViewInit {
     @ViewChild(NodeEntriesWrapperComponent) nodeEntries: NodeEntriesWrapperComponent<Submission>;
     dataSource = new NodeDataSource<Submission>();
+    language: string = 'de-DE';
     columns = {
         Default: [
             new ListItem('SUBMISSION', 'assignee'),
@@ -54,11 +57,13 @@ export class AssignmentSubmissionComponent implements AfterViewInit {
     constructor(
         private route: ActivatedRoute,
         private translate: TranslateService,
+        private translationsService: TranslationsService,
         private editorialBreadcrumbService: EditorialBreadcrumbService,
         public editorialPageService: EditorialPageService,
         public editorialSidebarService: EditorialSidebarService,
         private assignmentService: AssignmentV1Service,
     ) {
+        this.language = this.translationsService.getLocale();
         effect(() => {
             this.selectedSubmissionFile()
                 ? this.editorialBreadcrumbService.path.set([
@@ -114,9 +119,12 @@ export class AssignmentSubmissionComponent implements AfterViewInit {
                 assignment: this.assignment(),
                 submission: event.element,
                 submissionFileCallback: (submission) => {
+                    console.log(submission);
                     this.selectedSubmissionFile.set(submission);
                 },
             } as SubmissionConfig,
         });
     }
+
+    changeAnnotation() {}
 }

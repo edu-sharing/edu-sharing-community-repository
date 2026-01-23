@@ -16114,7 +16114,7 @@
     },
     "/assignment/v1/{assignmentId}/submissions/{submissionId}/submissionStatus": {
       "put": {
-        "description": "edut submission status",
+        "description": "edit submission status",
         "operationId": "editSubmission",
         "parameters": [
           {
@@ -16219,7 +16219,7 @@
             "description": "Fatal error occured."
           }
         },
-        "summary": "edut submission status",
+        "summary": "edit submission status",
         "tags": [
           "Assignment v1"
         ]

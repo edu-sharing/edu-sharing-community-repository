@@ -21,6 +21,7 @@ import { SubmissionConfig } from '../submission-sidebar/submission-sidebar.compo
 export class ManageSubmissionNodesComponent implements OnChanges {
     data = input.required<SubmissionConfig>();
     files = signal<SubmissionFile[]>(null);
+    selected = signal<SubmissionFile>(null);
     @Output() nodeClick = new EventEmitter<SubmissionFile>();
     constructor(private assignmentV1Service: AssignmentV1Service) {}
 
@@ -35,5 +36,10 @@ export class ManageSubmissionNodesComponent implements OnChanges {
                 ),
             );
         }
+    }
+
+    click(item: SubmissionFile) {
+        this.selected.set(item);
+        this.nodeClick.emit(item);
     }
 }

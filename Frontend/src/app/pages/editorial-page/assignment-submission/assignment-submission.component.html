@@ -17,4 +17,28 @@
     </ng-template>
   </es-node-entries-wrapper>
 </ng-container>
-<ng-container *ngIf="selectedSubmissionFile()"> TODO </ng-container>
+<ng-container *ngIf="selectedSubmissionFile()">
+  <ng-container *ngIf="selectedSubmissionFile().correction">
+    {{ selectedSubmissionFile().correction }}
+    {{ selectedSubmissionFile().correction.downloadUrl }}
+    <ngx-extended-pdf-viewer
+      [src]="selectedSubmissionFile().correction.downloadUrl"
+      [height]="'auto'"
+      [language]="language"
+      [textLayer]="true"
+      [showHandToolButton]="true"
+      [showOpenFileButton]="false"
+      [showPrintButton]="false"
+      [showPropertiesButton]="false"
+      [showRotateButton]="false"
+      [showScrollingButtons]="false"
+      [showSpreadButton]="false"
+      [showDrawEditor]="true"
+      [showHighlightEditor]="true"
+      [showStampEditor]="true"
+      [showTextEditor]="true"
+      [zoom]="'page-fit'"
+      (annotationEditorEvent)="changeAnnotation()"
+    ></ngx-extended-pdf-viewer>
+  </ng-container>
+</ng-container>

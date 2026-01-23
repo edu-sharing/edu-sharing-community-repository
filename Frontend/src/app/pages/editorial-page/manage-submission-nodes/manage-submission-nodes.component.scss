@@ -16,5 +16,8 @@
         &:hover {
             background-color: var(--palette-primary-50);
         }
+        &.selected {
+            background: var(--listItemSelectedBackgroundEffect);
+        }
     }
 }
