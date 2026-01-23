@@ -21,6 +21,7 @@ import org.edu_sharing.service.assignment.BasicNodeDao;
 import org.edu_sharing.service.assignment.SubmissionFileDao;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.transform.RepresentationService;
+import org.edu_sharing.util.CheckedFunction;
 import org.edu_sharing.util.CheckedSupplier;
 import org.edu_sharing.util.LazyProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,14 +79,14 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
         contentNode = new LazyProvider<>(CheckedSupplier.wrap(() -> {
             validateExists();
             return contentNodeRef.get()
-                    .map(NodeDao::getAsNodeSimple)
+                    .map(CheckedFunction.wrap(n -> NodeDao.getNode(n).asNode()))
                     .orElse(null);
         }));
 
         correctionNode = new LazyProvider<>(CheckedSupplier.wrap(() -> {
             validateExists();
             return correctionNodeRef.get()
-                    .map(NodeDao::getAsNodeSimple)
+                    .map(CheckedFunction.wrap(n -> NodeDao.getNode(n).asNode()))
                     .orElse(null);
         }));
     }
