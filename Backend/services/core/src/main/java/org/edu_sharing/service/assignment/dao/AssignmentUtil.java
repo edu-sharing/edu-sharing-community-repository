@@ -7,9 +7,15 @@ import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.permission.PermissionService;
 
+import java.util.Objects;
+
 public final class AssignmentUtil {
 
     static boolean isAssignmentCoordinator(PermissionService permissionService, String nodeId) {
+        if (Objects.isNull(nodeId)) {
+            return false;
+        }
+
         if (AuthorityServiceHelper.isAdmin(AuthenticationUtil.getFullyAuthenticatedUser())) {
             return true;
         }
@@ -18,6 +24,10 @@ public final class AssignmentUtil {
     }
 
     static boolean isAssignmentCoordinator(NodeRef nodeRef) {
+        if (Objects.isNull(nodeRef)) {
+            return false;
+        }
+
         if (AuthorityServiceHelper.isAdmin(AuthenticationUtil.getFullyAuthenticatedUser())) {
             return true;
         }
@@ -26,6 +36,10 @@ public final class AssignmentUtil {
     }
 
     static boolean isAssignee(PermissionService permissionService, String nodeId) {
+        if (Objects.isNull(nodeId)) {
+            return false;
+        }
+
         if (AuthorityServiceHelper.isAdmin(AuthenticationUtil.getFullyAuthenticatedUser())) {
             return true;
         }
@@ -34,6 +48,10 @@ public final class AssignmentUtil {
     }
 
     static boolean isAssignee(NodeRef nodeRef) {
+        if (Objects.isNull(nodeRef)) {
+            return false;
+        }
+
         if (AuthorityServiceHelper.isAdmin(AuthenticationUtil.getFullyAuthenticatedUser())) {
             return true;
         }
@@ -42,7 +60,7 @@ public final class AssignmentUtil {
     }
 
     static boolean hasAccessTo(PermissionService permissionService, String nodeId) {
-      return isAssignmentCoordinator(permissionService, nodeId) || isAssignee(permissionService, nodeId);
+        return isAssignmentCoordinator(permissionService, nodeId) || isAssignee(permissionService, nodeId);
     }
 
     static boolean hasAccessTo(NodeRef nodeRef) {
