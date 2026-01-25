@@ -502,6 +502,11 @@
       <type>checkbox</type>
     </widget>
     <widget>
+      <id>cclom:location</id>
+      <type>text</type>
+      <textEscapingPolicy>all</textEscapingPolicy>
+    </widget>
+    <widget>
       <id>curriculum_title</id>
       <required>mandatory</required>
       <caption>Pinnwand-Titel</caption>
