@@ -28,7 +28,7 @@
           "error",
           {
             "type": "element",
-            "prefix": "app",
+            "prefix": "edu",
             "style": "kebab-case"
           }
         ]

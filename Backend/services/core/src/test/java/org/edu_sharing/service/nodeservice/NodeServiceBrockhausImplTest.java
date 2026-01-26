@@ -11,7 +11,7 @@ class NodeServiceBrockhausImplTest {
 
     @BeforeEach
     void setUp() {
-        underTest = new NodeServiceBrockhausImpl(null);
+        underTest = new NodeServiceBrockhausImpl();
     }
 
     @Test

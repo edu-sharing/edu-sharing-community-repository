@@ -11,7 +11,8 @@ import { FormatDatePipe } from './pipes/format-date.pipe';
 import { ListItemLabelPipe } from './node-entries/list-item-label.pipe';
 import { SortDropdownComponent } from './sort-dropdown/sort-dropdown.component';
 import { MdsModule } from './mds/mds.module';
-import { I18N_CONFIG, UserAvatarComponent } from '../public-api';
+import { I18N_CONFIG } from '../public-api';
+import { UserAvatarComponent } from './user-avatar/user-avatar.component';
 
 @NgModule({
     declarations: [],

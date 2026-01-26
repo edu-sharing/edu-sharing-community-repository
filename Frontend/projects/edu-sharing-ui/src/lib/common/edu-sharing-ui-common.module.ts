@@ -13,7 +13,6 @@ import { FocusStateDirective } from '../directives/focus-state.directive';
 import { IconDirective } from '../directives/icon.directive';
 import { InfiniteScrollDirective } from '../directives/infinite-scroll.directive';
 import { DropdownComponent } from '../dropdown/dropdown.component';
-import { InfoMessageComponent } from '../info-message/info-message.component';
 import { NodeUrlComponent } from '../node-url/node-url.component';
 import { FormatSizePipe } from '../pipes/file-size.pipe';
 import { FormatDatePipe } from '../pipes/format-date.pipe';
@@ -54,8 +53,6 @@ import { InfoMessageComponent } from '../info-message/info-message.component';
         FocusStateDirective,
         FormatDatePipe,
         FormatSizePipe,
-        IconDirective,
-        InfoMessageComponent,
         MdsDurationPipe,
         InfiniteScrollDirective,
         PropertySlugPipe,

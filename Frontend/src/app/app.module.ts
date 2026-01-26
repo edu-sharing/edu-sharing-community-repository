@@ -55,8 +55,6 @@ import { WebComponentLocationStrategy } from './main/web-component.utils';
 import { GlobalLoginComponent } from './main/global-login-trigger/global-login.component';
 import { AppService } from './services/app.service';
 import { RenderingServiceApiModule } from 'ngx-rendering-service-api';
-import { DialogsService } from './features/dialogs/dialogs.service';
-import { DialogsService as DialogsServiceAbstract } from 'ngx-rendering-service-lib';
 
 const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     showDelay: 500,

@@ -26,7 +26,6 @@ platformBrowserDynamic()
 
 */
 function bootstrapOnce() {
-    console.log('bootstrapOnce');
     if (!window.edusharingAngularBootstrapped) {
         window.edusharingAngularBootstrapped = true;
         platformBrowserDynamic()

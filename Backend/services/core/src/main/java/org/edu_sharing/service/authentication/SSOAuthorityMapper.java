@@ -259,6 +259,7 @@ public class SSOAuthorityMapper {
             boolean createGroups = mappingConfig.isCreateGroups();
             boolean hashGroupNames = mappingConfig.isHashGroupNames();
             boolean updateMemberships = mappingConfig.isUpdateMemberships();
+            boolean setupHomeDir = mappingConfig.isSetupHomeDir();
 
             if (whitelistedUser) {
                 createUser = false;
@@ -369,7 +370,7 @@ public class SSOAuthorityMapper {
                     }
 
                     try {
-                        if (!config.setupHomeDir) {
+                        if (!setupHomeDir) {
                             OnUpdatePersonPropertiesPolicy.constructPersonFolders.set(false);
                         }
                     personService.createPerson(personProperties);

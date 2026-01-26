@@ -42,6 +42,9 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
     @Input() bulkBehaviour = BulkBehavior.Default;
     @Input() create: string;
     @Input() currentValues: Values;
+    /**
+     * interactively called when any values are changed (evenn if user did not use SAVE event, use done for that)
+     */
     @Output() currentValuesChange = new EventEmitter<Values>();
     @Input() customTitle: string;
     @Input() embedded = false;
@@ -77,10 +80,6 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
     @Output() done = new EventEmitter<Node[] | Values>();
     @Output() mdsLoaded = new EventEmitter();
     @Output() openContributor = new EventEmitter();
-    /**
-     * interactively called when any values are changed (evenn if user did not use SAVE event, use done for that)
-     */
-    @Output() currentValuesChange = new EventEmitter<Values>();
     /**
      * @DEPRECATED old mds only
      */
