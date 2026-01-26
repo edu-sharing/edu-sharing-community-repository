@@ -3583,6 +3583,17 @@
             },
             "type": "object"
           },
+          "inputPreprocessor": {
+            "items": {
+              "enum": [
+                "trim",
+                "uppercase",
+                "lowercase"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
           "interactionType": {
             "enum": [
               "Input",

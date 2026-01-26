@@ -49,7 +49,10 @@
       <placeholder>cm_name_placeholder</placeholder>
       <bottomCaption>cm_name_bottom</bottomCaption>
       <type>text</type>
-      <required>true</required>
+      <required>mandatory</required>
+      <inputPreprocessor>
+        <preprocessor>trim</preprocessor>
+      </inputPreprocessor>
       <!-- <condition>!ccm:wwwurl</condition>  -->
     </widget>
     <widget>
@@ -60,6 +63,9 @@
       <bottomCaption>cm_title_bottom</bottomCaption>
       <type>text</type>
       <hideIfEmpty>true</hideIfEmpty>
+      <inputPreprocessor>
+        <preprocessor>trim</preprocessor>
+      </inputPreprocessor>
       <aiConfigs>
         <aiConfig>
           <id>default</id>
@@ -94,6 +100,9 @@
       <placeholder>cm_wwwurl_placeholder</placeholder>
       <type>text</type>
       <required>true</required>
+      <inputPreprocessor>
+        <preprocessor>trim</preprocessor>
+      </inputPreprocessor>
       <condition type="PROPERTY">ccm:wwwurl</condition>
     </widget>
     <widget>
@@ -103,6 +112,9 @@
       <caption>lom_prop_educational_description</caption>
       <placeholder>lom_prop_educational_description_placeholder</placeholder>
       <hideIfEmpty>true</hideIfEmpty>
+      <inputPreprocessor>
+        <preprocessor>trim</preprocessor>
+      </inputPreprocessor>
       <aiConfigs>
         <aiConfig>
           <id>default</id>

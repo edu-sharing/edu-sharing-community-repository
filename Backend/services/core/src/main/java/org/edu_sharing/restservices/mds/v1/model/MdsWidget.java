@@ -80,6 +80,7 @@ public class MdsWidget {
 
     private MetadataWidget.WidgetFilterMode filterMode;
     private MetadataWidget.WidgetExpandable expandable;
+    private List<MetadataWidget.MetadataInputPreprocessor> inputPreprocessor;
 
     private List<MdsAiConfig> aiConfigs;
 
@@ -114,6 +115,7 @@ public class MdsWidget {
         this.isExtended = widget.isExtended();
         this.hideIfEmpty = widget.isHideIfEmpty();
         this.isRequired = widget.getRequired();
+        this.inputPreprocessor = widget.getInputPreprocessor();
         this.allowempty = widget.isAllowempty();
         this.isSearchable = widget.isSearchable();
         if (widget.getCondition() != null) {
