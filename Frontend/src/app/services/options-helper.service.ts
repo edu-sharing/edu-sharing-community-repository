@@ -416,7 +416,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         });
         debugNode.elementType = [];
         debugNode.onlyDesktop = true;
-        debugNode.constrains = [Constrain.AdminOrDebug];
+        debugNode.constrains = [Constrain.AdminOrDebug, Constrain.Selection];
         debugNode.group = DefaultGroups.View;
         debugNode.priority = -100;
 

@@ -17,29 +17,23 @@
     </ng-template>
   </es-node-entries-wrapper>
 </ng-container>
-<ng-container *ngIf="selectedSubmissionFile()">
+<ng-container *ngIf="selectedSubmissionFile() && selectedSubmissionFileUrl() !== undefined">
   <mat-tab-group>
-    <mat-tab *ngIf="selectedSubmissionFile().correction?.mediatype === 'file-pdf'">
+    <mat-tab
+      *ngIf="
+        selectedSubmissionFileUrl() && selectedSubmissionFile().correction?.mediatype === 'file-pdf'
+      "
+    >
       <ng-template mat-tab-label>
         <i esIcon="check"></i>
         {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.VIEW_CORRECT' | translate }}
       </ng-template>
       <ngx-extended-pdf-viewer
-        [src]="selectedSubmissionFile().correction.downloadUrl"
+        [src]="selectedSubmissionFileUrl()"
         [height]="'auto'"
         [language]="language"
         [textLayer]="true"
-        [showHandToolButton]="true"
-        [showOpenFileButton]="false"
-        [showPrintButton]="false"
-        [showPropertiesButton]="false"
-        [showRotateButton]="false"
-        [showScrollingButtons]="false"
-        [showSpreadButton]="false"
-        [showDrawEditor]="true"
-        [showHighlightEditor]="true"
-        [showStampEditor]="true"
-        [showTextEditor]="true"
+        [customToolbar]="additionalButtons"
         [zoom]="'page-fit'"
         (annotationEditorEvent)="changeAnnotation()"
       ></ngx-extended-pdf-viewer>
@@ -59,3 +53,31 @@
     </mat-tab>
   </mat-tab-group>
 </ng-container>
+
+<ng-template #additionalButtons>
+  <div id="toolbarViewer">
+    <div id="toolbarViewerLeft">
+      <pdf-toggle-sidebar></pdf-toggle-sidebar>
+      <div class="toolbarButtonSpacer"></div>
+      <pdf-paging-area></pdf-paging-area>
+    </div>
+    <pdf-zoom-toolbar></pdf-zoom-toolbar>
+    <div id="toolbarViewerRight">
+      <pdf-hand-tool></pdf-hand-tool>
+      <pdf-draw-editor></pdf-draw-editor>
+      <pdf-highlight-editor></pdf-highlight-editor>
+      <pdf-text-editor></pdf-text-editor>
+
+      <div class="verticalToolbarSeparator hiddenSmallView"></div>
+      <button
+        mat-flat-button
+        color="primary"
+        class="save"
+        (click)="saveCorrection()"
+        [disabled]="correctionSaving() || !hasCorrectionChanges()"
+      >
+        <i esIcon="save"></i>{{ 'SAVE' | translate }}
+      </button>
+    </div>
+  </div>
+</ng-template>

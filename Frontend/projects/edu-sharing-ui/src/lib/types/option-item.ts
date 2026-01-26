@@ -294,6 +294,7 @@ export enum Constrain {
     Admin, // only visible if user is admin or esDebug is enabled on window component
     AdminOrDebug, // only visible if user is admin or esDebug is enabled on window component
     NoBulk, // No support for bulk (multiple objects)
+    Selection, // Only visible when currently any element is selected
     NoSelection, // Only visible when currently no element is selected
     ClipboardContent, // Only visible when the clipboard has content
     AddObjects, // Only visible when it is possible to add objects into the current list

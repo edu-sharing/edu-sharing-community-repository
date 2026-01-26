@@ -8,6 +8,7 @@
         node.collection.type
       : '') +
     ($any(node).virtual ? ' grid-card-virtual' : '') +
+    (nodeHelper.isNodeAssignment(node) ? ' grid-card-assignment' : '') +
     ' ' +
     (entriesService.singleClickHint === 'dynamic' ? ' dynamic-single-click' : '')
   "

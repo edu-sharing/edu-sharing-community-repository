@@ -18,6 +18,7 @@ import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.
 import { ManageSubmissionNodesComponent } from '../manage-submission-nodes/manage-submission-nodes.component';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { debounce, debounceTime } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 
 export type SubmissionConfig = {
     submission: Submission;
@@ -35,7 +36,8 @@ export type SubmissionConfig = {
 export class SubmissionSidebarComponent {
     data = input.required<SubmissionConfig>();
     readonly feedbackForm = new FormGroup({
-        validationNodes: new FormControl('', Validators.nullValidator),
+        validationNotes: new FormControl('', Validators.nullValidator),
+        feedback: new FormControl('', Validators.nullValidator),
     });
     readonly submission = computed(() => this.data()?.submission);
     readonly submissionStatus = new ListItem('SUBMISSION', 'submissionStatus');
@@ -46,17 +48,21 @@ export class SubmissionSidebarComponent {
     ) {
         effect(() => {
             this.feedbackForm.setValue({
-                validationNodes: this.submission().validationNotes || 'TEST',
+                validationNotes: this.submission().validationNotes || '',
+                feedback: this.submission().feedback || '',
             });
         });
-        this.feedbackForm.valueChanges.pipe(debounceTime(5000)).subscribe((value) => {
-            this.assignmentV1Service.editSubmission1({
-                submissionId: this.data().submission.ref.id,
-                assignmentId: this.data().assignment.ref.id,
-                body: {
-                    validationNotes: value.validationNodes,
-                },
-            });
+        this.feedbackForm.valueChanges.pipe(debounceTime(3000)).subscribe(async (value) => {
+            await firstValueFrom(
+                this.assignmentV1Service.editSubmission1({
+                    submissionId: this.data().submission.ref.id,
+                    assignmentId: this.data().assignment.ref.id,
+                    body: {
+                        validationNotes: value.validationNotes,
+                        feedback: value.feedback,
+                    },
+                }),
+            );
         });
     }
 }

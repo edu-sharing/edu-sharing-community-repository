@@ -43,11 +43,20 @@
             <mat-label>{{ 'SIDEBAR.SUBMISSION.INTERNAL_NOTE' | translate }}</mat-label>
             <textarea
               matInput
-              formControlName="validationNodes"
+              formControlName="validationNotes"
               cdkTextareaAutosize
-              required
               cdkAutosizeMinRows="2"
-              cdkAutosizeMaxRows="5"
+              cdkAutosizeMaxRows="6"
+            ></textarea>
+          </mat-form-field>
+          <mat-form-field floatLabel="always">
+            <mat-label>{{ 'SIDEBAR.SUBMISSION.FEEDBACK' | translate }}</mat-label>
+            <textarea
+              matInput
+              formControlName="feedback"
+              cdkTextareaAutosize
+              cdkAutosizeMinRows="2"
+              cdkAutosizeMaxRows="6"
             ></textarea>
           </mat-form-field>
         </form>

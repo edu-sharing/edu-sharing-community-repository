@@ -120,6 +120,12 @@ $collectionIconSize: 25px;
         }
         .summary {
             @include limitLineCount(4, 1.25);
+            flex-grow: 1;
+        }
+    }
+    &.grid-card-assignment {
+        .card-meta {
+            height: 100%;
         }
     }
     .card-meta {

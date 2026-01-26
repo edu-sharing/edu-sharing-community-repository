@@ -311,7 +311,12 @@ export abstract class OptionsHelperService {
                 return Constrain.NoScope;
             }
         }
-        if (constrains.indexOf(Constrain.NoSelection) !== -1) {
+        if (constrains.includes(Constrain.Selection)) {
+            if (!(objects && objects.length)) {
+                return Constrain.Selection;
+            }
+        }
+        if (constrains.includes(Constrain.NoSelection)) {
             if (objects && objects.length) {
                 return Constrain.NoSelection;
             }
