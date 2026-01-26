@@ -314,7 +314,7 @@ final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao 
             return;
         }
 
-        if (assignmentDao.getEndDate() != null && assignmentDao.getEndDate().after(new Date())) {
+        if (assignmentDao.getEndDate() != null && assignmentDao.getEndDate().before(new Date())) {
             throw new InsufficientPermissionException("Assignment with id " + assignmentDao.getNodeId() + " has already ended.");
         }
 
