@@ -119,15 +119,17 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
         if (StringUtils.isNotBlank(nodeId)) {
             throw new IllegalStateException("Submission file id must be empty, but is: " + nodeId);
         }
-
-        // validates if assignment file exists otherwise throws exception
-        assignmentDao.getAssignmentFile(request.assignmentFile());
-
+        if(!assignmentDao.getAllowAdditionalDocumentSubmissions() || request.assignmentFile() != null) {
+            // validates if assignment file exists otherwise throws exception
+            assignmentDao.getAssignmentFile(request.assignmentFile());
+        }
         log.debug("Creating new submission file");
         Map<String, Object> properties = new HashMap<>() {{
             put(CCConstants.CM_NAME, "content");
-            put(CCConstants.CCM_PROP_SUBMISSION_FILE_REFER_TO_ASSIGNMENT_FIlE, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, request.assignmentFile()));
         }};
+        if(request.assignmentFile() != null) {
+            properties.put(CCConstants.CCM_PROP_SUBMISSION_FILE_REFER_TO_ASSIGNMENT_FILE, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, request.assignmentFile()));
+        }
 
         AuthenticationUtil.runAsSystem(() -> {
             nodeId = nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, submissionDao.getNodeId(), CCConstants.CCM_TYPE_SUBMISSION_FILE, CCConstants.CCM_ASSOC_SUBMISSION_FILES, properties);
@@ -236,7 +238,7 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
             String contentNodeId;
             try {
                 Map<String, String[]> contentProperties = new HashMap<>(request.properties()) {{
-                    put(CCConstants.CCM_PROP_SUBMISSION_FILE_REFER_TO_ASSIGNMENT_FIlE, new String[]{request.assignmentFile()});
+                    put(CCConstants.CCM_PROP_SUBMISSION_FILE_REFER_TO_ASSIGNMENT_FILE, new String[]{request.assignmentFile()});
                 }};
                 contentNodeId = nodeService.createNode(nodeId, CCConstants.CCM_TYPE_IO, contentProperties, CCConstants.CCM_ASPECT_SUBMISSION_FILE_CONTENT, true);
                 log.debug("Created new submission file content node {} for {}", contentNodeId, nodeId);
@@ -315,7 +317,7 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
 
     @Override
     public Optional<AssignmentFileDao> getReferToAssigmentFile() {
-        NodeRef nodeRef = propertyMapper.get().getNodeRef(CCConstants.CCM_PROP_SUBMISSION_FILE_REFER_TO_ASSIGNMENT_FIlE);
+        NodeRef nodeRef = propertyMapper.get().getNodeRef(CCConstants.CCM_PROP_SUBMISSION_FILE_REFER_TO_ASSIGNMENT_FILE);
         if (nodeRef == null) {
             return Optional.empty();
         }
