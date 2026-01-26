@@ -30,6 +30,7 @@ import { EditorialPageService } from '../editorial-page.service';
 import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
 import { SubmissionConfig } from '../submission-sidebar/submission-sidebar.component';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
+import { RenderWrapperComponent } from '../../render2-page/render-wrapper-component/render-wrapper.component';
 
 /**
  * lists all submissions (for teacher view)
@@ -38,7 +39,7 @@ import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
     selector: 'es-assignment-submission',
     templateUrl: 'assignment-submission.component.html',
     styleUrls: ['assignment-submission.component.scss'],
-    imports: [SharedModule, TranslateModule, NgxExtendedPdfViewerModule],
+    imports: [SharedModule, TranslateModule, NgxExtendedPdfViewerModule, RenderWrapperComponent],
 })
 export class AssignmentSubmissionComponent implements AfterViewInit {
     @ViewChild(NodeEntriesWrapperComponent) nodeEntries: NodeEntriesWrapperComponent<Submission>;

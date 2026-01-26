@@ -37,6 +37,21 @@
           (nodeClick)="data().submissionFileCallback($event)"
         ></es-manage-assignment-submissions>
       </div>
+      <div class="feedback">
+        <form [formGroup]="feedbackForm">
+          <mat-form-field floatLabel="always">
+            <mat-label>{{ 'SIDEBAR.SUBMISSION.INTERNAL_NOTE' | translate }}</mat-label>
+            <textarea
+              matInput
+              formControlName="validationNodes"
+              cdkTextareaAutosize
+              required
+              cdkAutosizeMinRows="2"
+              cdkAutosizeMaxRows="5"
+            ></textarea>
+          </mat-form-field>
+        </form>
+      </div>
     </div>
   </mat-tab>
 </mat-tab-group>

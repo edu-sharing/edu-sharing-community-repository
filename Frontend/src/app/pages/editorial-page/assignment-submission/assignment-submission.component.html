@@ -18,27 +18,44 @@
   </es-node-entries-wrapper>
 </ng-container>
 <ng-container *ngIf="selectedSubmissionFile()">
-  <ng-container *ngIf="selectedSubmissionFile().correction">
-    {{ selectedSubmissionFile().correction }}
-    {{ selectedSubmissionFile().correction.downloadUrl }}
-    <ngx-extended-pdf-viewer
-      [src]="selectedSubmissionFile().correction.downloadUrl"
-      [height]="'auto'"
-      [language]="language"
-      [textLayer]="true"
-      [showHandToolButton]="true"
-      [showOpenFileButton]="false"
-      [showPrintButton]="false"
-      [showPropertiesButton]="false"
-      [showRotateButton]="false"
-      [showScrollingButtons]="false"
-      [showSpreadButton]="false"
-      [showDrawEditor]="true"
-      [showHighlightEditor]="true"
-      [showStampEditor]="true"
-      [showTextEditor]="true"
-      [zoom]="'page-fit'"
-      (annotationEditorEvent)="changeAnnotation()"
-    ></ngx-extended-pdf-viewer>
-  </ng-container>
+  <mat-tab-group>
+    <mat-tab *ngIf="selectedSubmissionFile().correction?.mediatype === 'file-pdf'">
+      <ng-template mat-tab-label>
+        <i esIcon="check"></i>
+        {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.VIEW_CORRECT' | translate }}
+      </ng-template>
+      <ngx-extended-pdf-viewer
+        [src]="selectedSubmissionFile().correction.downloadUrl"
+        [height]="'auto'"
+        [language]="language"
+        [textLayer]="true"
+        [showHandToolButton]="true"
+        [showOpenFileButton]="false"
+        [showPrintButton]="false"
+        [showPropertiesButton]="false"
+        [showRotateButton]="false"
+        [showScrollingButtons]="false"
+        [showSpreadButton]="false"
+        [showDrawEditor]="true"
+        [showHighlightEditor]="true"
+        [showStampEditor]="true"
+        [showTextEditor]="true"
+        [zoom]="'page-fit'"
+        (annotationEditorEvent)="changeAnnotation()"
+      ></ngx-extended-pdf-viewer>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <i esIcon="preview"></i>
+        {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.VIEW_ORIGINAL' | translate }}
+      </ng-template>
+      <es-render-wrapper-component
+        *ngIf="selectedSubmissionFile().content"
+        [showTopbar]="false"
+        [showMetadata]="false"
+        [nodeId]="selectedSubmissionFile().content.ref.id"
+        [repository]="selectedSubmissionFile().content.ref.repo"
+      ></es-render-wrapper-component>
+    </mat-tab>
+  </mat-tab-group>
 </ng-container>

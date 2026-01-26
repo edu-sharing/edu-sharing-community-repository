@@ -41,4 +41,14 @@
         display: flex;
         flex-direction: column;
     }
+    .feedback {
+        padding-top: 50px;
+        width: 100%;
+        flex-direction: column;
+        > form {
+            > mat-form-field {
+                width: 100%;
+            }
+        }
+    }
 }
