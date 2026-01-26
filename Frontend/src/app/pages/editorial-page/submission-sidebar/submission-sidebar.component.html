@@ -2,19 +2,19 @@
   <mat-tab>
     <ng-template mat-tab-label>
       <i esIcon="search_check" class="tab-icon"></i>
-      <span class="tab-label">{{ 'SIDEBAR.SUBMISSION.TAB_SUBMISSION' | translate }}</span>
+      <span class="tab-label">{{ 'EDITORIAL.SIDEBAR.SUBMISSION.TAB_SUBMISSION' | translate }}</span>
     </ng-template>
     <div class="submission">
       <div>
         <div class="left">
-          <label>{{ 'SIDEBAR.SUBMISSION.SUBMISSION_FROM' | translate }}</label>
+          <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_FROM' | translate }}</label>
           <div class="from">{{ submission().assignee | authorityName }}</div>
-          <label>{{ 'SIDEBAR.SUBMISSION.SUBMISSION_TITLE' | translate }}</label>
+          <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_TITLE' | translate }}</label>
           <div class="title">TODO: What is the title? Or do we duplicate it everytime?</div>
         </div>
         <es-user-avatar size="large" class="right" [user]="submission().assignee"></es-user-avatar>
       </div>
-      <label>{{ 'SIDEBAR.SUBMISSION.SUBMISSION_STATE' | translate }}</label>
+      <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_STATE' | translate }}</label>
       <div class="state">
         <es-list-node-assignment
           [node]="submission()"
@@ -31,7 +31,7 @@
         }}</span>
       </div>
       <div class="submissions">
-        <label>{{ 'SIDEBAR.SUBMISSION.SUBMISSION_ATTACHMENT' | translate }}</label>
+        <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_ATTACHMENT' | translate }}</label>
         <es-manage-assignment-submissions
           [data]="data()"
           (nodeClick)="data().submissionFileCallback($event)"
@@ -40,7 +40,7 @@
       <div class="feedback">
         <form [formGroup]="feedbackForm">
           <mat-form-field floatLabel="always">
-            <mat-label>{{ 'SIDEBAR.SUBMISSION.INTERNAL_NOTE' | translate }}</mat-label>
+            <mat-label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.INTERNAL_NOTE' | translate }}</mat-label>
             <textarea
               matInput
               formControlName="validationNotes"
@@ -50,7 +50,7 @@
             ></textarea>
           </mat-form-field>
           <mat-form-field floatLabel="always">
-            <mat-label>{{ 'SIDEBAR.SUBMISSION.FEEDBACK' | translate }}</mat-label>
+            <mat-label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.FEEDBACK' | translate }}</mat-label>
             <textarea
               matInput
               formControlName="feedback"
@@ -62,5 +62,12 @@
         </form>
       </div>
     </div>
+  </mat-tab>
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <i esIcon="comment" class="tab-icon"></i>
+      <span class="tab-label">{{ 'EDITORIAL.SIDEBAR.SUBMISSION.TAB_DISCUSSION' | translate }}</span>
+    </ng-template>
+    <div class="comments"></div>
   </mat-tab>
 </mat-tab-group>

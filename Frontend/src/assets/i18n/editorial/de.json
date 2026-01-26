@@ -9,7 +9,17 @@
       "TITLE_SHARE": "Freigaben",
       "TITLE_ASSIGNMENT": "Aufgaben",
       "NO_OPTIONS_SELECTION": "Für die gewählte Auswahl an Elementen stehen keine übergreifenden Aktionen zur Verfügung.\nBitte ändern Sie die Auswahl",
-      "NO_OPTIONS_NO_SELECTION": "Für die gewählte Ansicht stehen keine allgemeinen Aktionen zur Verfügung\nSie können Elemente auswählen, um Aktionen zu erhalten"
+      "NO_OPTIONS_NO_SELECTION": "Für die gewählte Ansicht stehen keine allgemeinen Aktionen zur Verfügung\nSie können Elemente auswählen, um Aktionen zu erhalten",
+      "SUBMISSION": {
+        "TAB_SUBMISSION": "Abgabe",
+        "TAB_DISCUSSION": "Diskussion",
+        "SUBMISSION_FROM": "Von",
+        "SUBMISSION_TITLE": "Titel",
+        "SUBMISSION_STATE": "Status",
+        "SUBMISSION_ATTACHMENT": "Angehängte Dateien",
+        "INTERNAL_NOTE": "Persönliche Notiz",
+        "FEEDBACK": "Feedback geben"
+      }
     },
     "OPTION": {
       "REJECT_SHARE": "Freigabe ausblenden",
@@ -20,6 +30,7 @@
       "SORT_INTO": "Mit Splitscreen einsortieren",
       "SORT_INTO_DESCRIPTION": "Hier können Sie über die Suche, aus Sammlungen und Workspace oder durch Upload etwas einsortieren.",
       "CREATE_ASSIGNMENT": "Neue Aufgabe",
+      "MANAGE_SUBMISSION": "Abgabe bearbeiten",
       "CREATE_ASSIGNMENT_DESCRIPTION": "Anlegen einer neuen Aufgabe",
       "PREVIEW": "Vorschau anzeigen",
       "SUBMISSION_REMOVE": "Element entfernen",
@@ -104,7 +115,10 @@
         "MISSING_AUTHORITIES_ASSIGNEE": "Für diesen Aufgabentyp muss mindestens eine Person oder Gruppe in der Rolle \"Erledigen\" eingeladen werden"
       },
       "SUBMISSIONS": {
-        "EMPTY": "Für diese Aufgabe wurden noch keine Abgaben angelegt"
+        "EMPTY": "Für diese Aufgabe wurden noch keine Abgaben angelegt",
+        "VIEW_ORIGINAL": "Originaldatei",
+        "VIEW_CORRECT": "Korrigieren",
+        "CHANGES_SAVED": "Korrektur gespeichert"
       },
       "FORM": {
         "TITLE": "Titel",
