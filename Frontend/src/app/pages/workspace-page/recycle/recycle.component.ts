@@ -8,7 +8,13 @@ import {
     ViewChild,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { Node } from 'ngx-edu-sharing-api';
+import {
+    ArchiveV1Service,
+    GenericAuthority,
+    HOME_REPOSITORY,
+    Node,
+    PROPERTY_FILTER_ALL,
+} from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
     ColumnType,
@@ -32,7 +38,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import {
     ArchiveRestore,
-    RestArchiveService,
+    RestConnectorService,
     RestConstants,
     RestoreResult,
     TemporaryStorageService,
@@ -91,18 +97,27 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
     };
     searchQuery: string;
     skipDeleteConfirmation = false;
-    loadData(currentQuery: string, offset: number, sortBy: string, sortAscending: boolean) {
-        return this.archive.search(currentQuery || '*', '', {
-            propertyFilter: [RestConstants.ALL],
-            offset: offset,
-            sortBy: [sortBy],
-            sortAscending: sortAscending,
+    loadData(
+        currentQuery: string,
+        skipCount: number,
+        maxItems: number,
+        sortBy: string,
+        sortAscending: boolean,
+    ) {
+        return this.archiveV1Service.searchArchive({
+            repository: HOME_REPOSITORY,
+            pattern: currentQuery || '*',
+            propertyFilter: [PROPERTY_FILTER_ALL],
+            skipCount,
+            maxItems,
+            sortProperties: [sortBy],
+            sortAscending: [sortAscending],
         });
     }
     private destroyed = new Subject<void>();
 
     constructor(
-        private archive: RestArchiveService,
+        private archiveV1Service: ArchiveV1Service,
         private toast: Toast,
         private translate: TranslateService,
         private service: TemporaryStorageService,
@@ -215,10 +230,15 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private deleteNodesWithoutConfirmation(nodes: Node[]) {
         this.toast.showProgressSpinner();
-        this.archive.delete(nodes).subscribe(
-            () => this.deleteFinished(),
-            (error) => this.handleErrors(error),
-        );
+        this.archiveV1Service
+            .purge({
+                repository: HOME_REPOSITORY,
+                archivedNodeIds: nodes.map((n) => n.ref.id),
+            })
+            .subscribe(
+                () => this.deleteFinished(),
+                (error) => this.handleErrors(error),
+            );
     }
 
     private deleteFinished() {
@@ -239,10 +259,15 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
     public restoreNodes(list: Node[], toPath = '') {
         // archiveRestore list
         this.toast.showProgressSpinner();
-        this.archive.restore(list, toPath).subscribe(
-            (result: ArchiveRestore) => this.restoreFinished(list, result),
-            (error: any) => this.handleErrors(error),
-        );
+        this.archiveV1Service
+            .restore({
+                repository: HOME_REPOSITORY,
+                archivedNodeIds: list.map((l) => l.ref.id),
+            })
+            .subscribe(
+                (result: ArchiveRestore) => this.restoreFinished(list, result),
+                (error: any) => this.handleErrors(error),
+            );
     }
     private handleErrors(error: any) {
         this.toast.error(error);
@@ -270,6 +295,7 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
         const result = await this.loadData(
             this.searchQuery,
             event ? event?.offset || this.dataSource.getData().length : 0,
+            event?.amount || RestConnectorService.DEFAULT_NUMBER_PER_REQUEST,
             this.sort.active,
             this.sort.direction === 'asc',
         ).toPromise();

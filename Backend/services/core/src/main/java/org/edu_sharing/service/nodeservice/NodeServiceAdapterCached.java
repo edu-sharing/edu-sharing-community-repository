@@ -16,6 +16,12 @@ public class NodeServiceAdapterCached extends NodeServiceAdapter{
             .maximumWeightedCapacity(1000)
             .build();
 
+    public NodeServiceAdapterCached(String appId) {
+        super(appId);
+    }
+    public static void updateCache(String nodeId, Map<String,Object> properties) {
+        propertyCache.put(nodeId, properties);
+    }
     public static void updateCache(Map<String,Object> properties) {
         propertyCache.put((String)properties.get(CCConstants.SYS_PROP_NODE_UID), properties);
     }

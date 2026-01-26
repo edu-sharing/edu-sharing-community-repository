@@ -40,6 +40,7 @@ import { HtmlTextPipe } from '../pipes/html-text.pipe';
 import { AssignmentPipe } from '../pipes/assignment.pipe';
 import { AuthorityColorPipe } from '../pipes/authority-color.pipe';
 import { AssetsPathPipe } from '../pipes/assets-path.pipe';
+import { InfoMessageComponent } from '../info-message/info-message.component';
 
 @NgModule({
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -79,7 +80,9 @@ import { AssetsPathPipe } from '../pipes/assets-path.pipe';
         CommonModule,
         MatMenuModule,
         SpinnerComponent,
+        IconDirective,
         SpinnerSmallComponent,
+        InfoMessageComponent,
         ToolpermissionPipe,
         MatButtonModule,
         HtmlTextPipe,
@@ -110,6 +113,7 @@ import { AssetsPathPipe } from '../pipes/assets-path.pipe';
         AuthorityColorPipe,
         AssetsPathPipe,
         NodeImagePipe,
+        NodeLicensePipe,
         NodeImageSizePipe,
         NodePersonNamePipe,
         NodeTitlePipe,

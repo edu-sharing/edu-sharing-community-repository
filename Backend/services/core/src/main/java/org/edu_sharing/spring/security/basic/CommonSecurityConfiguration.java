@@ -11,8 +11,9 @@ public class CommonSecurityConfiguration {
     public StrictHttpFirewall httpFirewall() {
         StrictHttpFirewall firewall = new StrictHttpFirewall();
         //config for allowing urls like: edu-sharing/rest/rendering/v1/details/brockhaus/%252fjulex%252farticle%252fschule?version=-1
-        firewall.setAllowUrlEncodedPercent(true);
-        firewall.setAllowUrlEncodedSlash(true);
+        // disabled -> Brockhaus ids are automatically base64 encoded before exposed to clients
+        firewall.setAllowUrlEncodedPercent(false);
+        firewall.setAllowUrlEncodedSlash(false);
         return firewall;
     }
 }

@@ -82,7 +82,6 @@ import {
     NodeRelationsDialogData,
     NodeRelationsDialogResult,
 } from './dialog-modules/node-relations-dialog/node-relations-dialog-data';
-import { NodeReportDialogData } from './dialog-modules/node-report-dialog/node-report-dialog.component';
 import {
     NodeTemplateDialogData,
     NodeTemplateDialogResult,
@@ -165,6 +164,7 @@ import {
 import { firstValueFrom, from } from 'rxjs';
 import { concatMap, toArray } from 'rxjs/operators';
 import { Toast } from '../../services/toast';
+import { NodeReportDialogData } from 'ngx-rendering-service-lib';
 
 export enum DialogTemplate {
     AddMaterialDialogBelow,

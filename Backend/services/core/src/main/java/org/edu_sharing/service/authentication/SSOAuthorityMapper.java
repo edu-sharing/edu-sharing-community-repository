@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.policy.OnUpdatePersonPropertiesPolicy;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -103,6 +104,7 @@ public class SSOAuthorityMapper {
         private boolean updateMemberships = true;
         private boolean debug = false;
         private String mappingGroupBuilderClass;
+        boolean setupHomeDir = true;
         private boolean authByAppCheckClientIp = true;
         private String organisationParam;
         private String globalGroupsParam;
@@ -366,8 +368,14 @@ public class SSOAuthorityMapper {
                         }
                     }
 
-
+                    try {
+                        if (!config.setupHomeDir) {
+                            OnUpdatePersonPropertiesPolicy.constructPersonFolders.set(false);
+                        }
                     personService.createPerson(personProperties);
+                    }finally {
+                        OnUpdatePersonPropertiesPolicy.constructPersonFolders.set(null);
+                    }
                 } else if (updateUser) {
 
                     //don't update the username (this leads to lowercase username when lowercase username comes with sso data

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { distinctUntilChanged, filter, map, startWith } from 'rxjs/operators';
-import { Node, RestConstants, UsageV1Service } from 'ngx-edu-sharing-api';
+import { NetworkService, Node, RestConstants, UsageV1Service } from 'ngx-edu-sharing-api';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import {
@@ -36,6 +36,7 @@ export class MdsEditorWidgetCollectionsComponent implements OnInit, NativeWidget
     constructor(
         private mdsEditorValues: MdsEditorInstanceService,
         private usageService: UsageV1Service,
+        private networkService: NetworkService,
     ) {}
 
     ngOnInit(): void {
@@ -47,17 +48,22 @@ export class MdsEditorWidgetCollectionsComponent implements OnInit, NativeWidget
             .subscribe(async (nodes) => {
                 if (nodes?.length === 1) {
                     let nodeId = nodes[0].ref.id;
+                    const isFromHomeRepo = await firstValueFrom(
+                        this.networkService.isFromHomeRepository(nodes[0]),
+                    );
                     if (this.isCollectionRef(nodes[0])) {
                         nodeId = nodes[0].properties?.[RestConstants.CCM_PROP_IO_ORIGINAL]?.[0];
                     }
-                    this.dataSource.isLoading = true;
-                    const result = (
-                        (await firstValueFrom(
-                            this.usageService.getUsagesByNodeCollections({ nodeId }),
-                        )) as unknown as any[]
-                    ).map((n) => n.collection) as Node[];
-                    this.dataSource.setData(result);
-                    this.dataSource.isLoading = false;
+                    if (isFromHomeRepo) {
+                        this.dataSource.isLoading = true;
+                        const result = (
+                            (await firstValueFrom(
+                                this.usageService.getUsagesByNodeCollections({ nodeId }),
+                            )) as unknown as any[]
+                        ).map((n) => n.collection) as Node[];
+                        this.dataSource.setData(result);
+                        this.dataSource.isLoading = false;
+                    }
                 }
             });
     }

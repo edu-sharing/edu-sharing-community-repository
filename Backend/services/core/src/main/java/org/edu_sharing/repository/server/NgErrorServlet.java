@@ -36,6 +36,10 @@ public class NgErrorServlet extends SpringHttpServlet {
 		try {
 			Object errorMessage= req.getAttribute("jakarta.servlet.error.message");
 			Object errorCode= req.getAttribute("jakarta.servlet.error.status_code");
+			Object ex = req.getAttribute("jakarta.servlet.error.exception");
+			if(ex instanceof Throwable) {
+				logger.info("Internal exception: " + ((Throwable) ex).getMessage(), (Throwable) ex);
+			}
 			ErrorFilter.handleError(req, resp, new Throwable(
 							errorMessage.toString()),
 					Integer.parseInt(errorCode.toString())

@@ -45,6 +45,7 @@ export * from './lib/rest-constants';
 export {
     MdsV1Service,
     AssignmentV1Service,
+    ArchiveV1Service,
     AdminV1Service,
     ConfigV1Service,
     StreamV1Service,

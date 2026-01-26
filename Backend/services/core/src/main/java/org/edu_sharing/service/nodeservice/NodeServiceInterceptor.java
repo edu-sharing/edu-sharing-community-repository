@@ -5,6 +5,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
@@ -114,6 +115,8 @@ public class NodeServiceInterceptor implements MethodInterceptor {
             }
         } catch (ToolPermissionException e) {
             throw e;
+        } catch (InvalidNodeRefException t) {
+            logger.debug("InvalidNodeRefException while verifying if object is remote object: " + t.getMessage());
         } catch (Throwable t) {
             logger.info("Unexpected error while verifying if object is remote object: " + t.getMessage());
         }

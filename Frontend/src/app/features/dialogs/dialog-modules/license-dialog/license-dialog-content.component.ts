@@ -159,6 +159,10 @@ export class LicenseDialogContentComponent implements OnInit {
     @Output() isLoading = new EventEmitter<boolean>();
     @Output() canSave = new EventEmitter<boolean>();
     aiTools: Array<MdsWidgetValue> = [];
+    /**
+     * are all current nodes public
+     */
+    isPublic: boolean | undefined = undefined;
 
     set primaryType(primaryType: string) {
         if (!primaryType.startsWith('CC_BY')) {
@@ -260,7 +264,6 @@ export class LicenseDialogContentComponent implements OnInit {
     private permissions: Acl;
     private allowedLicenses: string[];
     private releaseMulti: string;
-    private allowRelease = true; // FIXME: not used.
     aiOpen = false;
 
     constructor(
@@ -316,6 +319,7 @@ export class LicenseDialogContentComponent implements OnInit {
                 this.updateCanSave();
                 this.releaseMulti = null;
                 let i = 0;
+                this.isPublic = nodes.every((n) => n.isPublic);
                 for (const node of nodes) {
                     i++;
                     this.nodeService.getPermissions(node.ref.id).subscribe((permissions) => {
@@ -334,6 +338,7 @@ export class LicenseDialogContentComponent implements OnInit {
     private async initProperties(properties: any) {
         this.loadConfig();
         this._properties = properties;
+        this.isPublic = undefined;
         this.setDefaultModeState();
         await this.mdsEditorInstanceService.initWithNodes(
             [
@@ -362,7 +367,7 @@ export class LicenseDialogContentComponent implements OnInit {
             nodes.map((n) =>
                 this.nodeApi
                     .getNodeMetadata(n.ref.id, [RestConstants.ALL])
-                    .pipe(map((n2) => n2.node)),
+                    .pipe(map((n2) => n2.node as Node)),
             ),
         );
     }
@@ -682,7 +687,9 @@ export class LicenseDialogContentComponent implements OnInit {
             }
         if (this.releaseMulti != null && this.releaseMulti != 'false') this.releaseMulti = 'multi';
         else this.releaseMulti = 'false';
-        if (last) this.setPermissionState();
+        if (last) {
+            this.setPermissionState();
+        }
     }
 
     private setPermissionState() {
@@ -702,12 +709,10 @@ export class LicenseDialogContentComponent implements OnInit {
                     return;
                 }
                 if (!data) {
-                    this.allowRelease = false;
                     return;
                 }
                 for (const node of this.getNodes()) {
                     if (node.access.indexOf(RestConstants.ACCESS_CHANGE_PERMISSIONS) == -1) {
-                        this.allowRelease = false;
                         return;
                     }
                 }

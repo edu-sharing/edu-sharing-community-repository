@@ -71,9 +71,16 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
 
     @Output() extendedChange = new EventEmitter();
     @Output() cancelMds = new EventEmitter();
+    /**
+     * user saved all data or nodes
+     */
     @Output() done = new EventEmitter<Node[] | Values>();
     @Output() mdsLoaded = new EventEmitter();
     @Output() openContributor = new EventEmitter();
+    /**
+     * interactively called when any values are changed (evenn if user did not use SAVE event, use done for that)
+     */
+    @Output() currentValuesChange = new EventEmitter<Values>();
     /**
      * @DEPRECATED old mds only
      */
@@ -106,7 +113,10 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
         if (this.graphqlIds || this.nodes || this.currentValues) {
             void this.init();
         }
-        this.mdsEditorInstance.values.subscribe((values) => (this.values = values));
+        this.mdsEditorInstance.values.subscribe((values) => {
+            this.values = values;
+            this.currentValuesChange.emit(values);
+        });
 
         if (!this.embedded) {
             throw new Error(

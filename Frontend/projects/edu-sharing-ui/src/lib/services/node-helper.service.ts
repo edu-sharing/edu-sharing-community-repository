@@ -318,7 +318,7 @@ export class NodeHelperService {
                     queryParams: { id: node.ref.id },
                 };
             } else if (node.ref) {
-                const fromHome = this.networkService.isFromHomeRepository(node as Node);
+                const fromHome = node.ref.isHomeRepo || false; //this.networkService.isFromHomeRepository(node);
                 data = {
                     routerLink: short
                         ? UIConstants.ROUTER_PREFIX_SHORT + node.ref.id

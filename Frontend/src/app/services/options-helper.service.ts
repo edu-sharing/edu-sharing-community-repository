@@ -582,6 +582,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         };
         editConnectorNode.elementType = [
             ElementType.Node,
+            ElementType.NodePublishedCopy,
             ElementType.NodeChild,
             ElementType.NodeProposal,
         ];

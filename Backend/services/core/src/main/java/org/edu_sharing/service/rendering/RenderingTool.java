@@ -158,18 +158,68 @@ public class RenderingTool {
 	}
 
 	public static void buildRenderingCache(String nodeId) {
-		final Context context = Context.getCurrentContextForCustomThreads();
-		prepareExecutor.execute(()->{
-			AuthenticationUtil.runAsSystem(()-> {
-				try {
-					Context.setInstance(context);
-					// Deprecated, use the Lightbend config!
-					if(!ConfigServiceFactory.getCurrentConfig().getValue("rendering.prerender",true)) {
-						return null;
-					}
-					if(!LightbendConfigCache.getBoolean("rendering.prerender")) {
-						return null;
-					}
+        try{
+            // Deprecated, use the Lightbend config!
+            if(!ConfigServiceFactory.getCurrentConfig().getValue("rendering.prerender",true)) {
+                return;
+            }
+            if(!LightbendConfigCache.getBoolean("rendering.prerender")) {
+                return;
+            }
+        }catch (Exception e){
+            logger.error(e.getMessage(), e);
+        }
+        AboutPlugins plugins = ApplicationContextFactory.getApplicationContext().getBean(AboutPlugins.class);
+        Optional<PluginInfo> rs2 = plugins.getPlugins().stream().filter(p -> RenderingPluginInfo.RENDERING_SERVICE_2.equals(p.getId())).findFirst();
+        if(rs2.isPresent()){
+            ApplicationInfo renderingService2 = ApplicationInfoList.getRenderingService2();
+            String baseUrl = renderingService2.getBaseUrl();
+            RestClient restClient = RestClient.builder()
+                    .baseUrl(baseUrl)
+                    .build();
+
+            String fullyAuthenticatedUser = AuthenticationUtil.getFullyAuthenticatedUser();
+            if(fullyAuthenticatedUser != null){
+                try {
+                    User user = AuthorityServiceFactory.getLocalService().getUser(fullyAuthenticatedUser);
+                    RequestUserData userData = RequestUserData.builder()
+                            .authorityName(fullyAuthenticatedUser)
+                            .firstName(user.getGivenName())
+                            .surName(user.getSurname())
+                            .userEMail(user.getEmail())
+                            .build();
+                    NodeDao node = NodeDao.getNode(RepositoryDao.getHomeRepository(), nodeId);
+                    Base64.Encoder encoder = Base64.getEncoder();
+
+                    SignedNode signedNode = node.getSignedNode();
+                    String encodedSignedNode = encoder.encodeToString(signedNode.getNode().getBytes());
+                    String encodedSignature = encoder.encodeToString(signedNode.getSignature());
+                    RenderDataRequest request = RenderDataRequest.builder()
+                            .repoId(ApplicationInfoList.getHomeRepository().getAppId())
+                            .nodeId(nodeId)
+                            .userData(userData)
+                            .securedNode(encodedSignedNode)
+                            .signature(encodedSignature)
+                            .build();
+                    String response = restClient.post()
+                            .uri("/rendering/public/renderdata")
+                            .header("Authorization", "Bearer " + node.getJWT())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .body(request)
+                            .retrieve()
+                            .body(String.class);
+                    logger.info("prerendering response:" + response);
+                } catch (Throwable e) {
+                    logger.warn("prerendering failed:" + e.getMessage(), e);
+                }
+            }
+
+        }else{
+            final Context context = Context.getCurrentContextForCustomThreads();
+            prepareExecutor.execute(()->{
+                AuthenticationUtil.runAsSystem(()-> {
+                    try {
+                        Context.setInstance(context);
 					// @TODO: May we need to build up caches just for particular file types?
 					RenderingService service = AlfAppContextGate.getApplicationContext().getBean(RenderingService.class);
 					return service.getDetails(ApplicationInfoList.getHomeRepository().getAppId(), nodeId, null, DISPLAY_PRERENDER, null);

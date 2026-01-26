@@ -7,11 +7,16 @@
     <ng-container *ngTemplateOutlet="content"></ng-container>
   </div>
   <ng-template #content>
-    <es-preview-content #preview [node]="node"></es-preview-content>
+    <es-preview-content #preview [node]="node" [customOptions]="customOptions"></es-preview-content>
   </ng-template>
   <ng-template #modal>
     <div class="preview-sidebar-rendering-modal">
-      <es-preview-content [node]="node" [autoRender]="true" class="modal"></es-preview-content>
+      <es-preview-content
+        [node]="node"
+        [customOptions]="customOptions"
+        [autoRender]="true"
+        class="modal"
+      ></es-preview-content>
     </div>
   </ng-template>
 </ng-container>

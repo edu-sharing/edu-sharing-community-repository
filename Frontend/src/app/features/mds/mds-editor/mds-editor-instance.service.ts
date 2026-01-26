@@ -715,7 +715,12 @@ export class MdsEditorInstanceService
     /**
      * is the ai suggestion toggle set to true?
      */
-    showAiSuggestions = new BehaviorSubject<boolean>(false);
+    readonly showAiSuggestions = new BehaviorSubject<boolean>(false);
+
+    /**
+     * are ai suggestions currently generated
+     */
+    readonly aiLoading = new BehaviorSubject(false);
 
     /** MDS Views of the relevant group (in order). */
     views: MdsView[];
@@ -1512,7 +1517,7 @@ export class MdsEditorInstanceService
             .filter((widget) => widget.relation === null)
             .reduce((acc, widget) => {
                 const property = widget.definition.id;
-                const newValue = this.getNewPropertyValue(widget, node?.properties[property]);
+                let newValue = this.getNewPropertyValue(widget, node?.properties[property]);
                 // filter null values in search
                 if (
                     this.editorMode === 'search' &&
@@ -1521,6 +1526,20 @@ export class MdsEditorInstanceService
                 ) {
                     return acc;
                 } else if (newValue) {
+                    newValue = newValue.map((v) => {
+                        widget.definition.inputPreprocessor?.forEach((processor) => {
+                            if (processor === 'trim') {
+                                v = v?.trim();
+                            } else if (processor === 'uppercase') {
+                                v = v?.toUpperCase();
+                            } else if (processor === 'lowercase') {
+                                v = v?.toLowerCase();
+                            } else {
+                                console.warn('unknown preprocessor ' + processor);
+                            }
+                        });
+                        return v;
+                    });
                     if (widget.definition.type === MdsWidgetType.Range) {
                         acc[`${property}_from`] = [newValue[0]];
                         acc[`${property}_to`] = [newValue[1]];

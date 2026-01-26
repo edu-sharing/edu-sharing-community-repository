@@ -849,28 +849,35 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             this.toast.showProgressSpinner();
             if (this.editId == null) {
                 const name = this.editDetails.authorityName;
-                this.iam.createUser(name.trim(), password, editStore.profile).subscribe(
-                    (user) => {
-                        this.edit = null;
-                        this.toast.closeProgressSpinner();
-                        if (this.org) {
-                            this.iam.addGroupMember(this.org.authorityName, name).subscribe(
-                                () => {
-                                    this.toast.toast('PERMISSIONS.USER_CREATED');
-                                    this.addVirtualEntry(user);
-                                },
-                                (error: any) => this.toast.error(error),
-                            );
-                        } else {
-                            this.toast.toast('PERMISSIONS.USER_CREATED');
-                            this.addVirtualEntry(user);
-                        }
-                    },
-                    (error: any) => {
-                        this.handleError(error);
-                        this.toast.closeProgressSpinner();
-                    },
-                );
+                this.iamService
+                    .createUser({
+                        person: name.trim(),
+                        repository: HOME_REPOSITORY,
+                        password,
+                        body: editStore.profile,
+                    })
+                    .subscribe(
+                        (user) => {
+                            this.edit = null;
+                            this.toast.closeProgressSpinner();
+                            if (this.org) {
+                                this.iam.addGroupMember(this.org.authorityName, name).subscribe(
+                                    () => {
+                                        this.toast.toast('PERMISSIONS.USER_CREATED');
+                                        this.addVirtualEntry(user);
+                                    },
+                                    (error: any) => this.toast.error(error),
+                                );
+                            } else {
+                                this.toast.toast('PERMISSIONS.USER_CREATED');
+                                this.addVirtualEntry(user);
+                            }
+                        },
+                        (error: any) => {
+                            this.handleError(error);
+                            this.toast.closeProgressSpinner();
+                        },
+                    );
             } else {
                 this.iam.editUser(this.editId, editStore.profile).subscribe(
                     async () => {

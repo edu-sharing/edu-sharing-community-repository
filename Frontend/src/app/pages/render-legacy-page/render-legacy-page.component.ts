@@ -84,7 +84,7 @@ import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { MdsEditorInstanceService } from '../../features/mds/mds-editor/mds-editor-instance.service';
 import { RouterHelper } from '../../util/router.helper';
 import { SharedModule } from '../../shared/shared.module';
-import { RenderRevokedComponent } from './nodes-render-revoked/render-revoked.component';
+import { RenderingServiceLibModule } from 'ngx-rendering-service-lib';
 
 export type SpecialRenderTemplate = 'revoked' | null;
 
@@ -92,7 +92,7 @@ export type SpecialRenderTemplate = 'revoked' | null;
     selector: 'es-render-legacy-page',
     templateUrl: 'render-legacy-page.component.html',
     styleUrls: ['render-legacy-page.component.scss'],
-    imports: [SharedModule, RenderRevokedComponent],
+    imports: [SharedModule, RenderingServiceLibModule],
     providers: [
         OptionsHelperDataService,
         RenderHelperService,

@@ -389,7 +389,7 @@ public class MetadataReader {
         return new MetadataQueryParameter.MetadataQueryFacet(type, sortBy, sortOrder, maxBucketSize, metadataQueryFacetItemList);
     }
 
-    private static InputStream getFile(String name, Filetype type) throws IOException {
+    static InputStream getFile(String name, Filetype type) throws IOException {
         String prefix = getPath() + "xml/";
         if (type.equals(Filetype.VALUESPACE)) {
             prefix += "valuespaces/";
@@ -397,7 +397,7 @@ public class MetadataReader {
         return PropertiesHelper.Config.getInputStreamForFile(prefix + name);
     }
 
-    private MetadataReader(String name, String locale) throws Exception {
+    MetadataReader(String name, String locale) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setIgnoringComments(true);
         builder = factory.newDocumentBuilder();
@@ -499,7 +499,7 @@ public class MetadataReader {
         }
         return defaults;
     }
-    private List<MetadataWidget> getWidgets(MetadataWidgetDefaults defaults) throws Exception {
+    List<MetadataWidget> getWidgets(MetadataWidgetDefaults defaults) throws Exception {
         List<MetadataWidget> widgets = new ArrayList<>();
         NodeList widgetsNode = (NodeList) xpath.evaluate("/metadataset/widgets/widget", doc, XPathConstants.NODESET);
         for (int i = 0; i < widgetsNode.getLength(); i++) {
@@ -668,6 +668,9 @@ public class MetadataReader {
                     case "values":
                         widget.setValues(getValues(data.getChildNodes(), valuespaceI18n, valuespaceI18nPrefix));
                         break;
+                    case "inputPreprocessor":
+                        widget.setInputPreprocessor(getInputPreprocessor(data.getChildNodes()));
+                        break;
                     case "subwidgets":
                         widget.setSubwidgets(getSubwidgets(data.getChildNodes()));
                         break;
@@ -818,6 +821,16 @@ public class MetadataReader {
         return null;
     }
 
+    private List<MetadataWidget.MetadataInputPreprocessor> getInputPreprocessor(NodeList keysNode) {
+        List<MetadataWidget.MetadataInputPreprocessor> list = new ArrayList<>();
+        for (int i = 0; i < keysNode.getLength(); i++) {
+            Node keyNode = keysNode.item(i);
+            if(keyNode.getNodeName().equals("preprocessor")) {
+                list.add(MetadataWidget.MetadataInputPreprocessor.valueOf(keyNode.getTextContent()));
+            }
+        }
+        return list;
+    }
     private List<MetadataKey> getValues(NodeList keysNode, String valuespaceI18n, String valuespaceI18nPrefix) {
         List<MetadataKey> keys = new ArrayList<>();
         for (int i = 0; i < keysNode.getLength(); i++) {
