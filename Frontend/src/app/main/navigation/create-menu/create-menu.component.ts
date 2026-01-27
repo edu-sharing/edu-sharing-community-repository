@@ -72,7 +72,7 @@ import { OptionsHelperService } from '../../../services/options-helper.service';
     templateUrl: 'create-menu.component.html',
     styleUrls: ['create-menu.component.scss'],
     animations: [trigger('dialog', UIAnimation.switchDialog(UIAnimation.ANIMATION_TIME_FAST))],
-    providers: [OptionsHelperDataService],
+    providers: [OptionsHelperDataService, OptionsHelperService],
     standalone: false,
 })
 export class CreateMenuComponent implements OnInit, OnDestroy {
