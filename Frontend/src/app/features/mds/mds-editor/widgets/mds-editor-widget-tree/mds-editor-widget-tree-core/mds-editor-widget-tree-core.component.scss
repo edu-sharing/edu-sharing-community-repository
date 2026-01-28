@@ -4,7 +4,9 @@
 .tree {
     .tree-node.is-suggestion-ai {
         mat-checkbox {
-            --mdc-checkbox-selected-checkmark-color: var(--aiColor);
+            --mdc-checkbox-selected-icon-color: var(--aiColor);
+            --mdc-checkbox-selected-hover-icon-color: var(--aiColor);
+            --mdc-checkbox-selected-focus-icon-color: var(--aiColor);
         }
         span {
             @include mds.highlightAiText();
