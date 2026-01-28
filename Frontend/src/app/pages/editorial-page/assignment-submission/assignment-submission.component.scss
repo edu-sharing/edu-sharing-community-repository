@@ -3,6 +3,11 @@
 
 #toolbarViewer {
     height: 40px;
+    &.small {
+        #toolbarViewerLeft {
+            display: none;
+        }
+    }
     .save {
         align-items: center;
         margin-left: 20px;

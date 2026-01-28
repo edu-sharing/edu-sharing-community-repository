@@ -29,6 +29,9 @@ $collectionIconSize: 25px;
     &.status-DRAFT {
         background-color: #ddd;
     }
+    &.type-SUBMISSION {
+        background-color: color-mix(in srgb, var(--palette-primary-100), 60% transparent);
+    }
     &.status-CANCELED {
         background-color: color-mix(in srgb, var(--colorStatusNegative), 60% transparent);
     }

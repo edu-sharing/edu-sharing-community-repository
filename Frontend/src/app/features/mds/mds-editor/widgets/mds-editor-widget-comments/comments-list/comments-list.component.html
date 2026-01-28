@@ -65,7 +65,7 @@
             {{ comment.comment }}
           </div>
           <div
-            class="commentText"
+            class="commentText commentHTML"
             *ngIf="comment !== editComment && text === 'html'"
             [innerHTML]="comment.comment"
           ></div>

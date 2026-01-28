@@ -55,7 +55,12 @@
 </ng-container>
 
 <ng-template #additionalButtons>
-  <div id="toolbarViewer">
+  <div
+    id="toolbarViewer"
+    esBorderBoxObserver
+    #observer="borderBoxObserver"
+    [class.small]="(observer.width$ | async) < 700"
+  >
     <div id="toolbarViewerLeft">
       <pdf-toggle-sidebar></pdf-toggle-sidebar>
       <div class="toolbarButtonSpacer"></div>

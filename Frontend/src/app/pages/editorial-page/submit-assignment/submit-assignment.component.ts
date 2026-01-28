@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, signal, ViewChild } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import {
     Assignment,
@@ -53,6 +53,7 @@ import { CommentsListComponent } from '../../../features/mds/mds-editor/widgets/
     imports: [SharedModule, TranslateModule, EditorComponent, CommentsListComponent],
 })
 export class SubmitAssignmentComponent {
+    @ViewChild(CommentsListComponent) commentsRef: CommentsListComponent;
     readonly editorConfig = {
         ...AssignmentEditorConfig,
         base_url: this.platformLocation.getBaseHrefFromDOM() + 'tinymce',
@@ -434,5 +435,6 @@ export class SubmitAssignmentComponent {
         );
         control.reset();
         control.enable();
+        void this.commentsRef.refresh();
     }
 }

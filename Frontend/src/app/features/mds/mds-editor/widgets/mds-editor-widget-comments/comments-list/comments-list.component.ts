@@ -181,7 +181,7 @@ export class CommentsListComponent {
         this.cancelComment.emit();
     }
 
-    private async refresh() {
+    public async refresh() {
         this.comments = null;
         if (!this._node) return;
         if (this.isLoading) {

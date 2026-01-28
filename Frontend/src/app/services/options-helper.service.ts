@@ -23,6 +23,7 @@ import {
     ProposalNode,
 } from 'ngx-edu-sharing-api';
 import {
+    AssignmentPipe,
     ClipboardObject,
     Constrain,
     CustomOptions,
@@ -1181,15 +1182,39 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         relationNode.permissionsRightMode = NodesRightMode.Effective;
         relationNode.group = DefaultGroups.Edit;
         relationNode.priority = 70;
+
+        const submitAssignment = new OptionItem('OPTIONS.ASSIGNMENT_SUBMIT', 'send', (object) =>
+            this.uiService.goToAssignment(this.getObjects(object, data)[0], 'submit'),
+        );
+        submitAssignment.customShowCallback = async (objects) => {
+            const assignment = objects[0] as Assignment;
+            return (
+                assignment.type === 'SUBMISSION' &&
+                new AssignmentPipe().transform(assignment, {
+                    mode: 'permissions',
+                }) !== 'COORDINATOR'
+            );
+        };
+        submitAssignment.elementType = [ElementType.Assignment];
+        submitAssignment.constrains = [Constrain.NoBulk, Constrain.User];
+        submitAssignment.showAsAction = true;
+        submitAssignment.group = DefaultGroups.View;
+        submitAssignment.priority = 5;
+
         const viewAssignmentSubmission = new OptionItem(
             'OPTIONS.ASSIGNMENT_SUBMISSION',
             'inbox',
             (object) =>
-                this.uiService.goToAssignment(this.getObjects(object, data)[0], 'submission'),
+                this.uiService.goToAssignment(this.getObjects(object, data)[0], 'submissions'),
         );
         viewAssignmentSubmission.customShowCallback = async (objects) => {
             const assignment = objects[0] as Assignment;
-            return assignment.type === 'SUBMISSION' && assignment.permissions.length > 0;
+            return (
+                assignment.type === 'SUBMISSION' &&
+                new AssignmentPipe().transform(assignment, {
+                    mode: 'permissions',
+                }) === 'COORDINATOR'
+            );
         };
         viewAssignmentSubmission.elementType = [ElementType.Assignment];
         viewAssignmentSubmission.constrains = [Constrain.NoBulk, Constrain.User];
@@ -1205,7 +1230,12 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         editAssignment.customShowCallback = async (objects) => {
             const assignment = objects[0] as Assignment;
             // user has access to permissions => so it's a coordinator
-            return assignment.permissions.length > 0;
+            return (
+                assignment.type === 'SUBMISSION' &&
+                new AssignmentPipe().transform(assignment, {
+                    mode: 'permissions',
+                }) === 'COORDINATOR'
+            );
         };
         editAssignment.showAsAction = true;
         editAssignment.group = DefaultGroups.Edit;
@@ -1408,6 +1438,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         options.push(bookmarkNode);
         options.push(shortcutNode);
         options.push(editCollection);
+        options.push(submitAssignment);
         options.push(viewAssignmentSubmission);
         options.push(editAssignment);
         options.push(pinCollection);

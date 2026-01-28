@@ -812,6 +812,7 @@
     "SELECT_ALL": "Alle auswählen",
     "DESELECT": "Alle abwählen",
     "NEW_ASSIGNMENT": "Neue Aufgabe",
+    "ASSIGNMENT_SUBMIT": "Abgeben",
     "ASSIGNMENT_SUBMISSION": "Abgaben",
     "ASSIGNMENT_EDIT": "Aufgabe bearbeiten"
   },
