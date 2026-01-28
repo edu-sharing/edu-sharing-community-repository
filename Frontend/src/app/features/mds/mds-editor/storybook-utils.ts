@@ -373,6 +373,11 @@ export class SuggestionsV1ServiceMock {
                     params.node,
                     ['6-12'],
                 ),
+                'ccm:taxonid': this.BaseSuggestion('ccm:taxonid', params.node, [
+                    '02002020104',
+                    '020020205',
+                    '020020206',
+                ]),
                 'ccm:commonlicense_ai_tool': this.BaseSuggestion(
                     'ccm:commonlicense_ai_tool',
                     params.node,
@@ -17116,7 +17121,7 @@ export const DefaultMds: MdsDefinition = {
             id: 'node_general',
             caption: 'Allg. Informationen',
             icon: 'description',
-            html: '\n\t\t\t  <preview>\n              <ccm:wwwurl>\n              <cm:name>\n              <cclom:title><ccm:educationaltypicallearningtime><ccm:educationaltypicalagerange><ccm:commonlicense_ai_tool caption="Test AI Tool" type="radioVertical"><ccm:tool_category>\n              <ccm:educationallearningresourcetype>\n              <cclom:general_keyword>\n              <cclom:general_description>\n              <author>\n              <license>\n              <version>\n              <childobjects> <ccm:tool_instance_params>\n\t\t\t\t',
+            html: '\n\t\t\t  <preview>\n              <ccm:wwwurl>\n              <cm:name>\n              <cclom:title> <ccm:taxonid> <ccm:educationaltypicallearningtime><ccm:educationaltypicalagerange><ccm:commonlicense_ai_tool caption="Test AI Tool" type="radioVertical"><ccm:tool_category>\n              <ccm:educationallearningresourcetype>\n              <cclom:general_keyword>\n              <cclom:general_description>\n              <author>\n              <license>\n              <version>\n              <childobjects> <ccm:tool_instance_params>\n\t\t\t\t',
             rel: null,
             hideIfEmpty: false,
             isExtended: false,

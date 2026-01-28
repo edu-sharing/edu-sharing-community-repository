@@ -20,7 +20,7 @@ import { MdsWidgetType, ValueType } from 'ngx-edu-sharing-ui';
 import { DisplayValue } from '../DisplayValues';
 import { MdsEditorWidgetBase, MdsEditorWidgetChipsSuggestionBase } from '../mds-editor-widget-base';
 import { MdsEditorWidgetTreeCoreComponent } from './mds-editor-widget-tree-core/mds-editor-widget-tree-core.component';
-import { Tree } from './tree';
+import { Tree, TreeNode } from './tree';
 import { MatChipOption, MatChipRow } from '@angular/material/chips';
 import { UIService } from '../../../../../core-module/rest/services/ui.service';
 import { MatButton } from '@angular/material/button';
@@ -416,12 +416,16 @@ export class MdsEditorWidgetTreeComponent
         }
     }
 
-    isSuggestion(value: DisplayValue) {
+    isSuggestion(value: DisplayValue | TreeNode) {
         return this.widget
             .getSuggestions()
             .pipe(
                 map((suggestions) =>
-                    suggestions?.find((s) => s.value === value.key && s.status === 'ACCEPTED'),
+                    suggestions?.find(
+                        (s) =>
+                            s.value === ((value as DisplayValue).key || (value as TreeNode).id) &&
+                            s.status === 'ACCEPTED',
+                    ),
                 ),
             );
     }
