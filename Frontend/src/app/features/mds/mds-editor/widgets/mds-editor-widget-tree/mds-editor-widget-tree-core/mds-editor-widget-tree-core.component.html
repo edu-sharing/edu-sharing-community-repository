@@ -41,7 +41,7 @@
     }}<i [esIcon]="'keyboard_arrow_' + (treeOpen ? 'up' : 'down')"></i>
   </button>
 </div> -->
-  <ng-container *ngIf="!isTree || !(suggestions | async)?.length || treeOpen">
+  <ng-container *ngIf="!isTree || true || treeOpen">
     <div class="tree-header" *ngIf="isTree">
       <mat-form-field floatLabel="always">
         <mat-label>{{ 'MDS.FILTER_TREE' | translate }}</mat-label>
