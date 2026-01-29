@@ -63,6 +63,7 @@ import { VirtualNode } from '../types/api-models';
 import { OptionsHelperDataService } from '../services/options-helper-data.service';
 import { UIService } from '../services/ui.service';
 import { ColumnType } from '../mds/mds-helper.service';
+import { PaginationStrategy } from './node-entries-global.service';
 
 @Component({
     selector: 'es-node-entries-wrapper',
@@ -109,6 +110,11 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @Output() columnsChange = new EventEmitter<ListItem[]>();
     @Input() globalOptions: OptionItem[];
     @Input() displayType = NodeEntriesDisplayType.Grid;
+    /**
+     * custom pagination strategy
+     * when unset, the global defined strategy for the current scope will be used
+     */
+    @Input() paginationStrategy: PaginationStrategy | null = null;
     @Output() displayTypeChange = new EventEmitter<NodeEntriesDisplayType>();
     @Input() elementInteractionType = InteractionType.DefaultActionLink;
     @Input() sort: ListSortConfig;
@@ -263,6 +269,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.configureColumns = this.configureColumns;
         this.entriesService.checkbox = this.checkbox;
         this.entriesService.displayType = this.displayType;
+        this.entriesService.paginationStrategy = this.paginationStrategy;
         this.entriesService.elementInteractionType = this.elementInteractionType;
         this.entriesService.gridConfig = this.gridConfig;
         this.entriesService.tableConfig = this.tableConfig;
