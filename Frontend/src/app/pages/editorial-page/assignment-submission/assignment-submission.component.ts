@@ -93,21 +93,23 @@ export class AssignmentSubmissionComponent implements AfterViewInit {
                     .getRepoUrl(correction.downloadUrl, correction)
                     .then((url) => this.selectedSubmissionFileUrl.set(url));
             }
-            this.selectedSubmissionFile()
-                ? this.editorialBreadcrumbService.path.set([
-                      {
-                          title: this.assignment().title,
-                          callback: () => this.selectedSubmissionFile.set(null),
-                      },
-                      {
-                          title: new AuthorityNamePipe(this.translate).transform(
-                              this.submission().assignee,
-                          ),
-                      },
-                  ])
-                : this.assignment
-                ? this.editorialBreadcrumbService.path.set([{ title: this.assignment().title }])
-                : this.editorialBreadcrumbService.path.set([]);
+            if (this.assignment() && this.selectedSubmissionFile()) {
+                this.editorialBreadcrumbService.path.set([
+                    {
+                        title: this.assignment().title,
+                        callback: () => this.selectedSubmissionFile.set(null),
+                    },
+                    {
+                        title: new AuthorityNamePipe(this.translate).transform(
+                            this.submission().assignee,
+                        ),
+                    },
+                ]);
+            } else if (this.assignment()) {
+                this.editorialBreadcrumbService.path.set([{ title: this.assignment().title }]);
+            } else {
+                this.editorialBreadcrumbService.path.set([]);
+            }
         });
         this.route.queryParams
             .pipe(
@@ -146,6 +148,7 @@ export class AssignmentSubmissionComponent implements AfterViewInit {
             optionConfig: {
                 assignment: this.assignment(),
                 submission: event.element,
+                submissionList: this.dataSource.getData(),
                 submissionFileCallback: (submission) => {
                     console.log(submission);
                     this.selectedSubmissionFile.set(submission);

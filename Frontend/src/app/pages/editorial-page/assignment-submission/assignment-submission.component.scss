@@ -3,7 +3,20 @@
 
 #toolbarViewer {
     height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    #toolbarViewerRight {
+        //flex-grow: 1;
+        justify-self: flex-end;
+    }
+    &.medium {
+        pdf-zoom-toolbar {
+            display: none;
+        }
+    }
     &.small {
+        justify-content: flex-end;
         #toolbarViewerLeft {
             display: none;
         }

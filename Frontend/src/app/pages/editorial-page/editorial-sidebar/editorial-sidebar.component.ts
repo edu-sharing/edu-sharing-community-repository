@@ -15,6 +15,7 @@ import {
 import { Node, RestConstants, Submission } from 'ngx-edu-sharing-api';
 import {
     Constrain,
+    DefaultGroups,
     EduSharingUiCommonModule,
     ElementType,
     NodeEntriesDataType,
@@ -181,6 +182,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
                 this.close();
             },
         );
+        createAssignment.group = DefaultGroups.Create;
         createAssignment.toolpermissions = [
             RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS,
         ];

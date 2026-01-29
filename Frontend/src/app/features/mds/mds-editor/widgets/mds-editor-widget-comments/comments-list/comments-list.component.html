@@ -52,13 +52,10 @@
               #menuTrigger="matMenuTrigger"
               class="dropdown-dummy"
               [matMenuTriggerFor]="dropdown.menu"
+              *ngIf="getOptions(comment) && getOptions(comment).length"
               (click)="options = getOptions(comment)"
             >
-              <i
-                esIcon="more_vert"
-                class="dropdown"
-                *ngIf="getOptions(comment) && getOptions(comment).length"
-              ></i>
+              <i esIcon="more_vert" class="dropdown"></i>
             </button>
           </div>
           <div class="commentText" *ngIf="comment !== editComment && text === 'plain'">

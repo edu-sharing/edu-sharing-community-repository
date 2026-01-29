@@ -59,7 +59,8 @@
     id="toolbarViewer"
     esBorderBoxObserver
     #observer="borderBoxObserver"
-    [class.small]="(observer.width$ | async) < 700"
+    [class.medium]="(observer.width$ | async) < 800"
+    [class.small]="(observer.width$ | async) < 600"
   >
     <div id="toolbarViewerLeft">
       <pdf-toggle-sidebar></pdf-toggle-sidebar>

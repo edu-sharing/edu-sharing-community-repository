@@ -26,7 +26,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { ManageAssignmentAuthoritiesComponent } from '../manage-assignment-authorities/manage-assignment-authorities.component';
 import { Toast } from 'ngx-edu-sharing-ui';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
-import { combineLatest, filter, firstValueFrom } from 'rxjs';
+import { combineLatest, EMPTY, firstValueFrom } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { EditorialBreadcrumbService } from '../editorial-breadcrumb/editorial-breadcrumb.service';
@@ -71,10 +71,11 @@ export class ManageAssignmentComponent {
     dateTime = new Date().getTime() + 1000 * 3600 * 24 * 5;
     @ViewChild(MatStepper) matStepper: MatStepper;
     @ViewChild('dateChooser') dateChooserRef: ShareDialogChooseDateComponent;
-    assignment = signal<Assignment>({
+    readonly EmptyAssignment = {
         type: 'SUBMISSION',
         status: 'DRAFT',
-    } as Assignment);
+    } as Assignment;
+    assignment = signal<Assignment>(this.EmptyAssignment);
     authorities = signal<Permission[]>(null);
     mainDataFormGroup: FormGroup;
     nodes = signal<NodeWithRole[]>(null);
@@ -109,24 +110,39 @@ export class ManageAssignmentComponent {
         private editorialSidebarService: EditorialSidebarService,
         private editorialBreadcrumbService: EditorialBreadcrumbService,
     ) {
+        this.mainDataFormGroup = this.formBuilder.group({
+            title: ['', [Validators.required]],
+            summary: ['', [Validators.required]],
+            useEndTime: [false, [Validators.required]],
+            allowAdditionalDocumentSubmissions: [true, []],
+        });
         this.route.queryParams
             .pipe(
                 map((p) => p.assignment),
-                filter((p) => !!p),
                 distinctUntilChanged(),
-                switchMap((assignmentId) =>
-                    combineLatest([
-                        this.assignmentService.getAssignment({
-                            assignmentId,
-                        }),
-                        this.assignmentService.getAssignmentFiles({
-                            assignmentId,
-                        }),
-                        this.assignmentService.getSubmissions({
-                            assignmentId,
-                        }),
-                    ]),
-                ),
+                switchMap((assignmentId) => {
+                    if (assignmentId) {
+                        return combineLatest([
+                            this.assignmentService.getAssignment({
+                                assignmentId,
+                            }),
+                            this.assignmentService.getAssignmentFiles({
+                                assignmentId,
+                            }),
+                            this.assignmentService.getSubmissions({
+                                assignmentId,
+                            }),
+                        ]);
+                    } else {
+                        this.editorialBreadcrumbService.path.set([]);
+                        this.assignment.set(this.EmptyAssignment);
+                        this.submissions.set(null);
+                        this.authorities.set(null);
+                        this.mainDataFormGroup.reset();
+                        this.nodes.set(null);
+                        return EMPTY;
+                    }
+                }),
             )
             .subscribe(([assignment, files, submissions]) => {
                 this.editorialBreadcrumbService.path.set([{ title: assignment.title }]);
@@ -151,13 +167,6 @@ export class ManageAssignmentComponent {
                     }),
                 );
             });
-
-        this.mainDataFormGroup = this.formBuilder.group({
-            title: ['', [Validators.required]],
-            summary: ['', [Validators.required]],
-            useEndTime: [false, [Validators.required]],
-            allowAdditionalDocumentSubmissions: [true, [Validators.required]],
-        });
         this.editorialSidebarService.applyNodeEmitted.subscribe(({ nodes }) => {
             this.nodes.set(
                 (this.nodes() || []).concat(

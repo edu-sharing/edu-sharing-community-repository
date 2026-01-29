@@ -1,3 +1,4 @@
+@use '../../../../assets/scss/mixins' as mixins;
 @use '../../node-entries/node-entries-card-small/node-entries-card-small.component' as badges;
 :host {
     > span {
@@ -6,6 +7,9 @@
         gap: 10px;
     }
 }
+.assignment-summary {
+    @include mixins.limitLineCount(1);
+}
 .status {
-    @include badges.assignmentBadge();
+    @include badges.assignmentBadge(4px);
 }

@@ -7,23 +7,29 @@
 }
 
 .submission {
+    .actions {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+    }
     > div {
         display: flex;
         gap: 20px;
     }
     padding: 20px;
+    label {
+        font-size: vars.$fontSizeSmall;
+    }
     .left {
         flex-grow: 1;
-        label {
-            font-size: vars.$fontSizeSmall;
-        }
+
         .from {
             font-size: vars.$fontSizeXLarge;
             font-weight: bold;
         }
-        > div {
-            padding-bottom: 20px;
-        }
+    }
+    .details {
+        padding-bottom: 20px;
     }
     .state {
         display: flex;
@@ -57,4 +63,11 @@
             }
         }
     }
+}
+.comments {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px;
+    overflow-x: hidden;
 }

@@ -1,6 +1,17 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import {
+    AfterViewInit,
+    ChangeDetectorRef,
+    Component,
+    Input,
+    OnChanges,
+    SimpleChanges,
+} from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { OptionItem } from '../../types/option-item';
+import * as rxjs from 'rxjs';
+import { NodeEntriesService } from '../../services/node-entries.service';
+import { startWith } from 'rxjs/operators';
+import { NodeEntriesDataType } from '../data-type';
 // TODO: Decide if providing focus highlights and ripples with this component is a good idea. When
 // using `app-node-url` for cards, we might need highlights and ripples for the whole card while
 // `app-node-url` should only wrap the title since links with lots of content confuse screen
@@ -23,17 +34,32 @@ import { OptionItem } from '../../types/option-item';
     `,
     standalone: false,
 })
-export class OptionButtonComponent implements OnChanges {
+export class OptionButtonComponent<T extends NodeEntriesDataType>
+    implements OnChanges, AfterViewInit
+{
     @Input() option: OptionItem;
     @Input() node: Node;
 
+    constructor(
+        private changeDetectorRef: ChangeDetectorRef,
+        private entriesService: NodeEntriesService<T>,
+    ) {}
     isShown = false;
     isEnabled = false;
     async ngOnChanges(changes: SimpleChanges) {
         this.isEnabled = await this.optionIsValid(this.option, this.node);
         this.isShown = await this.optionIsShown(this.option, this.node);
+        console.log('change', this.isShown);
     }
 
+    ngAfterViewInit(): void {
+        rxjs.combineLatest([
+            this.entriesService.options$.pipe(startWith(void 0 as void)),
+        ]).subscribe(() => {
+            console.log('change detect');
+            void this.ngOnChanges(null);
+        });
+    }
     async optionIsValid(optionItem: OptionItem, node: Node): Promise<boolean> {
         if (optionItem.enabledCallback) {
             return await optionItem.enabledCallback([node]);

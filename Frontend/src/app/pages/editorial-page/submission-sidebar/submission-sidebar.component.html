@@ -8,14 +8,14 @@
       <div>
         <div class="left">
           <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_FROM' | translate }}</label>
-          <div class="from">{{ submission().assignee | authorityName }}</div>
+          <div class="from details">{{ submission().assignee | authorityName }}</div>
           <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_TITLE' | translate }}</label>
-          <div class="title">TODO: What is the title? Or do we duplicate it everytime?</div>
+          <div class="title details">TODO: What is the title? Or do we duplicate it everytime?</div>
         </div>
         <es-user-avatar size="large" class="right" [user]="submission().assignee"></es-user-avatar>
       </div>
       <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_STATE' | translate }}</label>
-      <div class="state">
+      <div class="state details">
         <es-list-node-assignment
           [node]="submission()"
           [item]="submissionStatus"
@@ -24,12 +24,25 @@
           [node]="submission()"
           [item]="validationStatus"
         ></es-list-node-assignment>
-        <span>{{
-          submission().submissionDate
-            ? (submission().submissionDate | formatDate : { time: true })
-            : '-'
-        }}</span>
       </div>
+      <ng-container *ngIf="submission().submissionDate">
+        <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_DATE' | translate }}</label>
+        <div class="details">
+          <es-list-node-assignment
+            [node]="submission()"
+            [item]="submissionDate"
+          ></es-list-node-assignment>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="submission().returnDate">
+        <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.RETURN_DATE' | translate }}</label>
+        <div class="details">
+          <es-list-node-assignment
+            [node]="submission()"
+            [item]="returnDate"
+          ></es-list-node-assignment>
+        </div>
+      </ng-container>
       <div class="submissions">
         <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_ATTACHMENT' | translate }}</label>
         <es-manage-assignment-submissions
@@ -61,6 +74,24 @@
           </mat-form-field>
         </form>
       </div>
+      <div class="actions">
+        <button mat-button color="primary" [disabled]="!canGoBack()">
+          <i esIcon="arrow_back"></i>
+          {{ 'EDITORIAL.SIDEBAR.SUBMISSION.PREVIOUS' | translate }}
+        </button>
+        <button
+          mat-flat-button
+          color="primary"
+          [disabled]="data().submission.validationStatus === 'FINISHED'"
+          (click)="markAsFinished()"
+        >
+          <i esIcon="send"></i>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SEND_BACK' | translate }}
+        </button>
+        <button mat-button color="primary" [disabled]="!canGoForward()">
+          <i esIcon="arrow_forward"></i>
+          {{ 'EDITORIAL.SIDEBAR.SUBMISSION.NEXT' | translate }}
+        </button>
+      </div>
     </div>
   </mat-tab>
   <mat-tab>
@@ -68,6 +99,17 @@
       <i esIcon="comment" class="tab-icon"></i>
       <span class="tab-label">{{ 'EDITORIAL.SIDEBAR.SUBMISSION.TAB_DISCUSSION' | translate }}</span>
     </ng-template>
-    <div class="comments"></div>
+    <form [formGroup]="submitFormGroup" class="comments">
+      <es-comments-list
+        *ngIf="submission()?.ref?.id"
+        mode="view"
+        text="html"
+        [node]="submission()?.ref?.id"
+      ></es-comments-list>
+      <editor [init]="editorConfig" formControlName="submitComment"></editor>
+      <button mat-flat-button color="primary" (click)="addComment()">
+        {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.ADD_COMMENT' | translate }}
+      </button>
+    </form>
   </mat-tab>
 </mat-tab-group>

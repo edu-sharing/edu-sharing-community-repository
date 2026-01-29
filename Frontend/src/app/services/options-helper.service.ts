@@ -236,6 +236,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         }
 
         if (components.list) {
+            console.log('new list options');
             components.list.setOptions({
                 [Target.List]: await this.getAvailableOptions(Target.List, [], components, data),
                 [Target.ListDropdown]: await this.getAvailableOptions(

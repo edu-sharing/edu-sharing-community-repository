@@ -9,11 +9,11 @@ $collectionIconSize: 25px;
 
 @import '../node-entries-card/node-entries-card.main';
 
-@mixin assignmentBadge() {
+@mixin assignmentBadge($paddingH: 7px) {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 7px 6px;
+    padding: $paddingH 6px;
     border-radius: var(--borderRadiusBadges);
     background-color: var(--palette-primary-100);
     gap: 5px;
@@ -50,8 +50,10 @@ $collectionIconSize: 25px;
     &.submission-status-FINISHED {
         background-color: color-mix(in srgb, var(--colorStatusPositive), 60% transparent);
     }
+    &.submissionDate {
+    }
     > i {
-        font-size: 18px;
+        font-size: 15px;
     }
 }
 @mixin assignmentSummary() {

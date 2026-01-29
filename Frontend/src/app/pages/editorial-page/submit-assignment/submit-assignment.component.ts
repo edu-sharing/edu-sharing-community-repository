@@ -1,4 +1,4 @@
-import { Component, computed, signal, ViewChild } from '@angular/core';
+import { Component, computed, QueryList, signal, ViewChild, ViewChildren } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import {
     Assignment,
@@ -25,6 +25,7 @@ import {
     ListOptionsConfig,
     NodeDataSource,
     NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent,
     NodeHelperService,
     OptionData,
     OptionItem,
@@ -54,6 +55,9 @@ import { CommentsListComponent } from '../../../features/mds/mds-editor/widgets/
 })
 export class SubmitAssignmentComponent {
     @ViewChild(CommentsListComponent) commentsRef: CommentsListComponent;
+    @ViewChildren(NodeEntriesWrapperComponent) nodeEntriesRef: QueryList<
+        NodeEntriesWrapperComponent<Node>
+    >;
     readonly editorConfig = {
         ...AssignmentEditorConfig,
         base_url: this.platformLocation.getBaseHrefFromDOM() + 'tinymce',
@@ -414,6 +418,10 @@ export class SubmitAssignmentComponent {
                 }),
             );
             this.submission.set({ ...this.submission(), submissionStatus: 'FINISHED' });
+            this.nodeEntriesRef?.forEach((n) => {
+                // enforce refresh so that customShowCallback can get re-evaluated
+                n.optionsHelper.refreshComponents();
+            });
             this.toast.show({
                 type: 'info',
                 subtype: ToastType.InfoSimple,

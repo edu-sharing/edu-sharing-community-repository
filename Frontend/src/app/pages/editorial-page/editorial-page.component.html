@@ -38,7 +38,7 @@
         [primaryMode]="(params$ | async).primaryMode"
         [nodes]="selection()?.selected"
         [component]="mainComponent$ | async"
-        (showComponent)="mainComponent$.next($event)"
+        (showComponent)="goToComponent($event)"
         (closeTrigger)="editorialSidebarService.sidebarOpened.set(false)"
       ></es-editorial-sidebar>
     </div>

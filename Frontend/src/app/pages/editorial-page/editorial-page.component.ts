@@ -325,15 +325,16 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                     null,
                     this.mdsDefinition$.value.widgets,
                 );
-                const createAssigment = new OptionItem(
+                const createAssignment = new OptionItem(
                     'EDITORIAL.OPTIONS.CREATE_ASSIGNMENT',
                     'task',
-                    () => this.mainComponent$.next('manageAssignment'),
+                    () => this.goToComponent('manageAssignment'),
                 );
-                createAssigment.toolpermissions = [
+                createAssignment.group = DefaultGroups.Create;
+                createAssignment.toolpermissions = [
                     RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS,
                 ];
-                this.updateCreateOptions([createAssigment]);
+                this.updateCreateOptions([createAssignment]);
                 this.mdsGroup.set('editorial_assignment');
                 if (widget == null) {
                     console.warn(
@@ -606,9 +607,20 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         });
         this.mainNav.patchMainNavConfig({
             customCreateOptions: {
-                useDefaultOptions: true,
+                useDefaultOptions: false,
                 addOptions: options,
             },
+        });
+    }
+
+    goToComponent(component: MainComponentType) {
+        void this.router.navigate(['./'], {
+            relativeTo: this.route,
+            replaceUrl: !this.firstNavigation$.value,
+            queryParams: {
+                mainComponent: component,
+            },
+            queryParamsHandling: 'replace',
         });
     }
 }

@@ -1,4 +1,4 @@
-import { Component, computed, effect, input } from '@angular/core';
+import { Component, computed, effect, input, model, ViewChild } from '@angular/core';
 import {
     ListItem,
     ListItemsModule,
@@ -10,18 +10,29 @@ import { SharedModule } from '../../../shared/shared.module';
 import {
     Assignment,
     AssignmentV1Service,
+    CommentV1Service,
+    HOME_REPOSITORY,
     Node,
     Submission,
     SubmissionFile,
 } from 'ngx-edu-sharing-api';
 import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
 import { ManageSubmissionNodesComponent } from '../manage-submission-nodes/manage-submission-nodes.component';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { debounce, debounceTime } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
+import { CommentsListComponent } from '../../../features/mds/mds-editor/widgets/mds-editor-widget-comments/comments-list/comments-list.component';
+import { EditorComponent } from '@tinymce/tinymce-angular';
+import { AssignmentEditorConfig } from '../manage-assignment/manage-assignment.component';
+import { TranslateService } from '@ngx-translate/core';
+import { PlatformLocation } from '@angular/common';
 
 export type SubmissionConfig = {
     submission: Submission;
+    /**
+     * list of all submissions for navigation
+     */
+    submissionList: Submission[];
     assignment: Assignment;
     submissionFileCallback: (selected: SubmissionFile) => void;
 };
@@ -30,22 +41,53 @@ export type SubmissionConfig = {
     selector: 'es-submission-sidebar',
     templateUrl: 'submission-sidebar.component.html',
     styleUrls: ['submission-sidebar.component.scss'],
-    imports: [SharedModule, UserAvatarComponent, ListItemsModule, ManageSubmissionNodesComponent],
+    imports: [
+        SharedModule,
+        UserAvatarComponent,
+        ListItemsModule,
+        ManageSubmissionNodesComponent,
+        CommentsListComponent,
+        EditorComponent,
+    ],
     providers: [NodeEntriesService, TreeNodeService],
 })
 export class SubmissionSidebarComponent {
-    data = input.required<SubmissionConfig>();
+    @ViewChild(CommentsListComponent) commentsRef: CommentsListComponent;
+    readonly editorConfig = {
+        ...AssignmentEditorConfig,
+        base_url: this.platformLocation.getBaseHrefFromDOM() + 'tinymce',
+        language: this.translateService.getDefaultLang(),
+    };
+    submitFormGroup: FormGroup;
+    data = model.required<SubmissionConfig>();
     readonly feedbackForm = new FormGroup({
         validationNotes: new FormControl('', Validators.nullValidator),
         feedback: new FormControl('', Validators.nullValidator),
     });
+    readonly canGoBack = computed(
+        () => this.data().submissionList?.indexOf(this.data().submission) > 0,
+    );
+    readonly canGoForward = computed(
+        () =>
+            this.data().submissionList?.indexOf(this.data().submission) <
+            this.data().submissionList?.length - 1,
+    );
     readonly submission = computed(() => this.data()?.submission);
     readonly submissionStatus = new ListItem('SUBMISSION', 'submissionStatus');
     readonly validationStatus = new ListItem('SUBMISSION', 'validationStatus');
+    readonly submissionDate = new ListItem('SUBMISSION', 'submissionDate');
+    readonly returnDate = new ListItem('SUBMISSION', 'returnDate');
     constructor(
         public editorialSidebarService: EditorialSidebarService,
+        private translateService: TranslateService,
+        private platformLocation: PlatformLocation,
         private assignmentV1Service: AssignmentV1Service,
+        private commentV1Service: CommentV1Service,
+        private formBuilder: FormBuilder,
     ) {
+        this.submitFormGroup = this.formBuilder.group({
+            submitComment: ['', [Validators.required]],
+        });
         effect(() => {
             this.feedbackForm.setValue({
                 validationNotes: this.submission().validationNotes || '',
@@ -63,6 +105,37 @@ export class SubmissionSidebarComponent {
                     },
                 }),
             );
+        });
+    }
+
+    async addComment() {
+        const control = this.submitFormGroup.get('submitComment');
+        control.disable();
+        await firstValueFrom(
+            this.commentV1Service.addComment({
+                repository: HOME_REPOSITORY,
+                node: this.submission().ref.id,
+                body: control.value,
+            }),
+        );
+        control.reset();
+        control.enable();
+        void this.commentsRef.refresh();
+    }
+
+    async markAsFinished() {
+        const submission = await firstValueFrom(
+            this.assignmentV1Service.editSubmission1({
+                submissionId: this.data().submission.ref.id,
+                assignmentId: this.data().assignment.ref.id,
+                body: {
+                    validationStatus: 'FINISHED',
+                },
+            }),
+        );
+        this.data.set({
+            ...this.data(),
+            submission,
         });
     }
 }
