@@ -242,7 +242,7 @@ export class NodeHelperService {
         target.properties = source.properties;
         (target as Node).name = (source as Node).name;
         (target as Node).title = (source as Node).title;
-        (target as Node).iconURL = (source as Node).iconURL;
+        (target as Node).icon = (source as Node).icon;
         (target as Node).preview = (source as Node).preview;
         (target as User).authorityName = (source as User).authorityName;
         (target as User).profile = (source as User).profile;

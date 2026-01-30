@@ -2,8 +2,6 @@ import { Component } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
     FrameEventsService,
-    Node,
-    NodeRemoteWrapper,
     NodeWrapper,
     RestConnectorService,
     RestConstants,
@@ -13,13 +11,14 @@ import {
 } from '../../core-module/core.module';
 import { Toast } from '../../services/toast';
 import { NodeHelperService } from '../../services/node-helper.service';
+import { Node } from 'ngx-edu-sharing-api';
 import { TranslationsService } from 'ngx-edu-sharing-ui';
 import { PlatformLocation } from '@angular/common';
 
-export class NodeLMS extends Node {
+export type NodeLMS = Node & {
     objectUrl?: string;
     nodeId?: string;
-}
+};
 
 @Component({
     selector: 'es-apply-to-lms-page',
@@ -89,7 +88,7 @@ export class ApplyToLmsPageComponent {
         );
     }
 
-    private applyNode(wrapper: NodeRemoteWrapper) {
+    private applyNode(wrapper: { node: Node; remote: Node }) {
         const node: NodeLMS = wrapper.node;
         // copy the main object to remote (in this case, it's simply a regular, local object)
         if (!wrapper.remote) wrapper.remote = wrapper.node;
@@ -128,21 +127,25 @@ export class ApplyToLmsPageComponent {
         params += '&mediatype=' + encodeURIComponent(node.mediatype);
         params +=
             '&h=' +
-            ApplyToLmsPageComponent.roundNumber(node.properties[RestConstants.CCM_PROP_HEIGHT]);
+            ApplyToLmsPageComponent.roundNumber(
+                parseFloat(node.properties[RestConstants.CCM_PROP_HEIGHT]?.[0]),
+            );
         params +=
             '&w=' +
-            ApplyToLmsPageComponent.roundNumber(node.properties[RestConstants.CCM_PROP_WIDTH]);
+            ApplyToLmsPageComponent.roundNumber(
+                parseFloat(node.properties[RestConstants.CCM_PROP_WIDTH]?.[0]),
+            );
         if (node.content.version) params += '&v=' + node.content.version;
         if (node.properties[RestConstants.CCM_PROP_CCRESSOURCETYPE])
             params +=
                 '&resourceType=' +
-                encodeURIComponent(node.properties[RestConstants.CCM_PROP_CCRESSOURCETYPE]);
+                encodeURIComponent(node.properties[RestConstants.CCM_PROP_CCRESSOURCETYPE]?.[0]);
         if (node.properties[RestConstants.CCM_PROP_CCRESSOURCEVERSION])
             params +=
                 '&resourceVersion=' +
-                encodeURIComponent(node.properties[RestConstants.CCM_PROP_CCRESSOURCEVERSION]);
+                encodeURIComponent(node.properties[RestConstants.CCM_PROP_CCRESSOURCEVERSION]?.[0]);
         params += '&isDirectory=' + node.isDirectory;
-        params += '&iconURL=' + encodeURIComponent(node.iconURL);
+        params += '&iconURL=' + encodeURIComponent(node.icon?.url);
         params += '&previewURL=' + encodeURIComponent(node.preview.url);
         params += '&repoType=' + encodeURIComponent(node.repositoryType);
         // reurl + params

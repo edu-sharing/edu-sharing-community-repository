@@ -17,12 +17,12 @@ import { UniversalNode } from '../../../core-module/rest/definitions';
 import {
     DialogButton,
     Group,
-    Node,
     Organization,
     RestHelper,
     UIService,
 } from '../../../core-module/core.module';
 import { KeyEvents } from '../../../util/key-events';
+import { Node } from 'ngx-edu-sharing-api';
 import { AuthorityNamePipe, UIAnimation } from 'ngx-edu-sharing-ui';
 import { CardService } from '../../../services/card.service';
 import { JumpMark, JumpMarksService } from '../../../services/jump-marks.service';
@@ -114,7 +114,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
                     this.icon = 'group';
                     this.subtitle = new AuthorityNamePipe(this.translate).transform(nodes[0]);
                 } else {
-                    this.avatar = nodes[0].iconURL;
+                    this.avatar = nodes[0].icon?.url;
                     this.subtitle = RestHelper.getTitle(nodes[0]);
                 }
             } else {

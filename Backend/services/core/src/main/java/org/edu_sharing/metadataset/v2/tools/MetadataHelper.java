@@ -29,6 +29,9 @@ public class MetadataHelper {
 	public static MetadataSet getMetadataset(NodeRef node) throws Exception{
 		return getMetadataset(node, getLocale());
 	}
+	public static MetadataSet getMetadataset(String mdsSet) throws Exception{
+		return MetadataReader.getMetadataset(ApplicationInfoList.getHomeRepository(), mdsSet, getLocale());
+	}
 	public static MetadataSet getMetadataset(NodeRef node, String locale) throws Exception{
 		String mdsSet = NodeServiceHelper.getProperty(node, CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
 		if(mdsSet==null || mdsSet.isEmpty())
@@ -52,7 +55,7 @@ public class MetadataHelper {
 		);
 	}
 
-		private static String getLocale() {
+	private static String getLocale() {
 		String locale="default";
 		try{
 			locale = AuthenticationToolAPI.getInstance().getCurrentLocale();

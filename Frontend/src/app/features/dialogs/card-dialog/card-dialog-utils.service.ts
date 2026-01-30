@@ -23,8 +23,8 @@ export class CardDialogUtilsService {
         }
         return {
             avatar: {
-                kind: 'image',
-                url: await this.repoUrlService.getRepoUrl((node as Node).iconURL, node as Node),
+                kind: 'node',
+                node: node as Node,
             },
             subtitle: RestHelper.getTitle(node as Node),
         };

@@ -44,7 +44,9 @@ export class NodeTypeBadgeComponent implements OnChanges {
     }
 
     materialIcon() {
-        if ((this.node as GenericAuthority).authorityType === 'USER') {
+        if ((this.node as Node).icon?.fontGlyphId) {
+            return (this.node as Node).icon?.fontGlyphId;
+        } else if ((this.node as GenericAuthority).authorityType === 'USER') {
             return 'person';
         } else if ((this.node as GenericAuthority).authorityType === 'GROUP') {
             return 'group';
@@ -53,7 +55,6 @@ export class NodeTypeBadgeComponent implements OnChanges {
         } else if ((this.node as Submission).validationStatus !== undefined) {
             return 'send';
         }
-
         return null;
     }
 }

@@ -96,6 +96,7 @@ import { SortSelectPanelComponent } from './sort-select-panel/sort-select-panel.
         NodeEntriesCardComponent,
         NodeRatingComponent,
         NodesDragDirective,
+        PreviewImageComponent,
         NodesDragSourceDirective,
         NodesDropTargetDirective,
         NodeStatsBadgesComponent,

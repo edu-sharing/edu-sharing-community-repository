@@ -1502,7 +1502,7 @@ public class NodeDao {
 
         data.setMimetype(getMimetype());
         data.setMediatype(getMediatype());
-        data.setIconURL(getIconURL());
+        data.setIcon(getIcon());
         data.setCommentCount(getCommentCount());
         data.setLicense(getLicense());
         data.setSize(getSize(data));
@@ -1627,8 +1627,11 @@ public class NodeDao {
         return (String) nodeProps.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
     }
 
-    private String getIconURL() {
-        return new MimeTypesV2().getIcon(type, nodeProps, aspects);
+    private NodeIcon getIcon() {
+        return new NodeIcon(
+                new MimeTypesV2().getIcon(type, nodeProps, aspects),
+                new MimeTypesV2().getFontGlyph(type, nodeProps, aspects)
+        );
     }
 
     public List<String> getPermissions(String authority) throws DAOException {

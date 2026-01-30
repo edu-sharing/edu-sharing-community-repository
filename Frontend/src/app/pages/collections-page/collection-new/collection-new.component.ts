@@ -41,7 +41,6 @@ import {
     FrameEventsService,
     IamGroups,
     IamUser,
-    Node,
     NodeRef,
     RestCollectionService,
     RestConnectorService,
@@ -62,6 +61,7 @@ import {
     CollectionsTypeConfig,
     ConfigService,
     Group,
+    Node,
     NodeService,
     SessionStorageService,
     Store,
@@ -480,9 +480,9 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         if (this.editId) {
             nodes = [this.editId];
         } else {
-            const permissionsDummy = new EduData.Node();
+            const permissionsDummy = {} as Node;
             permissionsDummy.title = this.currentCollection.title;
-            permissionsDummy.iconURL = this.connector.getThemeMimeIconSvg('collection.svg');
+            permissionsDummy.icon = { url: this.connector.getThemeMimeIconSvg('collection.svg') };
             permissionsDummy.ref = {} as NodeRef;
             permissionsDummy.aspects = [RestConstants.CCM_ASPECT_COLLECTION];
             permissionsDummy.properties = {};

@@ -1,19 +1,22 @@
 package org.edu_sharing.service.mime;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.axis.utils.StringUtils;
 import org.edu_sharing.alfresco.action.RessourceInfoExecuter;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.metadataset.v2.MetadataWidget;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.Theme;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.tools.URLHelper;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.spring.ApplicationContextFactory;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 public class MimeTypesV2 {
@@ -195,6 +198,9 @@ public class MimeTypesV2 {
 	 * Gets a full icon path for a small mime icon for the given node properties
 	 * @return
 	 */
+	public String getFontGlyph(String nodeType,Map<String,Object> properties,List<String> aspects){
+		return getNodeType(new NodeInfo(nodeType,properties,aspects), Type.FontGlyph);
+	}
 	public String getIcon(String nodeType,Map<String,Object> properties,List<String> aspects){
 		return getIconPath()+getNodeType(new NodeInfo(nodeType,properties,aspects), Type.Icon)+"."+preferredFormat.getSuffix();
 	}
@@ -243,13 +249,45 @@ public class MimeTypesV2 {
 		return regularType;
 	}
 	public static String getNodeTypeInternal(NodeInfo info, Type type){
-		if(isCollection(info.aspects, info.properties))
-			return "collection";
-		if(isDirectory(info.properties, info.nodeType)) {
-			if(info.aspects.contains(CCConstants.CCM_ASPECT_MAP_REF)){
-				return "folder-link";
-			}
-			return "folder";
+		if(type.equals(Type.FontGlyph)){
+			// check if enabled
+			if(LightbendConfigLoader.get().hasPath("repository.mimetypes.nodeIconWidgetId")) {
+				String id = LightbendConfigLoader.get().getString("repository.mimetypes.nodeIconWidgetId");
+				String mdsSet = (String) info.properties.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
+				if(StringUtils.isEmpty(mdsSet)) {
+					mdsSet = CCConstants.metadatasetdefault_id;
+				}
+                try {
+					Object values = info.properties.get(CCConstants.getValidGlobalName(id));
+					if(values instanceof Collection) {
+						values = ((Collection<?>) values).iterator().next();
+					}
+					if(values instanceof String) {
+						MetadataWidget widget = MetadataHelper.getMetadataset(mdsSet).findWidget(id);
+						String icon = widget.getValuesAsMap().get(values).getIcon();
+						if(!StringUtils.isEmpty(icon)) {
+							return icon;
+						}
+					} else if (values != null) {
+						log.info("Not valid string value for " + id + " / " + info.properties.get(CCConstants.SYS_PROP_NODE_UID) + ": " + values.getClass());
+					}
+                } catch (Throwable t) {
+					log.info("Error resolving font glyphe:" + t.getMessage(), t);
+                }
+				String primaryType = getPrimaryType(info);
+				// no fallback for "default" types
+				if(primaryType != null) {
+					return null;
+				}
+				if(LightbendConfigLoader.get().hasPath("repository.mimetypes.nodeIconFallbackId")) {
+					return LightbendConfigLoader.get().getString("repository.mimetypes.nodeIconFallbackId");
+				}
+            }
+			return null;
+		}
+		String primaryType = getPrimaryType(info);
+		if (primaryType != null) {
+			return primaryType;
 		}
 		if(info.properties != null) {
 			String ccressourcetype = (String) info.properties.get(CCConstants.CCM_PROP_CCRESSOURCETYPE);
@@ -284,6 +322,20 @@ public class MimeTypesV2 {
 		}
 		return getTypeFromMimetype(getMimeType(info.properties, info.nodeType),info.properties,fallback);
 	}
+
+	@Nullable
+	private static String getPrimaryType(NodeInfo info) {
+		if(isCollection(info.aspects, info.properties))
+			return "collection";
+		if(isDirectory(info.properties, info.nodeType)) {
+			if(info.aspects.contains(CCConstants.CCM_ASPECT_MAP_REF)){
+				return "folder-link";
+			}
+			return "folder";
+		}
+		return null;
+	}
+
 	public static String getTypeFromMimetype(String mimetype) {
 		return getTypeFromMimetype(mimetype,null,"file");
 	}
@@ -512,6 +564,7 @@ public class MimeTypesV2 {
 	public enum Type {
 		Preview,
 		Icon,
+		FontGlyph,
 		Mediatype
 	}
 }

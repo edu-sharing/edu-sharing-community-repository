@@ -60,7 +60,7 @@ public class Node implements Serializable {
 	private String size = null;
 	private Preview preview = null;
 	private Content content = null;
-	private String iconURL;
+	private NodeIcon icon;
 	private License license;
 	@JsonProperty("isDirectory")
 	private boolean directory;
@@ -86,7 +86,7 @@ public class Node implements Serializable {
 	public static Node FakeFromRef(NodeRef ref) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
 		Node node = NodeDao.createEmptyDummy(Node.class, ref);
 		node.setPreview(new Preview());
-		node.setIconURL(new MimeTypesV2().getDefaultIcon());
+		node.setIcon(new NodeIcon(new MimeTypesV2().getDefaultIcon(), null));
 		HashMap<String, String[]> props = new HashMap<>();
 		props.put(CCConstants.getValidLocalName(CCConstants.CM_NAME), new String[]{ref.getId()});
 		node.setProperties(props);

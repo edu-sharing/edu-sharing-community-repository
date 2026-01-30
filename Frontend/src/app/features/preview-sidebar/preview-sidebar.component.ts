@@ -111,7 +111,7 @@ export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
         }
         this.modalDialogRef = await this.dialogs.openGenericDialog({
             title: RestHelper.getTitle(this.node),
-            avatar: { kind: 'image', url: this.node.iconURL },
+            avatar: { kind: 'image', url: this.node.icon?.url },
             contentTemplate: this.modalRef,
             minWidth: '100%',
             minHeight: '100%',

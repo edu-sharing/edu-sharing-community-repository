@@ -27,15 +27,21 @@
     display: flex;
     justify-content: center;
 }
+$width: 250px;
+$height: 175px;
 .image-container {
     position: relative;
     display: flex;
     justify-content: center;
     margin-bottom: 25px;
+    es-preview-image {
+        width: $width;
+        height: $height;
+    }
     .card-image-backdrop {
         position: absolute;
-        width: 250px;
-        height: 175px;
+        width: $width;
+        height: $height;
         background-color: black;
         overflow: hidden;
         img,
@@ -52,8 +58,8 @@
         justify-content: center;
         position: absolute;
         z-index: 2;
-        width: 250px;
-        height: 175px;
+        width: $width;
+        height: $height;
         background-color: rgba(255, 255, 255, 0.75);
         backdrop-filter: blur(5px);
         > i {
@@ -61,8 +67,8 @@
         }
     }
     img {
-        width: 250px;
-        height: 175px;
+        width: $width;
+        height: $height;
         object-fit: contain;
         position: relative;
         z-index: 1;

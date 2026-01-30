@@ -61,7 +61,7 @@
             <img
               *ngIf="entry.node"
               class="entry-icon"
-              [src]="entry.node.iconURL"
+              [src]="entry.node.icon?.url"
               aria-hidden="true"
             />
           </ng-template>

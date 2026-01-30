@@ -34,6 +34,7 @@ export * from './node-entries/combined-data-source';
 export * from './node-entries/custom-templates-data-source';
 export * from './node-entries/entries-model';
 export * from './node-entries/data-type';
+export * from './node-entries/preview-image/preview-image.component';
 export * from './node-entries/items-cap';
 export * from './node-entries/list-item-label.pipe';
 export * from './node-entries/node-cache';

@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <valuespaces>
-	<valuespace
-		property="ccm:educationallearningresourcetype">
+	<valuespace property="ccm:educationallearningresourcetype">
 		<key></key>
-		<key>exercise</key>
-		<key>simulation</key>
-		<key>questionnaire</key>
-		<key>diagram</key>
-		<key>figure</key>
-		<key>graph</key>
-		<key>index</key>
-		<key>slide</key>
-		<key>table</key>
-		<key>narrativetext</key>
-		<key>exam</key>
-		<key>experiment</key>
-		<key>problemstatement</key>
-		<key>selfassessment</key>
-		<key>lecture</key>
-		<key>selfstudy</key>
-		<key>other</key>
+		<key icon="fitness_center">exercise</key>
+		<key icon="interactive_space">simulation</key>
+		<key icon="question_answer">questionnaire</key>
+		<key icon="flowchart">diagram</key>
+		<key icon="image">figure</key>
+		<key icon="bar_chart">graph</key>
+		<key icon="format_list_numbered">index</key>
+		<key icon="slideshow">slide</key>
+		<key icon="table_chart">table</key>
+		<key icon="description">narrativetext</key>
+		<key icon="assignment">exam</key>
+		<key icon="biotech">experiment</key>
+		<key icon="assignment_late">problemstatement</key>
+		<key icon="self_improvement">selfassessment</key>
+		<key icon="school">lecture</key>
+		<key icon="menu_book">selfstudy</key>
+		<key icon="extension">other</key>
 	</valuespace>
+
 	<valuespace
 		property="cclom:general_language">
 		<key>unknown</key>

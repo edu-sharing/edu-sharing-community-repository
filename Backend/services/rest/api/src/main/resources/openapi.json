@@ -958,8 +958,8 @@
           "downloadUrl": {
             "type": "string"
           },
-          "iconURL": {
-            "type": "string"
+          "icon": {
+            "$ref": "#/components/schemas/NodeIcon"
           },
           "isDirectory": {
             "type": "boolean"
@@ -4169,8 +4169,8 @@
           "downloadUrl": {
             "type": "string"
           },
-          "iconURL": {
-            "type": "string"
+          "icon": {
+            "$ref": "#/components/schemas/NodeIcon"
           },
           "isDirectory": {
             "type": "boolean"
@@ -4311,8 +4311,8 @@
           "downloadUrl": {
             "type": "string"
           },
-          "iconURL": {
-            "type": "string"
+          "icon": {
+            "$ref": "#/components/schemas/NodeIcon"
           },
           "isDirectory": {
             "type": "boolean"
@@ -4476,6 +4476,17 @@
         "required": [
           "node"
         ],
+        "type": "object"
+      },
+      "NodeIcon": {
+        "properties": {
+          "fontGlyphId": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "NodeIssueEventDTO": {

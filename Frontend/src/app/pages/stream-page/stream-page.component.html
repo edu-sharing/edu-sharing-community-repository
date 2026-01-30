@@ -130,7 +130,7 @@
           <div *ngFor="let node of streamsRelevant" class="stream-box">
             <div class="row row-nomargin">
               <div class="stream-box-icon col s1">
-                <img src="{{ node.iconURL }}" alt="" class="stream-icon" />
+                <img src="{{ node | esNodeIcon }}" alt="" class="stream-icon" />
               </div>
               <div class="stream-box-title col s9" (click)="onStreamObjectClick(node)">
                 {{ getTitle(node) }}
@@ -170,7 +170,7 @@
           >
             <div class="row row-nomargin">
               <div class="stream-box-icon col s1" *ngIf="strm.nodes[0]">
-                <img src="{{ strm.nodes[0].iconURL }}" alt="" class="stream-icon" />
+                <img src="{{ strm.nodes[0] | esNodeIcon }}" alt="" class="stream-icon" />
               </div>
               <div class="stream-box-title col s9" (click)="onStreamObjectClick(strm)">
                 <span *ngIf="getStreamTitle(strm)">{{

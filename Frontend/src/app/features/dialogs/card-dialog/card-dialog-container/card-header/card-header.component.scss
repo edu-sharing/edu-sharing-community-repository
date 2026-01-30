@@ -50,6 +50,12 @@
     i {
         color: var(--primary);
     }
+    ::ng-deep es-node-type-badge {
+        box-shadow: none;
+        > i {
+            font-size: 22px;
+        }
+    }
 }
 
 .card-dialog-header-text {

@@ -71,7 +71,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
                         await this.nodeApi.getNodeChildobjects(nodes[0].ref.id).toPromise()
                     ).nodes.map((n) => {
                         return {
-                            icon: n.iconURL,
+                            icon: n.icon?.url,
                             name: RestHelper.getTitle(n),
                             node: n,
                             properties: n.properties,

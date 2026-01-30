@@ -18,10 +18,15 @@
       <i esIcon="delete"></i>
       {{ 'WORKSPACE.EDITOR.PREVIEW_DELETED' | translate }}
     </div>
-    <img [src]="src$ | async" (load)="loading$.next(false)" />
-    <div class="card-image-backdrop">
-      <img [src]="src$ | async" alt="" />
-    </div>
+    <ng-container *ngIf="!(!node?.preview?.isIcon || file)">
+      <es-preview-image [node]="node"></es-preview-image>
+    </ng-container>
+    <ng-container *ngIf="!node?.preview?.isIcon || file">
+      <img [src]="src$ | async" (load)="loading$.next(false)" />
+      <div class="card-image-backdrop">
+        <img [src]="src$ | async" alt="" />
+      </div>
+    </ng-container>
     <div class="button-group">
       <button
         *ngIf="mdsEditorInstance.hasAi | async"
