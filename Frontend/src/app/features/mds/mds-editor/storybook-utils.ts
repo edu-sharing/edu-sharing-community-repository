@@ -684,7 +684,9 @@ export const DummyNode: Partial<Node> = {
         isIcon: true,
         mimetype: 'image/webp',
     },
-    iconURL: 'assets/images/storybook/link.svg',
+    icon: {
+        url: 'assets/images/storybook/link.svg',
+    },
     commentCount: 12,
     name: 'Node Name',
     title: 'Node Title',
