@@ -269,7 +269,12 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.configureColumns = this.configureColumns;
         this.entriesService.checkbox = this.checkbox;
         this.entriesService.displayType = this.displayType;
-        this.entriesService.paginationStrategy = this.paginationStrategy;
+        if (changes.paginationStrategy) {
+            this.entriesService.paginationStrategy = this.paginationStrategy;
+            setTimeout(() => {
+                this.nodeEntriesComponentRef?.refreshPaginator();
+            });
+        }
         this.entriesService.elementInteractionType = this.elementInteractionType;
         this.entriesService.gridConfig = this.gridConfig;
         this.entriesService.tableConfig = this.tableConfig;

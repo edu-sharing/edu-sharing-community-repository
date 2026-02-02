@@ -65,10 +65,7 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType>
     }
 
     ngAfterViewInit() {
-        if (this.paginator) {
-            void this.initPaginator(this.paginator);
-            this.changeDetectorRef.detectChanges();
-        }
+        this.refreshPaginator();
     }
 
     ngOnDestroy(): void {
@@ -140,6 +137,13 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType>
                     });
             }
         });
+    }
+
+    refreshPaginator() {
+        if (this.paginator) {
+            void this.initPaginator(this.paginator);
+            this.changeDetectorRef.detectChanges();
+        }
     }
 
     openPage(page: PageEvent) {
