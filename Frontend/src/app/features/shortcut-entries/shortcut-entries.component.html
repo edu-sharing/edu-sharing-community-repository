@@ -56,7 +56,11 @@
           {{ entry.updates }}
         </div>
         <div class="entry-icon-wrapper" cdkDragHandle>
-          <i *ngIf="entry.icon; else previewNode" [esIcon]="entry.icon" class="entry-icon"></i>
+          <i
+            *ngIf="entry.node?.icon?.fontGlyphId || entry.icon; else previewNode"
+            [esIcon]="entry.node?.icon?.fontGlyphId || entry.icon"
+            class="entry-icon"
+          ></i>
           <ng-template #previewNode>
             <img
               *ngIf="entry.node"
