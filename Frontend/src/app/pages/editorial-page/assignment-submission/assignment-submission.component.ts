@@ -1,25 +1,10 @@
-import {
-    AfterViewInit,
-    Component,
-    computed,
-    effect,
-    EventEmitter,
-    Output,
-    signal,
-    ViewChild,
-} from '@angular/core';
+import { AfterViewInit, Component, effect, signal, ViewChild } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { EditorialBreadcrumbService } from '../editorial-breadcrumb/editorial-breadcrumb.service';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
-import {
-    Assignment,
-    AssignmentV1Service,
-    HOME_REPOSITORY,
-    Submission,
-    SubmissionFile,
-} from 'ngx-edu-sharing-api';
-import { map, switchMap } from 'rxjs/operators';
+import { Assignment, AssignmentV1Service, Submission, SubmissionFile } from 'ngx-edu-sharing-api';
+import { map, switchMap, tap } from 'rxjs/operators';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import {
     AuthorityNamePipe,
@@ -38,9 +23,12 @@ import {
 import { EditorialPageService } from '../editorial-page.service';
 import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
 import { SubmissionConfig } from '../submission-sidebar/submission-sidebar.component';
-import { NgxExtendedPdfViewerModule, NgxExtendedPdfViewerService } from 'ngx-extended-pdf-viewer';
+import {
+    NgxExtendedPdfViewerModule,
+    NgxExtendedPdfViewerService,
+    PDFWorker,
+} from 'ngx-extended-pdf-viewer';
 import { RenderWrapperComponent } from '../../render2-page/render-wrapper-component/render-wrapper.component';
-import { RestConstants } from '../../../core-module/rest/rest-constants';
 
 /**
  * lists all submissions (for teacher view)
@@ -64,6 +52,7 @@ export class AssignmentSubmissionComponent implements AfterViewInit {
     } as ColumnType;
     private assignment = signal<Assignment>(null);
     hasCorrectionChanges = signal(false);
+    tabSelected = signal(0);
     correctionSaving = signal(false);
     selectedSubmissionFile = signal<SubmissionFile>(null);
     selectedSubmissionFileUrl = signal<string>(undefined);
@@ -116,6 +105,7 @@ export class AssignmentSubmissionComponent implements AfterViewInit {
                 map((p) => p.assignment),
                 filter((p) => !!p),
                 distinctUntilChanged(),
+                tap(() => (this.dataSource.isLoading = true)),
                 switchMap((assignmentId) =>
                     combineLatest([
                         this.assignmentService.getAssignment({
@@ -129,6 +119,7 @@ export class AssignmentSubmissionComponent implements AfterViewInit {
             )
             .subscribe(([assignment, files]) => {
                 this.assignment.set(assignment);
+                this.dataSource.isLoading = false;
                 this.dataSource.setData(files);
             });
     }

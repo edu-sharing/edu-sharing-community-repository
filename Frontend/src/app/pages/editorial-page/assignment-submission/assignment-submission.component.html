@@ -18,7 +18,8 @@
   </es-node-entries-wrapper>
 </ng-container>
 <ng-container *ngIf="selectedSubmissionFile() && selectedSubmissionFileUrl() !== undefined">
-  <mat-tab-group>
+  <!-- dirty hack via tabSelected: we need to fully unload the ngx-extended-pdf-viewer component since it can't be registered twice -->
+  <mat-tab-group (selectedTabChange)="tabSelected.set($event.index)">
     <mat-tab
       *ngIf="
         selectedSubmissionFileUrl() && selectedSubmissionFile().correction?.mediatype === 'file-pdf'
@@ -29,6 +30,7 @@
         {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.VIEW_CORRECT' | translate }}
       </ng-template>
       <ngx-extended-pdf-viewer
+        *ngIf="tabSelected() === 0"
         [src]="selectedSubmissionFileUrl()"
         [height]="'auto'"
         [language]="language"
@@ -44,7 +46,7 @@
         {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.VIEW_ORIGINAL' | translate }}
       </ng-template>
       <es-render-wrapper-component
-        *ngIf="selectedSubmissionFile().content"
+        *ngIf="tabSelected() === 1 && selectedSubmissionFile().content"
         [showTopbar]="false"
         [showMetadata]="false"
         [nodeId]="selectedSubmissionFile().content.ref.id"
