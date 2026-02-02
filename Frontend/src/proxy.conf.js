@@ -10,6 +10,8 @@ if (!process.env.BACKEND_URL) {
     );
 }
 
+console.log('Starting proxy: ', process.env.BACKEND_URL, process.env.RS2_URL);
+
 const PROXY_CONFIG = [
     {
         context: [
@@ -68,19 +70,44 @@ const PROXY_CONFIG = [
         secure: false,
         changeOrigin: true,
         pathRewrite: { '^/rendering2': '/' },
+        configure(proxy) {
+            proxy.on('proxyReq', (proxyReq) => {
+                proxyReq.setHeader('Origin', process.env.BACKEND_URL);
+            });
+            proxy.on('proxyRes', (proxyRes, req, res) => {
+                proxyRes.headers['X-Edu-Sharing-Proxy-Target'] = process.env.RS2_URL;
+                const cookies = proxyRes.headers['set-cookie'];
+                if (cookies) {
+                    proxyRes.headers['set-cookie'] = cookies.map((cookie) =>
+                        cookie
+                            // We serve on a non-HTTPS connection, so 'Secure' cookies won't work.
+                            .replace('; Secure', '')
+                            // 'SameSite=None' is only allowed on 'Secure' cookies.
+                            .replace('; SameSite=None', ''),
+                    );
+                }
+                const contentType = proxyRes.headers['content-type'] || '';
+                if (!contentType.includes('application/json') && !contentType.includes('text')) {
+                    return;
+                }
+                /*
+                const chunks = [];
+                proxyRes.on("data", (chunk) => {
+                    chunks.push(chunk);
+                });
+                proxyRes.on("end", () => {
+                    let body = Buffer.concat(chunks).toString('utf8');
+                    // replace all rs2 uris to local for cookie auth
+                    body = body.replaceAll(process.env.RS2_URL, 'http://localhost:4200/rendering2');
+                    res.setHeader('content-length', Buffer.byteLength(body));
+                    console.log(body)
+                    res.end(body);
+                });
 
-        onProxyRes: function (proxyRes, req, res) {
-            proxyRes.headers['X-Edu-Sharing-Proxy-Target'] = process.env.RS2_URL;
-            const cookies = proxyRes.headers['set-cookie'];
-            if (cookies) {
-                proxyRes.headers['set-cookie'] = cookies.map((cookie) =>
-                    cookie
-                        // We serve on a non-HTTPS connection, so 'Secure' cookies won't work.
-                        .replace('; Secure', '')
-                        // 'SameSite=None' is only allowed on 'Secure' cookies.
-                        .replace('; SameSite=None', ''),
-                );
-            }
+                // Prevent default piping
+                proxyRes.pipe = () => {};
+                 */
+            });
         },
     },
 ];
