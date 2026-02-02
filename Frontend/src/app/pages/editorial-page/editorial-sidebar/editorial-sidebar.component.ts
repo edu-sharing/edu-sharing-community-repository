@@ -52,7 +52,8 @@ export type EditorialSidebarOption =
     | 'PREVIEW'
     | 'SORT_INTO'
     | 'MANAGE_SUBMISSION';
-export type OptionState<T extends NodesSelectorConfig | SubmissionConfig> = {
+export type OptionConfig = NodesSelectorConfig | SubmissionConfig;
+export type OptionState<T extends OptionConfig> = {
     option: EditorialSidebarOption;
     /**
      * additional, optional state for the option
@@ -116,7 +117,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         private dialogs: DialogsService,
         private uiService: UIService,
         private nodeHelperService: NodeHelperService,
-        private editorialSidebarService: EditorialSidebarService,
+        public editorialSidebarService: EditorialSidebarService,
         private optionsHelperDataService: OptionsHelperDataService,
     ) {
         this.editorialSidebarService.registerSidebar(this);

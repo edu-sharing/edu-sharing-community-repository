@@ -4,14 +4,13 @@ import { EditorialBreadcrumbService } from '../editorial-breadcrumb/editorial-br
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { Assignment, AssignmentV1Service, Submission, SubmissionFile } from 'ngx-edu-sharing-api';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { map, switchMap, take, tap } from 'rxjs/operators';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import {
     AuthorityNamePipe,
     ColumnType,
     InteractionType,
     ListItem,
-    NodeClickEvent,
     NodeDataSource,
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
@@ -23,11 +22,7 @@ import {
 import { EditorialPageService } from '../editorial-page.service';
 import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
 import { SubmissionConfig } from '../submission-sidebar/submission-sidebar.component';
-import {
-    NgxExtendedPdfViewerModule,
-    NgxExtendedPdfViewerService,
-    PDFWorker,
-} from 'ngx-extended-pdf-viewer';
+import { NgxExtendedPdfViewerModule, NgxExtendedPdfViewerService } from 'ngx-extended-pdf-viewer';
 import { RenderWrapperComponent } from '../../render2-page/render-wrapper-component/render-wrapper.component';
 
 /**
@@ -130,15 +125,15 @@ export class AssignmentSubmissionComponent implements AfterViewInit {
     protected readonly Scope = Scope;
     protected readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
 
-    select(event: NodeClickEvent<Submission>) {
-        this.nodeEntries.getSelection().setSelection(event.element);
-        this.submission.set(event.element);
+    select(event: Submission) {
+        this.nodeEntries.getSelection().setSelection(event);
+        this.submission.set(event);
         this.editorialSidebarService.showOption({
             option: 'MANAGE_SUBMISSION',
             trap: true,
             optionConfig: {
                 assignment: this.assignment(),
-                submission: event.element,
+                submission: event,
                 submissionList: this.dataSource.getData(),
                 submissionFileCallback: (submission) => {
                     console.log(submission);
@@ -146,6 +141,13 @@ export class AssignmentSubmissionComponent implements AfterViewInit {
                 },
             } as SubmissionConfig,
         });
+        this.editorialSidebarService.configChange$
+            .pipe(take(1))
+            .subscribe((config: SubmissionConfig) => {
+                console.log('sub', config);
+                this.dataSource.setData(config.submissionList);
+                this.select(config.submission);
+            });
     }
 
     changeAnnotation() {

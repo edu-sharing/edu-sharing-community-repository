@@ -64,6 +64,9 @@ $dark-secondary-text: rgba(black, 0.54);
     --mdc-switch-handle-shape: var(--mat-sys-corner-full);
     --mdc-switch-track-shape: var(--mat-sys-corner-full);
 }
+html mat-sidenav {
+    --mat-sidenav-container-divider-color: transparent;
+}
 html .mat-mdc-slide-toggle {
     --mat-switch-track-outline-width: 2px;
     --mat-switch-unselected-with-icon-handle-horizontal-margin: 0 4px;

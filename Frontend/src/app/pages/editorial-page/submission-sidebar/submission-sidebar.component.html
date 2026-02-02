@@ -75,7 +75,7 @@
         </form>
       </div>
       <div class="actions">
-        <button mat-button color="primary" [disabled]="!canGoBack()">
+        <button mat-button color="primary" (click)="stepElement(-1)" [disabled]="!canGoBack()">
           <i esIcon="arrow_back"></i>
           {{ 'EDITORIAL.SIDEBAR.SUBMISSION.PREVIOUS' | translate }}
         </button>
@@ -87,7 +87,7 @@
         >
           <i esIcon="send"></i>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SEND_BACK' | translate }}
         </button>
-        <button mat-button color="primary" [disabled]="!canGoForward()">
+        <button mat-button color="primary" (click)="stepElement(+1)" [disabled]="!canGoForward()">
           <i esIcon="arrow_forward"></i>
           {{ 'EDITORIAL.SIDEBAR.SUBMISSION.NEXT' | translate }}
         </button>

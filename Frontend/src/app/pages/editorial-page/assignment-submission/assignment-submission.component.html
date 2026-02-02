@@ -6,7 +6,7 @@
     [elementInteractionType]="InteractionType.Emitter"
     [scope]="Scope.EditorialPage"
     singleClickHint="static"
-    (clickItem)="select($event)"
+    (clickItem)="select($event.element)"
     [columns]="columns"
     [displayType]="editorialPageService.displayType()"
   >

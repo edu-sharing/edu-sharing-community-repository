@@ -32,6 +32,7 @@
       <es-submission-sidebar
         *ngIf="option === 'MANAGE_SUBMISSION'"
         [data]="$any(enabledOption().optionConfig)"
+        (dataChange)="editorialSidebarService.patchOptionConfig($event)"
       ></es-submission-sidebar>
       <es-preview-sidebar
         *ngIf="option === 'PREVIEW'"

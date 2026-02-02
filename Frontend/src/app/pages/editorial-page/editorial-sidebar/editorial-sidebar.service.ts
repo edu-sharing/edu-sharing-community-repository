@@ -1,7 +1,10 @@
 import { EventEmitter, Injectable, signal } from '@angular/core';
-import { Node, SubmissionFile } from 'ngx-edu-sharing-api';
-import { EditorialSidebarComponent, OptionState } from './editorial-sidebar.component';
-import { Observable } from 'rxjs';
+import { Node } from 'ngx-edu-sharing-api';
+import {
+    EditorialSidebarComponent,
+    OptionConfig,
+    OptionState,
+} from './editorial-sidebar.component';
 
 @Injectable({
     providedIn: 'root',
@@ -11,6 +14,7 @@ export class EditorialSidebarService {
      * triggered when in the sidebar a copy / apply event was performed (mode SORT_INTO)
      */
     applyNodeEmitted = new EventEmitter<{ nodes: Node[]; parent?: Node }>();
+    configChange$ = new EventEmitter<OptionConfig>();
     private _editorialSidebar: EditorialSidebarComponent;
     readonly sidebarOpened = signal(false);
     registerSidebar(editorialSidebar: EditorialSidebarComponent) {
@@ -35,9 +39,16 @@ export class EditorialSidebarService {
         return this._editorialSidebar;
     }
 
-    showOption(state: OptionState<unknown>) {
-        console.log(state);
+    showOption(state: OptionState<OptionConfig>) {
         this._editorialSidebar.enabledOption.set(state);
         this.sidebarOpened.set(true);
+    }
+
+    patchOptionConfig(optionConfig: OptionConfig) {
+        this.configChange$.emit(optionConfig);
+        this._editorialSidebar.enabledOption.set({
+            ...this._editorialSidebar.enabledOption(),
+            optionConfig,
+        });
     }
 }
