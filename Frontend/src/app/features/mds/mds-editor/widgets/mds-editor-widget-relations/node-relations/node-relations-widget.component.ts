@@ -54,7 +54,7 @@ export class MdsNodeRelationsWidgetComponent implements OnChanges {
             ]).subscribe(async (result) => {
                 this.forkedChilds = result[0].nodes;
                 this.versions = result[1].nodes.reverse();
-                this.relations = result[2].relations;
+                this.relations = result[2];
                 // is a forked child
                 if (this.node.properties[RestConstants.CCM_PROP_FORKED_ORIGIN]) {
                     this.nodeService

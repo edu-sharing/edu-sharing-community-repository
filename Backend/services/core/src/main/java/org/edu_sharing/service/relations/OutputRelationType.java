@@ -1,9 +1,14 @@
 package org.edu_sharing.service.relations;
 
 public enum OutputRelationType {
-    isPartOf,
-    isBasedOn,
+    isPartOf, hasPart,
+    isBasedOn, isBasisFor,
+
     references,
-    hasPart,
-    isBasisFor,
+
+    //new
+    isDuplicateOf,
+    requires, isRequiredBy,
+    replaces, isReplacedBy,
+    hasFormat, isFormatOf,
 }

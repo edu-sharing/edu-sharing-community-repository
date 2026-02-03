@@ -111,9 +111,7 @@ export class NodeRelationsDialogComponent implements OnInit {
         return this.relations.concat(this.addRelations);
     }
 
-    getRelations(
-        key: 'isPartOf' | 'isBasedOn' | 'references' | 'hasPart' | 'isBasisFor',
-    ): RelationData[] {
+    getRelations(key: RelationData['type']): RelationData[] {
         return this.getAllRelations()
             .filter((r) => r.type === key)
             .sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
@@ -139,10 +137,10 @@ export class NodeRelationsDialogComponent implements OnInit {
     resolveRelationSendData(r: RelationData) {
         const inverted = this.isInverted(r);
         let source = this.source.ref.id;
-        let target = r.node.ref.id;
+        let target = r.toNode.ref.id;
         let type: string = r.type;
         if (inverted) {
-            source = r.node.ref.id;
+            source = r.toNode.ref.id;
             target = this.source.ref.id;
             type = inverted;
         }
@@ -203,14 +201,15 @@ export class NodeRelationsDialogComponent implements OnInit {
         }
         if (
             this.getAllExistingRelations().find(
-                (r) => r.node.ref.id === this.target.ref.id && r.type === type,
+                (r) => r.toNode.ref.id === this.target.ref.id && r.type === type,
             )
         ) {
             this.toast.error(null, 'NODE_RELATIONS.RELATION_EXISTS');
             return;
         }
         this.addRelations.push({
-            node: this.target,
+            fromNode: this.source,
+            toNode: this.target,
             type,
             // @TODO: check if api model is invalid
             timestamp: new Date().getTime() as any,
@@ -240,7 +239,7 @@ export class NodeRelationsDialogComponent implements OnInit {
 
     canModify(relation: RelationData) {
         return this.nodeHelper.getNodesRight(
-            [relation.node],
+            [relation.toNode],
             RestConstants.PERMISSION_WRITE,
             NodesRightMode.Effective,
         );
@@ -265,7 +264,7 @@ export class NodeRelationsDialogComponent implements OnInit {
         this.source = node;
         this.relationService.getRelations(node.ref.id).subscribe(
             (relations) => {
-                this.relations = relations.relations;
+                this.relations = relations;
                 this.dialogRef.patchState({ isLoading: false });
                 this.cdr.detectChanges();
             },

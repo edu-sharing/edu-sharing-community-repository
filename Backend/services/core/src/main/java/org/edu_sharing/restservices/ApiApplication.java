@@ -115,7 +115,6 @@ public class ApiApplication extends ResourceConfig {
             throw new RuntimeException(e.getMessage(), e);
         }
 
-
     }
 
 }

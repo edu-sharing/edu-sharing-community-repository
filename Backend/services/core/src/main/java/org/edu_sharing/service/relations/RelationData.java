@@ -1,13 +1,35 @@
 package org.edu_sharing.service.relations;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Date;
+import java.util.Map;
 
-@Data
-public class RelationData {
-    private String node;
-    private String creator;
-    private Date timestamp;
-    private OutputRelationType type;
+public interface RelationData {
+    @JsonProperty(required = true)
+    String getFromNode();
+    @JsonProperty(required = true)
+    String getToNode();
+    @JsonProperty(required = true)
+    String getCreatedBy();
+    @JsonProperty(required = true)
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+    Date getCreated();
+    String getModifiedBy();
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+    Date getModified();
+    @JsonProperty(required = true)
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+    Date getTimestamp();
+    @JsonProperty(required = true)
+    OutputRelationType getType();
+    @JsonProperty(required = true)
+    OutputRelationType getReverseType();
+
+    @JsonProperty(required = true)
+    boolean isAiGenerated();
+    Evaluation getEvaluation();
+    Map<String, Object> getMetadata();
 }
+

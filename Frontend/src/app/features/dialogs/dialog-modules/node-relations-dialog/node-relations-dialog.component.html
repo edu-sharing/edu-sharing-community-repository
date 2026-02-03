@@ -89,20 +89,21 @@
       "{{ source | nodeTitle }}" {{ 'NODE_RELATIONS.RELATION_TYPE.' + key | translate }}
     </h5>
     <div class="relation-nodes">
-      <!--[node]="relation.node" -->
+      <!--[node]="relation.toNode" -->
       <div
         class="relation-node"
         *ngFor="let relation of getRelations(key)"
         [class.added]="addRelations.includes(relation)"
       >
-        <es-node-row [node]="relation.node" [columns]="columns.Default">
+        <es-node-row [node]="relation.toNode" [columns]="columns.Default">
           <ng-template #customMetadata>
             <div class="info-group">
               <label>{{ 'NODE_RELATIONS.RELATION_CREATED' | translate }}</label>
               <span>{{ relation.timestamp | formatDate : { relative: false } }}</span>
             </div>
             <div class="info-group">
-              <label>{{ 'NODE_RELATIONS.RELATION_CREATOR' | translate }}</label>
+              <label>{{ 'NODE_RELATIONS.RELATION_CREATOR' | translate }}</label
+              >c
               <span>{{ relation.creator | authorityName }}</span>
             </div>
           </ng-template>
@@ -110,7 +111,7 @@
         <button
           mat-icon-button
           color="primary"
-          (click)="openNode(relation.node)"
+          (click)="openNode(relation.toNode)"
           matTooltip="{{ 'NODE_RELATIONS.OPEN_NODE' | translate }}"
         >
           <i esIcon="open_in_new" [aria]="false"></i>

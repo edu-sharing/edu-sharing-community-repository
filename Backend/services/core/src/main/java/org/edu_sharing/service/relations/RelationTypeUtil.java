@@ -1,27 +1,50 @@
 package org.edu_sharing.service.relations;
 
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public final class RelationTypeUtil {
-    private final static Map<OutputRelationType, OutputRelationType> invertRelationTypeSet = new HashMap<>(){{
-        put(OutputRelationType.isBasisFor, OutputRelationType.isBasedOn);
-        put(OutputRelationType.hasPart, OutputRelationType.isPartOf);
-        put(OutputRelationType.references, OutputRelationType.references);
-        put(OutputRelationType.isBasedOn, OutputRelationType.isBasisFor);
-        put(OutputRelationType.isPartOf, OutputRelationType.hasPart);
-    }};
+    static {
+        invertRelationTypeSet = Map.ofEntries(
+                // normalized to inverted
+                Map.entry(OutputRelationType.isPartOf, OutputRelationType.hasPart),
+                Map.entry(OutputRelationType.isBasedOn, OutputRelationType.isBasisFor),
+                Map.entry(OutputRelationType.requires, OutputRelationType.isRequiredBy),
+                Map.entry(OutputRelationType.replaces, OutputRelationType.isReplacedBy),
+                Map.entry(OutputRelationType.hasFormat, OutputRelationType.isFormatOf),
 
-    private final static Map<InputRelationType, OutputRelationType> convertRelationTypeSet = new HashMap<>(){{
-        put(InputRelationType.references, OutputRelationType.references);
-        put(InputRelationType.isBasedOn, OutputRelationType.isBasedOn);
-        put(InputRelationType.isPartOf, OutputRelationType.isPartOf);
-    }};
+                // inverted to normalized
+                Map.entry(OutputRelationType.hasPart, OutputRelationType.isPartOf),
+                Map.entry(OutputRelationType.isBasisFor, OutputRelationType.isBasedOn),
+                Map.entry(OutputRelationType.isRequiredBy, OutputRelationType.requires),
+                Map.entry(OutputRelationType.isReplacedBy, OutputRelationType.replaces),
+                Map.entry(OutputRelationType.isFormatOf, OutputRelationType.hasFormat),
 
-    public  static OutputRelationType invert(OutputRelationType type){
-        return  invertRelationTypeSet.get(type);
+                // no convertions
+                Map.entry(OutputRelationType.references, OutputRelationType.references),
+                Map.entry(OutputRelationType.isDuplicateOf, OutputRelationType.isDuplicateOf)
+        );
+
+        reverseInputRelationTypeSet = Arrays.stream(InputRelationType.values())
+                .collect(Collectors.toMap(Function.identity(), RelationTypeUtil::reverse));
     }
-    public  static OutputRelationType toOutputType(InputRelationType type){
-        return  convertRelationTypeSet.get(type);
+
+    public final static Map<InputRelationType, OutputRelationType> reverseInputRelationTypeSet;
+
+    private final static Map<OutputRelationType, OutputRelationType> invertRelationTypeSet;
+
+
+    public static OutputRelationType reverse(InputRelationType type) {
+        return reverse(toOutputType(type));
+    }
+
+    public static OutputRelationType reverse(OutputRelationType type) {
+        return invertRelationTypeSet.get(type);
+    }
+
+    public static OutputRelationType toOutputType(InputRelationType type) {
+        return OutputRelationType.valueOf(type.name());
     }
 }

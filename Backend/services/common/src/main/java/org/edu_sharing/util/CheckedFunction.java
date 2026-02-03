@@ -1,6 +1,9 @@
 package org.edu_sharing.util;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.function.Function;
 
 /**
@@ -12,6 +15,8 @@ import java.util.function.Function;
  */
 @FunctionalInterface
 public interface CheckedFunction<T, R, E extends Throwable> {
+    Logger log = LoggerFactory.getLogger(CheckedFunction.class);
+
     /**
      * Applies this function to the given argument.
      *
@@ -35,7 +40,7 @@ public interface CheckedFunction<T, R, E extends Throwable> {
                 return checkedFunction.apply(t);
             } catch (RuntimeException e) {
                 throw e;
-            }  catch (Throwable e) {
+            } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
         };
@@ -46,6 +51,9 @@ public interface CheckedFunction<T, R, E extends Throwable> {
             try {
                 return checkedFunction.apply(t);
             } catch (Throwable e) {
+                if (log.isDebugEnabled()) {
+                    log.error("Error while executing checked function", e);
+                }
                 throw exceptionHandler.apply(e);
             }
         };
@@ -65,6 +73,9 @@ public interface CheckedFunction<T, R, E extends Throwable> {
             try {
                 return checkedFunction.apply(t);
             } catch (Throwable e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Error while executing checked function", e);
+                }
                 return defaultValue;
             }
         };

@@ -4,15 +4,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class RelationTypeUtilTest {
 
     @ParameterizedTest
     @EnumSource(OutputRelationType.class)
-    void invertRelationTypeTest(OutputRelationType type) {
+    void reverseRelationTypeTest(OutputRelationType type) {
         // This test will fail if we've added a new OutputRelationType without assigning an inverse relation
-        Assertions.assertNotNull(RelationTypeUtil.invert(type));
+        Assertions.assertNotNull(RelationTypeUtil.reverse(type));
     }
 
     @ParameterizedTest

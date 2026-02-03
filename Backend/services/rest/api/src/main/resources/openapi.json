@@ -1743,6 +1743,48 @@
         ],
         "type": "object"
       },
+      "CreateRelationRequest": {
+        "properties": {
+          "fromNode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "isAiGenerated": {
+            "type": "boolean"
+          },
+          "isEvaluated": {
+            "type": "boolean"
+          },
+          "metadata": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "toNode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "isPartOf",
+              "isBasedOn",
+              "references",
+              "isDuplicateOf",
+              "requires",
+              "replaces",
+              "hasFormat"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "fromNode",
+          "toNode",
+          "type"
+        ],
+        "type": "object"
+      },
       "CreateSuggestionRequestDTO": {
         "properties": {
           "confidence": {
@@ -1971,6 +2013,21 @@
           "error",
           "message"
         ],
+        "type": "object"
+      },
+      "Evaluation": {
+        "properties": {
+          "approved": {
+            "type": "boolean"
+          },
+          "approvedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "approvedBy": {
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "ExcelResult": {
@@ -4584,16 +4641,66 @@
         ],
         "type": "object"
       },
-      "NodeRelation": {
+      "NodeRelationData": {
         "properties": {
-          "node": {
+          "aiGenerated": {
+            "type": "boolean"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/User"
+          },
+          "evaluation": {
+            "$ref": "#/components/schemas/Evaluation"
+          },
+          "fromNode": {
             "$ref": "#/components/schemas/Node"
           },
-          "relations": {
-            "items": {
-              "$ref": "#/components/schemas/RelationData"
+          "metadata": {
+            "additionalProperties": {
+              "type": "object"
             },
-            "type": "array"
+            "type": "object"
+          },
+          "reverseType": {
+            "enum": [
+              "isPartOf",
+              "hasPart",
+              "isBasedOn",
+              "isBasisFor",
+              "references",
+              "isDuplicateOf",
+              "requires",
+              "isRequiredBy",
+              "replaces",
+              "isReplacedBy",
+              "hasFormat",
+              "isFormatOf"
+            ],
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "toNode": {
+            "$ref": "#/components/schemas/Node"
+          },
+          "type": {
+            "enum": [
+              "isPartOf",
+              "hasPart",
+              "isBasedOn",
+              "isBasisFor",
+              "references",
+              "isDuplicateOf",
+              "requires",
+              "isRequiredBy",
+              "replaces",
+              "isReplacedBy",
+              "hasFormat",
+              "isFormatOf"
+            ],
+            "type": "string"
           }
         },
         "type": "object"
@@ -6123,27 +6230,87 @@
       },
       "RelationData": {
         "properties": {
-          "creator": {
-            "$ref": "#/components/schemas/User"
+          "aiGenerated": {
+            "type": "boolean"
           },
-          "node": {
-            "$ref": "#/components/schemas/Node"
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "evaluation": {
+            "$ref": "#/components/schemas/Evaluation"
+          },
+          "fromNode": {
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "modified": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "modifiedBy": {
+            "type": "string"
+          },
+          "reverseType": {
+            "enum": [
+              "isPartOf",
+              "hasPart",
+              "isBasedOn",
+              "isBasisFor",
+              "references",
+              "isDuplicateOf",
+              "requires",
+              "isRequiredBy",
+              "replaces",
+              "isReplacedBy",
+              "hasFormat",
+              "isFormatOf"
+            ],
+            "type": "string"
           },
           "timestamp": {
             "format": "date-time",
             "type": "string"
           },
+          "toNode": {
+            "type": "string"
+          },
           "type": {
             "enum": [
               "isPartOf",
-              "isBasedOn",
-              "references",
               "hasPart",
-              "isBasisFor"
+              "isBasedOn",
+              "isBasisFor",
+              "references",
+              "isDuplicateOf",
+              "requires",
+              "isRequiredBy",
+              "replaces",
+              "isReplacedBy",
+              "hasFormat",
+              "isFormatOf"
             ],
             "type": "string"
           }
         },
+        "required": [
+          "aiGenerated",
+          "created",
+          "createdBy",
+          "fromNode",
+          "reverseType",
+          "timestamp",
+          "toNode",
+          "type"
+        ],
         "type": "object"
       },
       "Remote": {
@@ -7938,6 +8105,42 @@
           "answer",
           "id",
           "question"
+        ],
+        "type": "object"
+      },
+      "UpdateRelationRequest": {
+        "properties": {
+          "fromNode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "toNode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "isPartOf",
+              "isBasedOn",
+              "references",
+              "isDuplicateOf",
+              "requires",
+              "replaces",
+              "hasFormat"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "fromNode",
+          "toNode",
+          "type"
         ],
         "type": "object"
       },
@@ -38074,7 +38277,305 @@
         ]
       }
     },
-    "/relation/v1/relation/{repository}/{node}": {
+    "/relation/v1/{repository}": {
+      "post": {
+        "description": "Creates a relation between two nodes of the given type.",
+        "operationId": "createRelation",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRelationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodeRelationData"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "create a relation between nodes",
+        "tags": [
+          "RELATION v1"
+        ]
+      },
+      "put": {
+        "description": "Updates relation metadata between two nodes of the given type.",
+        "operationId": "updateRelation",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRelationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodeRelationData"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "update relation metadata between nodes",
+        "tags": [
+          "RELATION v1"
+        ]
+      }
+    },
+    "/relation/v1/{repository}/tracking": {
+      "get": {
+        "description": "Returns tracked relations that were modified after the specified date.",
+        "operationId": "getTrackedRelation",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Date to filter relation data from",
+            "in": "query",
+            "name": "after",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "maximum items",
+            "in": "query",
+            "name": "maxItems",
+            "schema": {
+              "default": 100,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "If true, deleted relations are returned, otherwise active relations are returned.",
+            "in": "query",
+            "name": "deleted",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RelationData"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "get tracked relations",
+        "tags": [
+          "RELATION v1"
+        ]
+      }
+    },
+    "/relation/v1/{repository}/{node}": {
       "get": {
         "description": "Returns all relations of the node.",
         "operationId": "getRelations",
@@ -38104,7 +38605,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/NodeRelation"
+                  "items": {
+                    "$ref": "#/components/schemas/NodeRelationData"
+                  },
+                  "type": "array"
                 }
               }
             },
@@ -38167,7 +38671,112 @@
         ]
       }
     },
-    "/relation/v1/relation/{repository}/{source}/{type}/{target}": {
+    "/relation/v1/{repository}/{node}/trace": {
+      "get": {
+        "description": "Recursifly returns all relations of the node and its successors.",
+        "operationId": "traceRelations",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of node",
+            "in": "path",
+            "name": "node",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Max depth of the trace",
+            "in": "query",
+            "name": "maxDepth",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/NodeRelationData"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "traces relation of the node",
+        "tags": [
+          "RELATION v1"
+        ]
+      }
+    },
+    "/relation/v1/{repository}/{source}/{type}/{target}": {
       "delete": {
         "description": "Delete a relation between two nodes of the given type.",
         "operationId": "deleteRelation",
@@ -38192,7 +38801,7 @@
             }
           },
           {
-            "description": "ID of node",
+            "description": "Relation Type",
             "in": "path",
             "name": "type",
             "required": true,
@@ -38200,7 +38809,11 @@
               "enum": [
                 "isPartOf",
                 "isBasedOn",
-                "references"
+                "references",
+                "isDuplicateOf",
+                "requires",
+                "replaces",
+                "hasFormat"
               ],
               "type": "string"
             }
@@ -38277,10 +38890,12 @@
         "tags": [
           "RELATION v1"
         ]
-      },
-      "put": {
+      }
+    },
+    "/relation/v1/{repository}/{source}/{type}/{target}/approve": {
+      "post": {
         "description": "Creates a relation between two nodes of the given type.",
-        "operationId": "createRelation",
+        "operationId": "approveRelation",
         "parameters": [
           {
             "description": "ID of repository (or \"-home-\" for home repository)",
@@ -38302,7 +38917,7 @@
             }
           },
           {
-            "description": "ID of node",
+            "description": "Relation Type",
             "in": "path",
             "name": "type",
             "required": true,
@@ -38310,7 +38925,11 @@
               "enum": [
                 "isPartOf",
                 "isBasedOn",
-                "references"
+                "references",
+                "isDuplicateOf",
+                "requires",
+                "replaces",
+                "hasFormat"
               ],
               "type": "string"
             }
@@ -38328,7 +38947,11 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {}
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodeRelationData"
+                }
+              }
             },
             "description": "OK."
           },

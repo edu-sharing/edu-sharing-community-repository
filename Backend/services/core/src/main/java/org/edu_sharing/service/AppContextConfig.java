@@ -7,7 +7,6 @@ import org.edu_sharing.repository.server.appcontext.AppContextRegistry;
 import org.edu_sharing.service.archive.ArchiveService;
 import org.edu_sharing.service.archive.ArchiveServiceImpl;
 import org.edu_sharing.service.authority.AuthorityService;
-import org.edu_sharing.service.authority.AuthorityServiceImpl;
 import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.collection.CollectionServiceElastic;
 import org.edu_sharing.service.comment.CommentService;
@@ -25,8 +24,9 @@ import org.edu_sharing.service.permission.PermissionServiceAdapter;
 import org.edu_sharing.service.permission.PermissionServiceCCPublish;
 import org.edu_sharing.service.rating.RatingService;
 import org.edu_sharing.service.rating.RatingServiceAdapter;
+import org.edu_sharing.service.relations.NodeRelationTraceService;
 import org.edu_sharing.service.relations.RelationService;
-import org.edu_sharing.service.relations.RelationServiceAdadapter;
+import org.edu_sharing.service.relations.RelationServiceAdapter;
 import org.edu_sharing.service.rendering.RenderingService;
 import org.edu_sharing.service.search.*;
 import org.springframework.context.annotation.Bean;
@@ -45,7 +45,7 @@ public class AppContextConfig {
                 .defineBean(CommentService.class, CommentServiceAdapter.class)
                 .defineBean(FeedbackService.class, FeedbackServiceAdapter.class)
                 .defineBean(RatingService.class, RatingServiceAdapter.class)
-                .defineBean(RelationService.class, RelationServiceAdadapter.class)
+                .defineBean(RelationService.class, RelationServiceAdapter.class)
                 .defineBean(NotificationService.class, NotificationService.class)
                 .defineBean(RenderingService.class, RenderingService.class)
                 .defineBean(CollectionService.class, CollectionService.class)
@@ -59,6 +59,7 @@ public class AppContextConfig {
                 .defineBean(FeedbackService.class, FeedbackServiceImpl.class)
                 .defineBean(RatingService.class, "ratingService")
                 .defineBean(RelationService.class, "relationService")
+                .defineBean(NodeRelationTraceService.class, NodeRelationTraceService.class)
                 .defineBean(CollectionService.class, CollectionServiceElastic.class)
                 .defineBean(AuthenticationTool.class, AuthenticationToolAPI.class)
                 .defineBean(AuthorityService.class, "authorityServiceImpl")
@@ -75,6 +76,7 @@ public class AppContextConfig {
                 .defineBean(FeedbackService.class, FeedbackServiceImpl.class)
                 .defineBean(RatingService.class, "ratingService")
                 .defineBean(RelationService.class, "relationService")
+                .defineBean(NodeRelationTraceService.class, NodeRelationTraceService.class)
                 .defineBean(CollectionService.class, CollectionServiceElastic.class)
                 .defineBean(AuthenticationTool.class, AuthenticationToolAPI.class)
                 .defineBean(AuthorityService.class,  "authorityServiceImpl")
