@@ -111,7 +111,7 @@ export class LandingPageComponent implements OnInit, OnDestroy {
         this.swimlanes.set(
             await this.configService.get<SwimlaneEntry[]>('frontpage.dashboard.swimlanes', [
                 {
-                    id: 'assignments',
+                    id: 'collections',
                     defaultExpanded: true,
                 },
                 {
@@ -119,7 +119,7 @@ export class LandingPageComponent implements OnInit, OnDestroy {
                     defaultExpanded: true,
                 },
                 {
-                    id: 'collections',
+                    id: 'assignments',
                     defaultExpanded: true,
                 },
                 {
