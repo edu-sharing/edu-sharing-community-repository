@@ -15,6 +15,7 @@ import { BulkBehavior } from '../features/mds/types/types';
 import { firstValueFrom, merge } from 'rxjs';
 import { filter, map, toArray } from 'rxjs/operators';
 import { MdsEditorDialogResult } from '../features/dialogs/dialog-modules/mds-editor-dialog/mds-editor-dialog-data';
+import { FileUploadProgressDialogData } from '../features/dialogs/dialog-modules/file-upload-progress-dialog/file-upload-progress-dialog-data';
 
 /**
  * Provides high-level methods to allow uploading and saving new material.
@@ -100,7 +101,7 @@ export class UploadDialogService {
      * Uploads new files and creates respective new nodes in the repository.
      */
     async uploadFilesAndCreateNodes(
-        data: FileData,
+        data: FileUploadProgressDialogData,
         showMetadataAfterUpload = true,
     ): Promise<Node[] | null> {
         const dialogRef = await this.dialogs.openFileUploadProgressDialog(data);

@@ -24,11 +24,11 @@
   (fileOver)="fileIsOver = $event"
   (fileDrop)="onFileDrop($event)"
 ></div>
-<div class="dialog darken drop-zone" *ngIf="fileIsOver">
+<div class="dialog darken drop-zone" *ngIf="fileIsOver && dropEnabled()">
   <div>
-    <i class="material-icons" *ngIf="isAllowed()">cloud_upload</i>
-    <i class="material-icons" *ngIf="!isAllowed()">cloud_off</i>
-    <p *ngIf="isAllowed()">{{ 'WORKSPACE.DROP_FILES' | translate }}</p>
-    <p *ngIf="!isAllowed()">{{ 'WORKSPACE.DROP_FILES_DISABLED' | translate }}</p>
+    <i class="material-icons" *ngIf="isDropAllowed()">cloud_upload</i>
+    <i class="material-icons" *ngIf="!isDropAllowed()">cloud_off</i>
+    <p *ngIf="isDropAllowed()">{{ 'WORKSPACE.DROP_FILES' | translate }}</p>
+    <p *ngIf="!isDropAllowed()">{{ 'WORKSPACE.DROP_FILES_DISABLED' | translate }}</p>
   </div>
 </div>

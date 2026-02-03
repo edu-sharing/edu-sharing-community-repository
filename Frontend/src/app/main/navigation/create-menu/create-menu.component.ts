@@ -645,8 +645,10 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         }
         this.createToolType = null;
     }
-
-    isAllowed() {
+    dropEnabled() {
+        return this.mainNavConfig.create?.globalDrop !== false;
+    }
+    isDropAllowed() {
         return (
             this.allowed &&
             this.connector.hasToolPermissionInstant(

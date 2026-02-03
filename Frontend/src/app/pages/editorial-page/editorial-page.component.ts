@@ -606,6 +606,10 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             return o;
         });
         this.mainNav.patchMainNavConfig({
+            create: {
+                allowed: true,
+                globalDrop: false, // this.params$.value.primaryMode === ''
+            },
             customCreateOptions: {
                 useDefaultOptions: false,
                 addOptions: options,

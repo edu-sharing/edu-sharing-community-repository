@@ -14,6 +14,10 @@ import { CustomOptions, OptionItem } from 'ngx-edu-sharing-ui';
 export class MainNavCreateConfig {
     /** allowed / display new material button */
     allowed?: boolean | 'EMIT_EVENT' = false;
+    /**
+     * allow the global dropping (drop file anywhere to upload)
+     */
+    globalDrop?: boolean;
     /** refer to CreateMenuComponent */
     allowBinary?: boolean = true;
     parent?: Node = null;

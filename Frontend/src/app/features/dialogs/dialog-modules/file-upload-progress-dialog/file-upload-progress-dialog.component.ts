@@ -68,16 +68,26 @@ export class FileUploadProgressDialogComponent implements OnInit {
         this._existingNodes()
             .pipe(
                 switchMap((existingNodes: Node[]) => {
-                    // open the dialog only if this dialog is still open...
-                    if (this.dialogRef.getLifecycleState() !== 'open') return of(false);
-                    // if some files are already present as nodes then inform the user and ask whether
-                    // to keep or overwrite the files
                     this.existingNodes = existingNodes;
-                    if (existingNodes.length > 0) {
-                        return from(this._openExistingDialog(existingNodes));
+                    if (
+                        !this.data.duplicateBehaviour ||
+                        this.data.duplicateBehaviour === 'ask-user'
+                    ) {
+                        // open the dialog only if this dialog is still open...
+                        if (this.dialogRef.getLifecycleState() !== 'open') return of(false);
+                        // if some files are already present as nodes then inform the user and ask whether
+                        // to keep or overwrite the files
+                        this.existingNodes = existingNodes;
+                        if (existingNodes.length > 0) {
+                            return from(this._openExistingDialog(existingNodes));
+                        }
+                        // if there are no existing nodes of the same name just proceed and upload
+                        return of(true);
+                    } else {
+                        this.keep = this.data.duplicateBehaviour === 'unique';
+                        console.log('keep?', this.keep);
+                        return of(true);
                     }
-                    // if there are no existing nodes of the same name just proceed and upload
-                    return of(true);
                 }),
             )
             .subscribe((doUpload) => {

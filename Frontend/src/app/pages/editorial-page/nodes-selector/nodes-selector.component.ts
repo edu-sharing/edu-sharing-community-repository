@@ -389,7 +389,11 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         switch (result.kind) {
             case 'file':
                 createdNodes = await this.uploadDialogService.uploadFilesAndCreateNodes(
-                    result,
+                    {
+                        ...result,
+                        duplicateBehaviour:
+                            this.option.optionConfig?.upload === 'fast' ? 'unique' : 'ask-user',
+                    },
                     this.option.optionConfig?.upload !== 'fast',
                 );
                 break;

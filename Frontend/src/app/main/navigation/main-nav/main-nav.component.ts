@@ -380,6 +380,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         // @TODO: May Check for more constrains
         return (
             this.mainNavConfig.create?.allowed === true &&
+            this.mainNavConfig.create?.globalDrop !== false &&
             !this.connector.getCurrentLogin()?.isGuest &&
             this.queryParams?.reurlCreate !== 'false'
         );
