@@ -133,7 +133,7 @@ public class NodeObjectReportJob extends AbstractJobMapAnnotationParams {
                         return;
                     }
                 case Quarterly:
-                    if(!List.of(1, 4, 7, 10).contains(now.getMonthValue()) {
+                    if(!List.of(1, 4, 7, 10).contains(now.getMonthValue())) {
                         logger.error("Job not running because of date: " + now.getDayOfMonth() + " month: " + now.getMonth());
                         return;
                     }
