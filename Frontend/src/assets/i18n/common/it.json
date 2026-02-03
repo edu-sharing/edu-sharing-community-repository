@@ -665,10 +665,10 @@
   "MDS": {
     "DIFFERENT_VALUES": "(Valori diversi)",
     "HAS_CHANGES": "modificato",
-    "TITLE": "Modifica info",
+    "TITLE": "Modifica informazioni",
     "SHOW_EXTENDED": "Mostra informazioni estese",
     "SHOW_EXTENDED_SEARCH": "Mostra altri filtri",
-    "AUTHOR_LABEL": "Sull'autore",
+    "AUTHOR_LABEL": "Informazioni sul creatore/creatrice",
     "AUTHOR_FREETEXT": "Indicazione libera creatore",
     "AUTHOR_FREETEXT_PLACEHOLDER": "Chi sono gli autori di quest'opera? Come devono essere attribuiti?",
     "AUTHOR_PERSON": "Autori/Autrici e Collaboratori/Collaboratrici",
