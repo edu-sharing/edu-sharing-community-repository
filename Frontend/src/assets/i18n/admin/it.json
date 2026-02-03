@@ -619,7 +619,7 @@
       "TOKEN": "Gettone",
       "TS": "Data di scadenza",
       "GENERATE": "Aggiungi token",
-      "SAVE": "Risparmiare",
+      "SAVE": "Salva",
       "REMOVE_TITLE": "Rimuovere il gettone?",
       "REMOVE_MESSAGE": "Si vuole davvero cancellare il token con l'url \"{{url}}\"?\n\nI link esistenti potrebbero diventare non disponibili a causa di questo processo.",
       "DYNAMIC_INFO": "Con la registrazione dinamica lti è possibile interconnettere edu-sharing con altri sistemi compatibili con lti. Fate clic su \"Generate Token\" per generare un nuovo token url.\n\nInseritelo nel vostro sistema compatibile con lti (ad esempio, moodle). Il sistema esterno verrà poi collegato automaticamente.",
