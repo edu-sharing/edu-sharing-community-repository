@@ -52,7 +52,8 @@ es-node-entries-wrapper {
     // @include mixins.materialShadowBottom();
     z-index: 1;
     .show-more {
-        padding-top: 10px;
+        padding-top: 16px;
+        padding-bottom: 8px;
         display: flex;
         align-self: flex-end;
     }
