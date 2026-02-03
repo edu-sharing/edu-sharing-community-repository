@@ -73,6 +73,8 @@ const PROXY_CONFIG = [
         configure(proxy) {
             proxy.on('proxyReq', (proxyReq) => {
                 proxyReq.setHeader('Origin', process.env.BACKEND_URL);
+                // only receive non-gzip results for patching
+                proxyReq.setHeader('Accept-Encoding', 'deflate');
             });
             proxy.on('proxyRes', (proxyRes, req, res) => {
                 proxyRes.headers['X-Edu-Sharing-Proxy-Target'] = process.env.RS2_URL;
@@ -82,6 +84,8 @@ const PROXY_CONFIG = [
                         cookie
                             // We serve on a non-HTTPS connection, so 'Secure' cookies won't work.
                             .replace('; Secure', '')
+                            .replace(/;\s*Domain=[^;]+/gi, '')
+                            .replace(/;\s*Path=[^;]+/gi, '')
                             // 'SameSite=None' is only allowed on 'Secure' cookies.
                             .replace('; SameSite=None', ''),
                     );
@@ -90,23 +94,26 @@ const PROXY_CONFIG = [
                 if (!contentType.includes('application/json') && !contentType.includes('text')) {
                     return;
                 }
-                /*
                 const chunks = [];
-                proxyRes.on("data", (chunk) => {
+                proxyRes.on('data', (chunk) => {
                     chunks.push(chunk);
                 });
-                proxyRes.on("end", () => {
+                proxyRes.on('end', () => {
                     let body = Buffer.concat(chunks).toString('utf8');
                     // replace all rs2 uris to local for cookie auth
-                    body = body.replaceAll(process.env.RS2_URL, 'http://localhost:4200/rendering2');
+                    const rs2 = new URL(process.env.RS2_URL);
+                    const escapedHost = rs2.host.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const escapedPath = rs2.pathname.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const regex = new RegExp(
+                        `${rs2.protocol}//${escapedHost.replace(/:\\d+$/, '')}:\\d+${escapedPath}`,
+                        'g',
+                    );
+                    body = body.replace(regex, 'http://localhost:4200/rendering2/');
                     res.setHeader('content-length', Buffer.byteLength(body));
-                    console.log(body)
                     res.end(body);
                 });
-
                 // Prevent default piping
                 proxyRes.pipe = () => {};
-                 */
             });
         },
     },
