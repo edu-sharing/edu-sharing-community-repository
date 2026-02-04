@@ -336,6 +336,7 @@ body {
     --mdc-checkbox-selected-focus-icon-color: var(--primary);
     --mdc-checkbox-disabled-selected-checkmark-color: var(--palette-primary-100);
     .mdc-checkbox__background {
+        background-color: #fff;
         .mdc-checkbox__checkmark {
             color: #fff !important;
         }
