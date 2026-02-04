@@ -6,7 +6,13 @@ import {
     OnInit,
 } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
-import { Node, NodeService, RelationData, RelationService, UserService } from 'ngx-edu-sharing-api';
+import {
+    Node,
+    NodeService,
+    NodeRelationData,
+    RelationService,
+    UserService,
+} from 'ngx-edu-sharing-api';
 import { forkJoin } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { UniversalNode } from '../../../../core-module/rest/definitions';
@@ -47,9 +53,9 @@ export class NodeRelationsDialogComponent implements OnInit {
     };
 
     source: UniversalNode;
-    relations: RelationData[];
-    addRelations: RelationData[] = [];
-    deleteRelations: RelationData[] = [];
+    relations: NodeRelationData[];
+    addRelations: NodeRelationData[] = [];
+    deleteRelations: NodeRelationData[] = [];
     swapRelation: boolean;
     readonly form = new UntypedFormGroup({
         relation: new UntypedFormControl(Relations.isBasedOn, Validators.required),
@@ -111,7 +117,7 @@ export class NodeRelationsDialogComponent implements OnInit {
         return this.relations.concat(this.addRelations);
     }
 
-    getRelations(key: RelationData['type']): RelationData[] {
+    getRelations(key: NodeRelationData['type']): NodeRelationData[] {
         return this.getAllRelations()
             .filter((r) => r.type === key)
             .sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
@@ -127,14 +133,14 @@ export class NodeRelationsDialogComponent implements OnInit {
         );
     }
 
-    removeRelation(relation: RelationData) {
+    removeRelation(relation: NodeRelationData) {
         if (!this.deleteRelations.includes(relation)) {
             this.deleteRelations.push(relation);
         }
         this.updateButtons();
     }
 
-    resolveRelationSendData(r: RelationData) {
+    resolveRelationSendData(r: NodeRelationData) {
         const inverted = this.isInverted(r);
         let source = this.source.ref.id;
         let target = r.toNode.ref.id;
@@ -222,7 +228,7 @@ export class NodeRelationsDialogComponent implements OnInit {
         this.updateButtons();
     }
 
-    private isInverted(r: RelationData) {
+    private isInverted(r: NodeRelationData) {
         return Object.keys(this.RelationsInverted).find(
             (k) => (this.RelationsInverted as any)[k] === r.type && k !== r.type,
         );
@@ -237,7 +243,7 @@ export class NodeRelationsDialogComponent implements OnInit {
         return !((this.RelationsInverted as any)[relation] === relation);
     }
 
-    canModify(relation: RelationData) {
+    canModify(relation: NodeRelationData) {
         return this.nodeHelper.getNodesRight(
             [relation.toNode],
             RestConstants.PERMISSION_WRITE,

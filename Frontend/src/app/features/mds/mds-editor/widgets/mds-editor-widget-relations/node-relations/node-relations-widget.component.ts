@@ -3,7 +3,7 @@ import {
     NetworkService,
     Node,
     NodeService,
-    RelationData,
+    NodeRelationData,
     RelationService,
 } from 'ngx-edu-sharing-api';
 import { ListItem } from 'ngx-edu-sharing-ui';
@@ -23,7 +23,7 @@ import { SharedModule } from '../../../../../../shared/shared.module';
 export class MdsNodeRelationsWidgetComponent implements OnChanges {
     loading = true;
     @Input() node: Node;
-    relations: RelationData[];
+    relations: NodeRelationData[];
     columns = [new ListItem('NODE', RestConstants.LOM_PROP_TITLE)];
     versions: Node[];
     forkedOrigin: Node;
