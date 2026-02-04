@@ -26,7 +26,14 @@ const meta: Meta<MdsEditorWrapperComponent> = {
                 alert(JSON.stringify(await mds.onSave(), null, 2)), // <-- your callback
         },
         template: `
-      <es-mds-editor-wrapper #mds [embedded]="embedded" [setId]="setId" [groupId]="groupId" [editorMode]="editorMode" [nodes]="nodes"></es-mds-editor-wrapper>
+      <es-mds-editor-wrapper #mds
+      [embedded]="embedded"
+      [setId]="setId"
+      [groupId]="groupId"
+      [editorMode]="editorMode"
+      [nodes]="nodes"
+      [currentValues]="currentValues"
+      ></es-mds-editor-wrapper>
       <button mat-flat-button color="primary" (click)="save(mds)">Test: Save</button>
     `,
     }),
