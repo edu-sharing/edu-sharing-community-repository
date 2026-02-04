@@ -63,11 +63,11 @@
             <ng-template #customMetadata>
               <div class="info-group">
                 <label>{{ 'NODE_RELATIONS.RELATION_CREATED' | translate }}</label>
-                <span>{{ relation.timestamp | formatDate : { relative: true } }}</span>
+                <span>{{ relation.createdAt | formatDate : { relative: true } }}</span>
               </div>
               <div class="info-group">
                 <label>{{ 'NODE_RELATIONS.RELATION_CREATOR' | translate }}</label>
-                <span>{{ relation.creator | authorityName }}</span>
+                <span>{{ relation.createdBy | authorityName }}</span>
               </div>
             </ng-template>
           </es-node-row>

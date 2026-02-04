@@ -4646,20 +4646,34 @@
           "aiGenerated": {
             "type": "boolean"
           },
-          "creator": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
             "$ref": "#/components/schemas/User"
           },
           "evaluation": {
-            "$ref": "#/components/schemas/Evaluation"
+            "$ref": "#/components/schemas/NodeRelationDataEvaluation"
           },
           "fromNode": {
             "$ref": "#/components/schemas/Node"
+          },
+          "isAiGenerated": {
+            "type": "boolean"
           },
           "metadata": {
             "additionalProperties": {
               "type": "object"
             },
             "type": "object"
+          },
+          "modifiedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "modifiedBy": {
+            "$ref": "#/components/schemas/User"
           },
           "reverseType": {
             "enum": [
@@ -4676,10 +4690,6 @@
               "hasFormat",
               "isFormatOf"
             ],
-            "type": "string"
-          },
-          "timestamp": {
-            "format": "date-time",
             "type": "string"
           },
           "toNode": {
@@ -4703,6 +4713,38 @@
             "type": "string"
           }
         },
+        "required": [
+          "createdAt",
+          "createdBy",
+          "evaluation",
+          "fromNode",
+          "isAiGenerated",
+          "metadata",
+          "reverseType",
+          "toNode",
+          "type"
+        ],
+        "type": "object"
+      },
+      "NodeRelationDataEvaluation": {
+        "properties": {
+          "approved": {
+            "type": "boolean"
+          },
+          "approvedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "approvedBy": {
+            "$ref": "#/components/schemas/User"
+          },
+          "isApproved": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "isApproved"
+        ],
         "type": "object"
       },
       "NodeRemote": {
@@ -6233,7 +6275,7 @@
           "aiGenerated": {
             "type": "boolean"
           },
-          "created": {
+          "createdAt": {
             "format": "date-time",
             "type": "string"
           },
@@ -6252,7 +6294,7 @@
             },
             "type": "object"
           },
-          "modified": {
+          "modifiedAt": {
             "format": "date-time",
             "type": "string"
           },
@@ -6303,7 +6345,7 @@
         },
         "required": [
           "aiGenerated",
-          "created",
+          "createdAt",
           "createdBy",
           "fromNode",
           "reverseType",

@@ -1,6 +1,7 @@
 package org.edu_sharing.restservices;
 
 import org.edu_sharing.restservices.relation.v1.model.CreateRelationRequest;
+import org.edu_sharing.restservices.relation.v1.model.NodeRelationDataEvaluation;
 import org.edu_sharing.restservices.relation.v1.model.UpdateRelationRequest;
 import org.edu_sharing.restservices.relation.v1.model.NodeRelationData;
 import org.edu_sharing.restservices.shared.User;
@@ -55,31 +56,31 @@ public class RelationDao {
     }
 
     private NodeRelationData mapRelationData(org.edu_sharing.service.relations.RelationData x) {
+        User createdBy = Objects.nonNull(x.getCreatedBy()) ? new User(authorityService.getUser(x.getCreatedBy())) : null;
+        User modifiedBy = Objects.nonNull(x.getModifiedBy()) ? new User(authorityService.getUser(x.getModifiedBy())) : null;
+
         return NodeRelationData.builder()
                 // use getAnyExistingNode in case the original id it refers to has been deleted
                 .fromNode(NodeDao.getAnyExistingNode(repoDao, Arrays.asList(NodeDao.ExistingMode.IfNotExists, NodeDao.ExistingMode.IfNoReadPermissions), x.getFromNode()).asNode())
                 .toNode(NodeDao.getAnyExistingNode(repoDao, Arrays.asList(NodeDao.ExistingMode.IfNotExists, NodeDao.ExistingMode.IfNoReadPermissions), x.getToNode()).asNode())
-                .creator(new User(authorityService.getUser(x.getCreatedBy())))
-                .timestamp(x.getCreated())
+                .createdBy(createdBy)
+                .createdAt(x.getCreatedAt())
+                .modifiedBy(modifiedBy)
+                .modifiedAt(x.getModifiedAt())
                 .type(x.getType())
                 .reverseType(x.getReverseType())
                 .isAiGenerated(x.isAiGenerated())
-                .evaluation(x.getEvaluation())
+                .evaluation(mapRelationDataToEvaluation(x))
                 .metadata(x.getMetadata())
                 .build();
     }
 
-    private NodeRelationData mapSimpleRelationData(org.edu_sharing.service.relations.RelationData x) {
-        return NodeRelationData.builder()
-                .fromNode(NodeDao.getAsNodeSimple(x.getFromNode()))
-                .toNode(NodeDao.getAsNodeSimple(x.getToNode()))
-                .creator(new User(authorityService.getUser(x.getCreatedBy())))
-                .timestamp(x.getCreated())
-                .type(x.getType())
-                .reverseType(x.getReverseType())
-                .isAiGenerated(x.isAiGenerated())
-                .evaluation(x.getEvaluation())
-                .metadata(x.getMetadata())
+    private NodeRelationDataEvaluation mapRelationDataToEvaluation(RelationData x) {
+        User approvedBy = Objects.nonNull(x.getEvaluation().getApprovedBy()) ? new User(authorityService.getUser(x.getEvaluation().getApprovedBy())) : null;
+        return NodeRelationDataEvaluation.builder()
+                .isApproved(x.getEvaluation().isApproved())
+                .approvedAt(x.getEvaluation().getApprovedAt())
+                .approvedBy(approvedBy)
                 .build();
     }
 
@@ -87,7 +88,7 @@ public class RelationDao {
         return mapRelationData(this.relationService.updateRelation(request));
     }
 
-    public List< org.edu_sharing.service.relations.RelationData> getTrackedRelation(Date after, Integer maxItems) {
+    public List<org.edu_sharing.service.relations.RelationData> getTrackedRelation(Date after, Integer maxItems) {
         return relationService.getTrackedData(after, maxItems == null ? Limit.unlimited() : Limit.of(maxItems));
     }
 

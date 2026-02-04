@@ -15,10 +15,10 @@ public interface RelationData {
     String getCreatedBy();
     @JsonProperty(required = true)
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    Date getCreated();
+    Date getCreatedAt();
     String getModifiedBy();
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    Date getModified();
+    Date getModifiedAt();
     @JsonProperty(required = true)
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     Date getTimestamp();

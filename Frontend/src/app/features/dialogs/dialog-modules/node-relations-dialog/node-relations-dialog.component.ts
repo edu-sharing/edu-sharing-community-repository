@@ -120,7 +120,7 @@ export class NodeRelationsDialogComponent implements OnInit {
     getRelations(key: NodeRelationData['type']): NodeRelationData[] {
         return this.getAllRelations()
             .filter((r) => r.type === key)
-            .sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
+            .sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
     }
 
     openNode(node: UniversalNode) {
@@ -216,10 +216,17 @@ export class NodeRelationsDialogComponent implements OnInit {
         this.addRelations.push({
             fromNode: this.source,
             toNode: this.target,
-            type,
+            type: type,
+            reverseType: type,
             // @TODO: check if api model is invalid
-            timestamp: new Date().getTime() as any,
-            creator: (await this.userService.observeCurrentUser().pipe(first()).toPromise()).person,
+            createdAt: new Date().getTime() as any,
+            createdBy: (await this.userService.observeCurrentUser().pipe(first()).toPromise())
+                .person,
+            isAiGenerated: false,
+            evaluation: {
+                isApproved: true,
+            },
+            metadata: {},
         });
         this.form.reset();
         this.form.setValue({ relation: Relations.isBasedOn });
