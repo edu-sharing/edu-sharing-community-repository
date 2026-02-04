@@ -1,11 +1,10 @@
 import { applicationConfig, type Meta, moduleMetadata, type StoryObj } from '@storybook/angular';
 import { MdsEditorWrapperComponent } from './mds-editor-wrapper.component';
-import { Data, DummyNode, mdsStorybookProviders, registerMockNode } from '../storybook-utils';
+import { DummyNode, mdsStorybookProviders, registerMockNode } from '../storybook-utils';
 import { SharedModule } from '../../../../shared/shared.module';
 import { DEFAULT, Node } from 'ngx-edu-sharing-api';
-import { CommonModule } from '@angular/common';
 import { MdsModule } from '../../mds.module';
-import { Helper } from 'ngx-edu-sharing-ui';
+import { Helper, MdsExtendedValue, MdsExtendedValues } from 'ngx-edu-sharing-ui';
 
 const meta: Meta<MdsEditorWrapperComponent> = {
     title: 'Mds/Editor',
@@ -33,6 +32,7 @@ const meta: Meta<MdsEditorWrapperComponent> = {
       [editorMode]="editorMode"
       [nodes]="nodes"
       [currentValues]="currentValues"
+      (currentValuesChange)="currentValuesChange"
       ></es-mds-editor-wrapper>
       <button mat-flat-button color="primary" (click)="save(mds)">Test: Save</button>
     `,
@@ -88,5 +88,27 @@ export const MdsIOBulkTemplate: Story = {
             registerMockNode(n);
             return n;
         }),
+    },
+};
+let DummyProps = {} as MdsExtendedValues;
+Object.entries(DummyNode.properties).map(([k, v]) => {
+    DummyProps[k] = {} as MdsExtendedValue;
+    v.forEach((key) => {
+        (DummyProps[k] as MdsExtendedValue)[key] = {
+            enabled: true,
+        };
+    });
+});
+console.log(DummyProps);
+export const MdsValuesStory: Story = {
+    args: {
+        setId: DEFAULT,
+        groupId: 'io',
+        editorMode: 'search',
+        nodes: null,
+        currentValues: DummyProps,
+        currentValuesChange: (v) => {
+            console.log(v);
+        },
     },
 };

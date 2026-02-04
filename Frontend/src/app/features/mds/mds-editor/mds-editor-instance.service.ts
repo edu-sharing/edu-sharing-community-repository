@@ -40,7 +40,6 @@ import {
     zip,
 } from 'rxjs';
 import {
-    debounce,
     debounceTime,
     distinctUntilChanged,
     filter,
@@ -96,6 +95,9 @@ import { MdsEditorWidgetErrorComponent } from './widgets/mds-editor-widget-error
 import {
     InitialValues,
     MdsEditorInstanceServiceAbstract,
+    MdsExtendedValue,
+    MdsExtendedValueData,
+    MdsExtendedValues,
     MdsValueList,
     MdsViewerWidget,
     MdsWidgetType,
@@ -103,6 +105,7 @@ import {
     SearchHelperService,
     UIService,
 } from 'ngx-edu-sharing-ui';
+import { mapExtendedValues } from './mds-editor-wrapper/extended-values-mapper';
 
 export interface CompletionStatusField {
     widget: Widget;
@@ -146,6 +149,7 @@ export class MdsEditorInstanceService
         private initialValues: InitialValues;
         private initialDisplayValues = new BehaviorSubject<MdsValueList>(null);
         private readonly value$ = new BehaviorSubject<string[]>(null);
+        private readonly extendedValue$ = new BehaviorSubject<MdsExtendedValue>(null);
         private isDirty = false;
         private suggestionsChanged = false;
         /**
@@ -200,7 +204,10 @@ export class MdsEditorInstanceService
                             case null:
                                 return (
                                     !!this.initialValues.individualValues ||
-                                    !arrayIsEqual(value, this.initialValues.jointValues)
+                                    !arrayIsEqual(
+                                        mapExtendedValues(value),
+                                        this.initialValues.jointValues,
+                                    )
                                 );
                         }
                     }),
@@ -316,18 +323,21 @@ export class MdsEditorInstanceService
                 ],
             );
         }
-        initWithValues(values?: Values): void {
+        initWithValues(values?: MdsExtendedValues): void {
             if (this.relation === 'suggestions') {
                 this.initialValues = { jointValues: [] };
             } else {
+                const value = values?.[this.definition.id];
                 this.initialValues = {
                     jointValues:
-                        values?.[this.definition.id] ||
+                        (mapExtendedValues(value) as string[]) ||
                         (this.getDefaultValue() !== null ? [this.getDefaultValue()] : []),
+                    extendedValues: !Array.isArray(value) ? (value as MdsExtendedValue) : null,
                 };
             }
             // Set initial values, so the initial completion status is calculated correctly.
             this.value$.next([...this.initialValues.jointValues]);
+            this.extendedValue$.next(this.initialValues.extendedValues);
             this.initialValuesSubject.next(this.initialValues);
             this.ready.next();
             this.ready.complete();
@@ -411,7 +421,7 @@ export class MdsEditorInstanceService
         }
 
         getValue(): string[] {
-            return this.value$.value;
+            return mapExtendedValues(this.value$.value);
         }
 
         getIndeterminateValues(): string[] {
@@ -514,8 +524,14 @@ export class MdsEditorInstanceService
             return this.initialDisplayValues;
         }
 
-        observeValue(): Observable<string[]> {
+        observeValue(): Observable<string[] | MdsExtendedValue> {
             return this.value$.asObservable();
+        }
+
+        patchExtendedValue(key: string, data: MdsExtendedValueData) {
+            this.extendedValue$.value[key] = data;
+            console.log(this.extendedValue$.value);
+            this.extendedValue$.next(this.extendedValue$.value);
         }
 
         observeHasChanged(): Observable<boolean> {
@@ -748,6 +764,7 @@ export class MdsEditorInstanceService
     activeViews = new ReplaySubject<MdsView[]>(1);
     /** Updated widget values, not considering nodes. */
     readonly values: Observable<{ [id: string]: string[] }>;
+    readonly extendedValues: Observable<MdsExtendedValues>;
 
     /**
      * suggestions that are modified (will be saved in the save routine)
@@ -792,7 +809,7 @@ export class MdsEditorInstanceService
         mdsId: string;
         repository?: string;
         nodes?: Node[];
-        values?: Values;
+        values?: MdsExtendedValues;
     }>();
 
     /**
@@ -986,6 +1003,23 @@ export class MdsEditorInstanceService
                 values.reduce((acc, v) => ({ ...acc, ...v }), {} as { [id: string]: string[] }),
             ),
             shareReplay(1),
+        );
+        this.extendedValues = combineLatest([this.values, this.values$]).pipe(
+            map(([v, extended]) => {
+                if (!extended) {
+                    return null;
+                }
+                const result = {} as MdsExtendedValues;
+                Object.entries(v).forEach(([key, value]) => {
+                    result[key] = {};
+                    (value || []).forEach((v) => {
+                        (result[key] as MdsExtendedValue)[v] = (
+                            extended[key] as MdsExtendedValue
+                        )?.[v];
+                    });
+                });
+                return result;
+            }),
         );
     }
 
@@ -1236,7 +1270,7 @@ export class MdsEditorInstanceService
         mdsId: string = null,
         repository: string = '-home-',
         editorMode: EditorMode = 'search',
-        initialValues: Values = {},
+        initialValues: MdsExtendedValues = {},
     ): Promise<EditorType> {
         this.editorMode = editorMode;
         this.editorBulkMode = { isBulk: false };
@@ -1500,13 +1534,13 @@ export class MdsEditorInstanceService
             return null;
         }
 
-        let values = this.mapWidgetValues(this.widgets.value, node);
+        let values = this.mapWidgetValues(this.widgets.value, node) as Values;
         // Native widgets don't necessarily match their ID and relevant property or even affect
         // multiple properties. Therefore, we allow them to set arbitrary properties by implementing
         // `getValues()`.
         for (const widget of this.nativeWidgets.value) {
             values = widget.component.getValues
-                ? await widget.component.getValues(values, node)
+                ? await widget.component.getValues(values as Values, node)
                 : values;
         }
 
@@ -1605,7 +1639,7 @@ export class MdsEditorInstanceService
         mdsId: string,
         repository?: string,
         nodes?: Node[],
-        values?: Values,
+        values?: MdsExtendedValues,
     ): Promise<boolean> {
         // Use a trigger to be able to cancel the init process when `initMds` is called a second
         // time before the first call could complete.
@@ -1672,7 +1706,7 @@ export class MdsEditorInstanceService
         mdsId: string,
         repository?: string,
         nodes?: Node[],
-        values?: Values,
+        values?: MdsExtendedValues,
     ) {
         let mdsDefinition = this.mdsDefinition$.value;
         if (
@@ -1838,7 +1872,7 @@ export class MdsEditorInstanceService
     private meetsCondition(
         widget: MdsWidget,
         nodes: Node[] = this.nodes$.value,
-        values: Values = this.values$.value,
+        values: MdsExtendedValues = this.values$.value,
         obeyDynamic = false,
     ): boolean {
         if (!widget.condition) {

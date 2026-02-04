@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { Node, SearchService } from 'ngx-edu-sharing-api';
 import { Subject } from 'rxjs';
-import { first, tap } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 import { RestConstants } from '../../../../core-module/core.module';
 import { Toast } from '../../../../services/toast';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
@@ -14,7 +14,7 @@ import {
     Values,
 } from '../../types/types';
 import { valuesDictIsEquivalent } from './values-dict-is-equivalent';
-import { MdsEditorInstanceServiceAbstract } from 'ngx-edu-sharing-ui';
+import { MdsEditorInstanceServiceAbstract, MdsExtendedValues } from 'ngx-edu-sharing-ui';
 
 /**
  * Wrapper component to select between the legacy `<es-mds>` component and the Angular-native
@@ -41,11 +41,12 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
     @Input() allowReplacing = true;
     @Input() bulkBehaviour = BulkBehavior.Default;
     @Input() create: string;
-    @Input() currentValues: Values;
+    @Input() currentValues: MdsExtendedValues;
     /**
      * interactively called when any values are changed (evenn if user did not use SAVE event, use done for that)
      */
     @Output() currentValuesChange = new EventEmitter<Values>();
+    @Output() currentValuesExtendedChange = new EventEmitter<MdsExtendedValues>();
     @Input() customTitle: string;
     @Input() embedded = false;
     @Input() extended = false;
@@ -116,6 +117,9 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
             this.values = values;
             this.currentValuesChange.emit(values);
         });
+        this.mdsEditorInstance.extendedValues.subscribe((values) =>
+            this.currentValuesExtendedChange.emit(values),
+        );
 
         if (!this.embedded) {
             throw new Error(

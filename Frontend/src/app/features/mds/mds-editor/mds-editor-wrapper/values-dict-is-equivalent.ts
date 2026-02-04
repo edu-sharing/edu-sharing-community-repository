@@ -1,10 +1,13 @@
-import { Values } from '../../types/types';
+import { MdsExtendedValues } from 'ngx-edu-sharing-ui';
+import { mapExtendedValues } from './extended-values-mapper';
 
-export function valuesDictIsEquivalent(lhs: Values, rhs: Values): boolean {
+export function valuesDictIsEquivalent(lhs: MdsExtendedValues, rhs: MdsExtendedValues): boolean {
     lhs ??= {};
     rhs ??= {};
     const keys = Array.from(new Set([...Object.keys(lhs), ...Object.keys(rhs)]));
-    return keys.every((key) => valuesArrayIsEquivalent(lhs[key], rhs[key]));
+    return keys.every((key) =>
+        valuesArrayIsEquivalent(mapExtendedValues(lhs[key]), mapExtendedValues(rhs[key])),
+    );
 }
 
 function valuesArrayIsEquivalent(lhs: string[] = [], rhs: string[] = []): boolean {

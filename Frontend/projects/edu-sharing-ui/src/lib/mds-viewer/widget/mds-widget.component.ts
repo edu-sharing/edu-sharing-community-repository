@@ -25,7 +25,10 @@ import { BehaviorSubject, of, Subject } from 'rxjs';
 import { MdsViewerService } from '../mds-viewer.service';
 import { Values } from '../../services/search-helper.service';
 import { NodeHelperService } from '../../services/node-helper.service';
-import { MdsEditorInstanceServiceAbstract } from '../mds-editor-instance-service.abstract';
+import {
+    MdsEditorInstanceServiceAbstract,
+    MdsExtendedValue,
+} from '../mds-editor-instance-service.abstract';
 
 export enum MdsType {
     Io = 'io',
@@ -82,6 +85,11 @@ export enum MdsWidgetType {
 export interface InitialValues {
     /** Values that are initially present in all nodes. */
     readonly jointValues: string[];
+    /**
+     * extended values as (may) provided via currentValues
+     * Might be null (and will be null in node context)
+     */
+    readonly extendedValues?: MdsExtendedValue;
     /**
      * Values that are initially present in some but not all nodes.
      *

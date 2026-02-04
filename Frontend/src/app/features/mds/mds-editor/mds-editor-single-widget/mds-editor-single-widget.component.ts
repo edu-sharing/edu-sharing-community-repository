@@ -30,6 +30,7 @@ import {
     UIService,
     ViewInstanceService,
 } from 'ngx-edu-sharing-ui';
+import { mapExtendedValues } from '../mds-editor-wrapper/extended-values-mapper';
 
 export interface MdsEditInterface {
     injectEditField(
@@ -164,7 +165,9 @@ export class MdsEditorSingleWidgetComponent implements OnChanges, OnDestroy, Mds
                     void mdsWidgetComponent.finishEdit(injected.instance, false);
                 });
             } else {
-                this.widget.observeValue().subscribe((v) => this.ngModelChange.emit(v));
+                this.widget
+                    .observeValue()
+                    .subscribe((v) => this.ngModelChange.emit(mapExtendedValues(v)));
             }
         });
         return injected;

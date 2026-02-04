@@ -3,6 +3,7 @@ import { FacetValue, SearchService } from 'ngx-edu-sharing-api';
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { map, shareReplay, startWith, takeUntil } from 'rxjs/operators';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
+import { mapExtendedValues } from '../../mds-editor-wrapper/extended-values-mapper';
 
 @Component({
     selector: 'es-mds-editor-widget-suggestion-chips',
@@ -61,7 +62,7 @@ export class MdsEditorWidgetSuggestionChipsComponent implements OnInit, OnDestro
         // Filter `widgetSuggestions$` by primary widget's value.
         return combineLatest([
             widgetSuggestions$,
-            primaryWidget.observeValue().pipe(startWith(null as string[])),
+            primaryWidget.observeValue().pipe(startWith(null as string[]), map(mapExtendedValues)),
         ]).pipe(
             map(([suggestions, values]) =>
                 suggestions?.filter(
