@@ -1097,21 +1097,21 @@
       "isBasedOn": "basiert auf",
       "isBasisFor": "ist Basis von",
       "references": "bezieht sich auf",
-      "isDuplicateOf":  "ist Duplikat von",
+      "isDuplicateOf": "ist Duplikat von",
       "requires": "benötigt",
       "isRequiredBy": "wird benötigt von",
-      "replaces":  "ersetzt",
+      "replaces": "ersetzt",
       "isReplacedBy": "wird ersetzt durch",
       "hasFormat": "hat Format",
-      "isFormatOf":  "ist Format von"
+      "isFormatOf": "ist Format von"
     },
     "RELATION_TYPE_FULLY": {
       "isPartOf": "ist Teil von (isPartOf)",
       "isBasedOn": "basiert auf (isBasedOn)",
       "references": "bezieht sich auf (references)",
-      "isDuplicateOf":  "ist Duplikat von (isDuplicateOf)",
+      "isDuplicateOf": "ist Duplikat von (isDuplicateOf)",
       "requires": "benötigt (requires)",
-      "replaces":  "ersetzt (replaces)",
+      "replaces": "ersetzt (replaces)",
       "hasFormat": "hat Format (hasFormat)"
     }
   },

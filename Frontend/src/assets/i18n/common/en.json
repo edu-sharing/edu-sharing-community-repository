@@ -1483,21 +1483,21 @@
       "isBasedOn": "is based on",
       "isBasisFor": "is base of",
       "references": "refers to",
-      "isDuplicateOf":  "is duplicate of",
+      "isDuplicateOf": "is duplicate of",
       "requires": "requires",
       "isRequiredBy": "is required by",
-      "replaces":  "replaces",
+      "replaces": "replaces",
       "isReplacedBy": "is replaced by",
       "hasFormat": "has format",
-      "isFormatOf":  "is format of"
+      "isFormatOf": "is format of"
     },
     "RELATION_TYPE_FULLY": {
       "isPartOf": "is part of (isPartOf)",
       "isBasedOn": "is based on (isBasedOn)",
       "references": "refers to (references)",
-      "isDuplicateOf":  "is duplicate of (isDuplicateOf)",
+      "isDuplicateOf": "is duplicate of (isDuplicateOf)",
       "requires": "requires (requires)",
-      "replaces":  "replaces (replaces)",
+      "replaces": "replaces (replaces)",
       "hasFormat": "has format (hasFormat)"
     }
   },
