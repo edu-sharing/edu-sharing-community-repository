@@ -366,7 +366,7 @@ export class MdsEditorWidgetTreeComponent
     }
 
     onValuesChange(values: DisplayValue[]): void {
-        this.chipsControl.setValue(values);
+        this.chipsControl.setValue([...values]);
         this.changeDetectorRef.detectChanges();
     }
 
