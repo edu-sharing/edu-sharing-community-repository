@@ -131,7 +131,6 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
 
     readonly valueType = ValueType.String;
 
-    // use any instead of `Widget` cause of external type
     @Input() widget: MdsViewerWidget;
     @Input() showCaption = true;
     /**
@@ -230,7 +229,7 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
         const values = this.getNodeValues();
         if (
             MdsViewerService.getBasicType(
-                this.definition,
+                this.getDefinition(),
                 this.viewInstance.treeDisplay === 'flat',
             ) === 'license'
         ) {

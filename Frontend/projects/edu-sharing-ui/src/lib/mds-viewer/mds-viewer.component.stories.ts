@@ -1,6 +1,5 @@
 import { applicationConfig, type Meta, moduleMetadata, type StoryObj } from '@storybook/angular';
 import { MdsViewerComponent } from './mds-viewer.component';
-import { RestConstants } from 'ngx-edu-sharing-api';
 import { SharedModule } from '../../../../../src/app/shared/shared.module';
 import {
     Data,
@@ -38,5 +37,18 @@ export const IO_Render: Story = {
         mds: DefaultMds,
         groupId: 'io_render',
         data: Data,
+    },
+};
+const {
+    ['ccm:metadatacontributer_creator']: _,
+    ['ccm:lifecyclecontributer_publisher']: __,
+    ['ccm:lifecyclecontributer_author']: ___,
+    ...filteredData
+} = Data;
+export const IO_Render_EmptyFields: Story = {
+    args: {
+        mds: DefaultMds,
+        groupId: 'io_render',
+        data: filteredData,
     },
 };
