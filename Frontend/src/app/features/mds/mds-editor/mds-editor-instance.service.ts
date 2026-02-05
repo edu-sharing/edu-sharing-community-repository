@@ -539,6 +539,8 @@ export class MdsEditorInstanceService
             extendedValue[key] = data;
             console.log(extendedValue);
             this.extendedValue$.next(extendedValue);
+            // workaround to trigger update of the extendedValues
+            this.value$.next(this.getValue());
         }
 
         syncExtendedValue(value: string[]) {
