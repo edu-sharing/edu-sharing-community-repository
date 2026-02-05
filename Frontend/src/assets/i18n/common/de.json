@@ -814,7 +814,8 @@
     "NEW_ASSIGNMENT": "Neue Aufgabe",
     "ASSIGNMENT_SUBMIT": "Abgeben",
     "ASSIGNMENT_SUBMISSION": "Abgaben",
-    "ASSIGNMENT_EDIT": "Aufgabe bearbeiten"
+    "ASSIGNMENT_EDIT": "Aufgabe bearbeiten",
+    "SORT_INTO": "Einsortieren"
   },
   "LTI": {
     "REGISTERED": {

@@ -12,16 +12,8 @@ import {
     Repository,
 } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
-import {
-    combineLatest,
-    distinctUntilChanged,
-    filter,
-    map,
-    switchMap,
-    takeUntil,
-    tap,
-} from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { distinctUntilChanged, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { RestConstants, UIConstants } from '../../core-module/core.module';
 import {
     CustomOptions,
@@ -100,23 +92,25 @@ export class SearchPageService implements OnDestroy {
     /**
      * observable of custom options to be used for the material list views
      */
-    getCustomMaterialOptions = merge([this.sidebarOption, this.addToCollectionMode]).pipe(
-        distinctUntilChanged(),
-        map(() => {
-            let custom = {
-                useDefaultOptions: true,
-            } as CustomOptions;
-            if (this.addToCollectionMode.value?.customOptions) {
-                custom = this.addToCollectionMode.value?.customOptions;
-            }
-            return {
-                ...custom,
-                addOptions: [this.sidebarOption.value, ...(custom.addOptions || [])].filter(
-                    (f) => !!f,
-                ),
-            } as CustomOptions;
-        }),
-    );
+    getCustomMaterialOptions = rxjs
+        .combineLatest([this.sidebarOption, this.addToCollectionMode])
+        .pipe(
+            distinctUntilChanged(),
+            map(() => {
+                let custom = {
+                    useDefaultOptions: true,
+                } as CustomOptions;
+                if (this.addToCollectionMode.value?.customOptions) {
+                    custom = this.addToCollectionMode.value?.customOptions;
+                }
+                return {
+                    ...custom,
+                    addOptions: [this.sidebarOption.value, ...(custom.addOptions || [])].filter(
+                        (f) => !!f,
+                    ),
+                } as CustomOptions;
+            }),
+        );
     get results(): SearchPageResults {
         return this._results.value;
     }

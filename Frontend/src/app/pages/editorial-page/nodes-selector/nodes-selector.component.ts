@@ -20,6 +20,7 @@ import {
     MdsQueryCriteria,
     Node,
     NodeService,
+    NodeServiceUnwrapped,
     PROPERTY_FILTER_ALL,
     ROOT,
     SearchRequestParams,
@@ -38,6 +39,7 @@ import {
     MdsHelperService,
     NodeClickEvent,
     NodeDataSource,
+    NodeEntriesDataType,
     NodeEntriesDisplayType,
     NodeEntriesService,
     NodeEntriesWrapperComponent,
@@ -76,11 +78,24 @@ enum StepType {
     CONFIGURE = 'configure',
 }
 export type NodesSelectorConfig = {
+    state?: TabType;
     /**
      * fast skips metadata & question for duplicate behaviour
      */
     upload?: 'fast' | 'default';
+    /**
+     * selected nodes that should be sorted into
+     * If null, we assume that this component is used to select the nodes that SHALL be sorted into
+     */
+    nodes?: NodeEntriesDataType[];
+    /**
+     * the callback to check if the given selection is valid as a target
+     */
     applyCallback?: (selected: Node[]) => boolean;
+    /**
+     * custom label for the APPLY button
+     */
+    applyLabel?: string;
 };
 @Component({
     selector: 'es-nodes-selector',
@@ -123,12 +138,21 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     onlyFilesSelected: Signal<boolean> = computed((): boolean =>
         this.selectedNodes().every((node) => node.type === RestConstants.CCM_TYPE_IO),
     );
-    isValidSelection: Signal<boolean> = computed(
-        (): boolean =>
-            (this.onlyOneSelected() || this.onlyFilesSelected()) &&
-            (!this.option.optionConfig?.applyCallback ||
-                this.option.optionConfig?.applyCallback(this.selectedNodes() as Node[])),
-    );
+    isValidSelection: Signal<boolean> = computed((): boolean => {
+        if (this.selectionMode() === 'source') {
+            return (
+                (this.onlyOneSelected() || this.onlyFilesSelected()) &&
+                (!this.option.optionConfig?.applyCallback ||
+                    this.option.optionConfig?.applyCallback(this.selectedNodes() as Node[]))
+            );
+        } else {
+            return (
+                this.onlyOneSelected() &&
+                (this.selectedNodes()[0].mediatype === 'folder' ||
+                    this.selectedNodes()[0].mediatype === 'collection')
+            );
+        }
+    });
     // initialize collection copy variables with true
     copyRoot = model(true);
     copyChildCollections = model(true);
@@ -205,6 +229,7 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         public nodeHelperService: NodeHelperService,
         public editorialSidebarService: EditorialSidebarService,
         private nodeService: NodeService,
+        private nodeServiceUnwrapped: NodeServiceUnwrapped,
         private uiService: UIService,
         private uploadDialogService: UploadDialogService,
         private searchService: SearchService,
@@ -213,12 +238,17 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         private treeNodeService: TreeNodeService,
     ) {}
 
-    ngOnChanges(changes: SimpleChanges): void {
+    async ngOnChanges(changes: SimpleChanges) {
         if (changes.option) {
-            if (this.option.optionState) {
-                this.selectedTab.set(this.option.optionState);
+            if (this.option.optionConfig?.state) {
+                this.selectedTab.set(this.option.optionConfig.state);
+                await this.refreshData(this.selectedTab());
             }
         }
+    }
+
+    selectionMode() {
+        return this.option.optionConfig?.nodes ? 'target' : 'source';
     }
 
     /**
@@ -267,15 +297,12 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         switch (event.tab.id) {
             case this.idPrefix + TabType.SEARCH:
                 this.selectedTab.set(TabType.SEARCH);
-                await this.updateSearchDataSource();
                 break;
             case this.idPrefix + TabType.COLLECTIONS:
                 this.selectedTab.set(TabType.COLLECTIONS);
-                await this.updateCollectionsDataSource();
                 break;
             case this.idPrefix + TabType.WORKSPACE:
                 this.selectedTab.set(TabType.WORKSPACE);
-                await this.updateWorkspaceDataSource();
                 break;
             case this.idPrefix + TabType.UPLOAD:
                 this.selectedTab.set(TabType.UPLOAD);
@@ -283,6 +310,7 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
             default:
                 console.log('onTabChange', event);
         }
+        await this.refreshData(this.selectedTab());
     }
 
     /**
@@ -506,6 +534,27 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         dataSource.isLoading = false;
     }
 
+    /**
+     * insert into the selected target
+     */
+    async insertSelectedNodes() {
+        const target = this.selectedNodes()[0] as Node;
+        const source = this.option.optionConfig.nodes as Node[];
+        if (target.mediatype === 'collection') {
+            this.editorialSidebarService.sidebarLoading.set(true);
+            this.uiService.addToCollection(target, source, false, () => {
+                this.editorialSidebarService.sidebarLoading.set(false);
+                this.editorialSidebarService.sidebarOpened.set(false);
+            });
+        } else if (target.mediatype === 'folder') {
+            this.editorialSidebarService.sidebarLoading.set(true);
+            try {
+                await this.uiService.copyNodes(source, target);
+                this.editorialSidebarService.sidebarOpened.set(false);
+            } catch (e) {}
+            this.editorialSidebarService.sidebarLoading.set(false);
+        }
+    }
     /**
      * Copies the selected nodes into the currently opened view.
      */
@@ -869,4 +918,20 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     protected readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     protected readonly Scope = Scope;
     protected readonly TabType = TabType;
+
+    private async refreshData(tabType: TabType) {
+        switch (tabType) {
+            case TabType.SEARCH:
+                await this.updateSearchDataSource();
+                break;
+            case TabType.COLLECTIONS:
+                await this.updateCollectionsDataSource();
+                break;
+            case TabType.WORKSPACE:
+                await this.updateWorkspaceDataSource();
+                break;
+            case TabType.UPLOAD:
+                break;
+        }
+    }
 }

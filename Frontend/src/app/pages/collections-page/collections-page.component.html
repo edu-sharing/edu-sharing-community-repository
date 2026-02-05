@@ -51,7 +51,7 @@
   <mat-sidenav
     #rightSidenav
     [mode]="'side'"
-    [opened]="sidenavRight()"
+    [opened]="editorialSidebarService.sidebarOpened()"
     [defaultWidth]="0.3"
     class="es-mat-sidenav"
     storageKey="COLLECTIONS_SIDENAV_RIGHT_WIDTH"
@@ -63,7 +63,6 @@
         [primaryMode]="'collections'"
         [parent]="collection"
         [nodes]="collectionContentRef?.listReferences?.getSelection()?.selected"
-        (closeTrigger)="sidenavRight.set(false)"
       ></es-editorial-sidebar>
     </div>
   </mat-sidenav>

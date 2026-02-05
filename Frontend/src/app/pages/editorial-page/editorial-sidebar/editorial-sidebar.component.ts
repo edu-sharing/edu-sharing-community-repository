@@ -12,7 +12,7 @@ import {
     TemplateRef,
     ViewChild,
 } from '@angular/core';
-import { Node, RestConstants, Submission } from 'ngx-edu-sharing-api';
+import { Node, RestConstants } from 'ngx-edu-sharing-api';
 import {
     Constrain,
     DefaultGroups,
@@ -45,6 +45,7 @@ import {
     SubmissionConfig,
     SubmissionSidebarComponent,
 } from '../submission-sidebar/submission-sidebar.component';
+
 export type SidebarContext = PrimaryMode | 'collections' | 'workspace' | 'search';
 export type EditorialSidebarOption =
     | 'WORKSPACE_METADATA'
@@ -55,11 +56,6 @@ export type EditorialSidebarOption =
 export type OptionConfig = NodesSelectorConfig | SubmissionConfig;
 export type OptionState<T extends OptionConfig> = {
     option: EditorialSidebarOption;
-    /**
-     * additional, optional state for the option
-     * This might vary by the specific option
-     */
-    optionState?: any;
     /**
      * any valid option config, varies for the selected option
      */
@@ -98,7 +94,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     enabledOption = signal<OptionState<unknown>>(null);
     isModal = input<boolean>(false);
 
-    @Output() closeTrigger = new EventEmitter<void>();
+    //@Output() closeTrigger = new EventEmitter<void>();
     @ViewChild('content', { static: true }) dialogContent: TemplateRef<unknown>;
 
     private readonly destroyed = new Subject<void>();

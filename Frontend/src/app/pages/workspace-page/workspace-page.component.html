@@ -2,7 +2,7 @@
   <mat-sidenav
     #rightSidenav
     [mode]="'side'"
-    [opened]="sidenavRight()"
+    [opened]="editorialSidebarService.sidebarOpened()"
     [defaultWidth]="0.3"
     class="es-mat-sidenav"
     storageKey="WORKSPACE_SIDENAV_RIGHT_WIDTH"
@@ -14,7 +14,6 @@
         [primaryMode]="'workspace'"
         [parent]="explorer?.node$ | async"
         [nodes]="explorer?.nodeEntries?.getSelection()?.selected"
-        (closeTrigger)="sidenavRight.set(false)"
       ></es-editorial-sidebar>
     </div>
   </mat-sidenav>

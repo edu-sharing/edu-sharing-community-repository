@@ -184,6 +184,7 @@ export class ManageAssignmentComponent {
                         }),
                 ),
             );
+            this.editorialSidebarService.sidebarOpened.set(false);
         });
     }
 
@@ -192,6 +193,7 @@ export class ManageAssignmentComponent {
             option: 'SORT_INTO',
             optionConfig: {
                 upload: 'fast',
+                applyLabel: 'EDITORIAL.ASSIGNMENT.SELECT_FILE',
                 applyCallback: (nodes) =>
                     nodes.every(
                         (n) => !this.nodeHelperService.isNodeCollection(n) && !n.isDirectory,

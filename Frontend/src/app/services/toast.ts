@@ -12,7 +12,7 @@ import {
     ToastDuration,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import { RestConnectorService } from '../core-module/core.module';
 import { RestConstants } from '../core-module/rest/rest-constants';
@@ -48,6 +48,10 @@ export enum ToastType {
 }
 export type ToastMessage = {
     message: string;
+    /**
+     * additional translations parameters
+     */
+    messageParameters?: { [key: string]: any };
     html?: boolean;
     type: 'error' | 'info';
     subtype: ToastType;
@@ -117,7 +121,7 @@ export class Toast extends ToastAbstract implements OnDestroy {
         if (message.type === 'info') {
             this.toast(
                 message.message,
-                null,
+                message.messageParameters,
                 null,
                 null,
                 message.action
@@ -316,14 +320,23 @@ export class Toast extends ToastAbstract implements OnDestroy {
         dialogMessage?: string;
         customAction?: CustomAction;
     }): Promise<void> {
-        const translatedMessage = await this.injector
-            .get(TranslateService)
-            .get(message ?? toastMessage?.message, options.translationParameters)
-            .toPromise();
+        const translatedMessage = await firstValueFrom(
+            this.injector
+                .get(TranslateService)
+                .get(message ?? toastMessage?.message, options.translationParameters),
+        );
+
         const action = this.getAction(options);
         toastMessage.message = translatedMessage;
         toastMessage.type = toastMessage.type ?? type;
         toastMessage.action = toastMessage.action ?? action;
+        if (toastMessage.action) {
+            toastMessage.action.label = await firstValueFrom(
+                this.injector
+                    .get(TranslateService)
+                    .get(toastMessage?.action?.label, options.translationParameters),
+            );
+        }
         return this.matSnackbarShowToast(toastMessage);
     }
 

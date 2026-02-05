@@ -6,7 +6,6 @@ import {
     NgZone,
     OnDestroy,
     OnInit,
-    signal,
     ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
@@ -83,6 +82,7 @@ import { ThemeService } from '../../services/theme.service';
 import { RecycleMainComponent } from './recycle/recycle.component';
 import { DialogsService } from 'src/app/features/dialogs/dialogs.service';
 import { OptionsHelperService } from '../../services/options-helper.service';
+import { EditorialSidebarService } from '../editorial-page/editorial-sidebar/editorial-sidebar.service';
 
 type NodeWrapper = { node: Node };
 
@@ -186,7 +186,6 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
     showLtiTools = false;
     private oldParams: Params;
     selectedNodeTree: string;
-    sidenavRight = signal(false);
     contributorNode: Node;
     shareLinkNode: Node;
     displayType: NodeEntriesDisplayType = null;
@@ -227,6 +226,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         private configService: ConfigService,
         private themeService: ThemeService,
         private ui: UIService,
+        public editorialSidebarService: EditorialSidebarService,
         public workspace: WorkspaceService,
     ) {
         this.event.addListener(this, this.destroyed$);
@@ -1110,7 +1110,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
             return this.root === 'TO_ME_SHARED_FILES';
         };
         const sidebarToggle = this.optionsHelperService.getOptionItemToggleSidebar(
-            this.sidenavRight,
+            this.editorialSidebarService.sidebarOpened,
         );
         this.customOptions.addOptions = [sidebarToggle, shareToggle];
     }

@@ -192,8 +192,11 @@
 @mixin darkenLight() {
     background-color: $darkenLightColor;
 }
-@mixin blurBackground($radius: 5px) {
+@mixin blurBackground($radius: 5px, $darken: 0) {
     backdrop-filter: blur($radius);
+    @if $darken != 0 {
+        background: rgba(0, 0, 0, $darken);
+    }
 }
 @mixin setGlobalFocus($color: $focusColor) {
     //respect element border radius

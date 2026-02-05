@@ -100,7 +100,7 @@
               singleClickHint="static"
               (clickItem)="select($event)"
               (fetchData)="fetchEvent($event)"
-              (selectionChange)="selection.set($any($event.source))"
+              (selectionChange)="selectionChange($event)"
               [columns]="columns()"
               [displayType]="editorialPageService.displayType()"
             >

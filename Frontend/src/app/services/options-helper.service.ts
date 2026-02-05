@@ -8,19 +8,17 @@ import {
     runInInjectionContext,
     WritableSignal,
 } from '@angular/core';
-import { ActivatedRoute, Params, Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
     Assignment,
     AssignmentFile,
     AuthenticationService,
-    GenericAuthority,
     LtiPlatformService,
     NetworkService,
     Node,
     NodeListErrorResponses,
     NodeListService,
-    ProposalNode,
 } from 'ngx-edu-sharing-api';
 import {
     AssignmentPipe,
@@ -32,8 +30,8 @@ import {
     HideMode,
     ListEventInterface,
     LocalEventsService,
-    NodeEntriesDataType,
     NodeEntriesDisplayType,
+    NodeHelperService as NodeHelperServiceUi,
     NodesRightMode,
     OptionData,
     OptionItem,
@@ -46,7 +44,6 @@ import {
     UIConstants,
 } from 'ngx-edu-sharing-ui';
 import {
-    BehaviorSubject,
     forkJoin,
     forkJoin as observableForkJoin,
     Observable,
@@ -64,12 +61,7 @@ import {
     RestHelper,
     RestIamService,
 } from '../core-module/core.module';
-import {
-    Connector,
-    Filetype,
-    LocalPermissions,
-    NodeWrapper,
-} from '../core-module/rest/data-object';
+import { LocalPermissions, NodeWrapper } from '../core-module/rest/data-object';
 import { Helper } from '../core-module/rest/helper';
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { RestConnectorsService } from '../core-module/rest/services/rest-connectors.service';
@@ -88,13 +80,17 @@ import { BridgeService } from './bridge.service';
 import { KeyboardShortcutsService } from './keyboard-shortcuts.service';
 import { MessageType } from '../util/message-type';
 import { forkJoinWithErrors } from '../util/rxjs/forkJoinWithErrors';
-import { NodeHelperService as NodeHelperServiceUi } from 'ngx-edu-sharing-ui';
 import { ConfigOptionItem, NodeHelperService } from './node-helper.service';
 import { Toast } from './toast';
 import { UIHelper } from '../core-ui-module/ui-helper';
 import { GlobalOptionsService } from './global-options.service';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Closable } from '../features/dialogs/card-dialog/card-dialog-config';
+import { EditorialSidebarService } from '../pages/editorial-page/editorial-sidebar/editorial-sidebar.service';
+import {
+    NodesSelectorConfig,
+    TabType,
+} from '../pages/editorial-page/nodes-selector/nodes-selector.component';
 
 @Injectable()
 export class OptionsHelperService extends OptionsHelperServiceAbstract implements OnDestroy {
@@ -133,6 +129,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         private keyboardShortcuts: KeyboardShortcutsService,
         private localEvents: LocalEventsService,
         private mainNavService: MainNavService,
+        private editorialSidebarService: EditorialSidebarService,
         private ngZone: NgZone,
         private injector: Injector,
         private nodeList: NodeListService,
@@ -236,7 +233,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         }
 
         if (components.list) {
-            console.log('new list options');
             components.list.setOptions({
                 [Target.List]: await this.getAvailableOptions(Target.List, [], components, data),
                 [Target.ListDropdown]: await this.getAvailableOptions(
@@ -618,6 +614,26 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
          }
          */
 
+        const sortInto = new OptionItem('OPTIONS.SORT_INTO', 'layers', (object) =>
+            this.editorialSidebarService.showOption({
+                option: 'SORT_INTO',
+                trap: true,
+                optionConfig: {
+                    state: TabType.COLLECTIONS,
+                    nodes: this.getObjects(object, data),
+                } as NodesSelectorConfig,
+            }),
+        );
+        sortInto.elementType = OptionsHelperService.ElementTypesAddToCollection;
+        sortInto.showAsAction = true;
+        sortInto.constrains = [Constrain.Files, Constrain.User, Constrain.NoScope];
+        sortInto.permissions = [RestConstants.ACCESS_CC_PUBLISH];
+        sortInto.permissionsRightMode = NodesRightMode.Effective;
+        sortInto.permissionsMode = HideMode.Disable;
+        sortInto.group = DefaultGroups.Reuse;
+        sortInto.priority = 10;
+
+        /*
         const addNodeToCollection = new OptionItem(
             'OPTIONS.COLLECTION',
             'layers',
@@ -639,6 +655,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         // addNodeToCollection.key = 'C';
         addNodeToCollection.group = DefaultGroups.Reuse;
         addNodeToCollection.priority = 10;
+        */
 
         const addNodeToLTIPlatform = new OptionItem('OPTIONS.LTI', 'input', (object) => {
             const nodes: Node[] = this.getObjects(object, data);
@@ -1447,8 +1464,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         options.push(feedbackMaterialView);
         options.push(simpleEditNode);
         options.push(editNode);
+        options.push(sortInto);
         // add to collection
-        options.push(addNodeToCollection);
+        //options.push(addNodeToCollection);
         options.push(addNodeToLTIPlatform);
         // create variant
         options.push(createNodeVariant);
@@ -1515,7 +1533,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 if ((item as AssignmentFile).referNode) {
                     item = (item as AssignmentFile).referNode;
                 }
-                console.log(item, item.downloadUrl);
                 // if at least one is allowed -> allow download (download servlet will later filter invalid files)
                 if (
                     item.downloadUrl != null &&

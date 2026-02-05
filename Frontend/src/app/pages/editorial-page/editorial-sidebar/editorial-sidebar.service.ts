@@ -17,6 +17,10 @@ export class EditorialSidebarService {
     configChange$ = new EventEmitter<OptionConfig>();
     private _editorialSidebar: EditorialSidebarComponent;
     readonly sidebarOpened = signal(false);
+    /**
+     * indicate that the sidebar should overlay a global progress spinner
+     */
+    readonly sidebarLoading = signal(false);
     registerSidebar(editorialSidebar: EditorialSidebarComponent) {
         if (this._editorialSidebar && this._editorialSidebar !== editorialSidebar) {
             console.error(

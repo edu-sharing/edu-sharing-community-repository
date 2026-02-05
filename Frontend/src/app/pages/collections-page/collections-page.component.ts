@@ -4,7 +4,6 @@ import {
     ElementRef,
     EventEmitter,
     OnDestroy,
-    signal,
     TemplateRef,
     ViewChild,
 } from '@angular/core';
@@ -13,6 +12,7 @@ import {
     ColorHelper,
     LocalEventsService,
     NodeEntriesDisplayType,
+    OptionItemToggle,
     OptionsHelperDataService,
     PreferredColor,
     Scope,
@@ -48,6 +48,7 @@ import { CollectionContentComponent } from './collection-content/collection-cont
 import { CollectionInfoBarComponent } from './collection-info-bar/collection-info-bar.component';
 import { GlobalCollectionsPageServiceInternal } from './global-collections-page.service';
 import { OptionsHelperService } from 'src/app/services/options-helper.service';
+import { EditorialSidebarService } from '../editorial-page/editorial-sidebar/editorial-sidebar.service';
 
 // component class
 @Component({
@@ -82,8 +83,7 @@ export class CollectionsPageComponent implements OnDestroy {
     tabSelected: string = RestConstants.COLLECTIONSCOPE_MY;
     isLoading = true;
     isReady = false;
-    sidenavRight = signal(false);
-    sidebarOption = [this.optionsHelperService.getOptionItemToggleSidebar(this.sidenavRight)];
+    sidebarOption: OptionItemToggle[];
     collection: Node;
     collectionSortEmitter = new EventEmitter<SortEvent>();
     collectionCustomSortEmitter = new EventEmitter<boolean>();
@@ -143,13 +143,6 @@ export class CollectionsPageComponent implements OnDestroy {
     private person: EduData.User;
     hasEditorial = false;
     hasMediacenter = false;
-    reurl: any;
-    private _collectionShare: Node;
-    private params: Params;
-    private destroyed = new Subject<void>();
-    readonly customTemplates = this.globalCollectionsPageServiceInternal.customTemplates;
-
-    // inject services
     constructor(
         private breadcrumbsService: BreadcrumbsService,
         private collectionService: RestCollectionService,
@@ -169,10 +162,16 @@ export class CollectionsPageComponent implements OnDestroy {
         private optionsService: OptionsHelperDataService,
         private networkService: RestNetworkService,
         private temporaryStorageService: TemporaryStorageService,
+        public editorialSidebarService: EditorialSidebarService,
         private toast: Toast,
         private translations: TranslationsService,
         private uiService: UIService,
     ) {
+        this.sidebarOption = [
+            this.optionsHelperService.getOptionItemToggleSidebar(
+                this.editorialSidebarService.sidebarOpened,
+            ),
+        ];
         this.sidebarOption[0].onlyDesktop = true;
         this.translations.waitForInit().subscribe(() => {
             combineLatest([
@@ -220,6 +219,13 @@ export class CollectionsPageComponent implements OnDestroy {
             )
             .subscribe(() => this.navigate(this.parentCollectionId.id));
     }
+    reurl: any;
+    private _collectionShare: Node;
+    private params: Params;
+    private destroyed = new Subject<void>();
+
+    readonly customTemplates = this.globalCollectionsPageServiceInternal.customTemplates;
+    // inject services
 
     ngOnDestroy() {
         this.destroyed.next();

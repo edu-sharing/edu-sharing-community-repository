@@ -15,17 +15,29 @@
 }
 
 :host {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
 }
 .option-show {
     animation: slide-fade 1s;
+}
+.sidebar-wrapper {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    .loading {
+        border-radius: var(--borderRadiusCards);
+        @include mixins.blurBackground(3px, 0.5);
+        @include mixins.overlay();
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 }
 .sidebar-container {
     overflow-y: auto;
     height: 0;
     flex-grow: 1;
+    position: relative;
 }
 .option {
     padding: 0 20px;

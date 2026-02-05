@@ -4,12 +4,12 @@ import {
     Assignment,
     AssignmentFile,
     AssignmentV1Service,
+    CommentV1Service,
     HOME_REPOSITORY,
     ME,
     Node,
-    CommentV1Service,
-    Submission,
     NodeService,
+    Submission,
 } from 'ngx-edu-sharing-api';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { combineLatest, filter, firstValueFrom, of, throwError } from 'rxjs';
@@ -245,8 +245,8 @@ export class SubmitAssignmentComponent {
         );
         this.editorialSidebarService.showOption({
             option: 'SORT_INTO',
-            optionState: TabType.UPLOAD,
             optionConfig: {
+                state: TabType.UPLOAD,
                 upload: 'fast',
                 applyCallback: (nodes) =>
                     nodes.every(

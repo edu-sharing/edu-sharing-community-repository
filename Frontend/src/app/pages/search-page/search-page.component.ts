@@ -1,14 +1,6 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { BreakpointObserver } from '@angular/cdk/layout';
-import {
-    Component,
-    HostBinding,
-    OnDestroy,
-    OnInit,
-    signal,
-    TemplateRef,
-    ViewChild,
-} from '@angular/core';
+import { Component, HostBinding, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfigService, Repository } from 'ngx-edu-sharing-api';
@@ -24,6 +16,7 @@ import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcru
 import { NavigationScheduler } from './navigation-scheduler';
 import { SearchPageService } from './search-page.service';
 import { OptionsHelperService } from '../../services/options-helper.service';
+import { EditorialSidebarService } from '../editorial-page/editorial-sidebar/editorial-sidebar.service';
 
 @Component({
     selector: 'es-search-page',
@@ -42,7 +35,6 @@ import { OptionsHelperService } from '../../services/options-helper.service';
 })
 export class SearchPageComponent implements OnInit, OnDestroy {
     readonly Scope = Scope;
-    sidenavRight = signal(false);
 
     @ViewChild('filtersDialogResetButton', { static: true })
     filtersDialogResetButton: TemplateRef<HTMLElement>;
@@ -70,6 +62,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
         private mainNav: MainNavService,
         private navigationScheduler: NavigationScheduler,
         private optionsHelperService: OptionsHelperService,
+        public editorialSidebarService: EditorialSidebarService,
         private route: ActivatedRoute,
         public searchPage: SearchPageService,
         private configService: ConfigService,
@@ -77,7 +70,9 @@ export class SearchPageComponent implements OnInit, OnDestroy {
     ) {
         this.searchPage.init();
         this.searchPage.sidebarOption.next(
-            this.optionsHelperService.getOptionItemToggleSidebar(this.sidenavRight),
+            this.optionsHelperService.getOptionItemToggleSidebar(
+                this.editorialSidebarService.sidebarOpened,
+            ),
         );
     }
 

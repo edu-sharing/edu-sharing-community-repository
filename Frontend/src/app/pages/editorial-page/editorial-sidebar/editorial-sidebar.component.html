@@ -1,72 +1,77 @@
-<div class="sidebar-header">
-  <button
-    mat-icon-button
-    *ngIf="enabledOption() && !enabledOption().trap"
-    (click)="enabledOption.set(null)"
-  >
-    <i esIcon="keyboard_arrow_left"></i>
-  </button>
-  <div>
-    {{ title() | translate }}
+<div class="sidebar-wrapper">
+  <div class="loading" *ngIf="editorialSidebarService.sidebarLoading()">
+    <es-spinner></es-spinner>
   </div>
-  <button mat-icon-button (click)="closeTrigger.emit()">
-    <i esIcon="close"></i>
-  </button>
-</div>
-<div class="sidebar-container">
-  <ng-container *ngTemplateOutlet="content"></ng-container>
-  <ng-template #content>
-    <div
-      *ngIf="enabledOption()?.option as option"
-      class="option option-{{ option | propertySlug }}"
+  <div class="sidebar-header">
+    <button
+      mat-icon-button
+      *ngIf="enabledOption() && !enabledOption().trap"
+      (click)="enabledOption.set(null)"
     >
-      <es-nodes-selector
-        *ngIf="option === 'SORT_INTO'"
-        [option]="enabledOption()"
-        [parent]="parent()"
-      ></es-nodes-selector>
-      <es-metadata-sidebar
-        *ngIf="option === 'WORKSPACE_METADATA'"
-        [nodeSidebar]="$any(nodes())?.[0]"
-      ></es-metadata-sidebar>
-      <es-submission-sidebar
-        *ngIf="option === 'MANAGE_SUBMISSION'"
-        [data]="$any(enabledOption().optionConfig)"
-        (dataChange)="editorialSidebarService.patchOptionConfig($event)"
-      ></es-submission-sidebar>
-      <es-preview-sidebar
-        *ngIf="option === 'PREVIEW'"
-        [node]="$any(nodes())?.[0]"
-      ></es-preview-sidebar>
+      <i esIcon="keyboard_arrow_left"></i>
+    </button>
+    <div>
+      {{ title() | translate }}
     </div>
+    <button mat-icon-button (click)="editorialSidebarService.sidebarOpened.set(false)">
+      <i esIcon="close"></i>
+    </button>
+  </div>
+  <div class="sidebar-container">
+    <ng-container *ngTemplateOutlet="content"></ng-container>
+    <ng-template #content>
+      <div
+        *ngIf="enabledOption()?.option as option"
+        class="option option-{{ option | propertySlug }}"
+      >
+        <es-nodes-selector
+          *ngIf="option === 'SORT_INTO'"
+          [option]="enabledOption()"
+          [parent]="parent()"
+        ></es-nodes-selector>
+        <es-metadata-sidebar
+          *ngIf="option === 'WORKSPACE_METADATA'"
+          [nodeSidebar]="$any(nodes())?.[0]"
+        ></es-metadata-sidebar>
+        <es-submission-sidebar
+          *ngIf="option === 'MANAGE_SUBMISSION'"
+          [data]="$any(enabledOption().optionConfig)"
+          (dataChange)="editorialSidebarService.patchOptionConfig($event)"
+        ></es-submission-sidebar>
+        <es-preview-sidebar
+          *ngIf="option === 'PREVIEW'"
+          [node]="$any(nodes())?.[0]"
+        ></es-preview-sidebar>
+      </div>
 
-    <div class="entries" *ngIf="!enabledOption()">
-      <ng-container *ngIf="options()?.length">
-        <div
-          class="entry"
-          *ngFor="let option of options()"
-          [tabindex]="option.isEnabled ? 0 : -1"
-          cdkMonitorElementFocus
-          (click)="option.callback(nodes())"
-          [attr.aria-disabled]="!option.isEnabled"
-          [class.disabled]="!option.isEnabled"
-        >
-          <i class="icon" [esIcon]="option.icon"></i>
-          <div class="text">
-            <div class="title">{{ option.name | translate }}</div>
-            <div class="description">{{ option.name + '_DESCRIPTION' | translate }}</div>
+      <div class="entries" *ngIf="!enabledOption()">
+        <ng-container *ngIf="options()?.length">
+          <div
+            class="entry"
+            *ngFor="let option of options()"
+            [tabindex]="option.isEnabled ? 0 : -1"
+            cdkMonitorElementFocus
+            (click)="option.callback(nodes())"
+            [attr.aria-disabled]="!option.isEnabled"
+            [class.disabled]="!option.isEnabled"
+          >
+            <i class="icon" [esIcon]="option.icon"></i>
+            <div class="text">
+              <div class="title">{{ option.name | translate }}</div>
+              <div class="description">{{ option.name + '_DESCRIPTION' | translate }}</div>
+            </div>
+            <i class="navigate" esIcon="keyboard_arrow_right"></i>
           </div>
-          <i class="navigate" esIcon="keyboard_arrow_right"></i>
-        </div>
-      </ng-container>
-      <es-info-message *ngIf="!options()?.length" mode="info">
-        <div class="message">
-          {{
-            'EDITORIAL.SIDEBAR.NO_OPTIONS' + (nodes()?.length ? '_SELECTION' : '_NO_SELECTION')
-              | translate
-          }}
-        </div>
-      </es-info-message>
-    </div>
-  </ng-template>
+        </ng-container>
+        <es-info-message *ngIf="!options()?.length" mode="info">
+          <div class="message">
+            {{
+              'EDITORIAL.SIDEBAR.NO_OPTIONS' + (nodes()?.length ? '_SELECTION' : '_NO_SELECTION')
+                | translate
+            }}
+          </div>
+        </es-info-message>
+      </div>
+    </ng-template>
+  </div>
 </div>

@@ -56,7 +56,7 @@ where. -->
       <mat-sidenav
         #rightSidenav
         [mode]="'side'"
-        [opened]="sidenavRight()"
+        [opened]="this.editorialSidebarService.sidebarOpened()"
         [defaultWidth]="0.3"
         [maxWidth]="0.5"
         class="es-mat-sidenav"
@@ -68,7 +68,6 @@ where. -->
           <es-editorial-sidebar
             [primaryMode]="'search'"
             [nodes]="searchPage.selection | async"
-            (closeTrigger)="sidenavRight.set(false)"
           ></es-editorial-sidebar>
         </div>
       </mat-sidenav>

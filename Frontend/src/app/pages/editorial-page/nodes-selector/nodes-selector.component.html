@@ -5,7 +5,7 @@
   (selectedTabChange)="onTabChange($event)"
 >
   <!-- SEARCH TAB -->
-  <mat-tab [id]="idPrefix + TabType.SEARCH">
+  <mat-tab [id]="idPrefix + TabType.SEARCH" *ngIf="selectionMode() === 'source'">
     <ng-template mat-tab-label>
       <i esIcon="search" class="tab-icon"></i>
       <span class="tab-label">{{ 'SIDEBAR.SEARCH_SHORT' | translate }}</span>
@@ -41,7 +41,7 @@
   </mat-tab>
 
   <!-- UPLOAD TAB -->
-  <mat-tab [id]="idPrefix + TabType.UPLOAD">
+  <mat-tab [id]="idPrefix + TabType.UPLOAD" *ngIf="selectionMode() === 'source'">
     <ng-template mat-tab-label>
       <i esIcon="upload" class="tab-icon"></i>
       <span class="tab-label">{{ 'WORKSPACE.UPLOAD_EXISTS.UPLOAD' | translate }}</span>
@@ -296,24 +296,39 @@
 
 <!-- FOOTER ACTION BAR -->
 <div class="tab-action-bar" *ngIf="selectedNodes().length">
-  <ng-container *ngIf="!isSelectStep()">
-    <button mat-flat-button color="primary" class="back-btn" (click)="goBack()">
-      <i esIcon="arrow_back"></i>
-      {{ 'BACK' | translate }}
-    </button>
-  </ng-container>
-  <ng-container>
-    <!-- disable in second step, if root or child collections are not selected -->
+  <ng-container *ngIf="selectionMode() === 'target'">
     <button
       mat-flat-button
       color="primary"
-      [disabled]="!isValidSelection() || (!isSelectStep() && !atLeastRootOrChildrenSelected())"
-      (click)="copyNodes()"
+      [disabled]="!isValidSelection()"
+      (click)="insertSelectedNodes()"
     >
-      {{
-        i18nPrefix + 'COPY.' + (selectedNodes().length === 1 ? 'SINGLE' : 'MULTIPLE') | translate
-      }}
+      {{ option.optionConfig?.applyLabel || i18nPrefix + 'COPY.TARGET' | translate }}
       <i esIcon="arrow_forward"></i>
     </button>
+  </ng-container>
+  <ng-container *ngIf="selectionMode() === 'source'">
+    <ng-container *ngIf="!isSelectStep()">
+      <button mat-flat-button color="primary" class="back-btn" (click)="goBack()">
+        <i esIcon="arrow_back"></i>
+        {{ 'BACK' | translate }}
+      </button>
+    </ng-container>
+    <ng-container>
+      <!-- disable in second step, if root or child collections are not selected -->
+      <button
+        mat-flat-button
+        color="primary"
+        [disabled]="!isValidSelection() || (!isSelectStep() && !atLeastRootOrChildrenSelected())"
+        (click)="copyNodes()"
+      >
+        {{
+          option.optionConfig?.applyLabel ||
+            i18nPrefix + 'COPY.' + (selectedNodes().length === 1 ? 'SINGLE' : 'MULTIPLE')
+            | translate
+        }}
+        <i esIcon="arrow_forward"></i>
+      </button>
+    </ng-container>
   </ng-container>
 </div>

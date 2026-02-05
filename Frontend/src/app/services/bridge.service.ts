@@ -10,6 +10,10 @@ import {
 } from '../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../features/dialogs/dialogs.service';
 
+/**
+ * @Deprecated
+ * Not used anymore, prefer direct usage of Toast
+ */
 @Injectable({ providedIn: 'root' })
 export class BridgeService {
     constructor(private injector: Injector, private cordova: CordovaService) {}

@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    effect,
+    OnDestroy,
+    OnInit,
+    signal,
+    ViewChild,
+} from '@angular/core';
 import {
     Assignment,
     AuthenticationService,
@@ -60,7 +68,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EditorialPageService } from './editorial-page.service';
 import { debounceTime, delay, distinctUntilChanged, first, startWith, tap } from 'rxjs/operators';
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { SelectionModel } from '@angular/cdk/collections';
+import { SelectionChange, SelectionModel } from '@angular/cdk/collections';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { OptionsHelperService } from '../../services/options-helper.service';
 import { EditorialSidebarService } from './editorial-sidebar/editorial-sidebar.service';
@@ -157,6 +165,11 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         /*this.isMobile$.pipe(first()).subscribe((mobile) => {
             this.editorialSidebarService.sidebarOpened.set(!mobile);
         });*/
+        effect(() => {
+            if (this.selection()?.selected.length !== 1) {
+                this.editorialSidebarService.sidebarOpened.set(false);
+            }
+        });
         this.authenticationService
             .observeLoginInfo()
             .subscribe((loginInfo) => this.loginInfo$.next(loginInfo));
@@ -596,6 +609,12 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         }
     }
 
+    selectionChange(event: SelectionChange<NodeEntriesDataType>) {
+        this.selection.set(event.source);
+        if (this.selection()?.selected.length !== 1) {
+            this.editorialSidebarService.sidebarOpened.set(false);
+        }
+    }
     fetchEvent(event: FetchEvent) {
         this.pagination$.next({
             skipCount: event.offset,

@@ -545,6 +545,8 @@
       "FOLDER_ADDED": "Folder added",
       "NODE_EXISTS_IN_COLLECTION": "The collection already contains the element {{name}}",
       "VIEW_COLLECTION": "View collection",
+      "COPIED_NODES": "{{count}} element(s) copied to {{target}}",
+      "VIEW_FOLDER": "View folder",
       "ADDED_TO_COLLECTION_MY": "{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible for you",
       "ADDED_TO_COLLECTION_SHARED": "{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible to all invited persons",
       "ADDED_TO_COLLECTION_PUBLIC": "{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible to everyone",

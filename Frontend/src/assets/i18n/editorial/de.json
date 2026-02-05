@@ -59,6 +59,7 @@
         "COPY": {
           "SINGLE": "Gewählten Inhalt kopieren",
           "MULTIPLE": "Gewählte Inhalte kopieren",
+          "TARGET": "Hier einsortieren",
           "ERROR": "Beim Kopieren der Inhalte ist ein Fehler aufgetreten."
         },
         "CONFIGURE_CONFIG": {
@@ -115,6 +116,7 @@
       "PERMISSIONS_TITLE": "Aufgabe zuweisen",
       "SAVE_DRAFT": "Entwurf speichern",
       "SUBMIT": "Aufgabe austeilen",
+      "SELECT_FILE": "Anhängen",
       "ERROR": {
         "FIELD_TITLE": "Bitte Titel eingeben",
         "FIELD_SUMMARY": "Bitte Beschreibung eingeben",
