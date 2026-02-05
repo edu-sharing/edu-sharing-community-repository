@@ -12,6 +12,7 @@ import {
     NodeRelationData,
     RelationService,
     UserService,
+    ConfigService,
 } from 'ngx-edu-sharing-api';
 import { forkJoin } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -37,6 +38,16 @@ import {
     OPEN_URL_MODE,
 } from 'ngx-edu-sharing-ui';
 
+enum Relations {
+    isPartOf = 'isPartOf',
+    isBasedOn = 'isBasedOn',
+    references = 'references',
+    isDuplicateOf = 'isDuplicateOf',
+    requires = 'requires',
+    replaces = 'replaces',
+    hasFormat = 'hasFormat',
+}
+
 @Component({
     selector: 'es-node-relations-dialog',
     templateUrl: './node-relations-dialog.component.html',
@@ -45,11 +56,14 @@ import {
     standalone: false,
 })
 export class NodeRelationsDialogComponent implements OnInit {
-    readonly Relations = Object.values(Relations);
-    readonly RelationsInverted = {
-        [Relations.isBasedOn]: 'isBasisFor',
+    readonly RelationsInverted: { [key: string]: NodeRelationData['reverseType'] } = {
         [Relations.isPartOf]: 'hasPart',
+        [Relations.isBasedOn]: 'isBasisFor',
         [Relations.references]: 'references',
+        [Relations.isDuplicateOf]: 'isDuplicateOf',
+        [Relations.requires]: 'isRequiredBy',
+        [Relations.replaces]: 'isReplacedBy',
+        [Relations.hasFormat]: 'isFormatOf',
     };
 
     source: UniversalNode;
@@ -63,6 +77,7 @@ export class NodeRelationsDialogComponent implements OnInit {
     permissions = [RestConstants.PERMISSION_WRITE];
     target: UniversalNode;
     columns = { Default: [new ListItem('NODE', RestConstants.LOM_PROP_TITLE)] } as ColumnType;
+    allowedRelations: string[];
 
     private readonly buttons = [
         new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.dialogRef.close(null)),
@@ -80,11 +95,15 @@ export class NodeRelationsDialogComponent implements OnInit {
         private relationService: RelationService,
         private toast: Toast,
         private userService: UserService,
+        private configService: ConfigService,
     ) {
         this.dialogRef.patchState({ isLoading: true });
     }
 
-    ngOnInit(): void {
+    async ngOnInit(): Promise<void> {
+        this.allowedRelations =
+            (await this.configService.get<string[]>('relations.allowedRelations')) ??
+            Object.values(Relations);
         this.dialogRef.patchConfig({ buttons: this.buttons });
         void this.initNode(this.data.node);
         this.updateButtons();
@@ -217,7 +236,7 @@ export class NodeRelationsDialogComponent implements OnInit {
             fromNode: this.source,
             toNode: this.target,
             type: type,
-            reverseType: type,
+            reverseType: this.RelationsInverted[type],
             // @TODO: check if api model is invalid
             createdAt: new Date().getTime() as any,
             createdBy: (await this.userService.observeCurrentUser().pipe(first()).toPromise())
@@ -286,10 +305,4 @@ export class NodeRelationsDialogComponent implements OnInit {
             },
         );
     }
-}
-
-enum Relations {
-    isBasedOn = 'isBasedOn',
-    isPartOf = 'isPartOf',
-    references = 'references',
 }

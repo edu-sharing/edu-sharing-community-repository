@@ -10,6 +10,13 @@
 		<register>
 			<local>false</local>
 		</register>
+		<!--
+		<relations>
+			<allowedRelations>hasPart</allowedRelations>
+			<allowedRelations>isBasisFor</allowedRelations>
+			<allowedRelations>references</allowedRelations>
+		</relations>
+		-->
 		<helpMenuOptions>
 			<key>ONLINE_HELP</key>
 			<icon>help_outline</icon>

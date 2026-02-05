@@ -1479,15 +1479,26 @@
       "FORKED_CHILDS": "Has variants",
       "FORKED_ORIGIN": "Is variant of",
       "isPartOf": "is part of",
-      "isBasedOn": "is based on",
-      "references": "refers to",
       "hasPart": "has part of",
-      "isBasisFor": "is base of"
+      "isBasedOn": "is based on",
+      "isBasisFor": "is base of",
+      "references": "refers to",
+      "isDuplicateOf":  "is duplicate of",
+      "requires": "requires",
+      "isRequiredBy": "is required by",
+      "replaces":  "replaces",
+      "isReplacedBy": "is replaced by",
+      "hasFormat": "has format",
+      "isFormatOf":  "is format of"
     },
     "RELATION_TYPE_FULLY": {
       "isPartOf": "is part of (isPartOf)",
       "isBasedOn": "is based on (isBasedOn)",
-      "references": "refers to (references)"
+      "references": "refers to (references)",
+      "isDuplicateOf":  "is duplicate of (isDuplicateOf)",
+      "requires": "requires (requires)",
+      "replaces":  "replaces (replaces)",
+      "hasFormat": "has format (hasFormat)"
     }
   },
   "LANDING_PAGE": {

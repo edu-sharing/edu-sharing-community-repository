@@ -6355,6 +6355,17 @@
         ],
         "type": "object"
       },
+      "Relations": {
+        "properties": {
+          "allowedRelations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "Remote": {
         "properties": {
           "id": {
@@ -8940,6 +8951,9 @@
           },
           "register": {
             "$ref": "#/components/schemas/Register"
+          },
+          "relations": {
+            "$ref": "#/components/schemas/Relations"
           },
           "remote": {
             "$ref": "#/components/schemas/ConfigRemote"

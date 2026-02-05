@@ -6,7 +6,7 @@
   <mat-form-field>
     <mat-label>{{ 'NODE_RELATIONS.RELATION_TYPE_LABEL' | translate }}</mat-label>
     <mat-select formControlName="relation">
-      <mat-option *ngFor="let key of Relations" [value]="key">
+      <mat-option *ngFor="let key of allowedRelations" [value]="key">
         {{ 'NODE_RELATIONS.RELATION_TYPE_FULLY.' + key | translate }}
       </mat-option>
     </mat-select>
@@ -102,8 +102,7 @@
               <span>{{ relation.createdAt | formatDate : { relative: false } }}</span>
             </div>
             <div class="info-group">
-              <label>{{ 'NODE_RELATIONS.RELATION_CREATOR' | translate }}</label
-              >c
+              <label>{{ 'NODE_RELATIONS.RELATION_CREATOR' | translate }}</label>
               <span>{{ relation.createdBy | authorityName }}</span>
             </div>
           </ng-template>
