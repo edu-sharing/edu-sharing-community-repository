@@ -339,6 +339,7 @@ export class MdsEditorInstanceService
             this.value$.next([...this.initialValues.jointValues]);
             this.extendedValue$.next(this.initialValues.extendedValues);
             this.initialValuesSubject.next(this.initialValues);
+            this.syncExtendedValue(this.getValue());
             this.ready.next();
             this.ready.complete();
         }
@@ -424,6 +425,10 @@ export class MdsEditorInstanceService
             return mapExtendedValues(this.value$.value);
         }
 
+        getExtendedValue(): MdsExtendedValue {
+            return this.extendedValue$.value ?? {};
+        }
+
         getIndeterminateValues(): string[] {
             return this.indeterminateValues;
         }
@@ -480,6 +485,7 @@ export class MdsEditorInstanceService
             // });
             this.isDirty = dirty;
             this.value$.next(value);
+            this.syncExtendedValue(value);
             this.mdsEditorInstanceService.updateHasChanges();
         }
 
@@ -529,9 +535,29 @@ export class MdsEditorInstanceService
         }
 
         patchExtendedValue(key: string, data: MdsExtendedValueData) {
-            this.extendedValue$.value[key] = data;
-            console.log(this.extendedValue$.value);
-            this.extendedValue$.next(this.extendedValue$.value);
+            const extendedValue: MdsExtendedValue = this.getExtendedValue();
+            extendedValue[key] = data;
+            console.log(extendedValue);
+            this.extendedValue$.next(extendedValue);
+        }
+
+        syncExtendedValue(value: string[]) {
+            const extendedValue: MdsExtendedValue = this.getExtendedValue();
+            // add missing values (default set them to enabled: true)
+            value.forEach((v) => {
+                if (!extendedValue[v]) {
+                    extendedValue[v] = {
+                        enabled: true,
+                    };
+                }
+            });
+            // remove deleted values
+            Object.keys(extendedValue).forEach((key) => {
+                if (!value.includes(key)) {
+                    delete extendedValue[key];
+                }
+            });
+            this.extendedValue$.next(extendedValue);
         }
 
         observeHasChanged(): Observable<boolean> {
