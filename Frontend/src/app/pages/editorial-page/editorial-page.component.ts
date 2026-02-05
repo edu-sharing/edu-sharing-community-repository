@@ -4,6 +4,7 @@ import {
     AuthenticationService,
     ConfigService,
     DEFAULT,
+    GenericSearchResults,
     HOME_REPOSITORY,
     InviteEvent,
     LoginInfo,
@@ -92,7 +93,8 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Scope = Scope;
     @ViewChild(ActionbarComponent) actionbarRef: ActionbarComponent;
-    @ViewChild(NodeEntriesWrapperComponent) nodeEntriesRef: NodeEntriesWrapperComponent<Node>;
+    @ViewChild(NodeEntriesWrapperComponent)
+    nodeEntriesRef: NodeEntriesWrapperComponent<NodeEntriesDataType>;
     private destroyed$ = new Subject<void>();
     isMobile$ = this.breakpointObserver
         .observe(['(max-width: 900px)'])
@@ -152,9 +154,9 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         public editorialPageService: EditorialPageService,
         public editorialBreadcrumbService: EditorialBreadcrumbService,
     ) {
-        this.isMobile$.pipe(first()).subscribe((mobile) => {
+        /*this.isMobile$.pipe(first()).subscribe((mobile) => {
             this.editorialSidebarService.sidebarOpened.set(!mobile);
-        });
+        });*/
         this.authenticationService
             .observeLoginInfo()
             .subscribe((loginInfo) => this.loginInfo$.next(loginInfo));
@@ -494,9 +496,9 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                         criteria: searchCriteria,
                     },
                 })
-                .subscribe((events) => {
+                .subscribe((event) => {
                     this.dataSource.isLoading = false;
-                    this.dataSource.setData(events.nodes, events.pagination);
+                    this.setNewData(event);
                 });
         } else if (routeConfig.primaryMode === 'share') {
             const searchCriteria = this.searchHelperService.convertCritieria(
@@ -528,9 +530,9 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                         criteria: searchCriteria,
                     },
                 })
-                .subscribe((events) => {
+                .subscribe((event) => {
                     this.dataSource.isLoading = false;
-                    this.dataSource.setData(events.nodes, events.pagination);
+                    this.setNewData(event);
                 });
         } else if (routeConfig.primaryMode === 'assignment') {
             this.searchService
@@ -550,9 +552,9 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                         criteria: searchCriteria,
                     },
                 })
-                .subscribe((events) => {
+                .subscribe((event) => {
                     this.dataSource.isLoading = false;
-                    this.dataSource.setData(events.nodes, events.pagination);
+                    this.setNewData(event);
                 });
         } else {
             this.searchService
@@ -578,9 +580,18 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 this.nodeEntriesRef?.getSelection()?.selected[0] === event.element
             )
         ) {
-            this.nodeEntriesRef?.getSelection()?.clear();
+            this.clearSelection();
         }
         this.nodeEntriesRef?.getSelection()?.toggle(event.element as Node);
+        if (
+            (event.element as Node).mediatype &&
+            !['collection', 'folder'].includes((event.element as Node).mediatype)
+        ) {
+            this.editorialSidebarService.showOption({
+                option: 'PREVIEW',
+                trap: false,
+            });
+        }
     }
 
     fetchEvent(event: FetchEvent) {
@@ -627,5 +638,18 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             },
             queryParamsHandling: 'replace',
         });
+    }
+
+    private setNewData(event: GenericSearchResults) {
+        this.clearSelection();
+        this.dataSource.setData(event.nodes, event.pagination);
+        this.nodeEntriesRef.addVirtualNodes(
+            this.editorialPageService.getVirtualNodes(this.params$.value.primaryMode),
+        );
+    }
+
+    private clearSelection() {
+        this.nodeEntriesRef?.getSelection()?.clear();
+        this.editorialSidebarService.sidebarOpened.set(false);
     }
 }

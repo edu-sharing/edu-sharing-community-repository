@@ -113,6 +113,7 @@
       "MAIN_TITLE_CREATE": "Neue Aufgabe erstellen",
       "MAIN_TITLE_EDIT": "Aufgabe bearbeiten",
       "PERMISSIONS_TITLE": "Aufgabe zuweisen",
+      "SAVE_DRAFT": "Entwurf speichern",
       "SUBMIT": "Aufgabe austeilen",
       "ERROR": {
         "FIELD_TITLE": "Bitte Titel eingeben",

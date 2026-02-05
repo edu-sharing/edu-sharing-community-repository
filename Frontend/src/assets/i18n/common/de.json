@@ -341,7 +341,7 @@
     },
     "STATUS": {
       "DRAFT": "Entwurf",
-      "INPROGRESS": "In Bearbeitung",
+      "INPROGRESS": "Ausgeteilt",
       "CANCELED": "Abgebrochen",
       "FINISHED": "Abgeschlossen"
     },

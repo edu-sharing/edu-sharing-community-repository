@@ -32,6 +32,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { EditorialBreadcrumbService } from '../editorial-breadcrumb/editorial-breadcrumb.service';
 import { NodesSelectorConfig } from '../nodes-selector/nodes-selector.component';
+import { EditorialPageService } from '../editorial-page.service';
 
 export type AssignmentBase = Pick<Assignment, 'title' | 'type' | 'summary'>;
 export const AssignmentEditorConfig = {
@@ -109,13 +110,14 @@ export class ManageAssignmentComponent {
         private nodeHelperService: NodeHelperService,
         private platformLocation: PlatformLocation,
         private translateService: TranslateService,
+        private editorialPageService: EditorialPageService,
         private editorialSidebarService: EditorialSidebarService,
         private editorialBreadcrumbService: EditorialBreadcrumbService,
     ) {
         this.mainDataFormGroup = this.formBuilder.group({
             title: ['', [Validators.required]],
             summary: ['', [Validators.required]],
-            useEndTime: [false, [Validators.required]],
+            useEndTime: [false, []],
             allowAdditionalDocumentSubmissions: [true, []],
         });
         this.route.queryParams
@@ -220,7 +222,7 @@ export class ManageAssignmentComponent {
         );
     }
 
-    async submit() {
+    async submit(status: Assignment['status']) {
         if (!this.authorities()?.length) {
             this.toast.error(null, 'EDITORIAL.ASSIGNMENT.ERROR.MISSING_AUTHORITIES');
             return;
@@ -249,7 +251,7 @@ export class ManageAssignmentComponent {
             }) || [];
         const assignment: CreateAssignmentRequest = {
             id: this.assignment().ref?.id,
-            status: this.assignment().status,
+            status: status,
             type: this.assignment().type,
             title: this.mainDataFormGroup.get('title').value,
             summary: this.mainDataFormGroup.get('summary').value,
@@ -262,11 +264,12 @@ export class ManageAssignmentComponent {
             permissions,
             assignmentFiles,
         };
-        await firstValueFrom(
+        const newAssignment = await firstValueFrom(
             this.assignmentService.createOrUpdateAssignment({
                 body: assignment,
             }),
         );
+        this.editorialPageService.addVirtualNodes([newAssignment], 'assignment');
         void this.router.navigate([], {
             relativeTo: this.route,
             queryParamsHandling: 'merge',

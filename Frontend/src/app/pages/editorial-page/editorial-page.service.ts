@@ -1,7 +1,8 @@
 import { Injectable, signal } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { MdsWidget } from 'ngx-edu-sharing-api';
-import { NodeEntriesDisplayType, Values } from 'ngx-edu-sharing-ui';
+import { NodeEntriesDataType, NodeEntriesDisplayType, Values } from 'ngx-edu-sharing-ui';
+import { PrimaryMode } from './editorial-page.component';
 
 export type EditorialTab = {
     id: string;
@@ -11,6 +12,7 @@ export type EditorialTab = {
 @Injectable()
 export class EditorialPageService {
     readonly displayType = signal(NodeEntriesDisplayType.Table);
+    private virtualNodes$ = new BehaviorSubject<{ [key: string]: NodeEntriesDataType[] }>({});
     private tabs$ = new BehaviorSubject<EditorialTab[]>(null);
     private tabWidgetId$ = new BehaviorSubject<string>(null);
 
@@ -50,5 +52,15 @@ export class EditorialPageService {
                 };
             }),
         );
+    }
+    getVirtualNodes(mode: PrimaryMode) {
+        return this.virtualNodes$.value[mode];
+    }
+    addVirtualNodes(nodes: NodeEntriesDataType[], mode: PrimaryMode) {
+        if (!this.virtualNodes$.value[mode]) {
+            this.virtualNodes$.value[mode] = [];
+        }
+        this.virtualNodes$.value[mode] = [...this.virtualNodes$.value[mode], ...nodes];
+        this.virtualNodes$.next(this.virtualNodes$.value);
     }
 }
