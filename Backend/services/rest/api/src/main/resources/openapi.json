@@ -15293,6 +15293,28 @@
               "format": "int32",
               "type": "integer"
             }
+          },
+          {
+            "description": "sort properties",
+            "in": "query",
+            "name": "sortProperties",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index",
+            "in": "query",
+            "name": "sortAscending",
+            "schema": {
+              "items": {
+                "type": "boolean"
+              },
+              "type": "array"
+            }
           }
         ],
         "requestBody": {

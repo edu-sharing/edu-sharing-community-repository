@@ -542,6 +542,8 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                     query: null,
                     repository: HOME_REPOSITORY,
                     contentType: 'ALL',
+                    sortProperties: [RestConstants.CM_PROP_C_CREATED],
+                    sortAscending: [false],
                     direction: this.editorialPageService.buildSearchCriteria(
                         this.tabSelection$.value,
                     )[this.TabWidgetShares] as any,

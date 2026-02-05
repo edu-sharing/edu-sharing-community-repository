@@ -125,7 +125,7 @@ public class SearchApi {
 	}
 
 	@NotNull
-	private static SearchToken getSearchToken(SearchService.ContentType contentType, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, SearchParameters parameters) {
+    public static SearchToken getSearchToken(SearchService.ContentType contentType, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, SearchParameters parameters) {
 		SearchToken token = new SearchToken();
 		if(parameters != null) {
 			token.setFacets(parameters.getFacets());

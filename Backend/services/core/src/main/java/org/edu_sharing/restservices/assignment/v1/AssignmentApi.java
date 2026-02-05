@@ -13,9 +13,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.*;
 import jakarta.ws.rs.*;
-
-import java.io.InputStream;
-
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -29,7 +26,10 @@ import org.edu_sharing.restservices.assignment.v1.model.*;
 import org.edu_sharing.restservices.search.v1.model.SearchParameters;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.SearchResult;
-import org.edu_sharing.service.assignment.*;
+import org.edu_sharing.service.assignment.AssignmentDao;
+import org.edu_sharing.service.assignment.AssignmentFileDao;
+import org.edu_sharing.service.assignment.SubmissionDao;
+import org.edu_sharing.service.assignment.SubmissionFileDao;
 import org.edu_sharing.service.assignment.dao.AssignmentDaoFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.model.SearchToken;
@@ -38,10 +38,13 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
+import static org.edu_sharing.restservices.search.v1.SearchApi.getSearchToken;
 
 @Slf4j
 @Path("/assignment/v1")
@@ -102,23 +105,11 @@ public class AssignmentApi {
     public Response searchAssignments(
             @Parameter(description = "search parameters", required = false) SearchParameters parameters,
             @Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue = "25")) @QueryParam("maxItems") Integer maxItems,
-            @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount
-    ) throws Throwable {
-        SearchToken token = new SearchToken();
-        token.setFacets(parameters.getFacets());
-        token.setFacetLimit((parameters.getFacetLimit() != null && parameters.getFacetLimit() > 0)
-                ? parameters.getFacetLimit() : 10);
-        token.setFacetsMinCount((parameters.getFacetMinCount() != null && parameters.getFacetMinCount() >= 0)
-                ? parameters.getFacetMinCount() : 5);
-        token.setQueryString(parameters.getFacetSuggest());
-        token.setPermissions(parameters.getPermissions());
-        token.setResolveCollections(parameters.isResolveCollections());
-        token.setReturnSuggestion(parameters.isReturnSuggestions());
-        token.setExcludes(parameters.getExcludes());
-        token.setFrom(skipCount != null ? skipCount : 0);
-        token.setMaxResult(maxItems != null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS);
-        token.setContentType(SearchService.ContentType.ALL);
-
+            @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount,
+            @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+            @Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending
+            ) throws Throwable {
+        SearchToken token = getSearchToken(SearchService.ContentType.ALL, maxItems, skipCount, sortProperties, sortAscending, parameters);
         SearchResult<AssignmentDao> assignmentDaoSearchResult = assignmentDaoFactory.searchAssignments(parameters.getCriteria(), token);
         AssignmentSearchResult result = assignmentDaoSearchResult.map(AssignmentDao::getAssignment, AssignmentSearchResult::new);
         return Response.ok().entity(result).build();

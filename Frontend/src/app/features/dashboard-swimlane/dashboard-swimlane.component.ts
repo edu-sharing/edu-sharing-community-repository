@@ -194,6 +194,8 @@ export class DashboardSwimlaneComponent {
                     body: {
                         criteria: [],
                     },
+                    sortProperties: [RestConstants.CM_PROP_C_CREATED],
+                    sortAscending: [false],
                     maxItems: this.maxItems,
                 }),
             );
