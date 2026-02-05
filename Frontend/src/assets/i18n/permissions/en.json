@@ -102,6 +102,7 @@
       "CLASS": "class",
       "WORKING_GROUP": "working group",
       "LESSON": "lesson",
+      "SCHOOL_NONE": "non-school institution",
       "SCHOOL_NATIONAL": "national school",
       "SCHOOL_MUNICIPAL": "municipal school",
       "SCHOOL_PRIVATE": "private school"
