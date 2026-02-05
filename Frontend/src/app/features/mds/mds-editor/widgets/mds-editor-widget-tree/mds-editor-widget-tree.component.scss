@@ -1,14 +1,15 @@
 @use '@angular/material' as mat;
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 
+:host {
+    position: relative;
+}
+
 mat-form-field {
     width: 100%;
 }
 .mat-chip-label {
     @include limitLineLength(200px);
-}
-:host {
-    position: relative;
 }
 .suggestion-badge {
     position: absolute;
@@ -89,5 +90,39 @@ mat-chip-row {
         .decline {
             color: $colorStatusNegative !important;
         }
+    }
+}
+.custom-toggle-button {
+    position: relative;
+    border: none;
+    border-radius: 6px;
+    min-height: 32px;
+    width: 100%;
+    box-shadow: 0 2px 4px 0 #00000026;
+    background: #fafafa;
+    font-size: 12px;
+
+    // fix material button label not set to 100% width
+    &::ng-deep .mdc-button__label {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    // adjust border-radius depending on the overlay position
+    &.overlay-top {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+    }
+
+    &.overlay-bottom {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    .mat-icon {
+        position: absolute;
+        right: 8px;
+        top: calc(50% - 12px);
     }
 }

@@ -17287,6 +17287,15 @@ export const DefaultMds: MdsDefinition = {
             isExtended: false,
         },
         {
+            id: 'node_general_bulk_sidebar',
+            caption: null,
+            icon: 'description',
+            html: '\n <cclom:general_keyword>\n <ccm:educationallearningresourcetype>\n <ccm:educationalcontext>\n <ccm:taxonid>',
+            rel: null,
+            hideIfEmpty: false,
+            isExtended: false,
+        },
+        {
             id: 'node_childobject',
             caption: 'Allg. Informationen',
             icon: 'description',
@@ -17584,6 +17593,11 @@ export const DefaultMds: MdsDefinition = {
         {
             id: 'io_bulk',
             views: ['node_general_bulk'],
+            rendering: 'angular',
+        },
+        {
+            id: 'io_bulk_sidebar',
+            views: ['node_general_bulk_sidebar'],
             rendering: 'angular',
         },
         {

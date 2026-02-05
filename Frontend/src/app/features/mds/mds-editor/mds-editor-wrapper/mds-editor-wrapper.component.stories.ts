@@ -33,6 +33,7 @@ const meta: Meta<MdsEditorWrapperComponent> = {
       [nodes]="nodes"
       [currentValues]="currentValues"
       (currentValuesChange)="currentValuesChange"
+      (currentValuesExtendedChange)="currentValuesExtendedChange"
       ></es-mds-editor-wrapper>
       <button mat-flat-button color="primary" (click)="save(mds)">Test: Save</button>
     `,
@@ -109,6 +110,22 @@ export const MdsValuesStory: Story = {
         currentValues: DummyProps,
         currentValuesChange: (v) => {
             console.log(v);
+        },
+    },
+};
+export const MdsIOBulkSidebarTemplate: Story = {
+    args: {
+        embedded: true,
+        setId: DEFAULT,
+        editorMode: 'valueSelection',
+        groupId: 'io_bulk_sidebar',
+        nodes: null,
+        currentValues: DummyProps,
+        currentValuesChange: (v) => {
+            console.log('currentValuesChange', v);
+        },
+        currentValuesExtendedChange: (v) => {
+            console.log('currentValuesExtendedChange', v);
         },
     },
 };

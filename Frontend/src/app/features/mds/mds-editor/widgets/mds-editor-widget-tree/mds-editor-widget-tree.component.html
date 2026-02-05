@@ -1,6 +1,18 @@
 <!--<div *ngIf="(chipsSuggestionsSubject | async)?.length as count" class="suggestion-badge">
   {{ count }}
 </div>-->
+<ng-container *ngIf="editorMode === valueSelection">
+  <h3 *ngIf="widget?.definition?.caption">
+    {{ widget.definition.caption | translate }}
+  </h3>
+  <es-mds-editor-widget-tree-value-selection
+    *ngIf="chipsControl?.value"
+    [selectedValues]="chipsControl.value"
+    [control]="chipsControl"
+    [widget]="widget"
+    (removed)="remove($event)"
+  ></es-mds-editor-widget-tree-value-selection>
+</ng-container>
 <div
   cdkOverlayOrigin
   #trigger="cdkOverlayOrigin"
@@ -9,6 +21,7 @@
   #triggerBorderBox="borderBoxObserver"
 >
   <es-mds-editor-widget-container
+    *ngIf="editorMode !== valueSelection; else toggleOverlay"
     #container
     [widget]="widget"
     [label]="false"
@@ -26,7 +39,7 @@
     -->
     <mat-chip-grid
       #chipList
-      [attr.aria-labelledby]="chipsControl?.value?.length > 0 ? container.labelId : null"
+      [attr.aria-labelledby]="chipsControl?.value?.length > 0 ? container?.labelId : null"
       (click)="$event.stopPropagation(); $event.preventDefault()"
       [formControl]="chipsControl"
     >
@@ -85,6 +98,22 @@
     </mat-chip-grid>
   </es-mds-editor-widget-container>
 </div>
+<ng-template #toggleOverlay>
+  <button
+    *ngIf="showDropdownArrow"
+    mat-button
+    class="custom-toggle-button"
+    [class]="positionY() ? 'open-' + positionY() : ''"
+    cdkMonitorElementFocus
+    #openButton
+    (click)="openOverlay()"
+    [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
+    [disabled]="chipsControl.disabled"
+  >
+    Auswahl bearbeiten
+    <i [esIcon]="overlayIsVisible ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"></i>
+  </button>
+</ng-template>
 <ng-template
   cdkConnectedOverlay
   [cdkConnectedOverlayOrigin]="trigger"
@@ -93,6 +122,7 @@
   [cdkConnectedOverlayMinWidth]="overlayIsVisible ? box.getBoundingClientRect().width : 0"
   [cdkConnectedOverlayWidth]="triggerBorderBox.width$ | async"
   [cdkConnectedOverlayOpen]="overlayIsVisible"
+  (positionChange)="onPositionChange($event)"
   (overlayKeydown)="onOverlayKeydown($event)"
   (overlayOutsideClick)="closeOverlay($event)"
 >
@@ -102,7 +132,7 @@
     class="suggestion-card"
     role="dialog"
     #overlay
-    [attr.aria-labelledby]="container.labelId"
+    [attr.aria-labelledby]="container?.labelId"
   >
     <es-mds-editor-widget-tree-core
       cdkTrapFocus

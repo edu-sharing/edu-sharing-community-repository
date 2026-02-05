@@ -15,7 +15,8 @@ export type EditorMode =
     | 'form'
     | 'inline'
     | 'viewer'
-    | 'searchFacetSuggestion';
+    | 'searchFacetSuggestion'
+    | 'valueSelection';
 
 export abstract class MdsEditorInstanceServiceAbstract {
     mdsId: string;

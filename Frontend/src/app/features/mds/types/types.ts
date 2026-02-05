@@ -120,6 +120,8 @@ export enum BulkBehavior {
  *   - No editing
  *   - Read only
  *   - Triggered via mds-viewer
+ * - `valueSelection`
+ *   - Specific to widget-tree
  */
 export type EditorMode =
     | 'nodes'
@@ -127,7 +129,8 @@ export type EditorMode =
     | 'form'
     | 'inline'
     | 'viewer'
-    | 'searchFacetSuggestion';
+    | 'searchFacetSuggestion'
+    | 'valueSelection';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;

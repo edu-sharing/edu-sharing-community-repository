@@ -1,4 +1,8 @@
-import { CdkConnectedOverlay, ConnectedPosition } from '@angular/cdk/overlay';
+import {
+    CdkConnectedOverlay,
+    ConnectedPosition,
+    ConnectedOverlayPositionChange,
+} from '@angular/cdk/overlay';
 import {
     AfterViewInit,
     ChangeDetectorRef,
@@ -7,8 +11,10 @@ import {
     OnDestroy,
     OnInit,
     QueryList,
+    signal,
     ViewChild,
     ViewChildren,
+    WritableSignal,
 } from '@angular/core';
 import { FormControl, UntypedFormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
@@ -43,6 +49,7 @@ export class MdsEditorWidgetTreeComponent
     isTree: boolean;
     showDropdownArrow: boolean;
     private ignoreNextFocusEvent = false;
+    valueSelection: string = 'valueSelection';
     add(value: DisplayValue): void {
         const treeNode = this.tree.findById(value.key);
         // old values are may not available in tree, so check for null
@@ -98,12 +105,12 @@ export class MdsEditorWidgetTreeComponent
      * user's action, but we don't want to open the overlay.
      */
     preventOverlayOpen = false;
-    readonly overlayPositions: ConnectedPosition[] = [
+    overlayPositions: ConnectedPosition[] = [
         {
             originX: 'start',
             originY: 'bottom',
             offsetX: 0,
-            offsetY: -34,
+            offsetY: this.editorMode !== this.valueSelection ? -34 : 0,
             overlayX: 'start',
             overlayY: 'top',
         },
@@ -116,7 +123,7 @@ export class MdsEditorWidgetTreeComponent
             overlayY: 'bottom',
         },
     ];
-
+    positionY: WritableSignal<string> = signal(null);
     private destroyed$: ReplaySubject<boolean> = new ReplaySubject(1);
 
     constructor(
@@ -302,7 +309,9 @@ export class MdsEditorWidgetTreeComponent
             setTimeout(() => this.treeRef?.input?.nativeElement.focus());
         }
     }
-
+    onPositionChange(event: ConnectedOverlayPositionChange) {
+        this.positionY.set(event.connectionPair?.originY || null);
+    }
     closeOverlay(event?: FocusEvent): void {
         // prevent directly closing because cdk outside click might trigger
         if (
@@ -314,11 +323,14 @@ export class MdsEditorWidgetTreeComponent
             return;
         }
         this.overlayIsVisible = false;
+        this.positionY.set(null);
         if (!this.isTree) {
             //this.inputControl.setValue('');
-            this.ignoreNextFocusEvent = true;
+            if (this.editorMode !== this.valueSelection) {
+                this.ignoreNextFocusEvent = true;
+            }
             this.inputControl.setValue('');
-            this.inputElement.nativeElement.focus();
+            this.inputElement?.nativeElement.focus();
         } else {
             this.openButtonRef.focus();
         }
@@ -374,7 +386,7 @@ export class MdsEditorWidgetTreeComponent
         if (event.relatedTarget === this.treeRef?.input?.nativeElement) {
             return;
         }
-        if (event.target === this.inputElement.nativeElement) {
+        if (event.target === this.inputElement?.nativeElement) {
             return;
         }
         if (
@@ -397,7 +409,7 @@ export class MdsEditorWidgetTreeComponent
     addSelectedTreeNode() {
         if (this.treeRef?.selectedNode) {
             this.treeRef.toggleNode(this.treeRef.selectedNode, true, true, true);
-            this.inputElement.nativeElement.focus();
+            this.inputElement?.nativeElement.focus();
         } else {
             const selected = this.treeRef?.findNodeByKeyOrCaption(this.inputControl.value);
             if (selected) {

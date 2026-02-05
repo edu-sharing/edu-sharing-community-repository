@@ -41,6 +41,7 @@ import { MdsEditorWidgetSuggestionChipsComponent } from './mds-editor/widgets/md
 import { MdsEditorWidgetTextComponent } from './mds-editor/widgets/mds-editor-widget-text/mds-editor-widget-text.component';
 import { HighlightPipe } from './mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree-core/highlight.pipe';
 import { MdsEditorWidgetTreeCoreComponent } from './mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree-core/mds-editor-widget-tree-core.component';
+import { MdsEditorWidgetTreeValueSelectionComponent } from './mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree-value-section/mds-editor-widget-tree-value-selection.component';
 import { MdsEditorWidgetTreeComponent } from './mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetVCardComponent } from './mds-editor/widgets/mds-editor-widget-vcard/mds-editor-widget-vcard.component';
 import { MdsEditorWidgetVersionComponent } from './mds-editor/widgets/mds-editor-widget-version/mds-editor-widget-version.component';
@@ -108,6 +109,7 @@ import { MdsEditorGlobalService } from './mds-editor/mds-editor-global.service';
         MatFormFieldModule,
         EduSharingUiModule,
         CommentsListComponent,
+        MdsEditorWidgetTreeValueSelectionComponent,
         MdsNodeRelationsWidgetComponent,
     ],
     providers: [MdsEditorGlobalService],
