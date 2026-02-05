@@ -1,0 +1,29 @@
+<metadataset id="default" label="default" hidden="false">
+    <name>Core Metadataset</name>
+    <i18n>mds</i18n>
+    <widgets>
+        <defaults>
+            <textEscapingPolicy>htmlBasic</textEscapingPolicy>
+        </defaults>
+        <widget>
+            <id>cm:name</id>
+            <id rel="graphql">info.filename</id>
+            <caption>cm_name</caption>
+            <placeholder>cm_name_placeholder</placeholder>
+            <bottomCaption>cm_name_bottom</bottomCaption>
+            <type>text</type>
+            <required>true</required>
+        </widget>
+        <widget>
+            <id>cm:validator</id>
+            <id rel="graphql">info.filename</id>
+            <caption>cm_name</caption>
+            <placeholder>cm_name_placeholder</placeholder>
+            <bottomCaption>cm_name_bottom</bottomCaption>
+            <type>text</type>
+            <inputPreprocessor>
+                <preprocessor>trim</preprocessor>
+            </inputPreprocessor>
+        </widget>
+    </widgets>
+</metadataset>

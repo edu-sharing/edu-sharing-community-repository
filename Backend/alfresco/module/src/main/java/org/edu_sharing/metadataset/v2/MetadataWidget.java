@@ -41,6 +41,15 @@ public class MetadataWidget extends MetadataTranslatable {
         auto,
         always
     }
+
+    /**
+     * processor to run on fields before sending (handled in ui)
+     */
+    public enum MetadataInputPreprocessor {
+        trim,
+        uppercase,
+        lowercase,
+    }
 	public enum ValuespaceMerge {
 		/**
 		 * all valuespaces are presented as an invidual tree on the main level (default)
@@ -120,6 +129,7 @@ public class MetadataWidget extends MetadataTranslatable {
     private boolean inherit = true;
     private Boolean countDefaultvalueAsFilter = false;
     private Required required = Required.optional;
+    private List<MetadataInputPreprocessor> inputPreprocessor = Collections.emptyList();
     private Map<String, MetadataKey> values;
     private List<Subwidget> subwidgets;
     private int maxlength;

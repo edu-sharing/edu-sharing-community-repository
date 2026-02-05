@@ -78,6 +78,7 @@ export class CustomSelectionModel<T> extends SelectionModel<T> {
 export class NodeEntriesService<T extends NodeEntriesDataType> {
     list: ListEventInterface<T>;
     readonly dataSource$ = new BehaviorSubject<NodeDataSource<T> | null>(null);
+    readonly paginationStrategy$ = new BehaviorSubject<PaginationStrategy | null>(null);
     /**
      * scope the current list is in, e.g. workspace
      * This is used for additional config injection based on the scope
@@ -90,7 +91,12 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
         this.dataSource$.next(value);
     }
     get paginationStrategy(): PaginationStrategy {
-        return this.entriesGlobal.getPaginationStrategy(this.scope);
+        return (
+            this.paginationStrategy$.value || this.entriesGlobal.getPaginationStrategy(this.scope)
+        );
+    }
+    set paginationStrategy(paginationStrategy: PaginationStrategy) {
+        this.paginationStrategy$.next(paginationStrategy);
     }
     /**
      * Subject that reflects the current columns configuration.

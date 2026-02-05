@@ -3583,6 +3583,17 @@
             },
             "type": "object"
           },
+          "inputPreprocessor": {
+            "items": {
+              "enum": [
+                "trim",
+                "uppercase",
+                "lowercase"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
           "interactionType": {
             "enum": [
               "Input",
@@ -13808,7 +13819,7 @@
         ]
       }
     },
-    "/archive/v1/search/{repository}/{pattern}": {
+    "/archive/v1/search/{repository}": {
       "get": {
         "description": "Searches for archive nodes.",
         "operationId": "searchArchive",
@@ -13825,7 +13836,7 @@
           },
           {
             "description": "search pattern",
-            "in": "path",
+            "in": "query",
             "name": "pattern",
             "required": true,
             "schema": {

@@ -406,11 +406,7 @@ export class FileChooserDialogComponent implements OnInit, AfterViewInit {
     }
 
     updateButtons() {
-        const buttons = [
-            new DialogButton(this.translate.instant('CANCEL'), { color: 'standard' }, () =>
-                this.cancel(),
-            ),
-        ];
+        const buttons = [new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel())];
         let confirmButton;
         if (this.data.pickDirectory) {
             if (this.path$.value.length) {
@@ -418,10 +414,8 @@ export class FileChooserDialogComponent implements OnInit, AfterViewInit {
             } else {
                 this.defaultSubtitle = this.translate.instant('SELECT_ROOT_NAME');
             }
-            confirmButton = new DialogButton(
-                this.translate.instant('APPLY'),
-                { color: 'primary' },
-                () => this.chooseDirectory(),
+            confirmButton = new DialogButton('APPLY', { color: 'primary' }, () =>
+                this.chooseDirectory(),
             );
             confirmButton.disabled =
                 (!this.path$.value.length && !this.canSelectHome) || !this.folderIsWritable();
@@ -435,6 +429,7 @@ export class FileChooserDialogComponent implements OnInit, AfterViewInit {
             confirmButton.disabled = true;
         } else if (this.selectedFiles.length) {
             this.defaultSubtitle = this.selectedFiles[0].name;
+            // TODO: this might be a problem with the data-test attribute as well
             confirmButton = new DialogButton(
                 this.translate.instant(
                     this.data.collections ? 'SELECT_COLLECTION' : 'SELECT_FILE',

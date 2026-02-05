@@ -65,13 +65,14 @@ import { CardComponent } from '../../../shared/components/card/card.component';
 import { MainNavConfig, MainNavService } from '../main-nav.service';
 import { CardDialogService } from '../../../features/dialogs/card-dialog/card-dialog.service';
 import { BridgeService } from '../../../services/bridge.service';
+import { OptionsHelperService } from '../../../services/options-helper.service';
 
 @Component({
     selector: 'es-create-menu',
     templateUrl: 'create-menu.component.html',
     styleUrls: ['create-menu.component.scss'],
     animations: [trigger('dialog', UIAnimation.switchDialog(UIAnimation.ANIMATION_TIME_FAST))],
-    providers: [OptionsHelperDataService],
+    providers: [OptionsHelperDataService, OptionsHelperService],
     standalone: false,
 })
 export class CreateMenuComponent implements OnInit, OnDestroy {
@@ -140,6 +141,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         private localEventsService: LocalEventsService,
         private nodeService: RestNodeService,
         private optionsService: OptionsHelperDataService,
+        private optionsHelperService: OptionsHelperService,
         private paste: PasteService,
         private route: ActivatedRoute,
         private router: Router,
@@ -298,9 +300,6 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                     }),
                 );
             }
-            if (this.mainNavConfig?.customCreateOptions) {
-                this.options.push(...this.mainNavConfig?.customCreateOptions);
-            }
             // handle app
             if (this.bridge.isRunningCordova()) {
                 const camera = new OptionItem('WORKSPACE.ADD_CAMERA', 'camera_alt', () =>
@@ -324,6 +323,13 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                         option.priority = i;
                         return option;
                     }),
+                );
+            }
+
+            if (this.mainNavConfig?.customCreateOptions) {
+                this.options = this.optionsHelperService.applyExternalOptions(
+                    this.options,
+                    this.mainNavConfig.customCreateOptions,
                 );
             }
         }

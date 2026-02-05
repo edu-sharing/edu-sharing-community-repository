@@ -36,6 +36,12 @@
     }
     .infobar-buttons {
         padding: 0 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        .mat-mdc-button:not(:disabled) {
+            --mdc-text-button-label-text-color: var(--textOnPrimary);
+        }
         .btn {
             color: var(--primary) !important;
             background: #fff !important;

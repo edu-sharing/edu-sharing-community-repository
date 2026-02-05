@@ -507,6 +507,7 @@
       },
       "AI": {
         "TITLE": "Informationen zur KI-Herkunft & -Nutzung",
+        "NO_PUBLIC_NODE": "Diese Option steht nur für öffentliche Elemente zur Verfügung. Elemente ohne öffentlichen Zugang sind grundsätzlich nicht für KI zugänglich",
         "USE_FOR_TRAINING": "Für Training verwendbar",
         "USE_FOR_TRAINING_INFO": "Dieses Element darf für Training von KI-Netzen benutzt werden. (Dies ist grundsätzlich der Fall, sofern es nicht explizit ausgeschlossen wird)",
         "GENERATED": "Durch KI generiert",
