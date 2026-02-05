@@ -30,14 +30,13 @@ import {
     UIConstants,
 } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
-import { defer, Observable, ReplaySubject, Subject } from 'rxjs';
+import { ReplaySubject, Subject } from 'rxjs';
 import { delay, filter, map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import {
     ConfigurationService,
     FrameEventsService,
     RestConnectorService,
     RestConstants,
-    RestHelper,
     RestIamService,
     TemporaryStorageService,
     UIService,
@@ -380,7 +379,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         // @TODO: May Check for more constrains
         return (
             this.mainNavConfig.create?.allowed === true &&
-            this.mainNavConfig.create?.globalDrop !== false &&
             !this.connector.getCurrentLogin()?.isGuest &&
             this.queryParams?.reurlCreate !== 'false'
         );

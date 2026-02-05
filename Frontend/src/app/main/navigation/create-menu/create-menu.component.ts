@@ -33,7 +33,7 @@ import {
     VirtualNode,
 } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { delay, filter, map, startWith, takeUntil, tap } from 'rxjs/operators';
+import { delay, filter, map, startWith, takeUntil } from 'rxjs/operators';
 import {
     Connector,
     Filetype,
@@ -325,13 +325,12 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                     }),
                 );
             }
-
-            if (this.mainNavConfig?.customCreateOptions) {
-                this.options = this.optionsHelperService.applyExternalOptions(
-                    this.options,
-                    this.mainNavConfig.customCreateOptions,
-                );
-            }
+        }
+        if (this.mainNavConfig?.customCreateOptions) {
+            this.options = this.optionsHelperService.applyExternalOptions(
+                this.options,
+                this.mainNavConfig.customCreateOptions,
+            );
         }
         if (this.folder) {
             const addFolder = new OptionItem('WORKSPACE.ADD_FOLDER', 'create_new_folder', () =>
@@ -423,6 +422,9 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     }
 
     onFileDrop(fileList: FileList) {
+        if (!this.isDropAllowed()) {
+            return;
+        }
         if (!this.allowed) {
             this.toast.error(null, 'WORKSPACE.TOAST.NOT_POSSIBLE_GENERAL');
             return;
@@ -651,6 +653,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     isDropAllowed() {
         return (
             this.allowed &&
+            this.dropEnabled() &&
             this.connector.hasToolPermissionInstant(
                 RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES,
             )

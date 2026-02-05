@@ -13,6 +13,7 @@ import {
     Assignment,
     AssignmentFileRequest,
     AssignmentV1Service,
+    AuthenticationService,
     Authority,
     CreateAssignmentRequest,
     Permission,
@@ -102,6 +103,7 @@ export class ManageAssignmentComponent {
         private toast: Toast,
         private router: Router,
         private route: ActivatedRoute,
+        private authenticationService: AuthenticationService,
         private dialogsService: DialogsService,
         private assignmentService: AssignmentV1Service,
         private nodeHelperService: NodeHelperService,
@@ -197,12 +199,17 @@ export class ManageAssignmentComponent {
         });
     }
 
-    addAuthority(authority: Authority) {
+    async addAuthority(authority: Authority) {
         if (
             (this.authorities() || []).some(
                 (n) => n.authority.authorityName === authority.authorityName,
             )
         ) {
+            return;
+        }
+        const login = await firstValueFrom(this.authenticationService.observeLoginInfo());
+        if (login.authorityName === authority.authorityName) {
+            this.toast.error(null, 'EDITORIAL.ASSIGNMENT.ERROR.OWN_AUTHORITY');
             return;
         }
         this.authorities.set(

@@ -608,6 +608,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         this.mainNav.patchMainNavConfig({
             create: {
                 allowed: true,
+                allowBinary: false,
                 globalDrop: false, // this.params$.value.primaryMode === ''
             },
             customCreateOptions: {
