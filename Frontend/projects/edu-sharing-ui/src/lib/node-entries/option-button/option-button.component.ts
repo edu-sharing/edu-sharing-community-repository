@@ -56,7 +56,6 @@ export class OptionButtonComponent<T extends NodeEntriesDataType>
         rxjs.combineLatest([
             this.entriesService.options$.pipe(startWith(void 0 as void)),
         ]).subscribe(() => {
-            console.log('change detect');
             void this.ngOnChanges(null);
         });
     }
