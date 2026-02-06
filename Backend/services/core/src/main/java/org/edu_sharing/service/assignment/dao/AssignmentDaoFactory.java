@@ -64,7 +64,7 @@ public class AssignmentDaoFactory {
     @Bean(autowireCandidate = false)
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    public AssignmentDao assignemntDaoByType(Assignment.Type type) {
+    public AssignmentDao assignmentDaoByType(Assignment.Type type) {
         return switch (type) {
             case SUBMISSION -> new NodeSubmissionAssignmentDao();
             case DEFAULT -> new NodeAssignmentDao();

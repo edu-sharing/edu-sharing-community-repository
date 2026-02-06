@@ -77,7 +77,7 @@ public class AssignmentApi {
     )
     public Response createOrUpdateAssignment(@Valid CreateAssignmentRequest request) {
         AssignmentDao assignment = Objects.isNull(request.id())
-                ? assignmentDaoFactory.assignemntDaoByType(request.type())
+                ? assignmentDaoFactory.assignmentDaoByType(request.type())
                 : assignmentDaoFactory.assignmentDaoByNodeId(request.id());
         assignment.createOrUpdate(request);
         return Response.ok().entity(assignment.getAssignment()).build();
