@@ -838,7 +838,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         }
 
         if (downloadAllowed) {
-            downloadAllowed = hasPermissions(nodeId, new String[]{CCConstants.PERMISSION_READ_ALL, CCConstants.PERMISSION_DOWNLOAD_CONTENT});
+            // use the @PermissionService to allow intercepting for Usage Nodes & Temporary Access!
+            downloadAllowed = PermissionServiceFactory.getLocalService()
+                    .hasAllPermissions(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, new String[]{CCConstants.PERMISSION_READ_ALL, CCConstants.PERMISSION_DOWNLOAD_CONTENT})
+                    .values().stream().allMatch(v -> v);
         }
         return downloadAllowed;
     }

@@ -123,7 +123,10 @@ public class MetadataWidget extends MetadataTranslatable {
     private Map<String, MetadataKey> values;
     private List<Subwidget> subwidgets;
     private int maxlength;
-    private TextEscapingPolicy textEscapingPolicy = TextEscapingPolicy.htmlBasic;
+    /**
+     * this property will be set via setDefaults
+     */
+    private TextEscapingPolicy textEscapingPolicy = null;
     private InteractionType interactionType = InteractionType.Input;
     private WidgetFilterMode filterMode = WidgetFilterMode.disabled;
     private WidgetExpandable expandable = WidgetExpandable.disabled;
@@ -141,9 +144,13 @@ public class MetadataWidget extends MetadataTranslatable {
         if("vcard".equals(type)) {
             // vcard display value will be escaped directly inside MetadataTemplateRenderer
             this.setTextEscapingPolicy(TextEscapingPolicy.none);
-        } else if(widgetDefaults != null) {
-            if (widgetDefaults.getTextEscapingPolicy() != null) {
-                this.setTextEscapingPolicy(widgetDefaults.getTextEscapingPolicy());
+        } else {
+            if(textEscapingPolicy == null) {
+                if (widgetDefaults != null && widgetDefaults.getTextEscapingPolicy() != null) {
+                    this.setTextEscapingPolicy(widgetDefaults.getTextEscapingPolicy());
+                } else {
+                    this.setTextEscapingPolicy(TextEscapingPolicy.htmlBasic);
+                }
             }
         }
     }
