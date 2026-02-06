@@ -21,7 +21,6 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { NgxColorsModule } from 'ngx-colors';
 import { MdsQueryCriteria, Node } from 'ngx-edu-sharing-api';
 import {
     EduSharingUiCommonModule,
@@ -56,7 +55,6 @@ import { LayoutOption } from '../../shared/types/layout-option';
         MatButtonToggleModule,
         MatFormFieldModule,
         MatInputModule,
-        NgxColorsModule,
         TranslateModule,
         WidgetConfigurationButtonsComponent,
     ],

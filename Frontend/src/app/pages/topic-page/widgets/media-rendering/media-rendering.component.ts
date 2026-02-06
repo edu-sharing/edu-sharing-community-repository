@@ -19,7 +19,6 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { TranslateModule } from '@ngx-translate/core';
-import { NgxColorsModule } from 'ngx-colors';
 import { Node } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule, NodeTitlePipe, Values } from 'ngx-edu-sharing-ui';
 import { Subject } from 'rxjs';
@@ -48,7 +47,6 @@ import { StatisticNode } from '../../shared/types/statistic-node';
         MatButtonToggleModule,
         MatFormFieldModule,
         MatInputModule,
-        NgxColorsModule,
         RenderWrapperComponent,
         SharedModule,
         TranslateModule,

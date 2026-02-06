@@ -10,7 +10,6 @@ import {
     ViewEncapsulation,
     WritableSignal,
 } from '@angular/core';
-import { NgxColorsModule } from 'ngx-colors';
 import { Node } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
@@ -25,12 +24,7 @@ import { ConfigurationOption } from '../../shared/types/configuration-option';
 @Component({
     selector: 'es-collection-chips',
     encapsulation: ViewEncapsulation.Emulated,
-    imports: [
-        EduSharingUiCommonModule,
-        NgxColorsModule,
-        SharedModule,
-        WidgetConfigurationButtonsComponent,
-    ],
+    imports: [EduSharingUiCommonModule, SharedModule, WidgetConfigurationButtonsComponent],
     templateUrl: './collection-chips.component.html',
     styleUrls: ['./collection-chips.component.scss'],
 })
