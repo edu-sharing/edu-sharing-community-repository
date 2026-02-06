@@ -18,36 +18,37 @@ import org.edu_sharing.util.LazyProvider;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Getter
 abstract class BasicNodeDaoImpl implements BasicNodeDao {
+    private final Set<LazyProvider<?>> lazyProviders = new HashSet<>();
+
     protected String nodeId;
     protected final LazyProvider<PropertyMapper> propertyMapper;
-    protected final LazyProvider<RepositoryDao> repositoryDao = new LazyProvider<>(RepositoryDao::getHomeRepository);
+    protected final LazyProvider<RepositoryDao> repositoryDao = registerLazyProvider(new LazyProvider<>(RepositoryDao::getHomeRepository));
 
     @Setter(onMethod_ = @Autowired)
     protected NodeService nodeService;
 
+
     public BasicNodeDaoImpl(String nodeId) {
         this.nodeId = nodeId;
-        propertyMapper = new LazyProvider<>(CheckedSupplier.wrap(() -> {
+        propertyMapper = registerLazyProvider(new LazyProvider<>(CheckedSupplier.wrap(() -> {
             validateExists();
             Map<String, Object> properties = AuthenticationUtil.runAsSystem(CheckedRunAsWork.wrap(() ->
                     nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), getNodeId())));
             return new PropertyMapper(properties);
-        }));
+        })));
     }
 
     public BasicNodeDaoImpl(org.edu_sharing.service.model.NodeRef nodeRef) {
         this.nodeId = nodeRef.getNodeId();
-        propertyMapper = new LazyProvider<>(CheckedSupplier.wrap(() -> {
+        propertyMapper = registerLazyProvider(new LazyProvider<>(CheckedSupplier.wrap(() -> {
             validateExists();
             return new PropertyMapper(nodeRef.getProperties());
-        }));
+        })));
     }
 
     public boolean exists() {
@@ -59,6 +60,24 @@ abstract class BasicNodeDaoImpl implements BasicNodeDao {
         nodeService.removeNode(nodeId, null, true);
     }
 
+    @NotNull
+    protected <T> LazyProvider<T> registerLazyProvider(@NotNull LazyProvider<T> lazyProvider) {
+        Objects.requireNonNull(lazyProvider, "lazyProviders cannot be null");
+        lazyProviders.add(lazyProvider);
+        return lazyProvider;
+    }
+
+    @Override
+    public void refresh() {
+        log.debug("Refreshing {} {}", this.getClass().getSimpleName(),  nodeId);
+        invalidateLazyProviders();
+    }
+
+    protected void invalidateLazyProviders() {
+        for (LazyProvider<?> lazyProvider : lazyProviders) {
+            lazyProvider.invalidate();
+        }
+    }
 
     @Override
     public String getCreator() {

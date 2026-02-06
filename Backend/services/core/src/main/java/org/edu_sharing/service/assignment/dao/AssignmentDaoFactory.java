@@ -46,8 +46,8 @@ public class AssignmentDaoFactory {
     public AssignmentDao assignmentDaoByNodeId(@NotNull @NonNull String nodeId) {
         String type = nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.CCM_PROP_ASSIGNMENT_TYPE);
         return switch (Enum.valueOf(Assignment.Type.class, type)) {
-            case SUBMISSION -> new SubmissionAssignmentDaoImpl(nodeId);
-            case DEFAULT -> new AssignmentDaoImpl(nodeId);
+            case SUBMISSION -> new NodeSubmissionAssignmentDao(nodeId);
+            case DEFAULT -> new NodeAssignmentDao(nodeId);
         };
     }
 
@@ -56,8 +56,8 @@ public class AssignmentDaoFactory {
     public AssignmentDao assignmentDaoByNodeRef(@NotNull @NonNull org.edu_sharing.service.model.NodeRef nodeRef) {
         String type = (String) nodeRef.getProperties().get(CCConstants.CCM_PROP_ASSIGNMENT_TYPE);
         return switch (Enum.valueOf(Assignment.Type.class, type)) {
-            case SUBMISSION -> new SubmissionAssignmentDaoImpl(nodeRef);
-            case DEFAULT -> new AssignmentDaoImpl(nodeRef);
+            case SUBMISSION -> new NodeSubmissionAssignmentDao(nodeRef);
+            case DEFAULT -> new NodeAssignmentDao(nodeRef);
         };
     }
 
@@ -66,8 +66,8 @@ public class AssignmentDaoFactory {
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public AssignmentDao assignemntDaoByType(Assignment.Type type) {
         return switch (type) {
-            case SUBMISSION -> new SubmissionAssignmentDaoImpl();
-            case DEFAULT -> new AssignmentDaoImpl();
+            case SUBMISSION -> new NodeSubmissionAssignmentDao();
+            case DEFAULT -> new NodeAssignmentDao();
         };
     }
 
@@ -76,36 +76,43 @@ public class AssignmentDaoFactory {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    AssignmentFileDao assignmentFileDao(AssignmentDaoImpl assignmentDao, String nodeId) {
-        return new AssignmentFileDaoImpl(assignmentDao, nodeId);
+    AssignmentFileDao assignmentFileDao(NodeAssignmentDao assignmentDao, String nodeId) {
+        return new NodeAssignmentFileDao(assignmentDao, nodeId);
     }
 
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    AssignmentFileDao submissionAssignmentFileDao(SubmissionAssignmentDaoImpl assignmentDao, String nodeId) {
-        return new SubmissionAssignmentFileDaoImpl(assignmentDao, nodeId);
+    AssignmentFileDao submissionAssignmentFileDao(NodeSubmissionAssignmentDao assignmentDao, String nodeId) {
+        return new NodeSubmissionAssignmentFileDao(assignmentDao, nodeId);
     }
 
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    SubmissionDao submissionDaoByNodeId(SubmissionAssignmentDaoImpl assignmentDao, String nodeId) {
-        return new SubmissionDaoImpl(this, assignmentDao, nodeId);
+    SubmissionDao submissionDaoByNodeId(NodeSubmissionAssignmentDao assignmentDao, String nodeId) {
+        return new NodeSubmissionDao(this, assignmentDao, nodeId);
     }
 
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    SubmissionDao submissionDaoByNodeRef(SubmissionAssignmentDaoImpl assignmentDao, org.edu_sharing.service.model.NodeRef nodeRef) {
-        return new SubmissionDaoImpl(this, assignmentDao, nodeRef);
+    SubmissionDao submissionDaoByNodeRef(NodeSubmissionAssignmentDao assignmentDao, org.edu_sharing.service.model.NodeRef nodeRef) {
+        return new NodeSubmissionDao(this, assignmentDao, nodeRef);
     }
 
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    SubmissionFileDao submissionFileDao(SubmissionAssignmentDaoImpl assignmentDao, SubmissionDaoImpl submissionDao, String nodeId) {
-        return new SubmissionFileDaoImpl(assignmentDao, submissionDao, nodeId);
+    public SubmissionDao emptySubmissionDao(String creator) {
+        return new EmptySubmissionAssignmentDao(creator);
+    }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    SubmissionFileDao submissionFileDao(NodeSubmissionAssignmentDao assignmentDao, NodeSubmissionDao submissionDao, String nodeId) {
+        return new NodeSubmissionFileDao(assignmentDao, submissionDao, nodeId);
     }
 
 

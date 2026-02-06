@@ -35,6 +35,8 @@ public interface BasicNodeDao {
     String getNodeId();
 
 
+    void refresh();
+
     /**
      * Retrieves the identifier of the creator associated with the node.
      *

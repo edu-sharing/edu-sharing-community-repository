@@ -1,7 +1,5 @@
 package org.edu_sharing.service.assignment.dao;
 
-import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -32,7 +30,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
-final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao {
+final class NodeSubmissionDao extends BasicNodeDaoImpl implements SubmissionDao {
 
     @Setter(onMethod_ = @Autowired)
     private PermissionService permissionService;
@@ -40,7 +38,7 @@ final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao 
     private AuthorityService authorityService;
 
     private AssignmentDaoFactory assignmentDaoFactory;
-    private SubmissionAssignmentDaoImpl assignmentDao;
+    private NodeSubmissionAssignmentDao assignmentDao;
 
     private final LazyProvider<Map<String, SubmissionFileDao>> submissionFileRefs = new LazyProvider<>(() -> {
         validateExists();
@@ -52,23 +50,18 @@ final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao 
                 .collect(Collectors.toMap(SubmissionFileDao::getNodeId, x -> x)));
     });
 
-    public SubmissionDaoImpl(AssignmentDaoFactory assignmentDaoFactory, SubmissionAssignmentDaoImpl assignmentDao, String nodeId) {
+    public NodeSubmissionDao(AssignmentDaoFactory assignmentDaoFactory, NodeSubmissionAssignmentDao assignmentDao, String nodeId) {
         super(nodeId);
         this.assignmentDaoFactory = assignmentDaoFactory;
         this.assignmentDao = assignmentDao;
     }
 
-    public SubmissionDaoImpl(AssignmentDaoFactory assignmentDaoFactory, SubmissionAssignmentDaoImpl assignmentDao, NodeRef nodeRef) {
+    public NodeSubmissionDao(AssignmentDaoFactory assignmentDaoFactory, NodeSubmissionAssignmentDao assignmentDao, NodeRef nodeRef) {
         super(nodeRef);
         this.assignmentDaoFactory = assignmentDaoFactory;
         this.assignmentDao = assignmentDao;
     }
 
-
-    @Override
-    public void refresh() {
-        propertyMapper.invalidate();
-    }
 
     @Override
     public Submission getSubmission() {
@@ -102,11 +95,13 @@ final class SubmissionDaoImpl extends BasicNodeDaoImpl implements SubmissionDao 
         }
     }
 
-    private Date getReturnDate() {
+    @Override
+    public Date getReturnDate() {
         return propertyMapper.get().getDate(CCConstants.CCM_PROP_SUBMISSION_RETURN_DATE);
     }
 
-    private Date getSubmissionDate() {
+    @Override
+    public Date getSubmissionDate() {
         return propertyMapper.get().getDate(CCConstants.CCM_PROP_SUBMISSION_SUBMISSION_DATE);
     }
 

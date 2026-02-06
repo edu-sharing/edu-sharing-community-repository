@@ -29,6 +29,7 @@ import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.annotation.Permission;
 import org.edu_sharing.util.CheckedRunAsWork;
 import org.edu_sharing.util.LazyProvider;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -37,12 +38,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
-public class SubmissionAssignmentDaoImpl extends BasicNodeDaoImpl implements AssignmentDao {
+public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements AssignmentDao {
 
     private final LazyProvider<Map<String, AssignmentFileDao>> assignmentFileRefs;
     private final LazyProvider<List<Assignment.Permission>> permissions;
     private final LazyProvider<String> submissionFolderRef;
-    private final LazyProvider<Map<String, SubmissionDao>> submissions;
+    private final LazyProvider<Map<String, SubmissionDao>> submissionsMap;
+    private final LazyProvider<Collection<SubmissionDao>> submissions;
 
     @Setter(onMethod_ = @Autowired)
     private AssignmentDaoFactory assignmentDaoFactory;
@@ -56,13 +58,13 @@ public class SubmissionAssignmentDaoImpl extends BasicNodeDaoImpl implements Ass
     private AuthorityService authorityService;
 
 
-    public SubmissionAssignmentDaoImpl() {
+    public NodeSubmissionAssignmentDao() {
         this((String) null);
     }
 
-    public SubmissionAssignmentDaoImpl(String nodeId) {
+    public NodeSubmissionAssignmentDao(String nodeId) {
         super(nodeId);
-        assignmentFileRefs = new LazyProvider<>(() -> {
+        assignmentFileRefs = registerLazyProvider(new LazyProvider<>(() -> {
             validateExists();
             return AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_ASSIGNMENT_FILE)
                     .stream()
@@ -70,9 +72,82 @@ public class SubmissionAssignmentDaoImpl extends BasicNodeDaoImpl implements Ass
                     .map(org.alfresco.service.cmr.repository.NodeRef::getId)
                     .map(x -> assignmentDaoFactory.submissionAssignmentFileDao(this, x))
                     .collect(Collectors.toMap(AssignmentFileDao::getNodeId, x -> x)));
-        });
+        }));
 
-        permissions = new LazyProvider<>(() -> {
+        permissions = registerLazyProvider(createLazyPermissionProvider(nodeId));
+
+        submissionFolderRef = registerLazyProvider(new LazyProvider<>(() -> {
+            validateExists();
+            return AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_SUBMISSIONS)
+                    .stream()
+                    .findFirst()
+                    .orElseThrow()
+                    .getChildRef()
+                    .getId());
+        }));
+
+        submissionsMap = registerLazyProvider(new LazyProvider<>(() -> {
+            validateExists();
+
+            List<ChildAssociationRef> childAssociationRefs = AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenChildAssociationRefType(submissionFolderRef.get(), CCConstants.CCM_TYPE_SUBMISSION));
+
+            return childAssociationRefs.stream()
+                    .map(ChildAssociationRef::getChildRef)
+                    .map(org.alfresco.service.cmr.repository.NodeRef::getId)
+                    .filter(id -> AssignmentUtil.hasAccessTo(permissionService, id))
+                    .collect(Collectors.toMap(x -> x, x -> assignmentDaoFactory.submissionDaoByNodeId(this, x)));
+        }));
+
+        submissions = registerLazyProvider(createLazySubmissionsProvider());
+
+    }
+
+
+    public NodeSubmissionAssignmentDao(org.edu_sharing.service.model.NodeRef nodeRef) {
+        super(nodeRef);
+        assignmentFileRefs = registerLazyProvider(new LazyProvider<>(() -> {
+            validateExists();
+            return AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_ASSIGNMENT_FILE)
+                    .stream()
+                    .map(ChildAssociationRef::getChildRef)
+                    .map(org.alfresco.service.cmr.repository.NodeRef::getId)
+                    .map(x -> assignmentDaoFactory.submissionAssignmentFileDao(this, x))
+                    .collect(Collectors.toMap(AssignmentFileDao::getNodeId, x -> x)));
+        }));
+
+        permissions = registerLazyProvider(createLazyPermissionProvider(nodeRef.getNodeId()));
+
+        submissionFolderRef = registerLazyProvider(new LazyProvider<>(() -> {
+            validateExists();
+            return nodeRef.getChildren()
+                    .stream()
+                    .filter(y -> CCConstants.CCM_TYPE_SUBMISSIONS.equals(y.getType()))
+                    .findFirst()
+                    .map(NodeRef::getNodeId)
+                    .orElse(null);
+        }));
+
+        submissionsMap = registerLazyProvider(new LazyProvider<>(() -> {
+            validateExists();
+
+            return nodeRef.getChildren()
+                    .stream()
+                    .filter(y -> CCConstants.CCM_TYPE_SUBMISSIONS.equals(y.getType()))
+                    .findFirst()
+                    .map(x -> x.getChildren().stream()
+                            .filter(AssignmentUtil::hasAccessTo)
+                            .collect(Collectors.toMap(NodeRef::getNodeId, y -> assignmentDaoFactory.submissionDaoByNodeRef(this, y))))
+                    .orElse(Collections.emptyMap());
+        }));
+
+        submissions = registerLazyProvider(createLazySubmissionsProvider());
+
+    }
+
+
+    @NotNull
+    private LazyProvider<List<Assignment.Permission>> createLazyPermissionProvider(String nodeId) {
+        return new LazyProvider<>(() -> {
             validateExists();
             if (!AssignmentUtil.isAssignmentCoordinator(permissionService, getNodeId())) {
                 return Collections.emptyList();
@@ -93,81 +168,25 @@ public class SubmissionAssignmentDaoImpl extends BasicNodeDaoImpl implements Ass
                             .toList()
             ));
         });
-
-        submissionFolderRef = new LazyProvider<>(() -> {
-            validateExists();
-            return AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_SUBMISSIONS)
-                    .stream()
-                    .findFirst()
-                    .orElseThrow()
-                    .getChildRef()
-                    .getId());
-        });
-
-        submissions = new LazyProvider<>(() -> {
-            validateExists();
-
-            List<ChildAssociationRef> childAssociationRefs = AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenChildAssociationRefType(submissionFolderRef.get(), CCConstants.CCM_TYPE_SUBMISSION));
-
-            return childAssociationRefs.stream()
-                    .map(ChildAssociationRef::getChildRef)
-                    .map(org.alfresco.service.cmr.repository.NodeRef::getId)
-                    .filter(id -> AssignmentUtil.hasAccessTo(permissionService, id))
-                    .collect(Collectors.toMap(x -> x, x -> assignmentDaoFactory.submissionDaoByNodeId(this, x)));
-        });
-
     }
 
-    public SubmissionAssignmentDaoImpl(org.edu_sharing.service.model.NodeRef nodeRef) {
-        super(nodeRef);
-        assignmentFileRefs = new LazyProvider<>(() -> {
-            validateExists();
-            return AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_ASSIGNMENT_FILE)
-                    .stream()
-                    .map(ChildAssociationRef::getChildRef)
-                    .map(org.alfresco.service.cmr.repository.NodeRef::getId)
-                    .map(x -> assignmentDaoFactory.submissionAssignmentFileDao(this, x))
-                    .collect(Collectors.toMap(AssignmentFileDao::getNodeId, x -> x)));
-        });
+    @NotNull
+    private LazyProvider<Collection<SubmissionDao>> createLazySubmissionsProvider() {
+        return new LazyProvider<>(() -> {
+            Collection<SubmissionDao> realSubmissions = submissionsMap.get().values();
+            List<Assignment.Permission> permissions = getPermissions();
 
-        permissions = new LazyProvider<>(() ->
-                nodeRef.getPermissions()
-                        .entrySet()
-                        .stream()
-                        .filter(Map.Entry::getValue)
-                        .map(Map.Entry::getKey)
-                        .map(y -> {
-                            Assignment.Role role = mapPermissionToRole(y);
-                            if (role == null) {
-                                return null;
-                            }
+            Set<String> possibleAssignees = permissions.stream()
+                    .filter(x -> x.role() == Assignment.Role.ASSIGNEE)
+                    .map(x -> x.authority().getAuthorityName())
+                    .collect(Collectors.toSet());
 
-                            return new Assignment.Permission(new Authority(AuthenticationUtil.getFullyAuthenticatedUser(), y), role);
-                        })
-                        .filter(Objects::nonNull)
-                        .toList()
-        );
+            possibleAssignees.removeAll(realSubmissions.stream().map(SubmissionDao::getCreator).collect(Collectors.toSet()));
 
-        submissionFolderRef = new LazyProvider<>(() -> {
-            validateExists();
-            return nodeRef.getChildren()
-                    .stream()
-                    .filter(y -> CCConstants.CCM_TYPE_SUBMISSIONS.equals(y.getType()))
-                    .findFirst()
-                    .map(NodeRef::getNodeId)
-                    .orElse(null);
-        });
-
-        submissions = new LazyProvider<>(() -> {
-            validateExists();
-            return nodeRef.getChildren()
-                    .stream()
-                    .filter(y -> CCConstants.CCM_TYPE_SUBMISSIONS.equals(y.getType()))
-                    .findFirst()
-                    .map(x -> x.getChildren().stream()
-                            .filter(AssignmentUtil::hasAccessTo)
-                            .collect(Collectors.toMap(NodeRef::getNodeId, y -> assignmentDaoFactory.submissionDaoByNodeRef(this, y))))
-                    .orElse(Collections.emptyMap());
+            return Stream.concat(
+                    realSubmissions.stream(),
+                    possibleAssignees.stream().map(x -> assignmentDaoFactory.emptySubmissionDao(x))
+            ).toList();
         });
     }
 
@@ -373,15 +392,6 @@ public class SubmissionAssignmentDaoImpl extends BasicNodeDaoImpl implements Ass
     }
 
     @Override
-    public void refresh() {
-        log.debug("Refreshing assignment {}", nodeId);
-        propertyMapper.invalidate();
-        assignmentFileRefs.invalidate();
-        permissions.invalidate();
-        submissionFolderRef.invalidate();
-    }
-
-    @Override
     public Assignment getAssignment() {
         if (!exists()) {
             return null;
@@ -447,9 +457,8 @@ public class SubmissionAssignmentDaoImpl extends BasicNodeDaoImpl implements Ass
         return assignmentFileRefs.get().values();
     }
 
-    @Override
     public Collection<SubmissionDao> getSubmissions() {
-        return submissions.get().values();
+        return submissions.get();
     }
 
     @Override
@@ -460,7 +469,7 @@ public class SubmissionAssignmentDaoImpl extends BasicNodeDaoImpl implements Ass
                     .orElseThrow(() -> new MissingResourceException("No submission found for user " + currentUser));
         }
 
-        SubmissionDao submissionDao = submissions.get().get(submissionId);
+        SubmissionDao submissionDao = submissionsMap.get().get(submissionId);
         if (submissionDao == null) {
             throw new IllegalArgumentException("Submission with id " + submissionId + " does not exist.");
         }
@@ -469,7 +478,6 @@ public class SubmissionAssignmentDaoImpl extends BasicNodeDaoImpl implements Ass
 
     private Optional<SubmissionDao> getSubmissionByCreator(String creator) {
         return AuthenticationUtil.runAsSystem(() -> submissions.get()
-                .values()
                 .stream()
                 .filter(x -> x.getCreator().equals(creator))
                 .findFirst());
@@ -477,25 +485,25 @@ public class SubmissionAssignmentDaoImpl extends BasicNodeDaoImpl implements Ass
 
     @Override
     public SubmissionDao getOrCreateSubmission(String submissionId) {
-        submissions.invalidate();
+        submissionsMap.invalidate();
 
         SubmissionDao submissionDao;
         if (StringUtils.isBlank(submissionId)) {
             submissionDao = assignmentDaoFactory.submissionDaoByNodeId(this, null);
             submissionDao.create();
-            submissions.get().put(submissionDao.getNodeId(), submissionDao);
+            submissionsMap.get().put(submissionDao.getNodeId(), submissionDao);
         } else if ("-me-".equalsIgnoreCase(submissionId)) {
             String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
             Optional<SubmissionDao> submissionByCreator = getSubmissionByCreator(currentUser);
             if (submissionByCreator.isEmpty()) {
                 submissionDao = assignmentDaoFactory.submissionDaoByNodeId(this, null);
                 submissionDao.create();
-                submissions.get().put(submissionDao.getNodeId(), submissionDao);
+                submissionsMap.get().put(submissionDao.getNodeId(), submissionDao);
             } else {
                 submissionDao = submissionByCreator.get();
             }
         } else {
-            submissionDao = submissions.get().get(submissionId);
+            submissionDao = submissionsMap.get().get(submissionId);
         }
 
         if (submissionDao == null) {

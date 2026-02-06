@@ -25,24 +25,24 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.*;
 
 @Slf4j
-final class SubmissionAssignmentFileDaoImpl extends BasicNodeDaoImpl implements AssignmentFileDao {
-    private final SubmissionAssignmentDaoImpl assignmentDao;
+final class NodeAssignmentFileDao extends BasicNodeDaoImpl implements AssignmentFileDao {
+    private final NodeAssignmentDao assignmentDao;
     private final LazyProvider<Node> referNode;
 
     @Setter(onMethod_ = @Autowired)
     private PermissionService permissionService;
 
-    public SubmissionAssignmentFileDaoImpl(SubmissionAssignmentDaoImpl assignmentDao, String nodeId) {
+    public NodeAssignmentFileDao(NodeAssignmentDao assignmentDao, String nodeId) {
         super(nodeId);
         this.assignmentDao = assignmentDao;
 
 
-        referNode = new LazyProvider<>(() -> {
+        referNode = registerLazyProvider(new LazyProvider<>(() -> {
             validateExists();
             return Optional.ofNullable(propertyMapper.get().getNodeRef(CCConstants.CCM_PROP_ASSIGNMENT_FILE_REFER_TO))
                     .map(CheckedFunction.wrap(n -> NodeDao.getNode(n).asNode()))
                     .orElse(null);
-        });
+        }));
     }
 
 
@@ -53,6 +53,7 @@ final class SubmissionAssignmentFileDaoImpl extends BasicNodeDaoImpl implements 
         if (StringUtils.isNotBlank(nodeId)) {
             throw new IllegalStateException("AssignmentFile with id " + nodeId + " already exists.");
         }
+
 
         validateCanChangeAssignment();
 
@@ -73,12 +74,6 @@ final class SubmissionAssignmentFileDaoImpl extends BasicNodeDaoImpl implements 
     }
 
     @Override
-    public void refresh() {
-        propertyMapper.invalidate();
-        referNode.invalidate();
-    }
-
-    @Override
     public AssignmentFile getAssignmentFile() {
         if (!exists()) {
             return null;
@@ -88,7 +83,7 @@ final class SubmissionAssignmentFileDaoImpl extends BasicNodeDaoImpl implements 
                 getNodeRef(),
                 referNode.get(),
                 getDocumentRole(),
-                null);
+                isDone());
     }
 
     @Override
@@ -115,15 +110,14 @@ final class SubmissionAssignmentFileDaoImpl extends BasicNodeDaoImpl implements 
             properties.put(CCConstants.CCM_PROP_ASSIGNMENT_FILE_DOCUMENT_TYPE, assignmentFileRequest.documentRole().name());
         }
 
+        if (!Objects.equals(assignmentFileRequest.isDone(), isDone())) {
+            properties.put(CCConstants.CCM_PROP_ASSIGNMENT_FILE_IS_DONE, assignmentFileRequest.isDone());
+        }
+
         if (!properties.isEmpty()) {
             nodeService.updateNodeNative(nodeId, properties);
             refresh();
         }
-    }
-
-    @Override
-    public Boolean isDone() {
-        return null;
     }
 
     @Override
@@ -138,6 +132,11 @@ final class SubmissionAssignmentFileDaoImpl extends BasicNodeDaoImpl implements 
     }
 
     private void handleReferenceCopy(@NotNull AssignmentFileRequest assignmentFileRequest, String currentReferNodeId, Map<String, Object> properties) {
+        if (assignmentDao.getType() != Assignment.Type.SUBMISSION) {
+            log.debug("Skipping reference copy for non-submission assignment");
+            return;
+        }
+
         if (StringUtils.isNotBlank(currentReferNodeId) && nodeService.exists(currentReferNodeId)) {
             log.debug("Deleting old reference node {}", currentReferNodeId);
             nodeService.removeNode(currentReferNodeId, nodeId, false);
@@ -158,13 +157,29 @@ final class SubmissionAssignmentFileDaoImpl extends BasicNodeDaoImpl implements 
     }
 
     @Override
+    public Boolean isDone() {
+        return propertyMapper.get().getBoolean(CCConstants.CCM_PROP_ASSIGNMENT_FILE_IS_DONE, false);
+    }
+
+    @Override
     public AssignmentFile.Role getDocumentRole() {
         return propertyMapper.get().getEnum(CCConstants.CCM_PROP_ASSIGNMENT_FILE_DOCUMENT_TYPE, AssignmentFile.Role.class);
     }
 
     private void validateCanChangeAssignment() {
-        if(!assignmentDao.canChangeAssignment()){
-            throw new IllegalStateException("Cannot edit assignment for assignment with type " + assignmentDao.getType());
+        if (assignmentDao.getType() != Assignment.Type.SUBMISSION) {
+            return;
+        }
+
+        switch (assignmentDao.getStatus()) {
+            case DRAFT -> { }
+            case INPROGRESS -> {
+                if (!assignmentDao.getSubmissions().isEmpty()) {
+                    throw new IllegalStateException("Cannot edit assignment with existing submissions.");
+                }
+            }
+            case FINISHED -> throw new IllegalStateException("Cannot edit assignment for finished assignment.");
+            case CANCELED -> throw new IllegalStateException("Cannot edit assignment for canceled assignment.");
         }
     }
 }

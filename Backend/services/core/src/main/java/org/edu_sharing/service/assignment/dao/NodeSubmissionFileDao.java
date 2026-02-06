@@ -17,7 +17,6 @@ import org.edu_sharing.restservices.assignment.v1.model.SubmissionFileRequest;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.assignment.AssignmentFileDao;
-import org.edu_sharing.service.assignment.BasicNodeDao;
 import org.edu_sharing.service.assignment.SubmissionFileDao;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.transform.RepresentationService;
@@ -33,10 +32,10 @@ import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
-final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements SubmissionFileDao {
+final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements SubmissionFileDao {
 
-    private final SubmissionAssignmentDaoImpl assignmentDao;
-    private final SubmissionDaoImpl submissionDao;
+    private final NodeSubmissionAssignmentDao assignmentDao;
+    private final NodeSubmissionDao submissionDao;
 
     private final LazyProvider<Optional<NodeRef>> contentNodeRef;
     private final LazyProvider<Optional<NodeRef>> correctionNodeRef;
@@ -53,53 +52,43 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
     private final MCAlfrescoAPIClient apiClient = new MCAlfrescoAPIClient();
 
 
-    public SubmissionFileDaoImpl(SubmissionAssignmentDaoImpl assignmentDao, SubmissionDaoImpl submissionDao, String nodeId) {
+    public NodeSubmissionFileDao(NodeSubmissionAssignmentDao assignmentDao, NodeSubmissionDao submissionDao, String nodeId) {
         super(nodeId);
         this.assignmentDao = assignmentDao;
         this.submissionDao = submissionDao;
 
-        contentNodeRef = new LazyProvider<>(() -> {
+        contentNodeRef = registerLazyProvider(new LazyProvider<>(() -> {
             validateExists();
             return AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_IO)
                     .stream()
                     .filter(x -> x.getTypeQName().toString().equals(CCConstants.CCM_ASSOC_SUBMISSION_FILE_CONTENT))
                     .map(ChildAssociationRef::getChildRef)
                     .findFirst());
-        });
+        }));
 
-        correctionNodeRef = new LazyProvider<>(() -> {
+        correctionNodeRef = registerLazyProvider(new LazyProvider<>(() -> {
             validateExists();
             return AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_IO)
                     .stream()
                     .filter(x -> x.getTypeQName().toString().equals(CCConstants.CCM_ASSOC_SUBMISSION_FILE_CORRECTION))
                     .map(ChildAssociationRef::getChildRef)
                     .findFirst());
-        });
+        }));
 
-        contentNode = new LazyProvider<>(CheckedSupplier.wrap(() -> {
+        contentNode = registerLazyProvider(new LazyProvider<>(CheckedSupplier.wrap(() -> {
             validateExists();
             return contentNodeRef.get()
                     .map(CheckedFunction.wrap(n -> NodeDao.getNode(n).asNode()))
                     .orElse(null);
-        }));
+        })));
 
-        correctionNode = new LazyProvider<>(CheckedSupplier.wrap(() -> {
+        correctionNode = registerLazyProvider(new LazyProvider<>(CheckedSupplier.wrap(() -> {
             validateExists();
             return correctionNodeRef.get()
                     .map(CheckedFunction.wrap(n -> NodeDao.getNode(n).asNode()))
                     .orElse(null);
-        }));
+        })));
     }
-
-    @Override
-    public void refresh() {
-        propertyMapper.invalidate();
-        contentNodeRef.invalidate();
-        correctionNodeRef.invalidate();
-        contentNode.invalidate();
-        correctionNode.invalidate();
-    }
-
 
     @Override
     @RetryingTransaction
@@ -110,7 +99,7 @@ final class SubmissionFileDaoImpl extends BasicNodeDaoImpl implements Submission
         if (!assignmentDao.getAllowAdditionalDocumentSubmissions() && submissionDao.getSubmissionFiles()
                 .stream()
                 .anyMatch(x -> x.getReferToAssigmentFile()
-                        .map(BasicNodeDao::getNodeId)
+                        .map(org.edu_sharing.service.assignment.BasicNodeDao::getNodeId)
                         .map(y -> y.equals(request.assignmentFile()))
                         .orElse(false))) {
             throw new IllegalArgumentException("A submission file to the same assignment file already exists.");

@@ -21,13 +21,11 @@ import org.edu_sharing.service.assignment.AssignmentDao;
 import org.edu_sharing.service.assignment.AssignmentFileDao;
 import org.edu_sharing.service.assignment.SubmissionDao;
 import org.edu_sharing.service.authority.AuthorityService;
-import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.annotation.Permission;
 import org.edu_sharing.util.CheckedRunAsWork;
 import org.edu_sharing.util.LazyProvider;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -36,7 +34,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
-final class AssignmentDaoImpl extends BasicNodeDaoImpl implements AssignmentDao {
+final class NodeAssignmentDao extends BasicNodeDaoImpl implements AssignmentDao {
 
 
     @Setter(onMethod_ = @Autowired)
@@ -50,7 +48,7 @@ final class AssignmentDaoImpl extends BasicNodeDaoImpl implements AssignmentDao 
     @Setter(onMethod_ = @Autowired)
     private AuthorityService authorityService;
 
-    private final LazyProvider<Map<String, AssignmentFileDao>> assignmentFileRefs = new LazyProvider<>(() -> {
+    private final LazyProvider<Map<String, AssignmentFileDao>> assignmentFileRefs = registerLazyProvider(new LazyProvider<>(() -> {
         validateExists();
         return AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenChildAssociationRefType(getNodeId(), CCConstants.CCM_TYPE_ASSIGNMENT_FILE)
                 .stream()
@@ -58,19 +56,19 @@ final class AssignmentDaoImpl extends BasicNodeDaoImpl implements AssignmentDao 
                 .map(org.alfresco.service.cmr.repository.NodeRef::getId)
                 .map(x -> assignmentDaoFactory.assignmentFileDao(this, x))
                 .collect(Collectors.toMap(AssignmentFileDao::getNodeId, x -> x)));
-    });
+    }));
 
 
     private final LazyProvider<List<Assignment.Permission>> permissions;
 
-    public AssignmentDaoImpl() {
+    public NodeAssignmentDao() {
         this((String)null);
     }
 
-    public AssignmentDaoImpl(String nodeId) {
+    public NodeAssignmentDao(String nodeId) {
         super(nodeId);
 
-        permissions = new LazyProvider<>(() -> {
+        permissions = registerLazyProvider(new LazyProvider<>(() -> {
             validateExists();
             if (!AssignmentUtil.isAssignmentCoordinator(permissionService, getNodeId())) {
                 return Collections.emptyList();
@@ -90,12 +88,12 @@ final class AssignmentDaoImpl extends BasicNodeDaoImpl implements AssignmentDao 
                             .filter(Objects::nonNull)
                             .toList()
             ));
-        });
+        }));
     }
 
-    public AssignmentDaoImpl(org.edu_sharing.service.model.NodeRef nodeRef) {
+    public NodeAssignmentDao(org.edu_sharing.service.model.NodeRef nodeRef) {
         super(nodeRef);
-        permissions = new LazyProvider<>(() -> {
+        permissions = registerLazyProvider(new LazyProvider<>(() -> {
             validateExists();
             if (!AssignmentUtil.isAssignmentCoordinator(permissionService, getNodeId())) {
                 return Collections.emptyList();
@@ -116,7 +114,7 @@ final class AssignmentDaoImpl extends BasicNodeDaoImpl implements AssignmentDao 
                     })
                     .filter(Objects::nonNull)
                     .toList();
-        });
+        }));
     }
 
     private Assignment.Role mapPermissionToRole(String permission) {
@@ -222,15 +220,6 @@ final class AssignmentDaoImpl extends BasicNodeDaoImpl implements AssignmentDao 
         newAssignmentFileRequestMap.keySet().removeAll(assignmentFileDaoMap.keySet());
         log.debug("Added assignment files: {}", newAssignmentFileRequestMap.keySet());
         newAssignmentFileRequestMap.values().forEach(x -> assignmentDaoFactory.assignmentFileDao(this, null).create(x));
-    }
-
-
-    @Override
-    public void refresh() {
-        log.debug("Refreshing assignment {}", nodeId);
-        propertyMapper.invalidate();
-        assignmentFileRefs.invalidate();
-        permissions.invalidate();
     }
 
     @Override

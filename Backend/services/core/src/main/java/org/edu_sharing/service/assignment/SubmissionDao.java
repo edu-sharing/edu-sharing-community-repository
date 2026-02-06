@@ -6,12 +6,17 @@ import org.edu_sharing.restservices.assignment.v1.model.SubmissionFileRequest;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 
 public interface SubmissionDao extends BasicNodeDao {
     void refresh();
 
     Submission getSubmission();
+
+    Date getReturnDate();
+
+    Date getSubmissionDate();
 
     boolean isReturned();
 
