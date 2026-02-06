@@ -1,0 +1,86 @@
+// reference for: use ... as * (https://stackoverflow.com/a/63012314)
+@use '../../../topic-page/topic-page-variables' as *;
+
+.ai-widget {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    h2 {
+        width: 100%;
+        text-align: center;
+    }
+
+    wlo-editable-text {
+        width: 100%;
+    }
+
+    .edit-mode {
+        margin-top: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+
+        mat-form-field {
+            width: 100%;
+            display: block;
+        }
+
+        .prompt-description code {
+            cursor: pointer;
+        }
+
+        .select-dimensions {
+            display: grid;
+            place-items: center;
+            gap: 0.5rem;
+
+            &.wlo-grid-cols-1 {
+                grid-template-columns: repeat(1, minmax(0, 1fr));
+            }
+
+            &.wlo-grid-cols-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            &.wlo-grid-cols-3 {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        .answers-container {
+            margin-top: 25px;
+        }
+    }
+
+    .placeholder-btn {
+        margin-bottom: 20px;
+    }
+
+    .reloading-indicator {
+        // Hint: this requires the outer container to be relative to display the reloading indicator over the full div
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: wait;
+        background: rgba($inverse-surface, 0.4);
+        border-top-left-radius: $widget-border-radius;
+        border-top-right-radius: $widget-border-radius;
+    }
+}
+
+// fix for displaying the full spinner
+:host ::ng-deep es-spinner .spinner {
+    width: 150px;
+}
+
+// adding :host in front does not work, as the snackbar is placed on the end of the <body>
+::ng-deep .mat-toolbar.mat-primary {
+    background: $primary;
+    color: $on-primary;
+}

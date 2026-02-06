@@ -24,6 +24,7 @@
     "src/polyfills.ts"
   ],
   "include": [
+    "src/main.web-component.ts",
     "src/**/*.d.ts"
   ],
   "exclude": [

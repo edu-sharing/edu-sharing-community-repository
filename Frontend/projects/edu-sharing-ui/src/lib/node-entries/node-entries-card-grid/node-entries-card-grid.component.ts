@@ -28,7 +28,6 @@ import { CustomTemplatesDataSource } from '../custom-templates-data-source';
 import { Target } from '../../types/option-item';
 import { NodeEntriesService } from '../../services/node-entries.service';
 import { UIService } from '../../services/ui.service';
-import { ListItemSort } from '../../types/list-item';
 import { DragData } from '../../types/drag-drop';
 import { CdkOverlayOrigin } from '@angular/cdk/overlay';
 import { NodeHelperService } from '../../services/node-helper.service';

@@ -1,0 +1,14 @@
+<div *ngIf="initialized(); else loadingSpinner">
+  <!-- color + configuration buttons -->
+  <es-widget-configuration-buttons
+    *ngIf="editMode()"
+    [optionOne]="embedConfigurationOption"
+    [pageVariantNode]="pageVariantNode"
+    [swimlaneIndex]="swimlaneIndex"
+    [updateInProgress]="updateInProgress()"
+    (optionOneClicked)="embedWidget()"
+  ></es-widget-configuration-buttons>
+</div>
+<ng-template #loadingSpinner>
+  <es-spinner></es-spinner>
+</ng-template>

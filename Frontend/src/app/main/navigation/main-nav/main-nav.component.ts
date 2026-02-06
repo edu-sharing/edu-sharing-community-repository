@@ -30,7 +30,7 @@ import {
     UIConstants,
 } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
-import { defer, Observable, ReplaySubject, Subject } from 'rxjs';
+import { ReplaySubject, Subject } from 'rxjs';
 import { delay, filter, map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import {
     ConfigurationService,

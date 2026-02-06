@@ -33,7 +33,7 @@ import {
     VirtualNode,
 } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { delay, filter, map, startWith, takeUntil, tap } from 'rxjs/operators';
+import { delay, filter, map, startWith, takeUntil } from 'rxjs/operators';
 import {
     Connector,
     Filetype,

@@ -1,5 +1,5 @@
 import { Component, NgZone, OnDestroy, ViewChild, ViewEncapsulation } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Params } from '@angular/router';
 import {
     EventListener,
     FrameEventsService,
@@ -12,11 +12,15 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { Subject } from 'rxjs';
+import { WIDGETS } from '../topic-page/shared/types/custom-definitions';
 
 @Component({
     selector: 'es-mds-embed',
     encapsulation: ViewEncapsulation.None,
     template: `
+        <ng-container *ngIf="!component">
+            Please append /&lt;component-name&gt; to your url
+        </ng-container>
         <es-mds-editor-wrapper
             #mdsRef
             [embedded]="true"
@@ -31,6 +35,14 @@ import { Subject } from 'rxjs';
             #licenseRef
             [data]="{ kind: 'properties', properties: data }"
         ></es-license-dialog-content>
+        <es-code-editor [options]="jsonConfig" [(ngModel)]="configOverwrite"></es-code-editor>
+        <es-generic-widget
+            *ngIf="component === 'generic-widget'"
+            [contextNodeId]="queryParams.contextNodeId"
+            [widgetType]="queryParams.widgetType || WIDGETS.CONTENT_TEASER"
+            [configOverwrite]="configOverwrite"
+            [editMode]="queryParams.editMode === 'true'"
+        ></es-generic-widget>
     `,
     styleUrls: ['embed-page.component.scss'],
     standalone: false,
@@ -38,12 +50,19 @@ import { Subject } from 'rxjs';
 export class EmbedPageComponent implements EventListener, OnDestroy {
     @ViewChild('mdsRef') mdsRef: MdsEditorWrapperComponent;
     @ViewChild('licenseRef') licenseRef: LicenseDialogContentComponent;
-    component: string;
+    readonly jsonConfig: any = {
+        minimap: { enabled: false },
+        language: 'json',
+        automaticLayout: true,
+    };
+    component: 'mds' | 'license' | 'generic-widget';
+    configOverwrite: string;
     data: any = {};
     groupId = 'io';
     setId = RestConstants.DEFAULT;
     refresh: Boolean;
     private destroyed = new Subject<void>();
+    queryParams: Params;
     constructor(
         private translations: TranslationsService,
         private mainNavService: MainNavService,
@@ -65,6 +84,7 @@ export class EmbedPageComponent implements EventListener, OnDestroy {
             this.route.params.subscribe((params) => {
                 this.component = params.component;
                 this.route.queryParams.subscribe((params) => {
+                    this.queryParams = params;
                     if (params.group) {
                         this.groupId = params.group;
                     }
@@ -109,4 +129,6 @@ export class EmbedPageComponent implements EventListener, OnDestroy {
             }
         }
     }
+
+    protected readonly WIDGETS = WIDGETS;
 }

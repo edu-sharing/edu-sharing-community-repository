@@ -1,0 +1,20 @@
+<div class="custom-propose-content-card" role="listitem">
+  <div class="card-header">
+    <div class="no-content-text">
+      {{ 'TOPIC_PAGE.WIDGET.PROPOSE_CONTENT.NO_CONTENT_QUESTION' | translate }}
+    </div>
+    <es-pointing-owl-image></es-pointing-owl-image>
+  </div>
+  <div class="card-body">
+    <div class="card-heading">
+      {{ 'TOPIC_PAGE.WIDGET.PROPOSE_CONTENT.SHARING_MAKES_YOU_HAPPY' | translate }}
+    </div>
+    <p>
+      {{ 'TOPIC_PAGE.WIDGET.PROPOSE_CONTENT.CONTENT_QUESTION' | translate }}
+    </p>
+    <button class="propose-content" mat-flat-button color="primary" (click)="proposeContent()">
+      <i esIcon="add" aria-hidden="true"></i>
+      {{ 'TOPIC_PAGE.WIDGET.PROPOSE_CONTENT.TITLE' | translate }}
+    </button>
+  </div>
+</div>

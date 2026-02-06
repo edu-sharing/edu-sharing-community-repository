@@ -1,0 +1,56 @@
+@use '../../../topic-page/topic-page-variables' as *;
+
+:host {
+}
+
+.iframe-widget {
+    .iframe-form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .toggle-input {
+        margin-top: 8px;
+    }
+
+    .iframe-display {
+        margin-top: 8px;
+
+        &.edit-mode {
+            margin-top: 24px;
+        }
+
+        .preview-title {
+            font-weight: $font-weight-bold;
+        }
+
+        .confirmation-dialog {
+            margin-top: 8px;
+            padding: 16px;
+            width: 100%;
+            height: 450px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 16px;
+            background: $surface;
+            z-index: 1;
+        }
+
+        iframe {
+            margin-top: 8px;
+            box-sizing: border-box;
+
+            &:not(.show-border) {
+                border: none;
+            }
+        }
+    }
+
+    .iframe-buttons {
+        margin-top: 24px;
+        display: inline-flex;
+        gap: 16px;
+    }
+}

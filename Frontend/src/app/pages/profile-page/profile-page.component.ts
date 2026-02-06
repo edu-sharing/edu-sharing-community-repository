@@ -36,7 +36,6 @@ import {
     ME,
     NodeEntry,
     User,
-    UserProfile,
     UserService,
     UserStats,
 } from 'ngx-edu-sharing-api';

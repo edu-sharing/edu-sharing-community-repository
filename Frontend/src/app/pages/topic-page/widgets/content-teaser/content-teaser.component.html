@@ -1,0 +1,43 @@
+<div *ngIf="initialized(); else loadingSpinner">
+  <!-- content teaser entries -->
+  <es-node-entries
+    class="main-content"
+    [blacklistedNodeIds]="blacklistedNodeIds"
+    [queryId]="queryId()"
+    [criteria]="criteria()"
+    [layout]="layout"
+    [scrollGradientColor]="swimlaneColor() && !swimlaneShapeSelected() ? swimlaneColor() : null"
+    [hasEditRightsAndIsEditMode]="editMode()"
+    [searchText]="searchText"
+    (blacklistChanged)="changedBlacklist($event)"
+    (displayTypeChanged)="layoutChangeAction()"
+    (itemClicked)="itemClicked($event)"
+    (nodeStatisticsChanged)="changeNodeStatistics($event)"
+    (totalSearchResultCountChanged)="changeTotalSearchResultCount($event)"
+  ></es-node-entries>
+
+  <!-- color + configuration buttons -->
+  <es-widget-configuration-buttons
+    *ngIf="editMode()"
+    [ariaLabel]="'TOPIC_PAGE.WIDGET.CONTENT_TEASER.CONFIG_ARIA' | translate"
+    [(layout)]="layout"
+    [layoutOptions]="layoutOptions"
+    [optionOne]="{
+      icon: 'search',
+      isVisible: true,
+      text:
+        ('TOPIC_PAGE.WIDGET.CONTENT_TEASER.CHANGE_FILTER_OR_SEARCH' | translate) +
+        (totalSearchResultCount > -1 ? ' (' + totalSearchResultCount + ')' : ''),
+    }"
+    [optionTwo]="embedConfigurationOption"
+    [pageVariantNode]="pageVariantNode"
+    [swimlaneIndex]="swimlaneIndex"
+    [updateInProgress]="updateInProgress()"
+    (layoutChange)="changeLayout()"
+    (optionOneClicked)="openRepoContentUrl()"
+    (optionTwoClicked)="embedWidget()"
+  ></es-widget-configuration-buttons>
+</div>
+<ng-template #loadingSpinner>
+  <es-spinner></es-spinner>
+</ng-template>

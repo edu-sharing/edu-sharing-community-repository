@@ -1,0 +1,47 @@
+<es-info-message mode="info" class="info-message">
+  {{ i18nPrefix + 'INFO' | translate }}
+  <br /><br />
+  {{ i18nPrefix + 'HINT' | translate }}
+</es-info-message>
+
+<div class="options-container">
+  <button
+    mat-stroked-button
+    class="option-button"
+    [class.recommended]="nodeId || propagatedNodeId"
+    [disabled]="!nodeId && !propagatedNodeId"
+    (click)="selectOption('nodeId')"
+  >
+    <div class="option-icon">
+      <i esIcon="network_node"></i>
+    </div>
+    <div class="option-text">
+      <h3>
+        {{ i18nPrefix + 'OPTION_NODE_ID_LABEL' | translate }}
+      </h3>
+      <p>
+        {{ i18nPrefix + 'OPTION_NODE_ID_DESCRIPTION' | translate }}
+        <ng-container *ngIf="!nodeId && !propagatedNodeId">
+          <br /><br />
+          {{ i18nPrefix + 'OPTION_NODE_ID_NOT_FOUND' | translate }}
+        </ng-container>
+      </p>
+    </div>
+    <div class="recommended-label" *ngIf="nodeId || propagatedNodeId">
+      {{ i18nPrefix + 'RECOMMENDED' | translate }}
+    </div>
+  </button>
+  <button mat-stroked-button class="option-button" (click)="selectOption('configOverwrite')">
+    <div class="option-icon">
+      <i esIcon="data_object"></i>
+    </div>
+    <div class="option-text">
+      <h3>
+        {{ i18nPrefix + 'OPTION_OVERWRITE_LABEL' | translate }}
+      </h3>
+      <p>
+        {{ i18nPrefix + 'OPTION_OVERWRITE_DESCRIPTION' | translate }}
+      </p>
+    </div>
+  </button>
+</div>
