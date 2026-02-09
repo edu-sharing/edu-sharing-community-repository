@@ -256,7 +256,9 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
      * Initializes the component by definition the default columns for the collections data source.
      */
     async ngOnInit(): Promise<void> {
-        this.selectedTab.set(this.supportedTabs()[0]);
+        if (this.selectedTab() === null) {
+            this.selectedTab.set(this.supportedTabs()[0]);
+        }
         this.flatNodeEntriesColumns = await this.mdsHelperService.getColumnsByMdsId('search', {
             repository: HOME_REPOSITORY,
         });
