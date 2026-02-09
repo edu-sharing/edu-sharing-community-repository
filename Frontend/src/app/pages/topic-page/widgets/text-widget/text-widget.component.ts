@@ -16,6 +16,7 @@ import { Node } from 'ngx-edu-sharing-api';
 import { SpinnerComponent } from 'ngx-edu-sharing-ui';
 import { WidgetConfigurationButtonsComponent } from '../shared/widget-configuration-buttons/widget-configuration-buttons.component';
 import { ConfigurationOption } from '../../shared/types/configuration-option';
+import { WidgetComponentInterface } from '../generic-widget/generic-widget.component';
 
 @Component({
     selector: 'es-text-widget',
@@ -25,7 +26,7 @@ import { ConfigurationOption } from '../../shared/types/configuration-option';
     templateUrl: './text-widget.component.html',
     styleUrls: ['./text-widget.component.scss'],
 })
-export class TextWidgetComponent {
+export class TextWidgetComponent implements WidgetComponentInterface {
     // INPUTS
     @Input() contextNodeId: string;
     editMode: InputSignal<boolean> = input<boolean>(false);
@@ -35,6 +36,7 @@ export class TextWidgetComponent {
     @Input() swimlaneIndex: number = -1;
 
     @Output() embedWidgetClicked: EventEmitter<void> = new EventEmitter<void>();
+    @Output() configChanged: EventEmitter<void> = new EventEmitter<void>();
 
     // VARIABLES
     initialized: WritableSignal<boolean> = signal(false);

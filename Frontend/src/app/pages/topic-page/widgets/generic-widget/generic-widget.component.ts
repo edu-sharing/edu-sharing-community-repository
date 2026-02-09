@@ -61,6 +61,7 @@ import {
 import { BaseWidgetConfig } from '../../shared/types/widget-config/base-widget-config';
 import { getNodeOrDefaultNodeId } from '../../shared/utils/node-util';
 import { Closable } from '../../../../features/dialogs/card-dialog/card-dialog-config';
+import { GenericWidgetGlobalService } from './generic-widget-global.service';
 
 export interface WidgetComponentInterface {
     // inputs
@@ -114,7 +115,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     @Input() swimlaneColor: string = DEFAULT_BG_COLOR;
     @Input() swimlaneIndex: number = -1;
     @Input() swimlaneShape: SwimlaneBackgroundShape = SwimlaneBackgroundShape.None;
-    @Input() widgetType: WIDGET_TYPE = WIDGETS.CONTENT_TEASER;
+    @Input() widgetType: WIDGET_TYPE | string = WIDGETS.CONTENT_TEASER;
 
     // Additional inputs that might be specific to certain widgets
     @Input() customUrl?: (collection: Node) => string;
@@ -162,6 +163,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         private clipboard: Clipboard,
         private dialogs: DialogsService,
         private injector: Injector,
+        private genericWidgetGlobalService: GenericWidgetGlobalService,
         private globalWidgetConfigService: GlobalWidgetConfigService,
         private platformLocation: PlatformLocation,
         private toast: Toast,
@@ -736,7 +738,10 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
      */
     private async getComponentClass(): Promise<any> {
         let componentClass: any;
-
+        componentClass = this.genericWidgetGlobalService.getCustomWidget(this.widgetType);
+        if (componentClass != null) {
+            return componentClass;
+        }
         switch (this.widgetType) {
             case WIDGETS.AI_TEXT_WIDGET:
                 const aiTextWidgetModule = await import(
@@ -790,6 +795,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         }
 
         if (!componentClass) {
+            console.error(this.widgetType + ' not found');
             throw new Error(
                 this.translate.instant(
                     'TOPIC_PAGE.WIDGET.GENERIC_WIDGET.WIDGET_NOT_FOUND_IN_MODULE_OR_UNKNOWN',

@@ -33,6 +33,9 @@
 
 <!-- metadata type templates -->
 <ng-template #specialType>
+  <ng-container *ngIf="genericWidgetGlobalService.hasCustomDisplayType(layout)">
+    <div #customType></div>
+  </ng-container>
   <ng-container *ngIf="layout === GenericNodeEntriesDisplayType.MapView">
     <!-- note: the datasource cannot be used here, as the es-node-entries-wrapper is not initialized -->
     <!--<es-map-node-card
@@ -53,6 +56,5 @@
       (zoomUpdated)="updateMapZoom($event)"
     ></es-map-node-card>
     -->
-    TODO
   </ng-container>
 </ng-template>

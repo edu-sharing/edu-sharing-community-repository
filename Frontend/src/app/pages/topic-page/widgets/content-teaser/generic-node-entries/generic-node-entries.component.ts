@@ -12,13 +12,13 @@ import {
     SimpleChanges,
     TemplateRef,
     ViewChild,
+    ViewContainerRef,
     ViewEncapsulation,
     WritableSignal,
 } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateService } from '@ngx-translate/core';
 import {
-    DEFAULT,
     HOME_REPOSITORY,
     MdsQueryCriteria,
     MdsService,
@@ -37,7 +37,6 @@ import {
     GridConfig,
     Helper,
     InteractionType,
-    ListItem,
     MdsHelperService,
     NodeDataSource,
     NodeEntriesDisplayType,
@@ -46,21 +45,24 @@ import {
     OptionItem,
     OptionsHelperDataService,
     Scope,
-    Values,
+    UIService,
 } from 'ngx-edu-sharing-ui';
 import { firstValueFrom, Subject } from 'rxjs';
-import { shareReplay, takeUntil } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 import { PreviewSidebarService } from '../../../../../features/preview-sidebar/preview-sidebar.service';
 import { OptionsHelperService } from '../../../shared/services/options-helper.service';
 import { TopicPageHelperService } from '../../../shared/services/topic-page-helper.service';
 import { GenericNodeEntriesDisplayType } from '../../../shared/types/generic-node-entries-display-type';
 import { StatisticNode } from '../../../shared/types/statistic-node';
 import { CustomProposeContentCardComponent } from './custom-propose-content-card/custom-propose-content-card.component';
-import { MapBucket } from '../../../shared/types/map-bucket';
-import {
-    DEFAULT_LOCATION_PROP,
-    DEFAULT_MAP_ZOOM_LIMIT,
-} from '../../../shared/types/custom-definitions';
+import { GenericWidgetGlobalService } from '../../generic-widget/generic-widget-global.service';
+
+export interface DisplayTypeComponentInterface {
+    selectedNode: Node;
+    criteria: MdsQueryCriteria[];
+    maxItems: number;
+    setDataSource(resetNecessary: boolean, skipCount?: number): Promise<void>;
+}
 
 @Component({
     selector: 'es-node-entries',
@@ -81,6 +83,10 @@ import {
     styleUrls: ['./generic-node-entries.component.scss'],
 })
 export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, OnDestroy, OnInit {
+    @ViewChild('customType', { read: ViewContainerRef, static: false })
+    customType!: ViewContainerRef;
+    @ViewChild('customType') customTypeElement!: ElementRef<HTMLElement>;
+
     private readonly CUSTOM_CARD_POSITION_INDEX: number = 6;
     private readonly DEFAULT_WIDTH: string = '314px';
     private readonly FULL_WIDTH: string = 'max(314px, 100% - 200px)';
@@ -103,6 +109,7 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
         layout: 'scroll',
     };
     private _hasEditRightsAndIsEditMode: boolean;
+    customTypeInstance: DisplayTypeComponentInterface;
     @Input() get hasEditRightsAndIsEditMode(): boolean {
         return this._hasEditRightsAndIsEditMode;
     }
@@ -158,6 +165,24 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
                 this.elementRef.nativeElement.style.setProperty('--cardWidth', this.DEFAULT_WIDTH);
                 break;
             default:
+                if (this.genericWidgetGlobalService.hasCustomDisplayType(val)) {
+                    this.genericWidgetGlobalService
+                        .getCustomDisplayType(val)
+                        .then((componentClass) => {
+                            // inject the component into the widget container
+                            this.customTypeInstance = this.uiService.injectAngularComponent(
+                                this.customType,
+                                componentClass,
+                                this.customTypeElement.nativeElement,
+                                {
+                                    selectedNode: this.selectedNode(),
+                                    criteria: this.criteria,
+                                    maxItems: this.maxItems,
+                                } as unknown as Partial<DisplayTypeComponentInterface>,
+                                { replace: false },
+                            ).instance;
+                        });
+                }
         }
         // emit an event that the display type has been changed, in case it is not the initial change
         // TODO: use es-node-entries-wrappers displayTypeChanges event
@@ -171,7 +196,7 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
     }
     // load three rows of nodes at once on desktop (-1 due to propose card being added)
     @Input() maxItems: number = 11;
-    @Input() mds: string = DEFAULT;
+    @Input() mds: string | null = null;
     @Input() queryId: string = 'ngsearch';
     @Input() scrollGradientColor: string;
     @Input() searchText: string;
@@ -241,22 +266,7 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
     private customOptions: CustomOptions = {};
     dataSource: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
     private destroy$ = new Subject<void>();
-    // map-specific variables
-    facetLimit: number = 5;
-    facetMinCount: number = 1;
-    facetProperties: string[] = [];
-    // initialize the map with the bounds of Germany (LatLngBounds from leaflet)
-    // @TODO
-    //private mapBounds: LatLngBounds = DEFAULT_MAP_BOUNDS;
-    mapBuckets: WritableSignal<MapBucket[]> = signal(undefined);
-    mapDataLoading: WritableSignal<boolean> = signal(true);
-    mapNodes: WritableSignal<Node[]> = signal([]);
-    // the offset to trigger showing more details
-    private mapZoomOffset: number = 1;
-    mapZoomLevel: WritableSignal<number> = signal(6);
-    // a limit to avoid too large clusters
-    mapZoomLimit: WritableSignal<number> = signal(DEFAULT_MAP_ZOOM_LIMIT);
-    private mapValues: Values = {};
+
     nodeEntriesDisplayType: WritableSignal<NodeEntriesDisplayType> = signal(
         NodeEntriesDisplayType.Grid,
     );
@@ -271,20 +281,15 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
         return this.selectedNodeIds?.length > 0;
     }
 
-    /**
-     * Returns, whether the current layout is a map view.
-     */
-    private get isMapView(): boolean {
-        return this.layout === GenericNodeEntriesDisplayType.MapView;
-    }
-
     constructor(
         private elementRef: ElementRef,
         private previewSidebarService: PreviewSidebarService,
         private mdsService: MdsService,
         private mdsHelperService: MdsHelperService,
         private searchService: SearchService,
+        private uiService: UIService,
         private topicPageHelperService: TopicPageHelperService,
+        public genericWidgetGlobalService: GenericWidgetGlobalService,
         private translate: TranslateService,
     ) {
         // subscribe to changes on the selected node
@@ -339,7 +344,10 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
         // cclom:rights_description -> Rechte
         if (!this.columns) {
             this.mdsService
-                .getMetadataSet({ repository: HOME_REPOSITORY, metadataSet: DEFAULT })
+                .getMetadataSet({
+                    repository: HOME_REPOSITORY,
+                    metadataSet: this.genericWidgetGlobalService.getDefaultMds(),
+                })
                 .subscribe((mds) => {
                     this.columns = this.mdsHelperService.getColumns(mds, 'genericWidget');
                     this.columnsExtension = {
@@ -530,13 +538,12 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
         resetNecessary: boolean = false,
         skipCount?: number,
     ): Promise<void> {
-        if (this.isMapView && !this.facetProperties?.length) {
-            return;
+        if (this.customTypeInstance) {
+            return this.customTypeInstance.setDataSource(resetNecessary, skipCount);
         }
         if (resetNecessary) {
             this.dataSource.reset();
             this.allRequestedNodes = [];
-            this.mapDataLoading.set(true);
         }
         let query: string = this.queryId;
         // create a deep copy of criteria, as we will modify (and later might reset) it
@@ -544,42 +551,6 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
             await this.extendCriteria(this.criteria),
         );
         // for the map view, overwrite the criteria to search for nodes with location
-        if (this.isMapView) {
-            this.maxItems = 100;
-            query = 'ngsearch';
-            Object.keys(this.mapValues).forEach((key: string): void => {
-                const existingCriteria = criteria.find((c: MdsQueryCriteria) => c.property === key);
-                // merge both criteria and mapValues
-                if (existingCriteria) {
-                    existingCriteria.values = [
-                        ...new Set([...existingCriteria.values, ...this.mapValues[key]]),
-                    ];
-                }
-                // push map criteria if values are selected
-                else if (this.mapValues[key].length) {
-                    criteria.push({
-                        property: key,
-                        values: this.mapValues[key],
-                    });
-                }
-            });
-            // convert the bounds into the following format:
-            // ['minLat', 'minLon', 'maxLat', 'maxLon']
-            // e.g., ['47.3024876979', '5.98865807458', '54.983104153', '15.0169958839']
-            // @TODO
-            /*
-            const boundingBox: [string, string, string, string] = [
-                this.mapBounds.getSouth().toString(),
-                this.mapBounds.getWest().toString(),
-                this.mapBounds.getNorth().toString(),
-                this.mapBounds.getEast().toString(),
-            ];
-            criteria.push({
-                property: DEFAULT_LOCATION_PROP,
-                values: boundingBox,
-            });
-             */
-        }
         // note: resolveCollections is set to true to be consistent with the editorial desk
         //       for the map view, set it to false
         const request: SearchRequestParams = {
@@ -589,40 +560,19 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
             skipCount: skipCount ?? 0,
             propertyFilter: [PROPERTY_FILTER_ALL],
             contentType: 'ALL',
-            metadataset: this.mds,
+            metadataset: this.mds || this.genericWidgetGlobalService.getDefaultMds(),
             sortProperties: ['cm:created'],
             sortAscending: [true],
             body: {
                 criteria,
-                resolveCollections: this.isMapView,
+                resolveCollections: false,
             },
         };
-        if (this.isMapView) {
-            request.body.facetLimit = this.facetLimit;
-            request.body.facets = [
-                {
-                    property: DEFAULT_LOCATION_PROP,
-                    args: {
-                        precision: this.mapZoomLevel() + this.mapZoomOffset,
-                    },
-                },
-            ];
-            request.body.facetMinCount = this.facetMinCount;
-        }
         const searchResult: SearchResults = await firstValueFrom(
             this.searchService.search(request),
         );
 
         this.totalSearchResultCountChanged.emit(searchResult.pagination.total);
-
-        if (this.isMapView) {
-            this.mapNodes.set(searchResult.nodes);
-            const mapBuckets: MapBucket[] =
-                searchResult.facets?.find((f) => f.property === DEFAULT_LOCATION_PROP)?.values ||
-                [];
-            this.mapBuckets.set(mapBuckets);
-            this.mapDataLoading.set(false);
-        }
 
         // avoid pushing potential duplicates
         // TODO: This duplicate check is currently necessary, as the same items might be requested again (and again)
@@ -922,7 +872,7 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
         // in this case, 100 items are loaded
         if (skipCount === 0 && totalCount > this.maxItems) {
             // TODO: remove, if implemented properly
-            if (this.isMapView) {
+            if (this.customTypeInstance) {
                 return;
             }
             const request: SearchRequestParams = {
@@ -932,7 +882,7 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
                 skipCount: 0,
                 propertyFilter: [PROPERTY_FILTER_ALL],
                 contentType: 'ALL',
-                metadataset: this.mds,
+                metadataset: this.mds || this.genericWidgetGlobalService.getDefaultMds(),
                 sortProperties: ['cm:created'],
                 sortAscending: [true],
                 body: {
@@ -940,9 +890,10 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
                     resolveCollections: this.layout !== GenericNodeEntriesDisplayType.MapView,
                 },
             };
-            if (this.isMapView) {
-                request.body.facetLimit = this.facetLimit;
-                request.body.facetMinCount = this.facetMinCount;
+            if (this.customTypeInstance) {
+                //@TODO what is this?
+                //request.body.facetLimit = this.facetLimit;
+                //request.body.facetMinCount = this.facetMinCount;
             }
             const searchResult: SearchResults = await firstValueFrom(
                 this.searchService.search(request),
@@ -1008,35 +959,6 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
         this.updateMapBounds(DEFAULT_MAP_BOUNDS);
     }
      */
-
-    /**
-     * Updates the facet properties and observes those via the search service.
-     */
-    updateMapFacets(facets: string[]): void {
-        // ensure to be only executed once and with valid facets
-        if (!this.facetProperties.length && facets?.length) {
-            this.facetProperties = facets;
-            this.searchService
-                .observeFacets(Object.values(this.facetProperties), { includeActiveFilters: true })
-                .pipe(shareReplay(1), takeUntil(this.destroy$))
-                .subscribe();
-        }
-    }
-
-    /**
-     * Updates the map values and sets the data source again.
-     */
-    updateMapValues(values: Values): void {
-        this.mapValues = values;
-        void this.setDataSource(true);
-    }
-
-    /**
-     * Updates the map zoom.
-     */
-    updateMapZoom(zoomLevel: number): void {
-        this.mapZoomLevel.set(zoomLevel);
-    }
 
     /**
      * Pass through the item clicked event.
