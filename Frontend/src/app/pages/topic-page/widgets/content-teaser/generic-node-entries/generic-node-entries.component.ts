@@ -1,0 +1,1061 @@
+import {
+    AfterViewInit,
+    Component,
+    ElementRef,
+    EventEmitter,
+    Input,
+    OnChanges,
+    OnDestroy,
+    OnInit,
+    Output,
+    signal,
+    SimpleChanges,
+    TemplateRef,
+    ViewChild,
+    ViewEncapsulation,
+    WritableSignal,
+} from '@angular/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslateService } from '@ngx-translate/core';
+import {
+    DEFAULT,
+    HOME_REPOSITORY,
+    MdsQueryCriteria,
+    MdsService,
+    Node,
+    Pagination,
+    PROPERTY_FILTER_ALL,
+    SearchRequestParams,
+    SearchResults,
+    SearchService,
+} from 'ngx-edu-sharing-api';
+import {
+    CheckTextOverflowDirective,
+    ColumnType,
+    CustomOptions,
+    EduSharingUiModule,
+    GridConfig,
+    Helper,
+    InteractionType,
+    ListItem,
+    MdsHelperService,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent,
+    NodePersonNamePipe,
+    OptionItem,
+    OptionsHelperDataService,
+    Scope,
+    Values,
+} from 'ngx-edu-sharing-ui';
+import { firstValueFrom, Subject } from 'rxjs';
+import { shareReplay, takeUntil } from 'rxjs/operators';
+import { PreviewSidebarService } from '../../../../../features/preview-sidebar/preview-sidebar.service';
+import { OptionsHelperService } from '../../../shared/services/options-helper.service';
+import { TopicPageHelperService } from '../../../shared/services/topic-page-helper.service';
+import { GenericNodeEntriesDisplayType } from '../../../shared/types/generic-node-entries-display-type';
+import { StatisticNode } from '../../../shared/types/statistic-node';
+import { CustomProposeContentCardComponent } from './custom-propose-content-card/custom-propose-content-card.component';
+import { MapBucket } from '../../../shared/types/map-bucket';
+import {
+    DEFAULT_LOCATION_PROP,
+    DEFAULT_MAP_ZOOM_LIMIT,
+} from '../../../shared/types/custom-definitions';
+
+@Component({
+    selector: 'es-node-entries',
+    encapsulation: ViewEncapsulation.Emulated,
+    imports: [
+        CustomProposeContentCardComponent,
+        EduSharingUiModule,
+        // MapNodeCardComponent,
+        MatTooltipModule,
+    ],
+    providers: [
+        CheckTextOverflowDirective,
+        NodePersonNamePipe,
+        OptionsHelperDataService,
+        OptionsHelperService,
+    ],
+    templateUrl: './generic-node-entries.component.html',
+    styleUrls: ['./generic-node-entries.component.scss'],
+})
+export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, OnDestroy, OnInit {
+    private readonly CUSTOM_CARD_POSITION_INDEX: number = 6;
+    private readonly DEFAULT_WIDTH: string = '314px';
+    private readonly FULL_WIDTH: string = 'max(314px, 100% - 200px)';
+    // taxonomy URL
+    // TODO: make this configurable
+    private readonly DISCIPLINES_TAXONOMY_URL: string =
+        'https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/discipline/index.json';
+    private readonly UNIVERSITY_DISCIPLINES_TAXONOMY_URL: string =
+        'https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/hochschulfaechersystematik/index.json';
+    private readonly LRT_TAXONOMY_URL: string =
+        'https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/new_lrt/index.json';
+    private readonly OEH_LRT_TAXONOMY_URL: string =
+        'https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/oehMetadatasets/index.json';
+    private readonly TOPICS_TAXONOMY_URL: string =
+        'https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/oeh-topics/5e40e372-735c-4b17-bbf7-e827a5702b57.json';
+
+    @Input() blacklistedNodeIds: string[] = [];
+    @Input() criteria: MdsQueryCriteria[] = [];
+    @Input() gridConfig: GridConfig = {
+        layout: 'scroll',
+    };
+    private _hasEditRightsAndIsEditMode: boolean;
+    @Input() get hasEditRightsAndIsEditMode(): boolean {
+        return this._hasEditRightsAndIsEditMode;
+    }
+    set hasEditRightsAndIsEditMode(val: boolean) {
+        this._hasEditRightsAndIsEditMode = val;
+        // check, whether the selectedNodeIds do still exist in the view mode
+        if (!val && this.selectedNodeIds?.[0]) {
+            const filteredNodes: Node[] = this.allRequestedNodes.filter(
+                (node: Node) => !this.blacklistedNodeIds.includes(node.ref.id),
+            );
+            // selected node is not included anymore
+            if (!filteredNodes.map((node: Node) => node.ref.id).includes(this.selectedNodeIds[0])) {
+                // send an update
+                this.itemClicked.emit(null);
+            }
+        }
+    }
+    private _layout: GenericNodeEntriesDisplayType;
+    @Input() get layout() {
+        return this._layout;
+    }
+    set layout(val: GenericNodeEntriesDisplayType) {
+        let newDisplayType: NodeEntriesDisplayType;
+        // match layout of GenericNodeEntries to NodeEntriesDisplayType from ngx-edu-sharing-ui
+        switch (val) {
+            case GenericNodeEntriesDisplayType.SingleView:
+                newDisplayType = NodeEntriesDisplayType.Grid;
+                this.gridConfig.layout = 'scroll';
+                this.nodeEntries?.ngOnChanges();
+                this.elementRef.nativeElement.style.setProperty('--cardWidth', this.FULL_WIDTH);
+                break;
+            case GenericNodeEntriesDisplayType.SplitView:
+                newDisplayType = NodeEntriesDisplayType.Grid;
+                this.gridConfig.layout = 'scroll';
+                this.nodeEntries?.ngOnChanges();
+                this.elementRef.nativeElement.style.setProperty('--cardWidth', this.FULL_WIDTH);
+                break;
+            case GenericNodeEntriesDisplayType.StandardView:
+                newDisplayType = NodeEntriesDisplayType.Grid;
+                this.gridConfig.layout = 'scroll';
+                this.nodeEntries?.ngOnChanges();
+                this.elementRef.nativeElement.style.setProperty('--cardWidth', this.DEFAULT_WIDTH);
+                break;
+            case GenericNodeEntriesDisplayType.CompactView:
+                newDisplayType = NodeEntriesDisplayType.Grid;
+                this.gridConfig.layout = 'grid';
+                this.nodeEntries?.ngOnChanges();
+                this.elementRef.nativeElement.style.setProperty('--cardWidth', this.DEFAULT_WIDTH);
+                break;
+            case GenericNodeEntriesDisplayType.ListView:
+                newDisplayType = NodeEntriesDisplayType.Table;
+                this.nodeEntries?.ngOnChanges();
+                this.elementRef.nativeElement.style.setProperty('--cardWidth', this.DEFAULT_WIDTH);
+                break;
+            default:
+        }
+        // emit an event that the display type has been changed, in case it is not the initial change
+        // TODO: use es-node-entries-wrappers displayTypeChanges event
+        if (this._layout !== undefined) {
+            setTimeout((): void => {
+                this.onDisplayTypeChanged();
+            }, 500);
+        }
+        this._layout = val;
+        this.nodeEntriesDisplayType.set(newDisplayType);
+    }
+    // load three rows of nodes at once on desktop (-1 due to propose card being added)
+    @Input() maxItems: number = 11;
+    @Input() mds: string = DEFAULT;
+    @Input() queryId: string = 'ngsearch';
+    @Input() scrollGradientColor: string;
+    @Input() searchText: string;
+    @Output() blacklistChanged: EventEmitter<string> = new EventEmitter<string>();
+    @Output() displayTypeChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
+    @Output() itemClicked: EventEmitter<Node> = new EventEmitter<Node>();
+    @Output() nodeStatisticsChanged: EventEmitter<StatisticNode[]> = new EventEmitter<
+        StatisticNode[]
+    >();
+    @Output() totalSearchResultCountChanged: EventEmitter<number> = new EventEmitter<number>();
+
+    // es-node-entries-wrapper
+    @ViewChild('contentWrapper') nodeEntries: NodeEntriesWrapperComponent<Node>;
+    // wlo-custom-propose-content-card
+    @ViewChild('cardSuggest') cardSuggestRef: TemplateRef<unknown>;
+    // wlo-custom-attribute templates
+    @ViewChild('customTitleRef') customTitleRef: TemplateRef<unknown>;
+    @ViewChild('customLrtRef') customLrtRef: TemplateRef<unknown>;
+    @ViewChild('customTaxonidRef') customTaxonidRef: TemplateRef<unknown>;
+    @ViewChild('customEducationcontextRef') customEducationcontextRef: TemplateRef<unknown>;
+    @ViewChild('customAuthorRef') customAuthorRef: TemplateRef<unknown>;
+    @ViewChild('customSourceRef') customSourceRef: TemplateRef<unknown>;
+
+    // custom column fields (the order of the attributes in the view is used)
+    private readonly customTitleKey: string = 'virtual:custom_title';
+    private readonly customLrtKey: string = 'virtual:custom_lrt';
+    private readonly customTaxonidKey: string = 'virtual:custom_taxonid';
+    private readonly customEducationcontextKey: string = 'virtual:custom_educationalcontext';
+    private readonly customSourceKey: string = 'virtual:custom_source';
+    private readonly customAuthorKey: string = 'virtual:custom_author';
+
+    // custom column labels
+    private readonly i18nPrefix: string = 'TOPIC_PAGE.WIDGET.CONTENT_TEASER.';
+    private readonly customTitleLabel: string = 'TITLE_LABEL';
+    private readonly customLrtLabel: string = 'LRT_LABEL';
+    private readonly customTaxonidLabel: string = 'TAXONID_LABEL';
+    private readonly customEducationcontextLabel: string = 'EDUCATIONAL_CONTEXT_LABEL';
+    private readonly customSourceLabel: string = 'SOURCE_LABEL';
+    private readonly customAuthorLabel: string = 'AUTHOR_LABEL';
+
+    // related property fields
+    readonly lrtPropertyKey: string = 'ccm:oeh_lrt_aggregated_DISPLAYNAME';
+    readonly taxonidPropertyKey: string = 'ccm:taxonid_DISPLAYNAME';
+    readonly educationcontextPropertyKey: string = 'ccm:educationalcontext_DISPLAYNAME';
+    readonly sourcePropertyKey: string = 'ccm:oeh_publisher_combined';
+    readonly authorPropertyKey: string = 'ccm:author_freetext';
+
+    // criteria extension related fields
+    private propertyToTaxonomiesMatching: Map<string, string[]> = new Map<string, string[]>([
+        ['ccm:curriculum', [this.TOPICS_TAXONOMY_URL]],
+        ['virtual:collection_id_primary', [this.TOPICS_TAXONOMY_URL]],
+        ['virtual:oeh_lrt', [this.LRT_TAXONOMY_URL, this.OEH_LRT_TAXONOMY_URL]],
+        [
+            'virtual:taxonid',
+            [this.DISCIPLINES_TAXONOMY_URL, this.UNIVERSITY_DISCIPLINES_TAXONOMY_URL],
+        ],
+    ]);
+    private taxonomyToJsonMatching: Map<string, any> = new Map<string, any>();
+    private taxonomiesRetrieved: boolean = false;
+
+    // custom names for blacklisted and selected item(s)
+    private allRequestedNodes: Node[] = [];
+    private blacklistedClassName: string = 'blacklisted';
+    private selectedClassName: string = 'selected';
+    columns: ColumnType;
+    columnsExtension: ColumnType;
+    private customOptions: CustomOptions = {};
+    dataSource: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
+    private destroy$ = new Subject<void>();
+    // map-specific variables
+    facetLimit: number = 5;
+    facetMinCount: number = 1;
+    facetProperties: string[] = [];
+    // initialize the map with the bounds of Germany (LatLngBounds from leaflet)
+    // @TODO
+    //private mapBounds: LatLngBounds = DEFAULT_MAP_BOUNDS;
+    mapBuckets: WritableSignal<MapBucket[]> = signal(undefined);
+    mapDataLoading: WritableSignal<boolean> = signal(true);
+    mapNodes: WritableSignal<Node[]> = signal([]);
+    // the offset to trigger showing more details
+    private mapZoomOffset: number = 1;
+    mapZoomLevel: WritableSignal<number> = signal(6);
+    // a limit to avoid too large clusters
+    mapZoomLimit: WritableSignal<number> = signal(DEFAULT_MAP_ZOOM_LIMIT);
+    private mapValues: Values = {};
+    nodeEntriesDisplayType: WritableSignal<NodeEntriesDisplayType> = signal(
+        NodeEntriesDisplayType.Grid,
+    );
+    selectedNode: WritableSignal<Node> = signal(null);
+    private selectedNodeIds: string[] = [];
+    sidebarOpen: WritableSignal<boolean> = signal(false);
+
+    /**
+     * Returns, whether at least one item is selected.
+     */
+    private get atLeastOneItemSelected(): boolean {
+        return this.selectedNodeIds?.length > 0;
+    }
+
+    /**
+     * Returns, whether the current layout is a map view.
+     */
+    private get isMapView(): boolean {
+        return this.layout === GenericNodeEntriesDisplayType.MapView;
+    }
+
+    constructor(
+        private elementRef: ElementRef,
+        private previewSidebarService: PreviewSidebarService,
+        private mdsService: MdsService,
+        private mdsHelperService: MdsHelperService,
+        private searchService: SearchService,
+        private topicPageHelperService: TopicPageHelperService,
+        private translate: TranslateService,
+    ) {
+        // subscribe to changes on the selected node
+        this.previewSidebarService
+            .getCurrentNode()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((node: Node | null): void => {
+                const selectedNode: Node = node;
+                if (selectedNode?.ref.id) {
+                    // overwrite the array instead of pushing to it as only one node can be selected
+                    this.selectedNodeIds = [selectedNode.ref.id];
+                    this.selectedNode.set(selectedNode);
+                } else {
+                    this.selectedNodeIds = [];
+                    this.selectedNode.set(null);
+                }
+                let nodes: Node[] = this.allRequestedNodes;
+                if (!this.hasEditRightsAndIsEditMode) {
+                    nodes = this.allRequestedNodes.filter(
+                        (node: Node) => !this.blacklistedNodeIds.includes(node.ref.id),
+                    );
+                }
+                this.dynamicallyAddCssClasses(nodes, this.selectedNodeIds, this.selectedClassName);
+                if (!this.nodeEntries) {
+                    return;
+                }
+                this.sidebarOpen.set(this.atLeastOneItemSelected);
+                // check whether the selection matches the currently selected node
+                // sidebar was closed, but selection still exists -> clear selection
+                if (!this.sidebarOpen() && this.nodeEntries.getSelection().selected?.length > 0) {
+                    this.nodeEntries.getSelection().clear();
+                }
+                // sidebar is opened, but the selection does not match
+                else if (
+                    this.sidebarOpen() &&
+                    this.nodeEntries.getSelection().selected?.length > 0 &&
+                    this.nodeEntries.getSelection().selected[0].ref.id !== this.selectedNodeIds[0]
+                ) {
+                    this.nodeEntries.getSelection().setSelection(selectedNode);
+                }
+            });
+    }
+
+    /**
+     * Initializes the translations service, columns and custom options.
+     */
+    ngOnInit(): void {
+        // specify columns and columnsExtension (for SplitView)
+        // TODO:
+        // ccm:taxonid vs. cclom:general_keyword
+        // ccm:educationalcontext vs. ccm:educationalintendedenduserrole
+        // cclom:rights_description -> Rechte
+        if (!this.columns) {
+            this.mdsService
+                .getMetadataSet({ repository: HOME_REPOSITORY, metadataSet: DEFAULT })
+                .subscribe((mds) => {
+                    this.columns = this.mdsHelperService.getColumns(mds, 'genericWidget');
+                    this.columnsExtension = {
+                        Default: [...this.columns.Default],
+                    };
+                });
+        }
+        // specify addOptions
+        if (!this.customOptions?.addOptions) {
+            this.customOptions = this.retrieveCustomOptions();
+        }
+    }
+
+    /**
+     * Retrieves the custom options to be displayed in the node entries component.
+     */
+    retrieveCustomOptions(): CustomOptions {
+        const changeOnInspectionTable: OptionItem = new OptionItem(
+            this.i18nPrefix + 'CHANGE_ON_INSPECTION_TABLE',
+            'assignment_turned_in',
+            (node: any, nodes: any[]): void => {
+                // if showAlways is used, the node is set, otherwise it has to be retrieved using the activeObjects of the optionsHelper
+                // the workaround of using the activeObjects of the optionsHelper does not work, when showAlways is set
+                const nodeToChange: Node =
+                    node ?? this.nodeEntries.optionsHelper.getData()?.activeObjects?.[0] ?? null;
+                if (nodeToChange) {
+                    const url: string =
+                        this.topicPageHelperService.getBaseHref() +
+                        'components/editorial-desk?mode=audit&fromMds=true&viewType=Single&nodeId=' +
+                        nodeToChange.ref.id;
+                    window.open(url, '_blank');
+                }
+            },
+        );
+        changeOnInspectionTable.showAlways = true;
+        changeOnInspectionTable.isPrimary = true;
+        changeOnInspectionTable.customShowCallback = async (): Promise<boolean> =>
+            this.hasEditRightsAndIsEditMode;
+        const removeFromWidget: OptionItem = new OptionItem(
+            this.i18nPrefix + 'REMOVE_FROM_WIDGET',
+            'visibility',
+            async (node: any, nodes: any[]): Promise<void> => {
+                // if showAlways is used, the node is set, otherwise it has to be retrieved using the activeObjects of the optionsHelper
+                // the workaround of using the activeObjects of the optionsHelper does not work, when showAlways is set
+                const nodeToRemove: Node =
+                    node ?? this.nodeEntries.optionsHelper.getData()?.activeObjects?.[0] ?? null;
+                if (nodeToRemove) {
+                    this.blacklistChanged.emit(nodeToRemove.ref.id);
+                    if (this.hasEditRightsAndIsEditMode) {
+                        this.dynamicallyAddCssClasses(
+                            this.allRequestedNodes,
+                            this.blacklistedNodeIds,
+                            this.blacklistedClassName,
+                        );
+                    }
+                }
+            },
+        );
+        removeFromWidget.showAlways = true;
+        removeFromWidget.isPrimary = true;
+        removeFromWidget.customShowCallback = async (nodes: Node[]): Promise<boolean> =>
+            this.hasEditRightsAndIsEditMode &&
+            !this.blacklistedNodeIds.includes(nodes?.[0]?.ref?.id);
+        const addToWidget: OptionItem = new OptionItem(
+            this.i18nPrefix + 'ADD_TO_WIDGET',
+            'visibility_off',
+            async (node: any, nodes: any[]): Promise<void> => {
+                // if showAlways is used, the node is set, otherwise it has to be retrieved using the activeObjects of the optionsHelper
+                // the workaround of using the activeObjects of the optionsHelper does not work, when showAlways is set
+                const nodeToAdd: Node =
+                    node ?? this.nodeEntries.optionsHelper.getData()?.activeObjects?.[0] ?? null;
+                if (nodeToAdd) {
+                    this.blacklistChanged.emit(nodeToAdd.ref.id);
+                    if (this.hasEditRightsAndIsEditMode) {
+                        this.dynamicallyAddCssClasses(
+                            this.allRequestedNodes,
+                            this.blacklistedNodeIds,
+                            this.blacklistedClassName,
+                        );
+                    }
+                }
+            },
+        );
+        addToWidget.showAlways = true;
+        addToWidget.isPrimary = true;
+        addToWidget.customShowCallback = async (nodes: Node[]): Promise<boolean> =>
+            this.hasEditRightsAndIsEditMode &&
+            this.blacklistedNodeIds.includes(nodes?.[0]?.ref?.id);
+        // note: these options do not have a visible effect
+        // .showAsAction = true;
+        // .showName = true;
+        // .isSeparate = true;
+        // .isEnabled = true;
+        return {
+            addOptions: [changeOnInspectionTable, removeFromWidget, addToWidget],
+        };
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
+    /**
+     * Reloads the view by (re)setting the datasource and node-entries-wrapper.
+     *
+     * @param changes
+     */
+    async ngOnChanges(changes: SimpleChanges): Promise<void> {
+        // check if changes were really made and return, if not
+        let changedMade: boolean = false;
+        Object.keys(changes).forEach((key: string): void => {
+            const change = changes[key];
+            if (
+                change &&
+                (change.firstChange ||
+                    JSON.stringify(change.currentValue) !== JSON.stringify(change.previousValue))
+            ) {
+                changedMade = true;
+            }
+        });
+        if (!changedMade) {
+            return;
+        }
+        this.dataSource.isLoading = true;
+        const resetOnFirstLoad: boolean = Object.keys(changes).length > 1;
+        const resetDueToCriteriaChange: boolean =
+            changes.criteria?.previousValue !== changes.criteria?.currentValue;
+        await this.setDataSource(resetOnFirstLoad || resetDueToCriteriaChange);
+        // workaround for updating showAlways options: override customOptions variable
+        this.customOptions = this.retrieveCustomOptions();
+        await this.nodeEntries?.initOptionsGenerator({
+            customOptions: this.hasEditRightsAndIsEditMode
+                ? this.customOptions
+                : { addOptions: [] },
+        });
+        this.dataSource.isLoading = false;
+        // add blacklisted class names for edit mode
+        if (this.hasEditRightsAndIsEditMode) {
+            this.dynamicallyAddCssClasses(
+                this.allRequestedNodes,
+                this.blacklistedNodeIds,
+                this.blacklistedClassName,
+            );
+        }
+        // add selected class name
+        let nodes: Node[] = this.allRequestedNodes;
+        if (!this.hasEditRightsAndIsEditMode) {
+            nodes = this.allRequestedNodes.filter(
+                (node: Node) => !this.blacklistedNodeIds.includes(node.ref.id),
+            );
+        }
+        this.dynamicallyAddCssClasses(nodes, this.selectedNodeIds, this.selectedClassName);
+        if (!this.nodeEntries) {
+            return;
+        }
+        this.sidebarOpen.set(this.atLeastOneItemSelected);
+        // check, whether the selection matches the currently selected node
+        // sidebar was closed, but selection still exists
+        if (!this.sidebarOpen() && this.nodeEntries.getSelection().selected?.length > 0) {
+            this.nodeEntries.getSelection().clear();
+        }
+        // sidebar is opened, but the selection does not match
+        else if (
+            this.sidebarOpen() &&
+            this.nodeEntries.getSelection().selected?.[0].ref.id !== this.selectedNodeIds[0]
+        ) {
+            this.nodeEntries
+                .getSelection()
+                .setSelection(
+                    this.allRequestedNodes.find((n) => n.ref.id === this.selectedNodeIds[0]),
+                );
+        }
+    }
+
+    /**
+     * Registers custom field renderings using the nodeEntriesGlobalService.
+     */
+    ngAfterViewInit(): void {}
+
+    /**
+     * Performs a search query to set the data source.
+     *
+     * @param resetNecessary
+     * @param skipCount
+     */
+    private async setDataSource(
+        resetNecessary: boolean = false,
+        skipCount?: number,
+    ): Promise<void> {
+        if (this.isMapView && !this.facetProperties?.length) {
+            return;
+        }
+        if (resetNecessary) {
+            this.dataSource.reset();
+            this.allRequestedNodes = [];
+            this.mapDataLoading.set(true);
+        }
+        let query: string = this.queryId;
+        // create a deep copy of criteria, as we will modify (and later might reset) it
+        let criteria: MdsQueryCriteria[] = Helper.deepCopy(
+            await this.extendCriteria(this.criteria),
+        );
+        // for the map view, overwrite the criteria to search for nodes with location
+        if (this.isMapView) {
+            this.maxItems = 100;
+            query = 'ngsearch';
+            Object.keys(this.mapValues).forEach((key: string): void => {
+                const existingCriteria = criteria.find((c: MdsQueryCriteria) => c.property === key);
+                // merge both criteria and mapValues
+                if (existingCriteria) {
+                    existingCriteria.values = [
+                        ...new Set([...existingCriteria.values, ...this.mapValues[key]]),
+                    ];
+                }
+                // push map criteria if values are selected
+                else if (this.mapValues[key].length) {
+                    criteria.push({
+                        property: key,
+                        values: this.mapValues[key],
+                    });
+                }
+            });
+            // convert the bounds into the following format:
+            // ['minLat', 'minLon', 'maxLat', 'maxLon']
+            // e.g., ['47.3024876979', '5.98865807458', '54.983104153', '15.0169958839']
+            // @TODO
+            /*
+            const boundingBox: [string, string, string, string] = [
+                this.mapBounds.getSouth().toString(),
+                this.mapBounds.getWest().toString(),
+                this.mapBounds.getNorth().toString(),
+                this.mapBounds.getEast().toString(),
+            ];
+            criteria.push({
+                property: DEFAULT_LOCATION_PROP,
+                values: boundingBox,
+            });
+             */
+        }
+        // note: resolveCollections is set to true to be consistent with the editorial desk
+        //       for the map view, set it to false
+        const request: SearchRequestParams = {
+            query,
+            repository: HOME_REPOSITORY,
+            maxItems: !skipCount ? this.maxItems : this.maxItems + 1, // +1 to load full row
+            skipCount: skipCount ?? 0,
+            propertyFilter: [PROPERTY_FILTER_ALL],
+            contentType: 'ALL',
+            metadataset: this.mds,
+            sortProperties: ['cm:created'],
+            sortAscending: [true],
+            body: {
+                criteria,
+                resolveCollections: this.isMapView,
+            },
+        };
+        if (this.isMapView) {
+            request.body.facetLimit = this.facetLimit;
+            request.body.facets = [
+                {
+                    property: DEFAULT_LOCATION_PROP,
+                    args: {
+                        precision: this.mapZoomLevel() + this.mapZoomOffset,
+                    },
+                },
+            ];
+            request.body.facetMinCount = this.facetMinCount;
+        }
+        const searchResult: SearchResults = await firstValueFrom(
+            this.searchService.search(request),
+        );
+
+        this.totalSearchResultCountChanged.emit(searchResult.pagination.total);
+
+        if (this.isMapView) {
+            this.mapNodes.set(searchResult.nodes);
+            const mapBuckets: MapBucket[] =
+                searchResult.facets?.find((f) => f.property === DEFAULT_LOCATION_PROP)?.values ||
+                [];
+            this.mapBuckets.set(mapBuckets);
+            this.mapDataLoading.set(false);
+        }
+
+        // avoid pushing potential duplicates
+        // TODO: This duplicate check is currently necessary, as the same items might be requested again (and again)
+        const existingNodeIds: string[] = this.allRequestedNodes.map((n: Node) => n.ref.id);
+        searchResult.nodes?.forEach((node: Node) => {
+            if (!existingNodeIds.includes(node.ref.id)) {
+                this.allRequestedNodes.push(node);
+                existingNodeIds.push(node.ref.id);
+            }
+        });
+
+        // in edit mode, display all requested nodes
+        if (this.hasEditRightsAndIsEditMode) {
+            this.dataSource.setData(this.allRequestedNodes, searchResult.pagination);
+        }
+        // in view mode, display the filtered nodes
+        else {
+            const filteredNodes: Node[] = this.allRequestedNodes.filter(
+                (node: Node) => !this.blacklistedNodeIds.includes(node.ref.id),
+            );
+            // note: as the requests are cached, do not change the original result object, otherwise, it is changed permanently
+            const updatedPagination: Pagination = JSON.parse(
+                JSON.stringify(searchResult.pagination),
+            );
+            updatedPagination.total -= this.allRequestedNodes.length - filteredNodes.length;
+            this.dataSource.setData(filteredNodes, updatedPagination);
+            // in view mode, inject custom card,
+            // if too few elements exist
+            // and if the correct type is selected (TODO: list is currently not supported)
+            const isGridItemType: boolean = [
+                GenericNodeEntriesDisplayType.SingleView,
+                GenericNodeEntriesDisplayType.SplitView,
+                GenericNodeEntriesDisplayType.StandardView,
+                GenericNodeEntriesDisplayType.CompactView,
+            ].includes(this.layout);
+            if (isGridItemType) {
+                this.injectCustomCards(filteredNodes.length);
+            }
+        }
+
+        // emit the node statistics of the search result
+        void this.emitNodeStatistics(
+            this.allRequestedNodes,
+            this.blacklistedNodeIds,
+            searchResult.pagination.total,
+            skipCount,
+            query,
+            criteria,
+        );
+    }
+
+    /**
+     * Helper function to initially retrieve the taxonomies.
+     */
+    async retrieveTaxonomies(): Promise<void> {
+        for (const [propertyName, taxonomies] of this.propertyToTaxonomiesMatching) {
+            for (const taxonomy of taxonomies) {
+                try {
+                    const response: Response = await fetch(taxonomy);
+                    if (!response.ok) {
+                        throw new Error(`Response status: ${response.status}`);
+                    }
+                    const taxonomyJson = await response.json();
+                    this.taxonomyToJsonMatching.set(taxonomy, taxonomyJson);
+                } catch (error) {
+                    console.error(error.message);
+                }
+            }
+        }
+    }
+
+    /**
+     * Helper function to handle the entire extension of the criteria array.
+     *
+     * @param criteria
+     */
+    private async extendCriteria(criteria: MdsQueryCriteria[]): Promise<MdsQueryCriteria[]> {
+        // if necessary, retrieve the taxonomies first
+        if (!this.taxonomiesRetrieved) {
+            await this.retrieveTaxonomies();
+            this.taxonomiesRetrieved = true;
+        }
+
+        // iterate the matchings and extend the criteria
+        for (const [propertyName, taxonomies] of this.propertyToTaxonomiesMatching) {
+            const mdsQueryCriteria: MdsQueryCriteria = criteria.find(
+                (mdsQueryCriteria: MdsQueryCriteria): boolean =>
+                    mdsQueryCriteria.property === propertyName,
+            );
+            const atLeastOneValue: boolean = mdsQueryCriteria?.values?.length > 0;
+            // for the matching, at least one value has been defined
+            if (atLeastOneValue) {
+                // iterate the set values (multiple values can be selected) and extend each of those values
+                for (const selectedValueId of mdsQueryCriteria.values) {
+                    // if multiple matchingValues do exist, iterate each of them
+                    for (const taxonomy of taxonomies) {
+                        // if no matching does exist, retrieve the taxonomy once again
+                        if (!this.taxonomyToJsonMatching.get(taxonomy)) {
+                            await this.retrieveTaxonomies();
+                        }
+                        // extend the criteria value and overwrite the criteria variable
+                        criteria = await this.extendCriteriaValue(
+                            selectedValueId,
+                            criteria,
+                            this.taxonomyToJsonMatching.get(taxonomy),
+                            propertyName,
+                        );
+                    }
+                }
+            }
+        }
+        return criteria;
+    }
+
+    /**
+     * Extends a given propertyName in a given criteria array by its children IDs using the taxonomy.
+     *
+     * @param criteriaId
+     * @param criteria
+     * @param taxonomyJson
+     * @param propertyName
+     */
+    private async extendCriteriaValue(
+        criteriaId: string,
+        criteria: MdsQueryCriteria[],
+        taxonomyJson: any,
+        propertyName: string,
+    ): Promise<MdsQueryCriteria[]> {
+        try {
+            if (taxonomyJson?.hasTopConcept?.length > 0) {
+                // check, if the criteriaId is part of the top level taxonomy JSON itself or its top concept
+                const isTopLevelElement: boolean = !!this.searchTree(taxonomyJson, criteriaId);
+                let criteriaElement =
+                    isTopLevelElement || this.searchTree(taxonomyJson.hasTopConcept, criteriaId);
+                if (!criteriaElement) {
+                    return criteria;
+                }
+                let updatedIds: string[] = [criteriaId];
+                // note: the top level element does not have narrow elements, but a top concept itself
+                if (isTopLevelElement) {
+                    taxonomyJson.hasTopConcept?.forEach((topLevelChild: any): void => {
+                        updatedIds = this.retrieveNarrowIds(topLevelChild, updatedIds);
+                    });
+                } else {
+                    updatedIds = this.retrieveNarrowIds(criteriaElement, updatedIds);
+                }
+                // insert the updated values
+                const criteriaIndex: number = criteria.findIndex(
+                    (c: MdsQueryCriteria): boolean => c.property === propertyName,
+                );
+                if (criteriaIndex !== -1) {
+                    // reference: https://medium.com/@rivoltafilippo/javascript-merge-arrays-without-duplicates-3fbd8f4881be
+                    criteria[criteriaIndex].values = [
+                        ...new Set([...criteria[criteriaIndex].values, ...updatedIds]),
+                    ];
+                }
+            }
+            return criteria;
+        } catch (error) {
+            console.error(error.message);
+            return criteria;
+        }
+    }
+
+    /**
+     * Helper function to search a sub-element with a given matchingId in a given element's tree.
+     *
+     * @param element
+     * @param matchingId
+     */
+    private searchTree(element: any, matchingId: string): any {
+        if (element.id && element.id === matchingId) {
+            return element;
+        } else if (Array.isArray(element) || element.narrower) {
+            const elements = Array.isArray(element) ? element : element.narrower;
+            let result = null;
+            for (let i: number = 0; result === null && i < elements.length; i++) {
+                result = this.searchTree(elements[i], matchingId);
+            }
+            return result;
+        }
+        return null;
+    }
+
+    /**
+     * Helper function to recursively retrieve the full list of narrow IDs of a given element.
+     *
+     * @param element
+     * @param ids
+     */
+    private retrieveNarrowIds(element: any, ids: string[]): string[] {
+        if (element.id && !ids.includes(element.id)) {
+            ids.push(element.id);
+        }
+        element.narrower?.forEach((narrowElement: any): void => {
+            ids = this.retrieveNarrowIds(narrowElement, ids);
+        });
+        return ids;
+    }
+
+    /**
+     * Helper function to push custom card at the end of the data source.
+     *
+     * @param positionToAdd
+     */
+    private injectCustomCards(positionToAdd: number): void {
+        // the position should either be the seventh or the last element, if less than seven elements exist
+        if (positionToAdd > this.CUSTOM_CARD_POSITION_INDEX) {
+            positionToAdd = this.CUSTOM_CARD_POSITION_INDEX;
+        }
+        this.dataSource.getData().splice(positionToAdd, 0, this.cardSuggestRef);
+    }
+
+    /**
+     * Helper function to mark blacklisted / selected nodes by adding / removing a specific CSS class to their card / row.
+     *
+     * @param nodes
+     * @param relevantNodeIds
+     * @param className
+     */
+    private dynamicallyAddCssClasses(
+        nodes: Node[],
+        relevantNodeIds: string[],
+        className: string,
+    ): void {
+        nodes?.forEach((node: Node, index: number): void => {
+            let element: HTMLElement | null = this.queryElement(index);
+            if (!element) {
+                return;
+            }
+
+            if (relevantNodeIds.includes(node.ref.id)) {
+                element.classList?.add(className);
+            } else if (element.classList?.contains(className)) {
+                element.classList.remove(className);
+            }
+        });
+    }
+
+    /**
+     * Helper function to query the correct HTML element for a given index.
+     *
+     * @param index
+     */
+    private queryElement(index: number): HTMLElement | null {
+        if (
+            this.layout === GenericNodeEntriesDisplayType.SingleView ||
+            this.layout === GenericNodeEntriesDisplayType.SplitView ||
+            this.layout === GenericNodeEntriesDisplayType.StandardView ||
+            this.layout === GenericNodeEntriesDisplayType.CompactView
+        ) {
+            return this.elementRef.nativeElement?.querySelectorAll(
+                'es-node-entries-wrapper es-node-entries-card .grid-card',
+            )?.[index];
+        } else if (this.layout === GenericNodeEntriesDisplayType.ListView) {
+            return this.elementRef.nativeElement?.querySelectorAll(
+                'es-node-entries-wrapper es-node-entries-table mat-table .mat-row',
+            )?.[index];
+        }
+        return null;
+    }
+
+    /**
+     * Helper function to emit the node statistics.
+     * Blacklisted nodes are not emitted.
+     */
+    async emitNodeStatistics(
+        nodes: Node[],
+        blacklistedIds: string[],
+        totalCount: number,
+        skipCount: number = 0,
+        query: string,
+        criteria: MdsQueryCriteria[],
+    ): Promise<void> {
+        // emit the statistics
+        const emitStatistics = (mappingNodes: Node[]): void => {
+            const nodeStatistics: StatisticNode[] = [];
+            mappingNodes.forEach((node: Node): void => {
+                if (!blacklistedIds.includes(node.ref.id)) {
+                    // @TODO
+                    /*nodeStatistics.push({
+                        nodeId: node.ref.id,
+                        isEditorial: isEditorial(node),
+                        isOer: isOer(node),
+                        isOrganization: checkMetadataset(node, DEFAULT_METADATASET_ORGANIZATION),
+                        isPerson: checkMetadataset(node, DEFAULT_METADATASET_PERSON),
+                        lrts: node.properties[DEFAULT_LRT_PROP] ?? [],
+                    });*/
+                }
+            });
+            this.nodeStatisticsChanged.emit(nodeStatistics);
+        };
+        // nodes have already removed duplicates, so no additional check is necessary
+        emitStatistics(nodes);
+
+        // an update should be emitted, if it is the initial call and the totalCount is larger than the maxItems
+        // in this case, 100 items are loaded
+        if (skipCount === 0 && totalCount > this.maxItems) {
+            // TODO: remove, if implemented properly
+            if (this.isMapView) {
+                return;
+            }
+            const request: SearchRequestParams = {
+                query,
+                repository: HOME_REPOSITORY,
+                maxItems: 100,
+                skipCount: 0,
+                propertyFilter: [PROPERTY_FILTER_ALL],
+                contentType: 'ALL',
+                metadataset: this.mds,
+                sortProperties: ['cm:created'],
+                sortAscending: [true],
+                body: {
+                    criteria,
+                    resolveCollections: this.layout !== GenericNodeEntriesDisplayType.MapView,
+                },
+            };
+            if (this.isMapView) {
+                request.body.facetLimit = this.facetLimit;
+                request.body.facetMinCount = this.facetMinCount;
+            }
+            const searchResult: SearchResults = await firstValueFrom(
+                this.searchService.search(request),
+            );
+            const copyOfAllRequestedNodes: Node[] = JSON.parse(
+                JSON.stringify(this.allRequestedNodes),
+            );
+            const existingNodeIds: string[] = copyOfAllRequestedNodes.map((n: Node) => n.ref.id);
+            // avoid pushing duplicates
+            searchResult.nodes?.forEach((node: Node): void => {
+                if (!existingNodeIds.includes(node.ref.id)) {
+                    copyOfAllRequestedNodes.push(node);
+                    existingNodeIds.push(node.ref.id);
+                }
+            });
+            emitStatistics(copyOfAllRequestedNodes);
+        }
+    }
+
+    /**
+     * Fetches further data in response to es-node-entries-wrapper's fetchData output.
+     *
+     * @param currentPagination
+     */
+    async fetchData(currentPagination: any): Promise<void> {
+        this.dataSource.isLoading = true;
+        // in edit mode, all requested nodes are shown, while in view mode, some requested nodes might be omitted, which has to be taken into account
+        // TODO: an alternative solution might be replacing the offset calculation by this.allRequestedNodes.length
+        const offsetToTakeIntoAccount: number = this.hasEditRightsAndIsEditMode
+            ? currentPagination.offset
+            : currentPagination.offset +
+              this.allRequestedNodes.filter((node: Node) =>
+                  this.blacklistedNodeIds.includes(node.ref.id),
+              ).length;
+        await this.setDataSource(false, offsetToTakeIntoAccount);
+        this.dataSource.isLoading = false;
+        if (this.hasEditRightsAndIsEditMode) {
+            this.dynamicallyAddCssClasses(
+                this.allRequestedNodes,
+                this.blacklistedNodeIds,
+                this.blacklistedClassName,
+            );
+        }
+    }
+
+    /**
+     * @TODO
+     * Updates the bounds of the map and sets the data source again.
+     */
+    /*
+    updateMapBounds(bounds: LatLngBounds): void {
+        this.mapBounds = bounds;
+        void this.setDataSource(true);
+    }
+     */
+
+    /**
+     * @TODO
+     * Resets the map bounds to the default and sets the data source again.
+     */
+    /*
+    resetMapBounds(): void {
+        this.updateMapBounds(DEFAULT_MAP_BOUNDS);
+    }
+     */
+
+    /**
+     * Updates the facet properties and observes those via the search service.
+     */
+    updateMapFacets(facets: string[]): void {
+        // ensure to be only executed once and with valid facets
+        if (!this.facetProperties.length && facets?.length) {
+            this.facetProperties = facets;
+            this.searchService
+                .observeFacets(Object.values(this.facetProperties), { includeActiveFilters: true })
+                .pipe(shareReplay(1), takeUntil(this.destroy$))
+                .subscribe();
+        }
+    }
+
+    /**
+     * Updates the map values and sets the data source again.
+     */
+    updateMapValues(values: Values): void {
+        this.mapValues = values;
+        void this.setDataSource(true);
+    }
+
+    /**
+     * Updates the map zoom.
+     */
+    updateMapZoom(zoomLevel: number): void {
+        this.mapZoomLevel.set(zoomLevel);
+    }
+
+    /**
+     * Pass through the item clicked event.
+     *
+     * @param node
+     */
+    onItemClicked(node: Node): void {
+        this.itemClicked.emit(node);
+        this.previewSidebarService.handleNodeClick(node);
+    }
+
+    /**
+     * Emits an event, when the display type changes.
+     */
+    onDisplayTypeChanged(): void {
+        this.displayTypeChanged.emit(true);
+    }
+
+    protected readonly GenericNodeEntriesDisplayType = GenericNodeEntriesDisplayType;
+    protected readonly InteractionType = InteractionType;
+    protected readonly Scope = Scope;
+}

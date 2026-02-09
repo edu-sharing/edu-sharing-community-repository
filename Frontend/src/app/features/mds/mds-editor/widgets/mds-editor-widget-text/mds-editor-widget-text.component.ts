@@ -2,14 +2,13 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { UntypedFormControl, ValidatorFn, Validators } from '@angular/forms';
 import { MAT_FORM_FIELD } from '@angular/material/form-field';
 import { TranslateService } from '@ngx-translate/core';
-import { SuggestionResponseDto, SuggestionStatus } from 'ngx-edu-sharing-api';
+import { SuggestionResponseDto } from 'ngx-edu-sharing-api';
 import { DateHelper, UIService, ValueType } from 'ngx-edu-sharing-ui';
 import { filter } from 'rxjs/operators';
 import { Toast } from '../../../../../services/toast';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { BehaviorSubject } from 'rxjs';
-import { init } from 'jasmine-spec-reporter/built/display/colors-display';
 
 @Component({
     selector: 'es-mds-editor-widget-text',

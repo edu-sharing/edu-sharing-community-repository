@@ -1,0 +1,14 @@
+svg {
+    position: absolute;
+    --owl-position-right: 40px;
+
+    &.owl-body {
+        right: var(--owl-position-right);
+        bottom: 0;
+    }
+
+    &.pointing-hand {
+        right: calc(var(--owl-position-right) - 16px);
+        bottom: -29px;
+    }
+}

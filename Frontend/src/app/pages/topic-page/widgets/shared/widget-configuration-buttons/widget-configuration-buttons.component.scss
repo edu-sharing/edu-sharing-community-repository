@@ -1,0 +1,124 @@
+@use '../../../topic-page-variables' as *;
+
+:host {
+    display: flex;
+    align-items: center;
+
+    // overwrite color button text color
+    --mdc-text-button-label-text-color: #{var(
+            --mat-standard-button-toggle-text-color,
+            var(--mat-app-on-surface)
+        )};
+}
+
+.widget-configuration-buttons {
+    padding-top: 14px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    width: 100%;
+    color: $on-surface;
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_containment/Container_queries
+    container-type: inline-size;
+}
+
+// adjustments for extra-small containers (breakpoint of Bootstrap being used here)
+@container (max-width: 575.98px) {
+    .widget-configuration-buttons .widget-display-config-buttons {
+        // hide label
+        .widget-display-config-label {
+            display: none;
+        }
+
+        // wrap buttons to avoid breaking the layout
+        .mat-button-toggle-group {
+            display: flex;
+            flex-wrap: wrap;
+        }
+    }
+}
+
+.widget-option {
+    padding: 0 24px 0 18px;
+    min-height: 48px;
+    font-family: $primary-font-family;
+    font-size: $font-size-medium;
+    font-weight: $font-weight-regular;
+    line-height: $line-height-medium;
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.4);
+}
+
+.widget-display-config-buttons,
+.widget-option {
+    padding-right: 24px;
+    align-items: center;
+    display: inline-flex;
+    background-color: $on-primary;
+    border-radius: 24px;
+    ::ng-deep .mat-mdc-form-field-flex {
+        align-items: center;
+
+        .mat-mdc-form-field-infix {
+            padding: 0;
+            min-height: unset;
+
+            input.mat-mdc-input-element {
+                margin: 0;
+            }
+        }
+    }
+}
+
+.widget-display-config-buttons {
+    margin-left: auto;
+    margin-right: 0;
+    padding-left: 22px;
+    padding-right: 22px;
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.4);
+}
+
+::ng-deep .widget-display-config-buttons .mat-button-toggle-group {
+    // reset border-radius
+    border-radius: 0;
+    border: none;
+    height: 100%;
+    .display-button {
+        width: 52px;
+        display: flex;
+        &.mat-button-toggle-checked {
+            background: $primary;
+
+            &.mat-button-toggle-disabled {
+                color: #ccc;
+            }
+        }
+        // TODO: find a better option for reducing the size of the button elements
+        span.mat-button-toggle-label-content {
+            align-items: center;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            height: var(--mat-standard-button-toggle-height);
+        }
+        div {
+            font-size: 62.5%;
+            font-weight: $font-weight-regular;
+            line-height: $line-height-medium;
+        }
+    }
+}
+
+.widget-display-config-label {
+    margin-left: 4px;
+    margin-right: 12px;
+
+    // match button disabled label text color
+    &.disabled-text {
+        color: var(--mdc-text-button-disabled-label-text-color, $secondary);
+    }
+}
+
+.widget-label {
+    margin-left: 5px;
+    margin-right: 2px;
+}

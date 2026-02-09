@@ -37,6 +37,32 @@
         }
       </createImage>
     </aiConfig>
+    <aiConfig>
+      <id>topic_page_ai_default</id>
+      <provider>openai</provider>
+      <useCaching>true</useCaching>
+    </aiConfig>
+    <aiConfig>
+      <id>topic_page_ai_chat_completion</id>
+      <chatCompletion>
+        {
+        "model": "gpt-4.1-mini"
+        }
+      </chatCompletion>
+    </aiConfig>
+    <aiConfig>
+      <id>topic_page_ai_text_widget</id>
+      <chatCompletion>
+        {
+        "messages": [
+        {
+        "role": "user",
+        "content": "Erstelle eine Zusammenfassung des Themas ({{var(cm:name)|node(cm:name)|-}}) in 5 Sätzen."
+        }
+        ]
+        }
+      </chatCompletion>
+    </aiConfig>
   </aiConfigs>
   <widgets>
     <defaults>
@@ -1237,6 +1263,15 @@
       </columns>
     </list>
     <list>
+      <id>genericWidget</id>
+      <columns>
+        <column>cclom:title</column>
+        <column>cm:modified</column>
+        <column>ccm:commonlicense_key</column>
+        <column>ccm:replicationsource</column>
+      </columns>
+    </list>
+    <list>
       <id>searchCollections</id>
       <columns>
         <column>COLLECTION.title</column>
@@ -1641,6 +1676,22 @@
       </property>
       <property name="virtual:reurlTypes">
         <statement>{"wildcard": {"properties.cclom:format": "${valueRaw}*" }}</statement>
+        <multiple>true</multiple>
+        <multiplejoin>OR</multiplejoin>
+      </property>
+      <property name="virtual:collection_id_tree">
+        <statement>
+          { "nested": {
+          "path": "collections",
+          "query":
+          {"bool":{
+          "should":[
+          {"match":{"collections.path": "${valueRaw}"}},
+          {"match":{"collections.nodeRef.id": "${valueRaw}"}}
+          ]
+          }}
+          }}
+        </statement>
         <multiple>true</multiple>
         <multiplejoin>OR</multiplejoin>
       </property>

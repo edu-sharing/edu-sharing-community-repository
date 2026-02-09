@@ -1,0 +1,240 @@
+@use '../../../../src/app/pages/topic-page/topic-page-variables' as *;
+
+:host {
+    margin-top: 15px;
+    display: block;
+    // This is currently necessary to get the grid working
+    --cardWidth: 314px;
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_containment/Container_queries
+    container-type: inline-size;
+}
+
+// fix for not displaying the card / list options in view mode
+// TODO: this should be added as an option to the es-node-entries-wrapper
+:host ::ng-deep es-node-entries-wrapper.view-mode {
+    ::ng-deep es-node-entries-card .card-options {
+        visibility: hidden !important;
+        height: 10px !important;
+    }
+
+    ::ng-deep es-node-entries-table mat-table .mat-column-actions {
+        display: none !important;
+    }
+}
+
+// workaround to add margin-top to the load more button
+// TODO: this should be fixed in the es-node-entries-wrapper, if it is an actual issue
+:host ::ng-deep es-node-entries-wrapper {
+    ::ng-deep es-node-entries-card-grid,
+    ::ng-deep es-node-entries-table {
+        .load-more {
+            margin-top: 10px;
+        }
+    }
+}
+
+// increase gap between elements
+:host ::ng-deep es-node-entries-wrapper ::ng-deep es-node-entries-card-grid {
+    .card-grid {
+        column-gap: 32px;
+        row-gap: 32px;
+    }
+}
+
+// workaround using dynamically added CSS classes to:
+// * fix box-sizing for selected items,
+// * fix background,
+// * mark blacklisted items,
+// * display / hide specific options (important for the ones having showAlways set to true)
+// * fix contrast issue in table header
+:host ::ng-deep es-node-entries-wrapper {
+    // add background for blacklisted items
+    ::ng-deep es-node-entries-card .grid-card,
+    ::ng-deep es-node-entries-table mat-table .mat-row {
+        // fix background (!important is currently necessary due to a very specific selector being applied in parallel)
+        &:not(.blacklisted) {
+            background-color: $surface !important;
+        }
+
+        &.blacklisted {
+            // https://www.magicpattern.design/tools/css-backgrounds
+            $blacklist-color: $surface-container-highest;
+            $blacklist-color-contrast: $surface-container;
+            background-color: $blacklist-color;
+            background-image: repeating-linear-gradient(
+                    45deg,
+                    $blacklist-color-contrast 25%,
+                    transparent 25%,
+                    transparent 75%,
+                    $blacklist-color-contrast 75%,
+                    $blacklist-color-contrast
+                ),
+                repeating-linear-gradient(
+                    45deg,
+                    $blacklist-color-contrast 25%,
+                    $blacklist-color 25%,
+                    $blacklist-color 75%,
+                    $blacklist-color-contrast 75%,
+                    $blacklist-color-contrast
+                );
+            background-position: 0 0, 3px 3px;
+            background-size: 6px 6px;
+        }
+    }
+
+    // fixed height for table rows
+    ::ng-deep es-node-entries-table mat-table .mat-row {
+        height: 60px;
+    }
+
+    // add border for selected items
+    ::ng-deep es-node-entries-card .grid-card {
+        &.selected {
+            // fix box-sizing for selected items
+            box-sizing: border-box;
+            border: 3px solid $primary;
+            // remove box-shadow in selected mode
+            box-shadow: none;
+        }
+    }
+
+    // fix contrast issue in table header
+    ::ng-deep es-node-entries-table mat-table mat-header-cell {
+        color: $on-surface;
+    }
+}
+
+// workaround to hide the x-axis overflow of the es-node-entries-wrapper
+:host ::ng-deep es-node-entries-wrapper .card-grid-wrapper {
+    overflow: hidden;
+}
+
+// workaround to hide the labels of the custom columns in card-meta + adjust style + hide icons in list
+:host ::ng-deep es-node-entries-wrapper {
+    ::ng-deep es-node-entries-card .grid-card .mat-ripple .card-meta {
+        .card-meta-row-virtual_custom_title,
+        .card-meta-row-virtual_custom_lrt,
+        .card-meta-row-virtual_custom_taxonid,
+        .card-meta-row-virtual_custom_educationalcontext,
+        .card-meta-row-virtual_custom_source,
+        .card-meta-row-virtual_custom_author {
+            label {
+                display: none;
+            }
+
+            .custom-attribute {
+                width: 100%;
+                display: flex;
+                align-items: start;
+                justify-content: space-between;
+                color: $secondary-text;
+
+                i {
+                    margin-right: 12px;
+                    min-width: 22px;
+                    text-align: start;
+                    font-size: 125%;
+                }
+
+                .attribute-text {
+                    margin-right: auto;
+                    text-align: start;
+                }
+            }
+        }
+
+        // custom style for title column
+        .card-meta-row-virtual_custom_title {
+            margin-bottom: 5px;
+
+            a.custom-attribute {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: -webkit-box;
+                line-height: $line-height-medium;
+                max-height: 2.8em;
+                color: $primary;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+            }
+        }
+    }
+
+    // hide icons in list view
+    ::ng-deep es-node-entries-table .mat-mdc-table .mat-mdc-cell {
+        .custom-attribute i {
+            display: none;
+        }
+    }
+}
+
+// the tab hitbox should be fully visible in the list view
+.list-attribute {
+    margin-left: 5px;
+}
+
+// reset the link style (for the custom title column)
+.reset-link-style {
+    // TODO: Replace, if necessary
+    color: inherit;
+    text-decoration: inherit;
+}
+
+// fix for unnecessary margin on empty es-option-button + hover effect of available node options with showAlways being set to true
+:host ::ng-deep .card-options-area es-option-button {
+    // remove margin from es-option-button and apply it to the button instead
+    margin: 0 !important;
+
+    button {
+        margin: 0 2px !important;
+    }
+
+    // fix hover effect
+    &:hover {
+        background: none !important;
+    }
+
+    button:hover {
+        background: $surface-container-lowest;
+    }
+}
+
+// fix wlo-custom-attribute width
+wlo-custom-attribute {
+    width: 100%;
+}
+
+// for single- and split-view also make sure that the --cardWidth is not too large
+// case 1: sidebar is not open
+// desktop breakpoint is 1210px
+@media (min-width: 1210px) {
+    // the container must be larger or equal 1050px
+    @container (min-width: 1050px) {
+        es-node-entries-wrapper:not(.sidebar-open) {
+            &.single-view,
+            &.split-view {
+                --cardWidth: 850px;
+            }
+        }
+    }
+}
+
+// case 2: sidebar is open
+@media (min-width: 1610px) {
+    // the container must be larger or equal 1050px
+    @container (min-width: 1050px) {
+        es-node-entries-wrapper.sidebar-open {
+            &.single-view,
+            &.split-view {
+                --cardWidth: 850px;
+            }
+        }
+    }
+}
+
+// make sure that the --cardWidth never gets too small
+@container (max-width: 314px) {
+    es-node-entries-wrapper {
+        --cardWidth: 100%;
+    }
+}
