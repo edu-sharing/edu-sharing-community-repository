@@ -121,30 +121,7 @@
     (click)="updateSelectedNodes(flatNode, $event)"
   >
     <div class="general-information container">
-      <!-- display the default icon, if it exists -->
-      <ng-container *ngIf="flatNode.item.iconURL; else fallbackIcon">
-        <img [src]="flatNode.item.iconURL" />
-      </ng-container>
-      <!-- fallback for faked nodes or nodes without default icon -->
-      <ng-template #fallbackIcon>
-        <!-- special case for faked nodes: a material icon should be used instead of an image -->
-        <ng-container
-          *ngIf="
-            flatNode.item.preview && !flatNode.item.preview?.url.includes('/');
-            else nodePreview
-          "
-        >
-          <i [esIcon]="flatNode.item.preview.url"></i>
-        </ng-container>
-        <!-- if none of the conditions matches, display the node preview -->
-        <ng-template #nodePreview>
-          <img
-            [src]="
-              flatNode.item | esNodeImage : { maxWidth: 100, maxHeight: 100, crop: true } | async
-            "
-          />
-        </ng-template>
-      </ng-template>
+      <es-node-type-badge [node]="flatNode.item" [collectionIcons]="false"></es-node-type-badge>
       <span
         class="node-title"
         [class.font-bold]="flatNode.level === 0"

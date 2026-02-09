@@ -808,11 +808,8 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         isCollection: boolean = false,
     ): Partial<Node> {
         const node: Partial<Node> = {
-            preview: {
-                isIcon: true,
-                height: 20,
-                url: icon,
-                width: 20,
+            icon: {
+                fontGlyphId: icon,
             },
             ref: {
                 archived: false,
