@@ -24,7 +24,8 @@
           (click)="click(option)"
           attr.data-test="menu-item-{{ option.name }}"
         >
-          <i [esIcon]="option.icon" esIconContext="option"></i> {{ option.name | translate }}
+          <i *ngIf="option.icon" [esIcon]="option.icon" esIconContext="option"></i>
+          {{ option.name | translate }}
         </button>
       </li>
     </ng-container>
