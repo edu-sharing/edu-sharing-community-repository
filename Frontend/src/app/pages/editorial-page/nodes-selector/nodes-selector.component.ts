@@ -110,14 +110,15 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     @Input() parent: Node;
     @Input() option!: OptionState<NodesSelectorConfig>;
 
-    selectedTab: WritableSignal<TabType> = signal(TabType.SEARCH);
-    selectedTabId = computed(() =>
-        (
-            [TabType.SEARCH, TabType.COLLECTIONS, TabType.WORKSPACE, TabType.UPLOAD] as TabType[]
-        ).indexOf(this.selectedTab()),
-    );
+    selectedTab: WritableSignal<TabType> = signal(null);
+    selectedTabId = computed(() => this.supportedTabs().indexOf(this.selectedTab()));
     selectedNodeChildren: WritableSignal<Partial<Node>[]> = signal([]);
     selectedNodes: WritableSignal<Partial<Node>[]> = signal([]);
+    supportedTabs: Signal<TabType[]> = computed(() =>
+        this.selectionMode() === 'source'
+            ? [TabType.SEARCH, TabType.COLLECTIONS, TabType.WORKSPACE, TabType.UPLOAD]
+            : [TabType.COLLECTIONS, TabType.WORKSPACE],
+    );
     highestSelectedNode: Signal<Partial<Node> | null> = computed((): Partial<Node> | null => {
         const selectedNodes: Partial<Node>[] = this.selectedNodes();
         // early return for empty or single selection
@@ -255,6 +256,7 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
      * Initializes the component by definition the default columns for the collections data source.
      */
     async ngOnInit(): Promise<void> {
+        this.selectedTab.set(this.supportedTabs()[0]);
         this.flatNodeEntriesColumns = await this.mdsHelperService.getColumnsByMdsId('search', {
             repository: HOME_REPOSITORY,
         });
