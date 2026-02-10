@@ -65,7 +65,7 @@ export class MetadataTemplateManagementComponent implements OnInit {
     });
     templateSelection: WritableSignal<boolean> = signal(false);
     readonly metadataTemplatesKey: string = 'metadataTemplates';
-    readonly metadataTemplateGroup: string = 'io_bulk';
+    readonly metadataTemplateGroup: string = 'io_bulk_sidebar';
     selectedValues: WritableSignal<MdsExtendedValues> = signal(null);
     templateName: string = '';
     @ViewChild('mdsEditor') mdsEditor: MdsEditorWrapperComponent;
