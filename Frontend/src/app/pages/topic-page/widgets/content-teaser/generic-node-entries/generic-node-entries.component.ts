@@ -54,8 +54,8 @@ import { OptionsHelperService } from '../../../shared/services/options-helper.se
 import { TopicPageHelperService } from '../../../shared/services/topic-page-helper.service';
 import { GenericNodeEntriesDisplayType } from '../../../shared/types/generic-node-entries-display-type';
 import { StatisticNode } from '../../../shared/types/statistic-node';
-import { CustomProposeContentCardComponent } from './custom-propose-content-card/custom-propose-content-card.component';
 import { GenericWidgetGlobalService } from '../../generic-widget/generic-widget-global.service';
+import { NgTemplateOutlet } from '@angular/common';
 
 export interface DisplayTypeComponentInterface {
     selectedNode: Node;
@@ -63,15 +63,22 @@ export interface DisplayTypeComponentInterface {
     maxItems: number;
     setDataSource(resetNecessary: boolean, skipCount?: number): Promise<void>;
 }
+export enum CustomCardRole {
+    /**
+     * card that should incentivize people to propose contents
+     * Is injected somewhere in the swimlane
+     */
+    SuggestContent,
+}
 
 @Component({
     selector: 'es-node-entries',
     encapsulation: ViewEncapsulation.Emulated,
     imports: [
-        CustomProposeContentCardComponent,
         EduSharingUiModule,
         // MapNodeCardComponent,
         MatTooltipModule,
+        NgTemplateOutlet,
     ],
     providers: [
         CheckTextOverflowDirective,
@@ -779,11 +786,13 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
      * @param positionToAdd
      */
     private injectCustomCards(positionToAdd: number): void {
-        // the position should either be the seventh or the last element, if less than seven elements exist
-        if (positionToAdd > this.CUSTOM_CARD_POSITION_INDEX) {
-            positionToAdd = this.CUSTOM_CARD_POSITION_INDEX;
+        if (this.genericWidgetGlobalService.getCustomCards(CustomCardRole.SuggestContent)) {
+            // the position should either be the seventh or the last element, if less than seven elements exist
+            if (positionToAdd > this.CUSTOM_CARD_POSITION_INDEX) {
+                positionToAdd = this.CUSTOM_CARD_POSITION_INDEX;
+            }
+            this.dataSource.getData().splice(positionToAdd, 0, this.cardSuggestRef);
         }
-        this.dataSource.getData().splice(positionToAdd, 0, this.cardSuggestRef);
     }
 
     /**
@@ -980,4 +989,5 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
     protected readonly GenericNodeEntriesDisplayType = GenericNodeEntriesDisplayType;
     protected readonly InteractionType = InteractionType;
     protected readonly Scope = Scope;
+    protected readonly CustomCardRole = CustomCardRole;
 }

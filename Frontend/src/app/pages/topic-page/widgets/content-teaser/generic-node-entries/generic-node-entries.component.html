@@ -26,11 +26,19 @@
   </ng-template>
 </es-node-entries-wrapper>
 
-<!-- custom card for proposing content -->
-<ng-template #cardSuggest>
-  <es-custom-propose-content-card [searchText]="searchText"></es-custom-propose-content-card>
+<ng-template
+  #cardSuggest
+  *ngIf="genericWidgetGlobalService.getCustomCards(CustomCardRole.SuggestContent)?.[0]?.templateRef as templateRef"
+>
+  <ng-container
+    *ngTemplateOutlet="
+      templateRef;
+      context: {
+        searchText: searchText
+      }
+    "
+  ></ng-container>
 </ng-template>
-
 <!-- metadata type templates -->
 <ng-template #specialType>
   <ng-container *ngIf="genericWidgetGlobalService.hasCustomDisplayType(layout)">
