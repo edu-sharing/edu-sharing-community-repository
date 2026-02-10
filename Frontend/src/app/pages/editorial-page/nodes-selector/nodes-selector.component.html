@@ -225,84 +225,7 @@
       </ng-container>
 
       <ng-container *ngSwitchCase="TabType.METHODOLOGY">
-        <div class="methodology-container">
-          <ng-container *ngIf="!templateSelection(); else selectTemplate">
-            <es-info-message mode="info">
-              {{ i18nPrefix + 'METHODOLOGY.INFO' | translate }}
-            </es-info-message>
-            <div class="template-actions">
-              <div class="template-selection">
-                <es-dropdown #dropdown [options]="templateOptions()">
-                  {{ currentTemplate().name | translate }}
-                </es-dropdown>
-                <button
-                  class="dropdown-selection"
-                  #trigger="matMenuTrigger"
-                  mat-button
-                  [matMenuTriggerFor]="dropdown.menu"
-                >
-                  <ng-container *ngIf="selectedTemplateIndex() === -1; else selectedTemplateName">
-                    {{ i18nPrefix + 'METHODOLOGY.SELECT_TEMPLATE' | translate }}
-                  </ng-container>
-                  <ng-template #selectedTemplateName>
-                    {{ currentTemplate().name }}
-                  </ng-template>
-                  <i [esIcon]="trigger?.menuOpen ? 'arrow_drop_up' : 'arrow_drop_down'"></i>
-                </button>
-              </div>
-              <button
-                class="template-toggle"
-                mat-icon-button
-                [disabled]="!customTemplates().length"
-                (click)="toggleTemplateSelection()"
-              >
-                <i esIcon="settings"></i>
-              </button>
-            </div>
-            <es-mds-editor-wrapper
-              #mdsEditor
-              [embedded]="true"
-              [setId]="DEFAULT"
-              [groupId]="metadataTemplateGroup"
-              [editorMode]="'valueSelection'"
-              [nodes]="null"
-              [currentValues]="currentTemplate().values"
-              (currentValuesExtendedChange)="currentValuesExtendedChange($event)"
-            ></es-mds-editor-wrapper>
-            <button class="create-template" mat-flat-button (click)="createTemplate()">
-              {{ i18nPrefix + 'METHODOLOGY.CREATE_TEMPLATE.BUTTON_LABEL' | translate }}
-            </button>
-          </ng-container>
-          <ng-template #selectTemplate>
-            <div class="select-template-container">
-              <div class="select-template-header">
-                <button mat-icon-button (click)="toggleTemplateSelection()">
-                  <i esIcon="arrow_back"></i>
-                </button>
-                {{ i18nPrefix + 'METHODOLOGY.MANAGE_TEMPLATES' | translate }}
-              </div>
-              <div class="select-template-list">
-                <div
-                  class="template-list-item"
-                  [class.last-list-item]="last"
-                  *ngFor="let template of customTemplates(); let last = last"
-                >
-                  <div class="template-title">
-                    {{ template.name }}
-                  </div>
-                  <div class="template-actions">
-                    <button mat-icon-button (click)="renameTemplate(template)">
-                      <i esIcon="edit" [aria]="true"></i>
-                    </button>
-                    <button mat-icon-button (click)="deleteTemplate(template)">
-                      <i esIcon="delete" [aria]="true"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </ng-template>
-        </div>
+        <es-metadata-template-management></es-metadata-template-management>
       </ng-container>
 
       <ng-template #noSearchResults let-dataSource="dataSource">
@@ -424,10 +347,3 @@
     </ng-container>
   </ng-container>
 </div>
-
-<ng-template #templateTitleDialog>
-  <mat-form-field appearance="outline" subscriptSizing="dynamic">
-    <mat-label>{{ i18nPrefix + 'METHODOLOGY.TEMPLATE_NAME' | translate }}</mat-label>
-    <input matInput [(ngModel)]="templateName" />
-  </mat-form-field>
-</ng-template>
