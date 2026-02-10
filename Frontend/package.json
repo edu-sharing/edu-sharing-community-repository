@@ -90,7 +90,7 @@
     "tinymce-i18n": "^23.9.11",
     "tslib": "^2.3.1",
     "uuid": "^11.1.0",
-    "webpack": "^5.75.0",
+    "webpack": "^5.105.1",
     "zone.js": "~0.15.1"
   },
   "devDependencies": {
@@ -158,6 +158,9 @@
     "ts-node": "~10.9.1",
     "typedoc": "^0.28.15",
     "typescript": "~5.8.3"
+  },
+  "overrides": {
+    "pacote": "~21.0.4"
   },
   "lint-staged": {
     "*.{js,css,md,ts,html,scss}": "prettier --write"
