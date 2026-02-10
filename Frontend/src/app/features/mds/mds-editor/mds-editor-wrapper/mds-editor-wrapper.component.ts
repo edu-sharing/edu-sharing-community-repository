@@ -115,6 +115,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
         }
         this.mdsEditorInstance.values.subscribe((values) => {
             this.values = values;
+            console.log('currentValuesChange', values);
             this.currentValuesChange.emit(values);
         });
         this.mdsEditorInstance.extendedValues.subscribe((values) => {
@@ -311,7 +312,6 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
                 );
                 this.editorType = 'angular';
             }
-            this.mdsEditorInstance.values.subscribe((v) => this.currentValuesChange.emit(v));
             this.mdsLoaded.emit(this.mdsEditorInstance.mdsDefinition$.value);
         } catch (error) {
             this.handleError(error);
