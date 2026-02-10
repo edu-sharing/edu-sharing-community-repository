@@ -28,7 +28,6 @@ import {
     SearchService,
 } from 'ngx-edu-sharing-api';
 import {
-    ActionbarComponent,
     CanDrop,
     ColumnType,
     DragData,
@@ -101,6 +100,7 @@ export type NodesSelectorConfig = {
      */
     applyLabel?: string;
 };
+
 @Component({
     selector: 'es-nodes-selector',
     templateUrl: 'nodes-selector.component.html',
@@ -202,7 +202,6 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     dataSourceSearch: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
     searchDisplayType: NodeEntriesDisplayType = NodeEntriesDisplayType.Table;
     searchSent: WritableSignal<boolean> = signal(false);
-    @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
     @ViewChild('searchWrapperRef') searchWrapper!: NodeEntriesWrapperComponent<Node>;
 
     // collections tab
