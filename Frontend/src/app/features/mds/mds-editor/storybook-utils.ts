@@ -1,14 +1,20 @@
+import { CommonModule } from '@angular/common';
 import {
     ApplicationConfig,
-    ApplicationRef,
+    Component,
     EventEmitter,
     importProvidersFrom,
     Inject,
     Injectable,
-    Injector,
     NgModule,
-    Optional,
 } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import {
+    MAT_DIALOG_DATA,
+    MatDialog,
+    MatDialogModule,
+    MatDialogRef,
+} from '@angular/material/dialog';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -33,6 +39,7 @@ import {
     NodeSuggestionResponseDto,
     RestConstants,
     SessionStorageService,
+    Store,
     SuggestionResponseDto,
     SuggestionsByNodeIdParams,
     SuggestionsV1Service,
@@ -40,13 +47,13 @@ import {
     UserSimple,
     Variables,
 } from 'ngx-edu-sharing-api';
-import { BehaviorSubject, forkJoin, from, Observable, of as observableOf, of, Subject } from 'rxjs';
+import { BehaviorSubject, forkJoin, Observable, of, Subject } from 'rxjs';
 import { CordovaService } from '../../../services/cordova.service';
-import { Toast as ToastService } from '../../../services/toast';
 import { InputStatus, MdsWidgetValue } from '../types/types';
 import { MdsEditorInstanceService } from './mds-editor-instance.service';
 import {
     ColumnType,
+    EduSharingUiModule,
     Helper,
     I18N_CONFIG,
     I18nConfig,
@@ -348,6 +355,136 @@ export class EduSharingLlmServiceMock {
         return of([]);
     }
 }
+
+@Component({
+    standalone: true,
+    selector: 'app-inline-generic-dialog',
+    template: `
+        <mat-dialog-content class="mat-typography">
+            <header class="dialog-header">
+                <div class="header-text">
+                    <h2 mat-dialog-title>{{ data.title | translate }}</h2>
+                    <p class="subtitle" *ngIf="data.subtitle">
+                        {{ data.subtitle }}
+                    </p>
+                </div>
+
+                <button mat-icon-button aria-label="Close" (click)="close('close')">
+                    <i esIcon="close"></i>
+                </button>
+            </header>
+
+            <section class="dialog-body">
+                <ng-container *ngIf="data.message; else templateContent">
+                    <div>
+                        {{ data.message | translate }}
+                    </div>
+                </ng-container>
+
+                <ng-template #templateContent>
+                    <ng-container *ngTemplateOutlet="data.contentTemplate"></ng-container>
+                </ng-template>
+            </section>
+        </mat-dialog-content>
+
+        <mat-dialog-actions align="end" *ngIf="data.buttons?.length">
+            <button mat-button *ngFor="let button of data.buttons" (click)="close(button.label)">
+                {{ button.label | translate }}
+            </button>
+        </mat-dialog-actions>
+    `,
+    styles: `
+        mat-dialog-content {
+            padding: 0 !important;
+        }
+
+        .dialog-header, .dialog-body, mat-dialog-actions {
+            padding: 12px 16px !important;
+        }
+
+        .dialog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            border-bottom: 1px solid #e0e0e0;
+
+            .header-text {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+            }
+
+            h2 {
+                margin: 0;
+                padding: 0;
+                font-size: 1.5rem;
+                display: flex;
+                align-items: center;
+            }
+
+            .subtitle {
+                margin: 0.25rem 0 0;
+                font-size: 0.875rem;
+                color: rgba(0, 0, 0, 0.6);
+            }
+        }
+
+        mat-dialog-actions {
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+    `,
+    imports: [CommonModule, EduSharingUiModule, MatButtonModule, MatDialogModule],
+})
+export class SimpleGenericDialogComponent {
+    constructor(
+        @Inject(MAT_DIALOG_DATA) public data: any,
+        private dialogRef: MatDialogRef<SimpleGenericDialogComponent, any>,
+    ) {}
+
+    close(result: any): void {
+        this.dialogRef.close(result);
+    }
+}
+
+// TODO: Replace by a real mocked dialogs service
+@Injectable()
+export class MetadataTemplateDialogsServiceMock {
+    constructor(private dialog: MatDialog) {}
+
+    async openGenericDialog(config: any): Promise<MatDialogRef<SimpleGenericDialogComponent, any>> {
+        const dialogRef = this.dialog.open(SimpleGenericDialogComponent, {
+            width: config.width ?? '480px',
+            disableClose: config.disableClose ?? false,
+            data: {
+                title: config.title,
+                subtitle: config.subtitle,
+                message: config.message,
+                contentTemplate: config.contentTemplate,
+                buttons: config.buttons,
+            },
+        });
+
+        return Promise.resolve(dialogRef);
+    }
+}
+
+@Injectable()
+export class SessionStorageServiceMock extends SessionStorageService {
+    storageObject: any = {};
+
+    get(key: string, fallback?: any, store?: Store): Observable<any> {
+        return of(this.storageObject[key] || []);
+    }
+
+    set(key: string, value: any, store?: Store): Promise<void> {
+        this.storageObject[key] = value;
+        return Promise.resolve();
+    }
+}
+
 @Injectable()
 export class SuggestionsV1ServiceMock {
     readonly BaseSuggestion = (propertyId: string, nodeId: string, values: string[]) =>
