@@ -149,7 +149,7 @@ export class MdsEditorInstanceService
         private initialValues: InitialValues;
         private initialDisplayValues = new BehaviorSubject<MdsValueList>(null);
         private readonly value$ = new BehaviorSubject<string[]>(null);
-        private readonly extendedValue$ = new BehaviorSubject<MdsExtendedValue>(null);
+        private readonly extendedValue$ = new BehaviorSubject<MdsExtendedValue>({});
         private isDirty = false;
         private suggestionsChanged = false;
         /**
@@ -336,9 +336,8 @@ export class MdsEditorInstanceService
                 };
             }
             // Set initial values, so the initial completion status is calculated correctly.
-            this.syncExtendedValue([...this.initialValues.jointValues]);
             this.value$.next([...this.initialValues.jointValues]);
-            this.extendedValue$.next(this.initialValues.extendedValues);
+            this.extendedValue$.next(this.initialValues.extendedValues || {});
             this.initialValuesSubject.next(this.initialValues);
             this.ready.next();
             this.ready.complete();
@@ -484,7 +483,6 @@ export class MdsEditorInstanceService
             //     newValue: value,
             // });
             this.isDirty = dirty;
-            this.syncExtendedValue(value);
             this.value$.next(value);
             this.mdsEditorInstanceService.updateHasChanges();
         }
@@ -535,31 +533,12 @@ export class MdsEditorInstanceService
         }
 
         patchExtendedValue(key: string, data: MdsExtendedValueData) {
-            const extendedValue: MdsExtendedValue = this.getExtendedValue();
-            extendedValue[key] = data;
-            console.log(extendedValue);
-            this.extendedValue$.next(extendedValue);
-            // workaround to trigger update of the extendedValues
-            this.value$.next(this.getValue());
-        }
-
-        syncExtendedValue(value: string[]) {
-            const extendedValue: MdsExtendedValue = this.getExtendedValue();
-            // add missing values (default set them to enabled: true)
-            value.forEach((v) => {
-                if (!extendedValue[v]) {
-                    extendedValue[v] = {
-                        enabled: true,
-                    };
-                }
-            });
-            // remove deleted values
-            Object.keys(extendedValue).forEach((key) => {
-                if (!value.includes(key)) {
-                    delete extendedValue[key];
-                }
-            });
-            this.extendedValue$.next(extendedValue);
+            this.extendedValue$.value[key] = data;
+            this.extendedValue$.next(this.extendedValue$.value);
+            this.mdsEditorInstanceService.patchExtendedValue(
+                this.definition.id,
+                this.extendedValue$.value,
+            );
         }
 
         observeHasChanged(): Observable<boolean> {
@@ -793,6 +772,7 @@ export class MdsEditorInstanceService
     /** Updated widget values, not considering nodes. */
     readonly values: Observable<{ [id: string]: string[] }>;
     readonly extendedValues: Observable<MdsExtendedValues>;
+    private readonly extendedValues$ = new BehaviorSubject<MdsExtendedValues>(null); // only in property/without nodes mode
 
     /**
      * suggestions that are modified (will be saved in the save routine)
@@ -1032,7 +1012,9 @@ export class MdsEditorInstanceService
             ),
             shareReplay(1),
         );
-        this.extendedValues = combineLatest([this.values, this.values$]).pipe(
+        this.extendedValues = combineLatest([this.values, this.extendedValues$]).pipe(
+            // wait 1 tick so that the extended value is already present
+            debounceTime(0),
             map(([v, extended]) => {
                 if (!extended) {
                     return null;
@@ -1043,7 +1025,7 @@ export class MdsEditorInstanceService
                     (value || []).forEach((v) => {
                         (result[key] as MdsExtendedValue)[v] = (
                             extended[key] as MdsExtendedValue
-                        )?.[v] ?? { enabled: true };
+                        )?.[v] || { enabled: true };
                     });
                 });
                 return result;
@@ -1303,6 +1285,7 @@ export class MdsEditorInstanceService
         this.editorMode = editorMode;
         this.editorBulkMode = { isBulk: false };
         this.values$.next(initialValues);
+        this.extendedValues$.next(initialValues);
         if (mdsId === null) {
             try {
                 const sets = ConfigurationHelper.filterValidMds(
@@ -2325,6 +2308,13 @@ export class MdsEditorInstanceService
                 this.editorMode === 'nodes' &&
                 this.groupId === 'io',
         );
+    }
+
+    patchExtendedValue(id: string, value: MdsExtendedValue) {
+        if (this.extendedValues$.value) {
+            this.extendedValues$.value[id] = value;
+            this.extendedValues$.next(this.extendedValues$.value);
+        }
     }
 }
 

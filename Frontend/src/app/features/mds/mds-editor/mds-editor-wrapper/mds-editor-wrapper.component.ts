@@ -117,9 +117,10 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
             this.values = values;
             this.currentValuesChange.emit(values);
         });
-        this.mdsEditorInstance.extendedValues.subscribe((values) =>
-            this.currentValuesExtendedChange.emit(values),
-        );
+        this.mdsEditorInstance.extendedValues.subscribe((values) => {
+            console.log('currentValuesExtendedChange', values);
+            this.currentValuesExtendedChange.emit(values);
+        });
 
         if (!this.embedded) {
             throw new Error(

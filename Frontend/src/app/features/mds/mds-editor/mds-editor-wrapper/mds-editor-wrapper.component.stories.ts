@@ -96,7 +96,7 @@ Object.entries(DummyNode.properties).map(([k, v]) => {
     DummyProps[k] = {} as MdsExtendedValue;
     v.forEach((key) => {
         (DummyProps[k] as MdsExtendedValue)[key] = {
-            enabled: true,
+            enabled: Math.random() > 0.25,
         };
     });
 });

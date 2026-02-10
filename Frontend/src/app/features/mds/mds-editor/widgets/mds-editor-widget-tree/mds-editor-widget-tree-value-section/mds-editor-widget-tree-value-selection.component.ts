@@ -79,8 +79,9 @@ export class MdsEditorWidgetTreeValueSelectionComponent {
         // make sure to clear the form array before pushing new values on the current extended values
         const selections = this.form.get('selections') as FormArray;
         selections.clear();
+        console.log();
         this.selectedValues().forEach((value) => {
-            selections.push(new FormControl<boolean>(extendedValues[value.key]?.enabled ?? false));
+            selections.push(new FormControl<boolean>(extendedValues[value.key]?.enabled ?? true));
         });
     }
 }
