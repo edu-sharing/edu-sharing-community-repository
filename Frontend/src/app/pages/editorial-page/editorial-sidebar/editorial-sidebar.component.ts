@@ -198,6 +198,22 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         sortInto.elementType = [ElementType.NoneOrUnknown];
         sortInto.scopes = ['collections'];
         options.push(sortInto);
+        const manageContent = new OptionItem(
+            'EDITORIAL.OPTIONS.MANAGE_CONTENT',
+            'tab_new_right',
+            () =>
+                this.enabledOption.set({
+                    trap: false,
+                    option: 'SORT_INTO',
+                    optionConfig: { nodes: this.nodes() },
+                }),
+        );
+        manageContent.customShowCallback = async () =>
+            this.parent() && this.nodeHelperService.isNodeCollection(this.parent());
+        manageContent.elementType = [ElementType.Node];
+        manageContent.constrains = [Constrain.Files];
+        manageContent.scopes = ['collections'];
+        options.push(manageContent);
         this.optionsHelperDataService.setData({
             scope: this.primaryMode(),
             activeObjects: this.nodes(),

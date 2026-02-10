@@ -34,6 +34,8 @@
     "OPTIONS": {
       "SORT_INTO": "Mit Splitscreen einsortieren",
       "SORT_INTO_DESCRIPTION": "Hier können Sie über die Suche, aus Sammlungen und Workspace oder durch Upload etwas einsortieren.",
+      "MANAGE_CONTENT": "Inhalte zuordnen & freigeben",
+      "MANAGE_CONTENT_DESCRIPTION": "Mit diesem Panel kannst du rechts eine beliebige andere Ansicht als Quelle für deinen Kooperationsort öffnen.",
       "CREATE_ASSIGNMENT": "Neue Aufgabe",
       "MANAGE_SUBMISSION": "Abgabe bearbeiten",
       "CREATE_ASSIGNMENT_DESCRIPTION": "Anlegen einer neuen Aufgabe",
@@ -42,7 +44,25 @@
       "PREVIEW_DESCRIPTION": "Eine Vorschau des Inhalts inkl. der wichtigsten Metadaten anzeigen",
       "WORKSPACE_METADATA": "Statistik, Versionen & Details",
       "WORKSPACE_METADATA_DESCRIPTION": "Verwendungsstatistiken, Versionsverwaltung und allgemeine Details anzeigen",
-      "SORT_INTO_TAB": {
+      "NODES_SELECTOR": {
+        "METHODOLOGY": {
+          "TITLE": "Methodik",
+          "INFO": "Finde schneller, was du suchst. Baue dir Tagging-Vorlagen und tagge Material.\n Baue dir damit deine typischen Filter für die Suche.",
+          "SELECT_TEMPLATE": "Vorlage auswählen",
+          "MANAGE_TEMPLATES": "Vorlagen verwalten",
+          "TEMPLATE_NAME": "Titel der Vorlage",
+          "EDIT_TEMPLATE": {
+            "DIALOG_TITLE": "Vorlage anpassen"
+          },
+          "DELETE_TEMPLATE": {
+            "DIALOG_TITLE": "Vorlage löschen",
+            "CONFIRMATION_MESSAGE": "Willst du diese Vorlage wirklich löschen?"
+          },
+          "CREATE_TEMPLATE": {
+            "BUTTON_LABEL": "Auswahl als Vorlage speichern",
+            "DIALOG_TITLE": "Erstelle eine neue Vorlage"
+          }
+        },
         "NO_SEARCH_RESULTS": "Es konnten keine Ergebnisse gefunden werden.",
         "SEARCH": {
           "PLACEHOLDER": "Suche nach Inhalten"

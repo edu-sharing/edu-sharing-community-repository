@@ -8,6 +8,7 @@ import {
     Signal,
     signal,
     SimpleChanges,
+    TemplateRef,
     ViewChild,
     WritableSignal,
 } from '@angular/core';
@@ -16,16 +17,17 @@ import { MatTabChangeEvent } from '@angular/material/tabs';
 import { TranslateService } from '@ngx-translate/core';
 import {
     CollectionService as ApiCollectionService,
+    DEFAULT,
     HOME_REPOSITORY,
     MdsQueryCriteria,
     Node,
     NodeService,
-    NodeServiceUnwrapped,
     PROPERTY_FILTER_ALL,
     ROOT,
     SearchRequestParams,
     SearchResults,
     SearchService,
+    SessionStorageService,
 } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
@@ -36,6 +38,7 @@ import {
     FetchEvent,
     InteractionType,
     LocalEventsService,
+    MdsExtendedValues,
     MdsHelperService,
     NodeClickEvent,
     NodeDataSource,
@@ -43,6 +46,7 @@ import {
     NodeEntriesDisplayType,
     NodeEntriesService,
     NodeEntriesWrapperComponent,
+    OptionItem,
     Scope,
     TreeNodeService,
 } from 'ngx-edu-sharing-ui';
@@ -57,6 +61,13 @@ import { RestCollectionService } from '../../../core-module/rest/services/rest-c
 import { UIService } from '../../../core-module/rest/services/ui.service';
 import { AddMaterialDialogResult } from '../../../features/dialogs/dialog-modules/add-material-dialog/add-material-dialog-data';
 import { AddMaterialDialogModule } from '../../../features/dialogs/dialog-modules/add-material-dialog/add-material-dialog.module';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import {
+    DELETE_OR_CANCEL,
+    SAVE_OR_CANCEL,
+} from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
+import { MdsModule } from '../../../features/mds/mds.module';
+import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { BridgeService } from '../../../services/bridge.service';
 import { NodeHelperService } from '../../../services/node-helper.service';
 import { Toast } from '../../../services/toast';
@@ -68,6 +79,7 @@ import { OptionState } from '../editorial-sidebar/editorial-sidebar.component';
 
 export enum TabType {
     SEARCH = 'search',
+    METHODOLOGY = 'methodology',
     COLLECTIONS = 'collections',
     WORKSPACE = 'workspace',
     UPLOAD = 'upload',
@@ -77,6 +89,13 @@ enum StepType {
     SELECT = 'select',
     CONFIGURE = 'configure',
 }
+
+interface Template {
+    id: string;
+    name: string;
+    values: MdsExtendedValues;
+}
+
 export type NodesSelectorConfig = {
     state?: TabType;
     /**
@@ -101,11 +120,11 @@ export type NodesSelectorConfig = {
     selector: 'es-nodes-selector',
     templateUrl: 'nodes-selector.component.html',
     styleUrls: ['nodes-selector.component.scss'],
-    imports: [SharedModule, AddMaterialDialogModule],
+    imports: [SharedModule, AddMaterialDialogModule, MdsModule],
     providers: [NodeEntriesService, TreeNodeService],
 })
 export class NodesSelectorComponent implements OnInit, OnChanges {
-    protected readonly i18nPrefix: string = 'EDITORIAL.OPTIONS.SORT_INTO_TAB.';
+    protected readonly i18nPrefix: string = 'EDITORIAL.OPTIONS.NODES_SELECTOR.';
     protected readonly idPrefix: string = 'nodes-selector-tab';
     @Input() parent: Node;
     @Input() option!: OptionState<NodesSelectorConfig>;
@@ -117,7 +136,7 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     supportedTabs: Signal<TabType[]> = computed(() =>
         this.selectionMode() === 'source'
             ? [TabType.SEARCH, TabType.COLLECTIONS, TabType.WORKSPACE, TabType.UPLOAD]
-            : [TabType.COLLECTIONS, TabType.WORKSPACE],
+            : [TabType.METHODOLOGY, TabType.COLLECTIONS, TabType.WORKSPACE],
     );
     highestSelectedNode: Signal<Partial<Node> | null> = computed((): Partial<Node> | null => {
         const selectedNodes: Partial<Node>[] = this.selectedNodes();
@@ -196,6 +215,43 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
     @ViewChild('searchWrapperRef') searchWrapper!: NodeEntriesWrapperComponent<Node>;
 
+    // methodology tab
+    initialTemplates: Template[] = [
+        {
+            id: uuidv4(),
+            name: 'keine Vorlage',
+            values: {},
+        },
+    ];
+    customTemplates: WritableSignal<Template[]> = signal([]);
+    selectedTemplateIndex: WritableSignal<number> = signal(-1);
+    templates = computed(() => [...this.initialTemplates, ...this.customTemplates()]);
+    currentTemplate = computed(() =>
+        this.templates()?.[this.selectedTemplateIndex()]
+            ? this.templates()[this.selectedTemplateIndex()]
+            : this.templates()[0],
+    );
+    templateOptions = computed(() => {
+        // call the signal to recompute the options value
+        this.selectedTemplateIndex();
+        return this.templates().map((template, index) => {
+            const optionItem = new OptionItem(template.name, null, () => {
+                this.selectTemplate(index);
+            });
+            optionItem.isEnabled = index !== this.selectedTemplateIndex();
+            // TODO: this sets .mat-menu-item-selected, but the visible selection is based on .cdk-focused
+            // optionItem.isSelected = index === this.selectedTemplateIndex();
+            return optionItem;
+        });
+    });
+    templateSelection: WritableSignal<boolean> = signal(false);
+    readonly metadataTemplatesKey: string = 'metadataTemplates';
+    readonly metadataTemplateGroup: string = 'io_bulk';
+    selectedValues: WritableSignal<MdsExtendedValues> = signal(null);
+    templateName: string = '';
+    @ViewChild('mdsEditor') mdsEditor: MdsEditorWrapperComponent;
+    @ViewChild('templateTitleDialog') templateTitleDialogRef: TemplateRef<undefined>;
+
     // collections tab
     collectionsDisplayType: WritableSignal<NodeEntriesDisplayType> = signal(
         NodeEntriesDisplayType.Tree,
@@ -225,15 +281,16 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         private apiCollectionService: ApiCollectionService,
         private bridge: BridgeService,
         private collectionService: RestCollectionService,
+        private dialogs: DialogsService,
         private localEventsService: LocalEventsService,
         private mdsHelperService: MdsHelperService,
         public nodeHelperService: NodeHelperService,
         public editorialSidebarService: EditorialSidebarService,
         private nodeService: NodeService,
-        private nodeServiceUnwrapped: NodeServiceUnwrapped,
         private uiService: UIService,
         private uploadDialogService: UploadDialogService,
         private searchService: SearchService,
+        private storage: SessionStorageService,
         private toast: Toast,
         private translate: TranslateService,
         private treeNodeService: TreeNodeService,
@@ -259,6 +316,7 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         if (this.selectedTab() === null) {
             this.selectedTab.set(this.supportedTabs()[0]);
         }
+        await this.updateCustomTemplates();
         this.flatNodeEntriesColumns = await this.mdsHelperService.getColumnsByMdsId('search', {
             repository: HOME_REPOSITORY,
         });
@@ -301,6 +359,9 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         switch (event.tab.id) {
             case this.idPrefix + TabType.SEARCH:
                 this.selectedTab.set(TabType.SEARCH);
+                break;
+            case this.idPrefix + TabType.METHODOLOGY:
+                this.selectedTab.set(TabType.METHODOLOGY);
                 break;
             case this.idPrefix + TabType.COLLECTIONS:
                 this.selectedTab.set(TabType.COLLECTIONS);
@@ -372,6 +433,101 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
             this.collectionsDisplayType.set(NodeEntriesDisplayType.Tree);
             this.searchSent.set(false);
         }
+    }
+
+    /**
+     * Handles the toggling of the template selection.
+     */
+    toggleTemplateSelection(): void {
+        this.templateSelection.set(!this.templateSelection());
+    }
+
+    /**
+     * Handles the renaming of a given template.
+     *
+     * @param template
+     */
+    async renameTemplate(template: Template): Promise<void> {
+        const defaultName: string = 'Template ' + (this.customTemplates().length + 1);
+        this.templateName = template.name;
+        const editTemplateDialogRef = await this.dialogs.openGenericDialog({
+            title: this.i18nPrefix + 'METHODOLOGY.EDIT_TEMPLATE.DIALOG_TITLE',
+            subtitle: template.name,
+            contentTemplate: this.templateTitleDialogRef,
+            buttons: SAVE_OR_CANCEL,
+        });
+        const result = await firstValueFrom(editTemplateDialogRef.afterClosed());
+        if (result === 'SAVE') {
+            template.name = this.templateName || defaultName;
+            const currentTemplates: Template[] = [...this.customTemplates()];
+            const index = currentTemplates.findIndex((t) => t.id === template.id);
+            currentTemplates.splice(index, 1, template);
+            await this.storage.set(this.metadataTemplatesKey, currentTemplates);
+            await this.updateCustomTemplates();
+        }
+        // reset template name
+        this.templateName = '';
+    }
+
+    /**
+     * Handles the deletion of a given template.
+     *
+     * @param template
+     */
+    async deleteTemplate(template: Template): Promise<void> {
+        const deleteTemplateDialogRef = await this.dialogs.openGenericDialog({
+            title: this.i18nPrefix + 'METHODOLOGY.DELETE_TEMPLATE.DIALOG_TITLE',
+            subtitle: template.name,
+            message: this.i18nPrefix + 'METHODOLOGY.DELETE_TEMPLATE.CONFIRMATION_MESSAGE',
+            buttons: DELETE_OR_CANCEL,
+        });
+        const result = await firstValueFrom(deleteTemplateDialogRef.afterClosed());
+        if (result === 'YES_DELETE') {
+            const currentTemplates: Template[] = [...this.customTemplates()];
+            const index = currentTemplates.findIndex((t) => t.id === template.id);
+            currentTemplates.splice(index, 1);
+            await this.storage.set(this.metadataTemplatesKey, currentTemplates);
+            await this.updateCustomTemplates();
+            if (!this.customTemplates().length) {
+                this.templateSelection.set(false);
+            }
+        }
+    }
+
+    /**
+     * Handles the saving of the current selection as a template.
+     */
+    async createTemplate(): Promise<void> {
+        const defaultName: string = 'Template ' + (this.customTemplates().length + 1);
+        this.templateName = defaultName;
+        const createTemplateDialogRef = await this.dialogs.openGenericDialog({
+            title: this.i18nPrefix + 'METHODOLOGY.CREATE_TEMPLATE.DIALOG_TITLE',
+            contentTemplate: this.templateTitleDialogRef,
+            buttons: SAVE_OR_CANCEL,
+        });
+        const result = await firstValueFrom(createTemplateDialogRef.afterClosed());
+        if (result === 'SAVE') {
+            const currentTemplates: Template[] = [...this.customTemplates()];
+            currentTemplates.push({
+                id: uuidv4(),
+                name: this.templateName || defaultName,
+                values: this.selectedValues(),
+            });
+            await this.storage.set(this.metadataTemplatesKey, currentTemplates);
+            await this.updateCustomTemplates();
+            this.selectTemplate(this.templates().length - 1);
+        }
+        // reset template name
+        this.templateName = '';
+    }
+
+    /**
+     * Reacts to the (currentValuesExtendedChange) output by holding the currently selected values.
+     *
+     * @param event
+     */
+    currentValuesExtendedChange(event: MdsExtendedValues) {
+        this.selectedValues.set(event);
     }
 
     /**
@@ -685,6 +841,29 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     }
 
     /**
+     * Helper function to retrieve the custom templates.
+     */
+    private async updateCustomTemplates(): Promise<void> {
+        const customTemplates = await firstValueFrom(this.storage.get(this.metadataTemplatesKey));
+        if (customTemplates) {
+            this.customTemplates.set(customTemplates as Template[]);
+        }
+    }
+
+    /**
+     * Helper function to select a template at a given index.
+     *
+     * @param index
+     */
+    private selectTemplate(index: number) {
+        this.selectedTemplateIndex.set(index);
+        // wait for the view being rendered
+        setTimeout(() => {
+            void this.mdsEditor.reInit();
+        });
+    }
+
+    /**
      * Helper function to initialize the collections datasource with (faked) nodes for "my" and "editorial" collections.
      */
     private async updateCollectionsDataSource(): Promise<void> {
@@ -915,6 +1094,7 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         this.workspaceWrapper?.getSelection().clear();
     }
 
+    protected readonly DEFAULT = DEFAULT;
     protected readonly InteractionType = InteractionType;
     protected readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     protected readonly Scope = Scope;
@@ -924,6 +1104,8 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         switch (tabType) {
             case TabType.SEARCH:
                 await this.updateSearchDataSource();
+                break;
+            case TabType.METHODOLOGY:
                 break;
             case TabType.COLLECTIONS:
                 await this.updateCollectionsDataSource();
