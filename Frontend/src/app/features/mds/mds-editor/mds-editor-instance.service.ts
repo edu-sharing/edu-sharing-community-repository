@@ -336,10 +336,10 @@ export class MdsEditorInstanceService
                 };
             }
             // Set initial values, so the initial completion status is calculated correctly.
+            this.syncExtendedValue([...this.initialValues.jointValues]);
             this.value$.next([...this.initialValues.jointValues]);
             this.extendedValue$.next(this.initialValues.extendedValues);
             this.initialValuesSubject.next(this.initialValues);
-            this.syncExtendedValue(this.getValue());
             this.ready.next();
             this.ready.complete();
         }
@@ -484,8 +484,8 @@ export class MdsEditorInstanceService
             //     newValue: value,
             // });
             this.isDirty = dirty;
-            this.value$.next(value);
             this.syncExtendedValue(value);
+            this.value$.next(value);
             this.mdsEditorInstanceService.updateHasChanges();
         }
 
@@ -1043,7 +1043,7 @@ export class MdsEditorInstanceService
                     (value || []).forEach((v) => {
                         (result[key] as MdsExtendedValue)[v] = (
                             extended[key] as MdsExtendedValue
-                        )?.[v];
+                        )?.[v] ?? { enabled: true };
                     });
                 });
                 return result;
