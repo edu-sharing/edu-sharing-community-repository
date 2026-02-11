@@ -565,7 +565,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     }
 
     /**
-     * Reacts to wlo-editable-text (searchResultsUpdated) event by setting the search results
+     * Reacts to es-editable-text (searchResultsUpdated) event by setting the search results
      * and updating the search input count.
      *
      * @param event
@@ -576,7 +576,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     }
 
     /**
-     * Reacts to wlo-editable-text (searchResultsUpdated) event and emit it.
+     * Reacts to es-editable-text (searchResultsUpdated) event and emit it.
      *
      * @param count
      * @param type

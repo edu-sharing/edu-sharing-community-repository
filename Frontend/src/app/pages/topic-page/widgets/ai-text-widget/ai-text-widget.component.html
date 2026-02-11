@@ -3,7 +3,7 @@
     <es-spinner></es-spinner>
   </div>
   <div class="edit-mode" *ngIf="editMode(); else outputResult">
-    <!-- HTML rule: form must not contain other form elements, so avoid using wlo-editable-text in form -->
+    <!-- HTML rule: form must not contain other form elements, so avoid using es-editable-text in form -->
     <form [formGroup]="form">
       <h3 class="mat-heading-4">
         {{ 'TOPIC_PAGE.WIDGET.AI_WIDGET.HEADING' | translate }}

@@ -231,7 +231,7 @@ export class AiTextWidgetComponent implements WidgetComponentInterface {
     }
 
     /**
-     * Reacts to wlo-editable-text (searchResultsUpdated) event and emit it.
+     * Reacts to es-editable-text (searchResultsUpdated) event and emit it.
      *
      * @param count
      */
