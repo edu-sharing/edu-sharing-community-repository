@@ -318,7 +318,7 @@
       [disabled]="!isValidSelection()"
       (click)="insertSelectedNodes()"
     >
-      {{ option.optionConfig?.applyLabel || i18nPrefix + 'COPY.TARGET' | translate }}
+      {{ option().optionConfig?.applyLabel || i18nPrefix + 'COPY.TARGET' | translate }}
       <i esIcon="arrow_forward"></i>
     </button>
   </ng-container>
@@ -338,7 +338,7 @@
         (click)="copyNodes()"
       >
         {{
-          option.optionConfig?.applyLabel ||
+          option().optionConfig?.applyLabel ||
             i18nPrefix + 'COPY.' + (selectedNodes().length === 1 ? 'SINGLE' : 'MULTIPLE')
             | translate
         }}

@@ -1,13 +1,13 @@
 import {
     Component,
     computed,
+    effect,
+    input,
     Input,
     model,
-    OnChanges,
     OnInit,
     Signal,
     signal,
-    SimpleChanges,
     ViewChild,
     WritableSignal,
 } from '@angular/core';
@@ -113,11 +113,11 @@ export type NodesSelectorConfig = {
     ],
     providers: [NodeEntriesService, TreeNodeService],
 })
-export class NodesSelectorComponent implements OnInit, OnChanges {
+export class NodesSelectorComponent implements OnInit {
     protected readonly i18nPrefix: string = 'EDITORIAL.OPTIONS.NODES_SELECTOR.';
     protected readonly idPrefix: string = 'nodes-selector-tab';
     @Input() parent: Node;
-    @Input() option!: OptionState<NodesSelectorConfig>;
+    option = input<OptionState<NodesSelectorConfig>>();
 
     selectedTab: WritableSignal<TabType> = signal(null);
     selectedTabId = computed(() => this.supportedTabs().indexOf(this.selectedTab()));
@@ -152,8 +152,8 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         if (this.selectionMode() === 'source') {
             return (
                 (this.onlyOneSelected() || this.onlyFilesSelected()) &&
-                (!this.option.optionConfig?.applyCallback ||
-                    this.option.optionConfig?.applyCallback(this.selectedNodes() as Node[]))
+                (!this.option().optionConfig?.applyCallback ||
+                    this.option().optionConfig?.applyCallback(this.selectedNodes() as Node[]))
             );
         } else {
             return (
@@ -228,6 +228,7 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
     // shared among tabs
     flatNodeEntriesColumns: ColumnType;
     searchText = model('');
+    selectionMode = computed(() => (this.option()?.optionConfig?.nodes ? 'target' : 'source'));
 
     constructor(
         private apiCollectionService: ApiCollectionService,
@@ -244,19 +245,14 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
         private toast: Toast,
         private translate: TranslateService,
         private treeNodeService: TreeNodeService,
-    ) {}
-
-    async ngOnChanges(changes: SimpleChanges) {
-        if (changes.option) {
-            if (this.option.optionConfig?.state) {
-                this.selectedTab.set(this.option.optionConfig.state);
-                await this.refreshData(this.selectedTab());
+    ) {
+        effect(() => {
+            const option = this.option();
+            if (option?.optionConfig?.state) {
+                this.selectedTab.set(option.optionConfig.state);
+                void this.refreshData(this.selectedTab());
             }
-        }
-    }
-
-    selectionMode() {
-        return this.option.optionConfig?.nodes ? 'target' : 'source';
+        });
     }
 
     /**
@@ -434,15 +430,15 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
                     {
                         ...result,
                         duplicateBehaviour:
-                            this.option.optionConfig?.upload === 'fast' ? 'unique' : 'ask-user',
+                            this.option().optionConfig?.upload === 'fast' ? 'unique' : 'ask-user',
                     },
-                    this.option.optionConfig?.upload !== 'fast',
+                    this.option().optionConfig?.upload !== 'fast',
                 );
                 break;
             case 'link':
                 createdNodes = await this.uploadDialogService.createLinkNode(
                     result,
-                    this.option.optionConfig?.upload !== 'fast',
+                    this.option().optionConfig?.upload !== 'fast',
                 );
                 break;
             default:
@@ -553,7 +549,7 @@ export class NodesSelectorComponent implements OnInit, OnChanges {
      */
     async insertSelectedNodes() {
         const target = this.selectedNodes()[0] as Node;
-        const source = this.option.optionConfig.nodes as Node[];
+        const source = this.option().optionConfig.nodes as Node[];
         if (target.mediatype === 'collection') {
             this.editorialSidebarService.sidebarLoading.set(true);
             this.uiService.addToCollection(target, source, false, () => {
