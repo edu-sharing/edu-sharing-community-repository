@@ -738,7 +738,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
      */
     private async getComponentClass(): Promise<any> {
         let componentClass: any;
-        componentClass = this.genericWidgetGlobalService.getCustomWidget(this.widgetType);
+        componentClass = await this.genericWidgetGlobalService.getCustomWidget(this.widgetType);
         if (componentClass != null) {
             return componentClass;
         }
