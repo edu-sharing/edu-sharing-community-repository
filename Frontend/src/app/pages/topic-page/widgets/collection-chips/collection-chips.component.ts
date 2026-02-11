@@ -20,6 +20,7 @@ import { LayoutOption } from '../../shared/types/layout-option';
 import { CollectionChipsConfig } from '../../shared/types/widget-config/collection-chips-config';
 import { WidgetConfigurationButtonsComponent } from '../shared/widget-configuration-buttons/widget-configuration-buttons.component';
 import { ConfigurationOption } from '../../shared/types/configuration-option';
+import { WidgetComponentInterface } from '../generic-widget/generic-widget.component';
 
 @Component({
     selector: 'es-collection-chips',
@@ -28,7 +29,7 @@ import { ConfigurationOption } from '../../shared/types/configuration-option';
     templateUrl: './collection-chips.component.html',
     styleUrls: ['./collection-chips.component.scss'],
 })
-export class CollectionChipsComponent {
+export class CollectionChipsComponent implements WidgetComponentInterface {
     // INPUTS + OUTPUTS
     @Input() contextNodeId!: string;
     @Input() customUrl?: (collection: Node) => string;

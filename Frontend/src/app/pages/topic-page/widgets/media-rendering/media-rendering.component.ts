@@ -35,6 +35,7 @@ import { MediaRenderingConfig } from '../../shared/types/widget-config/media-ren
 import { WidgetConfigurationButtonsComponent } from '../shared/widget-configuration-buttons/widget-configuration-buttons.component';
 import { ConfigurationOption } from '../../shared/types/configuration-option';
 import { StatisticNode } from '../../shared/types/statistic-node';
+import { WidgetComponentInterface } from '../generic-widget/generic-widget.component';
 
 @Component({
     selector: 'es-media-rendering',
@@ -57,7 +58,7 @@ import { StatisticNode } from '../../shared/types/statistic-node';
     templateUrl: './media-rendering.component.html',
     styleUrls: ['./media-rendering.component.scss'],
 })
-export class MediaRenderingComponent implements AfterViewInit, OnDestroy {
+export class MediaRenderingComponent implements AfterViewInit, OnDestroy, WidgetComponentInterface {
     // INPUTS + OUTPUTS
     @Input() contextNodeId: string;
     editMode: InputSignal<boolean> = input<boolean>(false);

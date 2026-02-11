@@ -42,6 +42,7 @@ import { ScrollHelperService } from '../../shared/services/scroll-helper.service
 import { DEFAULT_COLLECTION_ID_PROP } from '../../shared/types/custom-definitions';
 import { ApplyFilterEvent } from '../../shared/types/apply-filter-event';
 import { LayoutOption } from '../../shared/types/layout-option';
+import { WidgetComponentInterface } from '../generic-widget/generic-widget.component';
 
 @Component({
     selector: 'es-content-teaser',
@@ -68,7 +69,7 @@ import { LayoutOption } from '../../shared/types/layout-option';
     templateUrl: './content-teaser.component.html',
     styleUrls: ['./content-teaser.component.scss'],
 })
-export class ContentTeaserComponent implements AfterViewInit, OnDestroy {
+export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetComponentInterface {
     // INPUTS + OUTPUTS
     @Input() contextNodeId!: string;
     @Input() defaultNodeId: string = '';

@@ -26,6 +26,7 @@ import { LifecycleDirective } from './lifecycle.directive';
 import { RemoteTreeDataSource, TreeNode } from './remote-tree-data-source';
 import { WrapObservablePipe } from './wrap-observable.pipe';
 import { ConfigurationOption } from '../../shared/types/configuration-option';
+import { WidgetComponentInterface } from '../generic-widget/generic-widget.component';
 
 @Component({
     selector: 'es-topics-column-browser',
@@ -41,7 +42,7 @@ import { ConfigurationOption } from '../../shared/types/configuration-option';
     templateUrl: './topics-column-browser.component.html',
     styleUrls: ['./topics-column-browser.component.scss'],
 })
-export class TopicsColumnBrowserComponent {
+export class TopicsColumnBrowserComponent implements WidgetComponentInterface {
     // CONSTANTS
     private readonly MOBILE_WIDTH: number = 860;
 
@@ -57,6 +58,7 @@ export class TopicsColumnBrowserComponent {
     @Input() swimlaneIndex: number = -1;
 
     @Output() embedWidgetClicked: EventEmitter<void> = new EventEmitter<void>();
+    @Output() configChanged: EventEmitter<void> = new EventEmitter<void>();
 
     // VARIABLES
     readonly dataSource: RemoteTreeDataSource<Node> = new RemoteTreeDataSource<Node>();
