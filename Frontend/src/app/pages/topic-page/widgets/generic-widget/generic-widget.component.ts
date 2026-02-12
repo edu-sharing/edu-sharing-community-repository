@@ -35,7 +35,12 @@ import { WidgetHeaderComponent } from './generic-widget-header/generic-widget-he
 import { WidgetConfig } from '../../shared/types/widget-config/widget-config';
 import { BapiConfigObject } from '../../shared/types/bapi-config-object';
 import { ConfigurationOption } from '../../shared/types/configuration-option';
-import { DEFAULT_BG_COLOR, WIDGET_TYPE, WIDGETS } from '../../shared/types/custom-definitions';
+import {
+    DEFAULT_BG_COLOR,
+    WIDGET_TYPE,
+    WIDGET_TYPE_OPTIONS,
+    WIDGETS,
+} from '../../shared/types/custom-definitions';
 import { SwimlaneBackgroundShape } from '../../shared/types/swimlane-background-shape';
 import { StatisticNode } from '../../shared/types/statistic-node';
 import { CardDialogRef } from '../../../../features/dialogs/card-dialog/card-dialog-ref';
@@ -814,7 +819,13 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         if (!this.widgetInstance || !this.widgetComponentRef) {
             return;
         }
-
+        // find matching widget type
+        const widgetType: string = this.supportedWidgetTypes.includes(this.widgetType)
+            ? this.widgetType
+            : this.genericWidgetGlobalService.getCustomWidgetMatchingWidgetType(this.widgetType);
+        if (!widgetType) {
+            return;
+        }
         // set common properties
         this.widgetComponentRef.setInput('contextNodeId', this.contextNodeId);
         this.widgetComponentRef.setInput('editMode', this.editMode());
@@ -824,7 +835,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         this.widgetComponentRef.setInput('swimlaneIndex', this.swimlaneIndex);
 
         // set widget-specific properties
-        switch (this.widgetType) {
+        switch (widgetType) {
             case WIDGETS.AI_TEXT_WIDGET:
                 this.widgetComponentRef.setInput('nodeId', this.nodeId);
                 this.widgetComponentRef.setInput('propagatedNodeId', this.propagatedNodeId);
@@ -917,4 +928,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     }
 
     protected readonly WIDGETS = WIDGETS;
+    private readonly supportedWidgetTypes: string[] = WIDGET_TYPE_OPTIONS.map(
+        (option) => option.value,
+    );
 }

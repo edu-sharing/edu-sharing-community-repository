@@ -13,6 +13,7 @@ export type CustomDisplayType = {
 };
 export type CustomWidgetInfo = {
     id: string;
+    matchingWidgetType?: string;
     component: () => Promise<Type<WidgetComponentInterface>>;
 };
 /**
@@ -33,6 +34,9 @@ export class GenericWidgetGlobalService {
             return info.component();
         }
         return null;
+    }
+    getCustomWidgetMatchingWidgetType(widgetId: string) {
+        return this.customWidgets.find((w) => w.id === widgetId)?.matchingWidgetType;
     }
     async getCustomDisplayType(displayType: GenericNodeEntriesDisplayType) {
         const info = this.customDisplayType.find((w) => w.displayType === displayType);
