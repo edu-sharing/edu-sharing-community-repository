@@ -10,8 +10,9 @@ import {
     ViewEncapsulation,
     WritableSignal,
 } from '@angular/core';
+import { Router } from '@angular/router';
 import { Node } from 'ngx-edu-sharing-api';
-import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
+import { EduSharingUiCommonModule, NodeHelperService } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { SharedModule } from '../../../../shared/shared.module';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
@@ -64,7 +65,11 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
     list: Node[];
     updateInProgress: WritableSignal<boolean> = signal(false);
 
-    constructor(private topicPageHelperService: TopicPageHelperService) {}
+    constructor(
+        private nodeHelper: NodeHelperService,
+        private router: Router,
+        private topicPageHelperService: TopicPageHelperService,
+    ) {}
 
     /**
      * Opens the link to a collection.
@@ -72,15 +77,22 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
      *
      * @param node
      */
-    collectionItemClicked(node: Node): void {
+    async collectionItemClicked(node: Node): Promise<void> {
         if (this.dragging) {
             return;
         }
-        const url: string =
-            this.customUrl && this.customUrl(node)
-                ? this.customUrl(node)
-                : node.properties[RestConstants.LOM_PROP_TECHNICAL_LOCATION]?.[0];
-        if (url) {
+        let url: string = this.customUrl && this.customUrl(node) ? this.customUrl(node) : null;
+        if (!url) {
+            const queryParamsArray = Object.entries(
+                this.nodeHelper.getNodeLink('queryParams', node),
+            )
+                .filter((k) => !!k[1] && k[0] !== 'scope')
+                .map((k) => k[0] + '=' + encodeURIComponent(k[1]));
+            url =
+                (this.nodeHelper.getNodeLink('routerLink', node) as string) +
+                (queryParamsArray.length > 0 ? '?' + queryParamsArray.join('&') : '');
+            await this.router.navigateByUrl(url);
+        } else {
             window.open(url, '_self');
         }
     }

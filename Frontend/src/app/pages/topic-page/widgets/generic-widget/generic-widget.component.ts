@@ -53,7 +53,6 @@ import { Toast, ToastType } from '../../../../services/toast';
 import {
     convertNodeRefIntoNodeId,
     retrieveAiConfigFromNode,
-    retrieveCustomUrl,
     retrievePromptFromAiConfig,
     retrieveWidgetConfigFromNode,
 } from '../../shared/utils/template-util';
@@ -848,7 +847,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 break;
 
             case WIDGETS.COLLECTION_CHIPS:
-                this.widgetComponentRef.setInput('customUrl', retrieveCustomUrl);
+                this.widgetComponentRef.setInput('customUrl', this.customUrl);
                 break;
 
             case WIDGETS.CONTENT_TEASER:
@@ -872,8 +871,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 break;
 
             case WIDGETS.TOPICS_COLUMN_BROWSER:
-                // @TODO
-                //this.widgetComponentRef.setInput('customUrl', retrieveCustomUrl);
+                this.widgetComponentRef.setInput('customUrl', this.customUrl);
                 this.widgetComponentRef.setInput('height', this.height);
                 this.widgetComponentRef.setInput('sidebarEmbedding', this.sidebarEmbedding);
                 break;
