@@ -786,7 +786,7 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
      * @param positionToAdd
      */
     private injectCustomCards(positionToAdd: number): void {
-        if (this.genericWidgetGlobalService.getCustomCards(CustomCardRole.SuggestContent)) {
+        if (this.genericWidgetGlobalService.getCustomCards(CustomCardRole.SuggestContent)?.length) {
             // the position should either be the seventh or the last element, if less than seven elements exist
             if (positionToAdd > this.CUSTOM_CARD_POSITION_INDEX) {
                 positionToAdd = this.CUSTOM_CARD_POSITION_INDEX;
