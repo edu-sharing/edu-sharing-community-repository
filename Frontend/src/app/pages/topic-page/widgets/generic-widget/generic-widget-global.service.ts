@@ -17,7 +17,7 @@ export type CustomWidgetInfo = {
     component: () => Promise<Type<WidgetComponentInterface>>;
 };
 /**
- * this service is intended to add custom behaviour to the global tables & grid views
+ * This service is intended to add custom behavior to components of the generic widget.
  */
 @Injectable({
     providedIn: 'root',
@@ -28,17 +28,63 @@ export class GenericWidgetGlobalService {
     private customDisplayType: CustomDisplayType[] = [];
     private customCards: { role: CustomCardRole; templateRef: TemplateRef<unknown> }[] = [];
 
-    async getCustomWidget(widgetId: string) {
+    /**
+     * Registers a custom widget component.
+     */
+    registerCustomWidget(customWidgetInfo: CustomWidgetInfo) {
+        this.customWidgets.push(customWidgetInfo);
+    }
+    /**
+     * Registers a custom widget display type (for generic node entries).
+     */
+    registerCustomDisplayType(customDisplayType: CustomDisplayType) {
+        this.customDisplayType.push(customDisplayType);
+    }
+
+    /**
+     * Registers a custom card template with a given role.
+     */
+    registerCustomCard(role: CustomCardRole, templateRef: TemplateRef<unknown>) {
+        this.customCards.push({ role, templateRef });
+    }
+
+    /**
+     * Sets the default metadata set to a given value.
+     *
+     * @param mds
+     */
+    setDefaultMds(mds: string) {
+        this.defaultMds = mds;
+    }
+
+    /**
+     * Retrieves a custom widget component for a given widget ID.
+     *
+     * @param widgetId
+     */
+    async getCustomWidgetComponent(widgetId: string) {
         const info = this.customWidgets.find((w) => w.id === widgetId);
         if (info != null) {
             return info.component();
         }
         return null;
     }
+
+    /**
+     * Retrieves the matching widget type of a custom widget component for a given widget ID.
+     *
+     * @param widgetId
+     */
     getCustomWidgetMatchingWidgetType(widgetId: string) {
         return this.customWidgets.find((w) => w.id === widgetId)?.matchingWidgetType;
     }
-    async getCustomDisplayType(displayType: GenericNodeEntriesDisplayType) {
+
+    /**
+     * Retrieves a custom display type component for a given display type.
+     *
+     * @param displayType
+     */
+    async getCustomDisplayTypeComponent(displayType: GenericNodeEntriesDisplayType) {
         const info = this.customDisplayType.find((w) => w.displayType === displayType);
         if (info != null) {
             return info.component();
@@ -47,36 +93,35 @@ export class GenericWidgetGlobalService {
     }
 
     /**
-     * Registers a custom widget component
+     * Retrieves a list of custom cards with a given role.
+     *
+     * @param role
      */
-    registerCustomWidget(customWidgetInfo: CustomWidgetInfo) {
-        this.customWidgets.push(customWidgetInfo);
-    }
-    /**
-     * Registers a custom widget display type (for generic node entries)
-     */
-    registerCustomDisplayType(customDisplayType: CustomDisplayType) {
-        this.customDisplayType.push(customDisplayType);
-    }
     getCustomCards(role: CustomCardRole) {
         return this.customCards.filter((c) => c.role === role);
     }
-    registerCustomCard(role: CustomCardRole, templateRef: TemplateRef<unknown>) {
-        this.customCards.push({ role, templateRef });
-    }
 
-    setDefaultMds(mds: string) {
-        this.defaultMds = mds;
-    }
-
+    /**
+     * Retrieves the specified default metadata set.
+     */
     getDefaultMds() {
         return this.defaultMds;
     }
 
+    /**
+     * Checks if a given widget ID is registered as a custom widget.
+     *
+     * @param widgetId
+     */
     hasCustomWidget(widgetId: string) {
         return !!this.customWidgets.find((w) => w.id === widgetId);
     }
 
+    /**
+     * Checks if a given display type is registered as a custom display type.
+     *
+     * @param displayType
+     */
     hasCustomDisplayType(displayType?: GenericNodeEntriesDisplayType) {
         return !!this.customDisplayType.find((w) => w.displayType === displayType);
     }

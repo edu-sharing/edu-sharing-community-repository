@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import {
     AfterViewInit,
     Component,
@@ -55,7 +56,6 @@ import { TopicPageHelperService } from '../../../shared/services/topic-page-help
 import { GenericNodeEntriesDisplayType } from '../../../shared/types/generic-node-entries-display-type';
 import { StatisticNode } from '../../../shared/types/statistic-node';
 import { GenericWidgetGlobalService } from '../../generic-widget/generic-widget-global.service';
-import { NgTemplateOutlet } from '@angular/common';
 
 export interface DisplayTypeComponentInterface {
     selectedNode: Node;
@@ -74,12 +74,7 @@ export enum CustomCardRole {
 @Component({
     selector: 'es-node-entries',
     encapsulation: ViewEncapsulation.Emulated,
-    imports: [
-        EduSharingUiModule,
-        // MapNodeCardComponent,
-        MatTooltipModule,
-        NgTemplateOutlet,
-    ],
+    imports: [EduSharingUiModule, MatTooltipModule, NgTemplateOutlet],
     providers: [
         CheckTextOverflowDirective,
         NodePersonNamePipe,
@@ -173,8 +168,8 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
                 break;
             default:
                 if (this.genericWidgetGlobalService.hasCustomDisplayType(val)) {
-                    this.genericWidgetGlobalService
-                        .getCustomDisplayType(val)
+                    void this.genericWidgetGlobalService
+                        .getCustomDisplayTypeComponent(val)
                         .then((componentClass) => {
                             // inject the component into the widget container
                             this.customTypeInstance = this.uiService.injectAngularComponent(

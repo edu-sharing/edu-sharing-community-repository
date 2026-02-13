@@ -43,6 +43,7 @@ import { DEFAULT_COLLECTION_ID_PROP } from '../../shared/types/custom-definition
 import { ApplyFilterEvent } from '../../shared/types/apply-filter-event';
 import { LayoutOption } from '../../shared/types/layout-option';
 import { WidgetComponentInterface } from '../generic-widget/generic-widget.component';
+import { GenericWidgetGlobalService } from '../generic-widget/generic-widget-global.service';
 
 @Component({
     selector: 'es-content-teaser',
@@ -183,12 +184,6 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
             value: GenericNodeEntriesDisplayType.ListView,
             viewValue: 'LIST_VIEW',
         },
-        {
-            ariaLabel: 'MAP_VIEW_ARIA',
-            icon: 'svg-view_map',
-            value: GenericNodeEntriesDisplayType.MapView,
-            viewValue: 'MAP_VIEW',
-        },
     ];
     private propertyFilters: WritableSignal<Values> = signal({});
     queryId: Signal<string> = computed((): string =>
@@ -202,11 +197,25 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
     private windowRef: Window | null = null;
 
     constructor(
+        private genericWidgetGlobalService: GenericWidgetGlobalService,
         private scrollHelperService: ScrollHelperService,
         private searchHelperService: SearchHelperService,
         private topicPageHelperService: TopicPageHelperService,
         private translate: TranslateService,
-    ) {}
+    ) {
+        if (
+            this.genericWidgetGlobalService.hasCustomDisplayType(
+                GenericNodeEntriesDisplayType.MapView,
+            )
+        ) {
+            this.layoutOptions.push({
+                ariaLabel: 'MAP_VIEW_ARIA',
+                icon: 'svg-view_map',
+                value: GenericNodeEntriesDisplayType.MapView,
+                viewValue: 'MAP_VIEW',
+            });
+        }
+    }
 
     /**
      * Initializes event listener (the APPLY_FILTER event is returned by the editorial desk).
