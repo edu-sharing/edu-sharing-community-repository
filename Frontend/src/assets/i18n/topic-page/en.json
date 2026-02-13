@@ -364,7 +364,8 @@
         "MEDIA_RENDERING": "Media widget",
         "TEXT_WIDGET": "Text widget",
         "IFRAME_WIDGET": "iframe widget",
-        "AI_TEXT_WIDGET": "AI widget"
+        "AI_TEXT_WIDGET": "AI widget",
+        "undefined": "application-specific type"
       },
       "QR_CODE": {
         "HEADING": "Content link",

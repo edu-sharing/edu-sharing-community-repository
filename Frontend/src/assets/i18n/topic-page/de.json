@@ -364,7 +364,8 @@
         "MEDIA_RENDERING": "Medien-Widget",
         "TEXT_WIDGET": "Text-Widget",
         "IFRAME_WIDGET": "iFrame-Widget",
-        "AI_TEXT_WIDGET": "KI-Widget"
+        "AI_TEXT_WIDGET": "KI-Widget",
+        "undefined": "Anwendungsspezifischer Typ"
       },
       "QR_CODE": {
         "HEADING": "Link zum Inhalt",
