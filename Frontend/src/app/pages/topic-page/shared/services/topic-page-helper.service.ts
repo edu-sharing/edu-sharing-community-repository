@@ -2,7 +2,6 @@ import { PlatformLocation } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
-    ApiRequestConfiguration,
     CollectionEntries,
     CollectionService,
     HOME_REPOSITORY,
@@ -13,7 +12,7 @@ import {
     ParentEntries,
     PROPERTY_FILTER_ALL,
 } from 'ngx-edu-sharing-api';
-import { OptionItem, Values } from 'ngx-edu-sharing-ui';
+import { OptionGroup, OptionItem, Values } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
@@ -44,7 +43,6 @@ export class TopicPageHelperService {
     private readonly shareOptionsI18nPrefix: string = 'TOPIC_PAGE.WIDGET.SHARE_OPTIONS.';
 
     constructor(
-        private apiRequestConfig: ApiRequestConfiguration,
         private collectionApi: CollectionService,
         private dialogs: DialogsService,
         private nodeApi: NodeService,
@@ -444,60 +442,78 @@ export class TopicPageHelperService {
     /**
      * Define a list of custom options.
      */
-    retrieveCustomOptions(
-        qrCodeOption: boolean = false,
-        copyLinkOption: boolean = false,
-        writeMailOption: boolean = false,
-    ): OptionItem[] {
-        // share options
-        // qr code link
-        const qrCodeLink: OptionItem = new OptionItem(
-            'OPTIONS.QR_CODE',
-            'edu-qr_code',
-            async (node: Node, nodes?: any[]): Promise<void> => {
-                const selectedNode: Node | null = nodes?.[0] ?? node;
-                void this.dialogs.openQrDialog({ node: selectedNode });
-            },
-        );
-        qrCodeLink.enabledCallback = async (): Promise<boolean> => {
+    retrieveCustomOption(
+        type: 'qrCode' | 'copyLink' | 'writeMail' | 'reportProblem',
+        group: OptionGroup = null,
+        priority?: number,
+        customLabel?: string,
+        customIcon?: string,
+    ): OptionItem {
+        let option: OptionItem;
+        switch (type) {
+            case 'qrCode':
+                option = new OptionItem(
+                    'OPTIONS.QR_CODE',
+                    'edu-qr_code',
+                    async (node: Node, nodes?: any[]): Promise<void> => {
+                        const selectedNode: Node | null = nodes?.[0] ?? node;
+                        void this.dialogs.openQrDialog({ node: selectedNode });
+                    },
+                );
+                break;
+            case 'copyLink':
+                option = new OptionItem(
+                    this.shareOptionsI18nPrefix + 'COPY_LINK',
+                    'content_copy',
+                    async (node: Node, nodes?: any[]): Promise<void> => {
+                        const selectedNode: Node | null = nodes?.[0] ?? node;
+                        this.copyLink(selectedNode);
+                    },
+                );
+                break;
+            case 'writeMail':
+                option = new OptionItem(
+                    this.shareOptionsI18nPrefix + 'WRITE_MAIL.HEADING',
+                    'mail',
+                    async (node: Node, nodes?: any[]): Promise<void> => {
+                        const selectedNode: Node | null = nodes?.[0] ?? node;
+                        this.writeMail(selectedNode);
+                    },
+                );
+                break;
+            case 'reportProblem':
+                option = new OptionItem(
+                    'OPTIONS.NODE_REPORT',
+                    'flag',
+                    async (node: Node, nodes?: any[]): Promise<void> => {
+                        const selectedNode: Node | null = nodes?.[0] ?? node;
+                        void this.dialogs.openNodeReportDialog({
+                            node: selectedNode,
+                            mode: 'NODE_REPORT',
+                            showOptions: true,
+                        });
+                    },
+                );
+                break;
+            default:
+                return null;
+        }
+        option.enabledCallback = async (): Promise<boolean> => {
             return Promise.resolve(true);
         };
-        // copy link
-        const copyLink: OptionItem = new OptionItem(
-            this.shareOptionsI18nPrefix + 'COPY_LINK',
-            'content_copy',
-            async (node: Node, nodes?: any[]): Promise<void> => {
-                const selectedNode: Node | null = nodes?.[0] ?? node;
-                this.copyLink(selectedNode);
-            },
-        );
-        copyLink.enabledCallback = async (): Promise<boolean> => {
-            return Promise.resolve(true);
-        };
-        // write mail
-        const writeMail: OptionItem = new OptionItem(
-            this.shareOptionsI18nPrefix + 'WRITE_MAIL.HEADING',
-            'mail',
-            async (node: Node, nodes?: any[]): Promise<void> => {
-                const selectedNode: Node | null = nodes?.[0] ?? node;
-                this.writeMail(selectedNode);
-            },
-        );
-        writeMail.enabledCallback = async (): Promise<boolean> => {
-            return Promise.resolve(true);
-        };
-        // note: the last added option will be the first in the dropdown menu
-        const customOptions: OptionItem[] = [];
-        if (copyLinkOption) {
-            customOptions.push(copyLink);
+        if (group) {
+            option.group = group;
         }
-        if (writeMailOption) {
-            customOptions.push(writeMail);
+        if (priority !== undefined) {
+            option.priority = priority;
         }
-        if (qrCodeOption) {
-            customOptions.push(qrCodeLink);
+        if (customLabel) {
+            option.name = customLabel;
         }
-        return customOptions;
+        if (customIcon) {
+            option.icon = customIcon;
+        }
+        return option;
     }
 
     // TOASTS

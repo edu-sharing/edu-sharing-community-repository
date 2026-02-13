@@ -186,6 +186,7 @@
       },
       "SHARE_OPTIONS": {
         "COPY_LINK": "Link kopieren",
+        "COPY_LINK_TO_CONTENT": "Link zum Inhalt kopieren",
         "WRITE_MAIL": {
           "HEADING": "Mail schreiben",
           "SUBJECT_SHARED_CONTENT": "Geteilter Inhalt: {{title}}",
