@@ -788,14 +788,6 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 );
                 componentClass = topicsColumnBrowserModule.TopicsColumnBrowserComponent;
                 break;
-            /*
-        case WIDGETS.EDITORIAL_MEMBERS:
-            const editorialMembersModule = await import(
-            '../editorial-members/editorial-members.component'
-            );
-            componentClass = editorialMembersModule.EditorialMembersComponent;
-            break;
-*/
             default:
                 componentClass = null;
         }
