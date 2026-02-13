@@ -62,8 +62,14 @@
         }
 
         // fix contrast issue in table header
-        mat-header-cell {
+        .mat-mdc-header-cell {
             color: topic-page-vars.$on-surface;
+        }
+
+        // add border for selected items
+        .mat-mdc-row.selected {
+            box-sizing: border-box;
+            border: 3px solid topic-page-vars.$primary;
         }
     }
 }
