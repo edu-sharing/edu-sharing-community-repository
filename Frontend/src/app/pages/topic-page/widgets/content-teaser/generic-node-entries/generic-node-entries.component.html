@@ -6,7 +6,7 @@
   [class.single-view]="layout === GenericNodeEntriesDisplayType.SingleView"
   [class.split-view]="layout === GenericNodeEntriesDisplayType.SplitView"
   [class.view-mode]="!hasEditRightsAndIsEditMode"
-  [columns]="layout !== GenericNodeEntriesDisplayType.SplitView ? columns : columnsExtension"
+  [columns]="columns"
   [dataSource]="dataSource"
   [disableInfiniteScroll]="true"
   [displayType]="nodeEntriesDisplayType()"
@@ -43,26 +43,5 @@
 <ng-template #specialType>
   <ng-container *ngIf="genericWidgetGlobalService.hasCustomDisplayType(layout)">
     <div #customType></div>
-  </ng-container>
-  <ng-container *ngIf="layout === GenericNodeEntriesDisplayType.MapView">
-    <!-- note: the datasource cannot be used here, as the es-node-entries-wrapper is not initialized -->
-    <!--<es-map-node-card
-      [buckets]="mapBuckets()"
-      [criteria]="criteria"
-      [dataSource]="dataSource"
-      [isLoading]="mapDataLoading()"
-      [nodes]="mapNodes()"
-      [selectedNode]="selectedNode()"
-      [zoomLevel]="mapZoomLevel()"
-      [zoomLimit]="mapZoomLimit()"
-      (boundsUpdated)="updateMapBounds($event)"
-      (facetsUpdated)="updateMapFacets($event)"
-      (fetchData)="fetchData($event)"
-      (itemClicked)="onItemClicked($event)"
-      (mapValuesChanged)="updateMapValues($event)"
-      (resetBounds)="resetMapBounds()"
-      (zoomUpdated)="updateMapZoom($event)"
-    ></es-map-node-card>
-    -->
   </ng-container>
 </ng-template>
