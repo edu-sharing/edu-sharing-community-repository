@@ -4,15 +4,15 @@
     [class.selected]="sidebarOpen()"
     *ngIf="selectedNode; else noMediaSelected"
   >
-    <ng-container
-      *ngIf="
-        layout === MediaRenderingLayout.TitlePreview ||
-        layout === MediaRenderingLayout.TitlePreviewButtons
-      "
-    >
-      <h3 *ngIf="!headline()" class="render-title" [innerHTML]="selectedNodeTitle()"></h3>
-      <h4 *ngIf="headline()" class="render-title" [innerHTML]="selectedNodeTitle()"></h4>
-    </ng-container>
+    <div
+      *ngIf="layoutWithTitle()"
+      #div
+      class="render-title"
+      esCheckTextOverflow
+      #text="esCheckTextOverflow"
+      [matTooltip]="text.hasTextOverflow() ? div.innerText : null"
+      [innerHTML]="selectedNodeTitle()"
+    ></div>
     <es-render-wrapper-component
       *ngIf="selectedNode"
       [showTopbar]="false"
@@ -20,7 +20,7 @@
       [nodeId]="selectedNode.ref.id"
       [repository]="selectedNode.ref.repo"
     ></es-render-wrapper-component>
-    <div *ngIf="layout === MediaRenderingLayout.TitlePreviewButtons" class="render-buttons">
+    <div *ngIf="layout() === MediaRenderingLayout.TitlePreviewButtons" class="render-buttons">
       <a
         mat-stroked-button
         color="primary"

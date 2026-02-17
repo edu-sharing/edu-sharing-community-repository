@@ -2,13 +2,17 @@ import { CommonModule } from '@angular/common';
 import {
     AfterViewInit,
     Component,
+    computed,
     CUSTOM_ELEMENTS_SCHEMA,
     EventEmitter,
     input,
     Input,
     InputSignal,
+    model,
+    ModelSignal,
     OnDestroy,
     Output,
+    Signal,
     signal,
     ViewEncapsulation,
     WritableSignal,
@@ -87,7 +91,7 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
 
     private destroy$ = new Subject<void>();
     initialized: WritableSignal<boolean> = signal(false);
-    layout: MediaRenderingDisplayType = MediaRenderingDisplayType.Preview;
+    layout: ModelSignal<MediaRenderingDisplayType> = model(MediaRenderingDisplayType.Preview);
     layoutOptions: LayoutOption[] = [
         {
             ariaLabel: 'PREVIEW_ARIA',
@@ -108,6 +112,12 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
             viewValue: 'PREVIEW_TITLE_BUTTONS',
         },
     ];
+    layoutWithTitle: Signal<boolean> = computed((): boolean =>
+        [
+            this.MediaRenderingLayout.TitlePreview,
+            this.MediaRenderingLayout.TitlePreviewButtons,
+        ].includes(this.layout()),
+    );
     selectedNode: Node;
     selectedNodeTitle: WritableSignal<string> = signal('');
     sidebarOpen: WritableSignal<boolean> = signal(false);
@@ -240,7 +250,7 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
      */
     retrieveWidgetConfig(): MediaRenderingConfig {
         let widgetConfig: MediaRenderingConfig = {
-            mediaRenderingLayout: this.layout,
+            mediaRenderingLayout: this.layout(),
         };
         if (this.selectedNode?.ref.id) {
             widgetConfig.selectedNodeId = this.selectedNode.ref.id;
@@ -256,7 +266,7 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
      */
     async setWidgetValues(config: MediaRenderingConfig): Promise<void> {
         if (config.mediaRenderingLayout !== undefined) {
-            this.layout = config.mediaRenderingLayout;
+            this.layout.set(config.mediaRenderingLayout);
         }
         if (config.selectedNodeId) {
             this.selectedNode = await this.topicPageHelperService.getNode(config.selectedNodeId);
@@ -280,7 +290,7 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
             [
                 this.MediaRenderingLayout.TitlePreview,
                 this.MediaRenderingLayout.TitlePreviewButtons,
-            ].includes(this.layout)
+            ].includes(this.layout())
         ) {
             outputTitle = this.highlightSearch.transform(outputTitle, this.searchInput);
         }

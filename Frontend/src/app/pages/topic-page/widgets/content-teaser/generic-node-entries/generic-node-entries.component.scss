@@ -1,4 +1,4 @@
-@use '../../../../src/app/pages/topic-page/topic-page-variables' as topic-page-vars;
+@use '../../../../src/app/pages/topic-page/topic-page-variables' as topicPageVars;
 
 :host {
     margin-top: 15px;
@@ -49,7 +49,7 @@
         &.selected {
             // fix box-sizing for selected items
             box-sizing: border-box;
-            border: 3px solid topic-page-vars.$primary;
+            border: 3px solid topicPageVars.$primary;
             // remove box-shadow in selected mode
             box-shadow: none;
         }
@@ -63,13 +63,13 @@
 
         // fix contrast issue in table header
         .mat-mdc-header-cell {
-            color: topic-page-vars.$on-surface;
+            color: topicPageVars.$on-surface;
         }
 
         // add border for selected items
         .mat-mdc-row.selected {
             box-sizing: border-box;
-            border: 3px solid topic-page-vars.$primary;
+            border: 3px solid topicPageVars.$primary;
         }
     }
 }
@@ -87,7 +87,7 @@
         }
 
         button:hover {
-            background-color: topic-page-vars.$surface-container-lowest;
+            background-color: topicPageVars.$surface-container-lowest;
         }
     }
 }
@@ -138,9 +138,9 @@
                     .card-meta-row:first-child es-list-text span {
                         padding-left: 16px;
                         text-align: left;
-                        color: topic-page-vars.$on-primary;
-                        font-size: topic-page-vars.$fontSizeLarge;
-                        font-weight: topic-page-vars.$font-weight-bold;
+                        color: topicPageVars.$on-primary;
+                        font-size: topicPageVars.$fontSizeLarge;
+                        font-weight: topicPageVars.$font-weight-bold;
                     }
                 }
             }
