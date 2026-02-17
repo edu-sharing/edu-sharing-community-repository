@@ -433,7 +433,6 @@ export class MdsEditorWidgetTreeComponent
 
     reorderChip(event: CdkDragDrop<any>) {
         const currentValue = [...this.chipsControl.value];
-        console.log(event.previousIndex, event.currentIndex);
         moveItemInArray(currentValue, event.previousIndex, event.currentIndex);
         this.chipsControl.setValue(currentValue);
     }
