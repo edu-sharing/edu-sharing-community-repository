@@ -15,12 +15,11 @@
 
 .value-selection-wrapper {
     margin-bottom: 16px;
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
-    flex-wrap: wrap;
 
     .selected-value-card {
-        flex: 0 1 calc(50% - 4px);
         height: 61px;
         border-radius: 8px;
         padding: 4px 32px 4px 12px;
@@ -41,6 +40,7 @@
         .title,
         .subtitle {
             @include mixins.limitLineCount(1, 1.25);
+            word-break: break-word;
         }
 
         .title {
