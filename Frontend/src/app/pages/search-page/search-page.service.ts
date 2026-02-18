@@ -10,6 +10,7 @@ import {
     NetworkService,
     Node,
     Repository,
+    SavedSearch,
 } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
@@ -340,6 +341,13 @@ export class SearchPageService implements OnDestroy {
             useDefaultOptions: false,
             addOptions: [cancel, addTo],
         };
+    }
+
+    applySavedSearch(savedSearch: SavedSearch) {
+        this.activeRepository.setUserValue(savedSearch.repository);
+        this.activeMetadataSet.setUserValue(savedSearch.metadataSet);
+        this.searchString.setUserValue(savedSearch.searchString);
+        this.searchFilters.setUserValue(savedSearch.filters);
     }
 }
 
