@@ -196,6 +196,24 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             setTimeout((): void => {
                 this.onDisplayTypeChanged();
             }, 500);
+
+            // specify columns
+            if (!this.columns) {
+                this.mdsService
+                    .getMetadataSet({
+                        repository: HOME_REPOSITORY,
+                        metadataSet: this.genericWidgetGlobalService.getDefaultMds(),
+                    })
+                    .subscribe((mds) => {
+                        this.columns = this.mdsHelperService.getColumns(
+                            mds,
+                            'genericWidget' +
+                                (this._layout === GenericNodeEntriesDisplayType.ListView
+                                    ? 'Table'
+                                    : ''),
+                        );
+                    });
+            }
         }
         this._layout = val;
         this.nodeEntriesDisplayType.set(newDisplayType);
@@ -316,17 +334,6 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
      * Initializes the translations service, columns and custom options.
      */
     ngOnInit(): void {
-        // specify columns
-        if (!this.columns) {
-            this.mdsService
-                .getMetadataSet({
-                    repository: HOME_REPOSITORY,
-                    metadataSet: this.genericWidgetGlobalService.getDefaultMds(),
-                })
-                .subscribe((mds) => {
-                    this.columns = this.mdsHelperService.getColumns(mds, 'genericWidget');
-                });
-        }
         // specify addOptions
         if (!this.customOptions?.addOptions) {
             this.customOptions = this.retrieveCustomOptions();

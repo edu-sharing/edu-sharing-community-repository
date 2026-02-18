@@ -78,7 +78,11 @@ export class MdsHelperService {
                     'mds does not define columns for ' + name + ', invalid configuration!',
                 );
             }
-            if (['search', 'collectionReferences', 'genericWidget'].includes(name)) {
+            if (
+                ['search', 'collectionReferences', 'genericWidget', 'genericWidgetTable'].includes(
+                    name,
+                )
+            ) {
                 defaultColumns.push(new ListItem('NODE', RestConstants.LOM_PROP_TITLE));
                 defaultColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
                 defaultColumns.push(new ListItem('NODE', RestConstants.CCM_PROP_LICENSE));

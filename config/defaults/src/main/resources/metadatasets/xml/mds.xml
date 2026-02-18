@@ -1272,6 +1272,15 @@
       </columns>
     </list>
     <list>
+      <id>genericWidgetTable</id>
+      <columns>
+        <column>cclom:title</column>
+        <column>cm:modified</column>
+        <column>ccm:commonlicense_key</column>
+        <column>ccm:replicationsource</column>
+      </columns>
+    </list>
+    <list>
       <id>searchCollections</id>
       <columns>
         <column>COLLECTION.title</column>
