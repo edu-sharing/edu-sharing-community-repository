@@ -1,5 +1,5 @@
 <div class="empty" *ngIf="!files()?.length">
-  {{ 'SIDEBAR.SUBMISSION.ATTACHMENT.EMPTY' | translate }}
+  {{ 'EDITORIAL.SIDEBAR.SUBMISSION.ATTACHMENT_EMPTY' | translate }}
 </div>
 <div class="node-list" *ngIf="files()?.length">
   @for (item of files(); track item) { @if(item.assignmentFile?.referNode) {

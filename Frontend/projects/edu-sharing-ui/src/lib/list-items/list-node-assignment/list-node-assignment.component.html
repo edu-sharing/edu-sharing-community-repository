@@ -22,6 +22,16 @@
   <span *ngSwitchCase="'title'">
     {{ $any(node).title }}
   </span>
+  <ng-container *ngSwitchCase="'endTime'">
+    <span
+      *ngIf="$any(node).endTime as endTime"
+      class="status assignmentEndTime"
+      matTooltip="{{ endTime | formatDate : { time: true, relative: false } }}"
+    >
+      <i esIcon="alarm"></i>
+      {{ endTime | formatDate : { time: false, relative: false } }}
+    </span>
+  </ng-container>
   <span
     *ngSwitchCase="'summary'"
     class="assignment-summary"

@@ -55,4 +55,10 @@ export class EditorialSidebarService {
             optionConfig,
         });
     }
+
+    close() {
+        console.log('close');
+        this._editorialSidebar.enabledOption.set(null);
+        this.sidebarOpened.set(false);
+    }
 }

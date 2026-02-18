@@ -332,6 +332,7 @@
     "CARD_TYPE": "Aufgabe",
     "title": "Titel",
     "status": "Status",
+    "endTime": "Abgabefrist",
     "submissionStatus": "Abgabestatus",
     "type": "Aufgabentyp",
     "summary": "Beschreibung",

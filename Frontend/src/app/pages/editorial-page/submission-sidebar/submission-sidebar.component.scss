@@ -8,12 +8,14 @@
 
 .submission {
     .actions {
+        margin-top: 20px;
         width: 100%;
         display: flex;
         justify-content: space-between;
     }
-    > div {
+    > .details {
         display: flex;
+        flex-direction: row-reverse;
         gap: 20px;
     }
     padding: 20px;
@@ -30,6 +32,9 @@
     }
     .details {
         padding-bottom: 20px;
+        > es-list-node-assignment {
+            display: inline-flex;
+        }
     }
     .state {
         display: flex;
@@ -60,6 +65,15 @@
                 textarea {
                     resize: vertical;
                 }
+            }
+        }
+    }
+    .show-notes {
+        background: vars.$cardLightBackground;
+        padding: 10px 10px;
+        ::ng-deep {
+            > div {
+                width: 100%;
             }
         }
     }

@@ -23,6 +23,7 @@ import {
     OptionItem,
     OptionsHelperDataService,
     Target,
+    UIAnimation,
     UIConstants,
     UIService,
 } from 'ngx-edu-sharing-ui';
@@ -45,6 +46,8 @@ import {
     SubmissionConfig,
     SubmissionSidebarComponent,
 } from '../submission-sidebar/submission-sidebar.component';
+import { UIHelper } from '../../../core-ui-module/ui-helper';
+import { trigger } from '@angular/animations';
 
 export type SidebarContext = PrimaryMode | 'collections' | 'workspace' | 'search';
 export type EditorialSidebarOption =
@@ -81,6 +84,7 @@ export type OptionState<T extends OptionConfig> = {
         PreviewSidebarModule,
     ],
     providers: [OptionsHelperDataService],
+    animations: [trigger('overlay', UIAnimation.openOverlay())],
 })
 export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
@@ -156,6 +160,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         const preview = new OptionItem('EDITORIAL.OPTIONS.PREVIEW', 'preview', () =>
             this.enabledOption.set({ trap: false, option: 'PREVIEW' }),
         );
+        preview.group = DefaultGroups.View;
         preview.elementType = [ElementType.Node];
         preview.constrains = [Constrain.NoBulk, Constrain.Files];
         // preview.scopes = ['workspace', 'collections'];
@@ -208,11 +213,10 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
                     optionConfig: { nodes: this.nodes() },
                 }),
         );
-        manageContent.customShowCallback = async () =>
-            this.parent() && this.nodeHelperService.isNodeCollection(this.parent());
+        manageContent.group = DefaultGroups.Edit;
         manageContent.elementType = [ElementType.Node];
         manageContent.constrains = [Constrain.Files];
-        manageContent.scopes = ['collections'];
+        manageContent.scopes = ['workspace', 'collections', 'search'];
         options.push(manageContent);
         this.optionsHelperDataService.setData({
             scope: this.primaryMode(),
@@ -255,7 +259,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         let trap = false;
     }
 
-    private close() {
-        this.editorialSidebarService.sidebarOpened.set(false);
+    close() {
+        this.editorialSidebarService.close();
     }
 }

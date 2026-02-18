@@ -326,6 +326,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                         new ListItem('ASSIGNMENT', 'title'),
                         new ListItem('ASSIGNMENT', 'type'),
                         new ListItem('ASSIGNMENT', 'status'),
+                        new ListItem('ASSIGNMENT', 'endTime'),
                         new ListItem('ASSIGNMENT', 'submissionStatus'),
                         new ListItem('ASSIGNMENT', 'summary'),
                     ],

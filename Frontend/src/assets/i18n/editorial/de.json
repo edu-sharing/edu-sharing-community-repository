@@ -17,13 +17,16 @@
         "SUBMISSION_TITLE": "Titel",
         "SUBMISSION_STATE": "Status",
         "SUBMISSION_DATE": "Abgabedatum",
+        "NOT_STARTED": "Für diese Abgabe wurde noch nichts eingereicht",
         "RETURN_DATE": "Korrekturdatum",
         "PREVIOUS": "Vorherige",
         "NEXT": "Nächste",
         "SEND_BACK": "Zurückgeben",
         "SUBMISSION_ATTACHMENT": "Angehängte Dateien",
+        "INTERNAL_NOTE_SHOW": "Persönliche Notizen ergänzen",
         "INTERNAL_NOTE": "Persönliche Notiz",
-        "FEEDBACK": "Feedback geben"
+        "FEEDBACK": "Feedback geben",
+        "ATTACHMENT_EMPTY": "Keine Dateien abgegeben"
       }
     },
     "OPTION": {

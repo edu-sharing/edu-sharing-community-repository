@@ -1,4 +1,4 @@
-import { Component, computed, effect, model, ViewChild } from '@angular/core';
+import { Component, computed, effect, model, signal, ViewChild } from '@angular/core';
 import {
     ListItem,
     ListItemsModule,
@@ -59,6 +59,7 @@ export class SubmissionSidebarComponent {
     };
     submitFormGroup: FormGroup;
     data = model.required<SubmissionConfig>();
+    showValidationNotes = signal(false);
     readonly feedbackForm = new FormGroup({
         validationNotes: new FormControl('', Validators.nullValidator),
         feedback: new FormControl('', Validators.nullValidator),
