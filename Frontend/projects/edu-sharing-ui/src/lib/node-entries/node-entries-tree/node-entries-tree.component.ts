@@ -59,10 +59,11 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     isLoadMoreNode = (index: number, node: DynamicFlatNode): boolean => {
         return (
             node.item.parent &&
-            this.treeNodeService.parentIdToLastLoadedNodeId.get(node.item.parent.id) ===
+            this.treeNodeService.getParentIdToLastLoadedNodeId().get(node.item.parent.id) ===
                 node.item.ref.id
         );
     };
+    selectionMode: WritableSignal<'source' | 'target'> = signal('source');
     treeInitialized: WritableSignal<boolean> = signal(false);
 
     constructor(
@@ -93,6 +94,8 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
             .subscribe((nodes: Node[]) => {
                 void this.updateTree(nodes);
             });
+        // retrieve the selection mode
+        this.selectionMode.set(this.treeNodeService.getSelectionMode());
     }
 
     async ngAfterViewInit(): Promise<void> {
@@ -130,7 +133,10 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
      * @param event
      */
     async updateSelectedNodes(flatNode: DynamicFlatNode, event?: MouseEvent): Promise<void> {
-        if (flatNode.level === 0) {
+        if (
+            flatNode.level === 0 ||
+            (this.selectionMode() === 'target' && !this.isValidInsertTarget(flatNode))
+        ) {
             return;
         }
         const node: T = flatNode.item as T;
@@ -204,6 +210,18 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
         this.isDragging = false;
     }
 
+    /**
+     * Util function to check if a node allows inserting new children.
+     *
+     * @param flatNode
+     */
+    isValidInsertTarget(flatNode: DynamicFlatNode): boolean {
+        if (flatNode.item?.mediatype) {
+            return flatNode.item.mediatype === 'collection' || flatNode.item.mediatype === 'folder';
+        }
+        return false;
+    }
+
     // HELPER FUNCTIONS
     /**
      * Helper function to initialize the tree.
@@ -212,7 +230,7 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
         this.treeControl = new FlatTreeControl<DynamicFlatNode>(this.getLevel, this.isExpandable);
         this.dataSource = new DynamicDataSource(this.treeControl, this.treeNodeService);
         // retrieve the current nodes from the data source and initialize the tree with it
-        if (!this.treeNodeService.dataMap.size) {
+        if (!this.treeNodeService.getDataMap().size) {
             const nodes: Node[] = this.entriesService.dataSource.getData() as Node[];
             await this.treeNodeService.initializeTreeData(nodes);
         }

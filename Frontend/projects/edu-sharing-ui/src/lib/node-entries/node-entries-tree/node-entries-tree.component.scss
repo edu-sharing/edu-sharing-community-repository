@@ -1,5 +1,5 @@
 @use 'sass:color';
-@use '../../../../assets/scss/mixins' as *;
+@use '../../../../assets/scss/variables-scss' as vars;
 
 :host {
     display: flex;
@@ -97,6 +97,10 @@ mat-tree-node.selected {
 
     &.cursor-pointer {
         cursor: pointer;
+    }
+
+    &.insert-not-allowed {
+        color: vars.$textVeryLight;
     }
 
     .general-information {

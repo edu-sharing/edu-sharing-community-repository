@@ -119,7 +119,10 @@
 <ng-template #nodeInformation let-flatNode="node">
   <div
     class="node-information"
-    [class.cursor-pointer]="flatNode.level > 0"
+    [class.cursor-pointer]="
+      flatNode.level !== 0 && (selectionMode() !== 'target' || isValidInsertTarget(flatNode))
+    "
+    [class.insert-not-allowed]="selectionMode() === 'target' && !isValidInsertTarget(flatNode)"
     (click)="updateSelectedNodes(flatNode, $event)"
   >
     <div class="general-information container">

@@ -271,6 +271,9 @@ export class NodesSelectorComponent implements OnInit {
                 this.selectedTab.set(option.optionConfig.state);
                 void this.refreshData(option.optionConfig.state);
             }
+            this.treeNodeService.setSelectionMode(
+                option?.optionConfig?.nodes ? 'target' : 'source',
+            );
         });
     }
 
@@ -425,13 +428,15 @@ export class NodesSelectorComponent implements OnInit {
             // reset the flat datasource
             this.dataSourceCollectionsFlat = new NodeDataSource<Node | any>();
             this.dataSourceCollectionsFlat.isLoading = true;
-            const deepestNode = this.findDeepestNodeFromDataMap(this.treeNodeService.dataMap)?.node;
+            const deepestNode = this.findDeepestNodeFromDataMap(
+                this.treeNodeService.getDataMap(),
+            )?.node;
             if (!deepestNode) {
                 this.dataSourceCollectionsFlat.isLoading = false;
                 return;
             }
             // retrieve the children of the deepestNode to retrieve the level to be displayed
-            const nodes = this.treeNodeService.dataMap.get(deepestNode.parent.id);
+            const nodes = this.treeNodeService.getDataMap().get(deepestNode.parent.id);
             if (!nodes?.length) {
                 this.dataSourceCollectionsFlat.isLoading = false;
                 return;
@@ -889,6 +894,8 @@ export class NodesSelectorComponent implements OnInit {
                 type: '',
             };
             node.mediatype = 'collection';
+        } else {
+            node.mediatype = 'folder';
         }
         return node;
     }

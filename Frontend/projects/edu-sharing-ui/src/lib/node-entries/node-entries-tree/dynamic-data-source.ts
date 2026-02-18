@@ -74,14 +74,14 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
             // workaround using CSS
             const element = document.getElementById('toggle-' + node.item.ref.id);
             if (
-                this.treeNodeService.emptyFolders.includes(node.item.ref.id) &&
+                this.treeNodeService.getEmptyFolders().includes(node.item.ref.id) &&
                 element &&
                 !element.classList.contains('hidden')
             ) {
                 element.classList.add('hidden');
             }
             // non-working approach:
-            // if (this.treeNodeService.emptyFolders.includes(node.item.ref.id)) {
+            // if (this.treeNodeService.getEmptyFolders().includes(node.item.ref.id)) {
             //     const dataNode = this.data.find((n) => n.item.ref.id === node.item.ref.id);
             //     if (dataNode) {
             //         dataNode.expandable = false;
@@ -95,7 +95,7 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
         else if (children.length) {
             const element = document.getElementById('toggle-' + node.item.ref.id);
             if (
-                !this.treeNodeService.emptyFolders.includes(node.item.ref.id) &&
+                !this.treeNodeService.getEmptyFolders().includes(node.item.ref.id) &&
                 element &&
                 element.classList.contains('hidden')
             ) {

@@ -18,18 +18,18 @@ import { DynamicFlatNode } from './dynamic-flat-node';
 })
 export class TreeNodeService {
     // holds the already requested nodes
-    dataMap = new Map<string, Partial<Node>[]>();
+    private dataMap: Map<string, Partial<Node>[]> = new Map<string, Partial<Node>[]>();
     // holds the IDs of already clicked, but empty folders
-    emptyFolders: string[] = [];
+    private emptyFolders: string[] = [];
     // node types with children
     private readonly folderTypes: string[] = [
         RestConstants.CM_TYPE_FOLDER,
         RestConstants.CCM_TYPE_MAP,
     ];
     // holds information on the initial data
-    initialData: DynamicFlatNode[] = [];
+    private initialData: DynamicFlatNode[] = [];
     // holds information on the last loaded children node ID, which is used for pagination
-    parentIdToLastLoadedNodeId = new Map<string, string>();
+    private parentIdToLastLoadedNodeId = new Map<string, string>();
     // avoid empty (faked) parents from being toggled, as the IDs do not exist
     private emptyParentIds: string[] = [];
     private baseSearchParams = {
@@ -37,6 +37,7 @@ export class TreeNodeService {
         sortAscending: [true],
         sortProperties: [RestConstants.LOM_PROP_TITLE],
     };
+    private selectionMode: 'source' | 'target' = 'source';
     readonly nodesChanged = new EventEmitter<Node[]>();
 
     constructor(
@@ -51,7 +52,7 @@ export class TreeNodeService {
         this.localEventsService.nodesDeleted
             .pipe(takeUntilDestroyed())
             .subscribe((nodes: Node[]) => {
-                this.refreshTree(nodes, true);
+                void this.refreshTree(nodes, true);
             });
     }
 
@@ -279,6 +280,43 @@ export class TreeNodeService {
             !this.emptyFolders.includes(node.ref.id) &&
             !this.emptyParentIds.includes(node.ref.id);
         return atLeastOneChild || unclickedFolder;
+    }
+
+    /**
+     * Returns the data map.
+     */
+    getDataMap(): Map<string, Partial<Node>[]> {
+        return this.dataMap;
+    }
+
+    /**
+     * Returns the empty folders array.
+     */
+    getEmptyFolders(): string[] {
+        return this.emptyFolders;
+    }
+
+    /**
+     * Returns the parent ID to last loaded node ID mapping.
+     */
+    getParentIdToLastLoadedNodeId(): Map<string, string> {
+        return this.parentIdToLastLoadedNodeId;
+    }
+
+    /**
+     * Returns the selection mode.
+     */
+    getSelectionMode(): 'source' | 'target' {
+        return this.selectionMode;
+    }
+
+    /**
+     * Sets a given mode as the selection mode.
+     *
+     * @param mode
+     */
+    setSelectionMode(mode: 'source' | 'target') {
+        this.selectionMode = mode;
     }
 
     /**
