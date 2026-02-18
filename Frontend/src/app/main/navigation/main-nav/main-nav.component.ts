@@ -304,7 +304,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             return;
         }
         if (event != null) {
-            this.handleScrollHide();
+            window.requestAnimationFrame(() => this.handleScrollHide());
         }
     }
 
