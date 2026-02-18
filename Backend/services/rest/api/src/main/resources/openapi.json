@@ -14476,6 +14476,89 @@
         ]
       }
     },
+    "/bulk/v1/find/group/{group}": {
+      "get": {
+        "description": "Get a given root folder (crawler folder). Might be used to do bulk operations like global invitations",
+        "operationId": "findGroup",
+        "parameters": [
+          {
+            "description": "The group to look up the folder",
+            "in": "path",
+            "name": "group",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodeEntry"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "gets a given root folder for a group id",
+        "tags": [
+          "BULK v1"
+        ]
+      }
+    },
     "/bulk/v1/list": {
       "post": {
         "description": "lists all currently synchronized nodes matching the posted, multiple criteria",
@@ -31415,19 +31498,21 @@
               "default": false,
               "type": "boolean"
             }
-          },
-          {
-            "description": "value",
-            "in": "query",
-            "name": "value",
-            "schema": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "description": "value"
+        },
         "responses": {
           "200": {
             "content": {
