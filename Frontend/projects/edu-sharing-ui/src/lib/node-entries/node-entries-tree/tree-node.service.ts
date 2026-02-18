@@ -276,6 +276,7 @@ export class TreeNodeService {
             (node.collection?.childCollectionsCount > 0 ||
                 node.collection?.childReferencesCount > 0);
         const unclickedFolder: boolean =
+            !this.nodeHelperService.isNodeCollection(node as Node) &&
             this.folderTypes.includes(node.type) &&
             !this.emptyFolders.includes(node.ref.id) &&
             !this.emptyParentIds.includes(node.ref.id);

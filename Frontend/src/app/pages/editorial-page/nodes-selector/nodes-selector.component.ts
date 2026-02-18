@@ -762,6 +762,30 @@ export class NodesSelectorComponent implements OnInit {
             sortBy: [this.nodeHelperService.getSortByForCollection(ROOT).active],
             sortAscending: this.nodeHelperService.getSortByForCollection(ROOT).direction === 'asc',
         };
+        // recent collections
+        const recentCollectionsNode: Partial<Node> = this.createFakeNode(
+            this.translate.instant(this.i18nPrefix + 'COLLECTIONS.RECENT_COLLECTIONS'),
+            'history_2',
+            RestConstants.COLLECTIONSCOPE_RECENT,
+            true,
+        );
+        const subRecentCollections: CollectionSubcollections = await firstValueFrom(
+            this.collectionService.getCollectionSubcollections(
+                RestConstants.ROOT,
+                RestConstants.COLLECTIONSCOPE_RECENT,
+                [PROPERTY_FILTER_ALL],
+                request,
+            ),
+        );
+        subRecentCollections.collections?.forEach((collection) => {
+            // set the ID to the (fake) parent node
+            collection.parent.id = recentCollectionsNode.ref.id;
+            // reset childCollectionsCount and childReferencesCount to provide them as a flat list
+            collection.collection.childCollectionsCount = 0;
+            collection.collection.childReferencesCount = 0;
+        });
+        initialData.push(recentCollectionsNode);
+        initialData = initialData.concat(subRecentCollections.collections);
         // my collections
         const myCollectionsNode: Partial<Node> = this.createFakeNode(
             this.translate.instant(this.i18nPrefix + 'COLLECTIONS.MY_COLLECTIONS'),

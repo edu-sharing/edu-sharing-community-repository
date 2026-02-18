@@ -72,6 +72,7 @@
         },
         "COLLECTIONS": {
           "PLACEHOLDER": "Suche nach Sammlungen",
+          "RECENT_COLLECTIONS": "Zuletzt verwendet",
           "MY_COLLECTIONS": "Meine Sammlungen",
           "EDITORIAL_COLLECTIONS": "Redaktionelle Sammlungen"
         },
