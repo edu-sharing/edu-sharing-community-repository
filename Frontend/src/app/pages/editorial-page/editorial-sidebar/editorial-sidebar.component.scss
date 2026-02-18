@@ -42,8 +42,8 @@
 .option {
     padding: 0 20px;
     height: 100%;
-    &.option-EDITORIAL_OPTIONS_WORKSPACE_METADATA,
-    &.option-EDITORIAL_OPTIONS_PREVIEW {
+    &.option-WORKSPACE_METADATA,
+    &.option-PREVIEW {
         // has own padding cause of tabs
         padding: 0;
     }
