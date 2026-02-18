@@ -136,6 +136,11 @@
         </div>
       </ng-container>
 
+      <!-- METHODOLOGY TAB -->
+      <ng-container *ngSwitchCase="TabType.METHODOLOGY">
+        <es-metadata-template-management></es-metadata-template-management>
+      </ng-container>
+
       <!-- COLLECTIONS TAB -->
       <ng-container *ngSwitchCase="TabType.COLLECTIONS">
         <!-- TODO: move into actionbar -->
@@ -222,10 +227,6 @@
           }"
           (dialogResult)="uploadMaterialDialogResult($event)"
         ></es-add-material-dialog>
-      </ng-container>
-
-      <ng-container *ngSwitchCase="TabType.METHODOLOGY">
-        <es-metadata-template-management></es-metadata-template-management>
       </ng-container>
 
       <ng-template #noSearchResults let-dataSource="dataSource">

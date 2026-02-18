@@ -17,12 +17,6 @@
     }
 }
 
-// workaround to set outer option height to 100%
-::ng-deep .option-EDITORIAL_OPTIONS_SORT_INTO {
-    height: 100%;
-    //overflow: hidden;
-}
-
 :host {
     display: flex;
     flex-direction: column;
@@ -37,13 +31,19 @@
 
 .tab-main-view {
     top: 0;
-    border-bottom: 1px solid #ccc;
     box-sizing: border-box;
     // take the available space
     flex: 1 1 0;
     // important to flexbox to work properly
     min-height: 100%;
     overflow: hidden;
+
+    &::ng-deep {
+        mat-tab-header,
+        .tab-content {
+            padding: 0 20px;
+        }
+    }
 }
 
 // fix default tab body overflow
@@ -76,9 +76,6 @@
     position: sticky;
     z-index: 1;
     background: #fff;
-    // workaround to draw the border over the full width
-    margin-left: -20px;
-    margin-right: -20px;
     padding: 8px 20px;
     bottom: 0;
     display: flex;
@@ -100,7 +97,6 @@
 .search-container {
     display: flex;
     flex-direction: column;
-    overflow: hidden;
 
     .actionbar-search {
         margin-top: 16px;
@@ -111,76 +107,6 @@
 .info-message {
     margin-top: 16px;
     display: block;
-}
-
-// methodology tab related styles
-.methodology-container {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-
-    .dropdown-selection,
-    .template-toggle,
-    .create-template {
-        &:not(.mat-mdc-button-disabled) {
-            color: var(--primary);
-        }
-    }
-
-    .template-actions {
-        width: 100%;
-        display: flex;
-        flex-direction: row;
-        gap: 8px;
-        align-items: center;
-        justify-content: flex-end;
-
-        .template-selection {
-            padding-right: 8px;
-            border-right: 1px solid var(--primary);
-        }
-    }
-
-    .select-template-container {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-
-        .select-template-header {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            font-size: vars.$fontSizeXLarge;
-            font-weight: bold;
-        }
-
-        .select-template-list {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-
-            .template-list-item {
-                padding: 4px 0;
-                display: flex;
-                justify-content: space-between;
-                border-top: 1px solid #ccc;
-
-                &.last-list-item {
-                    border-bottom: 1px solid #ccc;
-                }
-
-                .template-title,
-                .template-actions {
-                    display: flex;
-                    align-items: center;
-                }
-
-                .template-title {
-                    flex-shrink: 0;
-                }
-            }
-        }
-    }
 }
 
 // collections tab related styles
