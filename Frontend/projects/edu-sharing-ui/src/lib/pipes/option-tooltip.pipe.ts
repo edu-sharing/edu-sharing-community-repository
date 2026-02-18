@@ -1,6 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { OptionItem } from '../types/option-item';
+import { firstValueFrom } from 'rxjs';
 
 @Pipe({
     name: 'optionTooltip',
@@ -11,7 +12,7 @@ export class OptionTooltipPipe implements PipeTransform {
 
     async transform(option: OptionItem, args: string[] = null) {
         return (
-            (await this.translate.get(option.name).toPromise()) +
+            ((await firstValueFrom(this.translate.get(option.name))) || '') +
             (option.keyboardShortcut ? ' (' + this.getKeyInfo(option) + ')' : '')
         );
     }

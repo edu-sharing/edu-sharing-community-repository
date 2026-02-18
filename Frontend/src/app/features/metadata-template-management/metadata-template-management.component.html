@@ -65,10 +65,10 @@
             {{ template.name }}
           </div>
           <div class="template-actions">
-            <button mat-icon-button (click)="renameTemplate(template)">
+            <button mat-icon-button color="primary" (click)="renameTemplate(template)">
               <i esIcon="edit" [aria]="true"></i>
             </button>
-            <button mat-icon-button (click)="deleteTemplate(template)">
+            <button mat-icon-button color="warn" (click)="deleteTemplate(template)">
               <i esIcon="delete" [aria]="true"></i>
             </button>
           </div>

@@ -104,6 +104,10 @@ export class MetadataTemplateManagementComponent implements OnInit {
         const editTemplateDialogRef = await this.dialogs.openGenericDialog({
             title: this.i18nPrefix + 'METHODOLOGY.EDIT_TEMPLATE.DIALOG_TITLE',
             subtitle: template.name,
+            avatar: {
+                kind: 'icon',
+                icon: 'edit',
+            },
             contentTemplate: this.templateTitleDialogRef,
             buttons: SAVE_OR_CANCEL,
         });
@@ -129,6 +133,10 @@ export class MetadataTemplateManagementComponent implements OnInit {
         const deleteTemplateDialogRef = await this.dialogs.openGenericDialog({
             title: this.i18nPrefix + 'METHODOLOGY.DELETE_TEMPLATE.DIALOG_TITLE',
             subtitle: template.name,
+            avatar: {
+                kind: 'icon',
+                icon: 'delete',
+            },
             message: this.i18nPrefix + 'METHODOLOGY.DELETE_TEMPLATE.CONFIRMATION_MESSAGE',
             buttons: DELETE_OR_CANCEL,
         });
@@ -153,6 +161,10 @@ export class MetadataTemplateManagementComponent implements OnInit {
         this.templateName = defaultName;
         const createTemplateDialogRef = await this.dialogs.openGenericDialog({
             title: this.i18nPrefix + 'METHODOLOGY.CREATE_TEMPLATE.DIALOG_TITLE',
+            avatar: {
+                kind: 'icon',
+                icon: 'save',
+            },
             contentTemplate: this.templateTitleDialogRef,
             buttons: SAVE_OR_CANCEL,
         });

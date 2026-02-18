@@ -3,6 +3,7 @@ import { SharedModule } from '../../../../shared/shared.module';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { GenericDialogComponent } from './generic-dialog.component';
+import { mdsStorybookProviders } from '../../../mds/mds-editor/storybook-utils';
 
 // TODO: Include dialog frame in the stories
 
@@ -16,10 +17,7 @@ const meta: Meta<GenericDialogComponent<string>> = {
             imports: [SharedModule],
         }),
         applicationConfig({
-            providers: [
-                { provide: CARD_DIALOG_DATA, useValue: {} },
-                { provide: CardDialogRef, useValue: {} },
-            ],
+            providers: mdsStorybookProviders,
         }),
     ],
     tags: ['autodocs'],
@@ -43,6 +41,7 @@ type Story = StoryObj<GenericDialogComponent<string>>;
 export const Info: Story = {
     args: {
         data: {
+            messageMode: 'text',
             message: 'foo',
         },
     },

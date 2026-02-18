@@ -9,12 +9,13 @@ import {
     SessionStorageServiceMock,
 } from '../mds/mds-editor/storybook-utils';
 import { MetadataTemplateManagementComponent } from './metadata-template-management.component';
+import { DialogsModule } from '../dialogs/dialogs.module';
 
 const additionalProviders = [
-    {
+    /*{
         provide: DialogsService,
         useClass: MetadataTemplateDialogsServiceMock,
-    },
+    },*/
     {
         provide: SessionStorageService,
         useClass: SessionStorageServiceMock,
@@ -26,7 +27,7 @@ const metadataTemplateManagement: Meta<MetadataTemplateManagementComponent> = {
     component: MetadataTemplateManagementComponent,
     decorators: [
         moduleMetadata({
-            imports: [SharedModule, MdsModule],
+            imports: [SharedModule, DialogsModule, MdsModule],
         }),
         applicationConfig({
             providers: mdsStorybookProviders.concat(additionalProviders),

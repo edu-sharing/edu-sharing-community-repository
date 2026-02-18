@@ -80,6 +80,8 @@ import {
     SuggestionResponseDto as SuggestionLlm,
     Suggestions$Params,
 } from 'ngx-edu-sharing-b-api';
+import { CARD_DIALOG_DATA } from '../../dialogs/card-dialog/card-dialog-config';
+import { CardDialogRef } from '../../dialogs/card-dialog/card-dialog-ref';
 
 @Injectable()
 export class translateProvider {
@@ -637,6 +639,8 @@ export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     ViewInstanceService,
     CordovaService,
     { provide: Toast, useClass: ToastMock },
+    { provide: CARD_DIALOG_DATA, useValue: {} },
+    { provide: CardDialogRef, useValue: {} },
     { provide: ActivatedRoute, useClass: ActivatedRouteMock },
     {
         provide: TranslateService,
