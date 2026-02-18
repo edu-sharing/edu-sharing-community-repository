@@ -1,7 +1,9 @@
 import {
     Component,
     computed,
+    EventEmitter,
     OnInit,
+    Output,
     signal,
     TemplateRef,
     ViewChild,
@@ -68,6 +70,7 @@ export class MetadataTemplateManagementComponent implements OnInit {
     readonly metadataTemplateGroup: string = 'io_bulk_sidebar';
     selectedValues: WritableSignal<MdsExtendedValues> = signal(null);
     templateName: string = '';
+    @Output() extendedValuesChange = new EventEmitter<MdsExtendedValues>();
     @ViewChild('mdsEditor') mdsEditor: MdsEditorWrapperComponent;
     @ViewChild('templateTitleDialog') templateTitleDialogRef: TemplateRef<undefined>;
 
@@ -90,6 +93,7 @@ export class MetadataTemplateManagementComponent implements OnInit {
      * @param event
      */
     currentValuesExtendedChange(event: MdsExtendedValues) {
+        this.extendedValuesChange.emit(event);
         this.selectedValues.set(event);
     }
 

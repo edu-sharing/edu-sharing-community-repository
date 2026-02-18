@@ -35,6 +35,8 @@ import {
     FetchEvent,
     InteractionType,
     LocalEventsService,
+    MdsExtendedValueData,
+    MdsExtendedValues,
     MdsHelperService,
     NodeClickEvent,
     NodeDataSource,
@@ -123,6 +125,19 @@ export class NodesSelectorComponent implements OnInit {
     selectedTabId = computed(() => this.supportedTabs().indexOf(this.selectedTab()));
     selectedNodeChildren: WritableSignal<Partial<Node>[]> = signal([]);
     selectedNodes: WritableSignal<Partial<Node>[]> = signal([]);
+    currentExtendedValues: WritableSignal<MdsExtendedValues> = signal(null);
+    private atLeastOneEnabledExtendedValue: Signal<boolean> = computed((): boolean => {
+        const values: MdsExtendedValues = this.currentExtendedValues();
+        if (!values) {
+            return false;
+        }
+        return Object.values(values).some((value) => {
+            if (value === null || Array.isArray(value)) {
+                return false;
+            }
+            return Object.values(value).some((data: MdsExtendedValueData) => data.enabled);
+        });
+    });
     supportedTabs: Signal<TabType[]> = computed(() =>
         this.selectionMode() === 'source'
             ? [TabType.SEARCH, TabType.COLLECTIONS, TabType.WORKSPACE, TabType.UPLOAD]
@@ -142,6 +157,10 @@ export class NodesSelectorComponent implements OnInit {
             selectedNodes.find((n) => !selectedNodeIds.includes(n.parent.id)) ?? selectedNodes[0]
         );
     });
+    isMethodologyTab: Signal<boolean> = computed(() => this.selectedTab() === TabType.METHODOLOGY);
+    methodologyTabWithValue: Signal<boolean> = computed(
+        () => this.isMethodologyTab() && this.atLeastOneEnabledExtendedValue(),
+    );
     private currentStep: WritableSignal<StepType> = signal(StepType.SELECT);
     isSelectStep: Signal<boolean> = computed((): boolean => this.currentStep() === StepType.SELECT);
     onlyOneSelected: Signal<boolean> = computed(() => this.selectedNodes().length === 1);
@@ -285,6 +304,15 @@ export class NodesSelectorComponent implements OnInit {
             }
         });
         this.selectedNodes.set([...selectedNodes]);
+    }
+
+    /**
+     * Listens to the change event of the extended values to update the according value.
+     *
+     * @param event
+     */
+    onExtendedValuesChange(event: MdsExtendedValues) {
+        this.currentExtendedValues.set(event);
     }
 
     /**
@@ -545,9 +573,9 @@ export class NodesSelectorComponent implements OnInit {
     }
 
     /**
-     * insert into the selected target
+     * Insert into the selected target.
      */
-    async insertSelectedNodes() {
+    async insertSelectedNodes(): Promise<void> {
         const target = this.selectedNodes()[0] as Node;
         const source = this.option().optionConfig.nodes as Node[];
         if (target.mediatype === 'collection') {
@@ -565,6 +593,31 @@ export class NodesSelectorComponent implements OnInit {
             this.editorialSidebarService.sidebarLoading.set(false);
         }
     }
+
+    /**
+     * Saves the enabled metadata to the currently selected nodes.
+     */
+    async saveMetadata(): Promise<void> {
+        const source = this.option().optionConfig.nodes as Node[];
+        // convert the extended values to a flat object with the metadata keys as keys and the enabled values as values
+        const values: MdsExtendedValues = this.currentExtendedValues() ?? {};
+        const enabledMetadata: { [key: string]: string[] } = {};
+        Object.entries(values)?.forEach(([key, value]) => {
+            if (value === null || Array.isArray(value)) {
+                return;
+            }
+            const enabledValues: string[] = Object.entries(value)
+                .filter(([_, data]) => data.enabled)
+                .map(([itemKey, _]) => itemKey);
+
+            if (enabledValues.length > 0) {
+                enabledMetadata[key] = enabledValues;
+            }
+        });
+        // @TODO Torsten: Additively add metadata "enabledMetadata" to "source"
+        console.log('Additively add metadata', enabledMetadata, 'to', source);
+    }
+
     /**
      * Copies the selected nodes into the currently opened view.
      */
