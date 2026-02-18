@@ -115,7 +115,7 @@ public class BulkApi {
         }
     }
 
-    @POST
+    @GET
     @Path("/find/group/{group}")
 
     @Operation(summary = "gets a given root folder for a group id", description = "Get a given root folder (crawler folder). Might be used to do bulk operations like global invitations")
