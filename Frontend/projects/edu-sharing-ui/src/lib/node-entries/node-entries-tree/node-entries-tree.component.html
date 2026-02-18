@@ -135,46 +135,47 @@
         </span>
       </span>
     </div>
-    <div
-      class="action-buttons container"
-      *ngIf="
-        (nodeHelper.isNodeCollection(flatNode.item) &&
-          (flatNode.item.collection?.childCollectionsCount ||
-            flatNode.item.collection?.childReferencesCount)) ||
-        (flatNode.level > 0 &&
-          nodeHelper.getCollectionScopeInfo($any(flatNode.item))?.scopeName !== 'UNKNOWN')
-      "
-    >
-      <div
-        class="node-detail"
-        *ngIf="
-          nodeHelper.isNodeCollection(flatNode.item) &&
-          flatNode.item.collection?.childCollectionsCount
-        "
-      >
-        <i esIcon="layers"></i> {{ flatNode.item.collection.childCollectionsCount }}
-      </div>
-      <div
-        class="node-detail"
-        *ngIf="
-          nodeHelper.isNodeCollection(flatNode.item) &&
-          flatNode.item.collection?.childReferencesCount
-        "
-      >
-        <i esIcon="insert_drive_file"></i> {{ flatNode.item.collection.childReferencesCount }}
-      </div>
-      <ng-container *ngIf="nodeHelper.getCollectionScopeInfo($any(flatNode.item)) as scopeInfo">
-        <div class="node-detail" *ngIf="flatNode.level > 0 && scopeInfo.scopeName !== 'UNKNOWN'">
-          <i
-            class="collectionScope"
-            [esIcon]="scopeInfo.icon"
-            esIconContext="collection-scope"
-            [matTooltip]="'COLLECTION.SCOPE.' + scopeInfo.scopeName | translate"
-            [altText]="'COLLECTION.SCOPE.' + scopeInfo.scopeName | translate"
-          ></i>
-        </div>
-      </ng-container>
-    </div>
+    <!--    Note: temporarily removed, as the tracker information is not updated properly -->
+    <!--    <div-->
+    <!--      class="action-buttons container"-->
+    <!--      *ngIf="-->
+    <!--        (nodeHelper.isNodeCollection(flatNode.item) &&-->
+    <!--          (flatNode.item.collection?.childCollectionsCount ||-->
+    <!--            flatNode.item.collection?.childReferencesCount)) ||-->
+    <!--        (flatNode.level > 0 &&-->
+    <!--          nodeHelper.getCollectionScopeInfo($any(flatNode.item))?.scopeName !== 'UNKNOWN')-->
+    <!--      "-->
+    <!--    >-->
+    <!--      <div-->
+    <!--        class="node-detail"-->
+    <!--        *ngIf="-->
+    <!--          nodeHelper.isNodeCollection(flatNode.item) &&-->
+    <!--          flatNode.item.collection?.childCollectionsCount-->
+    <!--        "-->
+    <!--      >-->
+    <!--        <i esIcon="layers"></i> {{ flatNode.item.collection.childCollectionsCount }}-->
+    <!--      </div>-->
+    <!--      <div-->
+    <!--        class="node-detail"-->
+    <!--        *ngIf="-->
+    <!--          nodeHelper.isNodeCollection(flatNode.item) &&-->
+    <!--          flatNode.item.collection?.childReferencesCount-->
+    <!--        "-->
+    <!--      >-->
+    <!--        <i esIcon="insert_drive_file"></i> {{ flatNode.item.collection.childReferencesCount }}-->
+    <!--      </div>-->
+    <!--      <ng-container *ngIf="nodeHelper.getCollectionScopeInfo($any(flatNode.item)) as scopeInfo">-->
+    <!--        <div class="node-detail" *ngIf="flatNode.level > 0 && scopeInfo.scopeName !== 'UNKNOWN'">-->
+    <!--          <i-->
+    <!--            class="collectionScope"-->
+    <!--            [esIcon]="scopeInfo.icon"-->
+    <!--            esIconContext="collection-scope"-->
+    <!--            [matTooltip]="'COLLECTION.SCOPE.' + scopeInfo.scopeName | translate"-->
+    <!--            [altText]="'COLLECTION.SCOPE.' + scopeInfo.scopeName | translate"-->
+    <!--          ></i>-->
+    <!--        </div>-->
+    <!--      </ng-container>-->
+    <!--    </div>-->
   </div>
 </ng-template>
 
