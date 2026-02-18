@@ -31,10 +31,10 @@ mat-tree-node.selected {
     width: 100%;
 }
 
-.child-tree-node {
+.parent-tree-node {
     flex-wrap: wrap;
 
-    .child-tree-node-container {
+    .parent-tree-node-container {
         display: flex;
         align-items: center;
         gap: 4px;
@@ -76,6 +76,11 @@ mat-tree-node.selected {
             height: 20px;
         }
     }
+}
+
+// for children, reverse the same space that the toggle button takes (24px icon width + 4px gap)
+.child-tree-node-container {
+    padding-left: 28px;
 }
 
 .node-information {

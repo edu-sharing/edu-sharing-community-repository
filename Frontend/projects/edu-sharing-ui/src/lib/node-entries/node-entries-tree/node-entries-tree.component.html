@@ -44,7 +44,9 @@
         [selected]="entriesService.selection.selected"
         [item]="entriesService.columns[0]"
       ></es-drag-preview>
-      <ng-container *ngTemplateOutlet="nodeInformation; context: { node: node }"></ng-container>
+      <div class="child-tree-node-container">
+        <ng-container *ngTemplateOutlet="nodeInformation; context: { node: node }"></ng-container>
+      </div>
     </mat-tree-node>
 
     <!-- load more button for leaf nodes -->
@@ -64,7 +66,7 @@
     <!-- nodes with children -->
     <!-- flex-wrap: wrap; is necessary to wrap the loading containers to the next line -->
     <mat-tree-node
-      class="child-tree-node"
+      class="parent-tree-node"
       [class.selected]="entriesService.selection.isSelected(node.item)"
       *matTreeNodeDef="let node; when: hasChild"
       matTreeNodePadding
@@ -83,7 +85,7 @@
         [selected]="entriesService.selection.selected"
         [item]="entriesService.columns[0]"
       ></es-drag-preview>
-      <div class="child-tree-node-container">
+      <div class="parent-tree-node-container">
         <a
           matIconButton
           matTreeNodeToggle
