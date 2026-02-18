@@ -269,7 +269,7 @@ export class NodesSelectorComponent implements OnInit {
             const option = this.option();
             if (option?.optionConfig?.state) {
                 this.selectedTab.set(option.optionConfig.state);
-                void this.refreshData(this.selectedTab());
+                void this.refreshData(option.optionConfig.state);
             }
         });
     }
