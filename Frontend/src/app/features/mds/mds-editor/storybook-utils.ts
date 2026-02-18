@@ -17427,7 +17427,7 @@ export const DefaultMds: MdsDefinition = {
             id: 'node_general_bulk_sidebar',
             caption: null,
             icon: 'description',
-            html: '\n <cclom:general_keyword>\n <ccm:educationallearningresourcetype>\n <ccm:educationalcontext>\n <ccm:taxonid>',
+            html: '\n <ccm:educationallearningresourcetype>\n <ccm:educationalcontext>\n <ccm:taxonid>',
             rel: null,
             hideIfEmpty: false,
             isExtended: false,

@@ -17,7 +17,12 @@
           ></mat-checkbox>
 
           <div class="value-text" *ngIf="selectedValues()[i] as selectedValue">
-            <div class="title">
+            <div
+              class="title"
+              esCheckTextOverflow
+              #text="esCheckTextOverflow"
+              [matTooltip]="text.hasTextOverflow() ? selectedValue.label : null"
+            >
               {{ selectedValue.label }}
             </div>
             <div
