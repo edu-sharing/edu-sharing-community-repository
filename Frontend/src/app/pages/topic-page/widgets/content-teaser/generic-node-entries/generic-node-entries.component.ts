@@ -196,24 +196,6 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             setTimeout((): void => {
                 this.onDisplayTypeChanged();
             }, 500);
-
-            // specify columns
-            if (!this.columns) {
-                this.mdsService
-                    .getMetadataSet({
-                        repository: HOME_REPOSITORY,
-                        metadataSet: this.genericWidgetGlobalService.getDefaultMds(),
-                    })
-                    .subscribe((mds) => {
-                        this.columns = this.mdsHelperService.getColumns(
-                            mds,
-                            'genericWidget' +
-                                (this._layout === GenericNodeEntriesDisplayType.ListView
-                                    ? 'Table'
-                                    : ''),
-                        );
-                    });
-            }
         }
         this._layout = val;
         this.nodeEntriesDisplayType.set(newDisplayType);
@@ -257,6 +239,7 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
     private blacklistedClassName: string = 'blacklisted';
     private selectedClassName: string = 'selected';
     columns: ColumnType;
+    tableColumns: ColumnType;
     private customOptions: CustomOptions = {};
     dataSource: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
     private destroy$ = new Subject<void>();
@@ -333,7 +316,18 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
     /**
      * Initializes the translations service, columns and custom options.
      */
-    ngOnInit(): void {
+    async ngOnInit(): Promise<void> {
+        // specify columns
+        if (!this.columns || !this.tableColumns) {
+            const mds = await firstValueFrom(
+                this.mdsService.getMetadataSet({
+                    repository: HOME_REPOSITORY,
+                    metadataSet: this.genericWidgetGlobalService.getDefaultMds(),
+                }),
+            );
+            this.columns = this.mdsHelperService.getColumns(mds, 'genericWidget');
+            this.tableColumns = this.mdsHelperService.getColumns(mds, 'genericWidgetTable');
+        }
         // specify addOptions
         if (!this.customOptions?.addOptions) {
             this.customOptions = this.retrieveCustomOptions();

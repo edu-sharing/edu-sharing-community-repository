@@ -6,7 +6,7 @@
   [class.single-view]="layout === GenericNodeEntriesDisplayType.SingleView"
   [class.split-view]="layout === GenericNodeEntriesDisplayType.SplitView"
   [class.view-mode]="!hasEditRightsAndIsEditMode"
-  [columns]="columns"
+  [columns]="layout !== GenericNodeEntriesDisplayType.ListView ? columns : tableColumns"
   [dataSource]="dataSource"
   [disableInfiniteScroll]="true"
   [displayType]="nodeEntriesDisplayType()"
