@@ -112,7 +112,7 @@ public class ActionObserver {
 	public synchronized void removeInactiveActions() {
 
         String timeout = LightbendConfigLoader.get().getString("repository.transformer.preview.actionTimeout");
-        long timeoutInHours = Duration.parse(timeout).toHours();
+        long timeoutInMs = Duration.parse(timeout).toMillis();
 
 		RunAsWork<Void> runAs = new RunAsWork<Void>() {
 			@Override
@@ -150,9 +150,8 @@ public class ActionObserver {
 								Date addDate = (Date) action.getParameterValue(ACTION_OBSERVER_ADD_DATE);
 								boolean actionTimedOut = false;
 								if (addDate != null) {
-									long hours = TimeUnit.HOURS.convert(new Date().getTime() - addDate.getTime(),
-											TimeUnit.MILLISECONDS);
-									if (hours > timeoutInHours) {
+                                    long msSinceCreation = new Date().getTime() - addDate.getTime();
+									if (msSinceCreation > timeoutInMs) {
 										actionTimedOut = true;
 										logger.info("action timed out");
 									}
