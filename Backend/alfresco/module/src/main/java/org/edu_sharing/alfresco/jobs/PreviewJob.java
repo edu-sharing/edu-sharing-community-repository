@@ -28,6 +28,7 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.util.TempFileProvider;
 import org.apache.log4j.Logger;
 import org.apache.tika.io.TikaInputStream;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ActionObserver;
@@ -47,7 +48,6 @@ public class PreviewJob implements Job {
 	NodeService nodeService = serviceRegistry.getNodeService();
 	MimetypeService mimetypeService = serviceRegistry.getMimetypeService();
 
-	int maxRunning = 5;
 
 	Logger logger = Logger.getLogger(PreviewJob.class);
 	
@@ -195,6 +195,7 @@ public class PreviewJob implements Job {
 			}
 
 			logger.debug("found " + countRunning + " running/pending" + " countPending:" + countPending);
+            int maxRunning = LightbendConfigLoader.get().getInt("repository.transformer.preview.maxRunning");;
 
 			if (countRunning < maxRunning) {
 				int newRunning = 0;
@@ -276,7 +277,7 @@ public class PreviewJob implements Job {
 					}
 
 					if (countRunning + newRunning >= maxRunning) {
-						logger.debug("returning cause countRunning + newRunning >= maxRunning");
+						logger.debug("returning cause countRunning + newRunning ("+ (countRunning + newRunning)+ ") >= maxRunning "+maxRunning);
 					}
 				}
 
