@@ -24,8 +24,24 @@
       "403": "L'accès à la ressource donnée est restreint.",
       "404": "Erreur 404",
       "500": "Erreur 500",
-      "SHARING_ERROR": "Malheureusement, edu-sharing ne peut actuellement partager que des fichiers de taille limitée. Veuillez essayer avec un autre fichier"
+      "SHARING_ERROR": "Malheureusement, edu-sharing ne peut actuellement partager que des fichiers de taille limitée. Veuillez essayer avec un autre fichier",
+      "OTHER": "Erreur inconnue",
+      "USER_BLOCKED": "Utilisateur bloqué",
+      "SSO_INSUFFICIENT_REQUIREMENTS": "Conditions non remplies",
+      "SSO_UNKNOWN_ERROR": "Erreur inconnue",
+      "MISSING_PARAM": "informations utilisateur incomplètes",
+      "SSO_REQ_ATT_NOT_MATCHES": "informations utilisateur incorrectes",
+      "SSO_SAML_IDP_LOGOUT_UNDEFINED": "Le fournisseur d'authentification ne propose pas de service de déconnexion globale. Veuillez fermer votre navigateur pour terminer la procédure de déconnexion.",
+      "INVALID_AUTHENTICATION_METHOD": "Veuillez contacter un administrateur."
     },
-    "SHARING_ERROR": "Le partage a échoué"
+    "SHARING_ERROR": "Le partage a échoué",
+    "OTHER": "Erreur inconnue",
+    "USER_BLOCKED": "Connexion impossible",
+    "SSO_INSUFFICIENT_REQUIREMENTS": "Connexion impossible",
+    "SSO_UNKNOWN_ERROR": "Connexion impossible",
+    "MISSING_PARAM": "Connexion impossible",
+    "SSO_REQ_ATT_NOT_MATCHES": "Connexion impossible",
+    "SSO_SAML_IDP_LOGOUT_UNDEFINED": "Déconnexion unique impossible",
+    "INVALID_AUTHENTICATION_METHOD": "L'authentification SSO n'est pas configurée."
   }
 }

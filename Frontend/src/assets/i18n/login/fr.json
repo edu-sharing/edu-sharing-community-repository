@@ -30,7 +30,8 @@
     "NO_ACCESS": "Aucune autorisation d'accès à cette zone",
     "APP_LOGO": "Logo",
     "SHOW_PASSWORD": "Afficher le mot de passe",
-    "HIDE_PASSWORD": "Cacher le mot de passe"
+    "HIDE_PASSWORD": "Cacher le mot de passe",
+    "ERROR_SAFE_DETAIL": "La connexion a échoué. Si vous n'avez pas encore de mot de passe pour votre coffre-fort numérique, veuillez demander à votre administrateur de vous en créer un temporaire à usage unique. Vous pourrez ensuite l'utiliser pour définir un nouveau mot de passe."
   },
   "LOGIN_APP": {
     "SERVERLIST_OWN": "définir son propre serveur",

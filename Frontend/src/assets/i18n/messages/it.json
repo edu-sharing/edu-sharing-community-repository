@@ -24,8 +24,24 @@
       "403": "L'accesso alla risorsa data è limitato.",
       "404": "Errore 404",
       "500": "Errore 500",
-      "SHARING_ERROR": "Purtroppo, al momento edu-sharing può condividere solo file di dimensioni limitate. Provare con un altro file"
+      "SHARING_ERROR": "Purtroppo, al momento edu-sharing può condividere solo file di dimensioni limitate. Provare con un altro file",
+      "OTHER": "Errore sconosciuto",
+      "USER_BLOCKED": "Utente bloccato",
+      "SSO_INSUFFICIENT_REQUIREMENTS": "Condizioni non soddisfatte",
+      "SSO_UNKNOWN_ERROR": "Errore sconosciuto",
+      "MISSING_PARAM": "informazioni utente incomplete",
+      "SSO_REQ_ATT_NOT_MATCHES": "informazioni utente errate",
+      "SSO_SAML_IDP_LOGOUT_UNDEFINED": "Il provider di autenticazione non offre un servizio di disconnessione globale. Chiudere il browser per completare la procedura di disconnessione.",
+      "INVALID_AUTHENTICATION_METHOD": "Contattare un amministratore."
     },
-    "SHARING_ERROR": "Condivisione fallita"
+    "SHARING_ERROR": "Condivisione fallita",
+    "OTHER": "Errore sconosciuto",
+    "USER_BLOCKED": "Accesso non possibile",
+    "SSO_INSUFFICIENT_REQUIREMENTS": "Accesso non possibile",
+    "SSO_UNKNOWN_ERROR": "Accesso non possibile",
+    "MISSING_PARAM": "Accesso non possibile",
+    "SSO_REQ_ATT_NOT_MATCHES": "Accesso non possibile",
+    "SSO_SAML_IDP_LOGOUT_UNDEFINED": "Disconnessione singola non possibile",
+    "INVALID_AUTHENTICATION_METHOD": "L'autenticazione SSO non è configurata"
   }
 }
