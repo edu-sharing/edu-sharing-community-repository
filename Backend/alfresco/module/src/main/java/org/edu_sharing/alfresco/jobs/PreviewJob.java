@@ -56,62 +56,6 @@ public class PreviewJob implements Job {
 	 */
 	long latency = 5000;
 	
-	
-	private void extractVideoImageMetadata(NodeRef nodeRef, String runAs) {
-		RunAsWork<Void> videoImageMetadataExtractor = new RunAsWork<Void>() {
-			@Override
-			public Void doWork() throws Exception {
-				ContentReader reader = contentService.getReader(nodeRef, ContentModel.PROP_CONTENT);
-
-				try{
-					String notMatchesMimetype = mimetypeService.getMimetypeIfNotMatches(reader);
-					if(notMatchesMimetype != null){
-						logger.error("mimetype does not match, maybe file was renamed " + nodeRef +" guessed: "+ reader.getMimetype() +" heuristic: " + notMatchesMimetype);
-						return null;
-					}
-				}
-				catch (ContentIOException cioe)
-				{
-					logger.error(cioe);
-					return null;
-				}
-
-				// alfresco does not read image size for all images, so we try to fix it
-				// trying to load not the whole image but just the bounding rect, see also:
-				// http://stackoverflow.com/questions/1559253/java-imageio-getting-image-dimensions-without-reading-the-entire-file
-				if(reader.getMimetype().contains("image")){
-					InputStream is = null;
-					try{
-						is = reader.getContentInputStream();
-						try(ImageInputStream in = ImageIO.createImageInputStream(is)){
-						    final Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
-						    if (readers.hasNext()) {
-						        ImageReader imageReader = readers.next();
-						        try {
-						        	imageReader.setInput(in);
-						        	nodeService.setProperty(nodeRef, QName.createQName(CCConstants.EXIF_PROP_PIXELXDIMENSION), imageReader.getWidth(0));
-									nodeService.setProperty(nodeRef, QName.createQName(CCConstants.EXIF_PROP_PIXELYDIMENSION), imageReader.getHeight(0));
-						        } finally {
-						        	imageReader.dispose();
-						        }
-						    }
-						} 
-					}catch(Throwable t){
-					} finally {
-						if(is != null){
-							is.close();
-						}
-					}
-				}
-				return null;
-			}
-		};
-		
-		AuthenticationUtil.runAs(videoImageMetadataExtractor, runAs);
-	}
-
-
-	
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -252,7 +196,6 @@ public class PreviewJob implements Job {
 											) {
 										if(lockState.getLockType() == null) {
 											logger.debug("nodeRef:" + entry.getKey() +" runAs:" + creator);
-											extractVideoImageMetadata(entry.getKey(),creator);
 											AuthenticationUtil.runAs(executeActionRunAs, creator);
 											logger.debug("finished action syncronously. nodeRef:" + entry.getKey()
 													+ " action status:" + action.getExecutionStatus()
