@@ -30,37 +30,42 @@ import { ChatCompletionResult, NodeConfig } from 'ngx-edu-sharing-b-api';
 import { UIService } from 'ngx-edu-sharing-ui';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-import { ConfigureWidgetEmbeddingDialogComponent } from './configure-widget-embedding-dialog/configure-widget-embedding-dialog.component';
-import { WidgetHeaderComponent } from './generic-widget-header/generic-widget-header.component';
-import { WidgetConfig } from '../../shared/types/widget-config/widget-config';
+import { Closable } from '../../../../features/dialogs/card-dialog/card-dialog-config';
+import { CardDialogRef } from '../../../../features/dialogs/card-dialog/card-dialog-ref';
+import { DialogsService } from '../../../../features/dialogs/dialogs.service';
+import { SharedModule } from '../../../../shared/shared.module';
+import { Toast, ToastType } from '../../../../services/toast';
+import { AiHelperService } from '../../shared/services/ai-helper.service';
+import { GlobalWidgetConfigService } from '../../shared/services/global-widget-config.service';
+import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
 import { BapiConfigObject } from '../../shared/types/bapi-config-object';
 import { ConfigurationOption } from '../../shared/types/configuration-option';
-import { DEFAULT_BG_COLOR, WIDGET_TYPE, WIDGETS } from '../../shared/types/custom-definitions';
-import { SwimlaneBackgroundShape } from '../../shared/types/swimlane-background-shape';
-import { StatisticNode } from '../../shared/types/statistic-node';
-import { CardDialogRef } from '../../../../features/dialogs/card-dialog/card-dialog-ref';
-import { PromptToTextMapping } from '../../shared/types/prompt-to-text-mapping';
-import { SharedModule } from '../../../../shared/shared.module';
-import { AiHelperService } from '../../shared/services/ai-helper.service';
-import { DialogsService } from '../../../../features/dialogs/dialogs.service';
-import { GlobalWidgetConfigService } from '../../shared/services/global-widget-config.service';
-import { Toast, ToastType } from '../../../../services/toast';
 import {
-    convertNodeRefIntoNodeId,
-    retrieveAiConfigFromNode,
-    retrieveCustomUrl,
-    retrievePromptFromAiConfig,
-    retrieveWidgetConfigFromNode,
-} from '../../shared/utils/template-util';
-import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
+    DEFAULT_BG_COLOR,
+    WIDGET_TYPE,
+    WIDGET_TYPE_OPTIONS,
+    WIDGETS,
+} from '../../shared/types/custom-definitions';
+import { PromptToTextMapping } from '../../shared/types/prompt-to-text-mapping';
+import { StatisticNode } from '../../shared/types/statistic-node';
+import { SwimlaneBackgroundShape } from '../../shared/types/swimlane-background-shape';
+import { BaseWidgetConfig } from '../../shared/types/widget-config/base-widget-config';
+import { WidgetConfig } from '../../shared/types/widget-config/widget-config';
 import {
     containsAiTags,
     retrieveBapiConfigObject,
     retrieveResultString,
 } from '../../shared/utils/ai-util';
-import { BaseWidgetConfig } from '../../shared/types/widget-config/base-widget-config';
 import { getNodeOrDefaultNodeId } from '../../shared/utils/node-util';
-import { Closable } from '../../../../features/dialogs/card-dialog/card-dialog-config';
+import {
+    convertNodeRefIntoNodeId,
+    retrieveAiConfigFromNode,
+    retrievePromptFromAiConfig,
+    retrieveWidgetConfigFromNode,
+} from '../../shared/utils/template-util';
+import { ConfigureWidgetEmbeddingDialogComponent } from './configure-widget-embedding-dialog/configure-widget-embedding-dialog.component';
+import { GenericWidgetGlobalService } from './generic-widget-global.service';
+import { WidgetHeaderComponent } from './generic-widget-header/generic-widget-header.component';
 
 export interface WidgetComponentInterface {
     // inputs
@@ -114,7 +119,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     @Input() swimlaneColor: string = DEFAULT_BG_COLOR;
     @Input() swimlaneIndex: number = -1;
     @Input() swimlaneShape: SwimlaneBackgroundShape = SwimlaneBackgroundShape.None;
-    @Input() widgetType: WIDGET_TYPE = WIDGETS.CONTENT_TEASER;
+    @Input() widgetType: WIDGET_TYPE | string = WIDGETS.CONTENT_TEASER;
 
     // Additional inputs that might be specific to certain widgets
     @Input() customUrl?: (collection: Node) => string;
@@ -162,6 +167,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         private clipboard: Clipboard,
         private dialogs: DialogsService,
         private injector: Injector,
+        private genericWidgetGlobalService: GenericWidgetGlobalService,
         private globalWidgetConfigService: GlobalWidgetConfigService,
         private platformLocation: PlatformLocation,
         private toast: Toast,
@@ -563,7 +569,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     }
 
     /**
-     * Reacts to wlo-editable-text (searchResultsUpdated) event by setting the search results
+     * Reacts to es-editable-text (searchResultsUpdated) event by setting the search results
      * and updating the search input count.
      *
      * @param event
@@ -574,7 +580,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     }
 
     /**
-     * Reacts to wlo-editable-text (searchResultsUpdated) event and emit it.
+     * Reacts to es-editable-text (searchResultsUpdated) event and emit it.
      *
      * @param count
      * @param type
@@ -736,7 +742,12 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
      */
     private async getComponentClass(): Promise<any> {
         let componentClass: any;
-
+        componentClass = await this.genericWidgetGlobalService.getCustomWidgetComponent(
+            this.widgetType,
+        );
+        if (componentClass != null) {
+            return componentClass;
+        }
         switch (this.widgetType) {
             case WIDGETS.AI_TEXT_WIDGET:
                 const aiTextWidgetModule = await import(
@@ -777,19 +788,12 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 );
                 componentClass = topicsColumnBrowserModule.TopicsColumnBrowserComponent;
                 break;
-            /*
-        case WIDGETS.EDITORIAL_MEMBERS:
-            const editorialMembersModule = await import(
-            '../editorial-members/editorial-members.component'
-            );
-            componentClass = editorialMembersModule.EditorialMembersComponent;
-            break;
-*/
             default:
                 componentClass = null;
         }
 
         if (!componentClass) {
+            console.error(this.widgetType + ' not found');
             throw new Error(
                 this.translate.instant(
                     'TOPIC_PAGE.WIDGET.GENERIC_WIDGET.WIDGET_NOT_FOUND_IN_MODULE_OR_UNKNOWN',
@@ -808,7 +812,13 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         if (!this.widgetInstance || !this.widgetComponentRef) {
             return;
         }
-
+        // find matching widget type
+        const widgetType: string = this.supportedWidgetTypes.includes(this.widgetType)
+            ? this.widgetType
+            : this.genericWidgetGlobalService.getCustomWidgetMatchingWidgetType(this.widgetType);
+        if (!widgetType) {
+            return;
+        }
         // set common properties
         this.widgetComponentRef.setInput('contextNodeId', this.contextNodeId);
         this.widgetComponentRef.setInput('editMode', this.editMode());
@@ -818,7 +828,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         this.widgetComponentRef.setInput('swimlaneIndex', this.swimlaneIndex);
 
         // set widget-specific properties
-        switch (this.widgetType) {
+        switch (widgetType) {
             case WIDGETS.AI_TEXT_WIDGET:
                 this.widgetComponentRef.setInput('nodeId', this.nodeId);
                 this.widgetComponentRef.setInput('propagatedNodeId', this.propagatedNodeId);
@@ -831,7 +841,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 break;
 
             case WIDGETS.COLLECTION_CHIPS:
-                this.widgetComponentRef.setInput('customUrl', retrieveCustomUrl);
+                this.widgetComponentRef.setInput('customUrl', this.customUrl);
                 break;
 
             case WIDGETS.CONTENT_TEASER:
@@ -855,8 +865,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 break;
 
             case WIDGETS.TOPICS_COLUMN_BROWSER:
-                // @TODO
-                //this.widgetComponentRef.setInput('customUrl', retrieveCustomUrl);
+                this.widgetComponentRef.setInput('customUrl', this.customUrl);
                 this.widgetComponentRef.setInput('height', this.height);
                 this.widgetComponentRef.setInput('sidebarEmbedding', this.sidebarEmbedding);
                 break;
@@ -911,4 +920,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     }
 
     protected readonly WIDGETS = WIDGETS;
+    private readonly supportedWidgetTypes: string[] = WIDGET_TYPE_OPTIONS.map(
+        (option) => option.value,
+    );
 }

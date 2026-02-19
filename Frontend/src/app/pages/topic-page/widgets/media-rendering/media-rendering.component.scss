@@ -1,4 +1,5 @@
-@use '../../../topic-page/topic-page-variables' as *;
+@use '../../../topic-page/topic-page-variables' as topicPageVars;
+@use 'mixins' as mixin;
 
 :host {
     // overwrite color button text color
@@ -20,16 +21,20 @@
         container-type: inline-size;
 
         &.selected {
-            border: 3px solid $primary;
+            border: 3px solid topicPageVars.$primary;
             border-radius: 0.5rem;
         }
 
         .render-title {
             margin-bottom: 0;
             text-align: center;
+            font-weight: topicPageVars.$font-weight-bold;
+            font-size: topicPageVars.$font-size-large;
+            @include mixin.limitLineCount(1, 1.4);
         }
 
         .render-buttons {
+            margin-bottom: 8px;
             display: flex;
             justify-content: center;
             gap: 1rem;

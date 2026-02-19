@@ -28,7 +28,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { TranslateModule } from '@ngx-translate/core';
 import {
-    DEFAULT,
     MdsAiConfig,
     MdsDefinition,
     MdsService,
@@ -57,6 +56,8 @@ import { AiHelperService } from '../../shared/services/ai-helper.service';
 import { BapiConfig } from '../../shared/types/bapi-config';
 import { BapiConfigObject } from '../../shared/types/bapi-config-object';
 import { StandardSelectInput } from '../../shared/types/standard-select-input';
+import { WidgetComponentInterface } from '../generic-widget/generic-widget.component';
+import { GenericWidgetGlobalService } from '../generic-widget/generic-widget-global.service';
 
 @Component({
     selector: 'es-ai-text-widget',
@@ -79,7 +80,7 @@ import { StandardSelectInput } from '../../shared/types/standard-select-input';
     templateUrl: './ai-text-widget.component.html',
     styleUrls: ['./ai-text-widget.component.scss'],
 })
-export class AiTextWidgetComponent {
+export class AiTextWidgetComponent implements WidgetComponentInterface {
     // INPUTS + OUTPUTS
     @Input() contextNodeId: string;
     @Input() defaultNodeId: string = '';
@@ -115,6 +116,7 @@ export class AiTextWidgetComponent {
     constructor(
         private aiHelperService: AiHelperService,
         private globalWidgetConfigService: GlobalWidgetConfigService,
+        private genericWidgetGlobalService: GenericWidgetGlobalService,
         private mdsService: MdsService,
         private toast: Toast,
     ) {
@@ -229,7 +231,7 @@ export class AiTextWidgetComponent {
     }
 
     /**
-     * Reacts to wlo-editable-text (searchResultsUpdated) event and emit it.
+     * Reacts to es-editable-text (searchResultsUpdated) event and emit it.
      *
      * @param count
      */
@@ -418,7 +420,9 @@ export class AiTextWidgetComponent {
             this.globalWidgetConfigService.defaultAiTextWidgetConfigId,
         );
         const mds: MdsDefinition = await firstValueFrom(
-            this.mdsService.getMetadataSet({ metadataSet: DEFAULT }),
+            this.mdsService.getMetadataSet({
+                metadataSet: this.genericWidgetGlobalService.getDefaultMds(),
+            }),
         );
         const mdsAIConfig: MdsAiConfig = mds.aiConfigs.find(
             (config: MdsAiConfig) => config.id === aiConfigId,

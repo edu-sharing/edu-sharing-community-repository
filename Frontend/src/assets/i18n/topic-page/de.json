@@ -186,6 +186,7 @@
       },
       "SHARE_OPTIONS": {
         "COPY_LINK": "Link kopieren",
+        "COPY_LINK_TO_CONTENT": "Link zum Inhalt kopieren",
         "WRITE_MAIL": {
           "HEADING": "Mail schreiben",
           "SUBJECT_SHARED_CONTENT": "Geteilter Inhalt: {{title}}",
@@ -364,7 +365,8 @@
         "MEDIA_RENDERING": "Medien-Widget",
         "TEXT_WIDGET": "Text-Widget",
         "IFRAME_WIDGET": "iFrame-Widget",
-        "AI_TEXT_WIDGET": "KI-Widget"
+        "AI_TEXT_WIDGET": "KI-Widget",
+        "undefined": "Anwendungsspezifischer Typ"
       },
       "QR_CODE": {
         "HEADING": "Link zum Inhalt",

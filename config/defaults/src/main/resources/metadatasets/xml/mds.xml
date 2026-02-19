@@ -1272,6 +1272,15 @@
       </columns>
     </list>
     <list>
+      <id>genericWidgetTable</id>
+      <columns>
+        <column>cclom:title</column>
+        <column>cm:modified</column>
+        <column>ccm:commonlicense_key</column>
+        <column>ccm:replicationsource</column>
+      </columns>
+    </list>
+    <list>
       <id>searchCollections</id>
       <columns>
         <column>COLLECTION.title</column>
@@ -1325,6 +1334,30 @@
       ]
       }}
     </basequery>
+    <query join="AND" id="saved_search">
+      <basequery>
+        {"bool":
+        {"must":[
+        {"match":{"nodeRef.storeRef.protocol":"workspace"}},
+        {"match":{"type":"ccm:saved_search"}}
+        ]}
+        }
+      </basequery>
+      <property name="ngsearchword">
+        <statement>
+          {"bool": {
+          "should":[
+          {"wildcard":{"nodeRef.id": {"value": "${value}", "case_insensitive": true}}},
+          {"wildcard":{"properties.cm:name.keyword": {"value": "*${value}*", "case_insensitive": true}}},
+          {"wildcard":{"properties.cm:title.keyword": {"value": "*${value}*", "case_insensitive": true}}}
+          ],
+          "minimum_should_match": 1
+          }}
+        </statement>
+        <multiple>true</multiple>
+        <multiplejoin>AND</multiplejoin>
+      </property>
+    </query>
     <query join="AND" id="collections_scope_my">
       <basequery>
         {"bool":

@@ -5,24 +5,37 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.Data;
 import org.alfresco.error.AlfrescoRuntimeException;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.EduSharingLockException;
 import org.edu_sharing.restservices.*;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.usage.Usage2Service;
 import org.edu_sharing.service.usage.UsageException;
+import org.edu_sharing.webservices.util.AuthenticationUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.Map;
 
 @Data
 public class ErrorResponse {
+    /**
+     * used in the lightbend config
+     */
+    private enum DisplayLevel {
+        minimal,
+        details,
+        full,
+    }
     public enum ErrorResponseLogging {
         strict, // default, log every error, including stacktrace
         relaxed, // stacktrace only for unknown errors, otherwise just one-line logging (recommended for get endpoints)
@@ -163,23 +176,24 @@ public class ErrorResponse {
     }
 
     public ErrorResponse(Throwable t) {
-        Level level = logger.getEffectiveLevel();
         if (t instanceof DAOException) {
             setDetails(((DAOException) t).getDetails());
         }
 
         setError(t.getClass().getName());
-        if (level.toInt() <= Level.INFO_INT)
+        DisplayLevel level = DisplayLevel.valueOf(LightbendConfigLoader.get().getString("security.logging.displayLevel." + (AuthorityServiceHelper.isAdmin() ? "admin" : "default")));
+        if(Arrays.asList(DisplayLevel.details, DisplayLevel.full).contains(level)) {
             setMessage(t.getMessage());
-        else
-            setMessage("InvalidLogLevel: Log Level must be at least INFO for showing error messages");
+        } else {
+            setMessage("Details hidden: You can configure the output via security.logging.displayLevel");
+        }
 
         setLogLevel(level.toString());
         StringWriter writer = new StringWriter();
         PrintWriter printWriter = new PrintWriter(writer);
         t.printStackTrace(printWriter);
         printWriter.flush();
-        if (level.toInt() <= Level.DEBUG_INT) {
+        if (level == DisplayLevel.full) {
             if (Context.getCurrentInstance() != null) {
                 setStacktrace(Context.getCurrentInstance().getB3().toString() + "\n" + writer);
             } else {

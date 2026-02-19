@@ -2,13 +2,17 @@ import { CommonModule } from '@angular/common';
 import {
     AfterViewInit,
     Component,
+    computed,
     CUSTOM_ELEMENTS_SCHEMA,
     EventEmitter,
     input,
     Input,
     InputSignal,
+    model,
+    ModelSignal,
     OnDestroy,
     Output,
+    Signal,
     signal,
     ViewEncapsulation,
     WritableSignal,
@@ -35,6 +39,7 @@ import { MediaRenderingConfig } from '../../shared/types/widget-config/media-ren
 import { WidgetConfigurationButtonsComponent } from '../shared/widget-configuration-buttons/widget-configuration-buttons.component';
 import { ConfigurationOption } from '../../shared/types/configuration-option';
 import { StatisticNode } from '../../shared/types/statistic-node';
+import { WidgetComponentInterface } from '../generic-widget/generic-widget.component';
 
 @Component({
     selector: 'es-media-rendering',
@@ -57,7 +62,7 @@ import { StatisticNode } from '../../shared/types/statistic-node';
     templateUrl: './media-rendering.component.html',
     styleUrls: ['./media-rendering.component.scss'],
 })
-export class MediaRenderingComponent implements AfterViewInit, OnDestroy {
+export class MediaRenderingComponent implements AfterViewInit, OnDestroy, WidgetComponentInterface {
     // INPUTS + OUTPUTS
     @Input() contextNodeId: string;
     editMode: InputSignal<boolean> = input<boolean>(false);
@@ -86,7 +91,7 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy {
 
     private destroy$ = new Subject<void>();
     initialized: WritableSignal<boolean> = signal(false);
-    layout: MediaRenderingDisplayType = MediaRenderingDisplayType.Preview;
+    layout: ModelSignal<MediaRenderingDisplayType> = model(MediaRenderingDisplayType.Preview);
     layoutOptions: LayoutOption[] = [
         {
             ariaLabel: 'PREVIEW_ARIA',
@@ -107,6 +112,12 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy {
             viewValue: 'PREVIEW_TITLE_BUTTONS',
         },
     ];
+    layoutWithTitle: Signal<boolean> = computed((): boolean =>
+        [
+            this.MediaRenderingLayout.TitlePreview,
+            this.MediaRenderingLayout.TitlePreviewButtons,
+        ].includes(this.layout()),
+    );
     selectedNode: Node;
     selectedNodeTitle: WritableSignal<string> = signal('');
     sidebarOpen: WritableSignal<boolean> = signal(false);
@@ -239,7 +250,7 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy {
      */
     retrieveWidgetConfig(): MediaRenderingConfig {
         let widgetConfig: MediaRenderingConfig = {
-            mediaRenderingLayout: this.layout,
+            mediaRenderingLayout: this.layout(),
         };
         if (this.selectedNode?.ref.id) {
             widgetConfig.selectedNodeId = this.selectedNode.ref.id;
@@ -255,7 +266,7 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy {
      */
     async setWidgetValues(config: MediaRenderingConfig): Promise<void> {
         if (config.mediaRenderingLayout !== undefined) {
-            this.layout = config.mediaRenderingLayout;
+            this.layout.set(config.mediaRenderingLayout);
         }
         if (config.selectedNodeId) {
             this.selectedNode = await this.topicPageHelperService.getNode(config.selectedNodeId);
@@ -279,7 +290,7 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy {
             [
                 this.MediaRenderingLayout.TitlePreview,
                 this.MediaRenderingLayout.TitlePreviewButtons,
-            ].includes(this.layout)
+            ].includes(this.layout())
         ) {
             outputTitle = this.highlightSearch.transform(outputTitle, this.searchInput);
         }

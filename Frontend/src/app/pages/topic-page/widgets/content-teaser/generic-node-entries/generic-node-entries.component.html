@@ -6,7 +6,7 @@
   [class.single-view]="layout === GenericNodeEntriesDisplayType.SingleView"
   [class.split-view]="layout === GenericNodeEntriesDisplayType.SplitView"
   [class.view-mode]="!hasEditRightsAndIsEditMode"
-  [columns]="layout !== GenericNodeEntriesDisplayType.SplitView ? columns : columnsExtension"
+  [columns]="layout !== GenericNodeEntriesDisplayType.ListView ? columns : tableColumns"
   [dataSource]="dataSource"
   [disableInfiniteScroll]="true"
   [displayType]="nodeEntriesDisplayType()"
@@ -26,33 +26,22 @@
   </ng-template>
 </es-node-entries-wrapper>
 
-<!-- custom card for proposing content -->
-<ng-template #cardSuggest>
-  <es-custom-propose-content-card [searchText]="searchText"></es-custom-propose-content-card>
+<ng-template
+  #cardSuggest
+  *ngIf="genericWidgetGlobalService.getCustomCards(CustomCardRole.SuggestContent)?.[0]?.templateRef as templateRef"
+>
+  <ng-container
+    *ngTemplateOutlet="
+      templateRef;
+      context: {
+        searchText: searchText
+      }
+    "
+  ></ng-container>
 </ng-template>
-
 <!-- metadata type templates -->
 <ng-template #specialType>
-  <ng-container *ngIf="layout === GenericNodeEntriesDisplayType.MapView">
-    <!-- note: the datasource cannot be used here, as the es-node-entries-wrapper is not initialized -->
-    <!--<es-map-node-card
-      [buckets]="mapBuckets()"
-      [criteria]="criteria"
-      [dataSource]="dataSource"
-      [isLoading]="mapDataLoading()"
-      [nodes]="mapNodes()"
-      [selectedNode]="selectedNode()"
-      [zoomLevel]="mapZoomLevel()"
-      [zoomLimit]="mapZoomLimit()"
-      (boundsUpdated)="updateMapBounds($event)"
-      (facetsUpdated)="updateMapFacets($event)"
-      (fetchData)="fetchData($event)"
-      (itemClicked)="onItemClicked($event)"
-      (mapValuesChanged)="updateMapValues($event)"
-      (resetBounds)="resetMapBounds()"
-      (zoomUpdated)="updateMapZoom($event)"
-    ></es-map-node-card>
-    -->
-    TODO
+  <ng-container *ngIf="genericWidgetGlobalService.hasCustomDisplayType(layout)">
+    <div #customType></div>
   </ng-container>
 </ng-template>

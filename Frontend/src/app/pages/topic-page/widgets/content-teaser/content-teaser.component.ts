@@ -42,6 +42,8 @@ import { ScrollHelperService } from '../../shared/services/scroll-helper.service
 import { DEFAULT_COLLECTION_ID_PROP } from '../../shared/types/custom-definitions';
 import { ApplyFilterEvent } from '../../shared/types/apply-filter-event';
 import { LayoutOption } from '../../shared/types/layout-option';
+import { WidgetComponentInterface } from '../generic-widget/generic-widget.component';
+import { GenericWidgetGlobalService } from '../generic-widget/generic-widget-global.service';
 
 @Component({
     selector: 'es-content-teaser',
@@ -68,7 +70,7 @@ import { LayoutOption } from '../../shared/types/layout-option';
     templateUrl: './content-teaser.component.html',
     styleUrls: ['./content-teaser.component.scss'],
 })
-export class ContentTeaserComponent implements AfterViewInit, OnDestroy {
+export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetComponentInterface {
     // INPUTS + OUTPUTS
     @Input() contextNodeId!: string;
     @Input() defaultNodeId: string = '';
@@ -182,12 +184,6 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy {
             value: GenericNodeEntriesDisplayType.ListView,
             viewValue: 'LIST_VIEW',
         },
-        {
-            ariaLabel: 'MAP_VIEW_ARIA',
-            icon: 'svg-view_map',
-            value: GenericNodeEntriesDisplayType.MapView,
-            viewValue: 'MAP_VIEW',
-        },
     ];
     private propertyFilters: WritableSignal<Values> = signal({});
     queryId: Signal<string> = computed((): string =>
@@ -201,11 +197,25 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy {
     private windowRef: Window | null = null;
 
     constructor(
+        private genericWidgetGlobalService: GenericWidgetGlobalService,
         private scrollHelperService: ScrollHelperService,
         private searchHelperService: SearchHelperService,
         private topicPageHelperService: TopicPageHelperService,
         private translate: TranslateService,
-    ) {}
+    ) {
+        if (
+            this.genericWidgetGlobalService.hasCustomDisplayType(
+                GenericNodeEntriesDisplayType.MapView,
+            )
+        ) {
+            this.layoutOptions.push({
+                ariaLabel: 'MAP_VIEW_ARIA',
+                icon: 'svg-view_map',
+                value: GenericNodeEntriesDisplayType.MapView,
+                viewValue: 'MAP_VIEW',
+            });
+        }
+    }
 
     /**
      * Initializes event listener (the APPLY_FILTER event is returned by the editorial desk).

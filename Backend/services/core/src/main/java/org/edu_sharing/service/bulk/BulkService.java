@@ -12,6 +12,8 @@ public interface BulkService {
 
     NodeRef getPrimaryFolder();
 
+    NodeRef getGroupFolder(String name);
+
     NodeRef sync(String group, List<String> match, List<String> groupBy, String type, List<String> aspects, Map<String, String[]> properties, boolean forceUpdate);
 
     List<NodeRef> list(Map<String, String[]> properties) throws Exception;

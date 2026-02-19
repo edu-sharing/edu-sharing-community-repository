@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AuthenticationService, DEFAULT, UserService } from 'ngx-edu-sharing-api';
+import { UserService } from 'ngx-edu-sharing-api';
 import {
     ChatCompletionResult,
     EduSharingLlmService,
@@ -10,16 +10,17 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { retrieveMdsConfig } from '../utils/ai-util';
 import { GlobalWidgetConfigService } from './global-widget-config.service';
+import { GenericWidgetGlobalService } from '../../widgets/generic-widget/generic-widget-global.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class AiHelperService {
     constructor(
-        private auth: AuthenticationService,
         private userService: UserService,
         private eduSharingLlmService: EduSharingLlmService,
         private globalWidgetConfigService: GlobalWidgetConfigService,
+        private genericWidgetGlobalService: GenericWidgetGlobalService,
     ) {}
 
     /**
@@ -52,7 +53,7 @@ export class AiHelperService {
                         config,
                     ],
                     contextNodeId,
-                    metadataSet: DEFAULT,
+                    metadataSet: this.genericWidgetGlobalService.getDefaultMds(),
                     user,
                     variables,
                 },
@@ -84,7 +85,7 @@ export class AiHelperService {
                         retrieveMdsConfig(widgetNodeId),
                     ],
                     contextNodeId,
-                    metadataSet: DEFAULT,
+                    metadataSet: this.genericWidgetGlobalService.getDefaultMds(),
                     user,
                     variables,
                 },
@@ -119,7 +120,7 @@ export class AiHelperService {
                         ),
                     ],
                     contextNodeId,
-                    metadataSet: DEFAULT,
+                    metadataSet: this.genericWidgetGlobalService.getDefaultMds(),
                     user,
                     variables,
                 },

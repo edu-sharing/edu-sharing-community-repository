@@ -27,6 +27,7 @@ import { MatButton } from '@angular/material/button';
 import { UIHelper } from '../../../../../core-ui-module/ui-helper';
 import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
 import { Toast } from '../../../../../services/toast';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 @Component({
     selector: 'es-mds-editor-widget-tree',
@@ -428,5 +429,11 @@ export class MdsEditorWidgetTreeComponent
                     ),
                 ),
             );
+    }
+
+    reorderChip(event: CdkDragDrop<any>) {
+        const currentValue = [...this.chipsControl.value];
+        moveItemInArray(currentValue, event.previousIndex, event.currentIndex);
+        this.chipsControl.setValue(currentValue);
     }
 }

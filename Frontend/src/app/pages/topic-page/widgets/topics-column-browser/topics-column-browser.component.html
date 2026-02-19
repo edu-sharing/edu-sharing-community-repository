@@ -18,17 +18,17 @@
             >
               <span matListItemTitle class="list-item-title-container">
                 <a
-                  *ngIf="customUrl && customUrl(node.data); else nodeLink"
+                  *ngIf="customUrl && customUrl(node.data); else defaultNodeLink"
                   [href]="customUrl(node.data)"
                   (click)="$event.stopPropagation()"
                   class="item-link cursor-pointer"
                 >
                   {{ node.data | nodeTitle }}
                 </a>
-                <ng-template #nodeLink>
-                  <es-node-url [node]="node.data" [mode]="'link'">{{
-                    node.data | nodeTitle
-                  }}</es-node-url>
+                <ng-template #defaultNodeLink>
+                  <ng-container
+                    *ngTemplateOutlet="nodeLink; context: { node: node.data }"
+                  ></ng-container>
                 </ng-template>
                 <div
                   *ngIf="
@@ -93,17 +93,17 @@
                 tabindex="1"
               >
                 <a
-                  *ngIf="customUrl && customUrl(node.data); else nodeLink"
+                  *ngIf="customUrl && customUrl(node.data); else defaultNodeLink"
                   [href]="customUrl(node.data)"
                   (click)="$event.stopPropagation()"
                   class="item-link cursor-pointer"
                 >
                   {{ node.data | nodeTitle }}
                 </a>
-                <ng-template #nodeLink>
-                  <es-node-url [node]="node.data" [mode]="'link'">{{
-                    node.data | nodeTitle
-                  }}</es-node-url>
+                <ng-template #defaultNodeLink>
+                  <ng-container
+                    *ngTemplateOutlet="nodeLink; context: { node: node.data }"
+                  ></ng-container>
                 </ng-template>
                 <div
                   *ngIf="
@@ -149,6 +149,11 @@
     (optionOneClicked)="embedWidget()"
   ></es-widget-configuration-buttons>
 </div>
+<ng-template #nodeLink let-node="node">
+  <es-node-url [node]="node" [mode]="'link'">
+    {{ node | nodeTitle }}
+  </es-node-url>
+</ng-template>
 <ng-template #loadingSpinner>
   <es-spinner></es-spinner>
 </ng-template>

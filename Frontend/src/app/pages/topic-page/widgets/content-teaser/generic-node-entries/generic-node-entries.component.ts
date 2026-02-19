@@ -1,5 +1,5 @@
+import { NgTemplateOutlet } from '@angular/common';
 import {
-    AfterViewInit,
     Component,
     ElementRef,
     EventEmitter,
@@ -12,13 +12,12 @@ import {
     SimpleChanges,
     TemplateRef,
     ViewChild,
+    ViewContainerRef,
     ViewEncapsulation,
     WritableSignal,
 } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TranslateService } from '@ngx-translate/core';
 import {
-    DEFAULT,
     HOME_REPOSITORY,
     MdsQueryCriteria,
     MdsService,
@@ -37,7 +36,6 @@ import {
     GridConfig,
     Helper,
     InteractionType,
-    ListItem,
     MdsHelperService,
     NodeDataSource,
     NodeEntriesDisplayType,
@@ -46,31 +44,40 @@ import {
     OptionItem,
     OptionsHelperDataService,
     Scope,
-    Values,
+    UIService,
 } from 'ngx-edu-sharing-ui';
 import { firstValueFrom, Subject } from 'rxjs';
-import { shareReplay, takeUntil } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
+import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { PreviewSidebarService } from '../../../../../features/preview-sidebar/preview-sidebar.service';
 import { OptionsHelperService } from '../../../shared/services/options-helper.service';
 import { TopicPageHelperService } from '../../../shared/services/topic-page-helper.service';
 import { GenericNodeEntriesDisplayType } from '../../../shared/types/generic-node-entries-display-type';
 import { StatisticNode } from '../../../shared/types/statistic-node';
-import { CustomProposeContentCardComponent } from './custom-propose-content-card/custom-propose-content-card.component';
-import { MapBucket } from '../../../shared/types/map-bucket';
-import {
-    DEFAULT_LOCATION_PROP,
-    DEFAULT_MAP_ZOOM_LIMIT,
-} from '../../../shared/types/custom-definitions';
+import { GenericWidgetGlobalService } from '../../generic-widget/generic-widget-global.service';
+
+export interface DisplayTypeComponentInterface {
+    // inputs
+    criteria: MdsQueryCriteria[];
+    selectedNode: Node;
+    // outputs
+    itemClicked: EventEmitter<Node>;
+    totalSearchResultCountChanged: EventEmitter<number>;
+    // methods
+    setDataSource(resetNecessary: boolean, skipCount?: number): Promise<void>;
+}
+export enum CustomCardRole {
+    /**
+     * card that should incentivize people to propose contents
+     * Is injected somewhere in the swimlane
+     */
+    SuggestContent,
+}
 
 @Component({
     selector: 'es-node-entries',
     encapsulation: ViewEncapsulation.Emulated,
-    imports: [
-        CustomProposeContentCardComponent,
-        EduSharingUiModule,
-        // MapNodeCardComponent,
-        MatTooltipModule,
-    ],
+    imports: [EduSharingUiModule, MatTooltipModule, NgTemplateOutlet],
     providers: [
         CheckTextOverflowDirective,
         NodePersonNamePipe,
@@ -80,7 +87,11 @@ import {
     templateUrl: './generic-node-entries.component.html',
     styleUrls: ['./generic-node-entries.component.scss'],
 })
-export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, OnDestroy, OnInit {
+export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit {
+    @ViewChild('customType', { read: ViewContainerRef, static: false })
+    customType!: ViewContainerRef;
+    @ViewChild('customType') customTypeElement!: ElementRef<HTMLElement>;
+
     private readonly CUSTOM_CARD_POSITION_INDEX: number = 6;
     private readonly DEFAULT_WIDTH: string = '314px';
     private readonly FULL_WIDTH: string = 'max(314px, 100% - 200px)';
@@ -103,12 +114,13 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
         layout: 'scroll',
     };
     private _hasEditRightsAndIsEditMode: boolean;
+    customTypeInstance: DisplayTypeComponentInterface;
     @Input() get hasEditRightsAndIsEditMode(): boolean {
         return this._hasEditRightsAndIsEditMode;
     }
     set hasEditRightsAndIsEditMode(val: boolean) {
         this._hasEditRightsAndIsEditMode = val;
-        // check, whether the selectedNodeIds do still exist in the view mode
+        // check whether the selectedNodeIds do still exist in the view mode
         if (!val && this.selectedNodeIds?.[0]) {
             const filteredNodes: Node[] = this.allRequestedNodes.filter(
                 (node: Node) => !this.blacklistedNodeIds.includes(node.ref.id),
@@ -158,6 +170,25 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
                 this.elementRef.nativeElement.style.setProperty('--cardWidth', this.DEFAULT_WIDTH);
                 break;
             default:
+                if (this.genericWidgetGlobalService.hasCustomDisplayType(val)) {
+                    void this.genericWidgetGlobalService
+                        .getCustomDisplayTypeComponent(val)
+                        .then((componentClass) => {
+                            // inject the component into the widget container
+                            this.customTypeInstance = this.uiService.injectAngularComponent(
+                                this.customType,
+                                componentClass,
+                                this.customTypeElement.nativeElement,
+                                {
+                                    selectedNode: this.selectedNode(),
+                                    criteria: this.criteria,
+                                } as unknown as Partial<DisplayTypeComponentInterface>,
+                                { replace: false },
+                            ).instance;
+                            // listen to outputs of custom type instance
+                            this.setupCustomTypeInstanceOutputs();
+                        });
+                }
         }
         // emit an event that the display type has been changed, in case it is not the initial change
         // TODO: use es-node-entries-wrappers displayTypeChanges event
@@ -171,8 +202,8 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
     }
     // load three rows of nodes at once on desktop (-1 due to propose card being added)
     @Input() maxItems: number = 11;
-    @Input() mds: string = DEFAULT;
-    @Input() queryId: string = 'ngsearch';
+    @Input() mds: string | null = null;
+    @Input() queryId: string = RestConstants.DEFAULT_QUERY_NAME;
     @Input() scrollGradientColor: string;
     @Input() searchText: string;
     @Output() blacklistChanged: EventEmitter<string> = new EventEmitter<string>();
@@ -187,37 +218,8 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
     @ViewChild('contentWrapper') nodeEntries: NodeEntriesWrapperComponent<Node>;
     // wlo-custom-propose-content-card
     @ViewChild('cardSuggest') cardSuggestRef: TemplateRef<unknown>;
-    // wlo-custom-attribute templates
-    @ViewChild('customTitleRef') customTitleRef: TemplateRef<unknown>;
-    @ViewChild('customLrtRef') customLrtRef: TemplateRef<unknown>;
-    @ViewChild('customTaxonidRef') customTaxonidRef: TemplateRef<unknown>;
-    @ViewChild('customEducationcontextRef') customEducationcontextRef: TemplateRef<unknown>;
-    @ViewChild('customAuthorRef') customAuthorRef: TemplateRef<unknown>;
-    @ViewChild('customSourceRef') customSourceRef: TemplateRef<unknown>;
 
-    // custom column fields (the order of the attributes in the view is used)
-    private readonly customTitleKey: string = 'virtual:custom_title';
-    private readonly customLrtKey: string = 'virtual:custom_lrt';
-    private readonly customTaxonidKey: string = 'virtual:custom_taxonid';
-    private readonly customEducationcontextKey: string = 'virtual:custom_educationalcontext';
-    private readonly customSourceKey: string = 'virtual:custom_source';
-    private readonly customAuthorKey: string = 'virtual:custom_author';
-
-    // custom column labels
     private readonly i18nPrefix: string = 'TOPIC_PAGE.WIDGET.CONTENT_TEASER.';
-    private readonly customTitleLabel: string = 'TITLE_LABEL';
-    private readonly customLrtLabel: string = 'LRT_LABEL';
-    private readonly customTaxonidLabel: string = 'TAXONID_LABEL';
-    private readonly customEducationcontextLabel: string = 'EDUCATIONAL_CONTEXT_LABEL';
-    private readonly customSourceLabel: string = 'SOURCE_LABEL';
-    private readonly customAuthorLabel: string = 'AUTHOR_LABEL';
-
-    // related property fields
-    readonly lrtPropertyKey: string = 'ccm:oeh_lrt_aggregated_DISPLAYNAME';
-    readonly taxonidPropertyKey: string = 'ccm:taxonid_DISPLAYNAME';
-    readonly educationcontextPropertyKey: string = 'ccm:educationalcontext_DISPLAYNAME';
-    readonly sourcePropertyKey: string = 'ccm:oeh_publisher_combined';
-    readonly authorPropertyKey: string = 'ccm:author_freetext';
 
     // criteria extension related fields
     private propertyToTaxonomiesMatching: Map<string, string[]> = new Map<string, string[]>([
@@ -237,26 +239,11 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
     private blacklistedClassName: string = 'blacklisted';
     private selectedClassName: string = 'selected';
     columns: ColumnType;
-    columnsExtension: ColumnType;
+    tableColumns: ColumnType;
     private customOptions: CustomOptions = {};
     dataSource: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
     private destroy$ = new Subject<void>();
-    // map-specific variables
-    facetLimit: number = 5;
-    facetMinCount: number = 1;
-    facetProperties: string[] = [];
-    // initialize the map with the bounds of Germany (LatLngBounds from leaflet)
-    // @TODO
-    //private mapBounds: LatLngBounds = DEFAULT_MAP_BOUNDS;
-    mapBuckets: WritableSignal<MapBucket[]> = signal(undefined);
-    mapDataLoading: WritableSignal<boolean> = signal(true);
-    mapNodes: WritableSignal<Node[]> = signal([]);
-    // the offset to trigger showing more details
-    private mapZoomOffset: number = 1;
-    mapZoomLevel: WritableSignal<number> = signal(6);
-    // a limit to avoid too large clusters
-    mapZoomLimit: WritableSignal<number> = signal(DEFAULT_MAP_ZOOM_LIMIT);
-    private mapValues: Values = {};
+
     nodeEntriesDisplayType: WritableSignal<NodeEntriesDisplayType> = signal(
         NodeEntriesDisplayType.Grid,
     );
@@ -271,21 +258,15 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
         return this.selectedNodeIds?.length > 0;
     }
 
-    /**
-     * Returns, whether the current layout is a map view.
-     */
-    private get isMapView(): boolean {
-        return this.layout === GenericNodeEntriesDisplayType.MapView;
-    }
-
     constructor(
         private elementRef: ElementRef,
-        private previewSidebarService: PreviewSidebarService,
-        private mdsService: MdsService,
+        public genericWidgetGlobalService: GenericWidgetGlobalService,
         private mdsHelperService: MdsHelperService,
+        private mdsService: MdsService,
+        private previewSidebarService: PreviewSidebarService,
         private searchService: SearchService,
         private topicPageHelperService: TopicPageHelperService,
-        private translate: TranslateService,
+        private uiService: UIService,
     ) {
         // subscribe to changes on the selected node
         this.previewSidebarService
@@ -300,6 +281,10 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
                 } else {
                     this.selectedNodeIds = [];
                     this.selectedNode.set(null);
+                }
+                // update the selected node if a custom type instance exists
+                if (this.customTypeInstance) {
+                    this.customTypeInstance.selectedNode = this.selectedNode();
                 }
                 let nodes: Node[] = this.allRequestedNodes;
                 if (!this.hasEditRightsAndIsEditMode) {
@@ -331,21 +316,17 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
     /**
      * Initializes the translations service, columns and custom options.
      */
-    ngOnInit(): void {
-        // specify columns and columnsExtension (for SplitView)
-        // TODO:
-        // ccm:taxonid vs. cclom:general_keyword
-        // ccm:educationalcontext vs. ccm:educationalintendedenduserrole
-        // cclom:rights_description -> Rechte
-        if (!this.columns) {
-            this.mdsService
-                .getMetadataSet({ repository: HOME_REPOSITORY, metadataSet: DEFAULT })
-                .subscribe((mds) => {
-                    this.columns = this.mdsHelperService.getColumns(mds, 'genericWidget');
-                    this.columnsExtension = {
-                        Default: [...this.columns.Default],
-                    };
-                });
+    async ngOnInit(): Promise<void> {
+        // specify columns
+        if (!this.columns || !this.tableColumns) {
+            const mds = await firstValueFrom(
+                this.mdsService.getMetadataSet({
+                    repository: HOME_REPOSITORY,
+                    metadataSet: this.genericWidgetGlobalService.getDefaultMds(),
+                }),
+            );
+            this.columns = this.mdsHelperService.getColumns(mds, 'genericWidget');
+            this.tableColumns = this.mdsHelperService.getColumns(mds, 'genericWidgetTable');
         }
         // specify addOptions
         if (!this.customOptions?.addOptions) {
@@ -468,6 +449,10 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
         const resetOnFirstLoad: boolean = Object.keys(changes).length > 1;
         const resetDueToCriteriaChange: boolean =
             changes.criteria?.previousValue !== changes.criteria?.currentValue;
+        // update the criteria if a custom type instance exists
+        if (this.customTypeInstance && changes.criteria) {
+            this.customTypeInstance.criteria = changes.criteria.currentValue;
+        }
         await this.setDataSource(resetOnFirstLoad || resetDueToCriteriaChange);
         // workaround for updating showAlways options: override customOptions variable
         this.customOptions = this.retrieveCustomOptions();
@@ -516,11 +501,6 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
     }
 
     /**
-     * Registers custom field renderings using the nodeEntriesGlobalService.
-     */
-    ngAfterViewInit(): void {}
-
-    /**
      * Performs a search query to set the data source.
      *
      * @param resetNecessary
@@ -530,13 +510,19 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
         resetNecessary: boolean = false,
         skipCount?: number,
     ): Promise<void> {
-        if (this.isMapView && !this.facetProperties?.length) {
-            return;
+        if (
+            this.layout === GenericNodeEntriesDisplayType.MapView &&
+            this.genericWidgetGlobalService.hasCustomDisplayType(this.layout)
+        ) {
+            if (this.customTypeInstance) {
+                return this.customTypeInstance.setDataSource(true, 0);
+            } else {
+                return Promise.resolve();
+            }
         }
         if (resetNecessary) {
             this.dataSource.reset();
             this.allRequestedNodes = [];
-            this.mapDataLoading.set(true);
         }
         let query: string = this.queryId;
         // create a deep copy of criteria, as we will modify (and later might reset) it
@@ -544,42 +530,6 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
             await this.extendCriteria(this.criteria),
         );
         // for the map view, overwrite the criteria to search for nodes with location
-        if (this.isMapView) {
-            this.maxItems = 100;
-            query = 'ngsearch';
-            Object.keys(this.mapValues).forEach((key: string): void => {
-                const existingCriteria = criteria.find((c: MdsQueryCriteria) => c.property === key);
-                // merge both criteria and mapValues
-                if (existingCriteria) {
-                    existingCriteria.values = [
-                        ...new Set([...existingCriteria.values, ...this.mapValues[key]]),
-                    ];
-                }
-                // push map criteria if values are selected
-                else if (this.mapValues[key].length) {
-                    criteria.push({
-                        property: key,
-                        values: this.mapValues[key],
-                    });
-                }
-            });
-            // convert the bounds into the following format:
-            // ['minLat', 'minLon', 'maxLat', 'maxLon']
-            // e.g., ['47.3024876979', '5.98865807458', '54.983104153', '15.0169958839']
-            // @TODO
-            /*
-            const boundingBox: [string, string, string, string] = [
-                this.mapBounds.getSouth().toString(),
-                this.mapBounds.getWest().toString(),
-                this.mapBounds.getNorth().toString(),
-                this.mapBounds.getEast().toString(),
-            ];
-            criteria.push({
-                property: DEFAULT_LOCATION_PROP,
-                values: boundingBox,
-            });
-             */
-        }
         // note: resolveCollections is set to true to be consistent with the editorial desk
         //       for the map view, set it to false
         const request: SearchRequestParams = {
@@ -589,40 +539,19 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
             skipCount: skipCount ?? 0,
             propertyFilter: [PROPERTY_FILTER_ALL],
             contentType: 'ALL',
-            metadataset: this.mds,
+            metadataset: this.mds || this.genericWidgetGlobalService.getDefaultMds(),
             sortProperties: ['cm:created'],
             sortAscending: [true],
             body: {
                 criteria,
-                resolveCollections: this.isMapView,
+                resolveCollections: false,
             },
         };
-        if (this.isMapView) {
-            request.body.facetLimit = this.facetLimit;
-            request.body.facets = [
-                {
-                    property: DEFAULT_LOCATION_PROP,
-                    args: {
-                        precision: this.mapZoomLevel() + this.mapZoomOffset,
-                    },
-                },
-            ];
-            request.body.facetMinCount = this.facetMinCount;
-        }
         const searchResult: SearchResults = await firstValueFrom(
             this.searchService.search(request),
         );
 
         this.totalSearchResultCountChanged.emit(searchResult.pagination.total);
-
-        if (this.isMapView) {
-            this.mapNodes.set(searchResult.nodes);
-            const mapBuckets: MapBucket[] =
-                searchResult.facets?.find((f) => f.property === DEFAULT_LOCATION_PROP)?.values ||
-                [];
-            this.mapBuckets.set(mapBuckets);
-            this.mapDataLoading.set(false);
-        }
 
         // avoid pushing potential duplicates
         // TODO: This duplicate check is currently necessary, as the same items might be requested again (and again)
@@ -829,11 +758,13 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
      * @param positionToAdd
      */
     private injectCustomCards(positionToAdd: number): void {
-        // the position should either be the seventh or the last element, if less than seven elements exist
-        if (positionToAdd > this.CUSTOM_CARD_POSITION_INDEX) {
-            positionToAdd = this.CUSTOM_CARD_POSITION_INDEX;
+        if (this.genericWidgetGlobalService.getCustomCards(CustomCardRole.SuggestContent)?.length) {
+            // the position should either be the seventh or the last element, if less than seven elements exist
+            if (positionToAdd > this.CUSTOM_CARD_POSITION_INDEX) {
+                positionToAdd = this.CUSTOM_CARD_POSITION_INDEX;
+            }
+            this.dataSource.getData().splice(positionToAdd, 0, this.cardSuggestRef);
         }
-        this.dataSource.getData().splice(positionToAdd, 0, this.cardSuggestRef);
     }
 
     /**
@@ -922,7 +853,7 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
         // in this case, 100 items are loaded
         if (skipCount === 0 && totalCount > this.maxItems) {
             // TODO: remove, if implemented properly
-            if (this.isMapView) {
+            if (this.customTypeInstance) {
                 return;
             }
             const request: SearchRequestParams = {
@@ -932,7 +863,7 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
                 skipCount: 0,
                 propertyFilter: [PROPERTY_FILTER_ALL],
                 contentType: 'ALL',
-                metadataset: this.mds,
+                metadataset: this.mds || this.genericWidgetGlobalService.getDefaultMds(),
                 sortProperties: ['cm:created'],
                 sortAscending: [true],
                 body: {
@@ -940,10 +871,6 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
                     resolveCollections: this.layout !== GenericNodeEntriesDisplayType.MapView,
                 },
             };
-            if (this.isMapView) {
-                request.body.facetLimit = this.facetLimit;
-                request.body.facetMinCount = this.facetMinCount;
-            }
             const searchResult: SearchResults = await firstValueFrom(
                 this.searchService.search(request),
             );
@@ -989,56 +916,6 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
     }
 
     /**
-     * @TODO
-     * Updates the bounds of the map and sets the data source again.
-     */
-    /*
-    updateMapBounds(bounds: LatLngBounds): void {
-        this.mapBounds = bounds;
-        void this.setDataSource(true);
-    }
-     */
-
-    /**
-     * @TODO
-     * Resets the map bounds to the default and sets the data source again.
-     */
-    /*
-    resetMapBounds(): void {
-        this.updateMapBounds(DEFAULT_MAP_BOUNDS);
-    }
-     */
-
-    /**
-     * Updates the facet properties and observes those via the search service.
-     */
-    updateMapFacets(facets: string[]): void {
-        // ensure to be only executed once and with valid facets
-        if (!this.facetProperties.length && facets?.length) {
-            this.facetProperties = facets;
-            this.searchService
-                .observeFacets(Object.values(this.facetProperties), { includeActiveFilters: true })
-                .pipe(shareReplay(1), takeUntil(this.destroy$))
-                .subscribe();
-        }
-    }
-
-    /**
-     * Updates the map values and sets the data source again.
-     */
-    updateMapValues(values: Values): void {
-        this.mapValues = values;
-        void this.setDataSource(true);
-    }
-
-    /**
-     * Updates the map zoom.
-     */
-    updateMapZoom(zoomLevel: number): void {
-        this.mapZoomLevel.set(zoomLevel);
-    }
-
-    /**
      * Pass through the item clicked event.
      *
      * @param node
@@ -1055,6 +932,22 @@ export class GenericNodeEntriesComponent implements AfterViewInit, OnChanges, On
         this.displayTypeChanged.emit(true);
     }
 
+    /**
+     * Registers actions that should be executed if a specific output is called.
+     */
+    private setupCustomTypeInstanceOutputs(): void {
+        if (!this.customTypeInstance) {
+            return;
+        }
+        this.customTypeInstance.totalSearchResultCountChanged
+            ?.pipe(takeUntil(this.destroy$))
+            .subscribe((count: number) => this.totalSearchResultCountChanged.emit(count));
+        this.customTypeInstance.itemClicked
+            ?.pipe(takeUntil(this.destroy$))
+            .subscribe((node: Node) => this.onItemClicked(node));
+    }
+
+    protected readonly CustomCardRole = CustomCardRole;
     protected readonly GenericNodeEntriesDisplayType = GenericNodeEntriesDisplayType;
     protected readonly InteractionType = InteractionType;
     protected readonly Scope = Scope;
