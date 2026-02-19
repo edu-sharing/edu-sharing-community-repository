@@ -36,9 +36,7 @@ public class ActionObserver {
 
 	Logger logger = Logger.getLogger(ActionObserver.class);
 
-	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-	NodeService nodeservice = serviceRegistry.getNodeService();
+	NodeService nodeservice = (NodeService) AlfAppContextGate.getApplicationContext().getBean("alfrescoDefaultDbNodeService");
 
 	public static String ACTION_OBSERVER_ADD_DATE = "action-observer-add-date";
 
