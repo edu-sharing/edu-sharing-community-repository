@@ -73,7 +73,6 @@
     "core-js": "^3.6.4",
     "edu-sharing-extension-dependencies": "file:src/app/extension",
     "jquery": "^3.7.1",
-    "jsonpath": "^1.1.1",
     "lodash-es": "^4.17.21",
     "marked": "^17.0.1",
     "material-design-icons": "^3.0.1",
@@ -160,7 +159,8 @@
     "typescript": "~5.8.3"
   },
   "overrides": {
-    "pacote": "~21.0.4"
+    "pacote": "~21.0.4",
+    "minimatch": "~10.2.2"
   },
   "lint-staged": {
     "*.{js,css,md,ts,html,scss}": "prettier --write"
