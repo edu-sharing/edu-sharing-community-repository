@@ -285,6 +285,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
             if ((reader != null) && (reader.getContentData() != null)) contentSize = reader.getContentData().getSize();
             String mimetype = null;
             if (reader != null) mimetype = reader.getMimetype();
+            LockStatus lockStatus = lockService.getLockStatus(nodeRef);
             logger.debug(" reader.getContentData().getSize():" + contentSize + " newContent:" + newContent + " LockStatus:" + lockStatus + " mimetype:" + mimetype);
 
             if (reader != null) {
@@ -362,7 +363,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
                 return null;
             });
 
-            LockStatus lockStatus = lockService.getLockStatus(nodeRef);
+
             logger.debug("lockStatus:" + lockStatus);
             // new content seems to be false even when the binary has new data, so we trigger the preview
             if (/*newContent */
