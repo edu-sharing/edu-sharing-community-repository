@@ -1,5 +1,6 @@
 package org.edu_sharing.repository.server.tools;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -16,6 +17,7 @@ import org.alfresco.service.cmr.action.ActionStatus;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.springframework.context.ApplicationContext;
 
@@ -40,7 +42,6 @@ public class ActionObserver {
 
 	public static String ACTION_OBSERVER_ADD_DATE = "action-observer-add-date";
 
-	public static int ACTION_OBSERVER_TIMEOUT_HOURS = 5;
 
 	private ActionObserver() {
 
@@ -110,6 +111,9 @@ public class ActionObserver {
 
 	public synchronized void removeInactiveActions() {
 
+        String timeout = LightbendConfigLoader.get().getString("repository.transformer.preview.actionTimeout");
+        long timeoutInHours = Duration.parse(timeout).toHours();
+
 		RunAsWork<Void> runAs = new RunAsWork<Void>() {
 			@Override
 			public Void doWork() throws Exception {
@@ -148,7 +152,7 @@ public class ActionObserver {
 								if (addDate != null) {
 									long hours = TimeUnit.HOURS.convert(new Date().getTime() - addDate.getTime(),
 											TimeUnit.MILLISECONDS);
-									if (hours > ACTION_OBSERVER_TIMEOUT_HOURS) {
+									if (hours > timeoutInHours) {
 										actionTimedOut = true;
 										logger.info("action timed out");
 									}
