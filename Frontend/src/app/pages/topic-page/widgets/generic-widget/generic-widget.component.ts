@@ -30,9 +30,14 @@ import { ChatCompletionResult, NodeConfig } from 'ngx-edu-sharing-b-api';
 import { UIService } from 'ngx-edu-sharing-ui';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-import { ConfigureWidgetEmbeddingDialogComponent } from './configure-widget-embedding-dialog/configure-widget-embedding-dialog.component';
-import { WidgetHeaderComponent } from './generic-widget-header/generic-widget-header.component';
-import { WidgetConfig } from '../../shared/types/widget-config/widget-config';
+import { Closable } from '../../../../features/dialogs/card-dialog/card-dialog-config';
+import { CardDialogRef } from '../../../../features/dialogs/card-dialog/card-dialog-ref';
+import { DialogsService } from '../../../../features/dialogs/dialogs.service';
+import { SharedModule } from '../../../../shared/shared.module';
+import { Toast, ToastType } from '../../../../services/toast';
+import { AiHelperService } from '../../shared/services/ai-helper.service';
+import { GlobalWidgetConfigService } from '../../shared/services/global-widget-config.service';
+import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
 import { BapiConfigObject } from '../../shared/types/bapi-config-object';
 import { ConfigurationOption } from '../../shared/types/configuration-option';
 import {
@@ -41,31 +46,26 @@ import {
     WIDGET_TYPE_OPTIONS,
     WIDGETS,
 } from '../../shared/types/custom-definitions';
-import { SwimlaneBackgroundShape } from '../../shared/types/swimlane-background-shape';
-import { StatisticNode } from '../../shared/types/statistic-node';
-import { CardDialogRef } from '../../../../features/dialogs/card-dialog/card-dialog-ref';
 import { PromptToTextMapping } from '../../shared/types/prompt-to-text-mapping';
-import { SharedModule } from '../../../../shared/shared.module';
-import { AiHelperService } from '../../shared/services/ai-helper.service';
-import { DialogsService } from '../../../../features/dialogs/dialogs.service';
-import { GlobalWidgetConfigService } from '../../shared/services/global-widget-config.service';
-import { Toast, ToastType } from '../../../../services/toast';
+import { StatisticNode } from '../../shared/types/statistic-node';
+import { SwimlaneBackgroundShape } from '../../shared/types/swimlane-background-shape';
+import { BaseWidgetConfig } from '../../shared/types/widget-config/base-widget-config';
+import { WidgetConfig } from '../../shared/types/widget-config/widget-config';
+import {
+    containsAiTags,
+    retrieveBapiConfigObject,
+    retrieveResultString,
+} from '../../shared/utils/ai-util';
+import { getNodeOrDefaultNodeId } from '../../shared/utils/node-util';
 import {
     convertNodeRefIntoNodeId,
     retrieveAiConfigFromNode,
     retrievePromptFromAiConfig,
     retrieveWidgetConfigFromNode,
 } from '../../shared/utils/template-util';
-import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
-import {
-    containsAiTags,
-    retrieveBapiConfigObject,
-    retrieveResultString,
-} from '../../shared/utils/ai-util';
-import { BaseWidgetConfig } from '../../shared/types/widget-config/base-widget-config';
-import { getNodeOrDefaultNodeId } from '../../shared/utils/node-util';
-import { Closable } from '../../../../features/dialogs/card-dialog/card-dialog-config';
+import { ConfigureWidgetEmbeddingDialogComponent } from './configure-widget-embedding-dialog/configure-widget-embedding-dialog.component';
 import { GenericWidgetGlobalService } from './generic-widget-global.service';
+import { WidgetHeaderComponent } from './generic-widget-header/generic-widget-header.component';
 
 export interface WidgetComponentInterface {
     // inputs
