@@ -179,7 +179,7 @@
         "FOLDER_STRUCTURE_CAPTION": "Struttura delle cartelle della directory..."
       },
       "SHARED_FOLDERS": {
-        "CAPTION": "File e cartelle dell'utente in directory condivise e di terze parti",
+        "CAPTION": "File e cartelle utente in directory condivise ed esterne",
         "FOLDERS_CAPTION": "Cartelle",
         "PRIVATE_FILES_CAPTION": "File senza o con licenze non aperte",
         "CC_FILES_CAPTION": "File con licenze aperte (CC)"
