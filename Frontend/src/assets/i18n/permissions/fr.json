@@ -179,7 +179,7 @@
         "FOLDER_STRUCTURE_CAPTION": "Structure des dossiers du répertoire..."
       },
       "SHARED_FOLDERS": {
-        "CAPTION": "Fichiers et dossiers de l'utilisateur-trice dans les répertoires partagés et tiers",
+        "CAPTION": "Fichiers et dossiers utilisateur dans les répertoires partagés et externes",
         "FOLDERS_CAPTION": "Dossiers",
         "PRIVATE_FILES_CAPTION": "Fichiers avec ou sans licence ouverte",
         "CC_FILES_CAPTION": "Fichiers sous licence ouverte (CC)"
