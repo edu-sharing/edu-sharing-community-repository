@@ -3,13 +3,17 @@ package org.edu_sharing.repository.server.tools;
 import lombok.Getter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionStatus;
+import org.alfresco.service.cmr.repository.ContentReader;
+import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.alfresco.model.ContentModel;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -38,8 +42,12 @@ public class ActionObserver {
 	Logger logger = Logger.getLogger(ActionObserver.class);
 
 	NodeService nodeservice = (NodeService) AlfAppContextGate.getApplicationContext().getBean("alfrescoDefaultDbNodeService");
+    ServiceRegistry serviceRegistry = (ServiceRegistry) AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
+    ContentService contentService = serviceRegistry.getContentService();
 
 	public static String ACTION_OBSERVER_ADD_DATE = "action-observer-add-date";
+
+    long shouldBeRemovedCheck = -1;
 
 
 	private ActionObserver() {
@@ -117,14 +125,9 @@ public class ActionObserver {
                     }
 
                     //observer removes action when node exists check fails. this can happen when transaction is not commited already.
-                    boolean checkExists = true;
-                    if(entry.getValue().stream().anyMatch(a -> (a.getParameterValue(ACTION_OBSERVER_ADD_DATE) != null
-                            && (new Date().getTime() - ((Date)a.getParameterValue(ACTION_OBSERVER_ADD_DATE)).getTime()) < 3600000))){
-                        checkExists = false;
-                    }
-
-                    if (checkExists && !nodeservice.exists(entry.getKey())) {
-                        logger.info(entry.getKey() + " was deleted will remove entry");
+                    boolean shouldBeRemoved = shouldBeRemoved(entry);
+                    if (shouldBeRemoved) {
+                        logger.info(entry.getKey() + " was deleted. will remove entry");
                         toRemove.add(entry.getKey());
                         continue;
                     }
@@ -172,5 +175,42 @@ public class ActionObserver {
 		AuthenticationUtil.runAsSystem(runAs);
 
 	}
+
+    private boolean shouldBeRemoved(Map.Entry<NodeRef, List<Action>> entry) {
+
+
+        Duration checkFirst = Duration.parse(LightbendConfigLoader.get().getString("repository.transformer.preview.checkFirst"));
+        Duration checkInterval = Duration.parse(LightbendConfigLoader.get().getString("repository.transformer.preview.checkInterval"));
+
+        boolean check = true;
+        if(entry.getValue().stream().anyMatch(a -> (a.getParameterValue(ACTION_OBSERVER_ADD_DATE) != null
+                && (new Date().getTime() - ((Date)a.getParameterValue(ACTION_OBSERVER_ADD_DATE)).getTime()) < checkFirst.toMillis()))){
+            check = false;
+        }
+
+
+        if(check && (shouldBeRemovedCheck > -1 && (System.currentTimeMillis() - shouldBeRemovedCheck) < checkInterval.toMillis())){
+            check  = false;
+        }
+
+        if (check){
+            logger.info("check if actions for node should be removed: " + entry.getKey());
+            boolean mustBeRemoved = false;
+            if (!nodeservice.exists(entry.getKey())) {
+                logger.info(entry.getKey() + " was deleted. must be removed.");
+                mustBeRemoved = true;
+            }
+            ContentReader reader = contentService.getReader(entry.getKey(), ContentModel.PROP_CONTENT);
+            if(reader == null || reader.getSize() < 1){
+                logger.info(entry.getKey() + " has no content. must be removed.");
+                mustBeRemoved = true;
+            }
+            shouldBeRemovedCheck = System.currentTimeMillis();
+            return mustBeRemoved;
+        }
+
+
+        return false;
+    }
 
 }
