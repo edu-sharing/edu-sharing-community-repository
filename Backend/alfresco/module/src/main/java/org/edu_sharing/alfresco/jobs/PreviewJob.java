@@ -28,6 +28,7 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.util.TempFileProvider;
 import org.apache.log4j.Logger;
 import org.apache.tika.io.TikaInputStream;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ActionObserver;
@@ -47,7 +48,6 @@ public class PreviewJob implements Job {
 	NodeService nodeService = serviceRegistry.getNodeService();
 	MimetypeService mimetypeService = serviceRegistry.getMimetypeService();
 
-	int maxRunning = 5;
 
 	Logger logger = Logger.getLogger(PreviewJob.class);
 	
@@ -55,62 +55,6 @@ public class PreviewJob implements Job {
 	 * 5 seconds latency before starting
 	 */
 	long latency = 5000;
-	
-	
-	private void extractVideoImageMetadata(NodeRef nodeRef, String runAs) {
-		RunAsWork<Void> videoImageMetadataExtractor = new RunAsWork<Void>() {
-			@Override
-			public Void doWork() throws Exception {
-				ContentReader reader = contentService.getReader(nodeRef, ContentModel.PROP_CONTENT);
-
-				try{
-					String notMatchesMimetype = mimetypeService.getMimetypeIfNotMatches(reader);
-					if(notMatchesMimetype != null){
-						logger.error("mimetype does not match, maybe file was renamed " + nodeRef +" guessed: "+ reader.getMimetype() +" heuristic: " + notMatchesMimetype);
-						return null;
-					}
-				}
-				catch (ContentIOException cioe)
-				{
-					logger.error(cioe);
-					return null;
-				}
-
-				// alfresco does not read image size for all images, so we try to fix it
-				// trying to load not the whole image but just the bounding rect, see also:
-				// http://stackoverflow.com/questions/1559253/java-imageio-getting-image-dimensions-without-reading-the-entire-file
-				if(reader.getMimetype().contains("image")){
-					InputStream is = null;
-					try{
-						is = reader.getContentInputStream();
-						try(ImageInputStream in = ImageIO.createImageInputStream(is)){
-						    final Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
-						    if (readers.hasNext()) {
-						        ImageReader imageReader = readers.next();
-						        try {
-						        	imageReader.setInput(in);
-						        	nodeService.setProperty(nodeRef, QName.createQName(CCConstants.EXIF_PROP_PIXELXDIMENSION), imageReader.getWidth(0));
-									nodeService.setProperty(nodeRef, QName.createQName(CCConstants.EXIF_PROP_PIXELYDIMENSION), imageReader.getHeight(0));
-						        } finally {
-						        	imageReader.dispose();
-						        }
-						    }
-						} 
-					}catch(Throwable t){
-					} finally {
-						if(is != null){
-							is.close();
-						}
-					}
-				}
-				return null;
-			}
-		};
-		
-		AuthenticationUtil.runAs(videoImageMetadataExtractor, runAs);
-	}
-
-
 	
 
 	@Override
@@ -195,6 +139,7 @@ public class PreviewJob implements Job {
 			}
 
 			logger.debug("found " + countRunning + " running/pending" + " countPending:" + countPending);
+            int maxRunning = LightbendConfigLoader.get().getInt("repository.transformer.preview.maxRunning");;
 
 			if (countRunning < maxRunning) {
 				int newRunning = 0;
@@ -251,7 +196,6 @@ public class PreviewJob implements Job {
 											) {
 										if(lockState.getLockType() == null) {
 											logger.debug("nodeRef:" + entry.getKey() +" runAs:" + creator);
-											extractVideoImageMetadata(entry.getKey(),creator);
 											AuthenticationUtil.runAs(executeActionRunAs, creator);
 											logger.debug("finished action syncronously. nodeRef:" + entry.getKey()
 													+ " action status:" + action.getExecutionStatus()
@@ -276,7 +220,7 @@ public class PreviewJob implements Job {
 					}
 
 					if (countRunning + newRunning >= maxRunning) {
-						logger.debug("returning cause countRunning + newRunning >= maxRunning");
+						logger.debug("returning cause countRunning + newRunning ("+ (countRunning + newRunning)+ ") >= maxRunning "+maxRunning);
 					}
 				}
 

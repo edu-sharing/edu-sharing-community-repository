@@ -31,4 +31,6 @@
 
   <bean id="applicationInfoSource" class="org.edu_sharing.alfresco.monitoring.ApplicationInfoMBeanImpl"/>
 
+  <bean id="previewActionSource" class="org.edu_sharing.alfresco.monitoring.PreviewActionMBeanImpl"/>
+
 </beans>

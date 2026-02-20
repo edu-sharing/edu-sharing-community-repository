@@ -198,7 +198,7 @@
         "FOLDER_STRUCTURE_CAPTION": "Ordnerstrukur des Verzeichnisses..."
       },
       "SHARED_FOLDERS": {
-        "CAPTION": "Dateien & Ordner der {{GENDER_SEPARATOR}}innen in gemeinsamen & fremden Verzeichnissen",
+        "CAPTION": "Dateien & Ordner der Nutzer{{GENDER_SEPARATOR}}innen in gemeinsamen & fremden Verzeichnissen",
         "FOLDERS_CAPTION": "Ordner",
         "PRIVATE_FILES_CAPTION": "Dateien ohne oder mit nicht-offenen Lizenzen",
         "CC_FILES_CAPTION": "Dateien mit offenen (CC-)Lizenzen"

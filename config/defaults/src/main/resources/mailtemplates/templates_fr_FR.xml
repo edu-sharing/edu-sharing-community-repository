@@ -1,0 +1,251 @@
+<templates>
+	<template name="header">
+		<message><![CDATA[
+			<div class="logo">
+			<img src="{{image:/images/logos/edu-sharing-mail.png}}">
+			</div>
+		]]>
+		</message>
+	</template>
+	<template name="invited">
+		<subject>{{inviter.firstName}} {{inviter.lastName}} vous a invité à un matériel.</subject>
+		<message><![CDATA[
+			<h1>Bonjour {{firstName}} {{lastName}}</h1>
+			<h2>{{inviter.firstName}} {{inviter.lastName}} a approuvé "{{name}}" pour vous.</h2>
+			Les droits suivants leur ont été accordés :<br>
+			<div class="rights">{{permissions}}</div>
+			<br>
+			<div class="center"><a class="btn" href="{{link}}">Lien vers le document</a></div>
+			<br><br>
+			{{if message}}Message de l'utilisateur :<br>
+				{{message}}
+			{{endif}}
+		]]>
+		</message>
+	</template>
+	<template name="invited_workflow">
+		<subject>{{assigner.firstName}} {{assigner.lastName}} vous a attribué un matériel.</subject>
+		<message><![CDATA[
+			<h1>Bonjour {{firstName}} {{lastName}}</h1>
+			<h2>{{assigner.firstName}} {{assigner.lastName}} vous a assigné "{{node.cm:name}}" avec le statut "{{status}}".</h2>
+			<br>
+			<div class="center"><a class="btn" href="{{link}}">Lien vers le document</a></div>
+			<br><br>
+			{{if comment}}Commentaire de l'utilisateur :<br>
+				{{comment}}
+			{{endif}}
+		]]>
+		</message>
+	</template>
+	<template name="invited_safe">
+		<subject>{{inviter.firstName}} {{inviter.lastName}} vous a invité à un matériel.</subject>
+		<message><![CDATA[
+			<h1>Bonjour {{firstName}} {{lastName}}</h1>
+			<h2>{{inviter.firstName}} {{inviter.lastName}} a approuvé "{{name}}" pour vous.</h2>
+			Les droits suivants leur ont été accordés :<br>
+			<div class="rights">{{permissions}}</div>
+			<br>
+			Après vous être connecté au coffre-fort, l'objet se trouve dans la section « Remis à moi ».
+			<br><br>
+			{{if message}}Message de l'utilisateur :<br>
+				{{message}}
+			{{endif}}
+		]]>
+		</message>
+	</template>
+	<template name="invited_collection">
+		<subject>{{inviter.firstName}} {{inviter.lastName}} hat Sie zur Mitarbeit an einer Sammlung eingeladen.</subject>
+		<message><![CDATA[
+			<h1>Bonjour {{firstName}} {{lastName}}</h1>
+			<h2>{{inviter.firstName}} {{inviter.lastName}} a partagé la collection "{{name}}" avec vous.</h2>
+			Les droits suivants leur ont été accordés :<br>
+			<div class="rights">{{permissions}}</div>
+			<br>
+			<div class="center"><a class="btn" href="{{link}}">Lien vers la collection</a></div>
+			<br><br>
+			{{if message}}Message de l'utilisateur :<br>
+				{{message}}
+			{{endif}}
+		]]>
+		</message>
+	</template>
+	<template name="userRegister">
+		<subject>Veuillez confirmer votre compte.</subject>
+		<message><![CDATA[
+			<div class="center">
+				<img src="{{image:/assets/images/register/register-mail.png}}">
+				<h1>Bonjour {{firstName}} {{lastName}},</h1>
+				<p>
+					Il ne vous reste plus qu'une étape pour finaliser votre inscription !
+					<br/>Cliquez sur le bouton ci-dessous pour confirmer votre adresse e-mail.
+				</p>
+				<a class="btn" href="{{link}}">CONFIRMER LE COMPTE</a>
+				<p>
+					Pour finaliser l'inscription, vous pouvez également copier le code d'activation et le coller dans le formulaire.
+				</p>
+				</p>
+				<div class="center"><div class="input-field">{{key}}</div></div>
+			</div>
+		]]>
+		</message>
+	</template>
+	<template name="userRecoverPassword">
+		<subject>Réinitialiser le mot de passe</subject>
+		<message><![CDATA[
+			<div class="center">
+				<img src="{{image:/assets/images/register/register-mail.png}}">
+				<h1>Bonjour {{firstName}} {{lastName}},</h1>
+				<p>Avez-vous oublié votre mot de passe ?
+				</p>
+				</p>
+					Cliquez sur le bouton pour définir un nouveau mot de passe.
+				</p>
+				<a class="btn" href="{{link}}">nouveau mot de passe</a>
+				<p>Vous pouvez également copier le code d'activation et le coller dans le formulaire :</p>
+				<div class="center"><div class="input-field">{{key}}</div></div>
+				<br>
+
+			</div>
+		]]>
+		</message>
+	</template>
+	<template name="userRegisterInformation">
+		<subject>Un nouvel utilisateur s'est inscrit.</subject>
+		<message><![CDATA[
+			<div class="center">
+				<img src="{{image:/assets/images/register/new_user.png}}">
+				<h1>Un nouvel utilisateur s'est inscrit dans le système !</h1>
+				<p>
+				Nom: {{firstName}} {{lastName}}
+				<br>E-mail: <a href="mailto:{{email}}">{{email}}</a>
+				</p>
+				{{if organization}}
+					<p>Organisation de l'utilisateur : {{organization}}</p>
+				{{endif}}
+				<a class="btn" href="{{link}}">Gestion des utilisateurs</a>
+			</div>
+		]]>
+		</message>
+	</template>
+	<template name="nodeIssue">
+		<subject>{{reporterEmail}} a signalé un problème</subject>
+		<message><![CDATA[
+			<h1>Bonjour!</h1>
+			<h2>{{reporterEmail}} a signalé un problème avec l'élément "{{name}}" ({{id}}).</h2>
+			Motif du rapport : {{reason}}<br><br><br>
+			{{if userComment}}Informations complémentaires de l'utilisateur :<br>
+				{{userComment}}
+				<br><br><br>
+			{{endif}}
+			<div class="center"><a class="btn" href="{{link}}">Concernant le matériel signalé</a></div>
+			<br><br>		
+		]]>
+		</message>
+	</template>
+	<template name="nodeIssueFeedback">
+		<subject>{{reporterEmail}} hat Feedback zu einem Element gegeben</subject>
+		<message><![CDATA[
+			<h1>Bonjour!</h1>
+			<h2>{{reporterEmail}} a donné son avis sur l'élément "{{name}}" ({{id}}).</h2>
+			{{if userComment}}Informations complémentaires de l'utilisateur :<br>
+				{{userComment}}
+				<br><br><br>
+			{{endif}}
+			<div class="center"><a class="btn" href="{{link}}">Concernant le matériel signalé</a></div>
+			<br><br>
+		]]>
+		</message>
+	</template>
+	<template name="userStatusChanged">
+		<subject>Le statut de votre compte a changé.</subject>
+		<message><![CDATA[
+			<h1>Bonjour {{firstName}} {{lastName}}!</h1>
+			<h2>Le statut de votre compte a changé</h2>
+			Statut précédent : {{oldStatus}}
+			Nouveau statut : {{newStatus}}
+			<br><br><br>
+			Si cette modification ne vous convient pas, veuillez contacter immédiatement l'opérateur du système.
+		]]>
+		</message>
+	</template>
+	<template name="groupSignupList">
+		<subject>Ein Nutzer möchte Gruppe "{{group}}" beitreten</subject>
+		<message><![CDATA[
+			<h1>Bonjour!</h1>
+			<h2>{{firstName}} {{lastName}} souhaite rejoindre le groupe "{{group}}".</h2>
+			<br>
+			Veuillez vous rendre dans la gestion des utilisateurs et consulter la liste d'attente du groupe.
+		]]>
+		</message>
+	</template>
+	<template name="groupSignupUser">
+		<subject>groupe rejoint "{{group}}"</subject>
+		<message><![CDATA[
+			<h1>Bonjour {{firstName}} {{lastName}}!</h1>
+			<h2>Vous avez rejoint avec succès le groupe "{{group}}".</h2>
+		]]>
+		</message>
+	</template>
+	<template name="groupSignupConfirmed">
+		<subject>groupe rejoint "{{group}}"</subject>
+		<message><![CDATA[
+			<h1>Bonjour {{firstName}} {{lastName}}!</h1>
+			<h2>Votre demande d'adhésion au groupe "{{group}}" a été acceptée ! Vous êtes désormais membre de ce groupe.</h2>
+		]]>
+		</message>
+	</template>
+	<template name="groupSignupRejected">
+		<subject>Gruppe "{{group}}" abgelehnt</subject>
+		<message><![CDATA[
+			<h1>Bonjour {{firstName}} {{lastName}}!</h1>
+			<h2>Nous avons le regret de vous informer que votre demande d'adhésion au groupe « {{group}} » a été rejetée par l'administrateur du groupe.</h2>
+		]]>
+		</message>
+	</template>
+	<template name="groupSignupAdmin">
+		<subject>Un nouvel utilisateur a rejoint le groupe "{{group}}".</subject>
+		<message><![CDATA[
+			<h1>Bonjour!</h1>
+			<h2>{{firstName}} {{lastName}} vient de rejoindre le groupe "{{group}}".</h2>
+			<br>
+			Vous pouvez gérer les membres du groupe dans l'administration des utilisateurs.
+		]]>
+		</message>
+	</template>
+	<template name="mdsValuespaceSuggestion">
+		<subject>Une nouvelle proposition de métadonnées pour {{widgetCaption}}</subject>
+		<message><![CDATA[
+			<h1>Bonjour!</h1>
+			<h2>{{firstName}} {{lastName}} a suggéré une nouvelle valeur pour la plage de valeurs:</h2>
+			Champ: {{widgetCaption}} ({{widgetId}})<br>
+			Valeur suggérée: {{caption}} ({{id}})<br>
+			{{if parentId}} Valeur parente: {{parentCaption}} ({{parentId}})<br>
+			{{endif}}
+			{{if link}}
+			Suggéré pour l’élément "{{node.cm:name}}"
+			<div class="center"><a class="btn" href="{{link}}">Lien vers l’élément</a></div>
+			{{endif}}
+		]]>
+		</message>
+	</template>
+	<template name="footer">
+		<message><![CDATA[
+			<a href="http://edu-sharing.com" style="float:left;">www.edu-sharing.com</a>
+			<a href="https://bildung.social/@edu_sharing" style="float:right;">@edusharing</a>
+		]]>
+		</message>
+	</template>
+	<template name="gdpr">
+		<subject>Informations RGPD</subject>
+		<message><![CDATA[
+			<div class="center">
+				<h1>Bonjour {{firstName}} {{lastName}},</h1>
+				<p>Merci pour votre demande d'exportation de données RGPD !</p>
+				<br><br>
+				<p>Vos données seront désormais disponibles pendant {{retentionPeriod}} jours à l'adresse suivante :</p>
+				<a class="btn" href="{{link}}">Concernant leurs données</a>
+			</div>
+		]]>
+		</message>
+	</template>
+</templates>
