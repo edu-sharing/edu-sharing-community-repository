@@ -47,7 +47,7 @@ public class ActionObserver {
 
 	public static String ACTION_OBSERVER_ADD_DATE = "action-observer-add-date";
 
-    long shouldBeRemovedCheck = -1;
+    long lastRemoveCheck = System.currentTimeMillis();
 
 
 	private ActionObserver() {
@@ -111,10 +111,19 @@ public class ActionObserver {
         String timeout = LightbendConfigLoader.get().getString("repository.transformer.preview.actionTimeout");
         long timeoutInMs = Duration.parse(timeout).toMillis();
 
+
 		RunAsWork<Void> runAs = new RunAsWork<Void>() {
 			@Override
 			public Void doWork() throws Exception {
 				ArrayList<NodeRef> toRemove = new ArrayList<>();
+
+                Duration checkInterval = Duration.parse(LightbendConfigLoader.get().getString("repository.transformer.preview.checkInterval"));
+
+                boolean checkRemove = false;
+                if((System.currentTimeMillis() - lastRemoveCheck) > checkInterval.toMillis()){
+                    checkRemove  = true;
+                    lastRemoveCheck = System.currentTimeMillis();
+                }
 
                 for (Map.Entry<NodeRef, List<Action>> entry : nodeActionsMap.entrySet()) {
 
@@ -125,9 +134,8 @@ public class ActionObserver {
                     }
 
                     //observer removes action when node exists check fails. this can happen when transaction is not commited already.
-                    boolean shouldBeRemoved = shouldBeRemoved(entry);
+                    boolean shouldBeRemoved = checkRemove && shouldBeRemoved(entry);
                     if (shouldBeRemoved) {
-                        logger.info(entry.getKey() + " was deleted. will remove entry");
                         toRemove.add(entry.getKey());
                         continue;
                     }
@@ -180,17 +188,11 @@ public class ActionObserver {
 
 
         Duration checkFirst = Duration.parse(LightbendConfigLoader.get().getString("repository.transformer.preview.checkFirst"));
-        Duration checkInterval = Duration.parse(LightbendConfigLoader.get().getString("repository.transformer.preview.checkInterval"));
 
         boolean check = true;
         if(entry.getValue().stream().anyMatch(a -> (a.getParameterValue(ACTION_OBSERVER_ADD_DATE) != null
                 && (new Date().getTime() - ((Date)a.getParameterValue(ACTION_OBSERVER_ADD_DATE)).getTime()) < checkFirst.toMillis()))){
             check = false;
-        }
-
-
-        if(check && (shouldBeRemovedCheck > -1 && (System.currentTimeMillis() - shouldBeRemovedCheck) < checkInterval.toMillis())){
-            check  = false;
         }
 
         if (check){
@@ -205,7 +207,6 @@ public class ActionObserver {
                 logger.info(entry.getKey() + " has no content. must be removed.");
                 mustBeRemoved = true;
             }
-            shouldBeRemovedCheck = System.currentTimeMillis();
             return mustBeRemoved;
         }
 
