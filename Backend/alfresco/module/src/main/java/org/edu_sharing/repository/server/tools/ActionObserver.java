@@ -65,20 +65,15 @@ public class ActionObserver {
 			return;
 		}
 
-        List<Action> actions = nodeActionsMap
-                .computeIfAbsent(nodeRef, k -> new CopyOnWriteArrayList<>());
-		
-		/**
-		 * webdav Edu_SharingUnlockMethod is sometimes called twice for the same node 
-		 * so check if actionDef is already there
-		 */
-		boolean alreadyThere = false;
-		for(Action a : actions) {
-			if(action.getActionDefinitionName().equals(a.getActionDefinitionName())){
-				alreadyThere = true;
-			}
-		}
-		if(!alreadyThere) actions.add(action);
+        nodeActionsMap.compute(nodeRef, (k, actions) -> {
+            if(actions == null) actions = new CopyOnWriteArrayList<>();
+
+            boolean alreadyThere = actions.stream()
+                    .anyMatch(a -> a.getActionDefinitionName().equals(action.getActionDefinitionName()));
+
+            if(!alreadyThere) actions.add(action);
+            return actions;
+        });
 	}
 
 	/**
