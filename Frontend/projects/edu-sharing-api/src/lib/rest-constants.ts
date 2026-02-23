@@ -85,7 +85,8 @@ export class RestConstants {
     public static TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS =
         'TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS';
     public static CCM_PROP_IMPORT_BLOCKED = 'ccm:importblocked';
-
+    public static CCM_PROP_PAGE_CONFIG_REF: string = 'ccm:page_config_ref';
+    public static CCM_PROP_PAGE_CONFIG_PROPAGATE_REF: string = 'ccm:page_config_propagate_ref';
     public static CCM_PROP_LICENSE = 'ccm:commonlicense_key';
     public static CCM_PROP_WF_RECEIVER = 'ccm:wf_receiver';
     public static CCM_PROP_WF_STATUS = 'ccm:wf_status';

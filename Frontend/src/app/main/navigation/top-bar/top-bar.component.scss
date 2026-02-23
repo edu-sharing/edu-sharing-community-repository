@@ -11,6 +11,12 @@
     align-items: center;
 }
 
+:host ::ng-deep {
+    .mat-mdc-button:not(:disabled) {
+        --mdc-text-button-label-text-color: $workspaceTopBarFontColor;
+    }
+}
+
 .user span {
     max-width: 160px;
 }
