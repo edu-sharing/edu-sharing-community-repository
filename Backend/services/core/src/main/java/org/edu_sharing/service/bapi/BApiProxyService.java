@@ -1,5 +1,6 @@
 package org.edu_sharing.service.bapi;
 
+import co.elastic.clients.util.ContentType;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -85,7 +86,11 @@ public class BApiProxyService {
             Response.ResponseBuilder result = Response.status(response.code());
             if (response.body() != null) {
                 result.entity(response.body().string());
-                result.type(String.valueOf(response.body().contentType()));
+                if(response.body().contentType() != null) {
+                    result.type(String.valueOf(response.body().contentType()));
+                } else {
+                    result.type(ContentType.APPLICATION_JSON);
+                }
             }
             return result.build();
         } catch (IOException e) {
