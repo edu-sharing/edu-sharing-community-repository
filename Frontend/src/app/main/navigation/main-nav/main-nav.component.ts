@@ -15,7 +15,10 @@ import {
     About,
     AboutService,
     AuthenticationService,
+    ConfigService,
     CurrentUserInfo,
+    RepositoryMessage,
+    SessionStorageService,
     User,
     UserService,
 } from 'ngx-edu-sharing-api';
@@ -183,7 +186,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             });
         });
     }
-
     private registerMainNavConfig() {
         const mainNavConfig$ = this.mainNavService.observeMainNavConfig().pipe(
             // Update `this.mainNavConfig` as soon as possible
@@ -214,16 +216,8 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         userInfo: CurrentUserInfo,
         queryParams: Params,
     ): void {
-        this.visible = this.getIsVisible(mainNavConfig, queryParams);
-        if (this.visible) {
-            // Unset override.
-            document.documentElement.style.setProperty('--mainnavHeight', null);
-            document.documentElement.style.setProperty('--mainnavCurrentHeight', null);
-        } else {
-            // Override relevant css variables.
-            document.documentElement.style.setProperty('--mainnavHeight', '0');
-            document.documentElement.style.setProperty('--mainnavCurrentHeight', '0');
-        }
+        this.mainNavService.setVisible(this.getIsVisible(mainNavConfig, queryParams));
+        this.visible = this.mainNavService.isVisible;
         this.canOpen = mainNavConfig.canOpen;
         if (!userInfo.loginInfo.isValidLogin) {
             this.canOpen = userInfo.loginInfo.isGuest;

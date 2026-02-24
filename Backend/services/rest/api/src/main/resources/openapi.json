@@ -5879,6 +5879,75 @@
         "properties": {
           "frontpage": {
             "$ref": "#/components/schemas/Frontpage"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/RepositoryMessage"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "RepositoryMessage": {
+        "properties": {
+          "contexts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "from": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "mode": {
+            "enum": [
+              "bar",
+              "modal"
+            ],
+            "type": "string"
+          },
+          "repeat": {
+            "enum": [
+              "once",
+              "repeat",
+              "always"
+            ],
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "info",
+              "warning",
+              "error"
+            ],
+            "type": "string"
+          },
+          "to": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "toolpermissions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "userMode": {
+            "enum": [
+              "all",
+              "guest",
+              "user"
+            ],
+            "type": "string"
+          },
+          "uuid": {
+            "format": "uuid",
+            "type": "string"
           }
         },
         "type": "object"
@@ -17125,6 +17194,17 @@
       "get": {
         "description": "Retrieves all available context objects",
         "operationId": "getAvailableContext",
+        "parameters": [
+          {
+            "description": "Include static contexts (from the client.config.xml). Defaults to false",
+            "in": "query",
+            "name": "includeStatic",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -17681,6 +17761,78 @@
         },
         "security": [],
         "summary": "get all inital language strings for angular",
+        "tags": [
+          "CONFIG v1"
+        ]
+      }
+    },
+    "/config/v1/messages": {
+      "get": {
+        "operationId": "getSystemMessage",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RepositoryMessage"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "security": [],
+        "summary": "get a system message that should be shown (if any)",
         "tags": [
           "CONFIG v1"
         ]

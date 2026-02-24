@@ -145,6 +145,10 @@
         </div>
       </div>
     </div>
+    <div *ngIf="modeIsActive('MESSAGES')" class="content messages">
+      <es-admin-messages></es-admin-messages>
+    </div>
+
     <div *ngIf="modeIsActive('CONFIG')" class="content config">
       <div class="heading">
         <i class="material-icons">build</i><span>{{ 'ADMIN.CONFIG.XML_CONFIG' | translate }}</span>

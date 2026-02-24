@@ -1,8 +1,8 @@
-import { Injectable, TemplateRef } from '@angular/core';
+import { computed, Injectable, signal, TemplateRef } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Node } from 'ngx-edu-sharing-api';
+import { Node, RepositoryMessage } from 'ngx-edu-sharing-api';
 import { FrameEventsService } from '../../core-module/core.module';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { ManagementDialogsService } from '../../features/management-dialogs/management-dialogs.service';
@@ -88,6 +88,7 @@ export enum TemplateSlot {
     providedIn: 'root',
 })
 export class MainNavService {
+    readonly DefaultHeight = 70;
     private mainnav: MainNavComponent;
     private cookieInfo: CookieInfoComponent;
     private mainNavConfigSubject = new BehaviorSubject<MainNavConfig>(new MainNavConfig());
@@ -98,6 +99,9 @@ export class MainNavService {
      * The observable will receive the newly generated node
      */
     onConnectorCreated = new Subject<Node>();
+    private _isVisible: boolean;
+    private _systemMessage = signal<RepositoryMessage>(null);
+    showSystemMessage = computed(() => this._systemMessage()?.mode === 'bar');
 
     constructor(
         private managementDialogs: ManagementDialogsService,
@@ -177,5 +181,34 @@ export class MainNavService {
         return rxjs
             .combineLatest([this.mainNavConfigSubject, this.mainNavConfigOverrideSubject])
             .pipe(map(([config, override]) => ({ ...config, ...(override ?? {}) })));
+    }
+
+    get isVisible(): boolean {
+        return this._isVisible;
+    }
+
+    get systemMessage(): RepositoryMessage {
+        return this._systemMessage();
+    }
+
+    setVisible(isVisible: boolean) {
+        this._isVisible = isVisible;
+        this.updateHeight();
+    }
+    setSystemMessage(systemMessage: RepositoryMessage) {
+        this._systemMessage.set(systemMessage);
+    }
+    updateHeight(height = this.DefaultHeight) {
+        if (this._isVisible) {
+            if (!height) {
+                height = this.DefaultHeight;
+            }
+            document.documentElement.style.setProperty('--mainnavHeight', height + 'px');
+            //document.documentElement.style.setProperty('--mainnavCurrentHeight', null);
+        } else {
+            // Override relevant css variables.
+            document.documentElement.style.setProperty('--mainnavHeight', '0');
+            //document.documentElement.style.setProperty('--mainnavCurrentHeight', '0');
+        }
     }
 }
