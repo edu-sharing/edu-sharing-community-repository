@@ -1,13 +1,68 @@
 package org.edu_sharing.service.admin.model;
 
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 import java.util.List;
+import java.util.UUID;
 
+@Data
+@NoArgsConstructor
 public class RepositoryConfig implements Serializable {
-    public Frontpage frontpage = new Frontpage();
+    private Frontpage frontpage = new Frontpage();
+    private List<RepositoryMessage> messages;
 
-    public RepositoryConfig(){}
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class RepositoryMessage implements Serializable{
+        private List<String> contexts,toolpermissions;
+        private UserMode userMode;
+        private Mode mode;
+        private Repeat repeat;
+        private Severity severity;
+        @JsonPropertyDescription("optional start date for message")
+        private Long from;
+        @JsonPropertyDescription("optional end date for message")
+        private Long to;
+        @JsonPropertyDescription("uuid of message")
+        private UUID uuid;
+        @JsonPropertyDescription("message to display")
+        private String message;
+        public enum Repeat {
+            @JsonPropertyDescription("show only once")
+            once,
+            @JsonPropertyDescription("show next time, but temporary closable")
+            repeat,
+            @JsonPropertyDescription("Always show, not closable (only for mode bar)")
+            always
+        }
+        public enum Severity {
+            info,
+            warning,
+            error
+        }
+        public enum UserMode {
+            @JsonPropertyDescription("for all users")
+            all,
+            @JsonPropertyDescription("for guest users only")
+            guest,
+            @JsonPropertyDescription("For users only")
+            user
+        }
+        public enum Mode {
+            @JsonPropertyDescription("show as a temporary bar")
+            bar,
+            @JsonPropertyDescription("show as modal dialog")
+            modal,
 
+        }
+    }
+    @Data
+    @NoArgsConstructor
     public static class Frontpage implements Serializable{
         public enum Mode{
             collection,
@@ -16,28 +71,28 @@ public class RepositoryConfig implements Serializable {
             downloads
         };
 
-        public int totalCount=50;
-        public int displayCount=12;
-        public Mode mode=Mode.rating;
-        public int timespan=30;
-        public boolean timespanAll = false;
-        public List<Query> queries;
+        private int totalCount=50;
+        private int displayCount=12;
+        private Mode mode=Mode.rating;
+        private int timespan=30;
+        private boolean timespanAll = false;
+        private List<Query> queries;
         // the id of the collection, if mode == collection
-        public String collection;
+        private String collection;
 
-        public Frontpage(){}
-
+        @Data
         public static class Query {
-            public Condition condition=new Condition();
-            public String query;
+            private Condition condition=new Condition();
+            private String query;
         }
     }
+    @Data
     public static class Condition{
         public enum Type{
             TOOLPERMISSION
         }
-        public Type type;
-        public boolean negate;
-        public String value;
+        private Type type;
+        private boolean negate;
+        private String value;
     }
 }

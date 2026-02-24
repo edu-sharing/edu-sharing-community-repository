@@ -141,7 +141,9 @@ export class AdminContextComponent implements OnInit {
         this.loading = true;
         this.currentId = await this.configService.observeContextId().pipe(first()).toPromise();
         this.context = (
-            (await this.configV1Service.getAvailableContext({}).toPromise()) as unknown as Context[]
+            (await this.configV1Service
+                .getAvailableContext({ includeStatic: false })
+                .toPromise()) as unknown as Context[]
         ).sort((a, b) =>
             a.id === this.currentId
                 ? -1

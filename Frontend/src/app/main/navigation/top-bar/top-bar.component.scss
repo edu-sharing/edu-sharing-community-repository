@@ -1,14 +1,31 @@
 @use 'sass:color';
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use '../../../pages/admin-page/messages/messages.component' as messages;
 
 :host > div {
     width: 100%;
-    height: var(--mainnavHeight);
-    background: $workspaceTopBarBackground;
-    color: $workspaceTopBarFontColor;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    > .main-bar {
+        background: $workspaceTopBarBackground;
+        color: $workspaceTopBarFontColor;
+        height: 70px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        flex-grow: 1;
+    }
+    > es-info-message .wrapper {
+        display: flex;
+        gap: 20px;
+        > div {
+            flex-grow: 1;
+        }
+        ::ng-deep {
+            @include messages.removeTinyWrapping();
+        }
+    }
 }
 
 :host ::ng-deep {
