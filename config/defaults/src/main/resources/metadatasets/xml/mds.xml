@@ -743,6 +743,12 @@
         <entry cap="Lese- und Bearbeitungsrechte">1</entry>
       </values>
     </widget>
+    <widget>
+      <id>virtual:collection_id_tree</id>
+      <caption>virtual_prop_collection_id_tree</caption>
+      <hideIfEmpty>true</hideIfEmpty>
+      <type>nodefilter</type>
+    </widget>
   </widgets>
   <templates>
     <template>
@@ -888,6 +894,7 @@
     <template>
       <id>search</id>
       <html><![CDATA[
+          <virtual:collection_id_tree>
           <ccm:educationallearningresourcetype type="facetList" expandable="expanded">
           <cclom:general_keyword type="facetList" expandable="expanded">
           <license>

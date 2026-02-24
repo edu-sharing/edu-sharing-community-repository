@@ -1,0 +1,20 @@
+<es-mds-editor-widget-container
+  #container
+  [injectedView]="this"
+  [label]="true"
+  [widget]="widget"
+  [wrapInFormField]="false"
+  *ngIf="(hidden$ | async) !== true"
+>
+  <div class="node-row">
+    <es-node-row [columns]="columns" [node]="node$ | async"></es-node-row>
+    <button
+      mat-icon-button
+      color="primary"
+      (click)="clearFilter()"
+      matTooltip="{{ 'REMOVE' | translate }}"
+    >
+      <i esIcon="cancel" [aria]="false"></i>
+    </button>
+  </div>
+</es-mds-editor-widget-container>

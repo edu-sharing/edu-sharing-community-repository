@@ -21,6 +21,12 @@ import { switchMap, takeUntil } from 'rxjs/operators';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import { FrameEventsService } from '../../core-module/rest/services/frame-events.service';
 import { RestConstants } from '../../core-module/rest/rest-constants';
+import { Values } from '../../features/mds/types/types';
+
+export type SearchFilter = {
+    propertyFilters: Values;
+    searchString: string;
+};
 
 @Component({
     selector: 'es-search-page-results',
@@ -138,12 +144,10 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
         this.primaryAction.subscribe((action) => {
             if (action === 'applyFilter') {
                 const applyFilter = new OptionItem('OPTIONS.APPLY_FILTER', 'redo', () => {
-                    let filters = this.searchPage.searchFilters.getValue() || {};
-                    if (this.searchPage.searchString.getValue()) {
-                        filters[RestConstants.PRIMARY_SEARCH_CRITERIA] = [
-                            this.searchPage.searchString.getValue(),
-                        ];
-                    }
+                    const filters = {
+                        propertyFilters: this.searchPage.searchFilters.getValue() as Values,
+                        searchString: this.searchPage.searchString.getValue(),
+                    } as SearchFilter;
                     const data = JSON.stringify(filters);
                     console.info(data);
                     this.frameEventsService.broadcastEvent(
