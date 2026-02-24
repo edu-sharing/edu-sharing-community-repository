@@ -118,6 +118,41 @@ export class ColorHelper {
 
         return [r * 255, g * 255, b * 255];
     }
+
+    /**
+     * Generates color variants by varying saturation and lightness separately,
+     * returns a single array sorted by perceived brightness (dark → light)
+     *
+     * @param hex Base hex color (#rrggbb)
+     * @param satSteps Number of saturation steps
+     * @param lightSteps Number of lightness steps
+     * @param deltaSat Max saturation delta from base (0-1)
+     * @param deltaLight Max lightness delta from base (0-1)
+     */
+    public static generateHslVariants(
+        hex: string,
+        satSteps: number,
+        deltaSat: number = 0.9,
+        deltaLight: number = 0.9,
+    ): string[] {
+        const rgb = ColorHelper.cssColorToRgb(hex);
+        if (!rgb) {
+            return [];
+        }
+        const [h, s, l] = ColorHelper.rgbToHsl(rgb);
+
+        const result: string[] = [];
+
+        for (let si = 0; si <= satSteps; si++) {
+            const sat = Math.pow((deltaSat * 2 - 1) * (si / satSteps) + (1 - deltaSat), 0.5);
+            const lum = Math.pow((deltaLight * 2 - 1) * (si / satSteps) + (1 - deltaLight), 0.5);
+            console.log(h, sat);
+            const newRgb = ColorHelper.hslToRgb([h, sat, lum]);
+            result.push(ColorHelper.rgbToHex(newRgb));
+        }
+        result.splice(result.length / 2, 0, hex);
+        return result;
+    }
 }
 export enum PreferredColor {
     Black,
