@@ -1364,7 +1364,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 return false;
             }
         };
-        // topicPage.showAsAction = true;
+        topicPage.showAsAction = true;
         topicPage.group = DefaultGroups.View;
         topicPage.priority = 15;
 
