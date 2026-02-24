@@ -203,7 +203,7 @@ public class ActionObserver {
                 mustBeRemoved = true;
             }
             ContentReader reader = contentService.getReader(entry.getKey(), ContentModel.PROP_CONTENT);
-            if(reader == null || reader.getSize() < 1){
+            if(!mustBeRemoved && (reader == null || reader.getSize() < 1)){
                 logger.info(entry.getKey() + " has no content. must be removed.");
                 mustBeRemoved = true;
             }
