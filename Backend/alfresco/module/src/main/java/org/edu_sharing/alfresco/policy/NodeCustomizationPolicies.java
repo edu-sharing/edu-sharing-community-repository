@@ -61,6 +61,7 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -369,8 +370,10 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
             if (/*newContent */
                     (LockStatus.NO_LOCK.equals(lockStatus) || LockStatus.LOCK_EXPIRED.equals(lockStatus))
                             && (reader != null) && (reader.getContentData() != null) && reader.getContentData().getSize() > 0) {
-
-                new ThumbnailHandling().thumbnailHandling(nodeRef);
+                CompletableFuture.runAsync(() -> {
+                    // asynchroner Code
+                    new ThumbnailHandling().thumbnailHandling(nodeRef);
+                });
             }
         }
         new RepositoryCache().remove(nodeRef.getId());
