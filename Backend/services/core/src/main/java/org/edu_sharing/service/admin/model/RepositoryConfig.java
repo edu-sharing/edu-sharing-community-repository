@@ -34,7 +34,7 @@ public class RepositoryConfig implements Serializable {
         private Long to;
         @Schema(description = "uuid of message")
         private UUID uuid;
-        @Size(max = 1024 * 512)
+        @Size(max = 51)
         @Schema(description = "Message to display", maxLength = 1024*512)
         @JsonPropertyDescription("message to display")
         private String message;

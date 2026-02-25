@@ -14,6 +14,7 @@ import org.edu_sharing.swagger.SwaggerReader;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.validation.ValidationFeature;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
@@ -78,6 +79,7 @@ public class ApiApplication extends ResourceConfig {
         // required in order to catch invalid json data exception
         this.register(JacksonXmlBindJsonProvider.class);
         this.register(JacksonFeature.withoutExceptionMappers());
+        this.register(ValidationFeature.class);
         //final BeanConfig beanConfig = new BeanConfig();
 
         OpenAPI oas = new OpenAPI();
