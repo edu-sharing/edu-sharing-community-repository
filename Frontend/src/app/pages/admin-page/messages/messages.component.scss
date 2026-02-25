@@ -96,6 +96,9 @@ form.create {
             @include removeTinyWrapping();
         }
         .chips {
+            .components {
+                --mdc-chip-elevated-container-color: #cdbeda;
+            }
             .contexts {
                 --mdc-chip-elevated-container-color: #bedabe;
             }

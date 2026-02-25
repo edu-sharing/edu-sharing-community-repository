@@ -342,6 +342,9 @@
         </div>
         <div class="chips">
           <mat-chip-set>
+            <mat-chip class="components" *ngFor="let c of msg.components">
+              {{ 'SIDEBAR.' + c.toUpperCase() | translate }}
+            </mat-chip>
             <mat-chip
               class="contexts"
               *ngFor="let c of msg.contexts"

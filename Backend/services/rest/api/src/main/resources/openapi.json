@@ -5891,17 +5891,35 @@
       },
       "RepositoryMessage": {
         "properties": {
-          "contexts": {
+          "components": {
             "items": {
+              "maxLength": 256,
               "type": "string"
             },
+            "maxItems": 256,
+            "maxLength": 256,
+            "minItems": 0,
+            "type": "array"
+          },
+          "contexts": {
+            "items": {
+              "maxLength": 256,
+              "type": "string"
+            },
+            "maxItems": 256,
+            "maxLength": 256,
+            "minItems": 0,
             "type": "array"
           },
           "from": {
+            "description": "optional start date for message",
             "format": "int64",
             "type": "integer"
           },
           "message": {
+            "description": "Message to display",
+            "maxLength": 524288,
+            "minLength": 0,
             "type": "string"
           },
           "mode": {
@@ -5928,19 +5946,18 @@
             "type": "string"
           },
           "to": {
+            "description": "optional end date for message",
             "format": "int64",
             "type": "integer"
           },
           "toolpermissions": {
             "items": {
+              "maxLength": 256,
               "type": "string"
             },
-            "type": "array"
-          },
-          "components": {
-            "items": {
-              "type": "string"
-            },
+            "maxItems": 256,
+            "maxLength": 256,
+            "minItems": 0,
             "type": "array"
           },
           "userMode": {
@@ -5952,6 +5969,7 @@
             "type": "string"
           },
           "uuid": {
+            "description": "uuid of message",
             "format": "uuid",
             "type": "string"
           }
@@ -17780,10 +17798,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/RepositoryMessage"
-                  }
+                  },
+                  "type": "array"
                 }
               }
             },

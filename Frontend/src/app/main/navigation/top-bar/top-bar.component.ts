@@ -81,27 +81,6 @@ export class TopBarComponent {
 
     private registerSystemMessages() {
         this.mainNavService.observeSystemMessage().subscribe(async (details) => {
-            console.log('new message', details.message);
-            if (!details.message) {
-                return;
-            }
-            if (
-                details.userStorage === details.message.uuid ||
-                details.sessionStorage === details.message.uuid
-            ) {
-                console.info('msg already shown', details.message);
-                this.mainNavService.setSystemMessage(null);
-                return;
-            }
-            if (details.message.repeat === 'once') {
-                void this.sessionStorageService.set(details.storageKey, details.message.uuid);
-                void this.sessionStorageService.set(
-                    details.storageKey,
-                    details.message.uuid,
-                    Store.Session,
-                );
-            }
-            this.mainNavService.setSystemMessage(details);
             if (details.message.mode === 'modal') {
                 const dialogRef = await this.dialogs.openGenericDialog({
                     title: 'NOTICE',
@@ -157,10 +136,6 @@ export class TopBarComponent {
     }
 
     hideMessage() {
-        void this.sessionStorageService.set(
-            this.mainNavService.systemMessage.storageKey,
-            this.mainNavService.systemMessage.message.uuid,
-            Store.Session,
-        );
+        this.mainNavService.closeSystemMessage();
     }
 }

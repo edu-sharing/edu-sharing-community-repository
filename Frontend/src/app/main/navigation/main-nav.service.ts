@@ -1,7 +1,7 @@
 import { computed, Injectable, signal, TemplateRef } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, forkJoin, Observable, Subject } from 'rxjs';
-import { debounceTime, map, switchMap, take } from 'rxjs/operators';
+import { debounceTime, filter, map, switchMap, take, tap } from 'rxjs/operators';
 import {
     ConfigService,
     Node,
@@ -28,8 +28,6 @@ export class MainNavCreateConfig {
     folder?: boolean = false;
 }
 export type SystemMessageDetails = {
-    sessionStorage: string;
-    userStorage: string;
     storageKey: string;
     message: RepositoryMessage;
 };
@@ -257,33 +255,72 @@ export class MainNavService {
                 debounceTime(0),
                 switchMap(
                     ([config, messages, _]: [MainNavConfig, RepositoryMessage[], UserEntry]) => {
-                        const message = messages.find(
-                            (msg) =>
-                                !msg.components?.length ||
-                                msg.components?.includes(config?.currentScope),
-                        );
-                        const storageKey = message.components?.length
-                            ? 'systemMessage_' + config?.currentScope
-                            : 'systemMessage';
-                        return forkJoin([
-                            this.sessionStorageService
-                                .observe(storageKey, null, Store.UserProfile)
-                                .pipe(take(1)),
-                            this.sessionStorageService
-                                .observe(storageKey, null, Store.Session)
-                                .pipe(take(1)),
-                        ]).pipe(
-                            map(([userStorage, sessionStorage]) => {
-                                return {
-                                    userStorage,
-                                    sessionStorage,
-                                    message,
-                                    storageKey,
-                                } as SystemMessageDetails;
-                            }),
+                        const messageObservables = messages.map((message) => {
+                            const storageKey = message.components?.length
+                                ? 'systemMessage_' + config?.currentScope
+                                : 'systemMessage';
+                            const details = {
+                                message,
+                                storageKey,
+                            } as SystemMessageDetails;
+                            return forkJoin([
+                                this.sessionStorageService
+                                    .observe(storageKey, null, Store.UserProfile)
+                                    .pipe(take(1)),
+                                this.sessionStorageService
+                                    .observe(storageKey, null, Store.Session)
+                                    .pipe(take(1)),
+                            ]).pipe(
+                                map(([userStorage, sessionStorage]) => {
+                                    let include = true;
+                                    if (
+                                        message.components?.length &&
+                                        !message.components.includes(config?.currentScope)
+                                    ) {
+                                        include = false;
+                                    }
+                                    // msg already hidden by user
+                                    if (
+                                        message.uuid === userStorage ||
+                                        message.uuid === sessionStorage
+                                    ) {
+                                        include = false;
+                                    }
+                                    return { include, details };
+                                }),
+                            );
+                        });
+                        return forkJoin(messageObservables).pipe(
+                            map((results) => results.find((r) => r.include)?.details),
                         );
                     },
                 ),
+                tap((details) => {
+                    if (!details) {
+                        return;
+                    }
+                    if (details.message.repeat === 'once') {
+                        void this.sessionStorageService.set(
+                            details.storageKey,
+                            details.message.uuid,
+                        );
+                        void this.sessionStorageService.set(
+                            details.storageKey,
+                            details.message.uuid,
+                            Store.Session,
+                        );
+                    }
+                    this.setSystemMessage(details);
+                }),
             );
+    }
+
+    closeSystemMessage() {
+        void this.sessionStorageService.set(
+            this.systemMessage.storageKey,
+            this.systemMessage.message.uuid,
+            Store.Session,
+        );
+        this.setSystemMessage(null);
     }
 }

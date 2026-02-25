@@ -145,6 +145,7 @@ export class AdminMessagesComponent implements OnInit {
             mode: this.createForm.get('mode').value,
             severity: this.createForm.get('severity').value,
             repeat: this.createForm.get('repeat').value,
+            components: this.selectedComponents(),
             contexts: this.selectedContexts().map((c) => c.id),
             from: this.createForm.get('fromEnabled').value ? this.fromDate() : null,
             to: this.createForm.get('toEnabled').value ? this.toDate() : null,
@@ -184,6 +185,7 @@ export class AdminMessagesComponent implements OnInit {
         });
         this.editId.set(null);
         this.message = '';
+        this.selectedComponents.set([]);
         this.selectedContexts.set([]);
         this.selectedTp.set([]);
     }
@@ -231,6 +233,7 @@ export class AdminMessagesComponent implements OnInit {
             msg.contexts.map((c) => this.contexts().find((c2) => c2.id === c)),
         );
         this.selectedTp.set(msg.toolpermissions);
+        this.selectedComponents.set(msg.components);
         this.editId.set(msg.uuid);
         void this.uiService.scrollSmooth(
             this.headingRef?.nativeElement?.getBoundingClientRect().top,
