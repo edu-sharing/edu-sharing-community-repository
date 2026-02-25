@@ -192,7 +192,7 @@
       ></div>
       <button
         mat-icon-button
-        (click)="hideMessage()"
+        (click)="mainNavService.closeSystemMessage()"
         *ngIf="mainNavService.systemMessage.message.repeat === 'repeat'"
       >
         <i esIcon="close"></i>

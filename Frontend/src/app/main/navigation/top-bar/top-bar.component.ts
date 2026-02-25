@@ -134,8 +134,4 @@ export class TopBarComponent {
             this.topbarRef.nativeElement?.getBoundingClientRect().height,
         );
     }
-
-    hideMessage() {
-        this.mainNavService.closeSystemMessage();
-    }
 }
