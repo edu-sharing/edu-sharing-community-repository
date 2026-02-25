@@ -2,7 +2,7 @@ import { ApplicationRef, Inject, Injectable, Injector, Optional } from '@angular
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, from, Observable, of, of as observableOf } from 'rxjs';
-import { first, map, switchMap, tap } from 'rxjs/operators';
+import { debounce, debounceTime, first, map, switchMap, tap } from 'rxjs/operators';
 import { ConfigService, LANGUAGES, SessionStorageService } from 'ngx-edu-sharing-api';
 import { AppService } from '../services/abstract/app.service';
 import { I18N_CONFIG, I18nConfig } from '../types/injection-tokens';
@@ -80,6 +80,7 @@ export class TranslationsService {
                 // Select queryParams.locale if set meaningfully
                 switchMap((supportedLanguages: string[]) =>
                     (this.route ? this.route.queryParams : of(null)).pipe(
+                        debounceTime(50),
                         first(),
                         map((params) => {
                             let selectedLanguage: string = null;
