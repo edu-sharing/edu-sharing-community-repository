@@ -186,6 +186,7 @@ public class ClientUtilsService {
 				// duplication detection via external API
 				try {
 					String duplicateServiceUrl = duplicateConfig.getString("url");
+					logger.info("Search duplications via " + duplicateServiceUrl);
 					
 					// /detect/hash/by-metadata
 					RequestBuilder method = RequestBuilder.post(duplicateServiceUrl);
@@ -209,11 +210,12 @@ public class ClientUtilsService {
 
 					// Execute request
 					String responseBody = new HttpQueryTool().query(method);
+					logger.info("Search duplications response: " + responseBody);
 					JSONObject result = new JSONObject(responseBody);
 					
 					// Parse the response
             		if (result.has("duplicates")) {
-                		JSONArray duplicates = result.getJSONArray("duplicates");
+						JSONArray duplicates = result.getJSONArray("duplicates");
 						for (int i = 0; i < duplicates.length(); i++) {
 							JSONObject duplicate = duplicates.getJSONObject(i);
 							String nodeId = duplicate.getString("node_id");
@@ -224,6 +226,7 @@ public class ClientUtilsService {
 								nodes.add(new org.edu_sharing.service.model.NodeRefImpl(nodeId));
 							}
 						}
+						logger.info("Search duplications found results: " + nodes.size());
 					}
 				} catch (HttpClientErrorException e) {
     				// Handle HTTP 400 errors (invalid input, node not found)
