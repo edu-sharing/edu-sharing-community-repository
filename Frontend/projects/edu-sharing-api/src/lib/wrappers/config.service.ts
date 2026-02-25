@@ -12,9 +12,9 @@ import {
 } from 'rxjs/operators';
 import { ApiRequestConfiguration } from '../api-request-configuration';
 import * as apiModels from '../api/models';
+import { RepositoryMessage } from '../api/models';
 import { ConfigV1Service } from '../api/services';
 import { switchReplay } from '../utils/rxjs-operators/switch-replay';
-import { RepositoryMessage } from '../api/models';
 
 export type ClientConfig = apiModels.Values;
 export type ClientConfigBackend = apiModels.ValuesBackend;
@@ -52,7 +52,7 @@ export class ConfigService {
     );
     private readonly message$ = this.updateTriggerMessages.pipe(
         startWith(void 0),
-        switchMap(() => this.configV1.getSystemMessage()),
+        switchMap(() => this.configV1.getSystemMessages()),
         shareReplay({ bufferSize: 1, refCount: true }),
     );
     private readonly variables$ = this.updateTrigger.pipe(
@@ -109,7 +109,7 @@ export class ConfigService {
      *
      * The observable will update on changes.
      */
-    observeSystemMessage({ forceUpdate = false } = {}): Observable<RepositoryMessage | null> {
+    observeSystemMessages({ forceUpdate = false } = {}): Observable<RepositoryMessage[]> {
         if (forceUpdate) {
             this.updateTriggerMessages.next();
         }

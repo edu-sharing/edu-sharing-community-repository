@@ -1,6 +1,8 @@
 package org.edu_sharing.service.admin.model;
 
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,17 +21,21 @@ public class RepositoryConfig implements Serializable {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class RepositoryMessage implements Serializable{
-        private List<String> contexts,toolpermissions;
+        @Schema(maxLength = 256)
+        @Size(max = 256)
+        private List<String> contexts,toolpermissions,components;
         private UserMode userMode;
         private Mode mode;
         private Repeat repeat;
         private Severity severity;
-        @JsonPropertyDescription("optional start date for message")
+        @Schema(description = "optional start date for message")
         private Long from;
-        @JsonPropertyDescription("optional end date for message")
+        @Schema(description = "optional end date for message")
         private Long to;
-        @JsonPropertyDescription("uuid of message")
+        @Schema(description = "uuid of message")
         private UUID uuid;
+        @Size(max = 1024 * 512)
+        @Schema(description = "Message to display", maxLength = 1024*512)
         @JsonPropertyDescription("message to display")
         private String message;
         public enum Repeat {

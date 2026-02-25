@@ -3,7 +3,6 @@ package org.edu_sharing.service.admin;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.admin.model.RepositoryConfig;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
@@ -15,6 +14,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class RepositoryConfigFactory {
@@ -22,7 +22,7 @@ public class RepositoryConfigFactory {
         return SystemFolder.getSystemObject(CCConstants.CCM_VALUE_IO_NAME_CONFIG_NODE_NAME);
     }
 
-    public static RepositoryConfig.RepositoryMessage getSystemMessage() {
+    public static List<RepositoryConfig.RepositoryMessage> getSystemMessages() {
         List<RepositoryConfig.RepositoryMessage> msg = getConfig().getMessages();
         long now = System.currentTimeMillis();
         boolean isGuest = AuthorityServiceFactory.getLocalService().isGuest();
@@ -36,10 +36,9 @@ public class RepositoryConfigFactory {
                                     (CollectionUtils.isEmpty(m.getContexts()) || m.getContexts().contains(ConfigServiceFactory.getCurrentContextId())) &&
                                     (CollectionUtils.isEmpty(m.getToolpermissions()) || m.getToolpermissions().stream().allMatch(tp -> ToolPermissionServiceFactory.getInstance().hasToolPermission(tp)))
                     )
-                    .findFirst()
-                    .orElse(null);
+                    .collect(Collectors.toList());
         }
-        return null;
+        return Collections.emptyList();
     }
 
     private static boolean userModeMatches(RepositoryConfig.RepositoryMessage m, boolean isGuest) {
