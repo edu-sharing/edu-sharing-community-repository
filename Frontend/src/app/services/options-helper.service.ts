@@ -7,6 +7,7 @@ import {
     NodeListErrorResponses,
     NodeListService,
     PROPERTY_FILTER_ALL,
+    ROOT,
 } from 'ngx-edu-sharing-api';
 import {
     ClipboardObject,
@@ -1346,6 +1347,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 )
             ) {
                 return true;
+            }
+            if (objects[0].ref.id === ROOT) {
+                return false;
             }
             try {
                 if (objects[0].properties?.[RestConstants.CCM_PROP_PAGE_CONFIG_REF]?.[0]) {
