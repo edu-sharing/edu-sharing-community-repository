@@ -22,6 +22,7 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ShareDialogModule } from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog.module';
+import { MainNavService } from '../../../main/navigation/main-nav.service';
 
 @Component({
     selector: 'es-admin-messages',
@@ -44,13 +45,28 @@ export class AdminMessagesComponent implements OnInit {
     );
     selectedTp = signal<string[]>([]);
     tpFilter = signal('');
+    componentFilter = signal('');
     tp = signal<string[]>([]);
+    selectedComponents = signal<string[]>([]);
+    components = signal<string[]>([]);
     availableTp = computed(() =>
         this.tp()
             .filter(
                 (c) =>
                     c.toLowerCase().includes(this.tpFilter().toLowerCase()) &&
                     !this.selectedTp().find((f) => f === c),
+            )
+            .sort(),
+    );
+    availableComponents = computed(() =>
+        this.components()
+            .filter(
+                (c) =>
+                    this.translate
+                        .instant('SIDEBAR.' + c.toUpperCase())
+                        .toLowerCase()
+                        .includes(this.componentFilter().toLowerCase()) &&
+                    !this.selectedComponents().find((f) => f === c),
             )
             .sort(),
     );
@@ -74,6 +90,7 @@ export class AdminMessagesComponent implements OnInit {
         private configV1Service: ConfigV1Service,
         private uiService: UIService,
         private platformLocation: PlatformLocation,
+        private mainNavService: MainNavService,
         private translate: TranslateService,
         private dialogs: DialogsService,
         private sanitizer: DomSanitizer,
@@ -95,7 +112,7 @@ export class AdminMessagesComponent implements OnInit {
             language: this.translate.getDefaultLang(),
         };
         this.editorConfig.base_url = this.platformLocation.getBaseHrefFromDOM() + 'tinymce/';
-
+        this.components.set(this.mainNavService.getAvailableScopes());
         this.config.set(await firstValueFrom(this.adminV1Service.getConfig()));
         this.tp.set(
             Object.keys(
@@ -184,9 +201,18 @@ export class AdminMessagesComponent implements OnInit {
     removeTp(event: MatChipEvent) {
         this.selectedTp.set(this.selectedTp().filter((c) => c !== event.chip.value));
     }
+    removeComponent(event: MatChipEvent) {
+        this.selectedComponents.set(
+            this.selectedComponents().filter((c) => c !== event.chip.value),
+        );
+    }
     selectTp(event: MatAutocompleteSelectedEvent) {
         this.selectedTp.set([...this.selectedTp(), event.option.value]);
         this.tpFilter.set('');
+    }
+    selectComponent(event: MatAutocompleteSelectedEvent) {
+        this.selectedComponents.set([...this.selectedComponents(), event.option.value]);
+        this.componentFilter.set('');
     }
 
     editMessage(msg: RepositoryMessage) {

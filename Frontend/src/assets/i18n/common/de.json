@@ -245,6 +245,7 @@
     "SECURE": "Safe",
     "PERMISSIONS": "Kontenverwaltung",
     "LOGIN": "Login",
+    "RENDER": "Rendering",
     "ADMIN": "Admin-Tools",
     "WORKSPACE_SHORT": "Workspace",
     "SEARCH_SHORT": "Suche",

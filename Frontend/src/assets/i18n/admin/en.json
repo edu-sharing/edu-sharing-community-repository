@@ -64,6 +64,8 @@
       "EDIT_MESSAGE": "Edit Announcement / Maintenance Message",
       "REMOVE_TITLE": "Delete Message",
       "REMOVE_MESSAGE": "Do you want to delete the following message?<br><br><hr>{{message}}",
+      "SELECT_COMPONENT": "Select area",
+      "SELECT_COMPONENT_HINT": "Select one or more area (OR linked). If none is selected, the message applies to all",
       "SELECT_CONTEXT": "Select Context(s)",
       "SELECT_CONTEXT_HINT": "Select one or more contexts (OR linked). If none is selected, the message applies to all",
       "SELECT_TP": "Select Permission(s)",

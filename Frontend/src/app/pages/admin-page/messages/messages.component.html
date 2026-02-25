@@ -3,6 +3,39 @@
     {{ 'ADMIN.MESSAGES.' + (this.editId() ? 'EDIT_MESSAGE' : 'ADD_MESSAGE') | translate }}
   </h3>
   <form class="create" [formGroup]="createForm">
+    <mat-form-field>
+      <mat-chip-grid #chipGridComponent>
+        <mat-chip-row
+          (removed)="removeComponent($event)"
+          [value]="item"
+          *ngFor="let item of selectedComponents()"
+        >
+          {{ 'SIDEBAR.' + item.toUpperCase() | translate }}
+          <button matChipRemove>
+            <i esIcon="cancel"></i>
+          </button>
+        </mat-chip-row>
+        <!-- Input with autocomplete -->
+        <input
+          [value]="componentFilter()"
+          (input)="componentFilter.set($any($event.target).value)"
+          placeholder="{{ 'ADMIN.MESSAGES.SELECT_COMPONENT' | translate }}"
+          [matChipInputFor]="chipGridComponent"
+          [matAutocomplete]="autoComponent"
+        />
+      </mat-chip-grid>
+
+      <mat-autocomplete
+        #autoComponent="matAutocomplete"
+        (optionSelected)="selectComponent($event)"
+        [autoSelectActiveOption]="false"
+      >
+        <mat-option *ngFor="let option of availableComponents()" [value]="option">
+          {{ 'SIDEBAR.' + option.toUpperCase() | translate }}
+        </mat-option>
+      </mat-autocomplete>
+      <mat-hint>{{ 'ADMIN.MESSAGES.SELECT_COMPONENT_HINT' | translate }}</mat-hint>
+    </mat-form-field>
     <mat-form-field *ngIf="contexts()?.length">
       <mat-chip-grid #chipGrid>
         <mat-chip-row

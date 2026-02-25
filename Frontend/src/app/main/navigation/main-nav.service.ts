@@ -1,15 +1,23 @@
 import { computed, Injectable, signal, TemplateRef } from '@angular/core';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { Node, RepositoryMessage } from 'ngx-edu-sharing-api';
+import { BehaviorSubject, forkJoin, Observable, Subject } from 'rxjs';
+import { debounceTime, map, switchMap, take } from 'rxjs/operators';
+import {
+    ConfigService,
+    Node,
+    RepositoryMessage,
+    SessionStorageService,
+    Store,
+    UserEntry,
+    UserService,
+} from 'ngx-edu-sharing-api';
 import { FrameEventsService } from '../../core-module/core.module';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { ManagementDialogsService } from '../../features/management-dialogs/management-dialogs.service';
 import { MainNavComponent } from '../../main/navigation/main-nav/main-nav.component';
 import { CookieInfoComponent } from '../cookie-info/cookie-info.component';
 import { SkipNavService } from './skip-nav/skip-nav.service';
-import { CustomOptions, OptionItem } from 'ngx-edu-sharing-ui';
+import { CustomOptions } from 'ngx-edu-sharing-ui';
 
 export class MainNavCreateConfig {
     /** allowed / display new material button */
@@ -19,6 +27,12 @@ export class MainNavCreateConfig {
     parent?: Node = null;
     folder?: boolean = false;
 }
+export type SystemMessageDetails = {
+    sessionStorage: string;
+    userStorage: string;
+    storageKey: string;
+    message: RepositoryMessage;
+};
 
 export class MainNavConfig {
     /**
@@ -100,14 +114,19 @@ export class MainNavService {
      */
     onConnectorCreated = new Subject<Node>();
     private _isVisible: boolean;
-    private _systemMessage = signal<RepositoryMessage>(null);
-    showSystemMessage = computed(() => this._systemMessage()?.mode === 'bar');
+    private _systemMessage = signal<SystemMessageDetails>(null);
+    showSystemMessage = computed(() => this._systemMessage()?.message?.mode === 'bar');
+    readonly DefaultScopes = ['workspace', 'collections', 'search', 'render', 'admin'];
+    private customScopes: string[];
 
     constructor(
         private managementDialogs: ManagementDialogsService,
         private event: FrameEventsService,
         private skipNav: SkipNavService,
         private dialogs: DialogsService,
+        private sessionStorageService: SessionStorageService,
+        private user: UserService,
+        private configServiceApi: ConfigService,
     ) {}
 
     /**
@@ -187,7 +206,7 @@ export class MainNavService {
         return this._isVisible;
     }
 
-    get systemMessage(): RepositoryMessage {
+    get systemMessage(): SystemMessageDetails {
         return this._systemMessage();
     }
 
@@ -195,7 +214,7 @@ export class MainNavService {
         this._isVisible = isVisible;
         this.updateHeight();
     }
-    setSystemMessage(systemMessage: RepositoryMessage) {
+    setSystemMessage(systemMessage: SystemMessageDetails) {
         this._systemMessage.set(systemMessage);
     }
     updateHeight(height = this.DefaultHeight) {
@@ -210,5 +229,61 @@ export class MainNavService {
             document.documentElement.style.setProperty('--mainnavHeight', '0');
             //document.documentElement.style.setProperty('--mainnavCurrentHeight', '0');
         }
+    }
+
+    /**
+     * register additional custom scopes (global areas/pages)
+     * Might be used by components that want to offer a list of available scopes for config purposes
+     */
+    setCustomScopes(scopes: string[]) {
+        this.customScopes = scopes;
+    }
+
+    getAvailableScopes() {
+        return [...this.DefaultScopes, ...(this.customScopes || [])];
+    }
+
+    /**
+     * observe the current system message that should be displayed (if any)
+     */
+    observeSystemMessage(): Observable<SystemMessageDetails> {
+        return rxjs
+            .combineLatest([
+                this.observeMainNavConfig(),
+                this.configServiceApi.observeSystemMessages(),
+                this.user.observeCurrentUser(),
+            ])
+            .pipe(
+                debounceTime(0),
+                switchMap(
+                    ([config, messages, _]: [MainNavConfig, RepositoryMessage[], UserEntry]) => {
+                        const message = messages.find(
+                            (msg) =>
+                                !msg.components?.length ||
+                                msg.components?.includes(config?.currentScope),
+                        );
+                        const storageKey = message.components?.length
+                            ? 'systemMessage_' + config?.currentScope
+                            : 'systemMessage';
+                        return forkJoin([
+                            this.sessionStorageService
+                                .observe(storageKey, null, Store.UserProfile)
+                                .pipe(take(1)),
+                            this.sessionStorageService
+                                .observe(storageKey, null, Store.Session)
+                                .pipe(take(1)),
+                        ]).pipe(
+                            map(([userStorage, sessionStorage]) => {
+                                return {
+                                    userStorage,
+                                    sessionStorage,
+                                    message,
+                                    storageKey,
+                                } as SystemMessageDetails;
+                            }),
+                        );
+                    },
+                ),
+            );
     }
 }

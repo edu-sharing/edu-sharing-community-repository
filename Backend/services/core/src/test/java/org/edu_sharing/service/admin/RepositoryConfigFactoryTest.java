@@ -6,9 +6,11 @@ import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
+import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.mockito.Mockito.*;
 
 class RepositoryConfigFactoryTest {
@@ -28,28 +30,28 @@ class RepositoryConfigFactoryTest {
 
             when(authority.isGuest()).thenReturn(false);
             msg.setUserMode(RepositoryConfig.RepositoryMessage.UserMode.user);
-            assertEquals(msg, RepositoryConfigFactory.getSystemMessage());
+            assertEquals(msg, RepositoryConfigFactory.getSystemMessages().get(0));
             msg.setUserMode(RepositoryConfig.RepositoryMessage.UserMode.guest);
-            assertNull(RepositoryConfigFactory.getSystemMessage());
+            assertIterableEquals(Collections.emptyList(), RepositoryConfigFactory.getSystemMessages());
 
 
             when(authority.isGuest()).thenReturn(true);
             msg.setUserMode(RepositoryConfig.RepositoryMessage.UserMode.guest);
-            assertEquals(msg, RepositoryConfigFactory.getSystemMessage());
+            assertEquals(msg, RepositoryConfigFactory.getSystemMessages().get(0));
             msg.setUserMode(RepositoryConfig.RepositoryMessage.UserMode.user);
-            assertNull(RepositoryConfigFactory.getSystemMessage());
+            assertIterableEquals(Collections.emptyList(), RepositoryConfigFactory.getSystemMessages());
 
             msg.setUserMode(RepositoryConfig.RepositoryMessage.UserMode.all);
             msg.setFrom(now - 10000);
-            assertEquals(msg, RepositoryConfigFactory.getSystemMessage());
+            assertEquals(msg, RepositoryConfigFactory.getSystemMessages().get(0));
             msg.setFrom(now + 10000);
-            assertNull(RepositoryConfigFactory.getSystemMessage());
+            assertIterableEquals(Collections.emptyList(), RepositoryConfigFactory.getSystemMessages());
 
             msg.setFrom(null);
             msg.setTo(now + 10000);
-            assertEquals(msg, RepositoryConfigFactory.getSystemMessage());
+            assertEquals(msg, RepositoryConfigFactory.getSystemMessages().get(0));
             msg.setTo(now - 10000);
-            assertNull(RepositoryConfigFactory.getSystemMessage());
+            assertIterableEquals(Collections.emptyList(), RepositoryConfigFactory.getSystemMessages());
         }
     }
 }

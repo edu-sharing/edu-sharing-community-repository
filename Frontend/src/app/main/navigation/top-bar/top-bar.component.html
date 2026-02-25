@@ -184,14 +184,16 @@
   <!-- system messages -->
   <es-info-message
     *ngIf="mainNavService.showSystemMessage()"
-    [mode]="mainNavService.systemMessage.severity || 'info'"
+    [mode]="mainNavService.systemMessage.message.severity || 'info'"
   >
     <div class="wrapper">
-      <div [innerHTML]="mainNavService.systemMessage.message | safeHtml : { purify: true }"></div>
+      <div
+        [innerHTML]="mainNavService.systemMessage.message.message | safeHtml : { purify: true }"
+      ></div>
       <button
         mat-icon-button
         (click)="hideMessage()"
-        *ngIf="mainNavService.systemMessage.repeat === 'repeat'"
+        *ngIf="mainNavService.systemMessage.message.repeat === 'repeat'"
       >
         <i esIcon="close"></i>
       </button>

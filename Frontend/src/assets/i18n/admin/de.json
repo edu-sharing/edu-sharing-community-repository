@@ -62,6 +62,8 @@
       "EDIT_MESSAGE": "Anzeige-/Wartungsnachricht bearbeiten",
       "REMOVE_TITLE": "Nachricht löschen",
       "REMOVE_MESSAGE": "Soll die folgende Nachricht gelöscht werden?<br><br><hr>{{message}}",
+      "SELECT_COMPONENT": "Bereich auswählen",
+      "SELECT_COMPONENT_HINT": "Wählen Sie einen oder mehrere Bereiche aus (Oder verknüpft). Bei keiner Auswahl gilt die Nachricht für alle",
       "SELECT_CONTEXT": "Kontext(e) auswählen",
       "SELECT_CONTEXT_HINT": "Wählen Sie einen oder mehrere Kontexte aus (Oder verknüpft). Bei keiner Auswahl gilt die Nachricht für alle",
       "SELECT_TP": "Berechtigung(en) auswählen",

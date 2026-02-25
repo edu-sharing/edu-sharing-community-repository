@@ -219,6 +219,7 @@
     "SECURE": "Safe",
     "PERMISSIONS": "User management",
     "LOGIN": "Login",
+    "RENDER": "Render",
     "ADMIN": "Admin-Tools",
     "WORKSPACE_SHORT": "Workspace",
     "SEARCH_SHORT": "Search",

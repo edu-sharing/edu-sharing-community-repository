@@ -5937,6 +5937,12 @@
             },
             "type": "array"
           },
+          "components": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
           "userMode": {
             "enum": [
               "all",
@@ -17768,13 +17774,16 @@
     },
     "/config/v1/messages": {
       "get": {
-        "operationId": "getSystemMessage",
+        "operationId": "getSystemMessages",
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RepositoryMessage"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RepositoryMessage"
+                  }
                 }
               }
             },
