@@ -2,6 +2,16 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 @use '../../../pages/admin-page/messages/messages.component' as messages;
 
+@mixin messageWrapper {
+    display: flex;
+    gap: 20px;
+    > div {
+        flex-grow: 1;
+    }
+    ::ng-deep {
+        @include messages.removeTinyWrapping();
+    }
+}
 :host > div {
     width: 100%;
     display: flex;
@@ -17,14 +27,7 @@
         flex-grow: 1;
     }
     > es-info-message .wrapper {
-        display: flex;
-        gap: 20px;
-        > div {
-            flex-grow: 1;
-        }
-        ::ng-deep {
-            @include messages.removeTinyWrapping();
-        }
+        @include messageWrapper();
     }
 }
 
