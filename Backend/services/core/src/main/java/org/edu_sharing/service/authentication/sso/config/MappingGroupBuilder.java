@@ -5,7 +5,7 @@ import java.util.Map;
 
 public abstract class MappingGroupBuilder {
 
-	protected abstract void init(Map<String,String> ssoAttributes);
+	protected abstract void init(Map<String,String> ssoAttributes, String username);
 	
 	public abstract List<MappingGroup> getMapTo();
 	
