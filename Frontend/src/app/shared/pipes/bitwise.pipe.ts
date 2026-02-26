@@ -1,4 +1,5 @@
-import { PipeTransform, Pipe } from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
+
 /**
  * Bitwise check for a flag, returns true or false if the flag matches
  * Examples:

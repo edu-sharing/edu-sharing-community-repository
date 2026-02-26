@@ -78,7 +78,11 @@ export class MdsHelperService {
                     'mds does not define columns for ' + name + ', invalid configuration!',
                 );
             }
-            if (name === 'search' || name === 'collectionReferences') {
+            if (
+                ['search', 'collectionReferences', 'genericWidget', 'genericWidgetTable'].includes(
+                    name,
+                )
+            ) {
                 defaultColumns.push(new ListItem('NODE', RestConstants.LOM_PROP_TITLE));
                 defaultColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
                 defaultColumns.push(new ListItem('NODE', RestConstants.CCM_PROP_LICENSE));
@@ -94,6 +98,8 @@ export class MdsHelperService {
                 defaultColumns.push(new ListItem('GROUP', RestConstants.AUTHORITY_GROUPTYPE));
             } else if (name === 'searchCollections') {
                 defaultColumns.push(...ListItem.getCollectionDefaults());
+            } else {
+                defaultColumns.push(new ListItem('NODE', RestConstants.LOM_PROP_TITLE));
             }
             columns['Default'] = defaultColumns;
         }

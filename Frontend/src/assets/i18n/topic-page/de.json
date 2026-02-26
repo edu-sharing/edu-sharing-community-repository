@@ -1,0 +1,456 @@
+{
+  "TOPIC_PAGE": {
+    "NAVIGATION": {
+      "NEW_PAGE_VARIANT": "Neue Themenseiten-Variante",
+      "NEW_PAGE_TEMPLATE": "Neue Themenseiten-Vorlage",
+      "APPS": "Apps",
+      "APPS_ELEMENT_NOT_FOUND": "Das Element mit der Klasse wlo-show-apps konnte nicht gefunden werden.",
+      "TITLE": "Themenseiten",
+      "SEARCH_PLACEHOLDER": "Suche nach Inhalten auf der Themenseite ..."
+    },
+    "AI": {
+      "GENERATED": "KI-generiert",
+      "INVALID_PROMPT": "Prompt mit Syntax-Fehlern"
+    },
+    "WIDGET": {
+      "SUB_HEADING_LABEL_OPTIONAL": "Teil-Überschrift  (optional)",
+      "DESCRIPTION_LABEL": "Beschreibung",
+      "DESCRIPTION_LABEL_OPTIONAL": "Beschreibung (optional)",
+      "NO_SUBCOLLECTIONS": "Für diese Sammlung wurden keine Untersammlungen gefunden.",
+      "SAVE_CONFIG_ACTION": "Schließen",
+      "SAVE_CONFIG_MESSAGE": "Deine Änderungen werden gespeichert.",
+      "SAVE_CONFIG_ERROR_ACTION": "Seite neuladen",
+      "SAVE_CONFIG_ERROR_MESSAGE": "Deine Änderungen konnten nicht gespeichert werden.",
+      "NODE_NOT_PUBLIC": "Der ausgewählte Inhalt ist nicht öffentlich.",
+      "AI_WIDGET": {
+        "HEADING": "Anfrage",
+        "PROMPT_DESCRIPTION": "Formulieren Sie eine Anfrage an die KI.",
+        "PLACEHOLDER_DESCRIPTION": "Sie können dabei die nachfolgenden Platzhalter verwenden, welche automatisch durch die jeweils auf der Seite eingestellten Werte ersetzt werden:",
+        "AND": "und",
+        "PROMPT_LABEL": "Prompt für die KI",
+        "PROMPT_PLACEHOLDER": "KI-Prompt",
+        "PROMPT_ADJUSTED_HINT": "Der Prompt wurde angepasst, die Antworten jedoch noch nicht aktualisiert.",
+        "SEND_HINT": "Wenn Sie \"Senden\" klicken, wird die aktuell gespeicherte Anfrage überschrieben und alle zuvor definierten Texte zurückgesetzt.",
+        "SEND": "Senden",
+        "ANSWERS_LABEL": "Antworten",
+        "ANSWERS_DESCRIPTION": "Hier haben Sie die Möglichkeit, Antworten für verschiedene Kombinationen von Werten der Platzhalter zu definieren. Ebenso können Sie sich für die aktuelle Auswahl einen Text mittels KI generieren lassen.",
+        "SELECT_PLACEHOLDER": "-- Bitte auswählen --",
+        "GENERATE_TEXT": "Erzeuge einen neuen KI-Text",
+        "GENERATE_TEXT_HINT": "Es wird ein Text mittels KI generiert. Dies kann einige Zeit in Anspruch nehmen.",
+        "CURRENT_SELECTION_ANSWER_LABEL": "Antwort für die aktuelle Auswahl",
+        "NO_ANSWER_DEFINED": "Bisher wurde für die Auswahl noch kein Text hinterlegt."
+      },
+      "BREADCRUMB": {
+        "DEFAULT_ROOT_NAME": "Fachportale",
+        "EDITORIAL_TEAM": "Redaktion",
+        "ADD_MEMBER": "Mitglied hinzufügen",
+        "REMOVE_MEMBER": "Mitglied entfernen",
+        "FURTHER_EDITORIAL_MEMBERS": "weitere RedakteurInnen",
+        "AND": "und",
+        "NO_MEMBERS_SELECTED": "Bisher wurden noch keine Redaktionsmitglieder ausgewählt.",
+        "PAGE_VARIANT_LABEL": "Seiten-Variante",
+        "NAVIGATE_TO_PAGE_TEMPLATE": "Zur Seiten-Vorlage"
+      },
+      "COLLECTION_CHIPS": {
+        "DEFAULT_ICON": "Standard-Icon",
+        "UPLOADED_ICON": "Hochgeladenes Icon",
+        "CONFIG_ARIA": "Wähle das Layout der Navigationspillen",
+        "CHANGE_FILTER_OR_SEARCH": "Filter oder Suche ändern"
+      },
+      "CONTENT_TEASER": {
+        "CONFIG_ARIA": "Wähle das Layout des Inhalte-Teasers",
+        "CHANGE_FILTER_OR_SEARCH": "Filter oder Suche ändern",
+        "SWITCH_INTO_EDIT_MODE": "In den Bearbeitungsmodus wechseln",
+        "SWITCH_INTO_VIEW_MODE": "In den Anzeigemodus wechseln",
+        "POPUP_BLOCKED": "Popup wurde blockiert oder konnte nicht geöffnet werden.",
+        "FILTER_EVENT_RECEIVED": "Filter-Event empfangen",
+        "NO_CONTENTS": "Noch keine Inhalte",
+        "TITLE_LABEL": "Titel",
+        "LRT_LABEL": "Materialart",
+        "TAXONID_LABEL": "Fachgebiet",
+        "EDUCATIONAL_CONTEXT_LABEL": "Bildungsstufe",
+        "SOURCE_LABEL": "Quelle",
+        "AUTHOR_LABEL": "Autor",
+        "WEBSITE_LABEL": "Webseite",
+        "CHANGE_ON_INSPECTION_TABLE": "Objekt auf Prüftisch ändern",
+        "REMOVE_FROM_WIDGET": "Objekt ausblenden",
+        "ADD_TO_WIDGET": "Objekt einblenden"
+      },
+      "EDITABLE_TEXT": {
+        "SHOW_MORE": "mehr anzeigen",
+        "SHOW_LESS": "weniger anzeigen",
+        "BOLD": "Fett",
+        "ITALIC": "Kursiv",
+        "QUOTE": "Zitat",
+        "CODE": "Code",
+        "LINK": "Link",
+        "UNORDERED_LIST": "Nicht sortierte Liste",
+        "ORDERED_LIST": "Sortierte Liste",
+        "TITLE": "Titel der Sammlung einfügen",
+        "DESCRIPTION": "Beschreibung der Sammlung einfügen",
+        "TARGET_GROUP": "Zielgruppe des Nutzers einfügen",
+        "EDUCATIONAL_LEVEL": "Bildungsstufe des Nutzers einfügen"
+      },
+      "FILTER_BAR": {
+        "NO_DATA": "Es wurden keine Daten zur Filterung gefunden.",
+        "CHANGES_SAVED": "Deine Änderungen wurden gespeichert.",
+        "CHANGES_RESET": "Deine Änderungen wurden zurückgesetzt.",
+        "ERROR_RETRIEVING_DATA": "Es ist ein Fehler beim Abrufen der ausgewählten Dimensionen aufgetreten.",
+        "PROFILING": {
+          "CHANGES_SAVED": "Profil gespeichert – jetzt bekommst du passende Inhalte angezeigt!",
+          "CHANGES_RESET": "Deine Profilierung wurde zurückgesetzt."
+        }
+      },
+      "GENERIC_WIDGET": {
+        "NO_WIDGET_CONTAINER": "Es konnte kein Widget Container gefunden werden.",
+        "ERROR_LOADING_WIDGET": "Fehler beim Laden der Widget Komponente.",
+        "WIDGET_TYPE": "Widget-Typ",
+        "STACK_TRACE": "Stack Trace",
+        "PARSE_OVERWRITE_ERROR": "Fehler beim Parsen der configOverwrite.",
+        "WIDGET_NOT_FOUND_IN_MODULE_OR_UNKNOWN": "Das Widget konnte nicht im Modul gefunden werden oder ist unbekannt ({{type}})."
+      },
+      "IFRAME_WIDGET": {
+        "SOURCE": "Quelle (src)",
+        "WIDTH": "Weite",
+        "HEIGHT": "Höhe",
+        "TITLE": "Titel (für Barrierefreiheit)",
+        "SHOW_BORDER": "Rahmen anzeigen?",
+        "SHOW_CONFIRMATION": "Bestätigungsdialog anzeigen?",
+        "SHOW_PREVIEW": "Vorschau anzeigen",
+        "UPDATE_PREVIEW": "Vorschau aktualisieren",
+        "PREVIEW_TITLE": "Vorschau des iFrames",
+        "SAVE_CONFIG": "Konfiguration speichern",
+        "SHOW_EXTERNAL_CONTENT": {
+          "HEADING": "Ja, externen Inhalt anzeigen",
+          "MESSAGE": "Sie sind dabei, externe Inhalte zu laden und anzuzeigen. Dabei werden unter Umständen persönliche Daten an diese übermittelt und dort verarbeitet.",
+          "BUTTON": "Zustimmen und fortfahren"
+        },
+        "NOT_SUPPORTED": "Ihr Browser unterstützt keine iFrames.",
+        "MISSING_SRC": "Es wurde keine Quelle angegeben, wodurch kein iFrame angezeigt werden kann."
+      },
+      "IMAGE_WRAPPER": {
+        "BACKDROP": "Verschommener Hintergrund des Bilds",
+        "ALT": "Bild zur Motivation des Themas",
+        "GENERATE": "Bild generieren",
+        "REGENERATE": "Bild neu generieren",
+        "UPLOAD": "Bild hochladen",
+        "DELETE": "Bild löschen",
+        "NO_IMAGE_SELECTED": "Es wurde noch kein Bild ausgewählt."
+      },
+      "MAP_VIEW": {
+        "HEADING": "Filter",
+        "RESET_ALL": "alle zurücksetzen",
+        "GERMANY": "Deutschland",
+        "YOUR_REGION": "Deine Region (in der Nähe)",
+        "RESULTS_SINGLE": "1 Ergebnis",
+        "RESULTS_MULTIPLE": "{{count}} Ergebnisse",
+        "SEARCH_LOCATION": "Suche innerhalb der Map",
+        "AT_LEAST_TWO_CHARACTERS": "Bitte geben Sie mindestens 2 Zeichen ein.",
+        "UNKNOWN_CITY": "Unbekannter Ort",
+        "ACTIVE_FILTERS": "Aktive Filterkriterien",
+        "SHOW_RESULTS_SINGLE": "1 Ergebnis anzeigen",
+        "SHOW_RESULTS_MULTIPLE": "{{count}} Ergebnisse anzeigen",
+        "SHOW_FILTERS": "Filter anzeigen",
+        "HIDE_FILTERS": "Filter ausblenden",
+        "ORGANIZATION": "Organisation",
+        "PEOPLE": "Personen",
+        "GENERAL_LOCATION": "Allgemeiner Ort",
+        "SHARE_CONTENT": "Inhalt teilen",
+        "OPEN_PAGE": "Seite öffnen",
+        "ADDRESS": "Adresse",
+        "TARGET_GROUP": "Zielgruppe",
+        "DISCIPLINE": "Fach",
+        "IS_LOADING": "Die Ergebnisse werden aktualisiert ...",
+        "NO_INFORMATION_AVAILABLE": "Keine Informationen vorhanden."
+      },
+      "MEDIA_RENDERING": {
+        "NO_ELEMENT_SELECTED": "Es wurde noch kein Element zur Anzeige ausgewählt.",
+        "TO_ORIGINAL_PAGE": "Zur Originalseite",
+        "SHOW_DETAILS": "Details einblenden",
+        "HIDE_DETAILS": "Details ausblenden",
+        "CONFIG_ARIA": "Wähle das Layout des Medien-Widgets",
+        "CHANGE_CONTENT": "Inhalt ändern",
+        "SELECT_CONTENT": "Inhalt auswählen",
+        "SELECT_CONTENT_TOOLTIP": "Hinweis: Wählen Sie einen öffentlichen Inhalt über die Redaktionsumgebung aus und klicken anschließend auf \"Übernehmen\"."
+      },
+      "PROPOSE_CONTENT": {
+        "TITLE": "Inhalt vorschlagen",
+        "NO_CONTENT_QUESTION": "Noch kein Inhalt?",
+        "SHARING_MAKES_YOU_HAPPY": "Teilen macht Freude",
+        "CONTENT_QUESTION": "Du kennst einen tollen Inhalt, der hier unbedingt erscheinen sollte?",
+        "POINTING_OWL": "WLO-Eule zeigt in deine Richtung."
+      },
+      "SEARCH_WIDGET": {
+        "SEARCH": "Suche",
+        "SEARCH_PLACEHOLDER": "Suche nach Inhalten auf der Themenseite ..."
+      },
+      "SHARE_OPTIONS": {
+        "COPY_LINK": "Link kopieren",
+        "COPY_LINK_TO_CONTENT": "Link zum Inhalt kopieren",
+        "WRITE_MAIL": {
+          "HEADING": "Mail schreiben",
+          "SUBJECT_SHARED_CONTENT": "Geteilter Inhalt: {{title}}",
+          "BODY_SHARED_CONTENT": "Hallo,\n\nich möchte diesen Inhalt mit dir teilen:\n\n{{url}}\n\nViele Grüße",
+          "NO_TITLE": "Ohne Titel",
+          "ERROR_NO_URL": "Keine URL im Knoten verfügbar:"
+        }
+      },
+      "SIDE_MENU": "Seitenmenü",
+      "STATISTICS": {
+        "ALL_LABEL": "Alle Inhalte auf dieser Themenseite",
+        "EDITORIAL_LABEL": "Davon redaktionell geprüfte Inhalte",
+        "OER_LABEL": "Davon OER Inhalte",
+        "MORE_RESULTS": {
+          "PREFIX": "Die Suche findet noch mehr:",
+          "SINGLE": "1 Inhalt",
+          "MULTIPLE": "{{count}} Inhalte insgesamt"
+        },
+        "WORK": "Berufe",
+        "EDUCATIONAL_OFFERS": "Bildungsangebote",
+        "EVENTS": "Veranstaltungen",
+        "MATERIALS": "Materialien",
+        "SOURCES": "Quellen",
+        "ORGANIZATIONS": "Organisationen",
+        "PEOPLE": "Personen",
+        "TOOLS": "Tools",
+        "PROMPTS": "Prompts",
+        "FIELDS_OF_ACTION": "Handlungsfelder",
+        "DIDACTIC_CONCEPTS": "Didaktische Konzepte",
+        "NO_STATISTICS_EXIST": "Für diese Themenseite existieren keine Statistiken."
+      },
+      "TOPIC_HEADER": {
+        "TOPIC_PAGE_SUBJECT_PORTAL_LABEL": "Themenseite Fachportal",
+        "COLLECTION_DESCRIPTION_LABEL": "Sammlungsbeschreibung",
+        "IMPORTANCE_HEADER": "Wofür ist das wichtig?",
+        "IMPORTANCE_LABEL": "Beschreibung der Wichtigkeit"
+      },
+      "TOPICS_COLUMN_BROWSER": {
+        "ERROR_RECEIVING_DATA": "Fehler beim Empfangen der Daten"
+      },
+      "EMBEDDING": {
+        "LABEL": "Einbetten",
+        "CODE_COPIED": "Der Code zur Einbettung des Inhaltes wurde in Ihre Zwischenablage kopiert."
+      },
+      "CHOOSE_LAYOUT": "Wähle Layout",
+      "COLOR": "Farbe",
+      "LAYOUT": {
+        "PREVIEW": "Vorschau",
+        "PREVIEW_ARIA": "Zeige als reine Vorschau",
+        "PREVIEW_TITLE": "Mit Titel",
+        "PREVIEW_TITLE_ARIA": "Zeige als Vorschau mit Titel",
+        "PREVIEW_TITLE_BUTTONS": "Erweitert",
+        "PREVIEW_TITLE_BUTTONS_ARIA": "Zeige als Vorschau mit Titel und Buttons",
+        "SINGLE_VIEW": "Einfach",
+        "SINGLE_VIEW_ARIA": "Einfachansicht",
+        "SPLIT_VIEW": "Geteilt",
+        "SPLIT_VIEW_ARIA": "Geteilte Ansicht",
+        "STANDARD_VIEW": "Standard",
+        "STANDARD_VIEW_ARIA": "Standardansicht",
+        "COMPACT_VIEW": "Kompakt",
+        "COMPACT_VIEW_ARIA": "Kompakte Ansicht",
+        "LIST_VIEW": "Liste",
+        "LIST_VIEW_ARIA": "Listenansicht",
+        "MAP_VIEW": "Karte",
+        "MAP_VIEW_ARIA": "Kartenansicht",
+        "BUTTONS": "Buttons",
+        "BUTTONS_ARIA": "Anzeige als Buttons",
+        "GRID": "Kacheln",
+        "GRID_ARIA": "Anzeige als Kacheln"
+      }
+    },
+    "SIDE_MENU": {
+      "EDIT_PAGE": "Seite bearbeiten",
+      "BACK_TO_PREVIEW": "Vorschau",
+      "NEW": "Neu",
+      "PROFILING": {
+        "LABEL": "Profilierung",
+        "HEADING": "Wer bist du?"
+      },
+      "TOPIC_TREE": {
+        "LABEL": "Themenbaum",
+        "HEADING": "Themenbaum von {{topic}}"
+      },
+      "STATISTICS": {
+        "LABEL": "Statistik",
+        "HEADING": "Inhalte von {{topic}}"
+      },
+      "CONFIG_PAGE_VARIANT": {
+        "LABEL": "Einstellungen",
+        "HEADING": "Einstellungen der Themenseiten-Variante",
+        "INFO_TITLE": "Parameter definieren",
+        "INFO_TEXT": "Vergib einen eindeutigen Titel und wähle eine passende Zielgruppe aus.",
+        "WARN_TEXT": "Nicht alle erforderlichen Parameter-Felder sind ausgefüllt. Du kannst den Vorgang nicht abbrechen.",
+        "TITLE": "Titel der Variante",
+        "TITLE_PLACEHOLDER": "Themenseiten-Variante für xyz",
+        "EDUCATION_LEVEL_LABEL": "Bildungsstufe",
+        "TARGET_GROUP_LABEL": "Zielgruppe",
+        "DELETE_VARIANT": "Variante löschen"
+      },
+      "SWITCH_INTO_TEMPLATE_MODE": "Zur Seiten-Vorlage",
+      "SWITCH_INTO_STANDARD_MODE": "Zurück zur Seite",
+      "RESET_URL_PARAMETER": "Seite ohne Parameter laden"
+    },
+    "CONFIG_PAGE_TEMPLATE": {
+      "HEADING": "Bearbeitung der Seiten-Vorlage(n)",
+      "SAME_REF_ERROR": "Sie nutzen derzeit die gleiche Vorlage für Portale und Themenseiten. Dies sollte vermieden werden.",
+      "UNLINK": "Loslösen",
+      "ADD_EMPTY_TEMPLATE": "Leere Vorlage erstellen",
+      "EMPTY_TEMPLATE_HINT": "Bisher ist noch keine Vorlage vorhanden. Verwenden Sie den Button, um eine leere Vorlage anzulegen und dahin zu wechseln.",
+      "SWITCH_TO_PAGE_VARIANT": "Zur Seiten-Vorlage wechseln",
+      "SWITCH_TO_PAGE_VARIANT_HINT": "Klicken Sie den Button, um zur Vorlage zu wechseln und diese zu bearbeiten."
+    },
+    "CONFIG_WIDGET_EMBEDDING": {
+      "HEADING": "Widget einbetten",
+      "INFO": "Mithilfe dieses Dialogs kannst du dein Widget auf einer externen Seite einbetten. Nach Auswahl einer Option wird der Code automatisch in deine Zwischenablage kopiert.",
+      "HINT": "Hinweis: Zur erfolgreichen Einbindung muss die Ziel-Domain durch WLO freischaltet sein.",
+      "OPTION_NODE_ID_LABEL": "Einbindung über Node-ID",
+      "OPTION_NODE_ID_DESCRIPTION": "Das Widget wird mit dessen individueller ID eingebettet. Alle nachträglichen Änderungen am Widget werden automatisch übernommen.",
+      "OPTION_NODE_ID_NOT_FOUND": "Hinweis: Diese Option kann nicht ausgewählt werden, da noch keine Anpassungen am Widget vorgenommen wurden.",
+      "OPTION_OVERWRITE_LABEL": "Einbindung über statisches Konfigurationsobjekt",
+      "OPTION_OVERWRITE_DESCRIPTION": "Das Widget wird in der aktuellen Konfiguration auf der externen Seite eingebettet.",
+      "RECOMMENDED": "Empfohlen"
+    },
+    "ANCHOR_FALLBACK_PREFIX": "Abschnitt",
+    "SWIMLANE": {
+      "HEADING_LABEL": "Überschrift",
+      "DEFAULT_HEADING": "Eine beispielhafte Überschrift",
+      "POSITION_UP": "Abschnitt nach oben verschieben",
+      "POSITION_DOWN": "Abschnitt nach unten verschieben",
+      "SELECT_ELEMENT": {
+        "HEADING": "Inhaltselement hinzufügen",
+        "CONTAINER_ELEMENT": "Bereichselement",
+        "ACCORDION_ELEMENT": "Akkordeonelement",
+        "ANCHOR_MENU": "Ankermenü"
+      },
+      "SELECT_BACKGROUND": {
+        "HEADING": "Wähle Hintergrund",
+        "COLOR": "Farbe",
+        "SHAPE": "Form",
+        "NONE": "Keine",
+        "ARROW_LARGE": "Pfeil (groß)",
+        "ARROW_SMALL": "Pfeil (klein)",
+        "FLAG_LARGE": "Flagge (groß)",
+        "FLAG_SMALL": "Flagge (klein)",
+        "ROUND_LARGE": "Abgerundet (groß)",
+        "ROUND_SMALL": "Abgerundet (klein)",
+        "MIRROR": "Spiegeln"
+      },
+      "SELECT_LAYOUT": {
+        "HEADING": "Layout auswählen",
+        "ONE_COLUMN": "Eine Spalte",
+        "TWO_COLUMNS": "Zwei Spalten",
+        "THREE_COLUMNS": "Drei Spalten",
+        "LEFT_SIDE_PANEL": "Linke Seitenleiste",
+        "RIGHT_SIDE_PANEL": "Rechte Seitenleiste"
+      },
+      "CHANGE_GRID": {
+        "CONFIGURE": "Grid konfigurieren",
+        "ADJUST": "Grid anpassen",
+        "CONFIGURED_WIDGET_WARNING": "Mit dieser Anpassung löschen Sie ein bereits konfiguriertes Widget. Sind Sie sicher, dass Sie fortfahren wollen?",
+        "UNCONFIGURED_WIDGET_WARNING": "Ein oder mehrere hinzugefügte, aber noch nicht konfigurierte Widgets gehen durch diese Anpassung verloren. Sind Sie sicher, dass Sie fortfahren wollen?"
+      },
+      "NO_WIDGET_AVAILABLE": "Noch kein Widget vorhanden",
+      "SELECT_WIDGET": {
+        "HEADING": "Widget hinzufügen",
+        "CURRENT_TYPE": "Aktueller Widget-Typ",
+        "CONFIG_EXISTS": "bereits konfiguriert",
+        "CHANGE_TYPE": "Widget-Typ ändern",
+        "CHANGE_TYPE_WARNING": "Wollen Sie wirklich ein bereits konfiguriertes Widget austauschen? Die Konfiguration dieses Widgets geht dabei verloren.",
+        "DELETE": "Widget löschen",
+        "DELETE_WARNING": "Wollen Sie wirklich ein bereits konfiguriertes Widget löschen? Die Konfiguration dieses Widgets geht dabei verloren.",
+        "EDITORIAL_MEMBERS": "Redaktionsmitglieder",
+        "COLLECTION_CHIPS": "Navigationspillen",
+        "TOPICS_COLUMN_BROWSER": "Themenbaum (ausklappbar)",
+        "CONTENT_TEASER": "Inhalte-Teaser",
+        "MEDIA_RENDERING": "Medien-Widget",
+        "TEXT_WIDGET": "Text-Widget",
+        "IFRAME_WIDGET": "iFrame-Widget",
+        "AI_TEXT_WIDGET": "KI-Widget",
+        "undefined": "Anwendungsspezifischer Typ"
+      },
+      "QR_CODE": {
+        "HEADING": "Link zum Inhalt",
+        "TOOLTIP": "QR Code anzeigen"
+      },
+      "SHARE_CONTENT": {
+        "HEADING": "Inhalt teilen",
+        "COPY_LINK": "Link kopieren",
+        "COPY_LINK_SUCCESS": "Der Link wurde in Ihre Zwischenablage kopiert.",
+        "WRITE_MAIL": {
+          "HEADING": "Mail schreiben",
+          "SUBJECT_SHARED_CONTENT": "Geteilter Inhalt: {{title}}",
+          "BODY_SHARED_CONTENT": "Hallo,\n\nich möchte diesen Inhalt mit dir teilen:\n\n{{url}}\n\nViele Grüße",
+          "NO_TITLE": "Ohne Titel",
+          "ERROR_NO_URL": "Keine URL verfügbar"
+        }
+      },
+      "EDIT": {
+        "ARIA_LABEL": "Abschnitt bearbeiten",
+        "HEADING": "Konfiguriere {{heading}}",
+        "HEADING_LABEL": "Überschrift",
+        "HEADING_PLACEHOLDER": "Überschrift des Abschnitts",
+        "SWIMLANE_DEFAULT": "Abschnitt",
+        "TYPE_LABEL": "Typ",
+        "GRID_DEFINITION_LABEL": "Grid-Definition",
+        "CHANGE_GRID_HINT": "Wenn Sie den Grid-Typ ändern, können Widgets, die auf später nichtmehr vorhandenen Positionen am Ende des Grids hinzugefügt wurden, verloren gehen. Verschieben Sie daher bitte zuerst die jeweiligen Widgets, bevor Sie mit der Grid-Anpassung fortfahren."
+      },
+      "DELETE": {
+        "LABEL": "Abschnitt löschen",
+        "MESSAGE": "Willst du diesen Abschnitt wirklich löschen?"
+      }
+    },
+    "PREVIEW_PANEL": {
+      "CLOSE": "Vorschauansicht schließen",
+      "DURATION_LABEL": "Dauer",
+      "LANGUAGES_LABEL": "Sprache(n)",
+      "ALL_DETAILS": "Alle Details",
+      "EMBED_ELEMENT": "Element einbetten",
+      "LICENSE_LABEL": "Lizenz",
+      "CONDITIONS_OF_ACCESS": "Zugangsvoraussetzungen",
+      "PRICE": "Kosten",
+      "FREE_OF_CHARGE": "Kostenlos verfügbar",
+      "PAID_CONTENT": "Kostenpflichtig",
+      "CONTAINS_ADVERTISEMENT": "Werbung enthalten?",
+      "NO_ADVERTISEMENT": "keine Werbung",
+      "ADVERTISEMENT_CONTAINED": "Enthält Werbung",
+      "REPORT_PROBLEM": "Problem melden",
+      "RELATED_CONTENT": "Dazu passend"
+    },
+    "NO_SWIMLANES": "Bisher wurden noch keine Swimlanes mit Inhalten erstellt.",
+    "NO_PAGE_CONFIG": {
+      "DEFAULT_MESSAGE": "Für diese Seite konnte keine Seiten-Konfiguration gefunden werden.",
+      "VIEW_MESSAGE": "Bitte wenden Sie sich an Ihren Systemadministrator.",
+      "EDIT_MESSAGE": "Sie können jedoch über das Menü eine Seiten-Konfiguration auswählen, die Sie verwenden wollen.",
+      "SELECT_LABEL": "Seiten-Konfiguration",
+      "SELECT_PLACEHOLDER": "Seiten-Konfiguration auswählen",
+      "CREATE_PAGE": "Seite anlegen",
+      "MISSING_CONFIG_OR_VARIANTS": "Die Seiten-Konfiguration enthält keine Seiten-Varianten oder es konnte keine Seiten-Variante gewählt werden.",
+      "MISSING_VARIANTS": "Die Seiten-Konfiguration enthält keine Seiten-Varianten."
+    },
+    "NO_PAGE_VARIANT": {
+      "DEFAULT_MESSAGE": "Für diese Seite konnte keine Seiten-Variante gefunden werden.",
+      "NO_SELECTED_VARIANT": "Es konnte keine ausgewählte Seiten-Variante gefunden werden.",
+      "NO_SELECTED_VARIANT_NODE": "Es konnte kein ausgewählter Seiten-Varianten-Knoten gefunden werden.",
+      "VARIANT_OR_STRUCTURE_MISSING": "Es konnte entweder keine Seiten-Variante oder keine Struktur darin gefunden werden.",
+      "MISSING_IN_PAGE_CONFIG": "Die Seiten-Konfiguration enthält keine Varianten."
+    },
+    "NO_SEARCH_RESULTS": "Es konnen keine Suche-Ergebnisse in den Abschnitten gefunden werden.",
+    "SAVE_CONFIG_MESSAGE": "Deine Änderungen werden gespeichert.",
+    "SAVE_CONFIG_ERROR_ACTION": "Seite neuladen",
+    "SAVE_CONFIG_ERROR_MESSAGE": "Beim Laden einer Ressource ist ein Fehler aufgetreten. Bitte laden Sie die Seite neu.",
+    "CREATE_PAGE_VARIANT": {
+      "HEADING": "Seiten-Variante erstellen",
+      "MESSAGE": "Willst du wirklich auf Grundlage der Seiten-Struktur der aktuell gewählten Variante eine neue Seiten-Variante erstellen?",
+      "PENDING_MESSAGE": "Eine neue Seiten-Variante wird erstellt und geladen."
+    },
+    "DELETE_PAGE_VARIANT": {
+      "HEADING": "Seiten-Variante löschen",
+      "MESSAGE": "Willst du wirklich die aktuell gewählte Variante löschen?",
+      "PENDING_MESSAGE": "Die Seiten-Variante wird samt aller Anpassungen gelöscht."
+    },
+    "TEMPLATE_MODE_ACTIVE": {
+      "VIEW": "Sie befinden sich aktuell im Anzeigemodus der Vorlage.",
+      "EDIT": "Sie befinden sich aktuell im Bearbeitungsmodus der Vorlage."
+    }
+  }
+}

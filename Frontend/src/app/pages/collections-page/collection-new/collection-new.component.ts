@@ -108,20 +108,6 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     public hasCustomScope: boolean;
     public COLORS: string[];
-    public DEFAULT_COLORS: string[] = [
-        '#975B5D',
-        '#692426',
-        '#E6B247',
-        '#A89B39',
-        '#699761',
-        '#32662A',
-        '#60998F',
-        '#29685C',
-        '#759CB7',
-        '#537997',
-        '#976097',
-        '#692869',
-    ];
     public isLoading = true;
     currentCollection: EduData.Node;
     public newCollectionType: string;
@@ -293,7 +279,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
 
                     this.COLORS = this.configLegacy.instant(
                         'collections.colors',
-                        this.DEFAULT_COLORS,
+                        RestConstants.DEFAULT_COLLECTION_COLORS,
                     );
                     if (data.statusCode != RestConstants.STATUS_CODE_OK) {
                         this.toast.error(

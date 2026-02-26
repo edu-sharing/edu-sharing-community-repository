@@ -18,7 +18,6 @@ import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import {
     AuthenticationService,
     HOME_REPOSITORY,
-    Node,
     NodeServiceUnwrapped,
     UserService,
 } from 'ngx-edu-sharing-api';

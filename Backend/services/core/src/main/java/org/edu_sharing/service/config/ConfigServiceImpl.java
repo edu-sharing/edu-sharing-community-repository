@@ -40,6 +40,7 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -132,18 +133,26 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
         return contextCacheById.get(id);
     }
 
+    /**
+     *
+     * @param includeStatic include static contexts from the xml file
+     * @return
+     */
     @Override
-    public List<Context> getAvailableContext() {
+    public List<Context> getAvailableContext(boolean includeStatic) {
         return AuthenticationUtil.runAsSystem(() -> {
             String eduSharingSystemFolderContext = userEnvironmentTool.getEdu_SharingContextFolder();
             Map<String, Map<String, Object>> dynamicContextObjects = nodeService.getChildrenPropsByType(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, eduSharingSystemFolderContext, CCConstants.CCM_TYPE_CONTEXT);
-            return dynamicContextObjects
+            List<Context> result = dynamicContextObjects
                     .values()
                     .stream()
                     .map(x -> x.get(CCConstants.CCM_PROP_CONTEXT_CONFIG).toString())
                     .map(CheckedFunction.wrap(x -> objectMapper.readValue(x, Context.class), null))
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+                    .filter(Objects::nonNull).collect(Collectors.toList());
+            if (includeStatic) {
+                result.addAll(contextCacheById.getKeys().stream().filter(c -> result.stream().noneMatch(d -> d.id.equals(c))).map(contextCacheById::get).collect(Collectors.toList()));
+            }
+            return result;
         });
     }
 

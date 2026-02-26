@@ -141,6 +141,7 @@ export class MdsViewerServiceMock extends MdsViewerService {
 }
 @Injectable()
 export class AuthenticationServiceMock {
+    reportOutsideApiRequest() {}
     hasToolpermission(toolpermission: string) {
         return this.observeLoginInfo()
             .pipe(
@@ -260,10 +261,14 @@ export class ConfigServiceMock {
         return of(config);
     }
 }
+const MockNodes: { [key: string]: Node } = {};
+export function registerMockNode(node: Node) {
+    MockNodes[node.ref.id] = node;
+}
 @Injectable()
 export class NodeServiceMock {
     getNode(id: string, { repository = HOME_REPOSITORY } = {}): Observable<Node> {
-        return of(DummyNode as Node);
+        return of(MockNodes[id] || (DummyNode as Node));
     }
     editNodeMetadata(
         id: string,
@@ -368,6 +373,11 @@ export class SuggestionsV1ServiceMock {
                     params.node,
                     ['6-12'],
                 ),
+                'ccm:taxonid': this.BaseSuggestion('ccm:taxonid', params.node, [
+                    '02002020104',
+                    '020020205',
+                    '020020206',
+                ]),
                 'ccm:commonlicense_ai_tool': this.BaseSuggestion(
                     'ccm:commonlicense_ai_tool',
                     params.node,
@@ -530,7 +540,7 @@ export const Data: Values = {
     ['ccm:educationaltypicallearningtime']: ['' + 600_000],
     ['ccm:educationaltypicalagerange_from']: ['0'],
     ['ccm:educationaltypicalagerange_to']: ['99'],
-    ['ccm:taxonid']: ['0200105', '0200101'],
+    ['ccm:taxonid']: ['0200105', '0200101', '0200108', '020020203', '020020205'],
     ['ccm:educationalcontext']: ['vocational education'],
     ['ccm:lifecyclecontributer_author']: [VCardDummy.toVCardString(), VCardDummy.toVCardString()],
     ['ccm:lifecyclecontributer_publisher']: [
@@ -17111,7 +17121,7 @@ export const DefaultMds: MdsDefinition = {
             id: 'node_general',
             caption: 'Allg. Informationen',
             icon: 'description',
-            html: '\n\t\t\t  <preview>\n              <ccm:wwwurl>\n              <cm:name>\n              <cclom:title><ccm:educationaltypicallearningtime><ccm:educationaltypicalagerange><ccm:commonlicense_ai_tool caption="Test AI Tool" type="radioVertical"><ccm:tool_category>\n              <ccm:educationallearningresourcetype>\n              <cclom:general_keyword>\n              <cclom:general_description>\n              <author>\n              <license>\n              <version>\n              <childobjects> <ccm:tool_instance_params>\n\t\t\t\t',
+            html: '\n\t\t\t  <preview>\n              <ccm:wwwurl>\n              <cm:name>\n              <cclom:title> <ccm:taxonid> <ccm:educationaltypicallearningtime><ccm:educationaltypicalagerange><ccm:commonlicense_ai_tool caption="Test AI Tool" type="radioVertical"><ccm:tool_category>\n              <ccm:educationallearningresourcetype>\n              <cclom:general_keyword>\n              <cclom:general_description>\n              <author>\n              <license>\n              <version>\n              <childobjects> <ccm:tool_instance_params>\n\t\t\t\t',
             rel: null,
             hideIfEmpty: false,
             isExtended: false,
@@ -17142,7 +17152,9 @@ export const DefaultMds: MdsDefinition = {
             id: 'node_general_bulk',
             caption: null,
             icon: 'description',
-            html: '\n              <cclom:title>\n              <ccm:educationallearningresourcetype>\n              <cclom:general_keyword>\n              <cclom:general_description>\n\t\t\t\t',
+            html:
+                '\n              <cclom:title>\n              <ccm:educationallearningresourcetype>\n              <cclom:general_keyword>\n              <cclom:general_description>' +
+                '<ccm:taxonid> <ccm:educationaltypicallearningtime> <ccm:educationaltypicalagerange> <ccm:tool_category> ',
             rel: null,
             hideIfEmpty: false,
             isExtended: false,

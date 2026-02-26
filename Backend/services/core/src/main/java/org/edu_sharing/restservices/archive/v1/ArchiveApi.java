@@ -41,7 +41,7 @@ public class ArchiveApi {
 	private static Logger logger = Logger.getLogger(ArchiveApi.class);
 	
 	@GET
-	@Path("/search/{repository}/{pattern}")
+	@Path("/search/{repository}")
 	
 	@Operation(operationId = "searchArchive", summary = "Searches for archive nodes.", description = "Searches for archive nodes.")
 	
@@ -55,7 +55,7 @@ public class ArchiveApi {
 	    })
 	
 	public Response search(@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
-			@Parameter(description = "search pattern", required = true) @PathParam("pattern") String pattern,
+			@Parameter(description = "search pattern", required = true) @QueryParam("pattern") String pattern,
 			@Parameter(description = "maximum items per page", schema = @Schema(defaultValue="10")) @QueryParam("maxItems") Integer maxItems,
 		    @Parameter(description = "skip a number of items", schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
 		    @Parameter(description = "sort properties") @QueryParam("sortProperties") List<String> sortProperties,

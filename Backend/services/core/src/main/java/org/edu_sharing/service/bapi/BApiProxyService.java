@@ -1,5 +1,6 @@
 package org.edu_sharing.service.bapi;
 
+import co.elastic.clients.util.ContentType;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +13,6 @@ import org.apache.commons.lang.StringUtils;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.permission.annotation.Permission;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
@@ -24,17 +24,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BApiProxyService {
 
-    @Value("${repository.bapi.uri:}")
-    private String bapiUri;
-
-    @Value("${repository.bapi.authUserApiKey:}")
-    private String authUserApiKey;
-
-    @Value("${repository.bapi.guestUserApiKey:}")
-    private String guestUserApiKey;
-
-    @Value("${repository.bapi.callTimeout:PT1m}")
-    private String callTimeout;
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    private final BApiProxyConfig bApiProxyConfig;
 
     private final GuestService guestService;
 
@@ -50,20 +41,20 @@ public class BApiProxyService {
     public Response forwardRequest(String path, String body, HttpHeaders headers, HttpMethod method) {
         String authenticatedUser = AuthenticationUtil.getFullyAuthenticatedUser();
         String apiKey = guestService.isGuestUser(authenticatedUser) ?
-                guestUserApiKey : authUserApiKey;
+                bApiProxyConfig.getGuestUserApiKey() : bApiProxyConfig.getAuthUserApiKey();
 
-        if (StringUtils.isBlank(bapiUri) || StringUtils.isBlank(apiKey)) {
+        if (StringUtils.isBlank(bApiProxyConfig.getUri()) || StringUtils.isBlank(apiKey)) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .callTimeout(Duration.parse(callTimeout))
-                .connectTimeout(Duration.parse(callTimeout))
-                .writeTimeout(Duration.parse(callTimeout))
-                .readTimeout(Duration.parse(callTimeout))
+                .callTimeout(Duration.parse(bApiProxyConfig.getCallTimeout()))
+                .connectTimeout(Duration.parse(bApiProxyConfig.getCallTimeout()))
+                .writeTimeout(Duration.parse(bApiProxyConfig.getCallTimeout()))
+                .readTimeout(Duration.parse(bApiProxyConfig.getCallTimeout()))
                 .build();
         Request.Builder requestBuilder = new Request.Builder();
-        requestBuilder.url(bapiUri.concat(path));
+        requestBuilder.url(bApiProxyConfig.getUri().concat(path));
 
         RequestBody requestBody = null;
         if (StringUtils.isNotBlank(body)) {
@@ -85,7 +76,11 @@ public class BApiProxyService {
             Response.ResponseBuilder result = Response.status(response.code());
             if (response.body() != null) {
                 result.entity(response.body().string());
-                result.type(String.valueOf(response.body().contentType()));
+                if(response.body().contentType() != null) {
+                    result.type(String.valueOf(response.body().contentType()));
+                } else {
+                    result.type(ContentType.APPLICATION_JSON);
+                }
             }
             return result.build();
         } catch (IOException e) {

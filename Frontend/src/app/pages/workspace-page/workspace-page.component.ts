@@ -41,7 +41,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { delay, filter, first, map, startWith, take, takeUntil } from 'rxjs/operators';
+import { delay, filter, first, map, take, takeUntil } from 'rxjs/operators';
 import {
     ConfigurationService,
     Connector,

@@ -1,5 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import DOMPurify from 'dompurify';
 
 @Pipe({
     name: 'safeHtml',
@@ -8,7 +9,13 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 export class SafeHtmlPipe implements PipeTransform {
     constructor(protected sanitizer: DomSanitizer) {}
 
-    transform(value: any): SafeHtml {
+    transform(value: any, args: { purify: boolean } = { purify: false }): SafeHtml {
+        if (args?.purify) {
+            value = DOMPurify.sanitize(value, {
+                ALLOWED_TAGS: ['p', 'br', 'div', 'a', 'span', 'strong', 'em'],
+                ALLOWED_ATTR: ['style', 'href'],
+            });
+        }
         return this.sanitizer.bypassSecurityTrustHtml(value);
     }
 }

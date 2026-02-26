@@ -168,6 +168,7 @@ public class RemoteObjectService {
 		if(propsIn == null || propsIn.isEmpty()) {
             throw new Exception("no properties found for source nodeId:" + originalNodeId + ", appId: " + sourceRepositoryId);
         }
+        String finalRemoteNodeId = propsIn.get(CCConstants.SYS_PROP_NODE_UID) == null ? originalNodeId : propsIn.get(CCConstants.SYS_PROP_NODE_UID).toString();
         if (propsIn.containsKey(CCConstants.CM_NAME)) {
             propsIn.put(CCConstants.CM_NAME,
                     NodeServiceHelper.cleanupCmName((String) propsIn.get(CCConstants.CM_NAME) + "_" + UUID.randomUUID())
@@ -188,7 +189,7 @@ public class RemoteObjectService {
         // set the metadataset to keep the rendering of metadata consistent
         propsIn.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, repInfo.getMetadatsets()[0]);
         // We also need to store repository information for remote edu-sharing objects
-        propsIn.put(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID, originalNodeId);
+        propsIn.put(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID, finalRemoteNodeId);
         propsIn.put(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORY_TYPE, repInfo.getRepositoryType());
         propsIn.put(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID, repInfo.getAppId());
         // remove illegal data
@@ -196,7 +197,7 @@ public class RemoteObjectService {
         return AuthenticationUtil.runAsSystem(() -> {
             try {
                 Map<String, Object> searchProps = new HashMap<>();
-                searchProps.put(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID, originalNodeId);
+                searchProps.put(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID, finalRemoteNodeId);
                 searchProps.put(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID, repInfo.getAppId());
                 NodeService nodeService = NodeServiceFactory.getLocalService();
                 String root = NodeServiceHelper.getContainerRootPath(ROOT_PATH);

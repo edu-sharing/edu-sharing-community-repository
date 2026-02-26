@@ -1,0 +1,159 @@
+<div class="topics-column-browser" *ngIf="initialized(); else loadingSpinner">
+  <!-- node list for navigation -->
+  <div class="node-list" [class.mobile]="isMobile() | async">
+    <mat-selection-list
+      *ngIf="path.length === 0 || (isMobile() | async) === false"
+      class="first-level-list"
+      [multiple]="false"
+      [hideSingleSelectionIndicator]="true"
+    >
+      <ng-container *ngIf="dataSource.getRootNodes() | wrapObservable | async as nodes">
+        <ng-container *ngIf="nodes.state === 'success'">
+          <ng-container *ngIf="nodes.data?.length > 0; else noListItems">
+            <mat-list-option
+              *ngFor="let node of nodes.data"
+              [value]="node"
+              [selected]="path[0] === node"
+              (click)="scrollLeft(); onSelectedChange(node)"
+            >
+              <span matListItemTitle class="list-item-title-container">
+                <a
+                  *ngIf="customUrl && customUrl(node.data); else defaultNodeLink"
+                  [href]="customUrl(node.data)"
+                  (click)="$event.stopPropagation()"
+                  class="item-link cursor-pointer"
+                >
+                  {{ node.data | nodeTitle }}
+                </a>
+                <ng-template #defaultNodeLink>
+                  <ng-container
+                    *ngTemplateOutlet="nodeLink; context: { node: node.data }"
+                  ></ng-container>
+                </ng-template>
+                <div
+                  *ngIf="
+                    node.data.collection.childReferencesCount ||
+                    node.data.collection.childCollectionsCount
+                  "
+                  class="container-right"
+                >
+                  <span *ngIf="node.data.collection.childReferencesCount" class="badge">
+                    {{ node.data.collection.childReferencesCount }}
+                  </span>
+                  <i
+                    *ngIf="node.data.collection.childCollectionsCount"
+                    esIcon="keyboard_arrow_right"
+                    class="arrow-right"
+                  ></i>
+                </div>
+              </span>
+            </mat-list-option>
+          </ng-container>
+        </ng-container>
+        <div *ngIf="nodes.state === 'loading'" class="spinner-container">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+        <div *ngIf="nodes.state === 'error'" class="error-notice">
+          <p>
+            {{ 'TOPIC_PAGE.WIDGET.TOPICS_COLUMN_BROWSER.ERROR_RECEIVING_DATA' | translate }}
+          </p>
+        </div>
+      </ng-container>
+    </mat-selection-list>
+
+    <ng-template #noListItems>
+      <es-info-message mode="info" class="info-message">
+        {{ 'TOPIC_PAGE.WIDGET.NO_SUBCOLLECTIONS' | translate }}
+      </es-info-message>
+    </ng-template>
+
+    <ng-container *ngFor="let selectedNode of path; let last = last; let index = index">
+      <ng-container *ngIf="dataSource.getChildren(selectedNode) | wrapObservable | async as nodes">
+        <ng-container *ngIf="(isMobile() | async) === false || last">
+          <div class="children-list-container" wloLifecycle>
+            <div *ngIf="isMobile() | async" class="back">
+              <button mat-button (click)="path = path.slice(0, path.length - 1)">
+                <i esIcon="arrow_back_ios"></i>
+                {{ 'BACK' | translate }}
+              </button>
+            </div>
+            <ul
+              *ngIf="nodes.state === 'success' && nodes.data.length > 0"
+              role="listbox"
+              class="child-level-list"
+              wloLifecycle
+              (afterViewInit)="index > 0 && scrollIntoView($event.nativeElement)"
+            >
+              <li
+                *ngFor="let node of nodes.data"
+                class="child-list-item"
+                [class.cursor-pointer]="node.data.collection.childCollectionsCount"
+                [class.item-selected]="path.includes(node) && node.children?.length"
+                (click)="node.data.collection.childCollectionsCount && onSelectedChange(node)"
+                tabindex="1"
+              >
+                <a
+                  *ngIf="customUrl && customUrl(node.data); else defaultNodeLink"
+                  [href]="customUrl(node.data)"
+                  (click)="$event.stopPropagation()"
+                  class="item-link cursor-pointer"
+                >
+                  {{ node.data | nodeTitle }}
+                </a>
+                <ng-template #defaultNodeLink>
+                  <ng-container
+                    *ngTemplateOutlet="nodeLink; context: { node: node.data }"
+                  ></ng-container>
+                </ng-template>
+                <div
+                  *ngIf="
+                    node.data.collection.childReferencesCount ||
+                    node.data.collection.childCollectionsCount
+                  "
+                  class="container-right"
+                >
+                  <span *ngIf="node.data.collection.childReferencesCount" class="badge">
+                    {{ node.data.collection.childReferencesCount }}
+                  </span>
+                  <i
+                    *ngIf="node.data.collection.childCollectionsCount"
+                    esIcon="keyboard_arrow_right"
+                    class="arrow-right"
+                  ></i>
+                </div>
+              </li>
+            </ul>
+            <div *ngIf="nodes.state === 'loading'" class="spinner-container">
+              <mat-spinner diameter="40"></mat-spinner>
+            </div>
+            <div *ngIf="nodes.state === 'error'" class="error-notice">
+              <p>
+                {{ 'TOPIC_PAGE.WIDGET.TOPICS_COLUMN_BROWSER.ERROR_RECEIVING_DATA' | translate }}
+              </p>
+            </div>
+            <div *ngIf="nodes.state === 'success' && nodes.data.length === 0">
+              <ng-container [ngTemplateOutlet]="noListItems"></ng-container>
+            </div>
+          </div>
+        </ng-container>
+      </ng-container>
+    </ng-container>
+  </div>
+  <!-- color + configuration buttons -->
+  <es-widget-configuration-buttons
+    *ngIf="editMode()"
+    [optionOne]="embedConfigurationOption"
+    [pageVariantNode]="pageVariantNode"
+    [swimlaneIndex]="swimlaneIndex"
+    [updateInProgress]="updateInProgress()"
+    (optionOneClicked)="embedWidget()"
+  ></es-widget-configuration-buttons>
+</div>
+<ng-template #nodeLink let-node="node">
+  <es-node-url [node]="node" [mode]="'link'">
+    {{ node | nodeTitle }}
+  </es-node-url>
+</ng-template>
+<ng-template #loadingSpinner>
+  <es-spinner></es-spinner>
+</ng-template>

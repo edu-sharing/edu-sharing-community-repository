@@ -2375,9 +2375,6 @@ public class NodeDao {
             }
         }
 
-        node.getAccessEffective();
-
-
         String replicationSource = Arrays.stream(getProperties()
                         .getOrDefault(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE), new String[0]))
                 .findFirst()

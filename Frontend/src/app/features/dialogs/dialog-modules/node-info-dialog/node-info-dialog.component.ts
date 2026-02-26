@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, Inject, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { ConfigService, Node, NodeServiceUnwrapped } from 'ngx-edu-sharing-api';
+import { ConfigService, Node, NodeService, NodeServiceUnwrapped } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
     OptionsHelperDataService,
@@ -66,6 +66,7 @@ export class NodeInfoDialogComponent implements OnInit, AfterViewInit {
         private cardDialogUtils: CardDialogUtilsService,
         private config: ConfigService,
         private nodeApi: RestNodeService,
+        private nodeService: NodeService,
         private nodeServiceUnwrapped: NodeServiceUnwrapped,
         private router: Router,
         private breadcrumbsService: BreadcrumbsService,
@@ -178,11 +179,11 @@ export class NodeInfoDialogComponent implements OnInit, AfterViewInit {
             this.saving = true;
             forkJoin(
                 this._nodes.map((n) =>
-                    this.nodeApi.editNodeProperty(
+                    this.nodeService.setProperty(
+                        n.ref.repo,
                         n.ref.id,
                         this.customProperty[0],
                         this.customProperty[1].split(','),
-                        n.ref.repo,
                     ),
                 ),
             ).subscribe(
@@ -202,11 +203,11 @@ export class NodeInfoDialogComponent implements OnInit, AfterViewInit {
         this.saving = true;
         forkJoin(
             this._nodes.map((n) =>
-                this.nodeApi.editNodeProperty(
+                this.nodeService.setProperty(
+                    n.ref.repo,
                     n.ref.id,
                     property[0],
                     remove ? [] : property[1].split(','),
-                    n.ref.repo,
                 ),
             ),
         ).subscribe(

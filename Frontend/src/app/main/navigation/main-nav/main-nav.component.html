@@ -2,22 +2,18 @@
   <es-skip-nav></es-skip-nav>
   <es-banner [scope]="mainNavConfig.currentScope" (update)="refreshBanner()"></es-banner>
 
-  <div
-    *ngIf="mainNavConfig.showNavigation"
-    class="navigation-container"
-    role="navigation"
-    [attr.aria-label]="'NAV.MAIN' | translate"
-  >
-    <es-user-profile *ngIf="showProfile" (cancelProfile)="showProfile = false"></es-user-profile>
+  <div class="navigation-container" role="navigation" [attr.aria-label]="'NAV.MAIN' | translate">
+    <ng-container *ngIf="mainNavConfig.showNavigation">
+      <es-user-profile *ngIf="showProfile" (cancelProfile)="showProfile = false"></es-user-profile>
 
-    <es-global-progress *ngIf="globalProgress"></es-global-progress>
-    <es-tutorial
-      [element]="tutorialElement"
-      [heading]="'USER_TUTORIAL_HEADING'"
-      [description]="'USER_TUTORIAL_DESCRIPTION'"
-      [showSkip]="false"
-    ></es-tutorial>
-
+      <es-global-progress *ngIf="globalProgress"></es-global-progress>
+      <es-tutorial
+        [element]="tutorialElement"
+        [heading]="'USER_TUTORIAL_HEADING'"
+        [description]="'USER_TUTORIAL_DESCRIPTION'"
+        [showSkip]="false"
+      ></es-tutorial>
+    </ng-container>
     <es-top-bar
       class="topBar {{ 'topBar-' + mainNavConfig.currentScope }}"
       [class.noUser]="!showUser"
@@ -26,6 +22,7 @@
       [chatCount]="getChatCount()"
       [config]="config"
       [create]="mainNavConfig.create"
+      [show]="mainNavConfig.showNavigation"
       [currentScope]="mainNavConfig.currentScope"
       [currentUser]="currentUser"
       [isCreateAllowed]="isCreateAllowed()"
@@ -47,7 +44,6 @@
         *ngIf="searchFieldEnabled && !mainNavConfig.hideSearchField"
       ></es-search-field
     ></es-top-bar>
-
     <div *ngIf="canOpen && mainNavConfig.currentScope !== 'render'" #tabNav class="tab-nav">
       <es-main-menu-bottom
         class="mobile-move-bottom"

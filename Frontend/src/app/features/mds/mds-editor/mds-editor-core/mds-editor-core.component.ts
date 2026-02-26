@@ -25,7 +25,6 @@ export class MdsEditorCoreComponent {
     hasExtendedWidgets$: Observable<boolean>;
     readonly editorMode: EditorMode;
     readonly shouldShowExtendedWidgets$: BehaviorSubject<boolean>;
-    readonly aiLoading = new BehaviorSubject(false);
 
     constructor(
         public mdsEditorInstance: MdsEditorInstanceService,
@@ -75,7 +74,7 @@ export class MdsEditorCoreComponent {
     }
 
     async generateSuggestions() {
-        this.aiLoading.next(true);
+        this.mdsEditorInstance.aiLoading.next(true);
         this.toast.show({
             message: 'MDS.AI.GENERATE_ASYNC_STARTED',
             type: 'info',
@@ -141,7 +140,7 @@ export class MdsEditorCoreComponent {
         } catch (e) {
             console.warn('Could not fetch suggestion data', e);
         }
-        this.aiLoading.next(false);
+        this.mdsEditorInstance.aiLoading.next(false);
     }
 
     setAiSuggestions(change: MatSlideToggleChange) {

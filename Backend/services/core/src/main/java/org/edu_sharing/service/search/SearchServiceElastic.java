@@ -618,7 +618,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         try {
             queryData = mds.findQuery(query, MetadataReader.QUERY_SYNTAX_DSL);
         } catch (IllegalArgumentException e) {
-            logger.info("Query " + query + " is not defined within dsl language, switching to lucene...");
+            logger.warn("Query " + query + " is not defined within dsl language, switching to lucene...");
             return super.search(mds, query, criteria, searchToken);
         }
         Set<String> authorities;

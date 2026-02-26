@@ -17,12 +17,10 @@ import {
     EduSharingApiModule,
 } from 'ngx-edu-sharing-api';
 import {
-    ActionbarComponent,
     AppService as AppServiceAbstract,
     EduSharingUiModule,
     KeyboardShortcutsService as KeyboardShortcutsServiceAbstract,
     OptionsHelperService as OptionsHelperServiceAbstract,
-    SpinnerComponent,
     Toast as ToastAbstract,
     TranslationsModule,
 } from 'ngx-edu-sharing-ui';
@@ -49,84 +47,83 @@ import { Toast } from './services/toast';
 import { SharedModule } from './shared/shared.module';
 import { BApiModule } from 'ngx-edu-sharing-b-api';
 import { WrapperComponent } from './web-components/wrapper/app/wrapper.component';
-import { MockLocationStrategy } from '@angular/common/testing';
 import { WebComponentService } from './main/web-component.service';
-import { PreviewSidebarComponent } from './features/preview-sidebar/preview-sidebar.component';
 import { WebComponentLocationStrategy } from './main/web-component.utils';
 import { RenderingServiceApiModule } from 'ngx-rendering-service-api';
-import { DialogsService } from './features/dialogs/dialogs.service';
-import { DialogsService as DialogsServiceAbstract } from 'ngx-rendering-service-lib';
 
 const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     showDelay: 500,
     hideDelay: 0,
     touchendHideDelay: 0,
 };
+const Declarations = [
+    AppComponent,
+    CustomGlobalExtensionsComponent,
+    WrapperComponent,
+    extensionDeclarations,
+];
+const Imports = [
+    AppRoutingModule,
+    BrowserAnimationsModule,
+    BrowserModule,
+    CoreModule,
+    DialogsModule,
+    DragDropModule,
+    // forRoot is empty; It is initalized via useFactory!
+    RenderingServiceApiModule.forRoot({}),
+    EduSharingApiModule.forRoot({}),
+    EduSharingUiModule.forRoot({ production: environment.production }, extensionUiProviders),
+    BApiModule.forRoot({ rootUrl: environment.bApiUrl || '/edu-sharing/rest/bapi' }),
+    extensionImports,
+    HttpClientModule,
+    MainModule,
+    ManagementDialogsModule,
+    MaterialCssVarsModule.forRoot({ isAutoContrast: true }),
+    MdsModule,
+    ResizableModule,
+    SharedModule,
+    TranslationsModule.forRoot(),
+];
+export const Providers = [
+    { provide: ToastAbstract, useClass: Toast },
+    { provide: OptionsHelperServiceAbstract, useClass: OptionsHelperService },
+    { provide: KeyboardShortcutsServiceAbstract, useClass: KeyboardShortcutsService },
+    { provide: AppServiceAbstract, useClass: CordovaService },
+    {
+        provide: EDU_SHARING_API_CONFIG,
+        deps: [ErrorHandlerService],
+        useFactory: (errorHandler: ErrorHandlerService) =>
+            ({
+                rootUrl: environment.eduSharingApiUrl,
+                onError: (err, req) => errorHandler.handleError(err, req),
+            } as EduSharingApiConfigurationParams),
+    },
+    { provide: LocationStrategy, useClass: AppLocationStrategy },
+    { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
+    { provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: matTooltipDefaultOptions },
+    { provide: MAT_CHECKBOX_DEFAULT_OPTIONS, useValue: { color: 'primary' } },
+    { provide: MAT_RADIO_DEFAULT_OPTIONS, useValue: { color: 'primary' } },
+    { provide: MAT_SLIDE_TOGGLE_DEFAULT_OPTIONS, useValue: { color: 'primary' } },
+    ...extensionProviders,
+    ...extensionUiProviders,
+
+    WebComponentService,
+    ErrorHandlerService,
+].concat(
+    environment.webComponentMode
+        ? [
+              {
+                  provide: LocationStrategy,
+                  useClass: WebComponentLocationStrategy,
+              },
+          ]
+        : [],
+);
 
 @NgModule({
-    declarations: [
-        AppComponent,
-        CustomGlobalExtensionsComponent,
-        WrapperComponent,
-        extensionDeclarations,
-    ],
-    imports: [
-        AppRoutingModule,
-        BrowserAnimationsModule,
-        BrowserModule,
-        CoreModule,
-        DialogsModule,
-        DragDropModule,
-        // forRoot is empty; It is initalized via useFactory!
-        RenderingServiceApiModule.forRoot({}),
-        EduSharingApiModule.forRoot({}),
-        EduSharingUiModule.forRoot({ production: environment.production }, extensionUiProviders),
-        BApiModule.forRoot({ rootUrl: environment.bApiUrl || '/edu-sharing/rest/bapi' }),
-        extensionImports,
-        HttpClientModule,
-        MainModule,
-        ManagementDialogsModule,
-        MaterialCssVarsModule.forRoot({ isAutoContrast: true }),
-        MdsModule,
-        ResizableModule,
-        SharedModule,
-        TranslationsModule.forRoot(),
-    ],
-    providers: [
-        { provide: ToastAbstract, useClass: Toast },
-        { provide: OptionsHelperServiceAbstract, useClass: OptionsHelperService },
-        { provide: KeyboardShortcutsServiceAbstract, useClass: KeyboardShortcutsService },
-        { provide: AppServiceAbstract, useClass: CordovaService },
-        {
-            provide: EDU_SHARING_API_CONFIG,
-            deps: [ErrorHandlerService],
-            useFactory: (errorHandler: ErrorHandlerService) =>
-                ({
-                    rootUrl: environment.eduSharingApiUrl,
-                    onError: (err, req) => errorHandler.handleError(err, req),
-                } as EduSharingApiConfigurationParams),
-        },
-        { provide: LocationStrategy, useClass: AppLocationStrategy },
-        { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
-        { provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: matTooltipDefaultOptions },
-        { provide: MAT_CHECKBOX_DEFAULT_OPTIONS, useValue: { color: 'primary' } },
-        { provide: MAT_RADIO_DEFAULT_OPTIONS, useValue: { color: 'primary' } },
-        { provide: MAT_SLIDE_TOGGLE_DEFAULT_OPTIONS, useValue: { color: 'primary' } },
-        ...extensionProviders,
-        ...extensionUiProviders,
-
-        WebComponentService,
-        ErrorHandlerService,
-    ].concat(
-        environment.webComponentMode
-            ? [
-                  {
-                      provide: LocationStrategy,
-                      useClass: WebComponentLocationStrategy,
-                  },
-              ]
-            : [],
-    ),
+    declarations: Declarations,
+    imports: Imports,
+    providers: Providers,
     exports: [AppComponent],
     schemas: [].concat(extensionSchemas),
 })
@@ -134,22 +131,6 @@ export class AppModule implements DoBootstrap {
     constructor(private injector: Injector) {}
 
     ngDoBootstrap(appRef: ApplicationRef): void {
-        if (environment.webComponentMode) {
-            console.info('web component __env', (window as any).__env);
-            this.injector
-                .get(WebComponentService)
-                .registerWebComponent('edu-sharing-app', WrapperComponent);
-            this.injector
-                .get(WebComponentService)
-                .registerWebComponent('edu-sharing-spinner', SpinnerComponent);
-            this.injector
-                .get(WebComponentService)
-                .registerWebComponent('edu-sharing-actionbar', ActionbarComponent);
-            this.injector
-                .get(WebComponentService)
-                .registerWebComponent('edu-sharing-preview-sidebar', PreviewSidebarComponent);
-        } else {
-            appRef.bootstrap(AppComponent);
-        }
+        appRef.bootstrap(AppComponent);
     }
 }

@@ -17,7 +17,7 @@
         },
         {
         "role": "user",
-        "content": "Ich benötige hilfe bei diesem Material. Es hat die folgenden Eigenschaften \nTitel: {{var.cclom:title|-}}\nDateiname: {{var.cm:name|-}}\nLink: {{var.ccm:wwwwurl|-}}\nMaterialart: {{var.ccm:educationallearningresourcetype|-}}\nSchlagworte: {{var.cclom:general_keyword|-}}\nBeschreibung: {{var.cclom:general_description|-}}\nFormat: {{node.cclom:format|-}}\nMedientyp: {{node.virtual:mediatype|-}}"
+        "content": "Ich benötige hilfe bei diesem Material. Es hat die folgenden Eigenschaften \nTitel: {{var(cclom:title)|-}}\nDateiname: {{var(cm:name)|-}}\nLink: {{var(ccm:wwwwurl)|-}}\nMaterialart: {{var(ccm:educationallearningresourcetype)|-}}\nSchlagworte: {{var(cclom:general_keyword)|-}}\nBeschreibung: {{var(cclom:general_description)|-}}\nFormat: {{node(cclom:format)|-}}\nMedientyp: {{node(virtual:mediatype)|-}}"
         }
         ]
         }
@@ -33,9 +33,84 @@
         "size": "256x256",
         "n": 3,
         "response_format": "b64_json",
-        "prompt": "Ich benötige ein Bild für dieses Material. Es hat die folgenden Eigenschaften \nTitel: {{var.cclom:title|{{node.cclom:title|-}}}}\nDateiname: {{var.cm:name|{{node.cm:name|-}}}}\nLink: {{var.ccm:wwwwurl|{{node.ccm:wwwurl|-}}}}\nMaterialart: {{var.ccm:educationallearningresourcetype|{{node.ccm:educationallearningresourcetype||-}}}}\nSchlagworte: {{var.cclom:general_keyword|{{node.cclom:general_keyword|-}}}}\nBeschreibung: {{var.cclom:general_description|{{node.cclom:general_description|-}}}}. Erstelle das Bild im Stil {{var.preview.drawingStyle}}"
+        "prompt": "Ich benötige ein Bild für dieses Material. Es hat die folgenden Eigenschaften \nTitel: {{var(cclom:title)|node(cclom:title)|-}}\nDateiname: {{var(cm:name)|node(cm:name)|-}}\nLink: {{var(ccm:wwwwurl)|node(ccm:wwwurl)|-}}\nMaterialart: {{var(ccm:educationallearningresourcetype)|node(ccm:educationallearningresourcetype)||-}}\nSchlagworte: {{var(cclom:general_keyword)|node(cclom:general_keyword)|-}}\nBeschreibung: {{var(cclom:general_description)|node(cclom:general_description)|-}}. Erstelle das Bild im Stil {{var(preview.drawingStyle)}}"
         }
       </createImage>
+    </aiConfig>
+    <aiConfig>
+      <id>topic_page_ai_default</id>
+      <provider>openai</provider>
+      <useCaching>true</useCaching>
+    </aiConfig>
+    <aiConfig>
+      <id>topic_page_ai_chat_completion</id>
+      <chatCompletion>
+        {
+        "model": "gpt-4.1-mini"
+        }
+      </chatCompletion>
+    </aiConfig>
+    <aiConfig>
+      <id>topic_page_ai_create_image</id>
+      <createImage>
+        {
+        "model": "dall-e-3",
+        "size": "1024x1024",
+        "n": 1,
+        "response_format": "b64_json"
+        }
+      </createImage>
+    </aiConfig>
+    <aiConfig>
+      <id>topic_page_ai_clear_cache</id>
+      <clearCache>true</clearCache>
+    </aiConfig>
+    <aiConfig>
+      <id>topic_page_ai_topic_header_image</id>
+      <createImage>
+        {
+        "prompt": "## Aufgabe\nErzeuge ein ansprechendes, realistisch wirkendes Vorschaubild zu einer Sammlung von Bildungsinhalten.  \n- Vermeide sämtliche Textelemente oder Logos im Bild.  \n- Nutze die zentralen Schlagwörter, um das Thema klar widerzuspiegeln.  \n- Richte Dich nach den folgenden Anforderungen und Stilvorgaben.\n## Anforderungen\n1. **Hauptmotiv**: Beschreibe das zentrale Element der Sammmlung (eine Szene oder ein Kernthema), das den Bildungsinhalt repräsentiert.  \n2. **Realismus**: Achte auf eine glaubwürdige Darstellung aller Objekte und Szenen, inklusiv und kulturell sensitiv.  \n3. **Minimalismus**: Reduziere Ablenkungen, konzentriere Dich auf das Wesentliche, um eine klare Botschaft zu vermitteln.  \n4. **Emotionale Ansprache**: Verwende warme Farben, natürliches Licht und eine einladende Atmosphäre.  \n5. **Keine Texte im Bild**: Verzichte gänzlich auf Schrift oder Logos, um Redundanz und visuelle Störungen zu vermeiden.  \n## Stilvorgaben\n- **Attribute**: hochdetailliert, scharfe Fokussierung, poliert, makellos, ansprechend, Symmetrie, kohärent, minimalistisch, sauber, aufgeräumt  \n- **Farben und Beleuchtung**: warme Farben, natürliches Licht  \n- **Designelemente**: klare Linien, einfache Formen, ausbalancierte Komposition  \n- **Qualität**: professionelle Qualität, hohe Auflösung  \n- **Ästhetik**: elegant, geradlinig, modern, klare visuelle Hierarchie  \n## Eingabedaten\n- **Beschreibung des Bildungsinhalts**: {{var(cm:name)|node(cm:name)|-}} ({{var(ccm:taxonid_DISPLAYNAME)|node(ccm:taxonid_DISPLAYNAME)|-}})  \n- **Wichtige Schlagwörter**: {{var(cclom:general_keyword)|node(cclom:general_keyword)|-}}\n**Integriere alle oben genannten Anforderungen und Stilvorgaben sowie die Eingabedaten 'Beschreibung des Bildungsinhalts' und 'Wichtige Schlagwörter'.**"
+        }
+      </createImage>
+    </aiConfig>
+    <aiConfig>
+      <id>topic_page_ai_topic_header_description</id>
+      <chatCompletion>
+        {
+        "messages": [
+        {
+        "role": "user",
+        "content": "## Aufgabe\n1. **Ziel**  \n   - Erstelle einen ansprechenden, prägnanten Text, der eine Sammlung von Bildungsressourcen vorstellt.  \n   - Wecke das Interesse der Leserinnen und Leser.  \n   - Erkläre kurz und verständlich die wichtigsten Themen der Sammlung.  \n   - Zeige, wie die Ressourcen der Sammlung von Lehrenden und Lernenden genutzt werden können.  \n   - Integriere Hinweise auf konkrete Ressourcen der Sammlung in den Beschreibungstext, falls Dir diese als Information gegeben werden.\n2. **Struktur**  \n   - **Absatz 1**: Kurzer Einstieg, der zentrale Themen nennt und Interesse weckt.  \n   - **Absatz 2**: Übersicht der Hauptthemen, Mehrwert für Lehrende und Lernende, Bezug zu Lernzielen.\n3. **Sprache und Stil**  \n   - **Verständlichkeit**: Keine unnötigen Fachbegriffe, kurze Erläuterung komplexer Themen.  \n   - **Aktive Formulierungen**: Verzichte nach Möglichkeit auf den Passivstil.  \n   - **Kohärenz**: Verwende konsistente Terminologie, vermeide Wiederholungen und Widersprüche.  \n   - **Prägnanz**: Nutze kurze Sätze (max. 20 Wörter) und möglichst einfache Wörter (2–3 Silben).  \n   - **Lesbarkeit**: Achte auf klare Absätze und ausreichend Leerraum.  \n   - **Zielgruppenanpassung**: Passe Stil und Sprachgebrauch an die Bedürfnisse der Zielgruppe und des Fachgebiets an.\n4. **Inhaltliche Relevanz**  \n   - Baue relevante Schlüsselbegriffe ein.  \n   - Passe den Text an die Zielgruppe an (Vorwissen, Interessen, Nutzen).  \n   - Erkläre den Mehrwert der Inhalte.\n5. **Output-Format**  \n   - Gib den fertigen Text als zusammenhängende Beschreibung in zwei Absätzen aus.  \n   - Halte dich an die maximale Zeichenlänge (inkl. Leerzeichen).  \n   - Verzichte auf URLs, Markennamen und unnötige Füllwörter.\n## Eingabedaten\n- **Thema der Sammlung:** {{var(cm:name)|node(cm:name)|-}}\n- **Bildungsstufe:** {{var(ccm:educationalcontext_DISPLAYNAME)|node(ccm:educationalcontext_DISPLAYNAME)|-}}\n- **Fachgebiet:** {{var(ccm:taxonid_DISPLAYNAME)|node(ccm:taxonid_DISPLAYNAME)|-}}\n- **Maximale Zeichenlänge:** 400\n**Hinweis:** Verwende die oben genannten Informationen, um einen einheitlichen, gut strukturierten Text zu erstellen, der alle genannten Anforderungen erfüllt. Achte dabei besonders auf Sprachstil, Verständlichkeit und die Einhaltung der Zeichenbegrenzung."
+        }
+        ]
+        }
+      </chatCompletion>
+    </aiConfig>
+    <aiConfig>
+      <id>topic_page_ai_topic_header_text</id>
+      <chatCompletion>
+        {
+        "messages": [
+        {
+        "role": "user",
+        "content": "## Aufgabe\n1. **Ziel**  \n   - Erstelle einen ansprechenden, prägnanten Text, der eine Sammlung von Bildungsressourcen vorstellt.  \n   - Wecke das Interesse der Leserinnen und Leser.  \n   - Erkläre kurz und verständlich die wichtigsten Themen der Sammlung.  \n   - Zeige, wie die Ressourcen der Sammlung von Lehrenden und Lernenden genutzt werden können.  \n   - Erkläre zusätzlich: 'Wofür ist das wichtig?' → Stelle den Bezug zur Lebenswelt, zum Alltag oder Arbeitsleben her. Gib ggf. auch einen Ausblick auf gesellschaftliche oder wissenschaftliche Relevanz.  \n   - Integriere Hinweise auf konkrete Ressourcen der Sammlung in den Beschreibungstext, falls Dir diese als Information gegeben werden.\n2. **Struktur**\n   - **Absatz 1**: Kurzer Einstieg, der zentrale Themen nennt und Interesse weckt.  \n   - **Absatz 2**: Übersicht der Hauptthemen, Mehrwert für Lehrende und Lernende, Bezug zu Lernzielen. Beantworte hier auch die Frage 'Wofür ist das wichtig?' mit konkretem Nutzen und Relevanz für Alltag, Beruf, Gesellschaft oder Wissenschaft.\n3. **Sprache und Stil**\n   - **Verständlichkeit**: Keine unnötigen Fachbegriffe, kurze Erläuterung komplexer Themen.  \n   - **Aktive Formulierungen**: Verzichte nach Möglichkeit auf den Passivstil.  \n   - **Kohärenz**: Verwende konsistente Terminologie, vermeide Wiederholungen und Widersprüche.  \n   - **Prägnanz**: Nutze kurze Sätze (max. 20 Wörter) und möglichst einfache Wörter (2–3 Silben).  \n   - **Lesbarkeit**: Achte auf klare Absätze und ausreichend Leerraum.  \n   - **Zielgruppenanpassung**: Passe Stil und Sprachgebrauch an die Bedürfnisse der Zielgruppe und des Fachgebiets an.\n4. **Inhaltliche Relevanz**\n   - Baue relevante Schlüsselbegriffe ein.  \n   - Passe den Text an die Zielgruppe an (Vorwissen, Interessen, Nutzen).  \n   - Erkläre den Mehrwert der Inhalte und zeige auf, in welchen Kontexten das Wissen angewendet werden kann.\n5. **Output-Format**\n   - Gib den fertigen Text als zusammenhängende Beschreibung in **zwei Absätzen** aus.  \n   - Halte dich an die **maximale Zeichenlänge** (inkl. Leerzeichen).  \n   - Verzichte auf URLs, Markennamen und unnötige Füllwörter.\n## Eingabedaten\n- **Thema der Sammlung:** {{var(cm:name)|node(cm:name)|-}}\n- **Bildungsstufe:** {{var(ccm:educationalcontext_DISPLAYNAME)|node(ccm:educationalcontext_DISPLAYNAME)|-}}\n- **Fachgebiet:** {{var(ccm:taxonid_DISPLAYNAME)|node(ccm:taxonid_DISPLAYNAME)|-}} \n- **Maximale Zeichenlänge:** 400\n**Hinweis:** Verwende die oben genannten Informationen, um einen einheitlichen, gut strukturierten Text zu erstellen, der alle genannten Anforderungen erfüllt. Achte dabei besonders auf Sprachstil, Verständlichkeit und die Einhaltung der Zeichenbegrenzung."
+        }
+        ]
+        }
+      </chatCompletion>
+    </aiConfig>
+    <aiConfig>
+      <id>topic_page_ai_text_widget</id>
+      <chatCompletion>
+        {
+        "messages": [
+        {
+        "role": "user",
+        "content": "Erstelle eine Zusammenfassung des Themas ({{var(cm:name)|node(cm:name)|-}}) in 5 Sätzen."
+        }
+        ]
+        }
+      </chatCompletion>
     </aiConfig>
   </aiConfigs>
   <widgets>
@@ -49,7 +124,10 @@
       <placeholder>cm_name_placeholder</placeholder>
       <bottomCaption>cm_name_bottom</bottomCaption>
       <type>text</type>
-      <required>true</required>
+      <required>mandatory</required>
+      <inputPreprocessor>
+        <preprocessor>trim</preprocessor>
+      </inputPreprocessor>
       <!-- <condition>!ccm:wwwurl</condition>  -->
     </widget>
     <widget>
@@ -60,6 +138,9 @@
       <bottomCaption>cm_title_bottom</bottomCaption>
       <type>text</type>
       <hideIfEmpty>true</hideIfEmpty>
+      <inputPreprocessor>
+        <preprocessor>trim</preprocessor>
+      </inputPreprocessor>
       <aiConfigs>
         <aiConfig>
           <id>default</id>
@@ -94,6 +175,9 @@
       <placeholder>cm_wwwurl_placeholder</placeholder>
       <type>text</type>
       <required>true</required>
+      <inputPreprocessor>
+        <preprocessor>trim</preprocessor>
+      </inputPreprocessor>
       <condition type="PROPERTY">ccm:wwwurl</condition>
     </widget>
     <widget>
@@ -103,6 +187,9 @@
       <caption>lom_prop_educational_description</caption>
       <placeholder>lom_prop_educational_description_placeholder</placeholder>
       <hideIfEmpty>true</hideIfEmpty>
+      <inputPreprocessor>
+        <preprocessor>trim</preprocessor>
+      </inputPreprocessor>
       <aiConfigs>
         <aiConfig>
           <id>default</id>
@@ -248,7 +335,7 @@
             "messages": [
             {
             "role": "user",
-            "content": "Ordne das Material in einer der folgende Kategorien ein: {{widget.$.ccm:educationallearningresourcetype.values..caption}}"
+            "content": "Ordne das Material in einer der folgende Kategorien ein: {{widget(\"ccm:educationallearningresourcetype\".values[*].{id:id, name:caption})}} nutze zur Einordnung den Namen aber gib die jeweilige id zurück."
             }
             ]
             }
@@ -656,6 +743,12 @@
         <entry cap="Lese- und Bearbeitungsrechte">1</entry>
       </values>
     </widget>
+    <widget>
+      <id>virtual:collection_id_tree</id>
+      <caption>virtual_prop_collection_id_tree</caption>
+      <hideIfEmpty>true</hideIfEmpty>
+      <type>nodefilter</type>
+    </widget>
   </widgets>
   <templates>
     <template>
@@ -801,6 +894,7 @@
     <template>
       <id>search</id>
       <html><![CDATA[
+          <virtual:collection_id_tree>
           <ccm:educationallearningresourcetype type="facetList" expandable="expanded">
           <cclom:general_keyword type="facetList" expandable="expanded">
           <license>
@@ -1225,6 +1319,24 @@
       </columns>
     </list>
     <list>
+      <id>genericWidget</id>
+      <columns>
+        <column>cclom:title</column>
+        <column>cm:modified</column>
+        <column>ccm:commonlicense_key</column>
+        <column>ccm:replicationsource</column>
+      </columns>
+    </list>
+    <list>
+      <id>genericWidgetTable</id>
+      <columns>
+        <column>cclom:title</column>
+        <column>cm:modified</column>
+        <column>ccm:commonlicense_key</column>
+        <column>ccm:replicationsource</column>
+      </columns>
+    </list>
+    <list>
       <id>searchCollections</id>
       <columns>
         <column>COLLECTION.title</column>
@@ -1278,6 +1390,30 @@
       ]
       }}
     </basequery>
+    <query join="AND" id="saved_search">
+      <basequery>
+        {"bool":
+        {"must":[
+        {"match":{"nodeRef.storeRef.protocol":"workspace"}},
+        {"match":{"type":"ccm:saved_search"}}
+        ]}
+        }
+      </basequery>
+      <property name="ngsearchword">
+        <statement>
+          {"bool": {
+          "should":[
+          {"wildcard":{"nodeRef.id": {"value": "${value}", "case_insensitive": true}}},
+          {"wildcard":{"properties.cm:name.keyword": {"value": "*${value}*", "case_insensitive": true}}},
+          {"wildcard":{"properties.cm:title.keyword": {"value": "*${value}*", "case_insensitive": true}}}
+          ],
+          "minimum_should_match": 1
+          }}
+        </statement>
+        <multiple>true</multiple>
+        <multiplejoin>AND</multiplejoin>
+      </property>
+    </query>
     <query join="AND" id="collections_scope_my">
       <basequery>
         {"bool":
@@ -1629,6 +1765,22 @@
       </property>
       <property name="virtual:reurlTypes">
         <statement>{"wildcard": {"properties.cclom:format": "${valueRaw}*" }}</statement>
+        <multiple>true</multiple>
+        <multiplejoin>OR</multiplejoin>
+      </property>
+      <property name="virtual:collection_id_tree">
+        <statement>
+          { "nested": {
+          "path": "collections",
+          "query":
+          {"bool":{
+          "should":[
+          {"match":{"collections.path": "${valueRaw}"}},
+          {"match":{"collections.nodeRef.id": "${valueRaw}"}}
+          ]
+          }}
+          }}
+        </statement>
         <multiple>true</multiple>
         <multiplejoin>OR</multiplejoin>
       </property>

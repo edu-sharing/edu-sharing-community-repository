@@ -1,0 +1,72 @@
+<div class="media-rendering" *ngIf="initialized(); else loadingSpinner">
+  <div
+    class="render-content"
+    [class.selected]="sidebarOpen()"
+    *ngIf="selectedNode; else noMediaSelected"
+  >
+    <div
+      *ngIf="layoutWithTitle()"
+      #div
+      class="render-title"
+      esCheckTextOverflow
+      #text="esCheckTextOverflow"
+      [matTooltip]="text.hasTextOverflow() ? div.innerText : null"
+      [innerHTML]="selectedNodeTitle()"
+    ></div>
+    <es-render-wrapper-component
+      *ngIf="selectedNode"
+      [showTopbar]="false"
+      [showMetadata]="false"
+      [nodeId]="selectedNode.ref.id"
+      [repository]="selectedNode.ref.repo"
+    ></es-render-wrapper-component>
+    <div *ngIf="layout() === MediaRenderingLayout.TitlePreviewButtons" class="render-buttons">
+      <a
+        mat-stroked-button
+        color="primary"
+        [href]="selectedNode.properties['ccm:wwwurl']?.[0] ?? selectedNode.content.url"
+        target="_blank"
+      >
+        {{ 'TOPIC_PAGE.WIDGET.MEDIA_RENDERING.TO_ORIGINAL_PAGE' | translate }}
+        <i esIcon="open_in_new"></i>
+      </a>
+      <button mat-flat-button color="primary" (click)="itemClicked()">
+        {{
+          sidebarOpen()
+            ? ('TOPIC_PAGE.WIDGET.MEDIA_RENDERING.HIDE_DETAILS' | translate)
+            : ('TOPIC_PAGE.WIDGET.MEDIA_RENDERING.SHOW_DETAILS' | translate)
+        }}
+      </button>
+    </div>
+  </div>
+  <ng-template #noMediaSelected>
+    <es-info-message mode="info" class="info-message">
+      {{ 'TOPIC_PAGE.WIDGET.MEDIA_RENDERING.NO_ELEMENT_SELECTED' | translate }}
+    </es-info-message>
+  </ng-template>
+  <!-- color + configuration buttons -->
+  <es-widget-configuration-buttons
+    *ngIf="editMode()"
+    [ariaLabel]="'TOPIC_PAGE.WIDGET.MEDIA_RENDERING.CONFIG_ARIA' | translate"
+    [(layout)]="layout"
+    [layoutOptions]="layoutOptions"
+    [optionOne]="{
+      icon: 'search',
+      isVisible: true,
+      text: nodeId
+        ? ('TOPIC_PAGE.WIDGET.MEDIA_RENDERING.CHANGE_CONTENT' | translate)
+        : ('TOPIC_PAGE.WIDGET.MEDIA_RENDERING.SELECT_CONTENT' | translate),
+      tooltip: ('TOPIC_PAGE.WIDGET.MEDIA_RENDERING.SELECT_CONTENT_TOOLTIP' | translate),
+    }"
+    [optionTwo]="embedConfigurationOption"
+    [pageVariantNode]="pageVariantNode"
+    [swimlaneIndex]="swimlaneIndex"
+    [updateInProgress]="updateInProgress()"
+    (layoutChange)="layoutChanged()"
+    (optionOneClicked)="openReurlLink()"
+    (optionTwoClicked)="embedWidget()"
+  ></es-widget-configuration-buttons>
+</div>
+<ng-template #loadingSpinner>
+  <es-spinner></es-spinner>
+</ng-template>

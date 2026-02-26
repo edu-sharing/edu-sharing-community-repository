@@ -338,7 +338,7 @@ export class NodeService {
             node,
             property,
             keepModifiedDate,
-            value,
+            body: value,
         });
     }
 

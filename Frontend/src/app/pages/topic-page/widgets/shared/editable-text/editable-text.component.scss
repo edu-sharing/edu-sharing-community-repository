@@ -1,0 +1,78 @@
+@use '../../../topic-page-variables' as *;
+
+:host {
+    display: flex;
+    align-items: center;
+}
+
+.inline-block {
+    display: inline-block;
+}
+
+.text-container {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    overflow-wrap: break-word;
+    word-break: break-word;
+
+    &.container-padding {
+        padding: 0 16px;
+    }
+
+    &.prominent-text {
+        margin-bottom: 8px;
+        padding: 0 16px;
+        border-left: 4px solid $primary;
+        height: unset;
+        font-size: 106%;
+        letter-spacing: 0.02em;
+
+        // use ng-deep due to innerHTML
+        &::ng-deep p {
+            margin-bottom: 0 !important;
+        }
+    }
+
+    &.wlo-text-center {
+        text-align: center;
+    }
+
+    // repeated selector for increased specificity
+    .text-content.text-content {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+    // adjust style of parsed markdown
+    .text-content ::ng-deep {
+        blockquote {
+            font-style: italic;
+            font-size: $font-size-large;
+            font-weight: $font-weight-bold;
+            line-height: 140%;
+        }
+    }
+}
+
+.show-more-btn {
+    color: $primary;
+    display: flex;
+}
+
+:host {
+    position: relative;
+}
+.loading {
+    position: absolute;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+}
