@@ -79,7 +79,6 @@ public class ApiApplication extends ResourceConfig {
         // required in order to catch invalid json data exception
         this.register(JacksonXmlBindJsonProvider.class);
         this.register(JacksonFeature.withoutExceptionMappers());
-        this.register(ValidationFeature.class);
         //final BeanConfig beanConfig = new BeanConfig();
 
         OpenAPI oas = new OpenAPI();
