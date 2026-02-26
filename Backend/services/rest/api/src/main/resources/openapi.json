@@ -693,13 +693,17 @@
       "CollectionReference": {
         "properties": {
           "access": {
+            "description": "Access permissions of the actual node object",
             "items": {
+              "description": "Access permissions of the actual node object",
               "type": "string"
             },
             "type": "array"
           },
           "accessEffective": {
+            "description": "the effective access; this is the effective access, i.e. if this element is used in a collection, it will get more permissions;  please use this field to check access",
             "items": {
+              "description": "the effective access; this is the effective access, i.e. if this element is used in a collection, it will get more permissions;  please use this field to check access",
               "type": "string"
             },
             "type": "array"
@@ -711,7 +715,9 @@
             "type": "array"
           },
           "aspects": {
+            "description": "Aspects applied to this node, i.e. ccm:collection_io_reference",
             "items": {
+              "description": "Aspects applied to this node, i.e. ccm:collection_io_reference",
               "type": "string"
             },
             "type": "array"
@@ -720,6 +726,7 @@
             "$ref": "#/components/schemas/Collection"
           },
           "commentCount": {
+            "description": "Number of comments on this node",
             "format": "int32",
             "type": "integer"
           },
@@ -727,12 +734,14 @@
             "$ref": "#/components/schemas/Content"
           },
           "contributors": {
+            "description": "Contributors (authors, publishers) for the node",
             "items": {
               "$ref": "#/components/schemas/Contributor"
             },
             "type": "array"
           },
           "createdAt": {
+            "description": "Creation date",
             "format": "date-time",
             "type": "string"
           },
@@ -740,30 +749,38 @@
             "$ref": "#/components/schemas/Person"
           },
           "downloadUrl": {
+            "description": "Download url for this node",
             "type": "string"
           },
           "iconURL": {
+            "description": "icon url",
             "type": "string"
           },
           "isDirectory": {
+            "description": "Whether this node is a directory",
             "type": "boolean"
           },
           "isPublic": {
+            "description": "Whether the node is public (shared to everyone)",
             "type": "boolean"
           },
           "license": {
             "$ref": "#/components/schemas/License"
           },
           "mediatype": {
+            "description": "Media type of the node (simplified/grouped mimetype)",
             "type": "string"
           },
           "metadataset": {
+            "description": "Metadata set name",
             "type": "string"
           },
           "mimetype": {
+            "description": "mime type of the node",
             "type": "string"
           },
           "modifiedAt": {
+            "description": "Modification date",
             "format": "date-time",
             "type": "string"
           },
@@ -771,6 +788,7 @@
             "$ref": "#/components/schemas/Person"
           },
           "name": {
+            "description": "Node (file) name - limited to file name patterns",
             "type": "string"
           },
           "nodeLTIDeepLink": {
@@ -793,11 +811,14 @@
           },
           "properties": {
             "additionalProperties": {
+              "description": "Properties of the node; Dynamic key value pairs depending on the properties",
               "items": {
+                "description": "Properties of the node; Dynamic key value pairs depending on the properties",
                 "type": "string"
               },
               "type": "array"
             },
+            "description": "Properties of the node; Dynamic key value pairs depending on the properties",
             "type": "object"
           },
           "rating": {
@@ -810,24 +831,30 @@
             "additionalProperties": {
               "$ref": "#/components/schemas/Node"
             },
+            "description": "Relations to other nodes",
             "type": "object"
           },
           "remote": {
             "$ref": "#/components/schemas/Remote"
           },
           "repositoryType": {
+            "description": "Repository type of the repository this node is originated from",
             "type": "string"
           },
           "size": {
+            "description": "Size of the node in bytes",
             "type": "string"
           },
           "title": {
+            "description": "Node title",
             "type": "string"
           },
           "type": {
+            "description": "Node main type, i.e. ccm:io or ccm:map",
             "type": "string"
           },
           "usedInCollections": {
+            "description": "Collections in which this node is used (only filled for some requests)",
             "items": {
               "$ref": "#/components/schemas/Node"
             },
@@ -1232,6 +1259,7 @@
         "type": "object"
       },
       "Content": {
+        "description": "Content information",
         "properties": {
           "hash": {
             "type": "string"
@@ -1405,6 +1433,7 @@
         "type": "object"
       },
       "Contributor": {
+        "description": "Contributors (authors, publishers) for the node",
         "properties": {
           "email": {
             "type": "string"
@@ -2955,6 +2984,7 @@
         "type": "object"
       },
       "License": {
+        "description": "license details",
         "properties": {
           "icon": {
             "type": "string"
@@ -3943,19 +3973,25 @@
       "Node": {
         "properties": {
           "access": {
+            "description": "Access permissions of the actual node object",
             "items": {
+              "description": "Access permissions of the actual node object",
               "type": "string"
             },
             "type": "array"
           },
           "accessEffective": {
+            "description": "the effective access; this is the effective access, i.e. if this element is used in a collection, it will get more permissions;  please use this field to check access",
             "items": {
+              "description": "the effective access; this is the effective access, i.e. if this element is used in a collection, it will get more permissions;  please use this field to check access",
               "type": "string"
             },
             "type": "array"
           },
           "aspects": {
+            "description": "Aspects applied to this node, i.e. ccm:collection_io_reference",
             "items": {
+              "description": "Aspects applied to this node, i.e. ccm:collection_io_reference",
               "type": "string"
             },
             "type": "array"
@@ -3964,6 +4000,7 @@
             "$ref": "#/components/schemas/Collection"
           },
           "commentCount": {
+            "description": "Number of comments on this node",
             "format": "int32",
             "type": "integer"
           },
@@ -3971,12 +4008,14 @@
             "$ref": "#/components/schemas/Content"
           },
           "contributors": {
+            "description": "Contributors (authors, publishers) for the node",
             "items": {
               "$ref": "#/components/schemas/Contributor"
             },
             "type": "array"
           },
           "createdAt": {
+            "description": "Creation date",
             "format": "date-time",
             "type": "string"
           },
@@ -3984,30 +4023,38 @@
             "$ref": "#/components/schemas/Person"
           },
           "downloadUrl": {
+            "description": "Download url for this node",
             "type": "string"
           },
           "iconURL": {
+            "description": "icon url",
             "type": "string"
           },
           "isDirectory": {
+            "description": "Whether this node is a directory",
             "type": "boolean"
           },
           "isPublic": {
+            "description": "Whether the node is public (shared to everyone)",
             "type": "boolean"
           },
           "license": {
             "$ref": "#/components/schemas/License"
           },
           "mediatype": {
+            "description": "Media type of the node (simplified/grouped mimetype)",
             "type": "string"
           },
           "metadataset": {
+            "description": "Metadata set name",
             "type": "string"
           },
           "mimetype": {
+            "description": "mime type of the node",
             "type": "string"
           },
           "modifiedAt": {
+            "description": "Modification date",
             "format": "date-time",
             "type": "string"
           },
@@ -4015,6 +4062,7 @@
             "$ref": "#/components/schemas/Person"
           },
           "name": {
+            "description": "Node (file) name - limited to file name patterns",
             "type": "string"
           },
           "nodeLTIDeepLink": {
@@ -4031,11 +4079,14 @@
           },
           "properties": {
             "additionalProperties": {
+              "description": "Properties of the node; Dynamic key value pairs depending on the properties",
               "items": {
+                "description": "Properties of the node; Dynamic key value pairs depending on the properties",
                 "type": "string"
               },
               "type": "array"
             },
+            "description": "Properties of the node; Dynamic key value pairs depending on the properties",
             "type": "object"
           },
           "rating": {
@@ -4048,24 +4099,30 @@
             "additionalProperties": {
               "$ref": "#/components/schemas/Node"
             },
+            "description": "Relations to other nodes",
             "type": "object"
           },
           "remote": {
             "$ref": "#/components/schemas/Remote"
           },
           "repositoryType": {
+            "description": "Repository type of the repository this node is originated from",
             "type": "string"
           },
           "size": {
+            "description": "Size of the node in bytes",
             "type": "string"
           },
           "title": {
+            "description": "Node title",
             "type": "string"
           },
           "type": {
+            "description": "Node main type, i.e. ccm:io or ccm:map",
             "type": "string"
           },
           "usedInCollections": {
+            "description": "Collections in which this node is used (only filled for some requests)",
             "items": {
               "$ref": "#/components/schemas/Node"
             },
@@ -4085,19 +4142,25 @@
       "NodeCollectionProposalCount": {
         "properties": {
           "access": {
+            "description": "Access permissions of the actual node object",
             "items": {
+              "description": "Access permissions of the actual node object",
               "type": "string"
             },
             "type": "array"
           },
           "accessEffective": {
+            "description": "the effective access; this is the effective access, i.e. if this element is used in a collection, it will get more permissions;  please use this field to check access",
             "items": {
+              "description": "the effective access; this is the effective access, i.e. if this element is used in a collection, it will get more permissions;  please use this field to check access",
               "type": "string"
             },
             "type": "array"
           },
           "aspects": {
+            "description": "Aspects applied to this node, i.e. ccm:collection_io_reference",
             "items": {
+              "description": "Aspects applied to this node, i.e. ccm:collection_io_reference",
               "type": "string"
             },
             "type": "array"
@@ -4106,6 +4169,7 @@
             "$ref": "#/components/schemas/Collection"
           },
           "commentCount": {
+            "description": "Number of comments on this node",
             "format": "int32",
             "type": "integer"
           },
@@ -4113,12 +4177,14 @@
             "$ref": "#/components/schemas/Content"
           },
           "contributors": {
+            "description": "Contributors (authors, publishers) for the node",
             "items": {
               "$ref": "#/components/schemas/Contributor"
             },
             "type": "array"
           },
           "createdAt": {
+            "description": "Creation date",
             "format": "date-time",
             "type": "string"
           },
@@ -4126,30 +4192,38 @@
             "$ref": "#/components/schemas/Person"
           },
           "downloadUrl": {
+            "description": "Download url for this node",
             "type": "string"
           },
           "iconURL": {
+            "description": "icon url",
             "type": "string"
           },
           "isDirectory": {
+            "description": "Whether this node is a directory",
             "type": "boolean"
           },
           "isPublic": {
+            "description": "Whether the node is public (shared to everyone)",
             "type": "boolean"
           },
           "license": {
             "$ref": "#/components/schemas/License"
           },
           "mediatype": {
+            "description": "Media type of the node (simplified/grouped mimetype)",
             "type": "string"
           },
           "metadataset": {
+            "description": "Metadata set name",
             "type": "string"
           },
           "mimetype": {
+            "description": "mime type of the node",
             "type": "string"
           },
           "modifiedAt": {
+            "description": "Modification date",
             "format": "date-time",
             "type": "string"
           },
@@ -4157,6 +4231,7 @@
             "$ref": "#/components/schemas/Person"
           },
           "name": {
+            "description": "Node (file) name - limited to file name patterns",
             "type": "string"
           },
           "nodeLTIDeepLink": {
@@ -4173,11 +4248,14 @@
           },
           "properties": {
             "additionalProperties": {
+              "description": "Properties of the node; Dynamic key value pairs depending on the properties",
               "items": {
+                "description": "Properties of the node; Dynamic key value pairs depending on the properties",
                 "type": "string"
               },
               "type": "array"
             },
+            "description": "Properties of the node; Dynamic key value pairs depending on the properties",
             "type": "object"
           },
           "proposalCounts": {
@@ -4197,24 +4275,30 @@
             "additionalProperties": {
               "$ref": "#/components/schemas/Node"
             },
+            "description": "Relations to other nodes",
             "type": "object"
           },
           "remote": {
             "$ref": "#/components/schemas/Remote"
           },
           "repositoryType": {
+            "description": "Repository type of the repository this node is originated from",
             "type": "string"
           },
           "size": {
+            "description": "Size of the node in bytes",
             "type": "string"
           },
           "title": {
+            "description": "Node title",
             "type": "string"
           },
           "type": {
+            "description": "Node main type, i.e. ccm:io or ccm:map",
             "type": "string"
           },
           "usedInCollections": {
+            "description": "Collections in which this node is used (only filled for some requests)",
             "items": {
               "$ref": "#/components/schemas/Node"
             },
@@ -4318,6 +4402,7 @@
         "type": "object"
       },
       "NodeLTIDeepLink": {
+        "description": "Node LTI deep linking information",
         "properties": {
           "jwtDeepLinkResponse": {
             "type": "string"
@@ -5185,6 +5270,7 @@
         "type": "object"
       },
       "Person": {
+        "description": "Owner of the node",
         "properties": {
           "firstName": {
             "type": "string"
@@ -5326,6 +5412,7 @@
         "type": "object"
       },
       "Preview": {
+        "description": "Preview/Thumbnail information",
         "properties": {
           "data": {
             "format": "byte",
@@ -5577,6 +5664,7 @@
         "type": "object"
       },
       "RatingDetails": {
+        "description": "Rating details",
         "properties": {
           "affiliation": {
             "additionalProperties": {
@@ -5753,6 +5841,7 @@
         "type": "object"
       },
       "Remote": {
+        "description": "Remote node information (in case this node is from a remote/federated repository)",
         "properties": {
           "id": {
             "type": "string"
@@ -5974,6 +6063,9 @@
             "type": "string"
           }
         },
+        "required": [
+          "uuid"
+        ],
         "type": "object"
       },
       "RepositoryVersionInfo": {
