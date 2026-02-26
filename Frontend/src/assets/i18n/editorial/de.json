@@ -51,6 +51,7 @@
         "METHODOLOGY": {
           "TITLE": "Methodik",
           "INFO": "Finde schneller, was du suchst. Baue dir Tagging-Vorlagen und tagge Material.\n Baue dir damit deine typischen Filter für die Suche.",
+          "METADATA_SAVED": "Metadaten an {{count}} Element(en) aktualisiert",
           "SELECT_TEMPLATE": "Vorlage auswählen",
           "MANAGE_TEMPLATES": "Vorlagen verwalten",
           "TEMPLATE_NAME": "Titel der Vorlage",

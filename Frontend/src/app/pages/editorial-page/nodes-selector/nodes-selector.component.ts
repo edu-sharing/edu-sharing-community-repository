@@ -62,7 +62,7 @@ import { MdsModule } from '../../../features/mds/mds.module';
 import { MetadataTemplateManagementComponent } from '../../../features/metadata-template-management/metadata-template-management.component';
 import { BridgeService } from '../../../services/bridge.service';
 import { NodeHelperService } from '../../../services/node-helper.service';
-import { Toast } from '../../../services/toast';
+import { Toast, ToastType } from '../../../services/toast';
 import { UploadDialogService } from '../../../services/upload-dialog.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { MessageType } from '../../../util/message-type';
@@ -603,6 +603,7 @@ export class NodesSelectorComponent implements OnInit {
      * Saves the enabled metadata to the currently selected nodes.
      */
     async saveMetadata(): Promise<void> {
+        this.editorialSidebarService.sidebarLoading.set(true);
         const source = this.option().optionConfig.nodes as Node[];
         // convert the extended values to a flat object with the metadata keys as keys and the enabled values as values
         const values: MdsExtendedValues = this.currentExtendedValues() ?? {};
@@ -619,8 +620,30 @@ export class NodesSelectorComponent implements OnInit {
                 enabledMetadata[key] = enabledValues;
             }
         });
-        // @TODO Torsten: Additively add metadata "enabledMetadata" to "source"
-        console.log('Additively add metadata', enabledMetadata, 'to', source);
+        if (Object.entries(enabledMetadata).length > 0) {
+            for (const node of source) {
+                const props = (
+                    await firstValueFrom(
+                        this.nodeService.getNode(node.ref.id, { repository: node.ref.repo }),
+                    )
+                ).properties;
+                Object.entries(enabledMetadata).forEach(([key, value]) => {
+                    if (props[key]) {
+                        props[key].push(...value.filter((v) => !props[key].includes(v)));
+                    } else {
+                        props[key] = value;
+                    }
+                });
+                await firstValueFrom(this.nodeService.editNodeMetadata(node.ref.id, props));
+            }
+        }
+        this.editorialSidebarService.sidebarLoading.set(false);
+        this.toast.show({
+            type: 'info',
+            subtype: ToastType.InfoSimple,
+            message: this.i18nPrefix + 'METHODOLOGY.METADATA_SAVED',
+            messageParameters: { count: source.length },
+        });
     }
 
     /**
