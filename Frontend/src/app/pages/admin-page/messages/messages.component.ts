@@ -152,7 +152,7 @@ export class AdminMessagesComponent implements OnInit {
             toolpermissions: this.selectedTp(),
             uuid: uuidv4(),
         } as RepositoryMessage;
-        const config = this.config();
+        const config = this.config() || {};
         if (!config.messages) {
             config.messages = [];
         }

@@ -62,6 +62,7 @@
     "MESSAGES": {
       "ADD_MESSAGE": "New Announcement / Maintenance Message",
       "EDIT_MESSAGE": "Edit Announcement / Maintenance Message",
+      "NO_MESSAGES": "Currently no maintenance messages configured",
       "REMOVE_TITLE": "Delete Message",
       "REMOVE_MESSAGE": "Do you want to delete the following message?<br><br><hr>{{message}}",
       "SELECT_COMPONENT": "Select area",

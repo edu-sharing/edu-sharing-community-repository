@@ -60,6 +60,7 @@
     "MESSAGES": {
       "ADD_MESSAGE": "Neue Anzeige-/Wartungsnachricht",
       "EDIT_MESSAGE": "Anzeige-/Wartungsnachricht bearbeiten",
+      "NO_MESSAGES": "Derzeit keine Wartungsnachrichten konfiguriert",
       "REMOVE_TITLE": "Nachricht löschen",
       "REMOVE_MESSAGE": "Soll die folgende Nachricht gelöscht werden?<br><br><hr>{{message}}",
       "SELECT_COMPONENT": "Bereich auswählen",
