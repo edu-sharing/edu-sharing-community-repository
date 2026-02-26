@@ -47,6 +47,10 @@ export class TopBarComponent {
     @Input() isSafe: boolean;
     @Input() mainMenuStyle: 'sidebar' | 'dropdown' = 'sidebar';
     @Input() searchEnabled: boolean;
+    /**
+     * show the topbar at all? (excluding system messages)
+     */
+    @Input() show: boolean;
     @Input() showChat: boolean;
     @Input() showScope = true;
     @Input() showUser: boolean;
