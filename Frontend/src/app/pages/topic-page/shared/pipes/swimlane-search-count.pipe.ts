@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { Swimlane } from '../types/swimlane';
 import { GridTile } from '../types/grid-tile';
+import { Swimlane } from '../types/swimlane';
 
 @Pipe({
     name: 'swimlaneSearchCount',

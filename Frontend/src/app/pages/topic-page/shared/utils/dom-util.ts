@@ -28,20 +28,3 @@ export const scrollIntoView = (element: HTMLElement): void => {
         behavior: 'smooth',
     });
 };
-
-/**
- * Creates a query string for given parameters.
- *
- * @param params
- */
-export const createQueryString = (params: Record<string, any>): string => {
-    const searchParams = new URLSearchParams();
-
-    Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
-            searchParams.append(key, String(value));
-        }
-    });
-
-    return searchParams.toString();
-};

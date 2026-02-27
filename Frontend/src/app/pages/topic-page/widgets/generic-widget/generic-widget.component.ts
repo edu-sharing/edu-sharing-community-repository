@@ -25,7 +25,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
-import { MdsValue, MdsWidget, Node, SearchService } from 'ngx-edu-sharing-api';
+import { MdsWidget, Node, SearchService } from 'ngx-edu-sharing-api';
 import { ChatCompletionResult, NodeConfig } from 'ngx-edu-sharing-b-api';
 import { UIService } from 'ngx-edu-sharing-ui';
 import { Subject } from 'rxjs';
@@ -47,7 +47,6 @@ import {
     WIDGETS,
 } from '../../shared/types/custom-definitions';
 import { PromptToTextMapping } from '../../shared/types/prompt-to-text-mapping';
-import { StatisticNode } from '../../shared/types/statistic-node';
 import { SwimlaneBackgroundShape } from '../../shared/types/swimlane-background-shape';
 import { BaseWidgetConfig } from '../../shared/types/widget-config/base-widget-config';
 import { WidgetConfig } from '../../shared/types/widget-config/widget-config';
@@ -107,7 +106,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
 
     // INPUTS
     // if configOverwrite is set, it replaces the fetched config, allowing to directly control
-    // the widget, which will be important, when embedding the widget.
+    // the widget, which will be important when embedding the widget.
     @Input() configOverwrite: string;
     @Input() contextNodeId: string;
     editMode: InputSignal<boolean> = input<boolean>(false);
@@ -122,29 +121,25 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     @Input() widgetType: WIDGET_TYPE | string = WIDGETS.CONTENT_TEASER;
 
     // Additional inputs that might be specific to certain widgets
-    @Input() customUrl?: (collection: Node) => string;
     @Input() defaultNodeId: string = '';
     @Input() height?: string;
     @Input() hideDescription: boolean = false;
     @Input() isEmbedMode: boolean = false;
     @Input() searchText: string = '';
     @Input() selectDimensions: Map<string, MdsWidget> = new Map<string, MdsWidget>();
-    @Input() selectedDimensionValues: MdsValue[] = [];
     @Input() sidebarEmbedding: boolean = false;
 
     // OUTPUTS
     @Output() itemClickedEvent: EventEmitter<Node> = new EventEmitter<Node>();
-    @Output() nodeStatisticsChanged: EventEmitter<StatisticNode[]> = new EventEmitter<
-        StatisticNode[]
-    >();
     @Output() searchInputHitsChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
-    @Output() totalSearchResultCountChanged: EventEmitter<number> = new EventEmitter<number>();
+    @Output() visibleNodesChanged: EventEmitter<Node[]> = new EventEmitter<Node[]>();
 
     @ViewChild('configureWidgetEmbeddingTemplate')
     configureWidgetEmbeddingTemplateRef: TemplateRef<undefined>;
     configureWidgetEmbeddingDialogRef: CardDialogRef;
 
     // VARIABLES
+    aiSupported: WritableSignal<boolean> = signal(false);
     description: string;
     descriptionMapping: PromptToTextMapping;
     descriptionAiGenerated: WritableSignal<boolean> = signal(false);
@@ -186,7 +181,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
 
         // listen to changes in the selected variables and update potentially AI-generated properties
         this.topicPageHelperService
-            .getSelectedVariablesSubject()
+            .getSelectedVariables$()
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe((): void => {
                 if (!this.widgetNode) {
@@ -210,6 +205,8 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         }
         this.viewInitialized = true;
 
+        this.aiSupported.set(await this.aiHelperService.hasAISupport());
+
         // define a common embed configuration option to be used in every widget
         this.updateCommonConfigurationOptions();
 
@@ -229,7 +226,6 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
             (changes.editMode ||
                 changes.gridIndex ||
                 changes.searchInput ||
-                changes.selectedDimensionValues ||
                 changes.swimlaneColor ||
                 changes.swimlaneIndex ||
                 changes.swimlaneShape ||
@@ -343,7 +339,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
             this.headline = widgetConfig.headline;
         }
         // in case an AI config is defined, execute the prompts and store the results
-        if (aiConfig && Object.keys(aiConfig).length) {
+        if (aiConfig && Object.keys(aiConfig).length && this.aiSupported()) {
             if (aiConfig.headline) {
                 const config: NodeConfig = {
                     type: 'node',
@@ -419,7 +415,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
             '<link rel="stylesheet" type="text/css" href="' +
             webComponentBaseHref +
             'styles.css" />\n';
-        // build wlo-generic-widget tag dynamically
+        // build es-generic-widget tag dynamically
         embeddingCode += '<edu-sharing-generic-widget';
 
         // add required attributes
@@ -463,7 +459,8 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 if (
                     'prompt' in widgetConfig &&
                     widgetConfig.prompt &&
-                    containsAiTags(widgetConfig.prompt)
+                    containsAiTags(widgetConfig.prompt) &&
+                    this.aiSupported()
                 ) {
                     // as the generation takes place in the widget, we duplicate the function here
                     const defaultConfigId: string = getNodeOrDefaultNodeId(
@@ -550,7 +547,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     }
 
     /**
-     * Reacts to wlo-generic-widget-header (textChange) event by updating the widget config.
+     * Reacts to es-generic-widget-header (textChange) event by updating the widget config.
      *
      * @param event
      */
@@ -750,10 +747,12 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         }
         switch (this.widgetType) {
             case WIDGETS.AI_TEXT_WIDGET:
-                const aiTextWidgetModule = await import(
-                    '../ai-text-widget/ai-text-widget.component'
-                );
-                componentClass = aiTextWidgetModule.AiTextWidgetComponent;
+                if (this.aiSupported()) {
+                    const aiTextWidgetModule = await import(
+                        '../ai-text-widget/ai-text-widget.component'
+                    );
+                    componentClass = aiTextWidgetModule.AiTextWidgetComponent;
+                }
                 break;
             case WIDGETS.COLLECTION_CHIPS:
                 const collectionChipsModule = await import(
@@ -834,14 +833,6 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 this.widgetComponentRef.setInput('propagatedNodeId', this.propagatedNodeId);
                 this.widgetComponentRef.setInput('searchInput', this.searchInput());
                 this.widgetComponentRef.setInput('selectDimensions', this.selectDimensions);
-                this.widgetComponentRef.setInput(
-                    'selectedDimensionValues',
-                    this.selectedDimensionValues,
-                );
-                break;
-
-            case WIDGETS.COLLECTION_CHIPS:
-                this.widgetComponentRef.setInput('customUrl', this.customUrl);
                 break;
 
             case WIDGETS.CONTENT_TEASER:
@@ -854,10 +845,6 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 this.widgetComponentRef.setInput('swimlaneShape', this.swimlaneShape);
                 break;
 
-            case WIDGETS.EDITORIAL_MEMBERS:
-                this.widgetComponentRef.setInput('searchInput', this.searchInput());
-                break;
-
             case WIDGETS.MEDIA_RENDERING:
                 this.widgetComponentRef.setInput('headline', this.headline);
                 this.widgetComponentRef.setInput('nodeId', this.nodeId);
@@ -865,13 +852,12 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 break;
 
             case WIDGETS.TOPICS_COLUMN_BROWSER:
-                this.widgetComponentRef.setInput('customUrl', this.customUrl);
                 this.widgetComponentRef.setInput('height', this.height);
                 this.widgetComponentRef.setInput('sidebarEmbedding', this.sidebarEmbedding);
                 break;
 
             // default break for unknown widget types and widget types without additional inputs
-            // e.g., iframe-widget and text-widget
+            // e.g., collection-chips, iframe-widget and text-widget
             default:
                 break;
         }
@@ -891,15 +877,12 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
 
         // set up widget-specific outputs
         instance.itemClickedEvent?.subscribe((node: Node) => this.itemClickedEvent.emit(node));
-        instance.nodeStatisticsChanged?.subscribe((stats: StatisticNode[]) =>
-            this.nodeStatisticsChanged.emit(stats),
-        );
         instance.internalSearchResultCountChanged?.subscribe((count: number) => {
             this.updateSearchResults(count, 'internal');
         });
-        instance.totalSearchResultCountChanged?.subscribe((count: number) => {
-            this.totalSearchResultCountChanged.emit(count);
-            this.updateSearchResults(count, 'nodes');
+        instance.visibleNodesChanged?.subscribe((nodes: Node[] = []) => {
+            this.updateSearchResults(nodes.length, 'nodes');
+            this.visibleNodesChanged.emit(nodes);
         });
     }
 

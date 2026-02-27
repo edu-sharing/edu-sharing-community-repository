@@ -24,22 +24,21 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { TranslateModule } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
-import { EduSharingUiCommonModule, NodeTitlePipe, Values } from 'ngx-edu-sharing-ui';
+import { EduSharingUiCommonModule, NodeTitlePipe } from 'ngx-edu-sharing-ui';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { PreviewSidebarService } from '../../../../features/preview-sidebar/preview-sidebar.service';
-import { RenderWrapperComponent } from '../../../render2-page/render-wrapper-component/render-wrapper.component';
 import { Toast } from '../../../../services/toast';
 import { SharedModule } from '../../../../shared/shared.module';
+import { RenderWrapperComponent } from '../../../render2-page/render-wrapper-component/render-wrapper.component';
 import { HighlightSearchPipe } from '../../shared/pipes/highlight-search.pipe';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
+import { ConfigurationOption } from '../../shared/types/configuration-option';
 import { LayoutOption } from '../../shared/types/layout-option';
 import { MediaRenderingDisplayType } from '../../shared/types/media-rendering-display-type';
 import { MediaRenderingConfig } from '../../shared/types/widget-config/media-rendering-config';
-import { WidgetConfigurationButtonsComponent } from '../shared/widget-configuration-buttons/widget-configuration-buttons.component';
-import { ConfigurationOption } from '../../shared/types/configuration-option';
-import { StatisticNode } from '../../shared/types/statistic-node';
 import { WidgetComponentInterface } from '../generic-widget/generic-widget.component';
+import { WidgetConfigurationButtonsComponent } from '../shared/widget-configuration-buttons/widget-configuration-buttons.component';
 
 @Component({
     selector: 'es-media-rendering',
@@ -63,6 +62,9 @@ import { WidgetComponentInterface } from '../generic-widget/generic-widget.compo
     styleUrls: ['./media-rendering.component.scss'],
 })
 export class MediaRenderingComponent implements AfterViewInit, OnDestroy, WidgetComponentInterface {
+    // CONSTANTS
+    readonly i18nPrefix: string = 'TOPIC_PAGE.WIDGET.MEDIA_RENDERING.';
+
     // INPUTS + OUTPUTS
     @Input() contextNodeId: string;
     editMode: InputSignal<boolean> = input<boolean>(false);
@@ -85,9 +87,7 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
     @Output() embedWidgetClicked: EventEmitter<void> = new EventEmitter<void>();
     @Output() internalSearchResultCountChanged: EventEmitter<number> = new EventEmitter<number>();
     @Output() itemClickedEvent: EventEmitter<Node> = new EventEmitter<Node>();
-    @Output() nodeStatisticsChanged: EventEmitter<StatisticNode[]> = new EventEmitter<
-        StatisticNode[]
-    >();
+    @Output() visibleNodesChanged: EventEmitter<Node[]> = new EventEmitter<Node[]>();
 
     private destroy$ = new Subject<void>();
     initialized: WritableSignal<boolean> = signal(false);
@@ -197,7 +197,7 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
                 this.selectedNode = node;
                 this.computeSelectedNodeTitle();
                 this.configChanged.emit();
-                this.emitStatistics();
+                this.emitVisibleNode();
             });
         }
     };
@@ -206,11 +206,7 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
      * Opens a new window with the Re-URL parameter set.
      */
     openReurlLink(): void {
-        // 'search' opens the search buffet
-        const propertyFilters: Values = {
-            'virtual:audit_filter': ['search'],
-        };
-        this.windowRef = this.topicPageHelperService.openReurlLink(propertyFilters);
+        this.windowRef = this.topicPageHelperService.openReurlLink();
     }
 
     /**
@@ -241,7 +237,7 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
      * Postload action emitting the statistics.
      */
     async postLoadAction(): Promise<void> {
-        this.emitStatistics();
+        this.emitVisibleNode();
     }
 
     // noinspection JSUnusedGlobalSymbols
@@ -296,7 +292,7 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
         }
         // emit number of hits
         const numberOfHits: number = (
-            outputTitle.match(new RegExp('class="wlo-search-highlight"', 'g')) || []
+            outputTitle.match(new RegExp('class="topic-page-search-highlight"', 'g')) || []
         ).length;
         this.internalSearchResultCountChanged.emit(numberOfHits);
         this.selectedNodeTitle.set(outputTitle);
@@ -305,29 +301,11 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
     /**
      * Helper function to emit the statistics of the selected node.
      */
-    private emitStatistics() {
+    private emitVisibleNode(): void {
         if (this.selectedNode) {
-            // emit the selected node
-            // @TODO
-            /*
-            const searchResultStatistics: StatisticNode[] = [
-                {
-                    nodeId: this.selectedNode.ref.id,
-                    isEditorial: isEditorial(this.selectedNode),
-                    isOer: isOer(this.selectedNode),
-                    isOrganization: checkMetadataset(
-                        this.selectedNode,
-                        DEFAULT_METADATASET_ORGANIZATION,
-                    ),
-                    isPerson: checkMetadataset(this.selectedNode, DEFAULT_METADATASET_PERSON),
-                    lrts: this.selectedNode.properties[DEFAULT_LRT_PROP] ?? [],
-                },
-            ];
-            this.nodeStatisticsChanged.emit(searchResultStatistics);
-             */
-            this.nodeStatisticsChanged.emit([]);
+            this.visibleNodesChanged.emit([this.selectedNode]);
         } else {
-            this.nodeStatisticsChanged.emit([]);
+            this.visibleNodesChanged.emit([]);
         }
     }
 

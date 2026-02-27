@@ -10,10 +10,10 @@ import { SharedModule } from '../../../../../shared/shared.module';
 })
 export class ConfigureWidgetEmbeddingDialogComponent {
     readonly i18nPrefix: string = 'TOPIC_PAGE.CONFIG_WIDGET_EMBEDDING.';
+
     @Input() dialogRef: CardDialogRef;
     @Input() nodeId: string;
     @Input() propagatedNodeId: string;
-
     @Output() embedWidget: EventEmitter<'nodeId' | 'configOverwrite'> = new EventEmitter<
         'nodeId' | 'configOverwrite'
     >();

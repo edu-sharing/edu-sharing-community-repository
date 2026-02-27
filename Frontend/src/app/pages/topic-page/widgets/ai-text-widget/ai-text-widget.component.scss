@@ -1,7 +1,7 @@
-// reference for: use ... as * (https://stackoverflow.com/a/63012314)
-@use '../../../topic-page/topic-page-variables' as *;
+@use '../../topic-page-variables' as topicPageVars;
 
 .ai-widget {
+    min-height: 40px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -35,16 +35,26 @@
             place-items: center;
             gap: 0.5rem;
 
-            &.wlo-grid-cols-1 {
+            &.topic-page-grid-cols-1 {
                 grid-template-columns: repeat(1, minmax(0, 1fr));
             }
 
-            &.wlo-grid-cols-2 {
+            &.topic-page-grid-cols-2 {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
-            &.wlo-grid-cols-3 {
+            &.topic-page-grid-cols-3 {
                 grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            es-mds-editor-single-widget {
+                width: 100%;
+
+                &::ng-deep {
+                    .mat-mdc-form-field-subscript-wrapper {
+                        display: none;
+                    }
+                }
             }
         }
 
@@ -57,8 +67,12 @@
         margin-bottom: 20px;
     }
 
+    .empty-result-string {
+        padding: 8px 16px 16px 16px;
+    }
+
     .reloading-indicator {
-        // Hint: this requires the outer container to be relative to display the reloading indicator over the full div
+        // hint: this requires the outer container to be relative to display the reloading indicator over the full div
         position: absolute;
         top: 0;
         left: 0;
@@ -68,19 +82,11 @@
         align-items: center;
         justify-content: center;
         cursor: wait;
-        background: rgba($inverse-surface, 0.4);
-        border-top-left-radius: $widget-border-radius;
-        border-top-right-radius: $widget-border-radius;
+        background: rgba(topicPageVars.$inverse-surface, 0.4);
     }
 }
 
 // fix for displaying the full spinner
 :host ::ng-deep es-spinner .spinner {
     width: 150px;
-}
-
-// adding :host in front does not work, as the snackbar is placed on the end of the <body>
-::ng-deep .mat-toolbar.mat-primary {
-    background: $primary;
-    color: $on-primary;
 }

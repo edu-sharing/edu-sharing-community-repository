@@ -1,0 +1,74 @@
+<form class="config-form" [formGroup]="form" *ngIf="formInitialized()">
+  <es-info-message mode="info" class="info-message" *ngIf="formInputValid(); else invalidInputMsg">
+    <strong>
+      {{ i18nPrefix + 'INFO_TITLE' | translate }}
+    </strong>
+    <span>
+      {{ i18nPrefix + 'INFO_TEXT' | translate }}
+    </span>
+  </es-info-message>
+  <ng-template #invalidInputMsg>
+    <es-info-message mode="error" class="info-message">
+      {{ i18nPrefix + 'WARN_TEXT' | translate }}
+    </es-info-message>
+  </ng-template>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="page-variant-parameter">
+    <mat-label>
+      {{ i18nPrefix + 'TITLE' | translate }}
+    </mat-label>
+    <input
+      matInput
+      type="text"
+      [placeholder]="i18nPrefix + 'TITLE_PLACEHOLDER' | translate"
+      formControlName="title"
+    />
+  </mat-form-field>
+
+  <div class="select-dimensions" *ngIf="availableSelectDimensionKeys().length">
+    <div *ngFor="let dimensionKey of availableSelectDimensionKeys(); let i = index">
+      <ng-container *ngVar="viewModes[i] ? viewModes[i] : viewModes[0] as viewMode">
+        <ng-container *ngVar="selectDimensions().get(dimensionKey) as dimension">
+          <div class="dimension-wrapper">
+            <label class="dimension-label">
+              <i [esIcon]="viewIcons[i]" *ngIf="viewIcons[i]"></i>
+              {{ viewLabels[i] ? viewLabels[i] : dimension.caption }}
+            </label>
+            <mat-radio-group
+              class="dimension-container"
+              [formControlName]="dimensionKey"
+              *ngIf="viewMode !== 'checkbox'; else checkboxContainer"
+            >
+              <mat-radio-button *ngFor="let value of dimension.values" [value]="value.id">
+                {{ value.caption }}
+              </mat-radio-button>
+            </mat-radio-group>
+            <ng-template #checkboxContainer>
+              <div class="dimension-container" [formArrayName]="dimensionKey">
+                <div *ngFor="let value of dimension.values; let i = index" [formGroupName]="i">
+                  <mat-checkbox formControlName="checked">
+                    {{ value.caption }}
+                  </mat-checkbox>
+                </div>
+              </div>
+            </ng-template>
+          </div>
+        </ng-container>
+      </ng-container>
+    </div>
+  </div>
+
+  <div class="delete-and-apply-buttons">
+    <button
+      *ngIf="deleteVariantEnabled()"
+      mat-stroked-button
+      class="btn-outline-primary"
+      color="primary"
+      (click)="deletePageVariant()"
+    >
+      <i esIcon="delete"></i> {{ i18nPrefix + 'DELETE_VARIANT' | translate }}
+    </button>
+    <button mat-flat-button color="primary" [disabled]="!formInputValid()" (click)="applyChanges()">
+      {{ 'APPLY' | translate }}
+    </button>
+  </div>
+</form>

@@ -1,0 +1,67 @@
+@use '../../topic-page-variables' as topicPageVars;
+
+:host {
+    display: flex;
+    align-items: center;
+}
+
+.swimlane-configuration-buttons {
+    color: topicPageVars.$on-surface;
+    min-height: 48px;
+
+    .swimlane-display-config-buttons {
+        padding-left: 16px;
+        padding-right: 16px;
+        border-radius: 4px;
+        box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.4);
+        display: flex;
+        align-items: center;
+    }
+}
+
+// swimlane-specific styling for the color picker
+::ng-deep .swimlane-display-config-buttons es-color-picker .swimlane-color-picker {
+    border-radius: 0 !important;
+}
+
+::ng-deep .swimlane-display-config-buttons {
+    // reset border-radius
+    border-radius: 0;
+    border: none;
+    height: 100%;
+
+    .display-button {
+        padding: 0;
+        width: 48px;
+        border-radius: 0;
+        border-left: solid 1px
+            var(--mat-standard-button-toggle-divider-color, var(--mat-sys-outline));
+
+        .display-button-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+
+            .display-button-text {
+                font-size: 10px;
+                font-weight: topicPageVars.$font-weight-regular;
+                line-height: topicPageVars.$line-height-medium;
+            }
+        }
+
+        // fix that border-radius is also set on the ripple
+        &::ng-deep .mat-mdc-button-persistent-ripple {
+            border-radius: 0;
+        }
+    }
+}
+
+.swimlane-display-config-label {
+    margin-right: 12px;
+
+    // match button disabled label text color
+    &.disabled-text {
+        color: var(--mdc-text-button-disabled-label-text-color, topicPageVars.$secondary);
+    }
+}

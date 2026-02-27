@@ -14,9 +14,9 @@ import {
 import { TranslateModule } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { SpinnerComponent } from 'ngx-edu-sharing-ui';
-import { WidgetConfigurationButtonsComponent } from '../shared/widget-configuration-buttons/widget-configuration-buttons.component';
 import { ConfigurationOption } from '../../shared/types/configuration-option';
 import { WidgetComponentInterface } from '../generic-widget/generic-widget.component';
+import { WidgetConfigurationButtonsComponent } from '../shared/widget-configuration-buttons/widget-configuration-buttons.component';
 
 @Component({
     selector: 'es-text-widget',

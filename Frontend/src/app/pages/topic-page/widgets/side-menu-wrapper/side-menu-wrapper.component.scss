@@ -1,0 +1,62 @@
+@use 'variables-scss' as vars;
+@use '../../topic-page-variables' as topicPageVars;
+
+.side-menu-wrapper {
+    display: flex;
+    align-items: center;
+    position: fixed;
+    max-height: calc(100vh - 100px);
+    top: calc(50% + 50px);
+    transform: translateY(-50%);
+    z-index: 97;
+
+    &::ng-deep es-side-menu-item {
+        display: flex;
+    }
+
+    &.position-left {
+        left: 0;
+
+        &::ng-deep es-side-menu-item {
+            justify-content: flex-start !important;
+        }
+    }
+
+    &.position-right {
+        right: 0;
+
+        &::ng-deep es-side-menu-item {
+            justify-content: flex-end !important;
+        }
+    }
+}
+
+.side-menu {
+    min-width: 48px;
+    max-width: 50px;
+    max-height: 100%;
+}
+
+.menu-content {
+    position: relative;
+    flex: 1;
+    padding: 20px;
+    background: topicPageVars.$surface-container-lowest;
+    box-shadow: rgba(14, 30, 37, 0.12) 0 2px 4px 0, rgba(14, 30, 37, 0.32) 0 2px 16px 0;
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+}
+
+.close-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+}
+
+@media screen and (max-width: vars.$mobileWidth + vars.$mobileStage * 1) {
+    .side-menu.mobile-hidden {
+        min-width: unset;
+        max-width: 0;
+        visibility: hidden;
+    }
+}

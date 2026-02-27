@@ -53,7 +53,6 @@ import { PreviewSidebarService } from '../../../../../features/preview-sidebar/p
 import { OptionsHelperService } from '../../../shared/services/options-helper.service';
 import { TopicPageHelperService } from '../../../shared/services/topic-page-helper.service';
 import { GenericNodeEntriesDisplayType } from '../../../shared/types/generic-node-entries-display-type';
-import { StatisticNode } from '../../../shared/types/statistic-node';
 import { GenericWidgetGlobalService } from '../../generic-widget/generic-widget-global.service';
 
 export interface DisplayTypeComponentInterface {
@@ -62,7 +61,7 @@ export interface DisplayTypeComponentInterface {
     selectedNode: Node;
     // outputs
     itemClicked: EventEmitter<Node>;
-    totalSearchResultCountChanged: EventEmitter<number>;
+    visibleNodesChanged: EventEmitter<Node[]>;
     // methods
     setDataSource(resetNecessary: boolean, skipCount?: number): Promise<void>;
 }
@@ -209,14 +208,12 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
     @Output() blacklistChanged: EventEmitter<string> = new EventEmitter<string>();
     @Output() displayTypeChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
     @Output() itemClicked: EventEmitter<Node> = new EventEmitter<Node>();
-    @Output() nodeStatisticsChanged: EventEmitter<StatisticNode[]> = new EventEmitter<
-        StatisticNode[]
-    >();
     @Output() totalSearchResultCountChanged: EventEmitter<number> = new EventEmitter<number>();
+    @Output() visibleNodesChanged: EventEmitter<Node[]> = new EventEmitter<Node[]>();
 
     // es-node-entries-wrapper
     @ViewChild('contentWrapper') nodeEntries: NodeEntriesWrapperComponent<Node>;
-    // wlo-custom-propose-content-card
+    // es-custom-propose-content-card
     @ViewChild('cardSuggest') cardSuggestRef: TemplateRef<unknown>;
 
     private readonly i18nPrefix: string = 'TOPIC_PAGE.WIDGET.CONTENT_TEASER.';
@@ -593,7 +590,7 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
         }
 
         // emit the node statistics of the search result
-        void this.emitNodeStatistics(
+        void this.emitVisibleNodes(
             this.allRequestedNodes,
             this.blacklistedNodeIds,
             searchResult.pagination.total,
@@ -817,10 +814,10 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
     }
 
     /**
-     * Helper function to emit the node statistics.
+     * Helper function to emit the visible nodes.
      * Blacklisted nodes are not emitted.
      */
-    async emitNodeStatistics(
+    async emitVisibleNodes(
         nodes: Node[],
         blacklistedIds: string[],
         totalCount: number,
@@ -828,28 +825,19 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
         query: string,
         criteria: MdsQueryCriteria[],
     ): Promise<void> {
-        // emit the statistics
-        const emitStatistics = (mappingNodes: Node[]): void => {
-            const nodeStatistics: StatisticNode[] = [];
-            mappingNodes.forEach((node: Node): void => {
-                if (!blacklistedIds.includes(node.ref.id)) {
-                    // @TODO
-                    /*nodeStatistics.push({
-                        nodeId: node.ref.id,
-                        isEditorial: isEditorial(node),
-                        isOer: isOer(node),
-                        isOrganization: checkMetadataset(node, DEFAULT_METADATASET_ORGANIZATION),
-                        isPerson: checkMetadataset(node, DEFAULT_METADATASET_PERSON),
-                        lrts: node.properties[DEFAULT_LRT_PROP] ?? [],
-                    });*/
-                }
-            });
-            this.nodeStatisticsChanged.emit(nodeStatistics);
+        // emit the visible nodes
+        const emitNodes = (mappingNodes: Node[]): void => {
+            const visibleNodes: Node[] = mappingNodes.filter(
+                (n) => !blacklistedIds.includes(n.ref.id),
+            );
+            this.visibleNodesChanged.emit(visibleNodes);
         };
         // nodes have already removed duplicates, so no additional check is necessary
-        emitStatistics(nodes);
+        if (totalCount <= this.maxItems) {
+            emitNodes(nodes);
+        }
 
-        // an update should be emitted, if it is the initial call and the totalCount is larger than the maxItems
+        // an update should be emitted if it is the initial call and the totalCount is larger than the maxItems
         // in this case, 100 items are loaded
         if (skipCount === 0 && totalCount > this.maxItems) {
             // TODO: remove, if implemented properly
@@ -885,7 +873,7 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
                     existingNodeIds.push(node.ref.id);
                 }
             });
-            emitStatistics(copyOfAllRequestedNodes);
+            emitNodes(copyOfAllRequestedNodes);
         }
     }
 
@@ -939,9 +927,14 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
         if (!this.customTypeInstance) {
             return;
         }
-        this.customTypeInstance.totalSearchResultCountChanged
+        this.customTypeInstance.visibleNodesChanged
             ?.pipe(takeUntil(this.destroy$))
-            .subscribe((count: number) => this.totalSearchResultCountChanged.emit(count));
+            .subscribe((nodes: Node[]) => {
+                this.visibleNodesChanged.emit(nodes);
+                // no blacklisting supported here, so emit the count of the nodes
+                this.totalSearchResultCountChanged.emit(nodes.length);
+            });
+
         this.customTypeInstance.itemClicked
             ?.pipe(takeUntil(this.destroy$))
             .subscribe((node: Node) => this.onItemClicked(node));

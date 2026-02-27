@@ -4,8 +4,8 @@
       "NEW_PAGE_VARIANT": "New topic page variant",
       "NEW_PAGE_TEMPLATE": "New topic page template",
       "APPS": "Apps",
-      "APPS_ELEMENT_NOT_FOUND": "The element with class wlo-show-apps could not be found.",
-      "TITLE": "Topic pages",
+      "APPS_ELEMENT_NOT_FOUND": "The element with class topic-page-show-apps could not be found.",
+      "TITLE": "Topic page",
       "SEARCH_PLACEHOLDER": "Search for content on the topic page..."
     },
     "AI": {
@@ -91,16 +91,6 @@
         "TARGET_GROUP": "Add user target group",
         "EDUCATIONAL_LEVEL": "Add user educational level"
       },
-      "FILTER_BAR": {
-        "NO_DATA": "No data found to filter.",
-        "CHANGES_SAVED": "Your changes have been saved.",
-        "CHANGES_RESET": "Your changes have been reset.",
-        "ERROR_RETRIEVING_DATA": "Error occurred while requesting select dimensions.",
-        "PROFILING": {
-          "CHANGES_SAVED": "Profile saved – you'll now see relevant content!",
-          "CHANGES_RESET": "Your profiling has been reset."
-        }
-      },
       "GENERIC_WIDGET": {
         "NO_WIDGET_CONTAINER": "No widget container could be found.",
         "ERROR_LOADING_WIDGET": "Error loading the widget component.",
@@ -135,7 +125,8 @@
         "REGENERATE": "Regenerate image",
         "UPLOAD": "Upload image",
         "DELETE": "Delete image",
-        "NO_IMAGE_SELECTED": "No image has been selected yet."
+        "NO_IMAGE_SELECTED": "No image has been selected yet.",
+        "IMAGE_UPLOAD_CONFIRMATION_TEXT": "I agree that I hold all necessary rights to this image to include it on the topic page."
       },
       "MAP_VIEW": {
         "HEADING": "Filter",
@@ -172,6 +163,10 @@
         "CHANGE_CONTENT": "Change content",
         "SELECT_CONTENT": "Select content",
         "SELECT_CONTENT_TOOLTIP": "Note: Select a public content via the editorial environment and then click \"Apply\"."
+      },
+      "PROFILING": {
+        "CHANGES_SAVED": "Profile saved – you'll now see relevant content!",
+        "CHANGES_RESET": "Your profiling has been reset."
       },
       "PROPOSE_CONTENT": {
         "TITLE": "Propose content",
@@ -302,7 +297,7 @@
     "CONFIG_WIDGET_EMBEDDING": {
       "HEADING": "Embed widget",
       "INFO": "Using this dialog, you can embed your widget on an external page. After selecting an option, the code will be automatically copied to your clipboard.",
-      "HINT": "Note: For successful integration, the target domain must be enabled by WLO.",
+      "HINT": "Note: For successful integration, the target domain must be enabled by Edu Sharing.",
       "OPTION_NODE_ID_LABEL": "Embedding via node ID",
       "OPTION_NODE_ID_DESCRIPTION": "The widget will be embedded with its individual ID. All subsequent changes to the widget will be automatically applied.",
       "OPTION_NODE_ID_NOT_FOUND": "Note: This option is disabled because no changes have been made to the widget yet.",
@@ -358,7 +353,6 @@
         "CHANGE_TYPE_WARNING": "Do you really want to replace an already configured widget? The configuration of this widget will be lost.",
         "DELETE": "Delete widget",
         "DELETE_WARNING": "Do you really want to delete an already configured widget? The configuration of this widget will be lost.",
-        "EDITORIAL_MEMBERS": "Editorial members",
         "COLLECTION_CHIPS": "Navigation pills",
         "TOPICS_COLUMN_BROWSER": "Topic tree (collapsible)",
         "CONTENT_TEASER": "Content teaser",

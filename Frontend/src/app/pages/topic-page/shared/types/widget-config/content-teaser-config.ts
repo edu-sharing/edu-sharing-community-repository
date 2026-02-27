@@ -6,9 +6,5 @@ export interface ContentTeaserConfig extends BaseWidgetConfig {
     blacklistedNodeIds?: string[];
     contentTeaserLayout?: GenericNodeEntriesDisplayType;
     propertyFilters?: Values;
-    searchMode?: 'ngsearchword' | 'collection';
     searchText?: string;
-    sortActive?: string;
-    sortDirection?: string;
-    swimlaneColor?: string;
 }

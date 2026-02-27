@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { UserService } from 'ngx-edu-sharing-api';
+import { FeaturesHelperService, UserService } from 'ngx-edu-sharing-api';
 import {
     ChatCompletionResult,
     EduSharingLlmService,
@@ -8,20 +8,28 @@ import {
     NodeConfig,
 } from 'ngx-edu-sharing-b-api';
 import { firstValueFrom } from 'rxjs';
+import { GenericWidgetGlobalService } from '../../widgets/generic-widget/generic-widget-global.service';
 import { retrieveMdsConfig } from '../utils/ai-util';
 import { GlobalWidgetConfigService } from './global-widget-config.service';
-import { GenericWidgetGlobalService } from '../../widgets/generic-widget/generic-widget-global.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class AiHelperService {
     constructor(
-        private userService: UserService,
         private eduSharingLlmService: EduSharingLlmService,
-        private globalWidgetConfigService: GlobalWidgetConfigService,
+        private featuresHelperService: FeaturesHelperService,
         private genericWidgetGlobalService: GenericWidgetGlobalService,
+        private globalWidgetConfigService: GlobalWidgetConfigService,
+        private userService: UserService,
     ) {}
+
+    /**
+     * Checks whether AI is supported.
+     */
+    async hasAISupport(): Promise<boolean> {
+        return await this.featuresHelperService.hasUserAISupport();
+    }
 
     /**
      * Helper function to call the B-API to generate a text from a prompt stored in a node with a given ID.

@@ -47,7 +47,11 @@
         [value]="option.value"
         [attr.aria-label]="'TOPIC_PAGE.WIDGET.LAYOUT.' + option.ariaLabel | translate"
       >
-        <i *ngIf="option.icon" [esIcon]="option.icon"></i>
+        <i
+          *ngIf="option.icon"
+          [esIcon]="option.icon"
+          [path]="option.icon.startsWith('svg-') ? iconPath : null"
+        ></i>
         <div>
           {{ 'TOPIC_PAGE.WIDGET.LAYOUT.' + option.viewValue | translate }}
         </div>

@@ -15,13 +15,14 @@ import { Node } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule, NodeHelperService } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { SharedModule } from '../../../../shared/shared.module';
+import { TopicPageGlobalService } from '../../shared/services/topic-page-global.service';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
 import { CollectionListDisplayType } from '../../shared/types/collection-list-display-type';
+import { ConfigurationOption } from '../../shared/types/configuration-option';
 import { LayoutOption } from '../../shared/types/layout-option';
 import { CollectionChipsConfig } from '../../shared/types/widget-config/collection-chips-config';
-import { WidgetConfigurationButtonsComponent } from '../shared/widget-configuration-buttons/widget-configuration-buttons.component';
-import { ConfigurationOption } from '../../shared/types/configuration-option';
 import { WidgetComponentInterface } from '../generic-widget/generic-widget.component';
+import { WidgetConfigurationButtonsComponent } from '../shared/widget-configuration-buttons/widget-configuration-buttons.component';
 
 @Component({
     selector: 'es-collection-chips',
@@ -33,7 +34,6 @@ import { WidgetComponentInterface } from '../generic-widget/generic-widget.compo
 export class CollectionChipsComponent implements WidgetComponentInterface {
     // INPUTS + OUTPUTS
     @Input() contextNodeId!: string;
-    @Input() customUrl?: (collection: Node) => string;
     editMode: InputSignal<boolean> = input<boolean>(false);
     @Input() embedConfigurationOption?: ConfigurationOption;
     @Input() gridIndex: number = -1;
@@ -45,6 +45,7 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
     @Output() embedWidgetClicked: EventEmitter<void> = new EventEmitter<void>();
 
     // VARIABLES
+    customUrl: (node: Node) => string;
     layout: CollectionListDisplayType = CollectionListDisplayType.Chips;
     layoutOptions: LayoutOption[] = [
         {
@@ -55,7 +56,7 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
         },
         {
             ariaLabel: 'GRID_ARIA',
-            icon: 'view_module',
+            icon: 'grid_view',
             value: CollectionListDisplayType.Tiles,
             viewValue: 'GRID',
         },
@@ -68,8 +69,13 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
     constructor(
         private nodeHelper: NodeHelperService,
         private router: Router,
+        private topicPageGlobalService: TopicPageGlobalService,
         private topicPageHelperService: TopicPageHelperService,
-    ) {}
+    ) {
+        if (this.topicPageGlobalService.getCustomUrlFunction()) {
+            this.customUrl = this.topicPageGlobalService.getCustomUrlFunction();
+        }
+    }
 
     /**
      * Opens the link to a collection.

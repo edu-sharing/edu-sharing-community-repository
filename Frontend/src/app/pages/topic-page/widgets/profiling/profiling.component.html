@@ -1,0 +1,23 @@
+<div class="profiling-widget">
+  <es-mds-editor-wrapper
+    class="profiling-editor"
+    [currentValues]="searchFilterValues"
+    [editorMode]="'search'"
+    [embedded]="true"
+    [externalFilters]="mdsExternalFilters"
+    groupId="topic_page_profiling"
+    mode="search"
+    [repository]="mdsParams.repository"
+    [setId]="mdsParams.setId"
+  >
+  </es-mds-editor-wrapper>
+
+  <div class="apply-and-reset-btn">
+    <a href="javascript:void(0);" (click)="resetSelectValues()">
+      {{ 'RESET' | translate }}
+    </a>
+    <button mat-flat-button color="primary" (click)="applySelectValues()">
+      {{ 'APPLY' | translate }}
+    </button>
+  </div>
+</div>

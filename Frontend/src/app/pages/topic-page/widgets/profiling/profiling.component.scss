@@ -1,0 +1,32 @@
+@use '../../topic-page-variables' as topicPageVars;
+
+.profiling-editor ::ng-deep {
+    // reset different paddings to properly align widgets (radio buttons and checkboxes)
+    es-mds-editor-core {
+        mat-radio-group,
+        .checkboxes-group {
+            padding: 0;
+        }
+    }
+    .widget-container .ripple-container ul li mat-checkbox {
+        padding: 0;
+    }
+    .header-container > label {
+        font-size: topicPageVars.$font-size-large;
+        font-weight: topicPageVars.$font-weight-bold;
+    }
+}
+
+// style of apply / reset button on the bottom left
+.apply-and-reset-btn {
+    padding: 0 4px;
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    justify-content: center;
+
+    a {
+        color: topicPageVars.$primary;
+        text-decoration: underline;
+    }
+}

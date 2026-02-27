@@ -70,7 +70,7 @@
     <ng-container *ngFor="let selectedNode of path; let last = last; let index = index">
       <ng-container *ngIf="dataSource.getChildren(selectedNode) | wrapObservable | async as nodes">
         <ng-container *ngIf="(isMobile() | async) === false || last">
-          <div class="children-list-container" wloLifecycle>
+          <div class="children-list-container" esLifecycle>
             <div *ngIf="isMobile() | async" class="back">
               <button mat-button (click)="path = path.slice(0, path.length - 1)">
                 <i esIcon="arrow_back_ios"></i>
@@ -81,7 +81,7 @@
               *ngIf="nodes.state === 'success' && nodes.data.length > 0"
               role="listbox"
               class="child-level-list"
-              wloLifecycle
+              esLifecycle
               (afterViewInit)="index > 0 && scrollIntoView($event.nativeElement)"
             >
               <li
