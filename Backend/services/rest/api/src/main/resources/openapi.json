@@ -42199,6 +42199,15 @@
               "format": "int64",
               "type": "integer"
             }
+          },
+          {
+            "description": "date range to",
+            "in": "query",
+            "name": "dateTo",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
           }
         ],
         "responses": {

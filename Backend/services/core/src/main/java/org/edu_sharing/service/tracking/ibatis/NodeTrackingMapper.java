@@ -17,8 +17,8 @@ public interface NodeTrackingMapper {
     @Delete("DELETE FROM edu_tracking_node WHERE authority = #{authority}")
     void deleteNodesByAuthority(String authority);
 
-    @Select("SELECT node_uuid AS nodeid FROM edu_tracking_node WHERE time = #{from} GROUP BY node_uuid")
-    List<NodeResult> eduAlteredNodes(@Param("from") Date from);
+    @Select("SELECT node_uuid AS nodeid FROM edu_tracking_node WHERE time >= #{from} AND time < #{to} GROUP BY node_uuid")
+    List<NodeResult> eduAlteredNodes(@Param("from") Date from, @Param("to") Date to);
 
     @Select("SELECT null AS timestamp, jsonb_object_agg(type, count)::TEXT AS counts FROM ("
             + "SELECT COUNT(*) AS count, type "

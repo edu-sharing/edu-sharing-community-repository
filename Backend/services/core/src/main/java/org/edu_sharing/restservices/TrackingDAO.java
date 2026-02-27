@@ -128,8 +128,8 @@ public class TrackingDAO {
         return trackingAuthority;
     }
 
-    public List<String> getNodesAltered(Date dateFrom) {
-        return activityStatisticService.getAlteredNodes(dateFrom);
+    public List<String> getNodesAltered(Date dateFrom, Date dateTo) {
+        return activityStatisticService.getAlteredNodes(dateFrom, dateTo);
     }
 
     public List<NodeData> getNodeData(String nodeId, Date dateFrom) {

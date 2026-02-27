@@ -123,12 +123,18 @@ public class StatisticApi {
             @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
     public Response getNodesAlteredInRange(@Context HttpServletRequest req,
-                                           @Parameter(description = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom
+                                           @Parameter(description = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom,
+                                           @Parameter(description = "date range to") @QueryParam("dateTo") Long dateTo
     ) {
         if (!AuthorityServiceHelper.isAdmin()) {
             throw new NotAnAdminException();
         }
-        List<String> tracks = trackingDAO.getNodesAltered(new Date(dateFrom));
+
+        if(dateTo == null) {
+            dateTo = System.currentTimeMillis();
+        }
+
+        List<String> tracks = trackingDAO.getNodesAltered(new Date(dateFrom), new Date(dateTo));
         return Response.ok().entity(tracks).build();
     }
 

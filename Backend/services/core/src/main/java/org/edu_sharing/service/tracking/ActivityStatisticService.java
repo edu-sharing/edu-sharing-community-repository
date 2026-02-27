@@ -136,10 +136,13 @@ public class ActivityStatisticService {
     private final MediacenterService mediacenterService;
 
 
-    public List<String> getAlteredNodes(java.util.Date from) {
+    public List<String> getAlteredNodes(java.util.Date from,  java.util.Date to) {
         try (SqlSession session = new ConnectionDBAlfresco().getSqlSessionFactoryBean().openSession()) {
-            return session.getMapper(NodeTrackingMapper.class).eduAlteredNodes(from).stream().
-                    map(NodeResult::getNodeid).collect(Collectors.toList());
+            return session.getMapper(NodeTrackingMapper.class)
+                    .eduAlteredNodes(from, to)
+                    .stream()
+                    .map(NodeResult::getNodeid)
+                    .collect(Collectors.toList());
         }
     }
 
