@@ -280,6 +280,12 @@
         "EDUCATION_LEVEL_LABEL": "Educational level",
         "TARGET_GROUP_LABEL": "Target group",
         "DELETE_VARIANT": "Delete variant"
+      },
+      "CONFIG_PAGE_TEMPLATE": {
+        "HEADING": "Settings of the topic page template",
+        "TITLE": "Template title",
+        "TITLE_PLACEHOLDER": "Topic page template for xyz",
+        "DELETE_VARIANT": "Delete template"
       }
     },
     "CONFIG_PAGE_TEMPLATE": {
@@ -446,6 +452,11 @@
       "HEADING": "Delete page variant",
       "MESSAGE": "Do you really want to delete the currently selected variant?",
       "PENDING_MESSAGE": "The page variant including all customizations is being deleted."
+    },
+    "DELETE_PAGE_TEMPLATE": {
+      "HEADING": "Delete page template",
+      "MESSAGE": "Do you really want to delete the currently selected template?",
+      "PENDING_MESSAGE": "The page template including all customizations is being deleted."
     },
     "TEMPLATE_MODE_ACTIVE": {
       "VIEW": "You are currently in the template viewing mode.",

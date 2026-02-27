@@ -14,12 +14,14 @@
   </ng-template>
   <mat-form-field appearance="outline" subscriptSizing="dynamic" class="page-variant-parameter">
     <mat-label>
-      {{ i18nPrefix + 'TITLE' | translate }}
+      {{ (templateMode() ? templateI18nPrefix : i18nPrefix) + 'TITLE' | translate }}
     </mat-label>
     <input
       matInput
       type="text"
-      [placeholder]="i18nPrefix + 'TITLE_PLACEHOLDER' | translate"
+      [placeholder]="
+        (templateMode() ? templateI18nPrefix : i18nPrefix) + 'TITLE_PLACEHOLDER' | translate
+      "
       formControlName="title"
     />
   </mat-form-field>
@@ -65,7 +67,8 @@
       color="primary"
       (click)="deletePageVariant()"
     >
-      <i esIcon="delete"></i> {{ i18nPrefix + 'DELETE_VARIANT' | translate }}
+      <i esIcon="delete"></i>
+      {{ (templateMode() ? templateI18nPrefix : i18nPrefix) + 'DELETE_VARIANT' | translate }}
     </button>
     <button mat-flat-button color="primary" [disabled]="!formInputValid()" (click)="applyChanges()">
       {{ 'APPLY' | translate }}

@@ -26,11 +26,13 @@ import { retrievePageVariantConfig } from '../../shared/utils/template-util';
 })
 export class ConfigurePageVariantComponent implements OnInit {
     readonly i18nPrefix: string = 'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.';
+    readonly templateI18nPrefix: string = 'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_TEMPLATE.';
 
     deleteVariantEnabled: InputSignal<boolean> = input(false);
     @Input() pageVariantNode: Node;
     @Input() pageVariantTitle: string;
     selectDimensions: InputSignal<Map<string, MdsWidget>> = input(new Map<string, MdsWidget>());
+    templateMode: InputSignal<boolean> = input(false);
     @Input() viewIcons: string[] = [];
     @Input() viewLabels: string[] = [];
     @Input() viewModes: string[] = ['checkbox'];

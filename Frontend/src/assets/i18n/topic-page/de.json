@@ -280,6 +280,12 @@
         "EDUCATION_LEVEL_LABEL": "Bildungsstufe",
         "TARGET_GROUP_LABEL": "Zielgruppe",
         "DELETE_VARIANT": "Variante löschen"
+      },
+      "CONFIG_PAGE_TEMPLATE": {
+        "HEADING": "Einstellungen der Themenseiten-Vorlage",
+        "TITLE": "Titel der Vorlage",
+        "TITLE_PLACEHOLDER": "Themenseiten-Vorlage für xyz",
+        "DELETE_VARIANT": "Vorlage löschen"
       }
     },
     "CONFIG_PAGE_TEMPLATE": {
@@ -446,6 +452,11 @@
       "HEADING": "Seiten-Variante löschen",
       "MESSAGE": "Willst du wirklich die aktuell gewählte Variante löschen?",
       "PENDING_MESSAGE": "Die Seiten-Variante wird samt aller Anpassungen gelöscht."
+    },
+    "DELETE_PAGE_TEMPLATE": {
+      "HEADING": "Seiten-Vorlage löschen",
+      "MESSAGE": "Willst du wirklich die aktuell gewählte Vorlage löschen?",
+      "PENDING_MESSAGE": "Die Seiten-Vorlage wird samt aller Anpassungen gelöscht."
     },
     "TEMPLATE_MODE_ACTIVE": {
       "VIEW": "Sie befinden sich aktuell im Anzeigemodus der Vorlage.",

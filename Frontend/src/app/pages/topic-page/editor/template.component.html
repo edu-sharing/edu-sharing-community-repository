@@ -186,7 +186,11 @@
           "
         >
           <h2 class="side-menu-header mat-heading-4 font-bold">
-            {{ 'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.HEADING' | translate }}
+            {{
+              'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_' +
+                (templateMode() ? 'TEMPLATE' : 'VARIANT') +
+                '.HEADING' | translate
+            }}
           </h2>
           <es-configure-page-variant-dialog
             [deleteVariantEnabled]="collectionNodePageConfigRef && userHasEditRights()"
@@ -199,6 +203,7 @@
                   (pageVariantNodeIndex + 1)
             "
             [selectDimensions]="selectDimensions"
+            [templateMode]="templateMode()"
             [viewModes]="['checkbox', 'checkbox']"
             (applyChangesClicked)="applyPageVariant($event)"
             (deletePageVariantClicked)="deletePageVariant()"

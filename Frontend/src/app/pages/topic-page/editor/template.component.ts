@@ -1031,9 +1031,12 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
         if (!this.collectionNodePageConfigRef || !this.userHasEditRights()) {
             return;
         }
+        const deleteString: string = this.templateMode()
+            ? 'DELETE_PAGE_TEMPLATE.'
+            : 'DELETE_PAGE_VARIANT.';
         const dialogRef = await this.dialogs.openGenericDialog({
-            title: this.i18nPrefix + 'DELETE_PAGE_VARIANT.HEADING',
-            message: this.i18nPrefix + 'DELETE_PAGE_VARIANT.MESSAGE',
+            title: this.i18nPrefix + deleteString + 'HEADING',
+            message: this.i18nPrefix + deleteString + 'MESSAGE',
             buttons: YES_OR_NO,
             closable: Closable.Casual,
         });
@@ -1054,7 +1057,7 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
                 }
                 try {
                     // start deleting page variant
-                    this.startEditing(this.i18nPrefix + 'DELETE_PAGE_VARIANT.PENDING_MESSAGE');
+                    this.startEditing(this.i18nPrefix + deleteString + 'PENDING_MESSAGE');
                     // remove from variants first to ensure that no inconsistency occurs
                     pageConfig.variants = pageConfig.variants.filter(
                         (v) => !v.includes(this.pageVariantNode.ref.id),
@@ -1783,6 +1786,7 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
         }
         this.pageConfigNode = null;
         this.selectedVariantPosition = -1;
+        this.closeSideMenus();
         // remove create button for new page variant
         // retrieve existing options from main nav config to extend them
         const currentConfig = (await firstValueFrom(this.mainNavService.observeMainNavConfig()))
