@@ -6,7 +6,7 @@ import {
     InteractionType,
     ListSortConfig,
     NodeEntriesDisplayType,
-    OptionItem,
+    NodeEntriesWrapperComponent,
     OptionItemToggle,
     Scope,
     TemporaryStorageService,
@@ -18,7 +18,7 @@ import { Subject } from 'rxjs';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { TranslateService } from '@ngx-translate/core';
 import { switchMap, takeUntil } from 'rxjs/operators';
-import { ConfigService } from 'ngx-edu-sharing-api';
+import { ConfigService, Node } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-search-page-results',
@@ -34,6 +34,9 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
     private destroyed = new Subject<void>();
     previewMode: string | 'Sidebar' | 'RenderingPage';
 
+    @ViewChild('nodeEntriesResults')
+    nodeEntriesResults: NodeEntriesWrapperComponent<Node>;
+
     @ViewChild(ActionbarComponent)
     set _actionbar(value: ActionbarComponent) {
         // Avoid changed-after-checked error.
@@ -46,7 +49,6 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
     readonly resultColumns = this.results.resultColumns;
     readonly collectionColumns = this.results.collectionColumns;
     readonly state = this.results.state;
-    readonly onClick = this.results.onClick;
     readonly onDblClick = this.results.onDblClick;
     readonly addToCollectionMode = this.searchPage.addToCollectionMode;
     readonly customTemplates = this.globalSearchPageInternal.customTemplates;
@@ -97,6 +99,11 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
             this.searchPage.showingAllRepositories.next(false);
         });
         this.previewMode = await this.configService.get('searchPreviewMode', 'Sidebar');
+    }
+
+    onClick(event: Node) {
+        this.nodeEntriesResults.getSelection().setSelection(event);
+        this.results.onClick(event);
     }
 
     toggleFilters(): void {

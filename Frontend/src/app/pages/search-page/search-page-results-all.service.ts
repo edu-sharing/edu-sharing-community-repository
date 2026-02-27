@@ -24,6 +24,7 @@ import { SearchPageRestoreService } from './search-page-restore.service';
 import { SearchPageResults } from './search-page-results.service';
 import { SearchPageService } from './search-page.service';
 import { Router } from '@angular/router';
+import { EditorialSidebarService } from '../editorial-page/editorial-sidebar/editorial-sidebar.service';
 
 interface RepoData {
     title: string;
@@ -48,12 +49,13 @@ export class SearchPageResultsAllService extends SearchPageResults implements On
         _nodeHelper: NodeHelperService,
         _router: Router,
         _searchPage: SearchPageService,
+        _editorialSidebarService: EditorialSidebarService,
         private _searchPageRestore: SearchPageRestoreService,
         private _mds: MdsService,
         private mdsHelperService: MdsHelperService,
         private _translate: TranslateService,
     ) {
-        super(_router, _searchPage, _nodeHelper);
+        super(_router, _searchPage, _nodeHelper, _editorialSidebarService);
         this._initRepoData();
         this._registerPageRestore();
         this._registerLoadingProgress();
