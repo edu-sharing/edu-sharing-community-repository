@@ -56,6 +56,9 @@ export class ProfilingComponent implements AfterViewInit {
     async ngAfterViewInit(): Promise<void> {
         this.storageValues =
             (await firstValueFrom(this.storage.get(this.selectedProfilingVariablesKey))) || {};
+        if (Object.keys(this.storageValues).length) {
+            this.topicPageHelperService.setSelectedVariables(this.storageValues);
+        }
         this.initialValuesLoaded.set(true);
         // wait for the view being refreshed
         setTimeout(() => {
