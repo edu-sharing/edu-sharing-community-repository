@@ -105,7 +105,7 @@ export class AdminMessagesComponent implements OnInit {
             menubar: false,
             statusbar: false,
             resize: true,
-            plugins: ['link', 'colorpicker'],
+            plugins: ['link'],
             //newline_behavior: 'linebreak',
             toolbar:
                 'bold italic underline | forecolor backcolor | link | alignleft aligncenter alignright alignjustify | removeformat | undo redo',
