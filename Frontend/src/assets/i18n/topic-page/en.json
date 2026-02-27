@@ -449,7 +449,8 @@
     },
     "TEMPLATE_MODE_ACTIVE": {
       "VIEW": "You are currently in the template viewing mode.",
-      "EDIT": "You are currently in the template editing mode."
+      "EDIT": "You are currently in the template editing mode.",
+      "END": "Leave template mode"
     }
   }
 }

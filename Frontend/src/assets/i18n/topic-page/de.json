@@ -449,7 +449,8 @@
     },
     "TEMPLATE_MODE_ACTIVE": {
       "VIEW": "Sie befinden sich aktuell im Anzeigemodus der Vorlage.",
-      "EDIT": "Sie befinden sich aktuell im Bearbeitungsmodus der Vorlage."
+      "EDIT": "Sie befinden sich aktuell im Bearbeitungsmodus der Vorlage.",
+      "END": "Vorlagen-Modus beenden"
     }
   }
 }

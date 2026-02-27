@@ -57,9 +57,21 @@ es-side-menu-wrapper {
 }
 
 // BREADCRUMB NAVIGATION
-// center text of template-mode alert placed on top of the breadcrumb navigation
-.template-mode ::ng-deep .message-container {
-    text-align: center;
+// alert placed on top of the breadcrumb navigation
+.template-mode ::ng-deep {
+    .block {
+        border-radius: 0 !important;
+        border-left: none !important;
+        border-right: none !important;
+    }
+    .message-container {
+        text-align: center;
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+    }
 }
 
 .template-breadcrumb {

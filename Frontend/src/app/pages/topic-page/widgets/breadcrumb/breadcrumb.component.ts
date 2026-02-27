@@ -72,6 +72,7 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
     pageVariantConfigNodes: InputSignal<Node[]> = input<Node[]>([]);
     parentEntries: InputSignal<ParentEntries> = input<ParentEntries>(null);
     @Input() rootName?: string;
+    templateMode: InputSignal<boolean> = input<boolean>(false);
     @Output() navigateToTemplate: EventEmitter<void> = new EventEmitter<void>();
     @Output() variantSelected: EventEmitter<string> = new EventEmitter<string>();
 

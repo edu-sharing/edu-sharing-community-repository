@@ -12,6 +12,9 @@
     i18nPrefix + (editMode() ? 'TEMPLATE_MODE_ACTIVE.EDIT' : 'TEMPLATE_MODE_ACTIVE.VIEW')
       | translate
   }}
+  <button mat-flat-button color="primary" (click)="toggleTemplateMode()">
+    {{ i18nPrefix + 'TEMPLATE_MODE_ACTIVE.END' | translate }}
+  </button>
 </es-info-message>
 <ng-container *ngIf="!pageConfigCheckFailed(); else pageConfigCheckFailedMessage">
   <ng-container *ngIf="initialLoadSuccessfully()">
@@ -29,6 +32,7 @@
           [pageVariantNode]="pageVariantNode"
           [pageVariantConfigNodes]="pageVariantConfigs?.nodes"
           [parentEntries]="parentEntries()"
+          [templateMode]="templateMode()"
           (navigateToTemplate)="switchIntoTemplateMode()"
           (variantSelected)="navigateToVariant($event)"
         ></es-topic-page-breadcrumb>

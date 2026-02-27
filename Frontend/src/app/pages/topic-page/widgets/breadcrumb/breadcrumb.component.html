@@ -35,7 +35,8 @@
         <!-- hint: use default mat-select over es-dropdown due to being implemented as mat-menu -->
         <mat-select
           [disabled]="
-            (countOfConfigs === 1 || isProcessing()) && !(isAdmin() && pageTemplateExists())
+            (countOfConfigs === 1 || isProcessing()) &&
+            !(isAdmin() && pageTemplateExists() && !templateMode())
           "
           [value]="pageVariantNode?.ref.id"
           (selectionChange)="selectVariant($event.value)"
