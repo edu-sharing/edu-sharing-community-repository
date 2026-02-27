@@ -52,7 +52,6 @@ import {
 } from 'ngx-edu-sharing-api';
 import { DialogsService } from '../features/dialogs/dialogs.service';
 import { DialogButton } from '../util/dialog-button';
-import { isArray } from 'lodash';
 
 export interface ConfigEntry {
     name: string;
@@ -657,7 +656,7 @@ export class NodeHelperService extends NodeHelperServiceBase {
     }
     static getActionbarNodes<T>(listNodes: T[], externalNode: T | T[]): T[] {
         return externalNode
-            ? isArray(externalNode)
+            ? Array.isArray(externalNode)
                 ? externalNode
                 : [externalNode]
             : listNodes && listNodes.length
