@@ -4,12 +4,13 @@ import {
     CUSTOM_ELEMENTS_SCHEMA,
     EventEmitter,
     Output,
+    signal,
     ViewChild,
     ViewEncapsulation,
+    WritableSignal,
 } from '@angular/core';
-import { DEFAULT, HOME_REPOSITORY, MdsWidget } from 'ngx-edu-sharing-api';
-import { Values } from 'ngx-edu-sharing-ui';
-import { Subject } from 'rxjs';
+import { DEFAULT, HOME_REPOSITORY, MdsWidget, SessionStorageService } from 'ngx-edu-sharing-api';
+import { firstValueFrom, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MdsModule } from '../../../../features/mds/mds.module';
 import { Widget } from '../../../../features/mds/mds-editor/mds-editor-instance.service';
@@ -34,7 +35,9 @@ export class ProfilingComponent implements AfterViewInit {
         setId: DEFAULT,
     };
     mdsExternalFilters: any = null;
-    searchFilterValues: Values = {};
+    readonly selectedProfilingVariablesKey: string = 'selectedProfilingVariables';
+    storageValues: { [p: string]: string[] } = {};
+    initialValuesLoaded: WritableSignal<boolean> = signal(false);
 
     @Output() selectDimensionsChanged: EventEmitter<Map<string, MdsWidget>> = new EventEmitter<
         Map<string, MdsWidget>
@@ -43,25 +46,32 @@ export class ProfilingComponent implements AfterViewInit {
 
     constructor(
         private genericWidgetGlobalService: GenericWidgetGlobalService,
+        private storage: SessionStorageService,
         private toast: Toast,
         private topicPageHelperService: TopicPageHelperService,
     ) {
         this.mdsParams.setId = this.genericWidgetGlobalService.getDefaultMds();
     }
 
-    ngAfterViewInit(): void {
-        this.mdsEditor.mdsEditorInstance.widgets
-            .pipe(takeUntil(this.destroy$))
-            .subscribe((widgets: Widget[]) => {
-                if (!widgets?.length) {
-                    return;
-                }
-                this.selectDimensionsChanged.emit(
-                    new Map<string, MdsWidget>(
-                        widgets.map((widget) => [widget.definition.id, widget.definition]),
-                    ),
-                );
-            });
+    async ngAfterViewInit(): Promise<void> {
+        this.storageValues =
+            (await firstValueFrom(this.storage.get(this.selectedProfilingVariablesKey))) || {};
+        this.initialValuesLoaded.set(true);
+        // wait for the view being refreshed
+        setTimeout(() => {
+            this.mdsEditor.mdsEditorInstance.widgets
+                .pipe(takeUntil(this.destroy$))
+                .subscribe((widgets: Widget[]) => {
+                    if (!widgets?.length) {
+                        return;
+                    }
+                    this.selectDimensionsChanged.emit(
+                        new Map<string, MdsWidget>(
+                            widgets.map((widget) => [widget.definition.id, widget.definition]),
+                        ),
+                    );
+                });
+        });
     }
 
     /**
@@ -76,6 +86,7 @@ export class ProfilingComponent implements AfterViewInit {
             Object.entries(selectedValues).filter(([, value]) => value && value.length > 0),
         );
         this.topicPageHelperService.setSelectedVariables(selectedValues);
+        await this.storage.set(this.selectedProfilingVariablesKey, selectedValues);
         // inform the user about the changes
         this.toast.show({
             message: 'TOPIC_PAGE.WIDGET.PROFILING.CHANGES_' + (resetTrigger ? 'RESET' : 'SAVED'),

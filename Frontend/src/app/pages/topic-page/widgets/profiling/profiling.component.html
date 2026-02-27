@@ -1,7 +1,8 @@
 <div class="profiling-widget">
   <es-mds-editor-wrapper
+    *ngIf="initialValuesLoaded()"
     class="profiling-editor"
-    [currentValues]="searchFilterValues"
+    [currentValues]="storageValues"
     [editorMode]="'search'"
     [embedded]="true"
     [externalFilters]="mdsExternalFilters"
