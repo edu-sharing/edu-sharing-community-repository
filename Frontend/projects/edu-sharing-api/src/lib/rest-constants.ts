@@ -2,6 +2,10 @@ export class RestConstants {
     public static USERHOME = '-userhome-';
     public static DUPLICATE_NODE_RESPONSE = 409;
 
+    public static PLUGIN_KAFKA_NOTIFICATION = 'kafka-notification-plugin';
+    public static PLUGIN_MONGO = 'mongo-plugin';
+
+    public static SUGGESTION_DESCRIPTION_METHODOLOGY = 'METHODOLOGY';
     public static COLLECTIONSCOPE_MY = 'MY';
     public static COLLECTIONSCOPE_ORGA = 'EDU_GROUPS';
     public static COLLECTIONSCOPE_ALL = 'EDU_ALL';

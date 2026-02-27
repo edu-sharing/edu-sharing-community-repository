@@ -3,6 +3,7 @@ import {
     ApiHelpersService,
     Assignment,
     AssignmentFile,
+    CollectionReference,
     ConfigService,
     NetworkService,
     Node,
@@ -362,6 +363,17 @@ export class NodeHelperService {
      */
     isNodeRevoked(node: Node) {
         return node?.aspects?.includes(RestConstants.CCM_ASPECT_REVOKED);
+    }
+
+    /**
+     * returns the original node if (collection refs)
+     * if the node is not a ref, it will simply return the node id
+     */
+    public getOriginalId(node: Node) {
+        if (node.aspects.includes(RestConstants.CCM_ASPECT_IO_REFERENCE)) {
+            return (node as CollectionReference).originalId;
+        }
+        return node.ref.id;
     }
     /**
      * returns true if all nodes have the requested right

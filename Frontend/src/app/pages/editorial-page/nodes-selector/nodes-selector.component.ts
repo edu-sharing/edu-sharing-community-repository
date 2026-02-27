@@ -15,6 +15,8 @@ import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { MatTabChangeEvent } from '@angular/material/tabs';
 import { TranslateService } from '@ngx-translate/core';
 import {
+    AboutService,
+    AuthenticationService,
     CollectionService as ApiCollectionService,
     DEFAULT,
     HOME_REPOSITORY,
@@ -26,6 +28,7 @@ import {
     SearchRequestParams,
     SearchResults,
     SearchService,
+    SuggestionsV1Service,
 } from 'ngx-edu-sharing-api';
 import {
     CanDrop,
@@ -44,6 +47,7 @@ import {
     NodeEntriesDisplayType,
     NodeEntriesService,
     NodeEntriesWrapperComponent,
+    NodesRightMode,
     Scope,
     TreeNodeService,
 } from 'ngx-edu-sharing-ui';
@@ -68,6 +72,7 @@ import { SharedModule } from '../../../shared/shared.module';
 import { MessageType } from '../../../util/message-type';
 import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
 import { OptionState } from '../editorial-sidebar/editorial-sidebar.component';
+import { CreateSuggestionRequestDto } from '../../../../../dist/edu-sharing-api/lib/api/models/create-suggestion-request-dto';
 
 export enum TabType {
     SEARCH = 'search',
@@ -258,8 +263,11 @@ export class NodesSelectorComponent implements OnInit {
         public nodeHelperService: NodeHelperService,
         public editorialSidebarService: EditorialSidebarService,
         private nodeService: NodeService,
+        private suggestionsV1Service: SuggestionsV1Service,
         private uiService: UIService,
         private uploadDialogService: UploadDialogService,
+        private authenticationService: AuthenticationService,
+        private aboutService: AboutService,
         private searchService: SearchService,
         private toast: Toast,
         private translate: TranslateService,
@@ -620,29 +628,103 @@ export class NodesSelectorComponent implements OnInit {
                 enabledMetadata[key] = enabledValues;
             }
         });
+        let writeCount = 0,
+            skippedCount = 0,
+            suggestionCount = 0;
         if (Object.entries(enabledMetadata).length > 0) {
-            for (const node of source) {
-                const props = (
-                    await firstValueFrom(
-                        this.nodeService.getNode(node.ref.id, { repository: node.ref.repo }),
+            for (let node of source) {
+                // update meta state
+                node = await firstValueFrom(
+                    this.nodeService.getNode(node.ref.id, { repository: node.ref.repo }),
+                );
+                const props = node.properties;
+                if (
+                    this.nodeHelperService.getNodesRight(
+                        [node],
+                        RestConstants.PERMISSION_WRITE,
+                        NodesRightMode.Effective,
                     )
-                ).properties;
-                Object.entries(enabledMetadata).forEach(([key, value]) => {
-                    if (props[key]) {
-                        props[key].push(...value.filter((v) => !props[key].includes(v)));
-                    } else {
-                        props[key] = value;
-                    }
-                });
-                await firstValueFrom(this.nodeService.editNodeMetadata(node.ref.id, props));
+                ) {
+                    Object.entries(enabledMetadata).forEach(([key, value]) => {
+                        if (props[key]) {
+                            props[key].push(...value.filter((v) => !props[key].includes(v)));
+                        } else {
+                            props[key] = value;
+                        }
+                    });
+                    await firstValueFrom(
+                        this.nodeService.editNodeMetadata(
+                            this.nodeHelperService.getOriginalId(node),
+                            props,
+                        ),
+                    );
+                    writeCount++;
+                } else if (
+                    (await this.authenticationService.hasToolpermission(
+                        RestConstants.TOOLPERMISSION_SUGGESTION_WRITE,
+                    )) &&
+                    (await this.aboutService.hasPlugin(RestConstants.PLUGIN_MONGO))
+                ) {
+                    await firstValueFrom(
+                        this.suggestionsV1Service.createSuggestions({
+                            node: this.nodeHelperService.getOriginalId(node),
+                            type: 'USER_PROPOSAL',
+                            version: '',
+                            repository: HOME_REPOSITORY,
+                            body: Object.entries(enabledMetadata)
+                                .map(([key, value]) =>
+                                    value.map((v) => {
+                                        return {
+                                            propertyId: key,
+                                            value: v,
+                                            description:
+                                                RestConstants.SUGGESTION_DESCRIPTION_METHODOLOGY,
+                                            confidence: 1,
+                                        } as CreateSuggestionRequestDto;
+                                    }),
+                                )
+                                .flat(),
+                        }),
+                    );
+                    suggestionCount++;
+                } else {
+                    skippedCount++;
+                }
             }
         }
         this.editorialSidebarService.sidebarLoading.set(false);
+        let msg: string[] = [];
+        if (writeCount) {
+            msg.push(
+                await firstValueFrom(
+                    this.translate.get(this.i18nPrefix + 'METHODOLOGY.METADATA_SAVED_WRITE', {
+                        writeCount,
+                    }),
+                ),
+            );
+        }
+        if (suggestionCount) {
+            msg.push(
+                await firstValueFrom(
+                    this.translate.get(this.i18nPrefix + 'METHODOLOGY.METADATA_SUGGESTIONS', {
+                        suggestionCount,
+                    }),
+                ),
+            );
+        }
+        if (skippedCount) {
+            msg.push(
+                await firstValueFrom(
+                    this.translate.get(this.i18nPrefix + 'METHODOLOGY.METADATA_SKIPPED', {
+                        skippedCount,
+                    }),
+                ),
+            );
+        }
         this.toast.show({
             type: 'info',
             subtype: ToastType.InfoSimple,
-            message: this.i18nPrefix + 'METHODOLOGY.METADATA_SAVED',
-            messageParameters: { count: source.length },
+            message: msg.join('\n'),
         });
     }
 

@@ -442,7 +442,8 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.userMenuOptions = [];
         if (
             this.connector.getCurrentLogin()?.statusCode === RestConstants.STATUS_CODE_OK &&
-            this.about.plugins?.filter((s) => s.id === 'kafka-notification-plugin').length > 0
+            this.about.plugins?.filter((s) => s.id === RestConstants.PLUGIN_KAFKA_NOTIFICATION)
+                .length > 0
         ) {
             /*
             this.userMenuOptions.push(

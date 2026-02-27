@@ -51,7 +51,9 @@
         "METHODOLOGY": {
           "TITLE": "Methodik",
           "INFO": "Finde schneller, was du suchst. Baue dir Tagging-Vorlagen und tagge Material.\n Baue dir damit deine typischen Filter für die Suche.",
-          "METADATA_SAVED": "Metadaten an {{count}} Element(en) aktualisiert",
+          "METADATA_SAVED_WRITE": "Metadaten an {{writeCount}} Element(en) aktualisiert",
+          "METADATA_SUGGESTIONS": "Metadaten an {{suggestionCount}} Element(en) als Vorschlag hinterlegt, da keine ausreichenden Rechte vorhanden sind",
+          "METADATA_SKIPPED": "Metadaten an {{skippedCount}} Element(en) übersprungen, da keine ausreichenden Rechte vorhanden sind",
           "SELECT_TEMPLATE": "Vorlage auswählen",
           "MANAGE_TEMPLATES": "Vorlagen verwalten",
           "TEMPLATE_NAME": "Titel der Vorlage",
