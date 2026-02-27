@@ -293,8 +293,16 @@
     },
     "CONFIG_WIDGET_EMBEDDING": {
       "HEADING": "Embed widget",
-      "INFO": "Using this dialog, you can embed your widget on an external page. After selecting an option, the code will be automatically copied to your clipboard.",
-      "HINT": "Note: For successful integration, the target domain must be enabled by Edu Sharing.",
+      "DEFAULT": {
+        "TITLE": "Standard Embedding (LMS/CMS)",
+        "INFO": "Using this dialog, you can embed your widget in an LMS/CMS. After selecting an option, the code will be automatically copied to your clipboard.",
+        "HINT": "Note: For successful integration, the LMS/CMS must have the Edu-Sharing extension installed."
+      },
+      "ADVANCED": {
+        "TITLE": "Advanced Embedding (Website)",
+        "INFO": "Using this dialog, you can embed your widget on an external page. After selecting an option, the code will be automatically copied to your clipboard.",
+        "HINT": "Note: For successful integration, the target domain must be enabled by Edu-Sharing."
+      },
       "OPTION_NODE_ID_LABEL": "Embedding via node ID",
       "OPTION_NODE_ID_DESCRIPTION": "The widget will be embedded with its individual ID. All subsequent changes to the widget will be automatically applied.",
       "OPTION_NODE_ID_NOT_FOUND": "Note: This option is disabled because no changes have been made to the widget yet.",

@@ -62,7 +62,10 @@ import {
     retrievePromptFromAiConfig,
     retrieveWidgetConfigFromNode,
 } from '../../shared/utils/template-util';
-import { ConfigureWidgetEmbeddingDialogComponent } from './configure-widget-embedding-dialog/configure-widget-embedding-dialog.component';
+import {
+    ConfigureWidgetEmbeddingDialogComponent,
+    WidgetEmbeddingOption,
+} from './configure-widget-embedding-dialog/configure-widget-embedding-dialog.component';
 import { GenericWidgetGlobalService } from './generic-widget-global.service';
 import { WidgetHeaderComponent } from './generic-widget-header/generic-widget-header.component';
 
@@ -392,29 +395,34 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     /**
      * Embeds the widget depending on the selected widget embedding mode.
      */
-    async embedWidget(mode: 'nodeId' | 'configOverwrite' = 'nodeId'): Promise<void> {
+    async embedWidget(option: WidgetEmbeddingOption): Promise<void> {
+        const mode: 'nodeId' | 'configOverwrite' = option.mode;
+        const type: 'default' | 'advanced' = option.type;
         // prepare embedding code output
         let embeddingCode: string = '';
-        const baseUrl: string = window.location.origin + this.platformLocation.getBaseHrefFromDOM();
-        const webComponentBaseHref: string = baseUrl + 'web-components/app/';
-
-        // set API URL for embedding
-        embeddingCode +=
-            '<script>\n' +
-            '    window.__env = {\n' +
-            '        EDU_SHARING_API_URL: "' +
-            baseUrl +
-            'rest"\n' +
-            '    };\n' +
-            '</script>\n';
-        // web-component specific files
-        embeddingCode += '<script src="' + webComponentBaseHref + 'polyfills.js"></script>\n';
-        embeddingCode +=
-            '<script type="module" src="' + webComponentBaseHref + 'main.js"></script>\n';
-        embeddingCode +=
-            '<link rel="stylesheet" type="text/css" href="' +
-            webComponentBaseHref +
-            'styles.css" />\n';
+        // for standard embedding in LCMS, we only need to copy the web-component tag
+        if (type === 'advanced') {
+            const baseUrl: string =
+                window.location.origin + this.platformLocation.getBaseHrefFromDOM();
+            const webComponentBaseHref: string = baseUrl + 'web-components/app/';
+            // set API URL for embedding
+            embeddingCode +=
+                '<script>\n' +
+                '    window.__env = {\n' +
+                '        EDU_SHARING_API_URL: "' +
+                baseUrl +
+                'rest"\n' +
+                '    };\n' +
+                '</script>\n';
+            // web-component specific files
+            embeddingCode += '<script src="' + webComponentBaseHref + 'polyfills.js"></script>\n';
+            embeddingCode +=
+                '<script type="module" src="' + webComponentBaseHref + 'main.js"></script>\n';
+            embeddingCode +=
+                '<link rel="stylesheet" type="text/css" href="' +
+                webComponentBaseHref +
+                'styles.css" />\n';
+        }
         // build es-generic-widget tag dynamically
         embeddingCode += '<edu-sharing-generic-widget';
 

@@ -293,8 +293,16 @@
     },
     "CONFIG_WIDGET_EMBEDDING": {
       "HEADING": "Widget einbetten",
-      "INFO": "Mithilfe dieses Dialogs kannst du dein Widget auf einer externen Seite einbetten. Nach Auswahl einer Option wird der Code automatisch in deine Zwischenablage kopiert.",
-      "HINT": "Hinweis: Zur erfolgreichen Einbindung muss die Ziel-Domain durch Edu-Sharing freischaltet sein.",
+      "DEFAULT": {
+        "TITLE": "Standard-Einbettung (LMS/CMS)",
+        "INFO": "Mithilfe dieses Dialogs kannst du dein Widget in einem LMS/CMS einbetten. Nach Auswahl einer Option wird der Code automatisch in deine Zwischenablage kopiert.",
+        "HINT": "Hinweis: Zur erfolgreichen Einbindung muss das LMS/CMS die Edu-Sharing Erweiterung installiert haben."
+      },
+      "ADVANCED": {
+        "TITLE": "Fortgeschrittene Einbettung (Website)",
+        "INFO": "Mithilfe dieses Dialogs kannst du dein Widget auf einer externen Seite einbetten. Nach Auswahl einer Option wird der Code automatisch in deine Zwischenablage kopiert.",
+        "HINT": "Hinweis: Zur erfolgreichen Einbindung muss die Ziel-Domain durch Edu-Sharing freischaltet sein."
+      },
       "OPTION_NODE_ID_LABEL": "Einbindung über Node-ID",
       "OPTION_NODE_ID_DESCRIPTION": "Das Widget wird mit dessen individueller ID eingebettet. Alle nachträglichen Änderungen am Widget werden automatisch übernommen.",
       "OPTION_NODE_ID_NOT_FOUND": "Hinweis: Diese Option kann nicht ausgewählt werden, da noch keine Anpassungen am Widget vorgenommen wurden.",

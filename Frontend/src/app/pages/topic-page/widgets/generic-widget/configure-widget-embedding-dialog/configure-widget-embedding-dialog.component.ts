@@ -2,6 +2,11 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CardDialogRef } from '../../../../../features/dialogs/card-dialog/card-dialog-ref';
 import { SharedModule } from '../../../../../shared/shared.module';
 
+export interface WidgetEmbeddingOption {
+    type: 'default' | 'advanced';
+    mode: 'nodeId' | 'configOverwrite';
+}
+
 @Component({
     selector: 'es-configure-widget-embedding-dialog',
     imports: [SharedModule],
@@ -14,14 +19,20 @@ export class ConfigureWidgetEmbeddingDialogComponent {
     @Input() dialogRef: CardDialogRef;
     @Input() nodeId: string;
     @Input() propagatedNodeId: string;
-    @Output() embedWidget: EventEmitter<'nodeId' | 'configOverwrite'> = new EventEmitter<
-        'nodeId' | 'configOverwrite'
-    >();
+    @Output() embedWidget: EventEmitter<WidgetEmbeddingOption> =
+        new EventEmitter<WidgetEmbeddingOption>();
 
-    constructor() {}
+    activeTab: 'default' | 'advanced' = 'default';
 
-    selectOption(option: 'nodeId' | 'configOverwrite') {
+    onTabChanged(index: number) {
+        this.activeTab = index === 0 ? 'default' : 'advanced';
+    }
+
+    selectMode(mode: 'nodeId' | 'configOverwrite') {
         this.dialogRef.close();
-        this.embedWidget.emit(option);
+        this.embedWidget.emit({
+            type: this.activeTab,
+            mode: mode,
+        });
     }
 }
