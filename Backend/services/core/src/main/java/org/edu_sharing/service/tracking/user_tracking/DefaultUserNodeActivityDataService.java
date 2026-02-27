@@ -23,7 +23,7 @@ public class DefaultUserNodeActivityDataService implements UserNodeActivityDataS
 
     @NotNull
     @Override
-    public List<UserNodeActivity> getDataForAllUsers(@NotNull Date after, int limit) {
+    public List<UserNodeActivity> getDataForAllUsers(@NotNull Date after, @NotNull Date until, int limit) {
         return Collections.emptyList();
     }
 

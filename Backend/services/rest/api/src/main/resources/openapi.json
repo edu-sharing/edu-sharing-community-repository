@@ -38555,9 +38555,19 @@
             }
           },
           {
-            "description": "Date to filter relation data from",
+            "description": "Date to filter relation data from (exclusive)",
             "in": "query",
             "name": "after",
+            "required": true,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Date to filter relation data to (inclusive)",
+            "in": "query",
+            "name": "to",
             "schema": {
               "format": "date-time",
               "type": "string"
@@ -41315,9 +41325,18 @@
             }
           },
           {
-            "description": "Date to filter opLogs from",
+            "description": "Date to filter opLogs from (exclusive)",
             "in": "query",
             "name": "after",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Date to filter opLogs until (inklusive)",
+            "in": "query",
+            "name": "until",
             "schema": {
               "format": "date-time",
               "type": "string"
@@ -44806,9 +44825,19 @@
             }
           },
           {
-            "description": "Date to filter activities from",
+            "description": "Date to filter activities from (exclusive)",
             "in": "query",
             "name": "after",
+            "required": true,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Date to filter activities to (inclusive)",
+            "in": "query",
+            "name": "to",
             "schema": {
               "format": "date-time",
               "type": "string"

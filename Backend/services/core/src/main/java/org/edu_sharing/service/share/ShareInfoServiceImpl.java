@@ -22,10 +22,8 @@ import org.edu_sharing.service.permission.events.AddedPermissionsEvent;
 import org.edu_sharing.service.permission.events.RemovedPermissionEvent;
 import org.edu_sharing.service.share.ibatis.ShareInfoMapper;
 import org.edu_sharing.service.share.ibatis.ShareInfoOpLogMapper;
-import org.postgresql.util.PSQLException;
 import org.springframework.context.event.EventListener;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -288,8 +286,22 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
     }
 
 
+    /**
+     * Retrieves a list of ShareInfoOplog entries based on the specified parameters.
+     *
+     * @param afterTxId   the transaction ID after which the oplogs should be fetched;
+     *                    if null, this parameter will be ignored.
+     * @param afterDate   the start date after which the oplogs should be fetched;
+     *                    if null, this parameter will be ignored. (exclusive)
+     * @param untilDate   the end date until which the oplogs should be fetched;
+     *                    if null, this parameter will be ignored. (inklusiv)
+     * @param limit       the maximum number of oplogs to retrieve.
+     * @return            a list of ShareInfoOplog objects matching the specified criteria.
+     * @throws InsufficientPermissionException if the current user does not have sufficient permissions
+     *                                         to access the oplogs.
+     */
     @Override
-    public List<ShareInfoOplog> getOplogs(Long afterTxId, Date afterDate, int limit) {
+    public List<ShareInfoOplog> getOplogs(Long afterTxId, Date afterDate, Date untilDate, int limit) {
         if (!AuthenticationUtil.isRunAsUserTheSystemUser()
                 && !authorityService.isAdminAuthority(AuthenticationUtil.getRunAsUser())) {
             throw new InsufficientPermissionException("You are not allowed to access oplogs");
@@ -299,7 +311,9 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
         if (afterTxId != null) {
             oplogs = shareInfoOpLogMapper.getAllAfterId(afterTxId, limit);
         } else if (afterDate != null) {
-            oplogs = shareInfoOpLogMapper.getAllAfterTimestamp(afterDate, limit);
+            oplogs = untilDate!= null
+                    ? shareInfoOpLogMapper.getAllBetweenTimestamp(afterDate, untilDate, limit)
+                    : shareInfoOpLogMapper.getAllAfterTimestamp(afterDate, limit);
         } else {
             oplogs = shareInfoOpLogMapper.getAll(limit);
         }

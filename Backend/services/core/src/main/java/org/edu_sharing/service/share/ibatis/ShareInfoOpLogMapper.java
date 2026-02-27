@@ -36,4 +36,9 @@ public interface ShareInfoOpLogMapper {
     @Select("SELECT COUNT(*) FROM edu_share_info_oplog")
     long count();
 
+    @Select("SELECT * FROM edu_share_info_oplog WHERE timestamp > #{after}  AND timestamp <= #{until} ORDER BY timestamp FETCH NEXT #{limit} ROWS ONLY")
+    @Results({
+            @Result(column = "share_id", property = "shareId")
+    })
+    List<ShareInfoOplogData> getAllBetweenTimestamp(Date after, Date until, int limit);
 }

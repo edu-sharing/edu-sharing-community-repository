@@ -199,15 +199,16 @@ public class RelationApi {
     })
     public Response getTrackedRelation(
             @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
-            @Parameter(description = "Date to filter relation data from") @QueryParam("after") Date after,
+            @Parameter(description = "Date to filter relation data from (exclusive)", required = true) @QueryParam("after") Date after,
+            @Parameter(description = "Date to filter relation data to (inclusive)") @QueryParam("to") Date to,
             @Parameter(description = "maximum items", schema = @Schema(defaultValue = "100")) @QueryParam("maxItems") Integer maxItems,
             @Parameter(description = "If true, deleted relations are returned, otherwise active relations are returned.") @QueryParam("deleted") Boolean deleted
     ) {
         RepositoryDao repoDao = RepositoryDao.getRepository(repository);
         RelationDao relationDao = new RelationDao(repoDao);
         List<RelationData> relationData = deleted == Boolean.TRUE
-                ? relationDao.getDeletedTrackedData(after, maxItems)
-                : relationDao.getTrackedRelation(after, maxItems);
+                ? relationDao.getDeletedTrackedData(after, to, maxItems)
+                : relationDao.getTrackedRelation(after, to, maxItems);
         return Response.ok().entity(relationData).build();
     }
 }

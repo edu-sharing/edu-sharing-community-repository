@@ -9,6 +9,7 @@ import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.relations.*;
 import org.edu_sharing.util.CheckedFunction;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Limit;
 
 import java.util.Arrays;
@@ -88,11 +89,11 @@ public class RelationDao {
         return mapRelationData(this.relationService.updateRelation(request));
     }
 
-    public List<org.edu_sharing.service.relations.RelationData> getTrackedRelation(Date after, Integer maxItems) {
-        return relationService.getTrackedData(after, maxItems == null ? Limit.unlimited() : Limit.of(maxItems));
+    public List<org.edu_sharing.service.relations.RelationData> getTrackedRelation(@NotNull Date after, Date to, Integer maxItems) {
+        return relationService.getTrackedData(after, to, maxItems == null ? Limit.unlimited() : Limit.of(maxItems));
     }
 
-    public List<org.edu_sharing.service.relations.RelationData> getDeletedTrackedData(Date after, Integer maxItems) {
-        return relationService.getDeletedTrackedData(after, maxItems == null ? Limit.unlimited() : Limit.of(maxItems));
+    public List<org.edu_sharing.service.relations.RelationData> getDeletedTrackedData(@NotNull Date after, Date to, Integer maxItems) {
+        return relationService.getDeletedTrackedData(after, to,  maxItems == null ? Limit.unlimited() : Limit.of(maxItems));
     }
 }

@@ -13,12 +13,12 @@ import java.util.List;
 public class RelationServiceAdapter implements RelationService {
 
     @Override
-    public List<RelationData> getTrackedData(Date from, Limit limit) {
+    public List<RelationData> getTrackedData(@NotNull Date from, Date to, Limit limit) {
         return List.of();
     }
 
     @Override
-    public List<RelationData> getDeletedTrackedData(Date from, Limit limit) {
+    public List<RelationData> getDeletedTrackedData(@NotNull Date from, Date to, Limit limit) {
         return List.of();
     }
 

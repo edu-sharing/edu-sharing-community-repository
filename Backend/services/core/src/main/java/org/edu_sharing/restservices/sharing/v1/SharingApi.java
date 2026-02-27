@@ -196,14 +196,15 @@ public class SharingApi {
     public List<ShareInfoOplog> getOpLog(
             @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repId,
             @Parameter(description = "OpLog id to filter opLogs from") @QueryParam("opLogId") Long opLogId,
-            @Parameter(description = "Date to filter opLogs from") @QueryParam("after") Date after,
+            @Parameter(description = "Date to filter opLogs from (exclusive)") @QueryParam("after") Date after,
+            @Parameter(description = "Date to filter opLogs until (inklusive)") @QueryParam("until") Date until,
             @Parameter(description = "maximum items per page", schema = @Schema(defaultValue = "500")) @QueryParam("maxItems") Integer maxItems
     ) {
         if (!RepositoryDao.getRepository(repId).isHomeRepo()) {
             throw new IllegalArgumentException("The given repository is not the home repository");
         }
 
-        return shareInfoOpLogService.getOplogs(opLogId, after, maxItems);
+        return shareInfoOpLogService.getOplogs(opLogId, after, until, maxItems);
     }
 
 

@@ -124,7 +124,8 @@ public class TrackingApi {
     })
     public List<UserNodeActivity> getAllUserNodeActivities(
             @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repId,
-            @Parameter(description = "Date to filter activities from") @QueryParam("after") Date after,
+            @Parameter(description = "Date to filter activities from (exclusive)", required = true) @QueryParam("after") Date after,
+            @Parameter(description = "Date to filter activities to (inclusive)") @QueryParam("to") Date to,
             @Parameter(description = "maximum items", schema = @Schema(defaultValue = "100")) @QueryParam("maxItems") Integer maxItems,
             @Context HttpServletRequest req) {
 
@@ -132,7 +133,11 @@ public class TrackingApi {
             throw new IllegalArgumentException("The given repository is not the home repository");
         }
 
-        return userNodeActivityDataService.getDataForAllUsers(after, maxItems);
+        if(maxItems == null){
+            maxItems = 100;
+        }
+
+        return userNodeActivityDataService.getDataForAllUsers(after, to, maxItems);
     }
 
 
