@@ -819,7 +819,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                     nodeRef,
                     propsOutput,
                     Arrays.asList(aspects),
-                    null, null)
+                    null, null, null)
             ));
         }
 
@@ -1070,7 +1070,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                 propertiesFinal.put(CCConstants.CC_CACHE_MILLISECONDS_KEY, new Long(mdate.getTime()).toString());
                 for (PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
                     propertiesFinal = new HashMap<>(i.beforeCacheProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef, propertiesFinal,
-                            aspects.stream().map(QName::toString).collect(Collectors.toList()), null, null)));
+                            aspects.stream().map(QName::toString).collect(Collectors.toList()), null, null, null)));
                 }
                 repCache.put(nodeRef.getId(), propertiesFinal);
             }

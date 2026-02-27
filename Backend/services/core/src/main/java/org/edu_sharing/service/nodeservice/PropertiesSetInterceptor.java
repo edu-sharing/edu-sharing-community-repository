@@ -28,6 +28,15 @@ public interface PropertiesSetInterceptor {
          * Note: This type is more expensive since it needs to re-fetch properties from alfresco
          */
         AfterAlfrescoInterceptors,
+        /**
+         * run this interceptor before AND after the alfresco interecptors ran
+         * Note: Use the context object details to find out the state and keep track of custom state data
+         */
+        BeforeAndAfterAlfrescoInterceptors,
     }
 
+    enum ContextStage {
+        BeforeAlfrescoInterceptors,
+        AfterAlfrescoInterceptors
+    }
 }
