@@ -556,8 +556,12 @@ es-side-menu-wrapper {
 @media (max-width: topicPageVars.$mobileWidth + topicPageVars.$mobileStage * 1) {
     .template-header {
         padding-top: var(--offcanvas-offset);
-        padding-right: var(--offcanvas-offset);
         padding-bottom: var(--offcanvas-offset);
+
+        // reset padding-right on mobile, if the offcanvas menu is moved to the main menu
+        &.sidebar-mobile-hidden {
+            padding-right: var(--offcanvas-offset);
+        }
 
         // special case for anchor menu
         &.extra-padding-bottom {
@@ -575,7 +579,7 @@ es-side-menu-wrapper {
     }
 
     // mobile spacing adjustments
-    .topic-page-content-outer-wrapper {
+    .topic-page-content-outer-wrapper.sidebar-mobile-hidden {
         // reset padding-right on mobile, as the offcanvas menu is moved to the main menu
         .topic-page-content-wrapper .topic-page-swimlane-wrapper {
             padding-right: var(--offcanvas-offset);

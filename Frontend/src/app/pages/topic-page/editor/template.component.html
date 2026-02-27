@@ -38,6 +38,7 @@
     <!-- wait until the initial load is successfully to retrieve the correct nodeID for the header -->
     <div
       class="template-header"
+      [class.sidebar-mobile-hidden]="sidebarMobileHidden()"
       [class.extra-padding-bottom]="
         (swimlanes | filterSwimlaneType : ANCHOR_TYPE : anchorTrigger)?.length > 0
       "
@@ -71,7 +72,7 @@
 
   <!-- RIGHT SIDE MENU WITH MULTIPLE COLLAPSIBLE ITEMS (VIEW MODE) -->
   <es-side-menu-wrapper
-    [mobileHidden]="true"
+    [mobileHidden]="sidebarMobileHidden()"
     [selectedMenuItem]="selectedMenuItem"
     (closeContentView)="selectedMenuItem = ''"
     *ngIf="!editMode(); else editModeMenu"
@@ -208,6 +209,7 @@
   <div
     class="topic-page-content-outer-wrapper"
     [class.edit-mode]="editMode()"
+    [class.sidebar-mobile-hidden]="sidebarMobileHidden()"
     [class.sidebar-open]="sidebarOpen()"
   >
     <div

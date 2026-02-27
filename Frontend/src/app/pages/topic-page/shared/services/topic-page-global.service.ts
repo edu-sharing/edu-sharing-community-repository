@@ -31,6 +31,7 @@ export class TopicPageGlobalService {
     private customApplyFilterExtras: NavigationExtras;
     private customSideMenuItems: CustomSideMenuItem[] = [];
     private customUrlFunction: (node: Node) => string;
+    private sidebarMobileHidden: boolean = false;
     private visibleNodesMap: Map<string, Node[]> = new Map<string, Node[]>();
     private visibleNodesUpdated = new Subject<void>();
 
@@ -86,6 +87,13 @@ export class TopicPageGlobalService {
      */
     setCustomApplyFilterExtras(extras: NavigationExtras) {
         this.customApplyFilterExtras = extras;
+    }
+
+    /**
+     * Sets the sidebar mobile hidden state.
+     */
+    setSidebarMobileHidden(hidden: boolean) {
+        this.sidebarMobileHidden = hidden;
     }
 
     /**
@@ -173,6 +181,13 @@ export class TopicPageGlobalService {
      */
     getCustomBreadcrumbRootLink() {
         return this.customBreadcrumbRootLink;
+    }
+
+    /**
+     * Retrieves the sidebar mobile hidden state.
+     */
+    getSidebarMobileHidden() {
+        return this.sidebarMobileHidden;
     }
 
     /**

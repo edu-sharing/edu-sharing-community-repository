@@ -239,6 +239,7 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
         this.hasCustomBreadcrumbExtension.set(
             this.topicPageGlobalService.hasCustomBreadcrumbExtension(),
         );
+        this.sidebarMobileHidden.set(this.topicPageGlobalService.getSidebarMobileHidden());
         // listen to changes in the selected variables and reload the pageVariants, if necessary
         this.topicPageHelperService
             .getSelectedVariables$()
@@ -344,6 +345,7 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
     customSideMenuItemsAfter = computed(() =>
         this.customSideMenuItems().filter((item) => item.position === 'after'),
     );
+    sidebarMobileHidden: WritableSignal<boolean> = signal(false);
     selectedMenuItem: string = '';
     selectedNode: WritableSignal<Node> = signal(null);
 
