@@ -71,11 +71,6 @@ es-side-menu-wrapper {
     // overflow contents such as the image of the navbar or the AI labels
     z-index: 12;
 
-    // TODO: remove, when the offcanvas menu is no longer placed on the left side
-    &.reserve-space-left {
-        padding-left: calc(var(--offcanvas-menu-width) + var(--offcanvas-offset));
-    }
-
     .template-breadcrumb-wrapper {
         margin: 0 auto;
         display: flex;
@@ -102,11 +97,6 @@ es-side-menu-wrapper {
     // reserve space for the anchor menu
     &.extra-padding-bottom {
         padding-bottom: calc(32px + var(--anchor-menu-height) / 2);
-    }
-
-    // TODO: remove, when the offcanvas menu is no longer placed on the left side
-    &.reserve-space-left {
-        padding-left: calc(var(--offcanvas-menu-width) + var(--offcanvas-offset));
     }
 
     .template-header-wrapper {
@@ -373,18 +363,6 @@ es-side-menu-wrapper {
                         var(--action-button-width)
                 );
                 margin-bottom: 48px !important;
-            }
-
-            // TODO: remove, when the offcanvas menu is no longer placed on the left side
-            &.reserve-space-left {
-                padding-left: calc(var(--offcanvas-menu-width) + var(--offcanvas-offset));
-
-                &.edit-mode {
-                    padding-left: calc(
-                        var(--offcanvas-menu-width) + var(--offcanvas-offset) +
-                            var(--action-button-width)
-                    );
-                }
             }
 
             &.reserve-space-top {

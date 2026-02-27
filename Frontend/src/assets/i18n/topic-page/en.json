@@ -280,10 +280,7 @@
         "EDUCATION_LEVEL_LABEL": "Educational level",
         "TARGET_GROUP_LABEL": "Target group",
         "DELETE_VARIANT": "Delete variant"
-      },
-      "SWITCH_INTO_TEMPLATE_MODE": "Switch to template mode",
-      "SWITCH_INTO_STANDARD_MODE": "Switch to standard mode",
-      "RESET_URL_PARAMETER": "Load page without parameters"
+      }
     },
     "CONFIG_PAGE_TEMPLATE": {
       "HEADING": "Edit the page template(s)",

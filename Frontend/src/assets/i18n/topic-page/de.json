@@ -280,10 +280,7 @@
         "EDUCATION_LEVEL_LABEL": "Bildungsstufe",
         "TARGET_GROUP_LABEL": "Zielgruppe",
         "DELETE_VARIANT": "Variante löschen"
-      },
-      "SWITCH_INTO_TEMPLATE_MODE": "Zur Seiten-Vorlage",
-      "SWITCH_INTO_STANDARD_MODE": "Zurück zur Seite",
-      "RESET_URL_PARAMETER": "Seite ohne Parameter laden"
+      }
     },
     "CONFIG_PAGE_TEMPLATE": {
       "HEADING": "Bearbeitung der Seiten-Vorlage(n)",

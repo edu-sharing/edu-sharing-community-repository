@@ -1164,7 +1164,7 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
     /**
      * Reloads the page without parameters.
      */
-    async reloadWithoutParameters(): Promise<void> {
+    private async reloadWithoutParameters(): Promise<void> {
         // navigate to default variant
         await this.router.navigate([], {
             queryParams: { collectionId: this.latestParams.collectionId },

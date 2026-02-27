@@ -18,11 +18,7 @@
     <!-- WORKAROUND FOR VISUAL NAVBAR OVERFLOW -->
     <div class="custom-breadcrumb-overflow-container" *ngIf="hasCustomBreadcrumbExtension()"></div>
     <!-- BREADCRUMBS -->
-    <div
-      *ngIf="parentEntries()"
-      class="template-breadcrumb"
-      [class.reserve-space-left]="userHasEditRights() || pageVariantConfigs?.nodes?.length > 0"
-    >
+    <div *ngIf="parentEntries()" class="template-breadcrumb">
       <div class="template-breadcrumb-wrapper">
         <es-topic-page-breadcrumb
           [contextNodeId]="topicCollectionID()"
@@ -45,7 +41,6 @@
       [class.extra-padding-bottom]="
         (swimlanes | filterSwimlaneType : ANCHOR_TYPE : anchorTrigger)?.length > 0
       "
-      [class.reserve-space-left]="userHasEditRights() || pageVariantConfigs?.nodes?.length > 0"
     >
       <es-color-picker
         *ngIf="editMode()"
@@ -73,29 +68,6 @@
       </div>
     </div>
   </ng-container>
-
-  <!-- LEFT SIDE MENU WITH ACTION BUTTONS -->
-  <es-side-menu-wrapper position="left">
-    <ng-container slot="menu">
-      <es-side-menu-item
-        *ngIf="isAdmin()"
-        position="left"
-        [title]="
-          !templateMode()
-            ? ('TOPIC_PAGE.SIDE_MENU.SWITCH_INTO_TEMPLATE_MODE' | translate)
-            : ('TOPIC_PAGE.SIDE_MENU.SWITCH_INTO_STANDARD_MODE' | translate)
-        "
-        (itemClicked)="toggleTemplateMode()"
-      ></es-side-menu-item>
-      <es-side-menu-item
-        *ngIf="latestParams && !!latestParams.variantId"
-        position="left"
-        [icon]="'replay'"
-        [title]="'TOPIC_PAGE.SIDE_MENU.RESET_URL_PARAMETER' | translate"
-        (itemClicked)="reloadWithoutParameters()"
-      ></es-side-menu-item>
-    </ng-container>
-  </es-side-menu-wrapper>
 
   <!-- RIGHT SIDE MENU WITH MULTIPLE COLLAPSIBLE ITEMS (VIEW MODE) -->
   <es-side-menu-wrapper
@@ -315,9 +287,6 @@
               !editMode() && computedSearchInput() && !swimlaneIdToHitMatching.get(swimlane.id)
             "
             [class.reserve-space-bottom]="i === swimlanes.length - 1"
-            [class.reserve-space-left]="
-              userHasEditRights() || pageVariantConfigs?.nodes?.length > 0
-            "
             [class.reserve-space-top]="i === 0 && swimlane.type === ACCORDION_TYPE"
             [class.topic-page-accordion-swimlane]="swimlane.type === ACCORDION_TYPE"
             [style.background-color]="
