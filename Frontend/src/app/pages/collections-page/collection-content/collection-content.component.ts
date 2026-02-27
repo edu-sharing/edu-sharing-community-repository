@@ -685,14 +685,12 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                         if (this.scope === RestConstants.COLLECTIONSCOPE_MY) {
                             this.listCollections.addVirtualNodes(
                                 (
-                                    await this.sessionStorageService
-                                        .get(
-                                            SessionStorageService.KEY_ROOT_COLLECTIONS,
-                                            [],
-                                            Store.Session,
-                                        )
-                                        .toPromise()
-                                ).map((n: VirtualNode) => {
+                                    await this.sessionStorageService.get<VirtualNode[]>(
+                                        SessionStorageService.KEY_ROOT_COLLECTIONS,
+                                        [],
+                                        Store.Session,
+                                    )
+                                ).map((n) => {
                                     n.override = false;
                                     return n;
                                 }),

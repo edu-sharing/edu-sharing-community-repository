@@ -12,20 +12,14 @@ import {
     OptionItem,
     RepoUrlService,
     TemporaryStorageService,
+    Toast as ToastUi,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
 import { Helper } from '../core-module/rest/helper';
 import { HttpClient } from '@angular/common/http';
 import { MessageType } from '../util/message-type';
-import { Toast as ToastUi } from 'ngx-edu-sharing-ui';
 import { Toast } from './toast';
-import {
-    ComponentFactoryResolver,
-    Inject,
-    Injectable,
-    Optional,
-    ViewContainerRef,
-} from '@angular/core';
+import { ComponentFactoryResolver, Injectable, ViewContainerRef } from '@angular/core';
 import { BridgeService } from './bridge.service';
 import {
     AuthorityProfile,
@@ -461,13 +455,11 @@ export class NodeHelperService extends NodeHelperServiceBase {
         if (
             safe &&
             !confirmed &&
-            !(await this.sessionStorage
-                .get(
-                    SessionStorageService.KEY_WORKSPACE_SAFE_DOWNLOAD_CONFIRM,
-                    false,
-                    Store.Session,
-                )
-                .toPromise())
+            !(await this.sessionStorage.get(
+                SessionStorageService.KEY_WORKSPACE_SAFE_DOWNLOAD_CONFIRM,
+                false,
+                Store.Session,
+            ))
         ) {
             const buttons = [
                 new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, null),
@@ -738,7 +730,7 @@ export class NodeHelperService extends NodeHelperServiceBase {
 
     getDefaultInboxFolder() {
         return new Observable<Node>((subscriber) => {
-            this.sessionStorage.get('defaultInboxFolder', RestConstants.INBOX).subscribe(
+            this.sessionStorage.get('defaultInboxFolder', RestConstants.INBOX).then(
                 (id) => {
                     this.nodeService.getNodeMetadata(id).subscribe(
                         (node) => {

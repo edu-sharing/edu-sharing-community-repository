@@ -2,6 +2,7 @@ import { ApplicationRef, Component, DoCheck, OnInit, ViewChild } from '@angular/
 import { TranslateService } from '@ngx-translate/core';
 import { User } from 'ngx-edu-sharing-api';
 import {
+    AuthorityNamePipe,
     ColumnType,
     FetchEvent,
     InteractionType,
@@ -25,7 +26,6 @@ import { Helper } from '../../../core-module/rest/helper';
 import { Toast } from '../../../services/toast';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { AuthoritySearchMode } from '../../../shared/components/authority-search-input/authority-search-input.component';
-import { AuthorityNamePipe } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject } from 'rxjs';
 
 @Component({
@@ -103,7 +103,7 @@ export class PermissionsDeleteComponent implements OnInit, DoCheck {
             // shall the user be found & removed inside contributor metadata
             cleanupMetadata: true,
         };
-        this.storage.get('delete_users_options', defaultOptions).subscribe((data: any) => {
+        this.storage.get('delete_users_options', defaultOptions).then((data) => {
             if (data.version === defaultOptions.version) {
                 this.options = data;
             } else {

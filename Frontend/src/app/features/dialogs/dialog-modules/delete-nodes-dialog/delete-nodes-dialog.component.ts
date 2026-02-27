@@ -208,9 +208,11 @@ export class DeleteNodesDialogComponent implements OnInit {
     }
 
     private async removeTemporaryCollections(nodes: Node[]) {
-        const collections: Node[] = await this.sessionStorageService
-            .get(SessionStorageService.KEY_ROOT_COLLECTIONS, [], Store.Session)
-            .toPromise();
+        const collections = await this.sessionStorageService.get<Node[]>(
+            SessionStorageService.KEY_ROOT_COLLECTIONS,
+            [],
+            Store.Session,
+        );
         await this.sessionStorageService.set(
             SessionStorageService.KEY_ROOT_COLLECTIONS,
             collections.filter((c) => !nodes.find((n) => c.ref.id === n.ref.id)),

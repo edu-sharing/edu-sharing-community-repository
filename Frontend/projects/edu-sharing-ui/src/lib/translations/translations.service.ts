@@ -134,23 +134,22 @@ export class TranslationsService {
                                 useStored: false,
                             });
                         }
-                        return this.injector
-                            .get(SessionStorageService)
-                            .get('language')
-                            .pipe(
-                                map((storageLanguage) => {
-                                    let useStored = false;
-                                    if (supportedLanguages.indexOf(storageLanguage) !== -1) {
-                                        selectedLanguage = storageLanguage;
-                                        useStored = true;
-                                    }
-                                    return {
-                                        supportedLanguages,
-                                        selectedLanguage,
-                                        useStored,
-                                    };
-                                }),
-                            );
+                        return from(
+                            this.injector.get(SessionStorageService).get<string>('language'),
+                        ).pipe(
+                            map((storageLanguage) => {
+                                let useStored = false;
+                                if (supportedLanguages.indexOf(storageLanguage) !== -1) {
+                                    selectedLanguage = storageLanguage;
+                                    useStored = true;
+                                }
+                                return {
+                                    supportedLanguages,
+                                    selectedLanguage,
+                                    useStored,
+                                };
+                            }),
+                        );
                     }
                 }),
                 // Use browser language if available, otherwise fall back to the first supported

@@ -1,5 +1,14 @@
 import { Injectable } from '@angular/core';
-import { combineLatest, EMPTY, merge, Observable, of, Subject, throwError } from 'rxjs';
+import {
+    combineLatest,
+    EMPTY,
+    firstValueFrom,
+    merge,
+    Observable,
+    of,
+    Subject,
+    throwError,
+} from 'rxjs';
 import {
     catchError,
     distinctUntilChanged,
@@ -89,8 +98,8 @@ export class SessionStorageService {
      * Gets a current storage value from the backend or browser storage, depending on login state
      * and `store`.
      */
-    get(key: string, fallback: any = null, store = Store.UserProfile): Observable<any> {
-        return this.observe(key, fallback, store).pipe(first());
+    get<T>(key: string, fallback: T = null, store = Store.UserProfile): Promise<T> {
+        return firstValueFrom(this.observe(key, fallback, store));
     }
 
     /**

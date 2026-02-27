@@ -959,9 +959,11 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
 
     private async save4(collection: EduData.Node) {
         if (this.parentId === RestConstants.ROOT) {
-            const collections = await this.sessionStorageService
-                .get(SessionStorageService.KEY_ROOT_COLLECTIONS, [], Store.Session)
-                .toPromise();
+            const collections = await this.sessionStorageService.get(
+                SessionStorageService.KEY_ROOT_COLLECTIONS,
+                [],
+                Store.Session,
+            );
             collections.push(collection);
             await this.sessionStorageService.set(
                 SessionStorageService.KEY_ROOT_COLLECTIONS,
