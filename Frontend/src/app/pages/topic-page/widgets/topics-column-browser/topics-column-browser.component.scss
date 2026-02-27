@@ -76,6 +76,17 @@
 .item-link {
     text-decoration: unset;
     color: topicPageVars.$primary-dark;
+    display: inline-block;
+
+    // make the text bold but invisible by default, so the browser calculates layout using bold width from the start
+    &::before {
+        content: attr(data-text);
+        font-weight: topicPageVars.$font-weight-x-bold;
+        visibility: hidden;
+        display: block;
+        height: 0;
+        overflow: hidden;
+    }
 
     &:hover {
         font-weight: topicPageVars.$font-weight-x-bold !important;
@@ -290,10 +301,7 @@
 }
 
 // fix for vertically centering the text and icon of the mat-selection-list
-:host ::ng-deep mat-selection-list mat-list-option {
-    .item-link,
-    .mdc-button__label {
-        display: flex;
-        align-items: center;
-    }
+:host ::ng-deep mat-selection-list mat-list-option .mdc-button__label {
+    display: flex;
+    align-items: center;
 }

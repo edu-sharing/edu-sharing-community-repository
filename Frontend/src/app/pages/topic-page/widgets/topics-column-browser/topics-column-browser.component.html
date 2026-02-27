@@ -22,6 +22,7 @@
                   [href]="customUrl(node.data)"
                   (click)="$event.stopPropagation()"
                   class="item-link cursor-pointer"
+                  [attr.data-text]="node.data | nodeTitle"
                 >
                   {{ node.data | nodeTitle }}
                 </a>
@@ -97,6 +98,7 @@
                   [href]="customUrl(node.data)"
                   (click)="$event.stopPropagation()"
                   class="item-link cursor-pointer"
+                  [attr.data-text]="node.data | nodeTitle"
                 >
                   {{ node.data | nodeTitle }}
                 </a>
