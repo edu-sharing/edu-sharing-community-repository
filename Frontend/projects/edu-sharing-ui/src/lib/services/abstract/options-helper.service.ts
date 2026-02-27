@@ -63,7 +63,7 @@ export abstract class OptionsHelperService {
      * overwrite all the show callbacks by using the internal constrains + permission handlers
      * isOptionAvailable will check if customShowCallback exists and will also call it
      */
-    private handleCallbacks(options: OptionItem[], objects: Node[] | any, data: OptionData) {
+    protected handleCallbacks(options: OptionItem[], objects: Node[] | any, data: OptionData) {
         options.forEach((o) => {
             if (data?.scope === Scope.DebugShowAll) {
                 o.showCallback = async () => true;
@@ -424,7 +424,7 @@ export abstract class OptionsHelperService {
         return result;
     }
 
-    private async handleCallbackStates(
+    protected async handleCallbackStates(
         options: OptionItem[],
         target: Target,
         data: OptionData,

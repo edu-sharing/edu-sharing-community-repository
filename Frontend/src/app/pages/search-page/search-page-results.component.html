@@ -59,7 +59,7 @@
   [elementInteractionType]="
     previewMode === 'Sidebar' ? InteractionType.Emitter : InteractionType.DefaultActionLink
   "
-  [initConfig]="{ actionbar, customOptions: primaryActionOptions || searchPage.getCustomMaterialOptions | async}"
+  [initConfig]="{ actionbar, customOptions: primaryActionOptions || (searchPage.getCustomMaterialOptions | async)}"
   (clickItem)="onClick($event.element)"
   (dblClickItem)="onDblClick($event.element)"
   data-test="search-result-grid-material"

@@ -212,6 +212,7 @@ export class RestConstants {
     public static GROUP_TYPE_SCHOOL_NATIONAL = 'SCHOOL_NATIONAL';
     public static GROUP_TYPE_SCHOOL_MUNICIPAL = 'SCHOOL_MUNICIPAL';
     public static GROUP_TYPE_SCHOOL_PRIVATE = 'SCHOOL_PRIVATE';
+    public static GROUP_TYPE_SCHOOL_NONE = 'SCHOOL_NONE';
     public static VALID_GROUP_TYPES = [
         null,
         RestConstants.GROUP_TYPE_ADMINISTRATORS,
@@ -223,6 +224,7 @@ export class RestConstants {
         RestConstants.GROUP_TYPE_CLASS,
         RestConstants.GROUP_TYPE_WORKING_GROUP,
         RestConstants.GROUP_TYPE_LESSON,
+        RestConstants.GROUP_TYPE_SCHOOL_NONE,
     ];
     public static VALID_PERSON_STATUS_TYPES = ['active', 'blocked', 'todelete'];
     public static VALID_GROUP_TYPES_ORG = [

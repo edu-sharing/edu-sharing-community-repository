@@ -15,6 +15,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
+import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.mime.MimeTypesV2;
@@ -36,8 +37,6 @@ import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-
-import org.edu_sharing.repository.tools.URLHelper;
 
 public class MailTemplate {
 	static XPathFactory pfactory = XPathFactory.newInstance();
@@ -112,12 +111,15 @@ public class MailTemplate {
 	}
 
 	public static void addContentLinks(ApplicationInfo appInfo,String nodeId, Map<String, String> target, String keyName) throws Throwable{
-        NodeService nodeService=NodeServiceFactory.getInstance().getService(appInfo.getAppId());
-		String nodetype=MimeTypesV2.getNodeType(
-				nodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId),
-				nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId),
-                List.of(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId))
-				);
+		NodeService nodeService=NodeServiceFactory.getInstance().getService(appInfo.getAppId());
+		String nodetype = MimeTypesV2.getNodeType(
+				new MimeTypesV2.NodeInfo(
+						nodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId),
+						nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId),
+						List.of(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId))
+				),
+				MimeTypesV2.Type.Mediatype
+		);
 		addContentLinks(nodeId, target, keyName, nodetype);
 	}
 
@@ -146,10 +148,10 @@ public class MailTemplate {
 		String fullName = null;
 		String firstName = null, lastName = null, email = null;
 
-        if("system".equalsIgnoreCase(authorityName)) {
-            String domain = ApplicationInfoList.getHomeRepository().getDomain();
-            return new UserMail(domain, null, domain, "");
-        }
+		if("system".equalsIgnoreCase(authorityName)) {
+			String domain = ApplicationInfoList.getHomeRepository().getDomain();
+			return new UserMail(domain, null, domain, "");
+		}
 
 		String user = AuthenticationToolAPI.getInstance().getCurrentUser();
 		NodeRef nodeRef = AuthorityServiceHelper.getAuthorityNodeRef(authorityName);

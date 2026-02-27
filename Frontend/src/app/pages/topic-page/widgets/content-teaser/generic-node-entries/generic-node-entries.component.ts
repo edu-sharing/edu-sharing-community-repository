@@ -204,7 +204,6 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
     @Input() maxItems: number = 11;
     @Input() mds: string | null = null;
     @Input() queryId: string = RestConstants.DEFAULT_QUERY_NAME;
-    @Input() scrollGradientColor: string;
     @Input() searchText: string;
     @Output() blacklistChanged: EventEmitter<string> = new EventEmitter<string>();
     @Output() displayTypeChanged: EventEmitter<boolean> = new EventEmitter<boolean>();

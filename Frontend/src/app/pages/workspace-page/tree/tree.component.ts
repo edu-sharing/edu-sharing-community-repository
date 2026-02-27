@@ -13,7 +13,6 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { WorkspacePageComponent } from '../workspace-page.component';
 import { WorkspaceSubTreeComponent } from '../sub-tree/sub-tree.component';
-import { NodeEntriesService } from 'ngx-edu-sharing-ui/services/node-entries.service';
 import { TranslateService } from '@ngx-translate/core';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 

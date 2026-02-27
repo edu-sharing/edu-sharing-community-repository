@@ -2,9 +2,7 @@ import { CdkDragEnter, CdkDropList, moveItemInArray } from '@angular/cdk/drag-dr
 import {
     ChangeDetectionStrategy,
     Component,
-    effect,
     ElementRef,
-    HostBinding,
     Input,
     NgZone,
     OnDestroy,
@@ -32,6 +30,7 @@ import { DragData } from '../../types/drag-drop';
 import { CdkOverlayOrigin } from '@angular/cdk/overlay';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { NodesDragDropService } from '../../services/nodes-drag-drop.service';
+import { ListItemSort } from '../../types/list-item';
 
 let displayedWarnings: string[] = [];
 

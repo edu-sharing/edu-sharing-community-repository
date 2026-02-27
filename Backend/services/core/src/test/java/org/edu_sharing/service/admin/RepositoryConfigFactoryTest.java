@@ -19,6 +19,7 @@ class RepositoryConfigFactoryTest {
     void getSystemMessageTest() {
         long now = System.currentTimeMillis();
         RepositoryConfig config = new RepositoryConfig();
+        AuthorityServiceFactory authorityServiceFactory = mock(AuthorityServiceFactory.class);
         AuthorityService authority = mock(AuthorityService.class);
         RepositoryConfig.RepositoryMessage msg = new RepositoryConfig.RepositoryMessage();
         config.setMessages(List.of(msg));
@@ -26,7 +27,8 @@ class RepositoryConfigFactoryTest {
         try (MockedStatic<RepositoryConfigFactory> svc = mockStatic(RepositoryConfigFactory.class, CALLS_REAL_METHODS);
              MockedStatic<AuthorityServiceFactory> auth = mockStatic(AuthorityServiceFactory.class)) {
             svc.when(RepositoryConfigFactory::getConfig).thenReturn(config);
-            auth.when(AuthorityServiceFactory::getLocalService).thenReturn(authority);
+            auth.when(AuthorityServiceFactory::getInstance).thenReturn(authorityServiceFactory);
+            when(authorityServiceFactory.getLocalService()).thenReturn(authority);
 
             when(authority.isGuest()).thenReturn(false);
             msg.setUserMode(RepositoryConfig.RepositoryMessage.UserMode.user);

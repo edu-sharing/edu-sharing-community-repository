@@ -46,6 +46,7 @@ import {
     UIConstants,
 } from 'ngx-edu-sharing-ui';
 import {
+    firstValueFrom,
     forkJoin,
     forkJoin as observableForkJoin,
     Observable,
@@ -1215,7 +1216,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         topicPage.customShowCallback = async (objects) => {
             if (
                 this.nodeHelper.getNodesRight(
-                    objects,
+                    objects as Node[],
                     RestConstants.ACCESS_WRITE,
                     NodesRightMode.Effective,
                 )

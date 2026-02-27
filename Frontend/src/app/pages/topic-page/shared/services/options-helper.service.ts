@@ -1,15 +1,27 @@
-import { Injectable, OnDestroy } from '@angular/core';
-import { Node } from 'ngx-edu-sharing-api';
+import { Injectable, OnDestroy, Optional } from '@angular/core';
+import { AuthenticationService, NetworkService, Node } from 'ngx-edu-sharing-api';
 import {
+    NodeHelperService,
     OptionData,
     OptionItem,
     OptionsHelperComponents,
     OptionsHelperService as OptionsHelperServiceAbstract,
     Target,
+    TemporaryStorageService,
 } from 'ngx-edu-sharing-ui';
+import { ActivatedRoute } from '@angular/router';
 
 @Injectable()
 export class OptionsHelperService extends OptionsHelperServiceAbstract implements OnDestroy {
+    constructor(
+        nodeHelperService: NodeHelperService,
+        authenticationService: AuthenticationService,
+        storage: TemporaryStorageService,
+        networkService: NetworkService,
+        @Optional() route: ActivatedRoute,
+    ) {
+        super(nodeHelperService, authenticationService, storage, networkService, route);
+    }
     /**
      * Filter options by handling callbacks based on the target type.
      *
@@ -41,7 +53,11 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
      * @param objects
      * @param data
      */
-    private handleCallbacks(options: OptionItem[], objects: Node[] | any, data: OptionData): void {
+    protected handleCallbacks(
+        options: OptionItem[],
+        objects: Node[] | any,
+        data: OptionData,
+    ): void {
         options?.forEach((o: OptionItem): void => {
             o.showCallback = async (object): Promise<boolean> => {
                 const list = object
@@ -61,11 +77,12 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
 
     /**
      * Checks, whether a given option is available.
-     *
-     * @param option
-     * @param objects
+     * @TODO: why is this overridden?
      */
-    private async isOptionAvailable(option: OptionItem, objects: Node[] | any[]): Promise<boolean> {
+    protected async isOptionAvailable(
+        option: OptionItem,
+        objects: Node[] | any[],
+    ): Promise<boolean> {
         if (option.customShowCallback) {
             if ((await option.customShowCallback(objects)) === false) {
                 return false;
@@ -76,13 +93,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
 
     /**
      * Handle the callback states by filtering options by their availability.
-     *
-     * @param options
-     * @param target
-     * @param data
-     * @param objects
+     * @TODO: why is this overridden?
      */
-    private async handleCallbackStates(
+    protected async handleCallbackStates(
         options: OptionItem[],
         target: Target,
         data: OptionData,

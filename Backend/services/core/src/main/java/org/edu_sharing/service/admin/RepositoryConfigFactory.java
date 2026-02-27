@@ -25,7 +25,7 @@ public class RepositoryConfigFactory {
     public static List<RepositoryConfig.RepositoryMessage> getSystemMessages() {
         List<RepositoryConfig.RepositoryMessage> msg = getConfig().getMessages();
         long now = System.currentTimeMillis();
-        boolean isGuest = AuthorityServiceFactory.getLocalService().isGuest();
+        boolean isGuest = AuthorityServiceFactory.getInstance().getLocalService().isGuest();
 
         if (!CollectionUtils.isEmpty(msg)) {
             return msg.stream()

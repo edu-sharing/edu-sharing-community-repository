@@ -8,6 +8,7 @@ import {
     ListSortConfig,
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
+    OptionItem,
     OptionItemToggle,
     Scope,
     TemporaryStorageService,
@@ -20,14 +21,13 @@ import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { TranslateService } from '@ngx-translate/core';
 import { switchMap, takeUntil } from 'rxjs/operators';
 import { FrameEventsService } from '../../core-module/rest/services/frame-events.service';
-import { RestConstants } from '../../core-module/rest/rest-constants';
 import { Values } from '../../features/mds/types/types';
+import { ConfigService, Node } from 'ngx-edu-sharing-api';
 
 export type SearchFilter = {
     propertyFilters: Values;
     searchString: string;
 };
-import { ConfigService, Node } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-search-page-results',
@@ -167,7 +167,7 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
                     window.close();
                 });
                 applyFilter.group = DefaultGroups.Primary;
-                applyFilter.elementType = [ElementType.Unknown];
+                applyFilter.elementType = [ElementType.NoneOrUnknown];
                 this.primaryActionOptions = {
                     useDefaultOptions: false,
                     addOptions: [applyFilter],

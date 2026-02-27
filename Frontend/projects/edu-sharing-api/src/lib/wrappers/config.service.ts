@@ -11,7 +11,7 @@ import {
     tap,
 } from 'rxjs/operators';
 import { ApiRequestConfiguration } from '../api-request-configuration';
-import { RepositoryMessage } from '../api/models';
+import { RepositoryMessage } from '../api/models/repository-message';
 import { ConfigV1Service } from '../api/services';
 import { switchReplay } from '../utils/rxjs-operators/switch-replay';
 import { Values } from '../api/models/values';
