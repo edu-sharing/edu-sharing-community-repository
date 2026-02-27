@@ -22,6 +22,7 @@ export const TRANSLATION_LIST = [
     'oer',
     'messages',
     'register',
+    'topic-page',
     'profiles',
     'services',
     'stream',

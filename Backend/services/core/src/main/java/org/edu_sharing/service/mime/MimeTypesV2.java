@@ -405,10 +405,10 @@ public class MimeTypesV2 {
 		return aspects.contains(CCConstants.CCM_ASPECT_TOOL_DEFINITION);
 	}
 	private static boolean isSavedSearch(String type) {
-		return CCConstants.CCM_TYPE_SAVED_SEARCH.equals(type);
+		return CCConstants.CCM_TYPE_SAVED_SEARCH.equals(CCConstants.getValidGlobalName(type));
 	}
 	private static boolean isLtiInstance(String nodeType) {
-		return CCConstants.CCM_TYPE_TOOL_INSTANCE.equals(nodeType);
+		return CCConstants.CCM_TYPE_TOOL_INSTANCE.equals(CCConstants.getValidGlobalName(nodeType));
 	}
 
 	private static boolean isLTI13ToolObject(List<String> aspects){

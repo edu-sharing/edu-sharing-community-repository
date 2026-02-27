@@ -1,4 +1,4 @@
-import { Inject, Optional, Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
 
 /**

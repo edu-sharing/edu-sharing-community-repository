@@ -1,0 +1,9 @@
+@use '../../topic-page-variables' as *;
+
+:host {
+    // overwrite color button text color
+    --mdc-text-button-label-text-color: #{var(
+            --mat-standard-button-toggle-text-color,
+            var(--mat-app-on-surface)
+        )};
+}

@@ -177,7 +177,11 @@ public class BulkServiceImpl implements BulkService, ApplicationListener<Refresh
 		}).collect(Collectors.toList());
 	}
 
-
+	@Override
+	public NodeRef getGroupFolder(String name) {
+		name = NodeServiceHelper.cleanupCmName(name);
+        return nodeServiceAlfresco.getChildByName(primaryFolder, ContentModel.ASSOC_CONTAINS, name);
+	}
 
 	@Override
 	public NodeRef sync(String group, List<String> match, List<String> groupBy, String type, List<String> aspects, Map<String, String[]> properties, boolean resetVersion) {

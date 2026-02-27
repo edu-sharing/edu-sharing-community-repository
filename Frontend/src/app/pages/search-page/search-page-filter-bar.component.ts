@@ -86,10 +86,7 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
     }
 
     private applySavedSearch(savedSearch: SavedSearch): void {
-        this.searchPage.activeRepository.setUserValue(savedSearch.repository);
-        this.searchPage.activeMetadataSet.setUserValue(savedSearch.metadataSet);
-        this.searchPage.searchString.setUserValue(savedSearch.searchString);
-        this.searchPage.searchFilters.setUserValue(savedSearch.filters);
+        this.searchPage.applySavedSearch(savedSearch);
     }
 
     private async getSavedSearchInitialName(): Promise<string> {

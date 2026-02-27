@@ -358,7 +358,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                         }
                         facetsSearchFilter = Query.of(q -> q.bool(facetQuery.build()));
                     } else {
-                        String[] facetName = new String[]{"i18n." + currentLocale + "." + facet, "collections.i18n." + currentLocale + "." + facet};
+                        String[] facetName = new String[]{"i18n." + currentLocale + "." + facet.getProperty(), "collections.i18n." + currentLocale + "." + facet.getProperty()};
                         if(!metadataQueryFacet.get().getItems().isEmpty()) {
                             facetName = new String[]{metadataQueryFacet.get().getItems().get(0).getValue()};
                         }

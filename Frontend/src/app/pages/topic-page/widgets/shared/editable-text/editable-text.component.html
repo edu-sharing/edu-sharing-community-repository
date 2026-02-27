@@ -1,0 +1,63 @@
+<div class="loading" *ngIf="loading">
+  <es-spinner-small></es-spinner-small>
+</div>
+<ng-container *ngIf="!editable; else editMode">
+  <div
+    class="text-container"
+    [class.container-padding]="applyTextareaPadding"
+    [class.prominent-text]="prominentText"
+    [class.wlo-text-center]="alignCenter"
+  >
+    <ng-container *ngIf="headerElement !== ''; else normalText" [ngSwitch]="headerElement">
+      <h1 class="text-content mat-heading-1 font-bold" *ngSwitchCase="'h1'">
+        <ng-container *ngTemplateOutlet="textTemplate"></ng-container>
+      </h1>
+      <h2 class="text-content mat-heading-2 font-bold" *ngSwitchCase="'h2'">
+        <ng-container *ngTemplateOutlet="textTemplate"></ng-container>
+      </h2>
+      <h3 class="text-content mat-heading-3 font-bold" *ngSwitchDefault>
+        <ng-container *ngTemplateOutlet="textTemplate"></ng-container>
+      </h3>
+    </ng-container>
+    <ng-template #normalText>
+      <div class="text-content">
+        <ng-container
+          *ngTemplateOutlet="textTemplate; context: { parseMarkdown: true }"
+        ></ng-container>
+        <es-ai-label *ngIf="aiGenerated" [textContainer]="true"></es-ai-label>
+      </div>
+    </ng-template>
+    <ng-template #textTemplate let-parseMarkdown="parseMarkdown">
+      <div class="inline-block" [innerHTML]="outputText()"></div>
+      <ng-container *ngVar="nonEditText || text as textToDisplay">
+        <a
+          *ngIf="showMoreLimit && textToDisplay.length > showMoreLimit"
+          role="button"
+          href="javascript:void(0)"
+          (click)="toggleShowMore()"
+          class="show-more-btn"
+        >
+          {{
+            showMore
+              ? ('TOPIC_PAGE.WIDGET.EDITABLE_TEXT.SHOW_LESS' | translate)
+              : ('TOPIC_PAGE.WIDGET.EDITABLE_TEXT.SHOW_MORE' | translate)
+          }}
+          <i [esIcon]="showMore ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"></i>
+        </a>
+      </ng-container>
+    </ng-template>
+  </div>
+</ng-container>
+<ng-template #editMode>
+  <es-self-adjusting-textarea
+    [showAiButtons]="showAiButtons"
+    [alignCenter]="alignCenter"
+    [disabled]="disabled"
+    [headerElement]="headerElement"
+    [hideToolbar]="headerElement !== ''"
+    [inputLimit]="inputLimit"
+    [label]="label"
+    [(text)]="text"
+    (textChange)="emitTextChange($event)"
+  ></es-self-adjusting-textarea>
+</ng-template>

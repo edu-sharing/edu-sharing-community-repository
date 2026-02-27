@@ -1,6 +1,12 @@
-import { PipeTransform, Pipe } from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { ConfigurationService } from '../../core-module/core.module';
+import {
+    AuthorityProfile,
+    ConfigurationService,
+    Group,
+    Organization,
+    User,
+} from '../../core-module/core.module';
 
 @Pipe({
     name: 'permissionName',
@@ -9,11 +15,22 @@ import { ConfigurationService } from '../../core-module/core.module';
 export class PermissionNamePipe implements PipeTransform {
     constructor(private translate: TranslateService, private config: ConfigurationService) {}
 
-    transform(permission: any, args?: any): string {
+    transform(
+        permission: Organization | AuthorityProfile | Group | User | any,
+        args?: any,
+    ): string {
         if (args && args['field']) {
             let field = args['field'];
             if (field == 'secondary') {
-                field = this.config.instant('userSecondaryDisplayName', null);
+                if (permission.authorityType === 'GROUP') {
+                    return permission.profile?.groupType
+                        ? this.translate.instant(
+                              'PERMISSIONS.GROUP_TYPE.' + permission.profile?.groupType,
+                          )
+                        : '';
+                } else {
+                    field = this.config.instant('userSecondaryDisplayName', null);
+                }
             }
 
             if (field == 'email' || field == 'email-domain') {

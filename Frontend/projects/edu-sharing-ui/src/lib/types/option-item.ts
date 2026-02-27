@@ -242,6 +242,7 @@ export enum Scope {
     UserProfile = 'UserProfile',
     Stream = 'Stream',
     CreateMenu = 'CreateMenu',
+    TopicPage = 'TopicPage',
     DashboardSwimlane = 'DashboardSwimlane',
     EditorialPage = 'EditorialPage',
     EditorialSidebar = 'EditorialSidebar',

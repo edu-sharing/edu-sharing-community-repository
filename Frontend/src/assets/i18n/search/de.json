@@ -84,6 +84,9 @@
       "SEARCH_EXISTS_TITLE": "Suchanfrage existiert bereits",
       "SEARCH_EXISTS_MESSAGE": "Es ist bereits eine gespeicherte Suchanfrage mit diesen Namen vorhanden. Wenn Sie fortfahren, wird die bestehende Suchanfrage mit den aktuellen Einstellungen ersetzt",
       "TOAST_SAVED": "Die aktuelle Suchanfrage wurde erfolgreich gespeichert"
+    },
+    "ACTION": {
+      "APPLYFILTER_DESCRIPTION": "Nutzen Sie die Filterfunktion und filtern Sie die gewünschten Ergebnisse. Anschließend können Sie die Filterung übernehmen"
     }
   }
 }

@@ -2,6 +2,7 @@ package org.edu_sharing.restservices.config.v1;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -21,6 +22,8 @@ import org.edu_sharing.restservices.config.v1.model.Config;
 import org.edu_sharing.restservices.config.v1.model.Language;
 import org.edu_sharing.restservices.config.v1.model.Variables;
 import org.edu_sharing.restservices.shared.ErrorResponse;
+import org.edu_sharing.service.admin.RepositoryConfigFactory;
+import org.edu_sharing.service.admin.model.RepositoryConfig;
 import org.edu_sharing.service.config.ConfigService;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.config.DynamicConfig;
@@ -89,10 +92,12 @@ public class ConfigApi {
             @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public Response getAvailableContext() {
+    public Response getAvailableContext(
+            @Parameter(description = "Include static contexts (from the client.config.xml). Defaults to false", required = false, schema = @Schema(defaultValue="false")) @QueryParam("includeStatic") Boolean includeStatic
+    ) {
         try {
             ConfigService configService = ConfigServiceFactory.getConfigService();
-            List<Context> context = configService.getAvailableContext();
+            List<Context> context = configService.getAvailableContext(includeStatic != null && includeStatic);
             return Response.status(Response.Status.OK).entity(context).build();
         } catch (Throwable t) {
             logger.error(t.getMessage(), t);
@@ -158,6 +163,27 @@ public class ConfigApi {
     public Response getLanguageDefaults() {
         try {
             return Response.status(Response.Status.OK).entity(I18nAngular.getLanguageStrings().toString()).build();
+        } catch (Throwable t) {
+            logger.error(t.getMessage(), t);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+        }
+    }
+
+    @GET
+    @SecurityRequirements
+    @Path("/messages")
+    @Operation(summary = "get a system message that should be shown (if any)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(array = @ArraySchema(schema = @Schema(implementation = RepositoryConfig.RepositoryMessage.class)))),
+            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public Response getSystemMessages() {
+        try {
+            return Response.status(Response.Status.OK).entity(RepositoryConfigFactory.getSystemMessages()).build();
         } catch (Throwable t) {
             logger.error(t.getMessage(), t);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();

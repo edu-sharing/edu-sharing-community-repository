@@ -31,7 +31,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
-import java.time.*;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -121,9 +123,25 @@ public class NodeObjectReportJob extends AbstractJobMapAnnotationParams {
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         LocalDate now = LocalDate.now();
-        if (!force && now.getDayOfMonth() != 1) {
-            logger.error("Job not running because of date: " + now.getDayOfMonth());
-            return;
+        if (!force) {
+            if(now.getDayOfMonth() != 1) {
+                logger.error("Job not running because of date: " + now.getDayOfMonth());
+                return;
+            }
+            switch (type) {
+                case Yearly:
+                    if(now.getMonthValue() != 1) {
+                        logger.error("Job not running because of date: " + now.getDayOfMonth() + " month: " + now.getMonth());
+                        return;
+                    }
+                case Quarterly:
+                    if(!List.of(1, 4, 7, 10).contains(now.getMonthValue())) {
+                        logger.error("Job not running because of date: " + now.getDayOfMonth() + " month: " + now.getMonth());
+                        return;
+                    }
+                default:
+                    throw new NotImplementedException(type.name());
+            }
         }
 
         AuthenticationUtil.runAsSystem(this::createStats);

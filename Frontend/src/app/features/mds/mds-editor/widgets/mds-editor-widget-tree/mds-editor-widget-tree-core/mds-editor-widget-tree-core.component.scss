@@ -1,6 +1,17 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use '../../../mds-mixins' as mds;
 
 .tree {
+    .tree-node.is-suggestion-ai {
+        mat-checkbox {
+            --mdc-checkbox-selected-icon-color: var(--aiColor);
+            --mdc-checkbox-selected-hover-icon-color: var(--aiColor);
+            --mdc-checkbox-selected-focus-icon-color: var(--aiColor);
+        }
+        span {
+            @include mds.highlightAiText();
+        }
+    }
     .suggestions {
         background-color: var(--mat-tree-container-background-color);
         padding: 10px 20px;

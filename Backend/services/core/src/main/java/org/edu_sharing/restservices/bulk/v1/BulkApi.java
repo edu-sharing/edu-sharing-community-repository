@@ -115,6 +115,35 @@ public class BulkApi {
         }
     }
 
+    @GET
+    @Path("/find/group/{group}")
+
+    @Operation(summary = "gets a given root folder for a group id", description = "Get a given root folder (crawler folder). Might be used to do bulk operations like global invitations")
+
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
+    public Response findGroup(@Context HttpServletRequest req,
+                              @Parameter(description = "The group to look up the folder", required = true) @PathParam("group") String group
+    ) {
+        try {
+            NodeRef node = BulkServiceFactory.getInstance().getGroupFolder(group);
+            if (node == null) {
+                throw new DAOMissingException(new Throwable("Group folder not found"));
+            }
+            NodeEntry entry = new NodeEntry();
+            NodeDao nodeDao = NodeDao.getNode(RepositoryDao.getHomeRepository(), node.getId(), Filter.createShowAllFilter());
+            entry.setNode(nodeDao.asNode());
+            return Response.ok().entity(entry).build();
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t, ErrorResponse.ErrorResponseLogging.relaxed);
+        }
+    }
+
+
     @POST
     @Path("/list")
 

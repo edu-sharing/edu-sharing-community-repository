@@ -142,3 +142,5 @@ export { RegisterInformation } from './api/models/register-information';
 export { PrimaryLogin } from './api/models/primary-login';
 export { ScopeLogin } from './api/models/scope-login';
 export { OAuthEntry } from './api/models/o-auth-entry';
+export { RepositoryConfig } from './api/models/repository-config';
+export { RepositoryMessage } from './api/models/repository-message';

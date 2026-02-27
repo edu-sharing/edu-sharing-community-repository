@@ -21,7 +21,8 @@
       "TOOLKIT": "Tool Kit (Caches, Logfiles)",
       "BROWSER": "Node Browser & Solr-Debugging",
       "FOLDERTEMPLATES": "Folder templates",
-      "CONTEXT": "Context & domains"
+      "CONTEXT": "Context & domains",
+      "MESSAGES": "Maintenance Messages"
     },
     "PLUGINS": {
       "TITLE": "Extensions",
@@ -57,6 +58,59 @@
         "MORE": "More information about how to obtain, confiure and deploy extensions can be found on the edu-sharing website",
         "MORE_LINK": "Go to edu-sharing website"
       }
+    },
+    "MESSAGES": {
+      "ADD_MESSAGE": "New Announcement / Maintenance Message",
+      "EDIT_MESSAGE": "Edit Announcement / Maintenance Message",
+      "NO_MESSAGES": "Currently no maintenance messages configured",
+      "REMOVE_TITLE": "Delete Message",
+      "REMOVE_MESSAGE": "Do you want to delete the following message?<br><br><hr>{{message}}",
+      "SELECT_COMPONENT": "Select area",
+      "SELECT_COMPONENT_HINT": "Select one or more area (OR linked). If none is selected, the message applies to all",
+      "SELECT_CONTEXT": "Select Context(s)",
+      "SELECT_CONTEXT_HINT": "Select one or more contexts (OR linked). If none is selected, the message applies to all",
+      "SELECT_TP": "Select Permission(s)",
+      "SELECT_TP_HINT": "Select one or more permissions the user must have to see the message (OR linked). If none is selected, the message applies to all",
+      "MULTIPLE_ORDER_HINT": "Multiple messages can be active at the same time. However, the user will only see the first message in the list that applies to them. The order can be adjusted via drag & drop.",
+      "TIME_RANGE": "Time Restriction",
+      "TIME_FROM_ENABLED": "Start Time",
+      "TIME_TO_ENABLED": "End Time",
+      "MODES": "Display Mode",
+      "MODE": {
+        "BAR_TITLE": "Bar",
+        "BAR_DESCRIPTION": "Message is displayed as a bar below the top bar",
+        "MODAL_TITLE": "Modal",
+        "MODAL_DESCRIPTION": "Message is displayed in a dialog window"
+      },
+      "SEVERITIES": "Color / Importance",
+      "SEVERITY": {
+        "INFO_TITLE": "Info",
+        "INFO_DESCRIPTION": "Informational message (system color, usually light blue)",
+        "WARNING_TITLE": "Warning",
+        "WARNING_DESCRIPTION": "Warning message, yellow with exclamation mark",
+        "ERROR_TITLE": "Error",
+        "ERROR_DESCRIPTION": "Error message, red with X mark"
+      },
+      "USER_MODES": "Visible to Users or Guests",
+      "USER_MODE": {
+        "ALL_TITLE": "All",
+        "ALL_DESCRIPTION": "Visible to all users",
+        "GUEST_TITLE": "Guest",
+        "GUEST_DESCRIPTION": "Visible to guests only",
+        "USER_TITLE": "User",
+        "USER_DESCRIPTION": "Visible to logged-in users only"
+      },
+      "REPEATS": "Repetition",
+      "REPEAT": {
+        "ONCE_TITLE": "Once",
+        "ONCE_DESCRIPTION": "Message is shown only once",
+        "REPEAT_TITLE": "Repeat",
+        "REPEAT_DESCRIPTION": "Message is shown repeatedly, but can be dismissed by the user",
+        "ALWAYS_TITLE": "Always Show",
+        "ALWAYS_DESCRIPTION": "Message is always shown and cannot be dismissed"
+      },
+      "MESSAGE": "Message",
+      "CREATE_SAVE": "Save"
     },
     "GLOBAL_CONFIG": {
       "EDIT_DISABLED": "The configuration was set to read-only. No modifications can be made via this tool. The parameter {{key}} must be set to true in order to change parameters via this tool.",

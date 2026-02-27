@@ -18,6 +18,7 @@ import {
     ConfigService,
     MdsService,
     Node,
+    NodeService,
     ProposalNode,
     ROOT,
     SessionStorageService,
@@ -194,6 +195,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         private mdsHelperService: MdsHelperService,
         private nodeHelper: NodeHelperService,
         private nodeService: RestNodeService,
+        private nodeServiceApi: NodeService,
         private optionsService: OptionsHelperDataService,
         private route: ActivatedRoute,
         private router: Router,
@@ -745,8 +747,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         }
 
         try {
-            await this.nodeService
-                .editNodeProperty(
+            await this.nodeServiceApi
+                .setProperty(
+                    this.collection.ref.repo,
                     this.collection.ref.id,
                     RestConstants.CCM_PROP_COLLECTION_ORDER_MODE,
                     [sort.active, (sort.direction === 'asc') + ''],
@@ -857,8 +860,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     async setCollectionSort(sort: ListSortConfig) {
         this.sortCollections = sort;
         try {
-            await this.nodeService
-                .editNodeProperty(
+            await this.nodeServiceApi
+                .setProperty(
+                    this.collection.ref.repo,
                     this.collection.ref.id,
                     RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE,
                     [this.sortCollections.active, (this.sortCollections.direction === 'asc') + ''],

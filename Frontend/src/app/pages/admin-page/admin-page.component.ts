@@ -1319,6 +1319,10 @@ export class AdminPageComponent implements OnInit, OnDestroy {
                     icon: 'extension',
                 },
                 {
+                    id: 'MESSAGES',
+                    icon: 'message',
+                },
+                {
                     id: 'CONTEXT',
                     icon: 'public',
                 },

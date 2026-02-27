@@ -132,6 +132,7 @@
                 "base": "dist/web-components/app",
                 "browser": ""
               },
+              "browser": "src/main.web-component.ts",
               "outputHashing": "none",
               "sourceMap": false,
               "namedChunks": true,

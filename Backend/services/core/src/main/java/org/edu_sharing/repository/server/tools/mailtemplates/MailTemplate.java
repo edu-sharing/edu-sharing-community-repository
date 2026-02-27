@@ -35,9 +35,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import org.edu_sharing.repository.tools.URLHelper;
 
@@ -46,17 +44,17 @@ public class MailTemplate {
 	static XPath xpath = pfactory.newXPath();
 	static Logger logger = Logger.getLogger(MailTemplate.class);
 	public static String getSubject(String template,String locale) throws Exception{
-	    return getChildContent(locale,template,"subject");
+		return getChildContent(locale,template,"subject");
 	}
-	
+
 	public static String getContent(String template,String locale,boolean addFooter) throws Exception{
 		String data="<style>";
 		data += getChildContent(getTemplates(null), "stylesheet", "style");
 		data += "</style>";
-	    data += getChildContent(locale,"header","message") + 
-	    		"<div class='content'>"+getChildContent(locale,template,"message") + "</div>" + 
-	    		(addFooter ? ("<div class='footer'>"+getChildContent(locale,"footer","message")+"</div>") : "");
-	    return data;
+		data += getChildContent(locale,"header","message") +
+				"<div class='content'>"+getChildContent(locale,template,"message") + "</div>" +
+				(addFooter ? ("<div class='footer'>"+getChildContent(locale,"footer","message")+"</div>") : "");
+		return data;
 	}
 
 	public static void sendMail(String templateId, Map<String, String> replace) throws Exception {
@@ -114,24 +112,35 @@ public class MailTemplate {
 	}
 
 	public static void addContentLinks(ApplicationInfo appInfo,String nodeId, Map<String, String> target, String keyName) throws Throwable{
-		NodeService nodeService=NodeServiceFactory.getInstance().getService(appInfo.getAppId());
-		String mime=MimeTypesV2.getMimeType(
+        NodeService nodeService=NodeServiceFactory.getInstance().getService(appInfo.getAppId());
+		String nodetype=MimeTypesV2.getNodeType(
+				nodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId),
 				nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId),
-				nodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId)
-		);
-		if(MimeTypesV2.MIME_DIRECTORY.equals(mime)){
-			if(nodeService.hasAspect(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId,CCConstants.CCM_ASPECT_COLLECTION)){
-				target.put(keyName, URLHelper.getNgComponentsUrl() + "collections/?id="+nodeId);
-				target.put(keyName + ".static", URLHelper.getNgComponentsUrl(false) + "collections/?id="+nodeId);
-				return;
-			}
-			target.put(keyName, URLHelper.getNgComponentsUrl() +  "workspace/?id="+nodeId);
-			target.put(keyName + ".static", URLHelper.getNgComponentsUrl(false) +  "workspace/?id="+nodeId);
-			return;
-		}
-		target.put(keyName, URLHelper.getNgComponentsUrl() + "render/"+nodeId+"?closeOnBack=true");
-		target.put(keyName + ".static", URLHelper.getNgComponentsUrl(false) + "render/"+nodeId+"?closeOnBack=true");
+                List.of(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId))
+				);
+		addContentLinks(nodeId, target, keyName, nodetype);
 	}
+
+	static void addContentLinks(String nodeId, Map<String, String> target, String keyName, String nodetype) {
+		if("collection".equals(nodetype)){
+			target.put(keyName, URLHelper.getNgComponentsUrl() + "collections?id="+ nodeId);
+			target.put(keyName + ".static", URLHelper.getNgComponentsUrl(false) + "collections?id="+ nodeId);
+		} else if (
+				Arrays.asList("folder", "folder-link").contains(nodetype)
+		) {
+			target.put(keyName, URLHelper.getNgComponentsUrl() +  "workspace?id="+ nodeId);
+			target.put(keyName + ".static", URLHelper.getNgComponentsUrl(false) +  "workspace?id="+ nodeId);
+		} else if (
+				"saved_search".equals(nodetype)
+		) {
+			target.put(keyName, URLHelper.getNgComponentsUrl() +  "search?savedSearch="+ nodeId);
+			target.put(keyName + ".static", URLHelper.getNgComponentsUrl(false) +  "search?savedSearch="+ nodeId);
+		} else {
+			target.put(keyName, URLHelper.getNgComponentsUrl() + "render/"+ nodeId +"?closeOnBack=true");
+			target.put(keyName + ".static", URLHelper.getNgComponentsUrl(false) + "render/"+ nodeId +"?closeOnBack=true");
+		}
+	}
+
 	public static UserMail getUserMailData(String authorityName) {
 
 		String fullName = null;
@@ -189,7 +198,7 @@ public class MailTemplate {
 
 	}
 	private static String getChildContent(String locale,String template, String name) throws Exception {
-	    Map<TemplateDescription, Node> nodes = getTemplates(locale);
+		Map<TemplateDescription, Node> nodes = getTemplates(locale);
 		String content=getChildContent(nodes,template,name);
 		if(content!=null)
 			return content;
@@ -210,7 +219,7 @@ public class MailTemplate {
 			if(childs.item(j).getNodeName().equals(name))
 				return childs.item(j).getTextContent();
 		}
-	    return null;
+		return null;
 	}
 
 	private static Document getXML(String locale,boolean override) throws SAXException, IOException, ParserConfigurationException {
@@ -231,8 +240,8 @@ public class MailTemplate {
 	public static void applyNodePropertiesToMap(String prefix, Map<String, Object> properties, Map<String, String> map) {
 		properties.forEach((key, value) -> map.put(prefix + CCConstants.getValidLocalName(key), value instanceof Collection ?
 				StringUtils.join((Collection)value, ", ") : value == null ? "" :
-						StringUtils.join(ValueTool.getMultivalue(value.toString()), ", ")
-				));
+				StringUtils.join(ValueTool.getMultivalue(value.toString()), ", ")
+		));
 	}
 
 	public static class UserMail {

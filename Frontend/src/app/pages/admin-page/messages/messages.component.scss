@@ -1,0 +1,110 @@
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+@use 'sass:color';
+
+@mixin removeTinyWrapping() {
+    p,
+    ul,
+    li {
+        margin-block-start: 0;
+        margin-block-end: 0;
+    }
+}
+$radius: 25px;
+form.create {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    border-radius: $radius;
+    padding: 20px;
+    margin: 20px;
+    background-color: vars.$cardLightBackground;
+    .actions {
+        display: flex;
+        gap: 10px;
+    }
+    mat-radio-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-gap: 30px;
+    }
+    .time-range {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        > div {
+            width: 0;
+            min-width: 200px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+    }
+}
+
+.empty {
+    color: var(--textLight);
+    text-align: center;
+}
+::ng-deep mat-option.select-toolpermission {
+    .secondary {
+        font-size: var(--fontSizeXSmall);
+        color: var(--textLight);
+    }
+}
+.list {
+    display: flex;
+    flex-direction: column;
+    padding: 0 20px;
+    gap: 30px;
+
+    .message-card {
+        display: flex;
+        gap: 10px;
+        @include mixins.materialShadowBottom();
+        width: 100%;
+        padding: 15px 20px 15px 0;
+        .handle {
+            cursor: move;
+            min-width: 12px;
+            max-width: 12px;
+            overflow: hidden;
+            opacity: 0.3;
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+        .attributes {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+        }
+        .main-config {
+            display: flex;
+            justify-content: space-between;
+        }
+        label {
+            font-weight: bold;
+        }
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+        .message ::ng-deep {
+            @include removeTinyWrapping();
+        }
+        .chips {
+            .components {
+                --mdc-chip-elevated-container-color: #cdbeda;
+            }
+            .contexts {
+                --mdc-chip-elevated-container-color: #bedabe;
+            }
+            .tp {
+                --mdc-chip-elevated-container-color: #eae4ce;
+            }
+        }
+    }
+}

@@ -1,6 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
+import { OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject } from 'rxjs';
+import { UIHelper } from '../../core-ui-module/ui-helper';
+import { NodeHelperService } from '../../services/node-helper.service';
+import { BridgeService } from '../../services/bridge.service';
 import { PreviewSidebarComponent } from './preview-sidebar.component';
 
 /**
@@ -15,6 +19,8 @@ export class PreviewSidebarService {
     private currentNode$ = new BehaviorSubject<Node | null>(null);
     private instance$ = new BehaviorSubject<PreviewSidebarComponent>(null);
     private sidebarOpen$ = new BehaviorSubject<boolean>(false);
+
+    constructor(private bridgeService: BridgeService, private nodeHelper: NodeHelperService) {}
 
     registerInstance(instance: PreviewSidebarComponent) {
         if (this.instance$.value) {
@@ -59,6 +65,11 @@ export class PreviewSidebarService {
 
     handleNodeClick(node: Node) {
         if (!this.instance$.value) {
+            UIHelper.openUrl(
+                this.nodeHelper.getNodeUrl(node),
+                this.bridgeService,
+                OPEN_URL_MODE.Blank,
+            );
             return;
         }
         const newNode = this.instance$.value.node !== node ? node : null;

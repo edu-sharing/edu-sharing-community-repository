@@ -3,6 +3,7 @@ import {
     ActionbarComponent,
     CustomOptions,
     DefaultGroups,
+    ElementType,
     InteractionType,
     ListSortConfig,
     NodeEntriesDisplayType,
@@ -18,6 +19,14 @@ import { Subject } from 'rxjs';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { TranslateService } from '@ngx-translate/core';
 import { switchMap, takeUntil } from 'rxjs/operators';
+import { FrameEventsService } from '../../core-module/rest/services/frame-events.service';
+import { RestConstants } from '../../core-module/rest/rest-constants';
+import { Values } from '../../features/mds/types/types';
+
+export type SearchFilter = {
+    propertyFilters: Values;
+    searchString: string;
+};
 import { ConfigService, Node } from 'ngx-edu-sharing-api';
 
 @Component({
@@ -33,6 +42,7 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     private destroyed = new Subject<void>();
     previewMode: string | 'Sidebar' | 'RenderingPage';
+    primaryActionOptions: CustomOptions;
 
     @ViewChild('nodeEntriesResults')
     nodeEntriesResults: NodeEntriesWrapperComponent<Node>;
@@ -51,6 +61,7 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
     readonly state = this.results.state;
     readonly onDblClick = this.results.onDblClick;
     readonly addToCollectionMode = this.searchPage.addToCollectionMode;
+    readonly primaryAction = this.searchPage.primaryAction;
     readonly customTemplates = this.globalSearchPageInternal.customTemplates;
     defaultCustomOptions: CustomOptions;
     constructor(
@@ -59,9 +70,11 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
         private configService: ConfigService,
         public searchPage: SearchPageService,
         private temporaryStorageService: TemporaryStorageService,
+        private frameEventsService: FrameEventsService,
         private announcer: LiveAnnouncer,
         private translate: TranslateService,
     ) {
+        this.registerPrimaryActionOptions();
         // announce newly loaded elements to users using screen readers
         results.diffCount
             .pipe(
@@ -134,6 +147,34 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
         this.results.searchSort.setUserValue({
             active: sort.active,
             direction: sort.direction,
+        });
+    }
+
+    registerPrimaryActionOptions() {
+        this.primaryAction.subscribe((action) => {
+            if (action === 'applyFilter') {
+                const applyFilter = new OptionItem('OPTIONS.APPLY_FILTER', 'redo', () => {
+                    const filters = {
+                        propertyFilters: this.searchPage.searchFilters.getValue() as Values,
+                        searchString: this.searchPage.searchString.getValue(),
+                    } as SearchFilter;
+                    const data = JSON.stringify(filters);
+                    console.info(data);
+                    this.frameEventsService.broadcastEvent(
+                        FrameEventsService.EVENT_APPLY_FILTER,
+                        data,
+                    );
+                    window.close();
+                });
+                applyFilter.group = DefaultGroups.Primary;
+                applyFilter.elementType = [ElementType.Unknown];
+                this.primaryActionOptions = {
+                    useDefaultOptions: false,
+                    addOptions: [applyFilter],
+                };
+            } else {
+                this.primaryActionOptions = null;
+            }
         });
     }
 }

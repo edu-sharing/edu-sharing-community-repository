@@ -2262,7 +2262,7 @@ public class NodeApi  {
 	    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 	    	@Parameter(description = "property",required=true ) @QueryParam("property")  String property,
 			@Parameter(description = "keepModifiedDate",required=false, schema = @Schema(defaultValue="false")) @QueryParam("keepModifiedDate") Boolean keepModifiedDate,
-			@Parameter(description = "value",required=false ) @QueryParam("value")  List<String> value,
+			@Parameter(description = "value",required=false ) List<String> value,
 			@Context HttpServletRequest req) {
 	    
 	    	try {

@@ -1,12 +1,12 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, HostBinding, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { ConfigService, Repository } from 'ngx-edu-sharing-api';
+import { ConfigService, NodeService, Repository, SavedSearchesService } from 'ngx-edu-sharing-api';
 import { isTrue, notNull, OptionsHelperDataService, Scope, UIAnimation } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
-import { combineLatest, Observable, Subject } from 'rxjs';
+import { combineLatest, firstValueFrom, Observable, Subject } from 'rxjs';
 import { filter, map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { RestConstants, UIConstants } from '../../core-module/core.module';
 import { CardDialogRef } from '../../features/dialogs/card-dialog/card-dialog-ref';
@@ -61,9 +61,12 @@ export class SearchPageComponent implements OnInit, OnDestroy {
         private dialogs: DialogsService,
         private mainNav: MainNavService,
         private navigationScheduler: NavigationScheduler,
+        private router: Router,
         private optionsHelperService: OptionsHelperService,
         public editorialSidebarService: EditorialSidebarService,
         private route: ActivatedRoute,
+        private nodeService: NodeService,
+        private savedSearchesService: SavedSearchesService,
         public searchPage: SearchPageService,
         private configService: ConfigService,
         private translate: TranslateService,
@@ -163,10 +166,21 @@ export class SearchPageComponent implements OnInit, OnDestroy {
                 takeUntil(this.destroyed),
                 map(([queryParams, searchStringEntry]) => ({
                     addToCollection: queryParams.addToCollection,
+                    savedSearch: queryParams.savedSearch,
                     ...searchStringEntry,
                 })),
             )
-            .subscribe((params) => (this.queryParamsAllRepositories = params));
+            .subscribe((params) => {
+                this.queryParamsAllRepositories = params;
+                if (params.savedSearch) {
+                    void this.fetchSavedSearch(params.savedSearch);
+                    void this.router.navigate([], {
+                        queryParams: { savedSearch: null },
+                        queryParamsHandling: 'merge',
+                        replaceUrl: true,
+                    });
+                }
+            });
     }
 
     private async openFilterDialog(): Promise<CardDialogRef<unknown>> {
@@ -230,5 +244,13 @@ export class SearchPageComponent implements OnInit, OnDestroy {
         this.searchPage.loadingProgress
             .pipe(filter((progress) => progress < 100))
             .subscribe(() => (this.progressBarIsVisible = true));
+    }
+
+    private async fetchSavedSearch(savedSearch: string) {
+        this.searchPage.applySavedSearch(
+            this.savedSearchesService.savedSearchNodeToSavedSearch(
+                await firstValueFrom(this.nodeService.getNode(savedSearch)),
+            ),
+        );
     }
 }

@@ -1,0 +1,33 @@
+<!-- Common widget header -->
+<es-generic-widget-header
+  *ngIf="initialized(); else loadingSpinner"
+  [description]="description"
+  [descriptionAiGenerated]="descriptionAiGenerated()"
+  [descriptionOptional]="widgetType !== WIDGETS.TEXT_WIDGET"
+  [descriptionMapping]="descriptionMapping"
+  [hideDescription]="hideDescription"
+  [headline]="headline"
+  [headlineAiGenerated]="headlineAiGenerated()"
+  [headlineMapping]="headlineMapping"
+  [editMode]="editMode()"
+  [updateInProgress]="updateInProgress()"
+  [searchInput]="searchInput()"
+  (textChange)="onHeaderTextChange($event)"
+  (searchResultsUpdated)="onSearchResultsUpdated($event)"
+></es-generic-widget-header>
+
+<ng-template #loadingSpinner>
+  <es-spinner></es-spinner>
+</ng-template>
+
+<!-- Individual widget content -->
+<div #widgetContainer class="wlo-widget-content" [class.edit-mode]="editMode()"></div>
+
+<ng-template #configureWidgetEmbeddingTemplate>
+  <es-configure-widget-embedding-dialog
+    [dialogRef]="configureWidgetEmbeddingDialogRef"
+    [nodeId]="nodeId"
+    [propagatedNodeId]="propagatedNodeId"
+    (embedWidget)="embedWidget($event)"
+  ></es-configure-widget-embedding-dialog>
+</ng-template>

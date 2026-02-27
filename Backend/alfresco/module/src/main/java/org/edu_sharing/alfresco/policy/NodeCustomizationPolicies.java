@@ -136,6 +136,10 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
             CCConstants.CCM_PROP_MAP_REF_TARGET,
             CCConstants.CCM_PROP_IO_REVOKED_DATE,
             CCConstants.CCM_PROP_IO_REVOKED_REASON,
+            CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,
+            CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID,
+            CCConstants.CCM_PROP_IO_REPLICATIONSOURCEUUID,
+            CCConstants.CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP,
             CCConstants.CCM_PROP_RESTRICTED_ACCESS,
             CCConstants.CCM_PROP_RESTRICTED_ACCESS_PERMISSIONS,
     };

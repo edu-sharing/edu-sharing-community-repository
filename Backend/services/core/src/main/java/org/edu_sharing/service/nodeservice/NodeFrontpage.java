@@ -43,16 +43,16 @@ public class NodeFrontpage {
 
     public Collection<NodeRef> getNodesForCurrentUserAndConfig() throws Throwable {
 
-        RepositoryConfig.Frontpage config = RepositoryConfigFactory.getConfig().frontpage;
-        if(config.mode.equals(RepositoryConfig.Frontpage.Mode.collection)){
-            if(config.collection==null){
+        RepositoryConfig.Frontpage config = RepositoryConfigFactory.getConfig().getFrontpage();
+        if(config.getMode().equals(RepositoryConfig.Frontpage.Mode.collection)){
+            if(config.getCollection()==null){
                 throw new RuntimeException("Frontpage mode "+RepositoryConfig.Frontpage.Mode.collection+" requires a collection id to be defined");
             }
             // only return io's
             SortDefinition sortDefinition=new SortDefinition();
             sortDefinition.addSortDefinitionEntry(
                     new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CCM_PROP_COLLECTION_ORDERED_POSITION),true),0);
-            return collectionService.getChildren(config.collection, null,sortDefinition, Collections.singletonList("files"));
+            return collectionService.getChildren(config.getCollection(), null,sortDefinition, Collections.singletonList("files"));
         }
 
         BoolQuery.Builder query = new BoolQuery.Builder()
@@ -68,18 +68,18 @@ public class NodeFrontpage {
                         m -> m.term(t -> t.field("aspects").value("ccm:collection_io_reference"))
                 );
 
-        if(config.queries!=null && !config.queries.isEmpty()) {
+        if(config.getQueries()!=null && !config.getQueries().isEmpty()) {
             // filter all queries with matching toolpermissions, than concat them via "must"
-            config.queries.stream().filter((q)->{
-                if(q.condition.type.equals(RepositoryConfig.Condition.Type.TOOLPERMISSION)){
+            config.getQueries().stream().filter((q)->{
+                if(q.getCondition().getType().equals(RepositoryConfig.Condition.Type.TOOLPERMISSION)){
                     // should return true if query is launching
                     // so toolpermission == true && negate ? false : true -> toolpermission!=negate
-                    return ToolPermissionServiceFactory.getInstance().hasToolPermission(q.condition.value)!=q.condition.negate;
+                    return ToolPermissionServiceFactory.getInstance().hasToolPermission(q.getCondition().getValue()) != q.getCondition().isNegate();
                 }
                 return false;
             }).forEach((q)-> {
                 //@TODO check config queries in extensions and fit for new index
-                String queryString = QueryUtils.replaceCommonQueryParams(q.query,QueryUtils.replacerFromSyntax(MetadataReader.QUERY_SYNTAX_DSL));
+                String queryString = QueryUtils.replaceCommonQueryParams(q.getQuery(),QueryUtils.replacerFromSyntax(MetadataReader.QUERY_SYNTAX_DSL));
                 query.must(must->must.wrapper(new ReadableWrapperQueryBuilder(queryString).build()));
             });
         }
@@ -99,7 +99,7 @@ public class NodeFrontpage {
                 .index(WORKSPACE_INDEX)
                 .from(0)
                 // fetch more because we might need buffer for invalid permissions
-                .size(config.totalCount)
+                .size(config.getTotalCount())
                 .trackTotalHits(track->track.enabled(true))
                 .query(q -> q.bool(query.build()))
                 .sort(
@@ -117,11 +117,11 @@ public class NodeFrontpage {
         for(Hit<Map> hit : searchResult.hits().hits()){
             result.add(searchServiceElastic.transformSearchHit(isAdmin, authorities, user,hit.source(),false));
         }
-        result = result.subList(0, Math.min(result.size(), config.totalCount));
-        if(config.displayCount<config.totalCount) {
+        result = result.subList(0, Math.min(result.size(), config.getTotalCount()));
+        if(config.getDisplayCount()<config.getTotalCount()) {
             Set<NodeRef> randoms = new HashSet<>();
             // grab a random count of elements (equals displayCount) of the whole array
-            while (randoms.size() < config.displayCount && randoms.size()<result.size()) {
+            while (randoms.size() < config.getDisplayCount() && randoms.size()<result.size()) {
                 randoms.add(result.get(new Random().nextInt(result.size())));
             }
             return randoms;
@@ -134,19 +134,19 @@ public class NodeFrontpage {
         Calendar cal = Calendar.getInstance();
 
         String prefix = "";
-        if(RepositoryConfig.Frontpage.Mode.rating.equals(config.mode) ){
+        if(RepositoryConfig.Frontpage.Mode.rating.equals(config.getMode()) ){
             prefix = "statistic_RATING_";
-        }else if(RepositoryConfig.Frontpage.Mode.views.equals(config.mode)){
+        }else if(RepositoryConfig.Frontpage.Mode.views.equals(config.getMode())){
             prefix = "statistic_VIEW_MATERIAL_";
-        }else if(RepositoryConfig.Frontpage.Mode.downloads.equals(config.mode)){
+        }else if(RepositoryConfig.Frontpage.Mode.downloads.equals(config.getMode())){
             prefix = "statistic_DOWNLOAD_MATERIAL_";
         }
 
-        if(config.timespanAll){
+        if(config.isTimespanAll()){
             String fieldName = prefix + "null";
             result.add(fieldName);
         }else {
-            for (int i = 0; i < config.timespan; i++) {
+            for (int i = 0; i < config.getTimespan(); i++) {
                 if(i > 0){
                     cal.add(Calendar.DAY_OF_YEAR, -1);
                 }
