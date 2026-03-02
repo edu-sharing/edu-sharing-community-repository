@@ -11,6 +11,9 @@ export const EDU_SHARING_WEB_COMPONENTS = new InjectionToken<WebComponent[]>(
     'EDU_SHARING_WEB_COMPONENTS',
 );
 
+/**
+ * Service to register web components
+ */
 @Injectable({
     providedIn: 'root',
 })
@@ -20,9 +23,6 @@ export class WebComponentService {
         private translations: TranslationsService,
         @Optional() @Inject(EDU_SHARING_WEB_COMPONENTS) private components: WebComponent[],
     ) {
-        if (environment.webComponentMode) {
-            this.translations.initialize().subscribe();
-        }
         this.components?.forEach((c) => this.registerWebComponent(c.name, c.component));
     }
 

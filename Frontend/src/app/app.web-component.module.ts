@@ -7,10 +7,11 @@ import { PreviewSidebarComponent } from './features/preview-sidebar/preview-side
 import { AppModule, Providers } from './app.module';
 import { GenericWidgetComponent } from './pages/topic-page/widgets/generic-widget/generic-widget.component';
 import { AppComponent } from './app.component';
+import { WebComponentOnlyService } from './main/web-component-only.service';
 
 @NgModule({
     imports: [AppModule],
-    providers: Providers,
+    providers: Providers.concat(WebComponentOnlyService),
     exports: [AppComponent],
     schemas: [].concat(extensionSchemas),
 })
