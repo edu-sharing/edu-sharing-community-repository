@@ -202,11 +202,14 @@ public class ActionObserver {
                 logger.info(entry.getKey() + " was deleted. must be removed.");
                 mustBeRemoved = true;
             }
-            ContentReader reader = contentService.getReader(entry.getKey(), ContentModel.PROP_CONTENT);
-            if(reader == null || reader.getSize() < 1){
-                logger.info(entry.getKey() + " has no content. must be removed.");
-                mustBeRemoved = true;
+            if (!mustBeRemoved) {
+                ContentReader reader = contentService.getReader(entry.getKey(), ContentModel.PROP_CONTENT);
+                if((reader == null || reader.getSize() < 1)){
+                    logger.info(entry.getKey() + " has no content. must be removed.");
+                    mustBeRemoved = true;
+                }
             }
+
             return mustBeRemoved;
         }
 

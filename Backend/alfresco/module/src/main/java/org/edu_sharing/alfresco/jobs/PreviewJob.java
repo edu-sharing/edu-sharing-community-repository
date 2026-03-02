@@ -45,7 +45,7 @@ public class PreviewJob implements Job {
 			.getBean(ServiceRegistry.SERVICE_REGISTRY);
 	ActionService actionService = serviceRegistry.getActionService();
 	ContentService contentService = serviceRegistry.getContentService();
-	NodeService nodeService = serviceRegistry.getNodeService();
+	NodeService nodeService = (NodeService) AlfAppContextGate.getApplicationContext().getBean("alfrescoDefaultDbNodeService");
 	MimetypeService mimetypeService = serviceRegistry.getMimetypeService();
 
 
@@ -138,13 +138,13 @@ public class PreviewJob implements Job {
 				}
 			}
 
-			logger.debug("found " + countRunning + " running/pending" + " countPending:" + countPending);
+			logger.debug("found  " + countRunning + " running/pending" + " countPending:" + countPending);
             int maxRunning = LightbendConfigLoader.get().getInt("repository.transformer.preview.maxRunning");;
 
 			if (countRunning < maxRunning) {
 				int newRunning = 0;
 				for (Map.Entry<NodeRef, List<Action>> entry : m.entrySet()) {
-					synchronized (entry.getValue()) {
+					//synchronized (entry.getValue()) {
 						for (Action action : entry.getValue()) {
 
 							logger.debug("check start for id:" + action.getId() + " status "
@@ -162,15 +162,15 @@ public class PreviewJob implements Job {
 								};
 
 								//cleanup will be done after one hour in ActionObserver.removeInactiveActions
-								if(!serviceRegistry.getNodeService().exists(entry.getKey())){
+								if(!nodeService.exists(entry.getKey())){
 									return;
 								}
 
-								String creator = (String) serviceRegistry.getNodeService()
+								String creator = (String) nodeService
 										.getProperty(entry.getKey(), ContentModel.PROP_CREATOR);
 
 								boolean hasContent = false;
-								ContentReader reader = serviceRegistry.getContentService()
+								ContentReader reader = contentService
 										.getReader(entry.getKey(), ContentModel.PROP_CONTENT);
 								if (reader != null) {
 									if (reader.getSize() > 0) {
@@ -180,7 +180,7 @@ public class PreviewJob implements Job {
 
 								if (hasContent) {
 
-									String name = (String) serviceRegistry.getNodeService()
+									String name = (String) nodeService
 											.getProperty(entry.getKey(), ContentModel.PROP_NAME);
 									
 									LockState lockState = serviceRegistry.getLockService()
@@ -195,7 +195,7 @@ public class PreviewJob implements Job {
 									if ((System.currentTimeMillis() > (date.getTime() + latency)) 
 											) {
 										if(lockState.getLockType() == null) {
-											logger.debug("nodeRef:" + entry.getKey() +" runAs:" + creator);
+											logger.debug("nodeRef: " + entry.getKey() +" runAs:" + creator);
 											AuthenticationUtil.runAs(executeActionRunAs, creator);
 											logger.debug("finished action syncronously. nodeRef:" + entry.getKey()
 													+ " action status:" + action.getExecutionStatus()
@@ -217,10 +217,11 @@ public class PreviewJob implements Job {
 								}
 							}
 						}
-					}
+
 
 					if (countRunning + newRunning >= maxRunning) {
 						logger.debug("returning cause countRunning + newRunning ("+ (countRunning + newRunning)+ ") >= maxRunning "+maxRunning);
+                        return;
 					}
 				}
 

@@ -435,7 +435,7 @@ public class SSOAuthorityMapper {
 
 			MappingGroupBuilder mappingGroupBuilder = null;
 			if(mappingGroupBuilderClass != null && !mappingGroupBuilderClass.trim().equals("")) {
-				mappingGroupBuilder = MappingGroupBuilderFactory.instance(ssoAttributes, mappingGroupBuilderClass);
+				mappingGroupBuilder = MappingGroupBuilderFactory.instance(ssoAttributes, userName, mappingGroupBuilderClass);
 				if(mappingGroupBuilder.getOrganisation() != null) {
 					organisationName = mappingGroupBuilder.getOrganisation().getMapTo();
 					if(organisationName != null) {
