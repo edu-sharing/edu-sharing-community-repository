@@ -3,6 +3,7 @@ import {
     ListItem,
     ListItemsModule,
     NodeEntriesService,
+    SubmissionWithAssignment,
     TreeNodeService,
     UserAvatarComponent,
 } from 'ngx-edu-sharing-ui';
@@ -27,11 +28,11 @@ import { TranslateService } from '@ngx-translate/core';
 import { PlatformLocation } from '@angular/common';
 
 export type SubmissionConfig = {
-    submission: Submission;
+    submission: SubmissionWithAssignment;
     /**
      * list of all submissions for navigation
      */
-    submissionList: Submission[];
+    submissionList: SubmissionWithAssignment[];
     assignment: Assignment;
     submissionFileCallback: (selected: SubmissionFile) => void;
 };
@@ -154,11 +155,17 @@ export class SubmissionSidebarComponent {
     }
 
     private syncData(submission: Submission) {
-        const idx = this.data().submissionList.indexOf(this.data().submission);
-        this.data().submissionList.splice(idx, 1, submission);
+        const idx = this.data().submissionList.findIndex(
+            (s) => this.data().submission.ref?.id === s.ref?.id,
+        );
+        const newSubmission = {
+            ...submission,
+            assignment: this.data().assignment,
+        };
+        this.data().submissionList.splice(idx, 1, newSubmission);
         this.data.set({
             ...this.data(),
-            submission,
+            submission: newSubmission,
         });
     }
 }

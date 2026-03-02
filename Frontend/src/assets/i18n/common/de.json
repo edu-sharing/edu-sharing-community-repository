@@ -351,6 +351,7 @@
     "SUBMISSION_STATUS": {
       "NOT_STARTED": "Abzugeben",
       "PENDING": "Gestartet",
+      "WITHDRAWN": "Eingezogen",
       "FINISHED": "Abgegeben"
     },
     "VALIDATION_STATUS": {
