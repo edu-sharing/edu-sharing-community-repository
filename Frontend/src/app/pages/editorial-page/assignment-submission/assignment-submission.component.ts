@@ -136,7 +136,6 @@ export class AssignmentSubmissionComponent implements AfterViewInit {
                 submission: event,
                 submissionList: this.dataSource.getData(),
                 submissionFileCallback: (submission) => {
-                    console.log(submission);
                     this.selectedSubmissionFile.set(submission);
                 },
             } as SubmissionConfig,

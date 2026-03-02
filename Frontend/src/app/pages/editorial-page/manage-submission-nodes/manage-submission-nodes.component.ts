@@ -8,7 +8,7 @@ import {
     SimpleChanges,
 } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
-import { Assignment, AssignmentV1Service, Submission, SubmissionFile } from 'ngx-edu-sharing-api';
+import { AssignmentV1Service, SubmissionFile } from 'ngx-edu-sharing-api';
 import { firstValueFrom } from 'rxjs';
 import { SubmissionConfig } from '../submission-sidebar/submission-sidebar.component';
 
@@ -39,6 +39,24 @@ export class ManageSubmissionNodesComponent implements OnChanges {
     }
 
     click(item: SubmissionFile) {
+        void firstValueFrom(
+            this.assignmentV1Service.updateSubmissionFileValidation({
+                assignmentId: this.data().assignment.ref.id,
+                submissionId: this.data().submission.ref.id,
+                submissionFileId: item.ref.id,
+                body: {
+                    metadata: { validationStatus: 'PENDING' },
+                },
+            }),
+        );
+        this.files.set(
+            this.files().map((f) => {
+                if (f === item) {
+                    f.validationStatus = 'PENDING';
+                }
+                return f;
+            }),
+        );
         this.selected.set(item);
         this.nodeClick.emit(item);
     }
