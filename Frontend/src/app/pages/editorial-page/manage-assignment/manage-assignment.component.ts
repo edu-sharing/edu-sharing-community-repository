@@ -1,4 +1,4 @@
-import { Component, signal, ViewChild } from '@angular/core';
+import { Component, computed, signal, ViewChild } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { MatStepper, MatStepperModule } from '@angular/material/stepper';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -82,6 +82,9 @@ export class ManageAssignmentComponent {
     mainDataFormGroup: FormGroup;
     nodes = signal<NodeWithRole[]>(null);
     submissions = signal<Submission[]>(null);
+    submissionsWithContent = computed(() =>
+        this.submissions()?.filter((s) => s.submissionStatus !== 'NOT_STARTED'),
+    );
     validateMainForm() {
         this.mainDataFormGroup.markAllAsTouched();
         if (!this.mainDataFormGroup.valid) {

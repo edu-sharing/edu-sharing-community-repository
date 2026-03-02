@@ -186,7 +186,7 @@ export class SubmitAssignmentComponent {
                             })
                             .pipe(
                                 catchError((err) => {
-                                    if (err.status === RestConstants.HTTP_NOT_FOUND || true) {
+                                    if (err.status === RestConstants.HTTP_NOT_FOUND) {
                                         err.preventDefault();
                                         return of(null);
                                     }
@@ -195,23 +195,6 @@ export class SubmitAssignmentComponent {
                             ),
                     ]),
                 ),
-                switchMap((data) => {
-                    if (data[2]) {
-                        return of(data);
-                    }
-                    return this.assignmentService
-                        .editSubmission({
-                            assignmentId: data[0].ref.id,
-                            submissionId: ME,
-                            status: 'PENDING',
-                        })
-                        .pipe(
-                            map((submission) => {
-                                data[2] = submission;
-                                return data;
-                            }),
-                        );
-                }),
             )
             .subscribe(([assignment, files, submission, submissionFiles]) => {
                 this.assignment.set(assignment);
@@ -370,6 +353,7 @@ export class SubmitAssignmentComponent {
 
     private async saveSubmissionFiles(newFiles: SubmissionFile[]) {
         this.loading.set(true);
+        await this.prepareSubmission();
         const files = [];
         for (let file of newFiles) {
             files.push(
@@ -410,6 +394,7 @@ export class SubmitAssignmentComponent {
         );
         if (result === 'EDITORIAL.SUBMIT_ASSIGNMENT.SUBMIT') {
             this.loading.set(true);
+            await this.prepareSubmission();
             await firstValueFrom(
                 this.assignmentService.editSubmission({
                     assignmentId: this.assignment().ref.id,
@@ -434,6 +419,7 @@ export class SubmitAssignmentComponent {
     async addComment() {
         const control = this.submitFormGroup.get('submitComment');
         control.disable();
+        await this.prepareSubmission();
         await firstValueFrom(
             this.commentV1Service.addComment({
                 repository: HOME_REPOSITORY,
@@ -444,5 +430,19 @@ export class SubmitAssignmentComponent {
         control.reset();
         control.enable();
         void this.commentsRef.refresh();
+    }
+
+    private async prepareSubmission() {
+        if (!this.submission().ref?.id) {
+            this.submission.set(
+                await firstValueFrom(
+                    this.assignmentService.editSubmission({
+                        assignmentId: this.assignment().ref.id,
+                        submissionId: ME,
+                        status: 'PENDING',
+                    }),
+                ),
+            );
+        }
     }
 }
