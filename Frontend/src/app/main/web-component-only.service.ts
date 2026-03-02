@@ -1,12 +1,4 @@
-import {
-    ApplicationRef,
-    createComponent,
-    EnvironmentInjector,
-    Injectable,
-    Injector,
-    Type,
-} from '@angular/core';
-import { createCustomElement } from '@angular/elements';
+import { ApplicationRef, createComponent, EnvironmentInjector, Injectable } from '@angular/core';
 import { TranslationsService } from 'ngx-edu-sharing-ui';
 import { CustomGlobalExtensionsComponent } from 'edu-sharing-extension-dependencies/custom-global-component/custom-global-extensions.component';
 
@@ -16,7 +8,6 @@ import { CustomGlobalExtensionsComponent } from 'edu-sharing-extension-dependenc
 @Injectable()
 export class WebComponentOnlyService {
     constructor(
-        private injector: Injector,
         private translations: TranslationsService,
         private environmentInjector: EnvironmentInjector,
         private appRef: ApplicationRef,
@@ -31,18 +22,18 @@ export class WebComponentOnlyService {
      * @private
      */
     private enableCustomGlobalComponents() {
+        console.log('enableCustomGlobalComponents', this.environmentInjector, this.appRef);
         const componentRef = createComponent(CustomGlobalExtensionsComponent, {
             environmentInjector: this.environmentInjector,
         });
+        console.log('componentRef', componentRef);
         this.appRef.attachView(componentRef.hostView);
+        console.log(
+            'componentRef',
+            componentRef,
+            componentRef.location,
+            componentRef.location?.nativeElement,
+        );
         document.body.appendChild(componentRef.location.nativeElement);
-    }
-
-    /**
-     * register your component as a web component
-     * call this service from your own global service, provided in `extensionProviders`
-     */
-    registerWebComponent(name: string, component: Type<any>) {
-        customElements.define(name, createCustomElement(component, { injector: this.injector }));
     }
 }

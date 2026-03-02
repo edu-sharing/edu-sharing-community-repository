@@ -20,7 +20,6 @@ export const EDU_SHARING_WEB_COMPONENTS = new InjectionToken<WebComponent[]>(
 export class WebComponentService {
     constructor(
         private injector: Injector,
-        private translations: TranslationsService,
         @Optional() @Inject(EDU_SHARING_WEB_COMPONENTS) private components: WebComponent[],
     ) {
         this.components?.forEach((c) => this.registerWebComponent(c.name, c.component));

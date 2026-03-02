@@ -16,7 +16,13 @@ import { WebComponentOnlyService } from './main/web-component-only.service';
     schemas: [].concat(extensionSchemas),
 })
 export class WebComponentModule implements DoBootstrap {
-    constructor(private injector: Injector) {}
+    constructor(
+        private injector: Injector,
+        /**
+         * make sure that it is always injected
+         */
+        private webComponentOnlyService: WebComponentOnlyService,
+    ) {}
 
     ngDoBootstrap(_: ApplicationRef): void {
         console.info('web component __env', (window as any).__env);
