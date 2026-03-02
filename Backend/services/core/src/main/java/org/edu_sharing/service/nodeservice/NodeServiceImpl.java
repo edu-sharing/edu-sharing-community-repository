@@ -254,7 +254,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 propsConverted,
                 PropertiesInterceptorFactory.getPropertiesSetInterceptors()
                         .stream()
-                        .filter(i -> Arrays.asList(PropertiesSetInterceptor.SetInterceptorTiming.BeforeAlfrescoInterceptors, PropertiesSetInterceptor.SetInterceptorTiming.BeforeAndAfterAlfrescoInterceptors).contains(i.getInterceptorTiming()))
+                        .filter(i -> Arrays.asList(PropertiesSetInterceptor.SetInterceptorTiming.BeforeAlfrescoInterceptors, PropertiesSetInterceptor.SetInterceptorTiming.All).contains(i.getInterceptorTiming()))
                         .collect(Collectors.toList()),
                 context);
         Map<QName, Serializable> properties = transformPropMap(propsConverted);
@@ -272,13 +272,22 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
     private void runNodePropertiesAfterInterceptors(NodeRef nodeRef, PropertiesGetInterceptor.PropertiesContext context) {
         try {
-            List<? extends PropertiesSetInterceptor> afterInterceptors = PropertiesInterceptorFactory.getPropertiesSetInterceptors().stream().filter(i -> Arrays.asList(PropertiesSetInterceptor.SetInterceptorTiming.AfterAlfrescoInterceptors, PropertiesSetInterceptor.SetInterceptorTiming.BeforeAndAfterAlfrescoInterceptors).contains(i.getInterceptorTiming())).collect(Collectors.toList());
+            List<? extends PropertiesSetInterceptor> afterInterceptors = PropertiesInterceptorFactory.getPropertiesSetInterceptors().stream().filter(i -> Arrays.asList(PropertiesSetInterceptor.SetInterceptorTiming.AfterAlfrescoInterceptors, PropertiesSetInterceptor.SetInterceptorTiming.All).contains(i.getInterceptorTiming())).collect(Collectors.toList());
             if (!afterInterceptors.isEmpty()) {
                 Map<String, Object> storedProperties = nodeService.getProperties(nodeRef).entrySet().stream()
                         .collect(HashMap::new, (m, v) -> m.put(v.getKey().toString(), v.getValue()), HashMap::putAll);
                 context.setStage(PropertiesSetInterceptor.ContextStage.AfterAlfrescoInterceptors);
                 storedProperties = runSetInterceptors(nodeRef, storedProperties, afterInterceptors, context);
                 nodeService.setProperties(nodeRef, convertToFinalProperties(nodeRef, storedProperties));
+            }
+
+            // possible interceptors that do handling after the properties have been set
+            List<? extends PropertiesSetInterceptor> afterPropsSetInterceptors = PropertiesInterceptorFactory.getPropertiesSetInterceptors().stream().filter(i -> Arrays.asList(PropertiesSetInterceptor.SetInterceptorTiming.AfterPropertiesSet, PropertiesSetInterceptor.SetInterceptorTiming.All).contains(i.getInterceptorTiming())).collect(Collectors.toList());
+            if (!afterPropsSetInterceptors.isEmpty()) {
+                Map<String, Object> storedProperties = nodeService.getProperties(nodeRef).entrySet().stream()
+                        .collect(HashMap::new, (m, v) -> m.put(v.getKey().toString(), v.getValue()), HashMap::putAll);
+                context.setStage(PropertiesSetInterceptor.ContextStage.AfterPropertiesSet);
+                runSetInterceptors(nodeRef, storedProperties, afterInterceptors, context);
             }
         } catch (Throwable e) {
             logger.warn("Could not run after interceptors", e);
@@ -779,7 +788,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                     PropertiesSetInterceptor.ContextStage.BeforeAlfrescoInterceptors
             );
             propsFinal = runSetInterceptors(nodeRef, propsFinal, PropertiesInterceptorFactory.getPropertiesSetInterceptors().stream().filter(
-                    i -> Arrays.asList(PropertiesSetInterceptor.SetInterceptorTiming.BeforeAlfrescoInterceptors, PropertiesSetInterceptor.SetInterceptorTiming.BeforeAndAfterAlfrescoInterceptors).contains(i.getInterceptorTiming())
+                    i -> Arrays.asList(PropertiesSetInterceptor.SetInterceptorTiming.BeforeAlfrescoInterceptors, PropertiesSetInterceptor.SetInterceptorTiming.All).contains(i.getInterceptorTiming())
             ).collect(Collectors.toList()), context);
             HashMap<QName, Serializable> propsStore = convertToFinalProperties(nodeRef, propsFinal);
             // check that no interceptor has set a previously null variable
