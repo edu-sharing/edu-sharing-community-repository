@@ -52,6 +52,7 @@ import {
 } from 'ngx-edu-sharing-api';
 import { DialogsService } from '../features/dialogs/dialogs.service';
 import { DialogButton } from '../util/dialog-button';
+import { environment } from '../../environments/environment';
 
 export interface ConfigEntry {
     name: string;
@@ -743,6 +744,13 @@ export class NodeHelperService extends NodeHelperServiceBase {
     getNodeUrl(node: UniversalNode, queryParams?: Params, short = false): string {
         const link = this.getNodeLink('queryParams', node);
         if (link) {
+            let loc = location.origin;
+            if (environment.webComponentMode) {
+                loc = (window as any).__env?.EDU_SHARING_API_URL.slice(0, -5);
+                if (!loc) {
+                    console.warn('missing window.__env.EDU_SHARING_API_URL, urls might be wrong');
+                }
+            }
             const urlTree = this.router.createUrlTree(
                 [this.getNodeLink('routerLink', node, short)],
                 {
@@ -752,7 +760,7 @@ export class NodeHelperService extends NodeHelperServiceBase {
                     },
                 },
             );
-            return location.origin + this.location.prepareExternalUrl(urlTree.toString());
+            return loc + this.location.prepareExternalUrl(urlTree.toString());
         } else {
             return null;
         }
