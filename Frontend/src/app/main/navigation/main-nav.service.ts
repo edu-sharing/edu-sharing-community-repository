@@ -1,6 +1,6 @@
 import { computed, Injectable, signal, TemplateRef } from '@angular/core';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject, forkJoin, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, forkJoin, Observable, of, Subject } from 'rxjs';
 import { debounceTime, filter, map, switchMap, take, tap } from 'rxjs/operators';
 import {
     ConfigService,
@@ -248,54 +248,57 @@ export class MainNavService {
         return rxjs
             .combineLatest([
                 this.observeMainNavConfig(),
-                this.configServiceApi.observeSystemMessages(),
-                this.user.observeCurrentUser(),
+                this.user
+                    .observeCurrentUser()
+                    .pipe(switchMap((_) => this.configServiceApi.observeSystemMessages())),
             ])
             .pipe(
                 debounceTime(0),
-                switchMap(
-                    ([config, messages, _]: [MainNavConfig, RepositoryMessage[], UserEntry]) => {
-                        const messageObservables = messages.map((message) => {
-                            const storageKey = message.components?.length
-                                ? 'systemMessage_' + config?.currentScope
-                                : 'systemMessage';
-                            const details = {
-                                message,
-                                storageKey,
-                            } as SystemMessageDetails;
-                            return forkJoin([
-                                this.sessionStorageService
-                                    .observe(storageKey, null, Store.UserProfile)
-                                    .pipe(take(1)),
-                                this.sessionStorageService
-                                    .observe(storageKey, null, Store.Session)
-                                    .pipe(take(1)),
-                            ]).pipe(
-                                map(([userStorage, sessionStorage]) => {
-                                    let include = true;
-                                    if (
-                                        message.components?.length &&
-                                        !message.components.includes(config?.currentScope)
-                                    ) {
-                                        include = false;
-                                    }
-                                    // msg already hidden by user
-                                    if (
-                                        message.uuid === userStorage ||
-                                        message.uuid === sessionStorage
-                                    ) {
-                                        include = false;
-                                    }
-                                    return { include, details };
-                                }),
-                            );
-                        });
-                        return forkJoin(messageObservables).pipe(
-                            map((results) => results.find((r) => r.include)?.details),
+                switchMap(([config, messages]: [MainNavConfig, RepositoryMessage[]]) => {
+                    if (!messages.length) {
+                        return of(null);
+                    }
+                    const messageObservables = messages.map((message) => {
+                        const storageKey = message.components?.length
+                            ? 'systemMessage_' + config?.currentScope
+                            : 'systemMessage';
+                        const details = {
+                            message,
+                            storageKey,
+                        } as SystemMessageDetails;
+                        return forkJoin([
+                            this.sessionStorageService
+                                .observe(storageKey, null, Store.UserProfile)
+                                .pipe(take(1)),
+                            this.sessionStorageService
+                                .observe(storageKey, null, Store.Session)
+                                .pipe(take(1)),
+                        ]).pipe(
+                            map(([userStorage, sessionStorage]) => {
+                                let include = true;
+                                if (
+                                    message.components?.length &&
+                                    !message.components.includes(config?.currentScope)
+                                ) {
+                                    include = false;
+                                }
+                                // msg already hidden by user
+                                if (
+                                    message.uuid === userStorage ||
+                                    message.uuid === sessionStorage
+                                ) {
+                                    include = false;
+                                }
+                                return { include, details };
+                            }),
                         );
-                    },
-                ),
+                    });
+                    return forkJoin(messageObservables).pipe(
+                        map((results) => results.find((r) => r.include)?.details),
+                    );
+                }),
                 tap((details) => {
+                    console.log('new message data', details);
                     if (!details) {
                         this.setSystemMessage(null);
                         return;
