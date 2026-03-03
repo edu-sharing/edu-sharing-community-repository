@@ -56,14 +56,7 @@ public class PreviewJob {
 
                 log.info("executing preview task: {}",nodeRef);
                 AuthenticationUtil.runAs(() -> serviceRegistry.getRetryingTransactionHelper().doInTransaction(()->{
-
-                    Action thumbnailAction = actionService.createAction(CCConstants.ACTION_NAME_CREATE_THUMBNAIL);
-                    thumbnailAction.setTrackStatus(false);
-                    thumbnailAction.setExecuteAsynchronously(false);
-                    thumbnailAction.setParameterValue("thumbnail-name", CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
-                    thumbnailAction.setParameterValue(ActionObserver.ACTION_OBSERVER_ADD_DATE, new Date());
-
-                    actionService.executeAction(thumbnailAction, nodeRef, true, false);
+                    serviceRegistry.getRenditionService2().render(nodeRef, "imgpreview");
                     return null;
                 },false)
                         , creator);
