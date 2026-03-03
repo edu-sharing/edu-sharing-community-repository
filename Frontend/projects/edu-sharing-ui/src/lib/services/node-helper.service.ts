@@ -23,7 +23,6 @@ import { PlatformLocation } from '@angular/common';
 import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
 import { Sort } from '@angular/material/sort';
 import { NodeEntriesDataType } from '../node-entries/data-type';
-import { isArray } from 'lodash';
 import { Toast } from './abstract/toast.service';
 import { AssignmentPipe } from '../pipes/assignment.pipe';
 
@@ -487,7 +486,7 @@ export class NodeHelperService {
 
     static getActionbarNodes<T>(listNodes: T[], externalNode: T | T[]): T[] {
         return externalNode
-            ? isArray(externalNode)
+            ? Array.isArray(externalNode)
                 ? externalNode
                 : [externalNode]
             : listNodes && listNodes.length
