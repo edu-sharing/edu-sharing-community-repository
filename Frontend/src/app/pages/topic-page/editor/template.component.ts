@@ -145,7 +145,6 @@ import { ConfigurePageVariantComponent } from './configure-page-variant/configur
 import { SwimlaneComponent } from './swimlane/swimlane.component';
 import { SwimlaneSettingsDialogComponent } from './swimlane/swimlane-settings-dialog/swimlane-settings-dialog.component';
 import { SwimlaneConfigurationButtonsComponent } from './swimlane-configuration-buttons/swimlane-configuration-buttons.component';
-import { TextVariant } from '../shared/types/text-variant';
 
 @Component({
     imports: [
@@ -786,7 +785,7 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
                     await this.toggleTemplateMode();
                 },
             );
-            createPageTemplate.elementType = [ElementType.Unknown];
+            createPageTemplate.elementType = [ElementType.NoneOrUnknown];
             createPageTemplate.group = DefaultGroups.Toggles;
             createPageTemplate.priority = 11;
             createPageTemplate.constrains = [Constrain.Admin];
@@ -1821,7 +1820,7 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
                 await this.createPageVariant();
             },
         );
-        createPageVariant.elementType = [ElementType.Unknown];
+        createPageVariant.elementType = [ElementType.NoneOrUnknown];
         createPageVariant.group = DefaultGroups.Toggles;
         createPageVariant.priority = 10;
         createPageVariant.constrains = [Constrain.User];

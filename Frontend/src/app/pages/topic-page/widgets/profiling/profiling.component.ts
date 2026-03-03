@@ -54,8 +54,7 @@ export class ProfilingComponent implements AfterViewInit {
     }
 
     async ngAfterViewInit(): Promise<void> {
-        this.storageValues =
-            (await firstValueFrom(this.storage.get(this.selectedProfilingVariablesKey))) || {};
+        this.storageValues = (await this.storage.get(this.selectedProfilingVariablesKey)) || {};
         if (Object.keys(this.storageValues).length) {
             this.topicPageHelperService.setSelectedVariables(this.storageValues);
         }
