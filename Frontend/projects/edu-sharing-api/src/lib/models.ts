@@ -130,6 +130,7 @@ export { Tools } from './api/models/tools';
 export { CreateQaEntryDto } from './api/models/create-qa-entry-dto';
 export { UpdateQaEntryDto } from './api/models/update-qa-entry-dto';
 export { QaEntry } from './api/models/qa-entry';
+export { QaEntryResponseDto } from './api/models/qa-entry-response-dto';
 export { User } from './api/models/user';
 export { UserSimple } from './api/models/user-simple';
 export { UserProfile } from './api/models/user-profile';
