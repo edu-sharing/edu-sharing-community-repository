@@ -129,6 +129,8 @@ public class NodeObjectReportJob extends AbstractJobMapAnnotationParams {
                 return;
             }
             switch (type) {
+                case Monthly:
+                    break;
                 case Yearly:
                     if(now.getMonthValue() != 1) {
                         logger.error("Job not running because of date: " + now.getDayOfMonth() + " month: " + now.getMonth());

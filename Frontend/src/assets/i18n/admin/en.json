@@ -65,6 +65,7 @@
       "NO_MESSAGES": "Currently no maintenance messages configured",
       "REMOVE_TITLE": "Delete Message",
       "REMOVE_MESSAGE": "Do you want to delete the following message?<br><br><hr>{{message}}",
+      "INVALID_TO_DATE": "end time must be after the from time",
       "SELECT_COMPONENT": "Select area",
       "SELECT_COMPONENT_HINT": "Select one or more area (OR linked). If none is selected, the message applies to all",
       "SELECT_CONTEXT": "Select Context(s)",
@@ -89,7 +90,7 @@
         "WARNING_TITLE": "Warning",
         "WARNING_DESCRIPTION": "Warning message, yellow with exclamation mark",
         "ERROR_TITLE": "Error",
-        "ERROR_DESCRIPTION": "Error message, red with X mark"
+        "ERROR_DESCRIPTION": "Error message, red with exclamation mark"
       },
       "USER_MODES": "Visible to Users or Guests",
       "USER_MODE": {
@@ -105,7 +106,7 @@
         "ONCE_TITLE": "Once",
         "ONCE_DESCRIPTION": "Message is shown only once",
         "REPEAT_TITLE": "Repeat",
-        "REPEAT_DESCRIPTION": "Message is shown repeatedly, but can be dismissed by the user",
+        "REPEAT_DESCRIPTION": "Message is shown every user session (usually about 1h), but can be dismissed by the user",
         "ALWAYS_TITLE": "Always Show",
         "ALWAYS_DESCRIPTION": "Message is always shown and cannot be dismissed"
       },

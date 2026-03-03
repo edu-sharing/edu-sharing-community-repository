@@ -2192,10 +2192,11 @@ public class NodeDao {
     }
 
     public void addWorkflowHistory(WorkflowHistory history, boolean sendMail) throws DAOException {
-        Map<String, Object> properties = getNativeProperties();
         String nodeType = nodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
         List<String> aspects = Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId));
-
+        addWorkflowHistory(nodeId, nodeType, aspects, getNativeProperties(), history, sendMail);
+    }
+    public static void addWorkflowHistory(String nodeId, String nodeType, List<String> aspects, Map<String, Object> properties, WorkflowHistory history, boolean sendMail) throws DAOException {
         List<String> data = (List<String>) NodeServiceHelper.getPropertyNative(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
                 CCConstants.CCM_PROP_WF_PROTOCOL
         );
@@ -2232,6 +2233,9 @@ public class NodeDao {
     }
 
     public List<WorkflowHistory> getWorkflowHistory() throws DAOException {
+        return getWorkflowHistory(repoDao, nodeId);
+    }
+    public static List<WorkflowHistory> getWorkflowHistory(RepositoryDao repoDao, String nodeId) throws DAOException {
         List<WorkflowHistory> workflow = new ArrayList<>();
         List<String> data = (List<String>) NodeServiceHelper.getPropertyNative(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
                 CCConstants.CCM_PROP_WF_PROTOCOL

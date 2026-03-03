@@ -15,10 +15,10 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { Node } from 'ngx-edu-sharing-api';
 import { SharedModule } from '../../../../shared/shared.module';
 import { SafeUrlPipe } from '../../shared/pipes/save-url.pipe';
-import { IframeWidgetConfig } from '../../shared/types/widget-config/iframe-widget-config';
-import { WidgetConfigurationButtonsComponent } from '../shared/widget-configuration-buttons/widget-configuration-buttons.component';
 import { ConfigurationOption } from '../../shared/types/configuration-option';
+import { IframeWidgetConfig } from '../../shared/types/widget-config/iframe-widget-config';
 import { WidgetComponentInterface } from '../generic-widget/generic-widget.component';
+import { WidgetConfigurationButtonsComponent } from '../shared/widget-configuration-buttons/widget-configuration-buttons.component';
 
 export type IframeConfigForm = {
     [K in keyof IframeWidgetConfig]: FormControl<IframeWidgetConfig[K]>;

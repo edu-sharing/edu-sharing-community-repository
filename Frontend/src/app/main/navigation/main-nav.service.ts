@@ -1,6 +1,6 @@
 import { computed, Injectable, signal, TemplateRef } from '@angular/core';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject, forkJoin, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, forkJoin, Observable, of, Subject } from 'rxjs';
 import { debounceTime, filter, map, switchMap, take, tap } from 'rxjs/operators';
 import {
     ConfigService,
@@ -18,6 +18,7 @@ import { MainNavComponent } from '../../main/navigation/main-nav/main-nav.compon
 import { CookieInfoComponent } from '../cookie-info/cookie-info.component';
 import { SkipNavService } from './skip-nav/skip-nav.service';
 import { CustomOptions } from 'ngx-edu-sharing-ui';
+import { CLOSE } from '../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 
 export class MainNavCreateConfig {
     /** allowed / display new material button */
@@ -31,9 +32,11 @@ export class MainNavCreateConfig {
     parent?: Node = null;
     folder?: boolean = false;
 }
+type Status = 'new' | 'other-scope' | 'shown';
 export type SystemMessageDetails = {
     storageKey: string;
     message: RepositoryMessage;
+    status?: Status;
 };
 
 export class MainNavConfig {
@@ -92,7 +95,6 @@ export class MainNavConfig {
     onCreate?: (node: Node[]) => void;
     onCreateNotAllowed?: () => void;
 }
-
 export enum TemplateSlot {
     MainScopeButton,
     BeforeUserMenu,
@@ -252,55 +254,60 @@ export class MainNavService {
         return rxjs
             .combineLatest([
                 this.observeMainNavConfig(),
-                this.configServiceApi.observeSystemMessages(),
-                this.user.observeCurrentUser(),
+                this.user
+                    .observeCurrentUser()
+                    .pipe(switchMap((_) => this.configServiceApi.observeSystemMessages())),
             ])
             .pipe(
                 debounceTime(0),
-                switchMap(
-                    ([config, messages, _]: [MainNavConfig, RepositoryMessage[], UserEntry]) => {
-                        const messageObservables = messages.map((message) => {
-                            const storageKey = message.components?.length
-                                ? 'systemMessage_' + config?.currentScope
-                                : 'systemMessage';
-                            const details = {
-                                message,
-                                storageKey,
-                            } as SystemMessageDetails;
-                            return forkJoin([
-                                this.sessionStorageService
-                                    .observe(storageKey, null, Store.UserProfile)
-                                    .pipe(take(1)),
-                                this.sessionStorageService
-                                    .observe(storageKey, null, Store.Session)
-                                    .pipe(take(1)),
-                            ]).pipe(
-                                map(([userStorage, sessionStorage]) => {
-                                    let include = true;
-                                    if (
-                                        message.components?.length &&
-                                        !message.components.includes(config?.currentScope)
-                                    ) {
-                                        include = false;
-                                    }
-                                    // msg already hidden by user
-                                    if (
-                                        message.uuid === userStorage ||
-                                        message.uuid === sessionStorage
-                                    ) {
-                                        include = false;
-                                    }
-                                    return { include, details };
-                                }),
-                            );
-                        });
-                        return forkJoin(messageObservables).pipe(
-                            map((results) => results.find((r) => r.include)?.details),
+                switchMap(([config, messages]: [MainNavConfig, RepositoryMessage[]]) => {
+                    // console.log('new messages', messages, config);
+                    if (!messages.length) {
+                        return of(null);
+                    }
+                    const messageObservables = messages.map((message) => {
+                        const storageKey = message.components?.length
+                            ? 'systemMessage_' + config?.currentScope
+                            : 'systemMessage';
+                        const details = {
+                            message,
+                            storageKey,
+                        } as SystemMessageDetails;
+                        return forkJoin([
+                            this.sessionStorageService
+                                .observe(storageKey, null, Store.UserProfile)
+                                .pipe(take(1)),
+                            this.sessionStorageService
+                                .observe(storageKey, null, Store.Session)
+                                .pipe(take(1)),
+                        ]).pipe(
+                            map(([userStorage, sessionStorage]) => {
+                                let status: Status = 'new';
+                                if (
+                                    message.components?.length &&
+                                    !message.components.includes(config?.currentScope)
+                                ) {
+                                    status = 'other-scope';
+                                }
+                                // msg already hidden by user
+                                if (
+                                    message.uuid === userStorage ||
+                                    message.uuid === sessionStorage
+                                ) {
+                                    status = 'shown';
+                                }
+                                return { ...details, status };
+                            }),
                         );
-                    },
-                ),
-                tap((details) => {
-                    if (!details) {
+                    });
+                    return forkJoin(messageObservables).pipe(
+                        map((results) => results.find((r) => r.status !== 'other-scope')),
+                    );
+                }),
+                tap(async (details) => {
+                    // console.log('new message data', details);
+                    if (!details || details?.status === 'shown') {
+                        this.setSystemMessage(null);
                         return;
                     }
                     if (details.message.repeat === 'once') {
@@ -315,6 +322,30 @@ export class MainNavService {
                         );
                     }
                     this.setSystemMessage(details);
+
+                    if (details?.message?.mode === 'modal') {
+                        const dialogRef = await this.dialogs.openGenericDialog({
+                            title: 'NOTICE',
+                            avatar: {
+                                kind: 'icon',
+                                icon: 'info',
+                            },
+                            message: details.message.message,
+                            messageMode: 'html',
+                            buttons: CLOSE,
+                            minWidth: 600,
+                            maxWidth: 800,
+                        });
+                        dialogRef.afterClosed().subscribe((response) => {
+                            if (details.message.repeat === 'repeat') {
+                                void this.sessionStorageService.set(
+                                    details.storageKey,
+                                    details.message.uuid,
+                                    Store.Session,
+                                );
+                            }
+                        });
+                    }
                 }),
             );
     }

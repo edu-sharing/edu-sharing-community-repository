@@ -1,14 +1,8 @@
-@use '../../../topic-page-variables' as *;
+@use '../../../topic-page-variables' as topicPageVars;
 
 :host {
     display: flex;
     align-items: center;
-
-    // overwrite color button text color
-    --mdc-text-button-label-text-color: #{var(
-            --mat-standard-button-toggle-text-color,
-            var(--mat-app-on-surface)
-        )};
 }
 
 .widget-configuration-buttons {
@@ -17,7 +11,7 @@
     gap: 8px;
     flex-wrap: wrap;
     width: 100%;
-    color: $on-surface;
+    color: topicPageVars.$on-surface;
     // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_containment/Container_queries
     container-type: inline-size;
 }
@@ -41,10 +35,10 @@
 .widget-option {
     padding: 0 24px 0 18px;
     min-height: 48px;
-    font-family: $primary-font-family;
-    font-size: $font-size-medium;
-    font-weight: $font-weight-regular;
-    line-height: $line-height-medium;
+    font-family: topicPageVars.$primary-font-family;
+    font-size: topicPageVars.$font-size-medium;
+    font-weight: topicPageVars.$font-weight-regular;
+    line-height: topicPageVars.$line-height-medium;
     box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.4);
 }
 
@@ -53,7 +47,7 @@
     padding-right: 24px;
     align-items: center;
     display: inline-flex;
-    background-color: $on-primary;
+    background-color: topicPageVars.$on-primary;
     border-radius: 24px;
     ::ng-deep .mat-mdc-form-field-flex {
         align-items: center;
@@ -86,7 +80,7 @@
         width: 52px;
         display: flex;
         &.mat-button-toggle-checked {
-            background: $primary;
+            background: topicPageVars.$primary;
 
             &.mat-button-toggle-disabled {
                 color: #ccc;
@@ -102,8 +96,8 @@
         }
         div {
             font-size: 62.5%;
-            font-weight: $font-weight-regular;
-            line-height: $line-height-medium;
+            font-weight: topicPageVars.$font-weight-regular;
+            line-height: topicPageVars.$line-height-medium;
         }
     }
 }
@@ -114,7 +108,7 @@
 
     // match button disabled label text color
     &.disabled-text {
-        color: var(--mdc-text-button-disabled-label-text-color, $secondary);
+        color: var(--mdc-text-button-disabled-label-text-color, topicPageVars.$secondary);
     }
 }
 

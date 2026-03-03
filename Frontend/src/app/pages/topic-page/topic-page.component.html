@@ -1,0 +1,8 @@
+<div class="topic-page">
+  <es-template-page
+    *ngIf="topicPageLoaded()"
+    #templateComponent
+    [collectionId]="topicCollectionId()"
+    [variantId]="topicVariantId()"
+  ></es-template-page>
+</div>

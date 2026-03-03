@@ -812,6 +812,7 @@ public class MetadataReader {
                     log.warn("Could not read valuespace " + value.getValue() + ": " + t.getMessage() + " (will continue since lenient=true)", t);
                     return new ValuespaceData(new MetadataKey(), Collections.emptyList());
                 } else {
+                    log.error("Could not read valuespace " + value.getValue() + ": " + t.getMessage());
                     throw t;
                 }
             }

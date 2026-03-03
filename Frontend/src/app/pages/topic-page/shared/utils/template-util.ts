@@ -15,11 +15,28 @@ import { WidgetConfig } from '../types/widget-config/widget-config';
 import { PageConfig } from '../types/page-config';
 
 /**
+ * Sets the topic color depending on an existing page variant or collection node.
+ */
+export const retrieveTopicColor = (
+    pageVariant: PageVariantConfig,
+    collectionNode: Node,
+    topicName: string,
+): string => {
+    if (pageVariant.structure.topicColor) {
+        return pageVariant.structure.topicColor;
+    } else if (collectionNode?.collection?.color) {
+        return collectionNode.collection.color;
+    }
+    // set the background to some random (but deterministic) color, just for visuals
+    return getTopicColor(topicName);
+};
+
+/**
  * Retrieves a background color for a given topic name (just for visuals).
  *
  * @param topicName
  */
-export const getTopicColor = (topicName: string): string => {
+const getTopicColor = (topicName: string): string => {
     let topicColor: string = stringToColour(topicName);
 
     // TODO: later, this will be stored as variable that can be changed by the user
@@ -278,28 +295,4 @@ export const retrieveWidgetConfigFromNode = (node: Node): WidgetConfig => {
         return JSON.parse(node.properties[DEFAULT_WIDGET_CONFIG_PROP][0]);
     }
     return {};
-};
-
-/**
- * Retrieves the topic page URL for a given node.
- *
- * @param node
- */
-export const retrieveCustomUrl = (node: Node): string => {
-    const collectionId = node.properties?.['sys:node-uuid']?.[0];
-    if (collectionId) {
-        // take into account potential sub-paths, e.g., due to language switch
-        const pathNameArray: string[] = window.location.pathname.split('/');
-        // example pathNameArray = [ "", "search", "de", "template" ]
-        let suffix: string = '';
-        if (pathNameArray.length > 2) {
-            pathNameArray.forEach((subPath: string, index: number): void => {
-                if (index > 0 && !['', 'topic-pages'].includes(subPath)) {
-                    suffix += '/' + subPath;
-                }
-            });
-        }
-        return window.location.origin + suffix + '/topic-pages?collectionId=' + collectionId;
-    }
-    return '';
 };

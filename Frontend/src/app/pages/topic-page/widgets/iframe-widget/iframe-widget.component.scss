@@ -1,12 +1,11 @@
-@use '../../../topic-page/topic-page-variables' as *;
-
-:host {
-}
+@use '../../topic-page-variables' as topicPageVars;
 
 .iframe-widget {
     .iframe-form {
+        margin-top: 16px;
         display: flex;
         flex-direction: column;
+        gap: 12px;
     }
 
     .toggle-input {
@@ -21,7 +20,7 @@
         }
 
         .preview-title {
-            font-weight: $font-weight-bold;
+            font-weight: topicPageVars.$font-weight-bold;
         }
 
         .confirmation-dialog {
@@ -34,7 +33,7 @@
             justify-content: center;
             flex-direction: column;
             gap: 16px;
-            background: $surface;
+            background: topicPageVars.$surface;
             z-index: 1;
         }
 

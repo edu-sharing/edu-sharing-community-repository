@@ -3,11 +3,11 @@ import { Component, EventEmitter, Input, Output, signal, WritableSignal } from '
 import { MatButtonModule } from '@angular/material/button';
 import { TranslateModule } from '@ngx-translate/core';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
+import { VarDirective } from '../../../shared/directives/ng-var.directive';
 import { HighlightSearchPipe } from '../../../shared/pipes/highlight-search.pipe';
 import { MarkdownPipe } from '../../../shared/pipes/markdown.pipe';
-import { SelfAdjustingTextareaComponent } from './self-adjusting-textarea/self-adjusting-textarea.component';
 import { AiLabelComponent } from '../ai-label/ai-label.component';
-import { VarDirective } from '../../../shared/directives/ng-var.directive';
+import { SelfAdjustingTextareaComponent } from './self-adjusting-textarea/self-adjusting-textarea.component';
 
 @Component({
     selector: 'es-editable-text',
@@ -101,7 +101,7 @@ export class EditableTextComponent {
         }
         // emit number of hits
         const numberOfHits: number = (
-            outputText.match(new RegExp('class="wlo-search-highlight"', 'g')) || []
+            outputText.match(new RegExp('class="topic-page-search-highlight"', 'g')) || []
         ).length;
         this.searchResultsUpdated.emit(numberOfHits);
         this.outputText.set(outputText);

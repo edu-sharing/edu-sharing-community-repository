@@ -63,6 +63,7 @@
       "NO_MESSAGES": "Derzeit keine Wartungsnachrichten konfiguriert",
       "REMOVE_TITLE": "Nachricht löschen",
       "REMOVE_MESSAGE": "Soll die folgende Nachricht gelöscht werden?<br><br><hr>{{message}}",
+      "INVALID_TO_DATE": "End-Zeitpunkt muss vor dem Start-Zeitpunkt liegen",
       "SELECT_COMPONENT": "Bereich auswählen",
       "SELECT_COMPONENT_HINT": "Wählen Sie einen oder mehrere Bereiche aus (Oder verknüpft). Bei keiner Auswahl gilt die Nachricht für alle",
       "SELECT_CONTEXT": "Kontext(e) auswählen",
@@ -87,7 +88,7 @@
         "WARNING_TITLE": "Warnung",
         "WARNING_DESCRIPTION": "Warnmeldung, gelbe Meldung mit Ausrufezeichen",
         "ERROR_TITLE": "Fehler",
-        "ERROR_DESCRIPTION": "Fehlermeldung, rote Melung mit X-Zeichen"
+        "ERROR_DESCRIPTION": "Fehlermeldung, rote Meldung mit Ausrufezeichen"
       },
       "USER_MODES": "Anzeigen für Benutzer oder Gäste",
       "USER_MODE": {
@@ -103,7 +104,7 @@
         "ONCE_TITLE": "Einmal",
         "ONCE_DESCRIPTION": "Nachricht wird nur einmal angezeigt",
         "REPEAT_TITLE": "Wiederholen",
-        "REPEAT_DESCRIPTION": "Nachricht wird regelmäßig erneut angezeigt, kann vom Nutzer aber ausgeblendet werden",
+        "REPEAT_DESCRIPTION": "Nachricht wird in der nächsten Nutzersitzung (i.d.R. 1 Stunde) erneut angezeigt, kann vom Nutzer aber ausgeblendet werden",
         "ALWAYS_TITLE": "Immer anzeigen",
         "ALWAYS_DESCRIPTION": "Nachricht wird immer angezeigt und kann nicht ausgeblendet werden"
       },

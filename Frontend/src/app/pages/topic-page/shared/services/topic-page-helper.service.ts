@@ -1,5 +1,6 @@
 import { PlatformLocation } from '@angular/common';
 import { Injectable } from '@angular/core';
+import { NavigationExtras, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
     CollectionEntries,
@@ -12,7 +13,7 @@ import {
     ParentEntries,
     PROPERTY_FILTER_ALL,
 } from 'ngx-edu-sharing-api';
-import { OptionGroup, OptionItem, Values } from 'ngx-edu-sharing-ui';
+import { OptionGroup, OptionItem, UIConstants } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
@@ -29,9 +30,9 @@ import { PageVariantConfig } from '../types/page-variant-config';
 import { Swimlane } from '../types/swimlane';
 import { WidgetConfig } from '../types/widget-config/widget-config';
 import { WidgetNodeAddedEvent } from '../types/widget-node-added-event';
-import { createQueryString } from '../utils/dom-util';
 import { convertNodeRefIntoNodeId } from '../utils/template-util';
 import { TopicPageEventsService } from './topic-page-events.service';
+import { TopicPageGlobalService } from './topic-page-global.service';
 
 @Injectable({
     providedIn: 'root',
@@ -48,57 +49,103 @@ export class TopicPageHelperService {
         private nodeApi: NodeService,
         private nodeApiUnwrapped: NodeServiceUnwrapped,
         private platformLocation: PlatformLocation,
+        private router: Router,
         private toast: Toast,
         private topicPageEventsService: TopicPageEventsService,
+        private topicPageGlobalService: TopicPageGlobalService,
         private translate: TranslateService,
     ) {}
 
-    // TOPIC PAGE SETTINGS
-    /**
-     * Sets the locale for API requests.
-     * @TODO Please remove!
-     */
-    setDefaultLocale(): void {
-        // this.apiRequestConfig.setLocale('DE_de');
-    }
-
     /**
      * Retrieves the base href of the application.
+     *
+     * @param cutOffTrailingSlash
      */
-    getBaseHref(): string {
+    getBaseHref(cutOffTrailingSlash: boolean = true): string {
         let href: string = this.platformLocation.getBaseHrefFromDOM();
-        // make sure to add a trailing slash to the href
-        if (!href) {
-            href = '/';
-        } else if (!href.endsWith('/')) {
-            href = href + '/';
+        // cut off trailing slash
+        if (href?.endsWith('/') && cutOffTrailingSlash) {
+            href = href.slice(0, -1);
         }
         return href;
     }
 
     /**
-     * Opens a new window with the Re-URL parameter set.
+     * Opens a new tab with the Re-URL parameter set.
      */
-    openReurlLink(propertyFilters: Values): Window | null {
-        const stringifiedFilters: string = JSON.stringify(propertyFilters);
-        const params = {
-            mode: 'audit',
-            title: 'Inhalte-Buffets',
-            filters: stringifiedFilters,
-            q: '',
-            reurl: 'IFRAME',
-        };
-        return window.open(
-            this.getBaseHref() + 'components/editorial-desk?' + createQueryString(params),
-            '_blank',
-        );
+    openReurlLink(extras: NavigationExtras = {}): Window | null {
+        if (!extras.queryParams) {
+            extras.queryParams = {};
+        }
+        if (this.topicPageGlobalService.getCustomReurlExtras()) {
+            extras = this.mergeNavigationExtras(
+                extras,
+                this.topicPageGlobalService.getCustomReurlExtras() || {},
+            );
+        }
+        extras.queryParams.reurl = 'WINDOW';
+        // special case for filters: use stringify
+        if (extras.queryParams.filters) {
+            extras.queryParams.filters = JSON.stringify(extras.queryParams.filters);
+        }
+        const reurlComponent: string =
+            this.topicPageGlobalService.getCustomReurlComponent() || 'search';
+        const link: string =
+            this.getBaseHref() +
+            this.router
+                .createUrlTree([UIConstants.ROUTER_PREFIX + reurlComponent], extras)
+                .toString();
+        return window.open(link, '_blank');
     }
 
     /**
-     * Retrieves the selected variables subject to observe changes.
+     * Opens a new tab with the applyFilter parameter set.
      */
-    getSelectedVariablesSubject(): BehaviorSubject<{ [key: string]: string[] }> {
-        return this.selectedVariablesSubject;
+    openApplyFilterLink(extras: NavigationExtras = {}): Window | null {
+        if (!extras.queryParams) {
+            extras.queryParams = {};
+        }
+        if (this.topicPageGlobalService.getCustomApplyFilterExtras()) {
+            extras = this.mergeNavigationExtras(
+                extras,
+                this.topicPageGlobalService.getCustomApplyFilterExtras() || {},
+            );
+        }
+        extras.queryParams.action = 'applyFilter';
+        // special case for filters: use stringify
+        if (extras.queryParams.filters) {
+            extras.queryParams.filters = JSON.stringify(extras.queryParams.filters);
+        }
+        const applyFilterComponent: string =
+            this.topicPageGlobalService.getCustomApplyFilterComponent() || 'search';
+        const link: string =
+            this.getBaseHref() +
+            this.router
+                .createUrlTree([UIConstants.ROUTER_PREFIX + applyFilterComponent], extras)
+                .toString();
+        return window.open(link, '_blank');
+    }
+
+    /**
+     * Helper function to merge navigation extras with special consideration for filters.
+     *
+     * @param obj1
+     * @param obj2
+     */
+    private mergeNavigationExtras(
+        obj1: NavigationExtras,
+        obj2: NavigationExtras,
+    ): NavigationExtras {
+        return {
+            queryParams: {
+                ...obj1.queryParams,
+                ...obj2.queryParams,
+                filters: {
+                    ...obj1.queryParams?.filters,
+                    ...obj2.queryParams?.filters,
+                },
+            },
+        };
     }
 
     /**
@@ -106,15 +153,23 @@ export class TopicPageHelperService {
      *
      * @param variables
      */
-    setSelectedVariables(variables: { [key: string]: string[] }): void {
+    setSelectedVariables(variables: { [property: string]: string[] }): void {
+        console.log('setSelectedVariables', variables);
         this.selectedVariablesSubject.next(variables);
     }
 
     /**
      * Returns the selected variables of the topic page.
      */
-    getSelectedVariables(): { [key: string]: string[] } {
+    getSelectedVariables(): { [property: string]: string[] } {
         return this.selectedVariablesSubject.value;
+    }
+
+    /**
+     * Retrieves the selected variables variables to observe changes.
+     */
+    getSelectedVariables$(): Observable<{ [property: string]: string[] }> {
+        return this.selectedVariablesSubject.asObservable();
     }
 
     /**

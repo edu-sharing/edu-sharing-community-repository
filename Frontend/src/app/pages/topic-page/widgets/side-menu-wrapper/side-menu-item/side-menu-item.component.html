@@ -1,0 +1,21 @@
+<button
+  type="button"
+  class="collapsible-menu-item"
+  [class]="'position-' + position"
+  [class.background-item]="selectedMenuItem !== '' && selectedMenuItem !== title"
+  [class.menu-icon]="icon"
+  [class.primary-border]="color === 'primary'"
+  [class.selected-item]="selectedMenuItem === title"
+  [disabled]="disabled()"
+  [matTooltip]="icon && title ? title : null"
+  [matTooltipPosition]="position === 'right' ? 'left' : 'right'"
+  (click)="menuItemClicked()"
+>
+  <span class="menu-title" *ngIf="!icon; else iconContainer">
+    {{ title }}
+  </span>
+  <ng-template #iconContainer>
+    <!-- note: esIcon does always set aria-hidden to true, even when settings [aria]="true" -->
+    <mat-icon aria-hidden="false" [fontIcon]="icon" [attr.aria-label]="title ?? icon"></mat-icon>
+  </ng-template>
+</button>

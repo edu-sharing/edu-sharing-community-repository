@@ -1,118 +1,113 @@
 <div class="ai-widget" *ngIf="initialized(); else loadingSpinner">
-  <div class="reloading-indicator" *ngIf="reloadingIndicator">
-    <es-spinner></es-spinner>
-  </div>
+  <ng-container *ngIf="reloadingIndicator()">
+    <ng-container *ngTemplateOutlet="loadingSpinner"></ng-container>
+  </ng-container>
   <div class="edit-mode" *ngIf="editMode(); else outputResult">
-    <!-- HTML rule: form must not contain other form elements, so avoid using es-editable-text in form -->
-    <form [formGroup]="form">
+    <h3 class="mat-heading-4">
+      {{ i18nPrefix + 'HEADING' | translate }}
+    </h3>
+
+    <p class="prompt-description">
+      {{ i18nPrefix + 'PROMPT_DESCRIPTION' | translate }}
+      {{ i18nPrefix + 'PLACEHOLDER_DESCRIPTION' | translate }}
+      <ng-container *ngIf="availableSelectDimensionKeys.length > 0">
+        <ng-container *ngFor="let key of availableSelectDimensionKeys; let i = index">
+          <code (click)="appendDimensionKey(key)">{{
+            dimensionPrefix + key + dimensionSuffix
+          }}</code>
+          {{ i <= availableSelectDimensionKeys.length - 3 ? ', ' : '' }}
+          {{
+            i === availableSelectDimensionKeys.length - 2
+              ? ' ' + (i18nPrefix + 'AND' | translate)
+              : ''
+          }}
+        </ng-container>
+        .
+      </ng-container>
+    </p>
+
+    <mat-form-field appearance="outline">
+      <mat-label>
+        {{ i18nPrefix + 'PROMPT_LABEL' | translate }}
+      </mat-label>
+      <textarea
+        matInput
+        [placeholder]="i18nPrefix + 'PROMPT_PLACEHOLDER' | translate"
+        [(ngModel)]="promptInput"
+        [ngModelOptions]="{ standalone: true }"
+        rows="3"
+        (change)="checkForPromptChanges()"
+        #promptTextarea
+      ></textarea>
+    </mat-form-field>
+
+    <p>
+      {{ i18nPrefix + 'SEND_HINT' | translate }}
+    </p>
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="processPromptUpdate()"
+      [disabled]="disabled() || processPromptInProgress"
+    >
+      {{ i18nPrefix + 'SEND' | translate }}
+    </button>
+
+    <div class="answers-container" *ngIf="latestStoredPrompt">
       <h3 class="mat-heading-4">
-        {{ 'TOPIC_PAGE.WIDGET.AI_WIDGET.HEADING' | translate }}
+        {{ i18nPrefix + 'ANSWERS_LABEL' | translate }}
       </h3>
 
-      <p class="prompt-description">
-        {{ 'TOPIC_PAGE.WIDGET.AI_WIDGET.PROMPT_DESCRIPTION' | translate }}
-        {{ 'TOPIC_PAGE.WIDGET.AI_WIDGET.PLACEHOLDER_DESCRIPTION' | translate }}
-        <ng-container *ngIf="availableSelectDimensionKeys.length > 0">
-          <ng-container *ngFor="let key of availableSelectDimensionKeys; let i = index">
-            <code (click)="appendDimensionKey(key)">{{
-              dimensionPrefix + key + dimensionSuffix
-            }}</code>
-            {{ i <= availableSelectDimensionKeys.length - 3 ? ', ' : '' }}
-            {{
-              i === availableSelectDimensionKeys.length - 2
-                ? ' ' + ('TOPIC_PAGE.WIDGET.AI_WIDGET.AND' | translate)
-                : ''
-            }}
-          </ng-container>
-          .
-        </ng-container>
-      </p>
-
-      <mat-form-field appearance="outline">
-        <mat-label>
-          {{ 'TOPIC_PAGE.WIDGET.AI_WIDGET.PROMPT_LABEL' | translate }}
-        </mat-label>
-        <textarea
-          matInput
-          [placeholder]="'TOPIC_PAGE.WIDGET.AI_WIDGET.PROMPT_PLACEHOLDER' | translate"
-          formControlName="prompt"
-          rows="3"
-          (change)="checkForPromptChanges()"
-          #promptTextarea
-        ></textarea>
-      </mat-form-field>
-
       <p>
-        {{ 'TOPIC_PAGE.WIDGET.AI_WIDGET.SEND_HINT' | translate }}
+        {{ i18nPrefix + 'ANSWERS_DESCRIPTION' | translate }}
       </p>
-      <button
-        mat-flat-button
-        color="primary"
-        (click)="processPromptUpdate()"
-        [disabled]="form.disabled || processPromptInProgress"
+
+      <div
+        class="select-dimensions"
+        [class.topic-page-grid-cols-1]="selectDimensionKeysUsed.length === 1"
+        [class.topic-page-grid-cols-2]="selectDimensionKeysUsed.length % 2 === 0"
+        [class.topic-page-grid-cols-3]="
+          selectDimensionKeysUsed.length > 2 && selectDimensionKeysUsed.length % 2 !== 0
+        "
+        *ngIf="selectDimensionKeysUsed.length > 0 && !processPromptInProgress"
       >
-        {{ 'TOPIC_PAGE.WIDGET.AI_WIDGET.SEND' | translate }}
-      </button>
-
-      <div class="answers-container" *ngIf="latestStoredPrompt && latestStoredPrompt !== ''">
-        <h3 class="mat-heading-4">
-          {{ 'TOPIC_PAGE.WIDGET.AI_WIDGET.ANSWERS_LABEL' | translate }}
-        </h3>
-
-        <p>
-          {{ 'TOPIC_PAGE.WIDGET.AI_WIDGET.ANSWERS_DESCRIPTION' | translate }}
-        </p>
-
-        <div
-          class="select-dimensions"
-          [class.wlo-grid-cols-1]="selectDimensionKeysUsed.length === 1"
-          [class.wlo-grid-cols-2]="selectDimensionKeysUsed.length % 2 === 0"
-          [class.wlo-grid-cols-3]="
-            selectDimensionKeysUsed.length > 2 && selectDimensionKeysUsed.length % 2 !== 0
-          "
-          *ngIf="selectDimensionKeysUsed.length > 0 && !processPromptInProgress"
-        >
-          <ng-container
-            formArrayName="dimensions"
-            *ngFor="let dimensionKey of selectDimensionKeysUsed; let i = index"
-          >
-            <mat-form-field class="select-form-field" [formGroupName]="i" subscriptSizing="dynamic">
-              <mat-label>
-                {{ selectDimensions.get(dimensionKey).caption ?? dimensionKey }}
-              </mat-label>
-              <mat-select formControlName="id">
-                <mat-option value="">
-                  {{ 'TOPIC_PAGE.WIDGET.AI_WIDGET.SELECT_PLACEHOLDER' | translate }}
-                </mat-option>
-                <mat-option
-                  *ngFor="let option of selectDimensions.get(dimensionKey).values"
-                  [value]="option['id']"
-                >
-                  {{ option['caption'] }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </ng-container>
-        </div>
+        <ng-container *ngFor="let dimensionKey of selectDimensionKeysUsed; let i = index">
+          <es-mds-editor-single-widget
+            [editorMode]="'form'"
+            [mds]="mds"
+            [widgetId]="dimensionKey"
+            [customAttributes]="{ type: MdsWidgetType.Singleoption }"
+            [ngModel]="latestSelectedDimensionValues[dimensionKey]"
+            (ngModelChange)="
+              latestSelectedDimensionValues[dimensionKey] = $event; updateResultInput()
+            "
+            ngDefaultControl
+          ></es-mds-editor-single-widget>
+        </ng-container>
       </div>
-    </form>
+    </div>
 
     <es-editable-text
-      *ngIf="latestStoredPrompt && latestStoredPrompt !== '' && !triggerTextUpdate()"
+      *ngIf="latestStoredPrompt"
       [applyTextareaPadding]="false"
-      [disabled]="form.disabled || processPromptInProgress"
+      [disabled]="disabled() || processPromptInProgress"
       [editable]="true"
-      [label]="'TOPIC_PAGE.WIDGET.AI_WIDGET.CURRENT_SELECTION_ANSWER_LABEL' | translate"
+      [label]="i18nPrefix + 'CURRENT_SELECTION_ANSWER_LABEL' | translate"
       [inputLimit]="1000"
-      [nonEditText]="form.get('result').value"
+      [nonEditText]="resultInput"
       [showMoreLimit]="650"
-      [text]="form.get('result').value"
-      (textChange)="form.get('result').patchValue($event); saveModification()"
+      [text]="resultInput"
+      (textChange)="resultInput = $event; saveModification()"
     ></es-editable-text>
 
     <div>
-      <button mat-flat-button (click)="generateTextForSelection()" [disabled]="form.disabled">
-        {{ 'TOPIC_PAGE.WIDGET.AI_WIDGET.GENERATE_TEXT' | translate }}
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="generateTextForSelection()"
+        [disabled]="disabled()"
+      >
+        {{ i18nPrefix + 'GENERATE_TEXT' | translate }}
       </button>
     </div>
 
@@ -126,20 +121,24 @@
   </div>
   <ng-template #outputResult>
     <es-editable-text
-      *ngIf="resultString && resultString !== ''; else emptyResultString"
+      *ngIf="resultString; else emptyResultString"
       [aiGenerated]="aiGeneratedText()"
       [editable]="false"
-      [label]="'TOPIC_PAGE.WIDGET.AI_WIDGET.CURRENT_SELECTION_ANSWER_LABEL' | translate"
+      [label]="i18nPrefix + 'CURRENT_SELECTION_ANSWER_LABEL' | translate"
       [nonEditText]="resultString"
       [searchInput]="searchInput()"
       [text]="resultString"
       (searchResultsUpdated)="updateSearchResults($event)"
     ></es-editable-text>
     <ng-template #emptyResultString>
-      {{ 'TOPIC_PAGE.WIDGET.AI_WIDGET.NO_ANSWER_DEFINED' | translate }}
+      <div class="empty-result-string" *ngIf="initialized() && !reloadingIndicator()">
+        {{ i18nPrefix + 'NO_ANSWER_DEFINED' | translate }}
+      </div>
     </ng-template>
   </ng-template>
 </div>
 <ng-template #loadingSpinner>
-  <es-spinner></es-spinner>
+  <div class="reloading-indicator" *ngIf="reloadingIndicator()">
+    <es-spinner></es-spinner>
+  </div>
 </ng-template>

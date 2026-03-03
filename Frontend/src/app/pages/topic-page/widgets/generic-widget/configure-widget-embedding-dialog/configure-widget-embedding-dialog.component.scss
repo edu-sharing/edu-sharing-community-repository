@@ -3,8 +3,19 @@
     width: 800px;
 }
 
-.unlink-btn {
-    margin-top: 16px;
+// fix for resetting the padding of the card-content
+::ng-deep .card-content:has(es-configure-widget-embedding-dialog) {
+    padding: 0 !important;
+}
+
+.embedding-types ::ng-deep {
+    .mat-mdc-tab-header {
+        margin-bottom: 16px;
+    }
+
+    .mat-mdc-tab-body-content {
+        padding: 0 25px 25px 25px;
+    }
 }
 
 .info-message {

@@ -13,7 +13,7 @@ export class SafeHtmlPipe implements PipeTransform {
         if (args?.purify) {
             value = DOMPurify.sanitize(value, {
                 ALLOWED_TAGS: ['p', 'br', 'div', 'a', 'span', 'strong', 'em'],
-                ALLOWED_ATTR: ['style', 'href'],
+                ALLOWED_ATTR: ['href', 'target'],
             });
         }
         return this.sanitizer.bypassSecurityTrustHtml(value);

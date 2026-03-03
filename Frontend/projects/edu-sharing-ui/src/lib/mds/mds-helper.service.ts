@@ -49,7 +49,7 @@ export class MdsHelperService {
                         } else if (name === 'searchCollections') {
                             type = 'COLLECTION';
                         }
-                        if (isArray(column[1])) {
+                        if (Array.isArray(column[1])) {
                             (columns as any)[column[0]] = column[1].map((c) => {
                                 if (c.id.includes('.')) {
                                     const split = c.id.split('.');

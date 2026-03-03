@@ -750,6 +750,17 @@
       <type>nodefilter</type>
     </widget>
     <widget>
+      <id>virtual:profiling_target_group</id>
+      <caption>virtual_profiling_target_group</caption>
+      <type>radioVertical</type>
+      <valuespace_i18n_prefix>virtual_profiling_target_group_</valuespace_i18n_prefix>
+      <values>
+        <value>learner</value>
+        <value>teacher</value>
+        <value>general</value>
+      </values>
+    </widget>
+    <widget>
       <id>virtual:activityType</id>
       <caption>cp_virtual_activityType</caption>
       <valuespace_i18n_prefix>activityType_</valuespace_i18n_prefix>
@@ -1158,6 +1169,13 @@
 				<curriculum_editable>
 				]]></html>
     </template>
+    <template>
+      <id>topic_page_profiling</id>
+      <html><![CDATA[
+          <virtual:profiling_target_group>
+          <ccm:educationalcontext type="checkboxVertical">
+      ]]></html>
+    </template>
   </templates>
   <groups>
     <group>
@@ -1358,6 +1376,13 @@
       <rendering>angular</rendering>
       <views>
         <view>search_relation_node</view>
+      </views>
+    </group>
+    <group>
+      <id>topic_page_profiling</id>
+      <rendering>angular</rendering>
+      <views>
+        <view>topic_page_profiling</view>
       </views>
     </group>
     <group>

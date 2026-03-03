@@ -7,11 +7,12 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { TranslateModule } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
-import { GenericNodeEntriesDisplayType } from '../../../shared/types/generic-node-entries-display-type';
 import { CollectionListDisplayType } from '../../../shared/types/collection-list-display-type';
-import { MediaRenderingDisplayType } from '../../../shared/types/media-rendering-display-type';
-import { LayoutOption } from '../../../shared/types/layout-option';
 import { ConfigurationOption } from '../../../shared/types/configuration-option';
+import { DEFAULT_ICON_PATH } from '../../../shared/types/custom-definitions';
+import { GenericNodeEntriesDisplayType } from '../../../shared/types/generic-node-entries-display-type';
+import { LayoutOption } from '../../../shared/types/layout-option';
+import { MediaRenderingDisplayType } from '../../../shared/types/media-rendering-display-type';
 
 @Component({
     selector: 'es-widget-configuration-buttons',
@@ -68,4 +69,6 @@ export class WidgetConfigurationButtonsComponent {
     clickOptionTwo(): void {
         this.optionTwoClicked.emit(true);
     }
+
+    protected readonly iconPath: string = DEFAULT_ICON_PATH;
 }

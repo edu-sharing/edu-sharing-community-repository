@@ -6,7 +6,7 @@
     class="text-container"
     [class.container-padding]="applyTextareaPadding"
     [class.prominent-text]="prominentText"
-    [class.wlo-text-center]="alignCenter"
+    [class.topic-page-text-center]="alignCenter"
   >
     <ng-container *ngIf="headerElement !== ''; else normalText" [ngSwitch]="headerElement">
       <h1 class="text-content mat-heading-1 font-bold" *ngSwitchCase="'h1'">

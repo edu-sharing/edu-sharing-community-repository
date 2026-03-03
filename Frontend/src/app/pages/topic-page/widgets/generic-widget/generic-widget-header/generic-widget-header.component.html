@@ -1,6 +1,6 @@
 <es-editable-text
   *ngIf="shouldShowHeadline()"
-  class="c-widget-headline"
+  class="generic-widget-headline"
   [aiGenerated]="headlineAiGenerated()"
   [alignCenter]="true"
   [disabled]="updateInProgress()"
@@ -15,13 +15,13 @@
 
 <es-editable-text
   *ngIf="shouldShowDescription()"
-  class="c-widget-description"
+  class="generic-widget-description"
   [aiGenerated]="descriptionAiGenerated()"
   [disabled]="updateInProgress()"
   [editable]="editMode()"
   [label]="descriptionLabel() | translate"
   [searchInput]="searchInput()"
-  [showAiButtons]="true"
+  [showAiButtons]="aiSupported()"
   [text]="description() | aiTextPrompt : editMode() : descriptionMapping()"
   (searchResultsUpdated)="onSearchResultsUpdated($event, 'description')"
   (textChange)="onTextChange($event)"

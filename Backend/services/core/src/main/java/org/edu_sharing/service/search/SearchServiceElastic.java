@@ -1209,7 +1209,8 @@ public class SearchServiceElastic implements SearchService {
         PropertiesGetInterceptor.PropertiesContext propertiesContext = PropertiesInterceptorFactory.getPropertiesContext(
                 alfNodeRef, props, eduNodeRef.getAspects(),
                 permissions,
-                sourceAsMap
+                sourceAsMap,
+                null
         );
         for (PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
             props = new HashMap<>(i.beforeDeliverProperties(propertiesContext));

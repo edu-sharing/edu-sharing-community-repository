@@ -362,7 +362,8 @@ public class BulkEditNodesJob extends AbstractJob{
 							properties,
 							nodeService.getAspects(nodeRef).stream().map(QName::toString).collect(Collectors.toList()),
 							null,
-							null
+							null,
+							PropertiesSetInterceptor.ContextStage.BeforeAlfrescoInterceptors
 					));
 					nodeService.setProperties(nodeRef,  NodeServiceImpl.convertToFinalProperties(nodeRef, propertiesMapped));
 				} else {

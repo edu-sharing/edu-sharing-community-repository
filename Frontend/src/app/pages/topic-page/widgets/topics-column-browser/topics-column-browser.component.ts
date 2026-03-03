@@ -19,14 +19,15 @@ import { map } from 'rxjs/operators';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { SharedModule } from '../../../../shared/shared.module';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
+import { TopicPageGlobalService } from '../../shared/services/topic-page-global.service';
+import { ConfigurationOption } from '../../shared/types/configuration-option';
 import { scrollIntoView } from '../../shared/utils/dom-util';
 import { retrieveNodeId } from '../../shared/utils/template-util';
+import { WidgetComponentInterface } from '../generic-widget/generic-widget.component';
 import { WidgetConfigurationButtonsComponent } from '../shared/widget-configuration-buttons/widget-configuration-buttons.component';
 import { LifecycleDirective } from './lifecycle.directive';
 import { RemoteTreeDataSource, TreeNode } from './remote-tree-data-source';
 import { WrapObservablePipe } from './wrap-observable.pipe';
-import { ConfigurationOption } from '../../shared/types/configuration-option';
-import { WidgetComponentInterface } from '../generic-widget/generic-widget.component';
 
 @Component({
     selector: 'es-topics-column-browser',
@@ -48,7 +49,6 @@ export class TopicsColumnBrowserComponent implements WidgetComponentInterface {
 
     // INPUTS + OUTPUTS
     @Input() contextNodeId!: string;
-    @Input() customUrl?: (collection: Node) => string;
     editMode: InputSignal<boolean> = input<boolean>(false);
     @Input() embedConfigurationOption?: ConfigurationOption;
     @Input() gridIndex: number = -1;
@@ -61,6 +61,7 @@ export class TopicsColumnBrowserComponent implements WidgetComponentInterface {
     @Output() configChanged: EventEmitter<void> = new EventEmitter<void>();
 
     // VARIABLES
+    customUrl: (node: Node) => string;
     readonly dataSource: RemoteTreeDataSource<Node> = new RemoteTreeDataSource<Node>();
     initialized: WritableSignal<boolean> = signal(false);
     path: TreeNode<Node>[] = [];
@@ -73,8 +74,13 @@ export class TopicsColumnBrowserComponent implements WidgetComponentInterface {
 
     constructor(
         private readonly elementRef: ElementRef<HTMLElement>,
+        private topicPageGlobalService: TopicPageGlobalService,
         private topicPageHelperService: TopicPageHelperService,
-    ) {}
+    ) {
+        if (this.topicPageGlobalService.getCustomUrlFunction()) {
+            this.customUrl = this.topicPageGlobalService.getCustomUrlFunction();
+        }
+    }
 
     /**
      * Checks whether the current view is a mobile view.

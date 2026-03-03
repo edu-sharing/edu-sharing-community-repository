@@ -1,6 +1,7 @@
 <!-- Common widget header -->
 <es-generic-widget-header
   *ngIf="initialized(); else loadingSpinner"
+  [aiSupported]="aiSupported()"
   [description]="description"
   [descriptionAiGenerated]="descriptionAiGenerated()"
   [descriptionOptional]="widgetType !== WIDGETS.TEXT_WIDGET"
@@ -21,7 +22,7 @@
 </ng-template>
 
 <!-- Individual widget content -->
-<div #widgetContainer class="wlo-widget-content" [class.edit-mode]="editMode()"></div>
+<div #widgetContainer class="es-widget-content" [class.edit-mode]="editMode()"></div>
 
 <ng-template #configureWidgetEmbeddingTemplate>
   <es-configure-widget-embedding-dialog

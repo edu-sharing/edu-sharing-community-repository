@@ -1,4 +1,4 @@
-@use '../../../topic-page/topic-page-variables' as *;
+@use '../../topic-page-variables' as topicPageVars;
 
 :host {
     // resize mat-icons
@@ -21,8 +21,8 @@
     --mdc-list-list-item-hover-state-layer-opacity: 0;
 
     // define variables to be used by both list components (for both parents and children)
-    --column-browser-hover-color: #{$surface-alt};
-    --column-browser-focused-color: #{$surface-selected};
+    --column-browser-hover-color: #{topicPageVars.$surface-alt};
+    --column-browser-focused-color: #{topicPageVars.$surface-selected};
     --column-browser-badge-hover-color: #cacaca;
     --column-browser-badge-focused-color: #ccd8e5;
 }
@@ -75,14 +75,25 @@
 
 .item-link {
     text-decoration: unset;
-    color: $primary-dark;
+    color: topicPageVars.$primary-dark;
+    display: inline-block;
+
+    // make the text bold but invisible by default, so the browser calculates layout using bold width from the start
+    &::before {
+        content: attr(data-text);
+        font-weight: topicPageVars.$font-weight-x-bold;
+        visibility: hidden;
+        display: block;
+        height: 0;
+        overflow: hidden;
+    }
 
     &:hover {
-        font-weight: $font-weight-x-bold !important;
+        font-weight: topicPageVars.$font-weight-x-bold !important;
     }
 
     &:focus-visible {
-        border: 3px solid $primary;
+        border: 3px solid topicPageVars.$primary;
         border-radius: 6px;
         outline: none;
     }
@@ -108,7 +119,7 @@
             vertical-align: middle;
             border-radius: 12px;
             color: #333;
-            background: $surface-alt;
+            background: topicPageVars.$surface-alt;
         }
     }
 }
@@ -161,7 +172,7 @@
         }
 
         &:focus-visible {
-            border: 3px solid $primary;
+            border: 3px solid topicPageVars.$primary;
             border-radius: 2px;
             background: var(--column-browser-focused-color);
 
@@ -172,7 +183,7 @@
 
         &.mdc-list-item--selected {
             border: none;
-            border-left: 6px solid $primary !important;
+            border-left: 6px solid topicPageVars.$primary !important;
             background: var(--column-browser-focused-color) !important;
 
             .badge {
@@ -240,7 +251,7 @@
             &.item-selected {
                 margin-left: 0;
                 border: none;
-                border-left: 6px solid $primary !important;
+                border-left: 6px solid topicPageVars.$primary !important;
                 background: var(--column-browser-focused-color) !important;
 
                 .badge {
@@ -250,7 +261,7 @@
 
             &:focus-visible {
                 outline: none;
-                border: 3px solid $primary !important;
+                border: 3px solid topicPageVars.$primary !important;
                 border-radius: 2px;
                 background: var(--column-browser-focused-color) !important;
 
@@ -290,10 +301,7 @@
 }
 
 // fix for vertically centering the text and icon of the mat-selection-list
-:host ::ng-deep mat-selection-list mat-list-option {
-    .item-link,
-    .mdc-button__label {
-        display: flex;
-        align-items: center;
-    }
+:host ::ng-deep mat-selection-list mat-list-option .mdc-button__label {
+    display: flex;
+    align-items: center;
 }

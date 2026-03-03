@@ -4,8 +4,8 @@
       "NEW_PAGE_VARIANT": "Neue Themenseiten-Variante",
       "NEW_PAGE_TEMPLATE": "Neue Themenseiten-Vorlage",
       "APPS": "Apps",
-      "APPS_ELEMENT_NOT_FOUND": "Das Element mit der Klasse wlo-show-apps konnte nicht gefunden werden.",
-      "TITLE": "Themenseiten",
+      "APPS_ELEMENT_NOT_FOUND": "Das Element mit der Klasse topic-page-show-apps konnte nicht gefunden werden.",
+      "TITLE": "Themenseite",
       "SEARCH_PLACEHOLDER": "Suche nach Inhalten auf der Themenseite ..."
     },
     "AI": {
@@ -91,16 +91,6 @@
         "TARGET_GROUP": "Zielgruppe des Nutzers einfügen",
         "EDUCATIONAL_LEVEL": "Bildungsstufe des Nutzers einfügen"
       },
-      "FILTER_BAR": {
-        "NO_DATA": "Es wurden keine Daten zur Filterung gefunden.",
-        "CHANGES_SAVED": "Deine Änderungen wurden gespeichert.",
-        "CHANGES_RESET": "Deine Änderungen wurden zurückgesetzt.",
-        "ERROR_RETRIEVING_DATA": "Es ist ein Fehler beim Abrufen der ausgewählten Dimensionen aufgetreten.",
-        "PROFILING": {
-          "CHANGES_SAVED": "Profil gespeichert – jetzt bekommst du passende Inhalte angezeigt!",
-          "CHANGES_RESET": "Deine Profilierung wurde zurückgesetzt."
-        }
-      },
       "GENERIC_WIDGET": {
         "NO_WIDGET_CONTAINER": "Es konnte kein Widget Container gefunden werden.",
         "ERROR_LOADING_WIDGET": "Fehler beim Laden der Widget Komponente.",
@@ -135,7 +125,8 @@
         "REGENERATE": "Bild neu generieren",
         "UPLOAD": "Bild hochladen",
         "DELETE": "Bild löschen",
-        "NO_IMAGE_SELECTED": "Es wurde noch kein Bild ausgewählt."
+        "NO_IMAGE_SELECTED": "Es wurde noch kein Bild ausgewählt.",
+        "IMAGE_UPLOAD_CONFIRMATION_TEXT": "Ich stimme zu, dass ich alle notwendigen Rechte an diesem Bild besitze, um es auf der Themenseite einzubinden."
       },
       "MAP_VIEW": {
         "HEADING": "Filter",
@@ -172,6 +163,10 @@
         "CHANGE_CONTENT": "Inhalt ändern",
         "SELECT_CONTENT": "Inhalt auswählen",
         "SELECT_CONTENT_TOOLTIP": "Hinweis: Wählen Sie einen öffentlichen Inhalt über die Redaktionsumgebung aus und klicken anschließend auf \"Übernehmen\"."
+      },
+      "PROFILING": {
+        "CHANGES_SAVED": "Profil gespeichert – jetzt bekommst du passende Inhalte angezeigt!",
+        "CHANGES_RESET": "Deine Profilierung wurde zurückgesetzt."
       },
       "PROPOSE_CONTENT": {
         "TITLE": "Inhalt vorschlagen",
@@ -286,9 +281,12 @@
         "TARGET_GROUP_LABEL": "Zielgruppe",
         "DELETE_VARIANT": "Variante löschen"
       },
-      "SWITCH_INTO_TEMPLATE_MODE": "Zur Seiten-Vorlage",
-      "SWITCH_INTO_STANDARD_MODE": "Zurück zur Seite",
-      "RESET_URL_PARAMETER": "Seite ohne Parameter laden"
+      "CONFIG_PAGE_TEMPLATE": {
+        "HEADING": "Einstellungen der Themenseiten-Vorlage",
+        "TITLE": "Titel der Vorlage",
+        "TITLE_PLACEHOLDER": "Themenseiten-Vorlage für xyz",
+        "DELETE_VARIANT": "Vorlage löschen"
+      }
     },
     "CONFIG_PAGE_TEMPLATE": {
       "HEADING": "Bearbeitung der Seiten-Vorlage(n)",
@@ -301,8 +299,16 @@
     },
     "CONFIG_WIDGET_EMBEDDING": {
       "HEADING": "Widget einbetten",
-      "INFO": "Mithilfe dieses Dialogs kannst du dein Widget auf einer externen Seite einbetten. Nach Auswahl einer Option wird der Code automatisch in deine Zwischenablage kopiert.",
-      "HINT": "Hinweis: Zur erfolgreichen Einbindung muss die Ziel-Domain durch WLO freischaltet sein.",
+      "DEFAULT": {
+        "TITLE": "Standard-Einbettung (LMS/CMS)",
+        "INFO": "Mithilfe dieses Dialogs kannst du dein Widget in einem LMS/CMS einbetten. Nach Auswahl einer Option wird der Code automatisch in deine Zwischenablage kopiert.",
+        "HINT": "Hinweis: Zur erfolgreichen Einbindung muss das LMS/CMS die Edu-Sharing Erweiterung installiert haben."
+      },
+      "ADVANCED": {
+        "TITLE": "Fortgeschrittene Einbettung (Website)",
+        "INFO": "Mithilfe dieses Dialogs kannst du dein Widget auf einer externen Seite einbetten. Nach Auswahl einer Option wird der Code automatisch in deine Zwischenablage kopiert.",
+        "HINT": "Hinweis: Zur erfolgreichen Einbindung muss die Ziel-Domain durch Edu-Sharing freischaltet sein."
+      },
       "OPTION_NODE_ID_LABEL": "Einbindung über Node-ID",
       "OPTION_NODE_ID_DESCRIPTION": "Das Widget wird mit dessen individueller ID eingebettet. Alle nachträglichen Änderungen am Widget werden automatisch übernommen.",
       "OPTION_NODE_ID_NOT_FOUND": "Hinweis: Diese Option kann nicht ausgewählt werden, da noch keine Anpassungen am Widget vorgenommen wurden.",
@@ -358,7 +364,6 @@
         "CHANGE_TYPE_WARNING": "Wollen Sie wirklich ein bereits konfiguriertes Widget austauschen? Die Konfiguration dieses Widgets geht dabei verloren.",
         "DELETE": "Widget löschen",
         "DELETE_WARNING": "Wollen Sie wirklich ein bereits konfiguriertes Widget löschen? Die Konfiguration dieses Widgets geht dabei verloren.",
-        "EDITORIAL_MEMBERS": "Redaktionsmitglieder",
         "COLLECTION_CHIPS": "Navigationspillen",
         "TOPICS_COLUMN_BROWSER": "Themenbaum (ausklappbar)",
         "CONTENT_TEASER": "Inhalte-Teaser",
@@ -448,9 +453,15 @@
       "MESSAGE": "Willst du wirklich die aktuell gewählte Variante löschen?",
       "PENDING_MESSAGE": "Die Seiten-Variante wird samt aller Anpassungen gelöscht."
     },
+    "DELETE_PAGE_TEMPLATE": {
+      "HEADING": "Seiten-Vorlage löschen",
+      "MESSAGE": "Willst du wirklich die aktuell gewählte Vorlage löschen?",
+      "PENDING_MESSAGE": "Die Seiten-Vorlage wird samt aller Anpassungen gelöscht."
+    },
     "TEMPLATE_MODE_ACTIVE": {
       "VIEW": "Sie befinden sich aktuell im Anzeigemodus der Vorlage.",
-      "EDIT": "Sie befinden sich aktuell im Bearbeitungsmodus der Vorlage."
+      "EDIT": "Sie befinden sich aktuell im Bearbeitungsmodus der Vorlage.",
+      "END": "Vorlagen-Modus beenden"
     }
   }
 }
