@@ -63,6 +63,7 @@
       "NO_MESSAGES": "Derzeit keine Wartungsnachrichten konfiguriert",
       "REMOVE_TITLE": "Nachricht löschen",
       "REMOVE_MESSAGE": "Soll die folgende Nachricht gelöscht werden?<br><br><hr>{{message}}",
+      "INVALID_TO_DATE": "End-Zeitpunkt muss vor dem Start-Zeitpunkt liegen",
       "SELECT_COMPONENT": "Bereich auswählen",
       "SELECT_COMPONENT_HINT": "Wählen Sie einen oder mehrere Bereiche aus (Oder verknüpft). Bei keiner Auswahl gilt die Nachricht für alle",
       "SELECT_CONTEXT": "Kontext(e) auswählen",

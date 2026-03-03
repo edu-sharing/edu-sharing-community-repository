@@ -65,6 +65,7 @@
       "NO_MESSAGES": "Currently no maintenance messages configured",
       "REMOVE_TITLE": "Delete Message",
       "REMOVE_MESSAGE": "Do you want to delete the following message?<br><br><hr>{{message}}",
+      "INVALID_TO_DATE": "end time must be after the from time",
       "SELECT_COMPONENT": "Select area",
       "SELECT_COMPONENT_HINT": "Select one or more area (OR linked). If none is selected, the message applies to all",
       "SELECT_CONTEXT": "Select Context(s)",
