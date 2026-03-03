@@ -54,6 +54,7 @@ import org.apache.commons.logging.LogFactory;
 import org.dom4j.DocumentHelper;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
+import org.edu_sharing.alfresco.policy.ThumbnailHandling;
 import org.w3c.dom.Document;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -412,6 +413,15 @@ public abstract class WebDAVMethod
             boolean isReadOnly = isReadOnly();
             // Execute the method
             getTransactionService().getRetryingTransactionHelper().doInTransaction(executeImplCallback, isReadOnly);
+            /**
+             * edu-sharing customization after tx finished. add to thumbnail queue
+              */
+            if(this instanceof PutMethod){
+                PutMethod putMethod = (PutMethod)this;
+                if(putMethod.getFileSize() > 0 && !putMethod.getContentNodeInfo().isFolder()){
+                    new ThumbnailHandling().thumbnailHandling(putMethod.getContentNodeInfo().getNodeRef());
+                }
+            }
             generateResponseImpl();
         }
         catch (AccessDeniedException e)

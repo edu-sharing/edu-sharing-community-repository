@@ -367,14 +367,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 
             logger.debug("lockStatus:" + lockStatus);
             // new content seems to be false even when the binary has new data, so we trigger the preview
-            if (/*newContent */
-                    (LockStatus.NO_LOCK.equals(lockStatus) || LockStatus.LOCK_EXPIRED.equals(lockStatus))
-                            && (reader != null) && (reader.getContentData() != null) && reader.getContentData().getSize() > 0) {
-                CompletableFuture.runAsync(() -> {
-                    // asynchroner Code
-                    new ThumbnailHandling().thumbnailHandling(nodeRef);
-                });
-            }
+
         }
         new RepositoryCache().remove(nodeRef.getId());
     }

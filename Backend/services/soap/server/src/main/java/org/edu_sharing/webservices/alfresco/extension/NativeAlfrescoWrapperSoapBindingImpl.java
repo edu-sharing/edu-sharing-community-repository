@@ -1094,21 +1094,6 @@ public class NativeAlfrescoWrapperSoapBindingImpl implements org.edu_sharing.web
 	}
 	
 	@Override
-	public void executeAction(String nodeId, String actionName,
-			String actionId, HashMap parameters, boolean async)
-			throws RemoteException {
-		try {
-			
-			MCAlfrescoAPIClient mcAlfrescoAPIClient = new MCAlfrescoAPIClient();
-			mcAlfrescoAPIClient.executeAction(nodeId, actionName, actionId, parameters, async);
-			
-		} catch(Throwable e) {
-			logger.error(e.getMessage(), e);
-			throw new RemoteException(e.getMessage(), e);
-		}
-	}
-	
-	@Override
 	public void createAssociation(String fromID, String toID, String association)
 			throws RemoteException {
 		try {
