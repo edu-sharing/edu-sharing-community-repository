@@ -477,8 +477,8 @@ export class MetadataTemplateDialogsServiceMock {
 export class SessionStorageServiceMock extends SessionStorageService {
     storageObject: any = {};
 
-    get(key: string, fallback?: any, store?: Store): Observable<any> {
-        return of(this.storageObject[key] || []);
+    async get<T>(key: string, fallback?: T, store?: Store): Promise<T> {
+        return this.storageObject[key] || [];
     }
 
     set(key: string, value: any, store?: Store): Promise<void> {
