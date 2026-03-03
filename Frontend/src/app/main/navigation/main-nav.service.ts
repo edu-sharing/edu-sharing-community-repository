@@ -18,6 +18,7 @@ import { MainNavComponent } from '../../main/navigation/main-nav/main-nav.compon
 import { CookieInfoComponent } from '../cookie-info/cookie-info.component';
 import { SkipNavService } from './skip-nav/skip-nav.service';
 import { CustomOptions } from 'ngx-edu-sharing-ui';
+import { CLOSE } from '../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 
 export class MainNavCreateConfig {
     /** allowed / display new material button */
@@ -27,9 +28,11 @@ export class MainNavCreateConfig {
     parent?: Node = null;
     folder?: boolean = false;
 }
+type Status = 'new' | 'other-scope' | 'shown';
 export type SystemMessageDetails = {
     storageKey: string;
     message: RepositoryMessage;
+    status?: Status;
 };
 
 export class MainNavConfig {
@@ -88,7 +91,6 @@ export class MainNavConfig {
     onCreate?: (node: Node[]) => void;
     onCreateNotAllowed?: () => void;
 }
-
 export enum TemplateSlot {
     MainScopeButton,
     BeforeUserMenu,
@@ -255,6 +257,7 @@ export class MainNavService {
             .pipe(
                 debounceTime(0),
                 switchMap(([config, messages]: [MainNavConfig, RepositoryMessage[]]) => {
+                    // console.log('new messages', messages, config);
                     if (!messages.length) {
                         return of(null);
                     }
@@ -275,31 +278,31 @@ export class MainNavService {
                                 .pipe(take(1)),
                         ]).pipe(
                             map(([userStorage, sessionStorage]) => {
-                                let include = true;
+                                let status: Status = 'new';
                                 if (
                                     message.components?.length &&
                                     !message.components.includes(config?.currentScope)
                                 ) {
-                                    include = false;
+                                    status = 'other-scope';
                                 }
                                 // msg already hidden by user
                                 if (
                                     message.uuid === userStorage ||
                                     message.uuid === sessionStorage
                                 ) {
-                                    include = false;
+                                    status = 'shown';
                                 }
-                                return { include, details };
+                                return { ...details, status };
                             }),
                         );
                     });
                     return forkJoin(messageObservables).pipe(
-                        map((results) => results.find((r) => r.include)?.details),
+                        map((results) => results.find((r) => r.status !== 'other-scope')),
                     );
                 }),
-                tap((details) => {
-                    console.log('new message data', details);
-                    if (!details) {
+                tap(async (details) => {
+                    // console.log('new message data', details);
+                    if (!details || details?.status === 'shown') {
                         this.setSystemMessage(null);
                         return;
                     }
@@ -315,6 +318,30 @@ export class MainNavService {
                         );
                     }
                     this.setSystemMessage(details);
+
+                    if (details?.message?.mode === 'modal') {
+                        const dialogRef = await this.dialogs.openGenericDialog({
+                            title: 'NOTICE',
+                            avatar: {
+                                kind: 'icon',
+                                icon: 'info',
+                            },
+                            message: details.message.message,
+                            messageMode: 'html',
+                            buttons: CLOSE,
+                            minWidth: 600,
+                            maxWidth: 800,
+                        });
+                        dialogRef.afterClosed().subscribe((response) => {
+                            if (details.message.repeat === 'repeat') {
+                                void this.sessionStorageService.set(
+                                    details.storageKey,
+                                    details.message.uuid,
+                                    Store.Session,
+                                );
+                            }
+                        });
+                    }
                 }),
             );
     }

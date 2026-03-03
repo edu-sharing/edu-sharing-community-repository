@@ -84,31 +84,7 @@ export class TopBarComponent {
     }
 
     private registerSystemMessages() {
-        this.mainNavService.observeSystemMessage().subscribe(async (details) => {
-            if (details.message.mode === 'modal') {
-                const dialogRef = await this.dialogs.openGenericDialog({
-                    title: 'NOTICE',
-                    avatar: {
-                        kind: 'icon',
-                        icon: 'info',
-                    },
-                    message: details.message.message,
-                    messageMode: 'html',
-                    buttons: CLOSE,
-                    minWidth: 600,
-                    maxWidth: 800,
-                });
-                dialogRef.afterClosed().subscribe((response) => {
-                    if (details.message.repeat === 'repeat') {
-                        void this.sessionStorageService.set(
-                            details.storageKey,
-                            details.message.uuid,
-                            Store.Session,
-                        );
-                    }
-                });
-            }
-        });
+        this.mainNavService.observeSystemMessage().subscribe(async (details) => {});
     }
     toggleMenuSidebar() {
         if (this.canOpen) {

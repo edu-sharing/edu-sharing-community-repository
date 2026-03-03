@@ -107,10 +107,10 @@ export class AdminMessagesComponent implements OnInit {
             menubar: false,
             statusbar: false,
             resize: true,
-            plugins: ['link'],
+            plugins: ['link', 'code'],
             //newline_behavior: 'linebreak',
             toolbar:
-                'bold italic underline | forecolor backcolor | link | alignleft aligncenter alignright alignjustify | removeformat | undo redo',
+                'bold italic underline | link | alignleft aligncenter alignright alignjustify | removeformat | code | undo redo',
             language: this.translate.getDefaultLang(),
         };
         this.editorConfig.base_url = this.platformLocation.getBaseHrefFromDOM() + 'tinymce/';
@@ -154,7 +154,7 @@ export class AdminMessagesComponent implements OnInit {
             toolpermissions: this.selectedTp(),
             uuid: uuidv4(),
         } as RepositoryMessage;
-        if (this.fromDate() && this.toDate() && this.toDate() <= this.fromDate()) {
+        if (message.from && message.to && message.to <= message.from) {
             this.toast.error(null, 'ADMIN.MESSAGES.INVALID_TO_DATE');
             return;
         }
