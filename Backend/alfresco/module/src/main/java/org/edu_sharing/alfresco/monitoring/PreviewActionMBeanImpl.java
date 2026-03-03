@@ -10,6 +10,6 @@ public class PreviewActionMBeanImpl extends MBeanSupport implements PreviewActio
     @ManagedAttribute
     @Override
     public int getCount() {
-        return doWork(() -> ActionObserver.getInstance().nodeActionsMap.size());
+        return doWork(() -> ActionObserver.getInstance().queueSize());
     }
 }

@@ -12,4 +12,7 @@
         <property name="registryService" ref="RegistryService" />
         <property name="tenantAdminService" ref="tenantAdminService" />
     </bean>
+
+    <bean id="queueFactory" class="org.edu_sharing.repository.server.tools.cache.QueueFactoryLocal">
+    </bean>
 </beans>

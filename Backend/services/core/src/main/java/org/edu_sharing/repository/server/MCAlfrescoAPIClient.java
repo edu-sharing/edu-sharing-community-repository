@@ -58,6 +58,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.HasPermissionsWork;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
+import org.edu_sharing.alfresco.policy.ThumbnailHandling;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.connector.ConnectorService;
 import org.edu_sharing.alfresco.service.guest.GuestService;
@@ -1944,6 +1945,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         if(onComplete != null && nodeRef != null) {
             onComplete.run();
         }
+        new ThumbnailHandling().thumbnailHandling(nodeRef);
     }
 
     public void setUserDefinedPreview(String nodeId, byte[] content, String fileName) {
@@ -2692,25 +2694,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         return reader != null && reader.getSize() > 0;
     }
 
-    public void executeAction(String nodeId, String actionName, String actionId, Map<String, Object> parameters, boolean async) {
-
-        ActionService actionService = serviceRegistry.getActionService();
-        Action action = actionService.createAction(actionName);
-        action.setTrackStatus(true);
-
-        NodeRef nodeRef = new NodeRef(storeRef, nodeId);
-
-        if (async) {
-            ActionObserver.getInstance().addAction(nodeRef, action);
-        }
-        if (parameters != null) {
-            for (Object key : parameters.keySet()) {
-                action.setParameterValue((String) key, (Serializable) parameters.get(key));
-            }
-        }
-        actionService.executeAction(action, nodeRef, true, async);
-
-    }
 
     public String getGroupFolderId() throws Throwable {
         return getGroupFolderId(this.authenticationInfo.get(CCConstants.AUTH_USERNAME));

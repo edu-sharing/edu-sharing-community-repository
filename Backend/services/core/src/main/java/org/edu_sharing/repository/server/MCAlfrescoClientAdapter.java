@@ -249,10 +249,6 @@ public class MCAlfrescoClientAdapter extends MCAlfrescoBaseClient {
 		return null;
 	}
 
-	@Override
-	public void executeAction(String nodeId, String actionName, String actionId, Map<String, Object> parameters, boolean async)
-			throws Exception {	
-	}
 
 	@Override
 	public String copyNode(String nodeId, String toNodeId, boolean copyChildren) throws Exception {
