@@ -297,6 +297,7 @@ export class MainNavService {
                 ),
                 tap((details) => {
                     if (!details) {
+                        this.setSystemMessage(null);
                         return;
                     }
                     if (details.message.repeat === 'once') {
