@@ -13,10 +13,7 @@ import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionStatus;
-import org.alfresco.service.cmr.repository.ContentReader;
-import org.alfresco.service.cmr.repository.InvalidNodeRefException;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
@@ -61,11 +58,14 @@ public class PreviewServlet extends HttpServlet {
 
 	ServiceRegistry serviceRegistry;
 
+    org.alfresco.service.cmr.repository.NodeService dbNodeService;
+
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 		ApplicationContext appContext = AlfAppContextGate.getApplicationContext();
 		serviceRegistry = (ServiceRegistry) appContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+        dbNodeService = (org.alfresco.service.cmr.repository.NodeService)AlfAppContextGate.getApplicationContext().getBean("alfrescoDefaultDbNodeService");
 	}
 
 	private boolean isCacheable(int width,int height, int maxWidth, int maxHeight){
@@ -129,10 +129,9 @@ public class PreviewServlet extends HttpServlet {
 
 			// check nodetype for security reasons
 			String inNodeId=nodeId;
-			Map<String,Object> props;
+            Map<String,Object> props = new HashMap<>();
 			if (nodeId != null) {
 				try {
-					props = nodeService.getProperties(storeRef.getProtocol(),storeRef.getIdentifier(),nodeId);
 					String[] aspectsArray = nodeService.getAspects(storeRef.getProtocol(), storeRef.getIdentifier(), nodeId);
 					List<String> aspects;
 					if(aspectsArray == null){
@@ -140,7 +139,20 @@ public class PreviewServlet extends HttpServlet {
 					} else {
 						aspects = Arrays.asList(aspectsArray);
 					}
+
+                    if(!remoteNode){
+                        String original = (String)dbNodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL));
+                        if(original != null) props.put(CCConstants.CCM_PROP_IO_ORIGINAL,original);
+
+                        String scope = (String)dbNodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME));
+                        if(scope != null) props.put(CCConstants.CCM_PROP_EDUSCOPE_NAME,scope);
+
+                        MLText lifecycleVersion = (MLText)dbNodeService.getProperty(nodeRef,QName.createQName(CCConstants.LOM_PROP_LIFECYCLE_VERSION));
+                        if(lifecycleVersion != null) props.put(CCConstants.LOM_PROP_LIFECYCLE_VERSION,lifecycleVersion.getDefaultValue());
+                    }
+
 					if (remoteNode || nodeType.equals(CCConstants.CCM_TYPE_REMOTEOBJECT) || aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)) {
+                        props = nodeService.getProperties(storeRef.getProtocol(),storeRef.getIdentifier(),nodeId);
 						if(aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)){
 							// just fetch dynamic data which needs to be fetched, because the local io already has metadata
 							props.putAll(NodeServiceFactory.getNodeService(
