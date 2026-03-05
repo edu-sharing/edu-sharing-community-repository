@@ -7,7 +7,7 @@
  */
 export function replaceElementWithDiv(
     element: Element,
-    mode: 'append' | 'replace' = 'replace',
+    mode: 'append' | 'replace' | 'child' = 'replace',
 ): HTMLDivElement {
     const div = document.createElement('div');
     div.setAttribute('data-element', element.localName);
@@ -22,6 +22,9 @@ export function replaceElementWithDiv(
             // element.parentNode.append(div);
         } else if (mode === 'replace') {
             element.parentNode.replaceChild(div, element);
+        } else if (mode === 'child') {
+            element.appendChild(div);
+            return element as HTMLDivElement;
         }
     } else {
         console.warn('replace child failed for ' + element.localName);

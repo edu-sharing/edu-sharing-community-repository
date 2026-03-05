@@ -121,7 +121,7 @@ export interface MdsState {
 }
 
 export type Widget = InstanceType<typeof MdsEditorInstanceService.Widget>;
-
+export type WidgetLocation = { id: string; ref: ElementRef<any> };
 export type CompletionStatus = { [key in RequiredMode]: CompletionStatusEntry };
 
 export class UnauthoritzedException implements Error {
@@ -843,6 +843,7 @@ export class MdsEditorInstanceService
     private loginInfo: LoginInfo;
     suggestionsSupported: boolean;
     private state$ = new BehaviorSubject<MdsState>({ widgets: {} });
+    widgetLocations = [] as WidgetLocation[];
 
     constructor(
         private mdsEditorCommonService: MdsEditorCommonService,
@@ -2249,7 +2250,7 @@ export class MdsEditorInstanceService
         widget: Widget,
         element: Element,
         widgetComponent: Type<Object>,
-        mode: 'append' | 'replace' = 'replace',
+        mode: 'append' | 'replace' | 'child' = 'replace',
         view?: MdsEditorViewComponent,
         container?: ElementRef<HTMLDivElement>,
     ): {
@@ -2314,6 +2315,21 @@ export class MdsEditorInstanceService
         if (this.extendedValues$.value) {
             this.extendedValues$.value[id] = value;
             this.extendedValues$.next(this.extendedValues$.value);
+        }
+    }
+
+    /**
+     * register a custom (DOM) location for a given widget id
+     * Please note that this method currently only supports regular widget (not native widgets)
+     * Also note that the location must be registered BEFORE inflating, afterwards, the widget won't be moved
+     * This is useful if you want to extract a specific widget/input field to a different page location
+     */
+    registerWidgetLocation(details: WidgetLocation) {
+        const current = this.widgetLocations.find((w) => w.id === details.id);
+        if (current) {
+            current.ref = details.ref;
+        } else {
+            this.widgetLocations.push(details);
         }
     }
 }

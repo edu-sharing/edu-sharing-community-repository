@@ -246,11 +246,21 @@ export class MdsEditorViewComponent
                             widget,
                             this.mdsEditorInstance.editorMode,
                         );
+                        const location = this.mdsEditorInstance.widgetLocations.find(
+                            (w) => w.id === widget.definition.id,
+                        );
+                        if (location && location.ref.nativeElement) {
+                            location.ref.nativeElement.innerHTML = '';
+                        }
                         this.mdsEditorInstance.injectWidget(
                             widget,
-                            element,
+                            location?.ref?.nativeElement || element,
                             widgetComponent,
-                            widgets.length === 1 ? 'replace' : 'append',
+                            location?.ref?.nativeElement
+                                ? 'child'
+                                : widgets.length === 1
+                                ? 'replace'
+                                : 'append',
                             this,
                             this.container,
                         );
