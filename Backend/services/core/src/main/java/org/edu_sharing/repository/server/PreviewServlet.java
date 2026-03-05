@@ -141,14 +141,7 @@ public class PreviewServlet extends HttpServlet {
 					}
 
                     if(!remoteNode){
-                        String original = (String)dbNodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL));
-                        if(original != null) props.put(CCConstants.CCM_PROP_IO_ORIGINAL,original);
-
-                        String scope = (String)dbNodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME));
-                        if(scope != null) props.put(CCConstants.CCM_PROP_EDUSCOPE_NAME,scope);
-
-                        MLText lifecycleVersion = (MLText)dbNodeService.getProperty(nodeRef,QName.createQName(CCConstants.LOM_PROP_LIFECYCLE_VERSION));
-                        if(lifecycleVersion != null) props.put(CCConstants.LOM_PROP_LIFECYCLE_VERSION,lifecycleVersion.getDefaultValue());
+                        props.putAll(getBasicProperties(nodeRef));
                     }
 
 					if (remoteNode || nodeType.equals(CCConstants.CCM_TYPE_REMOTEOBJECT) || aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)) {
@@ -349,14 +342,14 @@ public class PreviewServlet extends HttpServlet {
 				final String nodeIdFinal=nodeId;
 				props=AuthenticationUtil.runAsSystem(() -> {
                     try{
-                        return NodeServiceFactory.getLocalService().getProperties(storeRef.getProtocol(), storeRef.getIdentifier(),nodeIdFinal);
+                        return getPropertiesForDefaultHandling(storeRef,nodeIdFinal);
                     }catch(Throwable t){
                         throw new Exception(t);
                     }
                 });
 			}
 			else{
-				props=nodeService.getProperties(storeRef.getProtocol(), storeRef.getIdentifier(),nodeId);
+				props = getPropertiesForDefaultHandling(storeRef,nodeId);
 				aspects=nodeService.getAspects(storeRef.getProtocol(), storeRef.getIdentifier(),nodeId);
 				type = nodeService.getType(nodeId);
 			}
@@ -367,6 +360,34 @@ public class PreviewServlet extends HttpServlet {
 			resp.sendRedirect(mime.getDefaultPreview());
 		}
 	}
+
+    private Map<String, Object> getBasicProperties(NodeRef nodeRef)  {
+        Map<String, Object>  props = new HashMap<>();
+        String original = (String)dbNodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL));
+        if(original != null) props.put(CCConstants.CCM_PROP_IO_ORIGINAL,original);
+
+        String scope = (String)dbNodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME));
+        if(scope != null) props.put(CCConstants.CCM_PROP_EDUSCOPE_NAME,scope);
+
+        MLText lifecycleVersion = (MLText)dbNodeService.getProperty(nodeRef,QName.createQName(CCConstants.LOM_PROP_LIFECYCLE_VERSION));
+        if(lifecycleVersion != null) props.put(CCConstants.LOM_PROP_LIFECYCLE_VERSION,lifecycleVersion.getDefaultValue());
+        return props;
+    }
+
+    Map<String,Object> getPropertiesForDefaultHandling(StoreRef storeRef, String nodeId){
+        Map<String,Object> props = new HashMap<>();
+        NodeRef nodeRef = new NodeRef(storeRef, nodeId);
+        String wwwUrl = (String)dbNodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_WWWURL));
+        if(wwwUrl != null) props.put(CCConstants.CCM_PROP_IO_WWWURL,wwwUrl);
+
+        String resourceType = (String)dbNodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_CCRESSOURCETYPE));
+        if(resourceType != null) props.put(CCConstants.CCM_PROP_CCRESSOURCETYPE,resourceType);
+
+        List<String> resourceTypeSub = (List<String>)dbNodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_CCRESSOURCESUBTYPE));
+        if(resourceTypeSub != null && resourceTypeSub.size() > 0) props.put(CCConstants.CCM_PROP_CCRESSOURCESUBTYPE,resourceTypeSub.get(0));
+
+        return props;
+    }
 
 	private void validatePermissions(StoreRef storeRef, String nodeId) {
 		boolean result = PermissionServiceFactory.getLocalService().hasPermission(storeRef.getProtocol(),storeRef.getIdentifier(),nodeId,CCConstants.PERMISSION_READ_PREVIEW);
