@@ -42,6 +42,10 @@
       [attr.aria-labelledby]="chipsControl?.value?.length > 0 ? container?.labelId : null"
       (click)="$event.stopPropagation(); $event.preventDefault()"
       [formControl]="chipsControl"
+      cdkDropList
+      cdkDropListOrientation="mixed"
+      [cdkDropListData]="chipsControl?.value"
+      (cdkDropListDropped)="reorderChip($event)"
     >
       <!-- @TODO removed in angular 15
           [multiple]="true"
@@ -57,6 +61,8 @@
         matTooltipPosition="above"
         [class.indeterminate]="(indeterminateValues$ | async)?.includes(value.key)"
         [class.mat-chip-selected]="false"
+        cdkDrag
+        [cdkDragData]="value"
         [class.chip-is-suggestion]="(isSuggestion(value) | async)?.type"
         [class.chip-is-suggestion-ai]="(isSuggestion(value) | async)?.type === 'AI'"
         (click)="revealInTree(value)"

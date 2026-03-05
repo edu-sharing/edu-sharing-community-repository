@@ -3,10 +3,14 @@
 </div>
 <div class="node-list" *ngIf="files()?.length">
   @for (item of files(); track item) { @if(item.assignmentFile?.referNode) {
-  <div tabindex="0" (click)="click(item)" [class.selected]="selected() === item">
+  <div
+    tabindex="0"
+    (click)="click(item)"
+    [class.selected]="selected() === item"
+    [class.new]="!item.validationStatus || item.validationStatus === 'NOT_STARTED'"
+  >
     <es-node-type-badge [node]="item.assignmentFile.referNode"></es-node-type-badge>
     <div class="title">{{ item.assignmentFile.referNode | nodeTitle }}</div>
-    <mat-slide-toggle>TODO</mat-slide-toggle>
   </div>
   } }
 </div>

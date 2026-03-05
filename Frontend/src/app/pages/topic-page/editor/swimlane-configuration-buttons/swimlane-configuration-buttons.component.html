@@ -1,0 +1,57 @@
+<div class="swimlane-configuration-buttons">
+  <!-- display configuration (color, shape, mirror) -->
+  <div class="swimlane-display-config-buttons">
+    <label class="swimlane-display-config-label" [class.disabled-text]="inputsDisabled()">
+      {{ 'TOPIC_PAGE.SWIMLANE.SELECT_BACKGROUND.HEADING' | translate }}:
+    </label>
+
+    <es-color-picker
+      [selectedColor]="swimlaneColor"
+      [disabled]="inputsDisabled()"
+      [acceptLabel]="'APPLY'"
+      [cancelLabel]="'CANCEL'"
+      [colorLabel]="'TOPIC_PAGE.SWIMLANE.SELECT_BACKGROUND.COLOR'"
+      [customClass]="'swimlane-color-picker'"
+      (colorChange)="changedColor($event)"
+    ></es-color-picker>
+
+    <button
+      mat-icon-button
+      class="display-button"
+      [disabled]="!swimlaneColor"
+      [matMenuTriggerFor]="selectSwimlaneShape"
+    >
+      <div class="display-button-content">
+        <i esIcon="shapes"></i>
+        <div class="display-button-text">
+          {{ 'TOPIC_PAGE.SWIMLANE.SELECT_BACKGROUND.SHAPE' | translate }}
+        </div>
+      </div>
+    </button>
+
+    <mat-menu #selectSwimlaneShape="matMenu" class="topic-page-menu">
+      <button
+        mat-menu-item
+        *ngFor="let option of swimlaneBackgroundShapeOptions"
+        (click)="updateSwimlaneShape(option.shape)"
+      >
+        <i [esIcon]="option.image" [path]="option.image.startsWith('svg-') ? iconPath : null"></i>
+        {{ 'TOPIC_PAGE.SWIMLANE.SELECT_BACKGROUND.' + option.viewValue | translate }}
+      </button>
+    </mat-menu>
+
+    <button
+      mat-icon-button
+      class="display-button"
+      [disabled]="!swimlaneColor || swimlaneShape === SwimlaneBackgroundShape.None"
+      (click)="toggleSwimlaneShapeMirroring()"
+    >
+      <div class="display-button-content">
+        <i esIcon="compare_arrows"></i>
+        <div class="display-button-text">
+          {{ 'TOPIC_PAGE.SWIMLANE.SELECT_BACKGROUND.MIRROR' | translate }}
+        </div>
+      </div>
+    </button>
+  </div>
+</div>

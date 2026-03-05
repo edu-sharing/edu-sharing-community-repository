@@ -1,0 +1,307 @@
+@use '../../topic-page-variables' as topicPageVars;
+
+:host {
+    // resize mat-icons
+    .mat-icon,
+    .mat-mdc-icon {
+        // fixed font-size is okay here due to fixed width and height
+        font-size: 1.125rem;
+        height: 1.125rem;
+        width: 1.125rem;
+    }
+
+    // workaround to vertically center the icon correctly in a button
+    button .mat-icon,
+    button .mat-mdc-icon {
+        vertical-align: sub;
+    }
+
+    // hover and focuses are applied via ::before, so disable via opacity
+    --mdc-list-list-item-focus-state-layer-opacity: 0;
+    --mdc-list-list-item-hover-state-layer-opacity: 0;
+
+    // define variables to be used by both list components (for both parents and children)
+    --column-browser-hover-color: #{topicPageVars.$surface-alt};
+    --column-browser-focused-color: #{topicPageVars.$surface-selected};
+    --column-browser-badge-hover-color: #cacaca;
+    --column-browser-badge-focused-color: #ccd8e5;
+}
+
+// styles for topics column browser
+.topics-column-browser {
+    .node-list {
+        margin-top: 8px;
+        margin-bottom: 8px;
+        display: inline-flex;
+        overflow-x: auto;
+        overflow-y: hidden;
+        flex-grow: 1;
+        background: rgba(255, 255, 255, 0.4);
+
+        &.mobile {
+            display: flex;
+        }
+    }
+}
+
+// global styles for elements in both lists
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.spinner-container {
+    height: 100%;
+    display: grid;
+    flex-grow: 1;
+
+    mat-spinner {
+        margin: auto;
+    }
+}
+
+.error-notice {
+    padding: 10px 20px;
+}
+
+.error-notice {
+    // TODO: Fixed colors for now
+    border: 1px solid #b71c1c;
+    background-color: #ffcdd2;
+
+    p {
+        margin: 0;
+    }
+}
+
+.item-link {
+    text-decoration: unset;
+    color: topicPageVars.$primary-dark;
+    display: inline-block;
+
+    // make the text bold but invisible by default, so the browser calculates layout using bold width from the start
+    &::before {
+        content: attr(data-text);
+        font-weight: topicPageVars.$font-weight-x-bold;
+        visibility: hidden;
+        display: block;
+        height: 0;
+        overflow: hidden;
+    }
+
+    &:hover {
+        font-weight: topicPageVars.$font-weight-x-bold !important;
+    }
+
+    &:focus-visible {
+        border: 3px solid topicPageVars.$primary;
+        border-radius: 6px;
+        outline: none;
+    }
+}
+
+// global styles for both lists
+.first-level-list,
+.children-list-container {
+    min-width: 325px;
+    flex-shrink: 0;
+
+    .container-right {
+        margin-left: 75px;
+        display: inline-flex;
+        align-items: center;
+        gap: 16px;
+
+        .badge {
+            padding: 0 5px;
+            font: 600 11px Montserrat;
+            line-height: 140%;
+            text-align: center;
+            vertical-align: middle;
+            border-radius: 12px;
+            color: #333;
+            background: topicPageVars.$surface-alt;
+        }
+    }
+}
+
+// parent list container
+.first-level-list {
+    padding: 0;
+    overflow-y: auto;
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.4);
+
+    // overwrite border-radius of focus effect from the mat-list-option
+    &::ng-deep mat-list-option:focus {
+        .mat-mdc-focus-indicator::before {
+            border-radius: 0;
+        }
+    }
+
+    mat-list-option {
+        padding: 0 20px;
+
+        .list-item-title-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            .item-link {
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .mat-icon {
+                flex-shrink: 0;
+            }
+        }
+
+        &:hover {
+            background: var(--column-browser-hover-color);
+
+            .badge {
+                background: var(--column-browser-badge-hover-color) !important;
+            }
+        }
+
+        &:active {
+            background: var(--column-browser-focused-color);
+
+            .badge {
+                background: var(--column-browser-badge-focused-color) !important;
+            }
+        }
+
+        &:focus-visible {
+            border: 3px solid topicPageVars.$primary;
+            border-radius: 2px;
+            background: var(--column-browser-focused-color);
+
+            .badge {
+                background: var(--column-browser-badge-focused-color) !important;
+            }
+        }
+
+        &.mdc-list-item--selected {
+            border: none;
+            border-left: 6px solid topicPageVars.$primary !important;
+            background: var(--column-browser-focused-color) !important;
+
+            .badge {
+                background: var(--column-browser-badge-focused-color) !important;
+            }
+        }
+    }
+}
+
+// children list containers
+.children-list-container {
+    display: flex;
+    flex-direction: column;
+
+    &:last-of-type .child-level-list {
+        flex-wrap: wrap;
+    }
+
+    &:not(:last-of-type) {
+        overflow-y: auto;
+        overflow-x: hidden;
+        flex-direction: column;
+        box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.4);
+    }
+
+    .back {
+        padding: 5px 15px;
+    }
+
+    .child-level-list {
+        margin: 0;
+        padding: 0;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+
+        .child-list-item {
+            padding: 0 20px;
+            height: var(--mdc-list-list-item-one-line-container-height);
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            // TODO: Replace, if necessary
+            background-color: unset;
+            border: unset;
+            text-align: unset;
+
+            &:hover {
+                background: var(--column-browser-hover-color);
+
+                .badge {
+                    background: var(--column-browser-badge-hover-color) !important;
+                }
+            }
+
+            &:active {
+                background: var(--column-browser-focused-color);
+
+                .badge {
+                    background: var(--column-browser-badge-focused-color) !important;
+                }
+            }
+
+            &.item-selected {
+                margin-left: 0;
+                border: none;
+                border-left: 6px solid topicPageVars.$primary !important;
+                background: var(--column-browser-focused-color) !important;
+
+                .badge {
+                    background: var(--column-browser-badge-focused-color) !important;
+                }
+            }
+
+            &:focus-visible {
+                outline: none;
+                border: 3px solid topicPageVars.$primary !important;
+                border-radius: 2px;
+                background: var(--column-browser-focused-color) !important;
+
+                .badge {
+                    background: var(--column-browser-badge-focused-color) !important;
+                }
+            }
+
+            // adjust font style to match the selection list
+            .item-link {
+                font-family: var(--mdc-list-list-item-label-text-font);
+                line-height: var(--mdc-list-list-item-label-text-line-height);
+                font-size: var(--mdc-list-list-item-label-text-size);
+                font-weight: var(--mdc-list-list-item-label-text-weight);
+                letter-spacing: var(--mdc-list-list-item-label-text-tracking);
+            }
+        }
+    }
+
+    .info-message {
+        margin-left: 8px;
+        display: block;
+    }
+}
+
+// max-width also defined in ts file!
+@media screen and (max-width: 860px) {
+    .first-level-list,
+    .children-list-container,
+    .child-list-item {
+        min-width: unset;
+        width: 100%;
+        // fix for children taking more space then existing
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+}
+
+// fix for vertically centering the text and icon of the mat-selection-list
+:host ::ng-deep mat-selection-list mat-list-option .mdc-button__label {
+    display: flex;
+    align-items: center;
+}

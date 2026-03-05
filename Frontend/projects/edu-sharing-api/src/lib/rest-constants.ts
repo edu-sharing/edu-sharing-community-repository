@@ -2,6 +2,24 @@ export class RestConstants {
     public static USERHOME = '-userhome-';
     public static DUPLICATE_NODE_RESPONSE = 409;
 
+    public static DEFAULT_COLLECTION_COLORS: string[] = [
+        '#975B5D',
+        '#692426',
+        '#E6B247',
+        '#A89B39',
+        '#699761',
+        '#32662A',
+        '#60998F',
+        '#29685C',
+        '#759CB7',
+        '#537997',
+        '#976097',
+        '#692869',
+    ];
+    public static PLUGIN_KAFKA_NOTIFICATION = 'kafka-notification-plugin';
+    public static PLUGIN_MONGO = 'mongo-plugin';
+
+    public static SUGGESTION_DESCRIPTION_METHODOLOGY = 'METHODOLOGY';
     public static COLLECTIONSCOPE_MY = 'MY';
     public static COLLECTIONSCOPE_ORGA = 'EDU_GROUPS';
     public static COLLECTIONSCOPE_ALL = 'EDU_ALL';
@@ -104,7 +122,8 @@ export class RestConstants {
     public static TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS =
         'TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS';
     public static CCM_PROP_IMPORT_BLOCKED = 'ccm:importblocked';
-
+    public static CCM_PROP_PAGE_CONFIG_REF: string = 'ccm:page_config_ref';
+    public static CCM_PROP_PAGE_CONFIG_PROPAGATE_REF: string = 'ccm:page_config_propagate_ref';
     public static CCM_PROP_LICENSE = 'ccm:commonlicense_key';
     public static CCM_PROP_WF_RECEIVER = 'ccm:wf_receiver';
     public static CCM_PROP_WF_STATUS = 'ccm:wf_status';
@@ -193,6 +212,7 @@ export class RestConstants {
     public static GROUP_TYPE_SCHOOL_NATIONAL = 'SCHOOL_NATIONAL';
     public static GROUP_TYPE_SCHOOL_MUNICIPAL = 'SCHOOL_MUNICIPAL';
     public static GROUP_TYPE_SCHOOL_PRIVATE = 'SCHOOL_PRIVATE';
+    public static GROUP_TYPE_SCHOOL_NONE = 'SCHOOL_NONE';
     public static VALID_GROUP_TYPES = [
         null,
         RestConstants.GROUP_TYPE_ADMINISTRATORS,
@@ -204,6 +224,7 @@ export class RestConstants {
         RestConstants.GROUP_TYPE_CLASS,
         RestConstants.GROUP_TYPE_WORKING_GROUP,
         RestConstants.GROUP_TYPE_LESSON,
+        RestConstants.GROUP_TYPE_SCHOOL_NONE,
     ];
     public static VALID_PERSON_STATUS_TYPES = ['active', 'blocked', 'todelete'];
     public static VALID_GROUP_TYPES_ORG = [

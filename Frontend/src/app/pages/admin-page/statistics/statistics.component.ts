@@ -13,8 +13,8 @@ import {
 import { TranslateService } from '@ngx-translate/core';
 import { DEFAULT, HOME_REPOSITORY, Node, SearchResults, SearchService } from 'ngx-edu-sharing-api';
 import {
-    ColumnType,
     AuthorityNamePipe,
+    ColumnType,
     FormatDatePipe,
     InteractionType,
     ListCountsComponent,
@@ -1015,8 +1015,11 @@ export class AdminStatisticsComponent implements OnInit {
             this.columns = { Default: [new ListItem('NODE', RestConstants.CM_NAME)] };
         }
         this.storage
-            .get('admin_statistics_properties', this.columns.Default.map((c) => c.name).join('\n'))
-            .subscribe((p) => (this.exportProperties = p));
+            .get<string>(
+                'admin_statistics_properties',
+                this.columns.Default.map((c) => c.name).join('\n'),
+            )
+            .then((p) => (this.exportProperties = p));
 
         this.columns.Default = this.columns.Default.concat([
             //new ListItem('NODE', 'counts.OVERALL'),

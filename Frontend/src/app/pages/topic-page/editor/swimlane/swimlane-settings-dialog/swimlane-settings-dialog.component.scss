@@ -1,0 +1,59 @@
+@use '../../../topic-page-variables' as topicPageVars;
+
+:host {
+    width: 100%;
+}
+
+.dialog-title-heading {
+    padding-top: 16px;
+}
+
+.settings-form {
+    padding-top: 5px !important;
+
+    mat-form-field {
+        width: 100%;
+    }
+}
+
+.topic-page-grid-content {
+    color: topicPageVars.$secondary-text;
+}
+
+.topic-page-text-center {
+    text-align: center;
+}
+
+.drag-handle {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    cursor: move;
+    width: 24px;
+    height: 24px;
+}
+
+.delete-tile {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.grid-label {
+    margin-bottom: 16px;
+}
+
+hr {
+    margin-top: 16px;
+    margin-bottom: 16px;
+    border-color: topicPageVars.$outline;
+}
+
+es-info-message {
+    margin-bottom: 16px;
+    display: block;
+}

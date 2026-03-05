@@ -1,0 +1,28 @@
+<es-editable-text
+  *ngIf="shouldShowHeadline()"
+  class="generic-widget-headline"
+  [aiGenerated]="headlineAiGenerated()"
+  [alignCenter]="true"
+  [disabled]="updateInProgress()"
+  [editable]="editMode()"
+  [headerElement]="'h3'"
+  [label]="'TOPIC_PAGE.WIDGET.SUB_HEADING_LABEL_OPTIONAL' | translate"
+  [searchInput]="searchInput()"
+  [text]="headline() | aiTextPrompt : editMode() : headlineMapping()"
+  (searchResultsUpdated)="onSearchResultsUpdated($event, 'headline')"
+  (textChange)="onTextChange($event, true)"
+></es-editable-text>
+
+<es-editable-text
+  *ngIf="shouldShowDescription()"
+  class="generic-widget-description"
+  [aiGenerated]="descriptionAiGenerated()"
+  [disabled]="updateInProgress()"
+  [editable]="editMode()"
+  [label]="descriptionLabel() | translate"
+  [searchInput]="searchInput()"
+  [showAiButtons]="aiSupported()"
+  [text]="description() | aiTextPrompt : editMode() : descriptionMapping()"
+  (searchResultsUpdated)="onSearchResultsUpdated($event, 'description')"
+  (textChange)="onTextChange($event)"
+></es-editable-text>

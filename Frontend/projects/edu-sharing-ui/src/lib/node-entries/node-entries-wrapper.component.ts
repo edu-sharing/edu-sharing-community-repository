@@ -62,6 +62,7 @@ import { VirtualNode } from '../types/api-models';
 import { UIService } from '../services/ui.service';
 import { SelectionChange } from '@angular/cdk/collections';
 import { ColumnType } from '../mds/mds-helper.service';
+import { PaginationStrategy } from './node-entries-global.service';
 import { NodeEntriesDataType } from './data-type';
 import { OptionsHelperService } from '../services/abstract/options-helper.service';
 import { OptionsHelperDataService } from '../services/options-helper-data.service';
@@ -112,6 +113,11 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @Input() globalOptions: OptionItem[];
     @Input() globalOptionsPosition: 'before' | 'after' = 'before';
     @Input() displayType = NodeEntriesDisplayType.Grid;
+    /**
+     * custom pagination strategy
+     * when unset, the global defined strategy for the current scope will be used
+     */
+    @Input() paginationStrategy: PaginationStrategy | null = null;
     @Output() displayTypeChange = new EventEmitter<NodeEntriesDisplayType>();
     @Output() selectionChange = new EventEmitter<SelectionChange<T>>();
     @Input() elementInteractionType = InteractionType.DefaultActionLink;
@@ -262,6 +268,12 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.configureColumns = this.configureColumns;
         this.entriesService.checkbox = this.checkbox;
         this.entriesService.displayType = this.displayType;
+        if (changes.paginationStrategy) {
+            this.entriesService.paginationStrategy = this.paginationStrategy;
+            setTimeout(() => {
+                this.nodeEntriesComponentRef?.refreshPaginator();
+            });
+        }
         this.entriesService.elementInteractionType = this.elementInteractionType;
         this.entriesService.gridConfig = this.gridConfig;
         if (this.tableConfig) {

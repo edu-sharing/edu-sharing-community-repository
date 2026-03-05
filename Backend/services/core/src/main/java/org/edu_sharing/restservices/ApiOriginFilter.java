@@ -71,6 +71,11 @@ public class ApiOriginFilter implements jakarta.servlet.Filter {
 				res.addHeader(
 						"Access-Control-Allow-Credentials",
 						"false");
+
+				res.addHeader(
+						"Access-Control-Allow-Headers",
+						req.getHeader("Access-Control-Request-Headers"));
+
 				res.addHeader(
 						"Access-Control-Allow-Origin", "*");
 			}

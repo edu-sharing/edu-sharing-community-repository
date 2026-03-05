@@ -495,7 +495,7 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
         } else if ("-me-".equalsIgnoreCase(submissionId)) {
             String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
             Optional<SubmissionDao> submissionByCreator = getSubmissionByCreator(currentUser);
-            if (submissionByCreator.isEmpty()) {
+            if (submissionByCreator.isEmpty() || submissionByCreator.get() instanceof EmptySubmissionAssignmentDao) {
                 submissionDao = assignmentDaoFactory.submissionDaoByNodeId(this, null);
                 submissionDao.create();
                 submissionsMap.get().put(submissionDao.getNodeId(), submissionDao);

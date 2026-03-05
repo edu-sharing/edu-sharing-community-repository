@@ -128,8 +128,8 @@ export class DashboardSwimlaneComponent {
             .subscribe(() => void this.initSwimlane());
         effect(() => {
             this.storage
-                .get(this.getStorageKey(), this.swimlane().defaultExpanded)
-                .subscribe((v) => this.open.next(v));
+                .get<boolean>(this.getStorageKey(), this.swimlane().defaultExpanded)
+                .then((v) => this.open.next(v));
 
             this.dataSource.isLoading = this.nodes() == null || !this.columns();
             if (!this.dataSource.isLoading) {

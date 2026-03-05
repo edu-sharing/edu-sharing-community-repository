@@ -120,8 +120,8 @@ export class LuceneTemplateMemoryComponent {
         private translate: TranslateService,
     ) {
         this.storage
-            .get(LuceneTemplateMemoryComponent.STORAGE_KEY)
-            .subscribe((templates: LuceneTemplates) => {
+            .get<LuceneTemplates>(LuceneTemplateMemoryComponent.STORAGE_KEY)
+            .then((templates) => {
                 this.templates = templates ?? {};
                 for (const key of Object.keys(LuceneTemplateMemoryComponent.DEFAULT_TEMPLATES)) {
                     this.templates[

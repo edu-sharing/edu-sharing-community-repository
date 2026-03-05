@@ -3,8 +3,17 @@
 @use 'projects/edu-sharing-ui/src/lib/node-entries/node-entries-card-small/node-entries-card-small.component'
     as card;
 
+$maxWidth: 1000px;
+mat-tab-group {
+    width: 100%;
+    max-width: $maxWidth;
+    justify-self: center;
+    display: flex;
+}
 .assignment-view,
 .assignment-submit {
+    width: 100%;
+    justify-self: center;
     display: flex;
     flex-direction: column;
     gap: 10px;

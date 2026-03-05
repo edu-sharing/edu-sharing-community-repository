@@ -44,7 +44,7 @@ export class NotificationListComponent implements OnInit {
         this.authenticationService.observeLoginInfo().subscribe(async (login) => {
             this.show =
                 login.statusCode === RestConstants.STATUS_CODE_OK &&
-                (await this.aboutService.hasPlugin('kafka-notification-plugin'));
+                (await this.aboutService.hasPlugin(RestConstants.PLUGIN_KAFKA_NOTIFICATION));
             if (this.show) {
                 void this.loadNotifications();
             }

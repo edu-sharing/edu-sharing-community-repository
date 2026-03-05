@@ -51,6 +51,9 @@
         "METHODOLOGY": {
           "TITLE": "Methodik",
           "INFO": "Finde schneller, was du suchst. Baue dir Tagging-Vorlagen und tagge Material.\n Baue dir damit deine typischen Filter für die Suche.",
+          "METADATA_SAVED_WRITE": "Metadaten an {{writeCount}} Element(en) aktualisiert",
+          "METADATA_SUGGESTIONS": "Metadaten an {{suggestionCount}} Element(en) als Vorschlag hinterlegt, da keine ausreichenden Rechte vorhanden sind",
+          "METADATA_SKIPPED": "Metadaten an {{skippedCount}} Element(en) übersprungen, da keine ausreichenden Rechte vorhanden sind",
           "SELECT_TEMPLATE": "Vorlage auswählen",
           "MANAGE_TEMPLATES": "Vorlagen verwalten",
           "TEMPLATE_NAME": "Titel der Vorlage",
@@ -117,6 +120,9 @@
     "SUBMIT_ASSIGNMENT": {
       "TAB_ASSIGNMENT": "Aufgabe",
       "TAB_SUBMIT": "Abgaben",
+      "SUBMIT_CONFIRM_TITLE": "Aufgabe abgeben?",
+      "SUBMIT_CONFIRM_INFO": "Soll die Aufgabe abgegeben werden?\n\nWichtig: Nach einer erfolgten Abgabe sind keine weiteren Änderungen mehr möglich!",
+      "SBMITTED": "Die Aufgabe wurde abgegeben",
       "ADD_COMMENT": "Kommentar hinzufügen",
       "SUBMIT_DETAILS": "Abgabeinformationen",
       "START_TIME": "Ausgegeben",

@@ -157,7 +157,9 @@ export class MdsEditorSingleWidgetComponent implements OnChanges, OnDestroy, Mds
         // timeout to wait for view inflation and set the focus
         await this.applicationRef.tick();
         setTimeout(() => {
-            injected.instance.focus();
+            if (this.editorMode !== 'form') {
+                injected.instance.focus();
+            }
             if (this.editorMode === 'inline') {
                 injected.instance.onBlur.pipe(first()).subscribe(() => {
                     this.ngModelChange.emit(injected.instance.widget.getValue());

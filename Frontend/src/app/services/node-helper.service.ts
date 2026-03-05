@@ -12,20 +12,14 @@ import {
     OptionItem,
     RepoUrlService,
     TemporaryStorageService,
+    Toast as ToastUi,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
 import { Helper } from '../core-module/rest/helper';
 import { HttpClient } from '@angular/common/http';
 import { MessageType } from '../util/message-type';
-import { Toast as ToastUi } from 'ngx-edu-sharing-ui';
 import { Toast } from './toast';
-import {
-    ComponentFactoryResolver,
-    Inject,
-    Injectable,
-    Optional,
-    ViewContainerRef,
-} from '@angular/core';
+import { ComponentFactoryResolver, Injectable, ViewContainerRef } from '@angular/core';
 import { BridgeService } from './bridge.service';
 import {
     AuthorityProfile,
@@ -53,6 +47,7 @@ import {
 } from 'ngx-edu-sharing-api';
 import { DialogsService } from '../features/dialogs/dialogs.service';
 import { DialogButton } from '../util/dialog-button';
+import { environment } from '../../environments/environment';
 
 export interface ConfigEntry {
     name: string;
@@ -461,13 +456,11 @@ export class NodeHelperService extends NodeHelperServiceBase {
         if (
             safe &&
             !confirmed &&
-            !(await this.sessionStorage
-                .get(
-                    SessionStorageService.KEY_WORKSPACE_SAFE_DOWNLOAD_CONFIRM,
-                    false,
-                    Store.Session,
-                )
-                .toPromise())
+            !(await this.sessionStorage.get(
+                SessionStorageService.KEY_WORKSPACE_SAFE_DOWNLOAD_CONFIRM,
+                false,
+                Store.Session,
+            ))
         ) {
             const buttons = [
                 new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, null),
@@ -721,6 +714,13 @@ export class NodeHelperService extends NodeHelperServiceBase {
     getNodeUrl(node: UniversalNode, queryParams?: Params, short = false): string {
         const link = this.getNodeLink('queryParams', node);
         if (link) {
+            let loc = location.origin;
+            if (environment.webComponentMode) {
+                loc = (window as any).__env?.EDU_SHARING_API_URL.slice(0, -5);
+                if (!loc) {
+                    console.warn('missing window.__env.EDU_SHARING_API_URL, urls might be wrong');
+                }
+            }
             const urlTree = this.router.createUrlTree(
                 [this.getNodeLink('routerLink', node, short)],
                 {
@@ -730,7 +730,7 @@ export class NodeHelperService extends NodeHelperServiceBase {
                     },
                 },
             );
-            return location.origin + this.location.prepareExternalUrl(urlTree.toString());
+            return loc + this.location.prepareExternalUrl(urlTree.toString());
         } else {
             return null;
         }
@@ -738,7 +738,7 @@ export class NodeHelperService extends NodeHelperServiceBase {
 
     getDefaultInboxFolder() {
         return new Observable<Node>((subscriber) => {
-            this.sessionStorage.get('defaultInboxFolder', RestConstants.INBOX).subscribe(
+            this.sessionStorage.get('defaultInboxFolder', RestConstants.INBOX).then(
                 (id) => {
                     this.nodeService.getNodeMetadata(id).subscribe(
                         (node) => {

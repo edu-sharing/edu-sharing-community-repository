@@ -14,7 +14,7 @@ import {
 import { TranslateService } from '@ngx-translate/core';
 import { LocalEventsService, NodeHelperService, UIAnimation } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
-import { firstValueFrom, forkJoin as observableForkJoin, of } from 'rxjs';
+import { forkJoin as observableForkJoin, of } from 'rxjs';
 import {
     CollectionUsage,
     ConfigurationService,
@@ -251,7 +251,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     async ngOnInit() {
         this.initButtons();
         this.hasNotificationService = await this.aboutService.hasPlugin(
-            'kafka-notification-plugin',
+            RestConstants.PLUGIN_KAFKA_NOTIFICATION,
         );
     }
 

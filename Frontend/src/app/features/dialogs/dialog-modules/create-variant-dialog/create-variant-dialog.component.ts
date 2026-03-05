@@ -5,12 +5,10 @@ import { OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
 import {
     Connector,
     DialogButton,
-    FrameEventsService,
     RestConnectorService,
     RestConnectorsService,
     RestConstants,
     RestHelper,
-    RestIamService,
     RestNodeService,
     UIService,
 } from '../../../../core-module/core.module';

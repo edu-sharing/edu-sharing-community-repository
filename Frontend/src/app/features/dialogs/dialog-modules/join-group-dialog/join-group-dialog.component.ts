@@ -62,7 +62,7 @@ export class JoinGroupDialogComponent implements OnInit {
                     this.groups = groups.groups;
                     this.groupsLoading = false;
                     this.searchGroups();
-                    setTimeout(() => this.searchControl.nativeElement.focus());
+                    setTimeout(() => this.searchControl?.nativeElement?.focus());
                 },
                 (error) => {
                     this.toast.error(error);

@@ -2368,6 +2368,7 @@ public class CCConstants {
     public static final String GROUP_TYPE_SCHOOL_NATIONAL = "SCHOOL_NATIONAL";
     public static final String GROUP_TYPE_SCHOOL_MUNICIPAL = "SCHOOL_MUNICIPAL";
     public static final String GROUP_TYPE_SCHOOL_PRIVATE = "SCHOOL_PRIVATE";
+	public static final String GROUP_TYPE_SCHOOL_NONE = "SCHOOL_NONE";
 
     public static final String EDITORIAL_GROUP_TYPE = "EDITORIAL";
     public static final String COLLECTIONTYPE_DEFAULT = "default";

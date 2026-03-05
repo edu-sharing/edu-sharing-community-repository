@@ -19,19 +19,19 @@
       <editor [init]="editorConfig" formControlName="summary"></editor>
       <mat-label>{{ 'EDITORIAL.ASSIGNMENT.FORM.FILES' | translate }}</mat-label>
       <div class="files">
-        <es-info-message class="submissions" *ngIf="submissions()?.length > 0">{{
+        <es-info-message class="submissions" *ngIf="submissionsWithContent()?.length > 0">{{
           'EDITORIAL.ASSIGNMENT.FORM.HAS_SUBMISSIONS' | translate
         }}</es-info-message>
         <es-manage-assignment-nodes
           [assignment]="assignment()"
-          [readonly]="submissions()?.length > 0"
+          [readonly]="submissionsWithContent()?.length > 0"
           [nodes]="nodes()"
         ></es-manage-assignment-nodes>
         <button
           mat-flat-button
           color="primary"
           (click)="showFileDialog()"
-          [disabled]="submissions()?.length > 0"
+          [disabled]="submissionsWithContent()?.length > 0"
         >
           <i esIcon="add"></i> {{ 'EDITORIAL.ASSIGNMENT.FORM.ADD_FILE' | translate }}
         </button>

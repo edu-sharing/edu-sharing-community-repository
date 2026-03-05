@@ -272,19 +272,27 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         }
         assocName = "{" + CCConstants.NAMESPACE_CCM + "}" + assocName;
         Map<String, Object> propsConverted = new HashMap<>(_props);
+        PropertiesGetInterceptor.PropertiesContext context = PropertiesInterceptorFactory.getPropertiesContext(
+                null,
+                propsConverted,
+                Collections.emptyList(), null, null,
+                PropertiesSetInterceptor.ContextStage.BeforeAlfrescoInterceptors
+        );
+
         propsConverted = runSetInterceptors(
                 null,
                 propsConverted,
                 PropertiesInterceptorFactory.getPropertiesSetInterceptors()
                         .stream()
-                        .filter(i -> i.getInterceptorTiming().equals(PropertiesSetInterceptor.SetInterceptorTiming.BeforeAlfrescoInterceptors))
-                        .collect(Collectors.toList()));
+                        .filter(i -> Arrays.asList(PropertiesSetInterceptor.SetInterceptorTiming.BeforeAlfrescoInterceptors, PropertiesSetInterceptor.SetInterceptorTiming.All).contains(i.getInterceptorTiming()))
+                        .collect(Collectors.toList()),
+                context);
         Map<QName, Serializable> properties = transformPropMap(propsConverted);
 
 
         ChildAssociationRef childRef = nodeService.createNode(parentNodeRef, QName.createQName(childAssociation), QName.createQName(assocName), nodeType,
                 properties);
-        runNodePropertiesAfterInterceptors(childRef.getChildRef());
+        runNodePropertiesAfterInterceptors(childRef.getChildRef(), context);
 
         if (childAssociation.equals(CCConstants.CCM_ASSOC_CHILDIO)) {
             repositoryCache.remove(parentID);
@@ -292,14 +300,24 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         return childRef.getChildRef().getId();
     }
 
-    private void runNodePropertiesAfterInterceptors(NodeRef nodeRef) {
+    private void runNodePropertiesAfterInterceptors(NodeRef nodeRef, PropertiesGetInterceptor.PropertiesContext context) {
         try {
-            List<? extends PropertiesSetInterceptor> afterInterceptors = PropertiesInterceptorFactory.getPropertiesSetInterceptors().stream().filter(i -> i.getInterceptorTiming().equals(PropertiesSetInterceptor.SetInterceptorTiming.AfterAlfrescoInterceptors)).collect(Collectors.toList());
+            List<? extends PropertiesSetInterceptor> afterInterceptors = PropertiesInterceptorFactory.getPropertiesSetInterceptors().stream().filter(i -> Arrays.asList(PropertiesSetInterceptor.SetInterceptorTiming.AfterAlfrescoInterceptors, PropertiesSetInterceptor.SetInterceptorTiming.All).contains(i.getInterceptorTiming())).collect(Collectors.toList());
             if (!afterInterceptors.isEmpty()) {
                 Map<String, Object> storedProperties = nodeService.getProperties(nodeRef).entrySet().stream()
                         .collect(HashMap::new, (m, v) -> m.put(v.getKey().toString(), v.getValue()), HashMap::putAll);
-                storedProperties = runSetInterceptors(nodeRef, storedProperties, afterInterceptors);
+                context.setStage(PropertiesSetInterceptor.ContextStage.AfterAlfrescoInterceptors);
+                storedProperties = runSetInterceptors(nodeRef, storedProperties, afterInterceptors, context);
                 nodeService.setProperties(nodeRef, convertToFinalProperties(nodeRef, storedProperties));
+            }
+
+            // possible interceptors that do handling after the properties have been set
+            List<? extends PropertiesSetInterceptor> afterPropsSetInterceptors = PropertiesInterceptorFactory.getPropertiesSetInterceptors().stream().filter(i -> Arrays.asList(PropertiesSetInterceptor.SetInterceptorTiming.AfterPropertiesSet, PropertiesSetInterceptor.SetInterceptorTiming.All).contains(i.getInterceptorTiming())).collect(Collectors.toList());
+            if (!afterPropsSetInterceptors.isEmpty()) {
+                Map<String, Object> storedProperties = nodeService.getProperties(nodeRef).entrySet().stream()
+                        .collect(HashMap::new, (m, v) -> m.put(v.getKey().toString(), v.getValue()), HashMap::putAll);
+                context.setStage(PropertiesSetInterceptor.ContextStage.AfterPropertiesSet);
+                runSetInterceptors(nodeRef, storedProperties, afterInterceptors, context);
             }
         } catch (Throwable e) {
             log.warn("Could not run after interceptors", e);
@@ -794,14 +812,22 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
             }
 
             Map<String, Object> propsFinal = propsConverted;
-
-            propsFinal = runSetInterceptors(nodeRef, propsFinal, PropertiesInterceptorFactory.getPropertiesSetInterceptors().stream().filter(i -> i.getInterceptorTiming().equals(PropertiesSetInterceptor.SetInterceptorTiming.BeforeAlfrescoInterceptors)).collect(Collectors.toList()));
+            PropertiesGetInterceptor.PropertiesContext context = PropertiesInterceptorFactory.getPropertiesContext(
+                    nodeRef,
+                    propsFinal,
+                    Arrays.asList(getAspects(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId()))
+                    , null, null,
+                    PropertiesSetInterceptor.ContextStage.BeforeAlfrescoInterceptors
+            );
+            propsFinal = runSetInterceptors(nodeRef, propsFinal, PropertiesInterceptorFactory.getPropertiesSetInterceptors().stream().filter(
+                    i -> Arrays.asList(PropertiesSetInterceptor.SetInterceptorTiming.BeforeAlfrescoInterceptors, PropertiesSetInterceptor.SetInterceptorTiming.All).contains(i.getInterceptorTiming())
+            ).collect(Collectors.toList()), context);
             HashMap<QName, Serializable> propsStore = convertToFinalProperties(nodeRef, propsFinal);
             // check that no interceptor has set a previously null variable
             propsNull.removeIf(prop -> propsStore.get(prop) != null);
 
             nodeService.setProperties(nodeRef, propsStore);
-            runNodePropertiesAfterInterceptors(nodeRef);
+            runNodePropertiesAfterInterceptors(nodeRef, context);
             // do in transaction to disable behaviour
             // otherwise interceptors might be called multiple times -> the final update props is enough!
             // do it AFTER set properties so the values can be sent as NULL-Values into setProperties to be read by interceptors
@@ -828,13 +854,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
     }
 
-    private Map<String, Object> runSetInterceptors(NodeRef nodeRef, Map<String, Object> propsFinal, List<? extends PropertiesSetInterceptor> interceptors) {
+    private Map<String, Object> runSetInterceptors(NodeRef nodeRef, Map<String, Object> propsFinal, List<? extends PropertiesSetInterceptor> interceptors, PropertiesGetInterceptor.PropertiesContext context) {
         for (PropertiesSetInterceptor i : interceptors) {
             try {
-                propsFinal = i.beforeSetProperties(PropertiesInterceptorFactory.getPropertiesContext(
-                        nodeRef,
-                        propsFinal,
-                        nodeRef == null ? Collections.emptyList() : Arrays.asList(getAspects(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId())), null, null));
+                context.setProperties(propsFinal);
+                propsFinal = i.beforeSetProperties(context);
             } catch (Throwable e) {
                 log.warn("Error while calling interceptor {}: {}", i.getClass().getName(), e.toString());
             }
@@ -1913,7 +1937,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                         properties = i.beforeSetProperties(PropertiesInterceptorFactory.getPropertiesContext(
                                 nodeRef,
                                 properties,
-                                Arrays.asList(getAspects(protocol, storeId, nodeId)), null, null)
+                                Arrays.asList(getAspects(protocol, storeId, nodeId)), null, null, null)
                         );
                     } catch (Throwable e) {
                         log.warn("Error while calling interceptors " + i.getClass().getName() + ": " + e);

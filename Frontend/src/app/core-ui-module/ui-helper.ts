@@ -176,6 +176,29 @@ export class UIHelper {
         void router.navigate([UIConstants.ROUTER_PREFIX, 'render', node.ref.id]);
     }
 
+    public static goToTopicPage(router: Router, node: Node) {
+        void router.navigate([UIConstants.ROUTER_PREFIX, 'topic-pages'], {
+            queryParams: { collectionId: node.ref.id },
+        });
+    }
+
+    public static goToCollection(
+        router: Router,
+        node: Node,
+        mode: null | 'new' | 'edit' = null,
+        extras: NavigationExtras = {},
+    ) {
+        if (mode === 'new' || mode === 'edit') {
+            void router.navigate(
+                [UIConstants.ROUTER_PREFIX, 'collections', 'collection', mode, node.ref.id],
+                extras,
+            );
+        } else {
+            extras.queryParams = { id: node.ref.id };
+            void router.navigate([UIConstants.ROUTER_PREFIX, 'collections'], extras);
+        }
+    }
+
     /**
      * Navigate to the search in reurl (apply) mode
      * when done, the app will redirect to the current location

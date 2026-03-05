@@ -9,8 +9,6 @@
         <div class="left">
           <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_FROM' | translate }}</label>
           <div class="from details">{{ submission().assignee | authorityName }}</div>
-          <!--<label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_TITLE' | translate }}</label>
-          <div class="title details">TODO: What is the title? Or do we duplicate it everytime?</div>-->
           <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_STATE' | translate }}</label>
           <div class="state details">
             <es-list-node-assignment
@@ -70,7 +68,7 @@
               class="toggle-reverse show-notes"
               [ngModelOptions]="{ standalone: true }"
               [disabled]="!!feedbackForm.get('validationNotes').value"
-              [ngModel]="showValidationNotes || !!feedbackForm.get('validationNotes').value"
+              [ngModel]="showValidationNotes() || !!feedbackForm.get('validationNotes').value"
               (ngModelChange)="showValidationNotes.set($event)"
             >
               {{ 'EDITORIAL.SIDEBAR.SUBMISSION.INTERNAL_NOTE_SHOW' | translate }}

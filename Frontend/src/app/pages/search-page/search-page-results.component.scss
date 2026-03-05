@@ -5,6 +5,19 @@
 .add-to-collection-banner {
     @include addToCollectionBanner;
 }
+.primary-action-banner {
+    @include addToCollectionBanner;
+    border-radius: 10px;
+    background-color: var(--primary);
+    display: flex;
+    padding: 10px 20px;
+    align-items: center;
+    gap: 20px;
+    .description {
+        flex-grow: 1;
+        color: var(--light-primary-text);
+    }
+}
 
 .entries-wrapper {
     @include entriesWrapper;

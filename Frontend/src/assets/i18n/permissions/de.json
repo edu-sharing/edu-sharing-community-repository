@@ -103,6 +103,7 @@
       "CLASS": "Klasse",
       "WORKING_GROUP": "Arbeitsgruppe",
       "LESSON": "Unterricht",
+      "SCHOOL_NONE": "Nichtschulische Einrichtung",
       "SCHOOL_NATIONAL": "Staatliche Schule",
       "SCHOOL_MUNICIPAL": "Kommunale Schule",
       "SCHOOL_PRIVATE": "Private Schule"

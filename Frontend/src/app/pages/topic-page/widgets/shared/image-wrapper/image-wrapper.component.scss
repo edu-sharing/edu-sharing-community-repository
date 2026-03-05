@@ -1,0 +1,123 @@
+@use 'mixins' as mixin;
+@use '../../../topic-page-variables' as topicPageVars;
+
+:host {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: topicPageVars.$surface-container-lowest;
+    position: relative;
+    --image-button-size: 48px;
+
+    &.edit-mode {
+        margin-right: calc(var(--image-button-size) / 2);
+    }
+
+    // adjustments for mobile devices (blurred background, non-overlapping buttons)
+    @media (max-width: topicPageVars.$mobileWidth + topicPageVars.$mobileStage * 1) {
+        margin-right: 0 !important;
+
+        .image-wrapper {
+            max-height: var(--mobile-max-height);
+            background-color: #000;
+        }
+
+        .image-backdrop {
+            display: block;
+
+            img {
+                object-fit: cover;
+                @include mixin.blurImage(15px);
+                opacity: 1;
+            }
+        }
+
+        .topic-image {
+            min-width: unset;
+            width: auto;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .image-buttons {
+            right: 8px;
+        }
+
+        // overflow black background, if no image can be loaded
+        .no-image-msg {
+            width: 100%;
+            min-height: 175px;
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+}
+
+.image-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+// image backdrop is only used for mobile devices
+.image-backdrop {
+    display: none;
+}
+
+// default style for topic image ("object-fit: cover" using flexbox)
+.topic-image {
+    min-width: 100%;
+    min-height: 100%;
+    max-height: 512px;
+    flex-shrink: 0;
+}
+
+// vertically centered buttons to change or delete the image
+.image-buttons {
+    position: absolute;
+    // https://stackoverflow.com/a/23384995
+    top: 50%;
+    transform: translate(0, -50%);
+    right: calc(-1 * var(--image-button-size) / 2);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 4;
+
+    button {
+        width: var(--image-button-size);
+        height: var(--image-button-size);
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: none;
+        background: topicPageVars.$primary;
+        color: topicPageVars.$on-primary;
+        box-shadow: 0 4px 4px 0 #00000040;
+
+        &:disabled {
+            background: topicPageVars.$secondary;
+        }
+    }
+}
+
+// slightly transparent background overflowing the image
+.image-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 3;
+}

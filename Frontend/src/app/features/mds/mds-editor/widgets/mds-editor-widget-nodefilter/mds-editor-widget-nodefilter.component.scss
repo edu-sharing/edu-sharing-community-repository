@@ -1,0 +1,14 @@
+.node-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    es-node-row {
+        flex-grow: 1;
+        ::ng-deep .node-row {
+            padding: 0;
+            .node-data .node-data-primary {
+                font-weight: normal;
+            }
+        }
+    }
+}

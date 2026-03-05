@@ -10,20 +10,23 @@
 
 <div
   class="mobile-move-top2"
+  #topbar
   [ngClass]="currentScope() ? 'scope-' + currentScope().toLowerCase() : ''"
+  (esBorderBoxObserver)="sizeChanged()"
 >
-  <div class="menuButtonOuter" [ngSwitch]="mainMenuStyle">
-    <ng-container
-      *ngIf="mainNavService.getCustomTemplateSlot(TemplateSlot.MainScopeButton) && showScope"
-    >
-      <es-main-menu-sidebar
-        #mainMenuSidebar
-        [currentScope]="currentScope()"
-        (closeSidebar)="closeScopeSelector.emit()"
-        (showLicenses)="showLicenses.emit()"
-      ></es-main-menu-sidebar>
+  <div class="main-bar" *ngIf="show">
+    <div class="menuButtonOuter" [ngSwitch]="mainMenuStyle">
       <ng-container
-        *ngTemplateOutlet="
+        *ngIf="mainNavService.getCustomTemplateSlot(TemplateSlot.MainScopeButton) && showScope"
+      >
+        <es-main-menu-sidebar
+          #mainMenuSidebar
+          [currentScope]="currentScope()"
+          (closeSidebar)="closeScopeSelector.emit()"
+          (showLicenses)="showLicenses.emit()"
+        ></es-main-menu-sidebar>
+        <ng-container
+          *ngTemplateOutlet="
           mainNavService.getCustomTemplateSlot(TemplateSlot.MainScopeButton);
           context: {
             currentScope: currentScope(),
@@ -31,155 +34,176 @@
             onClick: toggleSidebar,
           }
         "
-      ></ng-container>
-    </ng-container>
-    <ng-container *ngIf="!mainNavService.getCustomTemplateSlot(TemplateSlot.MainScopeButton)">
-      <ng-container *ngSwitchCase="'dropdown'">
-        <es-main-menu-dropdown
-          #mainMenuDropdown
-          [currentScope]="currentScope()"
-          (closeDropdown)="closeScopeSelector.emit()"
-        ></es-main-menu-dropdown>
-        <button
-          *ngIf="showScope"
-          [matMenuTriggerFor]="mainMenuDropdown.dropdown.menu"
-          [disabled]="!canOpen"
-          matRipple
-          cdkMonitorElementFocus
-          class="menuButton"
-          [class.clickable]="canOpen"
-          title="{{ 'CHOOSEENVIRONMENT' | translate }}"
-        >
-          <img class="material-icons eduImage" [src]="getIconSource() | esAssetsPath" alt="" />
-          <span>{{ title | translate }}</span>
-          <i aria-hidden="true" class="material-icons barIcon">keyboard_arrow_down</i>
-        </button>
+        ></ng-container>
       </ng-container>
-      <ng-container *ngSwitchCase="'sidebar'">
-        <es-main-menu-sidebar
-          #mainMenuSidebar
-          [currentScope]="currentScope()"
-          (showLicenses)="showLicenses.emit()"
-          (closeSidebar)="closeScopeSelector.emit()"
-        ></es-main-menu-sidebar>
-        <button
-          *ngIf="showScope"
-          (click)="mainMenuSidebar.toggle()"
-          [disabled]="!canOpen"
-          matRipple
-          cdkMonitorElementFocus
-          class="menuButton"
-          [class.clickable]="canOpen"
-          title="{{ 'CHOOSEENVIRONMENT' | translate }}"
-          data-test="main-nav-scope-button"
-        >
-          <img class="material-icons eduImage" [src]="getIconSource() | esAssetsPath" alt="" />
-          <span>{{ title | translate }}</span>
-          <i aria-hidden="true" class="material-icons barIcon">keyboard_arrow_right</i>
-        </button>
+      <ng-container *ngIf="!mainNavService.getCustomTemplateSlot(TemplateSlot.MainScopeButton)">
+        <ng-container *ngSwitchCase="'dropdown'">
+          <es-main-menu-dropdown
+            #mainMenuDropdown
+            [currentScope]="currentScope()"
+            (closeDropdown)="closeScopeSelector.emit()"
+          ></es-main-menu-dropdown>
+          <button
+            *ngIf="showScope"
+            [matMenuTriggerFor]="mainMenuDropdown.dropdown.menu"
+            [disabled]="!canOpen"
+            matRipple
+            cdkMonitorElementFocus
+            class="menuButton"
+            [class.clickable]="canOpen"
+            title="{{ 'CHOOSEENVIRONMENT' | translate }}"
+          >
+            <img class="material-icons eduImage" [src]="getIconSource() | esAssetsPath" alt="" />
+            <span>{{ title | translate }}</span>
+            <i aria-hidden="true" class="material-icons barIcon">keyboard_arrow_down</i>
+          </button>
+        </ng-container>
+        <ng-container *ngSwitchCase="'sidebar'">
+          <es-main-menu-sidebar
+            #mainMenuSidebar
+            [currentScope]="currentScope()"
+            (showLicenses)="showLicenses.emit()"
+            (closeSidebar)="closeScopeSelector.emit()"
+          ></es-main-menu-sidebar>
+          <button
+            *ngIf="showScope"
+            (click)="mainMenuSidebar.toggle()"
+            [disabled]="!canOpen"
+            matRipple
+            cdkMonitorElementFocus
+            class="menuButton"
+            [class.clickable]="canOpen"
+            title="{{ 'CHOOSEENVIRONMENT' | translate }}"
+            data-test="main-nav-scope-button"
+          >
+            <img class="material-icons eduImage" [src]="getIconSource() | esAssetsPath" alt="" />
+            <span>{{ title | translate }}</span>
+            <i aria-hidden="true" class="material-icons barIcon">keyboard_arrow_right</i>
+          </button>
+        </ng-container>
       </ng-container>
-    </ng-container>
-  </div>
-  <div class="add-material">
-    <ng-container *ngTemplateOutlet="createButtonRef"></ng-container>
-    <ng-container *ngIf="!createButtonRef">
-      <button
-        mat-button
-        matRippleColor="rgba(255,255,255,0.08)"
-        class="addDesktop mat-button-no-uppercase"
-        *ngIf="!connector.getCurrentLogin()?.isGuest && isCreateAllowed"
-        [disabled]="!isCreateAllowed || !createMenu.hasUsableOptions()"
-        #dropdownTrigger="matMenuTrigger"
-        (menuOpened)="createMenu.updateOptions()"
-        [matMenuTriggerFor]="createMenu.dropdown ? createMenu.dropdown.menu : null"
-        [attr.aria-label]="'WORKSPACE.ADD' | translate"
-        data-test="top-bar-add-button"
-      >
-        <i esIcon="add"></i> <span>{{ 'WORKSPACE.ADD' | translate }}</span>
-      </button>
-      <button
-        mat-button
-        class="addDesktop mat-button-no-uppercase"
-        *ngIf="!connector.getCurrentLogin()?.isGuest && create.allowed === 'EMIT_EVENT'"
-        (click)="createNotAllowed.emit()"
-        [attr.aria-label]="'WORKSPACE.ADD' | translate"
-      >
-        <i esIcon="add"></i> <span>{{ 'WORKSPACE.ADD' | translate }}</span>
-      </button>
-      <button
-        class="create-dummy"
-        *ngIf="isCreateAllowed"
-        [style.left]="createMenuX + 'px'"
-        [style.top]="createMenuY + 'px'"
-        #dropdownTriggerDummy="matMenuTrigger"
-        [matMenuTriggerFor]="createMenu.dropdown ? createMenu.dropdown.menu : null"
-        tabindex="-1"
-        aria-hidden="true"
-      ></button>
-    </ng-container>
-    <ng-container *ngIf="mainNavService.getCustomTemplateSlot(TemplateSlot.AfterCreateMenu)">
-      <ng-container
-        *ngTemplateOutlet="
-          mainNavService.getCustomTemplateSlot(TemplateSlot.AfterCreateMenu);
-          context: {
-            currentScope: currentScope()
-          }
-        "
-      ></ng-container>
-    </ng-container>
-  </div>
-  <div class="topBarSearch" [class.noScope]="!showScope">
-    <div class="scopeNameMobile" *ngIf="!searchEnabled">{{ title | translate }}</div>
-    <ng-content select="[data-selector-search-field]"></ng-content>
-  </div>
-  <div class="topbar-search-right">
-    <ng-container *ngIf="isSafe && !mainMenuSidebar?.show">
-      <div class="timeout" *ngIf="autoLogoutTimeout$ | async as timeout" data-test="logout-timer">
-        <i esIcon="av_timer"></i>
-        {{ timeout }}
-      </div>
-    </ng-container>
-    <ng-container *ngIf="mainNavService.getCustomTemplateSlot(TemplateSlot.BeforeUserMenu)">
-      <ng-container
-        *ngTemplateOutlet="
+    </div>
+    <div class="add-material">
+      <ng-container *ngTemplateOutlet="createButtonRef"></ng-container>
+      <ng-container *ngIf="!createButtonRef">
+        <button
+          mat-button
+          matRippleColor="rgba(255,255,255,0.08)"
+          class="addDesktop mat-button-no-uppercase"
+          *ngIf="!connector.getCurrentLogin()?.isGuest && isCreateAllowed"
+          [disabled]="!isCreateAllowed || !createMenu.hasUsableOptions()"
+          #dropdownTrigger="matMenuTrigger"
+          (menuOpened)="createMenu.updateOptions()"
+          [matMenuTriggerFor]="createMenu.dropdown ? createMenu.dropdown.menu : null"
+          [attr.aria-label]="'WORKSPACE.ADD' | translate"
+          data-test="top-bar-add-button"
+        >
+          <i esIcon="add"></i> <span>{{ 'WORKSPACE.ADD' | translate }}</span>
+        </button>
+        <button
+          mat-button
+          class="addDesktop mat-button-no-uppercase"
+          *ngIf="!connector.getCurrentLogin()?.isGuest && create.allowed === 'EMIT_EVENT'"
+          (click)="createNotAllowed.emit()"
+          [attr.aria-label]="'WORKSPACE.ADD' | translate"
+        >
+          <i esIcon="add"></i> <span>{{ 'WORKSPACE.ADD' | translate }}</span>
+        </button>
+        <button
+          class="create-dummy"
+          *ngIf="isCreateAllowed"
+          [style.left]="createMenuX + 'px'"
+          [style.top]="createMenuY + 'px'"
+          #dropdownTriggerDummy="matMenuTrigger"
+          [matMenuTriggerFor]="createMenu.dropdown ? createMenu.dropdown.menu : null"
+          tabindex="-1"
+          aria-hidden="true"
+        ></button>
+      </ng-container>
+      <ng-container *ngIf="mainNavService.getCustomTemplateSlot(TemplateSlot.AfterCreateMenu)">
+        <ng-container
+          *ngTemplateOutlet="
+            mainNavService.getCustomTemplateSlot(TemplateSlot.AfterCreateMenu);
+            context: {
+              currentScope: currentScope()
+            }
+          "
+        ></ng-container>
+      </ng-container>
+    </div>
+    <div class="topBarSearch" [class.noScope]="!showScope">
+      <div class="scopeNameMobile" *ngIf="!searchEnabled">{{ title | translate }}</div>
+      <ng-content select="[data-selector-search-field]"></ng-content>
+    </div>
+    <div class="topbar-search-right">
+      <ng-container *ngIf="isSafe && !mainMenuSidebar?.show">
+        <div class="timeout" *ngIf="autoLogoutTimeout$ | async as timeout" data-test="logout-timer">
+          <i esIcon="av_timer"></i>
+          {{ timeout }}
+        </div>
+      </ng-container>
+      <ng-container *ngIf="mainNavService.getCustomTemplateSlot(TemplateSlot.BeforeUserMenu)">
+        <ng-container
+          *ngTemplateOutlet="
           mainNavService.getCustomTemplateSlot(TemplateSlot.BeforeUserMenu);
           context: {
             currentScope: currentScope(),
           }
         "
-      ></ng-container>
-    </ng-container>
-    <es-imprint-privacy *ngIf="!footerVisible()"></es-imprint-privacy>
-    <button
-      mat-icon-button
-      *ngIf="currentUser && showChat"
-      class="rocketchat"
-      (click)="openChat.emit()"
-    >
-      <i esIcon="message"></i>
-      <div class="mat-button-badge" [class.rocketchat-count-none]="chatCount === 0">
-        {{ chatCount }}
-      </div>
-    </button>
-    <es-notification-list class="notifications"></es-notification-list>
-    <button
-      mat-button
-      class="user"
-      esElementRef
-      #userRef="esElementRef"
-      *ngIf="currentUser && showUser"
-      [matMenuTriggerFor]="userDropdown.menu"
-      title="{{ 'USERMENU' | translate }}"
-      data-test="main-nav-user-menu-button"
-    >
-      <es-user-avatar [user]="currentUser" [size]="'xsmall'"></es-user-avatar>
-      <span *ngIf="!connector.getCurrentLogin()?.isGuest">{{ currentUser | nodePersonName }}</span>
-      <span *ngIf="connector.getCurrentLogin()?.isGuest">{{ 'USER_GUEST' | translate }}</span>
-      <i esIcon="keyboard_arrow_down" [aria]="false" class="iconArrow"></i>
-      <!-- <i class="material-icons barIcon iconPerson">account_circle</i>-->
-    </button>
-    <es-dropdown #userDropdown class="userMenu" [options]="userMenuOptions"></es-dropdown>
+        ></ng-container>
+      </ng-container>
+      <es-imprint-privacy *ngIf="!footerVisible()"></es-imprint-privacy>
+      <button
+        mat-icon-button
+        *ngIf="currentUser && showChat"
+        class="rocketchat"
+        (click)="openChat.emit()"
+      >
+        <i esIcon="message"></i>
+        <div class="mat-button-badge" [class.rocketchat-count-none]="chatCount === 0">
+          {{ chatCount }}
+        </div>
+      </button>
+      <es-notification-list class="notifications"></es-notification-list>
+      <button
+        mat-button
+        class="user"
+        esElementRef
+        #userRef="esElementRef"
+        *ngIf="currentUser && showUser"
+        [matMenuTriggerFor]="userDropdown.menu"
+        title="{{ 'USERMENU' | translate }}"
+        data-test="main-nav-user-menu-button"
+      >
+        <es-user-avatar [user]="currentUser" [size]="'xsmall'"></es-user-avatar>
+        <span *ngIf="!connector.getCurrentLogin()?.isGuest">{{
+          currentUser | nodePersonName
+        }}</span>
+        <span *ngIf="connector.getCurrentLogin()?.isGuest">{{ 'USER_GUEST' | translate }}</span>
+        <i esIcon="keyboard_arrow_down" [aria]="false" class="iconArrow"></i>
+        <!-- <i class="material-icons barIcon iconPerson">account_circle</i>-->
+      </button>
+      <es-dropdown #userDropdown class="userMenu" [options]="userMenuOptions"></es-dropdown>
+    </div>
   </div>
+  <!-- system messages -->
+  <es-info-message
+    *ngIf="mainNavService.showSystemMessage()"
+    [mode]="mainNavService.systemMessage.message.severity || 'info'"
+  >
+    <div class="wrapper">
+      <div
+        [innerHTML]="mainNavService.systemMessage.message.message | safeHtml : { purify: true }"
+      ></div>
+      <button
+        mat-icon-button
+        (click)="mainNavService.closeSystemMessage()"
+        *ngIf="mainNavService.systemMessage.message.repeat === 'repeat'"
+      >
+        <i esIcon="close"></i>
+      </button>
+    </div>
+  </es-info-message>
 </div>
 <ng-container *ngIf="mainNavService.getCustomTemplateSlot(TemplateSlot.BeforeUserMenu)">
   <ng-container

@@ -3,6 +3,7 @@ import {
     ApiHelpersService,
     Assignment,
     AssignmentFile,
+    CollectionReference,
     ConfigService,
     NetworkService,
     Node,
@@ -22,7 +23,6 @@ import { PlatformLocation } from '@angular/common';
 import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
 import { Sort } from '@angular/material/sort';
 import { NodeEntriesDataType } from '../node-entries/data-type';
-import { isArray } from 'lodash';
 import { Toast } from './abstract/toast.service';
 import { AssignmentPipe } from '../pipes/assignment.pipe';
 
@@ -363,6 +363,17 @@ export class NodeHelperService {
     isNodeRevoked(node: Node) {
         return node?.aspects?.includes(RestConstants.CCM_ASPECT_REVOKED);
     }
+
+    /**
+     * returns the original node if (collection refs)
+     * if the node is not a ref, it will simply return the node id
+     */
+    public getOriginalId(node: Node) {
+        if (node.aspects.includes(RestConstants.CCM_ASPECT_IO_REFERENCE)) {
+            return (node as CollectionReference).originalId;
+        }
+        return node.ref.id;
+    }
     /**
      * returns true if all nodes have the requested right
      * mode (only works for collection refs):
@@ -475,7 +486,7 @@ export class NodeHelperService {
 
     static getActionbarNodes<T>(listNodes: T[], externalNode: T | T[]): T[] {
         return externalNode
-            ? isArray(externalNode)
+            ? Array.isArray(externalNode)
                 ? externalNode
                 : [externalNode]
             : listNodes && listNodes.length

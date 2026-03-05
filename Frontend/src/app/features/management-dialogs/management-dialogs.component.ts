@@ -9,7 +9,13 @@ import {
     TemplateRef,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { CollectionProposalStatus, Node, ProposalNode } from 'ngx-edu-sharing-api';
+import {
+    CollectionProposalStatus,
+    HOME_REPOSITORY,
+    Node,
+    NodeService,
+    ProposalNode,
+} from 'ngx-edu-sharing-api';
 import {
     LocalEventsService,
     TemporaryStorageService,
@@ -112,6 +118,7 @@ export class WorkspaceManagementDialogsComponent {
         private uiService: UIService,
         private nodeHelper: NodeHelperService,
         private nodeService: RestNodeService,
+        private nodeServiceApi: NodeService,
         private router: Router,
         private temporaryStorage: TemporaryStorageService,
         private toast: Toast,
@@ -217,7 +224,8 @@ export class WorkspaceManagementDialogsComponent {
             .handleRestRequest(
                 observableForkJoin(
                     nodes.map((n) =>
-                        this.nodeService.editNodeProperty(
+                        this.nodeServiceApi.setProperty(
+                            HOME_REPOSITORY,
                             n.proposal?.ref.id ||
                                 (n.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL
                                     ? n.ref.id
@@ -239,7 +247,8 @@ export class WorkspaceManagementDialogsComponent {
             .handleRestRequest(
                 observableForkJoin(
                     nodes.map((n) =>
-                        this.nodeService.editNodeProperty(
+                        this.nodeServiceApi.setProperty(
+                            HOME_REPOSITORY,
                             n.proposal?.ref.id ||
                                 (n.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL
                                     ? n.ref.id

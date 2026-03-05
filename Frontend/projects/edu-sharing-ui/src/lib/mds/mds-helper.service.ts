@@ -49,7 +49,7 @@ export class MdsHelperService {
                         } else if (name === 'searchCollections') {
                             type = 'COLLECTION';
                         }
-                        if (isArray(column[1])) {
+                        if (Array.isArray(column[1])) {
                             (columns as any)[column[0]] = column[1].map((c) => {
                                 if (c.id.includes('.')) {
                                     const split = c.id.split('.');
@@ -88,8 +88,9 @@ export class MdsHelperService {
             } else if (name === 'swimlane_assignments') {
                 defaultColumns.push(new ListItem('ASSIGNMENT', null));
             } else if (
-                name === 'search' ||
-                name === 'collectionReferences' ||
+                ['search', 'collectionReferences', 'genericWidget', 'genericWidgetTable'].includes(
+                    name,
+                ) ||
                 name.startsWith('swimlane_')
             ) {
                 defaultColumns.push(new ListItem('NODE', RestConstants.LOM_PROP_TITLE));
@@ -107,6 +108,8 @@ export class MdsHelperService {
                 defaultColumns.push(new ListItem('GROUP', RestConstants.AUTHORITY_GROUPTYPE));
             } else if (name === 'searchCollections') {
                 defaultColumns.push(...ListItem.getCollectionDefaults());
+            } else {
+                defaultColumns.push(new ListItem('NODE', RestConstants.LOM_PROP_TITLE));
             }
             columns['Default'] = defaultColumns;
         }

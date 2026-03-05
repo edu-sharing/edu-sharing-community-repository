@@ -67,6 +67,7 @@ export class MetadataTemplateManagementComponent implements OnInit {
     });
     templateSelection: WritableSignal<boolean> = signal(false);
     readonly metadataTemplatesKey: string = 'metadataTemplates';
+    readonly metadataTemplateslastUsedKey: string = 'metadataTemplatesLastUsed';
     readonly metadataTemplateGroup: string = 'io_bulk_sidebar';
     selectedValues: WritableSignal<MdsExtendedValues> = signal(null);
     templateName: string = '';
@@ -78,6 +79,12 @@ export class MetadataTemplateManagementComponent implements OnInit {
 
     async ngOnInit() {
         await this.updateCustomTemplates();
+        if (this.customTemplates()?.length) {
+            const lastIndex = await this.storage.get<number>(this.metadataTemplateslastUsedKey);
+            if (lastIndex != null && lastIndex < this.customTemplates().length) {
+                this.selectTemplate(lastIndex);
+            }
+        }
     }
 
     /**
@@ -193,7 +200,7 @@ export class MetadataTemplateManagementComponent implements OnInit {
      * Helper function to retrieve the custom templates.
      */
     private async updateCustomTemplates(): Promise<void> {
-        const customTemplates = await firstValueFrom(this.storage.get(this.metadataTemplatesKey));
+        const customTemplates = await this.storage.get<Template[]>(this.metadataTemplatesKey);
         if (customTemplates) {
             this.customTemplates.set(customTemplates as Template[]);
         }
@@ -204,8 +211,11 @@ export class MetadataTemplateManagementComponent implements OnInit {
      *
      * @param index
      */
-    private selectTemplate(index: number) {
+    private async selectTemplate(index: number) {
         this.selectedTemplateIndex.set(index);
+        if ((await this.storage.get<number>(this.metadataTemplateslastUsedKey, index)) !== index) {
+            void this.storage.set(this.metadataTemplateslastUsedKey, index);
+        }
         // wait for the view being rendered
         setTimeout(() => {
             void this.mdsEditor.reInit();

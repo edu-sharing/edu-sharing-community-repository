@@ -41,7 +41,7 @@ import {
     UIConstants,
 } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject, firstValueFrom, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { delay, filter, first, map, take, takeUntil } from 'rxjs/operators';
 import {
     ConfigurationService,
@@ -742,9 +742,10 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         this.closeMetadata();
 
         this.toMeSharedToggle$.next(
-            await this.session
-                .get('toMeSharedGroup', this.config.instant('workspaceSharedToMeDefaultAll', false))
-                .toPromise(),
+            await this.session.get(
+                'toMeSharedGroup',
+                this.config.instant('workspaceSharedToMeDefaultAll', false),
+            ),
         );
 
         if (!id) {
@@ -1075,11 +1076,9 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
 
     async prepareActionbar() {
         this.toMeSharedToggle$.next(
-            await firstValueFrom(
-                this.session.get(
-                    'toMeSharedGroup',
-                    this.config.instant('workspaceSharedToMeDefaultAll', false),
-                ),
+            await this.session.get(
+                'toMeSharedGroup',
+                this.config.instant('workspaceSharedToMeDefaultAll', false),
             ),
         );
         const shareToggle = new OptionItemToggle(

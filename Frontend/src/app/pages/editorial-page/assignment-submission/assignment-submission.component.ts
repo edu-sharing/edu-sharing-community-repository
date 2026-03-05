@@ -16,6 +16,7 @@ import {
     NodeEntriesWrapperComponent,
     RepoUrlService,
     Scope,
+    SubmissionWithAssignment,
     Toast,
     TranslationsService,
 } from 'ngx-edu-sharing-ui';
@@ -35,8 +36,9 @@ import { RenderWrapperComponent } from '../../render2-page/render-wrapper-compon
     imports: [SharedModule, TranslateModule, NgxExtendedPdfViewerModule, RenderWrapperComponent],
 })
 export class AssignmentSubmissionComponent implements AfterViewInit {
-    @ViewChild(NodeEntriesWrapperComponent) nodeEntries: NodeEntriesWrapperComponent<Submission>;
-    dataSource = new NodeDataSource<Submission>();
+    @ViewChild(NodeEntriesWrapperComponent)
+    nodeEntries: NodeEntriesWrapperComponent<SubmissionWithAssignment>;
+    dataSource = new NodeDataSource<SubmissionWithAssignment>();
     language: string = 'de-DE';
     columns = {
         Default: [
@@ -115,7 +117,14 @@ export class AssignmentSubmissionComponent implements AfterViewInit {
             .subscribe(([assignment, files]) => {
                 this.assignment.set(assignment);
                 this.dataSource.isLoading = false;
-                this.dataSource.setData(files);
+                this.dataSource.setData(
+                    files.map((submission) => {
+                        return {
+                            ...submission,
+                            assignment,
+                        };
+                    }) as SubmissionWithAssignment[],
+                );
             });
     }
 
@@ -125,7 +134,7 @@ export class AssignmentSubmissionComponent implements AfterViewInit {
     protected readonly Scope = Scope;
     protected readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
 
-    select(event: Submission) {
+    select(event: SubmissionWithAssignment) {
         this.nodeEntries.getSelection().setSelection(event);
         this.submission.set(event);
         this.editorialSidebarService.showOption({
@@ -136,7 +145,6 @@ export class AssignmentSubmissionComponent implements AfterViewInit {
                 submission: event,
                 submissionList: this.dataSource.getData(),
                 submissionFileCallback: (submission) => {
-                    console.log(submission);
                     this.selectedSubmissionFile.set(submission);
                 },
             } as SubmissionConfig,

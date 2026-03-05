@@ -8,7 +8,7 @@ import {
     Node,
 } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
-import { Observable } from 'rxjs';
+import { from, Observable } from 'rxjs';
 import {
     catchError,
     distinctUntilChanged,
@@ -147,9 +147,9 @@ export class LicenseAgreementService {
 
     private hasUserAcceptedLicense(version: string): Observable<boolean | null> {
         if (version) {
-            return this.session
-                .get(LICENSE_AGREEMENT_STORAGE_KEY, false)
-                .pipe(map((acceptedVersion) => acceptedVersion === version));
+            return from(
+                this.session.get<string | false>(LICENSE_AGREEMENT_STORAGE_KEY, false),
+            ).pipe(map((acceptedVersion) => acceptedVersion === version));
         } else {
             return rxjs.of(null);
         }

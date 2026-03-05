@@ -9,7 +9,6 @@ import {
 } from '@angular/core';
 import { MatSidenavContainer } from '@angular/material/sidenav';
 import { SessionStorageService } from 'ngx-edu-sharing-api';
-import { firstValueFrom } from 'rxjs';
 
 @Directive({
     selector: '[esResizableSidenav]',
@@ -42,7 +41,7 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
         const defaultWidth = window.innerWidth * this.defaultWidth;
         if (this.storageKey) {
             const lastValue = this.applyWidthConstrains(
-                await firstValueFrom(this.storage.get(this.storageKey, defaultWidth)),
+                await this.storage.get<number>(this.storageKey, defaultWidth),
             );
             this.renderer.setStyle(this.el.nativeElement, 'width', `${lastValue}px`);
             this.sidenavContainer.updateContentMargins();

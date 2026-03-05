@@ -12,8 +12,12 @@ export type NodeEntriesDataType =
     | GenericAuthority
     | Assignment
     | AssignmentFile
-    | Submission;
+    | SubmissionWithAssignment;
 
 export type NodeEntriesData = Omit<NodeEntries, 'nodes'> & {
     nodes: NodeEntriesDataType[];
+};
+
+export type SubmissionWithAssignment = Submission & {
+    assignment: Assignment;
 };

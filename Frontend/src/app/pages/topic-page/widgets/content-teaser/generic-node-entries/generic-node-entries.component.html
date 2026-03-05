@@ -1,0 +1,47 @@
+<es-node-entries-wrapper
+  #contentWrapper
+  *ngIf="layout !== GenericNodeEntriesDisplayType.MapView; else specialType"
+  [checkbox]="false"
+  [class.sidebar-open]="sidebarOpen()"
+  [class.single-view]="layout === GenericNodeEntriesDisplayType.SingleView"
+  [class.split-view]="layout === GenericNodeEntriesDisplayType.SplitView"
+  [class.view-mode]="!hasEditRightsAndIsEditMode"
+  [columns]="layout !== GenericNodeEntriesDisplayType.ListView ? columns : tableColumns"
+  [dataSource]="dataSource"
+  [disableInfiniteScroll]="true"
+  [displayType]="nodeEntriesDisplayType()"
+  [dragDrop]="{
+    dragAllowed: false,
+  }"
+  [elementInteractionType]="InteractionType.Emitter"
+  [gridConfig]="gridConfig"
+  [scope]="Scope.Oer"
+  (clickItem)="onItemClicked($event.element)"
+  (fetchData)="fetchData($event)"
+>
+  <!-- placeholder template for empty content -->
+  <ng-template #empty>
+    <div class="empty">{{ 'TOPIC_PAGE.WIDGET.CONTENT_TEASER.NO_CONTENTS' | translate }}</div>
+  </ng-template>
+</es-node-entries-wrapper>
+
+<ng-template
+  #cardSuggest
+  *ngIf="genericWidgetGlobalService.getCustomCards(CustomCardRole.SuggestContent)?.[0]?.templateRef as templateRef"
+>
+  <ng-container
+    *ngTemplateOutlet="
+      templateRef;
+      context: {
+        searchText: searchText
+      }
+    "
+  ></ng-container>
+</ng-template>
+
+<!-- metadata type templates -->
+<ng-template #specialType>
+  <ng-container *ngIf="genericWidgetGlobalService.hasCustomDisplayType(layout)">
+    <div #customType></div>
+  </ng-container>
+</ng-template>

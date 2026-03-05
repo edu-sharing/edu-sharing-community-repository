@@ -49,6 +49,7 @@ const ALL_COUNTRIES = [
     'AT',
     'AU',
     'BA',
+    'BE',
     'BG',
     'BH',
     'BO',

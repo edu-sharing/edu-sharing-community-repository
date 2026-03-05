@@ -19,6 +19,8 @@ import {
     Node,
     NodeListErrorResponses,
     NodeListService,
+    PROPERTY_FILTER_ALL,
+    ROOT,
 } from 'ngx-edu-sharing-api';
 import {
     AssignmentPipe,
@@ -44,6 +46,7 @@ import {
     UIConstants,
 } from 'ngx-edu-sharing-ui';
 import {
+    firstValueFrom,
     forkJoin,
     forkJoin as observableForkJoin,
     Observable,
@@ -1201,6 +1204,49 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         relationNode.group = DefaultGroups.Edit;
         relationNode.priority = 70;
 
+        const topicPage = new OptionItem('OPTIONS.SHOW_TOPIC_PAGE', 'menu_book', async (node) =>
+            UIHelper.goToTopicPage(this.router, (await this.getObjectsAsync(node, data, false))[0]),
+        );
+        topicPage.constrains = [
+            Constrain.HomeRepository,
+            Constrain.Collections,
+            Constrain.NoBulk,
+            Constrain.User,
+        ];
+        topicPage.customShowCallback = async (objects) => {
+            if (
+                this.nodeHelper.getNodesRight(
+                    objects as Node[],
+                    RestConstants.ACCESS_WRITE,
+                    NodesRightMode.Effective,
+                )
+            ) {
+                return true;
+            }
+            if (objects[0].ref.id === ROOT) {
+                return false;
+            }
+            try {
+                if (objects[0].properties?.[RestConstants.CCM_PROP_PAGE_CONFIG_REF]?.[0]) {
+                    return true;
+                }
+                return (
+                    await firstValueFrom(
+                        this.nodeService.getNodeParents(objects[0].ref.id, false, [
+                            PROPERTY_FILTER_ALL,
+                        ]),
+                    )
+                ).nodes.some(
+                    (n) => n.properties[RestConstants.CCM_PROP_PAGE_CONFIG_PROPAGATE_REF]?.[0],
+                );
+            } catch (e) {
+                return false;
+            }
+        };
+        topicPage.showAsAction = true;
+        topicPage.group = DefaultGroups.View;
+        topicPage.priority = 15;
+
         const submitAssignment = new OptionItem('OPTIONS.ASSIGNMENT_SUBMIT', 'send', (object) =>
             this.uiService.goToAssignment(this.getObjects(object, data)[0], 'submit'),
         );
@@ -1455,6 +1501,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         options.push(editConnectorNode);
         options.push(bookmarkNode);
         options.push(shortcutNode);
+        options.push(topicPage);
         options.push(editCollection);
         options.push(submitAssignment);
         options.push(viewAssignmentSubmission);
@@ -1499,7 +1546,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             data.postPrepareOptions(options, objects);
         }
         if (this.globalOptionsService.postPrepareOptions) {
-            this.globalOptionsService.postPrepareOptions(options, objects);
+            this.globalOptionsService.postPrepareOptions(options, data, objects);
         }
         return options;
     }

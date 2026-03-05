@@ -70,6 +70,29 @@ type LuceneData = {
     index?: string;
     elasticRaw: boolean;
 };
+type JobConfig = {
+    params?: string;
+    name?: string;
+    class?: string;
+    object?: JobDescription;
+};
+type OAIConfig = {
+    url?: string;
+    set?: string;
+    prefix?: string;
+    className?: string;
+    importerClassName?: string;
+    recordHandlerClassName?: string;
+    binaryHandlerClassName?: string;
+    persistentHandlerClassName?: string;
+    metadata?: string;
+    file?: string;
+    ids?: string;
+    forceUpdate?: string;
+    from?: string;
+    until?: string;
+    periodInDays?: string;
+};
 
 type Job = {
     jobName: string;
@@ -156,13 +179,8 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     public propertyName: string;
     public cacheName: string;
     public cacheInfo: string;
-    public oai: any = {};
-    public job: {
-        params?: string;
-        name?: string;
-        class?: string;
-        object?: JobDescription;
-    } = {};
+    public oai: OAIConfig = {} as OAIConfig;
+    public job: JobConfig = {};
     public jobs: any[] = [];
     public jobsOpen: boolean[] = [];
     public jobsLogFilter: any = [];
@@ -1301,6 +1319,10 @@ export class AdminPageComponent implements OnInit, OnDestroy {
                     icon: 'extension',
                 },
                 {
+                    id: 'MESSAGES',
+                    icon: 'message',
+                },
+                {
                     id: 'CONTEXT',
                     icon: 'public',
                 },
@@ -1410,10 +1432,10 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             this.refreshUpdateList();
             // this.refreshCatalina();
             this.refreshAppList();
-            this.storage.get('admin_job', this.job).subscribe((data: any) => {
+            this.storage.get<JobConfig>('admin_job', this.job).then((data) => {
                 this.job = data;
             });
-            this.storage.get('admin_lucene', this.lucene).subscribe((data: any) => {
+            this.storage.get<LuceneData>('admin_lucene', this.lucene).then((data) => {
                 this.lucene = data;
             });
             this.reloadJobStatus([]);
@@ -1436,7 +1458,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
                 .subscribe((_) => {});
             this.admin.getOAIClasses().subscribe((classes: string[]) => {
                 this.oaiClasses = classes;
-                this.storage.get('admin_oai').subscribe((data: any) => {
+                this.storage.get<OAIConfig>('admin_oai').then((data) => {
                     if (data) this.oai = data;
                     else {
                         this.oai = {
@@ -1469,9 +1491,11 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     }
 
     private async showWarningDialog(): Promise<void> {
-        const alreadyConfirmed = await this.sessionStorage
-            .get('admin-confirmed-warning-dialog', false, Store.Session)
-            .toPromise();
+        const alreadyConfirmed = await this.sessionStorage.get(
+            'admin-confirmed-warning-dialog',
+            false,
+            Store.Session,
+        );
         if (alreadyConfirmed) {
             return;
         }

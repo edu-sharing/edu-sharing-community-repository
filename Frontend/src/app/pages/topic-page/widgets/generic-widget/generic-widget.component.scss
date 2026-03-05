@@ -1,0 +1,18 @@
+:host {
+    display: block;
+    width: 100%;
+}
+
+es-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+.es-widget-content.edit-mode {
+    margin-top: 8px;
+    padding: 0 16px 16px 16px;
+    border: 1px solid var(--mdc-outlined-text-field-outline-color, var(--mat-sys-outline));
+    border-radius: 8px;
+}

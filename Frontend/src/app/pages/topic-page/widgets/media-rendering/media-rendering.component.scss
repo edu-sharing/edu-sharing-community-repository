@@ -1,0 +1,95 @@
+@use 'mixins' as mixin;
+@use '../../topic-page-variables' as topicPageVars;
+@use '../../topic-page-common-styles' as topicPageStyles;
+
+:host {
+    ::ng-deep {
+        @include topicPageStyles.search-highlight-styles;
+    }
+}
+
+// styles for media rendering
+.media-rendering {
+    margin-top: 8px;
+
+    .render-content {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_containment/Container_queries
+        container-type: inline-size;
+
+        &.selected {
+            border: 3px solid topicPageVars.$primary;
+            border-radius: 0.5rem;
+        }
+
+        .render-title {
+            margin-bottom: 0;
+            text-align: center;
+            font-weight: topicPageVars.$font-weight-bold;
+            font-size: topicPageVars.$font-size-large;
+            @include mixin.limitLineCount(1, 1.4);
+        }
+
+        .render-buttons {
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+
+            // fix button text and icon not being aligned properly
+            &::ng-deep .mdc-button__label {
+                display: flex;
+                align-items: center;
+            }
+        }
+    }
+
+    .info-message {
+        margin-top: 8px;
+        margin-bottom: 16px;
+        display: block;
+    }
+}
+
+// adjustments to the rendered content
+:host ::ng-deep {
+    rs-root {
+        // remove the margin from rendered content
+        margin: 0 !important;
+        // adjust the containerHeight variable to be specific for the topic page
+        --containerHeight: 400px !important;
+
+        // try to show all modules with the full width,
+        // however, if the content becomes too high, scale it
+        .module {
+            max-height: var(--containerHeight);
+            width: auto !important;
+            max-width: 100%;
+        }
+
+        // fix audio-wrapper and video-wrapper do not define a max-height + max-width
+        .audio-wrapper,
+        .video-wrapper {
+            video {
+                max-height: var(--containerHeight);
+                max-width: 100%;
+            }
+        }
+
+        // fix link-wrapper does not define a max-height + max-width
+        .link-wrapper {
+            img {
+                max-height: var(--containerHeight);
+                max-width: 100%;
+            }
+        }
+
+        // remove link to original content
+        .url-wrapper .link-wrapper > a.mdc-button {
+            display: none;
+        }
+    }
+}

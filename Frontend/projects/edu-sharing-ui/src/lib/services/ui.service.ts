@@ -132,11 +132,13 @@ export class UIService {
      */
     async updateOptionEnabledState(options: BehaviorSubject<OptionItem[]>, objects: Node[] = null) {
         options.value?.forEach((o) => {
-            o.isEnabled = !o.customEnabledCallback;
-            void o.enabledCallback(objects).then((result) => {
-                o.isEnabled = result;
-                options.next(options.value);
-            });
+            o.isEnabled = !o.customEnabledCallback || !o.enabledCallback;
+            if (o.enabledCallback) {
+                void o.enabledCallback(objects).then((result) => {
+                    o.isEnabled = result;
+                    options.next(options.value);
+                });
+            }
         });
         options.next(options.value);
     }

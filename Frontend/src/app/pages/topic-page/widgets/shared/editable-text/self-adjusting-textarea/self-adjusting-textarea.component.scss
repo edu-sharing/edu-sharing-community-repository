@@ -1,0 +1,181 @@
+@use '../../../../topic-page-variables' as topicPageVars;
+
+:host {
+    width: 100%;
+}
+
+// set different border-radius to form field
+// https://stackoverflow.com/a/66484682
+:host ::ng-deep .mdc-text-field--outlined {
+    --mdc-outlined-text-field-container-shape: 8px;
+}
+
+.markdown-form {
+    width: 100%;
+}
+
+.toolbars {
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    // conditionally allow to align toolbar to the right
+    &.justify-end {
+        justify-content: flex-end;
+    }
+
+    // styling of markdown toolbar
+    markdown-toolbar {
+        padding: 4px;
+        display: inline-flex;
+        border: 1px solid topicPageVars.$outline-light;
+        border-radius: 3px;
+        outline: none;
+        max-width: 100%;
+        overflow-x: auto;
+
+        .format-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            height: 24px;
+            padding: 3px 5px;
+            width: 28px;
+            color: topicPageVars.$on-surface;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            .mat-icon,
+            .mat-mdc-icon {
+                font-size: inherit;
+                height: auto;
+                width: auto;
+            }
+
+            &:hover {
+                color: topicPageVars.$primary;
+            }
+
+            &:disabled {
+                color: topicPageVars.$secondary-text;
+                cursor: not-allowed;
+            }
+        }
+    }
+
+    .ai-buttons {
+        padding: 4px 8px;
+        border: 1px solid topicPageVars.$outline-light;
+        border-radius: 3px;
+        display: inline-flex;
+        gap: 4px;
+
+        button {
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: topicPageVars.$on-surface;
+
+            &:disabled {
+                color: topicPageVars.$secondary-text;
+                cursor: not-allowed;
+            }
+
+            .mat-icon,
+            .material-icons {
+                font-size: 18px;
+                height: 18px;
+                width: 18px;
+            }
+        }
+    }
+}
+
+.text-form-field {
+    width: 100%;
+
+    // fix for height not being updated properly
+    // related issue: https://stackoverflow.com/questions/54760371/how-to-change-height-in-mat-form-field
+    &::ng-deep {
+        .mat-mdc-form-field-flex,
+        .mat-mdc-form-field-infix {
+            height: 100%;
+        }
+
+        .mat-mdc-form-field-infix {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+
+    textarea {
+        margin-bottom: 0;
+        width: 100%;
+        height: 100%;
+        resize: none;
+        // avoid horizontal scrolling
+        overflow: hidden;
+
+        &.topic-page-text-center {
+            text-align: center;
+        }
+    }
+
+    // TODO: find better solution than copying those styles
+    .mat-heading-1,
+    .mat-heading-2,
+    .mat-heading-3,
+    .mat-heading-4,
+    .mat-heading-5,
+    .mat-heading-6 {
+        display: flex !important;
+        align-items: center !important;
+        font-weight: normal !important;
+        line-height: 120% !important;
+        i {
+            margin: 0 5px !important;
+        }
+        > span {
+            flex-grow: 1 !important;
+        }
+    }
+    .mat-heading-1 {
+        font-size: 220% !important;
+    }
+    .mat-heading-2 {
+        font-size: 180% !important;
+    }
+    .mat-heading-3 {
+        font-size: 150% !important;
+    }
+    .mat-heading-4 {
+        font-size: 120% !important;
+        font-weight: bold !important;
+    }
+    .mat-heading-5 {
+        font-size: 100% !important;
+        line-height: 1.3 !important;
+        font-weight: bold !important;
+    }
+    .mat-heading-6 {
+        font-weight: bold !important;
+        font-size: 90% !important;
+    }
+}
+
+// fix: toolbar overflows textarea placeholder
+//      calculation: 2 * form-field padding + height toolbar + 2 * toolbar-padding + margin-bottom
+:host ::ng-deep .text-form-field:not(.hidden-toolbar) {
+    .mdc-notched-outline {
+        &:not(.mdc-notched-outline--notched) label {
+            top: calc(2 * 14px + 24px + 2 * 5px + 8px);
+        }
+    }
+}

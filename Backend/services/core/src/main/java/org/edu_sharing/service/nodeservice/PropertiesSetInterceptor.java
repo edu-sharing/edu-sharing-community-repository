@@ -28,6 +28,23 @@ public interface PropertiesSetInterceptor {
          * Note: This type is more expensive since it needs to re-fetch properties from alfresco
          */
         AfterAlfrescoInterceptors,
+        /**
+         * run this interceptor after the properties have been already saved
+         * Please note that in this stage, you might only trigger manual storage actions (like calling the NodeService manually)
+         * The returned properties will be ignored and not set automatically
+         */
+        AfterPropertiesSet,
+        /**
+         * run this interceptor at any stage
+         * You need to filter the current stage manually using the PropertiesContext
+         * Note: Use the context object details to find out the state and keep track of custom state data
+         */
+        All,
     }
 
+    enum ContextStage {
+        BeforeAlfrescoInterceptors,
+        AfterAlfrescoInterceptors,
+        AfterPropertiesSet
+    }
 }

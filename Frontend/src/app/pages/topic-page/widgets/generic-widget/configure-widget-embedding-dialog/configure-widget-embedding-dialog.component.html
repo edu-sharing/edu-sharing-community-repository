@@ -1,0 +1,62 @@
+<mat-tab-group class="embedding-types" (selectedIndexChange)="onTabChanged($event)">
+  <mat-tab [label]="i18nPrefix + 'DEFAULT.TITLE' | translate">
+    <es-info-message mode="info" class="info-message">
+      {{ i18nPrefix + 'DEFAULT.INFO' | translate }}
+      <br /><br />
+      {{ i18nPrefix + 'DEFAULT.HINT' | translate }}
+    </es-info-message>
+    <ng-container *ngTemplateOutlet="optionsContainer"></ng-container>
+  </mat-tab>
+  <mat-tab [label]="i18nPrefix + 'ADVANCED.TITLE' | translate">
+    <es-info-message mode="info" class="info-message">
+      {{ i18nPrefix + 'ADVANCED.INFO' | translate }}
+      <br /><br />
+      {{ i18nPrefix + 'ADVANCED.HINT' | translate }}
+    </es-info-message>
+    <ng-container *ngTemplateOutlet="optionsContainer"></ng-container>
+  </mat-tab>
+</mat-tab-group>
+
+<ng-template #optionsContainer>
+  <div class="options-container">
+    <button
+      mat-stroked-button
+      class="option-button"
+      [class.recommended]="nodeId || propagatedNodeId"
+      [disabled]="!nodeId && !propagatedNodeId"
+      (click)="selectMode('nodeId')"
+    >
+      <div class="option-icon">
+        <i esIcon="network_node"></i>
+      </div>
+      <div class="option-text">
+        <h3>
+          {{ i18nPrefix + 'OPTION_NODE_ID_LABEL' | translate }}
+        </h3>
+        <p>
+          {{ i18nPrefix + 'OPTION_NODE_ID_DESCRIPTION' | translate }}
+          <ng-container *ngIf="!nodeId && !propagatedNodeId">
+            <br /><br />
+            {{ i18nPrefix + 'OPTION_NODE_ID_NOT_FOUND' | translate }}
+          </ng-container>
+        </p>
+      </div>
+      <div class="recommended-label" *ngIf="nodeId || propagatedNodeId">
+        {{ i18nPrefix + 'RECOMMENDED' | translate }}
+      </div>
+    </button>
+    <button mat-stroked-button class="option-button" (click)="selectMode('configOverwrite')">
+      <div class="option-icon">
+        <i esIcon="data_object"></i>
+      </div>
+      <div class="option-text">
+        <h3>
+          {{ i18nPrefix + 'OPTION_OVERWRITE_LABEL' | translate }}
+        </h3>
+        <p>
+          {{ i18nPrefix + 'OPTION_OVERWRITE_DESCRIPTION' | translate }}
+        </p>
+      </div>
+    </button>
+  </div>
+</ng-template>
