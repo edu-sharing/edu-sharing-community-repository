@@ -95,6 +95,9 @@ export class MdsEditorSingleWidgetComponent implements OnChanges, OnDestroy, Mds
             const mdsDefinition = await this.mdsService
                 .getMetadataSet({ metadataSet: this.mds, repository: this.repository })
                 .toPromise();
+            if (this.instanceExists) {
+                return;
+            }
             let definition = mdsDefinition.widgets.find(
                 (w) => w.id === this.widgetId && !w.template,
             );
