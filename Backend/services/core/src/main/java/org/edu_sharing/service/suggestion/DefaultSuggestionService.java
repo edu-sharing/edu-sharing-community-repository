@@ -3,7 +3,10 @@ package org.edu_sharing.service.suggestion;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.NotImplementedException;
 import org.edu_sharing.restservices.suggestions.v1.dto.CreateSuggestionRequestDTO;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Limit;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -11,7 +14,17 @@ import java.util.Map;
 public class DefaultSuggestionService implements SuggestionService {
 
     @Override
-    public List<Suggestion> createSuggestion(String nodeId, SuggestionType type, String version, List<CreateSuggestionRequestDTO> suggestions) {
+    public List<PropertySuggestion> getTrackedData(@NotNull Date from, Date to, Limit limit) {
+        return List.of();
+    }
+
+    @Override
+    public List<PropertySuggestion> getDeletedTrackedData(@NotNull Date from, Date to, Limit limit) {
+        return List.of();
+    }
+
+    @Override
+    public List<PropertySuggestion> createSuggestion(String nodeId, SuggestionType type, String version, List<CreateSuggestionRequestDTO> suggestions) {
         throw new NotImplementedException();
     }
 
@@ -21,12 +34,12 @@ public class DefaultSuggestionService implements SuggestionService {
     }
 
     @Override
-    public List<Suggestion> updateStatus(String nodeId, List<String> ids, SuggestionStatus status) {
+    public List<PropertySuggestion> updateStatus(String nodeId, List<String> ids, SuggestionStatus status) {
         throw new NotImplementedException();
     }
 
     @Override
-    public Map<String, List<Suggestion>> getSuggestionsByNodeId(String nodeId, List<SuggestionStatus> status) {
+    public Map<String, List<PropertySuggestion>> getSuggestionsByNodeId(String nodeId, List<SuggestionStatus> status) {
         throw new NotImplementedException();
     }
 

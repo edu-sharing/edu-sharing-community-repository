@@ -6,11 +6,11 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
-import lombok.RequiredArgsConstructor;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.UserSimple;
@@ -21,7 +21,9 @@ import org.edu_sharing.service.suggestion.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Limit;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -59,8 +61,8 @@ public class SuggestionsApi {
             @Valid List<CreateSuggestionRequestDTO> suggestionsDto) {
         Mapper mapper = new Mapper(RepositoryDao.getRepository(repository));
         SuggestionService suggestionService = suggestionServiceFactory.getServiceByAppId(repository);
-        List<Suggestion> suggestions = suggestionService.createSuggestion(node, type, version, suggestionsDto);
-        return Response.ok(suggestions.stream().map(mapper::map).toArray(SuggestionResponseDTO[]::new)).build();
+        List<PropertySuggestion> propertySuggestions = suggestionService.createSuggestion(node, type, version, suggestionsDto);
+        return Response.ok(propertySuggestions.stream().map(mapper::map).toArray(SuggestionResponseDTO[]::new)).build();
     }
 
     @DELETE
@@ -91,8 +93,8 @@ public class SuggestionsApi {
 
         Mapper mapper = new Mapper(RepositoryDao.getRepository(repository));
         SuggestionService suggestionService = suggestionServiceFactory.getServiceByAppId(repository);
-        List<Suggestion> suggestions = suggestionService.updateStatus(node, ids, status);
-        return Response.ok(suggestions.stream().map(mapper::map).toArray(SuggestionResponseDTO[]::new)).build();
+        List<PropertySuggestion> propertySuggestions = suggestionService.updateStatus(node, ids, status);
+        return Response.ok(propertySuggestions.stream().map(mapper::map).toArray(SuggestionResponseDTO[]::new)).build();
 
     }
 
@@ -110,56 +112,80 @@ public class SuggestionsApi {
 
         Mapper mapper = new Mapper(RepositoryDao.getRepository(repository));
         SuggestionService suggestionService = suggestionServiceFactory.getServiceByAppId(repository);
-        Map<String, List<Suggestion>> nodeSuggestions = suggestionService.getSuggestionsByNodeId(node, status);
+        Map<String, List<PropertySuggestion>> nodeSuggestions = suggestionService.getSuggestionsByNodeId(node, status);
         return Response.ok(mapper.map(node, nodeSuggestions)).build();
     }
 
-    @RequiredArgsConstructor
-    private static class Mapper {
-        private final RepositoryDao repositoryDao;
+    @GET
+    @Path("/{repository}/tracking")
+    @Operation(summary = "get tracked suggestions", description = "Returns tracked suggestions that were modified after the specified date.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(array = @ArraySchema(schema = @Schema(implementation = PropertySuggestion.class)))),
+            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public Response getTrackedRelation(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = "Date to filter suggestions from (exclusive)", required = true) @QueryParam("after") Date after,
+            @Parameter(description = "Date to filter suggestions to (inclusive)") @QueryParam("to") Date to,
+            @Parameter(description = "maximum items", schema = @Schema(defaultValue = "100")) @QueryParam("maxItems") Integer maxItems,
+            @Parameter(description = "If true, deleted suggestions are returned, otherwise active suggestions are returned.") @QueryParam("deleted") Boolean deleted
+    ) {
+        SuggestionService suggestionService = suggestionServiceFactory.getServiceByAppId(repository);
+        List<PropertySuggestion> propertySuggestions = deleted == Boolean.TRUE
+                ? suggestionService.getDeletedTrackedData(after, to, Limit.of(maxItems))
+                : suggestionService.getTrackedData(after, to, Limit.of(maxItems));
+        return Response.ok(propertySuggestions).build();
+    }
 
-        public NodeSuggestionResponseDTO map(String node, Map<String, List<Suggestion>> nodeSuggestions) {
-            return new NodeSuggestionResponseDTO(
-                    node,
-                    map(nodeSuggestions)
-            );
-        }
+    private record Mapper(RepositoryDao repositoryDao) {
+            public NodeSuggestionResponseDTO map(String node, Map<String, List<PropertySuggestion>> nodeSuggestions) {
+                return new NodeSuggestionResponseDTO(
+                        node,
+                        map(nodeSuggestions)
+                );
+            }
 
-        public Map<String, List<SuggestionResponseDTO>> map(Map<String, List<Suggestion>> nodeSuggestions) {
-            return nodeSuggestions
-                    .entrySet()
-                    .stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, y -> y.getValue().stream().map(this::map).collect(Collectors.toList())));
-        }
+            public Map<String, List<SuggestionResponseDTO>> map(Map<String, List<PropertySuggestion>> nodeSuggestions) {
+                return nodeSuggestions
+                        .entrySet()
+                        .stream()
+                        .collect(Collectors.toMap(Map.Entry::getKey, y -> y.getValue().stream().map(this::map).collect(Collectors.toList())));
+            }
 
-        public SuggestionResponseDTO map(Suggestion suggestion) {
+            public SuggestionResponseDTO map(PropertySuggestion propertySuggestion) {
 
-            UserSimple createBy = getPerson(suggestion.getCreatedBy());
-            UserSimple modifiedBy = getPerson(suggestion.getModifiedBy());
+                UserSimple createBy = getPerson(propertySuggestion.getCreatedBy());
+                UserSimple modifiedBy = getPerson(propertySuggestion.getModifiedBy());
 
-            return new SuggestionResponseDTO(
-                    suggestion.getId(),
-                    suggestion.getNodeId(),
-                    suggestion.getVersion(),
-                    suggestion.getPropertyId(),
-                    suggestion.getValue(),
-                    suggestion.getType(),
-                    suggestion.getStatus(),
-                    suggestion.getDescription(),
-                    suggestion.getConfidence(),
-                    suggestion.getCreated(),
-                    createBy,
-                    suggestion.getModified(),
-                    modifiedBy);
-        }
+                return new SuggestionResponseDTO(
+                        propertySuggestion.getId(),
+                        propertySuggestion.getNodeId(),
+                        propertySuggestion.getVersion(),
+                        propertySuggestion.getPropertyId(),
+                        propertySuggestion.getValue(),
+                        propertySuggestion.getType(),
+                        propertySuggestion.getStatus(),
+                        propertySuggestion.getDescription(),
+                        propertySuggestion.getConfidence(),
+                        propertySuggestion.getCreated(),
+                        createBy,
+                        propertySuggestion.getModified(),
+                        modifiedBy);
+            }
 
-        private UserSimple getPerson(String user) {
-            try {
-                return PersonDao.getPerson(repositoryDao, user).asPersonSimple(false);
-            } catch (DAOException daoException) {
-                log.error(daoException.getMessage());
-                return null;
+            private UserSimple getPerson(String user) {
+                try {
+                    return PersonDao.getPerson(repositoryDao, user).asPersonSimple(false);
+                } catch (DAOException daoException) {
+                    log.error(daoException.getMessage());
+                    return null;
+                }
             }
         }
-    }
+
+
 }

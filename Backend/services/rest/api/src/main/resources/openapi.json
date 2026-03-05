@@ -5898,6 +5898,78 @@
         ],
         "type": "object"
       },
+      "PropertySuggestion": {
+        "properties": {
+          "confidence": {
+            "format": "double",
+            "type": "number"
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "modified": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "modifiedBy": {
+            "type": "string"
+          },
+          "nodeId": {
+            "type": "string"
+          },
+          "propertyId": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "ACCEPTED",
+              "PENDING",
+              "DECLINED"
+            ],
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of the suggestion",
+            "enum": [
+              "AI",
+              "USER_PROPOSAL"
+            ],
+            "type": "string"
+          },
+          "value": {
+            "type": "object"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "description",
+          "id",
+          "nodeId",
+          "propertyId",
+          "status",
+          "timestamp",
+          "type",
+          "value",
+          "version"
+        ],
+        "type": "object"
+      },
       "ProposeForCollectionEventDTO": {
         "allOf": [
           {
@@ -43881,6 +43953,130 @@
         "summary": "update status for a stream object and authority",
         "tags": [
           "STREAM v1"
+        ]
+      }
+    },
+    "/suggestions/v1/{repository}/tracking": {
+      "get": {
+        "description": "Returns tracked suggestions that were modified after the specified date.",
+        "operationId": "getTrackedRelation_1",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Date to filter suggestions from (exclusive)",
+            "in": "query",
+            "name": "after",
+            "required": true,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Date to filter suggestions to (inclusive)",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "maximum items",
+            "in": "query",
+            "name": "maxItems",
+            "schema": {
+              "default": 100,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "If true, deleted suggestions are returned, otherwise active suggestions are returned.",
+            "in": "query",
+            "name": "deleted",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PropertySuggestion"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "get tracked suggestions",
+        "tags": [
+          "SUGGESTIONS v1"
         ]
       }
     },
