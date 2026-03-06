@@ -2,6 +2,10 @@ import { Observable, Subject } from 'rxjs';
 import { debounceTime, startWith } from 'rxjs/operators';
 import { switchReplay } from '../rxjs-operators/switch-replay';
 
+/**
+ * default duration (s) cache for an api return function
+ */
+export const DEFAULT_API_CACHE_DURATION = 5;
 class KeyCacheEntry<T> {
     private readonly _trigger = new Subject<void>();
     readonly observable: Observable<T>;

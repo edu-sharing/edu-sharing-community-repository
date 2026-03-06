@@ -15,7 +15,11 @@ import {
 import { NodeStats } from '../api/models/node-stats';
 import { NodeEntry } from '../api/models/node-entry';
 import { HandleParam } from '../api/models/handle-param';
-import { cachedShareReplay, KeyCache } from '../utils/decorators/cached-share-replay';
+import {
+    cachedShareReplay,
+    DEFAULT_API_CACHE_DURATION,
+    KeyCache,
+} from '../utils/decorators/cached-share-replay';
 
 export class NodeConstants {
     public static SPACES_STORE_REF = 'workspace://SpacesStore/';
@@ -109,7 +113,7 @@ export class NodeService {
             .pipe(tap(() => this._nodesChanged.next()));
     }
 
-    @cachedShareReplay(NodeService.parentsCache, getParentsCacheKey, 5)
+    @cachedShareReplay(NodeService.parentsCache, getParentsCacheKey, DEFAULT_API_CACHE_DURATION)
     getParents(
         node: string,
         {
