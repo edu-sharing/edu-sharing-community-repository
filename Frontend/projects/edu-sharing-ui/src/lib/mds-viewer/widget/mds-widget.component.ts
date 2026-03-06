@@ -3,6 +3,7 @@ import {
     Component,
     computed,
     ElementRef,
+    HostBinding,
     Injector,
     Input,
     OnChanges,
@@ -29,6 +30,8 @@ import {
     MdsEditorInstanceServiceAbstract,
     MdsExtendedValue,
 } from '../mds-editor-instance-service.abstract';
+import { animate, group, state, style, transition, trigger } from '@angular/animations';
+import { UIAnimation } from '../../util/ui-animation';
 
 export enum MdsType {
     Io = 'io',
@@ -48,6 +51,7 @@ export interface MdsValueList {
 export abstract class MdsViewerWidget {
     definition: MdsWidget;
     focusTrigger: Subject<void>;
+    readonly meetsDynamicCondition = new BehaviorSubject<boolean>(true);
     abstract getInitalValuesAsync(): Promise<InitialValues>;
     abstract getInitialDisplayValues(): BehaviorSubject<MdsValueList>;
 }
@@ -110,6 +114,34 @@ export enum ValueType {
     styleUrls: ['mds-widget.component.scss'],
     changeDetection: ChangeDetectionStrategy.Default,
     standalone: false,
+    animations: [
+        trigger('showHideExtended', [
+            state(
+                'hidden',
+                style({
+                    height: '0px',
+                    margin: '0px',
+                    opacity: '0',
+                    visibility: 'hidden',
+                    overflow: 'hidden', // Needed for transition only
+                }),
+            ),
+            transition('hidden => shown', [
+                group([
+                    // Animate hight, margin, and opacity to original values
+                    animate(UIAnimation.ANIMATION_TIME_FAST),
+                    // Keep `overflow: hidden` until the widget is fully expanded
+                    animate(UIAnimation.ANIMATION_TIME_FAST, style({ overflow: 'hidden' })),
+                ]),
+            ]),
+            transition('shown => hidden', [
+                // Set `overflow: hidden` at the beginning of the animation
+                style({ overflow: 'hidden' }),
+                // Animate to 'hidden' style
+                animate('.2s'),
+            ]),
+        ]),
+    ],
 })
 export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
@@ -131,6 +163,11 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
     ];
 
     readonly valueType = ValueType.String;
+    private isHidden = false;
+
+    @HostBinding('@showHideExtended') get showHideExtendedState(): string {
+        return this.isHidden ? 'hidden' : 'shown';
+    }
 
     @Input() widget: MdsViewerWidget;
     @Input() showCaption = true;
@@ -187,6 +224,9 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
             await this.focus();
             this.startEdit();
         });
+        this.widget.meetsDynamicCondition
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((meets) => (this.isHidden = !meets));
         this.value.set(await this.getNodeValue());
         this.widget
             .getInitialDisplayValues()

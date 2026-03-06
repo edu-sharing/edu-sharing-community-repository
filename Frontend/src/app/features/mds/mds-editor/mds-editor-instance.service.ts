@@ -142,8 +142,8 @@ export class MdsEditorInstanceService
     static Widget = class implements GeneralWidget, MdsViewerWidget {
         readonly addValue = new EventEmitter<MdsWidgetValue>();
         readonly status = new BehaviorSubject<InputStatus>(null);
-        readonly meetsDynamicCondition = new BehaviorSubject<boolean>(true);
         readonly focusTrigger = new Subject<void>();
+        readonly meetsDynamicCondition = new BehaviorSubject<boolean>(true);
         readonly setValueExternal = new Subject<string[]>();
         private hasUnsavedDefault: boolean; // fixed after `ready`
         private initialValues: InitialValues;
