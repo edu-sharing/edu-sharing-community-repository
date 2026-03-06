@@ -11,7 +11,13 @@ import {
     ViewChild,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { DEFAULT, HOME_REPOSITORY, Node, SearchService } from 'ngx-edu-sharing-api';
+import {
+    DEFAULT,
+    HOME_REPOSITORY,
+    Node,
+    SearchService,
+    SessionStorageService,
+} from 'ngx-edu-sharing-api';
 import {
     ColumnType,
     FormatDatePipe,
@@ -33,7 +39,6 @@ import { ConfigurationService } from '../../../core-module/rest/services/configu
 import { RestAdminService } from '../../../core-module/rest/services/rest-admin.service';
 import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
 import { RestStatisticsService } from '../../../core-module/rest/services/rest-statistics.service';
-import { SessionStorageService } from '../../../core-module/rest/services/session-storage.service';
 import { UIService } from '../../../core-module/rest/services/ui.service';
 import { NodeHelperService } from '../../../services/node-helper.service';
 import { Toast } from '../../../services/toast';
