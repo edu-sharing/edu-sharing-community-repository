@@ -79,6 +79,7 @@ export class IconDirective implements OnInit, OnDestroy {
     @Input() set esIconContext(context: string) {
         this.iconContext$.next(context);
     }
+    @Input() path?: string;
 
     constructor(
         private element: ElementRef<HTMLElement>,
@@ -128,7 +129,7 @@ export class IconDirective implements OnInit, OnDestroy {
             try {
                 const iconName = id.slice(4);
                 const fileName = iconName.endsWith('.svg') ? iconName : `${iconName}.svg`;
-                const path = `assets/images/icons/${fileName}`;
+                const path = `${this.path || 'assets/images/icons/'}${fileName}`;
 
                 const svgText = await firstValueFrom(this.http.get(path, { responseType: 'text' }));
 

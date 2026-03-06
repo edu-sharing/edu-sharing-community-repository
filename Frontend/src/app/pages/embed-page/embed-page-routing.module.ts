@@ -4,6 +4,10 @@ import { EmbedPageComponent } from './embed-page.component';
 
 const routes: Routes = [
     {
+        path: '',
+        component: EmbedPageComponent,
+    },
+    {
         path: ':component',
         component: EmbedPageComponent,
     },

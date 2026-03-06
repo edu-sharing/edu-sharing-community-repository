@@ -47,6 +47,26 @@
         background-color: var(--primary);
     }
 }
+@mixin materialScrollbarLight() {
+    &::-webkit-scrollbar-track {
+        -webkit-box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        background-color: transparent;
+    }
+    &::-webkit-scrollbar {
+        height: 4px;
+        background-color: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+        max-width: 4px;
+        border-radius: 10px;
+        // -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+        background-color: var(--palette-primary-100);
+    }
+    // Firefox
+    scrollbar-width: thin;
+    scrollbar-color: var(--palette-primary-100) transparent;
+}
 @mixin removeDefaultFocus() {
     outline: none;
 }

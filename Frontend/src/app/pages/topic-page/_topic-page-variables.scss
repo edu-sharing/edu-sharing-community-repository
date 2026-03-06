@@ -1,0 +1,147 @@
+@use 'sass:color';
+@use 'sass:map';
+@use 'sass:meta';
+// make variables locally available, but also forward them to other files
+@use 'variables-scss' as vars;
+@forward 'variables-scss';
+
+// re-export important variables
+$mobileWidth: vars.$mobileWidth;
+$mobileStage: vars.$mobileStage;
+$mobileTabSwitchWidth: vars.$mobileTabSwitchWidth;
+
+// MATERIAL COLOR ROLE VARIABLES
+// define a set of variables for the topic pages from Material, Edu-Sharing and WLO based on Material v3 role names
+$inverse-surface: #000;
+$on-primary: var(--light-primary-text, #fff);
+$on-surface: if(
+    meta.global-variable-exists('textMain', vars),
+    vars.$textMain,
+    var(--palette-foreground-text, #1a1c1c)
+);
+$outline: var(
+    --mdc-outlined-text-field-outline-color,
+    var(--mat-app-outline)
+); // $inputBorderColor is not equal to the border color of form-fields
+$primary: var(--primary, #003b7c);
+$primary-light: #3da6ee;
+// note: $primaryMediumDark is currently not equal to #032850
+$primary-dark: if(
+    meta.global-variable-exists('primaryMediumDark', vars),
+    vars.$primaryMediumDark,
+    #032850
+);
+$secondary: #515f7a;
+// the following colors are retrieved from Materials neutral palette (tone value as comment)
+$surface: #faf9f9; // N-98 (possible replacement: $cardLightBackground)
+$surface-alt: #f4f4f4;
+$surface-dim: #dadada; // N-87
+$surface-container-highest: #e3e2e2; // N-90
+$surface-container-high: #e8e8e8; // N-92
+$surface-container: #eee; // N-94 (possible replacement: $actionDialogBackground)
+$surface-container-low: #f4f3f3; // N-96 (possible replacement: $actionDialogBackground)
+$surface-container-lowest: if(
+    meta.global-variable-exists('backgroundColor', vars),
+    vars.$backgroundColor,
+    #fff
+);
+$surface-selected: #f2f5f8;
+
+// EXTENDED COLOR VARIABLES
+// status colors
+$error: if(
+    meta.global-variable-exists('warning', vars),
+    color.adjust(vars.$warning, $lightness: -10%),
+    #ba1a1a
+); // E-40
+$error-container: if(
+    meta.global-variable-exists('warning', vars),
+    color.adjust(vars.$warning, $lightness: 45%),
+    #ffdad6
+); // E-90
+$success: if(
+    meta.global-variable-exists('colorStatusPositive', vars),
+    color.adjust(vars.$colorStatusPositive, $lightness: -15%),
+    #43a047
+);
+$success-container: if(
+    meta.global-variable-exists('colorStatusPositive', vars),
+    color.adjust(vars.$colorStatusPositive, $lightness: 40%),
+    #e8f5e9
+);
+$warn: if(
+    meta.global-variable-exists('warningMedium', vars),
+    color.adjust(vars.$warningMedium, $lightness: -10%),
+    #ffb930
+);
+$warn-container: if(
+    meta.global-variable-exists('warningMedium', vars),
+    color.adjust(vars.$warningMedium, $lightness: 40%),
+    #fff1d6
+);
+// chip colors
+$chip-color-discipline: if(
+    map.has-key(vars.$chip-colors, 'ccm_taxonid'),
+    map.get(vars.$chip-colors, 'ccm_taxonid'),
+    #a6d6ae
+);
+$chip-color-educationalContext: if(
+    map.has-key(vars.$chip-colors, 'ccm_educationalcontext'),
+    map.get(vars.$chip-colors, 'ccm_educationalcontext'),
+    #d6a6a6
+);
+$chip-color-intendedEndUserRole: if(
+    map.has-key(vars.$chip-colors, 'ccm_educationalintendedenduserrole'),
+    map.get(vars.$chip-colors, 'ccm_educationalintendedenduserrole'),
+    #d3d6a6
+);
+$chip-color-learningResourceType: if(
+    map.has-key(vars.$chip-colors, 'ccm_educationallearningresourcetype'),
+    map.get(vars.$chip-colors, 'ccm_educationallearningresourcetype'),
+    #d6c1a6
+);
+$chip-color-oer: #d6a6d6;
+$chip-color-source: #d0a6d6;
+$chip-color-type: if(
+    map.has-key(vars.$chip-colors, 'ccm_objecttype'),
+    map.get(vars.$chip-colors, 'ccm_objecttype'),
+    #a6c0d6
+);
+// further colors
+$neon-default: #e4f700;
+$neon-medium: #b4da1c;
+$outline-light: if(
+    meta.global-variable-exists('searchInputBorderColor', vars),
+    vars.$searchInputBorderColor,
+    #c3c6d2
+);
+$pink-default: #ec4a70;
+$primary-dark: var(
+    --palette-primary-900,
+    #032850
+); // --palette-primary-900 is currently equal to #00194b, but should be #032850
+$secondary-text: vars.$textLight; // N-35
+
+// TYPOGRAPHY VARIABLES
+// font-family
+$primary-font-family: vars.$primaryFontFamily;
+// note: open_sansbold is not provided at the moment
+$brand-font-family: 'Montserrat' !default;
+// font-size (partly copied from variables-scss of Edu-Sharing)
+$font-size-x-large: vars.$fontSizeXLarge;
+$font-size-large: vars.$fontSizeLarge;
+$font-size-medium: 100% !default;
+$font-size-small: vars.$fontSizeSmall;
+$font-size-x-small: vars.$fontSizeXSmall;
+// font-weight
+$font-weight-x-bold: 700;
+$font-weight-bold: 600;
+$font-weight-medium: 500;
+$font-weight-regular: 400;
+// line-height
+$line-height-large: 150%;
+$line-height-medium: 125%;
+$line-height-small: 100%;
+
+// WIDGET-SPECIFIC VARIABLES
+$widget-border-radius: var(--border-radius, 24px);

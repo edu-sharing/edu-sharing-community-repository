@@ -33,7 +33,7 @@ import {
     VirtualNode,
 } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { delay, filter, map, startWith, takeUntil, tap } from 'rxjs/operators';
+import { delay, filter, map, startWith, takeUntil } from 'rxjs/operators';
 import {
     Connector,
     Filetype,
@@ -72,7 +72,7 @@ import { OptionsHelperService } from '../../../services/options-helper.service';
     templateUrl: 'create-menu.component.html',
     styleUrls: ['create-menu.component.scss'],
     animations: [trigger('dialog', UIAnimation.switchDialog(UIAnimation.ANIMATION_TIME_FAST))],
-    providers: [OptionsHelperDataService],
+    providers: [OptionsHelperDataService, OptionsHelperService],
     standalone: false,
 })
 export class CreateMenuComponent implements OnInit, OnDestroy {
@@ -184,10 +184,16 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             .observeEndpointAllowed('LTI')
             .pipe(filter((allowed) => allowed))
             .subscribe(() =>
-                this.ltiPlatformService.getTools().subscribe((t) => {
-                    this.tools = t;
-                    void this.updateOptions();
-                }),
+                this.ltiPlatformService.getTools().subscribe(
+                    (t) => {
+                        this.tools = t;
+                        void this.updateOptions();
+                    },
+                    (error) => {
+                        // ignore errors
+                        error.preventDefault();
+                    },
+                ),
             );
     }
 

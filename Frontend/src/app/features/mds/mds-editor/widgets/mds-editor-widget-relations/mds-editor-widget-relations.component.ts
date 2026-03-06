@@ -1,6 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { BehaviorSubject, of } from 'rxjs';
-import { UsageV1Service } from 'ngx-edu-sharing-api';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 

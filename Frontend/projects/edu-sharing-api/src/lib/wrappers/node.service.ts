@@ -11,10 +11,17 @@ import {
     NodeVersion,
     NodeVersionEntries,
     NodeVersionRefEntries,
+    ParentEntries,
 } from '../models';
 import { NodeStats } from '../api/models/node-stats';
 import { NodeEntry } from '../api/models/node-entry';
 import { HandleParam } from '../api/models/handle-param';
+import {
+    cachedApiReplay,
+    cachedShareReplay,
+    DEFAULT_API_CACHE_DURATION,
+    KeyCache,
+} from '../utils/decorators/cached-share-replay';
 
 export class NodeConstants {
     public static SPACES_STORE_REF = 'workspace://SpacesStore/';
@@ -34,11 +41,14 @@ export class NodeTools {
     providedIn: 'root',
 })
 export class NodeService {
+    private static readonly parentsCache = new KeyCache<ParentEntries>();
+    private static readonly nodesCache = new KeyCache<Node>();
     private readonly _nodesChanged = new Subject<void>();
     readonly nodesChanged = this._nodesChanged.asObservable();
 
     constructor(private nodeV1: NodeV1Service, private searchV1: SearchV1Service) {}
 
+    @cachedApiReplay(NodeService.nodesCache, getNodeCacheKey, 1)
     getNode(id: string, { repository = HOME_REPOSITORY } = {}): Observable<Node> {
         return this.nodeV1
             .getMetadata({
@@ -107,10 +117,12 @@ export class NodeService {
             .pipe(tap(() => this._nodesChanged.next()));
     }
 
+    @cachedApiReplay(NodeService.parentsCache, getParentsCacheKey, DEFAULT_API_CACHE_DURATION)
     getParents(
         node: string,
         {
             repository = HOME_REPOSITORY,
+            fullPath = false,
             ...params
         }: Partial<Omit<Parameters<NodeV1Service['getParents']>[0], 'node'>> = {},
     ) {
@@ -338,7 +350,7 @@ export class NodeService {
             node,
             property,
             keepModifiedDate,
-            value,
+            body: value,
         });
     }
 
@@ -449,4 +461,30 @@ export class NodeService {
     getStats(nodeId: string, { repository = HOME_REPOSITORY } = {}): Observable<NodeStats> {
         return this.nodeV1.getStats({ repository, node: nodeId });
     }
+}
+function getParentsCacheKey(
+    id: string,
+    details?: { repository?: string; fullPath?: boolean },
+): string {
+    if (!details) {
+        details = {};
+    }
+    if (details.repository === undefined) {
+        details.repository = HOME_REPOSITORY;
+        details.repository = HOME_REPOSITORY;
+    }
+    if (details.fullPath === undefined) {
+        details.fullPath = false;
+    }
+    return JSON.stringify([id, details.repository, details.fullPath]);
+}
+function getNodeCacheKey(id: string, details?: { repository?: string }): string {
+    if (!details) {
+        details = {};
+    }
+    if (details.repository === undefined) {
+        details.repository = HOME_REPOSITORY;
+        details.repository = HOME_REPOSITORY;
+    }
+    return JSON.stringify([id, details.repository]);
 }

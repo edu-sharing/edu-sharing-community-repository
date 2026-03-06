@@ -13,20 +13,21 @@ import {
 import { FormControl, UntypedFormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, firstValueFrom, ReplaySubject } from 'rxjs';
-import { debounceTime, filter, map, shareReplay, startWith, takeUntil } from 'rxjs/operators';
+import { debounceTime, filter, map, startWith, takeUntil } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsWidget, MdsWidgetValue } from '../../../types/types';
 import { MdsWidgetType, ValueType } from 'ngx-edu-sharing-ui';
 import { DisplayValue } from '../DisplayValues';
 import { MdsEditorWidgetBase, MdsEditorWidgetChipsSuggestionBase } from '../mds-editor-widget-base';
 import { MdsEditorWidgetTreeCoreComponent } from './mds-editor-widget-tree-core/mds-editor-widget-tree-core.component';
-import { Tree } from './tree';
+import { Tree, TreeNode } from './tree';
 import { MatChipOption, MatChipRow } from '@angular/material/chips';
 import { UIService } from '../../../../../core-module/rest/services/ui.service';
 import { MatButton } from '@angular/material/button';
 import { UIHelper } from '../../../../../core-ui-module/ui-helper';
 import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
 import { Toast } from '../../../../../services/toast';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 @Component({
     selector: 'es-mds-editor-widget-tree',
@@ -416,13 +417,23 @@ export class MdsEditorWidgetTreeComponent
         }
     }
 
-    isSuggestion(value: DisplayValue) {
+    isSuggestion(value: DisplayValue | TreeNode) {
         return this.widget
             .getSuggestions()
             .pipe(
                 map((suggestions) =>
-                    suggestions?.find((s) => s.value === value.key && s.status === 'ACCEPTED'),
+                    suggestions?.find(
+                        (s) =>
+                            s.value === ((value as DisplayValue).key || (value as TreeNode).id) &&
+                            s.status === 'ACCEPTED',
+                    ),
                 ),
             );
+    }
+
+    reorderChip(event: CdkDragDrop<any>) {
+        const currentValue = [...this.chipsControl.value];
+        moveItemInArray(currentValue, event.previousIndex, event.currentIndex);
+        this.chipsControl.setValue(currentValue);
     }
 }

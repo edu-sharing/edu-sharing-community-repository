@@ -54,6 +54,7 @@ import { CommentsListComponent } from './mds-editor/widgets/mds-editor-widget-co
 import { MdsNodeRelationsWidgetComponent } from './mds-editor/widgets/mds-editor-widget-relations/node-relations/node-relations-widget.component';
 import { MdsEditorWidgetRelationsComponent } from './mds-editor/widgets/mds-editor-widget-relations/mds-editor-widget-relations.component';
 import { MdsEditorGlobalService } from './mds-editor/mds-editor-global.service';
+import { MdsEditorWidgetNodefilterComponent } from './mds-editor/widgets/mds-editor-widget-nodefilter/mds-editor-widget-nodefilter.component';
 
 @NgModule({
     declarations: [
@@ -67,6 +68,7 @@ import { MdsEditorGlobalService } from './mds-editor/mds-editor-global.service';
         MdsEditorEmbeddedComponent,
         MdsEditorViewComponent,
         MdsEditorWidgetAuthorComponent,
+        MdsEditorWidgetNodefilterComponent,
         MdsEditorWidgetCollectionsComponent,
         MdsEditorWidgetRelationsComponent,
         MdsEditorWidgetCommentsComponent,

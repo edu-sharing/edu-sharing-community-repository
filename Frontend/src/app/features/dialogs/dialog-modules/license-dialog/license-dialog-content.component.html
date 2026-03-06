@@ -253,10 +253,14 @@
     <i esIcon="keyboard_arrow_down" *ngIf="!aiOpen"></i>
   </button>
   <div *ngIf="aiOpen" [@overlay]="aiOpen" class="ai-details">
+    <es-info-message mode="info" *ngIf="isPublic === false">
+      {{ 'WORKSPACE.LICENSE.AI.NO_PUBLIC_NODE' | translate }}
+    </es-info-message>
     <mat-checkbox
-      [(ngModel)]="ai.allowUsage"
+      [ngModel]="isPublic ? ai.allowUsage : false"
+      [disabled]="!isPublic"
       [indeterminate]="ai.allowUsage === 'indeterminate'"
-      (ngModelChange)="updateAi()"
+      (ngModelChange)="ai.allowUsage = $event; updateAi()"
     >
       <es-multi-line-label>
         <ng-container slot="label">
@@ -267,7 +271,6 @@
         </ng-container>
       </es-multi-line-label>
     </mat-checkbox>
-
     <mat-checkbox
       [(ngModel)]="ai.generated"
       [indeterminate]="ai.generated === 'indeterminate'"

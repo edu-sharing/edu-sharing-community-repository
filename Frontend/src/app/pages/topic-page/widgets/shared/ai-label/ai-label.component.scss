@@ -1,0 +1,31 @@
+@use '../../../topic-page-variables' as topicPageVars;
+
+.ai-label {
+    font-size: topicPageVars.$font-size-x-small;
+    font-family: topicPageVars.$brand-font-family;
+    font-weight: topicPageVars.$font-weight-x-bold;
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+
+    &.image-container {
+        padding: 0 16px;
+        position: absolute;
+        background: rgba(0, 0, 0, 0.45);
+        color: topicPageVars.$on-primary;
+        bottom: 2rem;
+        right: 0;
+        z-index: 11;
+    }
+
+    &.text-container {
+        padding: 0 8px;
+        color: topicPageVars.$secondary;
+        float: right;
+    }
+
+    // fix to properly center icon visually
+    &::ng-deep .svg-icons {
+        margin-bottom: 3px;
+    }
+}

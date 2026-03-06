@@ -15,6 +15,7 @@ import { AdminPluginsComponent } from './plugins/plugins.component';
 import { AdminStatisticsComponent } from './statistics/statistics.component';
 import { CodeEditorComponent } from './code-editor/code-editor';
 import { AdminContextComponent } from './context/context.component';
+import { AdminMessagesComponent } from './messages/messages.component';
 
 @NgModule({
     declarations: [
@@ -34,6 +35,7 @@ import { AdminContextComponent } from './context/context.component';
     imports: [
         SharedModule,
         AdminPageRoutingModule,
+        AdminMessagesComponent,
         MdsModule,
         MonacoEditorModule.forRoot({
             baseUrl: window.location.origin + '/edu-sharing/assets/monaco/min/vs',

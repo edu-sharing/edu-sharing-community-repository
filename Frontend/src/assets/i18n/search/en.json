@@ -84,6 +84,9 @@
       "SEARCH_EXISTS_TITLE": "A search with the same criteria has already been saved.",
       "SEARCH_EXISTS_MESSAGE": "A saved search query with the same name already exists. If you continue, the existing query will be replaced with the current settings.",
       "TOAST_SAVED": "The current search query has been saved successfully."
+    },
+    "ACTION": {
+      "APPLYFILTER_DESCRIPTION": "Use the filters to get your result. You can then apply the given filter configuration."
     }
   }
 }

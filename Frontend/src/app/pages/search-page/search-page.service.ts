@@ -10,6 +10,7 @@ import {
     NetworkService,
     Node,
     Repository,
+    SavedSearch,
 } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
@@ -49,7 +50,7 @@ export class SearchRequestParams {
         return JSON.stringify(this) === JSON.stringify(other);
     }
 }
-
+type PrimaryAction = null | 'applyFilter';
 interface AddToCollectionMode {
     customOptions: CustomOptions;
     collection: Node;
@@ -71,6 +72,7 @@ export class SearchPageService implements OnDestroy {
     readonly loadingProgress = new BehaviorSubject<number>(null);
     readonly reUrl = new BehaviorSubject<string | false>(null);
     readonly addToCollectionMode = new BehaviorSubject<AddToCollectionMode>(null);
+    readonly primaryAction = new BehaviorSubject<PrimaryAction>(null);
     readonly filtersMdsWidgets: BehaviorSubject<Widget[]> = new BehaviorSubject(null);
     /**
      * A list of properties that should be fetched as facets with a search request.
@@ -118,6 +120,7 @@ export class SearchPageService implements OnDestroy {
         this.initQueryParams();
         this.registerAllRepositories();
         this.registerAddToCollection();
+        this.registerPrimaryAction();
     }
 
     /**
@@ -294,6 +297,14 @@ export class SearchPageService implements OnDestroy {
             .subscribe(this.loadingProgress);
     }
 
+    private registerPrimaryAction(): void {
+        this.route.queryParamMap
+            .pipe(
+                map((queryParamMap) => queryParamMap.get('action')),
+                distinctUntilChanged(),
+            )
+            .subscribe((action) => this.primaryAction.next(action as PrimaryAction));
+    }
     private registerAddToCollection(): void {
         this.route.queryParamMap
             .pipe(
@@ -340,6 +351,13 @@ export class SearchPageService implements OnDestroy {
             useDefaultOptions: false,
             addOptions: [cancel, addTo],
         };
+    }
+
+    applySavedSearch(savedSearch: SavedSearch) {
+        this.activeRepository.setUserValue(savedSearch.repository);
+        this.activeMetadataSet.setUserValue(savedSearch.metadataSet);
+        this.searchString.setUserValue(savedSearch.searchString);
+        this.searchFilters.setUserValue(savedSearch.filters);
     }
 }
 

@@ -1,0 +1,87 @@
+:host {
+    display: block;
+    width: 800px;
+}
+
+// fix for resetting the padding of the card-content
+::ng-deep .card-content:has(es-configure-widget-embedding-dialog) {
+    padding: 0 !important;
+}
+
+.embedding-types ::ng-deep {
+    .mat-mdc-tab-header {
+        margin-bottom: 16px;
+    }
+
+    .mat-mdc-tab-body-content {
+        padding: 0 25px 25px 25px;
+    }
+}
+
+.info-message {
+    margin-bottom: 16px;
+    display: block;
+}
+
+.options-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .option-button {
+        height: auto;
+        border-radius: 8px !important;
+
+        &.recommended {
+            background-color: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .recommended-label {
+            position: absolute;
+            top: -12px;
+            right: 16px;
+            background-color: #4caf50;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        &::ng-deep .mdc-button__label {
+            width: 100%;
+            min-height: 48px;
+            justify-content: start;
+            gap: 0;
+
+            .option-icon {
+                min-width: 64px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 32px;
+            }
+
+            .option-text {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                padding: 24px 16px;
+
+                h3 {
+                    margin: 0;
+                    text-align: left;
+                    font-size: 16px;
+                    font-weight: 600;
+                }
+
+                p {
+                    margin: 0;
+                    text-align: left;
+                    font-size: 16px;
+                    font-weight: normal;
+                }
+            }
+        }
+    }
+}

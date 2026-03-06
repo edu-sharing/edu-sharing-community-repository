@@ -3,7 +3,13 @@ import { PlatformLocation } from '@angular/common';
 import { Component, ElementRef, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { AboutService, NetworkService, Node, Store } from 'ngx-edu-sharing-api';
+import {
+    AboutService,
+    NetworkService,
+    Node,
+    SessionStorageService,
+    Store,
+} from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
     ColumnType,
@@ -38,7 +44,6 @@ import {
     RestOrganizationService,
     RestSearchService,
     ServerUpdate,
-    SessionStorageService,
 } from '../../core-module/core.module';
 import { CsvHelper } from '../../core-module/csv.helper';
 import { Helper } from '../../core-module/rest/helper';
@@ -111,7 +116,6 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         private route: ActivatedRoute,
         private router: Router,
         private searchApi: RestSearchService,
-        private sessionStorage: SessionStorageService,
         private storage: SessionStorageService,
         private toast: Toast,
         private translate: TranslateService,
@@ -1301,6 +1305,10 @@ export class AdminPageComponent implements OnInit, OnDestroy {
                     icon: 'extension',
                 },
                 {
+                    id: 'MESSAGES',
+                    icon: 'message',
+                },
+                {
                     id: 'CONTEXT',
                     icon: 'public',
                 },
@@ -1469,7 +1477,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     }
 
     private async showWarningDialog(): Promise<void> {
-        const alreadyConfirmed = await this.sessionStorage
+        const alreadyConfirmed = await this.storage
             .get('admin-confirmed-warning-dialog', false, Store.Session)
             .toPromise();
         if (alreadyConfirmed) {
@@ -1489,7 +1497,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             if (result === 'CANCEL') {
                 window.history.back();
             } else if (result === 'ADMIN.UNDERSTAND') {
-                void this.sessionStorage.set('admin-confirmed-warning-dialog', true, Store.Session);
+                void this.storage.set('admin-confirmed-warning-dialog', true, Store.Session);
             }
         });
     }

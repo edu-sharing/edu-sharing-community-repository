@@ -1,0 +1,144 @@
+<div class="ai-widget" *ngIf="initialized(); else loadingSpinner">
+  <ng-container *ngIf="reloadingIndicator()">
+    <ng-container *ngTemplateOutlet="loadingSpinner"></ng-container>
+  </ng-container>
+  <div class="edit-mode" *ngIf="editMode(); else outputResult">
+    <h3 class="mat-heading-4">
+      {{ i18nPrefix + 'HEADING' | translate }}
+    </h3>
+
+    <p class="prompt-description">
+      {{ i18nPrefix + 'PROMPT_DESCRIPTION' | translate }}
+      {{ i18nPrefix + 'PLACEHOLDER_DESCRIPTION' | translate }}
+      <ng-container *ngIf="availableSelectDimensionKeys.length > 0">
+        <ng-container *ngFor="let key of availableSelectDimensionKeys; let i = index">
+          <code (click)="appendDimensionKey(key)">{{
+            dimensionPrefix + key + dimensionSuffix
+          }}</code>
+          {{ i <= availableSelectDimensionKeys.length - 3 ? ', ' : '' }}
+          {{
+            i === availableSelectDimensionKeys.length - 2
+              ? ' ' + (i18nPrefix + 'AND' | translate)
+              : ''
+          }}
+        </ng-container>
+        .
+      </ng-container>
+    </p>
+
+    <mat-form-field appearance="outline">
+      <mat-label>
+        {{ i18nPrefix + 'PROMPT_LABEL' | translate }}
+      </mat-label>
+      <textarea
+        matInput
+        [placeholder]="i18nPrefix + 'PROMPT_PLACEHOLDER' | translate"
+        [(ngModel)]="promptInput"
+        [ngModelOptions]="{ standalone: true }"
+        rows="3"
+        (change)="checkForPromptChanges()"
+        #promptTextarea
+      ></textarea>
+    </mat-form-field>
+
+    <p>
+      {{ i18nPrefix + 'SEND_HINT' | translate }}
+    </p>
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="processPromptUpdate()"
+      [disabled]="disabled() || processPromptInProgress"
+    >
+      {{ i18nPrefix + 'SEND' | translate }}
+    </button>
+
+    <div class="answers-container" *ngIf="latestStoredPrompt">
+      <h3 class="mat-heading-4">
+        {{ i18nPrefix + 'ANSWERS_LABEL' | translate }}
+      </h3>
+
+      <p>
+        {{ i18nPrefix + 'ANSWERS_DESCRIPTION' | translate }}
+      </p>
+
+      <div
+        class="select-dimensions"
+        [class.topic-page-grid-cols-1]="selectDimensionKeysUsed.length === 1"
+        [class.topic-page-grid-cols-2]="selectDimensionKeysUsed.length % 2 === 0"
+        [class.topic-page-grid-cols-3]="
+          selectDimensionKeysUsed.length > 2 && selectDimensionKeysUsed.length % 2 !== 0
+        "
+        *ngIf="selectDimensionKeysUsed.length > 0 && !processPromptInProgress"
+      >
+        <ng-container *ngFor="let dimensionKey of selectDimensionKeysUsed; let i = index">
+          <es-mds-editor-single-widget
+            [editorMode]="'form'"
+            [mds]="mds"
+            [widgetId]="dimensionKey"
+            [customAttributes]="{ type: MdsWidgetType.Singleoption }"
+            [ngModel]="latestSelectedDimensionValues[dimensionKey]"
+            (ngModelChange)="
+              latestSelectedDimensionValues[dimensionKey] = $event; updateResultInput()
+            "
+            ngDefaultControl
+          ></es-mds-editor-single-widget>
+        </ng-container>
+      </div>
+    </div>
+
+    <es-editable-text
+      *ngIf="latestStoredPrompt"
+      [applyTextareaPadding]="false"
+      [disabled]="disabled() || processPromptInProgress"
+      [editable]="true"
+      [label]="i18nPrefix + 'CURRENT_SELECTION_ANSWER_LABEL' | translate"
+      [inputLimit]="1000"
+      [nonEditText]="resultInput"
+      [showMoreLimit]="650"
+      [text]="resultInput"
+      (textChange)="resultInput = $event; saveModification()"
+    ></es-editable-text>
+
+    <div>
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="generateTextForSelection()"
+        [disabled]="disabled()"
+      >
+        {{ i18nPrefix + 'GENERATE_TEXT' | translate }}
+      </button>
+    </div>
+
+    <!-- color + configuration buttons -->
+    <es-widget-configuration-buttons
+      [optionOne]="embedConfigurationOption"
+      [pageVariantNode]="pageVariantNode"
+      [swimlaneIndex]="swimlaneIndex"
+      (optionOneClicked)="embedWidget()"
+    ></es-widget-configuration-buttons>
+  </div>
+  <ng-template #outputResult>
+    <es-editable-text
+      *ngIf="resultString; else emptyResultString"
+      [aiGenerated]="aiGeneratedText()"
+      [editable]="false"
+      [label]="i18nPrefix + 'CURRENT_SELECTION_ANSWER_LABEL' | translate"
+      [nonEditText]="resultString"
+      [searchInput]="searchInput()"
+      [text]="resultString"
+      (searchResultsUpdated)="updateSearchResults($event)"
+    ></es-editable-text>
+    <ng-template #emptyResultString>
+      <div class="empty-result-string" *ngIf="initialized() && !reloadingIndicator()">
+        {{ i18nPrefix + 'NO_ANSWER_DEFINED' | translate }}
+      </div>
+    </ng-template>
+  </ng-template>
+</div>
+<ng-template #loadingSpinner>
+  <div class="reloading-indicator" *ngIf="reloadingIndicator()">
+    <es-spinner></es-spinner>
+  </div>
+</ng-template>

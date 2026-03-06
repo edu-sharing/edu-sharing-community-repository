@@ -9,7 +9,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
-import { Node, User } from 'ngx-edu-sharing-api';
+import { Node, SessionStorageService, Store, User } from 'ngx-edu-sharing-api';
 import { Observable } from 'rxjs';
 import { ConfigurationService, RestConnectorService } from '../../../core-module/core.module';
 import { OptionItem } from 'ngx-edu-sharing-ui';
@@ -17,6 +17,8 @@ import { CreateMenuComponent } from '../create-menu/create-menu.component';
 import { MainMenuDropdownComponent } from '../main-menu-dropdown/main-menu-dropdown.component';
 import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar.component';
 import { MainNavCreateConfig, MainNavService, TemplateSlot } from '../main-nav.service';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { CLOSE } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 
 @Component({
     selector: 'es-top-bar',
@@ -32,6 +34,7 @@ export class TopBarComponent {
     @ViewChild('mainMenuDropdown') mainMenuDropdown: MainMenuDropdownComponent;
     @ViewChild('mainMenuSidebar') mainMenuSidebar: MainMenuSidebarComponent;
     @ViewChild('userRef') userRef: ElementRef;
+    @ViewChild('topbar') topbarRef: ElementRef;
 
     @Input() autoLogoutTimeout$: Observable<string>;
     @Input() canOpen = true;
@@ -44,6 +47,10 @@ export class TopBarComponent {
     @Input() isSafe: boolean;
     @Input() mainMenuStyle: 'sidebar' | 'dropdown' = 'sidebar';
     @Input() searchEnabled: boolean;
+    /**
+     * show the topbar at all? (excluding system messages)
+     */
+    @Input() show: boolean;
     @Input() showChat: boolean;
     @Input() showScope = true;
     @Input() showUser: boolean;
@@ -65,13 +72,20 @@ export class TopBarComponent {
         public connector: RestConnectorService,
         private configService: ConfigurationService,
         public mainNavService: MainNavService,
+        public dialogs: DialogsService,
+        private sessionStorageService: SessionStorageService,
         public elementRef: ElementRef,
-    ) {}
+    ) {
+        this.registerSystemMessages();
+    }
 
     getIconSource() {
         return this.configService.instant('mainnav.icon.url', 'assets/images/edu-white.svg');
     }
 
+    private registerSystemMessages() {
+        this.mainNavService.observeSystemMessage().subscribe(async (details) => {});
+    }
     toggleMenuSidebar() {
         if (this.canOpen) {
             if (this.mainMenuSidebar) {
@@ -93,5 +107,11 @@ export class TopBarComponent {
         void this.createMenu.updateOptions();
         this.createMenuTrigger.openMenu();
         this.createMenuTrigger.onMenuClose;
+    }
+
+    sizeChanged() {
+        this.mainNavService.updateHeight(
+            this.topbarRef.nativeElement?.getBoundingClientRect().height,
+        );
     }
 }

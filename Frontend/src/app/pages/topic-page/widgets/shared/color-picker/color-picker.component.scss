@@ -1,0 +1,94 @@
+@use '../../../topic-page-variables' as topicPageVars;
+
+:host {
+    display: inline-flex;
+    align-items: center;
+
+    // overwrite color button text color to match toggle button text color
+    --mdc-text-button-label-text-color: #{var(
+            --mat-standard-button-toggle-text-color,
+            var(--mat-app-on-surface)
+        )};
+}
+
+.color-picker-button {
+    padding: 0 !important;
+    display: flex;
+    height: 44px !important;
+    min-height: 100%;
+    width: 52px !important;
+    min-width: unset;
+    justify-content: center;
+    align-items: center;
+
+    // override material css button flex
+    &::ng-deep.mdc-button__label {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+    }
+
+    div {
+        font-size: 62.5%;
+        font-weight: topicPageVars.$font-weight-regular;
+        line-height: topicPageVars.$line-height-medium;
+    }
+}
+
+::ng-deep .ngx-color-picker {
+    & .preview {
+        height: 20px;
+        width: 20px;
+
+        & .preview-background {
+            height: 14px;
+            width: 14px;
+        }
+
+        & .circle {
+            height: 14px !important;
+            width: 14px !important;
+        }
+    }
+}
+
+// adjust style of ngx-colors component
+::ng-deep .ngx-colors-overlay {
+    .opened {
+        background: topicPageVars.$surface !important;
+        outline: 1px solid topicPageVars.$outline-light;
+
+        // input field for color code
+        .g-input input {
+            color: topicPageVars.$on-surface !important;
+            background: topicPageVars.$surface !important;
+        }
+
+        // button to switch to custom color selection
+        .circle.button {
+            background: topicPageVars.$surface-container-highest !important;
+
+            svg {
+                fill: topicPageVars.$on-surface !important;
+            }
+        }
+
+        // nav wrapper of selecting a custom color
+        .nav-wrapper {
+            // apply and reset button
+            button {
+                color: topicPageVars.$on-surface !important;
+            }
+
+            // back button
+            .round-button svg {
+                fill: topicPageVars.$on-surface !important;
+            }
+        }
+
+        // back button of selecting a color
+        .colors .add svg {
+            fill: topicPageVars.$on-surface !important;
+        }
+    }
+}

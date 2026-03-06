@@ -1,0 +1,124 @@
+@use 'mixins' as mixin;
+@use '../../topic-page-variables' as topicPageVars;
+
+.list {
+    margin-top: 8px;
+    // add paddings due to tile hover effect
+    padding-top: 8px;
+    padding-bottom: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+// due to drag-and-drop, avoid nesting in .list
+.collection-chip {
+    padding-left: 16px;
+    padding-right: 12px;
+    border-radius: 25px;
+    text-decoration: none;
+    letter-spacing: normal;
+
+    &:not(:disabled) {
+        background-color: topicPageVars.$primary;
+    }
+
+    .chip-title {
+        color: topicPageVars.$on-primary;
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        font-weight: topicPageVars.$font-weight-bold;
+        font-size: topicPageVars.$font-size-large;
+
+        line-height: topicPageVars.$line-height-large;
+        word-break: break-word;
+        hyphens: auto;
+
+        // fix icon is sometimes not entirely visible
+        .mat-icon,
+        .mat-mdc-icon {
+            min-width: 20px;
+            width: 20px;
+            height: 20px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+}
+
+.collection-tile {
+    padding: 0;
+    width: 164px;
+    height: 164px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    position: relative;
+    background: topicPageVars.$surface;
+    border: 1px solid topicPageVars.$outline-light;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.25);
+    transition: 0.3s;
+    cursor: pointer;
+
+    &:hover {
+        transform: translate(0, -4px);
+        box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .drag-btn {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    .tile-header {
+        padding: 8px 8px 0 8px;
+        height: 92px;
+        width: 100%;
+
+        img {
+            height: 100%;
+            width: auto;
+        }
+
+        &.default-icon {
+            padding: 0;
+
+            img {
+                width: 100%;
+                object-fit: cover;
+            }
+        }
+    }
+
+    .tile-content {
+        // grow to fill remaining space
+        flex: 1 1 auto;
+        padding: 0 12px;
+        display: inline-flex;
+        align-items: center;
+
+        .tile-title {
+            text-align: center;
+            max-width: 100%;
+            font-weight: topicPageVars.$font-weight-bold;
+            font-size: topicPageVars.$font-size-large;
+            hyphens: auto;
+            color: topicPageVars.$primary-dark;
+            @include mixin.limitLineCount(2, 1.25);
+        }
+    }
+}
+
+.info-message {
+    margin-top: 8px;
+    margin-bottom: 16px;
+    display: block;
+}

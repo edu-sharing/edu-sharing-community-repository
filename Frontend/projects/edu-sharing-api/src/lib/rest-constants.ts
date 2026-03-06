@@ -1,6 +1,20 @@
 export class RestConstants {
     public static USERHOME = '-userhome-';
 
+    public static DEFAULT_COLLECTION_COLORS: string[] = [
+        '#975B5D',
+        '#692426',
+        '#E6B247',
+        '#A89B39',
+        '#699761',
+        '#32662A',
+        '#60998F',
+        '#29685C',
+        '#759CB7',
+        '#537997',
+        '#976097',
+        '#692869',
+    ];
     public static COLLECTIONSCOPE_MY = 'MY';
     public static COLLECTIONSCOPE_ORGA = 'EDU_GROUPS';
     public static COLLECTIONSCOPE_ALL = 'EDU_ALL';
@@ -85,7 +99,8 @@ export class RestConstants {
     public static TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS =
         'TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS';
     public static CCM_PROP_IMPORT_BLOCKED = 'ccm:importblocked';
-
+    public static CCM_PROP_PAGE_CONFIG_REF: string = 'ccm:page_config_ref';
+    public static CCM_PROP_PAGE_CONFIG_PROPAGATE_REF: string = 'ccm:page_config_propagate_ref';
     public static CCM_PROP_LICENSE = 'ccm:commonlicense_key';
     public static CCM_PROP_WF_RECEIVER = 'ccm:wf_receiver';
     public static CCM_PROP_WF_STATUS = 'ccm:wf_status';

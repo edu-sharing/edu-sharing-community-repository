@@ -82,6 +82,13 @@ const routes: Routes = [
             ),
     },
 
+    // Topic pages
+    {
+        path: UIConstants.ROUTER_PREFIX + 'topic-pages',
+        loadChildren: () =>
+            import('./pages/topic-page/topic-page.module').then((m) => m.TopicPageModule),
+    },
+
     // Login
     {
         path: UIConstants.ROUTER_PREFIX + 'login',

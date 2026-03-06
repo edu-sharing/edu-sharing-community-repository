@@ -1,0 +1,66 @@
+<ng-container *ngIf="initialized(); else loadingSpinner">
+  <ng-container *ngIf="imagePath; else noImageSelected">
+    <!-- the actual image -->
+    <div class="image-wrapper">
+      <div class="image-backdrop">
+        <img [src]="imagePath" [alt]="i18nPrefix + 'BACKDROP' | translate" aria-hidden="true" />
+      </div>
+      <img class="topic-image" [src]="imagePath" [alt]="i18nPrefix + 'ALT' | translate" />
+      <!-- displays an AI label, if the image is generated and has not been uploaded by the user -->
+      <es-ai-label
+        *ngIf="aiGeneratedImage() && !userUploadedNodeId() && !imageProcessing()"
+        [imageContainer]="aiGeneratedImage()"
+      ></es-ai-label>
+    </div>
+
+    <!-- displays a spinner while the image is being processed -->
+    <div class="image-loading" *ngIf="imageProcessing()">
+      <ng-template *ngTemplateOutlet="loadingSpinner"></ng-template>
+    </div>
+  </ng-container>
+  <!-- edit buttons to generate, upload or delete an image -->
+  <div class="image-buttons" *ngIf="editMode && atLeastOneEditOptionSupported()">
+    <button
+      *ngIf="aiGenerationSupportedAndValid()"
+      mat-icon-button
+      color="primary"
+      [disabled]="imageProcessing()"
+      [matTooltip]="
+        aiGeneratedImage() && !userUploadedNodeId()
+          ? (i18nPrefix + 'REGENERATE' | translate)
+          : (i18nPrefix + 'GENERATE' | translate)
+      "
+      (click)="generateImageClicked()"
+    >
+      <i esIcon="magic_button"></i>
+    </button>
+    <button
+      *ngIf="userUploadSupportedAndValid()"
+      mat-icon-button
+      color="primary"
+      [disabled]="imageProcessing()"
+      [matTooltip]="i18nPrefix + 'UPLOAD' | translate"
+      (click)="uploadImageClicked(fileInput)"
+    >
+      <i esIcon="publish"></i>
+    </button>
+    <button
+      mat-icon-button
+      color="primary"
+      [matTooltip]="i18nPrefix + 'DELETE' | translate"
+      [disabled]="deleteImageDisabled() || imageProcessing()"
+      (click)="deleteImage()"
+    >
+      <i esIcon="delete"></i>
+    </button>
+    <input #fileInput type="file" accept="image/*" (change)="imageChanged($event)" hidden />
+  </div>
+  <ng-template #noImageSelected>
+    <div class="no-image-msg">
+      {{ i18nPrefix + 'NO_IMAGE_SELECTED' | translate }}
+    </div>
+  </ng-template>
+</ng-container>
+<ng-template #loadingSpinner>
+  <es-spinner></es-spinner>
+</ng-template>

@@ -19,7 +19,8 @@
       "TOOLKIT": "Tool Kit (Caches, Logfiles)",
       "BROWSER": "Node Browser & Solr-Debugging",
       "FOLDERTEMPLATES": "Ordnervorlagen",
-      "CONTEXT": "Kontexte/Domains"
+      "CONTEXT": "Kontexte/Domains",
+      "MESSAGES": "Wartungsnachrichten"
     },
     "PLUGINS": {
       "TITLE": "Erweiterungen",
@@ -55,6 +56,60 @@
       },
       "MORE": "Weitere Informationen zu Erweiterungen und wie diese bezogen, konfiguriert und installiert werden können, sind auf der edu-sharing Website zu finden",
       "MORE_LINK": "Zur edu-sharing Webseite"
+    },
+    "MESSAGES": {
+      "ADD_MESSAGE": "Neue Anzeige-/Wartungsnachricht",
+      "EDIT_MESSAGE": "Anzeige-/Wartungsnachricht bearbeiten",
+      "NO_MESSAGES": "Derzeit keine Wartungsnachrichten konfiguriert",
+      "REMOVE_TITLE": "Nachricht löschen",
+      "REMOVE_MESSAGE": "Soll die folgende Nachricht gelöscht werden?<br><br><hr>{{message}}",
+      "INVALID_TO_DATE": "End-Zeitpunkt muss vor dem Start-Zeitpunkt liegen",
+      "SELECT_COMPONENT": "Bereich auswählen",
+      "SELECT_COMPONENT_HINT": "Wählen Sie einen oder mehrere Bereiche aus (Oder verknüpft). Bei keiner Auswahl gilt die Nachricht für alle",
+      "SELECT_CONTEXT": "Kontext(e) auswählen",
+      "SELECT_CONTEXT_HINT": "Wählen Sie einen oder mehrere Kontexte aus (Oder verknüpft). Bei keiner Auswahl gilt die Nachricht für alle",
+      "SELECT_TP": "Berechtigung(en) auswählen",
+      "SELECT_TP_HINT": "Wählen Sie eine oder mehrere Berechtigungen aus, die der Nutzer für die Sichtbarkeit haben muss (Oder verknüpft). Bei keiner Auswahl gilt die Nachricht für alle",
+      "MULTIPLE_ORDER_HINT": "Es können mehrere Meldungen gleichzeitig festgelegt sein. Der Nutzer wird jedoch nur die erste Meldung der Liste sehen, welche für Ihn zutrifft. Die Reihenfolge kann per Drag & Drop angepasst werden.",
+      "TIME_RANGE": "Zeitliche Beschränkung",
+      "TIME_FROM_ENABLED": "Start-Zeitpunkt",
+      "TIME_TO_ENABLED": "End-Zeitpunkt",
+      "MODES": "Darstellungsart",
+      "MODE": {
+        "BAR_TITLE": "Leiste",
+        "BAR_DESCRIPTION": "Nachricht wird als Leiste unterhalb der Topbar angezeigt",
+        "MODAL_TITLE": "Modal",
+        "MODAL_DESCRIPTION": "Nachricht wird in einem Dialogfenster angezeigt"
+      },
+      "SEVERITIES": "Farbe/Relevanz",
+      "SEVERITY": {
+        "INFO_TITLE": "Info",
+        "INFO_DESCRIPTION": "Infomeldung (Systemfarbe, i.d.R. hellblau)",
+        "WARNING_TITLE": "Warnung",
+        "WARNING_DESCRIPTION": "Warnmeldung, gelbe Meldung mit Ausrufezeichen",
+        "ERROR_TITLE": "Fehler",
+        "ERROR_DESCRIPTION": "Fehlermeldung, rote Meldung mit Ausrufezeichen"
+      },
+      "USER_MODES": "Anzeigen für Benutzer oder Gäste",
+      "USER_MODE": {
+        "ALL_TITLE": "Alle",
+        "ALL_DESCRIPTION": "Für alle Benutzer sichtbar",
+        "GUEST_TITLE": "Gast",
+        "GUEST_DESCRIPTION": "Nur für Gäste sichtbar",
+        "USER_TITLE": "Benutzer",
+        "USER_DESCRIPTION": "Nur für angemeldete Benutzer sichtbar"
+      },
+      "REPEATS": "Wiederholung",
+      "REPEAT": {
+        "ONCE_TITLE": "Einmal",
+        "ONCE_DESCRIPTION": "Nachricht wird nur einmal angezeigt",
+        "REPEAT_TITLE": "Wiederholen",
+        "REPEAT_DESCRIPTION": "Nachricht wird in der nächsten Nutzersitzung (i.d.R. 1 Stunde) erneut angezeigt, kann vom Nutzer aber ausgeblendet werden",
+        "ALWAYS_TITLE": "Immer anzeigen",
+        "ALWAYS_DESCRIPTION": "Nachricht wird immer angezeigt und kann nicht ausgeblendet werden"
+      },
+      "MESSAGE": "Nachricht",
+      "CREATE_SAVE": "Speichern"
     },
     "GLOBAL_CONFIG": {
       "EDIT_DISABLED": "Die Konfiguration wurde auf Read-Only eingestellt. Es können keine Modifikationen über dieses Tool vorgenommen werden. Der Parameter {{key}} muss auf true gesetzt werden, damit die Config hier bearbeitet werden kann. Dies ist nur für Testsysteme empfohlen.",

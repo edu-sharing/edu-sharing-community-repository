@@ -1,0 +1,36 @@
+<es-info-message
+  mode="error"
+  *ngIf="
+    pageConfigRef && pageConfigPropagateRef && pageConfigRef === pageConfigPropagateRef;
+    else configPageTemplate
+  "
+>
+  {{ i18nPrefix + 'SAME_REF_ERROR' | translate }}
+  <button class="unlink-btn" mat-flat-button (click)="unlinkPageConfigPropagate()">
+    <i esIcon="unlink"></i> {{ i18nPrefix + 'UNLINK' | translate }}
+  </button>
+</es-info-message>
+
+<ng-template #configPageTemplate>
+  <div *ngIf="!pageConfigPropagateRef; else existingPagePropagateRef">
+    <es-info-message mode="info" class="info-message">
+      {{ i18nPrefix + 'EMPTY_TEMPLATE_HINT' | translate }}
+    </es-info-message>
+    <button
+      mat-flat-button
+      color="primary"
+      [disabled]="creationInProgress()"
+      (click)="createAndLinkEmptyPageConfig()"
+    >
+      <i esIcon="add"></i> {{ i18nPrefix + 'ADD_EMPTY_TEMPLATE' | translate }}
+    </button>
+  </div>
+  <ng-template #existingPagePropagateRef>
+    <es-info-message mode="info" class="info-message">
+      {{ i18nPrefix + 'SWITCH_TO_PAGE_VARIANT_HINT' | translate }}
+    </es-info-message>
+    <button mat-flat-button color="primary" (click)="switchToPagePropagateRef()">
+      {{ i18nPrefix + 'SWITCH_TO_PAGE_VARIANT' | translate }}
+    </button>
+  </ng-template>
+</ng-template>

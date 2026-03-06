@@ -36,7 +36,8 @@ import org.htmlparser.tags.TitleTag;
 import org.htmlparser.util.NodeList;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.jsoup.Jsoup;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 
 import java.net.URI;
 import java.net.URL;
@@ -160,6 +161,10 @@ public class ClientUtilsService {
 			return;
 		}
         try {
+
+			HashSet<org.edu_sharing.service.model.NodeRef> nodes = new HashSet<>();
+			Config duplicateConfig = LightbendConfigLoader.get().getConfig("repository.communication.duplicate");
+			
 			SearchToken token = new SearchToken();
 			token.setMaxResult(10);
 			HashMap<String, String[]> queryData = new HashMap<>() {{
@@ -174,34 +179,66 @@ public class ClientUtilsService {
 			if(info.getKeywords() != null) {
 				queryData.put("keywords", info.getKeywords());
 			}
-			HashSet<org.edu_sharing.service.model.NodeRef> nodes = new HashSet<>(searchService.search(MetadataHelper.getLocalDefaultMetadataset(), "link_duplicates", queryData, token).getData());
-        if(info.getRawContent() != null) {
-			Config duplicate = LightbendConfigLoader.get().getConfig("repository.communication.duplicate");
-			try {
-				if (duplicate != null) {
-					if(duplicate.hasPath("url")) {
-						String duplicateServiceUrl = duplicate.getString("url");
-						String text = Jsoup.parse(info.getRawContent()).text();
-						RequestBuilder method = RequestBuilder.post(duplicateServiceUrl);
-						method.setHeader("Content-Type", "application/json");
-						JSONObject json = new JSONObject();
-						json.put("text", text);
-						json.put("threshold", duplicate.getDouble("threshold"));
-						method.setEntity(new StringEntity(json.toString(), StandardCharsets.UTF_8));
-						JSONArray result = new JSONArray(new HttpQueryTool().query(method));
-						for (int i = 0; i < result.length(); i++) {
-							JSONArray entry = result.getJSONArray(0);
-							String uuid = entry.getString(0);
-							nodes.add(new org.edu_sharing.service.model.NodeRefImpl(uuid));
-						}
-					}
-				}
-			} catch(Throwable t) {
-				logger.info(t.getMessage());
-			}
+			// simple duplication detection via search API
+			nodes = new HashSet<>(searchService.search(MetadataHelper.getLocalDefaultMetadataset(), "link_duplicates", queryData, token).getData());
 
-		}
-		List<Node> converted = NodeDao.convertToRest(
+			if (duplicateConfig != null && duplicateConfig.hasPath("url")) {
+				// duplication detection via external API
+				try {
+					String duplicateServiceUrl = duplicateConfig.getString("url");
+					logger.info("Search duplications via " + duplicateServiceUrl);
+					
+					// /detect/hash/by-metadata
+					RequestBuilder method = RequestBuilder.post(duplicateServiceUrl);
+					method.setHeader("Content-Type", "application/json");
+
+					// Create request format for duplicate detection API
+					JSONObject metadata = new JSONObject();
+					metadata.put("url", url.trim());
+					if(StringUtils.isNotEmpty(info.getDescription())) {
+						metadata.put("description", info.getDescription());
+					}
+					if(StringUtils.isNotEmpty(info.getTitle())) {
+						metadata.put("title", info.getTitle());
+					}
+
+					JSONObject json = new JSONObject();
+					json.put("metadata", metadata);
+					json.put("similarity_threshold", duplicateConfig.getDouble("similarity_threshold"));
+
+					method.setEntity(new StringEntity(json.toString(), StandardCharsets.UTF_8));
+
+					// Execute request
+					String responseBody = new HttpQueryTool().query(method);
+					logger.info("Search duplications response: " + responseBody);
+					JSONObject result = new JSONObject(responseBody);
+					
+					// Parse the response
+            		if (result.has("duplicates")) {
+						JSONArray duplicates = result.getJSONArray("duplicates");
+						for (int i = 0; i < duplicates.length(); i++) {
+							JSONObject duplicate = duplicates.getJSONObject(i);
+							String nodeId = duplicate.getString("node_id");
+							double similarityScore = duplicate.getDouble("similarity_score");
+							
+							// Only add if similarity is above threshold
+							if (similarityScore >= duplicateConfig.getDouble("similarity_threshold")) {
+								nodes.add(new org.edu_sharing.service.model.NodeRefImpl(nodeId));
+							}
+						}
+						logger.info("Search duplications found results: " + nodes.size());
+					}
+				} catch (HttpClientErrorException e) {
+    				// Handle HTTP 400 errors (invalid input, node not found)
+    				logger.warn("Duplicate detection failed with HTTP " + e.getRawStatusCode() + ": " + e.getResponseBodyAsString());
+				} catch (HttpServerErrorException e) {
+					// Handle HTTP 500 errors (server error)
+					logger.error("Duplicate detection service error: " + e.getResponseBodyAsString());
+				} catch(Throwable t) {
+					logger.info(t.getMessage());
+				}
+			}
+			List<Node> converted = NodeDao.convertToRest(
 				RepositoryDao.getHomeRepository(),
 				NodeDao.convertEduNodeRef(RepositoryDao.getHomeRepository(), new ArrayList<>(nodes)),
 				Filter.createShowAllFilter(),

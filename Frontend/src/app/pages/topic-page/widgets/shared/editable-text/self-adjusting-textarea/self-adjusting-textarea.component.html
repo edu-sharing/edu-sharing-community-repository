@@ -1,0 +1,107 @@
+<mat-form-field
+  class="text-form-field"
+  [class.hidden-toolbar]="hideToolbar"
+  appearance="outline"
+  subscriptSizing="dynamic"
+>
+  <mat-label>
+    {{ label }}
+  </mat-label>
+  <form class="markdown-form" [formGroup]="markdownForm">
+    <!-- note: the markdown-toolbar is currently limited to specific functions used in GitHub, -->
+    <!--       resulting in strike-through and horizontal lines being supported but not included -->
+    <div
+      class="toolbars"
+      [class.justify-end]="showAiButtons && hideToolbar"
+      *ngIf="!hideToolbar || showAiButtons"
+    >
+      <markdown-toolbar [attr.for]="controlId" *ngIf="!hideToolbar">
+        <md-bold
+          [title]="'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.BOLD' | translate"
+          [attr.aria-label]="'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.BOLD' | translate"
+        >
+          <button class="format-btn" [disabled]="disabled" (mousedown)="avoidSaveText()">
+            <i esIcon="format_bold"></i>
+          </button>
+        </md-bold>
+        <md-italic
+          [title]="'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.ITALIC' | translate"
+          [attr.aria-label]="'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.ITALIC' | translate"
+        >
+          <button class="format-btn" [disabled]="disabled" (mousedown)="avoidSaveText()">
+            <i esIcon="format_italic"></i>
+          </button>
+        </md-italic>
+        <md-quote
+          [title]="'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.QUOTE' | translate"
+          [attr.aria-label]="'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.QUOTE' | translate"
+        >
+          <button class="format-btn" [disabled]="disabled" (mousedown)="avoidSaveText()">
+            <i esIcon="format_quote"></i>
+          </button>
+        </md-quote>
+        <md-code
+          [title]="'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.CODE' | translate"
+          [attr.aria-label]="'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.CODE' | translate"
+        >
+          <button class="format-btn" [disabled]="disabled" (mousedown)="avoidSaveText()">
+            <i esIcon="code"></i>
+          </button>
+        </md-code>
+        <md-link
+          [title]="'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.LINK' | translate"
+          [attr.aria-label]="'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.LINK' | translate"
+        >
+          <button class="format-btn" [disabled]="disabled" (mousedown)="avoidSaveText()">
+            <i esIcon="link"></i>
+          </button>
+        </md-link>
+        <md-unordered-list
+          [title]="'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.UNORDERED_LIST' | translate"
+          [attr.aria-label]="'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.UNORDERED_LIST' | translate"
+        >
+          <button class="format-btn" [disabled]="disabled" (mousedown)="avoidSaveText()">
+            <i esIcon="format_list_bulleted"></i>
+          </button>
+        </md-unordered-list>
+        <md-ordered-list
+          [title]="'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.ORDERED_LIST' | translate"
+          [attr.aria-label]="'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.ORDERED_LIST' | translate"
+        >
+          <button class="format-btn" [disabled]="disabled" (mousedown)="avoidSaveText()">
+            <i esIcon="format_list_numbered"></i>
+          </button>
+        </md-ordered-list>
+      </markdown-toolbar>
+      <div class="ai-buttons" *ngIf="showAiButtons">
+        <button
+          *ngFor="let option of aiTagOptions"
+          [disabled]="disabled"
+          [matTooltip]="option.tooltip | translate"
+          mat-icon-button
+          color="primary"
+          (mousedown)="avoidSaveText()"
+          (click)="addAiTag(option.value)"
+        >
+          <i [esIcon]="option.icon" [attr.aria-label]="option.ariaLabel | translate"></i>
+        </button>
+      </div>
+    </div>
+
+    <textarea
+      [id]="controlId"
+      class="text-editor"
+      matInput
+      cdkTextareaAutosize
+      #autosize="cdkTextareaAutosize"
+      [attr.maxlength]="!inputLimit ? null : inputLimit"
+      [class.mat-heading-1]="headerElement === 'h1'"
+      [class.mat-heading-2]="headerElement === 'h2'"
+      [class.mat-heading-3]="headerElement === 'h3'"
+      [class.topic-page-text-center]="alignCenter"
+      [ngClass]="['h1', 'h2', 'h3'].includes(headerElement) ? ['font-bold', 'important'] : []"
+      [formControl]="descriptionControl"
+      (focusout)="saveText()"
+    ></textarea>
+  </form>
+</mat-form-field>

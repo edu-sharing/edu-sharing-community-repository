@@ -71,8 +71,9 @@ export class ThemeService {
                 );*/
                 if (!this.uiConfig.isEmbedded) {
                     document
+                        // @TODO: This fails in web component context: TypeError: Cannot read properties of null (reading 'setAttribute')
                         .querySelector('meta[name="theme-color"]')
-                        .setAttribute('content', color);
+                        ?.setAttribute('content', color);
                 }
                 break;
             case Variable.Accent:

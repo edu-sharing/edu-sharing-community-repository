@@ -1,0 +1,14 @@
+@use '../../topic-page-variables' as topicPageVars;
+
+.w-100 {
+    width: 100%;
+}
+
+.grid-container {
+    // color.adjust does not work here, as outline is retrieved from variables
+    border-color: rgba(topicPageVars.$outline, 0.7);
+}
+
+.topic-page-grid-border-container {
+    margin-top: 8px;
+}

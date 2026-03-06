@@ -4,7 +4,7 @@ import { filter } from 'rxjs/operators';
 import { DisplayValue, DisplayValues } from '../DisplayValues';
 import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { MdsWidgetType, ValueType } from 'ngx-edu-sharing-ui';
-import { BehaviorSubject, firstValueFrom, timer } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { SuggestionResponseDto } from 'ngx-edu-sharing-api';
 
 @Component({
