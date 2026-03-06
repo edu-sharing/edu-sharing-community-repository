@@ -722,20 +722,8 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
             }
             this.currentOptions = options;
         };
-
-        this.nodeApi
-            .getNodeChildobjects(this.sequenceParent.ref.id, this.sequenceParent.ref.repo)
-            .subscribe(
-                (data: NodeList) => {
-                    addButton(data);
-                    void this.initOptions();
-                },
-                (error) => {
-                    console.warn(error);
-                    addButton();
-                    void this.initOptions();
-                },
-            );
+        addButton(this.sequence);
+        void this.initOptions();
     }
 
     async setDownloadUrl(url: string) {
