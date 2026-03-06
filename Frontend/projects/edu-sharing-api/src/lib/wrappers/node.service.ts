@@ -15,6 +15,7 @@ import {
 import { NodeStats } from '../api/models/node-stats';
 import { NodeEntry } from '../api/models/node-entry';
 import { HandleParam } from '../api/models/handle-param';
+import { cachedShareReplay, KeyCache } from '../utils/decorators/cached-share-replay';
 
 export class NodeConstants {
     public static SPACES_STORE_REF = 'workspace://SpacesStore/';
@@ -34,6 +35,7 @@ export class NodeTools {
     providedIn: 'root',
 })
 export class NodeService {
+    private static readonly parentsCache = new KeyCache();
     private readonly _nodesChanged = new Subject<void>();
     readonly nodesChanged = this._nodesChanged.asObservable();
 
@@ -107,10 +109,12 @@ export class NodeService {
             .pipe(tap(() => this._nodesChanged.next()));
     }
 
+    @cachedShareReplay(NodeService.parentsCache, getParentsCacheKey, 5)
     getParents(
         node: string,
         {
             repository = HOME_REPOSITORY,
+            fullPath = false,
             ...params
         }: Partial<Omit<Parameters<NodeV1Service['getParents']>[0], 'node'>> = {},
     ) {
@@ -449,4 +453,20 @@ export class NodeService {
     getStats(nodeId: string, { repository = HOME_REPOSITORY } = {}): Observable<NodeStats> {
         return this.nodeV1.getStats({ repository, node: nodeId });
     }
+}
+function getParentsCacheKey(
+    id: string,
+    details?: { repository?: string; fullPath?: boolean },
+): string {
+    if (!details) {
+        details = {};
+    }
+    if (details.repository === undefined) {
+        details.repository = HOME_REPOSITORY;
+        details.repository = HOME_REPOSITORY;
+    }
+    if (details.fullPath === undefined) {
+        details.fullPath = false;
+    }
+    return JSON.stringify([id, details.repository, details.fullPath]);
 }
