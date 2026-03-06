@@ -11,11 +11,13 @@ import {
     NodeVersion,
     NodeVersionEntries,
     NodeVersionRefEntries,
+    ParentEntries,
 } from '../models';
 import { NodeStats } from '../api/models/node-stats';
 import { NodeEntry } from '../api/models/node-entry';
 import { HandleParam } from '../api/models/handle-param';
 import {
+    cachedApiReplay,
     cachedShareReplay,
     DEFAULT_API_CACHE_DURATION,
     KeyCache,
@@ -39,14 +41,14 @@ export class NodeTools {
     providedIn: 'root',
 })
 export class NodeService {
-    private static readonly parentsCache = new KeyCache();
-    private static readonly nodesCache = new KeyCache();
+    private static readonly parentsCache = new KeyCache<ParentEntries>();
+    private static readonly nodesCache = new KeyCache<Node>();
     private readonly _nodesChanged = new Subject<void>();
     readonly nodesChanged = this._nodesChanged.asObservable();
 
     constructor(private nodeV1: NodeV1Service, private searchV1: SearchV1Service) {}
 
-    @cachedShareReplay(NodeService.nodesCache, getNodeCacheKey, 1)
+    @cachedApiReplay(NodeService.nodesCache, getNodeCacheKey, 1)
     getNode(id: string, { repository = HOME_REPOSITORY } = {}): Observable<Node> {
         return this.nodeV1
             .getMetadata({
@@ -115,7 +117,7 @@ export class NodeService {
             .pipe(tap(() => this._nodesChanged.next()));
     }
 
-    @cachedShareReplay(NodeService.parentsCache, getParentsCacheKey, DEFAULT_API_CACHE_DURATION)
+    @cachedApiReplay(NodeService.parentsCache, getParentsCacheKey, DEFAULT_API_CACHE_DURATION)
     getParents(
         node: string,
         {
