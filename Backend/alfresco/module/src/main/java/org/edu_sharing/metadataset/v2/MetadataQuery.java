@@ -129,7 +129,7 @@ public class MetadataQuery extends MetadataQueryBase implements Serializable {
 
 	@Getter
 	@Setter
-	public static class MetadataQueryFunction {
+	public static class MetadataQueryFunction implements Serializable {
 		private String filter;
 		private double weight;
 	}
