@@ -204,7 +204,8 @@ public class PreviewServlet extends HttpServlet {
 			}
 
 			if(CCConstants.CCM_TYPE_MAP.equals(nodeType)){
-				if(deliverContentAsSystem(nodeRef, CCConstants.CCM_PROP_MAP_ICON, req, resp))
+                PreviewDetail preview = getPreview(nodeService, storeProtocol, storeId, nodeId);
+                if(deliverContentAsSystem(nodeRef, CCConstants.CCM_PROP_MAP_ICON, req, resp, preview))
 					return;
 			}
 
@@ -266,7 +267,7 @@ public class PreviewServlet extends HttpServlet {
 			/**
 			 * generated or userdefined
 			 */
-			if (getPrevResult != null && (getPrevResult.getType().equals(PreviewDetail.TYPE_USERDEFINED) || getPrevResult.getType().equals(PreviewDetail.TYPE_GENERATED))) {
+			if (getPrevResult != null && getPrevResult.getType() != null && (getPrevResult.getType().equals(PreviewDetail.TYPE_USERDEFINED) || getPrevResult.getType().equals(PreviewDetail.TYPE_GENERATED))) {
 				NodeRef prevNodeRef = null;
 				String property = CCConstants.CM_PROP_CONTENT;
 				if (getPrevResult.getType().equals(PreviewDetail.TYPE_USERDEFINED)) {
@@ -292,13 +293,13 @@ public class PreviewServlet extends HttpServlet {
 					if(isCollection) {
 						NodeRef fprevNodeRef = prevNodeRef;
 						String fproperty = property;
-						boolean result = deliverContentAsSystem(fprevNodeRef, fproperty, req, resp);
+						boolean result = deliverContentAsSystem(fprevNodeRef, fproperty, req, resp,getPrevResult);
 						if(result) {
 							return;
 						}
 						op.close();
 					}else {
-						if(deliverContentAsSystem(prevNodeRef, property, req, resp)) {
+						if(deliverContentAsSystem(prevNodeRef, property, req, resp,getPrevResult)) {
 
 							return;
 						}
@@ -423,7 +424,7 @@ public class PreviewServlet extends HttpServlet {
 	private boolean loadPreview(HttpServletRequest req, HttpServletResponse resp, ServletOutputStream op,StoreRef storeRef, String nodeId,
 								NodeService nodeService, PreviewDetail getPrevResult) throws IOException {
 
-		if(getPrevResult == null){
+		if(getPrevResult == null || getPrevResult.getType() == null){
 			return false;
 		}
 
@@ -452,7 +453,7 @@ public class PreviewServlet extends HttpServlet {
 						CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
 			}
 			if (prevNodeRef != null) {
-				if(deliverContentAsSystem(prevNodeRef, property, req, resp))
+				if(deliverContentAsSystem(prevNodeRef, property, req, resp,getPrevResult))
 					return true;
 				op.close();
 			}
@@ -461,12 +462,17 @@ public class PreviewServlet extends HttpServlet {
 			NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId);
 			String mimetype=NodeServiceFactory.getLocalService().getContentMimetype(storeRef.getProtocol(), storeRef.getIdentifier(),nodeId);
 			if(mimetype!=null && mimetype.startsWith("image")) {
-				if(deliverContentAsSystem(nodeRef,  CCConstants.CM_PROP_CONTENT, req, resp))
+				if(deliverContentAsSystem(nodeRef,  CCConstants.CM_PROP_CONTENT, req, resp,getPrevResult))
 					return true;
 			}
 		}
 		return false;
 	}
+
+    void setResponseHeader(String previewType, boolean isIcon, HttpServletResponse response){
+        if(previewType != null) response.setHeader("X-Edu-PreviewType", previewType);
+        response.setHeader("X-Edu-IsIcon", String.valueOf(isIcon));
+    }
 
 	private boolean handleExternalThumbnail(String nodeId, HttpServletRequest req, HttpServletResponse resp, String url) throws IOException {
 		if ("false".equalsIgnoreCase(req.getParameter("allowRedirect")) &&
@@ -664,8 +670,9 @@ public class PreviewServlet extends HttpServlet {
 		}
 
 	}
-	private boolean deliverContentAsSystem(NodeRef nodeRef, String contentProp,HttpServletRequest req, HttpServletResponse resp) throws IOException{
-		return AuthenticationUtil.runAsSystem(new RunAsWork<Boolean>() {
+	private boolean deliverContentAsSystem(NodeRef nodeRef, String contentProp,HttpServletRequest req, HttpServletResponse resp, PreviewDetail previewDetail) throws IOException{
+
+        return AuthenticationUtil.runAsSystem(new RunAsWork<Boolean>() {
 
 			@Override
 			public Boolean doWork() throws Exception {
@@ -711,6 +718,9 @@ public class PreviewServlet extends HttpServlet {
 						throw e;
 					}
 				}
+                if(previewDetail != null){
+                    setResponseHeader(previewDetail.getType(),previewDetail.isIcon,resp);
+                }
 				deliverImage(mimetype, in, resp);
 				return true;
 			}
@@ -750,14 +760,28 @@ public class PreviewServlet extends HttpServlet {
 	public static PreviewDetail getPreview(NodeService nodeService,String storeProtocol, String storeIdentifier, String nodeId,Map<String, Object> nodeProps){
 		StoreRef storeRef = new StoreRef(storeProtocol,storeIdentifier);
 		NodeRef nodeRef = new NodeRef(storeRef,nodeId);
-		if(!nodeService.getType(nodeId).equals(CCConstants.CCM_TYPE_IO)){
+
+        String nodeType = nodeService.getType(nodeId);
+
+        if(nodeType.equals(CCConstants.CCM_TYPE_MAP)){
+
+            boolean isIcon = true;
+            if(nodeProps != null){
+                if(nodeProps.get(CCConstants.CCM_PROP_MAP_ICON) != null) isIcon = false;
+            }else{
+                if(nodeService.getProperty(storeProtocol,storeIdentifier,nodeId,CCConstants.CCM_PROP_MAP_ICON) != null) isIcon = false;
+            }
+            return new PreviewDetail(null,null,false,isIcon);
+        }
+
+		if(!nodeType.equals(CCConstants.CCM_TYPE_IO)){
 			return null;
 		}
 
 		String extThumbnail =(nodeProps == null) ? nodeService.getProperty(storeProtocol,storeIdentifier,nodeId,CCConstants.CCM_PROP_IO_THUMBNAILURL)
 				: (String) nodeProps.get(CCConstants.CCM_PROP_IO_THUMBNAILURL);
 		if (extThumbnail != null && !extThumbnail.trim().equals("")) {
-			return new PreviewDetail(extThumbnail, PreviewDetail.TYPE_EXTERNAL, false);
+			return new PreviewDetail(extThumbnail, PreviewDetail.TYPE_EXTERNAL, false, false);
 		}
 
 		String defaultImageUrl = URLTool.getBaseUrl() + "/"
@@ -769,7 +793,7 @@ public class PreviewServlet extends HttpServlet {
 			 */
 			if (crUserDefinedPreview != null && crUserDefinedPreview.available() > 0) {
 				String url = nodeService.getPreview(storeProtocol,storeIdentifier,nodeId, null, null).getUrl();
-				return new PreviewDetail(url, PreviewDetail.TYPE_USERDEFINED, false);
+				return new PreviewDetail(url, PreviewDetail.TYPE_USERDEFINED, false, false);
 			}
 
 		}catch(Throwable t){
@@ -782,7 +806,7 @@ public class PreviewServlet extends HttpServlet {
 		 */
 		Action action = ActionObserver.getInstance().getAction(nodeRef, CCConstants.ACTION_NAME_CREATE_THUMBNAIL);
 		if (action != null && action.getExecutionStatus().equals(ActionStatus.Running)) {
-			return new PreviewDetail(defaultImageUrl, PreviewDetail.TYPE_DEFAULT, true);
+			return new PreviewDetail(defaultImageUrl, PreviewDetail.TYPE_DEFAULT, true,false);
 		}
 
 		/**
@@ -798,10 +822,10 @@ public class PreviewServlet extends HttpServlet {
 		}
 		if (previewProps != null && generatedIs != null) {
 			String url = NodeServiceHelper.getPreview(new NodeRef(storeRef, nodeId)).getUrl();
-			return new PreviewDetail(url, PreviewDetail.TYPE_GENERATED, false);
+			return new PreviewDetail(url, PreviewDetail.TYPE_GENERATED, false,false);
 		}
 
-		return new PreviewDetail(defaultImageUrl, PreviewDetail.TYPE_DEFAULT, false);
+		return new PreviewDetail(defaultImageUrl, PreviewDetail.TYPE_DEFAULT, false,true);
 	}
 	public static class PreviewDetail{
 		private String url;
@@ -810,14 +834,17 @@ public class PreviewServlet extends HttpServlet {
 
 		private boolean createActionIsRunning = true;
 
+        private boolean isIcon;
+
 		public static final String TYPE_EXTERNAL = "TYPE_EXTERNAL";
 		public static final String TYPE_USERDEFINED = "TYPE_USERDEFINED";
 		public static final String TYPE_GENERATED = "TYPE_GENERATED";
 		public static final String TYPE_DEFAULT = "TYPE_DEFAULT";
-		public PreviewDetail(String url, String type, boolean createActionIsRunning) {
+		public PreviewDetail(String url, String type, boolean createActionIsRunning, boolean isIcon) {
 			this.url = url;
 			this.type = type;
 			this.createActionIsRunning = createActionIsRunning;
+            this.isIcon = isIcon;
 		}
 
 		public String getUrl() {
@@ -831,5 +858,9 @@ public class PreviewServlet extends HttpServlet {
 		public boolean isCreateActionIsRunning() {
 			return createActionIsRunning;
 		}
-	}
+
+        public boolean isIcon() {
+            return isIcon;
+        }
+    }
 }
