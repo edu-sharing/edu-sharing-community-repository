@@ -18,6 +18,11 @@ $countBackgroundColor: color.scale($backgroundColor, $lightness: -15%);
     }
 }
 
+.filter-field {
+    width: 100%;
+    padding-bottom: 15px;
+}
+
 ul {
     margin: 0;
     list-style-type: none;

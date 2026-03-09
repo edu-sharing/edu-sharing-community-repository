@@ -8,7 +8,7 @@
   [wrapInFormField]="false"
   [showSpinner]="isInitState$ | async"
 >
-  <mat-form-field *ngIf="hasFilter()">
+  <mat-form-field *ngIf="hasFilter()" class="filter-field">
     <mat-label>{{ 'MDS.FILTER_FACET' | translate }}</mat-label>
     <input matInput [formControl]="filter" type="search" />
   </mat-form-field>
