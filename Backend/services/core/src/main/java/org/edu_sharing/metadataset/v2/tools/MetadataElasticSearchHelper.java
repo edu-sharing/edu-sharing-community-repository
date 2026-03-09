@@ -3,6 +3,7 @@ package org.edu_sharing.metadataset.v2.tools;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.AggregationBuilders;
 import co.elastic.clients.elasticsearch._types.aggregations.MultiTermLookup;
+import co.elastic.clients.elasticsearch._types.aggregations.TermsAggregation;
 import co.elastic.clients.elasticsearch._types.mapping.RuntimeField;
 import co.elastic.clients.elasticsearch._types.mapping.RuntimeFieldType;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
@@ -393,11 +394,15 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                             .precision((int) facet.getArgs().get("precision"))
                             .build()._toAggregation();
                 } else {
-                    innerAggregation = AggregationBuilders.terms()
+                    TermsAggregation.Builder builder = AggregationBuilders.terms()
                             .field(fieldName.get(0).getValue())
                             .size(metadataQueryFacet.map(MetadataQueryParameter.MetadataQueryFacet::getMaxBucketSize).orElse(searchToken.getFacetLimit() * FACET_LIMIT_MULTIPLIER))
-                            .minDocCount(searchToken.getFacetsMinCount())
-                            .build()._toAggregation();
+                            .minDocCount(searchToken.getFacetsMinCount());
+                    if(metadataQueryFacet.isPresent() && StringUtils.isNotBlank(metadataQueryFacet.get().getMissing())) {
+                        builder.missing(metadataQueryFacet.get().getMissing());
+                    }
+                    innerAggregation = builder.build()._toAggregation();
+
                 }
                 if (fieldName.get(0).getNested() != null) {
                     bqbQuery = fullFilterQuery.build()._toQuery();

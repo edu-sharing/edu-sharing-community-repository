@@ -242,6 +242,7 @@ class MetadataElasticSearchHelperTest {
                 MetadataQueryParameter.MetadataQueryFacet.SortBy.count,
                 MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc,
                 null,
+                null,
                 Arrays.asList(
                         new MetadataQueryParameter.MetadataQueryFacetItem("facet1", null),
                         new MetadataQueryParameter.MetadataQueryFacetItem("facet2", null)
@@ -271,6 +272,7 @@ class MetadataElasticSearchHelperTest {
                 MetadataQueryParameter.MetadataQueryFacet.Type.geo_grid,
                 MetadataQueryParameter.MetadataQueryFacet.SortBy.count,
                 MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc,
+                null,
                 null,
                 Collections.emptyList())
         );
@@ -379,6 +381,7 @@ class MetadataElasticSearchHelperTest {
                 MetadataQueryParameter.MetadataQueryFacet.SortBy.count,
                 MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc,
                 null,
+                null,
                 Arrays.asList(
                         new MetadataQueryParameter.MetadataQueryFacetItem("facet1", null),
                         new MetadataQueryParameter.MetadataQueryFacetItem("facet2", null)
@@ -406,6 +409,7 @@ class MetadataElasticSearchHelperTest {
                 MetadataQueryParameter.MetadataQueryFacet.Type.term,
                 MetadataQueryParameter.MetadataQueryFacet.SortBy.count,
                 MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc,
+                null,
                 null,
                 Arrays.asList(
                         new MetadataQueryParameter.MetadataQueryFacetItem("contributor.displayname.keyword", "contributor")

@@ -94,6 +94,11 @@ public class MetadataQueryParameter implements Serializable {
 		 * This value overrides the request specification with a fixed limit.
 		 */
 		private Integer maxBucketSize = null;
+		/**
+		 * a string/key that the missing values shall be mapped to
+		 * When null, fields with missing values are ignored
+		 */
+		private String missing = null;
 		private List<MetadataQueryFacetItem> items = new ArrayList<>();
 
 		public enum Type {

@@ -372,6 +372,12 @@ public class MetadataReader {
                 .map(Integer::valueOf)
                 .orElse(null);
 
+        String missing = attributes
+                .map(x -> x.getNamedItem("missing"))
+                .map(Node::getNodeValue)
+                .orElse(null);
+
+
         List<MetadataQueryParameter.MetadataQueryFacetItem> metadataQueryFacetItemList = new ArrayList<>();
         for (int l = 0; l < facets.getLength(); l++) {
             String facetName = facets.item(l).getNodeName();
@@ -386,7 +392,7 @@ public class MetadataReader {
                 metadataQueryFacetItemList.add(metadataQueryFacetItem);
             }
         }
-        return new MetadataQueryParameter.MetadataQueryFacet(type, sortBy, sortOrder, maxBucketSize, metadataQueryFacetItemList);
+        return new MetadataQueryParameter.MetadataQueryFacet(type, sortBy, sortOrder, maxBucketSize, missing, metadataQueryFacetItemList);
     }
 
     static InputStream getFile(String name, Filetype type) throws IOException {
