@@ -2,7 +2,7 @@
  * Created by Torsten on 13.01.2017.
  */
 
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
     selector: 'es-global-progress',
@@ -11,5 +11,6 @@ import { Component } from '@angular/core';
     standalone: false,
 })
 export class GlobalProgressComponent {
+    @Input() message: string;
     constructor() {}
 }

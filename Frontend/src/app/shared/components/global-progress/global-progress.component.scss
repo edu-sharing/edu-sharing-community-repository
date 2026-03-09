@@ -1,5 +1,15 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 
+.message {
+    text-align: center;
+    width: 100%;
+    font-size: 120%;
+    color: #fff;
+    max-width: 600px;
+}
 .globalProgress {
     z-index: $dialogZIndex + 5;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }

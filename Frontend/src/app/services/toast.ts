@@ -281,12 +281,14 @@ export class Toast extends ToastAbstract implements OnDestroy {
 
     private progressSpinnerOverlay: OverlayRef | null;
 
-    showProgressSpinner() {
-        if (!this.progressSpinnerOverlay) {
-            this.progressSpinnerOverlay = this.overlay.create();
-            const userProfilePortal = new ComponentPortal(GlobalProgressComponent);
-            this.progressSpinnerOverlay.attach(userProfilePortal);
+    showProgressSpinner(message = '') {
+        if (this.progressSpinnerOverlay) {
+            this.closeProgressSpinner();
         }
+        this.progressSpinnerOverlay = this.overlay.create();
+        const userProfilePortal = new ComponentPortal(GlobalProgressComponent);
+        const ref = this.progressSpinnerOverlay.attach(userProfilePortal);
+        ref.instance.message = message;
     }
 
     closeProgressSpinner(): void {
