@@ -1,4 +1,5 @@
 import {
+    AfterViewInit,
     Component,
     computed,
     ContentChild,
@@ -33,7 +34,7 @@ import { CLOSE } from '../../../features/dialogs/dialog-modules/generic-dialog/g
     styleUrls: ['./top-bar.component.scss'],
     standalone: false,
 })
-export class TopBarComponent {
+export class TopBarComponent implements AfterViewInit {
     readonly TemplateSlot = TemplateSlot;
     @ContentChild('createButton') createButtonRef: TemplateRef<any>;
     @ViewChild('createMenu') createMenu: CreateMenuComponent;
@@ -126,7 +127,9 @@ export class TopBarComponent {
         this.createMenuTrigger.openMenu();
         this.createMenuTrigger.onMenuClose;
     }
-
+    ngAfterViewInit() {
+        this.sizeChanged();
+    }
     sizeChanged() {
         this.mainNavService.updateHeight(
             this.topbarRef.nativeElement?.getBoundingClientRect().height,
