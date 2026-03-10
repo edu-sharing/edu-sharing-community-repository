@@ -114,6 +114,7 @@ export class MainNavService {
      */
     onConnectorCreated = new Subject<Node>();
     private _isVisible: boolean;
+    private lastHeight = this.DefaultHeight;
     private _systemMessage = signal<SystemMessageDetails>(null);
     showSystemMessage = computed(() => this._systemMessage()?.message?.mode === 'bar');
     readonly DefaultScopes = ['workspace', 'collections', 'search', 'render', 'admin'];
@@ -217,10 +218,13 @@ export class MainNavService {
     setSystemMessage(systemMessage: SystemMessageDetails) {
         this._systemMessage.set(systemMessage);
     }
-    updateHeight(height = this.DefaultHeight) {
+    updateHeight(height = 0) {
+        if (height) {
+            this.lastHeight = height;
+        }
         if (this._isVisible) {
             if (!height) {
-                height = this.DefaultHeight;
+                height = this.lastHeight;
             }
             document.documentElement.style.setProperty('--mainnavHeight', height + 'px');
             //document.documentElement.style.setProperty('--mainnavCurrentHeight', null);
