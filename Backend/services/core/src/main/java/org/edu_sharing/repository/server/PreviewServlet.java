@@ -354,10 +354,12 @@ public class PreviewServlet extends HttpServlet {
 				aspects=nodeService.getAspects(storeRef.getProtocol(), storeRef.getIdentifier(),nodeId);
 				type = nodeService.getType(nodeId);
 			}
+            setResponseHeader(PreviewDetail.TYPE_DEFAULT,true,resp);
 			resp.sendRedirect(mime.getPreview(type,props,Arrays.asList(aspects)));
 			return;
 		}
 		catch(Throwable t){
+            setResponseHeader(PreviewDetail.TYPE_DEFAULT,true,resp);
 			resp.sendRedirect(mime.getDefaultPreview());
 		}
 	}
@@ -386,6 +388,9 @@ public class PreviewServlet extends HttpServlet {
 
         List<String> resourceTypeSub = (List<String>)dbNodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_CCRESSOURCESUBTYPE));
         if(resourceTypeSub != null && resourceTypeSub.size() > 0) props.put(CCConstants.CCM_PROP_CCRESSOURCESUBTYPE,resourceTypeSub.get(0));
+
+        String lomFormat = (String)dbNodeService.getProperty(nodeRef,QName.createQName(CCConstants.LOM_PROP_TECHNICAL_FORMAT));
+        if(lomFormat != null) props.put(CCConstants.LOM_PROP_TECHNICAL_FORMAT,lomFormat);
 
         return props;
     }
