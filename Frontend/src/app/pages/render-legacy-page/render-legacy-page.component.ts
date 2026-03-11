@@ -24,6 +24,7 @@ import {
     MdsService,
     NetworkService,
     Node,
+    NodeService,
     ProposalNode,
 } from 'ngx-edu-sharing-api';
 import {
@@ -126,6 +127,7 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
         private mdsService: MdsService,
         private mdsHelperService: MdsHelperService,
         private nodeApi: RestNodeService,
+        private nodeService: NodeService,
         private searchApi: RestSearchService,
         private toolService: RestToolService,
         private injector: Injector,
@@ -551,7 +553,7 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
                                 .pipe(first())
                                 .toPromise();
                             if (this._fromHomeRepository) {
-                                this.nodeApi.getNodeParents(this._nodeId).subscribe(
+                                this.nodeService.getParents(this._nodeId).subscribe(
                                     (nodes) =>
                                         this.breadcrumbsService.setNodePath(nodes.nodes.reverse()),
                                     (error) => {
@@ -722,20 +724,8 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
             }
             this.currentOptions = options;
         };
-
-        this.nodeApi
-            .getNodeChildobjects(this.sequenceParent.ref.id, this.sequenceParent.ref.repo)
-            .subscribe(
-                (data: NodeList) => {
-                    addButton(data);
-                    void this.initOptions();
-                },
-                (error) => {
-                    console.warn(error);
-                    addButton();
-                    void this.initOptions();
-                },
-            );
+        addButton(this.sequence);
+        void this.initOptions();
     }
 
     async setDownloadUrl(url: string) {

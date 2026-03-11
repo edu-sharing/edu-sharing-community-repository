@@ -7,6 +7,7 @@ import {
     InputSignal,
     OnInit,
     Output,
+    Signal,
     signal,
     WritableSignal,
 } from '@angular/core';
@@ -16,7 +17,7 @@ import { SharedModule } from '../../../../shared/shared.module';
 import { VarDirective } from '../../shared/directives/ng-var.directive';
 import { DEFAULT_PAGE_VARIANT_CONFIG_PROP } from '../../shared/types/custom-definitions';
 import { PageVariantConfig } from '../../shared/types/page-variant-config';
-import { retrievePageVariantConfig } from '../../shared/utils/template-util';
+import { retrieveNodeId, retrievePageVariantConfig } from '../../shared/utils/template-util';
 
 @Component({
     selector: 'es-configure-page-variant-dialog',
@@ -29,6 +30,7 @@ export class ConfigurePageVariantComponent implements OnInit {
     readonly templateI18nPrefix: string = 'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_TEMPLATE.';
 
     deleteVariantEnabled: InputSignal<boolean> = input(false);
+    pageVariantConfigNodes: InputSignal<Node[]> = input([]);
     @Input() pageVariantNode: Node;
     @Input() pageVariantTitle: string;
     selectDimensions: InputSignal<Map<string, MdsWidget>> = input(new Map<string, MdsWidget>());
@@ -47,6 +49,12 @@ export class ConfigurePageVariantComponent implements OnInit {
     form: FormGroup;
     formInitialized: WritableSignal<boolean> = signal(false);
     formInputValid: WritableSignal<boolean> = signal(true);
+    furtherExistingPageVariants: Signal<Node[]> = computed(() =>
+        this.pageVariantConfigNodes().filter(
+            (n) => retrieveNodeId(n) !== retrieveNodeId(this.pageVariantNode),
+        ),
+    );
+    isDuplicate: WritableSignal<boolean> = signal(false);
 
     /**
      * Initializes the component by retrieving the page variant config and initializing the form controls.
@@ -131,6 +139,9 @@ export class ConfigurePageVariantComponent implements OnInit {
         let parametersChanged: boolean = false;
 
         // process form values
+        if (!pageVariantConfig.variables) {
+            pageVariantConfig.variables = {};
+        }
         this.selectDimensions().forEach((widget: MdsWidget, key: string) => {
             if (value[key] !== undefined) {
                 let processedValue: string[];
@@ -160,7 +171,7 @@ export class ConfigurePageVariantComponent implements OnInit {
         }
         const titleChanged: boolean = value.title && value.title !== this.pageVariantNode.title;
         if (titleChanged) {
-            outputMap.set(RestConstants.CM_PROP_TITLE, value.title);
+            outputMap.set(RestConstants.LOM_PROP_TITLE, value.title);
         }
         this.applyChangesClicked.emit(outputMap);
     }
@@ -171,6 +182,7 @@ export class ConfigurePageVariantComponent implements OnInit {
      * @param currentValue
      */
     checkValidity(currentValue: any = null): void {
+        this.isDuplicate.set(false);
         if (!currentValue) {
             currentValue = this.form.value;
         }
@@ -184,7 +196,37 @@ export class ConfigurePageVariantComponent implements OnInit {
                 validInput = false;
             }
         });
-        this.settingsValidityChanged.emit(validInput);
+        if (!validInput) {
+            this.settingsValidityChanged.emit(validInput);
+        } else {
+            // duplicate check
+            this.furtherExistingPageVariants()?.forEach((pageVariant: Node) => {
+                let isDuplicate: boolean = true;
+                const pageVariantConfig: PageVariantConfig = retrievePageVariantConfig(pageVariant);
+                const variables = pageVariantConfig?.variables || {};
+                this.selectDimensions().forEach((widget: MdsWidget, key: string) => {
+                    const value: Array<{ id: string; checked: boolean }> | string =
+                        currentValue[key];
+                    if (Array.isArray(value)) {
+                        const processedValue: string[] = value
+                            .filter((item) => item.checked)
+                            .map((item) => item.id);
+                        if (
+                            processedValue.length !== variables[key]?.length ||
+                            !processedValue.every((v) => variables[key]?.includes(v))
+                        ) {
+                            isDuplicate = false;
+                        }
+                    } else {
+                        isDuplicate = false;
+                    }
+                });
+                if (isDuplicate) {
+                    this.isDuplicate.set(true);
+                    validInput = false;
+                }
+            });
+        }
         this.formInputValid.set(validInput);
     }
 }

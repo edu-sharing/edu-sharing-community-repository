@@ -16,6 +16,7 @@ import {
     MdsDefinition,
     MdsService,
     Node,
+    SessionStorageService,
     NodeService,
     UserService,
 } from 'ngx-edu-sharing-api';
@@ -56,7 +57,6 @@ import {
     RestConstants,
     RestNodeService,
     RestToolService,
-    SessionStorageService,
     UIService,
 } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';

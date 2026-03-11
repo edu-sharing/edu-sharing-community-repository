@@ -37,6 +37,7 @@ import { AuthenticationService } from './authentication.service';
 @Injectable({ providedIn: 'root' })
 export class SessionStorageService {
     static readonly KEY_WORKSPACE_SORT = 'workspace_sort';
+    static readonly KEY_WORKSPACE_SAFE_DOWNLOAD_CONFIRM = 'workspace_safe_download_confirm';
     static readonly KEY_ROOT_COLLECTIONS = 'collections_root';
 
     private readonly localStorage = new BrowserStorage(localStorage, this.authentication, false);

@@ -272,14 +272,15 @@
       "CONFIG_PAGE_VARIANT": {
         "LABEL": "Settings",
         "HEADING": "Settings of the topic page variant",
-        "INFO_TITLE": "Define parameters",
-        "INFO_TEXT": "Assign a unique title and select an appropriate target audience.",
         "WARN_TEXT": "Some of the required parameter fields have not been filled in. You cannot cancel the process.",
+        "DUPLICATE_WARN_TEXT": "A topic page variant with the same parameters already exists.",
         "TITLE": "Variant title",
         "TITLE_PLACEHOLDER": "Topic page variant for xyz",
         "EDUCATION_LEVEL_LABEL": "Educational level",
         "TARGET_GROUP_LABEL": "Target group",
-        "DELETE_VARIANT": "Delete variant"
+        "DELETE_VARIANT": "Delete variant",
+        "DEFINE_PARAMETERS": "Define parameters",
+        "DUPLICATE_PARAMETERS": "Duplicate in existing variant detected"
       },
       "CONFIG_PAGE_TEMPLATE": {
         "HEADING": "Settings of the topic page template",
@@ -402,7 +403,8 @@
       "DELETE": {
         "LABEL": "Delete section",
         "MESSAGE": "Do you really want to delete this section?"
-      }
+      },
+      "INVALID_OR_UNKNOWN_WIDGET": "The widget is not defined or unknown."
     },
     "PREVIEW_PANEL": {
       "CLOSE": "Close preview panel",
@@ -444,18 +446,36 @@
     "SAVE_CONFIG_ERROR_ACTION": "Reload page",
     "SAVE_CONFIG_ERROR_MESSAGE": "An error occurred while loading a resource. Please reload the page.",
     "CREATE_PAGE_VARIANT": {
-      "HEADING": "Create page variant",
-      "MESSAGE": "Do you really want to create a new page variant based on the page structure of the currently selected variant?",
-      "PENDING_MESSAGE": "A new page variant is being created and loaded."
+      "HEADING": "Create new topic page variant",
+      "EXISTING_VARIANT": {
+        "INFO_HEADING": "Attention: There are already variants of this topic page.",
+        "INFO_LIST_TEXT": "Before creating a new one, please check:",
+        "INFO_LIST_ITEM_ONE": "Does a suitable variant already exist?",
+        "INFO_LIST_ITEM_TWO": "Can an existing template be adapted?"
+      },
+      "EXISTING_TOPIC_PAGE": {
+        "INFO_HEADING": "There is already a topic page for this collection.",
+        "INFO_TEXT": "You can create and customize a copy of it, replace its filters, choose a different topic page as a basis, or create a new variant from a template."
+      },
+      "CREATE_COPY_OF_LABEL": "Create copy of:",
+      "COPY_OPTIONS": {
+        "ARIA": "Selection of copy source",
+        "TOPIC_PAGE": "Topic page",
+        "TEMPLATE": "Template"
+      },
+      "SEARCH_PLACEHOLDER": "Search topic page templates",
+      "PENDING_MESSAGE": "A new page variant is being created and loaded.",
+      "SUCCESS_MESSAGE": "Topic page copy created successfully",
+      "COPY_SUFFIX": "Copy"
     },
     "DELETE_PAGE_VARIANT": {
       "HEADING": "Delete page variant",
-      "MESSAGE": "Do you really want to delete the currently selected variant?",
+      "MESSAGE": "Do you really want to delete the selected variant? This action cannot be undone.",
       "PENDING_MESSAGE": "The page variant including all customizations is being deleted."
     },
     "DELETE_PAGE_TEMPLATE": {
       "HEADING": "Delete page template",
-      "MESSAGE": "Do you really want to delete the currently selected template?",
+      "MESSAGE": "Do you really want to delete the selected template? This action cannot be undone.",
       "PENDING_MESSAGE": "The page template including all customizations is being deleted."
     },
     "TEMPLATE_MODE_ACTIVE": {

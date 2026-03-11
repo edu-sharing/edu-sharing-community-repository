@@ -31,6 +31,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -95,9 +96,9 @@ public class BulkDeleteNodesJob extends AbstractJob{
 		nodeService = serviceRegistry.getNodeService();
 		nodeServiceEdu = NodeServiceFactory.getInstance().getLocalService();
 
-		elastic = (String) context.getJobDetail().getJobDataMap().get("lucene");
+		elastic = (String) context.getJobDetail().getJobDataMap().get("elastic");
 		startFolder = (String) context.getJobDetail().getJobDataMap().get("startFolder");
-		if(startFolder==null || startFolder.isEmpty()){
+		if(StringUtils.isBlank(startFolder) && StringUtils.isBlank(elastic)) {
 			throw new IllegalArgumentException("Missing required parameter 'startFolder'");
 		}
 		Object recycleStr = context.getJobDetail().getJobDataMap().get("recycle");

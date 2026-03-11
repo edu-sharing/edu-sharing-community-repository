@@ -272,14 +272,15 @@
       "CONFIG_PAGE_VARIANT": {
         "LABEL": "Einstellungen",
         "HEADING": "Einstellungen der Themenseiten-Variante",
-        "INFO_TITLE": "Parameter definieren",
-        "INFO_TEXT": "Vergib einen eindeutigen Titel und wähle eine passende Zielgruppe aus.",
         "WARN_TEXT": "Nicht alle erforderlichen Parameter-Felder sind ausgefüllt. Du kannst den Vorgang nicht abbrechen.",
+        "DUPLICATE_WARN_TEXT": "Es existiert bereits eine Themenseiten-Variante mit den gleichen Parametern.",
         "TITLE": "Titel der Variante",
         "TITLE_PLACEHOLDER": "Themenseiten-Variante für xyz",
         "EDUCATION_LEVEL_LABEL": "Bildungsstufe",
         "TARGET_GROUP_LABEL": "Zielgruppe",
-        "DELETE_VARIANT": "Variante löschen"
+        "DELETE_VARIANT": "Variante löschen",
+        "DEFINE_PARAMETERS": "Definiere Parameter",
+        "DUPLICATE_PARAMETERS": "Duplikat in existierender Variante erkannt"
       },
       "CONFIG_PAGE_TEMPLATE": {
         "HEADING": "Einstellungen der Themenseiten-Vorlage",
@@ -402,7 +403,8 @@
       "DELETE": {
         "LABEL": "Abschnitt löschen",
         "MESSAGE": "Willst du diesen Abschnitt wirklich löschen?"
-      }
+      },
+      "INVALID_OR_UNKNOWN_WIDGET": "Das Widget ist nicht definiert oder unbekannt."
     },
     "PREVIEW_PANEL": {
       "CLOSE": "Vorschauansicht schließen",
@@ -444,18 +446,36 @@
     "SAVE_CONFIG_ERROR_ACTION": "Seite neuladen",
     "SAVE_CONFIG_ERROR_MESSAGE": "Beim Laden einer Ressource ist ein Fehler aufgetreten. Bitte laden Sie die Seite neu.",
     "CREATE_PAGE_VARIANT": {
-      "HEADING": "Seiten-Variante erstellen",
-      "MESSAGE": "Willst du wirklich auf Grundlage der Seiten-Struktur der aktuell gewählten Variante eine neue Seiten-Variante erstellen?",
-      "PENDING_MESSAGE": "Eine neue Seiten-Variante wird erstellt und geladen."
+      "HEADING": "Neue Themenseiten-Variante erstellen",
+      "EXISTING_VARIANT": {
+        "INFO_HEADING": "Achtung: Es gibt bereits Varianten dieser Themenseite.",
+        "INFO_LIST_TEXT": "Bevor du eine Neue anlegst, prüfe bitte:",
+        "INFO_LIST_ITEM_ONE": "Besteht schon eine passende Variante?",
+        "INFO_LIST_ITEM_TWO": "Kann eine vorhandene Vorlage angepasst werden?"
+      },
+      "EXISTING_TOPIC_PAGE": {
+        "INFO_HEADING": "Es gibt bereits eine Themenseite zu dieser Sammlung.",
+        "INFO_TEXT": "Du kannst eine Kopie davon erstellen und anpassen, ihre Filter ablösen und eine andere Themenseite als Basis wählen oder eine neue Variante aus einer Vorlage erstellen."
+      },
+      "CREATE_COPY_OF_LABEL": "Erstelle Kopie von:",
+      "COPY_OPTIONS": {
+        "ARIA": "Auswahl der Kopier-Grundlage",
+        "TOPIC_PAGE": "Themenseite",
+        "TEMPLATE": "Vorlage"
+      },
+      "SEARCH_PLACEHOLDER": "Durchsuche Themenseiten-Vorlagen",
+      "PENDING_MESSAGE": "Eine neue Seiten-Variante wird erstellt und geladen.",
+      "SUCCESS_MESSAGE": "Kopie der Themenseite erfolgreich erstellt",
+      "COPY_SUFFIX": "Kopie"
     },
     "DELETE_PAGE_VARIANT": {
       "HEADING": "Seiten-Variante löschen",
-      "MESSAGE": "Willst du wirklich die aktuell gewählte Variante löschen?",
+      "MESSAGE": "Möchtest du die gewählte Variante wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
       "PENDING_MESSAGE": "Die Seiten-Variante wird samt aller Anpassungen gelöscht."
     },
     "DELETE_PAGE_TEMPLATE": {
       "HEADING": "Seiten-Vorlage löschen",
-      "MESSAGE": "Willst du wirklich die aktuell gewählte Vorlage löschen?",
+      "MESSAGE": "Möchtest du die gewählte Vorlage wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
       "PENDING_MESSAGE": "Die Seiten-Vorlage wird samt aller Anpassungen gelöscht."
     },
     "TEMPLATE_MODE_ACTIVE": {

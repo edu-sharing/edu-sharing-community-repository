@@ -31,7 +31,6 @@ import { RestConstants } from '../core-module/rest/rest-constants';
 import { RestHelper } from '../core-module/rest/rest-helper';
 import { RestConnectorService } from '../core-module/rest/services/rest-connector.service';
 import { UniversalNode } from '../core-module/rest/definitions';
-import { SessionStorageService, Store } from '../core-module/rest/services/session-storage.service';
 import { map } from 'rxjs/operators';
 import { RestNodeService } from '../core-module/rest/services/rest-node.service';
 import {
@@ -43,6 +42,8 @@ import {
     NetworkService,
     Node,
     Repository,
+    SessionStorageService,
+    Store,
     TrackingV1Service,
 } from 'ngx-edu-sharing-api';
 import { DialogsService } from '../features/dialogs/dialogs.service';

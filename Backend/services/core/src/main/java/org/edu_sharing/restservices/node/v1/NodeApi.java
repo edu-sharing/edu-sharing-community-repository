@@ -1681,8 +1681,6 @@ public class NodeApi  {
     
     @POST
     @Path("/nodes/{repository}/{node}/textContent")
-    @Consumes({ "multipart/form-data" })
-    
     @Operation(summary = "Change content of node as text.", description = "Change content of node as text.")
     
     @ApiResponses(

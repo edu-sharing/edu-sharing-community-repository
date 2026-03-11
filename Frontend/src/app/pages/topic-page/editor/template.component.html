@@ -194,6 +194,7 @@
           </h2>
           <es-configure-page-variant-dialog
             [deleteVariantEnabled]="collectionNodePageConfigRef && userHasEditRights()"
+            [pageVariantConfigNodes]="pageVariantConfigs?.nodes"
             [pageVariantNode]="pageVariantNode"
             [pageVariantTitle]="
               pageVariantNode.title && !pageVariantNode.title.includes(pageVariantConfigPrefix)
@@ -611,6 +612,17 @@
 
 <ng-template #editSwimlaneDialog>
   <es-swimlane-settings-dialog [form]="swimlaneToEditForm"></es-swimlane-settings-dialog>
+</ng-template>
+
+<ng-template #addPageVariantDialog>
+  <es-add-page-variant-dialog
+    [dialogRef]="pageVariantCreateDialogRef"
+    [pageConfigRef]="collectionNodePageConfigRef"
+    [pageVariantConfigNodes]="pageVariantConfigs?.nodes"
+    [pageVariantNode]="pageVariantNode"
+    [(selectedNode)]="pageVariantCreateDialogSelectedNode"
+    (copyOptionChanged)="pageVariantCreateDialogCopyOption = $event"
+  ></es-add-page-variant-dialog>
 </ng-template>
 
 <ng-template #configurePageTemplate>

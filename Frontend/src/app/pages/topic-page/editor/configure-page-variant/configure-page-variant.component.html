@@ -1,17 +1,12 @@
-<form class="config-form" [formGroup]="form" *ngIf="formInitialized()">
-  <es-info-message mode="info" class="info-message" *ngIf="formInputValid(); else invalidInputMsg">
-    <strong>
-      {{ i18nPrefix + 'INFO_TITLE' | translate }}
-    </strong>
-    <span>
-      {{ i18nPrefix + 'INFO_TEXT' | translate }}
-    </span>
+<form
+  class="config-form"
+  [class.valid-form]="formInputValid()"
+  [formGroup]="form"
+  *ngIf="formInitialized()"
+>
+  <es-info-message mode="error" class="info-message" *ngIf="!formInputValid()">
+    {{ i18nPrefix + (isDuplicate() ? 'DUPLICATE_WARN_TEXT' : 'WARN_TEXT') | translate }}
   </es-info-message>
-  <ng-template #invalidInputMsg>
-    <es-info-message mode="error" class="info-message">
-      {{ i18nPrefix + 'WARN_TEXT' | translate }}
-    </es-info-message>
-  </ng-template>
   <mat-form-field appearance="outline" subscriptSizing="dynamic" class="page-variant-parameter">
     <mat-label>
       {{ (templateMode() ? templateI18nPrefix : i18nPrefix) + 'TITLE' | translate }}
@@ -70,8 +65,22 @@
       <i esIcon="delete"></i>
       {{ (templateMode() ? templateI18nPrefix : i18nPrefix) + 'DELETE_VARIANT' | translate }}
     </button>
-    <button mat-flat-button color="primary" [disabled]="!formInputValid()" (click)="applyChanges()">
-      {{ 'APPLY' | translate }}
-    </button>
+    <div
+      [matTooltip]="
+        !formInputValid()
+          ? (i18nPrefix + (isDuplicate() ? 'DUPLICATE_PARAMETERS' : 'DEFINE_PARAMETERS')
+            | translate)
+          : null
+      "
+    >
+      <button
+        mat-flat-button
+        color="primary"
+        [disabled]="!formInputValid()"
+        (click)="applyChanges()"
+      >
+        {{ 'APPLY' | translate }}
+      </button>
+    </div>
   </div>
 </form>

@@ -108,6 +108,7 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
         'https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/oeh-topics/5e40e372-735c-4b17-bbf7-e827a5702b57.json';
 
     @Input() blacklistedNodeIds: string[] = [];
+    @Input() contextNodeId: string;
     @Input() criteria: MdsQueryCriteria[] = [];
     @Input() gridConfig: GridConfig = {
         layout: 'scroll',

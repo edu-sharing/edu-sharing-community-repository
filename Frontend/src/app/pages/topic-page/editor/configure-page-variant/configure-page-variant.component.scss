@@ -1,7 +1,16 @@
 @use '../../topic-page-variables' as topicPageVars;
 
+:host {
+    display: block;
+    min-width: 500px;
+}
+
 .config-form {
     max-width: 500px;
+
+    &.valid-form {
+        margin-top: 32px;
+    }
 }
 
 .info-message {

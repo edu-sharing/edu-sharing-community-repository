@@ -15,7 +15,6 @@ import {
     RestConnectorService,
     RestConstants,
     SearchRequestCriteria,
-    SessionStorageService,
     UIService,
 } from '../../../core-module/core.module';
 import { TranslateService } from '@ngx-translate/core';
@@ -63,6 +62,7 @@ import {
     SearchResultNode,
     SearchResults,
     SearchService,
+    SessionStorageService,
     UserService,
 } from 'ngx-edu-sharing-api';
 import { Sort } from '@angular/material/sort';
