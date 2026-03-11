@@ -11,6 +11,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { MdsWidget } from 'ngx-edu-sharing-api';
 
 export class DefaultWidget implements MdsViewerWidget {
+    readonly meetsDynamicCondition = new BehaviorSubject<boolean>(true);
     focusTrigger: Subject<void>;
 
     constructor(public definition: MdsWidget, private values: string[]) {}
