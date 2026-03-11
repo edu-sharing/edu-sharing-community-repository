@@ -2535,6 +2535,10 @@
                     <type>d:boolean</type>
                     <multiple>false</multiple>
                 </property>
+                <property name="ccm:page_variant_profiling_target_group">
+                    <type>d:text</type>
+                    <multiple>true</multiple>
+                </property>
             </properties>
         </aspect>
         <aspect name="ccm:page">
