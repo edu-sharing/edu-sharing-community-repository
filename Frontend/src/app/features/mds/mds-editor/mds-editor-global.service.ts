@@ -12,7 +12,9 @@ export type CustomNativeWidget = {
 /**
  * this service is intended to add custom widget rendering
  */
-@Injectable()
+@Injectable({
+    providedIn: 'root',
+})
 export class MdsEditorGlobalService {
     private customWidgets: CustomWidget[] = [];
     private customNativeWidgets: CustomNativeWidget[] = [];
@@ -33,5 +35,6 @@ export class MdsEditorGlobalService {
     }
     registerCustomNativeWidget(customWidget: CustomNativeWidget) {
         this.customNativeWidgets.push(customWidget);
+        console.log(this.customNativeWidgets);
     }
 }
