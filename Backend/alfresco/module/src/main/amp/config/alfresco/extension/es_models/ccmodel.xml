@@ -2333,6 +2333,14 @@
           <type>d:boolean</type>
           <multiple>false</multiple>
         </property>
+        <property name="ccm:page_variant_template_ref">
+            <type>d:noderef</type>
+            <multiple>false</multiple>
+        </property>
+        <property name="ccm:page_variant_template_version">
+            <type>d:text</type>
+            <multiple>false</multiple>
+        </property>
         <property name="ccm:page_variant_profiling_target_group">
             <type>d:text</type>
             <multiple>true</multiple>
