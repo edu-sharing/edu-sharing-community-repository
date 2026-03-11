@@ -20,7 +20,6 @@ import {
     NodeListErrorResponses,
     NodeListService,
     NodeService,
-    PROPERTY_FILTER_ALL,
     ROOT,
 } from 'ngx-edu-sharing-api';
 import {
@@ -139,7 +138,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         private nodeList: NodeListService,
         private nodeService: NodeService,
         private nodeServiceLegacy: RestNodeService,
-        private route: ActivatedRoute,
         private router: Router,
         private toast: Toast,
         private ltiPlatformService: LtiPlatformService,
