@@ -55,7 +55,11 @@ import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
 import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog-ref';
-import { YES_OR_NO } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
+import {
+    DELETE_OR_CANCEL,
+    USE_OR_CANCEL,
+    YES_OR_NO,
+} from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { QrDialogModule } from '../../../features/dialogs/dialog-modules/qr-dialog/qr-dialog.module';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { PreviewSidebarModule } from '../../../features/preview-sidebar/preview-sidebar.module';
@@ -139,16 +143,20 @@ import { EditableTextComponent } from '../widgets/shared/editable-text/editable-
 import { SideMenuItemComponent } from '../widgets/side-menu-wrapper/side-menu-item/side-menu-item.component';
 import { SideMenuWrapperComponent } from '../widgets/side-menu-wrapper/side-menu-wrapper.component';
 import { TopicHeaderComponent } from '../widgets/topic-header/topic-header.component';
+import {
+    AddPageVariantDialogComponent,
+    CopyOption,
+} from './add-page-variant-dialog/add-page-variant-dialog.component';
 import { AddSwimlaneBorderButtonComponent } from './add-swimlane-button/add-swimlane-border-button.component';
 import { ConfigurePageTemplateDialogComponent } from './configure-page-template-dialog/configure-page-template-dialog.component';
 import { ConfigurePageVariantComponent } from './configure-page-variant/configure-page-variant.component';
 import { SwimlaneComponent } from './swimlane/swimlane.component';
 import { SwimlaneSettingsDialogComponent } from './swimlane/swimlane-settings-dialog/swimlane-settings-dialog.component';
 import { SwimlaneConfigurationButtonsComponent } from './swimlane-configuration-buttons/swimlane-configuration-buttons.component';
-import { TextVariant } from '../shared/types/text-variant';
 
 @Component({
     imports: [
+        AddPageVariantDialogComponent,
         AddSwimlaneBorderButtonComponent,
         AiTextPromptPipe,
         BreadcrumbComponent,
@@ -263,6 +271,7 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
     @Input() variantId: string;
     initialTopicColor: string;
     @HostBinding('style.--topic-color') topicColor: string;
+    @ViewChild('addPageVariantDialog') addPageVariantRef: TemplateRef<undefined>;
     @ViewChild('configurePageTemplate') configurePageTemplateRef: TemplateRef<undefined>;
     @ViewChild('editModeToggle') editModeToggle: TemplateRef<any>;
     @ViewChild('editSwimlaneDialog') editSwimlaneRef: TemplateRef<undefined>;
@@ -312,6 +321,9 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
     pageVariantNode: Node;
     pageVariantNodeIndex: number = 0;
     pageVariantSettingsValid: WritableSignal<boolean> = signal(true);
+    pageVariantCreateDialogRef: CardDialogRef;
+    pageVariantCreateDialogSelectedNode: Node;
+    pageVariantCreateDialogCopyOption: CopyOption;
     pageTemplateEditDialogRef: CardDialogRef;
     qrCodeDialogRef: CardDialogRef;
     qrCodeUrl: WritableSignal<string> = signal('');
@@ -903,72 +915,116 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
     }
 
     /**
-     * Creates a new page variant by cloning the currently selected one (without the node definitions) and navigates to it.
+     * Allows creating a new page variant by opening a new dialog.
      */
     async createPageVariant(): Promise<void> {
-        const dialogRef = await this.dialogs.openGenericDialog({
-            title: this.i18nPrefix + 'CREATE_PAGE_VARIANT.HEADING',
-            message: this.i18nPrefix + 'CREATE_PAGE_VARIANT.MESSAGE',
-            buttons: YES_OR_NO,
+        this.pageVariantCreateDialogSelectedNode = null;
+        this.pageVariantCreateDialogRef = await this.dialogs.openGenericDialog({
+            title: 'TOPIC_PAGE.CREATE_PAGE_VARIANT.HEADING',
+            minWidth: '700px',
+            maxWidth: '100%',
+            contentTemplate: this.addPageVariantRef,
             closable: Closable.Casual,
+            buttons: USE_OR_CANCEL,
         });
-        dialogRef.afterClosed().subscribe(async (response) => {
-            if (response === 'YES') {
-                // check for pageConfigNode existence
-                if (!retrieveNodeId(this.pageConfigNode)) {
-                    return;
-                }
-                // parse the page config from the properties
-                const pageConfig: PageConfig = retrievePageConfig(this.pageConfigNode);
-                // check for pageConfig variant existence
-                if (!pageConfig.variants) {
-                    console.error(
-                        this.translate.instant('TOPIC_PAGE.NO_PAGE_VARIANT.MISSING_IN_PAGE_CONFIG'),
-                        pageConfig,
+        const response = await firstValueFrom(this.pageVariantCreateDialogRef.afterClosed());
+        // the goal is to add another page variant to the existing (propagated) page config
+        if (response === 'USE') {
+            if (!this.pageVariantCreateDialogSelectedNode) {
+                return;
+            }
+            // create a child for the variant node
+            this.startEditing(this.i18nPrefix + 'CREATE_PAGE_VARIANT.PENDING_MESSAGE');
+            // check for custom page node existence and create it if necessary
+            await this.checkForCustomPageNodeExistence();
+            // check for pageConfigNode existence
+            if (!retrieveNodeId(this.pageConfigNode)) {
+                return;
+            }
+            // parse the page config from the properties
+            const pageConfig: PageConfig = retrievePageConfig(this.pageConfigNode);
+            // check for pageConfig variant existence
+            if (!pageConfig.variants) {
+                console.error(
+                    this.translate.instant('TOPIC_PAGE.NO_PAGE_VARIANT.MISSING_IN_PAGE_CONFIG'),
+                    pageConfig,
+                );
+                return;
+            }
+            try {
+                this.closeSideMenus();
+                // retrieve page variant config and remove node IDs
+                const variantConfig: PageVariantConfig = retrievePageVariantConfig(
+                    this.pageVariantCreateDialogSelectedNode,
+                );
+                // depending on the copy option, different variables should be deleted
+                let variablesToDelete = Array.from(this.selectDimensions.keys());
+                if (this.pageVariantCreateDialogCopyOption === CopyOption.TopicPage) {
+                    variablesToDelete = variablesToDelete.filter(
+                        (v) => v !== 'ccm:educationalcontext',
                     );
-                    return;
                 }
-                try {
-                    this.closeSideMenus();
-                    // create child for variant node
-                    this.startEditing(this.i18nPrefix + 'CREATE_PAGE_VARIANT.PENDING_MESSAGE');
-                    // retrieve page variant config and remove node IDs
-                    const variantConfig: PageVariantConfig = this.retrievePageVariant();
-                    preparePageVariantConfig(variantConfig, true);
-                    // create a copy of the page variant config with an updated variant config
-                    const properties: { [key: string]: string } = {
-                        [DEFAULT_PAGE_VARIANT_CONFIG_PROP]: JSON.stringify(variantConfig),
-                        [DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]: 'false',
-                    };
-                    let pageConfigVariantNode: Node = await this.topicPageHelperService.createChild(
+                // delete the nodeIds but keep them as propagatedNodeIds + remove certain variables
+                preparePageVariantConfig(variantConfig, true, true, variablesToDelete);
+                // create a copy of the page variant config with an updated variant config
+                const properties: { [key: string]: string } = {
+                    [DEFAULT_PAGE_VARIANT_CONFIG_PROP]: JSON.stringify(variantConfig),
+                    [DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]: 'false',
+                    [RestConstants.LOM_PROP_TITLE]:
+                        this.pageVariantCreateDialogSelectedNode.title +
+                        '_' +
+                        this.translate.instant(this.i18nPrefix + 'CREATE_PAGE_VARIANT.COPY_SUFFIX'),
+                };
+                let pageConfigVariantNode: Node = await this.topicPageHelperService.createChild(
+                    retrieveNodeId(this.pageConfigNode),
+                    RestConstants.CCM_TYPE_MAP,
+                    this.pageVariantCreateDialogSelectedNode.name + '_' + uuidv4(),
+                    DEFAULT_PAGE_VARIANT_CONFIG_ASPECT,
+                    properties,
+                );
+                // push it to the existing variants
+                pageConfig.variants.push(
+                    prependWorkspacePrefix(retrieveNodeId(pageConfigVariantNode)),
+                );
+                // update the ccm:page_config of page config node
+                this.pageConfigNode =
+                    await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
                         retrieveNodeId(this.pageConfigNode),
-                        RestConstants.CCM_TYPE_MAP,
-                        DEFAULT_PAGE_VARIANT_NAME_PREFIX + uuidv4(),
-                        DEFAULT_PAGE_VARIANT_CONFIG_ASPECT,
-                        properties,
+                        DEFAULT_PAGE_CONFIG_PROP,
+                        JSON.stringify(pageConfig),
                     );
-                    // push it to the existing variants
-                    pageConfig.variants.push(
-                        prependWorkspacePrefix(retrieveNodeId(pageConfigVariantNode)),
+                // reload page variant configs
+                await this.updatePageVariantConfigs(true);
+                // TODO: there seems to be a race condition here, so slightly delay the navigate call
+                setTimeout(async () => {
+                    // switch into edit mode
+                    this.editMode.set(true);
+                    // end visual editing
+                    this.endEditing();
+                    this.topicPageHelperService.openSaveConfigToast(
+                        this.i18nPrefix + 'CREATE_PAGE_VARIANT.SUCCESS_MESSAGE',
                     );
-                    // update the ccm:page_config of page config node
-                    this.pageConfigNode =
-                        await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
-                            retrieveNodeId(this.pageConfigNode),
-                            DEFAULT_PAGE_CONFIG_PROP,
-                            JSON.stringify(pageConfig),
-                        );
-                    // reload page variant configs
-                    await this.updatePageVariantConfigs(true);
                     // navigate to the newly created variant
                     await this.navigateToVariant(retrieveNodeId(pageConfigVariantNode));
-                    this.endEditing();
-                } catch (err) {
-                    console.error(err);
-                    this.topicPageHelperService.displayErrorToast();
-                }
+                    // wait for the variant load and automatically open the settings menu
+                    setTimeout(async () => {
+                        const queryParamsToAddOrOverwrite: Params = {
+                            openMenu: 'settings',
+                        };
+                        // on variant change, do not keep the fragments
+                        await this.router.navigate([], {
+                            relativeTo: this.route,
+                            queryParams: queryParamsToAddOrOverwrite,
+                            queryParamsHandling: 'merge',
+                        });
+                    }, 500);
+                }, 500);
+            } catch (err) {
+                console.error(err);
+                this.endEditing();
+                this.topicPageHelperService.displayErrorToast();
             }
-        });
+        }
     }
 
     /**
@@ -977,6 +1033,8 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
      * @param changesMap
      */
     async applyPageVariant(changesMap: Map<string, string>): Promise<void> {
+        // reset validity variable
+        this.pageVariantSettingsValid.set(true);
         this.startEditing();
         if (!changesMap.size) {
             this.closeSideMenus();
@@ -1037,11 +1095,11 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
         const dialogRef = await this.dialogs.openGenericDialog({
             title: this.i18nPrefix + deleteString + 'HEADING',
             message: this.i18nPrefix + deleteString + 'MESSAGE',
-            buttons: YES_OR_NO,
+            buttons: DELETE_OR_CANCEL,
             closable: Closable.Casual,
         });
         dialogRef.afterClosed().subscribe(async (response) => {
-            if (response === 'YES') {
+            if (response === 'YES_DELETE') {
                 // parse the page config from the properties
                 const pageConfig: PageConfig = retrievePageConfig(this.pageConfigNode);
                 // check for pageConfig variant existence
@@ -2064,14 +2122,20 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
             let updatedVariantRefId: string;
             if (this.pageVariantConfigs.nodes?.length) {
                 for (const variantNode of this.pageVariantConfigs.nodes) {
+                    const properties: { [p: string]: string } = {
+                        [DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]: 'false',
+                    };
+                    // if a title is set, copy it as well
+                    if (variantNode.properties[RestConstants.LOM_PROP_TITLE]?.length) {
+                        properties[RestConstants.LOM_PROP_TITLE] =
+                            variantNode.properties[RestConstants.LOM_PROP_TITLE][0];
+                    }
                     let pageConfigVariantNode: Node = await this.topicPageHelperService.createChild(
                         retrieveNodeId(this.pageConfigNode),
                         RestConstants.CCM_TYPE_MAP,
                         DEFAULT_PAGE_VARIANT_NAME_PREFIX + uuidv4(),
                         DEFAULT_PAGE_VARIANT_CONFIG_ASPECT,
-                        {
-                            [DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]: 'false',
-                        },
+                        properties,
                     );
                     pageVariants.push(
                         prependWorkspacePrefix(retrieveNodeId(pageConfigVariantNode)),
@@ -2274,6 +2338,7 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
      */
     private closeSideMenus(): void {
         this.selectedMenuItem = '';
+        this.pageVariantSettingsValid.set(true);
     }
 
     /**
