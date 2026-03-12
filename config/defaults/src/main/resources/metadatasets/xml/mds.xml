@@ -1176,6 +1176,13 @@
           <ccm:educationalcontext type="checkboxVertical">
       ]]></html>
     </template>
+    <template>
+      <id>topic_page_variant_configuration</id>
+      <html><![CDATA[
+          <ccm:page_variant_profiling_target_group type="checkboxVertical">
+          <ccm:educationalcontext type="checkboxVertical">
+      ]]></html>
+    </template>
   </templates>
   <groups>
     <group>
@@ -1383,6 +1390,13 @@
       <rendering>angular</rendering>
       <views>
         <view>topic_page_profiling</view>
+      </views>
+    </group>
+    <group>
+      <id>topic_page_variant_configuration</id>
+      <rendering>angular</rendering>
+      <views>
+        <view>topic_page_variant_configuration</view>
       </views>
     </group>
     <group>
