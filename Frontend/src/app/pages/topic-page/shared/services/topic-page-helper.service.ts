@@ -257,7 +257,7 @@ export class TopicPageHelperService {
         type: string,
         name: string,
         aspect?: string,
-        properties?: { [key: string]: string },
+        properties?: { [key: string]: string | string[] },
     ): Promise<Node> {
         parentId = convertNodeRefIntoNodeId(parentId);
         const request: any = {
@@ -279,7 +279,7 @@ export class TopicPageHelperService {
             request.obeyMds = false;
             // enrich the request body with the input parameters
             Object.entries(properties).forEach(([key, value]) => {
-                request.body[key] = [value];
+                request.body[key] = Array.isArray(value) ? value : [value];
             });
             return (await firstValueFrom(this.nodeApiUnwrapped.createChild(request))).node;
         }
@@ -288,13 +288,16 @@ export class TopicPageHelperService {
     /**
      * Sets a property to an existing node.
      */
-    async setProperty(nodeId: string, property: string, value: string): Promise<Node> {
+    async setProperty(nodeId: string, property: string, value: string | string[]): Promise<Node> {
         nodeId = convertNodeRefIntoNodeId(nodeId);
+        const convertedValue: string[] = Array.isArray(value) ? value : [value];
         // workaround to remove temporary properties from the page variant config
         if (property === DEFAULT_PAGE_VARIANT_CONFIG_PROP) {
-            value = this.cleanPageVariantConfig(value);
+            convertedValue[0] = this.cleanPageVariantConfig(convertedValue[0]);
         }
-        return firstValueFrom(this.nodeApi.setProperty(HOME_REPOSITORY, nodeId, property, [value]));
+        return firstValueFrom(
+            this.nodeApi.setProperty(HOME_REPOSITORY, nodeId, property, convertedValue),
+        );
     }
 
     /**
@@ -329,7 +332,7 @@ export class TopicPageHelperService {
     async setPropertyAndRetrieveUpdatedNode(
         nodeId: string,
         propertyName: string,
-        value: string,
+        value: string | string[],
     ): Promise<Node> {
         nodeId = convertNodeRefIntoNodeId(nodeId);
         await this.setProperty(nodeId, propertyName, value);

@@ -828,17 +828,9 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
         }
         // otherwise, iterate the variant configs and select the one with the most matching variables
         else {
-            // transform pageVariantConfig nodes into an array of PageVariantConfig objects
-            const variantConfigsArray: PageVariantConfig[] = [];
-            this.pageVariantConfigs.nodes?.forEach((variantNode: Node): void => {
-                const variantConfig: PageVariantConfig = retrievePageVariantConfig(variantNode);
-                if (variantConfig?.variables) {
-                    variantConfigsArray.push(variantConfig);
-                }
-            });
             // retrieve the best matching index
-            const bestMatchIndex = this.retrieveExistingValueForSelection(
-                variantConfigsArray,
+            const bestMatchIndex = this.retrieveBestMatchingVariantIndex(
+                this.pageVariantConfigs.nodes,
                 this.topicPageHelperService.getSelectedVariables(),
             );
             if (bestMatchIndex !== -1 && this.pageVariantConfigs.nodes) {
@@ -957,17 +949,10 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
                 const variantConfig: PageVariantConfig = retrievePageVariantConfig(
                     this.pageVariantCreateDialogSelectedNode,
                 );
-                // depending on the copy option, different variables should be deleted
-                let variablesToDelete = Array.from(this.selectDimensions.keys());
-                if (this.pageVariantCreateDialogCopyOption === CopyOption.TopicPage) {
-                    variablesToDelete = variablesToDelete.filter(
-                        (v) => v !== 'ccm:educationalcontext',
-                    );
-                }
                 // delete the nodeIds but keep them as propagatedNodeIds + remove certain variables
-                preparePageVariantConfig(variantConfig, true, true, variablesToDelete);
+                preparePageVariantConfig(variantConfig, true, true);
                 // create a copy of the page variant config with an updated variant config
-                const properties: { [key: string]: string } = {
+                const properties: { [key: string]: string | string[] } = {
                     [DEFAULT_PAGE_VARIANT_CONFIG_PROP]: JSON.stringify(variantConfig),
                     [DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]: 'false',
                     [RestConstants.LOM_PROP_TITLE]:
@@ -982,6 +967,23 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
                     DEFAULT_PAGE_VARIANT_CONFIG_ASPECT,
                     properties,
                 );
+                // depending on the copy option, certain variables should be added
+                // workaround: this currently has to be done separately as it crashes otherwise
+                const educationContextProp: string = 'ccm:educationalcontext';
+                if (
+                    this.pageVariantCreateDialogCopyOption === CopyOption.TopicPage &&
+                    this.pageVariantCreateDialogSelectedNode.properties?.[educationContextProp]
+                        ?.length
+                ) {
+                    pageConfigVariantNode =
+                        await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
+                            retrieveNodeId(pageConfigVariantNode),
+                            educationContextProp,
+                            this.pageVariantCreateDialogSelectedNode.properties[
+                                educationContextProp
+                            ],
+                        );
+                }
                 // push it to the existing variants
                 pageConfig.variants.push(
                     prependWorkspacePrefix(retrieveNodeId(pageConfigVariantNode)),
@@ -1032,7 +1034,7 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
      *
      * @param changesMap
      */
-    async applyPageVariant(changesMap: Map<string, string>): Promise<void> {
+    async applyPageVariant(changesMap: Map<string, string | string[]>): Promise<void> {
         // reset validity variable
         this.pageVariantSettingsValid.set(true);
         this.startEditing();
@@ -2345,19 +2347,17 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
     }
 
     /**
-     * Helper function to retrieve the best matching between given page variants and selected values.
-     *
-     * TODO: Combine function with the one used in the ai-text-widget
+     * Helper function to retrieve the best matching between given page variant nodes and selected values.
      */
-    private retrieveExistingValueForSelection(
-        pageVariantConfigs: PageVariantConfig[],
-        userSelection: { [key: string]: string[] },
+    private retrieveBestMatchingVariantIndex(
+        pageVariants: Node[],
+        parameterSelection: { [key: string]: string[] },
     ): number {
-        // early return, if no user selection is available
-        if (!Object.keys(userSelection).length) {
+        // early return, if no selection is available
+        if (!Object.keys(parameterSelection).length) {
             return -1;
         }
-        const numberOfUserSelectionVariables = Object.values(userSelection).reduce(
+        const numberOfUserSelectionVariables = Object.values(parameterSelection).reduce(
             (sum, values) => sum + values.length,
             0,
         );
@@ -2366,24 +2366,23 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
         // prefer fewer variables
         let bestMatchNumberOfVariables = Number.MAX_VALUE;
 
-        for (let index = 0; index < pageVariantConfigs.length; index++) {
-            const variantConfig = pageVariantConfigs[index];
+        for (let index = 0; index < pageVariants.length; index++) {
+            const pageVariantNode: Node = pageVariants[index];
 
-            // count the number of variables in variantConfig.variables
-            const variantNumberOfVariables = Object.values(variantConfig.variables || {}).reduce(
-                (sum, values) => sum + (Array.isArray(values) ? values.length : 1),
-                0,
-            );
-
-            let totalMatches = 0;
+            // count the number of selected values from the page variant
+            let variantNumberOfVariables: number = 0;
+            Array.from(this.selectDimensions.keys()).forEach((dimension: string) => {
+                variantNumberOfVariables += pageVariantNode.properties[dimension]?.length ?? 0;
+            });
+            let totalMatches: number = 0;
 
             // count matches per dimension
-            for (const [dimensionKey, selectedValues] of Object.entries(userSelection)) {
-                const storedValues = variantConfig.variables?.[dimensionKey];
-                if (storedValues) {
-                    const valuesArray = Array.isArray(storedValues) ? storedValues : [storedValues];
+            for (const [dimensionKey, selectedValues] of Object.entries(parameterSelection)) {
+                // retrieve the selected values directly from the according property
+                const storedValues: string[] = pageVariantNode.properties[dimensionKey];
+                if (storedValues.length) {
                     selectedValues.forEach((val) => {
-                        if (valuesArray.includes(val)) {
+                        if (storedValues.includes(val)) {
                             totalMatches++;
                         }
                     });
