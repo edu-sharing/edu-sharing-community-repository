@@ -27,6 +27,7 @@ import {
     CONTENT_TYPE_ALL,
     DEFAULT,
     HOME_REPOSITORY,
+    MdsService,
     MdsWidget,
     Node,
     NodeEntries,
@@ -152,6 +153,8 @@ import { ConfigurePageVariantComponent } from './configure-page-variant/configur
 import { SwimlaneComponent } from './swimlane/swimlane.component';
 import { SwimlaneSettingsDialogComponent } from './swimlane/swimlane-settings-dialog/swimlane-settings-dialog.component';
 import { SwimlaneConfigurationButtonsComponent } from './swimlane-configuration-buttons/swimlane-configuration-buttons.component';
+import { GenericWidgetGlobalService } from '../widgets/generic-widget/generic-widget-global.service';
+import { MdsModule } from '../../../features/mds/mds.module';
 
 @Component({
     imports: [
@@ -166,6 +169,7 @@ import { SwimlaneConfigurationButtonsComponent } from './swimlane-configuration-
         FilterSwimlaneTypePipe,
         FilterVisibleSwimlanePipe,
         GenericWidgetComponent,
+        MdsModule,
         PreviewSidebarModule,
         ProfilingComponent,
         QrDialogModule,
@@ -210,6 +214,7 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
     constructor(
         private aiHelperService: AiHelperService,
         private clipboard: Clipboard,
+        private mdsService: MdsService,
         private connector: RestConnectorService,
         private dialogs: DialogsService,
         private elementRef: ElementRef,
@@ -223,6 +228,7 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
         private searchService: SearchService,
         private topicPageEventsService: TopicPageEventsService,
         public topicPageGlobalService: TopicPageGlobalService,
+        public genericWidgetGlobalService: GenericWidgetGlobalService,
         private topicPageHelperService: TopicPageHelperService,
         private translate: TranslateService,
         private translationsService: TranslationsService,
@@ -277,6 +283,7 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
 
     initialLoadSuccessfully: WritableSignal<boolean> = signal(false);
     requestInProgress: WritableSignal<boolean> = signal(false);
+    filterPanel = signal(false);
     private initializedWithParams: boolean = false;
     private readonly destroyed$ = new Subject<void>();
 
@@ -452,10 +459,16 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
             this.editModeToggle,
         );
         // enable the search field and observe the search event
+        const mds = await firstValueFrom(
+            this.mdsService.getMetadataSet({
+                repository: HOME_REPOSITORY,
+                metadataSet: this.genericWidgetGlobalService.getDefaultMds(),
+            }),
+        );
         this.searchFieldService.enable(
             {
                 enableFiltersAndSuggestions: false,
-                showFiltersButton: false,
+                showFiltersButton: !!mds.views.find((v) => v.id === 'search_topic_page'),
                 placeholder: 'TOPIC_PAGE.NAVIGATION.SEARCH_PLACEHOLDER',
             },
             this.destroyed$,
@@ -467,6 +480,9 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
                 filter((i) => !!i),
             )
             .subscribe((instance) => {
+                instance
+                    .onFiltersButtonClicked()
+                    .subscribe(() => this.filterPanel.set(!this.filterPanel()));
                 this.searchEvent$ = instance.onSearchTriggered();
                 this.searchEvent$
                     .pipe(
@@ -2482,4 +2498,5 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
     protected readonly SwimlaneBackgroundShape = SwimlaneBackgroundShape;
     protected readonly swimlaneShapeToImageMapping = SWIMLANE_SHAPE_TO_IMAGE_MAPPING;
     protected readonly WIDGETS = WIDGETS;
+    protected readonly HOME_REPOSITORY = HOME_REPOSITORY;
 }

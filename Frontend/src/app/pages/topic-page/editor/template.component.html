@@ -6,7 +6,18 @@
   <!-- for requestInProgress the page might be too large to display a visible spinner -->
   <es-spinner *ngIf="!initialLoadSuccessfully()"></es-spinner>
 </div>
-
+<div *ngIf="filterPanel()">
+  TODO: Filter panel would be here!
+  <es-mds-editor-wrapper
+    groupId="search_topic_page"
+    [repository]="HOME_REPOSITORY"
+    [setId]="genericWidgetGlobalService.getDefaultMds()"
+    [embedded]="true"
+    [currentValues]="{}"
+    mode="search"
+  ></es-mds-editor-wrapper>
+  <!--    [currentValues]="searchFilterValues" -->
+</div>
 <es-info-message mode="info" class="template-mode" *ngIf="templateMode()">
   {{
     i18nPrefix + (editMode() ? 'TEMPLATE_MODE_ACTIVE.EDIT' : 'TEMPLATE_MODE_ACTIVE.VIEW')
