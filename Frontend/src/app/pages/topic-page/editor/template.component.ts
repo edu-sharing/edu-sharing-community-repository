@@ -2380,7 +2380,7 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
             for (const [dimensionKey, selectedValues] of Object.entries(parameterSelection)) {
                 // retrieve the selected values directly from the according property
                 const storedValues: string[] = pageVariantNode.properties[dimensionKey];
-                if (storedValues.length) {
+                if (storedValues?.length) {
                     selectedValues.forEach((val) => {
                         if (storedValues.includes(val)) {
                             totalMatches++;
