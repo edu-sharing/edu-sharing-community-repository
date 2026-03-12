@@ -215,14 +215,9 @@
         "DELETE_VARIANT": "Delete template"
       }
     },
-    "CONFIG_PAGE_TEMPLATE": {
-      "HEADING": "Edit the page template(s)",
-      "SAME_REF_ERROR": "You are currently using the same template for portals and topic pages. This should be avoided.",
-      "UNLINK": "Unlink",
-      "ADD_EMPTY_TEMPLATE": "Add empty template",
-      "EMPTY_TEMPLATE_HINT": "No template exists yet. Use the button to create an empty template and switch to it.",
-      "SWITCH_TO_PAGE_VARIANT": "Switch to page variant",
-      "SWITCH_TO_PAGE_VARIANT_HINT": "Click the button to switch to the template in order to edit it."
+    "ADD_PAGE_TEMPLATE": {
+      "LABEL": "Create topic page template",
+      "MESSAGE": "No template exists yet. Would you like to create an empty template and switch to it?"
     },
     "CONFIG_WIDGET_EMBEDDING": {
       "HEADING": "Embed widget",
@@ -354,6 +349,7 @@
     "SAVE_CONFIG_MESSAGE": "Your changes are being saved.",
     "SAVE_CONFIG_ERROR_ACTION": "Reload page",
     "SAVE_CONFIG_ERROR_MESSAGE": "An error occurred while loading a resource. Please reload the page.",
+    "DEFAULT_TEMPLATE_NAME": "Page template",
     "CREATE_PAGE_VARIANT": {
       "HEADING": "Create new topic page variant",
       "EXISTING_VARIANT": {

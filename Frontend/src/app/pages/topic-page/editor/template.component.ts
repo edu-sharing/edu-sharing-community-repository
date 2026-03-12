@@ -148,7 +148,6 @@ import {
     CopyOption,
 } from './add-page-variant-dialog/add-page-variant-dialog.component';
 import { AddSwimlaneBorderButtonComponent } from './add-swimlane-button/add-swimlane-border-button.component';
-import { ConfigurePageTemplateDialogComponent } from './configure-page-template-dialog/configure-page-template-dialog.component';
 import { ConfigurePageVariantComponent } from './configure-page-variant/configure-page-variant.component';
 import { SwimlaneComponent } from './swimlane/swimlane.component';
 import { SwimlaneSettingsDialogComponent } from './swimlane/swimlane-settings-dialog/swimlane-settings-dialog.component';
@@ -162,7 +161,6 @@ import { SwimlaneConfigurationButtonsComponent } from './swimlane-configuration-
         BreadcrumbComponent,
         CdkAccordionModule,
         ColorPickerComponent,
-        ConfigurePageTemplateDialogComponent,
         ConfigurePageVariantComponent,
         EditableTextComponent,
         FilterSwimlaneTypePipe,
@@ -272,7 +270,6 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
     initialTopicColor: string;
     @HostBinding('style.--topic-color') topicColor: string;
     @ViewChild('addPageVariantDialog') addPageVariantRef: TemplateRef<undefined>;
-    @ViewChild('configurePageTemplate') configurePageTemplateRef: TemplateRef<undefined>;
     @ViewChild('editModeToggle') editModeToggle: TemplateRef<any>;
     @ViewChild('editSwimlaneDialog') editSwimlaneRef: TemplateRef<undefined>;
     @ViewChild('showQrCodeDialog') showQrCodeDialogRef: TemplateRef<undefined>;
@@ -324,7 +321,6 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
     pageVariantCreateDialogRef: CardDialogRef;
     pageVariantCreateDialogSelectedNode: Node;
     pageVariantCreateDialogCopyOption: CopyOption;
-    pageTemplateEditDialogRef: CardDialogRef;
     qrCodeDialogRef: CardDialogRef;
     qrCodeUrl: WritableSignal<string> = signal('');
     selectedVariantPosition: number = -1;
@@ -795,7 +791,16 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
                 createTemplateName,
                 'svg-page_template',
                 async () => {
-                    await this.toggleTemplateMode();
+                    const dialogRef = await this.dialogs.openGenericDialog({
+                        title: this.i18nPrefix + 'ADD_PAGE_TEMPLATE.LABEL',
+                        message: this.i18nPrefix + 'ADD_PAGE_TEMPLATE.MESSAGE',
+                        buttons: YES_OR_NO,
+                        closable: Closable.Casual,
+                    });
+                    const response = await firstValueFrom(dialogRef.afterClosed());
+                    if (response === 'YES') {
+                        void this.createAndVisitEmptyPageConfig();
+                    }
                 },
             );
             createPageTemplate.elementType = [ElementType.Unknown];
@@ -1813,23 +1818,11 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
     }
 
     /**
-     * Called by left es-side-menu-item itemClicked output event.
+     * Leaves the template mode by setting the according variable and reloading the page.
      */
-    async toggleTemplateMode(): Promise<void> {
-        // switch into non-preview mode and return
-        if (this.templateMode()) {
-            this.templateMode.set(false);
-            window.location.reload();
-            return;
-        }
-        this.pageTemplateEditDialogRef = await this.dialogs.openGenericDialog({
-            title: 'TOPIC_PAGE.CONFIG_PAGE_TEMPLATE.HEADING',
-            minWidth: '700px',
-            maxWidth: '100%',
-            contentTemplate: this.configurePageTemplateRef,
-            closable: Closable.Casual,
-            buttons: [{ label: 'CANCEL', config: { color: 'standard' } }],
-        });
+    leaveTemplateMode(): void {
+        this.templateMode.set(false);
+        window.location.reload();
     }
 
     /**
@@ -2095,6 +2088,75 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
             this.topicPageHelperService.displayErrorToast();
         } finally {
             this.createCustomConfigInProgress.set(false);
+        }
+    }
+
+    /**
+     * Creates, links and visits an empty page config.
+     */
+    async createAndVisitEmptyPageConfig() {
+        try {
+            this.startEditing();
+            // page ccm:map for page config node
+            const pageConfigNode: Node = await this.topicPageHelperService.createChild(
+                this.collectionId,
+                RestConstants.CCM_TYPE_MAP,
+                DEFAULT_PAGE_NAME_PREFIX + uuidv4(),
+                DEFAULT_PAGE_CONFIG_ASPECT,
+            );
+            // create a page variant as a template and add it to the list of variants
+            const pageVariants: string[] = [];
+            const properties: { [key: string]: string } = {
+                [DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]: 'true',
+                [RestConstants.LOM_PROP_TITLE]: this.translate.instant(
+                    this.i18nPrefix + 'DEFAULT_TEMPLATE_NAME',
+                ),
+            };
+            let pageConfigVariantNode: Node = await this.topicPageHelperService.createChild(
+                retrieveNodeId(pageConfigNode),
+                RestConstants.CCM_TYPE_MAP,
+                DEFAULT_PAGE_VARIANT_NAME_PREFIX + uuidv4(),
+                DEFAULT_PAGE_VARIANT_CONFIG_ASPECT,
+                properties,
+            );
+            pageVariants.push(prependWorkspacePrefix(retrieveNodeId(pageConfigVariantNode)));
+            // update properties of the page variant afterward to include the node ID in the template
+            const variantConfig: PageVariantConfig = {
+                template: {
+                    id: prependWorkspacePrefix(retrieveNodeId(pageConfigVariantNode)),
+                    version: '1.0.0',
+                },
+                structure: {
+                    swimlanes: [],
+                },
+            };
+            await this.topicPageHelperService.setProperty(
+                retrieveNodeId(pageConfigVariantNode),
+                DEFAULT_PAGE_VARIANT_CONFIG_PROP,
+                JSON.stringify(variantConfig),
+            );
+            // update page config node
+            const pageConfig: PageConfig = {
+                default: pageVariants[0],
+                variants: pageVariants,
+            };
+            await this.topicPageHelperService.setProperty(
+                retrieveNodeId(pageConfigNode),
+                DEFAULT_PAGE_CONFIG_PROP,
+                JSON.stringify(pageConfig),
+            );
+            // update propagate ref
+            await this.topicPageHelperService.setProperty(
+                this.collectionId,
+                DEFAULT_PAGE_CONFIG_PROPAGATE_REF_PROP,
+                prependWorkspacePrefix(retrieveNodeId(pageConfigNode)),
+            );
+            await this.switchIntoTemplateMode(true);
+        } catch (err) {
+            console.error(err);
+            this.topicPageHelperService.displayErrorToast();
+        } finally {
+            this.endEditing();
         }
     }
 

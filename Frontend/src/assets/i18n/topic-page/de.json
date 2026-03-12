@@ -215,14 +215,9 @@
         "DELETE_VARIANT": "Vorlage löschen"
       }
     },
-    "CONFIG_PAGE_TEMPLATE": {
-      "HEADING": "Bearbeitung der Seiten-Vorlage(n)",
-      "SAME_REF_ERROR": "Sie nutzen derzeit die gleiche Vorlage für Portale und Themenseiten. Dies sollte vermieden werden.",
-      "UNLINK": "Loslösen",
-      "ADD_EMPTY_TEMPLATE": "Leere Vorlage erstellen",
-      "EMPTY_TEMPLATE_HINT": "Bisher ist noch keine Vorlage vorhanden. Verwenden Sie den Button, um eine leere Vorlage anzulegen und dahin zu wechseln.",
-      "SWITCH_TO_PAGE_VARIANT": "Zur Seiten-Vorlage wechseln",
-      "SWITCH_TO_PAGE_VARIANT_HINT": "Klicken Sie den Button, um zur Vorlage zu wechseln und diese zu bearbeiten."
+    "ADD_PAGE_TEMPLATE": {
+      "LABEL": "Themenseiten-Vorlage erstellen",
+      "MESSAGE": "Bisher ist noch keine Vorlage vorhanden. Möchtest du eine leere Vorlage anlegen und dahin wechseln?"
     },
     "CONFIG_WIDGET_EMBEDDING": {
       "HEADING": "Widget einbetten",
@@ -354,6 +349,7 @@
     "SAVE_CONFIG_MESSAGE": "Deine Änderungen werden gespeichert.",
     "SAVE_CONFIG_ERROR_ACTION": "Seite neuladen",
     "SAVE_CONFIG_ERROR_MESSAGE": "Beim Laden einer Ressource ist ein Fehler aufgetreten. Bitte laden Sie die Seite neu.",
+    "DEFAULT_TEMPLATE_NAME": "Seiten-Vorlage",
     "CREATE_PAGE_VARIANT": {
       "HEADING": "Neue Themenseiten-Variante erstellen",
       "EXISTING_VARIANT": {
