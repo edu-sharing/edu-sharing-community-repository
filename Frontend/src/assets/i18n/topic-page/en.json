@@ -3,8 +3,6 @@
     "NAVIGATION": {
       "NEW_PAGE_VARIANT": "New topic page variant",
       "NEW_PAGE_TEMPLATE": "New topic page template",
-      "APPS": "Apps",
-      "APPS_ELEMENT_NOT_FOUND": "The element with class topic-page-show-apps could not be found.",
       "TITLE": "Topic page",
       "SEARCH_PLACEHOLDER": "Search for content on the topic page..."
     },
@@ -42,12 +40,6 @@
       },
       "BREADCRUMB": {
         "DEFAULT_ROOT_NAME": "Subject portals",
-        "EDITORIAL_TEAM": "Editorial team",
-        "ADD_MEMBER": "Add member",
-        "REMOVE_MEMBER": "Remove member",
-        "FURTHER_EDITORIAL_MEMBERS": "further editorial members",
-        "AND": "and",
-        "NO_MEMBERS_SELECTED": "No editorial members have been selected yet.",
         "PAGE_VARIANT_LABEL": "Page variant",
         "NAVIGATE_TO_PAGE_TEMPLATE": "Navigate to page template"
       },
@@ -65,13 +57,6 @@
         "POPUP_BLOCKED": "Popup was blocked or could not be opened.",
         "FILTER_EVENT_RECEIVED": "Filter event received",
         "NO_CONTENTS": "No contents yet",
-        "TITLE_LABEL": "Title",
-        "LRT_LABEL": "Material type",
-        "TAXONID_LABEL": "Subject area",
-        "EDUCATIONAL_CONTEXT_LABEL": "Educational level",
-        "SOURCE_LABEL": "Source",
-        "AUTHOR_LABEL": "Author",
-        "WEBSITE_LABEL": "Website",
         "CHANGE_ON_INSPECTION_TABLE": "Change object on inspection table",
         "REMOVE_FROM_WIDGET": "Hide object",
         "ADD_TO_WIDGET": "Show object"
@@ -128,32 +113,6 @@
         "NO_IMAGE_SELECTED": "No image has been selected yet.",
         "IMAGE_UPLOAD_CONFIRMATION_TEXT": "I agree that I hold all necessary rights to this image to include it on the topic page."
       },
-      "MAP_VIEW": {
-        "HEADING": "Filter",
-        "RESET_ALL": "reset all",
-        "GERMANY": "Germany",
-        "YOUR_REGION": "Your region (nearby)",
-        "RESULTS_SINGLE": "1 result",
-        "RESULTS_MULTIPLE": "{{count}} results",
-        "SEARCH_LOCATION": "Search within the map",
-        "AT_LEAST_TWO_CHARACTERS": "Please input at least 2 characters.",
-        "UNKNOWN_CITY": "Unbekannter Ort",
-        "ACTIVE_FILTERS": "Active filters",
-        "SHOW_RESULTS_SINGLE": "Show 1 result",
-        "SHOW_RESULTS_MULTIPLE": "Show {{count}} results",
-        "SHOW_FILTERS": "Show filters",
-        "HIDE_FILTERS": "Hide filters",
-        "SHARE_CONTENT": "Share content",
-        "ORGANIZATION": "Organization",
-        "PEOPLE": "People",
-        "GENERAL_LOCATION": "General location",
-        "OPEN_PAGE": "Open page",
-        "ADDRESS": "Address",
-        "TARGET_GROUP": "Target group",
-        "DISCIPLINE": "Subject",
-        "IS_LOADING": "The results are being updated ...",
-        "NO_INFORMATION_AVAILABLE": "No information available."
-      },
       "MEDIA_RENDERING": {
         "NO_ELEMENT_SELECTED": "No element has been selected for display yet.",
         "TO_ORIGINAL_PAGE": "To original page",
@@ -167,13 +126,6 @@
       "PROFILING": {
         "CHANGES_SAVED": "Profile saved – you'll now see relevant content!",
         "CHANGES_RESET": "Your profiling has been reset."
-      },
-      "PROPOSE_CONTENT": {
-        "TITLE": "Propose content",
-        "NO_CONTENT_QUESTION": "No content yet?",
-        "SHARING_MAKES_YOU_HAPPY": "Sharing makes you happy",
-        "CONTENT_QUESTION": "Do you know a great piece of content that should definitely appear here?",
-        "POINTING_OWL": "The WLO-owl pointing in your direction."
       },
       "SEARCH_WIDGET": {
         "SEARCH": "Search",
@@ -191,28 +143,6 @@
         }
       },
       "SIDE_MENU": "Side menu",
-      "STATISTICS": {
-        "ALL_LABEL": "All content on this topic page",
-        "EDITORIAL_LABEL": "Editorially reviewed content",
-        "OER_LABEL": "OER content",
-        "MORE_RESULTS": {
-          "PREFIX": "The search finds more:",
-          "SINGLE": "1 content",
-          "MULTIPLE": "{{count}} contents in total"
-        },
-        "WORK": "Jobs",
-        "EDUCATIONAL_OFFERS": "Educational offers",
-        "EVENTS": "Events",
-        "MATERIALS": "Materials",
-        "SOURCES": "Sources",
-        "ORGANIZATIONS": "Organizations",
-        "PEOPLE": "People",
-        "TOOLS": "Tools",
-        "PROMPTS": "Prompts",
-        "FIELDS_OF_ACTION": "Fields of action",
-        "DIDACTIC_CONCEPTS": "Didactic concepts",
-        "NO_STATISTICS_EXIST": "There are no statistics available for this topic page."
-      },
       "TOPIC_HEADER": {
         "TOPIC_PAGE_SUBJECT_PORTAL_LABEL": "Topic page subject portal\n",
         "COLLECTION_DESCRIPTION_LABEL": "Collection description",
@@ -264,10 +194,6 @@
       "TOPIC_TREE": {
         "LABEL": "Topic Tree",
         "HEADING": "Topic tree of {{topic}}"
-      },
-      "STATISTICS": {
-        "LABEL": "Statistic",
-        "HEADING": "Contents of {{topic}}"
       },
       "CONFIG_PAGE_VARIANT": {
         "LABEL": "Settings",
@@ -405,23 +331,6 @@
         "MESSAGE": "Do you really want to delete this section?"
       },
       "INVALID_OR_UNKNOWN_WIDGET": "The widget is not defined or unknown."
-    },
-    "PREVIEW_PANEL": {
-      "CLOSE": "Close preview panel",
-      "DURATION_LABEL": "Duration",
-      "LANGUAGES_LABEL": "Language(s)",
-      "ALL_DETAILS": "All details",
-      "EMBED_ELEMENT": "Embed element",
-      "LICENSE_LABEL": "License",
-      "CONDITIONS_OF_ACCESS": "Access requirements",
-      "PRICE": "Cost",
-      "FREE_OF_CHARGE": "Free of charge",
-      "PAID_CONTENT": "Paid content",
-      "CONTAINS_ADVERTISEMENT": "Contains advertisement?",
-      "NO_ADVERTISEMENT": "No advertisement",
-      "ADVERTISEMENT_CONTAINED": "Contains advertisement",
-      "REPORT_PROBLEM": "Report problem",
-      "RELATED_CONTENT": "Related content"
     },
     "NO_SWIMLANES": "No swimlanes with content have been created yet.",
     "NO_PAGE_CONFIG": {
