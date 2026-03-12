@@ -233,7 +233,6 @@ export const preparePageVariantConfig = (
     pageVariant: PageVariantConfig,
     propagated: boolean = false,
     deleteHeaderIds: boolean = true,
-    variablesToDelete: string[] = [],
 ): void => {
     pageVariant.structure.swimlanes?.forEach((swimlane: Swimlane): void => {
         swimlane.grid?.forEach((gridItem: GridTile): void => {
@@ -246,11 +245,6 @@ export const preparePageVariantConfig = (
             }
         });
     });
-    if (variablesToDelete?.length) {
-        variablesToDelete.forEach((variable: string) => {
-            delete pageVariant.variables[variable];
-        });
-    }
     if (!deleteHeaderIds) {
         return;
     }

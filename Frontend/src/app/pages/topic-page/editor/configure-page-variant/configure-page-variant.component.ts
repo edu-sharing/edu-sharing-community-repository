@@ -15,9 +15,7 @@ import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { MdsWidget, Node, RestConstants } from 'ngx-edu-sharing-api';
 import { SharedModule } from '../../../../shared/shared.module';
 import { VarDirective } from '../../shared/directives/ng-var.directive';
-import { DEFAULT_PAGE_VARIANT_CONFIG_PROP } from '../../shared/types/custom-definitions';
-import { PageVariantConfig } from '../../shared/types/page-variant-config';
-import { retrieveNodeId, retrievePageVariantConfig } from '../../shared/utils/template-util';
+import { retrieveNodeId } from '../../shared/utils/template-util';
 
 @Component({
     selector: 'es-configure-page-variant-dialog',
@@ -39,8 +37,8 @@ export class ConfigurePageVariantComponent implements OnInit {
     @Input() viewLabels: string[] = [];
     @Input() viewModes: string[] = ['checkbox'];
 
-    @Output() applyChangesClicked: EventEmitter<Map<string, string>> = new EventEmitter<
-        Map<string, string>
+    @Output() applyChangesClicked: EventEmitter<Map<string, string | string[]>> = new EventEmitter<
+        Map<string, string | string[]>
     >();
     @Output() deletePageVariantClicked: EventEmitter<void> = new EventEmitter<void>();
     @Output() settingsValidityChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
@@ -57,14 +55,9 @@ export class ConfigurePageVariantComponent implements OnInit {
     isDuplicate: WritableSignal<boolean> = signal(false);
 
     /**
-     * Initializes the component by retrieving the page variant config and initializing the form controls.
+     * Initializes the component by setting up the form controls.
      */
     ngOnInit(): void {
-        const pageVariantConfig: PageVariantConfig = retrievePageVariantConfig(
-            this.pageVariantNode,
-        );
-        const parameters = pageVariantConfig?.variables ?? {};
-
         const formControls: { [key: string]: FormControl | FormArray } = {
             title: new FormControl(this.pageVariantTitle),
         };
@@ -74,11 +67,8 @@ export class ConfigurePageVariantComponent implements OnInit {
             // TODO: replace by mds usage
             this.selectDimensions().forEach((widget: MdsWidget, key: string) => {
                 if (widget.values && widget.values.length > 0) {
-                    let matchingParameter = parameters[key];
-                    // fix old format not being recognized as array
-                    if (!Array.isArray(matchingParameter)) {
-                        matchingParameter = [matchingParameter];
-                    }
+                    const matchingParameter: string[] =
+                        this.pageVariantNode.properties?.[key] || [];
                     const isCheckbox: boolean = this.viewModes[index] === 'checkbox';
                     if (isCheckbox) {
                         // handle checkboxes - create FormArray
@@ -127,21 +117,13 @@ export class ConfigurePageVariantComponent implements OnInit {
      * Processes the form changes and emits the apply changes event.
      */
     applyChanges(): void {
-        const pageVariantConfig: PageVariantConfig = retrievePageVariantConfig(
-            this.pageVariantNode,
-        );
-        const parameters = pageVariantConfig?.variables ?? {};
         const value = this.form.value;
         if (!value) {
             return;
         }
-        const outputMap = new Map<string, string>();
-        let parametersChanged: boolean = false;
+        const outputMap = new Map<string, string | string[]>();
 
         // process form values
-        if (!pageVariantConfig.variables) {
-            pageVariantConfig.variables = {};
-        }
         this.selectDimensions().forEach((widget: MdsWidget, key: string) => {
             if (value[key] !== undefined) {
                 let processedValue: string[];
@@ -149,26 +131,23 @@ export class ConfigurePageVariantComponent implements OnInit {
                 if (Array.isArray(value[key])) {
                     // handle checkbox arrays - extract selected IDs
                     const checkboxValues = value[key] as Array<{ id: string; checked: boolean }>;
-                    const selectedValues = checkboxValues
+                    processedValue = checkboxValues
                         .filter((item) => item.checked)
                         .map((item) => item.id);
-                    processedValue = selectedValues;
                 } else {
                     // handle single values (radio buttons)
                     processedValue = [value[key] || ''];
                 }
 
-                // check if the value has been changed
-                if (JSON.stringify(processedValue) !== JSON.stringify(parameters[key] || [])) {
-                    pageVariantConfig.variables[key] = processedValue;
-                    parametersChanged = true;
+                // check if the value has been changed and if so, add them to the output map
+                if (
+                    JSON.stringify(processedValue) !==
+                    JSON.stringify(this.pageVariantNode.properties?.[key] || [])
+                ) {
+                    outputMap.set(key, processedValue);
                 }
             }
         });
-
-        if (parametersChanged) {
-            outputMap.set(DEFAULT_PAGE_VARIANT_CONFIG_PROP, JSON.stringify(pageVariantConfig));
-        }
         const titleChanged: boolean = value.title && value.title !== this.pageVariantNode.title;
         if (titleChanged) {
             outputMap.set(RestConstants.LOM_PROP_TITLE, value.title);
@@ -200,10 +179,8 @@ export class ConfigurePageVariantComponent implements OnInit {
             this.settingsValidityChanged.emit(validInput);
         } else {
             // duplicate check
-            this.furtherExistingPageVariants()?.forEach((pageVariant: Node) => {
+            this.furtherExistingPageVariants()?.forEach((pageVariantNode: Node) => {
                 let isDuplicate: boolean = true;
-                const pageVariantConfig: PageVariantConfig = retrievePageVariantConfig(pageVariant);
-                const variables = pageVariantConfig?.variables || {};
                 this.selectDimensions().forEach((widget: MdsWidget, key: string) => {
                     const value: Array<{ id: string; checked: boolean }> | string =
                         currentValue[key];
@@ -212,8 +189,10 @@ export class ConfigurePageVariantComponent implements OnInit {
                             .filter((item) => item.checked)
                             .map((item) => item.id);
                         if (
-                            processedValue.length !== variables[key]?.length ||
-                            !processedValue.every((v) => variables[key]?.includes(v))
+                            processedValue.length !== pageVariantNode.properties?.[key]?.length ||
+                            !processedValue.every((v) =>
+                                pageVariantNode.properties?.[key]?.includes(v),
+                            )
                         ) {
                             isDuplicate = false;
                         }
