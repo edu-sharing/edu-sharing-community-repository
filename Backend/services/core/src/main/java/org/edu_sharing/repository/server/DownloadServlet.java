@@ -326,7 +326,7 @@ public class DownloadServlet extends HttpServlet {
 
 		NodeService nodeService = NodeServiceFactory.getLocalService();
 
-		setHeaders(resp, zipName);
+		setHeaders(resp, zipName,"application/zip");
 		ZipOutputStream zos = new ZipOutputStream(resp.getOutputStream());
 		zos.setMethod( ZipOutputStream.DEFLATED );
 
@@ -381,9 +381,6 @@ public class DownloadServlet extends HttpServlet {
 			}
 			else{
 				result=runAll.doWork();
-			}
-			if(result) {
-				outputData(resp, zipName, file, "application/zip");
 			}
 		}
 		catch(Throwable t){
