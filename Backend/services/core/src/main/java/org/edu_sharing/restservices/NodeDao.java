@@ -574,6 +574,9 @@ public class NodeDao {
 
     private Map<String, Boolean> hasPermissions;
 
+    /**
+     * type as a (long) name, i.e. CCConstants.CCM_TYPE_IO
+     */
     private final String type;
     private final List<String> aspects;
 
@@ -803,7 +806,9 @@ public class NodeDao {
             }
 
             if (nodeProps.containsKey(CCConstants.NODETYPE)) {
-                this.type = (String) nodeProps.get(CCConstants.NODETYPE);
+                this.type = Optional.ofNullable((String)nodeProps.get(CCConstants.NODETYPE))
+                        .map(CCConstants::getValidGlobalName)
+                        .orElse((String) nodeProps.get(CCConstants.NODETYPE));
             } else {
                 this.type = CCConstants.CCM_TYPE_IO;
             }
