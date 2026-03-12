@@ -13,10 +13,7 @@ import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionStatus;
-import org.alfresco.service.cmr.repository.ContentReader;
-import org.alfresco.service.cmr.repository.InvalidNodeRefException;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
@@ -62,11 +59,14 @@ public class PreviewServlet extends SpringHttpServlet {
 
 	ServiceRegistry serviceRegistry;
 
+    org.alfresco.service.cmr.repository.NodeService dbNodeService;
+
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 		ApplicationContext appContext = AlfAppContextGate.getApplicationContext();
 		serviceRegistry = (ServiceRegistry) appContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+        dbNodeService = (org.alfresco.service.cmr.repository.NodeService)AlfAppContextGate.getApplicationContext().getBean("alfrescoDefaultDbNodeService");
 	}
 
 	private boolean isCacheable(int width,int height, int maxWidth, int maxHeight){
@@ -130,10 +130,9 @@ public class PreviewServlet extends SpringHttpServlet {
 
 			// check nodetype for security reasons
 			String inNodeId=nodeId;
-			Map<String,Object> props;
+            Map<String,Object> props = new HashMap<>();
 			if (nodeId != null) {
 				try {
-					props = nodeService.getProperties(storeRef.getProtocol(),storeRef.getIdentifier(),nodeId);
 					String[] aspectsArray = nodeService.getAspects(storeRef.getProtocol(), storeRef.getIdentifier(), nodeId);
 					List<String> aspects;
 					if(aspectsArray == null){
@@ -141,7 +140,13 @@ public class PreviewServlet extends SpringHttpServlet {
 					} else {
 						aspects = Arrays.asList(aspectsArray);
 					}
+
+                    if(!remoteNode){
+                        props.putAll(getBasicProperties(nodeRef));
+                    }
+
 					if (remoteNode || nodeType.equals(CCConstants.CCM_TYPE_REMOTEOBJECT) || aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)) {
+                        props = nodeService.getProperties(storeRef.getProtocol(),storeRef.getIdentifier(),nodeId);
 						if(aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)){
 							// just fetch dynamic data which needs to be fetched, because the local io already has metadata
 							props.putAll(NodeServiceFactory.getInstance().getService(
@@ -200,7 +205,8 @@ public class PreviewServlet extends SpringHttpServlet {
 			}
 
 			if(CCConstants.CCM_TYPE_MAP.equals(nodeType)){
-				if(deliverContentAsSystem(nodeRef, CCConstants.CCM_PROP_MAP_ICON, req, resp))
+                PreviewDetail preview = getPreview(nodeService, storeProtocol, storeId, nodeId);
+                if(deliverContentAsSystem(nodeRef, CCConstants.CCM_PROP_MAP_ICON, req, resp, preview))
 					return;
 			}
 
@@ -262,7 +268,7 @@ public class PreviewServlet extends SpringHttpServlet {
 			/**
 			 * generated or userdefined
 			 */
-			if (getPrevResult != null && (getPrevResult.getType().equals(PreviewDetail.TYPE_USERDEFINED) || getPrevResult.getType().equals(PreviewDetail.TYPE_GENERATED))) {
+			if (getPrevResult != null && getPrevResult.getType() != null && (getPrevResult.getType().equals(PreviewDetail.TYPE_USERDEFINED) || getPrevResult.getType().equals(PreviewDetail.TYPE_GENERATED))) {
 				NodeRef prevNodeRef = null;
 				String property = CCConstants.CM_PROP_CONTENT;
 				if (getPrevResult.getType().equals(PreviewDetail.TYPE_USERDEFINED)) {
@@ -288,13 +294,13 @@ public class PreviewServlet extends SpringHttpServlet {
 					if(isCollection) {
 						NodeRef fprevNodeRef = prevNodeRef;
 						String fproperty = property;
-						boolean result = deliverContentAsSystem(fprevNodeRef, fproperty, req, resp);
+						boolean result = deliverContentAsSystem(fprevNodeRef, fproperty, req, resp,getPrevResult);
 						if(result) {
 							return;
 						}
 						op.close();
 					}else {
-						if(deliverContentAsSystem(prevNodeRef, property, req, resp)) {
+						if(deliverContentAsSystem(prevNodeRef, property, req, resp,getPrevResult)) {
 
 							return;
 						}
@@ -338,24 +344,57 @@ public class PreviewServlet extends SpringHttpServlet {
 				final String nodeIdFinal=nodeId;
 				props=AuthenticationUtil.runAsSystem(() -> {
                     try{
-                        return NodeServiceFactory.getInstance().getLocalService().getProperties(storeRef.getProtocol(), storeRef.getIdentifier(),nodeIdFinal);
+                        return getPropertiesForDefaultHandling(storeRef, nodeIdFinal);
                     }catch(Throwable t){
                         throw new Exception(t);
                     }
                 });
 			}
 			else{
-				props=nodeService.getProperties(storeRef.getProtocol(), storeRef.getIdentifier(),nodeId);
+				props = getPropertiesForDefaultHandling(storeRef,nodeId);
 				aspects=nodeService.getAspects(storeRef.getProtocol(), storeRef.getIdentifier(),nodeId);
 				type = nodeService.getType(nodeId);
 			}
+            setResponseHeader(PreviewDetail.TYPE_DEFAULT,true,resp);
 			resp.sendRedirect(mime.getPreview(type,props,Arrays.asList(aspects)));
 			return;
 		}
 		catch(Throwable t){
+            setResponseHeader(PreviewDetail.TYPE_DEFAULT,true,resp);
 			resp.sendRedirect(mime.getDefaultPreview());
 		}
 	}
+
+    private Map<String, Object> getBasicProperties(NodeRef nodeRef)  {
+        Map<String, Object>  props = new HashMap<>();
+        String original = (String)dbNodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL));
+        if(original != null) props.put(CCConstants.CCM_PROP_IO_ORIGINAL,original);
+
+        String scope = (String)dbNodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME));
+        if(scope != null) props.put(CCConstants.CCM_PROP_EDUSCOPE_NAME,scope);
+
+        MLText lifecycleVersion = (MLText)dbNodeService.getProperty(nodeRef,QName.createQName(CCConstants.LOM_PROP_LIFECYCLE_VERSION));
+        if(lifecycleVersion != null) props.put(CCConstants.LOM_PROP_LIFECYCLE_VERSION,lifecycleVersion.getDefaultValue());
+        return props;
+    }
+
+    Map<String,Object> getPropertiesForDefaultHandling(StoreRef storeRef, String nodeId){
+        Map<String,Object> props = new HashMap<>();
+        NodeRef nodeRef = new NodeRef(storeRef, nodeId);
+        String wwwUrl = (String)dbNodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_WWWURL));
+        if(wwwUrl != null) props.put(CCConstants.CCM_PROP_IO_WWWURL,wwwUrl);
+
+        String resourceType = (String)dbNodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_CCRESSOURCETYPE));
+        if(resourceType != null) props.put(CCConstants.CCM_PROP_CCRESSOURCETYPE,resourceType);
+
+        List<String> resourceTypeSub = (List<String>)dbNodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_CCRESSOURCESUBTYPE));
+        if(resourceTypeSub != null && !resourceTypeSub.isEmpty()) props.put(CCConstants.CCM_PROP_CCRESSOURCESUBTYPE,resourceTypeSub.get(0));
+
+        String lomFormat = (String)dbNodeService.getProperty(nodeRef,QName.createQName(CCConstants.LOM_PROP_TECHNICAL_FORMAT));
+        if(lomFormat != null) props.put(CCConstants.LOM_PROP_TECHNICAL_FORMAT,lomFormat);
+
+        return props;
+    }
 
 	private void validatePermissions(StoreRef storeRef, String nodeId) {
 		boolean result = PermissionServiceFactory.getInstance().getLocalService().hasPermission(storeRef.getProtocol(),storeRef.getIdentifier(),nodeId,CCConstants.PERMISSION_READ_PREVIEW);
@@ -391,7 +430,7 @@ public class PreviewServlet extends SpringHttpServlet {
 	private boolean loadPreview(HttpServletRequest req, HttpServletResponse resp, ServletOutputStream op,StoreRef storeRef, String nodeId,
 								NodeService nodeService, PreviewDetail getPrevResult) throws IOException {
 
-		if(getPrevResult == null){
+		if(getPrevResult == null || getPrevResult.getType() == null){
 			return false;
 		}
 
@@ -420,7 +459,7 @@ public class PreviewServlet extends SpringHttpServlet {
 						CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
 			}
 			if (prevNodeRef != null) {
-				if(deliverContentAsSystem(prevNodeRef, property, req, resp))
+				if(deliverContentAsSystem(prevNodeRef, property, req, resp,getPrevResult))
 					return true;
 				op.close();
 			}
@@ -429,12 +468,17 @@ public class PreviewServlet extends SpringHttpServlet {
 			NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId);
 			String mimetype=NodeServiceFactory.getInstance().getLocalService().getContentMimetype(storeRef.getProtocol(), storeRef.getIdentifier(),nodeId);
 			if(mimetype!=null && mimetype.startsWith("image")) {
-				if(deliverContentAsSystem(nodeRef,  CCConstants.CM_PROP_CONTENT, req, resp))
+				if(deliverContentAsSystem(nodeRef,  CCConstants.CM_PROP_CONTENT, req, resp,getPrevResult))
 					return true;
 			}
 		}
 		return false;
 	}
+
+    void setResponseHeader(String previewType, boolean isIcon, HttpServletResponse response){
+        if(previewType != null) response.setHeader("X-Edu-PreviewType", previewType);
+        response.setHeader("X-Edu-IsIcon", String.valueOf(isIcon));
+    }
 
 	private boolean handleExternalThumbnail(String nodeId, HttpServletRequest req, HttpServletResponse resp, String url) throws IOException {
 		if ("false".equalsIgnoreCase(req.getParameter("allowRedirect")) &&
@@ -632,8 +676,9 @@ public class PreviewServlet extends SpringHttpServlet {
 		}
 
 	}
-	private boolean deliverContentAsSystem(NodeRef nodeRef, String contentProp,HttpServletRequest req, HttpServletResponse resp) throws IOException{
-		return AuthenticationUtil.runAsSystem(new RunAsWork<Boolean>() {
+	private boolean deliverContentAsSystem(NodeRef nodeRef, String contentProp,HttpServletRequest req, HttpServletResponse resp, PreviewDetail previewDetail) throws IOException{
+
+        return AuthenticationUtil.runAsSystem(new RunAsWork<Boolean>() {
 
 			@Override
 			public Boolean doWork() throws Exception {
@@ -679,6 +724,9 @@ public class PreviewServlet extends SpringHttpServlet {
 						throw e;
 					}
 				}
+                if(previewDetail != null){
+                    setResponseHeader(previewDetail.getType(),previewDetail.isIcon,resp);
+                }
 				deliverImage(mimetype, in, resp);
 				return true;
 			}
@@ -718,14 +766,28 @@ public class PreviewServlet extends SpringHttpServlet {
 	public static PreviewDetail getPreview(NodeService nodeService,String storeProtocol, String storeIdentifier, String nodeId,Map<String, Object> nodeProps){
 		StoreRef storeRef = new StoreRef(storeProtocol,storeIdentifier);
 		NodeRef nodeRef = new NodeRef(storeRef,nodeId);
-		if(!nodeService.getType(nodeId).equals(CCConstants.CCM_TYPE_IO)){
+
+        String nodeType = nodeService.getType(nodeId);
+
+        if(nodeType.equals(CCConstants.CCM_TYPE_MAP)){
+
+            boolean isIcon = true;
+            if(nodeProps != null){
+                if(nodeProps.get(CCConstants.CCM_PROP_MAP_ICON) != null) isIcon = false;
+            }else{
+                if(nodeService.getProperty(storeProtocol,storeIdentifier,nodeId,CCConstants.CCM_PROP_MAP_ICON) != null) isIcon = false;
+            }
+            return new PreviewDetail(null,null,false,isIcon);
+        }
+
+		if(!nodeType.equals(CCConstants.CCM_TYPE_IO)){
 			return null;
 		}
 
 		String extThumbnail =(nodeProps == null) ? nodeService.getProperty(storeProtocol,storeIdentifier,nodeId,CCConstants.CCM_PROP_IO_THUMBNAILURL)
 				: (String) nodeProps.get(CCConstants.CCM_PROP_IO_THUMBNAILURL);
 		if (extThumbnail != null && !extThumbnail.trim().equals("")) {
-			return new PreviewDetail(extThumbnail, PreviewDetail.TYPE_EXTERNAL, false);
+			return new PreviewDetail(extThumbnail, PreviewDetail.TYPE_EXTERNAL, false, false);
 		}
 
 		String defaultImageUrl = URLTool.getBaseUrl() + "/"
@@ -737,7 +799,7 @@ public class PreviewServlet extends SpringHttpServlet {
 			 */
 			if (crUserDefinedPreview != null && crUserDefinedPreview.available() > 0) {
 				String url = nodeService.getPreview(storeProtocol,storeIdentifier,nodeId, null, null).getUrl();
-				return new PreviewDetail(url, PreviewDetail.TYPE_USERDEFINED, false);
+				return new PreviewDetail(url, PreviewDetail.TYPE_USERDEFINED, false, false);
 			}
 
 		}catch(Throwable t){
@@ -750,7 +812,7 @@ public class PreviewServlet extends SpringHttpServlet {
 		 */
 		Action action = ActionObserver.getInstance().getAction(nodeRef, CCConstants.ACTION_NAME_CREATE_THUMBNAIL);
 		if (action != null && action.getExecutionStatus().equals(ActionStatus.Running)) {
-			return new PreviewDetail(defaultImageUrl, PreviewDetail.TYPE_DEFAULT, true);
+			return new PreviewDetail(defaultImageUrl, PreviewDetail.TYPE_DEFAULT, true,false);
 		}
 
 		/**
@@ -766,10 +828,10 @@ public class PreviewServlet extends SpringHttpServlet {
 		}
 		if (previewProps != null && generatedIs != null) {
 			String url = NodeServiceHelper.getPreview(new NodeRef(storeRef, nodeId)).getUrl();
-			return new PreviewDetail(url, PreviewDetail.TYPE_GENERATED, false);
+			return new PreviewDetail(url, PreviewDetail.TYPE_GENERATED, false,false);
 		}
 
-		return new PreviewDetail(defaultImageUrl, PreviewDetail.TYPE_DEFAULT, false);
+		return new PreviewDetail(defaultImageUrl, PreviewDetail.TYPE_DEFAULT, false,true);
 	}
 	public static class PreviewDetail{
 		private String url;
@@ -778,14 +840,17 @@ public class PreviewServlet extends SpringHttpServlet {
 
 		private boolean createActionIsRunning = true;
 
+        private boolean isIcon;
+
 		public static final String TYPE_EXTERNAL = "TYPE_EXTERNAL";
 		public static final String TYPE_USERDEFINED = "TYPE_USERDEFINED";
 		public static final String TYPE_GENERATED = "TYPE_GENERATED";
 		public static final String TYPE_DEFAULT = "TYPE_DEFAULT";
-		public PreviewDetail(String url, String type, boolean createActionIsRunning) {
+		public PreviewDetail(String url, String type, boolean createActionIsRunning, boolean isIcon) {
 			this.url = url;
 			this.type = type;
 			this.createActionIsRunning = createActionIsRunning;
+            this.isIcon = isIcon;
 		}
 
 		public String getUrl() {
@@ -799,5 +864,9 @@ public class PreviewServlet extends SpringHttpServlet {
 		public boolean isCreateActionIsRunning() {
 			return createActionIsRunning;
 		}
-	}
+
+        public boolean isIcon() {
+            return isIcon;
+        }
+    }
 }

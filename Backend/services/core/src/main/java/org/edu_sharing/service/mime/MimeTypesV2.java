@@ -11,7 +11,6 @@ import org.edu_sharing.repository.client.tools.Theme;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.tools.URLHelper;
-import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.spring.ApplicationContextFactory;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -131,13 +130,20 @@ public class MimeTypesV2 {
 		}
 
 	}
+    private static final List<String> directoryTypes = List.of(
+            CCConstants.CCM_TYPE_MAP,
+            CCConstants.CM_TYPE_FOLDER,
+            CCConstants.CCM_TYPE_ASSIGNMENT,
+            CCConstants.CCM_TYPE_SUBMISSIONS,
+            CCConstants.SYS_STORE_ROOT
+    );
+
 	public static boolean isDirectory(Map<String,Object> properties, String nodeType){
-		if(Arrays.asList(
-				CCConstants.CCM_TYPE_MAP,
-				CCConstants.CM_TYPE_FOLDER,
-				CCConstants.CCM_TYPE_ASSIGNMENT,
-				CCConstants.CCM_TYPE_SUBMISSIONS,
-				CCConstants.SYS_STORE_ROOT).contains(CCConstants.getValidGlobalName(nodeType))) {
+        String nodeTypeLong = Optional.ofNullable(nodeType)
+                .map(CCConstants::getValidGlobalName)
+                .orElse(nodeType);
+
+        if(directoryTypes.contains(nodeTypeLong)) {
 			return true;
 		}
 
