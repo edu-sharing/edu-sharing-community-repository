@@ -1,6 +1,5 @@
 package org.edu_sharing.restservices.mds.v1;
 
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -8,6 +7,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.restservices.ApiService;
@@ -22,10 +25,6 @@ import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Mds;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -145,7 +144,7 @@ public class MdsApi {
 			MdsDao mds = MdsDao.getMds(repoDao, mdsId);
 			Suggestions response = mds.getSuggestions(suggestionParam.getValueParameters().getQuery(),
 					suggestionParam.getValueParameters().getProperty(),
-					suggestionParam.getValueParameters().getPattern(),
+					suggestionParam.getValueParameters().getPattern() != null ? suggestionParam.getValueParameters().getPattern() : "",
 					suggestionParam.getCriteria());
 
 			return Response.status(Response.Status.OK).entity(response).build();
