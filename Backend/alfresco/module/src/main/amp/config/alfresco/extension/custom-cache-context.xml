@@ -80,4 +80,8 @@
     <bean name="eduSharingLockCache" factory-bean="cacheFactory" factory-method="createCache">
         <constructor-arg value="cache.eduSharingLockCache"/>
     </bean>
+
+    <bean name="eduSharingPreviewQueue" factory-bean="queueFactory" factory-method="createQueue">
+        <constructor-arg value="cache.eduSharingPreviewQueue"/>
+    </bean>
 </beans>

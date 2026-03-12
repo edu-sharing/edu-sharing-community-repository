@@ -980,7 +980,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         Boolean.parseBoolean(restrictedAccess)
                 ).stream().filter(permissions::contains).collect(Collectors.toList());
             } else {
-                logger.warn("Permission query matched more than one node " + nodeId + " " + StringUtils.join(permissions));
+                if (searchResult.hits().total().value() > 1) {
+                    logger.warn("Permission query matched more than one node " + nodeId + " " + StringUtils.join(permissions));
+                }
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

@@ -11,7 +11,7 @@ public class MappingGroupBuilderFactory {
 	
 	static Logger logger = Logger.getLogger(MappingGroupBuilderFactory.class);
 
-	public static MappingGroupBuilder instance(Map<String,String> ssoAttributes, String mappingGroupBuilderClass) {
+	public static MappingGroupBuilder instance(Map<String,String> ssoAttributes, String username, String mappingGroupBuilderClass) {
 		if(mappingGroupBuilderClass == null || mappingGroupBuilderClass.trim().equals("")) {
 			return null;
 		}
@@ -19,7 +19,7 @@ public class MappingGroupBuilderFactory {
 		try {
 			Class clazz = Class.forName(mappingGroupBuilderClass);
 			MappingGroupBuilder mgb = (MappingGroupBuilder)clazz.getConstructor(new Class[] { }).newInstance(new Object[] {  });
-			mgb.init(ssoAttributes);
+			mgb.init(ssoAttributes, username);
 			return mgb;
 		}catch(ClassNotFoundException e) {
 			logger.error(e.getMessage(), e);

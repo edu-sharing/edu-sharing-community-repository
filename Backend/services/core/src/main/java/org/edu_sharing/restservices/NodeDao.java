@@ -2415,9 +2415,11 @@ public class NodeDao {
 
     private Preview getPreview() {
         if (previewData != null) {
+
             return new Preview(getStoreProtocol(),
                     getStoreIdentifier(),
                     remoteId != null ? remoteId : getRef().getId(),
+                    this.type,
                     previewData
             );
         }

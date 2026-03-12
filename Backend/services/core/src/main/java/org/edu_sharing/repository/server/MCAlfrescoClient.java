@@ -421,18 +421,6 @@ public interface MCAlfrescoClient {
 	public String getProperty(String storeProtocol, String storeIdentifier, String nodeId, String property);
 	
 	public GetPreviewResult getPreviewUrl(String storeProtocol, String storeIdentifier, String nodeId);
-	
-	/**
-	 * execute a action
-	 * 
-	 * @param nodeId the nodeId on which the action works
-	 * @param actionName the action name
-	 * @param actionId the action id
-	 * @param parameters the parameters a action expects
-	 * @param async
-	 * @throws Exception
-	 */
-	public abstract void executeAction(String nodeId, String actionName, String actionId, Map<String, Object>  parameters, boolean async) throws Exception;
 
 	public String copyNode(String nodeId, String toNodeId, boolean copyChildren) throws Exception;
 
