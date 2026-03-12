@@ -12,7 +12,7 @@
     i18nPrefix + (editMode() ? 'TEMPLATE_MODE_ACTIVE.EDIT' : 'TEMPLATE_MODE_ACTIVE.VIEW')
       | translate
   }}
-  <button mat-flat-button color="primary" (click)="toggleTemplateMode()">
+  <button mat-flat-button color="primary" (click)="leaveTemplateMode()">
     {{ i18nPrefix + 'TEMPLATE_MODE_ACTIVE.END' | translate }}
   </button>
 </es-info-message>
@@ -623,16 +623,6 @@
     [(selectedNode)]="pageVariantCreateDialogSelectedNode"
     (copyOptionChanged)="pageVariantCreateDialogCopyOption = $event"
   ></es-add-page-variant-dialog>
-</ng-template>
-
-<ng-template #configurePageTemplate>
-  <es-configure-page-template-dialog
-    [dialogRef]="pageTemplateEditDialogRef"
-    [collectionId]="collectionNode.ref.id"
-    [pageConfigRef]="collectionNodePageConfigRef"
-    [pageConfigPropagateRef]="collectionNodePagePropagateConfigRef"
-    (switchIntoTemplateMode)="switchIntoTemplateMode($event)"
-  ></es-configure-page-template-dialog>
 </ng-template>
 
 <ng-template #showQrCodeDialog>
