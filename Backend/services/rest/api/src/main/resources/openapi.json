@@ -28969,6 +28969,15 @@
         "operationId": "getValues",
         "parameters": [
           {
+            "description": "Requested locale, e.g. de_DE",
+            "in": "header",
+            "name": "locale",
+            "schema": {
+              "example": "de_DE",
+              "type": "string"
+            }
+          },
+          {
             "description": "ID of repository (or \"-home-\" for home repository)",
             "in": "path",
             "name": "repository",
@@ -36103,7 +36112,7 @@
         ],
         "requestBody": {
           "content": {
-            "multipart/form-data": {
+            "application/json": {
               "schema": {
                 "type": "string"
               }
