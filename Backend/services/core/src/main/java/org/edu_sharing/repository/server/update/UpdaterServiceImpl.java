@@ -11,6 +11,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.RepositoryEnvironment;
 import org.edu_sharing.repository.server.tools.security.RunAsSystem;
 import org.edu_sharing.repository.update.Protocol;
 import org.edu_sharing.repository.update.SQLUpdater;
@@ -60,6 +61,7 @@ public class UpdaterServiceImpl implements ApplicationContextAware, ApplicationL
     private final Optional<List<UpdateFactory>> updateFactories;
     private final SQLUpdater sqlUpdater;
     private final ObjectProvider<Protocol> protocolProvider;
+    private final RepositoryEnvironment repositoryEnvironment;
 
     @PostConstruct
     public void runPreUpdates() {
@@ -163,7 +165,9 @@ public class UpdaterServiceImpl implements ApplicationContextAware, ApplicationL
                 .map(x -> (RoutineUpdateInfo) x)
                 .forEach(this::validateUpdateMethodSignature);
 
-        runAutoUpdates();
+        if (repositoryEnvironment.isPrimaryRepository()) {
+            runAutoUpdates();
+        }
     }
 
     private void validateUpdateMethodSignature(RoutineUpdateInfo routineUpdateInfo) {
@@ -282,9 +286,9 @@ public class UpdaterServiceImpl implements ApplicationContextAware, ApplicationL
                 } catch (Throwable throwable) {
                     log.error("Error writing protocol entry", throwable);
                 }
-            }catch (RollbackException ignore){
+            } catch (RollbackException ignore) {
                 log.info("No changes in transaction to commit for {}", x.getId());
-            } catch(Exception ex) {
+            } catch (Exception ex) {
                 try {
                     if (!x.isNonTransactional()) {
                         transaction.rollback();

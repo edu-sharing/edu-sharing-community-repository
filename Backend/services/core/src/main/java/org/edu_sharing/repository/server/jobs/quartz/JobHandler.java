@@ -10,6 +10,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.repository.server.tools.RepositoryEnvironment;
 import org.edu_sharing.spring.scope.refresh.RefreshScopeRefreshedEvent;
 import org.jetbrains.annotations.NotNull;
 import org.quartz.*;
@@ -51,12 +52,14 @@ public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEven
      * holds the random uuid of this unique job instance
      */
     static final String JOB_DATA_MAP_JOB_UUID = "JOB_DATA_MAP_JOB_UUID";
+    private final RepositoryEnvironment repositoryEnvironment;
 
     //private final ApplicationContext eduApplicationContext = null;
 
     @Autowired
-    public JobHandler(SchedulerFactoryBean schedulerFactoryBean) throws Exception {
+    public JobHandler(SchedulerFactoryBean schedulerFactoryBean, RepositoryEnvironment repositoryEnvironment) throws Exception {
         this.schedulerFactoryBean = schedulerFactoryBean;
+        this.repositoryEnvironment = repositoryEnvironment;
         init();
     }
 
@@ -124,7 +127,7 @@ public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEven
     }
 
     private void checkPrimaryRepository() {
-        if (!isPrimaryRepository()) {
+        if (!repositoryEnvironment.isPrimaryRepository()) {
             throw new RuntimeException("Jobs can only be controlled on the primary repository");
         }
     }
@@ -434,7 +437,7 @@ public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEven
 
     public synchronized void refresh(boolean triggerImmediateJobs) {
         try {
-            if (!isPrimaryRepository()) {
+            if (!repositoryEnvironment.isPrimaryRepository()) {
                 logger.info("Not primary repository, will not register or handle quartz jobs");
                 return;
             }
@@ -487,24 +490,6 @@ public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEven
         } catch (Exception e) {
             logger.warn("Could not init scheduled jobs", e);
         }
-    }
-
-    private boolean isPrimaryRepository() {
-        if (LightbendConfigLoader.get().hasPath("jobs.primaryHostname")) {
-            try {
-                return Arrays.asList(
-                        InetAddress.getLocalHost().getHostName(),
-                        InetAddress.getLocalHost().getHostName().split("\\.")[0]
-                ).contains(LightbendConfigLoader.get().getString("jobs.primaryHostname"));
-            } catch (UnknownHostException e) {
-                logger.warn("Could not resolve hostname", e);
-                return false;
-            }
-        } else {
-            logger.debug("No primaryHostname key, assuming no cluster, jobs are active on this repository");
-            return true;
-        }
-
     }
 
     public Trigger getTriggerFromString(String jobName, String triggerConfig) throws ParseException {
@@ -569,7 +554,7 @@ public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEven
     }
 
     public List<JobInfo> getAllRunningJobs() throws SchedulerException {
-        if (!isPrimaryRepository()) {
+        if (!repositoryEnvironment.isPrimaryRepository()) {
             return null;
         }
         List<JobInfo> result = getJobs();
@@ -740,7 +725,7 @@ public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEven
     @EventListener(ContextRefreshedEvent.class)
     private void refreshStatic() throws SchedulerException {
         logger.info("loading static jobs:" + jobConfigListStatic.size());
-        if (!isPrimaryRepository()) {
+        if (!repositoryEnvironment.isPrimaryRepository()) {
             logger.info("Not primary repository, will not register or handle quartz jobs");
             return;
         }
