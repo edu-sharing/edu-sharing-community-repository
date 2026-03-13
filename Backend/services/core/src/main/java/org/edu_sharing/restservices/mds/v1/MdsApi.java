@@ -12,8 +12,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
-import org.apache.log4j.Logger;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.MdsDao;
 import org.edu_sharing.restservices.RepositoryDao;
@@ -29,14 +29,14 @@ import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Path("/mds/v1")
 @Tag(name = "MDS v1")
-@ApiService(value = "MDS", major = 1, minor = 0)
+@ApiService(value = "MDS", major = 1)
 @Consumes({"application/json"})
 @Produces({"application/json"})
 public class MdsApi {
 
-    private static Logger logger = Logger.getLogger(MdsApi.class);
 
     @GET
     @Path("/metadatasets/{repository}")
@@ -186,9 +186,8 @@ public class MdsApi {
             @Parameter(description = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, schema = @Schema(defaultValue = "-default-")) @PathParam("metadataset") String mdsId,
             @Parameter(description = "widget id, e.g. cm:name", required = true) @PathParam("widget") String widget,
             @Parameter(description = "caption of the new entry (id will be auto-generated)", required = true) @QueryParam("caption") String valueCaption,
-            @Parameter(description = "parent id of the new entry (might be null)", required = false) @QueryParam("parent") String parent,
-            @Parameter(description = "One or more nodes this suggestion relates to (optional, only for extended mail data)", required = false) @QueryParam("nodeId") List<String> nodes,
-            @Context HttpServletRequest req) {
+            @Parameter(description = "parent id of the new entry (might be null)") @QueryParam("parent") String parent,
+            @Parameter(description = "One or more nodes this suggestion relates to (optional, only for extended mail data)") @QueryParam("nodeId") List<String> nodes) {
 
         try {
 
@@ -232,8 +231,7 @@ public class MdsApi {
             @Parameter(description = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, schema = @Schema(defaultValue = "-default-")) @PathParam("metadataset") String mdsId,
             @Parameter(description = "query") @QueryParam("query") String query,
             @Parameter(description = "property") @QueryParam("property") String property,
-            @Parameter(description = "keys") ArrayList<String> keys,
-            @Context HttpServletRequest req) {
+            @Parameter(description = "keys") ArrayList<String> keys) {
 
         try {
 
