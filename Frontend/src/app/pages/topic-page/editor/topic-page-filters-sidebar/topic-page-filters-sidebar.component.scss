@@ -1,0 +1,49 @@
+@use '../../topic-page-variables' as topicPageVars;
+
+:host {
+    display: flex;
+    border-right: 1px solid var(--mat-sidenav-container-divider-color);
+}
+
+.filter-bar-container {
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin: 10px;
+    border-radius: 10px;
+    &[hidden] {
+        display: none;
+    }
+}
+
+.filter-bar-heading {
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    height: 60px;
+    border-bottom: 1px solid var(--mat-divider-color);
+
+    .filter-bar-title {
+        flex-grow: 1;
+        font-size: 130%;
+        margin: 0;
+    }
+    .filter-bar-close-button {
+        margin-right: -10px;
+        flex-shrink: 0;
+        height: 40px;
+        width: 40px;
+    }
+}
+
+.filter-bar-body {
+    flex-grow: 1;
+    overflow: auto;
+    --container-padding: 20px;
+    padding: var(--container-padding);
+}
+
+.filters-dialog-content {
+    flex-grow: 1;
+}

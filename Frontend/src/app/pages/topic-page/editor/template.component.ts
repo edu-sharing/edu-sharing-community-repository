@@ -51,7 +51,7 @@ import {
     Values,
 } from 'ngx-edu-sharing-ui';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, startWith, takeUntil } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, startWith, takeUntil } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
@@ -140,6 +140,7 @@ import {
 } from '../shared/utils/template-util';
 import { BreadcrumbComponent } from '../widgets/breadcrumb/breadcrumb.component';
 import { GenericWidgetComponent } from '../widgets/generic-widget/generic-widget.component';
+import { GenericWidgetGlobalService } from '../widgets/generic-widget/generic-widget-global.service';
 import { ProfilingComponent } from '../widgets/profiling/profiling.component';
 import { ColorPickerComponent } from '../widgets/shared/color-picker/color-picker.component';
 import { EditableTextComponent } from '../widgets/shared/editable-text/editable-text.component';
@@ -155,8 +156,7 @@ import { ConfigurePageVariantComponent } from './configure-page-variant/configur
 import { SwimlaneComponent } from './swimlane/swimlane.component';
 import { SwimlaneSettingsDialogComponent } from './swimlane/swimlane-settings-dialog/swimlane-settings-dialog.component';
 import { SwimlaneConfigurationButtonsComponent } from './swimlane-configuration-buttons/swimlane-configuration-buttons.component';
-import { GenericWidgetGlobalService } from '../widgets/generic-widget/generic-widget-global.service';
-import { MdsModule } from '../../../features/mds/mds.module';
+import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/topic-page-filters-sidebar.component';
 
 @Component({
     imports: [
@@ -171,7 +171,6 @@ import { MdsModule } from '../../../features/mds/mds.module';
         FilterSwimlaneTypePipe,
         FilterVisibleSwimlanePipe,
         GenericWidgetComponent,
-        MdsModule,
         PreviewSidebarModule,
         ProfilingComponent,
         QrDialogModule,
@@ -183,6 +182,7 @@ import { MdsModule } from '../../../features/mds/mds.module';
         SwimlaneSearchCountPipe,
         SwimlaneSettingsDialogComponent,
         TopicHeaderComponent,
+        TopicPageFiltersSidebarComponent,
         TranslateModule,
         VarDirective,
     ],
@@ -216,11 +216,12 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
     constructor(
         private aiHelperService: AiHelperService,
         private clipboard: Clipboard,
-        private mdsService: MdsService,
         private connector: RestConnectorService,
         private dialogs: DialogsService,
         private elementRef: ElementRef,
+        private genericWidgetGlobalService: GenericWidgetGlobalService,
         private mainNavService: MainNavService,
+        private mdsService: MdsService,
         private optionsHelperService: OptionsHelperDataService,
         private platformLocation: PlatformLocation,
         private previewSidebarService: PreviewSidebarService,
@@ -229,8 +230,7 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
         private searchFieldService: SearchFieldService,
         private searchService: SearchService,
         private topicPageEventsService: TopicPageEventsService,
-        public topicPageGlobalService: TopicPageGlobalService,
-        public genericWidgetGlobalService: GenericWidgetGlobalService,
+        private topicPageGlobalService: TopicPageGlobalService,
         private topicPageHelperService: TopicPageHelperService,
         private translate: TranslateService,
         private translationsService: TranslationsService,
@@ -240,6 +240,17 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
             // check for administration privileges
             this.isAdmin.set(this.connector.getCurrentLogin()?.isAdmin ?? false);
         });
+        // subscribe to changes on the search input + search filters
+        this.searchInputSubject
+            .pipe(debounceTime(200), distinctUntilChanged(), takeUntil(this.destroyed$))
+            .subscribe((searchInput: string) => {
+                this.searchInput.set(searchInput);
+            });
+        this.searchFiltersSubject
+            .pipe(debounceTime(500), distinctUntilChanged(), takeUntil(this.destroyed$))
+            .subscribe((searchFilters: Values) => {
+                this.searchFilters.set(searchFilters);
+            });
         // subscribe to changes on the sidebar opening state
         this.previewSidebarService
             .getOpenState()
@@ -285,13 +296,13 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
 
     initialLoadSuccessfully: WritableSignal<boolean> = signal(false);
     requestInProgress: WritableSignal<boolean> = signal(false);
-    filterPanel = signal(false);
     private initializedWithParams: boolean = false;
     private readonly destroyed$ = new Subject<void>();
 
     userHasEditRights: WritableSignal<boolean> = signal(false);
     isAdmin: WritableSignal<boolean> = signal(false);
     editMode: WritableSignal<boolean> = signal(false);
+    filterPanelOpen: WritableSignal<boolean> = signal(false);
     sidebarOpen: WritableSignal<boolean> = signal(false);
     customSidebarOptions: CustomOptions = {
         useDefaultOptions: true,
@@ -365,7 +376,6 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
     );
     sidebarMobileHidden: WritableSignal<boolean> = signal(false);
     selectedMenuItem: string = '';
-    selectedNode: WritableSignal<Node> = signal(null);
 
     searchEvent$: Observable<SearchEvent>;
     searchCountTrigger: number = 1;
@@ -377,6 +387,8 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
     );
     private searchInput: WritableSignal<string> = signal('');
     private searchFilters: WritableSignal<Values> = signal({});
+    private searchInputSubject: Subject<string> = new Subject<string>();
+    private searchFiltersSubject: Subject<Values> = new Subject<Values>();
     searchUrl: string = '';
     swimlaneIdToHitMatching: Map<string, boolean> = new Map<string, boolean>();
     swimlaneTitleIdToHitMatching: Map<string, boolean> = new Map<string, boolean>();
@@ -489,7 +501,7 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
             .subscribe((instance) => {
                 instance
                     .onFiltersButtonClicked()
-                    .subscribe(() => this.filterPanel.set(!this.filterPanel()));
+                    .subscribe(() => this.filterPanelOpen.set(!this.filterPanelOpen()));
                 this.searchEvent$ = instance.onSearchTriggered();
                 this.searchEvent$
                     .pipe(
@@ -502,7 +514,7 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
                         distinctUntilChanged(),
                     )
                     .subscribe((event) => {
-                        this.searchInput.set(event.searchString);
+                        this.searchInputSubject.next(event.searchString);
                     });
             });
     }
@@ -769,6 +781,15 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
         } else {
             return false;
         }
+    }
+
+    /**
+     * Sets the search filters to a given value.
+     *
+     * @param filters
+     */
+    applySearchFilters(filters: Values): void {
+        this.searchFiltersSubject.next(filters);
     }
 
     // PAGE CONFIG + VARIANT SPECIFIC FUNCTIONS
@@ -2494,14 +2515,10 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
         }
         return bestMatchIndex;
     }
-    applySearchFilters(filters: Values) {
-        this.searchFilters.set(filters);
-    }
 
     protected readonly iconPath: string = DEFAULT_ICON_PATH;
     protected readonly pageVariantConfigPrefix = DEFAULT_PAGE_VARIANT_NAME_PREFIX;
     protected readonly SwimlaneBackgroundShape = SwimlaneBackgroundShape;
     protected readonly swimlaneShapeToImageMapping = SWIMLANE_SHAPE_TO_IMAGE_MAPPING;
     protected readonly WIDGETS = WIDGETS;
-    protected readonly HOME_REPOSITORY = HOME_REPOSITORY;
 }

@@ -7,7 +7,7 @@
     --anchor-menu-height: 108px;
     --border-radius: 24px;
     --content-max-width: 1440px;
-    --sidebar-height: var(--mainnavHeight, 89px);
+    --navbar-height: var(--mainnavHeight, 89px);
     --sidebar-offset: 16px;
     --offcanvas-menu-width: 48px;
     --offcanvas-offset: 8px;
@@ -142,6 +142,15 @@ es-side-menu-wrapper {
             }
         }
     }
+}
+
+.topic-page-outer-wrapper {
+    display: flex;
+    flex-direction: row;
+}
+
+.topic-page-wrapper {
+    width: 100%;
 }
 
 .topic-page-content-outer-wrapper {
@@ -759,11 +768,15 @@ es-editable-text {
 
 // adjust style of es-preview-sidebar for topic page
 :host es-preview-sidebar ::ng-deep .preview-sidebar {
-    max-height: calc(100vh - var(--sidebar-height) - 2 * var(--sidebar-offset));
+    margin: 10px;
+    max-height: calc(100vh - var(--navbar-height) - 2 * var(--sidebar-offset));
+    width: 450px;
     max-width: 550px;
     position: sticky;
-    top: calc(var(--sidebar-height) + var(--sidebar-offset));
+    top: calc(var(--navbar-height) + var(--sidebar-offset));
+    border-radius: 16px;
     display: flex;
+    overflow: hidden;
 }
 
 // common styles
