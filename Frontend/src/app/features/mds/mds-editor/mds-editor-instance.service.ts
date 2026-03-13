@@ -1873,7 +1873,7 @@ export class MdsEditorInstanceService
                         (!widget.template?.length &&
                             availableWidgets
                                 .filter((w) => w.id === widget.id)
-                                .every((w) => !w.template.includes(view.id))),
+                                .every((w) => !w.template?.includes(view.id))),
                 )
                 // Sort widgets by order of appearance, so the list can be used to rotate through
                 // widgets in a meaningful way.
