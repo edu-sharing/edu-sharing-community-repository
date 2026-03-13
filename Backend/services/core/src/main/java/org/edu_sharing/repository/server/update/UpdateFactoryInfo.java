@@ -13,6 +13,8 @@ public class UpdateFactoryInfo implements UpdateInfo {
     boolean isNonTransactional;
     int order;
     boolean auto;
+    boolean async;
+    boolean blocking;
     boolean testable;
     Consumer<Boolean> action;
 

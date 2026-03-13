@@ -6,7 +6,8 @@ public interface UpdateInfo {
     String getDescription();
 
     boolean isNonTransactional();
-
+    boolean isAsync();
+    boolean isBlocking();
     int getOrder();
     boolean isAuto();
     boolean isTestable();

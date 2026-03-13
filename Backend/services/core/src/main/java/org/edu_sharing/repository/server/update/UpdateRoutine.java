@@ -44,5 +44,21 @@ public @interface UpdateRoutine {
      * @return If set the update will not be capsuled in a global transactional context
      */
     boolean isNonTransactional() default false;
+
+    /**
+     * Specifies whether the update routine should run asynchronously.
+     *
+     * @return true if the update routine is executed asynchronously, false if executed synchronously.
+     */
+    boolean async() default false;
+    
+    /**
+     * Specifies whether the update service should wait for the update routine to finish.
+     * This setting is only relevant if {@code async} is {@code true}.
+     *
+     * @return {@code true} if the update service should wait for the update routine to complete;
+     * {@code false} otherwise
+     */
+    boolean blocking() default true;
 }
 

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.commons.lang3.StringUtils;
@@ -14,6 +15,7 @@ import org.edu_sharing.repository.server.tools.security.RunAsSystem;
 import org.edu_sharing.repository.update.Protocol;
 import org.edu_sharing.repository.update.SQLUpdater;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.webservices.util.AuthenticationUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -34,6 +36,10 @@ import jakarta.transaction.UserTransaction;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -107,6 +113,16 @@ public class UpdaterServiceImpl implements ApplicationContextAware, ApplicationL
         }
 
         @Override
+        public boolean isAsync() {
+            return updateRoutine.async();
+        }
+
+        @Override
+        public boolean isBlocking() {
+            return updateRoutine.blocking();
+        }
+
+        @Override
         public int getOrder() {
             return updateRoutine.order();
         }
@@ -167,17 +183,54 @@ public class UpdaterServiceImpl implements ApplicationContextAware, ApplicationL
     }
 
     private void runAutoUpdates() {
+        List<Future<Void>> blockingAsyncJobs = new ArrayList<>();
+
+        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        ForkJoinPool forkJoinPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors());
         ArrayList<UpdateInfo> updateInfos = getAllUpdateInfos();
+
         for (UpdateInfo x : updateInfos) {
             if (!x.isAuto()) {
                 continue;
             }
-            try {
-                executeUpdate(x, false);
-            } catch (Exception ex) {
-                log.error("Update failed {}:", x.getId(), ex);
+
+            if (x.isAsync()) {
+                Future<Void> future = CompletableFuture.runAsync(() -> {
+                    ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+                    try {
+                        Thread.currentThread().setContextClassLoader(contextClassLoader);
+                        AuthenticationUtil.runAsSystem(() -> {
+                            executeUpdate(x, false);
+                            return null;
+                        });
+                    } catch (Exception ex) {
+                        log.error("Update failed {}:", x.getId(), ex);
+                    } finally {
+                        Thread.currentThread().setContextClassLoader(originalClassLoader);
+                    }
+                }, forkJoinPool);
+
+                if (x.isBlocking()) {
+                    blockingAsyncJobs.add(future);
+                }
+            } else {
+                try {
+                    executeUpdate(x, false);
+                } catch (Exception ex) {
+                    log.error("Update failed {}:", x.getId(), ex);
+                }
             }
         }
+
+        for (Future<Void> job : blockingAsyncJobs) {
+            try {
+                job.get();
+            } catch (InterruptedException | ExecutionException ex) {
+                log.error("Blocking async update failed:", ex);
+            }
+        }
+
+        //forkJoinPool.shutdown();
     }
 
     @NotNull

@@ -56,6 +56,8 @@ public class SQLUpdater implements UpdateFactory {
                         100000 + i,
                         false, // we handle this in an explicit call before all other
                         false,
+                        true,
+                        false,
                         (test) -> runSQLScript(script, test));
                 updateInfos.add(updateInfo);
             }

@@ -7,9 +7,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.security.OwnableService;
 import org.alfresco.service.namespace.QName;
-import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
@@ -17,14 +15,11 @@ import org.edu_sharing.repository.server.update.UpdateRoutine;
 import org.edu_sharing.repository.server.update.UpdateService;
 import org.edu_sharing.service.nodeservice.RecurseMode;
 import org.edu_sharing.service.share.GlobalShareService;
-import org.edu_sharing.service.share.ShareInfoService;
 import org.edu_sharing.service.share.ShareInfoServiceImpl;
 import org.edu_sharing.service.share.ShareType;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 
-import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @UpdateService
@@ -40,7 +35,9 @@ public class Release_11_0_ShareInfos {
             id = "Release_11_0_ShareInfos",
             description = "Migrate ph_users and ph_invite to shareInfo",
             order = 11000,
-            auto = true)
+            auto = true,
+            async = true,
+            blocking = false)
     public void execute() {
         NodeRunner runner = new NodeRunner();
         runner.setRunAsSystem(true);
@@ -80,15 +77,21 @@ public class Release_11_0_ShareInfos {
                 NodeRef nodeRefShare = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, shareNodeId);
                 String shareCreator = (String) nodeService.getProperty(nodeRefShare, ContentModel.PROP_CREATOR);
 
-                shareInfoService.createShare(nodeRef.getId(), shareCreator, shareNodeId, ShareType.LINK);
+                try {
+                    shareInfoService.createShare(nodeRef.getId(), shareCreator, shareNodeId, ShareType.LINK);
+                    log.info("Created link share for {}: by: {} - with: {}", nodeRef.getId(), shareCreator, share.getNodeId());
+                } catch (DuplicateKeyException ignored) {
+                }
                 users.remove(shareCreator);
-                log.info("Created link share for {}: by: {} - with: {}", nodeRef.getId(), shareCreator, share.getNodeId());
             }
 
             users.remove(sharedBy);
             for (String authority : invited) {
-                shareInfoService.createShare(nodeRef.getId(), sharedBy, authority, ShareType.AUTHORITY);
-                log.info("Created authority share for {}: by: {} - with: {}", nodeRef.getId(), creator, authority);
+                try {
+                    shareInfoService.createShare(nodeRef.getId(), sharedBy, authority, ShareType.AUTHORITY);
+                    log.info("Created authority share for {}: by: {} - with: {}", nodeRef.getId(), creator, authority);
+                } catch (DuplicateKeyException ignored) {
+                }
             }
 
             if (!users.isEmpty()) {
