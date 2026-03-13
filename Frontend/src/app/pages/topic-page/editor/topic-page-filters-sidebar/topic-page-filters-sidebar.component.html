@@ -1,0 +1,20 @@
+<div class="filter-bar-container mat-elevation-z3">
+  <div class="filter-bar-heading">
+    <h2 class="filter-bar-title">{{ 'SEARCH.FILTERS' | translate }}</h2>
+    <button class="filter-bar-close-button" mat-icon-button (click)="closeFilterBar()">
+      <i esIcon="close" [aria]="true"></i>
+    </button>
+  </div>
+  <div class="filter-bar-body">
+    <es-mds-editor-wrapper
+      groupId="search_topic_page"
+      [repository]="HOME_REPOSITORY"
+      [setId]="genericWidgetGlobalService.getDefaultMds()"
+      [embedded]="true"
+      [currentValues]="{}"
+      (currentValuesChange)="applySearchFilters($event)"
+      mode="search"
+    ></es-mds-editor-wrapper>
+    <!--    [currentValues]="searchFilterValues" -->
+  </div>
+</div>
