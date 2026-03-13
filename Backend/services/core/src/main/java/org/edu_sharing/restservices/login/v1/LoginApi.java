@@ -18,6 +18,7 @@ import jakarta.ws.rs.core.Response;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.repository.TrackingApplicationInfo;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -33,8 +34,10 @@ import org.edu_sharing.restservices.login.v1.model.LoginCredentials;
 import org.edu_sharing.restservices.login.v1.model.ScopeAccess;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.UserProfileAppAuth;
+import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authentication.*;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.authority.AuthorityServiceImpl;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.spring.security.openid.SilentLoginModeRedirect;
 import org.springframework.context.ApplicationContext;
@@ -327,6 +330,27 @@ public class LoginApi {
             return Response.status(Response.Status.OK).entity(result).build();
         } catch (Throwable e) {
             return ErrorResponse.createResponse(e);
+        }
+    }
+
+    @POST
+    @Path("/destroyTickets/{user}")
+    @Operation(summary = "Destroys active tickets of the user. If the user is not authenticated user admin rights are required", description = "")
+
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = Void.class))),
+            })
+
+    public Response destroyTickets(@Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue = "-me-")) @PathParam("user") String user) {
+        try {
+            AuthorityServiceFactory.getLocalService().inValidateTickets(user);
+            return Response.ok().build();
+        }catch(GuestCagePolicy.GuestPermissionDeniedException | NotAnAdminException e){
+            return Response.status(Response.Status.FORBIDDEN).build();
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
         }
     }
 }
