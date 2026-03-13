@@ -27,7 +27,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
 import { MdsWidget, Node, SearchService } from 'ngx-edu-sharing-api';
 import { ChatCompletionResult, NodeConfig } from 'ngx-edu-sharing-b-api';
-import { UIService } from 'ngx-edu-sharing-ui';
+import { UIService, Values } from 'ngx-edu-sharing-ui';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { Closable } from '../../../../features/dialogs/card-dialog/card-dialog-config';
@@ -118,6 +118,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     @Input() pageVariantNode?: Node;
     @Input() propagatedNodeId: string;
     searchInput: InputSignal<string> = input<string>(null);
+    searchFilters: InputSignal<Values> = input<Values>(null);
     @Input() swimlaneColor: string = DEFAULT_BG_COLOR;
     @Input() swimlaneIndex: number = -1;
     @Input() swimlaneShape: SwimlaneBackgroundShape = SwimlaneBackgroundShape.None;
@@ -229,6 +230,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
             (changes.editMode ||
                 changes.gridIndex ||
                 changes.searchInput ||
+                changes.searchFilters ||
                 changes.swimlaneColor ||
                 changes.swimlaneIndex ||
                 changes.swimlaneShape ||
@@ -848,6 +850,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 this.widgetComponentRef.setInput('nodeId', this.nodeId);
                 this.widgetComponentRef.setInput('propagatedNodeId', this.propagatedNodeId);
                 this.widgetComponentRef.setInput('searchInput', this.searchInput());
+                this.widgetComponentRef.setInput('searchFilters', this.searchFilters());
                 this.widgetComponentRef.setInput('searchText', this.searchText);
                 this.widgetComponentRef.setInput('swimlaneColor', this.swimlaneColor);
                 this.widgetComponentRef.setInput('swimlaneShape', this.swimlaneShape);

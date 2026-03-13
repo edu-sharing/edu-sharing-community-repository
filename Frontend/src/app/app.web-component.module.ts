@@ -8,6 +8,7 @@ import { AppModule, Providers } from './app.module';
 import { GenericWidgetComponent } from './pages/topic-page/widgets/generic-widget/generic-widget.component';
 import { AppComponent } from './app.component';
 import { WebComponentOnlyService } from './main/web-component-only.service';
+import { TemplateComponent } from './pages/topic-page/editor/template.component';
 
 @NgModule({
     imports: [AppModule],
@@ -41,5 +42,8 @@ export class WebComponentModule implements DoBootstrap {
         this.injector
             .get(WebComponentService)
             .registerWebComponent('edu-sharing-generic-widget', GenericWidgetComponent);
+        this.injector
+            .get(WebComponentService)
+            .registerWebComponent('edu-sharing-topic-page', TemplateComponent);
     }
 }
