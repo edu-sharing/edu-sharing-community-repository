@@ -45,7 +45,7 @@ public class MdsWidget {
     private String icon;
     private String type;
     private String link;
-    private String template;
+    private List<String> template;
     private String configuration;
     private boolean hasValues;
     private List<MdsValue> values;

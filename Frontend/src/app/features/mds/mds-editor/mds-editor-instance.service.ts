@@ -1868,12 +1868,12 @@ export class MdsEditorInstanceService
                     // We want either...
                     (widget) =>
                         // ...the overriding widget (naming this view's ID as `template`), or...
-                        widget.template === view.id ||
+                        widget.template?.includes(view.id) ||
                         // ...the default widget when there is no overriding widget.
-                        (!widget.template &&
+                        (!widget.template?.length &&
                             availableWidgets
                                 .filter((w) => w.id === widget.id)
-                                .every((w) => w.template !== view.id)),
+                                .every((w) => !w.template.includes(view.id))),
                 )
                 // Sort widgets by order of appearance, so the list can be used to rotate through
                 // widgets in a meaningful way.

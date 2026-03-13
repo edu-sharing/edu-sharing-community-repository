@@ -110,7 +110,7 @@ public class MetadataWidget extends MetadataTranslatable {
     private String icon;    //return MetadataReaderV2.getTranslation(this,placeholder,locale);
     private String placeholder;
     private String defaultvalue;
-    private String template;
+    private List<String> template = new ArrayList<>();
     private String suggestionSource;
     private String suggestionQuery;
     private String suggestDisplayProperty;

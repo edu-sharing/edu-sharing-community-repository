@@ -532,7 +532,7 @@ public class MetadataReader {
                         widget.setIcon(value);
                         break;
                     case "template":
-                        widget.setTemplate(value);
+                        widget.getTemplate().add(value);
                         break;
                     case "caption":
                         //widget.setCaption(value);

@@ -3845,7 +3845,10 @@
             "type": "array"
           },
           "template": {
-            "type": "string"
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           },
           "type": {
             "type": "string"

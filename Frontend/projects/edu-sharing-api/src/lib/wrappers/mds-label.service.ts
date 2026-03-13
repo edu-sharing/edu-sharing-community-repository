@@ -130,7 +130,8 @@ export class MdsLabelService {
                     mds.widgets?.find(
                         (widget) =>
                             widget.id === property &&
-                            ((!template && !widget.template) || template === widget.template),
+                            ((!template && !widget.template?.length) ||
+                                widget.template?.includes(template)),
                     )?.values ??
                     // fallback to the one without template
                     mds.widgets?.find(

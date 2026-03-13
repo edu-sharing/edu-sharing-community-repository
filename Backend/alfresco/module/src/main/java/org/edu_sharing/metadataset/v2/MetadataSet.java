@@ -206,9 +206,9 @@ public class MetadataSet implements Serializable {
 		  List<MetadataWidget> found=new ArrayList<>();
 		  boolean hasTemplate=false;
 		  for(MetadataWidget widget : widgets){
-			  if(widget.getId().equals(widgetId) && widget.getTemplate()==null)
+			  if(widget.getId().equals(widgetId) && widget.getTemplate().isEmpty())
 					found.add(widget);
-			  if(widget.getId().equals(widgetId) && template.equals(widget.getTemplate())) {
+			  if(widget.getId().equals(widgetId) && widget.getTemplate().contains(template)) {
 					if(!hasTemplate) found.clear();
 					hasTemplate=true;
 					found.add(widget);

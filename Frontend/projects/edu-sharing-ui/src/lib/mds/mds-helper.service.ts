@@ -129,7 +129,7 @@ export class MdsHelperService {
         }
         for (let w of widgets) {
             if (w.id == cid) {
-                if (template === undefined || w.template === template) {
+                if (template === undefined || w.template?.includes(template)) {
                     return w;
                 }
             }
@@ -144,52 +144,6 @@ export class MdsHelperService {
     ) {}
 
     /**
-     * Same as getWidget, but will also check the widget conditions
-     * @param connector
-     * @param properties
-     * @param id
-     * @param template
-     * @param widgets
-     */
-    async getWidgetWithCondition(
-        properties: any,
-        id: string,
-        template: string = null,
-        widgets: any,
-    ) {
-        for (let w of widgets) {
-            if (w.id == id) {
-                if (
-                    (template == null || w.template == template) &&
-                    (await this.isWidgetConditionTrue(w, properties))
-                ) {
-                    return w;
-                }
-            }
-        }
-        return null;
-    }
-
-    async isWidgetConditionTrue(widget: any, properties: any) {
-        if (!widget.condition) return true;
-        let condition = widget.condition;
-        if (condition.type == 'PROPERTY' && properties) {
-            if (
-                (!properties[condition.value] && !condition.negate) ||
-                (properties[condition.value] && condition.negate)
-            ) {
-                return false;
-            }
-        }
-        if (condition.type == 'TOOLPERMISSION') {
-            let tp = await this.authentication.hasToolpermission(condition.value);
-            if (tp == condition.negate) {
-                return false;
-            }
-        }
-        return true;
-    }
-    /**
      * Find a template by id in the given mds
      */
     static findTemplate(mds: MdsDefinition, id: string) {
@@ -198,22 +152,6 @@ export class MdsHelperService {
                 ArrayElement<MdsDefinition['views']> | ArrayElement<MdsDefinition['views']>
             >
         ).find((v) => v.id === id);
-    }
-    /**
-     * Returns all widgets used by the given template
-     */
-    static getUsedWidgets(mds: MdsDefinition, template: string = null): any[] {
-        const used: any = [];
-        const templateData = MdsHelperService.findTemplate(mds, template);
-        for (const w of mds.widgets) {
-            if (
-                templateData.html.indexOf('<' + w.id) !== -1 &&
-                !used.find((w2: any) => w2.id === w.id)
-            ) {
-                used.push(w);
-            }
-        }
-        return used;
     }
 
     /**

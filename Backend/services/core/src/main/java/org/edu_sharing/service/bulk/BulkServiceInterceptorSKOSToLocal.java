@@ -26,7 +26,7 @@ public class BulkServiceInterceptorSKOSToLocal implements BulkServiceInterceptor
         try {
             MetadataSet mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), mdsId);
             mds.getWidgets().stream().filter(
-                    w -> w.getTemplate() == null && w.getCondition() == null && w.getValues() != null && !w.getValues().isEmpty()
+                    w -> w.getTemplate().isEmpty() && w.getCondition() == null && w.getValues() != null && !w.getValues().isEmpty()
             ).forEach(w -> {
                 List<?> valuesList = getPropertyValue(properties, CCConstants.getValidGlobalName(w.getId()));
                 if(valuesList != null) {
