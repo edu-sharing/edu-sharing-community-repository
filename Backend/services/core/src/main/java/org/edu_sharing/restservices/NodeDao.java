@@ -2369,6 +2369,7 @@ public class NodeDao {
 
     public String getJWT() throws GeneralSecurityException {
         String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        UserProfile userProfile = PersonDao.getPerson(repoDao, user).asPerson().getProfile();
 
         Node node = asNode();
 
@@ -2404,7 +2405,7 @@ public class NodeDao {
                 .findFirst()
                 .orElse(null);
 
-        return JwtTokenUtil.generateToken(user, nodeId, permissions, getMimetype(), getMediatype(), replicationSource, resourceType);
+        return JwtTokenUtil.generateToken(user, nodeId, permissions, getMimetype(), getMediatype(), replicationSource, resourceType, userProfile);
     }
 
     private String getMimetype() {

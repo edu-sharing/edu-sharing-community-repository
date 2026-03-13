@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.restservices.shared.UserProfile;
 
 import java.security.GeneralSecurityException;
 import java.security.Key;
@@ -16,7 +17,7 @@ import java.util.UUID;
 @Slf4j
 public class JwtTokenUtil {
 
-    public static String generateToken(String username, String nodeId, Collection<String> permissions, String mimeType, String mediaType, String replicationSource, String resourceType) throws GeneralSecurityException {
+    public static String generateToken(String username, String nodeId, Collection<String> permissions, String mimeType, String mediaType, String replicationSource, String resourceType, UserProfile userProfile) throws GeneralSecurityException {
         Key privateKey = new Signing().getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM);
 
         Date date = new Date();
@@ -37,6 +38,10 @@ public class JwtTokenUtil {
                 .claim("mediaType", mediaType)
                 .claim("replicationSource", replicationSource)
                 .claim("resourceType", resourceType)
+                .claim("firstName", userProfile.getFirstName())
+                .claim("lastName", userProfile.getLastName())
+                .claim("userEmail", userProfile.getEmail())
+                .claim("primaryAffiliation", userProfile.getPrimaryAffiliation())
                 .signWith(privateKey)
                 .compact();
 
