@@ -349,7 +349,8 @@
     "SAVE_CONFIG_MESSAGE": "Deine Änderungen werden gespeichert.",
     "SAVE_CONFIG_ERROR_ACTION": "Seite neuladen",
     "SAVE_CONFIG_ERROR_MESSAGE": "Beim Laden einer Ressource ist ein Fehler aufgetreten. Bitte laden Sie die Seite neu.",
-    "DEFAULT_TEMPLATE_NAME": "Seiten-Vorlage",
+    "DEFAULT_PAGE_TEMPLATE_NAME": "Seiten-Vorlage",
+    "DEFAULT_PAGE_VARIANT_NAME": "Seiten-Variante",
     "CREATE_PAGE_VARIANT": {
       "HEADING": "Neue Themenseiten-Variante erstellen",
       "EXISTING_VARIANT": {

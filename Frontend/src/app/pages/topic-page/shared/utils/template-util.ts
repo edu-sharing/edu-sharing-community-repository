@@ -6,6 +6,9 @@ import {
     DEFAULT_PAGE_CONFIG_REF_PROP,
     DEFAULT_PAGE_CONFIG_PROP,
     DEFAULT_PAGE_VARIANT_CONFIG_PROP,
+    DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP,
+    DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP,
+    DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION,
 } from '../types/custom-definitions';
 import { BapiConfigObject } from '../types/bapi-config-object';
 import { PageVariantConfig } from '../types/page-variant-config';
@@ -144,18 +147,26 @@ export const convertNodeRefIntoNodeId = (nodeRef: string): string => {
 };
 
 /**
- * Updates the last modified attribute of a given page variant.
- * If the first structural change was made, return a reload flag.
+ * Retrieves the page variant template ref by checking if the node has one, otherwise set it to its ref.
  *
- * @param pageVariant
+ * @param node
  */
-export const updatePageVariantLastModified = (pageVariant: PageVariantConfig): boolean => {
-    let reloadVariantsNecessary: boolean = false;
-    if (pageVariant.template) {
-        reloadVariantsNecessary = !pageVariant.template?.lastModified;
-        pageVariant.template.lastModified = Date.now().toString();
-    }
-    return reloadVariantsNecessary;
+export const retrievePageVariantTemplateRef = (node: Node): string => {
+    const templateRefOrNodeId: string =
+        node.properties?.[DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP]?.[0] || retrieveNodeId(node);
+    return prependWorkspacePrefix(templateRefOrNodeId);
+};
+
+/**
+ * Retrieves the page variant template version by checking if the node has one, otherwise set it to a default.
+ *
+ * @param node
+ */
+export const retrievePageVariantTemplateVersion = (node: Node): string => {
+    return (
+        node.properties?.[DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP]?.[0] ||
+        DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION
+    );
 };
 
 /**
