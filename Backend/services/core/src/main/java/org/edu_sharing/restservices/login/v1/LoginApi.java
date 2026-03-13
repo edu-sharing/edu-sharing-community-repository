@@ -262,7 +262,7 @@ public class LoginApi {
 
         try {
             ApplicationContext eduApplicationContext = org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
-            SSOAuthorityMapper ssoMapper = (SSOAuthorityMapper) eduApplicationContext.getBean("ssoAuthorityMapper");
+            SSOAuthorityMapper ssoMapper = eduApplicationContext.getBean(SSOAuthorityMapper.class);
 
             TrackingApplicationInfo verifiedApp = ContextManagementFilter.accessTool.get();
             if (verifiedApp == null) {
@@ -314,7 +314,7 @@ public class LoginApi {
                 }
             }
 
-            EduAuthentication authService = (EduAuthentication) eduApplicationContext.getBean("authenticationService");
+            EduAuthentication authService = eduApplicationContext.getBean(EduAuthentication.class);
             authService.authenticateByTrustedApp(ssoDataMap);
 
             AuthenticationToken result = new AuthenticationToken();

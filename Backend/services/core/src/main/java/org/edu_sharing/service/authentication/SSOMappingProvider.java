@@ -2,6 +2,7 @@ package org.edu_sharing.service.authentication;
 
 import com.drew.lang.annotations.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.edu_sharing.service.authentication.authByApp.config.AuthByAppConfigProvider;
 import org.edu_sharing.service.authentication.sso.config.ExternalConfigProvider;
 import org.edu_sharing.service.authentication.sso.mapping.Mapping;
 import org.edu_sharing.service.lti13.sso.config.LTIConfigProvider;
@@ -20,6 +21,7 @@ public class SSOMappingProvider {
     private final Saml2ConfigProvider saml2ConfigProvider;
     private final LTIConfigProvider ltiConfigProvider;
     private final ExternalConfigProvider externalConfigProvider;
+    private final AuthByAppConfigProvider authByAppConfigProvider;
 
 
     @NotNull
@@ -30,6 +32,7 @@ public class SSOMappingProvider {
             case SSOAuthorityMapper.SSO_TYPE_SAML2 -> getSAMLMapping();
             case SSOAuthorityMapper.SSO_TYPE_LTI -> getLtiMapping();
             case SSOAuthorityMapper.SSO_TYPE_EXTERNAL -> getExternalMapping();
+            case SSOAuthorityMapper.SSO_TYPE_AuthByApp -> getAuthByAppMapping();
             default ->
                     throw new IllegalStateException("Unexpected value: " + ssoType);
         };
@@ -51,6 +54,9 @@ public class SSOMappingProvider {
 
     private Mapping getExternalMapping() {
         return externalConfigProvider.getConfig().getMapping();
+    }
+    private Mapping getAuthByAppMapping() {
+        return authByAppConfigProvider.getConfig().getMapping();
     }
 
     private Mapping getOAuthMapping(Map<String, String> ssoAttributes) {
