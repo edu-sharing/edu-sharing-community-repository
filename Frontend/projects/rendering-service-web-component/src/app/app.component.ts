@@ -26,7 +26,6 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
     @Input() display_mode: 'inline' | 'full' = 'inline';
     @Input() jwt: string;
     @Input() render_url: string;
-    @Input() encoded_user: string;
     @Input() service_worker_url: string;
     @Input() activate_service_worker: boolean;
     @Input() assets_url: string = '';
@@ -70,7 +69,6 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
                 this.signature,
                 this.jwt,
                 this.render_url,
-                this.encoded_user,
             );
             data.node.preview.url = this.previewUrl;
             this.node.set(data.node);

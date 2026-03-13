@@ -7,7 +7,6 @@ import {
     Node,
     NodeServiceUnwrapped,
     RestConstants,
-    UserService,
 } from 'ngx-edu-sharing-api';
 import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
 import { OptionsHelperDataService } from './options-helper-data.service';
@@ -25,7 +24,6 @@ export class RenderHelperService {
         private aboutService: AboutService,
         private nodeApiUnwrapped: NodeServiceUnwrapped,
         private configuration: EduSharingUiConfiguration,
-        private userService: UserService,
         @Optional() private optionsHelperDataService: OptionsHelperDataService,
     ) {}
 
@@ -43,7 +41,6 @@ export class RenderHelperService {
             }),
         );
         const node = securedNode.node;
-        const user = await firstValueFrom(this.userService.observeCurrentUserInfo());
         console.info(this.injector.get(OptionsHelperDataService));
         this.optionsHelperDataService?.setData({
             scope: Scope.Render,
@@ -78,12 +75,6 @@ export class RenderHelperService {
             securedNode: securedNode.signedNode,
             signature: securedNode.signature,
             token: token,
-            userData: {
-                authorityName: user.user.person.authorityName,
-                firstName: user.user.person.profile.firstName,
-                surName: user.user.person.profile.lastName,
-                userEMail: user.user.person.profile.email,
-            },
         } as RenderDataRequestWithToken;
 
         return {
@@ -97,24 +88,16 @@ export class RenderHelperService {
         signature: string,
         jwt: string,
         renderUrl: string,
-        encodedUser: string,
     ): Promise<CombinedRenderData> {
         this.injector.get(RSApiConfiguration).rootUrl = renderUrl;
         const decodedNodeString = this.base64ToUtf8(encodedNode);
         const node = JSON.parse(decodedNodeString) as Node;
-        const userData = JSON.parse(this.base64ToUtf8(encodedUser));
         const request = {
             nodeId: node.ref.id,
             repoId: node.ref.repo,
             securedNode: encodedNode,
             signature: signature,
             token: jwt,
-            userData: {
-                authorityName: userData.authorityName ?? '',
-                firstName: userData.firstName ?? '',
-                surName: userData.lastName ?? '',
-                userEMail: userData.email ?? '',
-            },
         } as RenderDataRequestWithToken;
 
         return {
