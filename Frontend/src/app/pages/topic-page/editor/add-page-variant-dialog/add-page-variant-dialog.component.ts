@@ -43,7 +43,7 @@ import { SelectOption } from '../../shared/types/select-option';
 import {
     convertNodeRefIntoNodeId,
     retrieveNodeId,
-    retrievePageVariantConfig,
+    retrievePageVariantTemplateRef,
 } from '../../shared/utils/template-util';
 import { GenericWidgetGlobalService } from '../../widgets/generic-widget/generic-widget-global.service';
 
@@ -252,7 +252,7 @@ export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
             // retrieve either the template ref ID (copy mode: template) or the page variant ID (copy mode: topic page)
             const nodeRefToReferTo: string =
                 this.selectedOption === CopyOption.Template
-                    ? retrievePageVariantConfig(this.pageVariantNode)?.template?.id
+                    ? retrievePageVariantTemplateRef(this.pageVariantNode)
                     : retrieveNodeId(this.pageVariantNode);
             if (nodeRefToReferTo) {
                 const nodeIdToReferTo = convertNodeRefIntoNodeId(nodeRefToReferTo);
