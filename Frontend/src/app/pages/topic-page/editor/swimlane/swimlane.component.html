@@ -42,7 +42,11 @@
             ></es-select-widget-type>
           </div>
         </div>
-        <div *ngIf="!editMode">Invalid or unknown widget {{ gridItem.item }}</div>
+        <es-info-message mode="warning" *ngIf="!editMode">
+          {{
+            ('TOPIC_PAGE.SWIMLANE.INVALID_OR_UNKNOWN_WIDGET' | translate) + (gridItem.item || '')
+          }}
+        </es-info-message>
       </ng-template>
     </div>
   </ng-container>

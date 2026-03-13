@@ -3,8 +3,6 @@
     "NAVIGATION": {
       "NEW_PAGE_VARIANT": "Neue Themenseiten-Variante",
       "NEW_PAGE_TEMPLATE": "Neue Themenseiten-Vorlage",
-      "APPS": "Apps",
-      "APPS_ELEMENT_NOT_FOUND": "Das Element mit der Klasse topic-page-show-apps konnte nicht gefunden werden.",
       "TITLE": "Themenseite",
       "SEARCH_PLACEHOLDER": "Suche nach Inhalten auf der Themenseite ..."
     },
@@ -42,12 +40,6 @@
       },
       "BREADCRUMB": {
         "DEFAULT_ROOT_NAME": "Fachportale",
-        "EDITORIAL_TEAM": "Redaktion",
-        "ADD_MEMBER": "Mitglied hinzufügen",
-        "REMOVE_MEMBER": "Mitglied entfernen",
-        "FURTHER_EDITORIAL_MEMBERS": "weitere RedakteurInnen",
-        "AND": "und",
-        "NO_MEMBERS_SELECTED": "Bisher wurden noch keine Redaktionsmitglieder ausgewählt.",
         "PAGE_VARIANT_LABEL": "Seiten-Variante",
         "NAVIGATE_TO_PAGE_TEMPLATE": "Zur Seiten-Vorlage"
       },
@@ -65,13 +57,6 @@
         "POPUP_BLOCKED": "Popup wurde blockiert oder konnte nicht geöffnet werden.",
         "FILTER_EVENT_RECEIVED": "Filter-Event empfangen",
         "NO_CONTENTS": "Noch keine Inhalte",
-        "TITLE_LABEL": "Titel",
-        "LRT_LABEL": "Materialart",
-        "TAXONID_LABEL": "Fachgebiet",
-        "EDUCATIONAL_CONTEXT_LABEL": "Bildungsstufe",
-        "SOURCE_LABEL": "Quelle",
-        "AUTHOR_LABEL": "Autor",
-        "WEBSITE_LABEL": "Webseite",
         "CHANGE_ON_INSPECTION_TABLE": "Objekt auf Prüftisch ändern",
         "REMOVE_FROM_WIDGET": "Objekt ausblenden",
         "ADD_TO_WIDGET": "Objekt einblenden"
@@ -128,32 +113,6 @@
         "NO_IMAGE_SELECTED": "Es wurde noch kein Bild ausgewählt.",
         "IMAGE_UPLOAD_CONFIRMATION_TEXT": "Ich stimme zu, dass ich alle notwendigen Rechte an diesem Bild besitze, um es auf der Themenseite einzubinden."
       },
-      "MAP_VIEW": {
-        "HEADING": "Filter",
-        "RESET_ALL": "alle zurücksetzen",
-        "GERMANY": "Deutschland",
-        "YOUR_REGION": "Deine Region (in der Nähe)",
-        "RESULTS_SINGLE": "1 Ergebnis",
-        "RESULTS_MULTIPLE": "{{count}} Ergebnisse",
-        "SEARCH_LOCATION": "Suche innerhalb der Map",
-        "AT_LEAST_TWO_CHARACTERS": "Bitte geben Sie mindestens 2 Zeichen ein.",
-        "UNKNOWN_CITY": "Unbekannter Ort",
-        "ACTIVE_FILTERS": "Aktive Filterkriterien",
-        "SHOW_RESULTS_SINGLE": "1 Ergebnis anzeigen",
-        "SHOW_RESULTS_MULTIPLE": "{{count}} Ergebnisse anzeigen",
-        "SHOW_FILTERS": "Filter anzeigen",
-        "HIDE_FILTERS": "Filter ausblenden",
-        "ORGANIZATION": "Organisation",
-        "PEOPLE": "Personen",
-        "GENERAL_LOCATION": "Allgemeiner Ort",
-        "SHARE_CONTENT": "Inhalt teilen",
-        "OPEN_PAGE": "Seite öffnen",
-        "ADDRESS": "Adresse",
-        "TARGET_GROUP": "Zielgruppe",
-        "DISCIPLINE": "Fach",
-        "IS_LOADING": "Die Ergebnisse werden aktualisiert ...",
-        "NO_INFORMATION_AVAILABLE": "Keine Informationen vorhanden."
-      },
       "MEDIA_RENDERING": {
         "NO_ELEMENT_SELECTED": "Es wurde noch kein Element zur Anzeige ausgewählt.",
         "TO_ORIGINAL_PAGE": "Zur Originalseite",
@@ -167,13 +126,6 @@
       "PROFILING": {
         "CHANGES_SAVED": "Profil gespeichert – jetzt bekommst du passende Inhalte angezeigt!",
         "CHANGES_RESET": "Deine Profilierung wurde zurückgesetzt."
-      },
-      "PROPOSE_CONTENT": {
-        "TITLE": "Inhalt vorschlagen",
-        "NO_CONTENT_QUESTION": "Noch kein Inhalt?",
-        "SHARING_MAKES_YOU_HAPPY": "Teilen macht Freude",
-        "CONTENT_QUESTION": "Du kennst einen tollen Inhalt, der hier unbedingt erscheinen sollte?",
-        "POINTING_OWL": "WLO-Eule zeigt in deine Richtung."
       },
       "SEARCH_WIDGET": {
         "SEARCH": "Suche",
@@ -191,28 +143,6 @@
         }
       },
       "SIDE_MENU": "Seitenmenü",
-      "STATISTICS": {
-        "ALL_LABEL": "Alle Inhalte auf dieser Themenseite",
-        "EDITORIAL_LABEL": "Davon redaktionell geprüfte Inhalte",
-        "OER_LABEL": "Davon OER Inhalte",
-        "MORE_RESULTS": {
-          "PREFIX": "Die Suche findet noch mehr:",
-          "SINGLE": "1 Inhalt",
-          "MULTIPLE": "{{count}} Inhalte insgesamt"
-        },
-        "WORK": "Berufe",
-        "EDUCATIONAL_OFFERS": "Bildungsangebote",
-        "EVENTS": "Veranstaltungen",
-        "MATERIALS": "Materialien",
-        "SOURCES": "Quellen",
-        "ORGANIZATIONS": "Organisationen",
-        "PEOPLE": "Personen",
-        "TOOLS": "Tools",
-        "PROMPTS": "Prompts",
-        "FIELDS_OF_ACTION": "Handlungsfelder",
-        "DIDACTIC_CONCEPTS": "Didaktische Konzepte",
-        "NO_STATISTICS_EXIST": "Für diese Themenseite existieren keine Statistiken."
-      },
       "TOPIC_HEADER": {
         "TOPIC_PAGE_SUBJECT_PORTAL_LABEL": "Themenseite Fachportal",
         "COLLECTION_DESCRIPTION_LABEL": "Sammlungsbeschreibung",
@@ -265,21 +195,18 @@
         "LABEL": "Themenbaum",
         "HEADING": "Themenbaum von {{topic}}"
       },
-      "STATISTICS": {
-        "LABEL": "Statistik",
-        "HEADING": "Inhalte von {{topic}}"
-      },
       "CONFIG_PAGE_VARIANT": {
         "LABEL": "Einstellungen",
         "HEADING": "Einstellungen der Themenseiten-Variante",
-        "INFO_TITLE": "Parameter definieren",
-        "INFO_TEXT": "Vergib einen eindeutigen Titel und wähle eine passende Zielgruppe aus.",
         "WARN_TEXT": "Nicht alle erforderlichen Parameter-Felder sind ausgefüllt. Du kannst den Vorgang nicht abbrechen.",
+        "DUPLICATE_WARN_TEXT": "Es existiert bereits eine Themenseiten-Variante mit den gleichen Parametern.",
         "TITLE": "Titel der Variante",
         "TITLE_PLACEHOLDER": "Themenseiten-Variante für xyz",
         "EDUCATION_LEVEL_LABEL": "Bildungsstufe",
         "TARGET_GROUP_LABEL": "Zielgruppe",
-        "DELETE_VARIANT": "Variante löschen"
+        "DELETE_VARIANT": "Variante löschen",
+        "DEFINE_PARAMETERS": "Definiere Parameter",
+        "DUPLICATE_PARAMETERS": "Duplikat in existierender Variante erkannt"
       },
       "CONFIG_PAGE_TEMPLATE": {
         "HEADING": "Einstellungen der Themenseiten-Vorlage",
@@ -402,24 +329,8 @@
       "DELETE": {
         "LABEL": "Abschnitt löschen",
         "MESSAGE": "Willst du diesen Abschnitt wirklich löschen?"
-      }
-    },
-    "PREVIEW_PANEL": {
-      "CLOSE": "Vorschauansicht schließen",
-      "DURATION_LABEL": "Dauer",
-      "LANGUAGES_LABEL": "Sprache(n)",
-      "ALL_DETAILS": "Alle Details",
-      "EMBED_ELEMENT": "Element einbetten",
-      "LICENSE_LABEL": "Lizenz",
-      "CONDITIONS_OF_ACCESS": "Zugangsvoraussetzungen",
-      "PRICE": "Kosten",
-      "FREE_OF_CHARGE": "Kostenlos verfügbar",
-      "PAID_CONTENT": "Kostenpflichtig",
-      "CONTAINS_ADVERTISEMENT": "Werbung enthalten?",
-      "NO_ADVERTISEMENT": "keine Werbung",
-      "ADVERTISEMENT_CONTAINED": "Enthält Werbung",
-      "REPORT_PROBLEM": "Problem melden",
-      "RELATED_CONTENT": "Dazu passend"
+      },
+      "INVALID_OR_UNKNOWN_WIDGET": "Das Widget ist nicht definiert oder unbekannt."
     },
     "NO_SWIMLANES": "Bisher wurden noch keine Swimlanes mit Inhalten erstellt.",
     "NO_PAGE_CONFIG": {
@@ -444,18 +355,36 @@
     "SAVE_CONFIG_ERROR_ACTION": "Seite neuladen",
     "SAVE_CONFIG_ERROR_MESSAGE": "Beim Laden einer Ressource ist ein Fehler aufgetreten. Bitte laden Sie die Seite neu.",
     "CREATE_PAGE_VARIANT": {
-      "HEADING": "Seiten-Variante erstellen",
-      "MESSAGE": "Willst du wirklich auf Grundlage der Seiten-Struktur der aktuell gewählten Variante eine neue Seiten-Variante erstellen?",
-      "PENDING_MESSAGE": "Eine neue Seiten-Variante wird erstellt und geladen."
+      "HEADING": "Neue Themenseiten-Variante erstellen",
+      "EXISTING_VARIANT": {
+        "INFO_HEADING": "Achtung: Es gibt bereits Varianten dieser Themenseite.",
+        "INFO_LIST_TEXT": "Bevor du eine Neue anlegst, prüfe bitte:",
+        "INFO_LIST_ITEM_ONE": "Besteht schon eine passende Variante?",
+        "INFO_LIST_ITEM_TWO": "Kann eine vorhandene Vorlage angepasst werden?"
+      },
+      "EXISTING_TOPIC_PAGE": {
+        "INFO_HEADING": "Es gibt bereits eine Themenseite zu dieser Sammlung.",
+        "INFO_TEXT": "Du kannst eine Kopie davon erstellen und anpassen, ihre Filter ablösen und eine andere Themenseite als Basis wählen oder eine neue Variante aus einer Vorlage erstellen."
+      },
+      "CREATE_COPY_OF_LABEL": "Erstelle Kopie von:",
+      "COPY_OPTIONS": {
+        "ARIA": "Auswahl der Kopier-Grundlage",
+        "TOPIC_PAGE": "Themenseite",
+        "TEMPLATE": "Vorlage"
+      },
+      "SEARCH_PLACEHOLDER": "Durchsuche Themenseiten-Vorlagen",
+      "PENDING_MESSAGE": "Eine neue Seiten-Variante wird erstellt und geladen.",
+      "SUCCESS_MESSAGE": "Kopie der Themenseite erfolgreich erstellt",
+      "COPY_SUFFIX": "Kopie"
     },
     "DELETE_PAGE_VARIANT": {
       "HEADING": "Seiten-Variante löschen",
-      "MESSAGE": "Willst du wirklich die aktuell gewählte Variante löschen?",
+      "MESSAGE": "Möchtest du die gewählte Variante wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
       "PENDING_MESSAGE": "Die Seiten-Variante wird samt aller Anpassungen gelöscht."
     },
     "DELETE_PAGE_TEMPLATE": {
       "HEADING": "Seiten-Vorlage löschen",
-      "MESSAGE": "Willst du wirklich die aktuell gewählte Vorlage löschen?",
+      "MESSAGE": "Möchtest du die gewählte Vorlage wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
       "PENDING_MESSAGE": "Die Seiten-Vorlage wird samt aller Anpassungen gelöscht."
     },
     "TEMPLATE_MODE_ACTIVE": {

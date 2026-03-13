@@ -6,12 +6,13 @@
     "NO_RESULTS_MESSAGE": "Non ci sono elementi corrispondenti al termine di ricerca nel cestino.",
     "ENTER_NEW_TEXT": "Inserire un nuovo termine di ricerca.",
     "ARCHIVE_EMPTY": "Non ci sono oggetti nel cestino.",
+    "ARCHIVE_REORDERING": "Il cestino è in fase di reindicizzazione. Riprova tra qualche secondo.",
     "DELETE": {
       "CONFIRM_TITLE": "Cancellare l'oggetto in modo permanente?",
       "CONFIRM_MESSAGE": "Se si eliminano definitivamente gli oggetti, non è possibile ripristinarli in seguito.",
       "NOT_ASK_AGAIN": "Non chiedete di nuovo questa sessione.",
       "YES": "Sì, eliminare",
-      "CANCEL": "annullare"
+      "CANCEL": "Annulla"
     },
     "RESTORE": {
       "NEW_LOCATION_TITLE": "ripristino terminato",

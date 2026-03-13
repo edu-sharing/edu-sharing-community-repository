@@ -41,6 +41,12 @@ import {
 } from '../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { CardDialogRef } from '../../features/dialogs/card-dialog/card-dialog-ref';
 
+type WafyEntry = {
+    name: string;
+    url: string;
+    type: string;
+};
+
 @Component({
     selector: 'es-login-page',
     templateUrl: 'login-page.component.html',
@@ -372,11 +378,18 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private processProviders(providers: any) {
-        const data: any = {};
+        const data: {
+            [key in string]: {
+                group: string;
+                providers: WafyEntry[];
+            };
+        } = {};
         for (const provider of Object.keys(providers.wayf_idps)) {
-            const object = providers.wayf_idps[provider];
+            const object: WafyEntry = providers.wayf_idps[provider];
             if (object) {
-                object.url = provider;
+                if (!object.url) {
+                    object.url = provider;
+                }
                 const type = object.type;
                 if (!data[type]) {
                     data[type] = {

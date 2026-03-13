@@ -30,7 +30,8 @@
     "NO_ACCESS": "Non ci sono permessi per accedere a quest'area",
     "APP_LOGO": "Logo",
     "SHOW_PASSWORD": "Mostra password",
-    "HIDE_PASSWORD": "Nascondere la password"
+    "HIDE_PASSWORD": "Nascondere la password",
+    "ERROR_SAFE_DETAIL": "Accesso non riuscito. Se non hai ancora una password per la tua area protetta, chiedi all'amministratore di crearne una temporanea monouso, che potrai poi utilizzare per impostarne una nuova."
   },
   "LOGIN_APP": {
     "SERVERLIST_OWN": "impostare il proprio server",

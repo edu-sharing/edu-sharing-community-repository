@@ -324,18 +324,10 @@ public class DownloadServlet extends HttpServlet {
 
 
 
-		ServletOutputStream op = resp.getOutputStream();
-
-		ApplicationContext appContext = AlfAppContextGate.getApplicationContext();
-
-		ApplicationInfo homeAppInfo = ApplicationInfoList.getHomeRepository();
-
 		NodeService nodeService = NodeServiceFactory.getLocalService();
-		PermissionService permissionService = PermissionServiceFactory.getLocalService();
 
-		File file = TempFileProvider.createTempFile("edu.",".zip");
-		FileOutputStream bufferOut = new FileOutputStream(file);
-		ZipOutputStream zos = new ZipOutputStream(bufferOut);
+		setHeaders(resp, zipName,"application/zip");
+		ZipOutputStream zos = new ZipOutputStream(resp.getOutputStream());
 		zos.setMethod( ZipOutputStream.DEFLATED );
 
 		List<String> errors=new ArrayList<>();
@@ -389,9 +381,6 @@ public class DownloadServlet extends HttpServlet {
 			}
 			else{
 				result=runAll.doWork();
-			}
-			if(result) {
-				outputData(resp, zipName, file, "application/zip");
 			}
 		}
 		catch(Throwable t){

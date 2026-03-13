@@ -136,7 +136,6 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
             ) {
                 this.aiGeneratedImage = this.aiSupported();
                 this.aiGeneratedText.set(false);
-                this.collectionDescription = undefined;
                 this.initialized.set(false);
                 this.description = this.DEFAULT_DESCRIPTION;
                 this.textBackgroundColor = this.DEFAULT_HEADER_TEXT_BG_COLOR;

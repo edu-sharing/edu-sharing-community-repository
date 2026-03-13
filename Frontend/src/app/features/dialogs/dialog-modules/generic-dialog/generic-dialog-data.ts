@@ -99,3 +99,8 @@ export const SAVE_OR_CANCEL: GenericDialogButton<'SAVE' | 'CANCEL'>[] = [
     { label: 'CANCEL', config: { color: 'standard' } },
     { label: 'SAVE', config: { color: 'primary' } },
 ];
+
+export const USE_OR_CANCEL: GenericDialogButton<'USE' | 'CANCEL'>[] = [
+    { label: 'CANCEL', config: { color: 'standard' } },
+    { label: 'USE', config: { color: 'primary' } },
+];

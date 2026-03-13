@@ -6,6 +6,7 @@
     "NO_RESULTS_MESSAGE": "Il n'y a pas d'éléments correspondant au terme recherché dans la corbeille.",
     "ENTER_NEW_TEXT": "Veuillez saisir un nouveau terme de recherche.",
     "ARCHIVE_EMPTY": "Il n'y a pas d'objets dans la corbeille.",
+    "ARCHIVE_REORDERING": "La corbeille est en cours de réindexation. Veuillez réessayer dans quelques secondes.",
     "DELETE": {
       "CONFIRM_TITLE": "Supprimer définitivement l'objet ?",
       "CONFIRM_MESSAGE": "Si vous supprimez définitivement des objets, vous ne pourrez pas les restaurer ultérieurement.",

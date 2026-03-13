@@ -55,6 +55,14 @@ export class TopicPageComponent {
                                 );
                                 break;
                             }
+                            case 'settings': {
+                                this.templateComponent?.collapsibleItemClicked(
+                                    this.translate.instant(
+                                        'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL',
+                                    ),
+                                );
+                                break;
+                            }
                             default: {
                                 return;
                             }

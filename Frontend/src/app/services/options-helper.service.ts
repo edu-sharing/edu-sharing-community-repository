@@ -712,6 +712,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                             resolve(true);
                         },
                         (error) => {
+                            error.preventDefault();
                             resolve(false);
                         },
                     );
@@ -1359,14 +1360,13 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 }
                 return (
                     await firstValueFrom(
-                        this.nodeServiceLegacy.getNodeParents(objects[0].ref.id, false, [
-                            PROPERTY_FILTER_ALL,
-                        ]),
+                        this.nodeService.getParents(objects[0].ref.id, { fullPath: false }),
                     )
                 ).nodes.some(
                     (n) => n.properties[RestConstants.CCM_PROP_PAGE_CONFIG_PROPAGATE_REF]?.[0],
                 );
             } catch (e) {
+                e.preventDefault();
                 return false;
             }
         };

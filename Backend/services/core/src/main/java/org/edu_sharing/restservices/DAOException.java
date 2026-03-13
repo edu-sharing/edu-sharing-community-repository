@@ -13,6 +13,7 @@ import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.alfresco.service.cmr.usage.ContentQuotaException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.RestrictedAccessException;
+import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfresco.policy.NodeFileExtensionValidationException;
 import org.edu_sharing.alfresco.policy.NodeFileSizeExceededException;
 import org.edu_sharing.alfresco.policy.NodeMimetypeValidationException;
@@ -120,6 +121,7 @@ public class DAOException extends RuntimeException {
 
         if (t instanceof AccessDeniedException
                 || t instanceof AuthenticationException || t instanceof PermissionException
+                || t instanceof GuestCagePolicy.GuestPermissionDeniedException
                 || t instanceof InsufficientPermissionException || t instanceof NotAnAdminException) {
 
             return new DAOSecurityException(t, nodeId);

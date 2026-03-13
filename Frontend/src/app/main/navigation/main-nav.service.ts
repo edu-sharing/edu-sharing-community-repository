@@ -1,7 +1,7 @@
 import { computed, Injectable, signal, TemplateRef } from '@angular/core';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject, forkJoin, Observable, of, Subject } from 'rxjs';
-import { debounceTime, filter, map, switchMap, take, tap } from 'rxjs/operators';
+import { BehaviorSubject, forkJoin, Observable, of, startWith, Subject } from 'rxjs';
+import { debounceTime, filter, map, pairwise, switchMap, take, tap } from 'rxjs/operators';
 import {
     ConfigService,
     Node,
@@ -114,6 +114,7 @@ export class MainNavService {
      */
     onConnectorCreated = new Subject<Node>();
     private _isVisible: boolean;
+    private lastHeight = this.DefaultHeight;
     private _systemMessage = signal<SystemMessageDetails>(null);
     showSystemMessage = computed(() => this._systemMessage()?.message?.mode === 'bar');
     readonly DefaultScopes = ['workspace', 'collections', 'search', 'render', 'admin'];
@@ -217,10 +218,13 @@ export class MainNavService {
     setSystemMessage(systemMessage: SystemMessageDetails) {
         this._systemMessage.set(systemMessage);
     }
-    updateHeight(height = this.DefaultHeight) {
+    updateHeight(height = 0) {
+        if (height) {
+            this.lastHeight = height;
+        }
         if (this._isVisible) {
             if (!height) {
-                height = this.DefaultHeight;
+                height = this.lastHeight;
             }
             document.documentElement.style.setProperty('--mainnavHeight', height + 'px');
             //document.documentElement.style.setProperty('--mainnavCurrentHeight', null);
@@ -249,7 +253,12 @@ export class MainNavService {
     observeSystemMessage(): Observable<SystemMessageDetails> {
         return rxjs
             .combineLatest([
-                this.observeMainNavConfig(),
+                this.observeMainNavConfig().pipe(
+                    startWith(null),
+                    pairwise(),
+                    filter(([a, b]) => a?.currentScope !== b.currentScope),
+                    map(([_, c]) => c),
+                ),
                 this.user
                     .observeCurrentUser()
                     .pipe(switchMap((_) => this.configServiceApi.observeSystemMessages())),
