@@ -48,6 +48,7 @@ import {
     Scope,
     TranslationsService,
     UIConstants,
+    Values,
 } from 'ngx-edu-sharing-ui';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, startWith, takeUntil } from 'rxjs/operators';
@@ -369,7 +370,11 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
     computedSearchInput: Signal<string> = computed((): string =>
         this.editMode() ? '' : this.searchInput(),
     );
+    computedSearchFilters: Signal<Values> = computed(
+        (): Values => (this.editMode() ? {} : this.searchFilters()),
+    );
     private searchInput: WritableSignal<string> = signal('');
+    private searchFilters: WritableSignal<Values> = signal({});
     searchUrl: string = '';
     swimlaneIdToHitMatching: Map<string, boolean> = new Map<string, boolean>();
     swimlaneTitleIdToHitMatching: Map<string, boolean> = new Map<string, boolean>();
@@ -2488,6 +2493,9 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
             }
         }
         return bestMatchIndex;
+    }
+    applySearchFilters(filters: Values) {
+        this.searchFilters.set(filters);
     }
 
     protected readonly iconPath: string = DEFAULT_ICON_PATH;

@@ -19,6 +19,7 @@ import { GenericWidgetComponent } from '../../widgets/generic-widget/generic-wid
 import { GenericWidgetGlobalService } from '../../widgets/generic-widget/generic-widget-global.service';
 import { ConfigureGridComponent } from './configure-grid/configure-grid.component';
 import { SelectWidgetTypeComponent } from './select-widget-type/select-widget-type.component';
+import { Values } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-swimlane',
@@ -46,6 +47,7 @@ export class SwimlaneComponent implements AfterViewChecked {
     @Input() grid: GridTile[] = [];
     @Input() pageVariantNode?: Node;
     @Input() searchInput: string;
+    @Input() searchFilters: Values;
     @Input() selectDimensions: Map<string, MdsWidget> = new Map<string, MdsWidget>();
     @Input() swimlaneIndex: number;
     @Input() topicWidgets: NodeEntries;

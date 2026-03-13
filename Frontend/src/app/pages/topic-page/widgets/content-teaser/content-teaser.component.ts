@@ -82,6 +82,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
     @Input() pageVariantNode?: Node;
     @Input() propagatedNodeId?: string;
     searchInput: InputSignal<string> = input<string>(null);
+    searchFilters: InputSignal<Values> = input<Values>(null);
     @Input() searchText: string;
     swimlaneColor: InputSignal<string> = input<string>(null);
     @Input() swimlaneIndex: number = -1;
@@ -138,6 +139,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
                 values: [value],
             });
         }
+
         // special cases for propagating parent: replace the collectionId
         const propagatedWidget: boolean = this.propagatedNodeId && !this.nodeId;
         // check if the propertyFilter contains the collectionId and replace it
@@ -150,6 +152,12 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
         criteriaArray.push(
             ...this.searchHelperService.convertCritieria(this.propertyFilters(), []),
         );
+        if (this.searchFilters()) {
+            // @TODO: This will AND combine the local swimlane filters and external filters
+            criteriaArray.push(
+                ...this.searchHelperService.convertCritieria(this.searchFilters(), [], false),
+            );
+        }
         return criteriaArray;
     });
     initialized: WritableSignal<boolean> = signal(false);
