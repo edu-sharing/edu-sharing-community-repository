@@ -177,6 +177,10 @@
             <artifactId>flying-saucer-pdf</artifactId>
             <version>9.1.22</version>
         </dependency>
+        <dependency>
+            <groupId>org.edu_sharing</groupId>
+            <artifactId>edu_sharing-community-repository-backend-services-core</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

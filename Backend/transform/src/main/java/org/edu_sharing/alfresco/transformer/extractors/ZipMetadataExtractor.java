@@ -6,6 +6,9 @@ import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.tika.utils.StringUtils;
 import org.edu_sharing.alfresco.transformer.executors.tools.ZipTool;
+import org.edu_sharing.repository.client.tools.forms.VCardTool;
+import org.edu_sharing.service.license.H5PLicenseMapper;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
@@ -13,7 +16,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.alfresco.transform.base.metadata.AbstractMetadataExtractorEmbedder.Type.EXTRACTOR;
@@ -24,6 +29,10 @@ public class ZipMetadataExtractor extends AbstractMetadataExtractorEmbedder {
     public static String ID = "EduSharingZipMetadataExtractor";
 
     public static String TITLE = "title";
+    public static String LICENSE = "license";
+    public static String LICENSEVERSION = "licenseVersion";
+    public static String AUTHOR = "author";
+    public static String AUTHOREDITOR = "authorEditor";
 
     private static final Logger logger = LoggerFactory.getLogger(ZipMetadataExtractor.class);
 
@@ -62,6 +71,38 @@ public class ZipMetadataExtractor extends AbstractMetadataExtractorEmbedder {
                     if(!StringUtils.isBlank(title)) {
                         result.put(TITLE, title);
                     }
+
+                    String licenseKey =  (String)jo.get("license");
+                    if(licenseKey!=null) {
+                        String eduLicenseKey = H5PLicenseMapper.get(licenseKey);
+                        if(eduLicenseKey != null) {
+                            result.put(LICENSE,eduLicenseKey);
+                        }
+                    }
+                    String licenseVersion = (String)jo.get("licenseVersion");
+                    if(licenseVersion!=null) {
+                        result.put(LICENSEVERSION,licenseVersion);
+                    }
+
+
+                    JSONArray authors = (JSONArray)jo.get("authors");
+                    ArrayList<String> authorList = new ArrayList<>();
+                    ArrayList<String> authorEditorList = new ArrayList<>();
+                    if(authors !=null){
+                        for(int i=0;i<authors.size();i++) {
+                            JSONObject author = (JSONObject)authors.get(i);
+                            String authorName = (String)author.get("name");
+                            String authorRole = (String)author.get("role");
+                            if(!StringUtils.isBlank(authorName)) {
+                                String vcard = VCardTool.nameToVCard(authorName);
+                                if(AUTHOREDITOR.equals(authorRole)) authorEditorList.add(vcard);
+                                else authorList.add(vcard);
+                            }
+                        }
+                    }
+                    if(!authorList.isEmpty())result.put(AUTHOR, authorList);
+                    if(!authorEditorList.isEmpty())result.put(AUTHOREDITOR, authorEditorList);
+
                 }
 
             }
