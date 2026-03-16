@@ -135,7 +135,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
 
     // OUTPUTS
     @Output() itemClickedEvent: EventEmitter<Node> = new EventEmitter<Node>();
-    @Output() searchInputHitsChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
+    @Output() searchHitsChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
     @Output() visibleNodesChanged: EventEmitter<Node[]> = new EventEmitter<Node[]>();
 
     @ViewChild('configureWidgetEmbeddingTemplate')
@@ -155,7 +155,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     initialized: WritableSignal<boolean> = signal(false);
     private searchResults: Map<string, number> = new Map<string, number>();
     updateInProgress: WritableSignal<boolean> = signal(false);
-    private updateSearchInputCount$: Subject<void> = new Subject<void>();
+    private updateSearchResultCount$: Subject<void> = new Subject<void>();
     private viewInitialized: boolean = false;
     private widgetComponentRef: ComponentRef<any> | null = null;
     widgetInstance: WidgetComponentInterface | null = null;
@@ -174,13 +174,13 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         private translate: TranslateService,
         private uiService: UIService,
     ) {
-        this.updateSearchInputCount$
+        this.updateSearchResultCount$
             .pipe(debounceTime(1000), takeUntilDestroyed(this.destroyRef))
             .subscribe((): void => {
                 const hasHits: boolean = [...this.searchResults.values()].some(
                     (count) => count > 0,
                 );
-                this.searchInputHitsChanged.emit(hasHits);
+                this.searchHitsChanged.emit(hasHits);
             });
 
         // listen to changes in the selected variables and update potentially AI-generated properties
@@ -583,7 +583,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
      */
     onSearchResultsUpdated(event: { count: number; type: string }): void {
         this.searchResults.set(event.type, event.count);
-        this.updateSearchInputCount$.next();
+        this.updateSearchResultCount$.next();
     }
 
     /**
@@ -594,7 +594,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
      */
     updateSearchResults(count: number, type: string): void {
         this.searchResults.set(type, count);
-        this.updateSearchInputCount$.next();
+        this.updateSearchResultCount$.next();
     }
 
     // HELPERS

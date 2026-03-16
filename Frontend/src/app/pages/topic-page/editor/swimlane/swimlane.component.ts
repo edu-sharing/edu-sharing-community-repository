@@ -52,7 +52,7 @@ export class SwimlaneComponent implements AfterViewChecked {
     @Input() swimlaneIndex: number;
     @Input() topicWidgets: NodeEntries;
     @Output() gridUpdated: EventEmitter<GridTile[]> = new EventEmitter<GridTile[]>();
-    @Output() searchInputHitsChanged: EventEmitter<GridTileToHitsMapping> =
+    @Output() searchHitsChanged: EventEmitter<GridTileToHitsMapping> =
         new EventEmitter<GridTileToHitsMapping>();
     @Output() visibleNodesChanged: EventEmitter<GridTileToSearchResultsMapping> =
         new EventEmitter<GridTileToSearchResultsMapping>();
@@ -96,14 +96,14 @@ export class SwimlaneComponent implements AfterViewChecked {
     }
 
     /**
-     * Called by es-generic-widget searchInputHitsChanged output event.
+     * Called by es-generic-widget searchHitsChanged output event.
      * Emits the hasHits.
      *
      * @param hasHits
      * @param gridIndex
      */
-    changeSearchInputHits(hasHits: boolean, gridIndex: number): void {
-        this.searchInputHitsChanged.emit({ hasHits, gridIndex });
+    changeSearchHits(hasHits: boolean, gridIndex: number): void {
+        this.searchHitsChanged.emit({ hasHits, gridIndex });
     }
 
     /**
