@@ -1,3 +1,4 @@
+
 package org.edu_sharing.restservices.about.v1;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -159,6 +160,32 @@ public class AboutApi {
 
             return Response.ok().build();
 
+        } catch (Throwable t) {
+            logger.debug(t.getMessage(), t);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+
+
+    }
+    @GET
+    @Path("/health/liveness")
+    @Operation(summary = "liveness of repo services", description = "returns http status 200 when all relevant internal state are alive and ok")
+
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
+    public Response liveness(
+                           @QueryParam("timeoutSeconds") @DefaultValue("10") int timeout,
+                           @Context HttpServletRequest req) {
+        try {
+            boolean result = new Monitoring().clusterCheckTimeout(timeout);
+            if (!result) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            }
+            return Response.ok().build();
         } catch (Throwable t) {
             logger.debug(t.getMessage(), t);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
