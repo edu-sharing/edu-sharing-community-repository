@@ -543,7 +543,8 @@ es-side-menu-wrapper {
         }
 
         .no-search-hit {
-            margin-top: 16px;
+            margin: 16px 8px 0 8px;
+            display: block;
         }
 
         .mat-grid-tile {
@@ -728,15 +729,6 @@ es-editable-text {
         font-weight: topicPageVars.$font-weight-x-bold;
         line-height: topicPageVars.$line-height-small;
     }
-}
-
-.abo-label {
-    margin-left: 8px;
-    padding: 4px 8px;
-    background-color: #4caf50;
-    color: white;
-    border-radius: 4px;
-    font-size: 16px;
 }
 
 .swimlane-qr-code {
