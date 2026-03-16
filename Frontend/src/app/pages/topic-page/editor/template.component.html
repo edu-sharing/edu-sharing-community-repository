@@ -284,13 +284,16 @@
             </div>
           </ng-container>
           <ng-container *ngIf="swimlanes.length > 0; else noSwimlanesCreatedYet">
-            <es-info-message
+            <div
+              class="topic-page-swimlane-wrapper"
               *ngIf="searchInputOrFiltersDefined() && !firstMatchingSwimlaneId"
-              mode="info"
-              class="no-search-hit"
             >
-              {{ 'TOPIC_PAGE.NO_SEARCH_RESULTS' | translate }}
-            </es-info-message>
+              <div class="topic-page-swimlane">
+                <es-info-message mode="info" class="no-search-hit">
+                  {{ 'TOPIC_PAGE.NO_SEARCH_RESULTS' | translate }}
+                </es-info-message>
+              </div>
+            </div>
             <!-- note: do not show empty swimlanes to users -->
             <ng-container *ngFor="let swimlane of swimlanes; let i = index">
               <!-- border with button to add a swimlane -->
