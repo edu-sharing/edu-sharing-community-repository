@@ -1560,7 +1560,7 @@ export class MdsEditorInstanceService
     }
     private mapWidgetValues(widgets: Widget[], node?: Node): { [id: string]: string[] } {
         return widgets
-            .filter((widget) => widget.relation === null)
+            ?.filter((widget) => widget.relation === null)
             .reduce((acc, widget) => {
                 const property = widget.definition.id;
                 let newValue = this.getNewPropertyValue(widget, node?.properties[property]);
