@@ -8,14 +8,14 @@ import { Swimlane } from '../types/swimlane';
 export class FilterVisibleSwimlanePipe implements PipeTransform {
     transform(
         swimlanes: Swimlane[] | null,
-        searchInput: string | null,
+        searchFiltered: boolean = false,
         hitMatching: Map<string, boolean> | null,
     ): Swimlane[] {
         if (!swimlanes?.length) {
             return [];
         }
 
-        if (!searchInput) {
+        if (!searchFiltered) {
             return swimlanes;
         }
 

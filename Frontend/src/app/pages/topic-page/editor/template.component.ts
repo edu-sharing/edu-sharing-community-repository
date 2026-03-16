@@ -385,6 +385,12 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
     computedSearchFilters: Signal<Values> = computed(
         (): Values => (this.editMode() ? {} : this.searchFilters()),
     );
+    searchInputOrFiltersDefined: Signal<boolean> = computed(() => {
+        return (
+            this.computedSearchInput() !== '' ||
+            (this.computedSearchFilters() && Object.keys(this.computedSearchFilters())?.length > 0)
+        );
+    });
     private searchInput: WritableSignal<string> = signal('');
     private searchFilters: WritableSignal<Values> = signal({});
     private searchInputSubject: Subject<string> = new Subject<string>();
@@ -1801,7 +1807,7 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
     }
 
     /**
-     * Called by es-swimlane searchInputHitsChanged output event.
+     * Called by es-swimlane searchHitsChanged output event.
      *
      * @param event
      * @param swimlaneIndex

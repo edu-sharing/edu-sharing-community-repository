@@ -239,7 +239,7 @@
           *ngVar="
             (swimlanes
               | filterSwimlaneType : ANCHOR_TYPE : anchorTrigger
-              | filterVisibleSwimlanes : computedSearchInput() : swimlaneIdToHitMatching) ??
+              | filterVisibleSwimlanes : searchInputOrFiltersDefined() : swimlaneIdToHitMatching) ??
             [] as anchorSwimlanes
           "
         >
@@ -285,7 +285,7 @@
           </ng-container>
           <ng-container *ngIf="swimlanes.length > 0; else noSwimlanesCreatedYet">
             <es-info-message
-              *ngIf="computedSearchInput() && !firstMatchingSwimlaneId"
+              *ngIf="searchInputOrFiltersDefined() && !firstMatchingSwimlaneId"
               mode="info"
               class="no-search-hit"
             >
@@ -309,7 +309,9 @@
                 [class.edit-mode]="editMode()"
                 [class.next-item-accordion]="swimlanes[i + 1]?.type === ACCORDION_TYPE"
                 [class.no-search-hit]="
-                  !editMode() && computedSearchInput() && !swimlaneIdToHitMatching.get(swimlane.id)
+                  !editMode() &&
+                  searchInputOrFiltersDefined() &&
+                  !swimlaneIdToHitMatching.get(swimlane.id)
                 "
                 [class.reserve-space-bottom]="i === swimlanes.length - 1"
                 [class.reserve-space-top]="i === 0 && swimlane.type === ACCORDION_TYPE"
@@ -626,7 +628,7 @@
     [swimlaneIndex]="index"
     [topicWidgets]="topicWidgets"
     (gridUpdated)="handleGridUpdate($event, index)"
-    (searchInputHitsChanged)="updateGridItemSearchInputHits($event, index)"
+    (searchHitsChanged)="updateGridItemSearchInputHits($event, index)"
     (visibleNodesChanged)="updateVisibleNodes($event, index)"
   ></es-swimlane>
 </ng-template>
