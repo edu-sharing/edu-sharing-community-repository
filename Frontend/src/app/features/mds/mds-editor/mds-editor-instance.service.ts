@@ -1823,6 +1823,22 @@ export class MdsEditorInstanceService
         const result: Widget[] = [];
         const availableWidgets = this.getAllAvailableWidgets(mdsDefinition, views);
         const variables = await this.config.observeVariables().pipe(first()).toPromise();
+        availableWidgets.forEach((w1, idx1) => {
+            if (
+                availableWidgets.some(
+                    (w2, idx2) =>
+                        idx1 !== idx2 &&
+                        w1.id === w2.id &&
+                        Helper.arrayEquals(w1.template, w2.template),
+                )
+            ) {
+                console.warn(
+                    `Duplicate widget declarations detected. Please carefully check your mds configuration for the widget id ${w1.id}`,
+                    w1,
+                    availableWidgets,
+                );
+            }
+        });
         for (const view of views) {
             for (let widgetDefinition of this.getWidgetsForView(availableWidgets, view)) {
                 widgetDefinition = parseAttributes(view.html, widgetDefinition);
