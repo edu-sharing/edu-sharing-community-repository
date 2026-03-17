@@ -104,6 +104,7 @@ data:
   REPOSITORY_SERVICE_PROT_EXTERNAL: {{ if .Values.ingress.tls }}"https"{{ else }}"http"{{ end }}
   REPOSITORY_SERVICE_WAIT_EXTERNAL: {{ .Values.config.connector.external.timeout | quote }}
   REPOSITORY_SERVICE_WAIT_INTERNAL: {{ .Values.config.connector.internal.timeout | quote }}
+  REPOSITORY_SERVICE_REQUEST_HEADER_SIZE: {{ .Values.config.connector.external.maxHttpRequestHeaderSize | quote  }}
   REPOSITORY_TRANSFORM_ENABLED: "true"
   REPOSITORY_TRANSFORM_AIO_HOST: {{ .Values.config.transform.aio.host | quote }}
   REPOSITORY_TRANSFORM_AIO_PORT: {{ .Values.config.transform.aio.port | quote }}

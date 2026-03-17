@@ -270,6 +270,8 @@ config:
       threads: 200
       ## @param config.connector.external.timeout Set external connector timeout
       timeout: 20000
+      ## @param config.connector.external.maxHttpRequestHeaderSize Set tomcat maxHttpRequestHeaderSize
+      maxHttpRequestHeaderSize: 8192
 
     internal:
       ## @param config.connector.internal.threads Set internal connector threads

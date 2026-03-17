@@ -50,13 +50,13 @@ public class UsageTool {
         }
         return null;
     }
-    public void removeUsage(String lmsId, String courseId, String parentNodeId, String resourceId) throws Exception {
+    public void removeUsage(String lmsId, String courseId, String parentNodeId, String resourceId, boolean ignoreErrors) throws Exception {
         Map<QName, Serializable> usage = this.getUsage(lmsId, courseId, parentNodeId, resourceId);
         if(usage != null){
             String parentId = (String)usage.get(QName.createQName(CCConstants.CCM_PROP_USAGE_PARENTNODEID));
             String usageId = (String)usage.get(QName.createQName(CCConstants.SYS_PROP_NODE_UID));
             nodeService.removeChild(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentId),new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,usageId));
-        }else{
+        }else if(!ignoreErrors) {
             throw new Exception("no usage found for lmsId:"+lmsId +" courseId:"+courseId+ " parentNodeId:"+parentNodeId+" resourceId:"+resourceId);
         }
     }
