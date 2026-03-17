@@ -369,6 +369,7 @@
       </es-info-message>
       <es-node-entries-wrapper
         *ngIf="dataSourceStructure.getTotal() > 0"
+        class="node-entries-structure"
         [columns]="structureColumns"
         [dataSource]="dataSourceStructure"
         [displayType]="NodeEntriesDisplayType.Tree"

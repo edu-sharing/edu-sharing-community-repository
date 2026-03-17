@@ -81,6 +81,15 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
+
+    .node-entries-structure ::ng-deep {
+        mat-tree mat-tree-node:first-of-type .parent-tree-node-container {
+            padding-left: 4px;
+            background: #eee;
+            color: var(--textLight);
+            border-bottom: 1px solid #ccc;
+        }
+    }
 }
 
 .history {
