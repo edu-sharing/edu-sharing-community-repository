@@ -75,7 +75,6 @@ services:
       VIRTUAL_PORT: 8080
       VIRTUAL_DEST: /edu-sharing/
       VIRTUAL_PATH: "${REPOSITORY_SERVICE_PATH:-/edu-sharing}/"
-      ALLOW_EMPTY_PASSWORD: "yes"
       CACHE_CLUSTER: "false"
       CACHE_DATABASE: "0"
       CACHE_HOST: redis-cache
@@ -155,7 +154,6 @@ services:
       REPOSITORY_TRANSFORM_AIO_PORT: "8090"
       REPOSITORY_TRANSFORM_ES_HOST: repository-transform-edu-sharing
       REPOSITORY_TRANSFORM_ES_PORT: "8091"
-      TOMCAT_INSTALL_DEFAULT_WEBAPPS: "no"
     expose:
       - "7199"
       - "8080"
@@ -164,8 +162,8 @@ services:
       - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_SERVICE_PORT_AJP:-8102}:8009"
       - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_SERVICE_PORT_HTTP:-8100}:8081"
     volumes:
-      - "repository-service-volume-config-cluster:/opt/bitnami/tomcat/shared/classes/config/cluster"
-      - "repository-service-volume-config-node:/opt/bitnami/tomcat/shared/classes/config/node"
+      - "repository-service-volume-config-cluster:/usr/local/tomcat/shared/classes/config/cluster"
+      - "repository-service-volume-config-node:/usr/local/tomcat/shared/classes/config/node"
       - "repository-service-volume-data:/opt/alfresco/alf_data"
       - "repository-service-volume-safe:/opt/alfresco/alf_safe"
     depends_on:
