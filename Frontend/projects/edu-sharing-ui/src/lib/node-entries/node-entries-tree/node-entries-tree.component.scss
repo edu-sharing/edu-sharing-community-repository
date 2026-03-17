@@ -81,6 +81,7 @@ mat-tree-node.selected {
 // for children, reverse the same space that the toggle button takes (24px icon width + 4px gap)
 .child-tree-node-container {
     padding-left: 28px;
+    width: 100%;
     max-width: 100%;
 }
 
