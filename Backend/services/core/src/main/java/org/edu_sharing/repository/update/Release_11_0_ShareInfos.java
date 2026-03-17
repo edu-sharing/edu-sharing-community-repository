@@ -19,7 +19,10 @@ import org.edu_sharing.service.share.ShareInfoServiceImpl;
 import org.edu_sharing.service.share.ShareType;
 import org.springframework.dao.DuplicateKeyException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @UpdateService
@@ -36,6 +39,7 @@ public class Release_11_0_ShareInfos {
             description = "Migrate ph_users and ph_invite to shareInfo",
             order = 11000,
             auto = true,
+            isNonTransactional = true,
             async = true,
             blocking = false)
     public void execute() {

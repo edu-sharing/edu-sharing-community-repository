@@ -16,7 +16,9 @@ import org.edu_sharing.service.nodeservice.RecurseMode;
 import org.edu_sharing.service.organization.OrganizationService;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @UpdateService
@@ -32,6 +34,7 @@ public class Release_11_0_OrganizationAssignment {
     @UpdateRoutine(
             id = "Release_11_0_OrganizationAssignment",
             description = "Migrate all materials by assigning the organization of the current owner",
+            isNonTransactional = true,
             order = 0
     )
     public void execute() {
