@@ -239,7 +239,7 @@
     "NOTIFY_TITLE": "Inviare una notifica via e-mail",
     "NOTIFY_INFO": "I nuovi utenti o gruppi riceveranno una notifica di invito.",
     "STRUCTURE": {
-      "INFO": "Trasferisci le persone e i gruppi definiti nella scheda Condivisioni alle sottocollezioni esistenti.\n Le sottocollezioni selezionate erediteranno automaticamente le nuove condivisioni da questa collezione in futuro."
+      "INFO": "Trasferisci le persone e i gruppi definiti nella scheda <strong>Condivisioni</strong> alle sottocollezioni esistenti.\n Le sottocollezioni selezionate erediteranno automaticamente le nuove condivisioni da questa collezione in futuro."
     },
     "METADATA": {
       "INVITED_USERS": "utenti invitati",

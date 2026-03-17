@@ -310,7 +310,7 @@
     "NOTIFY_TITLE": "E-Mail Benachrichtigung senden",
     "NOTIFY_INFO": "Die neu eingeladenenen Nutzenden und Gruppen erhalten eine Benachrichtigung",
     "STRUCTURE": {
-      "INFO": "Übertragen Sie die im Tab Freigaben festgelegten Personen und Gruppen auf vorhandene Untersammlungen.\n Markierte Untersammlungen übernehmen künftig automatisch neue Freigaben aus dieser Sammlung."
+      "INFO": "Übertragen Sie die im Tab <strong>Freigaben</strong> festgelegten Personen und Gruppen auf vorhandene Untersammlungen.\n Markierte Untersammlungen übernehmen künftig automatisch neue Freigaben aus dieser Sammlung."
     },
     "METADATA": {
       "INVITED_USERS": "eingeladene Nutzende",

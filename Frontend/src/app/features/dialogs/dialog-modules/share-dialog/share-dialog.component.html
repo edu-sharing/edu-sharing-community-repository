@@ -365,7 +365,7 @@
     </ng-template>
     <div class="structure">
       <es-info-message mode="info">
-        {{ 'WORKSPACE.STRUCTURE.INFO' | translate }}
+        <span [innerHTML]="'WORKSPACE.STRUCTURE.INFO' | translate"></span>
       </es-info-message>
       <es-node-entries-wrapper
         *ngIf="dataSourceStructure.getTotal() > 0"

@@ -273,7 +273,7 @@
     "NOTIFY_TITLE": "Send e-mail notification",
     "NOTIFY_INFO": "The new users or groups will get an invitation notification",
     "STRUCTURE": {
-      "INFO": "Transfer the persons and groups defined in the Shares tab to existing subcollections.\n Checked subcollections will automatically inherit new shares from this collection in the future."
+      "INFO": "Transfer the persons and groups defined in the <strong>Shares</strong> tab to existing subcollections.\n Checked subcollections will automatically inherit new shares from this collection in the future."
     },
     "METADATA": {
       "INVITED_USERS": "invited users",

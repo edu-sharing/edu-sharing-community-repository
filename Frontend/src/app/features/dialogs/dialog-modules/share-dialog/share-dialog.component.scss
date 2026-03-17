@@ -90,6 +90,10 @@
             border-bottom: 1px solid #ccc;
         }
     }
+
+    es-info-message span {
+        white-space: pre-line;
+    }
 }
 
 .history {
