@@ -93,6 +93,7 @@
     "UNBLOCK_MESSAGE": "Möchten Sie die gewählten Elemente wieder für den Import freischalten?\n\nGgf. dauert es bis zum nächsten Import, bis die Sichtbarkeit in der Suche der Elemente wiederhergestellt ist",
     "TAB_INVITE": "Einladen",
     "TAB_INVITED": "Schon Eingeladen",
+    "TAB_STRUCTURE_INHERITANCE": "Struktur & Vererbung",
     "TAB_RESTRICTED_ACCESS": "Lizenzierung",
     "TAB_PUBLISH": "Veröffentlichen",
     "TAB_ADVANCED": "Erweitert",
@@ -308,6 +309,9 @@
     "PERMISSIONS_UPDATED": "Freigaben wurden aktualisiert",
     "NOTIFY_TITLE": "E-Mail Benachrichtigung senden",
     "NOTIFY_INFO": "Die neu eingeladenenen Nutzenden und Gruppen erhalten eine Benachrichtigung",
+    "STRUCTURE": {
+      "INFO": "Übertragen Sie die im Tab Freigaben festgelegten Personen und Gruppen auf vorhandene Untersammlungen.\n Markierte Untersammlungen übernehmen künftig automatisch neue Freigaben aus dieser Sammlung."
+    },
     "METADATA": {
       "INVITED_USERS": "eingeladene Nutzende",
       "INVITED_GROUPS": "eingeladene Gruppen",

@@ -81,6 +81,7 @@
     "UNBLOCK_MESSAGE": "Si desidera riattivare gli elementi selezionati per l'importazione?\n\nPotrebbe essere necessario fino alla prossima importazione perché gli elementi siano di nuovo visibili nella ricerca.",
     "TAB_INVITE": "Aggiungi",
     "TAB_INVITED": "Invitato",
+    "TAB_STRUCTURE_INHERITANCE": "Struttura ed ereditarietà",
     "TAB_RESTRICTED_ACCESS": "Licenze",
     "TAB_PUBLISH": "Pubblicare",
     "TAB_ADVANCED": "Avanzato",
@@ -237,6 +238,9 @@
     "PERMISSIONS_UPDATED": "Autorizzazioni aggiornate",
     "NOTIFY_TITLE": "Inviare una notifica via e-mail",
     "NOTIFY_INFO": "I nuovi utenti o gruppi riceveranno una notifica di invito.",
+    "STRUCTURE": {
+      "INFO": "Trasferisci le persone e i gruppi definiti nella scheda Condivisioni alle sottocollezioni esistenti.\n Le sottocollezioni selezionate erediteranno automaticamente le nuove condivisioni da questa collezione in futuro."
+    },
     "METADATA": {
       "INVITED_USERS": "utenti invitati",
       "INVITED_GROUPS": "Gruppi invitati",

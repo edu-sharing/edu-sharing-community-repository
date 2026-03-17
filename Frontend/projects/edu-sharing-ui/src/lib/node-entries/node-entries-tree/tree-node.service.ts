@@ -37,6 +37,12 @@ export class TreeNodeService {
         sortAscending: [true],
         sortProperties: [RestConstants.LOM_PROP_TITLE],
     };
+    // whether files should be requested and shown as well
+    private showFiles: boolean = true;
+    // whether multiple selection is allowed
+    private multipleSelection: boolean = false;
+    // holds initially selected nodes to allow later selections
+    private initiallySelectedNodes: Node[] = [];
     private selectionMode: 'source' | 'target' = 'source';
     readonly nodesChanged = new EventEmitter<Node[]>();
 
@@ -182,42 +188,44 @@ export class TreeNodeService {
                             }),
                         ),
                 );
-                const nodeEntriesRef = await firstValueFrom(
-                    this.collectionService
-                        .getReferences({
-                            collection: nodeId,
-                            repository: node.ref.repo,
-                            ...this.baseSearchParams,
-                            sortProperties: [
-                                this.nodeHelperService.getSortByForCollectionReferences(
-                                    node as Node,
-                                ).active,
-                            ],
-                            sortAscending: [
-                                this.nodeHelperService.getSortByForCollectionReferences(
-                                    node as Node,
-                                ).direction === 'asc',
-                            ],
-                        })
-                        .pipe(
-                            map((s) => {
-                                return {
-                                    pagination: s.pagination,
-                                    nodes: s.references,
-                                };
-                            }),
-                        ),
-                );
-                nodeEntries.nodes = nodeEntries.nodes.concat(nodeEntriesRef.nodes);
-                nodeEntriesRef.pagination.count += nodeEntries.pagination.count;
-                nodeEntriesRef.pagination.total += nodeEntries.pagination.total;
+                if (this.showFiles) {
+                    const nodeEntriesRef = await firstValueFrom(
+                        this.collectionService
+                            .getReferences({
+                                collection: nodeId,
+                                repository: node.ref.repo,
+                                ...this.baseSearchParams,
+                                sortProperties: [
+                                    this.nodeHelperService.getSortByForCollectionReferences(
+                                        node as Node,
+                                    ).active,
+                                ],
+                                sortAscending: [
+                                    this.nodeHelperService.getSortByForCollectionReferences(
+                                        node as Node,
+                                    ).direction === 'asc',
+                                ],
+                            })
+                            .pipe(
+                                map((s) => {
+                                    return {
+                                        pagination: s.pagination,
+                                        nodes: s.references,
+                                    };
+                                }),
+                            ),
+                    );
+                    nodeEntries.nodes = nodeEntries.nodes.concat(nodeEntriesRef.nodes);
+                    nodeEntriesRef.pagination.count += nodeEntries.pagination.count;
+                    nodeEntriesRef.pagination.total += nodeEntries.pagination.total;
+                }
             } else {
                 // regular file/folders
                 nodeEntries = await firstValueFrom(
                     this.nodeService.getChildren(nodeId, this.baseSearchParams),
                 );
             }
-            children = nodeEntries?.nodes ?? [];
+            children = this.replaceNodeReferences(nodeEntries?.nodes ?? []);
             // hold the last loaded node ID to load the next elements
             if (children.length < nodeEntries.pagination.total) {
                 this.parentIdToLastLoadedNodeId.set(
@@ -256,7 +264,9 @@ export class TreeNodeService {
             }),
         );
         const requestedChildren = nodeEntries?.nodes ?? [];
-        const children = existingChildren.concat(requestedChildren);
+        const children = this.replaceNodeReferences(
+            existingChildren.concat(requestedChildren) as Node[],
+        );
         this.dataMap.set(nodeId, children);
         // update the last loaded node ID to load the next elements
         if (children.length < nodeEntries.pagination.total) {
@@ -418,5 +428,65 @@ export class TreeNodeService {
         this.initialData = [];
         this.parentIdToLastLoadedNodeId = new Map<string, string>();
         this.emptyParentIds = [];
+    }
+
+    /**
+     * Updates the show files flag to a given value.
+     *
+     * @param showFiles
+     */
+    updateShowFiles(showFiles: boolean) {
+        this.showFiles = showFiles;
+    }
+
+    /**
+     * Updates the multiple selection flag to a given value.
+     *
+     * @param multipleSelection
+     */
+    updateMultipleSelectionAllowed(multipleSelection: boolean) {
+        this.multipleSelection = multipleSelection;
+    }
+
+    /**
+     * Returns whether multiple selection is allowed.
+     */
+    isMultipleSelectionAllowed(): boolean {
+        return this.multipleSelection;
+    }
+
+    /**
+     * Updates the initially selected nodes.
+     *
+     * @param nodes
+     */
+    updateInitiallySelectedNodes(nodes: Node[]) {
+        this.initiallySelectedNodes = nodes;
+    }
+
+    /**
+     * Helper function to replace node references of already selected nodes in a given array of nodes.
+     * This is necessary as the comparison of the SelectionModel uses reference equality (===) by default,
+     * so the selection is not detected properly, even when both JSON objects are identically.
+     *
+     * @param nodes
+     */
+    private replaceNodeReferences(nodes: Node[]) {
+        if (this.initiallySelectedNodes?.length) {
+            nodes = nodes.map((child) => {
+                // check if a child exists that was initially selected and replace it
+                const match = this.initiallySelectedNodes.find(
+                    (initialNode) => child.ref.id === initialNode.ref.id,
+                );
+                // remove match as already added before
+                if (match) {
+                    this.initiallySelectedNodes = this.initiallySelectedNodes.filter(
+                        (initialNode) => initialNode.ref.id !== match.ref.id,
+                    );
+                }
+                return match ?? child;
+            });
+        }
+        return nodes;
     }
 }

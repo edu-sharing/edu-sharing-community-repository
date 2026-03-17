@@ -94,6 +94,7 @@
     "UNBLOCK_MESSAGE": "Do you want to reactivate the selected elements for importing?\n\nIt may will take up to the next import run until the elements are visible in search again",
     "TAB_INVITE": "Add",
     "TAB_INVITED": "Invited",
+    "TAB_STRUCTURE_INHERITANCE": "Structure & Inheritance",
     "TAB_RESTRICTED_ACCESS": "Licensing",
     "TAB_PUBLISH": "Publish",
     "TAB_ADVANCED": "Advanced",
@@ -271,6 +272,9 @@
 
     "NOTIFY_TITLE": "Send e-mail notification",
     "NOTIFY_INFO": "The new users or groups will get an invitation notification",
+    "STRUCTURE": {
+      "INFO": "Transfer the persons and groups defined in the Shares tab to existing subcollections.\n Checked subcollections will automatically inherit new shares from this collection in the future."
+    },
     "METADATA": {
       "INVITED_USERS": "invited users",
       "INVITED_GROUPS": "invited groups",

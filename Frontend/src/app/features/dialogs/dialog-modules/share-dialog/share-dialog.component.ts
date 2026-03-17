@@ -1,3 +1,4 @@
+import { SelectionChange } from '@angular/cdk/collections';
 import {
     AfterViewInit,
     ApplicationRef,
@@ -11,8 +12,20 @@ import {
     TemplateRef,
     ViewChild,
 } from '@angular/core';
+import { MatTabChangeEvent } from '@angular/material/tabs';
 import { TranslateService } from '@ngx-translate/core';
-import { LocalEventsService, NodeHelperService, UIAnimation } from 'ngx-edu-sharing-ui';
+import {
+    ColumnType,
+    InteractionType,
+    LocalEventsService,
+    MdsHelperService,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent,
+    NodeHelperService,
+    TreeNodeService,
+    UIAnimation,
+} from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
 import { forkJoin as observableForkJoin, of } from 'rxjs';
 import {
@@ -78,6 +91,7 @@ export type ExtendedAce = Omit<Ace, 'authority'> & {
     templateUrl: './share-dialog.component.html',
     styleUrls: ['./share-dialog.component.scss'],
     animations: [trigger('overlay', UIAnimation.openOverlay())],
+    providers: [TreeNodeService],
     standalone: false,
 })
 export class ShareDialogComponent implements OnInit, AfterViewInit {
@@ -87,6 +101,8 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     @ViewChild('inheritRef') inheritRef: any;
     @ViewChild('state') stateRef: TemplateRef<HTMLElement>;
     @ViewChild('shareLink') shareLinkRef: TemplateRef<HTMLElement>;
+    @ViewChild(NodeEntriesWrapperComponent)
+    structureTreeNodeEntries: NodeEntriesWrapperComponent<Node>;
     @Input() dataInput: ShareDialogData;
     @Output() permissionsChange = new EventEmitter<ShareDialogResult>();
     readonly RestConstants = RestConstants;
@@ -195,6 +211,10 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     showChooseType = false;
     private showChooseTypeList: Permission;
 
+    structureColumns: ColumnType;
+    readonly structureTabId: string = 'structure_tab';
+    dataSourceStructure: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
+
     constructor(
         @Optional() @Inject(CARD_DIALOG_DATA) public dataCard: ShareDialogData,
         @Optional() private dialogRef: CardDialogRef<ShareDialogData, ShareDialogResult>,
@@ -210,11 +230,13 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         private aboutService: AboutService,
         private iam: RestIamService,
         private iamV1Service: IamV1Service,
+        private mdsHelperService: MdsHelperService,
         private nodeApiLegacy: RestNodeService,
         private nodeApi: NodeService,
-        private nodeHelperService: NodeHelperService,
+        public nodeHelperService: NodeHelperService,
         private toast: Toast,
         private translate: TranslateService,
+        private treeNodeService: TreeNodeService,
         private usageApi: RestUsageService,
     ) {
         //this.dataService=new SearchData(iam);
@@ -239,6 +261,10 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
             },
             permissions: [RestConstants.PERMISSION_CONSUMER, RestConstants.ACCESS_CC_PUBLISH],
         };
+        // do not show files in the node-entries-tree of the structure tab
+        this.treeNodeService.updateShowFiles(false);
+        // allow multiple selection in the node-entries-tree of the structure tab
+        this.treeNodeService.updateMultipleSelectionAllowed(true);
 
         this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
             this.isSafe = data.currentScope != null;
@@ -253,6 +279,9 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         this.hasNotificationService = await this.aboutService.hasPlugin(
             RestConstants.PLUGIN_KAFKA_NOTIFICATION,
         );
+        this.structureColumns = await this.mdsHelperService.getColumnsByMdsId('search', {
+            repository: HOME_REPOSITORY,
+        });
     }
 
     ngAfterViewInit(): void {
@@ -1111,4 +1140,43 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         }
         this.dialogRef?.close(this.getEmitObject(permissions));
     }
+
+    onTabChange(event: MatTabChangeEvent): void {
+        if (event.tab?.id === this.structureTabId) {
+            void this.updateStructureView();
+        }
+    }
+
+    /**
+     * Updates the structure view by setting the current nodes as data source for the tree.
+     * Other nodes are loaded subsequently (first level on init, remaining levels on demand)
+     */
+    private async updateStructureView(): Promise<void> {
+        // TODO: request nodes with inherited permissions and select them in the node entries
+        const nodesWithInheritedPermissions: Node[] = [];
+        // Note: The comparison of the SelectionModel uses reference equality (===) by default,
+        //       so the selection is not detected properly, even when both JSON objects are identically
+        // set them in the service to be replaced when requested
+        this.treeNodeService.updateInitiallySelectedNodes(nodesWithInheritedPermissions);
+        this.dataSourceStructure.isLoading = true;
+        this.dataSourceStructure.setData(this._nodes);
+        this.dataSourceStructure.isLoading = false;
+        // update the selection as soon as the data source is loaded
+        setTimeout(async () => {
+            this.structureTreeNodeEntries.getSelection().select(...nodesWithInheritedPermissions);
+        });
+    }
+
+    onNodeSelectionChange(event: SelectionChange<Node>) {
+        console.log('onNodeSelectionChange', event);
+        event.added?.forEach((node: Node) => {
+            console.log('Check that node has inheritance set', node);
+        });
+        event.removed?.forEach((node: Node) => {
+            console.log('Check that node has inheritance not set', node);
+        });
+    }
+
+    protected readonly InteractionType = InteractionType;
+    protected readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
 }

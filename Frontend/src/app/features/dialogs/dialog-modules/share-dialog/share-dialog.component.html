@@ -10,7 +10,7 @@
   </button>
 </ng-template>
 
-<mat-tab-group mat-stretch-tabs [(selectedIndex)]="tab">
+<mat-tab-group mat-stretch-tabs [(selectedIndex)]="tab" (selectedTabChange)="onTabChange($event)">
   <mat-tab class="tabContent tabContentInvite">
     <ng-template mat-tab-label>
       <i esIcon="group_add" class="tab-icon"></i>
@@ -345,6 +345,34 @@
                                     [showDelete]="false"
         ></es-share-dialog-permission>
         -->
+    </div>
+  </mat-tab>
+  <mat-tab
+    [id]="structureTabId"
+    *ngIf="
+      _nodes &&
+      _nodes.length === 1 &&
+      _nodes[0].ref?.id &&
+      nodeHelperService.isNodeCollection(_nodes[0])
+    "
+    class="tabContent"
+  >
+    <ng-template mat-tab-label>
+      <i esIcon="group" class="tab-icon"></i>
+      <span class="tab-label">{{ 'WORKSPACE.TAB_STRUCTURE_INHERITANCE' | translate }}</span>
+    </ng-template>
+    <div class="structure">
+      <es-info-message mode="info">
+        {{ 'WORKSPACE.STRUCTURE.INFO' | translate }}
+      </es-info-message>
+      <es-node-entries-wrapper
+        *ngIf="dataSourceStructure.getTotal() > 0"
+        [columns]="structureColumns"
+        [dataSource]="dataSourceStructure"
+        [displayType]="NodeEntriesDisplayType.Tree"
+        [elementInteractionType]="InteractionType.Emitter"
+        (selectionChange)="onNodeSelectionChange($event)"
+      ></es-node-entries-wrapper>
     </div>
   </mat-tab>
   <mat-tab *ngIf="_nodes && publishPermission && !isBulk() && !isSafe" class="tabContent">

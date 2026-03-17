@@ -81,6 +81,7 @@
     "UNBLOCK_MESSAGE": "Voulez-vous réactiver les éléments sélectionnés pour l'importation ?\n\nIl faudra peut-être attendre la prochaine importation pour que les éléments soient à nouveau visibles dans la recherche.",
     "TAB_INVITE": "Ajouter",
     "TAB_INVITED": "Sur invitation",
+    "TAB_STRUCTURE_INHERITANCE": "Structure et héritage",
     "TAB_RESTRICTED_ACCESS": "Licences",
     "TAB_PUBLISH": "Publier",
     "TAB_ADVANCED": "Avancé",
@@ -250,6 +251,9 @@
     "PERMISSIONS_UPDATED": "Mise à jour des autorisations",
     "NOTIFY_TITLE": "Envoyer une notification par courrier électronique",
     "NOTIFY_INFO": "Les nouveaux utilisateurs ou groupes recevront une notification d'invitation.",
+    "STRUCTURE": {
+      "INFO": "Transférez les personnes et les groupes définis dans l'onglet Partages aux sous-collections existantes.\n Les sous-collections cochées hériteront automatiquement des nouveaux partages de cette collection à l'avenir."
+    },
     "METADATA": {
       "INVITED_USERS": "utilisateurs invités",
       "INVITED_GROUPS": "groupes invités",
