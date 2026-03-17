@@ -296,7 +296,9 @@
         <es-mat-link
           class="manageLink uppercase"
           *ngIf="publishPermission && !isBulk() && !isSafe"
-          (clickOnLink)="tab = 2"
+          (clickOnLink)="
+            tab = _nodes[0].ref?.id && nodeHelperService.isNodeCollection(_nodes[0]) ? 3 : 2
+          "
         >
           {{ 'WORKSPACE.SHARE.MANAGE_PUBLISH' | translate }}</es-mat-link
         >
