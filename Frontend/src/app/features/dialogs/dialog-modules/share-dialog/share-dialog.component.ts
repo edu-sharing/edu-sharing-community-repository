@@ -435,7 +435,9 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                     //this.inheritAllowed = !this.isCollection() && data.nodes.length > 1;
                     // changed in 4.1 to keep inherit state of collections
                     this.inheritAllowed =
-                        !data || data.scope === 'MY_FILES' || data.nodes.length > 1;
+                        !data ||
+                        ['MY_FILES', 'COLLECTION'].includes(data.scope) ||
+                        data.nodes.length > 1;
                     this.isSharedScope = data?.scope === 'SHARED_FILES';
                     this.updateToolpermissions();
                 });
@@ -721,7 +723,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                 return;
             }
             this.dialogRef?.patchState({ isLoading: true });
-            let inherit = this.inherited && this.inheritAllowed && !this.isCollection();
+            let inherit = this.inherited && this.inheritAllowed;
             const actions = this._nodes.map((n, i) => {
                 return async () => {
                     let permissions: Ace[] = Helper.deepCopy(this.permissions);
