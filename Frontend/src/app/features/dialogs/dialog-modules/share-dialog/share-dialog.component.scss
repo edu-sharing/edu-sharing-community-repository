@@ -42,20 +42,29 @@
 .group {
     position: relative;
     display: flex;
-    padding: 10px 20px;
 }
 
 .groupInvite {
-    padding: 10px 20px;
-    padding-top: 26px;
-    //background-color: $actionDialogBackground;
+    margin-top: 24px;
     flex-direction: column;
 }
 
-.invited,
+.groupInvited {
+    display: block;
+    > strong {
+        font-size: $fontSizeLarge;
+    }
+}
+
+.share-group,
 .advanced,
-.structure {
+.structure-group {
     padding: 20px $cardPadding;
+}
+
+.share-group {
+    display: flex;
+    flex-direction: column;
 }
 
 .advanced {
@@ -77,7 +86,7 @@
     }
 }
 
-.structure {
+.structure-group {
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -85,8 +94,9 @@
     .node-entries-structure ::ng-deep {
         mat-tree mat-tree-node:first-of-type .parent-tree-node-container {
             padding-left: 4px;
-            background: #eee;
+            background: #fafafa;
             color: var(--textLight);
+            height: 56px;
             border-bottom: 1px solid #ccc;
         }
     }
@@ -102,7 +112,6 @@
 }
 
 .groupMessage {
-    padding: 0 20px;
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -125,9 +134,11 @@
 }
 
 .bulk-config {
-    padding: 20px $cardPadding;
-    .mat-heading-4 {
+    margin-top: 16px;
+    strong {
         padding-bottom: 15px;
+        font-size: $fontSizeLarge;
+        display: block;
     }
     .mat-radio-button {
         padding: 5px 10px;
@@ -136,9 +147,6 @@
 
 .groupToInvite {
     display: flex;
-    margin-top: 35px;
-    padding-bottom: 45px;
-    padding-right: 20px;
     align-items: center;
     .toInvite {
         overflow: hidden;
@@ -170,7 +178,7 @@
     width: 100%;
     display: flex;
     background: #eee;
-    border-radius: 25px;
+    border-radius: 8px;
     margin-bottom: 6px;
     align-items: center;
     es-share-dialog-permission {
@@ -208,6 +216,22 @@
     cursor: default;
 }
 
+// fix height of owner, link share and usage to align with remaining items
+.owner,
+.link,
+.usage {
+    &.groupEntry,
+    .usageEntry {
+        &::ng-deep .group .container {
+            > .permissionName,
+            > .name {
+                // height of close button + 2 * padding
+                min-height: calc(48px + 2 * 3px);
+            }
+        }
+    }
+}
+
 .groupHeading {
     display: flex;
     align-items: baseline;
@@ -233,13 +257,9 @@
     white-space: pre-wrap;
 }
 
-.tabContentInvite {
-    padding-top: 0;
-}
-
 .inheritCheck {
+    margin-top: 16px;
     float: left;
-    padding-left: 20px;
 }
 
 .manageLink {
@@ -256,7 +276,8 @@
     top: -60px;
 }
 
-.notify-info {
+.notify-info,
+.inherit-info {
     color: $textLight;
 }
 

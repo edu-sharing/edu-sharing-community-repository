@@ -135,8 +135,15 @@ export class TreeNodeService {
                         0,
                     );
                 } else if (!subChildren.length && treeNode && treeNode.level === 0) {
-                    // store information about empty root elements
-                    this.emptyParentIds.push(treeNode.item.ref.id);
+                    // fix directories do not store information on whether they contain sub-nodes
+                    const isDirectory: boolean =
+                        !childIsCollection && child.type === RestConstants.CCM_TYPE_MAP;
+                    if (isDirectory) {
+                        treeNode.expandable = true;
+                    } else {
+                        // store information about empty root elements
+                        this.emptyParentIds.push(treeNode.item.ref.id);
+                    }
                 }
                 if (treeNode && this.isExpandable(child)) {
                     treeNode.expandable = true;
@@ -224,6 +231,16 @@ export class TreeNodeService {
                 nodeEntries = await firstValueFrom(
                     this.nodeService.getChildren(nodeId, this.baseSearchParams),
                 );
+                // filter out files if not requested and update the pagination
+                if (!this.showFiles) {
+                    let filteredNodesCount: number = nodeEntries.nodes.length;
+                    nodeEntries.nodes = nodeEntries.nodes.filter(
+                        (n) => n.type !== RestConstants.CCM_TYPE_IO,
+                    );
+                    filteredNodesCount -= nodeEntries.nodes.length;
+                    nodeEntries.pagination.count -= filteredNodesCount;
+                    nodeEntries.pagination.total -= filteredNodesCount;
+                }
             }
             children = this.replaceNodeReferences(nodeEntries?.nodes ?? []);
             // hold the last loaded node ID to load the next elements

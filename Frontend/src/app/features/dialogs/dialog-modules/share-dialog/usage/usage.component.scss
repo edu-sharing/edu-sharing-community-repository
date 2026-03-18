@@ -4,12 +4,11 @@
     width: 100%;
 }
 .deleted-info {
-    // the outer boundary in share dialog has 15px + 5px padding
-    width: calc(100% + 20px);
+    width: calc(100% - 16px);
     height: 30px;
     position: absolute;
     align-items: center;
-    left: -15px;
+    left: 0;
     top: 0;
     z-index: 1;
     display: flex;
@@ -61,9 +60,9 @@
 }
 .single {
     display: flex;
-    padding-left: 25px;
+    padding: 0 8px 0 24px;
     position: relative;
-    > div {
+    > div:not(.deleted-info) {
         display: flex;
         align-items: center;
         width: 100%;

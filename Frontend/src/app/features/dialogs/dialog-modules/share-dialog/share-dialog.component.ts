@@ -9,8 +9,10 @@ import {
     OnInit,
     Optional,
     Output,
+    signal,
     TemplateRef,
     ViewChild,
+    WritableSignal,
 } from '@angular/core';
 import { MatTabChangeEvent } from '@angular/material/tabs';
 import { TranslateService } from '@ngx-translate/core';
@@ -27,7 +29,7 @@ import {
     UIAnimation,
 } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
-import { forkJoin as observableForkJoin, of } from 'rxjs';
+import { firstValueFrom, forkJoin as observableForkJoin, of } from 'rxjs';
 import {
     CollectionUsage,
     ConfigurationService,
@@ -203,7 +205,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
 
     currentType = [RestConstants.ACCESS_CONSUMER, RestConstants.ACCESS_CC_PUBLISH];
     inherited: boolean;
-    notifyUsers = true;
+    notifyUsers: boolean = true;
     notifyMessage: string;
     inherit: ExtendedAce[] = [];
     permissions: ExtendedAce[] = null;
@@ -211,6 +213,8 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     showChooseType = false;
     private showChooseTypeList: Permission;
 
+    isCollectionOrDirectory: WritableSignal<boolean> = signal(false);
+    atLeastOneTreeChild: WritableSignal<boolean> = signal(false);
     structureColumns: ColumnType;
     readonly structureTabId: string = 'structure_tab';
     dataSourceStructure: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
@@ -348,10 +352,10 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                 this.dialogRef?.patchConfig(config),
             );
         this._nodes = nodes;
-        this.initialize();
+        void this.initialize();
     }
 
-    private initialize() {
+    private async initialize() {
         const isDirectory = new Set(this._nodes.map((n) => n.isDirectory));
         if (isDirectory.size !== 1) {
             this.toast.error(null, 'WORKSPACE.SHARE.ERROR_INVALID_TYPE_COMBINATION');
@@ -468,6 +472,20 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                     });
             }
         }
+        // check whether the first node is either a collection or directory
+        const isCollection: boolean = this.isCollection();
+        const nodeIsDirectory: boolean =
+            !isCollection && this._nodes[0]?.type === RestConstants.CCM_TYPE_MAP;
+        this.isCollectionOrDirectory.set(
+            this._nodes?.length > 0 && (isCollection || nodeIsDirectory),
+        );
+        // count the number of tree children with type !== ccm:io
+        const children: Node[] = this._nodes?.length
+            ? (await firstValueFrom(this.nodeApi.getChildren(this._nodes[0].ref.id))).nodes
+            : [];
+        this.atLeastOneTreeChild.set(
+            children?.some((n) => n.type !== RestConstants.CCM_TYPE_IO) ?? false,
+        );
         this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
             this.isAdmin = data.isAdmin;
         });

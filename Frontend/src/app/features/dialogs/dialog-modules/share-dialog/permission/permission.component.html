@@ -13,6 +13,81 @@
       <span class="secondary">{{ _permission | permissionName : { field: 'secondary' } }}</span>
     </div>
     <div class="permission" [class.readOnly]="!isEditable">
+      <!-- This template displays the overlay content and is connected to the button -->
+      <div
+        *ngIf="invalidPermission"
+        title="{{
+          'WORKSPACE.SHARE.TYPE_UNKNOWN_DESCRIPTION'
+            | translate : { permissions: _permission.permissions.join(', ') }
+        }}"
+      >
+        <div>
+          <i aria-hidden="true" class="material-icons align">help_outline</i>
+          <span>{{ 'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate }}</span>
+          <div class="select"></div>
+        </div>
+      </div>
+      <div *ngIf="!invalidPermission" class="permission-type">
+        <button
+          mat-button
+          [disabled]="isEditable !== true"
+          (click)="chooseType()"
+          role="combobox"
+          [attr.aria-label]="
+            'WORKSPACE.SHARE.TYPE_MENU_LABEL' | translate : { user: _permission | permissionName }
+          "
+          aria-haspopup="true"
+          [attr.aria-expanded]="showChooseType || null"
+          [attr.aria-controls]="showChooseType ? 'es-share-dialog-choose-type-menu' : null"
+        >
+          <ng-container *ngIf="_permission.permissions.indexOf('Owner') > -1">
+            <i class="material-icons align">home</i>
+            <span>{{ 'WORKSPACE.SHARE.GROUP_OWNER' | translate }}</span>
+          </ng-container>
+          <ng-container *ngIf="_permission.permissions.indexOf('Consumer') > -1">
+            <i class="material-icons align">remove_red_eye</i>
+            <span>{{ 'WORKSPACE.SHARE.TYPE_VIEWER' | translate }}</span>
+            <span *ngIf="isEditable === true && !isEveryone" class="select">
+              <i class="material-icons align">keyboard_arrow_down</i>
+            </span>
+          </ng-container>
+          <ng-container *ngIf="_permission.permissions.indexOf('Collaborator') > -1">
+            <i class="material-icons align">edit</i>
+            <span>{{ 'WORKSPACE.SHARE.TYPE_COWORKER' | translate }}</span>
+            <span *ngIf="isEditable === true && !isEveryone" class="select">
+              <i class="material-icons align">keyboard_arrow_down</i>
+            </span>
+          </ng-container>
+          <ng-container
+            *ngIf="
+              _permission.permissions.indexOf('Coordinator') > -1 ||
+              _permission.permissions.indexOf('All') > -1
+            "
+          >
+            <i class="material-icons align">work</i>
+            <span>{{ 'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate }}</span>
+            <span *ngIf="isEditable === true && !isEveryone" class="select">
+              <i class="material-icons align">keyboard_arrow_down</i>
+            </span>
+          </ng-container>
+        </button>
+
+        <div *ngIf="_permission.permissions.length === 0"></div>
+
+        <es-share-dialog-choose-type
+          *ngIf="showChooseType"
+          class="typeAdd"
+          [aria-label]="
+            'WORKSPACE.SHARE.TYPE_MENU_LABEL' | translate : { user: _permission | permissionName }
+          "
+          [selected]="_permission.permissions"
+          [isDirectory]="isDirectory"
+          [canPublish]="canPublish"
+          (cancelType)="showChooseType = false"
+          (typeChosen)="doChangeType($event)"
+        ></es-share-dialog-choose-type>
+      </div>
+
       <button
         mat-icon-button
         (click)="openTimebased()"
@@ -58,8 +133,9 @@
                 (ngModelChange)="
                   $event ? (timebased.from = getDateTomorrow()) : (timebased.from = null)
                 "
-                >{{ 'WORKSPACE.SHARE.TIMEBASED.FROM_CHECKBOX' | translate }}</mat-checkbox
               >
+                {{ 'WORKSPACE.SHARE.TIMEBASED.FROM_CHECKBOX' | translate }}
+              </mat-checkbox>
               <div *ngIf="!!timebased.from">
                 <es-share-dialog-choose-date
                   [(dateTime)]="timebased.from"
@@ -72,8 +148,9 @@
                 (ngModelChange)="
                   $event ? (timebased.to = getDateTomorrow(timebased.from)) : (timebased.to = null)
                 "
-                >{{ 'WORKSPACE.SHARE.TIMEBASED.TO_CHECKBOX' | translate }}</mat-checkbox
               >
+                {{ 'WORKSPACE.SHARE.TIMEBASED.TO_CHECKBOX' | translate }}
+              </mat-checkbox>
               <div *ngIf="!!timebased.to">
                 <es-share-dialog-choose-date
                   [(dateTime)]="timebased.to"
@@ -103,6 +180,7 @@
         *ngIf="(_permission.from || _permission.to) && timebasedInvalid"
         [matTooltip]="'WORKSPACE.SHARE.TIMEBASED.INVALID_STATE' | translate"
       ></i>
+
       <div class="publish">
         <i
           class="material-icons"
@@ -111,83 +189,9 @@
             _permission.permissions.indexOf('CCPublish') > -1
           "
           matTooltip="{{ 'WORKSPACE.SHARE.PUBLISHER' | translate }}"
-          >public</i
         >
-      </div>
-      <!-- This template displays the overlay content and is connected to the button -->
-
-      <div
-        *ngIf="invalidPermission"
-        title="{{
-          'WORKSPACE.SHARE.TYPE_UNKNOWN_DESCRIPTION'
-            | translate : { permissions: _permission.permissions.join(', ') }
-        }}"
-      >
-        <div>
-          <i aria-hidden="true" class="material-icons align">help_outline</i>
-          <span>{{ 'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate }}</span>
-          <div class="select"></div>
-        </div>
-      </div>
-      <div *ngIf="!invalidPermission" class="permission-type">
-        <button
-          mat-button
-          [disabled]="isEditable !== true"
-          (click)="chooseType()"
-          role="combobox"
-          [attr.aria-label]="
-            'WORKSPACE.SHARE.TYPE_MENU_LABEL' | translate : { user: _permission | permissionName }
-          "
-          aria-haspopup="true"
-          [attr.aria-expanded]="showChooseType || null"
-          [attr.aria-controls]="showChooseType ? 'es-share-dialog-choose-type-menu' : null"
-        >
-          <ng-container *ngIf="_permission.permissions.indexOf('Owner') > -1">
-            <i class="material-icons align">home</i>
-            <span>{{ 'WORKSPACE.SHARE.GROUP_OWNER' | translate }}</span>
-          </ng-container>
-          <ng-container *ngIf="_permission.permissions.indexOf('Consumer') > -1">
-            <i class="material-icons align">remove_red_eye</i>
-            <span>{{ 'WORKSPACE.SHARE.TYPE_VIEWER' | translate }}</span>
-            <span *ngIf="isEditable === true && !isEveryone" class="select"
-              ><i class="material-icons align">keyboard_arrow_down</i></span
-            >
-          </ng-container>
-          <ng-container *ngIf="_permission.permissions.indexOf('Collaborator') > -1">
-            <i class="material-icons align">edit</i>
-            <span>{{ 'WORKSPACE.SHARE.TYPE_COWORKER' | translate }}</span>
-            <span *ngIf="isEditable === true && !isEveryone" class="select"
-              ><i class="material-icons align">keyboard_arrow_down</i></span
-            >
-          </ng-container>
-          <ng-container
-            *ngIf="
-              _permission.permissions.indexOf('Coordinator') > -1 ||
-              _permission.permissions.indexOf('All') > -1
-            "
-          >
-            <i class="material-icons align">work</i>
-            <span>{{ 'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate }}</span>
-            <span *ngIf="isEditable === true && !isEveryone" class="select"
-              ><i class="material-icons align">keyboard_arrow_down</i></span
-            >
-          </ng-container>
-        </button>
-
-        <div *ngIf="_permission.permissions.length === 0"></div>
-
-        <es-share-dialog-choose-type
-          *ngIf="showChooseType"
-          class="typeAdd"
-          [aria-label]="
-            'WORKSPACE.SHARE.TYPE_MENU_LABEL' | translate : { user: _permission | permissionName }
-          "
-          [selected]="_permission.permissions"
-          [isDirectory]="isDirectory"
-          [canPublish]="canPublish"
-          (cancelType)="showChooseType = false"
-          (typeChosen)="doChangeType($event)"
-        ></es-share-dialog-choose-type>
+          public
+        </i>
       </div>
     </div>
     <div>
