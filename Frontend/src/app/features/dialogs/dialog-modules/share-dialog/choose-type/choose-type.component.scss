@@ -26,7 +26,7 @@
         background-color: $actionDialogBackground;
         padding: 20px 10px;
         display: flex;
-        justify-content: flex-end;
+        justify-content: center;
         mat-slide-toggle {
             background-color: transparent;
             .toggle {
@@ -37,6 +37,11 @@
                     left: 0;
                     margin-right: 5px;
                 }
+            }
+            // add gap between toggle and label
+            &::ng-deep .mdc-form-field {
+                display: inline-flex;
+                gap: 8px;
             }
         }
     }
@@ -56,15 +61,20 @@
         font-weight: bold;
 
         i {
-            margin-right: 8px;
+            margin-right: 12px;
         }
     }
 
     p {
         color: $textLight;
-        padding: 0 28px;
-        margin: 8px 0;
+        margin: 8px 0 4px;
+        padding-bottom: 0;
         text-align: left;
         line-height: 1.5;
     }
+}
+
+#es-share-dialog-choose-type-menu ::ng-deep .mat-mdc-option {
+    padding-top: 8px;
+    padding-bottom: 8px;
 }
