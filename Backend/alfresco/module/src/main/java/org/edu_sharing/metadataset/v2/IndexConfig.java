@@ -3,8 +3,10 @@ package org.edu_sharing.metadataset.v2;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
-public class IndexConfig {
+public class IndexConfig implements Serializable {
 
     public enum DataType {
         Dynamic, // for native type use as fallback if nothing is specified.
