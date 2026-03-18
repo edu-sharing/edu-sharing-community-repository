@@ -42,6 +42,11 @@ public @interface UpdateRoutine {
 
     /**
      * @return If set the update will not be capsuled in a global transactional context
+     * be careful using isNonTransactional=false when you're expecting the routine handle a lot of data.
+     * there are ibatis cache's that fill up without limit within an db session
+     * look at HierarchicalXMLConfigBuilder
+     *    configuration.setLocalCacheScope(LocalCacheScope.valueOf(props.getProperty("localCacheScope", "SESSION")));
+     *    it seems there is an IBatis Session for every transaction
      */
     boolean isNonTransactional() default false;
 
