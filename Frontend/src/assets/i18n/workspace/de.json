@@ -91,7 +91,7 @@
     "DELETE_IMPORT_BLOCK_INFO": "Das Element wird gesperrt und zukünftig nicht erneut importiert",
     "UNBLOCK_TITLE": "Element(e) reaktivieren?",
     "UNBLOCK_MESSAGE": "Möchten Sie die gewählten Elemente wieder für den Import freischalten?\n\nGgf. dauert es bis zum nächsten Import, bis die Sichtbarkeit in der Suche der Elemente wiederhergestellt ist",
-    "TAB_SHARES": "Freigaben",
+    "TAB_SHARING": "Freigaben",
     "TAB_STRUCTURE_INHERITANCE": "Struktur & Vererbung",
     "TAB_RESTRICTED_ACCESS": "Lizenzierung",
     "TAB_PUBLISH": "Veröffentlichen",
@@ -113,7 +113,7 @@
     },
     "SHARE": {
       "TITLE": "Freigaben verwalten",
-      "LOCAL_SHARES_TITLE": "Lokale Freigaben",
+      "LOCAL_SHARING_TITLE": "Lokale Freigaben",
       "NO_PERMISSIONS": "Noch keine expliziten Berechtigungen an diesem Element",
       "GROUP_OWNER": "Eigentümer",
       "GROUP_USERS": "Personen",
