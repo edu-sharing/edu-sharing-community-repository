@@ -190,6 +190,10 @@
         "TO_CHECKBOX": "End-Zeitpunkt festlegen",
         "DATE_LABEL": "Datum",
         "TIME_LABEL": "Uhrzeit",
+        "WITHOUT_LIMITS": "Unbegrenzt",
+        "START": "Start",
+        "END": "End",
+        "TIME": "Zeitpunkt",
         "INVALID_DATE": "Ungültiges Datum"
       },
       "PUBLISH": {

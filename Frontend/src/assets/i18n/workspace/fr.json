@@ -171,6 +171,10 @@
         "TO_CHECKBOX": "Définir l'heure de fin",
         "DATE_LABEL": "Date",
         "TIME_LABEL": "Heure",
+        "WITHOUT_LIMITS": "Sans limites",
+        "START": "Début",
+        "END": "Fin",
+        "TIME": "Date",
         "INVALID_DATE": "Date non valide"
       },
 

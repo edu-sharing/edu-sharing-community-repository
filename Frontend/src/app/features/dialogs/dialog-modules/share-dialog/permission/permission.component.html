@@ -88,92 +88,113 @@
         ></es-share-dialog-choose-type>
       </div>
 
-      <button
-        mat-icon-button
-        (click)="openTimebased()"
-        [class.timebased-active]="_permission.from || _permission.to"
-        [disabled]="inherit"
-        matTooltip="{{
-          'WORKSPACE.SHARE.TIMEBASED.TOOLTIP'
-            | translate : { permissions: _permission.permissions.join(', ') }
-        }}"
-        *ngIf="
-          permissionTimebased &&
-          (inherit || ((isEditable === 'timebasedOnly' || isEditable === true) && timebasedAllowed))
-        "
-        cdkOverlayOrigin
-        #timebasedTrigger="cdkOverlayOrigin"
-      >
-        <i esIcon="alarm"></i>
-        <ng-template
-          cdkConnectedOverlay
-          [cdkConnectedOverlayHasBackdrop]="true"
-          (backdropClick)="timebasedOpen = false"
-          [cdkConnectedOverlayOrigin]="timebasedTrigger"
-          [cdkConnectedOverlayPositions]="[
-            {
-              originX: 'end',
-              originY: 'bottom',
-              overlayX: 'end',
-              overlayY: 'top'
-            },
-            {
-              originX: 'end',
-              originY: 'bottom',
-              overlayX: 'end',
-              overlayY: 'bottom'
-            }
-          ]"
-          [cdkConnectedOverlayOpen]="timebasedOpen"
+      <div>
+        <button
+          mat-button
+          (click)="openTimebased()"
+          [class.timebased-active]="_permission.from || _permission.to"
+          [disabled]="inherit"
+          matTooltip="{{
+            'WORKSPACE.SHARE.TIMEBASED.TOOLTIP'
+              | translate : { permissions: _permission.permissions.join(', ') }
+          }}"
+          *ngIf="
+            permissionTimebased &&
+            (inherit ||
+              ((isEditable === 'timebasedOnly' || isEditable === true) && timebasedAllowed))
+          "
+          cdkOverlayOrigin
+          #timebasedTrigger="cdkOverlayOrigin"
         >
-          <div class="timebased-overlay">
-            <div class="content">
-              <mat-checkbox
-                [ngModel]="!!timebased.from"
-                (ngModelChange)="
-                  $event ? (timebased.from = getDateTomorrow()) : (timebased.from = null)
-                "
-              >
-                {{ 'WORKSPACE.SHARE.TIMEBASED.FROM_CHECKBOX' | translate }}
-              </mat-checkbox>
-              <div *ngIf="!!timebased.from">
-                <es-share-dialog-choose-date
-                  [(dateTime)]="timebased.from"
-                  [from]="currentDate"
-                  [to]="timebased.to"
-                ></es-share-dialog-choose-date>
+          <i esIcon="schedule"></i>
+          <span *ngIf="!_permission.from && !_permission.to; else timebasedPermissions">
+            {{ 'WORKSPACE.SHARE.TIMEBASED.WITHOUT_LIMITS' | translate }}
+          </span>
+          <i esIcon="keyboard_arrow_down"></i>
+          <ng-template #timebasedPermissions>
+            <ng-container *ngIf="_permission.from">{{
+              'WORKSPACE.SHARE.TIMEBASED.START' | translate
+            }}</ng-container>
+            <ng-container *ngIf="_permission.from && _permission.to">- & </ng-container>
+            <ng-container *ngIf="_permission.to">{{
+              'WORKSPACE.SHARE.TIMEBASED.END' | translate
+            }}</ng-container>
+            <ng-container *ngIf="_permission.from || _permission.to"
+              >-{{ 'WORKSPACE.SHARE.TIMEBASED.TIME' | translate }}</ng-container
+            >
+          </ng-template>
+          <ng-template
+            cdkConnectedOverlay
+            [cdkConnectedOverlayHasBackdrop]="true"
+            (backdropClick)="timebasedOpen = false"
+            [cdkConnectedOverlayOrigin]="timebasedTrigger"
+            [cdkConnectedOverlayPositions]="[
+              {
+                originX: 'end',
+                originY: 'bottom',
+                overlayX: 'end',
+                overlayY: 'top'
+              },
+              {
+                originX: 'end',
+                originY: 'bottom',
+                overlayX: 'end',
+                overlayY: 'bottom'
+              }
+            ]"
+            [cdkConnectedOverlayOpen]="timebasedOpen"
+          >
+            <div class="timebased-overlay">
+              <div class="content">
+                <mat-checkbox
+                  [ngModel]="!!timebased.from"
+                  (ngModelChange)="
+                    $event ? (timebased.from = getDateTomorrow()) : (timebased.from = null)
+                  "
+                >
+                  {{ 'WORKSPACE.SHARE.TIMEBASED.FROM_CHECKBOX' | translate }}
+                </mat-checkbox>
+                <div *ngIf="!!timebased.from">
+                  <es-share-dialog-choose-date
+                    [(dateTime)]="timebased.from"
+                    [from]="currentDate"
+                    [to]="timebased.to"
+                  ></es-share-dialog-choose-date>
+                </div>
+                <mat-checkbox
+                  [ngModel]="!!timebased.to"
+                  (ngModelChange)="
+                    $event
+                      ? (timebased.to = getDateTomorrow(timebased.from))
+                      : (timebased.to = null)
+                  "
+                >
+                  {{ 'WORKSPACE.SHARE.TIMEBASED.TO_CHECKBOX' | translate }}
+                </mat-checkbox>
+                <div *ngIf="!!timebased.to">
+                  <es-share-dialog-choose-date
+                    [(dateTime)]="timebased.to"
+                    [from]="timebased.from || currentDate"
+                  ></es-share-dialog-choose-date>
+                </div>
+                <div class="actions">
+                  <button mat-button color="primary" (click)="timebasedOpen = null">
+                    {{ 'CANCEL' | translate }}
+                  </button>
+                  <button mat-flat-button color="primary" (click)="saveTimebased()">
+                    {{ 'SAVE' | translate }}
+                  </button>
+                </div>
               </div>
-              <mat-checkbox
-                [ngModel]="!!timebased.to"
-                (ngModelChange)="
-                  $event ? (timebased.to = getDateTomorrow(timebased.from)) : (timebased.to = null)
-                "
-              >
-                {{ 'WORKSPACE.SHARE.TIMEBASED.TO_CHECKBOX' | translate }}
-              </mat-checkbox>
-              <div *ngIf="!!timebased.to">
-                <es-share-dialog-choose-date
-                  [(dateTime)]="timebased.to"
-                  [from]="timebased.from || currentDate"
-                ></es-share-dialog-choose-date>
-              </div>
-              <div class="actions">
-                <button mat-button color="primary" (click)="timebasedOpen = null">
-                  {{ 'CANCEL' | translate }}
+              <!-- <div class="close">
+                <button mat-icon-button (click)="timebasedOpen = false">
+                  <i esIcon="close"></i>
                 </button>
-                <button mat-flat-button color="primary" (click)="saveTimebased()">
-                  {{ 'SAVE' | translate }}
-                </button>
-              </div>
+              </div> -->
             </div>
-            <!-- <div class="close">
-              <button mat-icon-button (click)="timebasedOpen = false">
-                <i esIcon="close"></i>
-              </button>
-            </div> -->
-          </div>
-        </ng-template>
-      </button>
+          </ng-template>
+        </button>
+      </div>
       <i
         esIcon="warning"
         class="timebased-invalid"

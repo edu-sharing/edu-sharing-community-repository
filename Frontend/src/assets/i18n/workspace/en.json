@@ -190,6 +190,10 @@
         "TO_CHECKBOX": "Set end date",
         "DATE_LABEL": "Date",
         "TIME_LABEL": "Time",
+        "WITHOUT_LIMITS": "Without limits",
+        "START": "Start",
+        "END": "End",
+        "TIME": "Date",
         "INVALID_DATE": "Invalid date"
       },
       "PUBLISH": {
