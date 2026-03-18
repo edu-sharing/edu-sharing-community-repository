@@ -30,13 +30,6 @@ public class MetadataSet implements Serializable {
 	private MetadataCreate create;
 	private MetadataWidgetDefaults widgetDefaults;
 
-	public String getId() {
-		return id;
-	}
-	public void setId(String id) {
-		this.id = id;
-	}	
-
 	public MetadataQueries getQueries(String syntax) {
 		return queries.get(syntax);
 	}
@@ -272,13 +265,5 @@ public class MetadataSet implements Serializable {
 		}
 	  }
 		return empty;
-	}
-
-	public void setWidgetDefaults(MetadataWidgetDefaults widgetDefaults) {
-		this.widgetDefaults = widgetDefaults;
-	}
-
-	public MetadataWidgetDefaults getWidgetDefaults() {
-		return widgetDefaults;
 	}
 }

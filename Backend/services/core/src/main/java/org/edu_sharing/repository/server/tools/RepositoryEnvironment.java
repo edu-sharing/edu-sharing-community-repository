@@ -2,7 +2,6 @@ package org.edu_sharing.repository.server.tools;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.spring.scope.refresh.annotations.RefreshScope;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

@@ -483,6 +483,7 @@ public class MetadataReader {
         }
         return create;
     }
+
     private MetadataWidgetDefaults getWidgetDefaults() throws Exception {
         MetadataWidgetDefaults defaults = null;
         NodeList widgetsDefaultNode = (NodeList) xpath.evaluate("/metadataset/widgets/defaults", doc, XPathConstants.NODESET);
@@ -493,7 +494,7 @@ public class MetadataReader {
                 Node data = list2.item(j);
                 String name = data.getNodeName();
                 String value = data.getTextContent();
-                if(defaults == null) {
+                if (defaults == null) {
                     defaults = new MetadataWidgetDefaults();
                 }
                 switch (name) {
@@ -505,6 +506,7 @@ public class MetadataReader {
         }
         return defaults;
     }
+
     List<MetadataWidget> getWidgets(MetadataWidgetDefaults defaults) throws Exception {
         List<MetadataWidget> widgets = new ArrayList<>();
         NodeList widgetsNode = (NodeList) xpath.evaluate("/metadataset/widgets/widget", doc, XPathConstants.NODESET);
@@ -650,6 +652,8 @@ public class MetadataReader {
                     case "allowempty":
                         widget.setAllowempty(value.equalsIgnoreCase("true"));
                         break;
+                    case "index":
+                        widget.setIndexConfig(getIndexConfig(data.getChildNodes()));
                 }
             }
             List<ValuespaceInfo> valuespaces = new ArrayList<>();
@@ -752,6 +756,19 @@ public class MetadataReader {
         return result;
     }
 
+    private IndexConfig getIndexConfig(NodeList indexConfigNodes) throws Exception {
+        IndexConfig indexConfig = new IndexConfig();
+        for (int j = 0; j < indexConfigNodes.getLength(); j++) {
+            Node innerNode = indexConfigNodes.item(j);
+            switch (innerNode.getNodeName()) {
+                case "dataType":
+                    indexConfig.setDataType(IndexConfig.DataType.valueOf(innerNode.getTextContent()));
+                    break;
+            }
+        }
+        return indexConfig;
+    }
+
     private MetadataCondition getCondition(Node node, String id) {
         boolean negate = false;
         boolean dynamic = false;
@@ -805,8 +822,8 @@ public class MetadataReader {
 
 
     private ValuespaceData getValuespaceExternal(ValuespaceInfo value) throws Exception {
-        if(LightbendConfigLoader.get().getBoolean("repository.communication.metadatasets.externalValuespaces") == false) {
-            log.info("Will not resolve external valuespace " + value.getValue() + " since it is not allowed by config");
+        if (LightbendConfigLoader.get().getBoolean("repository.communication.metadatasets.externalValuespaces") == false) {
+            log.info("Will not resolve external valuespace {} since it is not allowed by config", value.getValue());
             return new ValuespaceData(new MetadataKey(), Collections.emptyList());
         }
         ValuespaceReader reader = ValuespaceReader.getSupportedReader(value);
@@ -815,10 +832,10 @@ public class MetadataReader {
                 return reader.getValuespace(locale);
             } catch (Throwable t) {
                 if (value.isLenient()) {
-                    log.warn("Could not read valuespace " + value.getValue() + ": " + t.getMessage() + " (will continue since lenient=true)", t);
+                    log.warn("Could not read valuespace {}: {} (will continue since lenient=true)", value.getValue(), t.getMessage(), t);
                     return new ValuespaceData(new MetadataKey(), Collections.emptyList());
                 } else {
-                    log.error("Could not read valuespace " + value.getValue() + ": " + t.getMessage());
+                    log.error("Could not read valuespace {}: {}", value.getValue(), t.getMessage());
                     throw t;
                 }
             }
@@ -832,12 +849,13 @@ public class MetadataReader {
         List<MetadataWidget.MetadataInputPreprocessor> list = new ArrayList<>();
         for (int i = 0; i < keysNode.getLength(); i++) {
             Node keyNode = keysNode.item(i);
-            if(keyNode.getNodeName().equals("preprocessor")) {
+            if (keyNode.getNodeName().equals("preprocessor")) {
                 list.add(MetadataWidget.MetadataInputPreprocessor.valueOf(keyNode.getTextContent()));
             }
         }
         return list;
     }
+
     private List<MetadataKey> getValues(NodeList keysNode, String valuespaceI18n, String valuespaceI18nPrefix) {
         List<MetadataKey> keys = new ArrayList<>();
         for (int i = 0; i < keysNode.getLength(); i++) {

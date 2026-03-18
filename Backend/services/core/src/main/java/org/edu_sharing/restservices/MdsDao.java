@@ -80,7 +80,7 @@ public class MdsDao {
     public Mds asMds() {
 
         Mds data = new Mds();
-
+        data.setId(mds.getId());
         data.setName(mds.getName());
         data.setCreate(mds.getCreate() != null ? new Mds.Create(mds.getCreate()) : null);
         data.setAiConfigs(getAiConfigs());

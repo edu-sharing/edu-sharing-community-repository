@@ -84,6 +84,8 @@ public class MdsWidget {
 
     private List<MdsAiConfig> aiConfigs;
 
+    private MdsIndex index;
+
     public MdsWidget() {
     }
 
@@ -147,6 +149,10 @@ public class MdsWidget {
                     .stream()
                     .map(x -> new MdsAiConfig(x.getId(), x.getProvider(), x.getUseCaching(), x.getClearCache(), x.getChatCompletion(), x.getCreateImage()))
                     .collect(Collectors.toList());
+        }
+
+        if(widget.getIndexConfig() != null){
+            this.index = new MdsIndex(widget.getIndexConfig().getDataType());
         }
     }
 }

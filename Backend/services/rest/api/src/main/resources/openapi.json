@@ -3435,6 +3435,9 @@
             },
             "type": "array"
           },
+          "id": {
+            "type": "string"
+          },
           "lists": {
             "items": {
               "$ref": "#/components/schemas/MdsList"
@@ -3465,6 +3468,7 @@
         },
         "required": [
           "groups",
+          "id",
           "lists",
           "name",
           "sorts",
@@ -3541,6 +3545,18 @@
               "type": "string"
             },
             "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "MdsIndex": {
+        "properties": {
+          "dataType": {
+            "enum": [
+              "Dynamic",
+              "JsonData"
+            ],
+            "type": "string"
           }
         },
         "type": "object"
@@ -3781,6 +3797,9 @@
               "type": "string"
             },
             "type": "object"
+          },
+          "index": {
+            "$ref": "#/components/schemas/MdsIndex"
           },
           "inputPreprocessor": {
             "items": {

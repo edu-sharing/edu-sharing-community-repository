@@ -12,6 +12,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Mds {
 
 	@JsonProperty(required = true)
+	private String id;
+
+	@JsonProperty(required = true)
 	private String name = null;
 
 	private Create create = null;

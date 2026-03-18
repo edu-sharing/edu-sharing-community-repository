@@ -146,6 +146,7 @@ public class MetadataWidget extends MetadataTranslatable {
     private String link;
     private String suggestionReceiver;
     private List<AiConfig> aiConfigs = new ArrayList<>();
+    private IndexConfig indexConfig = new IndexConfig();
 
     public void setDefaults(MetadataWidgetDefaults widgetDefaults) {
         this.widgetDefaults = widgetDefaults;
