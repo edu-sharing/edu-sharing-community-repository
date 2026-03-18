@@ -127,10 +127,6 @@
         "CHANGES_SAVED": "Profil gespeichert – jetzt bekommst du passende Inhalte angezeigt!",
         "CHANGES_RESET": "Deine Profilierung wurde zurückgesetzt."
       },
-      "SEARCH_WIDGET": {
-        "SEARCH": "Suche",
-        "SEARCH_PLACEHOLDER": "Suche nach Inhalten auf der Themenseite ..."
-      },
       "SHARE_OPTIONS": {
         "COPY_LINK": "Link kopieren",
         "COPY_LINK_TO_CONTENT": "Link zum Inhalt kopieren",
