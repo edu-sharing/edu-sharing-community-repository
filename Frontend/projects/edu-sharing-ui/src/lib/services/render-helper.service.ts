@@ -41,7 +41,6 @@ export class RenderHelperService {
             }),
         );
         const node = securedNode.node;
-        console.info(this.injector.get(OptionsHelperDataService));
         this.optionsHelperDataService?.setData({
             scope: Scope.Render,
             activeObjects: [node],

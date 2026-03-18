@@ -16,6 +16,7 @@ import { KeyboardShortcutsService } from './abstract/keyboard-shortcuts.service'
 import { ActivatedRoute } from '@angular/router';
 import { LocalEventsService } from './local-events.service';
 import { Toast } from './abstract/toast.service';
+import { GlobalStateService } from 'ngx-rendering-service-api';
 
 type DeleteEvent = {
     objects: Node[] | any;
@@ -34,6 +35,7 @@ export interface OptionData {
     selectedObjects?: Node[] | any[];
     allObjects?: Node[] | any[];
     parent?: Node | any;
+    customDownloadUrl?: string;
     customOptions?: CustomOptions;
     /**
      * custom interceptor to modify the default options array
@@ -61,10 +63,16 @@ export class OptionsHelperDataService implements OnDestroy {
         private toast: Toast,
         private userService: UserService,
         private networkService: NetworkService,
+        private globalStateService: GlobalStateService,
         @Optional() private keyboardShortcutsService: KeyboardShortcutsService,
         @Optional() private optionsHelperService: OptionsHelperService,
     ) {
         this.registerStaticSubscriptions();
+        this.globalStateService.downloadUrl$.pipe(takeUntil(this.destroyed)).subscribe(() => {
+            if (this.data) {
+                void this.refreshComponents();
+            }
+        });
     }
     /** Performs subscriptions that don't have to be refreshed. */
     private registerStaticSubscriptions(): void {
@@ -96,7 +104,10 @@ export class OptionsHelperDataService implements OnDestroy {
     }
 
     getData() {
-        return this.data;
+        return {
+            ...this.data,
+            customDownloadUrl: this.globalStateService.downloadUrl$.value,
+        };
     }
 
     setData(data: OptionData) {
@@ -113,7 +124,7 @@ export class OptionsHelperDataService implements OnDestroy {
             return;
         }
         this.globalOptions = await this.getAvailableOptions(Target.Actionbar);
-        await this.optionsHelperService?.refreshComponents(this.components, this.data);
+        await this.optionsHelperService?.refreshComponents(this.components, this.getData());
     }
 
     getAvailableOptions(target: Target, objects: Node[] = null) {
@@ -121,7 +132,7 @@ export class OptionsHelperDataService implements OnDestroy {
             target,
             objects,
             this.components,
-            this.data,
+            this.getData(),
         );
     }
 
@@ -167,7 +178,8 @@ export class OptionsHelperDataService implements OnDestroy {
     }
     filterOptions(options: OptionItem[], target: Target, objects: Node[] | any = null) {
         return (
-            this.optionsHelperService?.filterOptions(options, target, this.data, objects) || options
+            this.optionsHelperService?.filterOptions(options, target, this.getData(), objects) ||
+            options
         );
     }
     /**
@@ -185,6 +197,6 @@ export class OptionsHelperDataService implements OnDestroy {
     }
 
     pasteNode(nodes: Node[] = []) {
-        this.optionsHelperService.pasteNode(this.components, this.data, true, nodes);
+        this.optionsHelperService.pasteNode(this.components, this.getData(), true, nodes);
     }
 }
