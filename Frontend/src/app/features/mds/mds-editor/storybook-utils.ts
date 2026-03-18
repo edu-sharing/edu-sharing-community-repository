@@ -843,6 +843,7 @@ export const DummyNode: Partial<Node> = {
 
 export const DefaultMds: MdsDefinition = {
     name: 'Core Metadataset',
+    id: 'default',
     create: null,
     aiConfigs: [
         {
