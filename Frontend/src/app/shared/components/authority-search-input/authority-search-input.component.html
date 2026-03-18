@@ -24,7 +24,6 @@
       placeholder="{{ placeholder | translate }}"
       name="authoritySearch"
       [formControl]="input"
-      cdkFocusInitial
     />
     <es-spinner-small *ngIf="suggestionLoading | async" matSuffix></es-spinner-small>
     <mat-hint *ngIf="hint">{{ hint }}</mat-hint>

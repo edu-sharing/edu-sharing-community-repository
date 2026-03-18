@@ -1,4 +1,5 @@
 import {
+    AfterViewInit,
     ChangeDetectorRef,
     Component,
     ElementRef,
@@ -44,7 +45,7 @@ type SuggestionResult = SuggestionGroup[] | 'NO_RECENT' | 'NO_MATCHES';
     providers: [PermissionNamePipe],
     standalone: false,
 })
-export class AuthoritySearchInputComponent implements OnChanges {
+export class AuthoritySearchInputComponent implements AfterViewInit, OnChanges {
     @ViewChild('inputElement') inputElement: ElementRef<HTMLInputElement>;
 
     private _globalSearchAllowed = false;
@@ -61,6 +62,10 @@ export class AuthoritySearchInputComponent implements OnChanges {
      * maximum number of authorities to fetch in total
      */
     @Input() authorityCount = 50;
+    /**
+     * Set initial focus on the input field
+     */
+    @Input() initialFocus = true;
     /**
      * Show recent invited users
      */
@@ -118,6 +123,12 @@ export class AuthoritySearchInputComponent implements OnChanges {
             );
         } else {
             this._globalSearchAllowed = this.globalSearchAllowed;
+        }
+    }
+
+    ngAfterViewInit() {
+        if (this.initialFocus) {
+            this.inputElement?.nativeElement.focus();
         }
     }
 
