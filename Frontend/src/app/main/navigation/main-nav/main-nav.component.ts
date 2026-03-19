@@ -15,10 +15,7 @@ import {
     About,
     AboutService,
     AuthenticationService,
-    ConfigService,
     CurrentUserInfo,
-    RepositoryMessage,
-    SessionStorageService,
     User,
     UserService,
 } from 'ngx-edu-sharing-api';
@@ -170,7 +167,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
 
     @HostListener('window:resize')
     onResize(event: any) {
-        this.updateUserOptions();
+        void this.updateUserOptions();
     }
 
     private init(): void {
@@ -392,7 +389,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             this.config = data;
             this.editUrl = data.editProfileUrl;
             this.showEditProfile = data.editProfile;
-            this.updateUserOptions();
+            void this.updateUserOptions();
         });
     }
 

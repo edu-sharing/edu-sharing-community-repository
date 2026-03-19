@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, effect, signal, ViewChild } from '@angular/core';
+import { Component, effect, signal, ViewChild } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { EditorialBreadcrumbService } from '../editorial-breadcrumb/editorial-breadcrumb.service';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom } from 'rxjs';
@@ -35,7 +35,7 @@ import { RenderWrapperComponent } from '../../render2-page/render-wrapper-compon
     styleUrls: ['assignment-submission.component.scss'],
     imports: [SharedModule, TranslateModule, NgxExtendedPdfViewerModule, RenderWrapperComponent],
 })
-export class AssignmentSubmissionComponent implements AfterViewInit {
+export class AssignmentSubmissionComponent {
     @ViewChild(NodeEntriesWrapperComponent)
     nodeEntries: NodeEntriesWrapperComponent<SubmissionWithAssignment>;
     dataSource = new NodeDataSource<SubmissionWithAssignment>();
@@ -75,7 +75,7 @@ export class AssignmentSubmissionComponent implements AfterViewInit {
             if (!correction?.downloadUrl) {
                 this.selectedSubmissionFileUrl.set(null);
             } else {
-                this.repoUrlService
+                void this.repoUrlService
                     .getRepoUrl(correction.downloadUrl, correction)
                     .then((url) => this.selectedSubmissionFileUrl.set(url));
             }
@@ -128,8 +128,6 @@ export class AssignmentSubmissionComponent implements AfterViewInit {
             });
     }
 
-    ngAfterViewInit(): void {}
-
     protected readonly InteractionType = InteractionType;
     protected readonly Scope = Scope;
     protected readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
@@ -152,7 +150,6 @@ export class AssignmentSubmissionComponent implements AfterViewInit {
         this.editorialSidebarService.configChange$
             .pipe(take(1))
             .subscribe((config: SubmissionConfig) => {
-                console.log('sub', config);
                 this.dataSource.setData(config.submissionList);
                 this.select(config.submission);
             });

@@ -66,7 +66,7 @@ import {
 } from '../../main/navigation/search-field/search-field.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EditorialPageService } from './editorial-page.service';
-import { debounceTime, delay, distinctUntilChanged, first, startWith, tap } from 'rxjs/operators';
+import { debounceTime, delay, distinctUntilChanged, first, startWith } from 'rxjs/operators';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { SelectionChange, SelectionModel } from '@angular/cdk/collections';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
@@ -264,7 +264,6 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
     private registerMode() {
         this.params$.subscribe(async (p) => {
-            console.log(p);
             this.editorialBreadcrumbService.mode.set(p.primaryMode);
             if (p.primaryMode === 'activity') {
                 this.columns.set({
@@ -389,10 +388,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             this.pagination$.pipe(distinctUntilChanged((a, b) => Helper.objectEquals(a, b))),
             this.mainComponent$.pipe(distinctUntilChanged()),
             // first one will be the init of the set
-            this.searchValues$.pipe(
-                distinctUntilChanged((a, b) => Helper.objectEquals(a, b)),
-                tap((a) => console.log('values', a)),
-            ),
+            this.searchValues$.pipe(distinctUntilChanged((a, b) => Helper.objectEquals(a, b))),
         ])
             .pipe(
                 filter(([init]) => init),
@@ -445,7 +441,6 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         if (params.q) {
             ngsearchword = params.q;
             this.searchFieldService.getCurrentInstance().setSearchString(params.q);
-            console.log('search string', params.q);
         }
 
         this.IgnoredSearchFields.forEach((f) => delete criteria[f]);
@@ -474,7 +469,6 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             return;
         }
 
-        console.log('processCurrentValues', params);
         this.prepareOptions();
         this.dataSource.isLoading = true;
         this.dataSource.reset();

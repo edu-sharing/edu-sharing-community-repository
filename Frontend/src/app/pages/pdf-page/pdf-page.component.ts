@@ -193,7 +193,7 @@ export class PdfPageComponent implements AfterViewInit, OnDestroy, OnInit {
      * TODO: annotation change does currently not work for drawings and stamps.
      */
     changeAnnotation() {
-        console.log('change annotation', this.pdfViewerService.getSerializedAnnotations());
+        // console.log('change annotation', this.pdfViewerService.getSerializedAnnotations());
     }
 
     /**

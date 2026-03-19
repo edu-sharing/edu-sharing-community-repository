@@ -16,8 +16,8 @@ import {
     MdsDefinition,
     MdsService,
     Node,
-    SessionStorageService,
     NodeService,
+    SessionStorageService,
     UserService,
 } from 'ngx-edu-sharing-api';
 import {
@@ -587,7 +587,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         if (!params.id && !params.query && lastLocation) {
             this.openDirectory(lastLocation, { replaceUrl: true });
         } else {
-            this.openDirectoryFromRoute(params);
+            void this.openDirectoryFromRoute(params);
         }
         if (params.showAlpha) {
             this.showAlpha();
@@ -1094,7 +1094,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
             () => {
                 this.toMeSharedToggle$.next(!this.toMeSharedToggle$.value);
                 void this.session.set('toMeSharedGroup', this.toMeSharedToggle$.value);
-                this.openDirectoryFromRoute();
+                void this.openDirectoryFromRoute();
                 //this.treeComponent.reload = Boolean(true);
                 this.toast.toast(
                     'WORKSPACE.TOAST.TO_ME_SHARED_' +

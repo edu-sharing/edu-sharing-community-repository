@@ -8,7 +8,7 @@ import {
     NodeService,
     RestConstants,
 } from 'ngx-edu-sharing-api';
-import { firstValueFrom, map, tap } from 'rxjs';
+import { firstValueFrom, map } from 'rxjs';
 import { LocalEventsService } from '../../services/local-events.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { DynamicFlatNode } from './dynamic-flat-node';
@@ -420,13 +420,11 @@ export class TreeNodeService {
                 }
             } else {
                 if (deleted) {
-                    console.log('d', node, nodeId, this.dataMap);
                     for (let entry of this.dataMap.entries()) {
                         this.dataMap.set(
                             entry[0],
                             entry[1].filter((v) => v.ref.id !== nodeId),
                         );
-                        console.log(this.dataMap, entry[0]);
                     }
                 }
                 updatedNodes.push(node);

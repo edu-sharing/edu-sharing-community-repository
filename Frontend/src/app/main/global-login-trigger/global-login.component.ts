@@ -52,7 +52,7 @@ export class GlobalLoginComponent {
     }
 
     sendToBackend(token: string) {
-        fetch(this.platformLocation.getBaseHrefFromDOM() + 'login/google', {
+        void fetch(this.platformLocation.getBaseHrefFromDOM() + 'login/google', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ credential: token }),

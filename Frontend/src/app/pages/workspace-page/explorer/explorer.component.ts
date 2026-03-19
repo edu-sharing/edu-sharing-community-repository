@@ -205,7 +205,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
                 first(),
             )
             .subscribe(() => {
-                this.storage.get<Sort>(this.getSortConfigKey(), null).then((data) => {
+                void this.storage.get<Sort>(this.getSortConfigKey(), null).then((data) => {
                     if (data?.active != null) {
                         this.sort.active = data.active;
                         this.sort.direction = data.direction;
@@ -480,7 +480,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
 
     initColumns() {
         this.config.get('workspaceColumns').subscribe((data: string[]) => {
-            this.storage.get<ListItem[]>('workspaceColumns_10.0').then((columns) => {
+            void this.storage.get<ListItem[]>('workspaceColumns_10.0').then((columns) => {
                 this.columns = {
                     Default: WorkspaceExplorerComponent.getColumns(this.connector, columns, data),
                 };

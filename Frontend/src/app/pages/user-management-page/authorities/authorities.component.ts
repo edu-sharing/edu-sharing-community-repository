@@ -75,7 +75,6 @@ import { NodeHelperService } from '../../../services/node-helper.service';
 import { Toast, ToastType } from '../../../services/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import {
-    CLOSE,
     DELETE_OR_CANCEL,
     OK,
     SAVE_OR_CANCEL,
@@ -914,7 +913,6 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         } else if (this._mode == 'USER' && !this.org) {
             sort = this.sortConfig.active;
             if (sort === RestConstants.AUTHORITY_NAME) {
-                console.log('sort:' + sort);
                 sort = RestConstants.USER_NAME;
             }
             if (sort === RestConstants.AUTHORITY_STATUS) {

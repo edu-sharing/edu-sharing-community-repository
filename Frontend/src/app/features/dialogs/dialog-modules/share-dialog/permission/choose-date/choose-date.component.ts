@@ -73,7 +73,6 @@ export class ShareDialogChooseDateComponent implements OnInit, OnChanges {
     }
 
     updateDate(event: MatDatepickerInputEvent<Date, any>) {
-        console.log(event);
         const currentDate = new Date(this.dateTime);
         if (!event.value && (event.targetElement as HTMLInputElement).value) {
             const value = (event.targetElement as HTMLInputElement).value;

@@ -120,7 +120,7 @@ export class LuceneTemplateMemoryComponent {
         private toast: Toast,
         private translate: TranslateService,
     ) {
-        this.storage
+        void this.storage
             .get<LuceneTemplates>(LuceneTemplateMemoryComponent.STORAGE_KEY)
             .then((templates) => {
                 this.templates = templates ?? {};

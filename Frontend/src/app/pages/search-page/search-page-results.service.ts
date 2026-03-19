@@ -71,7 +71,7 @@ export abstract class SearchPageResults {
     };
 
     readonly onDblClick = (node: Node) => {
-        this._router.navigate([this._nodeHelper.getNodeLink('routerLink', node)], {
+        void this._router.navigate([this._nodeHelper.getNodeLink('routerLink', node)], {
             queryParams: this._nodeHelper.getNodeLink('queryParams', node) as any,
         });
     };
@@ -138,7 +138,7 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
     }
 
     readonly onDblClick = (node: Node) => {
-        this._router.navigate([this._nodeHelper.getNodeLink('routerLink', node)], {
+        void this._router.navigate([this._nodeHelper.getNodeLink('routerLink', node)], {
             queryParams: this._nodeHelper.getNodeLink('queryParams', node) as any,
         });
     };

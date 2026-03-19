@@ -15,8 +15,8 @@ import {
     DEFAULT,
     HOME_REPOSITORY,
     Node,
-    SearchService,
     SearchResults,
+    SearchService,
     SessionStorageService,
 } from 'ngx-edu-sharing-api';
 import {
@@ -1014,13 +1014,12 @@ export class AdminStatisticsComponent implements OnInit {
         const columns: string[] = await firstValueFrom(
             this.config.get('admin.statistics.nodeColumns'),
         );
-        console.log(columns);
         if (columns) {
             this.columns = { Default: columns.map((c) => new ListItem('NODE', c)) };
         } else {
             this.columns = { Default: [new ListItem('NODE', RestConstants.CM_NAME)] };
         }
-        this.storage
+        void this.storage
             .get<string>(
                 'admin_statistics_properties',
                 this.columns.Default.map((c) => c.name).join('\n'),

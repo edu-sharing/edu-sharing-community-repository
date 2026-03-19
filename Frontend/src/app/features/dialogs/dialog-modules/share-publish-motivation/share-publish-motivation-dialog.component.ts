@@ -1,13 +1,4 @@
-import {
-    Component,
-    ElementRef,
-    Inject,
-    NgZone,
-    OnDestroy,
-    OnInit,
-    Optional,
-    signal,
-} from '@angular/core';
+import { Component, Inject, NgZone, OnDestroy, OnInit, Optional, signal } from '@angular/core';
 import { ConfigService, HOME_REPOSITORY, IamV1Service, Node, UserStats } from 'ngx-edu-sharing-api';
 import { firstValueFrom, Subject } from 'rxjs';
 import { SharedModule } from '../../../../shared/shared.module';
@@ -101,7 +92,6 @@ export class SharePublishMotivationDialogComponent implements OnInit, OnDestroy 
             index = config.range.length;
         }
         this.img.set(index.toString());
-        console.log(index);
     }
     readonly destroyed$ = new Subject<void>();
 

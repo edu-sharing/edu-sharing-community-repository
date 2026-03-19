@@ -57,7 +57,6 @@ export class EditorialSidebarService {
     }
 
     close() {
-        console.log('close');
         this._editorialSidebar.enabledOption.set(null);
         this.sidebarOpened.set(false);
     }

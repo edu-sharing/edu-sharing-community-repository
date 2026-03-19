@@ -356,8 +356,6 @@ export class NodesSelectorComponent implements OnInit {
             case this.idPrefix + TabType.UPLOAD:
                 this.selectedTab.set(TabType.UPLOAD);
                 break;
-            default:
-                console.log('onTabChange', event);
         }
         await this.refreshData(this.selectedTab());
     }

@@ -405,7 +405,7 @@ export class SubmitAssignmentComponent {
             this.submission.set({ ...this.submission(), submissionStatus: 'FINISHED' });
             this.nodeEntriesRef?.forEach((n) => {
                 // enforce refresh so that customShowCallback can get re-evaluated
-                n.optionsHelper.refreshComponents();
+                void n.optionsHelper.refreshComponents();
             });
             this.toast.show({
                 type: 'info',

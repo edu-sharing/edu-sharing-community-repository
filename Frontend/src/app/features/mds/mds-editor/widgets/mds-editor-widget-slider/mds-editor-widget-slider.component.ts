@@ -121,7 +121,6 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
     }
 
     updateValue(value: ChangeContext) {
-        console.log(value);
         if (isNaN(value.value)) {
             return;
         }

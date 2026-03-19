@@ -177,7 +177,6 @@ export class NodesDragDropService {
     convertDragData<T>(elementRef: ElementRef<HTMLElement>, dragData: DragData<T>) {
         dragData.isFromOwnContainer =
             this.origin === null || elementRef.nativeElement.contains(this.origin);
-        console.log(elementRef.nativeElement, this.origin, dragData.isFromOwnContainer);
         return dragData;
     }
 }

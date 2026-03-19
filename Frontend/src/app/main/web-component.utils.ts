@@ -30,6 +30,5 @@ export class WebComponentLocationStrategy extends MockLocationStrategy {
         ) {
             window.open(this.getBaseUri() + path + query);
         }
-        console.log(this.getBaseUri(), path, query);
     }
 }

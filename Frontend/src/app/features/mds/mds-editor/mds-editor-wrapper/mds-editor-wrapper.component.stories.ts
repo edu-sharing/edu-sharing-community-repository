@@ -47,7 +47,6 @@ const meta: Meta<MdsEditorWrapperComponent> = {
             n.ref.id = Math.random() + '';
             delete n.properties['cclom:title'];
             delete n.properties['cclom:general_description'];
-            console.log(n.properties);
             registerMockNode(n);
             return n;
         }),
@@ -100,7 +99,6 @@ Object.entries(DummyNode.properties).map(([k, v]) => {
         };
     });
 });
-console.log(DummyProps);
 export const MdsValuesStory: Story = {
     args: {
         setId: DEFAULT,
@@ -108,9 +106,7 @@ export const MdsValuesStory: Story = {
         editorMode: 'search',
         nodes: null,
         currentValues: DummyProps,
-        currentValuesChange: (v) => {
-            console.log(v);
-        },
+        currentValuesChange: (v) => {},
     },
 };
 export const MdsIOBulkSidebarTemplate: Story = {
@@ -121,11 +117,7 @@ export const MdsIOBulkSidebarTemplate: Story = {
         groupId: 'io_bulk_sidebar',
         nodes: null,
         currentValues: DummyProps,
-        currentValuesChange: (v) => {
-            console.log('currentValuesChange', v);
-        },
-        currentValuesExtendedChange: (v) => {
-            console.log('currentValuesExtendedChange', v);
-        },
+        currentValuesChange: (v) => {},
+        currentValuesExtendedChange: (v) => {},
     },
 };

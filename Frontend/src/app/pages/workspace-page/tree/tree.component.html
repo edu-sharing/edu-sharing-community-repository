@@ -1,6 +1,6 @@
 <div
   class="rootNode"
-  [class.rootNodeSelected]="root == MY_FILES"
+  [class.rootNodeSelected]="root === MY_FILES"
   [esNodesDropTarget]="MY_FILES"
   [canDropNodes]="canDropOnMyFiles"
   (nodeDropped)="onNodesDrop($event)"

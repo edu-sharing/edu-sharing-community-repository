@@ -127,7 +127,7 @@ export class DashboardSwimlaneComponent {
             )
             .subscribe(() => void this.initSwimlane());
         effect(() => {
-            this.storage
+            void this.storage
                 .get<boolean>(this.getStorageKey(), this.swimlane().defaultExpanded)
                 .then((v) => this.open.next(v));
 

@@ -35,6 +35,5 @@ export class MdsEditorGlobalService {
     }
     registerCustomNativeWidget(customWidget: CustomNativeWidget) {
         this.customNativeWidgets.push(customWidget);
-        console.log(this.customNativeWidgets);
     }
 }

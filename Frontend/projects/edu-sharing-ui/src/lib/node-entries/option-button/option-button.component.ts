@@ -49,7 +49,6 @@ export class OptionButtonComponent<T extends NodeEntriesDataType>
     async ngOnChanges(changes: SimpleChanges) {
         this.isEnabled = await this.optionIsValid(this.option, this.node);
         this.isShown = await this.optionIsShown(this.option, this.node);
-        console.log('change', this.isShown);
     }
 
     ngAfterViewInit(): void {

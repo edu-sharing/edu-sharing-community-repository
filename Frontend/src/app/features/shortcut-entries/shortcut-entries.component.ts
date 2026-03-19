@@ -345,7 +345,7 @@ export class ShortcutEntriesComponent implements OnInit {
         if (entry.url) {
             window.open(entry.url, '_self');
         } else if (entry.node) {
-            this.router.navigate([this.nodeHelper.getNodeLink('routerLink', entry.node)], {
+            void this.router.navigate([this.nodeHelper.getNodeLink('routerLink', entry.node)], {
                 queryParams: this.nodeHelper.getNodeLink('queryParams', entry.node) as any,
             });
         }

@@ -210,7 +210,6 @@ export class AuthenticationServiceMock {
 @Injectable()
 export class MdsServiceMock extends MdsService {
     getMetadataSet({ repository, metadataSet }: Partial<MdsIdentifier>): Observable<MdsDefinition> {
-        console.log('mock mds');
         return of(DefaultMds);
     }
 }
@@ -301,7 +300,6 @@ export class ConfigServiceMock {
             },
             supportedLanguages: DEFAULT_SUPPORTED_LANGUAGES,
         };
-        console.log(config);
         return of(config);
     }
 }
@@ -323,7 +321,6 @@ export class NodeServiceMock {
             obeyMds = true,
         }: { versionComment?: string; repository?: string; obeyMds?: boolean } = {},
     ): Observable<Node> {
-        console.log('editNodeMetadata', properties);
         return of({ properties } as Node);
     }
 }
@@ -360,7 +357,7 @@ export class EduSharingLlmServiceMock {
 
 @Component({
     standalone: true,
-    selector: 'app-inline-generic-dialog',
+    selector: 'es-inline-generic-dialog',
     template: `
         <mat-dialog-content class="mat-typography">
             <header class="dialog-header">
@@ -721,7 +718,6 @@ export class WidgetDummy extends MdsEditorInstanceService.Widget {
     }
     async getSuggestedValues(searchString?: string): Promise<MdsWidgetValue[]> {
         if (searchString) {
-            console.log('filter values', searchString);
             const filterString = searchString.toLowerCase();
             return this.fakeBackendValues.filter(
                 (value) =>

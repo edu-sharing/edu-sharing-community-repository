@@ -45,6 +45,6 @@ export class MdsEditorWidgetNodefilterComponent extends MdsEditorWidgetBase impl
 
     protected clearFilter() {
         this.widget.setValue(null, true);
-        this.setValues(null);
+        void this.setValues(null);
     }
 }

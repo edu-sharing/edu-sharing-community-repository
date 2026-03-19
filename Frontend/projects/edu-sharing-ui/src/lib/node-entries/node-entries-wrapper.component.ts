@@ -369,7 +369,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     setDisplayType(displayType: NodeEntriesDisplayType): void {
         this.displayType = displayType;
         this.entriesService.displayType = displayType;
-        this.ngOnChanges();
+        void this.ngOnChanges();
         this.displayTypeChange.emit(displayType);
     }
 

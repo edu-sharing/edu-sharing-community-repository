@@ -369,7 +369,6 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     selectSortChange(sort: Sort) {
         this.entriesService.sort.active = sort.active;
         this.entriesService.sort.direction = sort.direction;
-        console.log(sort);
         this.updateSort(true);
         /*this.sort.active = sort.active;
         this.sort.direction = sort.direction;

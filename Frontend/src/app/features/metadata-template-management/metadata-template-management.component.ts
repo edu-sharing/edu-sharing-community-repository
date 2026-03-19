@@ -57,7 +57,7 @@ export class MetadataTemplateManagementComponent implements OnInit {
         this.selectedTemplateIndex();
         return this.templates().map((template, index) => {
             const optionItem = new OptionItem(template.name, null, () => {
-                this.selectTemplate(index);
+                void this.selectTemplate(index);
             });
             optionItem.isEnabled = index !== this.selectedTemplateIndex();
             // TODO: this sets .mat-menu-item-selected, but the visible selection is based on .cdk-focused
@@ -82,7 +82,7 @@ export class MetadataTemplateManagementComponent implements OnInit {
         if (this.customTemplates()?.length) {
             const lastIndex = await this.storage.get<number>(this.metadataTemplateslastUsedKey);
             if (lastIndex != null && lastIndex < this.customTemplates().length) {
-                this.selectTemplate(lastIndex);
+                void this.selectTemplate(lastIndex);
             }
         }
     }
@@ -189,7 +189,7 @@ export class MetadataTemplateManagementComponent implements OnInit {
             });
             await this.storage.set(this.metadataTemplatesKey, currentTemplates);
             await this.updateCustomTemplates();
-            this.selectTemplate(this.templates().length - 1);
+            void this.selectTemplate(this.templates().length - 1);
         }
         // reset template name
         this.templateName = '';

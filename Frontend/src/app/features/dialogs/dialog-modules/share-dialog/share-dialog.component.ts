@@ -919,7 +919,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
             if (this.data.sendToApi) {
                 this.localEvents.nodesChanged.emit(this.data.nodes as Node[]);
             }
-            this.checkEventsBeforeClose(permissions);
+            void this.checkEventsBeforeClose(permissions);
             if (!error) {
                 this.toast.toast('WORKSPACE.PERMISSIONS_UPDATED');
             }
@@ -1137,7 +1137,6 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
             'publishing.motivation',
             ConfigMotivationDefaultConfig,
         );
-        console.log('show dialog', showOerDialog, conf, this.getState(), this.isStateModified());
         if (showOerDialog && conf.enabled) {
             this.iamV1Service
                 .getUserStats({
@@ -1150,8 +1149,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                     if (offset === null) {
                         offset = conf.range[conf.range.length - 1];
                     }
-                    console.log(count, offset);
-                    if (true || offset == 1 || count % offset === 0) {
+                    if (offset == 1 || count % offset === 0) {
                         void this.dialogs.openSharePublishMotivationDialog({
                             nodes: this._nodes as Node[],
                         });
@@ -1188,13 +1186,13 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     }
 
     onNodeSelectionChange(event: SelectionChange<Node>) {
-        console.log('onNodeSelectionChange', event);
+        /*console.log('onNodeSelectionChange', event);
         event.added?.forEach((node: Node) => {
             console.log('Check that node has inheritance set', node);
         });
         event.removed?.forEach((node: Node) => {
             console.log('Check that node has inheritance not set', node);
-        });
+        });*/
     }
 
     protected readonly InteractionType = InteractionType;

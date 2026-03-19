@@ -22,18 +22,10 @@ export class WebComponentOnlyService {
      * @private
      */
     private enableCustomGlobalComponents() {
-        console.log('enableCustomGlobalComponents', this.environmentInjector, this.appRef);
         const componentRef = createComponent(CustomGlobalExtensionsComponent, {
             environmentInjector: this.environmentInjector,
         });
-        console.log('componentRef', componentRef);
         this.appRef.attachView(componentRef.hostView);
-        console.log(
-            'componentRef',
-            componentRef,
-            componentRef.location,
-            componentRef.location?.nativeElement,
-        );
         document.body.appendChild(componentRef.location.nativeElement);
     }
 }

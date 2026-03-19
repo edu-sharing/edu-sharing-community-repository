@@ -1,14 +1,13 @@
 import { Location } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Injectable, Injector, NgZone, Optional } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Injectable, Injector, NgZone } from '@angular/core';
+import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthenticationService, LoginInfo } from 'ngx-edu-sharing-api';
-import { AppService as AppServiceAbstract, DateHelper, UIConstants } from 'ngx-edu-sharing-ui';
+import { DateHelper, UIConstants } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject, firstValueFrom, from, Observable, Observer, Subject } from 'rxjs';
 import {
     debounceTime,
-    delay,
     distinctUntilChanged,
     filter,
     first,
@@ -1155,7 +1154,6 @@ export class CordovaService {
      */
     private async oauthGrant(oauth: OAuthDeviceAuthorizationResult) {
         const verificationUrl = URL.parse(oauth.verification_uri);
-        console.log(verificationUrl, verificationUrl.pathname);
         window.location.assign(
             verificationUrl.pathname + '?user_code=' + encodeURIComponent(oauth.user_code),
         );
@@ -1182,7 +1180,6 @@ export class CordovaService {
             'device_authorization_endpoint',
             'scope=read&grant_type=client_credentials',
         )) as OAuthDeviceAuthorizationResult;
-        console.log(device);
         await this.oauthGrant(device);
         this.setPermanentStorage(CordovaService.CORDOVA_STORAGE_DEVICE_CODE, device.device_code);
         return device;
@@ -1196,7 +1193,6 @@ export class CordovaService {
                 'grant_type=urn:ietf:params:oauth:grant-type:device_code&device_code=' +
                     (await this.getPermanentStorage(CordovaService.CORDOVA_STORAGE_DEVICE_CODE)),
             )) as OAuthResult;
-            console.log(result);
             this.oauth = result;
         } catch (e: HttpErrorResponse | any) {
             console.error(e, e.error.error);

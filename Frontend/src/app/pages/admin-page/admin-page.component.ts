@@ -1436,10 +1436,10 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             this.refreshUpdateList();
             // this.refreshCatalina();
             this.refreshAppList();
-            this.storage.get<JobConfig>('admin_job', this.job).then((data) => {
+            void this.storage.get<JobConfig>('admin_job', this.job).then((data) => {
                 this.job = data;
             });
-            this.storage.get<LuceneData>('admin_lucene', this.lucene).then((data) => {
+            void this.storage.get<LuceneData>('admin_lucene', this.lucene).then((data) => {
                 this.lucene = data;
             });
             this.reloadJobStatus([]);
@@ -1462,7 +1462,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
                 .subscribe((_) => {});
             this.admin.getOAIClasses().subscribe((classes: string[]) => {
                 this.oaiClasses = classes;
-                this.storage.get<OAIConfig>('admin_oai').then((data) => {
+                void this.storage.get<OAIConfig>('admin_oai').then((data) => {
                     if (data) this.oai = data;
                     else {
                         this.oai = {

@@ -81,7 +81,6 @@ export class ApiRequestConfiguration {
         }
         if (this.code2FaForNextRequest) {
             headers['X-2FA-Token'] = this.code2FaForNextRequest;
-            console.log('x 2fa', this.code2FaForNextRequest);
             this.code2FaForNextRequest = null;
         }
         return req.clone({

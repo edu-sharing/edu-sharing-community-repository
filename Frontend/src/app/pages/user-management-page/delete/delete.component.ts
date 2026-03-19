@@ -102,7 +102,7 @@ export class PermissionsDeleteComponent implements OnInit, DoCheck {
             // shall the user be found & removed inside contributor metadata
             cleanupMetadata: true,
         };
-        this.storage.get('delete_users_options', defaultOptions).then((data) => {
+        void this.storage.get('delete_users_options', defaultOptions).then((data) => {
             if (data.version === defaultOptions.version) {
                 this.options = data;
             } else {

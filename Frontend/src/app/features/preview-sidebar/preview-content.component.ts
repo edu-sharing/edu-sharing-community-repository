@@ -75,7 +75,7 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
         if (this.actionbar) {
             void this.updateOptions();
         }
-        this.about.hasPlugin('rendering-service-2').then(async (has) => {
+        void this.about.hasPlugin('rendering-service-2').then(async (has) => {
             if (has) {
                 const module = await this.moduleInfoService.getModuleInfo(node);
                 console.info('rs module', module);

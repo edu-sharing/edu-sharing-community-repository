@@ -85,7 +85,6 @@ export class FileUploadProgressDialogComponent implements OnInit {
                         return of(true);
                     } else {
                         this.keep = this.data.duplicateBehaviour === 'unique';
-                        console.log('keep?', this.keep);
                         return of(true);
                     }
                 }),

@@ -239,7 +239,6 @@ export class ManageAssignmentComponent {
             this.toast.error(null, 'EDITORIAL.ASSIGNMENT.ERROR.MISSING_AUTHORITIES_ASSIGNEE');
             return;
         }
-        console.log(this.authorities(), this.nodes());
         const permissions: PermissionRequest[] = this.authorities().map((a) => {
             return {
                 authorityName: a.authority.authorityName,
