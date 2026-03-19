@@ -696,6 +696,7 @@ es-side-menu-wrapper {
         visibility: hidden;
         .topic-page-swimlane {
             max-height: 0;
+            overflow: hidden;
         }
     }
 }
