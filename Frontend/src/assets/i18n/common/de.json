@@ -1575,6 +1575,7 @@
     }
   },
   "LANDING_PAGE": {
+    "TITLE": "Startseite",
     "SEARCH_PLACEHOLDER": "In Mediathek suchen..."
   },
   "SHORTCUT_ENTRIES": {
@@ -1598,9 +1599,13 @@
     "invitedcollections": "Freigegebene Sammlungen",
     "publiccollections": "Öffentliche Sammlungen",
     "aboutme": "Eigenes Profil",
-    "documentation": "Zur Dokumentation"
+    "documentation": "Zur Dokumentation",
+    "OPTIONS_FOR": "Aktionen für {{element}}",
+    "ADD_ENTRY": "Shorcut Kachel hinzufügen"
   },
   "DASHBOARD_SWIMLANE": {
+    "EXPAND": "{{ element }} ausklappen",
+    "COLLAPSE": "{{ element }} einklappen",
     "ACTIVITY": {
       "ACTION_TEXT_PREFIX": "zuletzt",
       "ACTION_TEXT_SUFFIX": "am",

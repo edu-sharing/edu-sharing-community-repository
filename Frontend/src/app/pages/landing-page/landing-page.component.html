@@ -1,4 +1,6 @@
 <div class="landing-page">
+  <h1 esTitle class="cdk-visually-hidden">{{ i18nPrefix + 'TITLE' | translate }}</h1>
+
   <es-shortcut-entries></es-shortcut-entries>
   <div class="swimlanes">
     <es-dashboard-swimlane *ngFor="let s of swimlanes()" [swimlane]="s"></es-dashboard-swimlane>

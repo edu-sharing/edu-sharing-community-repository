@@ -1,6 +1,14 @@
 <div class="toggle" (click)="toggleVisibility()" [class.toggle-open]="open | async">
   <h2 class="mat-heading-3">{{ 'DASHBOARD_SWIMLANE.' + swimlane().id + '.TITLE' | translate }}</h2>
-  <button class="toggle-button" mat-icon-button color="primary">
+  <button
+    class="toggle-button"
+    mat-icon-button
+    color="primary"
+    [attr.aria-label]="
+      ((open | async) ? 'DASHBOARD_SWIMLANE.COLLAPSE' : 'DASHBOARD_SWIMLANE.EXPAND')
+        | translate : { element: ('DASHBOARD_SWIMLANE.' + swimlane().id + '.TITLE' | translate) }
+    "
+  >
     <i [esIcon]="'keyboard_arrow_' + ((open | async) ? 'up' : 'down')"></i>
   </button>
 </div>

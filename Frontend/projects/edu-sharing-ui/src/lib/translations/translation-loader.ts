@@ -89,8 +89,17 @@ export class TranslationLoader implements TranslateLoader {
                     }
                     const files = this.i18nConfig.additionalI18nProvider(lang);
                     console.info('additional i18n provided', files);
+
+                    const eduSharingApiUrl: string | null = (window as any).__env
+                        ?.EDU_SHARING_API_URL;
+
                     return forkJoin(
-                        files.map((f) => this.http.get(f) as Observable<Dictionary>),
+                        files.map(
+                            (f) =>
+                                this.http.get(
+                                    eduSharingApiUrl ? eduSharingApiUrl + f : f,
+                                ) as Observable<Dictionary>,
+                        ),
                     ).pipe(
                         map((value) => {
                             for (let dictionary of value) {

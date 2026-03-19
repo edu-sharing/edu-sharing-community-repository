@@ -1508,6 +1508,7 @@
     }
   },
   "LANDING_PAGE": {
+    "TITLE": "Landing page",
     "SEARCH_PLACEHOLDER": "Search in media library..."
   },
   "SHORTCUT_ENTRIES": {
@@ -1531,9 +1532,14 @@
     "invitedcollections": "Shared Collections",
     "publiccollections": "Public Collections",
     "aboutme": "My Profile",
-    "documentation": "Go to Documentation"
+    "documentation": "Go to Documentation",
+    "OPTIONS_FOR": "Actions for {{element}}",
+    "ADD_ENTRY": "Add shortcut entry"
   },
-
+  "DASHBOARD_SWIMLANE": {
+    "EXPAND": "Expand {{ element }}",
+    "COLLAPSE": "Collapse {{ element }}"
+  },
   "STATISTICS": {
     "SELECTIVE_MATERIALS": "selective_materials",
     "MATERIALS": "materials",

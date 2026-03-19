@@ -49,6 +49,10 @@
           class="entry-menu-button"
           [matMenuTriggerFor]="dropdown.menu"
           (click)="setSelectedMenuIndex(i, $event)"
+          [attr.aria-label]="
+            i18nPrefix + 'OPTIONS_FOR'
+              | translate : { element: (entry | shortcutEntryTitle : i : i18nPrefix | async) }
+          "
         >
           <i esIcon="more_vert"></i>
         </button>
@@ -156,6 +160,7 @@
     class="entry-card empty"
     [class.disabled]="nodeIncluded()"
     [matMenuTriggerFor]="newEntryDropdown.menu"
+    [attr.aria-label]="i18nPrefix + 'ADD_ENTRY' | translate"
   >
     <div class="entry-icon-wrapper">
       <i esIcon="add" class="entry-icon"></i>
