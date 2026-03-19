@@ -47,3 +47,10 @@
 .filters-dialog-content {
     flex-grow: 1;
 }
+
+// fix form-field of first filter is cut off
+.filter-bar-editor-wrapper ::ng-deep {
+    .view-wrapper {
+        padding-top: 8px;
+    }
+}
