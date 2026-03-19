@@ -66,18 +66,28 @@
           "required": true
         },
         "responses": {
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 }
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -146,18 +156,28 @@
           "required": true
         },
         "responses": {
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 }
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -226,18 +246,28 @@
           "required": true
         },
         "responses": {
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 }
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -277,18 +307,28 @@
           "required": true
         },
         "responses": {
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 }
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -331,18 +371,28 @@
           "required": true
         },
         "responses": {
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 }
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -385,18 +435,28 @@
           "required": true
         },
         "responses": {
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 }
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -436,18 +496,28 @@
           "required": true
         },
         "responses": {
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 }
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -487,18 +557,28 @@
           "required": true
         },
         "responses": {
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 }
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -538,18 +618,28 @@
           "required": true
         },
         "responses": {
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 }
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -590,18 +680,28 @@
           }
         ],
         "responses": {
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 }
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -634,18 +734,28 @@
         "summary": " \n           List and describe the various provider available in the API\n        ",
         "operationId": "listProviders",
         "responses": {
-          "504": {
-            "description": "Gateway Timeout",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 }
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "504": {
+            "description": "Gateway Timeout",
             "content": {
               "*/*": {
                 "schema": {
@@ -1906,6 +2016,1382 @@
           }
         }
       }
+    },
+    "/api/v1/proxy/photon_geocoding/api": {
+      "get": {
+        "tags": [
+          "Photon Geocoding API"
+        ],
+        "summary": "Search locations",
+        "description": "Search for places using a text query.",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Search query",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lat",
+            "in": "query",
+            "description": "Latitude for location bias",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "description": "Longitude for location bias",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of results",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "maximum": 50,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "Preferred language of results",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string",
+              "example": "de"
+            }
+          },
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "GeoJSON FeatureCollection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureCollection"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/photon_geocoding/reverse": {
+      "get": {
+        "tags": [
+          "Photon Geocoding API"
+        ],
+        "summary": "Reverse geocoding",
+        "description": "Get location information for coordinates.",
+        "parameters": [
+          {
+            "name": "lat",
+            "in": "query",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "Preferred language of results",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string",
+              "example": "de"
+            }
+          },
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "GeoJSON FeatureCollection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureCollection"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/metadata-agent-canvas/widget/i18n/{lang}.json": {
+      "get": {
+        "tags": [
+          "metadata-agent-canvas"
+        ],
+        "summary": "Widget UI-Übersetzungen",
+        "description": "Liefert die UI-Übersetzungstexte für die Webkomponente. Unterstützte Sprachen: `de`, `en`.",
+        "operationId": "widget_i18n_widget_i18n__lang__json_get",
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "title": "Lang"
+            }
+          },
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/metadata-agent-canvas/widget/info": {
+      "get": {
+        "tags": [
+          "metadata-agent-canvas"
+        ],
+        "summary": "Widget-Einbindung (Web Component)",
+        "description": "Informationen zur Einbindung der Metadata Agent Webkomponente in eigene Anwendungen.\n\nGibt alle verfügbaren Varianten, die benötigten Script-URLs und Beispiel-Code zurück.",
+        "operationId": "widget_info_widget_info_get",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/metadata-agent-canvas/health": {
+      "get": {
+        "tags": [
+          "metadata-agent-canvas"
+        ],
+        "summary": "Health Check",
+        "description": "Prüft ob die API läuft und gibt die aktuelle Version zurück.",
+        "operationId": "health_check_health_get",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/metadata-agent-canvas/info/schemata": {
+      "get": {
+        "tags": [
+          "metadata-agent-canvas"
+        ],
+        "summary": "Verfügbare Schema-Kontexte",
+        "description": "Listet alle verfügbaren Schema-Kontexte mit ihren Versionen auf.\n\n## Response\n\n- **contexts**: Liste aller Kontexte mit Namen, Versionen und Default-Version\n- **default_context**: Der Standard-Kontext (normalerweise `default`)\n\n## Verwendung\n\nNutze diese Info um gültige Werte für `context` und `version` in anderen Endpoints zu finden.",
+        "operationId": "get_schemata_info_info_schemata_get",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchemataInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/metadata-agent-canvas/info/schemas/{context}/{version}": {
+      "get": {
+        "tags": [
+          "metadata-agent-canvas"
+        ],
+        "summary": "Schemas für Kontext/Version",
+        "description": "Listet alle verfügbaren Schemas (Content-Types) für einen Kontext und Version.\n\n## Path-Parameter\n\n- **context**: Schema-Kontext, z.B. `default`\n- **version**: Schema-Version, z.B. `1.8.1` oder `latest`\n\n## Response\n\nListe von Schemas mit:\n- **file**: Schema-Dateiname (z.B. `event.json`)\n- **profile_id**: Profil-ID für edu-sharing\n- **label**: Mehrsprachiges Label\n- **groups**: Anzahl Feldgruppen\n- **field_count**: Anzahl Felder",
+        "operationId": "get_schemas_for_version_info_schemas__context___version__get",
+        "parameters": [
+          {
+            "name": "context",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "title": "Context"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "title": "Version"
+            }
+          },
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SchemaInfo"
+                  },
+                  "title": "Response Get Schemas For Version Info Schemas  Context   Version  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/metadata-agent-canvas/info/schema/{context}/{version}/{schema_file}": {
+      "get": {
+        "tags": [
+          "metadata-agent-canvas"
+        ],
+        "summary": "Schema-Definition abrufen",
+        "description": "Gibt die vollständige Schema-Definition als JSON zurück.\n\n## Path-Parameter\n\n- **context**: Schema-Kontext, z.B. `default`\n- **version**: Schema-Version, z.B. `1.8.1`\n- **schema_file**: Schema-Datei, z.B. `event.json`, `core.json`\n\n## Response\n\nVollständiges Schema mit:\n- **fields**: Alle Felder mit ID, Label, Typ, Vokabular etc.\n- **groups**: Feldgruppen für UI-Anzeige\n- **metadata**: Schema-Metadaten",
+        "operationId": "get_schema_definition_info_schema__context___version___schema_file__get",
+        "parameters": [
+          {
+            "name": "context",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "title": "Context"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "title": "Version"
+            }
+          },
+          {
+            "name": "schema_file",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "title": "Schema File"
+            }
+          },
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/metadata-agent-canvas/detect-content-type": {
+      "post": {
+        "tags": [
+          "metadata-agent-canvas"
+        ],
+        "summary": "Content-Type erkennen",
+        "description": "Analysiert Text und erkennt automatisch den passenden Content-Type (Schema) für die Metadaten-Extraktion.\n\n## Input-Quellen (input_source)\n\n| Wert | Beschreibung | Benötigte Felder |\n|------|-------------|------------------|\n| `text` | Direkter Text als Eingabe (Standard) | `text` |\n| `url` | Text von URL via Crawler abrufen | `source_url`, optional `extraction_method` |\n| `node_id` | Text + Metadaten von Repository-Node abrufen | `node_id`, `repository` |\n| `node_url` | Repository-Node + Crawler-Fallback (URL aus ccm:wwwurl) | `node_id`, `repository` (source_url optional) |\n\n## Extraction Method (extraction_method)\n\n| Wert | Beschreibung |\n|------|-------------|\n| `simple` | Schnelle HTML-Extraktion |\n| `browser` | Vollständiges Browser-Rendering für JS-Seiten (Standard) |\n\n## Output Format (output_format)\n\n| Wert | Beschreibung |\n|------|-------------|\n| `markdown` | Markdown-Format (Standard) |\n| `txt` | Reiner Text |\n| `html` | Rohes HTML |\n\n## Repository (repository)\n\n| Wert | URL |\n|------|-----|\n| `staging` | repository.staging.openeduhub.net (Standard) |\n| `prod` | redaktion.openeduhub.net |\n\n## LLM-Optionen\n\n- **llm_provider**: `b-api-openai` (Standard), `openai`, `b-api-academiccloud`\n- **llm_model**: z.B. `gpt-4.1-mini` (Standard), `gpt-4o-mini`, `deepseek-r1`",
+        "operationId": "detect_content_type_detect_content_type_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DetectContentTypeRequest"
+              },
+              "examples": {
+                "text_input": {
+                  "summary": "1. Text-Eingabe",
+                  "description": "Direkter Text als Eingabe.",
+                  "value": {
+                    "input_source": "text",
+                    "text": "Workshop 'KI in der Bildung' am 15. März 2025 in Berlin.\nLernen Sie die Grundlagen der künstlichen Intelligenz kennen.",
+                    "source_url": "",
+                    "extraction_method": "browser",
+                    "output_format": "markdown",
+                    "node_id": "",
+                    "repository": "staging",
+                    "context": "default",
+                    "version": "latest",
+                    "language": "de",
+                    "llm_provider": "b-api-openai",
+                    "llm_model": "gpt-4.1-mini"
+                  }
+                },
+                "url_input": {
+                  "summary": "2. URL-Eingabe",
+                  "description": "Text von URL abrufen.",
+                  "value": {
+                    "input_source": "url",
+                    "text": "",
+                    "source_url": "https://www.wirlernenonline.de",
+                    "extraction_method": "browser",
+                    "output_format": "markdown",
+                    "node_id": "",
+                    "repository": "staging",
+                    "context": "default",
+                    "version": "latest",
+                    "language": "de",
+                    "llm_provider": "b-api-openai",
+                    "llm_model": "gpt-4.1-mini"
+                  }
+                },
+                "node_id_input": {
+                  "summary": "3. NodeID-Eingabe",
+                  "description": "Text von Repository-Node abrufen.",
+                  "value": {
+                    "input_source": "node_id",
+                    "text": "",
+                    "source_url": "",
+                    "extraction_method": "browser",
+                    "output_format": "markdown",
+                    "node_id": "cbf66543-fb90-4e69-a392-03f305139e3f",
+                    "repository": "staging",
+                    "context": "default",
+                    "version": "latest",
+                    "language": "de",
+                    "llm_provider": "b-api-openai",
+                    "llm_model": "gpt-4.1-mini"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DetectContentTypeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/metadata-agent-canvas/extract-field": {
+      "post": {
+        "tags": [
+          "metadata-agent-canvas"
+        ],
+        "summary": "Einzelnes Feld extrahieren",
+        "description": "Extrahiert oder regeneriert einen einzelnen Feldwert mittels LLM. Nützlich um einzelne Felder zu korrigieren ohne alles neu zu extrahieren.\n\n## Input-Quellen (input_source)\n\n| Wert | Beschreibung | Benötigte Felder |\n|------|-------------|------------------|\n| `text` | Direkter Text als Eingabe (Standard) | `text` |\n| `url` | Text von URL via Crawler abrufen | `source_url`, optional `extraction_method` |\n| `node_id` | Text + Metadaten von Repository-Node abrufen | `node_id`, `repository` |\n| `node_url` | Repository-Node + Crawler-Fallback (URL aus ccm:wwwurl) | `node_id`, `repository` (source_url optional) |\n\n## Extraction Method (extraction_method)\n\n| Wert | Beschreibung |\n|------|-------------|\n| `simple` | Schnelle HTML-Extraktion |\n| `browser` | Vollständiges Browser-Rendering für JS-Seiten (Standard) |\n\n## Output Format (output_format)\n\n| Wert | Beschreibung |\n|------|-------------|\n| `markdown` | Markdown-Format (Standard) |\n| `txt` | Reiner Text |\n| `html` | Rohes HTML |\n\n## Repository (repository)\n\n| Wert | URL |\n|------|-----|\n| `staging` | repository.staging.openeduhub.net (Standard) |\n| `prod` | redaktion.openeduhub.net |\n\n## Feld-Optionen\n\n- **schema_file**: Schema-Datei die das Feld enthält, z.B. `event.json`, `core.json`\n- **field_id**: Feld-ID zum Extrahieren, z.B. `schema:startDate`, `cclom:title`\n- **existing_metadata**: Bestehende Metadaten als Kontext (optional)\n- **normalize**: Normalisierung anwenden (Standard: `true`)\n\n## LLM-Optionen\n\n- **llm_provider**: `b-api-openai` (Standard), `openai`, `b-api-academiccloud`\n- **llm_model**: z.B. `gpt-4.1-mini` (Standard), `gpt-4o-mini`, `deepseek-r1`",
+        "operationId": "extract_field_extract_field_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExtractFieldRequest"
+              },
+              "examples": {
+                "text_input": {
+                  "summary": "1. Text-Eingabe",
+                  "description": "Extrahiert ein Feld aus direktem Text.",
+                  "value": {
+                    "input_source": "text",
+                    "text": "Workshop 'KI in der Bildung' am 15. März 2025 in Berlin.",
+                    "source_url": "",
+                    "extraction_method": "browser",
+                    "output_format": "markdown",
+                    "node_id": "",
+                    "repository": "staging",
+                    "context": "default",
+                    "version": "latest",
+                    "schema_file": "event.json",
+                    "field_id": "schema:startDate",
+                    "existing_metadata": {},
+                    "language": "de",
+                    "normalize": true,
+                    "llm_provider": "b-api-openai",
+                    "llm_model": "gpt-4.1-mini"
+                  }
+                },
+                "url_input": {
+                  "summary": "2. URL-Eingabe",
+                  "description": "Extrahiert ein Feld aus Text einer URL.",
+                  "value": {
+                    "input_source": "url",
+                    "text": "",
+                    "source_url": "https://www.wirlernenonline.de",
+                    "extraction_method": "browser",
+                    "output_format": "markdown",
+                    "node_id": "",
+                    "repository": "staging",
+                    "context": "default",
+                    "version": "latest",
+                    "schema_file": "event.json",
+                    "field_id": "cclom:title",
+                    "existing_metadata": {},
+                    "language": "de",
+                    "normalize": true,
+                    "llm_provider": "b-api-openai",
+                    "llm_model": "gpt-4.1-mini"
+                  }
+                },
+                "node_id_input": {
+                  "summary": "3. NodeID-Eingabe",
+                  "description": "Extrahiert ein Feld aus Repository-Node Daten.",
+                  "value": {
+                    "input_source": "node_id",
+                    "text": "",
+                    "source_url": "",
+                    "extraction_method": "browser",
+                    "output_format": "markdown",
+                    "node_id": "cbf66543-fb90-4e69-a392-03f305139e3f",
+                    "repository": "staging",
+                    "context": "default",
+                    "version": "latest",
+                    "schema_file": "event.json",
+                    "field_id": "schema:startDate",
+                    "existing_metadata": {},
+                    "language": "de",
+                    "normalize": true,
+                    "llm_provider": "b-api-openai",
+                    "llm_model": "gpt-4.1-mini"
+                  }
+                },
+                "feld_korrigieren": {
+                  "summary": "4. Feld korrigieren",
+                  "description": "Korrigiert ein Feld basierend auf existing_metadata.",
+                  "value": {
+                    "input_source": "text",
+                    "text": "Der Workshop wurde auf den 20. März 2025 verschoben.",
+                    "source_url": "",
+                    "extraction_method": "browser",
+                    "output_format": "markdown",
+                    "node_id": "",
+                    "repository": "staging",
+                    "context": "default",
+                    "version": "latest",
+                    "schema_file": "event.json",
+                    "field_id": "schema:startDate",
+                    "existing_metadata": {
+                      "schema:startDate": "2025-03-15T00:00"
+                    },
+                    "language": "de",
+                    "normalize": true,
+                    "llm_provider": "b-api-openai",
+                    "llm_model": "gpt-4.1-mini"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtractFieldResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/metadata-agent-canvas/generate": {
+      "post": {
+        "tags": [
+          "metadata-agent-canvas"
+        ],
+        "summary": "Metadaten generieren",
+        "description": "Generiert vollständige Metadaten aus Text, URL oder Repository-Node mittels LLM.\n\n## Input-Quellen (input_source)\n\n| Wert | Beschreibung | Benötigte Felder |\n|------|-------------|------------------|\n| `text` | Direkter Text als Eingabe (Standard) | `text` |\n| `url` | Text von URL via Crawler abrufen | `source_url`, optional `extraction_method` |\n| `node_id` | Metadaten + hinterlegte Volltexte von Repository-Node | `node_id`, `repository` |\n| `node_url` | Repository-Node + Crawler-Fallback (URL aus ccm:wwwurl) | `node_id`, `repository` (source_url optional, wird aus Metadaten geholt) |\n\n## Extraction Method (extraction_method)\n\n| Wert | Beschreibung |\n|------|-------------|\n| `simple` | Schnelle HTML-Extraktion |\n| `browser` | Vollständiges Browser-Rendering für JS-Seiten (Standard) |\n\n## Output Format (output_format)\n\n| Wert | Beschreibung |\n|------|-------------|\n| `markdown` | Markdown-Format (Standard) |\n| `txt` | Reiner Text |\n| `html` | Rohes HTML |\n\n## Repository (repository)\n\n| Wert | URL |\n|------|-----|\n| `staging` | repository.staging.openeduhub.net (Standard) |\n| `prod` | redaktion.openeduhub.net |\n\n## Schema-Optionen\n\n- **context**: Schema-Kontext, z.B. `default`, `mds_oeh`\n- **version**: Schema-Version, `latest` (Standard) oder spezifisch z.B. `1.8.1`\n- **schema_file**: `auto` (automatische Erkennung), oder spezifisch z.B. `event.json`\n\n## Extraktions-Optionen\n\n- **language**: Sprache für Extraktion (`de` oder `en`)\n- **max_workers**: Parallele LLM-Worker (1-20, Standard: 10)\n- **include_core**: Core-Felder einbeziehen (Standard: `true`)\n- **enable_geocoding**: Adressen zu Koordinaten umwandeln (Standard: `true`)\n- **normalize**: Normalisierung für Datum, Boolean, Vokabulare (Standard: `true`)\n\n## Regenerations-Optionen\n\n- **existing_metadata**: Bestehende Metadaten als Basis (werden erweitert)\n- **regenerate_fields**: Liste von Feld-IDs die neu extrahiert werden sollen\n- **regenerate_empty**: Leere Felder in existing_metadata neu extrahieren (Standard: `false`)\n\n## Screenshot-Optionen (Vorschaubild parallel zur Extraktion)\n\n- **screenshot_method**: `pageshot` (externe API, Standard) oder `playwright` (intern, privacy-safe). Wenn nicht gesetzt: kein Screenshot.\n- **preview_url**: URL für Screenshot (optional). Wenn nicht gesetzt: wird aus `source_url` oder bestehenden Metadaten (`ccm:wwwurl`) ermittelt.\n- Antwort enthält `preview_image_url` als Base64 Data-URL wenn Screenshot erfolgreich.\n\n## LLM-Optionen\n\n- **llm_provider**: `b-api-openai` (Standard), `openai`, `b-api-academiccloud`\n- **llm_model**: z.B. `gpt-4.1-mini` (Standard), `gpt-4o-mini`, `deepseek-r1`",
+        "operationId": "generate_metadata_generate_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateRequest"
+              },
+              "examples": {
+                "text_input": {
+                  "summary": "1. Text-Eingabe (Standard)",
+                  "description": "Direkter Text als Eingabe. Schema wird automatisch erkannt.",
+                  "value": {
+                    "input_source": "text",
+                    "text": "Workshop 'KI in der Bildung' am 15. März 2025 in Berlin.\nLernen Sie die Grundlagen der künstlichen Intelligenz kennen.",
+                    "source_url": "",
+                    "extraction_method": "browser",
+                    "output_format": "markdown",
+                    "node_id": "",
+                    "repository": "staging",
+                    "existing_metadata": {},
+                    "context": "default",
+                    "version": "latest",
+                    "schema_file": "auto",
+                    "language": "de",
+                    "max_workers": 10,
+                    "include_core": true,
+                    "enable_geocoding": true,
+                    "normalize": true,
+                    "regenerate_fields": [],
+                    "regenerate_empty": false,
+                    "llm_provider": "b-api-openai",
+                    "llm_model": "gpt-4.1-mini",
+                    "screenshot_method": "",
+                    "preview_url": ""
+                  }
+                },
+                "url_input": {
+                  "summary": "2. URL-Eingabe (Crawler)",
+                  "description": "Text von URL abrufen via Text-Extraction-API. extraction_method: 'simple' (schnell) oder 'browser' (JS-Rendering). Mit screenshot_method wird parallel ein Vorschaubild erstellt.",
+                  "value": {
+                    "input_source": "url",
+                    "text": "",
+                    "source_url": "https://www.wirlernenonline.de",
+                    "extraction_method": "browser",
+                    "output_format": "markdown",
+                    "node_id": "",
+                    "repository": "staging",
+                    "existing_metadata": {},
+                    "context": "default",
+                    "version": "latest",
+                    "schema_file": "auto",
+                    "language": "de",
+                    "max_workers": 10,
+                    "include_core": true,
+                    "enable_geocoding": true,
+                    "normalize": true,
+                    "regenerate_fields": [],
+                    "regenerate_empty": false,
+                    "llm_provider": "b-api-openai",
+                    "llm_model": "gpt-4.1-mini",
+                    "screenshot_method": "pageshot",
+                    "preview_url": ""
+                  }
+                },
+                "node_id_input": {
+                  "summary": "3. NodeID-Eingabe (Repository)",
+                  "description": "Metadaten + hinterlegte Volltexte von Repository-Node abrufen. repository: 'staging' oder 'prod'.",
+                  "value": {
+                    "input_source": "node_id",
+                    "text": "",
+                    "source_url": "",
+                    "extraction_method": "browser",
+                    "output_format": "markdown",
+                    "node_id": "cbf66543-fb90-4e69-a392-03f305139e3f",
+                    "repository": "staging",
+                    "existing_metadata": {},
+                    "context": "default",
+                    "version": "latest",
+                    "schema_file": "auto",
+                    "language": "de",
+                    "max_workers": 10,
+                    "include_core": true,
+                    "enable_geocoding": true,
+                    "normalize": true,
+                    "regenerate_fields": [],
+                    "regenerate_empty": false,
+                    "llm_provider": "b-api-openai",
+                    "llm_model": "gpt-4.1-mini",
+                    "screenshot_method": "pageshot",
+                    "preview_url": ""
+                  }
+                },
+                "node_url_input": {
+                  "summary": "4. NodeID+URL (kombiniert)",
+                  "description": "Repository-Metadaten + Volltext nutzen. Falls kein Volltext: URL aus ccm:wwwurl holen und Crawler nutzen.",
+                  "value": {
+                    "input_source": "node_url",
+                    "text": "",
+                    "source_url": "",
+                    "extraction_method": "browser",
+                    "output_format": "markdown",
+                    "node_id": "cbf66543-fb90-4e69-a392-03f305139e3f",
+                    "repository": "staging",
+                    "existing_metadata": {},
+                    "context": "default",
+                    "version": "latest",
+                    "schema_file": "auto",
+                    "language": "de",
+                    "max_workers": 10,
+                    "include_core": true,
+                    "enable_geocoding": true,
+                    "normalize": true,
+                    "regenerate_fields": [],
+                    "regenerate_empty": false,
+                    "llm_provider": "b-api-openai",
+                    "llm_model": "gpt-4.1-mini",
+                    "screenshot_method": "pageshot",
+                    "preview_url": ""
+                  }
+                },
+                "mit_existing_metadata": {
+                  "summary": "5. Mit bestehenden Metadaten",
+                  "description": "existing_metadata als Basis, nur bestimmte Felder neu extrahieren.",
+                  "value": {
+                    "input_source": "text",
+                    "text": "Workshop 'KI in der Bildung' am 15. März 2025 in Berlin.",
+                    "source_url": "",
+                    "extraction_method": "browser",
+                    "output_format": "markdown",
+                    "node_id": "",
+                    "repository": "staging",
+                    "existing_metadata": {
+                      "cclom:title": "Mein Workshop",
+                      "cclom:general_keyword": [
+                        "KI",
+                        "Bildung"
+                      ]
+                    },
+                    "context": "default",
+                    "version": "latest",
+                    "schema_file": "event.json",
+                    "language": "de",
+                    "max_workers": 10,
+                    "include_core": true,
+                    "enable_geocoding": true,
+                    "normalize": true,
+                    "regenerate_fields": [
+                      "schema:startDate"
+                    ],
+                    "regenerate_empty": true,
+                    "llm_provider": "b-api-openai",
+                    "llm_model": "gpt-4.1-mini",
+                    "screenshot_method": "",
+                    "preview_url": ""
+                  }
+                }
+              }
+            },
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              },
+              "examples": {
+                "mehrzeiliger_text": {
+                  "summary": "Mehrzeiliger Text (ohne JSON)",
+                  "description": "Für mehrzeilige Texte: Einfach den Text einfügen. Schema wird automatisch erkannt.",
+                  "value": "Workshop 'KI in der Bildung' am 15. März 2025 in Berlin.\n\nLernen Sie die Grundlagen der künstlichen Intelligenz kennen.\n\nZielgruppe: Lehrkräfte\nKosten: 49 Euro"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/metadata-agent-canvas/validate": {
+      "post": {
+        "tags": [
+          "metadata-agent-canvas"
+        ],
+        "summary": "Metadaten validieren",
+        "description": "Validiert Metadaten gegen das Schema und prüft Pflichtfelder, Datentypen und Vokabular-Werte.\n\n## Einfache Nutzung\n\nKopiere einfach den kompletten Output von `/generate` direkt hier rein – Context, Version und Schema werden automatisch erkannt.\n\n## Validierungsprüfungen\n\n- **Pflichtfelder**: Sind alle required Felder ausgefüllt?\n- **Datentypen**: Stimmen die Werte mit den erwarteten Typen überein?\n- **Vokabulare**: Sind nur erlaubte Vocabulary-Werte verwendet?\n- **Format**: Sind Datumsangaben, URLs etc. korrekt formatiert?\n\n## Response\n\n- **valid**: `true` wenn alle Prüfungen bestanden\n- **errors**: Liste der Validierungsfehler mit Feld-ID und Beschreibung\n- **warnings**: Nicht-kritische Hinweise",
+        "operationId": "validate_metadata_validate_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "examples": {
+                "direkt": {
+                  "summary": "Direkter Output von /generate",
+                  "description": "Kopiere einfach den kompletten Output von /generate hier rein",
+                  "value": {
+                    "contextName": "default",
+                    "schemaVersion": "1.8.1",
+                    "metadataset": "event.json",
+                    "language": "de",
+                    "cclom:title": "Workshop KI in der Bildung",
+                    "cclom:general_description": "Ein Workshop über KI...",
+                    "schema:actor": [
+                      {
+                        "name": "Max Mustermann"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/metadata-agent-canvas/export/markdown": {
+      "post": {
+        "tags": [
+          "metadata-agent-canvas"
+        ],
+        "summary": "Metadaten als Markdown exportieren",
+        "description": "Konvertiert Metadaten in ein lesbares Markdown-Dokument mit Labels und Struktur.\n\n## Einfache Nutzung\n\nKopiere einfach den kompletten Output von `/generate` direkt hier rein.\n\n## Export-Format\n\nDas generierte Markdown enthält:\n- **Titel** des Inhalts\n- **Feldgruppen** mit deutschen Labels\n- **Werte** formatiert nach Feldtyp (Datum, Liste, Text etc.)\n- **Vokabular-Labels** statt technischer IDs\n\n## Verwendung\n\n- Zur Dokumentation\n- Zur menschlichen Review\n- Zum Teilen mit Nicht-Technikern",
+        "operationId": "export_markdown_export_markdown_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "examples": {
+                "direkt": {
+                  "summary": "Direkter Output von /generate",
+                  "description": "Kopiere einfach den kompletten Output von /generate hier rein",
+                  "value": {
+                    "contextName": "default",
+                    "schemaVersion": "1.8.1",
+                    "metadataset": "event.json",
+                    "language": "de",
+                    "cclom:title": "Workshop KI in der Bildung",
+                    "cclom:general_description": "Ein Workshop über KI...",
+                    "schema:actor": [
+                      {
+                        "name": "Max Mustermann"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportMarkdownResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/metadata-agent-canvas/upload": {
+      "post": {
+        "tags": [
+          "metadata-agent-canvas"
+        ],
+        "summary": "Metadaten ins Repository hochladen",
+        "description": "Lädt Metadaten ins WLO edu-sharing Repository hoch und erstellt einen neuen Node.\n\n## Einfache Nutzung\n\nKopiere einfach den kompletten Output von `/generate` direkt hier rein.\n\n## Optionale Parameter\n\n| Parameter | Werte | Beschreibung |\n|-----------|-------|-------------|\n| `repository` | `staging` (Standard), `prod` | Ziel-Repository (staging = repository.staging.openeduhub.net, prod = redaktion.openeduhub.net) |\n| `check_duplicates` | `true` (Standard), `false` | Duplikat-Prüfung via ccm:wwwurl |\n| `start_workflow` | `true` (Standard), `false` | Review-Workflow starten |\n| `preview_url` | URL (leer = auto) | URL für Vorschaubild-Screenshot. Wenn leer, wird `ccm:wwwurl` aus den Metadaten verwendet. |\n| `screenshot_method` | `pageshot` (Standard), `playwright` | Methode für Screenshot-Erfassung. `pageshot` = externe API, `playwright` = intern/privacy-safe. |\n| `write_extended_data` | `true` (Standard), `false` | Extended-Felder schreiben (`ccm:oeh_extendedType`, `ccm:oeh_extendedData`, `ccm:oeh_extendedText`). |\n| `extended_text` | String (leer = auto) | Rohtext vor der Extraktion. Wird in `ccm:oeh_extendedText` geschrieben. |\n\n## Workflow\n\n1. **Duplikat-Check** (optional): Prüft ob URL bereits existiert\n2. **Node erstellen**: Legt neuen Node mit Basisdaten an\n3. **Metadaten setzen**: Überträgt alle Metadaten\n4. **Collections**: Fügt Node zu Collections hinzu (falls angegeben)\n5. **Extended Fields** (optional): Schreibt `ccm:oeh_extendedType` (Inhaltstyp-URI), `ccm:oeh_extendedData` (Metadaten-JSON), `ccm:oeh_extendedText` (Rohtext)\n6. **Workflow starten** (optional): Startet Review-Prozess\n\n## Response\n\n- **success**: `true` bei erfolgreichem Upload\n- **duplicate**: `true` wenn URL bereits existiert\n- **node**: Node-Info mit ID und URL",
+        "operationId": "upload_to_repository_upload_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "examples": {
+                "direkt": {
+                  "summary": "Direkter Output von /generate",
+                  "description": "Kopiere den Output von /generate hier rein. Optional: repository, check_duplicates, start_workflow, preview_url, screenshot_method",
+                  "value": {
+                    "contextName": "default",
+                    "schemaVersion": "1.8.1",
+                    "metadataset": "event.json",
+                    "cclom:title": "Workshop KI in der Bildung",
+                    "ccm:wwwurl": "https://example.com/workshop",
+                    "repository": "staging",
+                    "check_duplicates": true,
+                    "start_workflow": true,
+                    "preview_url": "",
+                    "screenshot_method": "pageshot",
+                    "write_extended_data": true,
+                    "extended_text": "Rohtext der Webseite vor der KI-Extraktion..."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/metadata-agent-canvas/screenshot": {
+      "post": {
+        "tags": [
+          "metadata-agent-canvas"
+        ],
+        "summary": "Screenshot einer Webseite erstellen",
+        "description": "Erstellt einen Screenshot einer Webseite.\n\n## Methoden\n\n| Methode | Datenschutz | Geschwindigkeit | Beschreibung |\n|---------|-------------|-----------------|-------------|\n| **pageshot** | ⚠️ URL wird an externen Service gesendet | ~3s | Externer PageShot API Service (Standard) |\n| **playwright** | ✅ Intern, keine Daten nach außen | ~3-5s | Lokaler Chromium-Browser (erfordert Playwright-Installation) |\n\n## Optional: Preview-Upload\n\nWenn `node_id` angegeben wird, wird der Screenshot direkt als Vorschaubild auf den edu-sharing Node hochgeladen.",
+        "operationId": "take_screenshot_screenshot_post",
+        "parameters": [
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScreenshotRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScreenshotResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proxy/metadata-agent-canvas/upload/verify/{node_id}": {
+      "post": {
+        "tags": [
+          "metadata-agent-canvas"
+        ],
+        "summary": "Upload-Ergebnis prüfen (SOLL/IST-Vergleich)",
+        "description": "Liest die Metadaten eines Nodes aus dem Repository und vergleicht sie optional mit den erwarteten Werten.\n\n## Nutzung\n\n**Nur lesen** (ohne Body): Gibt die aktuellen Metadaten des Nodes zurück.\n\n**SOLL/IST-Vergleich** (mit Body): Vergleicht die erwarteten Metadaten (z.B. Output von `/generate`) mit den tatsächlich geschriebenen Werten.\n\n## Diff-Status pro Feld\n\n| Status | Bedeutung |\n|--------|-----------|\n| `match` | Wert stimmt überein |\n| `mismatch` | Wert weicht ab (SOLL ≠ IST) |\n| `missing_in_repo` | Feld wurde erwartet, ist aber nicht im Repository |\n| `extra_in_repo` | Feld ist im Repository, war aber nicht erwartet |\n| `not_written` | Feld war nicht repo-fähig (virtual:, schema:, oder kein repo_field) |\n\n## Summary\n\nZählt die Anzahl der Felder pro Status-Kategorie.",
+        "operationId": "verify_upload_upload_verify__node_id__post",
+        "parameters": [
+          {
+            "name": "node_id",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "title": "Node Id"
+            }
+          },
+          {
+            "name": "clear-cache",
+            "in": "query",
+            "description": "Clear cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ignore-caching",
+            "in": "query",
+            "description": "Neither stores result in cache nor retrieves cached results for the given request",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyRequest"
+              },
+              "examples": {
+                "nur_lesen": {
+                  "summary": "1. Nur Metadaten lesen",
+                  "description": "Gibt die aktuellen Repository-Metadaten zurück (kein Vergleich).",
+                  "value": {
+                    "repository": "staging"
+                  }
+                },
+                "mit_vergleich": {
+                  "summary": "2. SOLL/IST-Vergleich",
+                  "description": "Kopiere den Output von /generate als expected_metadata rein.",
+                  "value": {
+                    "expected_metadata": {
+                      "contextName": "default",
+                      "schemaVersion": "1.8.1",
+                      "metadataset": "event.json",
+                      "cclom:title": "Workshop KI in der Bildung",
+                      "ccm:wwwurl": "https://example.com/workshop",
+                      "ccm:taxonid": "http://w3id.org/openeduhub/vocabs/discipline/12002"
+                    },
+                    "repository": "staging"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2928,7 +4414,8 @@
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "minItems": 1
           }
         },
         "required": [
@@ -2981,7 +4468,8 @@
         "properties": {
           "metadataSet": {
             "type": "string",
-            "description": "The name of the metadata set to be used for the request"
+            "description": "The name of the metadata set to be used for the request",
+            "minLength": 1
           },
           "configIds": {
             "type": "array",
@@ -2995,7 +4483,8 @@
                   "$ref": "#/components/schemas/NodeConfig"
                 }
               ]
-            }
+            },
+            "minItems": 1
           },
           "user": {
             "type": "string",
@@ -3003,7 +4492,8 @@
           },
           "contextNodeId": {
             "type": "string",
-            "description": "\n            The context Node Id to be used for prompt substitution.\n            Template: {{node.<propertyNameInShortFormat>}}\n            e.g. {{node.cclom:general_description}}\n        "
+            "description": "\n            The context Node Id to be used for prompt substitution.\n            Template: {{node.<propertyNameInShortFormat>}}\n            e.g. {{node.cclom:general_description}}\n        ",
+            "minLength": 1
           },
           "variables": {
             "type": "object",
@@ -3413,6 +4903,13 @@
           "type": {
             "type": "string",
             "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
           }
         },
         "required": [
@@ -5860,6 +7357,1889 @@
           }
         },
         "title": "LinkerConfig"
+      },
+      "FeatureCollection": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "FeatureCollection"
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Feature"
+            }
+          }
+        },
+        "required": [
+          "features",
+          "type"
+        ]
+      },
+      "Feature": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "Feature"
+          },
+          "geometry": {
+            "$ref": "#/components/schemas/Geometry"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/Properties"
+          }
+        },
+        "required": [
+          "geometry",
+          "properties",
+          "type"
+        ]
+      },
+      "Geometry": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "Point"
+          },
+          "coordinates": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "maxItems": 2,
+            "minItems": 2
+          }
+        },
+        "required": [
+          "coordinates",
+          "type"
+        ]
+      },
+      "Properties": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "postcode": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentTypeInfo": {
+        "type": "object",
+        "description": "Information about a detected content type.",
+        "properties": {
+          "schema_file": {
+            "type": "string",
+            "description": "Schema file name (e.g., 'event.json')",
+            "title": "Schema File"
+          },
+          "uri": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Vocab URI for this content type (e.g., 'http://w3id.org/openeduhub/vocabs/contentTypes/event')",
+            "title": "Uri"
+          },
+          "profile_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Profile ID if available",
+            "title": "Profile Id"
+          },
+          "label": {
+            "$ref": "#/components/schemas/LocalizedString",
+            "description": "Localized label for the content type"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Detection confidence (high/medium/low)",
+            "title": "Confidence"
+          }
+        },
+        "required": [
+          "label",
+          "schema_file"
+        ],
+        "title": "ContentTypeInfo"
+      },
+      "ContextInfo": {
+        "type": "object",
+        "description": "Information about a context.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "versions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Versions"
+          },
+          "default_version": {
+            "type": "string",
+            "title": "Default Version"
+          }
+        },
+        "required": [
+          "default_version",
+          "display_name",
+          "name",
+          "versions"
+        ],
+        "title": "ContextInfo"
+      },
+      "DetectContentTypeRequest": {
+        "type": "object",
+        "description": "Request model for content type detection.",
+        "examples": [
+          {
+            "context": "default",
+            "extraction_method": "browser",
+            "input_source": "text",
+            "language": "de",
+            "llm_model": "gpt-4.1-mini",
+            "llm_provider": "b-api-openai",
+            "node_id": "",
+            "repository": "staging",
+            "source_url": "",
+            "text": "Workshop 'KI in der Bildung' am 15. März 2025 in Berlin.",
+            "version": "latest"
+          }
+        ],
+        "properties": {
+          "input_source": {
+            "$ref": "#/components/schemas/InputSource",
+            "default": "text",
+            "description": "Input source: 'text' (direct input), 'url' (fetch via crawler), 'node_id' (fetch from repository), 'node_url' (repository + crawler fallback)"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Input text to analyze. Required when input_source='text'.",
+            "title": "Text"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "URL to fetch text from via text extraction API. Required when input_source='url' or 'node_url'.",
+            "title": "Source Url"
+          },
+          "extraction_method": {
+            "$ref": "#/components/schemas/ExtractionMethod",
+            "default": "browser",
+            "description": "Text extraction method: 'simple' (fast, basic HTML parsing) or 'browser' (full browser rendering, slower but more complete)"
+          },
+          "output_format": {
+            "$ref": "#/components/schemas/OutputFormat",
+            "default": "markdown",
+            "description": "Output format for text extraction: 'markdown' (default), 'txt' (plain text), 'html' (raw HTML)"
+          },
+          "node_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Repository NodeID to fetch metadata and text from. Required when input_source='node_id' or 'node_url'.",
+            "title": "Node Id"
+          },
+          "repository": {
+            "$ref": "#/components/schemas/Repository",
+            "default": "staging",
+            "description": "Repository to use for NodeID lookup: 'prod' (redaktion.openeduhub.net) or 'staging' (repository.staging.openeduhub.net)"
+          },
+          "context": {
+            "type": "string",
+            "default": "default",
+            "description": "Schema context to use",
+            "title": "Context"
+          },
+          "version": {
+            "type": "string",
+            "default": "latest",
+            "description": "Schema version to use ('latest' for newest)",
+            "title": "Version"
+          },
+          "language": {
+            "type": "string",
+            "default": "de",
+            "description": "Language for detection (de/en)",
+            "title": "Language"
+          },
+          "llm_provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "LLM provider to use. Options: 'openai' (native OpenAI API), 'b-api-openai' (OpenAI via B-API, default), 'b-api-academiccloud' (DeepSeek via B-API). If not set, uses METADATA_AGENT_LLM_PROVIDER from environment.",
+            "title": "Llm Provider"
+          },
+          "llm_model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "LLM model to use. Examples: 'gpt-4.1-mini' (default for b-api-openai), 'gpt-4o-mini' (for openai), 'deepseek-r1' (for b-api-academiccloud). If not set, uses the provider's default model from environment.",
+            "title": "Llm Model"
+          }
+        },
+        "title": "DetectContentTypeRequest"
+      },
+      "DetectContentTypeResponse": {
+        "type": "object",
+        "description": "Response model for content type detection.",
+        "properties": {
+          "detected": {
+            "$ref": "#/components/schemas/ContentTypeInfo",
+            "description": "Detected content type"
+          },
+          "available": {
+            "type": "array",
+            "description": "All available content types for this context/version",
+            "items": {
+              "$ref": "#/components/schemas/ContentTypeInfo"
+            },
+            "title": "Available"
+          },
+          "context": {
+            "type": "string",
+            "description": "Schema context used",
+            "title": "Context"
+          },
+          "version": {
+            "type": "string",
+            "description": "Schema version used",
+            "title": "Version"
+          },
+          "processing_time_ms": {
+            "type": "integer",
+            "description": "Processing time in milliseconds",
+            "title": "Processing Time Ms"
+          }
+        },
+        "required": [
+          "available",
+          "context",
+          "detected",
+          "processing_time_ms",
+          "version"
+        ],
+        "title": "DetectContentTypeResponse"
+      },
+      "ExportMarkdownResponse": {
+        "type": "object",
+        "description": "Response model for markdown export.",
+        "properties": {
+          "markdown": {
+            "type": "string",
+            "title": "Markdown"
+          },
+          "schema_used": {
+            "type": "string",
+            "title": "Schema Used"
+          }
+        },
+        "required": [
+          "markdown",
+          "schema_used"
+        ],
+        "title": "ExportMarkdownResponse"
+      },
+      "ExtractFieldRequest": {
+        "type": "object",
+        "description": "Request model for single field extraction.",
+        "examples": [
+          {
+            "context": "default",
+            "field_id": "schema:startDate",
+            "language": "de",
+            "llm_model": "gpt-4.1-mini",
+            "llm_provider": "b-api-openai",
+            "normalize": true,
+            "schema_file": "event.json",
+            "text": "Workshop 'KI in der Bildung' am 15. März 2025 in Berlin.",
+            "version": "latest"
+          },
+          {
+            "context": "default",
+            "existing_metadata": {
+              "schema:startDate": "2025-03-15T00:00"
+            },
+            "field_id": "schema:startDate",
+            "language": "de",
+            "llm_model": "gpt-4.1-mini",
+            "llm_provider": "b-api-openai",
+            "normalize": true,
+            "schema_file": "event.json",
+            "text": "Der Workshop wurde auf den 20. März 2025 verschoben.",
+            "version": "latest"
+          }
+        ],
+        "properties": {
+          "input_source": {
+            "$ref": "#/components/schemas/InputSource",
+            "default": "text",
+            "description": "Input source: 'text' (direct input), 'url' (fetch via crawler), 'node_id' (fetch from repository), 'node_url' (repository + crawler fallback)"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Input text to extract the field value from. Required when input_source='text'.",
+            "title": "Text"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "URL to fetch text from via text extraction API. Required when input_source='url' or 'node_url'.",
+            "title": "Source Url"
+          },
+          "extraction_method": {
+            "$ref": "#/components/schemas/ExtractionMethod",
+            "default": "browser",
+            "description": "Text extraction method: 'simple' (fast, basic HTML parsing) or 'browser' (full browser rendering, slower but more complete)"
+          },
+          "output_format": {
+            "$ref": "#/components/schemas/OutputFormat",
+            "default": "markdown",
+            "description": "Output format for text extraction: 'markdown' (default), 'txt' (plain text), 'html' (raw HTML)"
+          },
+          "node_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Repository NodeID to fetch metadata and text from. Required when input_source='node_id' or 'node_url'.",
+            "title": "Node Id"
+          },
+          "repository": {
+            "$ref": "#/components/schemas/Repository",
+            "default": "staging",
+            "description": "Repository to use for NodeID lookup: 'prod' (redaktion.openeduhub.net) or 'staging' (repository.staging.openeduhub.net)"
+          },
+          "context": {
+            "type": "string",
+            "default": "default",
+            "description": "Schema context to use",
+            "title": "Context"
+          },
+          "version": {
+            "type": "string",
+            "default": "latest",
+            "description": "Schema version to use ('latest' for newest)",
+            "title": "Version"
+          },
+          "schema_file": {
+            "type": "string",
+            "description": "Schema file containing the field (e.g., 'event.json', 'core.json') or a vocab URI (e.g., 'http://w3id.org/openeduhub/vocabs/contentTypes/event')",
+            "title": "Schema File"
+          },
+          "field_id": {
+            "type": "string",
+            "description": "Field ID to extract (e.g., 'schema:startDate', 'cclom:title')",
+            "title": "Field Id"
+          },
+          "existing_metadata": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Existing metadata JSON with current field values (for context in update scenarios). For node_id/node_url sources, fetched metadata is merged.",
+            "title": "Existing Metadata"
+          },
+          "language": {
+            "type": "string",
+            "default": "de",
+            "description": "Language for extraction (de/en)",
+            "title": "Language"
+          },
+          "normalize": {
+            "type": "boolean",
+            "default": true,
+            "description": "Apply normalization to extracted value (dates, vocabularies, etc.)",
+            "title": "Normalize"
+          },
+          "llm_provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "LLM provider to use. Options: 'openai' (native OpenAI API), 'b-api-openai' (OpenAI via B-API, default), 'b-api-academiccloud' (DeepSeek via B-API). If not set, uses METADATA_AGENT_LLM_PROVIDER from environment.",
+            "title": "Llm Provider"
+          },
+          "llm_model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "LLM model to use. Examples: 'gpt-4.1-mini' (default for b-api-openai), 'gpt-4o-mini' (for openai), 'deepseek-r1' (for b-api-academiccloud). If not set, uses the provider's default model from environment.",
+            "title": "Llm Model"
+          }
+        },
+        "required": [
+          "field_id",
+          "schema_file"
+        ],
+        "title": "ExtractFieldRequest"
+      },
+      "ExtractFieldResponse": {
+        "type": "object",
+        "description": "Response model for single field extraction.",
+        "properties": {
+          "field_id": {
+            "type": "string",
+            "description": "Field ID that was extracted",
+            "title": "Field Id"
+          },
+          "field_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Human-readable field label",
+            "title": "Field Label"
+          },
+          "value": {
+            "description": "Extracted (and normalized) value",
+            "title": "Value"
+          },
+          "raw_value": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Value before normalization (if different)",
+            "title": "Raw Value"
+          },
+          "previous_value": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Previous value if provided",
+            "title": "Previous Value"
+          },
+          "changed": {
+            "type": "boolean",
+            "description": "Whether the value changed from previous",
+            "title": "Changed"
+          },
+          "normalized": {
+            "type": "boolean",
+            "description": "Whether normalization was applied",
+            "title": "Normalized"
+          },
+          "context": {
+            "type": "string",
+            "description": "Schema context used",
+            "title": "Context"
+          },
+          "version": {
+            "type": "string",
+            "description": "Schema version used",
+            "title": "Version"
+          },
+          "schema_file": {
+            "type": "string",
+            "description": "Schema file used",
+            "title": "Schema File"
+          },
+          "processing": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Processing info (provider, model, time)",
+            "title": "Processing"
+          }
+        },
+        "required": [
+          "changed",
+          "context",
+          "field_id",
+          "normalized",
+          "processing",
+          "schema_file",
+          "value",
+          "version"
+        ],
+        "title": "ExtractFieldResponse"
+      },
+      "ExtractionMethod": {
+        "type": "string",
+        "description": "Text extraction method for URL input.",
+        "enum": [
+          "simple",
+          "browser"
+        ],
+        "title": "ExtractionMethod"
+      },
+      "FieldDiff": {
+        "type": "object",
+        "description": "Diff info for a single metadata field.",
+        "properties": {
+          "field_id": {
+            "type": "string",
+            "title": "Field Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "expected": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected"
+          },
+          "actual": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual"
+          }
+        },
+        "required": [
+          "field_id",
+          "status"
+        ],
+        "title": "FieldDiff"
+      },
+      "FieldUploadError": {
+        "type": "object",
+        "description": "Error info for a single field that failed during upload.",
+        "properties": {
+          "field_id": {
+            "type": "string",
+            "title": "Field Id"
+          },
+          "error": {
+            "type": "string",
+            "title": "Error"
+          },
+          "status_code": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status Code"
+          }
+        },
+        "required": [
+          "error",
+          "field_id"
+        ],
+        "title": "FieldUploadError"
+      },
+      "GenerateResponse": {
+        "type": "object",
+        "description": "Response model for metadata generation.\n\nThe response contains header info, then flat metadata fields directly,\nfollowed by processing info at the end.",
+        "properties": {
+          "contextName": {
+            "type": "string",
+            "description": "Schema context name",
+            "title": "Contextname"
+          },
+          "schemaVersion": {
+            "type": "string",
+            "description": "Schema version used",
+            "title": "Schemaversion"
+          },
+          "metadataset": {
+            "type": "string",
+            "description": "Schema file that was used",
+            "title": "Metadataset"
+          },
+          "metadataset_uri": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Vocab URI for the metadataset (e.g., 'http://w3id.org/openeduhub/vocabs/contentTypes/event')",
+            "title": "Metadataset Uri"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language used for extraction",
+            "title": "Language"
+          },
+          "exportedAt": {
+            "type": "string",
+            "description": "ISO timestamp of generation",
+            "title": "Exportedat"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Generated metadata as flat key-value pairs. Fields appear at top level in response.",
+            "title": "Metadata"
+          },
+          "processing": {
+            "$ref": "#/components/schemas/ProcessingInfo",
+            "description": "Processing statistics and debug info"
+          }
+        },
+        "required": [
+          "contextName",
+          "exportedAt",
+          "language",
+          "metadataset",
+          "processing",
+          "schemaVersion"
+        ],
+        "title": "GenerateResponse"
+      },
+      "InputSource": {
+        "type": "string",
+        "description": "Input source for metadata generation.",
+        "enum": [
+          "text",
+          "url",
+          "node_id",
+          "node_url"
+        ],
+        "title": "InputSource"
+      },
+      "LocalizedString": {
+        "type": "object",
+        "description": "Localized string with de/en support.",
+        "properties": {
+          "de": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "De"
+          },
+          "en": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "En"
+          }
+        },
+        "title": "LocalizedString"
+      },
+      "OutputFormat": {
+        "type": "string",
+        "description": "Output format for text extraction.",
+        "enum": [
+          "markdown",
+          "txt",
+          "html"
+        ],
+        "title": "OutputFormat"
+      },
+      "ProcessingInfo": {
+        "type": "object",
+        "description": "Processing statistics and debug info.",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "fields_extracted": {
+            "type": "integer",
+            "description": "Number of fields with values",
+            "title": "Fields Extracted"
+          },
+          "fields_total": {
+            "type": "integer",
+            "description": "Total number of fields in schema",
+            "title": "Fields Total"
+          },
+          "processing_time_ms": {
+            "type": "integer",
+            "description": "Processing time in milliseconds",
+            "title": "Processing Time Ms"
+          },
+          "llm_provider": {
+            "type": "string",
+            "description": "LLM provider used",
+            "title": "Llm Provider"
+          },
+          "llm_model": {
+            "type": "string",
+            "description": "LLM model used",
+            "title": "Llm Model"
+          },
+          "errors": {
+            "type": "array",
+            "description": "Any errors encountered",
+            "items": {
+              "type": "string"
+            },
+            "title": "Errors"
+          },
+          "warnings": {
+            "type": "array",
+            "description": "Any warnings",
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings"
+          }
+        },
+        "required": [
+          "fields_extracted",
+          "fields_total",
+          "llm_model",
+          "llm_provider",
+          "processing_time_ms",
+          "success"
+        ],
+        "title": "ProcessingInfo"
+      },
+      "Repository": {
+        "type": "string",
+        "description": "Repository selection for NodeID lookups.",
+        "enum": [
+          "prod",
+          "staging"
+        ],
+        "title": "Repository"
+      },
+      "SchemaInfo": {
+        "type": "object",
+        "description": "Information about a schema.",
+        "properties": {
+          "file": {
+            "type": "string",
+            "title": "File"
+          },
+          "profile_id": {
+            "type": "string",
+            "title": "Profile Id"
+          },
+          "label": {
+            "$ref": "#/components/schemas/LocalizedString"
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Groups"
+          },
+          "field_count": {
+            "type": "integer",
+            "title": "Field Count"
+          }
+        },
+        "required": [
+          "field_count",
+          "file",
+          "groups",
+          "label",
+          "profile_id"
+        ],
+        "title": "SchemaInfo"
+      },
+      "SchemataInfoResponse": {
+        "type": "object",
+        "description": "Response with available schemata information.",
+        "properties": {
+          "contexts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContextInfo"
+            },
+            "title": "Contexts"
+          },
+          "default_context": {
+            "type": "string",
+            "title": "Default Context"
+          }
+        },
+        "required": [
+          "contexts",
+          "default_context"
+        ],
+        "title": "SchemataInfoResponse"
+      },
+      "ScreenshotMethod": {
+        "type": "string",
+        "description": "Screenshot capture method.",
+        "enum": [
+          "pageshot",
+          "playwright"
+        ],
+        "title": "ScreenshotMethod"
+      },
+      "ScreenshotRequest": {
+        "type": "object",
+        "description": "Request model for standalone screenshot capture.",
+        "examples": [
+          {
+            "format": "png",
+            "height": 500,
+            "method": "pageshot",
+            "url": "https://klexikon.zum.de/wiki/Erde",
+            "width": 800
+          }
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Webpage URL to capture",
+            "title": "Url"
+          },
+          "method": {
+            "$ref": "#/components/schemas/ScreenshotMethod",
+            "default": "pageshot",
+            "description": "Capture method: 'pageshot' (external API, default) or 'playwright' (internal, privacy-safe)"
+          },
+          "width": {
+            "type": "integer",
+            "default": 800,
+            "description": "Viewport width (320-3840)",
+            "maximum": 3840.0,
+            "minimum": 320.0,
+            "title": "Width"
+          },
+          "height": {
+            "type": "integer",
+            "default": 500,
+            "description": "Viewport height (200-2160)",
+            "maximum": 2160.0,
+            "minimum": 200.0,
+            "title": "Height"
+          },
+          "format": {
+            "type": "string",
+            "default": "png",
+            "description": "Image format: 'png', 'jpeg', 'webp'",
+            "title": "Format"
+          },
+          "full_page": {
+            "type": "boolean",
+            "default": false,
+            "description": "Capture entire scrollable page",
+            "title": "Full Page"
+          },
+          "delay": {
+            "type": "integer",
+            "default": 2000,
+            "description": "Wait before capture in ms (0-10000)",
+            "maximum": 10000.0,
+            "minimum": 0.0,
+            "title": "Delay"
+          },
+          "node_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "If provided, upload screenshot as preview to this edu-sharing node",
+            "title": "Node Id"
+          },
+          "repository": {
+            "type": "string",
+            "default": "staging",
+            "description": "Repository for preview upload: 'staging' or 'prod'",
+            "title": "Repository"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "ScreenshotRequest"
+      },
+      "ScreenshotResponse": {
+        "type": "object",
+        "description": "Response from screenshot capture.",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "method": {
+            "type": "string",
+            "description": "Method used: 'pageshot' or 'playwright'",
+            "title": "Method"
+          },
+          "url": {
+            "type": "string",
+            "description": "Captured URL",
+            "title": "Url"
+          },
+          "format": {
+            "type": "string",
+            "description": "Image format",
+            "title": "Format"
+          },
+          "mimetype": {
+            "type": "string",
+            "description": "MIME type (e.g. image/png)",
+            "title": "Mimetype"
+          },
+          "width": {
+            "type": "integer",
+            "description": "Viewport width",
+            "title": "Width"
+          },
+          "height": {
+            "type": "integer",
+            "description": "Viewport height",
+            "title": "Height"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "description": "Image size in bytes",
+            "title": "Size Bytes"
+          },
+          "capture_time_ms": {
+            "type": "integer",
+            "description": "Capture duration in ms",
+            "title": "Capture Time Ms"
+          },
+          "image_base64": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Base64-encoded image (only in JSON response mode)",
+            "title": "Image Base64"
+          },
+          "preview_uploaded": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Whether preview was uploaded to node",
+            "title": "Preview Uploaded"
+          },
+          "node_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Node ID if preview was uploaded",
+            "title": "Node Id"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          }
+        },
+        "required": [
+          "capture_time_ms",
+          "format",
+          "height",
+          "method",
+          "mimetype",
+          "size_bytes",
+          "success",
+          "url",
+          "width"
+        ],
+        "title": "ScreenshotResponse"
+      },
+      "UploadResponse": {
+        "type": "object",
+        "description": "Response from repository upload.",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "duplicate": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duplicate"
+          },
+          "repository": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repository"
+          },
+          "node": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UploadedNodeInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "step": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Step"
+          },
+          "fields_written": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fields Written"
+          },
+          "fields_skipped": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fields Skipped"
+          },
+          "field_errors": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/FieldUploadError"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Field Errors"
+          },
+          "preview": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Preview screenshot status: {success, method, capture_time_ms, size_bytes} or {success: false, error}",
+            "title": "Preview"
+          }
+        },
+        "required": [
+          "success"
+        ],
+        "title": "UploadResponse"
+      },
+      "UploadedNodeInfo": {
+        "type": "object",
+        "description": "Information about uploaded or existing node.",
+        "properties": {
+          "nodeId": {
+            "type": "string",
+            "title": "Nodeid"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "wwwurl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wwwurl"
+          },
+          "repositoryUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repositoryurl"
+          }
+        },
+        "required": [
+          "nodeId"
+        ],
+        "title": "UploadedNodeInfo"
+      },
+      "ValidateResponse": {
+        "type": "object",
+        "description": "Response model for metadata validation.",
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "title": "Valid"
+          },
+          "schema_used": {
+            "type": "string",
+            "title": "Schema Used"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Errors"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Warnings"
+          },
+          "coverage": {
+            "type": "number",
+            "description": "Percentage of required fields filled",
+            "title": "Coverage"
+          }
+        },
+        "required": [
+          "coverage",
+          "schema_used",
+          "valid"
+        ],
+        "title": "ValidateResponse"
+      },
+      "VerifyResponse": {
+        "type": "object",
+        "description": "Response from upload verification.",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "node_id": {
+            "type": "string",
+            "title": "Node Id"
+          },
+          "repository": {
+            "type": "string",
+            "title": "Repository"
+          },
+          "actual_metadata": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Flat metadata as read from the repository",
+            "title": "Actual Metadata"
+          },
+          "diff": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/FieldDiff"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Field-level diff (only when expected_metadata is provided)",
+            "title": "Diff"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Diff summary: match, mismatch, missing_in_repo, extra_in_repo, not_written counts",
+            "title": "Summary"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          }
+        },
+        "required": [
+          "actual_metadata",
+          "node_id",
+          "repository",
+          "success"
+        ],
+        "title": "VerifyResponse"
+      },
+      "GenerateRequest": {
+        "type": "object",
+        "description": "Request model for metadata generation.",
+        "examples": [
+          {
+            "context": "default",
+            "existing_metadata": {
+              "cclom:title": "Mein Workshop"
+            },
+            "include_core": true,
+            "language": "de",
+            "llm_model": "gpt-4.1-mini",
+            "llm_provider": "b-api-openai",
+            "max_workers": 10,
+            "preview_url": "",
+            "schema_file": "auto",
+            "screenshot_method": "pageshot",
+            "text": "Workshop 'KI in der Bildung' am 15. März 2025 in Berlin. Lernen Sie die Grundlagen der künstlichen Intelligenz kennen.",
+            "version": "latest"
+          }
+        ],
+        "properties": {
+          "input_source": {
+            "$ref": "#/components/schemas/InputSource",
+            "default": "text",
+            "description": "Input source: 'text' (direct input), 'url' (fetch via crawler), 'node_id' (fetch from repository), 'node_url' (repository + crawler fallback)"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Input text to extract metadata from. Required when input_source='text'.",
+            "title": "Text"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "URL to fetch text from via text extraction API. Required when input_source='url' or 'node_url'.",
+            "title": "Source Url"
+          },
+          "extraction_method": {
+            "$ref": "#/components/schemas/ExtractionMethod",
+            "default": "browser",
+            "description": "Text extraction method: 'simple' (fast, basic HTML parsing) or 'browser' (full browser rendering, slower but more complete)"
+          },
+          "output_format": {
+            "$ref": "#/components/schemas/OutputFormat",
+            "default": "markdown",
+            "description": "Output format for text extraction: 'markdown' (default), 'txt' (plain text), 'html' (raw HTML)"
+          },
+          "node_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Repository NodeID to fetch metadata and text from. Required when input_source='node_id' or 'node_url'.",
+            "title": "Node Id"
+          },
+          "repository": {
+            "$ref": "#/components/schemas/Repository",
+            "default": "staging",
+            "description": "Repository to use for NodeID lookup: 'prod' (redaktion.openeduhub.net) or 'staging' (repository.staging.openeduhub.net)"
+          },
+          "existing_metadata": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Existing metadata JSON to use as base (will be updated/enriched). For node_id/node_url sources, fetched metadata is merged.",
+            "title": "Existing Metadata"
+          },
+          "context": {
+            "type": "string",
+            "default": "default",
+            "description": "Schema context to use (e.g., 'default', 'mds_oeh')",
+            "title": "Context"
+          },
+          "version": {
+            "type": "string",
+            "default": "latest",
+            "description": "Schema version to use ('latest' for newest version, or specific like '1.8.1')",
+            "title": "Version"
+          },
+          "schema_file": {
+            "type": "string",
+            "default": "auto",
+            "description": "Schema file to use ('auto' for automatic detection, specific filename like 'event.json', or a vocab URI like 'http://w3id.org/openeduhub/vocabs/contentTypes/event')",
+            "title": "Schema File"
+          },
+          "language": {
+            "type": "string",
+            "default": "de",
+            "description": "Primary language for extraction (de/en)",
+            "title": "Language"
+          },
+          "max_workers": {
+            "type": "integer",
+            "default": 10,
+            "description": "Maximum number of parallel LLM workers (1-20)",
+            "maximum": 20,
+            "minimum": 1,
+            "title": "Max Workers"
+          },
+          "include_core": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include core fields (title, description, keywords, etc.) in extraction",
+            "title": "Include Core"
+          },
+          "enable_geocoding": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable geocoding to convert location addresses to coordinates (uses Photon API)",
+            "title": "Enable Geocoding"
+          },
+          "normalize": {
+            "type": "boolean",
+            "default": true,
+            "description": "Apply normalization to extracted values (dates, booleans, vocabularies, etc.)",
+            "title": "Normalize"
+          },
+          "regenerate_fields": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "List of field IDs to regenerate (re-extract from text). Other fields use existing_metadata.",
+            "title": "Regenerate Fields"
+          },
+          "regenerate_empty": {
+            "type": "boolean",
+            "default": false,
+            "description": "Re-extract fields that are empty/null in existing_metadata",
+            "title": "Regenerate Empty"
+          },
+          "llm_provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "LLM provider to use. Options: 'openai' (native OpenAI API), 'b-api-openai' (OpenAI via B-API, default), 'b-api-academiccloud' (DeepSeek via B-API). If not set, uses METADATA_AGENT_LLM_PROVIDER from environment.",
+            "title": "Llm Provider"
+          },
+          "llm_model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "LLM model to use. Examples: 'gpt-4.1-mini' (default for b-api-openai), 'gpt-4o-mini' (for openai), 'deepseek-r1' (for b-api-academiccloud). If not set, uses the provider's default model from environment.",
+            "title": "Llm Model"
+          },
+          "preview_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "URL to capture as preview screenshot (runs async parallel to KI extraction). If not set, auto-detected from source_url or ccm:wwwurl.",
+            "title": "Preview Url"
+          },
+          "screenshot_method": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Screenshot method: 'pageshot' (external API, default) or 'playwright' (internal, privacy-safe). If not set, no screenshot is captured.",
+            "title": "Screenshot Method"
+          }
+        },
+        "title": "GenerateRequest"
+      },
+      "ValidateRequest": {
+        "type": "object",
+        "description": "Request model for metadata validation.\n\nAll parameters default to 'auto' and are automatically detected from the metadata:\n- contextName → context\n- schemaVersion → version\n- metadataset → schema_file\n\nYou can override any parameter by providing an explicit value.",
+        "properties": {
+          "metadata": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Metadata JSON to validate (full export or nested)",
+            "title": "Metadata"
+          },
+          "context": {
+            "type": "string",
+            "default": "auto",
+            "description": "Schema context ('auto' = read from contextName in metadata)",
+            "title": "Context"
+          },
+          "version": {
+            "type": "string",
+            "default": "auto",
+            "description": "Schema version ('auto' = read from schemaVersion in metadata)",
+            "title": "Version"
+          },
+          "schema_file": {
+            "type": "string",
+            "default": "auto",
+            "description": "Schema file ('auto' = read from metadataset in metadata)",
+            "title": "Schema File"
+          }
+        },
+        "required": [
+          "metadata"
+        ],
+        "title": "ValidateRequest"
+      },
+      "ExportMarkdownRequest": {
+        "type": "object",
+        "description": "Request model for markdown export.\n\nLike ValidateRequest, all parameters default to 'auto' for auto-detection.\nSimply pass the complete output from /generate directly as `metadata`.",
+        "examples": [
+          {
+            "metadata": {
+              "cclom:general_description": "Ein Workshop über KI...",
+              "cclom:title": "Workshop KI in der Bildung",
+              "contextName": "default",
+              "language": "de",
+              "metadataset": "event.json",
+              "schema:actor": [
+                {
+                  "name": "Max Mustermann"
+                }
+              ],
+              "schema:location": [
+                {
+                  "address": {
+                    "addressLocality": "Berlin"
+                  },
+                  "name": "Berlin"
+                }
+              ],
+              "schemaVersion": "1.8.1"
+            }
+          }
+        ],
+        "properties": {
+          "metadata": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Complete output from /generate endpoint - paste directly",
+            "title": "Metadata"
+          },
+          "context": {
+            "type": "string",
+            "default": "auto",
+            "description": "Schema context ('auto' = read from metadata)",
+            "title": "Context"
+          },
+          "version": {
+            "type": "string",
+            "default": "auto",
+            "description": "Schema version ('auto' = read from metadata)",
+            "title": "Version"
+          },
+          "schema_file": {
+            "type": "string",
+            "default": "auto",
+            "description": "Schema file ('auto' = read from metadata)",
+            "title": "Schema File"
+          },
+          "language": {
+            "type": "string",
+            "default": "auto",
+            "description": "Output language ('auto' = read from metadata, fallback: de)",
+            "title": "Language"
+          },
+          "include_empty": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include empty fields",
+            "title": "Include Empty"
+          }
+        },
+        "required": [
+          "metadata"
+        ],
+        "title": "ExportMarkdownRequest"
+      },
+      "UploadRequest": {
+        "type": "object",
+        "description": "Request model for uploading metadata to WLO repository.\n\nAccepts the JSON output from /generate endpoint.",
+        "examples": [
+          {
+            "check_duplicates": true,
+            "extended_text": "Raw text content...",
+            "metadata": {
+              "cclom:general_description": "Description...",
+              "cclom:title": "Example Event",
+              "ccm:wwwurl": "https://example.com/event",
+              "contextName": "default",
+              "metadataset": "event.json",
+              "schemaVersion": "1.8.1"
+            },
+            "preview_url": "https://example.com/event",
+            "repository": "staging",
+            "screenshot_method": "pageshot",
+            "source": "Klexikon",
+            "start_workflow": true,
+            "write_extended_data": true
+          }
+        ],
+        "properties": {
+          "metadata": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Metadata dict from /generate endpoint (with contextName, schemaVersion, etc.)",
+            "title": "Metadata"
+          },
+          "repository": {
+            "type": "string",
+            "default": "staging",
+            "description": "Target repository: 'staging' or 'production'",
+            "title": "Repository"
+          },
+          "check_duplicates": {
+            "type": "boolean",
+            "default": true,
+            "description": "Check for duplicates by ccm:wwwurl before uploading",
+            "title": "Check Duplicates"
+          },
+          "start_workflow": {
+            "type": "boolean",
+            "default": true,
+            "description": "Start review workflow after upload",
+            "title": "Start Workflow"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Bezugsquelle / Publisher-Name. Wenn angegeben, wird ccm:oeh_publisher_combined mit diesem Wert überschrieben.",
+            "title": "Source"
+          },
+          "preview_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "URL for preview screenshot. If provided, a screenshot is captured async and uploaded as node preview.",
+            "title": "Preview Url"
+          },
+          "screenshot_method": {
+            "$ref": "#/components/schemas/ScreenshotMethod",
+            "default": "pageshot",
+            "description": "Screenshot method: 'pageshot' (default) or 'playwright' (privacy-safe)"
+          },
+          "write_extended_data": {
+            "type": "boolean",
+            "default": true,
+            "description": "Write extended fields (ccm:oeh_extendedType, ccm:oeh_extendedData, ccm:oeh_extendedText) to node. Default: true.",
+            "title": "Write Extended Data"
+          },
+          "extended_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Raw source text before extraction (user input, extracted page content, etc.). Written to ccm:oeh_extendedText.",
+            "title": "Extended Text"
+          }
+        },
+        "required": [
+          "metadata"
+        ],
+        "title": "UploadRequest"
+      },
+      "VerifyRequest": {
+        "type": "object",
+        "description": "Request for verifying uploaded metadata against repository.",
+        "examples": [
+          {
+            "expected_metadata": {
+              "cclom:general_description": "Description...",
+              "cclom:title": "Example Event",
+              "ccm:taxonid": "http://w3id.org/openeduhub/vocabs/discipline/12002",
+              "ccm:wwwurl": "https://example.com/event"
+            },
+            "repository": "staging"
+          }
+        ],
+        "properties": {
+          "expected_metadata": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Expected metadata (e.g. output from /generate). If provided, a SOLL/IST diff is computed.",
+            "title": "Expected Metadata"
+          },
+          "repository": {
+            "type": "string",
+            "default": "staging",
+            "description": "Repository: 'staging' or 'prod'",
+            "title": "Repository"
+          }
+        },
+        "title": "VerifyRequest"
       }
     },
     "securitySchemes": {
