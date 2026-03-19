@@ -38,7 +38,7 @@ public class BApiProxyService {
     );
 
     @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_BAPI)
-    public Response forwardRequest(String path, String body, HttpHeaders headers, HttpMethod method) {
+    public Response forwardRequest(String path, String body, HttpHeaders headers, String queryParams, HttpMethod method) {
         String authenticatedUser = AuthenticationUtil.getFullyAuthenticatedUser();
         String apiKey = guestService.isGuestUser(authenticatedUser) ?
                 bApiProxyConfig.getGuestUserApiKey() : bApiProxyConfig.getAuthUserApiKey();
@@ -54,7 +54,14 @@ public class BApiProxyService {
                 .readTimeout(Duration.parse(bApiProxyConfig.getCallTimeout()))
                 .build();
         Request.Builder requestBuilder = new Request.Builder();
-        requestBuilder.url(bApiProxyConfig.getUri().concat(path));
+
+        String targetUrl = bApiProxyConfig.getUri().concat(path);
+        if (StringUtils.isNotBlank(queryParams)) {
+            targetUrl = targetUrl + "?" + queryParams;
+        }
+
+        requestBuilder.url(targetUrl);
+
 
         RequestBody requestBody = null;
         if (StringUtils.isNotBlank(body)) {
