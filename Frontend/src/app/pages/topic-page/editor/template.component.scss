@@ -773,6 +773,26 @@ es-editable-text {
     border-radius: 16px;
     display: flex;
     overflow: hidden;
+
+    es-render-wrapper-component {
+        // reduce min-height
+        min-height: 300px;
+
+        rs-root {
+            // reduce min-height
+            min-height: 300px;
+
+            // adjust img width + remove link to original content
+            .link-wrapper {
+                > img {
+                    max-width: 100%;
+                }
+                > a {
+                    display: none;
+                }
+            }
+        }
+    }
 }
 
 // common styles
