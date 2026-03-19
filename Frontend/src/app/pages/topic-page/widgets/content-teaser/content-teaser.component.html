@@ -9,6 +9,7 @@
     [layout]="layout"
     [scrollGradientColor]="swimlaneColor() && !swimlaneShapeSelected() ? swimlaneColor() : null"
     [hasEditRightsAndIsEditMode]="editMode()"
+    [lastSearchUpdate]="lastSearchUpdate()"
     [searchText]="searchText"
     (blacklistChanged)="changedBlacklist($event)"
     (displayTypeChanged)="layoutChangeAction()"

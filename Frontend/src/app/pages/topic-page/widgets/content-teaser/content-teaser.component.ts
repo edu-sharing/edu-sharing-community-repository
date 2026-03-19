@@ -4,6 +4,7 @@ import {
     Component,
     computed,
     CUSTOM_ELEMENTS_SCHEMA,
+    effect,
     EventEmitter,
     input,
     Input,
@@ -83,6 +84,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
     @Input() propagatedNodeId?: string;
     searchInput: InputSignal<string> = input<string>(null);
     searchFilters: InputSignal<Values> = input<Values>(null);
+    lastSearchUpdate: WritableSignal<Date | null> = signal<Date | null>(null);
     @Input() searchText: string;
     swimlaneColor: InputSignal<string> = input<string>(null);
     @Input() swimlaneIndex: number = -1;
@@ -219,6 +221,13 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
                 viewValue: 'MAP_VIEW',
             });
         }
+        // hold the last search update date to avoid omitting updates coming too late
+        effect((): void => {
+            // track update of both signals
+            this.searchInput();
+            this.searchFilters();
+            this.lastSearchUpdate.set(new Date());
+        });
     }
 
     /**

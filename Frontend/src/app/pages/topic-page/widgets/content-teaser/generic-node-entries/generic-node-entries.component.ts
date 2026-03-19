@@ -132,6 +132,7 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             }
         }
     }
+    @Input() lastSearchUpdate: Date | null;
     private _layout: GenericNodeEntriesDisplayType;
     @Input() get layout() {
         return this._layout;
@@ -841,6 +842,7 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
         // an update should be emitted if it is the initial call and the totalCount is larger than the maxItems
         // in this case, 100 items are loaded
         if (skipCount === 0 && totalCount > this.maxItems) {
+            const timeOfRequest: Date = new Date();
             // TODO: remove, if implemented properly
             if (this.customTypeInstance) {
                 return;
@@ -874,7 +876,9 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
                     existingNodeIds.push(node.ref.id);
                 }
             });
-            emitNodes(copyOfAllRequestedNodes);
+            if (!this.lastSearchUpdate || this.lastSearchUpdate < timeOfRequest) {
+                emitNodes(copyOfAllRequestedNodes);
+            }
         }
     }
 
