@@ -258,7 +258,11 @@ spec:
         {{- end }}
         {{- with .Values.livenessProbe }}
         livenessProbe:
-          tcpSocket:
+          httpGet:
+            httpHeaders:
+                - name: Accept
+                  value: application/json
+            path: /edu-sharing/rest/_about/health/liveness?timeoutSeconds={{ .timeoutSeconds }}
             port: api-internal
           failureThreshold: {{ .failureThreshold }}
           initialDelaySeconds: {{ .initialDelaySeconds }}
@@ -268,7 +272,7 @@ spec:
         {{- with .Values.readinessProbe }}
         readinessProbe:
           httpGet:
-            path: /edu-sharing/rest/_about/status/SERVICE?timeoutSeconds={{ .timeoutSeconds }}
+            path: /edu-sharing/rest/_about/health/readiness?timeoutSeconds={{ .timeoutSeconds }}
             httpHeaders:
             - name: Accept
               value: application/json
