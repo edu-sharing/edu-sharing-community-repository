@@ -34,7 +34,7 @@ public class AuthByAppConfigProvider {
 
 
     @EventListener(RefreshScopeRefreshedEvent.class)
-    @CacheEvict(cacheNames = {"externalProperties"}, allEntries = true, cacheManager = "localCacheManager")
+    @CacheEvict(cacheNames = {"authByAppProperties"}, allEntries = true, cacheManager = "localCacheManager")
     public void onConfigurationChanged() {}
 
 }
