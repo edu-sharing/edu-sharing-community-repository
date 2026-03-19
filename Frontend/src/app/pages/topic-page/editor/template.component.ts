@@ -245,11 +245,13 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
             .pipe(debounceTime(200), distinctUntilChanged(), takeUntil(this.destroyed$))
             .subscribe((searchInput: string) => {
                 this.searchInput.set(searchInput);
+                this.previewSidebarService.handleNodeClick(null);
             });
         this.searchFiltersSubject
             .pipe(debounceTime(500), distinctUntilChanged(), takeUntil(this.destroyed$))
             .subscribe((searchFilters: Values) => {
                 this.searchFilters.set(searchFilters);
+                this.previewSidebarService.handleNodeClick(null);
             });
         // subscribe to changes on the sidebar opening state
         this.previewSidebarService
