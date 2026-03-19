@@ -6,7 +6,9 @@ public class MappingBeanFactory {
 
     public static Mapping getMapping(Config config) {
         Mapping mapping = new Mapping();
-
+        if(config.hasPath("preferRemoteUser")) {
+            mapping.setPreferRemoteUser(config.getBoolean("preferRemoteUser"));
+        }
         if(config.hasPath("person")){
             config.getObject("person").forEach((key, value) -> {
                 if(key.equals("additionalKeyValues")){
