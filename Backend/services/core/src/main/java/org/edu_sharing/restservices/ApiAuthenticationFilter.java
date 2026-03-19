@@ -89,7 +89,7 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
                             return;
                         }
 
-                        authTool.authenticateUser(userName,((HttpServletRequest) req).getSession());
+                        authTool.authenticateUser(userName,((HttpServletRequest) req).getSession(),CCConstants.AUTH_TYPE_OAUTH);
                         validatedAuth = authTool.validateAuthentication(session);
                         logger.debug("oauth2 username is " + userName);
                     /*Token token = tokenService.getToken(accessToken);

@@ -296,9 +296,9 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
             addToSpringSecurityContext(session);
         }
 
-        public void authenticateUser (String username, HttpSession session){
+        public void authenticateUser(String username, HttpSession session,String authType){
             authenticationComponent.setCurrentUser(username);
-            storeAuthInfoInSession(username, authenticationService.getCurrentTicket(), CCConstants.AUTH_TYPE_DEFAULT, session);
+            storeAuthInfoInSession(username, authenticationService.getCurrentTicket(), authType, session);
         }
 
     }

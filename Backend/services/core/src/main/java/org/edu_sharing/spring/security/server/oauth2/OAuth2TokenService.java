@@ -1,6 +1,8 @@
 package org.edu_sharing.spring.security.server.oauth2;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.config.ConfigService;
 import org.edu_sharing.spring.conditions.ConditionalOnProperty;
@@ -30,5 +32,19 @@ public class OAuth2TokenService {
                 .build();
         Jwt jwt = jwtDecoder.decode(token);
         return jwt.getSubject();
+    }
+
+    public String getAccessToken(HttpServletRequest request) {
+
+        String accessToken = request.getParameter(CCConstants.REQUEST_PARAM_ACCESSTOKEN);
+        if(accessToken != null && !accessToken.trim().isEmpty()) return accessToken;
+
+        String authHdr = request.getHeader("Authorization");
+        if (authHdr != null) {
+            if (authHdr.length() > 6 && authHdr.substring(0, 6).equalsIgnoreCase("Bearer")) {
+                return authHdr.substring(6).trim();
+            }
+        }
+        return null;
     }
 }
