@@ -29,8 +29,8 @@ public class SilentLoginModeRedirect {
         }
 
         // preview redirect is problematic since browser seem to load random images from cache on 302 responses
-        if (request.getServletPath().equals("/rest") || request.getServletPath().equals("/preview")) {
-            log.debug("path is rest");
+        if (request.getServletPath().equals("/rest") || request.getServletPath().equals("/preview") ||  request.getServletPath().startsWith("/eduservlet")) {
+            log.debug("servlet path {} is not allowed",request.getServletPath());
             return false;
         }
 
