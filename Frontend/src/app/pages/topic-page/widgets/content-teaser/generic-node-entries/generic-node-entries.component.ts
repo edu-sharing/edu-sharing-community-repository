@@ -3,6 +3,7 @@ import {
     Component,
     ElementRef,
     EventEmitter,
+    HostBinding,
     Input,
     OnChanges,
     OnDestroy,
@@ -205,6 +206,7 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
     @Input() maxItems: number = 11;
     @Input() mds: string | null = null;
     @Input() queryId: string = RestConstants.DEFAULT_QUERY_NAME;
+    @HostBinding('style.--scroll-gradient-color') @Input() scrollGradientColor: string = '#fff';
     @Input() searchText: string;
     @Output() blacklistChanged: EventEmitter<string> = new EventEmitter<string>();
     @Output() displayTypeChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
