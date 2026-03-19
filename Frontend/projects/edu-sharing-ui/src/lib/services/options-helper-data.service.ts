@@ -104,10 +104,11 @@ export class OptionsHelperDataService implements OnDestroy {
     }
 
     getData() {
-        return {
-            ...this.data,
-            customDownloadUrl: this.globalStateService.downloadUrl$.value,
-        };
+        if (!this.data) {
+            return null;
+        }
+        this.data.customDownloadUrl = this.globalStateService.downloadUrl$.value;
+        return this.data;
     }
 
     setData(data: OptionData) {
