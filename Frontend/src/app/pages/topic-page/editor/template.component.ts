@@ -511,6 +511,7 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
                 this.searchEvent$ = instance.onSearchTriggered();
                 this.searchEvent$
                     .pipe(
+                        takeUntil(this.destroyed$),
                         startWith({
                             searchString: this.searchFieldService
                                 .getCurrentInstance()

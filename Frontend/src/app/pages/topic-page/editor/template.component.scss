@@ -542,7 +542,7 @@ es-side-menu-wrapper {
             }
         }
 
-        .no-search-hit {
+        .no-search-hit-message {
             margin: 16px 8px 0 8px;
             display: block;
         }
@@ -694,6 +694,9 @@ es-side-menu-wrapper {
         padding-bottom: 52px !important;
         max-height: 0;
         visibility: hidden;
+        .topic-page-swimlane {
+            max-height: 0;
+        }
     }
 }
 
