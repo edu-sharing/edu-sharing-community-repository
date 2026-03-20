@@ -1,11 +1,13 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
     Component,
+    computed,
     EventEmitter,
     input,
     Input,
     InputSignal,
     Output,
+    Signal,
     signal,
     ViewEncapsulation,
     WritableSignal,
@@ -32,11 +34,14 @@ import { WidgetConfigurationButtonsComponent } from '../shared/widget-configurat
     styleUrls: ['./collection-chips.component.scss'],
 })
 export class CollectionChipsComponent implements WidgetComponentInterface {
+    protected readonly i18nPrefix: string = 'TOPIC_PAGE.WIDGET.COLLECTION_CHIPS.';
+
     // INPUTS + OUTPUTS
     @Input() contextNodeId!: string;
     editMode: InputSignal<boolean> = input<boolean>(false);
     @Input() embedConfigurationOption?: ConfigurationOption;
     @Input() gridIndex: number = -1;
+    @Input() displayLimit: number = 8;
     @Input() pageVariantNode?: Node;
     searchInput: InputSignal<string> = input<string>(null);
     @Input() swimlaneIndex: number = -1;
@@ -65,6 +70,13 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
     initialized: WritableSignal<boolean> = signal(false);
     list: Node[];
     updateInProgress: WritableSignal<boolean> = signal(false);
+    showMore: WritableSignal<boolean> = signal(false);
+
+    protected readonly visibleList: Signal<Node[]> = computed(() =>
+        this.editMode() || this.showMore() || !this.displayLimit
+            ? this.list
+            : this.list.slice(0, this.displayLimit),
+    );
 
     constructor(
         private nodeHelper: NodeHelperService,
@@ -185,6 +197,13 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
                     config.sortedNodeIds.indexOf(a.ref.id) - config.sortedNodeIds.indexOf(b.ref.id),
             );
         }
+    }
+
+    /**
+     * Toggles the show more state.
+     */
+    toggleShowMore(): void {
+        this.showMore.set(!this.showMore());
     }
 
     protected readonly CollectionListLayout = CollectionListDisplayType;
