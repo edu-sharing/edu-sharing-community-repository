@@ -841,45 +841,45 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
 
         // an update should be emitted if it is the initial call and the totalCount is larger than the maxItems
         // in this case, 100 items are loaded
-        if (skipCount === 0 && totalCount > this.maxItems) {
-            const timeOfRequest: Date = new Date();
-            // TODO: remove, if implemented properly
-            if (this.customTypeInstance) {
-                return;
-            }
-            const request: SearchRequestParams = {
-                query,
-                repository: HOME_REPOSITORY,
-                maxItems: 100,
-                skipCount: 0,
-                propertyFilter: [PROPERTY_FILTER_ALL],
-                contentType: 'ALL',
-                metadataset: this.mds || this.genericWidgetGlobalService.getDefaultMds(),
-                sortProperties: ['cm:created'],
-                sortAscending: [true],
-                body: {
-                    criteria,
-                    resolveCollections: this.layout !== GenericNodeEntriesDisplayType.MapView,
-                },
-            };
-            const searchResult: SearchResults = await firstValueFrom(
-                this.searchService.search(request),
-            );
-            const copyOfAllRequestedNodes: Node[] = JSON.parse(
-                JSON.stringify(this.allRequestedNodes),
-            );
-            const existingNodeIds: string[] = copyOfAllRequestedNodes.map((n: Node) => n.ref.id);
-            // avoid pushing duplicates
-            searchResult.nodes?.forEach((node: Node): void => {
-                if (!existingNodeIds.includes(node.ref.id)) {
-                    copyOfAllRequestedNodes.push(node);
-                    existingNodeIds.push(node.ref.id);
-                }
-            });
-            if (!this.lastSearchUpdate || this.lastSearchUpdate < timeOfRequest) {
-                emitNodes(copyOfAllRequestedNodes);
-            }
-        }
+        // if (skipCount === 0 && totalCount > this.maxItems) {
+        //     const timeOfRequest: Date = new Date();
+        //     // TODO: remove, if implemented properly
+        //     if (this.customTypeInstance) {
+        //         return;
+        //     }
+        //     const request: SearchRequestParams = {
+        //         query,
+        //         repository: HOME_REPOSITORY,
+        //         maxItems: 100,
+        //         skipCount: 0,
+        //         propertyFilter: [PROPERTY_FILTER_ALL],
+        //         contentType: 'ALL',
+        //         metadataset: this.mds || this.genericWidgetGlobalService.getDefaultMds(),
+        //         sortProperties: ['cm:created'],
+        //         sortAscending: [true],
+        //         body: {
+        //             criteria,
+        //             resolveCollections: this.layout !== GenericNodeEntriesDisplayType.MapView,
+        //         },
+        //     };
+        //     const searchResult: SearchResults = await firstValueFrom(
+        //         this.searchService.search(request),
+        //     );
+        //     const copyOfAllRequestedNodes: Node[] = JSON.parse(
+        //         JSON.stringify(this.allRequestedNodes),
+        //     );
+        //     const existingNodeIds: string[] = copyOfAllRequestedNodes.map((n: Node) => n.ref.id);
+        //     // avoid pushing duplicates
+        //     searchResult.nodes?.forEach((node: Node): void => {
+        //         if (!existingNodeIds.includes(node.ref.id)) {
+        //             copyOfAllRequestedNodes.push(node);
+        //             existingNodeIds.push(node.ref.id);
+        //         }
+        //     });
+        //     if (!this.lastSearchUpdate || this.lastSearchUpdate < timeOfRequest) {
+        //         emitNodes(copyOfAllRequestedNodes);
+        //     }
+        // }
     }
 
     /**
