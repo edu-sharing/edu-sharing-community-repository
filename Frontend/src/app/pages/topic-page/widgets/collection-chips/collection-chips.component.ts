@@ -41,7 +41,7 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
     editMode: InputSignal<boolean> = input<boolean>(false);
     @Input() embedConfigurationOption?: ConfigurationOption;
     @Input() gridIndex: number = -1;
-    @Input() displayLimit: number = 8;
+    @Input() displayLimit: number = 0;
     @Input() pageVariantNode?: Node;
     searchInput: InputSignal<string> = input<string>(null);
     @Input() swimlaneIndex: number = -1;
