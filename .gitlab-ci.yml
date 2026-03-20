@@ -151,8 +151,8 @@ test docker:
     - cmp -s openapi.json ../../../build/service/target/build/rest-api/openapi.json || exit 1
     - popd
   rules:
-    - if: $CI_COMMIT_BRANCH =~ /^maven\/release\/.*/ && $CI_PIPELINE_SOURCE == "pipeline"
-    - if: $CI_COMMIT_TAG && $CI_PIPELINE_SOURCE == "pipeline"
+    - if: $CI_COMMIT_BRANCH =~ /^maven\/release\/.*/ && $CI_PIPELINE_SOURCE == "pipeline" && $SKIP_TESTS != "true"
+    - if: $CI_COMMIT_TAG && $CI_PIPELINE_SOURCE == "pipeline" && $SKIP_TESTS != "true"
     - if: $CI_COMMIT_BRANCH !~ /^maven\/release\/.*/ && $CI_COMMIT_TAG == null && $CI_PIPELINE_SOURCE == "pipeline" && $SKIP_TESTS != "true"
 
 
