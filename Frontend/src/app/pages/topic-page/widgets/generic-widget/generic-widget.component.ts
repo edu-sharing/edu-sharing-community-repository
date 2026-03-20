@@ -126,9 +126,9 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
 
     // Additional inputs that might be specific to certain widgets
     @Input() defaultNodeId: string = '';
+    @Input() displayLimit?: number;
     @Input() height?: string;
     @Input() hideDescription: boolean = false;
-    @Input() isEmbedMode: boolean = false;
     @Input() searchText: string = '';
     @Input() selectDimensions: Map<string, MdsWidget> = new Map<string, MdsWidget>();
     @Input() sidebarEmbedding: boolean = false;
@@ -227,7 +227,8 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         // allow later changes if certain inputs were changed
         if (
             this.viewInitialized &&
-            (changes.editMode ||
+            (changes.displayLimit ||
+                changes.editMode ||
                 changes.gridIndex ||
                 changes.searchInput ||
                 changes.searchFilters ||
@@ -845,6 +846,10 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 this.widgetComponentRef.setInput('selectDimensions', this.selectDimensions);
                 break;
 
+            case WIDGETS.COLLECTION_CHIPS:
+                this.widgetComponentRef.setInput('displayLimit', this.displayLimit);
+                break;
+
             case WIDGETS.CONTENT_TEASER:
                 this.widgetComponentRef.setInput('defaultNodeId', this.defaultNodeId);
                 this.widgetComponentRef.setInput('nodeId', this.nodeId);
@@ -868,7 +873,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 break;
 
             // default break for unknown widget types and widget types without additional inputs
-            // e.g., collection-chips, iframe-widget and text-widget
+            // e.g., iframe-widget and text-widget
             default:
                 break;
         }
