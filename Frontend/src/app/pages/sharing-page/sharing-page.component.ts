@@ -155,6 +155,7 @@ export class SharingPageComponent {
     download(children: Node[] = null) {
         const node = this.params.nodeId;
         const token = this.params.token;
+        let ids;
         let url =
             this.connector.getAbsoluteEndpointUrl() +
             '../share?mode=download&token=' +
@@ -164,15 +165,27 @@ export class SharingPageComponent {
             '&nodeId=' +
             encodeURIComponent(node);
         if (!children?.length && this.sharingInfo.node.isDirectory) {
-            const ids = RestHelper.getNodeIds(this.nodesDataSource.getData()).join(',');
-            url += '&childIds=' + encodeURIComponent(ids);
+            ids = RestHelper.getNodeIds(this.nodesDataSource.getData());
         } else {
             if (children != null) {
-                const ids = RestHelper.getNodeIds(children).join(',');
-                url += '&childIds=' + encodeURIComponent(ids);
+                ids = RestHelper.getNodeIds(children);
             }
         }
-        window.open(url);
+        if (ids?.length) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = url;
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'childIds';
+            input.value = ids.join(',');
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+        } else {
+            window.open(url);
+        }
     }
     changeSort(sort: ListSortConfig) {
         this.sort = sort;
