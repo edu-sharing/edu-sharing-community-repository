@@ -776,17 +776,20 @@ es-editable-text {
 
     es-render-wrapper-component {
         // reduce min-height
-        min-height: 300px;
+        min-height: 250px;
 
         rs-root {
             // reduce min-height
-            min-height: 300px;
+            min-height: 250px;
 
-            // adjust img width + remove link to original content
+            // adjust img width + avoid having visual empty space at the bottom
+            img {
+                max-width: 100%;
+                display: block;
+            }
+
+            // remove link to original content from link-wrapper
             .link-wrapper {
-                > img {
-                    max-width: 100%;
-                }
                 > a {
                     display: none;
                 }
