@@ -46,6 +46,8 @@
       "COLLECTION_CHIPS": {
         "DEFAULT_ICON": "Default icon",
         "UPLOADED_ICON": "Uploaded icon",
+        "SHOW_MORE": "show more",
+        "SHOW_LESS": "show less",
         "CONFIG_ARIA": "Choose the layout of the navigation pills",
         "CHANGE_FILTER_OR_SEARCH": "Change filter or search"
       },
