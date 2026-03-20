@@ -97,7 +97,7 @@ export class TranslationLoader implements TranslateLoader {
                         files.map(
                             (f) =>
                                 this.http.get(
-                                    eduSharingApiUrl ? eduSharingApiUrl + f : f,
+                                    eduSharingApiUrl ? eduSharingApiUrl + '/../..' + f : f,
                                 ) as Observable<Dictionary>,
                         ),
                     ).pipe(
