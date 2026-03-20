@@ -145,7 +145,7 @@ test docker:
     - pushd deploy/docker/compose/target/compose
     - docker compose -f 1_repository-common.yml -f 1_redis-common.yml up -d
     - "until wait-for-it docker:8100 -t 3; do sleep 1; done"
-    - >
+    - |
       until true; do
         echo "waiting for api to come available..."
         STATUS=$(curl -sS -w "%{http_code}" -o /dev/null -H 'Accept: application/json' http://docker:8100/edu-sharing/rest/_about/status/SERVICE?timeoutSeconds=3);
