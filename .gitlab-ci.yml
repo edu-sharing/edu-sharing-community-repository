@@ -111,6 +111,10 @@ unittest frontend:
 
 test docker:
   stage: test
+  rules:
+    - if: '$SKIP_TESTS == "true"'
+      when: never
+    - when: on_success
   cache:
     - key: $CI_BUILD_REF_NAME
       paths:
