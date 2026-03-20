@@ -146,13 +146,14 @@ test docker:
     - docker compose -f 1_repository-common.yml -f 1_redis-common.yml up -d
     - "until wait-for-it docker:8100 -t 3; do sleep 1; done"
     - |
-      until true; do
-        echo "waiting for api to come available..."
-        STATUS=$(curl -sS -w "%{http_code}" -o /dev/null -H 'Accept: application/json' http://docker:8100/edu-sharing/rest/_about/status/SERVICE?timeoutSeconds=3);
-        echo "API Status: $STATUS"
-        if [ "$STATUS" = "200" ]; then echo "Repository status 200 detected"; break; fi;
-        if [ "$STATUS" = "404" ]; then docker compose logs; exit 1; fi;
-        sleep 1;
+      while true
+      do
+              echo "waiting for api to come available..."
+              STATUS=$(curl -sS -w "%{http_code}" -o /dev/null -H 'Accept: application/json' http://docker:8100/edu-sharing/rest/_about/status/SERVICE?timeoutSeconds=3);
+              echo "API Status: $STATUS"
+              if [ "$STATUS" = "200" ]; then echo "Repository status 200 detected"; break; fi;
+              if [ "$STATUS" = "404" ]; then docker compose logs; exit 1; fi;
+              sleep 1;
       done
     - "curl -m 300 -H 'Accept: application/json' --user 'admin:admin' http://docker:8100/edu-sharing/rest/openapi.json | jq -S . > openapi.json"
     - docker compose -f 1_repository-common.yml -f 1_redis-common.yml down -v
