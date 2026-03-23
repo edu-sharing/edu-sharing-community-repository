@@ -20,10 +20,13 @@ export class TopicPageFiltersSidebarComponent {
     /**
      * Reacts to the currentValuesChange event and emits it the same way.
      *
-     * @param event
+     * @param selectedValues
      */
-    applySearchFilters(event: Values): void {
-        this.currentValuesChange.emit(event);
+    applySearchFilters(selectedValues: Values): void {
+        selectedValues = Object.fromEntries(
+            Object.entries(selectedValues).filter(([, value]) => value && value.length > 0),
+        );
+        this.currentValuesChange.emit(selectedValues);
     }
 
     /**
