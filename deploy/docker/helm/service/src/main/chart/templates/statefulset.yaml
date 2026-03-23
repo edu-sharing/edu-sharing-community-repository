@@ -242,6 +242,11 @@ spec:
           mountPath: /usr/local/tomcat/conf/logging.properties
           subPath: logging-server
         {{- end }}
+        {{- if .Values.persistence.data.temp.create }}
+        - name: temp
+          mountPath: /usr/local/tomcat/temp/Alfresco
+          subPath: Alfresco
+        {{- end }}
         {{- with .Values.startupProbe }}
         startupProbe:
           httpGet:
@@ -526,3 +531,9 @@ spec:
       name: data
       labels: {{ include "edusharing_common_lib.labels.app" . | nindent 8 }}
     spec: {{ merge .Values.persistence.data.config.spec .Values.global.cluster.storage.data.spec | toYaml | nindent 6 }}
+  {{- if .Values.persistence.data.temp.create }}
+  - metadata:
+      name: temp
+      labels: {{ include "edusharing_common_lib.labels.app" . | nindent 8 }}
+    spec: {{ merge .Values.persistence.data.temp.spec .Values.global.cluster.storage.data.spec | toYaml | nindent 6 }}
+  {{- end }}
