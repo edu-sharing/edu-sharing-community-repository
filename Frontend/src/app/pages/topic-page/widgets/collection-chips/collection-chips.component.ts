@@ -192,10 +192,17 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
             this.layout = config.collectionListLayout;
         }
         if (config.sortedNodeIds?.length) {
-            this.list.sort(
-                (a: Node, b: Node) =>
-                    config.sortedNodeIds.indexOf(a.ref.id) - config.sortedNodeIds.indexOf(b.ref.id),
-            );
+            this.list.sort((a: Node, b: Node) => {
+                // check whether the node is in the list of sorted node ids,
+                // if not, keep the existing order and put it at the end of the list
+                const indexA = config.sortedNodeIds.indexOf(a.ref.id);
+                const indexB = config.sortedNodeIds.indexOf(b.ref.id);
+
+                const sortedIndexA = indexA === -1 ? Number.MAX_SAFE_INTEGER : indexA;
+                const sortedIndexB = indexB === -1 ? Number.MAX_SAFE_INTEGER : indexB;
+
+                return sortedIndexA - sortedIndexB;
+            });
         }
     }
 

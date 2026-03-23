@@ -20,7 +20,8 @@ public class ApiOriginFilter implements jakarta.servlet.Filter {
 	List<String> CORS_ALLOWED_ENDPOINTS = Arrays.asList(
 			"/config/v1/values",
 			"/config/v1/language",
-			"/mds/v1/metadatasets"
+			"/mds/v1/metadatasets",
+			"/assets/i18n" // assets/i18n etc. from Angular
 	);
 	public void doFilter(ServletRequest request, ServletResponse response,
 						 FilterChain chain) throws IOException, ServletException {
@@ -62,7 +63,8 @@ public class ApiOriginFilter implements jakarta.servlet.Filter {
 					"Access-Control-Allow-Credentials",
 					"true");
 		} else {
-			String pathInfo = req.getPathInfo();
+			String pathInfo = req.getPathInfo() == null ? req.getServletPath() : req.getPathInfo();
+
 			// allow cors access for GET requests on uncritical endpoints
 			// required for (external) web component usage
 			if(Arrays.asList("OPTIONS", "GET").contains(req.getMethod()) &&
