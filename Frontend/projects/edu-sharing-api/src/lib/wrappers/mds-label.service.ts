@@ -139,7 +139,7 @@ export class MdsLabelService {
                             widget.id === property &&
                             // Values are defined on the general widget and not on special
                             // configurations for specific view.
-                            !widget.template,
+                            !widget.template?.length,
                     )?.values ??
                     null,
             ),
