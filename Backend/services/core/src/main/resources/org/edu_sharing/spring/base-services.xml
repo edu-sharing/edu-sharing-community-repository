@@ -63,8 +63,8 @@
   </bean>
 
   <bean id="mediacenterLicenseProvider" class="org.edu_sharing.service.mediacenter.MediacenterLicenseProviderImpl"/>
-  <bean id="localRatingService" class="org.edu_sharing.service.rating.RatingServiceAdapter" />
-  <bean id="localRelationService" class="org.edu_sharing.service.relations.RelationServiceAdapter"/>
+  <bean id="ratingService" class="org.edu_sharing.service.rating.RatingServiceAdapter" />
+  <bean id="relationService" class="org.edu_sharing.service.relations.RelationServiceAdapter"/>
   <bean id="permissionChecking" class="org.edu_sharing.service.permission.PermissionChecking"/>
   <bean id="suggestionService" primary="true" class="org.edu_sharing.service.suggestion.DefaultSuggestionService"/>
   <bean id="contextRefresher" class="org.edu_sharing.spring.scope.refresh.ContextRefresher">
