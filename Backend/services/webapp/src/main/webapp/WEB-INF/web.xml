@@ -251,6 +251,12 @@
     <filter-name>REST Origin Filter</filter-name>
     <url-pattern>/oauth2/*</url-pattern>
   </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>REST Origin Filter</filter-name>
+    <url-pattern>/assets/i18n/*</url-pattern>
+  </filter-mapping>
+
   <filter-mapping>
     <filter-name>Edu Error Filter</filter-name>
     <url-pattern>/*</url-pattern>
