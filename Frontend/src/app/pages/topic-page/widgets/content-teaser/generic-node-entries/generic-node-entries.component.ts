@@ -62,6 +62,7 @@ export interface DisplayTypeComponentInterface {
     selectedNode: Node;
     // outputs
     itemClicked: EventEmitter<Node>;
+    totalSearchResultCountChanged: EventEmitter<number>;
     visibleNodesChanged: EventEmitter<Node[]>;
     // methods
     setDataSource(resetNecessary: boolean, skipCount?: number): Promise<void>;
@@ -937,10 +938,13 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             ?.pipe(takeUntil(this.destroy$))
             .subscribe((nodes: Node[]) => {
                 this.visibleNodesChanged.emit(nodes);
-                // no blacklisting supported here, so emit the count of the nodes
-                this.totalSearchResultCountChanged.emit(nodes.length);
             });
-
+        this.customTypeInstance.totalSearchResultCountChanged
+            ?.pipe(takeUntil(this.destroy$))
+            .subscribe((count: number) => {
+                // no blacklisting supported here, so emit the total count
+                this.totalSearchResultCountChanged.emit(count);
+            });
         this.customTypeInstance.itemClicked
             ?.pipe(takeUntil(this.destroy$))
             .subscribe((node: Node) => this.onItemClicked(node));
