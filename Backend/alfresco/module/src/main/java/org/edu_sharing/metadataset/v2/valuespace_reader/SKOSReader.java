@@ -77,6 +77,9 @@ public class SKOSReader extends ValuespaceReader{
             }
             key.setAlternativeKeys(altKeys);
         }
+        if(entry.has("iconName")) {
+            key.setIcon(entry.getString("iconName"));
+        }
         if(entry.has("url")) {
             try {
                 // newer skos versions
