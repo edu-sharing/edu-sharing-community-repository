@@ -35,7 +35,6 @@ import { WIDGETS } from '../topic-page/shared/types/custom-definitions';
             #licenseRef
             [data]="{ kind: 'properties', properties: data }"
         ></es-license-dialog-content>
-        <es-code-editor [options]="jsonConfig" [(ngModel)]="configOverwrite"></es-code-editor>
         <es-generic-widget
             *ngIf="component === 'generic-widget'"
             [contextNodeId]="queryParams.contextNodeId"
