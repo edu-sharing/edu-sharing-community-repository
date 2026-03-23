@@ -37,6 +37,7 @@ import { SharedModule } from '../../../../shared/shared.module';
 import { Toast, ToastType } from '../../../../services/toast';
 import { AiHelperService } from '../../shared/services/ai-helper.service';
 import { GlobalWidgetConfigService } from '../../shared/services/global-widget-config.service';
+import { TopicPageGlobalService } from '../../shared/services/topic-page-global.service';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
 import { BapiConfigObject } from '../../shared/types/bapi-config-object';
 import { ConfigurationOption } from '../../shared/types/configuration-option';
@@ -125,10 +126,11 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     @Input() widgetType: WIDGET_TYPE | string = WIDGETS.CONTENT_TEASER;
 
     // Additional inputs that might be specific to certain widgets
+    @Input() customUrl?: (node: Node) => string;
     @Input() defaultNodeId: string = '';
+    @Input() displayLimit?: number;
     @Input() height?: string;
     @Input() hideDescription: boolean = false;
-    @Input() isEmbedMode: boolean = false;
     @Input() searchText: string = '';
     @Input() selectDimensions: Map<string, MdsWidget> = new Map<string, MdsWidget>();
     @Input() sidebarEmbedding: boolean = false;
@@ -170,6 +172,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         private globalWidgetConfigService: GlobalWidgetConfigService,
         private platformLocation: PlatformLocation,
         private toast: Toast,
+        private topicPageGlobalService: TopicPageGlobalService,
         private topicPageHelperService: TopicPageHelperService,
         private translate: TranslateService,
         private uiService: UIService,
@@ -227,7 +230,8 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         // allow later changes if certain inputs were changed
         if (
             this.viewInitialized &&
-            (changes.editMode ||
+            (changes.displayLimit ||
+                changes.editMode ||
                 changes.gridIndex ||
                 changes.searchInput ||
                 changes.searchFilters ||
@@ -252,6 +256,10 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
             await this.processChanges(changes);
             // read widget configuration (again) and set widget values
             await this.readWidgetConfig();
+        }
+        // special case for customUrl: if defined, set it globally for the widgets
+        if (this.customUrl) {
+            this.topicPageGlobalService.setCustomUrlFunction(this.customUrl);
         }
     }
 
@@ -845,6 +853,10 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 this.widgetComponentRef.setInput('selectDimensions', this.selectDimensions);
                 break;
 
+            case WIDGETS.COLLECTION_CHIPS:
+                this.widgetComponentRef.setInput('displayLimit', this.displayLimit);
+                break;
+
             case WIDGETS.CONTENT_TEASER:
                 this.widgetComponentRef.setInput('defaultNodeId', this.defaultNodeId);
                 this.widgetComponentRef.setInput('nodeId', this.nodeId);
@@ -868,7 +880,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 break;
 
             // default break for unknown widget types and widget types without additional inputs
-            // e.g., collection-chips, iframe-widget and text-widget
+            // e.g., iframe-widget and text-widget
             default:
                 break;
         }

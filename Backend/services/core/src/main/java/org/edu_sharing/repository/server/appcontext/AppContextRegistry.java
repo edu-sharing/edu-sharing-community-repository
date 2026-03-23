@@ -185,7 +185,7 @@ public final class AppContextRegistry {
         public void validateBeanDefinitionExists(ApplicationContext applicationContext) {
             String[] beanNames =  applicationContext.getBeanNamesForType(type);
             if(Arrays.stream(beanNames).noneMatch(x->x.equals(name))){
-                throw new IllegalStateException("No bean definition found for type: " + type.getName());
+                throw new IllegalStateException("No bean definition found for type: " + type.getName() + " with name: " + name);
             }
         }
     }
