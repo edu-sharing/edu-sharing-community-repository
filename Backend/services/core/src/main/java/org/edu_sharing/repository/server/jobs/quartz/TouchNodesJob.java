@@ -6,14 +6,18 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
+import org.edu_sharing.service.nodeservice.NodeService;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.Map;
 
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @JobDescription(description = "touch nodes so they get re-indexed by search index, in case they have a wrong state in the index")
 public class TouchNodesJob extends FixElasticSearchBase{
 
@@ -25,6 +29,11 @@ public class TouchNodesJob extends FixElasticSearchBase{
 
     @JobFieldDescription(description = "query that delivers a result of nodes that have to be checked. optional. if not set all nodes will be searched.", sampleValue = "{\"term\":{\"path\":\"<parent-uuid>\"}}")
     protected String query;
+
+    @Autowired
+    private NodeService nodeService;
+    @Autowired
+    private RetryingTransactionHelper retryingTransactionHelper;
 
     @Override
     public void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
@@ -42,9 +51,9 @@ public class TouchNodesJob extends FixElasticSearchBase{
     public class TouchHandler implements SearchResultHandler {
 
         @Override
-        public void handleSearchHit(Hit<Map> searchHit) throws IOException {
+        public void handleSearchHit(Hit<Map> searchHit) {
             NodeRef nodeRef = getNodeRef(searchHit);
-            String name = (String)nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+            String name = nodeService.getProperty(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(), CCConstants.CM_NAME);
             if(name == null){
                 logger.warn("ignoring node cause it has no name:" +nodeRef);
                 return;
@@ -52,15 +61,8 @@ public class TouchNodesJob extends FixElasticSearchBase{
 
             logger.info("touching node:"+nodeRef +" name:"+name);
             if(execute){
-                RetryingTransactionHelper th = serviceRegistry.getTransactionService().getRetryingTransactionHelper();
-                th.doInTransaction(() -> {
-                    try {
-                        if (keepModifiedDate) policyBehaviourFilter.disableBehaviour(nodeRef);
-                        nodeService.addAspect(nodeRef, ContentModel.ASPECT_INDEX_CONTROL,null);
-                    } finally {
-                        nodeService.removeAspect(nodeRef, ContentModel.ASPECT_INDEX_CONTROL);
-                        if(keepModifiedDate) policyBehaviourFilter.enableBehaviour(nodeRef);
-                    }
+                retryingTransactionHelper.doInTransaction(() -> {
+                    nodeService.touch(nodeRef.getId(), keepModifiedDate);
                     return null;
                 },false,true);
             }

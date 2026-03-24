@@ -1907,6 +1907,16 @@
             	</property>
       		</properties>
       </aspect>
+
+      <aspect name="cm:touch">
+         <title>Touch</title>
+         <properties>
+            <property name="cm:touchTimestamp">
+               <type>d:datetime</type>
+               <mandatory>true</mandatory>
+            </property>
+         </properties>
+      </aspect>
       
    </aspects>
 

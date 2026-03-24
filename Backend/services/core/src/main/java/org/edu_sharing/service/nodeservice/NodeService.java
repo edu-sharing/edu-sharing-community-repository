@@ -260,4 +260,6 @@ public interface NodeService {
      */
     void revokeNode(String storeProtocol, String storeId, String id, RevokeDetails details) throws Throwable;
 
+
+    void touch(String nodeId, boolean silentUpdate);
 }
