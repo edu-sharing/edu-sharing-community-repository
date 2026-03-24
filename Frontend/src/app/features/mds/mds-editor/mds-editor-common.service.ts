@@ -48,7 +48,11 @@ export class MdsEditorCommonService {
         return forkJoin(
             nodes.map((node) =>
                 this.restNode
-                    .getNodeMetadata(node.ref.id, [RestConstants.ALL])
+                    .getNodeMetadata(
+                        node.ref.id,
+                        [RestConstants.ALL],
+                        node.ref.repo || HOME_REPOSITORY,
+                    )
                     .pipe(map((nodeWrapper) => nodeWrapper.node)),
             ),
         ).toPromise();
