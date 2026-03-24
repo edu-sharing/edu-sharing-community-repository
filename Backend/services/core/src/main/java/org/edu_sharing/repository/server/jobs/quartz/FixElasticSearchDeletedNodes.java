@@ -1,30 +1,21 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
 import co.elastic.clients.elasticsearch._types.Result;
-import co.elastic.clients.elasticsearch._types.Time;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.*;
 import co.elastic.clients.elasticsearch.core.search.Hit;
-import co.elastic.clients.elasticsearch.core.search.HitsMetadata;
-import co.elastic.clients.elasticsearch.core.search.ResponseBody;
 import co.elastic.clients.json.JsonData;
 import co.elastic.clients.util.ObjectBuilder;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.repository.StoreRef;
-import org.apache.commons.text.StringEscapeUtils;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.search.SearchServiceElastic;
-import org.jetbrains.annotations.NotNull;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @JobDescription(description = "checks for nodes removed in repository but still exist in elasticsearch. please check that tracker is 100% finished and tracker is disabled before running ths job.")
 public class FixElasticSearchDeletedNodes extends FixElasticSearchBase {
 
@@ -44,6 +36,9 @@ public class FixElasticSearchDeletedNodes extends FixElasticSearchBase {
     @JobFieldDescription(description = "query that delivers a result of nodes that have to be checked. optional. if not set all nodes will be searched.", sampleValue = "{\"term\":{\"type\":\"ccm:io\"}}")
     protected String query;
 
+    @Autowired
+    private NodeService nodeService;
+
 
     Logger logger = Logger.getLogger(FixElasticSearchDeletedNodes.class);
 
@@ -54,7 +49,7 @@ public class FixElasticSearchDeletedNodes extends FixElasticSearchBase {
         AuthenticationUtil.runAsSystem(() -> {
             try {
                 Query.Builder builder = getBuilder(query);
-                search( builder.build(), new DeletedNodesHandler());
+                search(builder.build(), new DeletedNodesHandler());
             } catch (IOException e) {
                 logger.error(e.getMessage(), e);
             }
