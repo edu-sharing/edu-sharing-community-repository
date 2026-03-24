@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.apache.log4j.Logger;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.PreviewServlet;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.nodeservice.NodeService;
