@@ -1,4 +1,11 @@
-import { ApplicationRef, DoBootstrap, Injector, NgModule } from '@angular/core';
+import {
+    ApplicationRef,
+    DoBootstrap,
+    Injectable,
+    Injector,
+    NgModule,
+    Provider,
+} from '@angular/core';
 import { createCustomElement } from '@angular/elements';
 import { AppComponent } from './app.component';
 import { BrowserModule } from '@angular/platform-browser';
@@ -20,6 +27,14 @@ import { environment } from '../environments/environment';
 import { CdkConnectedOverlay, CdkOverlayOrigin } from '@angular/cdk/overlay';
 import { MatButtonModule } from '@angular/material/button';
 import { RenderingServiceApiModule } from 'ngx-rendering-service-api';
+import { Toast as ToastAbstract } from 'ngx-edu-sharing-ui';
+
+@Injectable({ providedIn: 'root' })
+export abstract class Toast extends ToastAbstract {
+    toast(message: string, translationParameters?: any) {}
+
+    error(errorObject: any, message?: string, translationParameters?: any) {}
+}
 
 @NgModule({
     declarations: [AppComponent],
@@ -49,8 +64,9 @@ import { RenderingServiceApiModule } from 'ngx-rendering-service-api';
         provideHttpClient(withInterceptorsFromDi()),
         // we do not read the user profile since we don't have a repository user present in lms contexts
         { provide: I18N_CONFIG, useValue: { readUserProfile: false } as I18nConfig },
+        { provide: ToastAbstract, useClass: Toast },
         RenderHelperService,
-    ],
+    ] as Provider[],
 })
 export class AppModule implements DoBootstrap {
     constructor(injector: Injector) {
