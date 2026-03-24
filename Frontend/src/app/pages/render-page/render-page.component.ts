@@ -20,6 +20,7 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
     ConfigService,
+    HOME_REPOSITORY,
     MdsDefinition,
     MdsService,
     NetworkService,
@@ -165,8 +166,7 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
                     this.editor = queryParams.editor;
                     this.fromLogin =
                         queryParams.fromLogin === 'true' || queryParams.redirectFromSSO === 'true';
-                    this.repository =
-                        queryParams.repo || queryParams.repository || RestConstants.HOME_REPOSITORY;
+                    this.repository = queryParams.repo || queryParams.repository || HOME_REPOSITORY;
                     this.queryParams = queryParams;
                     const childobject = queryParams.childobject_id
                         ? queryParams.childobject_id
@@ -540,6 +540,8 @@ export class RenderPageComponent implements EventListener, OnInit, OnDestroy, Af
                     } else {
                         try {
                             this._node = data.node;
+                            // if it's an remote repo, the repo id will be updated from the node endpoint
+                            this.repository = data.node.ref.repo || HOME_REPOSITORY;
                             this._fromHomeRepository = await this.networkService
                                 .isFromHomeRepository(this._node)
                                 .pipe(first())
