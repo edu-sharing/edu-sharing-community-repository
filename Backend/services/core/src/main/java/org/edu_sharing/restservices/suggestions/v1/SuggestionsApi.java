@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
@@ -21,9 +20,8 @@ import org.edu_sharing.service.suggestion.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Limit;
 
-import java.util.Date;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -117,28 +115,20 @@ public class SuggestionsApi {
     }
 
     @GET
-    @Path("/{repository}/tracking")
-    @Operation(summary = "get tracked suggestions", description = "Returns tracked suggestions that were modified after the specified date.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(array = @ArraySchema(schema = @Schema(implementation = PropertySuggestion.class)))),
-            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    })
-    public Response getTrackedRelation(
+    @Path("/{repository}/{node}/raw")
+    @Operation(summary = "Retrieve stored suggestion for the given nodeId in the raw format")
+    @ApiResponse(
+            responseCode = "200",
+            description = "get all suggestions notifications",
+            content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PropertySuggestion.class))))
+    public Response getRawSuggestionsByNodeId(
             @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
-            @Parameter(description = "Date to filter suggestions from (exclusive)", required = true) @QueryParam("after") Date after,
-            @Parameter(description = "Date to filter suggestions to (inclusive)") @QueryParam("to") Date to,
-            @Parameter(description = "maximum items", schema = @Schema(defaultValue = "100")) @QueryParam("maxItems") Integer maxItems,
-            @Parameter(description = "If true, deleted suggestions are returned, otherwise active suggestions are returned.") @QueryParam("deleted") Boolean deleted
-    ) {
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "Filter option") @QueryParam("status") List<SuggestionStatus> status) {
+
         SuggestionService suggestionService = suggestionServiceFactory.getServiceByAppId(repository);
-        List<PropertySuggestion> propertySuggestions = deleted == Boolean.TRUE
-                ? suggestionService.getDeletedTrackedData(after, to, Limit.of(maxItems))
-                : suggestionService.getTrackedData(after, to, Limit.of(maxItems));
-        return Response.ok(propertySuggestions).build();
+        Map<String, List<PropertySuggestion>> nodeSuggestions = suggestionService.getSuggestionsByNodeId(node, status);
+        return Response.ok(nodeSuggestions.values().stream().flatMap(Collection::stream).collect(Collectors.toList())).build();
     }
 
     private record Mapper(RepositoryDao repositoryDao) {

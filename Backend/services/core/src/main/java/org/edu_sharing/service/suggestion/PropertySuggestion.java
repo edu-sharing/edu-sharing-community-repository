@@ -32,9 +32,4 @@ public interface PropertySuggestion {
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     Date getModified();
     String getModifiedBy();
-
-    @JsonProperty(required = true)
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    Date getTimestamp();
-
 }

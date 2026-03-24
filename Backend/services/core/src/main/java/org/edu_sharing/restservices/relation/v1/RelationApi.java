@@ -28,12 +28,11 @@ import org.edu_sharing.service.tracking.ActivityEventService;
 import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Date;
 import java.util.List;
 
 @Path("/relation/v1")
 @Tag(name = "RELATION v1")
-@ApiService(value = "RELATION", major = 1, minor = 0)
+@ApiService(value = "RELATION", major = 1)
 @Consumes({"application/json"})
 @Produces({"application/json"})
 @Slf4j
@@ -141,6 +140,28 @@ public class RelationApi {
 
 
     @GET
+    @Path("/{repository}/{node}/raw")
+    @Operation(summary = "get all relation of the node without resolving node details", description = "Returns all relations of the node.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(array = @ArraySchema(schema = @Schema(implementation = RelationData.class)))),
+            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public Response getRawRelations(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node
+    ) {
+        RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+        RelationDao relationDao = new RelationDao(repoDao);
+        List<RelationData> relations = relationDao.getRawRelations(node);
+        return Response.ok().entity(relations).build();
+    }
+
+
+    @GET
     @Path("/{repository}/{node}/trace")
     @Operation(summary = "traces relation of the node", description = "Recursifly returns all relations of the node and its successors.")
     @ApiResponses({
@@ -186,29 +207,23 @@ public class RelationApi {
         return Response.ok().entity(relationData).build();
     }
 
-    @GET
-    @Path("/{repository}/tracking")
-    @Operation(summary = "get tracked relations", description = "Returns tracked relations that were modified after the specified date.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(array = @ArraySchema(schema = @Schema(implementation = RelationData.class)))),
-            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    })
-    public Response getTrackedRelation(
-            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
-            @Parameter(description = "Date to filter relation data from (exclusive)", required = true) @QueryParam("after") Date after,
-            @Parameter(description = "Date to filter relation data to (inclusive)") @QueryParam("to") Date to,
-            @Parameter(description = "maximum items", schema = @Schema(defaultValue = "100")) @QueryParam("maxItems") Integer maxItems,
-            @Parameter(description = "If true, deleted relations are returned, otherwise active relations are returned.") @QueryParam("deleted") Boolean deleted
-    ) {
-        RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-        RelationDao relationDao = new RelationDao(repoDao);
-        List<RelationData> relationData = deleted == Boolean.TRUE
-                ? relationDao.getDeletedTrackedData(after, to, maxItems)
-                : relationDao.getTrackedRelation(after, to, maxItems);
-        return Response.ok().entity(relationData).build();
-    }
+//    @Path("/{repository}/{node}/raw")
+//    @Operation(summary = "get all relation of the node", description = "Returns all relations of the node.")
+//    @ApiResponses({
+//            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(array = @ArraySchema(schema = @Schema(implementation = RelationData.class)))),
+//            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+//            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+//            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+//            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+//            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+//    })
+//    public Response getRelationsRaw(
+//            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+//            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node
+//    ) {
+//        RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+//        RelationDao relationDao = new RelationDao(repoDao);
+//        List<RelationData> relationData = relationDao.getRelationsRaw(node);
+//        return Response.ok().entity(relationData).build();
+//    }
 }
