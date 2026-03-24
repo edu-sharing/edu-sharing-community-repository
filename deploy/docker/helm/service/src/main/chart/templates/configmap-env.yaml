@@ -4,7 +4,6 @@ metadata:
   name: {{ include "edusharing_common_lib.names.name" . }}-env
   labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
 data:
-  ALLOW_EMPTY_PASSWORD: "yes"
   CACHE_CLUSTER: {{ .Values.config.cache.cluster | quote }}
   CACHE_DATABASE: {{ .Values.config.cache.database | quote }}
   CACHE_HOST: {{ .Values.config.cache.host | quote }}
@@ -106,6 +105,7 @@ data:
   REPOSITORY_SERVICE_WAIT_EXTERNAL: {{ .Values.config.connector.external.timeout | quote }}
   REPOSITORY_SERVICE_WAIT_INTERNAL: {{ .Values.config.connector.internal.timeout | quote }}
   REPOSITORY_SERVICE_ALFRESCO_SHARE_ENABLED: {{ .Values.config.alfresco.share.enabled | quote }}
+  REPOSITORY_SERVICE_REQUEST_HEADER_SIZE: {{ .Values.config.connector.external.maxHttpRequestHeaderSize | quote  }}
   REPOSITORY_TRANSFORM_ENABLED: "true"
   REPOSITORY_TRANSFORM_AIO_HOST: {{ .Values.config.transform.aio.host | quote }}
   REPOSITORY_TRANSFORM_AIO_PORT: {{ .Values.config.transform.aio.port | quote }}
@@ -115,4 +115,3 @@ data:
   REPOSITORY_TRANSFORM_PORT: {{ if .Values.config.transform.server.enabled }}""{{ else }}"8100"{{ end }}
   REPOSITORY_TRANSFORM_SERVER_HOST: {{ .Values.config.transform.server.host | quote }}
   REPOSITORY_TRANSFORM_SERVER_PORT: {{ .Values.config.transform.server.port | quote }}
-  TOMCAT_INSTALL_DEFAULT_WEBAPPS: "no"

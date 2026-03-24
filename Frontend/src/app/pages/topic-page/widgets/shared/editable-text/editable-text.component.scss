@@ -1,8 +1,14 @@
-@use '../../../topic-page-variables' as *;
+@use '../../../topic-page-variables' as topicPageVars;
+@use '../../../topic-page-common-styles' as topicPageStyles;
 
 :host {
     display: flex;
     align-items: center;
+    position: relative;
+
+    ::ng-deep {
+        @include topicPageStyles.search-highlight-styles;
+    }
 }
 
 .inline-block {
@@ -23,7 +29,7 @@
     &.prominent-text {
         margin-bottom: 8px;
         padding: 0 16px;
-        border-left: 4px solid $primary;
+        border-left: 4px solid topicPageVars.$primary;
         height: unset;
         font-size: 106%;
         letter-spacing: 0.02em;
@@ -34,7 +40,7 @@
         }
     }
 
-    &.wlo-text-center {
+    &.topic-page-text-center {
         text-align: center;
     }
 
@@ -49,21 +55,18 @@
     .text-content ::ng-deep {
         blockquote {
             font-style: italic;
-            font-size: $font-size-large;
-            font-weight: $font-weight-bold;
+            font-size: topicPageVars.$font-size-large;
+            font-weight: topicPageVars.$font-weight-bold;
             line-height: 140%;
         }
     }
 }
 
 .show-more-btn {
-    color: $primary;
+    color: topicPageVars.$primary;
     display: flex;
 }
 
-:host {
-    position: relative;
-}
 .loading {
     position: absolute;
     z-index: 1;

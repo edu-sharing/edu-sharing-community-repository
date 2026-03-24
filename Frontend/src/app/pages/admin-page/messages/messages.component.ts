@@ -23,6 +23,7 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ShareDialogModule } from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog.module';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
+import { Toast } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-admin-messages',
@@ -93,6 +94,7 @@ export class AdminMessagesComponent implements OnInit {
         private mainNavService: MainNavService,
         private translate: TranslateService,
         private dialogs: DialogsService,
+        private toast: Toast,
         private sanitizer: DomSanitizer,
         private adminV1Service: AdminV1Service,
     ) {}
@@ -105,10 +107,10 @@ export class AdminMessagesComponent implements OnInit {
             menubar: false,
             statusbar: false,
             resize: true,
-            plugins: ['link', 'colorpicker'],
+            plugins: ['link', 'code'],
             //newline_behavior: 'linebreak',
             toolbar:
-                'bold italic underline | forecolor backcolor | link | alignleft aligncenter alignright alignjustify | removeformat | undo redo',
+                'bold italic underline | link | alignleft aligncenter alignright alignjustify | removeformat | code | undo redo',
             language: this.translate.getDefaultLang(),
         };
         this.editorConfig.base_url = this.platformLocation.getBaseHrefFromDOM() + 'tinymce/';
@@ -152,6 +154,10 @@ export class AdminMessagesComponent implements OnInit {
             toolpermissions: this.selectedTp(),
             uuid: uuidv4(),
         } as RepositoryMessage;
+        if (message.from && message.to && message.to <= message.from) {
+            this.toast.error(null, 'ADMIN.MESSAGES.INVALID_TO_DATE');
+            return;
+        }
         const config = this.config() || {};
         if (!config.messages) {
             config.messages = [];

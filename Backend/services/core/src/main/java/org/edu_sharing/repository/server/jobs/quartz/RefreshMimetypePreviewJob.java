@@ -221,7 +221,6 @@ public class RefreshMimetypePreviewJob extends AbstractJobMapAnnotationParams {
 		thumbnailAction.setTrackStatus(true);
 
 		thumbnailAction.setParameterValue("thumbnail-name", CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
-		ActionObserver.getInstance().addAction(nodeRef, thumbnailAction);
 
 		//cause its already async set executeAsynchronously to false
 		actionService.executeAction(thumbnailAction, nodeRef, true, false);

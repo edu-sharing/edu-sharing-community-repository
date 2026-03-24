@@ -805,15 +805,6 @@ public class PreviewServlet extends HttpServlet {
 			// may fails if the user does not has access for content
 		}
 
-
-		/**
-		 * generated and action active
-		 */
-		Action action = ActionObserver.getInstance().getAction(nodeRef, CCConstants.ACTION_NAME_CREATE_THUMBNAIL);
-		if (action != null && action.getExecutionStatus().equals(ActionStatus.Running)) {
-			return new PreviewDetail(defaultImageUrl, PreviewDetail.TYPE_DEFAULT, true,false);
-		}
-
 		/**
 		 * generated and no action active
 		 */

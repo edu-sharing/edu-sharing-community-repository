@@ -1,0 +1,74 @@
+<div
+  class="es-topic-page-breadcrumb"
+  [class.edit-mode]="editMode()"
+  *ngIf="initialized(); else loadingSpinner"
+>
+  <ul class="es-topic-page-breadcrumb-list">
+    <li
+      class="es-topic-page-breadcrumb-list-item"
+      [class.last-item]="last"
+      *ngFor="let node of processedNodes(); let i = index; let last = last"
+    >
+      <a [href]="rootLink()" *ngIf="i === 0 && rootLink(); else defaultLink">
+        {{ rootName ?? (i18nPrefix + 'DEFAULT_ROOT_NAME' | translate) }}
+      </a>
+      <ng-template #defaultLink>
+        <a *ngIf="customUrl && customUrl(node); else defaultNodeLink" [href]="customUrl(node)">
+          <ng-container *ngTemplateOutlet="nodeTitle; context: { node }"></ng-container>
+        </a>
+        <ng-template #defaultNodeLink>
+          <es-node-url [node]="node" [mode]="'link'">
+            <ng-container *ngTemplateOutlet="nodeTitle; context: { node }"></ng-container>
+          </es-node-url>
+        </ng-template>
+      </ng-template>
+      <i *ngIf="!last || pageVariantConfigNodes().length" esIcon="chevron_right"></i>
+    </li>
+    <li
+      class="es-topic-page-breadcrumb-list-item"
+      *ngIf="pageVariantConfigNodes().length as countOfConfigs"
+    >
+      <mat-form-field class="select-config-field" appearance="outline" subscriptSizing="dynamic">
+        <mat-label>
+          {{ i18nPrefix + 'PAGE_VARIANT_LABEL' | translate }}
+        </mat-label>
+        <!-- hint: use default mat-select over es-dropdown due to being implemented as mat-menu -->
+        <mat-select
+          [disabled]="
+            (countOfConfigs === 1 || isProcessing()) &&
+            !(isAdmin() && pageTemplateExists() && !templateMode())
+          "
+          [value]="pageVariantNode?.ref.id"
+          (selectionChange)="selectVariant($event.value)"
+        >
+          <mat-option
+            *ngFor="let variant of pageVariantConfigNodes(); let i = index"
+            [value]="variant.ref.id"
+          >
+            {{
+              variant.title && !variant.title.includes(pageVariantConfigPrefix)
+                ? (variant | nodeTitle)
+                : (i18nPrefix + 'PAGE_VARIANT_LABEL' | translate) + ' ' + (i + 1)
+            }}
+          </mat-option>
+          <mat-option
+            class="navigate-to-template"
+            [value]="navigateToTemplateValue"
+            *ngIf="isAdmin() && pageTemplateExists()"
+          >
+            {{ i18nPrefix + 'NAVIGATE_TO_PAGE_TEMPLATE' | translate }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </li>
+  </ul>
+  <ng-container *ngIf="hasBreadcrumbExtension()">
+    <div #customExtension></div>
+  </ng-container>
+</div>
+<ng-template #nodeTitle let-node="node">
+  {{ node.properties?.['ccm:collectionshorttitle']?.[0] || (node | nodeTitle) }}
+</ng-template>
+<ng-template #loadingSpinner>
+  <es-spinner></es-spinner>
+</ng-template>

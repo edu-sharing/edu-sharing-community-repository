@@ -53,7 +53,7 @@
     [class.edit-mode]="editMode()"
   >
     <div *ngIf="editMode()" class="preview-title">
-      {{ 'TOPIC_PAGE.WIDGET.IFRAME_WIDGET.PREVIEW_TITLE' | translate }}
+      {{ i18nPrefix + 'PREVIEW_TITLE' | translate }}
     </div>
     <ng-container
       *ngTemplateOutlet="showIframe; context: { config: editMode() ? previewConfig : iframeConfig }"
@@ -88,14 +88,14 @@
         allow="encrypted-media"
         allowfullscreen
       >
-        {{ 'TOPIC_PAGE.WIDGET.IFRAME_WIDGET.NOT_SUPPORTED' | translate }}
+        {{ i18nPrefix + 'NOT_SUPPORTED' | translate }}
       </iframe>
     </ng-template>
   </ng-template>
 
   <ng-template #missingSrc>
     <es-info-message mode="info">
-      {{ 'TOPIC_PAGE.WIDGET.IFRAME_WIDGET.MISSING_SRC' | translate }}
+      {{ i18nPrefix + 'MISSING_SRC' | translate }}
     </es-info-message>
   </ng-template>
 

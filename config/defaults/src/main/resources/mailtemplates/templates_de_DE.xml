@@ -27,7 +27,7 @@
 		<subject>{{assigner.firstName}} {{assigner.lastName}} hat Ihnen ein Material zugewiesen.</subject>
 		<message><![CDATA[
 			<h1>Hallo {{firstName}} {{lastName}}</h1>
-			<h2>{{assigner.firstName}} {{assigner.lastName}} hat Ihnen "{{node.cm:name}}" mit den Status "{{status}}" zugewiesen.</h2>
+			<h2>{{assigner.firstName}} {{assigner.lastName}} hat Ihnen "{{node.cm:name}}" mit dem Status "{{status}}" zugewiesen.</h2>
 			<br>
 			<div class="center"><a class="btn" href="{{link}}">Link zum Material</a></div>
 			<br><br>
@@ -127,8 +127,6 @@
 		]]>
 		</message>
 	</template>
-
-
 	<template name="nodeIssue">
 		<subject>{{reporterEmail}} hat ein Problem gemeldet</subject>
 		<message><![CDATA[
@@ -171,44 +169,44 @@
 		</message>
 	</template>
 	<template name="groupSignupList">
-		<subject>Ein Nutzer möchte "{{group}}" beitreten</subject>
+		<subject>Ein Nutzer möchte Gruppe "{{group}}" beitreten</subject>
 		<message><![CDATA[
 			<h1>Hallo!</h1>
-			<h2>{{firstName}} {{lastName}} möchte "{{group}}" beitreten.</h2>
+			<h2>{{firstName}} {{lastName}} möchte Gruppe "{{group}}" beitreten.</h2>
 			<br>
 			Bitte wechseln Sie zur Nutzerverwaltung und prüfen Sie die Warteliste der Gruppe.
 		]]>
 		</message>
 	</template>
 	<template name="groupSignupUser">
-		<subject>"{{group}}" beigetreten</subject>
+		<subject>Gruppe "{{group}}" beigetreten</subject>
 		<message><![CDATA[
 			<h1>Hallo {{firstName}} {{lastName}}!</h1>
-			<h2>Sie sind erfolgreich "{{group}}" beigetreten.</h2>
+			<h2>Sie sind erfolgreich der Gruppe "{{group}}" beigetreten.</h2>
 		]]>
 		</message>
 	</template>
 	<template name="groupSignupConfirmed">
-		<subject>"{{group}}" beigetreten</subject>
+		<subject>Gruppe "{{group}}" beigetreten</subject>
 		<message><![CDATA[
-			<h1>Hello {{firstName}} {{lastName}}!</h1>
-			<h2>You're request to join "{{group}}" has been accepted! You are now member of this group.</h2>
+			<h1>Hallo {{firstName}} {{lastName}}!</h1>
+			<h2>Ihre Beitrittsanfrage an die Gruppe "{{group}}" wurde angenommen! Sie sind nun Mitglied dieser Gruppe.</h2>
 		]]>
 		</message>
 	</template>
 	<template name="groupSignupRejected">
-		<subject>Could not join "{{group}}"</subject>
+		<subject>Gruppe "{{group}}" abgelehnt</subject>
 		<message><![CDATA[
-			<h1>Hello {{firstName}} {{lastName}}!</h1>
-			<h2>We're sorry to inform you that your request to join "{{group}}" has been rejected by the group administrator.</h2>
+			<h1>Hallo {{firstName}} {{lastName}}!</h1>
+			<h2>Es tut uns leid, Ihnen mitteilen zu müssen, dass Ihre Anfrage zum Beitritt zur Gruppe "{{group}}" vom Gruppenadministrator abgelehnt wurde.</h2>
 		]]>
 		</message>
 	</template>
 	<template name="groupSignupAdmin">
-		<subject>Ein neuer Nutzer ist "{{group}}" beigetreten</subject>
+		<subject>Ein neuer Nutzer ist Gruppe "{{group}}" beigetreten</subject>
 		<message><![CDATA[
 			<h1>Hallo!</h1>
-			<h2> {{firstName}} {{lastName}} ist soeben "{{group}}" beigetreten.</h2>
+			<h2>{{firstName}} {{lastName}} ist soeben Gruppe "{{group}}" beigetreten.</h2>
 			<br>
 			Sie können die Mitglieder der Gruppe in der Nutzerverwaltung verwalten.
 		]]>

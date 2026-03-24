@@ -4,9 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { TranslateModule } from '@ngx-translate/core';
 import { NgxColorsColor, NgxColorsModule } from 'ngx-colors';
-import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import { ColorHelper } from 'ngx-edu-sharing-ui';
+import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 
 @Component({
     selector: 'es-color-picker',
@@ -29,32 +29,37 @@ export class ColorPickerComponent implements OnInit {
             this._initialColor = value;
         }
     }
+    @Input() disabled: boolean = false;
+    @Input() acceptLabel: string = 'APPLY';
+    @Input() cancelLabel: string = 'CANCEL';
+    @Input() colorLabel: string;
+    @Input() customClass: string = '';
+    @Output() colorChange: EventEmitter<string> = new EventEmitter<string>();
+
+    get internalColor(): string {
+        return this._selectedColor;
+    }
+    set internalColor(value: string) {
+        this._selectedColor = value;
+    }
+    protected palette: NgxColorsColor[] = [];
+
     constructor(private configService: ConfigService) {}
+
+    /**
+     * Initializes the component by retrieving the default colors and generating the color palette.
+     */
     async ngOnInit() {
         const colors = await this.configService.get<string[]>(
             'collections.colors',
             RestConstants.DEFAULT_COLLECTION_COLORS,
         );
         colors.forEach((c) => {
-            this.palette.push({ preview: c, variants: ColorHelper.generateHslVariants(c, 7) });
+            this.palette.push({
+                preview: c,
+                variants: ColorHelper.generateHslVariants(c, 7).reverse(),
+            });
         });
-        console.log(colors, this.palette);
-    }
-    @Input() disabled: boolean = false;
-    @Input() acceptLabel: string = 'APPLY';
-    @Input() cancelLabel: string = 'CANCEL';
-    @Input() colorLabel: string;
-    @Input() customClass: string = '';
-
-    @Output() colorChange: EventEmitter<string> = new EventEmitter<string>();
-    protected palette: NgxColorsColor[] = [];
-
-    get internalColor(): string {
-        return this._selectedColor;
-    }
-
-    set internalColor(value: string) {
-        this._selectedColor = value;
     }
 
     /**

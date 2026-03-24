@@ -1,0 +1,22 @@
+<div class="side-menu-wrapper" [class]="'position-' + position">
+  <div
+    #sideMenuWrapper
+    role="group"
+    class="side-menu"
+    [class.mobile-hidden]="mobileHidden()"
+    [attr.aria-label]="'TOPIC_PAGE.WIDGET.SIDE_MENU' | translate"
+  >
+    <ng-content select="[slot=menu]"></ng-content>
+  </div>
+
+  <div
+    class="menu-content"
+    *ngIf="selectedMenuItem !== ''"
+    [style.min-height.px]="sideMenuWrapper.offsetHeight + 20"
+  >
+    <button mat-icon-button class="close-btn" [disabled]="closeDisabled()" (click)="closeContent()">
+      <i esIcon="close"></i>
+    </button>
+    <ng-content select="[slot=content]"></ng-content>
+  </div>
+</div>

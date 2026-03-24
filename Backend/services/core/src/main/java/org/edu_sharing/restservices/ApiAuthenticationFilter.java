@@ -123,7 +123,9 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
                 "/lti/v13/details",
                 "/ltiplatform/v13/openid-configuration",
                 "/ltiplatform/v13/openid-registration",
-                "/ltiplatform/v13/content");
+                "/ltiplatform/v13/content",
+                "/ltiplatform/v13/generateLoginInitiationFormResourceLink",
+                "/ltiplatform/v13/auth");
         List<String> ADMIN_ENDPOINTS = Arrays.asList("/admin", "/bulk", "/lti/v13/registration/static", "/lti/v13/registration/url");
         List<String> DISABLED_ENDPOINTS = new ArrayList<>();
 

@@ -8,7 +8,6 @@ import {
 } from 'ngx-edu-sharing-api';
 import { Injectable } from '@angular/core';
 import { ListItem, ListItemType } from '../types/list-item';
-import { isArray } from 'lodash';
 
 type ColumnTypeInternal<T extends string> = { [k in T]?: ListItem[] };
 export type ColumnType = ColumnTypeInternal<'Default' | 'Table'>;
@@ -46,7 +45,7 @@ export class MdsHelperService {
                         } else if (name === 'searchCollections') {
                             type = 'COLLECTION';
                         }
-                        if (isArray(column[1])) {
+                        if (Array.isArray(column[1])) {
                             (columns as any)[column[0]] = column[1].map((c) => {
                                 if (c.id.includes('.')) {
                                     const split = c.id.split('.');

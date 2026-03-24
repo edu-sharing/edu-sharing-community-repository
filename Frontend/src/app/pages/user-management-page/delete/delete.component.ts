@@ -1,6 +1,6 @@
 import { ApplicationRef, Component, DoCheck, OnInit, ViewChild } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { User } from 'ngx-edu-sharing-api';
+import { SessionStorageService, User } from 'ngx-edu-sharing-api';
 import {
     ColumnType,
     FetchEvent,
@@ -19,7 +19,6 @@ import {
     RestAdminService,
     RestConstants,
     RestIamService,
-    SessionStorageService,
 } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { Toast } from '../../../services/toast';

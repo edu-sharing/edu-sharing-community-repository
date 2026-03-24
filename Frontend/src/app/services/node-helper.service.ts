@@ -18,13 +18,7 @@ import { Helper } from '../core-module/rest/helper';
 import { HttpClient } from '@angular/common/http';
 import { MessageType } from '../util/message-type';
 import { Toast } from './toast';
-import {
-    ComponentFactoryResolver,
-    Inject,
-    Injectable,
-    Optional,
-    ViewContainerRef,
-} from '@angular/core';
+import { ComponentFactoryResolver, Injectable, ViewContainerRef } from '@angular/core';
 import { BridgeService } from './bridge.service';
 import {
     AuthorityProfile,
@@ -36,7 +30,6 @@ import { RestConstants } from '../core-module/rest/rest-constants';
 import { RestHelper } from '../core-module/rest/rest-helper';
 import { RestConnectorService } from '../core-module/rest/services/rest-connector.service';
 import { UniversalNode } from '../core-module/rest/definitions';
-import { SessionStorageService, Store } from '../core-module/rest/services/session-storage.service';
 import { map } from 'rxjs/operators';
 import { RestNodeService } from '../core-module/rest/services/rest-node.service';
 import {
@@ -48,11 +41,13 @@ import {
     NetworkService,
     Node,
     Repository,
+    SessionStorageService,
+    Store,
     TrackingV1Service,
 } from 'ngx-edu-sharing-api';
 import { DialogsService } from '../features/dialogs/dialogs.service';
 import { DialogButton } from '../util/dialog-button';
-import { isArray } from 'lodash';
+import { environment } from '../../environments/environment';
 
 export interface ConfigEntry {
     name: string;
@@ -657,7 +652,7 @@ export class NodeHelperService extends NodeHelperServiceBase {
     }
     static getActionbarNodes<T>(listNodes: T[], externalNode: T | T[]): T[] {
         return externalNode
-            ? isArray(externalNode)
+            ? Array.isArray(externalNode)
                 ? externalNode
                 : [externalNode]
             : listNodes && listNodes.length
@@ -744,6 +739,13 @@ export class NodeHelperService extends NodeHelperServiceBase {
     getNodeUrl(node: UniversalNode, queryParams?: Params, short = false): string {
         const link = this.getNodeLink('queryParams', node);
         if (link) {
+            let loc = location.origin;
+            if (environment.webComponentMode) {
+                loc = (window as any).__env?.EDU_SHARING_API_URL.slice(0, -5);
+                if (!loc) {
+                    console.warn('missing window.__env.EDU_SHARING_API_URL, urls might be wrong');
+                }
+            }
             const urlTree = this.router.createUrlTree(
                 [this.getNodeLink('routerLink', node, short)],
                 {
@@ -753,7 +755,7 @@ export class NodeHelperService extends NodeHelperServiceBase {
                     },
                 },
             );
-            return location.origin + this.location.prepareExternalUrl(urlTree.toString());
+            return loc + this.location.prepareExternalUrl(urlTree.toString());
         } else {
             return null;
         }

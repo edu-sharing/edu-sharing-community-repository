@@ -63,6 +63,7 @@
       "NO_MESSAGES": "Derzeit keine Wartungsnachrichten konfiguriert",
       "REMOVE_TITLE": "Nachricht löschen",
       "REMOVE_MESSAGE": "Soll die folgende Nachricht gelöscht werden?<br><br><hr>{{message}}",
+      "INVALID_TO_DATE": "End-Zeitpunkt muss vor dem Start-Zeitpunkt liegen",
       "SELECT_COMPONENT": "Bereich auswählen",
       "SELECT_COMPONENT_HINT": "Wählen Sie einen oder mehrere Bereiche aus (Oder verknüpft). Bei keiner Auswahl gilt die Nachricht für alle",
       "SELECT_CONTEXT": "Kontext(e) auswählen",
@@ -87,7 +88,7 @@
         "WARNING_TITLE": "Warnung",
         "WARNING_DESCRIPTION": "Warnmeldung, gelbe Meldung mit Ausrufezeichen",
         "ERROR_TITLE": "Fehler",
-        "ERROR_DESCRIPTION": "Fehlermeldung, rote Melung mit X-Zeichen"
+        "ERROR_DESCRIPTION": "Fehlermeldung, rote Meldung mit Ausrufezeichen"
       },
       "USER_MODES": "Anzeigen für Benutzer oder Gäste",
       "USER_MODE": {
@@ -103,7 +104,7 @@
         "ONCE_TITLE": "Einmal",
         "ONCE_DESCRIPTION": "Nachricht wird nur einmal angezeigt",
         "REPEAT_TITLE": "Wiederholen",
-        "REPEAT_DESCRIPTION": "Nachricht wird regelmäßig erneut angezeigt, kann vom Nutzer aber ausgeblendet werden",
+        "REPEAT_DESCRIPTION": "Nachricht wird in der nächsten Nutzersitzung (i.d.R. 1 Stunde) erneut angezeigt, kann vom Nutzer aber ausgeblendet werden",
         "ALWAYS_TITLE": "Immer anzeigen",
         "ALWAYS_DESCRIPTION": "Nachricht wird immer angezeigt und kann nicht ausgeblendet werden"
       },
@@ -130,8 +131,7 @@
       "NODE_OVERRIDE_CONFIG_TITLE": "Node-Override",
       "NODE_OVERRIDE_CONFIG_HINT": "Override-Konfiguration für den aktuellen Cluster-Knoten (IP-Adresse überprüfen!)",
       "DEFAULTS_OVERRIDE_CONFIG_TITLE": "Helm Config override",
-      "DEFAULTS_OVERRIDE_CONFIG_HINT": "Values configured via helm deployment override",
-
+      "DEFAULTS_OVERRIDE_CONFIG_HINT": "Override für Einstellungen, die via helm deployment konfiguriert wurden.",
       "SIZE": "Editor-Größe",
       "SIZE_MEDIUM": "Normal",
       "SIZE_LARGE": "Groß",
@@ -381,7 +381,9 @@
       "UPLOAD_TEMP_DONE": "Datei wurde unter {{filename}} auf dem Server abgelegt",
       "AUTHENTICATE": "Sitzung starten",
       "AUTHENTICATE_AS_USER": "Sitzung als nutzende Person starten",
-      "AUTHENTICATE_AS_USER_DETAILS": "Wenn sie fortfahren, wird die bestehende Admin-Sitzung beendet und eine Sitzung mit dem gewählten Konto gestartet. Um die Admin-Rechte wieder zu erlangen, müssen Sie sich erneut anmelden. Fortfahren?"
+      "AUTHENTICATE_AS_USER_DETAILS": "Wenn sie fortfahren, wird die bestehende Admin-Sitzung beendet und eine Sitzung mit dem gewählten Konto gestartet. Um die Admin-Rechte wieder zu erlangen, müssen Sie sich erneut anmelden. Fortfahren?",
+      "REFRESH_EDU_GROUP_CACHE": "Edu Group Cache aktualisieren",
+      "EDU_GROUP_CACHE_REFRESHED": "Edu Group Cache wurde aktualisiert"
     },
     "BROWSER": {
       "NODE_BROWSER": "Node-Browser",

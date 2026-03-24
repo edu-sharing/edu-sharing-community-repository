@@ -980,7 +980,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         Boolean.parseBoolean(restrictedAccess)
                 ).stream().filter(permissions::contains).collect(Collectors.toList());
             } else {
-                logger.warn("Permission query matched more than one node " + nodeId + " " + StringUtils.join(permissions));
+                if (searchResult.hits().total().value() > 1) {
+                    logger.warn("Permission query matched more than one node " + nodeId + " " + StringUtils.join(permissions));
+                }
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -1176,7 +1178,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
         PropertiesGetInterceptor.PropertiesContext propertiesContext = PropertiesInterceptorFactory.getPropertiesContext(
                 alfNodeRef, props, eduNodeRef.getAspects(),
                 permissions,
-                sourceAsMap
+                sourceAsMap,
+                null
         );
         for (PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
             props = new HashMap<>(i.beforeDeliverProperties(propertiesContext));

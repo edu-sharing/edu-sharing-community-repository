@@ -108,7 +108,7 @@ const PROXY_CONFIG = [
                         `${rs2.protocol}//${escapedHost.replace(/:\\d+$/, '')}:\\d+${escapedPath}`,
                         'g',
                     );
-                    body = body.replace(regex, 'http://localhost:4200/rendering2/');
+                    body = body.replace(regex, 'http://localhost:4200/rendering2');
                     res.setHeader('content-length', Buffer.byteLength(body));
                     res.end(body);
                 });

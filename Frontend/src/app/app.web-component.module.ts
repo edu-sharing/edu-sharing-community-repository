@@ -7,15 +7,22 @@ import { PreviewSidebarComponent } from './features/preview-sidebar/preview-side
 import { AppModule, Providers } from './app.module';
 import { GenericWidgetComponent } from './pages/topic-page/widgets/generic-widget/generic-widget.component';
 import { AppComponent } from './app.component';
+import { WebComponentOnlyService } from './main/web-component-only.service';
 
 @NgModule({
     imports: [AppModule],
-    providers: Providers,
+    providers: Providers.concat(WebComponentOnlyService),
     exports: [AppComponent],
     schemas: [].concat(extensionSchemas),
 })
 export class WebComponentModule implements DoBootstrap {
-    constructor(private injector: Injector) {}
+    constructor(
+        private injector: Injector,
+        /**
+         * make sure that it is always injected
+         */
+        private webComponentOnlyService: WebComponentOnlyService,
+    ) {}
 
     ngDoBootstrap(_: ApplicationRef): void {
         console.info('web component __env', (window as any).__env);

@@ -1,0 +1,806 @@
+@use '../topic-page-variables' as topicPageVars;
+@use '../topic-page-common-styles' as topicPageStyles;
+
+:host {
+    --topic-color: #{topicPageVars.$primary-dark};
+    --anchor-item-bg-color: #{topicPageVars.$surface};
+    --anchor-menu-height: 108px;
+    --border-radius: 24px;
+    --content-max-width: 1440px;
+    --sidebar-height: var(--mainnavHeight, 89px);
+    --sidebar-offset: 16px;
+    --offcanvas-menu-width: 48px;
+    --offcanvas-offset: 8px;
+    // overwrite border radius for template page
+    --mdc-fab-small-container-shape: 4px;
+    display: flex;
+    flex-direction: column;
+}
+
+.reloading-indicator-bg {
+    position: fixed;
+    z-index: 1001;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+// OFFCANVAS MENU
+// reserve space for close button + adjust color
+.side-menu-header {
+    margin-top: 0;
+    padding-right: 24px;
+    color: topicPageVars.$primary-dark;
+    font-weight: topicPageVars.$font-weight-bold;
+    font-size: topicPageVars.$font-size-x-large;
+}
+
+es-side-menu-wrapper {
+    color: topicPageVars.$primary-dark;
+
+    // color adjustments of specific elements
+    &::ng-deep {
+        mat-radio-button label,
+        mat-checkbox label {
+            color: topicPageVars.$primary-dark;
+        }
+
+        mat-radio-button.mat-mdc-radio-button .mdc-radio {
+            --mdc-radio-state-layer-size: 36px;
+        }
+        --mdc-checkbox-state-layer-size: 36px;
+    }
+}
+
+// BREADCRUMB NAVIGATION
+// alert placed on top of the breadcrumb navigation
+.template-mode ::ng-deep {
+    .block {
+        border-radius: 0 !important;
+        border-left: none !important;
+        border-right: none !important;
+    }
+    .message-container {
+        text-align: center;
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+    }
+}
+
+.template-breadcrumb {
+    padding-right: calc(var(--offcanvas-menu-width) + var(--offcanvas-offset));
+    box-sizing: border-box;
+    width: 100%;
+    position: sticky;
+    top: 0;
+    // overflow contents such as the image of the navbar or the AI labels
+    z-index: 12;
+
+    .template-breadcrumb-wrapper {
+        margin: 0 auto;
+        display: flex;
+        justify-content: flex-start;
+        position: relative;
+        box-sizing: border-box;
+        max-width: var(--content-max-width);
+    }
+}
+
+// TOPIC HEADER
+.template-header {
+    padding: 32px calc(var(--offcanvas-menu-width) + var(--offcanvas-offset)) 32px
+        var(--offcanvas-offset);
+    background-color: var(--topic-color);
+    position: relative;
+
+    .topic-color-picker {
+        position: absolute;
+        top: 16px;
+        right: calc(50% - 26px);
+    }
+
+    // reserve space for the anchor menu
+    &.extra-padding-bottom {
+        padding-bottom: calc(32px + var(--anchor-menu-height) / 2);
+    }
+
+    .template-header-wrapper {
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        gap: 24px;
+        position: relative;
+        box-sizing: border-box;
+        max-width: var(--content-max-width);
+
+        .template-header-container {
+            position: relative;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-radius: var(--border-radius);
+            // use overflow hidden to prevent children from overflowing areas hidden by border-radius
+            overflow: hidden;
+
+            // workaround for keeping overflow: hidden, but realizing border-radius on the
+            // image-wrapper, even though it has margin-right set
+            ::ng-deep es-topic-header {
+                es-image-wrapper,
+                es-image-wrapper .image-wrapper {
+                    border-top-right-radius: var(--border-radius);
+                    border-bottom-right-radius: var(--border-radius);
+                }
+            }
+        }
+    }
+}
+
+.topic-page-content-outer-wrapper {
+    --action-button-width: 48px;
+    --container-border-radius: 16px;
+    --side-menu-padding: 8px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    z-index: 10;
+
+    // fix sidebar is overflown by offcanvas menu
+    &.sidebar-open {
+        padding-right: calc(var(--offcanvas-menu-width) + var(--offcanvas-offset));
+
+        .topic-page-content-wrapper .topic-page-swimlane-wrapper {
+            padding-right: 0;
+
+            &.edit-mode {
+                padding-right: var(--action-button-width);
+            }
+        }
+    }
+
+    .topic-page-content-wrapper {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        width: 100%;
+        position: relative;
+
+        // TODO: why only in edit mode?
+        // reserve the same space as done in the topic-header
+        &.extra-padding-top {
+            padding-top: calc(32px + var(--anchor-menu-height) / 2);
+        }
+
+        .anchor-container {
+            z-index: 10;
+            position: absolute;
+            top: calc(-1 * (var(--side-menu-padding) + var(--anchor-menu-height) / 2));
+            left: 0;
+            height: calc(var(--anchor-menu-height) + 2 * var(--side-menu-padding));
+            width: 100%;
+            box-sizing: border-box;
+            // center anchor-menu with text-align, as inline-flex is used
+            text-align: center;
+
+            .anchor-menu {
+                padding: var(--side-menu-padding);
+                height: 100%;
+                // hint: use content-box here to prevent the scrollbar from destroying the layout
+                //       manually substract the padding set
+                max-width: calc(100% - 2 * var(--side-menu-padding));
+                box-sizing: content-box;
+                display: inline-flex;
+                flex-direction: row;
+                // note: avoid adding "align-items: center" and "justify-content: center",
+                //       as it conflicts with the horizontal scrolling
+                gap: 32px;
+                overflow-x: auto;
+
+                .anchor-item {
+                    // https://stackoverflow.com/a/68382653
+                    flex-shrink: 0 !important;
+                    width: var(--anchor-menu-height);
+                    height: var(--anchor-menu-height);
+                    box-sizing: border-box;
+                    text-align: center;
+                    vertical-align: middle;
+                    position: relative;
+
+                    .item-container,
+                    .total-count {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    .item-container {
+                        padding: 12px;
+                        width: 100%;
+                        height: 100%;
+                        box-sizing: border-box;
+                        border-radius: calc(var(--anchor-menu-height) / 2);
+                        box-shadow: 0 4px 4px 0 #00000040;
+                        cursor: pointer;
+                        // fix style of button to match design
+                        border: none;
+                        /* make sure text stays inside circle */
+                        //-webkit-clip-path: circle(50% at 50% 50%);
+                        //clip-path: circle(50% at 50% 50%);
+                        overflow: hidden;
+
+                        .item-text {
+                            margin: 0;
+                            display: -webkit-box;
+                            -webkit-box-orient: vertical;
+                            -webkit-line-clamp: 3;
+                            line-clamp: 3;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            hyphens: auto;
+                            word-break: break-word;
+                            color: topicPageVars.$primary-dark;
+                        }
+                    }
+
+                    .anchor-item-color-picker {
+                        position: absolute;
+                        top: -8px;
+                        left: -8px;
+                    }
+
+                    .total-count {
+                        padding-left: 5px;
+                        padding-right: 5px;
+                        position: absolute;
+                        top: 8px;
+                        right: 2px;
+                        height: 20px;
+                        min-width: 20px;
+                        border-radius: 10px;
+                    }
+                }
+            }
+        }
+
+        .topic-page-swimlane-wrapper {
+            --swimlane-gap: 16px;
+            margin: 0 auto var(--swimlane-gap) auto;
+            padding-left: var(--offcanvas-offset);
+            padding-right: calc(var(--offcanvas-menu-width) + var(--offcanvas-offset));
+            width: 100%;
+            position: relative;
+
+            // fix position of es-swimlane-wrapper, when being scrolled into position
+            // this is caused by the navbar
+            scroll-margin-top: 100px;
+
+            .topic-page-swimlane {
+                margin: 0 auto;
+                max-width: var(--content-max-width);
+                position: relative;
+            }
+
+            .swimlane-heading-wrapper {
+                padding-left: 164px;
+                padding-right: 164px;
+                display: flex;
+                align-items: center;
+                position: relative;
+                width: 100%;
+
+                .swimlane-heading-buttons {
+                    display: flex;
+                    gap: 16px;
+                    position: absolute;
+                    top: -4px;
+                    right: 32px; // align it with the accordion buttons
+
+                    button {
+                        box-shadow: 0 4px 4px 0 #00000040;
+                        background: topicPageVars.$surface-container-lowest;
+                        color: topicPageVars.$primary-dark;
+                    }
+                }
+
+                // define different paddings and positions for accordions
+                &.is-accordion {
+                    padding-left: 120px;
+                    padding-right: 120px;
+
+                    .swimlane-heading-buttons {
+                        right: 0;
+                    }
+                }
+            }
+
+            .bg-shape {
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 100%;
+                z-index: 0;
+                width: auto;
+                max-width: 85%;
+                font-size: unset;
+
+                // mirror left-aligned shapes horizontally
+                &.shape-mirrored {
+                    left: unset;
+                    right: 0;
+                    transform: scaleX(-1);
+                }
+
+                // override default style set by icon directive to display full view background SVG
+                ::ng-deep .svg-icons {
+                    height: 100%;
+                    max-height: 100%;
+                    width: auto;
+                    max-width: 100%;
+                    display: block;
+                }
+            }
+
+            // adjust style of swimlane-wrapper for accordions
+            &.topic-page-accordion-swimlane {
+                // special case for accordions next to each other
+                &.next-item-accordion {
+                    margin-bottom: 3px;
+                }
+
+                .topic-page-swimlane {
+                    border-radius: var(--container-border-radius);
+                    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.4);
+                }
+
+                // adjust expanded style
+                &:has(.topic-page-accordion-item-expanded) {
+                    margin-bottom: var(--swimlane-gap);
+                }
+            }
+
+            // in edit mode, reserve extra space for the buttons on the left, right and bottom
+            &.edit-mode {
+                padding-left: calc(var(--offcanvas-offset) + var(--action-button-width));
+                padding-right: calc(
+                    var(--offcanvas-menu-width) + var(--offcanvas-offset) +
+                        var(--action-button-width)
+                );
+                margin-bottom: 48px !important;
+            }
+
+            &.reserve-space-top {
+                margin-top: 32px;
+            }
+
+            &.reserve-space-bottom {
+                margin-bottom: 40px;
+            }
+
+            // overrides for empty swimlanes
+            &.is-empty {
+                padding: 24px 44px;
+
+                &.edit-mode {
+                    margin-top: 24px;
+                }
+            }
+
+            .topic-page-edit-buttons,
+            .topic-page-move-buttons {
+                position: absolute;
+                top: 24px;
+                z-index: 10;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            // width of button (40px) + space between (4px)
+            --action-btn-position: -44px;
+
+            .topic-page-edit-buttons {
+                right: var(--action-btn-position);
+            }
+
+            .topic-page-move-buttons {
+                left: var(--action-btn-position);
+            }
+
+            .topic-page-color-shape-buttons {
+                position: absolute;
+                bottom: -52px;
+                right: 20px;
+            }
+
+            // ACCORDIONS
+            .topic-page-accordion {
+                display: block;
+                width: 100%;
+                // prevent background images from overflowing the accordion container due to border-radius
+                border-radius: var(--container-border-radius);
+                position: relative;
+                overflow: hidden;
+
+                .topic-page-accordion-item {
+                    display: block;
+
+                    .topic-page-accordion-item-header {
+                        display: flex;
+                        align-content: center;
+                        justify-content: space-between;
+                        position: relative;
+
+                        es-editable-text ::ng-deep {
+                            // remove margin from accordion heading
+                            h2 {
+                                margin: 0;
+                                padding: 0;
+                            }
+                        }
+
+                        // position of expand/collapse icon
+                        .topic-page-accordion-item-description {
+                            --accordion-icon-size: 32px;
+                            position: absolute;
+                            top: calc(80px / 2 - var(--accordion-icon-size) / 2);
+                            right: 160px;
+                            width: var(--accordion-icon-size);
+                            height: var(--accordion-icon-size);
+
+                            // fix positioning of the expand/collapse icon
+                            .mat-icon {
+                                width: var(--accordion-icon-size);
+                                height: var(--accordion-icon-size);
+                                font-size: var(--accordion-icon-size);
+                                display: inline-flex;
+                                align-items: center;
+                                justify-content: center;
+                            }
+                        }
+                    }
+
+                    // sync padding-left and padding-right with topic-page-container
+                    .topic-page-accordion-item-header,
+                    .topic-page-accordion-item-body {
+                        padding: 24px 32px;
+                    }
+
+                    .topic-page-accordion-item-header:hover {
+                        cursor: pointer;
+                    }
+                }
+            }
+
+            // CONTAINERS
+            .topic-page-container {
+                padding: 24px 0;
+                height: 100%;
+                box-sizing: border-box;
+
+                h2,
+                h3 {
+                    text-align: center;
+                }
+            }
+
+            // EDIT MODE ADJUSTMENTS FOR ACCORDION AND CONTAINERS
+            &.edit-mode {
+                .topic-page-accordion {
+                    .topic-page-accordion-item {
+                        // remove padding-bottom due to layout already defining a gap between items
+                        .topic-page-accordion-item-header {
+                            padding-bottom: 0;
+
+                            // display collapse icon
+                            .topic-page-accordion-item-description {
+                                display: none;
+                            }
+                        }
+
+                        // remove padding-top due to layout already defining a gap between items
+                        .topic-page-accordion-item-body {
+                            padding-top: 0;
+                        }
+                    }
+
+                    .topic-page-accordion-item-header,
+                    .topic-page-accordion-item-body {
+                        padding-left: 24px !important;
+                        padding-right: 24px !important;
+                    }
+                }
+
+                .topic-page-container {
+                    padding-left: 24px;
+                    padding-right: 24px;
+                    border: 1px solid topicPageVars.$outline;
+                    border-radius: var(--container-border-radius);
+                }
+
+                .swimlane-heading-wrapper {
+                    padding-left: 0;
+                    padding-right: 0;
+                }
+            }
+        }
+
+        .no-search-hit {
+            margin-top: 16px;
+        }
+
+        .mat-grid-tile {
+            .drop-list,
+            .component-wrapper {
+                width: 100%;
+                height: 100%;
+            }
+        }
+
+        /* this is required to avoid the duplication effect on dragging */
+        .cdk-drag-placeholder {
+            display: none;
+        }
+    }
+}
+
+/* grabbing into the node-entry to avoid unappealingly thin cards */
+::ng-deep .grid-card {
+    min-width: 220px;
+}
+
+:host mat-grid-list ::ng-deep {
+    .mat-grid-tile .mat-grid-tile-content {
+        position: relative;
+        display: block;
+    }
+}
+
+// media query for mobile devices
+@media (max-width: topicPageVars.$mobileWidth + topicPageVars.$mobileStage * 1) {
+    .template-header {
+        padding-top: var(--offcanvas-offset);
+        padding-bottom: var(--offcanvas-offset);
+
+        // reset padding-right on mobile, if the offcanvas menu is moved to the main menu
+        &.sidebar-mobile-hidden {
+            padding-right: var(--offcanvas-offset);
+        }
+
+        // special case for anchor menu
+        &.extra-padding-bottom {
+            padding-bottom: calc(var(--offcanvas-offset) + var(--anchor-menu-height) / 2);
+        }
+
+        // adjust border-radius set by workaround for keeping overflow: hidden
+        .template-header-wrapper .template-header-container ::ng-deep es-topic-header {
+            es-image-wrapper,
+            es-image-wrapper .image-wrapper {
+                border-top-right-radius: var(--border-radius);
+                border-bottom-right-radius: unset;
+            }
+        }
+    }
+
+    // mobile spacing adjustments
+    .topic-page-content-outer-wrapper.sidebar-mobile-hidden {
+        // reset padding-right on mobile, as the offcanvas menu is moved to the main menu
+        .topic-page-content-wrapper .topic-page-swimlane-wrapper {
+            padding-right: var(--offcanvas-offset);
+        }
+
+        // special case for sidebar opening case, as it is blended on top of the main content
+        &.sidebar-open {
+            padding-right: 0;
+
+            .topic-page-content-wrapper .topic-page-swimlane-wrapper {
+                padding-right: var(--offcanvas-offset);
+            }
+        }
+    }
+
+    // use full width of the heading-wrapper, instead of centering it
+    .swimlane-heading-wrapper {
+        padding-left: 0 !important;
+    }
+
+    // change position of collapse/expand icon in accordion
+    .topic-page-accordion-item-description {
+        right: 140px !important;
+    }
+}
+
+// THEMING ADJUSTMENTS
+.action-btn {
+    color: topicPageVars.$secondary-text;
+    background: topicPageVars.$surface;
+
+    &.btn-modify {
+        color: topicPageVars.$on-primary;
+        background: topicPageVars.$primary;
+    }
+}
+
+.reloading-indicator-bg {
+    background: topicPageVars.$surface;
+
+    &.transparent-bg {
+        background: rgba(topicPageVars.$inverse-surface, 0.5);
+    }
+}
+
+.template-breadcrumb {
+    background: topicPageVars.$primary-dark;
+
+    &::ng-deep {
+        a,
+        i,
+        p {
+            color: topicPageVars.$on-primary !important;
+        }
+    }
+}
+
+.template-header-container,
+.topic-page-content-wrapper {
+    color: topicPageVars.$primary-dark;
+}
+
+.topic-page-content-wrapper {
+    background: topicPageVars.$surface-container-lowest;
+}
+
+.topic-page-swimlane-wrapper {
+    .topic-page-swimlane {
+        &::ng-deep es-editable-text ::ng-deep {
+            h2,
+            h3 {
+                color: topicPageVars.$primary-dark;
+            }
+        }
+    }
+
+    // default color for swimlanes without background color
+    &:not(.custom-background-color) .topic-page-swimlane {
+        background-color: topicPageVars.$surface-container-lowest;
+    }
+
+    // default color for accordions
+    &.topic-page-accordion-swimlane .topic-page-swimlane {
+        background-color: topicPageVars.$surface-container-low;
+    }
+
+    &.no-search-hit {
+        margin-top: -52px !important;
+        padding: 0 !important;
+        padding-bottom: 52px !important;
+        max-height: 0;
+        visibility: hidden;
+    }
+}
+
+.anchor-container .anchor-menu .anchor-item {
+    .item-container {
+        background: var(--anchor-item-bg-color);
+    }
+
+    .total-count {
+        color: topicPageVars.$on-primary;
+        background-color: topicPageVars.$pink-default;
+    }
+}
+
+// GENERAL OVERWRITES / FIXES
+// this is necessary for accordions to work properly
+es-editable-text {
+    width: 100%;
+}
+
+// TYPOGRAPHY ADJUSTMENTS
+.anchor-container .anchor-menu .anchor-item {
+    // decrease font-size + line-height of anchor item container
+    .item-text {
+        font-family: 'Montserrat', sans-serif;
+        font-size: topicPageVars.$font-size-medium;
+        line-height: topicPageVars.$line-height-medium;
+    }
+
+    // adjust font-size, line-height + font-weight of total count
+    .total-count {
+        font-size: 62.5%;
+        font-weight: topicPageVars.$font-weight-x-bold;
+        line-height: topicPageVars.$line-height-small;
+    }
+}
+
+.abo-label {
+    margin-left: 8px;
+    padding: 4px 8px;
+    background-color: #4caf50;
+    color: white;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.swimlane-qr-code {
+    max-width: 100%;
+}
+
+// edit page config dialog
+.missing-page-config {
+    padding: 24px;
+
+    es-info-message {
+        margin-bottom: 16px;
+        display: block;
+    }
+
+    .config-selection-container {
+        display: flex;
+        gap: 16px;
+
+        mat-form-field {
+            flex: 1;
+        }
+
+        .create-button > button {
+            min-height: 100%;
+        }
+    }
+}
+
+// adjust style of es-preview-sidebar for topic page
+:host es-preview-sidebar ::ng-deep .preview-sidebar {
+    max-height: calc(100vh - var(--sidebar-height) - 2 * var(--sidebar-offset));
+    max-width: 550px;
+    position: sticky;
+    top: calc(var(--sidebar-height) + var(--sidebar-offset));
+    display: flex;
+}
+
+// common styles
+// styling of page edit button (template)
+button.topic-page-edit-toggle-btn {
+    margin-left: 16px;
+
+    .mdc-button__label {
+        gap: 8px;
+    }
+}
+
+@media screen and (max-width: (topicPageVars.$mobileWidth + topicPageVars.$mobileStage * 1)) {
+    .topic-page-btn-label {
+        display: none;
+    }
+}
+
+// global styles
+::ng-deep {
+    // due to drag and drop, the styles have to be applied globally
+    @include topicPageStyles.grid-styles;
+    // menu styles have to be applied globally
+    @include topicPageStyles.menu-styles;
+
+    // override .topic-page-grid-border-container background when being dragged
+    .cdk-drag .topic-page-grid-border-container {
+        background: topicPageVars.$surface;
+    }
+
+    // custom styles for create menu of topic page (opened via add button)
+    // hint: the selector depends on the scope being applied
+    .create-menu-TopicPage {
+        i.mat-icon > .svg-icons {
+            font-size: 24px;
+            width: 24px;
+            height: 24px;
+        }
+    }
+}

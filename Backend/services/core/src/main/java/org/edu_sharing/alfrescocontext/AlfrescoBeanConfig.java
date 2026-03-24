@@ -16,6 +16,7 @@ import org.alfresco.repo.search.SearchTrackingComponent;
 import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.MutableAuthenticationDao;
 import org.alfresco.repo.security.authentication.RepositoryAuthenticationDao;
+import org.alfresco.repo.security.authentication.TicketComponent;
 import org.alfresco.repo.security.person.RegexHomeFolderProvider;
 import org.alfresco.repo.tenant.TenantService;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
@@ -402,5 +403,10 @@ public class AlfrescoBeanConfig {
         }
 
         throw new NoSuchBeanDefinitionException(RepositoryAuthenticationDao.class);
+    }
+
+    @Bean
+    public TicketComponent  ticketComponent() {
+        return applicationContext.getBean("ticketComponent", TicketComponent.class);
     }
 }

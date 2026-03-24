@@ -323,7 +323,7 @@
               {{ msg.from ? (msg.from | formatDate : { relative: false, time: true }) : '-' }}
             </div>
           </div>
-          <div class="to" *ngIf="msg.to">
+          <div class="to">
             <label>{{ 'ADMIN.MESSAGES.TIME_TO_ENABLED' | translate }}</label>
             <div>{{ msg.to ? (msg.to | formatDate : { relative: false, time: true }) : '-' }}</div>
           </div>

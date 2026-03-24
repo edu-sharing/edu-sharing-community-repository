@@ -1,4 +1,3 @@
-// retrieved from https://stackoverflow.com/a/43172992
 import { Directive, Input, TemplateRef, ViewContainerRef } from '@angular/core';
 
 @Directive({
@@ -10,7 +9,7 @@ export class VarDirective {
         this.context.$implicit = this.context.ngVar = context;
 
         if (!this.hasView) {
-            this.vcRef.createEmbeddedView(this.templateRef, this.context);
+            this.viewContainerRef.createEmbeddedView(this.templateRef, this.context);
             this.hasView = true;
         }
     }
@@ -25,5 +24,8 @@ export class VarDirective {
 
     private hasView: boolean = false;
 
-    constructor(private templateRef: TemplateRef<any>, private vcRef: ViewContainerRef) {}
+    constructor(
+        private templateRef: TemplateRef<any>,
+        private viewContainerRef: ViewContainerRef,
+    ) {}
 }

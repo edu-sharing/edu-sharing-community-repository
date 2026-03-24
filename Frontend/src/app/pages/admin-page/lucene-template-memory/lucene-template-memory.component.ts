@@ -1,8 +1,9 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { DialogButton, SessionStorageService } from '../../../core-module/core.module';
+import { DialogButton } from '../../../core-module/core.module';
 import { Toast } from '../../../services/toast';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { SessionStorageService } from 'ngx-edu-sharing-api';
 
 interface LuceneTemplate {
     query: string;

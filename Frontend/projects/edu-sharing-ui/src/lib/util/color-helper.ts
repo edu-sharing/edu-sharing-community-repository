@@ -146,7 +146,6 @@ export class ColorHelper {
         for (let si = 0; si <= satSteps; si++) {
             const sat = Math.pow((deltaSat * 2 - 1) * (si / satSteps) + (1 - deltaSat), 0.5);
             const lum = Math.pow((deltaLight * 2 - 1) * (si / satSteps) + (1 - deltaLight), 0.5);
-            console.log(h, sat);
             const newRgb = ColorHelper.hslToRgb([h, sat, lum]);
             result.push(ColorHelper.rgbToHex(newRgb));
         }

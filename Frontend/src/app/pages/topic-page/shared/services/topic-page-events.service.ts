@@ -1,6 +1,6 @@
 import { EventEmitter, Injectable } from '@angular/core';
-import { WidgetNodeAddedEvent } from '../types/widget-node-added-event';
 import { ColorChangeEvent } from '../types/color-change-event';
+import { WidgetNodeAddedEvent } from '../types/widget-node-added-event';
 
 /**
  * An application-wide event broker for topic-page events.

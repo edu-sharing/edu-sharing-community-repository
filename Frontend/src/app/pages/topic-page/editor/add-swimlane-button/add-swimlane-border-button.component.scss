@@ -1,0 +1,24 @@
+@use '../../topic-page-variables' as topicPageVars;
+@use '../../topic-page-common-styles' as topicPageStyles;
+
+.add-swimlane-container {
+    --button-height: 40px;
+    margin: 24px 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+
+    // the borders next to the add button
+    .container-border {
+        flex: 1;
+        border-bottom: 2px solid topicPageVars.$outline;
+        border-radius: 1px;
+    }
+
+    .add-swimlane-btn {
+        margin-left: 8px;
+        margin-right: 8px;
+        color: topicPageVars.$secondary-text !important;
+        background: topicPageVars.$surface !important;
+    }
+}

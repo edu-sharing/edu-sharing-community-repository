@@ -115,4 +115,8 @@ public class URLHelper {
     public static String getNgComponentsUrl(boolean dynamic) {
         return getNgComponentsUrl(getBaseUrl(dynamic));
     }
+
+    public static String getNgCollectionUrl(String nodeId, boolean dynamic) {
+       return getNgComponentsUrl(dynamic) + "collections/?id=" + nodeId;
+    }
 }

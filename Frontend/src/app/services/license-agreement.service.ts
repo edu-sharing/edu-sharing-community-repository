@@ -6,6 +6,7 @@ import {
     LicenseAgreement,
     LoginInfo,
     Node,
+    SessionStorageService,
 } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
@@ -18,7 +19,7 @@ import {
     switchMap,
     tap,
 } from 'rxjs/operators';
-import { RestNodeService, SessionStorageService } from '../core-module/core.module';
+import { RestNodeService } from '../core-module/core.module';
 import {
     LicenseAgreementDialogData,
     LicenseAgreementDialogResult,

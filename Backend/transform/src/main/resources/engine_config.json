@@ -59,6 +59,18 @@
       {
         "value": {
           "required": false,
+          "name": "alphaRemove"
+        }
+      },
+      {
+        "value": {
+          "required": false,
+          "name": "timeout"
+        }
+      },
+      {
+        "value": {
+          "required": false,
           "name": "endPage"
         }
       }

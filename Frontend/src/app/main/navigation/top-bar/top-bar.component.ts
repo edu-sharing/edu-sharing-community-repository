@@ -1,4 +1,5 @@
 import {
+    AfterViewInit,
     Component,
     ContentChild,
     ElementRef,
@@ -26,7 +27,7 @@ import { CLOSE } from '../../../features/dialogs/dialog-modules/generic-dialog/g
     styleUrls: ['./top-bar.component.scss'],
     standalone: false,
 })
-export class TopBarComponent {
+export class TopBarComponent implements AfterViewInit {
     readonly TemplateSlot = TemplateSlot;
     @ContentChild('createButton') createButtonRef: TemplateRef<any>;
     @ViewChild('createMenu') createMenu: CreateMenuComponent;
@@ -84,31 +85,7 @@ export class TopBarComponent {
     }
 
     private registerSystemMessages() {
-        this.mainNavService.observeSystemMessage().subscribe(async (details) => {
-            if (details.message.mode === 'modal') {
-                const dialogRef = await this.dialogs.openGenericDialog({
-                    title: 'NOTICE',
-                    avatar: {
-                        kind: 'icon',
-                        icon: 'info',
-                    },
-                    message: details.message.message,
-                    messageMode: 'html',
-                    buttons: CLOSE,
-                    minWidth: 600,
-                    maxWidth: 800,
-                });
-                dialogRef.afterClosed().subscribe((response) => {
-                    if (details.message.repeat === 'repeat') {
-                        void this.sessionStorageService.set(
-                            details.storageKey,
-                            details.message.uuid,
-                            Store.Session,
-                        );
-                    }
-                });
-            }
-        });
+        this.mainNavService.observeSystemMessage().subscribe(async (details) => {});
     }
     toggleMenuSidebar() {
         if (this.canOpen) {
@@ -132,7 +109,9 @@ export class TopBarComponent {
         this.createMenuTrigger.openMenu();
         this.createMenuTrigger.onMenuClose;
     }
-
+    ngAfterViewInit() {
+        this.sizeChanged();
+    }
     sizeChanged() {
         this.mainNavService.updateHeight(
             this.topbarRef.nativeElement?.getBoundingClientRect().height,

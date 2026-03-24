@@ -47,6 +47,7 @@ import org.edu_sharing.spring.ApplicationContextFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.dao.DuplicateKeyException;
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -107,8 +108,7 @@ public class PersonDao {
 
 				repoDao.getBaseClient().getUserInfo(userName);
 
-				throw new DAOValidationException(
-						new IllegalArgumentException("Username already exists."));
+				throw new DAODuplicateNodeNameException(new DuplicateKeyException("Username already exists."), userName);
 
 			} catch (NoSuchPersonException e) {
 

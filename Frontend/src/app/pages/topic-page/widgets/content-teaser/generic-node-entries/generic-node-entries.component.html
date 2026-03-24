@@ -34,11 +34,12 @@
     *ngTemplateOutlet="
       templateRef;
       context: {
-        searchText: searchText
+        nodeId: contextNodeId,
       }
     "
   ></ng-container>
 </ng-template>
+
 <!-- metadata type templates -->
 <ng-template #specialType>
   <ng-container *ngIf="genericWidgetGlobalService.hasCustomDisplayType(layout)">

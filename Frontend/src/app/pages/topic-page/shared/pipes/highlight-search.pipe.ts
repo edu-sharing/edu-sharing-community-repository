@@ -45,7 +45,7 @@ export class HighlightSearchPipe implements PipeTransform {
                 if (before) frag.appendChild(doc.createTextNode(before));
 
                 const span = doc.createElement('span');
-                span.className = 'wlo-search-highlight';
+                span.className = 'topic-page-search-highlight';
                 span.textContent = match[0]; // original match; preserve case
                 frag.appendChild(span);
 

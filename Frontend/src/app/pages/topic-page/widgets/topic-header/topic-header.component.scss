@@ -1,0 +1,115 @@
+@use '../../topic-page-variables' as topicPageVars;
+@use '../../topic-page-common-styles' as topicPageStyles;
+
+:host {
+    min-height: 150px;
+    ::ng-deep {
+        @include topicPageStyles.search-highlight-styles;
+    }
+}
+
+// for large devices, display text and image in 5 to 3 grid
+.es-topic-header-widget .template-header-content {
+    display: flex;
+
+    .topic-text-wrapper {
+        padding: 40px;
+        position: relative;
+        flex: 5;
+        // use flex again for text wrapper
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+
+        .topic-header-color-picker {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .topic-page-subject-portal-label {
+            // negative margin due to gap: 16px of topic-text-wrapper
+            margin-bottom: -8px;
+            color: topicPageVars.$primary;
+            font-weight: topicPageVars.$font-weight-regular;
+            font-size: 14px;
+        }
+
+        h1,
+        h2 {
+            margin-bottom: 0;
+        }
+
+        h1 {
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+        h2 {
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .topic-header-title {
+            display: flex;
+            gap: 16px;
+
+            span {
+                flex: unset;
+            }
+        }
+
+        // remove padding-right to use the width of the topic-header more efficiently
+        ::ng-deep es-editable-text .text-container {
+            padding-right: 0;
+        }
+
+        .important-header-icon {
+            margin: 0;
+            font-size: 26px;
+            width: 26px;
+            height: 26px;
+            color: topicPageVars.$primary;
+        }
+    }
+
+    es-image-wrapper {
+        flex: 3;
+        // fix image will not being shrunk
+        min-width: 0;
+    }
+}
+
+// for extra small devices (portrait phones, less than 576px), justify text content
+// breakpoint retrieved from Bootstrap
+@media (max-width: 575.98px) {
+    .es-topic-header-widget .template-header-content .topic-text-wrapper {
+        ::ng-deep es-editable-text {
+            text-align: justify;
+        }
+    }
+}
+
+// for mobile devices, place the image in the header above the text
+@media (max-width: topicPageVars.$mobileWidth + topicPageVars.$mobileStage * 1) {
+    .es-topic-header-widget .template-header-content {
+        flex-direction: column-reverse;
+
+        .topic-text-wrapper {
+            padding: 1.25rem;
+        }
+    }
+}
+
+// for medium devices, make both text and image take up equal space
+// breakpoint retrieved from Bootstrap
+@media (max-width: 1199.98px) {
+    .es-topic-header-widget .template-header-content {
+        .topic-text-wrapper,
+        es-image-wrapper {
+            flex: 1;
+        }
+    }
+}

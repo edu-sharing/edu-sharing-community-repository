@@ -1,12 +1,11 @@
-@use '../../../topic-page/topic-page-variables' as topicPageVars;
 @use 'mixins' as mixin;
+@use '../../topic-page-variables' as topicPageVars;
+@use '../../topic-page-common-styles' as topicPageStyles;
 
 :host {
-    // overwrite color button text color
-    --mdc-text-button-label-text-color: #{var(
-            --mat-standard-button-toggle-text-color,
-            var(--mat-app-on-surface)
-        )};
+    ::ng-deep {
+        @include topicPageStyles.search-highlight-styles;
+    }
 }
 
 // styles for media rendering
