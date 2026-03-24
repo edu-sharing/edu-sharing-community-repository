@@ -534,6 +534,7 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
     ngOnDestroy(): void {
         this.destroyed$.next();
         this.destroyed$.complete();
+        this.mainNavService.unregisterCustomTemplateSlot(TemplateSlot.AfterCreateMenu);
     }
 
     /**
