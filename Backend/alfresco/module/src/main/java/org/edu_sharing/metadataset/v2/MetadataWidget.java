@@ -90,6 +90,7 @@ public class MetadataWidget extends MetadataTranslatable {
             "vcard",
             "checkboxHorizontal",
             "checkboxVertical",
+            "facetList",
             "multivalueTree",
             "multivalueBadges",
             "multivalueFixedBadges",
