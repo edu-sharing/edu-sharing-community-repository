@@ -97,9 +97,8 @@ export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
     columns = {
         Default: [
             new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
-            // TODO: properties of ccm:educationalcontext are not displayed correctly in the table
-            // new ListItem('NODE', 'ccm:page_variant_profiling_target_group'),
-            // new ListItem('NODE', 'ccm:educationalcontext'),
+            new ListItem('NODE', 'ccm:page_variant_profiling_target_group'),
+            new ListItem('NODE', 'ccm:educationalcontext'),
         ],
     };
     dataSource: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();

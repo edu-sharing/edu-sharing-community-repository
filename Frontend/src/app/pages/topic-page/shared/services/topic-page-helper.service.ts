@@ -19,6 +19,7 @@ import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { DialogsService } from '../../../../features/dialogs/dialogs.service';
 import { Toast, ToastType } from '../../../../services/toast';
+import { GenericWidgetGlobalService } from '../../widgets/generic-widget/generic-widget-global.service';
 import {
     DEFAULT_AI_CONFIG_PROP,
     DEFAULT_PAGE_VARIANT_CONFIG_PROP,
@@ -54,6 +55,7 @@ export class TopicPageHelperService {
     constructor(
         private collectionApi: CollectionService,
         private dialogs: DialogsService,
+        private genericWidgetGlobalService: GenericWidgetGlobalService,
         private nodeApi: NodeService,
         private nodeApiUnwrapped: NodeServiceUnwrapped,
         private platformLocation: PlatformLocation,
@@ -273,6 +275,9 @@ export class TopicPageHelperService {
             type,
             body: {
                 [RestConstants.CM_NAME]: [name],
+                [RestConstants.CM_PROP_METADATASET_EDU_METADATASET]: [
+                    this.genericWidgetGlobalService.getDefaultMds(),
+                ],
             },
         };
         if (aspect) {
