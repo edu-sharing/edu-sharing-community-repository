@@ -70,27 +70,45 @@
         color="primary"
         (click)="updateList()"
       >
-        {{ 'TOPIC_PAGE.WIDGET.SEARCH_WIDGET.SEARCH' | translate }}
+        {{ i18nPrefix + 'SEARCH' | translate }}
       </button>
     </div>
   </mat-form-field>
 
-  <es-node-entries-wrapper
-    #nodeEntriesWrapper
-    class="topic-page-entries-wrapper"
-    [checkbox]="false"
-    [dataSource]="dataSource"
-    [columns]="columns"
-    [displayType]="DisplayType.Table"
-    [elementInteractionType]="InteractionType.Emitter"
-    [scope]="Scope.TopicPage"
-    [sort]="{
+  <div class="search-filters-and-results">
+    <es-mds-editor-wrapper
+      class="page-variant-search-filters"
+      groupId="topic_page_variant_search"
+      [repository]="HOME_REPOSITORY"
+      [setId]="genericWidgetGlobalService.getDefaultMds()"
+      [embedded]="true"
+      [currentValues]="{}"
+      (currentValuesChange)="onSearchFiltersChange($event)"
+      mode="search"
+    ></es-mds-editor-wrapper>
+
+    <es-node-entries-wrapper
+      #nodeEntriesWrapper
+      class="topic-page-entries-wrapper"
+      [checkbox]="false"
+      [dataSource]="dataSource"
+      [columns]="columns"
+      [displayType]="DisplayType.Table"
+      [elementInteractionType]="InteractionType.Emitter"
+      [scope]="Scope.TopicPage"
+      [sort]="{
       allowed: true,
       active: sortActive,
       direction: sortDirection,
       columns: sortColumns,
     }"
-    (clickItem)="onNodeClick($event)"
-    (sortChange)="onSort($event)"
-  ></es-node-entries-wrapper>
+      (clickItem)="onNodeClick($event)"
+      (sortChange)="onSort($event)"
+    >
+      <!-- placeholder template for empty content -->
+      <ng-template #empty>
+        <div class="empty">{{ i18nPrefix + 'EMPTY' | translate }}</div>
+      </ng-template>
+    </es-node-entries-wrapper>
+  </div>
 </div>
