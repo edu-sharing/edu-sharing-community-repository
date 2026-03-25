@@ -2047,12 +2047,12 @@ public class NodeDao {
                 logger.warn("Error while fetching original node version from " + nodeId + ":" + t.getMessage());
             }
         }
+        if(this.version != null) {
+            return this.version;
+        }
         String version = (String) nodeProps.get(CCConstants.LOM_PROP_LIFECYCLE_VERSION);
         if (version == null) {
             version = (String) nodeProps.get(CCConstants.CM_PROP_VERSIONABLELABEL);
-        }
-        if (version == null) {
-            version = this.version;
         }
         return version;
     }
