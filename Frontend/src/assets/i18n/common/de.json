@@ -317,6 +317,7 @@
     "ccm:lifecyclecontributer_authorFN": "Autor{{GENDER_SEPARATOR}}in",
     "ccm:wf_status": "Status",
     "ccm:eaf_productionyear": "Prod. Jahr",
+    "ccm:page_variant_profiling_target_group": "Zielgruppe",
     "counts": {
       "OVERALL": "Summe",
       "VIEW_MATERIAL": "Seitenaufrufe",
