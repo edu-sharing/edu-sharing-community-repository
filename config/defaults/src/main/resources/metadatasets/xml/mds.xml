@@ -2001,14 +2001,12 @@
         </statement>
       </property>
       <property name="ccm:page_variant_profiling_target_group">
-        <statement>
-          {"match":{"properties.ccm:page_variant_profiling_target_group.keyword":"${valueRaw}"}}
-        </statement>
+        <multiple>true</multiple>
+        <multiplejoin>OR</multiplejoin>
       </property>
       <property name="ccm:educationalcontext">
-        <statement>
-          {"match":{"properties.ccm:educationalcontext.keyword":"${valueRaw}"}}
-        </statement>
+        <multiple>true</multiple>
+        <multiplejoin>OR</multiplejoin>
       </property>
     </query>
 
