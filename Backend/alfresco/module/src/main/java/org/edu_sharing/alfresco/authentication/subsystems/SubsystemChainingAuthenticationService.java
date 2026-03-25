@@ -13,12 +13,16 @@ import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.authentication.LoginInterceptor;
+import org.edu_sharing.alfresco.interceptors.InterceptorHelper;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.springframework.dao.ConcurrencyFailureException;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -53,7 +57,7 @@ public class SubsystemChainingAuthenticationService extends org.alfresco.repo.se
                 successFullAuthenticationMethod.set(getId(authService));
                 setLoginTimestampToNow(userName, CCConstants.PROP_USER_ESFIRSTLOGIN);
                 setLoginTimestampToNow(userName, CCConstants.PROP_USER_ESLASTLOGIN);
-
+                callLoginInterceptors(userName);
                 return;
             } catch (AuthenticationException e) {
                 if (logger.isDebugEnabled()) {
@@ -64,6 +68,17 @@ public class SubsystemChainingAuthenticationService extends org.alfresco.repo.se
         }
         throw new AuthenticationException("Failed to authenticate");
 
+    }
+
+    static public void callLoginInterceptors(String userName) {
+        List<String> className = new ArrayList<>(LightbendConfigLoader.get().getStringList("repository.interceptors.authentication.login"));
+        List<LoginInterceptor> clazz = InterceptorHelper.getInterceptors(className, SubsystemChainingAuthenticationService.class.getClassLoader());
+        if(!clazz.isEmpty()) {
+            LoginInterceptor.LoginContext context = LoginInterceptor.LoginContext.builder().authorityName(userName).build();
+            for (LoginInterceptor loginInterceptor : clazz) {
+                loginInterceptor.onLogin(context);
+            }
+        }
     }
 
     public void setLoginTimestampToNow(String userName, String property) {

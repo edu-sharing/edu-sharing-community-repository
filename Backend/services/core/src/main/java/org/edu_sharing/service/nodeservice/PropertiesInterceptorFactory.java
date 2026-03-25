@@ -1,13 +1,14 @@
 package org.edu_sharing.service.nodeservice;
 
+import kotlin.reflect.jvm.internal.calls.Caller;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.interceptors.InterceptorHelper;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class PropertiesInterceptorFactory {
@@ -18,26 +19,9 @@ public class PropertiesInterceptorFactory {
     static List<PropertiesSetInterceptor> propertiesSetInterceptors = null;
     static List<NodeServiceInterceptorPermissions> nodeServiceInterceptorPermissions = null;
 
-    public static List<?> getInterceptors(List<String> className) {
+    public static <T> List<T> getInterceptors(List<String> className) {
         synchronized (PropertiesInterceptorFactory.class) {
-            try {
-                ArrayList<Class<?>> clazz = (ArrayList<Class<?>>)className.stream().map((String className1) -> {
-                    try {
-                        return Class.forName(className1);
-                    } catch (ClassNotFoundException e) {
-                        throw new RuntimeException(e);
-                    }
-                }).collect(Collectors.toCollection((Supplier<ArrayList<Class<?>>>) ArrayList::new));
-                return clazz.stream().map((c) -> {
-                    try {
-                        return c.newInstance();
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }).collect(Collectors.toList());
-            } catch (Throwable t) {
-                throw new RuntimeException(t);
-            }
+            return InterceptorHelper.getInterceptors(className, PropertiesInterceptorFactory.class.getClassLoader());
         }
     }
     public static List<? extends PropertiesSetInterceptor> getPropertiesSetInterceptors(){
@@ -45,8 +29,7 @@ public class PropertiesInterceptorFactory {
             synchronized (PropertiesInterceptorFactory.class){
                 try{
                     List<String> className = new ArrayList<>(LightbendConfigLoader.get().getStringList("repository.interceptors.properties.set"));
-                    List<PropertiesSetInterceptor> clazz =
-                            (List<PropertiesSetInterceptor>) getInterceptors(className);
+                    List<PropertiesSetInterceptor> clazz = getInterceptors(className);
                     if(clazz.size() == 0) {
                         logger.info("No interceptors for set properties defined, will use default handling");
                     }
@@ -63,8 +46,7 @@ public class PropertiesInterceptorFactory {
             synchronized (PropertiesInterceptorFactory.class){
                 try{
                     List<String> className = new ArrayList<>(LightbendConfigLoader.get().getStringList("repository.interceptors.properties.get"));
-                    List<PropertiesGetInterceptor> clazz =
-                            (List<PropertiesGetInterceptor>) getInterceptors(className);
+                    List<PropertiesGetInterceptor> clazz = getInterceptors(className);
                     if(clazz.size() == 0) {
                         logger.info("No interceptors for get properties defined, will use default handling");
                     }
@@ -88,8 +70,7 @@ public class PropertiesInterceptorFactory {
                             .map(co -> co.toConfig())
                             .map(c -> c.getString("clazz"))
                             .collect(Collectors.toList());
-                    List<NodeServiceInterceptorPermissions> clazz =
-                            (List<NodeServiceInterceptorPermissions>) getInterceptors(classes);
+                    List<NodeServiceInterceptorPermissions> clazz = getInterceptors(classes);
                     if(clazz.size() == 0) {
                         logger.info("No interceptors for get properties defined, will use default handling");
                     }
