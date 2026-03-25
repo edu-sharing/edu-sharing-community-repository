@@ -1,17 +1,18 @@
 package org.edu_sharing.repository.server;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Properties;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.version.VersionService;
+import org.edu_sharing.spring.ApplicationContextFactory;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Properties;
 
 public class MetadataServlet extends HttpServlet {
 
@@ -21,7 +22,9 @@ public class MetadataServlet extends HttpServlet {
 	public static final String FORMAT_LMS = "lms";
 	
 	public static final String[] formats ={FORMAT_REPOSITORY,FORMAT_RENDER,FORMAT_LMS};
-	
+
+	private final VersionService versionService = ApplicationContextFactory.getApplicationContext().getBean(VersionService.class);
+
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		
@@ -54,6 +57,8 @@ public class MetadataServlet extends HttpServlet {
 		ApplicationInfo appInfo =  ApplicationInfoList.getHomeRepository();
 		
 		Properties props = new Properties();
+		props.put("apiversion", versionService.getVersionNoException(VersionService.Type.REPOSITORY));
+
 		if(paramFormat.equals(FORMAT_REPOSITORY)){
 			props.put(ApplicationInfo.KEY_TRUSTEDCLIENT, "true");
 			props.put(ApplicationInfo.KEY_SEARCHABLE, "true");
@@ -134,5 +139,5 @@ public class MetadataServlet extends HttpServlet {
 		props.storeToXML(resp.getOutputStream(), "repository application file for application type "+paramFormat, "UTF-8");
 		
 	}
-	
+
 }
