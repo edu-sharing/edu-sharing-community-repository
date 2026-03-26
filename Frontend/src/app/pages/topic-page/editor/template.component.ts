@@ -266,6 +266,15 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
         this.hasCustomBreadcrumbExtension.set(
             this.topicPageGlobalService.hasCustomBreadcrumbExtension(),
         );
+        // the sidebar should be hidden when it is configured and a touch event is detected
+        // TODO: this only works if a touch event is detected
+        // if (this.topicPageGlobalService.getSidebarMobileHidden()) {
+        //     this.uiService.isTouchSubject
+        //         .pipe(takeUntil(this.destroyed$))
+        //         .subscribe((isTouch: boolean): void => {
+        //             this.sidebarMobileHidden.set(isTouch);
+        //         });
+        // }
         this.sidebarMobileHidden.set(this.topicPageGlobalService.getSidebarMobileHidden());
         // listen to changes in the selected variables and reload the pageVariants, if necessary
         this.topicPageHelperService
