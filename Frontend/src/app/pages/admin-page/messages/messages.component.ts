@@ -126,7 +126,7 @@ export class AdminMessagesComponent implements OnInit {
                 domain: ['test2.de', 'abc.de'],
             } as Context,
         ]);*/
-        if ((await this.configService.get<string>(' admin.wysiwygType', 'TinyMCE')) === 'TinyMCE') {
+        if ((await this.configService.get<string>('admin.wysiwygType', 'TinyMCE')) === 'TinyMCE') {
             this.editorConfig = {
                 base_url: this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce/',
                 branding: false,
