@@ -113,7 +113,7 @@ export class AdminMessagesComponent implements OnInit {
                 'bold italic underline | link | alignleft aligncenter alignright alignjustify | removeformat | code | undo redo',
             language: this.translate.getDefaultLang(),
         };
-        this.editorConfig.base_url = this.platformLocation.getBaseHrefFromDOM() + 'tinymce/';
+        this.editorConfig.base_url = this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce/';
         this.components.set(this.mainNavService.getAvailableScopes());
         this.config.set(await firstValueFrom(this.adminV1Service.getConfig()));
         this.tp.set(
