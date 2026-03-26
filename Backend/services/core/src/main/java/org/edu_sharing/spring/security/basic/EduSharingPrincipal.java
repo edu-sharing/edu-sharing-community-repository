@@ -8,6 +8,7 @@ import org.alfresco.repo.security.authentication.RepositoryAuthenticatedUser;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import net.sf.acegisecurity.providers.dao.User;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -47,7 +48,7 @@ public class EduSharingPrincipal implements UserDetails {
         this.salt = salt;
     }
 
-    public EduSharingPrincipal(RepositoryAuthenticatedUser repo) {
+    public EduSharingPrincipal(User repo) {
 
         this.username = repo.getUsername();
         this.password = repo.getPassword();
@@ -57,8 +58,11 @@ public class EduSharingPrincipal implements UserDetails {
         this.accountNonLocked = repo.isAccountNonLocked();
         this.authorities = map(repo.getAuthorities());
 
-        this.hashIndicator = repo.getHashIndicator();
-        this.salt = repo.getSalt();
+        if(repo instanceof RepositoryAuthenticatedUser){
+            this.hashIndicator =  ((RepositoryAuthenticatedUser)repo).getHashIndicator();
+            this.salt = ((RepositoryAuthenticatedUser)repo).getSalt();
+        }
+
     }
 
     @Override
