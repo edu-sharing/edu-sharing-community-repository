@@ -96,9 +96,18 @@ export class TranslationLoader implements TranslateLoader {
                     return forkJoin(
                         files.map(
                             (f) =>
-                                this.http.get(
-                                    eduSharingApiUrl ? eduSharingApiUrl + '/../..' + f : f,
-                                ) as Observable<Dictionary>,
+                                this.http
+                                    .get(eduSharingApiUrl ? eduSharingApiUrl + '/../..' + f : f)
+                                    .pipe(
+                                        catchError((e) => {
+                                            console.warn(
+                                                'Error loading custom language file',
+                                                f,
+                                                e,
+                                            );
+                                            return of({});
+                                        }),
+                                    ) as Observable<Dictionary>,
                         ),
                     ).pipe(
                         map((value) => {
