@@ -350,7 +350,7 @@
       "VARIANT_OR_STRUCTURE_MISSING": "Es konnte entweder keine Seiten-Variante oder keine Struktur darin gefunden werden.",
       "MISSING_IN_PAGE_CONFIG": "Die Seiten-Konfiguration enthält keine Varianten."
     },
-    "NO_SEARCH_RESULTS": "Es konnen keine Suche-Ergebnisse in den Abschnitten gefunden werden.",
+    "NO_SEARCH_RESULTS": "Es konnten keine Suche-Ergebnisse in den Abschnitten gefunden werden.",
     "SAVE_CONFIG_MESSAGE": "Deine Änderungen werden gespeichert.",
     "SAVE_CONFIG_ERROR_ACTION": "Seite neuladen",
     "SAVE_CONFIG_ERROR_MESSAGE": "Beim Laden einer Ressource ist ein Fehler aufgetreten. Bitte laden Sie die Seite neu.",
