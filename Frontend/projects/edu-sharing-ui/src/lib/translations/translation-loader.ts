@@ -100,6 +100,8 @@ export class TranslationLoader implements TranslateLoader {
                                     .get(eduSharingApiUrl ? eduSharingApiUrl + '/../..' + f : f)
                                     .pipe(
                                         catchError((e) => {
+                                            // prevent toast, if it is scoped as api request
+                                            e.preventDefault?.();
                                             console.warn(
                                                 'Error loading custom language file',
                                                 f,
