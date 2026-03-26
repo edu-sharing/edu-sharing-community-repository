@@ -273,7 +273,21 @@
         </es-multi-line-label>
       </mat-radio-button>
     </mat-radio-group>
-    <label class="mat-heading-5">
+
+    <mat-form-field *ngIf="!editorConfig">
+      <mat-label>
+        {{ 'ADMIN.MESSAGES.MESSAGE' | translate }}
+      </mat-label>
+      <textarea
+        matInput
+        cdkTextareaAutosize
+        [(ngModel)]="message"
+        [ngModelOptions]="{ standalone: true }"
+        cdkAutosizeMinRows="3"
+        cdkAutosizeMaxRows="5"
+      ></textarea>
+    </mat-form-field>
+    <label class="mat-heading-5" *ngIf="editorConfig">
       {{ 'ADMIN.MESSAGES.MESSAGE' | translate }}
     </label>
     <editor
