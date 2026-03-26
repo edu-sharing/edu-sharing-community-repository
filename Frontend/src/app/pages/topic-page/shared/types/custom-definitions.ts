@@ -56,7 +56,6 @@ export const DEFAULT_AI_CHAT_COMPLETION_CONFIG_ID: string = 'topic_page_ai_chat_
 export const DEFAULT_AI_IMAGE_CREATE_CONFIG_ID: string = 'topic_page_ai_create_image';
 export const DEFAULT_AI_CLEAR_CACHE_CONFIG_ID: string = 'topic_page_ai_clear_cache';
 export const DEFAULT_AI_TEXT_WIDGET_CONFIG_ID: string = 'topic_page_ai_text_widget';
-export const DEFAULT_CONTENT_TEASER_WIDGET_CONFIG_ID: string = 'topic_page_ai_content_teaser';
 export const DEFAULT_TOPIC_HEADER_DESCRIPTION_WIDGET_CONFIG_ID: string =
     'topic_page_ai_topic_header_description';
 export const DEFAULT_TOPIC_HEADER_IMAGE_WIDGET_CONFIG_ID: string =
