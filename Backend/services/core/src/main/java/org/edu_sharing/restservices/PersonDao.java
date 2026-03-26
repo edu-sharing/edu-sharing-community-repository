@@ -4,6 +4,7 @@ import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import jakarta.servlet.http.HttpSession;
+import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
@@ -11,7 +12,6 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
@@ -39,8 +39,9 @@ import org.edu_sharing.service.authority.QRCode2Fa;
 import org.edu_sharing.service.dashboard.DashboardConfigService;
 import org.edu_sharing.service.dashboard.DashboardConfigServiceFactory;
 import org.edu_sharing.service.dashboard.models.DashboardShortcut;
-import org.edu_sharing.service.dataprotection.FeatureInfoDataProtectionService;
 import org.edu_sharing.service.dataprotection.DataProtectionService;
+import org.edu_sharing.service.dataprotection.FeatureInfoDataProtectionService;
+import org.edu_sharing.service.ldap.LDAPService;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -56,6 +57,7 @@ import org.edu_sharing.util.CheckedCast;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -176,6 +178,8 @@ public class PersonDao {
     private DataProtectionService dataProtectionService;
     private final UserCache userCache;
 
+    private LDAPService ldapService;
+
 
     public PersonDao(RepositoryDao repoDao, String userName) throws DAOException {
 
@@ -202,6 +206,10 @@ public class PersonDao {
 
             dataProtectionService = ApplicationContextFactory.getApplicationContext().getBean(DataProtectionService.class);
             userCache = AlfAppContextGate.getApplicationContext().getBean(UserCache.class);
+
+            try {
+                ldapService = ApplicationContextFactory.getApplicationContext().getBean(LDAPService.class);
+            }catch (NoSuchBeanDefinitionException e){}
 
         } catch (Throwable t) {
             throw DAOException.mapping(t);
@@ -311,11 +319,23 @@ public class PersonDao {
                 throw new AccessDeniedException("It's not allowed to change password of external managed users. Please contact your system administrator.");
             }
 
-            if (oldPassword == null) {
-                ((MCAlfrescoAPIClient) this.baseClient).setUserPassword(getUserName(), newPassword);
-            } else {
-                ((MCAlfrescoAPIClient) this.baseClient).updateUserPassword(getUserName(), oldPassword, newPassword);
+            boolean ldapUser = ldapService != null && ldapService.userExists(getUserName());
+
+            if(ldapUser) {
+                if (oldPassword != null) {
+                    if(!ldapService.checkCredentials(getUserName(), oldPassword)){
+                        throw new AuthenticationException("Invalid old password.");
+                    }
+                }
+                ldapService.setPassword(getUserName(), newPassword);
+            }else{
+                if (oldPassword == null) {
+                    ((MCAlfrescoAPIClient) this.baseClient).setUserPassword(getUserName(), newPassword);
+                } else {
+                    ((MCAlfrescoAPIClient) this.baseClient).updateUserPassword(getUserName(), oldPassword, newPassword);
+                }
             }
+
         } catch (Throwable t) {
 
             throw DAOException.mapping(t);
