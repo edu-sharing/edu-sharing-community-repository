@@ -5,7 +5,6 @@ import {
     DEFAULT_AI_CONFIG_ID,
     DEFAULT_AI_IMAGE_CREATE_CONFIG_ID,
     DEFAULT_AI_TEXT_WIDGET_CONFIG_ID,
-    DEFAULT_CONTENT_TEASER_WIDGET_CONFIG_ID,
     DEFAULT_TOPIC_HEADER_DESCRIPTION_WIDGET_CONFIG_ID,
     DEFAULT_TOPIC_HEADER_IMAGE_WIDGET_CONFIG_ID,
     DEFAULT_TOPIC_HEADER_TEXT_WIDGET_CONFIG_ID,
@@ -23,8 +22,6 @@ export class GlobalWidgetConfigService {
     private _defaultTopicHeaderDescriptionWidgetNodeId: string;
     private _defaultTopicHeaderImageWidgetNodeId: string;
     private _defaultTopicHeaderTextWidgetNodeId: string;
-    private _defaultContentTeaserWidgetNodeId: string;
-    private _persistFilters: boolean;
 
     constructor(
         @Optional() @Inject('DEFAULT_AI_CONFIG_ID') defaultAiConfigId?: string,
@@ -49,10 +46,6 @@ export class GlobalWidgetConfigService {
         @Optional()
         @Inject('DEFAULT_TOPIC_HEADER_TEXT_WIDGET_CONFIG_ID')
         defaultTopicHeaderTextWidgetNodeId?: string,
-        @Optional()
-        @Inject('DEFAULT_CONTENT_TEASER_WIDGET_CONFIG_ID')
-        defaultContentTeaserWidgetNodeId?: string,
-        @Optional() @Inject('PERSIST_FILTERS') persistFilters?: boolean,
     ) {
         // IDs for the global AI configs
         this._defaultAiConfigId = defaultAiConfigId || DEFAULT_AI_CONFIG_ID;
@@ -72,9 +65,6 @@ export class GlobalWidgetConfigService {
             defaultTopicHeaderImageWidgetNodeId || DEFAULT_TOPIC_HEADER_IMAGE_WIDGET_CONFIG_ID;
         this._defaultTopicHeaderTextWidgetNodeId =
             defaultTopicHeaderTextWidgetNodeId || DEFAULT_TOPIC_HEADER_TEXT_WIDGET_CONFIG_ID;
-        this._defaultContentTeaserWidgetNodeId =
-            defaultContentTeaserWidgetNodeId || DEFAULT_CONTENT_TEASER_WIDGET_CONFIG_ID;
-        this._persistFilters = persistFilters ?? true;
     }
 
     /**
@@ -195,33 +185,5 @@ export class GlobalWidgetConfigService {
      */
     set defaultTopicHeaderTextWidgetNodeId(value: string) {
         this._defaultTopicHeaderTextWidgetNodeId = value;
-    }
-
-    /**
-     * Returns the default node ID of the user configurable widget.
-     */
-    get defaultContentTeaserWidgetNodeId(): string {
-        return this._defaultContentTeaserWidgetNodeId;
-    }
-
-    /**
-     * Sets the default node ID of the user configurable widget.
-     */
-    set defaultContentTeaserWidgetNodeId(value: string) {
-        this._defaultContentTeaserWidgetNodeId = value;
-    }
-
-    /**
-     * Returns the persist filters flag.
-     */
-    get persistFilters(): boolean {
-        return this._persistFilters;
-    }
-
-    /**
-     * Sets the persist filters flag.
-     */
-    set persistFilters(value: boolean) {
-        this._persistFilters = value;
     }
 }
