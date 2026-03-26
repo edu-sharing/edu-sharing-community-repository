@@ -57,6 +57,7 @@ import { GenericWidgetGlobalService } from '../../generic-widget/generic-widget-
 
 export interface DisplayTypeComponentInterface {
     // inputs
+    contextNodeId: string;
     criteria: MdsQueryCriteria[];
     selectedNode: Node;
     // outputs
@@ -182,8 +183,9 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
                                 componentClass,
                                 this.customTypeElement.nativeElement,
                                 {
-                                    selectedNode: this.selectedNode(),
+                                    contextNodeId: this.contextNodeId,
                                     criteria: this.criteria,
+                                    selectedNode: this.selectedNode(),
                                 } as unknown as Partial<DisplayTypeComponentInterface>,
                                 { replace: false },
                             ).instance;
