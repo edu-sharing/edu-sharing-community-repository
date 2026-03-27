@@ -33,6 +33,7 @@ import org.edu_sharing.service.dashboard.models.DashboardShortcut;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.password.ValidPassword;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.register.RegisterServiceFactory;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -151,7 +152,12 @@ public class IamApi {
             String authType = context.getAuthType();
             if (person.equals("-me-") || person.equals(username)) {
                 if (authType != null && !authType.equals(CCConstants.AUTH_TYPE_DEFAULT)) {
-                    response.setEditProfile(false);
+                    if(RegisterServiceFactory.getConfig().hasPath("ldap.authMethodAlfName")) {
+                        String alfName = RegisterServiceFactory.getConfig().getString("ldap.authMethodAlfName");
+                        response.setEditProfile(Objects.equals(CCConstants.AUTH_TYPE + alfName, authType));
+                    } else {
+                        response.setEditProfile(false);
+                    }
                 } else {
                     response.setEditProfile(true);
                 }
