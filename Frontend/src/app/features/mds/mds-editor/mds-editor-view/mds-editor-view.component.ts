@@ -212,7 +212,9 @@ export class MdsEditorViewComponent
         // structure if left unclosed.
         const html = closeTags(
             this.view.html,
-            (tagName) => this.knownWidgetTags.includes(tagName) || tagName.includes(':'),
+            (tagName) =>
+                !!this.knownWidgetTags.find((k) => k.toLowerCase() === tagName.toLowerCase()) ||
+                tagName.includes(':'),
         );
         return this.sanitizer.bypassSecurityTrustHtml(html);
     }

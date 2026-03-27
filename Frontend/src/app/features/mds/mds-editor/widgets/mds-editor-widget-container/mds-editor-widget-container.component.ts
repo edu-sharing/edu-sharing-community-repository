@@ -210,6 +210,10 @@ export class MdsEditorWidgetContainerComponent
     }
 
     private registerIsHidden(): void {
+        if (!this.widget) {
+            this.isHidden = false;
+            return;
+        }
         const shouldShowFactors = [this.widget.meetsDynamicCondition];
         if (
             this.widget.definition.isExtended &&
