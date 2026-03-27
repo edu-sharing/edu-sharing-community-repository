@@ -28,6 +28,8 @@ import {
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
     Scope,
+    SearchHelperService,
+    Values,
 } from 'ngx-edu-sharing-ui';
 import { firstValueFrom, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
@@ -84,13 +86,20 @@ export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
     ];
     selectedOption: string;
 
+    // mds-editor-wrapper
+    searchFilters: Values;
+
     // search-related variables
     private searchSubject: Subject<string> = new Subject<string>();
     searchValue: string;
 
     // node-entries-wrapper
     columns = {
-        Default: [new ListItem('NODE', RestConstants.LOM_PROP_TITLE)],
+        Default: [
+            new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
+            new ListItem('NODE', 'ccm:page_variant_profiling_target_group'),
+            new ListItem('NODE', 'ccm:educationalcontext'),
+        ],
     };
     dataSource: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
     sortActive: string;
@@ -107,7 +116,8 @@ export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
     @ViewChild('nodeEntriesWrapper') nodeEntries: NodeEntriesWrapperComponent<Node>;
 
     constructor(
-        private genericWidgetGlobalService: GenericWidgetGlobalService,
+        public genericWidgetGlobalService: GenericWidgetGlobalService,
+        private searchHelperService: SearchHelperService,
         private searchService: SearchService,
     ) {
         // setup search with debouncing
@@ -163,6 +173,16 @@ export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
     }
 
     /**
+     * Sets the search filters to a given value.
+     *
+     * @param filters
+     */
+    onSearchFiltersChange(filters: Values): void {
+        this.searchFilters = filters;
+        void this.updateList();
+    }
+
+    /**
      * Handles the sorting of the list of page variants.
      *
      * @param event
@@ -208,6 +228,9 @@ export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
                     values: [this.searchValue.trim()],
                 });
             }
+            if (Object.keys(this.searchFilters)?.length) {
+                criteria.push(...this.searchHelperService.convertCritieria(this.searchFilters, []));
+            }
             const searchResult: SearchResults = await firstValueFrom(
                 this.searchService.search({
                     query: DEFAULT_PAGE_VARIANT_QUERY_ID,
@@ -232,6 +255,25 @@ export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
                 nodes = nodes.filter((n) =>
                     n.title.toLowerCase().includes(this.searchValue.toLowerCase()),
                 );
+            }
+            // manual properties filter
+            if (Object.keys(this.searchFilters)?.length) {
+                const propertyFilters = Object.fromEntries(
+                    Object.entries(this.searchFilters).filter(
+                        ([, value]) => value && value.length > 0,
+                    ),
+                );
+                if (Object.keys(propertyFilters).length) {
+                    nodes = nodes.filter((n) =>
+                        Object.entries(propertyFilters).every(([property, allowedValues]) => {
+                            const nodeValues: string[] = n.properties?.[property];
+                            if (!nodeValues) {
+                                return false;
+                            }
+                            return nodeValues.some((v) => (allowedValues as string[]).includes(v));
+                        }),
+                    );
+                }
             }
             // manual sorting
             if (this.sortActive) {
@@ -297,6 +339,7 @@ export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
     }
 
     protected readonly DisplayType = NodeEntriesDisplayType;
+    protected readonly HOME_REPOSITORY = HOME_REPOSITORY;
     protected readonly InteractionType = InteractionType;
     protected readonly Scope = Scope;
 }

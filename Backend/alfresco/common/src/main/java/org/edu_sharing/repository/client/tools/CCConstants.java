@@ -1525,6 +1525,14 @@ public class CCConstants {
     public static final String CCM_PROP_USAGE_RESSOURCEID = "{http://www.campuscontent.de/model/1.0}usageressourceid";
     public static final String CCM_PROP_USAGE_GUID = "{http://www.campuscontent.de/model/1.0}usageguid";
 
+    /**
+     * Touch
+     */
+    public final static String CCM_PROP_TOUCH_TIMESTAMP = "{http://www.campuscontent.de/model/1.0}touchTimestamp";
+
+
+
+
     public static final String CCM_ASSOC_USAGEASPECT_USAGES = "{http://www.campuscontent.de/model/1.0}usages";
 
     public static final String CCM_ASSOC_CHILDIO = "{http://www.campuscontent.de/model/1.0}childio";

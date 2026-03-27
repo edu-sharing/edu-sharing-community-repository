@@ -3,25 +3,12 @@ package org.edu_sharing.service.suggestion;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.NotImplementedException;
 import org.edu_sharing.restservices.suggestions.v1.dto.CreateSuggestionRequestDTO;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.data.domain.Limit;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
 public class DefaultSuggestionService implements SuggestionService {
-
-    @Override
-    public List<PropertySuggestion> getTrackedData(@NotNull Date from, Date to, Limit limit) {
-        return List.of();
-    }
-
-    @Override
-    public List<PropertySuggestion> getDeletedTrackedData(@NotNull Date from, Date to, Limit limit) {
-        return List.of();
-    }
 
     @Override
     public List<PropertySuggestion> createSuggestion(String nodeId, SuggestionType type, String version, List<CreateSuggestionRequestDTO> suggestions) {

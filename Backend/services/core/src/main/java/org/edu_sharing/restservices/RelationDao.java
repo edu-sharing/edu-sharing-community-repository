@@ -4,16 +4,14 @@ import org.edu_sharing.restservices.relation.v1.model.CreateRelationRequest;
 import org.edu_sharing.restservices.relation.v1.model.NodeRelationDataEvaluation;
 import org.edu_sharing.restservices.relation.v1.model.UpdateRelationRequest;
 import org.edu_sharing.restservices.relation.v1.model.NodeRelationData;
+import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.User;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.relations.*;
 import org.edu_sharing.util.CheckedFunction;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.data.domain.Limit;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -49,6 +47,10 @@ public class RelationDao {
                 .toList();
     }
 
+    public List<RelationData> getRawRelations(String sourceNodeId) {
+        return this.relationService.getRelations(sourceNodeId);
+    }
+
     public List<NodeRelationData> traceRelations(String sourceNodeId, Integer maxDepth) {
         List<org.edu_sharing.service.relations.RelationData> relations = this.nodeRelationTraceService.traceRelations(sourceNodeId, maxDepth);
         return relations.stream().map(CheckedFunction.wrap(this::mapRelationData, null))
@@ -60,10 +62,21 @@ public class RelationDao {
         User createdBy = Objects.nonNull(x.getCreatedBy()) ? new User(authorityService.getUser(x.getCreatedBy())) : null;
         User modifiedBy = Objects.nonNull(x.getModifiedBy()) ? new User(authorityService.getUser(x.getModifiedBy())) : null;
 
+        Node fromNode =NodeDao.getAnyExistingNode(
+                repoDao,
+                Arrays.asList(NodeDao.ExistingMode.IfNotExists, NodeDao.ExistingMode.IfNoReadPermissions),
+                x.getFromNode())
+                .asNode();
+
+        Node toNode = NodeDao.getAnyExistingNode(repoDao,
+                Arrays.asList(NodeDao.ExistingMode.IfNotExists, NodeDao.ExistingMode.IfNoReadPermissions),
+                x.getToNode())
+                .asNode();
+
         return NodeRelationData.builder()
                 // use getAnyExistingNode in case the original id it refers to has been deleted
-                .fromNode(NodeDao.getAnyExistingNode(repoDao, Arrays.asList(NodeDao.ExistingMode.IfNotExists, NodeDao.ExistingMode.IfNoReadPermissions), x.getFromNode()).asNode())
-                .toNode(NodeDao.getAnyExistingNode(repoDao, Arrays.asList(NodeDao.ExistingMode.IfNotExists, NodeDao.ExistingMode.IfNoReadPermissions), x.getToNode()).asNode())
+                .fromNode(fromNode)
+                .toNode(toNode)
                 .createdBy(createdBy)
                 .createdAt(x.getCreatedAt())
                 .modifiedBy(modifiedBy)
@@ -87,13 +100,5 @@ public class RelationDao {
 
     public NodeRelationData updateRelation(UpdateRelationRequest request) {
         return mapRelationData(this.relationService.updateRelation(request));
-    }
-
-    public List<org.edu_sharing.service.relations.RelationData> getTrackedRelation(@NotNull Date after, Date to, Integer maxItems) {
-        return relationService.getTrackedData(after, to, maxItems == null ? Limit.unlimited() : Limit.of(maxItems));
-    }
-
-    public List<org.edu_sharing.service.relations.RelationData> getDeletedTrackedData(@NotNull Date after, Date to, Integer maxItems) {
-        return relationService.getDeletedTrackedData(after, to,  maxItems == null ? Limit.unlimited() : Limit.of(maxItems));
     }
 }

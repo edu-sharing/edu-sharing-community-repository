@@ -448,4 +448,9 @@ public class NodeServiceAdapter implements NodeService {
 	public void revokeNode(String storeProtocol, String storeId, String id, RevokeDetails details) throws Throwable {
 
 	}
+
+	@Override
+	public void touch(String nodeId, boolean silentUpdate) {
+
+	}
 }

@@ -121,7 +121,7 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
     public void addToSpringSecurityContext(HttpSession session) {
             net.sf.acegisecurity.Authentication acegiAuth = AuthenticationUtil.getFullAuthentication();
             if(acegiAuth == null) return;
-            RepositoryAuthenticatedUser alfrescoPrincipal = (RepositoryAuthenticatedUser) acegiAuth.getPrincipal();
+            net.sf.acegisecurity.providers.dao.User alfrescoPrincipal = (net.sf.acegisecurity.providers.dao.User) acegiAuth.getPrincipal();
             if (SecurityContextHolder.getContext().getAuthentication() == null
                     || SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken
                     || !SecurityContextHolder.getContext().getAuthentication().getName().equals(alfrescoPrincipal.getUsername())

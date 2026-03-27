@@ -368,6 +368,8 @@
         "TEMPLATE": "Template"
       },
       "SEARCH_PLACEHOLDER": "Search topic page templates",
+      "SEARCH": "Search",
+      "EMPTY": "No templates could be found.",
       "PENDING_MESSAGE": "A new page variant is being created and loaded.",
       "SUCCESS_MESSAGE": "Topic page copy created successfully",
       "COPY_SUFFIX": "Copy"

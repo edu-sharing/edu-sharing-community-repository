@@ -368,6 +368,8 @@
         "TEMPLATE": "Vorlage"
       },
       "SEARCH_PLACEHOLDER": "Durchsuche Themenseiten-Vorlagen",
+      "SEARCH": "Suche",
+      "EMPTY": "Es konnten keine Vorlagen gefunden werden.",
       "PENDING_MESSAGE": "Eine neue Seiten-Variante wird erstellt und geladen.",
       "SUCCESS_MESSAGE": "Kopie der Themenseite erfolgreich erstellt",
       "COPY_SUFFIX": "Kopie"

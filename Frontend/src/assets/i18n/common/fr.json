@@ -261,6 +261,7 @@
     "ccm:lifecyclecontributer_authorFN": "auteur-trice",
     "ccm:wf_status": "statut",
     "ccm:eaf_productionyear": "Année de production",
+    "ccm:page_variant_profiling_target_group": "Groupe cible",
     "counts": {
       "OVERALL": "Somme",
       "VIEW_MATERIAL": "Accès",

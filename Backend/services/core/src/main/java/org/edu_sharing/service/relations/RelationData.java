@@ -20,9 +20,6 @@ public interface RelationData {
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     Date getModifiedAt();
     @JsonProperty(required = true)
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    Date getTimestamp();
-    @JsonProperty(required = true)
     OutputRelationType getType();
     @JsonProperty(required = true)
     OutputRelationType getReverseType();

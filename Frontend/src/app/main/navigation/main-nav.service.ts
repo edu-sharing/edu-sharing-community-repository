@@ -140,6 +140,9 @@ export class MainNavService {
     registerCustomTemplateSlot(slot: TemplateSlot, template: TemplateRef<any>) {
         this.customTemplates[slot] = template;
     }
+    unregisterCustomTemplateSlot(slot: TemplateSlot) {
+        delete this.customTemplates[slot];
+    }
     getCustomTemplateSlot(slot: TemplateSlot) {
         return this.customTemplates[slot];
     }

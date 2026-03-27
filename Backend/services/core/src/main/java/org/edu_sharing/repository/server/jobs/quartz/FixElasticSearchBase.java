@@ -26,7 +26,6 @@ public abstract class FixElasticSearchBase extends AbstractJobMapAnnotationParam
     protected final ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
     protected final ServiceRegistry serviceRegistry = applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY, ServiceRegistry.class);
     protected final BehaviourFilter policyBehaviourFilter = applicationContext.getBean("policyBehaviourFilter", BehaviourFilter.class);
-    protected final NodeService nodeService = serviceRegistry.getNodeService();
     protected final SearchServiceElastic searchServiceElastic = ApplicationContextFactory.getApplicationContext().getBean(SearchServiceElastic.class);
 
     static int pageSize = 1000;

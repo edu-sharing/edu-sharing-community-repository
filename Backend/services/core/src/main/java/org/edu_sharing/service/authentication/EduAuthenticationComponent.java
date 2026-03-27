@@ -123,6 +123,7 @@ public class EduAuthenticationComponent {
             if (alfAuthService instanceof SubsystemChainingAuthenticationService scAuthService) {
                 scAuthService.setLoginTimestampToNow(username, CCConstants.PROP_USER_ESFIRSTLOGIN);
                 scAuthService.setLoginTimestampToNow(username, CCConstants.PROP_USER_ESLASTLOGIN);
+                SubsystemChainingAuthenticationService.callLoginInterceptors(repoUsername);
             }
         }
         return username;
