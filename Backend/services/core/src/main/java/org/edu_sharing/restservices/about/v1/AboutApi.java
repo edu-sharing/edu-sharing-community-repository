@@ -1,7 +1,6 @@
 
 package org.edu_sharing.restservices.about.v1;
 
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -9,7 +8,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.log4j.Logger;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import lombok.extern.slf4j.Slf4j;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -22,16 +25,12 @@ import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.monitoring.Monitoring;
 import org.edu_sharing.service.version.VersionService;
 import org.edu_sharing.spring.ApplicationContextFactory;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Path("/_about")
 @Tag(name = "ABOUT")
 @SecurityRequirements
@@ -39,7 +38,6 @@ import java.util.Map;
 @Produces({"application/json"})
 public class AboutApi {
 
-    private static Logger logger = Logger.getLogger(AboutApi.class);
 
     @Autowired
     private VersionService versionService;
@@ -69,7 +67,7 @@ public class AboutApi {
             version.setRepository(versionService.getVersionNoException(VersionService.Type.REPOSITORY));
             version.setRenderservice(versionService.getVersionNoException(VersionService.Type.RENDERSERVICE));
 
-            logger.debug("Request via domain " + org.edu_sharing.alfresco.repository.server.authentication.Context.getCurrentInstance().getRequest().getServerName());
+            log.debug("Request via domain {}", org.edu_sharing.alfresco.repository.server.authentication.Context.getCurrentInstance().getRequest().getServerName());
 
             about.setVersion(version);
 
@@ -115,7 +113,7 @@ public class AboutApi {
 
         } catch (Throwable t) {
 
-            logger.error(t.getMessage(), t);
+            log.error(t.getMessage(), t);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
         }
 
@@ -150,7 +148,7 @@ public class AboutApi {
             } else {
                 result = new Monitoring().alfrescoSearchEngineCheckTimeout(timeout);
             }
-            logger.debug("result:" + result);
+            log.debug("result:{}", result);
             //check if it is a node id?
             //NodeServiceFactory.getLocalService().exists(protocol, store, result)
 
@@ -161,7 +159,7 @@ public class AboutApi {
             return Response.ok().build();
 
         } catch (Throwable t) {
-            logger.debug(t.getMessage(), t);
+            log.debug(t.getMessage(), t);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
 
@@ -188,7 +186,7 @@ public class AboutApi {
             }
             return Response.ok().build();
         } catch (Throwable t) {
-            logger.debug(t.getMessage(), t);
+            log.debug(t.getMessage(), t);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -212,7 +210,7 @@ public class AboutApi {
             }
             return Response.ok().build();
         } catch (Throwable t) {
-            logger.debug(t.getMessage(), t);
+            log.debug(t.getMessage(), t);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
