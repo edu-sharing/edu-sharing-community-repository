@@ -844,7 +844,7 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
         // emit the visible nodes
         const emitNodes = (mappingNodes: Node[]): void => {
             const visibleNodes: Node[] = mappingNodes.filter(
-                (n) => !blacklistedIds.includes(n.ref.id),
+                (n) => n?.ref?.id && !blacklistedIds.includes(n.ref.id),
             );
             this.visibleNodesChanged.emit(visibleNodes);
         };
