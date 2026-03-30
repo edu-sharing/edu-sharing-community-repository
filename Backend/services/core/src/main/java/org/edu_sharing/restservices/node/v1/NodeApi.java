@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.NodeRefVersion;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LRMITool;
 import org.edu_sharing.restservices.*;
@@ -452,6 +453,10 @@ public class NodeApi  {
 			response.setJwt(nodeDao.getJWT());
 			response.setSignedNode(encodedSignedNode);
 			response.setSignature(encodedSignature);
+			ApplicationInfo rs = ApplicationInfoList.getRenderingService2();
+			if (rs != null) {
+				response.setRenderingBaseUrl(rs.getContentUrl());
+			}
 
 			return Response.status(Response.Status.OK).entity(response).build();
 
