@@ -448,7 +448,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
             if (!widget.isMultivalue() && values.size() > 1)
                 throw new IllegalArgumentException("Multiple values given for a non-multivalue widget: ID " + id + ", widget type " + widget.getType());
             if (widget.isMultivalue()) {
-                toSafe.put(id, values.isEmpty() ? null : new ArrayList<>(values));
+                if(values.size() <= 1) {
+                    toSafe.put(id, values.isEmpty() ? null : values.get(0));
+                } else {
+                    toSafe.put(id, new ArrayList<>(values));
+                }
             } else {
                 toSafe.put(id, values.isEmpty() ? null : values.get(0));
             }
@@ -519,7 +523,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         return converted;
     }
 
-    //transient Logger logger = Logger.getLogger(MetadataWidget.class);
+//transient Logger logger = Logger.getLogger(MetadataWidget.class);
 
     private static Iterable<String> getAllSafeProps() {
         List<String> safe = new ArrayList<>();
