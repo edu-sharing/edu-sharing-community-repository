@@ -1,6 +1,8 @@
 export class RestConstants {
     public static USERHOME = '-userhome-';
     public static DUPLICATE_NODE_RESPONSE = 409;
+    // use not the maximum int value to prevent overflows in repository
+    public static COUNT_UNLIMITED = 1247483647;
 
     public static DEFAULT_COLLECTION_COLORS: string[] = [
         '#975B5D',

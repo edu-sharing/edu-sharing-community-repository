@@ -3,8 +3,10 @@ import { firstValueFrom } from 'rxjs';
 import { RenderDataRequestWithToken, RSApiConfiguration } from 'ngx-rendering-service-api';
 import {
     AboutService,
+    ConfigService,
     HOME_REPOSITORY,
     Node,
+    NodeService,
     NodeServiceUnwrapped,
     RestConstants,
 } from 'ngx-edu-sharing-api';
@@ -22,6 +24,8 @@ export class RenderHelperService {
     constructor(
         private injector: Injector,
         private aboutService: AboutService,
+        private configService: ConfigService,
+        private nodeService: NodeService,
         private nodeApiUnwrapped: NodeServiceUnwrapped,
         private configuration: EduSharingUiConfiguration,
         @Optional() private optionsHelperDataService: OptionsHelperDataService,
@@ -37,10 +41,13 @@ export class RenderHelperService {
             this.nodeApiUnwrapped.getMetadataSigned({
                 repository: repository || HOME_REPOSITORY,
                 node: nodeId,
+                version: version || RestConstants.NODE_VERSION_CURRENT,
             }),
         );
-        const node = securedNode.node;
-        console.info(this.injector.get(OptionsHelperDataService));
+        let node = securedNode.node;
+        if (node.aspects?.includes(RestConstants.CCM_ASPECT_IO_CHILDOBJECT)) {
+            node = await this.inheritProps(node);
+        }
         this.optionsHelperDataService?.setData({
             scope: Scope.Render,
             activeObjects: [node],
@@ -129,5 +136,28 @@ export class RenderHelperService {
         for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
 
         return new TextDecoder('utf-8', { fatal: false }).decode(bytes);
+    }
+
+    private async inheritProps(node: Node) {
+        try {
+            const parent = await firstValueFrom(
+                this.nodeService.getNode(node.parent.id, { repository: node.parent.repo }),
+            );
+            const config = await firstValueFrom(
+                this.configService.observeBackendConfig({ forceUpdate: false }),
+            );
+            Object.entries(parent.properties).forEach(([k, v]) => {
+                // @TODO: This might should be at a better location, i.e. in the widget definition of mds?
+                if (config.repository?.childobjects?.ignoredInheritMetadata?.includes(k)) {
+                    return;
+                }
+                if (!node.properties[k]) {
+                    node.properties[k] = v;
+                }
+            });
+        } catch (e) {
+            e.preventDefault();
+        }
+        return node;
     }
 }
