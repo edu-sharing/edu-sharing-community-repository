@@ -517,6 +517,17 @@
         },
         "type": "object"
       },
+      "ChildobjectsConfig": {
+        "properties": {
+          "ignoredInheritMetadata": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "Collection": {
         "properties": {
           "authorFreetext": {
@@ -5978,6 +5989,14 @@
         },
         "type": "object"
       },
+      "RepositoryConfigBackend": {
+        "properties": {
+          "childobjects": {
+            "$ref": "#/components/schemas/ChildobjectsConfig"
+          }
+        },
+        "type": "object"
+      },
       "RepositoryMessage": {
         "properties": {
           "components": {
@@ -8458,6 +8477,9 @@
       },
       "ValuesBackend": {
         "properties": {
+          "repository": {
+            "$ref": "#/components/schemas/RepositoryConfigBackend"
+          },
           "security": {
             "$ref": "#/components/schemas/SecurityConfig"
           }

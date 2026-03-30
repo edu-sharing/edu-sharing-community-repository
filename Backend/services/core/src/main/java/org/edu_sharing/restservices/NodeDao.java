@@ -2862,7 +2862,7 @@ public class NodeDao {
                     NodeServiceHelper.getProperties(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentRef));
             // ignore some technical properties, like mimetypes etc. (configured via lightbend)
             for (String prop : LightbendConfigLoader.get().getStringList("repository.childobjects.ignoredInheritMetadata")) {
-                propsParent.remove(prop);
+                propsParent.remove(CCConstants.getValidGlobalName(prop));
             }
             // override it with the props from the child
             for (Map.Entry<String, Object> entry : propsChild.entrySet()) {
