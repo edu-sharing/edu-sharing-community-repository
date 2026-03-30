@@ -2,4 +2,6 @@
   *ngIf="nodeId() && version()"
   [nodeId]="nodeId()"
   [version]="version()"
+  [childId]="childId()"
+  (childIdChange)="setChildId($event)"
 ></es-render-wrapper-component>

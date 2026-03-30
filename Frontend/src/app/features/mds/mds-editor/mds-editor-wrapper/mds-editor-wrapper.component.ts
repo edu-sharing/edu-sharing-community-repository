@@ -52,6 +52,11 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
     @Input() toastOnSave = 'WORKSPACE.EDITOR.UPDATED';
     @Input() mode: 'search' | 'default' = 'default';
     @Input() nodes: Node[];
+    /**
+     * only if param nodes is used: Shall the metadata for all nodes be re-fetched from the api
+     * when false, the given node properties are already considered valid/recent
+     */
+    @Input() nodeRefetch = true;
     @Input() graphqlIds: string[];
     @Input() parentNode: Node;
     @Input() priority = 1;
@@ -277,6 +282,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
         try {
             const config = {
                 groupId: this.groupId,
+                refetch: this.nodeRefetch,
                 bulkBehavior: this.bulkBehaviour,
                 editorMode: this.editorMode ?? 'nodes',
             };

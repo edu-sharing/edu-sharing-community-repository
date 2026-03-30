@@ -171,6 +171,13 @@
           },
           "statistics": {
             "$ref": "#/components/schemas/Statistics"
+          },
+          "wysiwygType": {
+            "enum": [
+              "Textarea",
+              "TinyMCE"
+            ],
+            "type": "string"
           }
         },
         "type": "object"
@@ -513,6 +520,17 @@
           },
           "url": {
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ChildobjectsConfig": {
+        "properties": {
+          "ignoredInheritMetadata": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           }
         },
         "type": "object"
@@ -5978,6 +5996,14 @@
         },
         "type": "object"
       },
+      "RepositoryConfigBackend": {
+        "properties": {
+          "childobjects": {
+            "$ref": "#/components/schemas/ChildobjectsConfig"
+          }
+        },
+        "type": "object"
+      },
       "RepositoryMessage": {
         "properties": {
           "components": {
@@ -6985,6 +7011,9 @@
           },
           "node": {
             "$ref": "#/components/schemas/Node"
+          },
+          "renderingBaseUrl": {
+            "type": "string"
           },
           "signature": {
             "type": "string"
@@ -8458,6 +8487,9 @@
       },
       "ValuesBackend": {
         "properties": {
+          "repository": {
+            "$ref": "#/components/schemas/RepositoryConfigBackend"
+          },
           "security": {
             "$ref": "#/components/schemas/SecurityConfig"
           }
@@ -8686,6 +8718,166 @@
         },
         "security": [],
         "summary": "Discover the API.",
+        "tags": [
+          "ABOUT"
+        ]
+      }
+    },
+    "/_about/health/liveness": {
+      "get": {
+        "description": "returns http status 200 when all relevant internal state are alive and ok",
+        "operationId": "liveness",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "timeoutSeconds",
+            "schema": {
+              "default": 10,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {}
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "security": [],
+        "summary": "liveness of repo services",
+        "tags": [
+          "ABOUT"
+        ]
+      }
+    },
+    "/_about/health/readiness": {
+      "get": {
+        "description": "returns http status 200 when all relevant internal state are ready for traffic and ok",
+        "operationId": "readiness",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "timeoutSeconds",
+            "schema": {
+              "default": 10,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {}
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "security": [],
+        "summary": "readiness of repo services",
         "tags": [
           "ABOUT"
         ]
@@ -14418,6 +14610,41 @@
           }
         },
         "summary": "Destroys the current session and logout the user",
+        "tags": [
+          "AUTHENTICATION v1"
+        ]
+      }
+    },
+    "/authentication/v1/destroyTickets/{user}": {
+      "post": {
+        "operationId": "destroyTickets",
+        "parameters": [
+          {
+            "description": "username (or \"-me-\" for current user)",
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "default": "-me-",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {}
+            },
+            "description": "OK."
+          },
+          "500": {
+            "content": {
+              "application/json": {}
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Destroys active tickets of the user. If the user is not authenticated user admin rights are required",
         "tags": [
           "AUTHENTICATION v1"
         ]
@@ -31786,9 +32013,6 @@
         },
         "responses": {
           "200": {
-            "content": {
-              "application/json": {}
-            },
             "description": "OK."
           },
           "400": {
@@ -32943,7 +33167,7 @@
         ],
         "requestBody": {
           "content": {
-            "multipart/form-data": {
+            "application/json": {
               "schema": {
                 "type": "string"
               }
