@@ -852,7 +852,7 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
             const createTemplateName: string = 'TOPIC_PAGE.NAVIGATION.NEW_PAGE_TEMPLATE';
             const createPageTemplate = new OptionItem(
                 createTemplateName,
-                'svg-page_template',
+                'edu-add_page_template',
                 async () => {
                     const dialogRef = await this.dialogs.openGenericDialog({
                         title: this.i18nPrefix + 'ADD_PAGE_TEMPLATE.LABEL',
@@ -1935,7 +1935,7 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
         // add a create page variant option to the "new" button
         const createPageVariant = new OptionItem(
             this.createPageVariantTitle,
-            'svg-page_variant',
+            'edu-page_variant',
             async () => {
                 await this.createPageVariant();
             },
