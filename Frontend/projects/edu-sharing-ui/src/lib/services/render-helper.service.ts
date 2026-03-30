@@ -16,6 +16,10 @@ import { Scope } from '../types/option-item';
 
 export type CombinedRenderData = {
     node: Node;
+    /**
+     * the parent node; only set if the current element is a series (child)
+     */
+    nodeParent?: Node;
     request?: RenderDataRequestWithToken;
     error?: string;
 };
@@ -45,8 +49,9 @@ export class RenderHelperService {
             }),
         );
         let node = securedNode.node;
+        let nodeParent: Node = null;
         if (node.aspects?.includes(RestConstants.CCM_ASPECT_IO_CHILDOBJECT)) {
-            node = await this.inheritProps(node);
+            nodeParent = await this.inheritProps(node);
         }
         this.optionsHelperDataService?.setData({
             scope: Scope.Render,
@@ -85,6 +90,7 @@ export class RenderHelperService {
 
         return {
             node,
+            nodeParent,
             request,
         };
     }
@@ -155,9 +161,10 @@ export class RenderHelperService {
                     node.properties[k] = v;
                 }
             });
+            return parent;
         } catch (e) {
             e.preventDefault();
         }
-        return node;
+        return null;
     }
 }
