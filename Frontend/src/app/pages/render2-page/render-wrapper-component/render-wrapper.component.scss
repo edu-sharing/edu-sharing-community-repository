@@ -20,7 +20,6 @@ rs-root {
             &.module-JUPYTER,
             &.module-EDUHTML,
             &.module-BINDER,
-            &.module-H5P,
             &.module-PDF,
             &.module-SPREADSHEET,
             &.module-MOODLE,
@@ -29,6 +28,10 @@ rs-root {
                 width: 70%;
                 height: auto;
                 aspect-ratio: 16 / 9;
+            }
+            &.module-H5P {
+                width: 70%;
+                height: auto;
             }
             &.module-VIDEO,
             &.module-url {

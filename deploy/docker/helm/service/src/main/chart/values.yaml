@@ -562,6 +562,16 @@ persistence:
           requests:
             ## @param persistence.data.config.spec.resources.requests.storage Set storage request for persistent data
             storage: 1Gi
+    temp:
+      ## @param persistence.data.temp.create Create temporary data
+      create: false
+      spec:
+        ## @param persistence.data.temp.spec.accessModes Set access modes for temporary data
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            ## @param persistence.data.temp.spec.resources.requests.storage Set storage request for temporary data
+            storage: 1Gi
 
   share:
 

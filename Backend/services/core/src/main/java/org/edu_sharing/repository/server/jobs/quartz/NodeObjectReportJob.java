@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -102,9 +103,11 @@ public class NodeObjectReportJob extends AbstractJobMapAnnotationParams {
             Collections.singletonList("sys:node-uuid")
     );
 
-    @JobFieldDescription(description = "List of properties to filter by")
+    @JobFieldDescription(description = "List of properties in the tracking table to filter by")
     private Map<String, String> filters;
 
+    @JobFieldDescription(description = "List of the node properties to filter by (i.e. ccm:editorial_state)")
+    private Map<String, String> nodePropertiesFilters;
     @JobFieldDescription(description = "List of aspects to filter by", sampleValue = "[]")
     private List<String> aspectFilters = Collections.emptyList();
 
@@ -248,15 +251,45 @@ public class NodeObjectReportJob extends AbstractJobMapAnnotationParams {
             if (isInterrupted()) {
                 return;
             }
-
-            if (!aspectFilters.isEmpty()) {
+            if(!nodePropertiesFilters.isEmpty()) {
                 try {
-                    String[] apsects = nodeService.getAspects(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), entry.getNode());
-                    if (Arrays.stream(apsects).map(CCConstants::getValidLocalName).noneMatch(x -> aspectFilters.contains(x))) {
+                    boolean filter = false;
+                    for (Map.Entry<String, String> filterEntry : nodePropertiesFilters.entrySet()) {
+                        Serializable propValue = nodeService.getPropertyNative(
+                                StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(),
+                                StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+                                entry.getNode(),
+                                CCConstants.getValidGlobalName(filterEntry.getKey()));
+                        if(propValue == null) {
+                            filter = true;
+                        } else if(propValue instanceof Collection) {
+                            filter = ((Collection<?>)propValue).stream().noneMatch(v -> v.equals(filterEntry.getValue()));
+                        } else {
+                            filter = !propValue.equals(filterEntry.getValue());
+                        }
+                        if(filter) {
+                            break;
+                        }
+                    }
+                    if (filter) {
                         continue;
                     }
                 } catch (InvalidNodeRefException e) {
-                    log.warn("Node {} does not exist", entry.getNode());
+                    log.info("Node {} does not exist", entry.getNode());
+                    continue;
+                } catch (Throwable t) {
+                log.info("Could not check property filter for node {}", entry.getNode());
+                continue;
+            }
+            }
+            if (!aspectFilters.isEmpty()) {
+                try {
+                    String[] aspects = nodeService.getAspects(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), entry.getNode());
+                    if (Arrays.stream(aspects).map(CCConstants::getValidLocalName).noneMatch(x -> aspectFilters.contains(x))) {
+                        continue;
+                    }
+                } catch (InvalidNodeRefException e) {
+                    log.info("Node {} does not exist", entry.getNode());
                     continue;
                 }
             }
