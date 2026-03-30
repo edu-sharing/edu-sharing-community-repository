@@ -1,5 +1,5 @@
-<div class="events-wrapper">
-  <es-node-url class="event" [node]="event" *ngFor="let event of events()">
+<div class="events-wrapper" role="list">
+  <es-node-url class="event" [node]="event" *ngFor="let event of events()" role="listitem">
     <div class="node-title">
       {{ event | nodeTitle }}
     </div>
