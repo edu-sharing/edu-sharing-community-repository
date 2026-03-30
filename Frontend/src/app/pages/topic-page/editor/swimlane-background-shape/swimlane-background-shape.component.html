@@ -1,0 +1,38 @@
+<ng-container class="background-shape" [ngSwitch]="shape()">
+  <ng-container *ngSwitchCase="SwimlaneBackgroundShape.ArrowLarge">
+    <svg viewBox="0 0 82 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M54.925 0H0V54H54.925L82 27L54.925 0Z" fill="currentColor" />
+    </svg>
+  </ng-container>
+  <ng-container *ngSwitchCase="SwimlaneBackgroundShape.ArrowSmall">
+    <svg viewBox="0 0 68 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M54.4439 0H0V26H54.4439L68 13.0263L54.4439 0Z" fill="currentColor" />
+    </svg>
+  </ng-container>
+  <ng-container *ngSwitchCase="SwimlaneBackgroundShape.FlagLarge">
+    <svg viewBox="0 0 82 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M82 0H0V54H82L54.925 27L82 0Z" fill="currentColor" />
+    </svg>
+  </ng-container>
+  <ng-container *ngSwitchCase="SwimlaneBackgroundShape.FlagSmall">
+    <svg viewBox="0 0 68 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M68 0H0V26H68L54.4 13.0263L68 0Z" fill="currentColor" />
+    </svg>
+  </ng-container>
+  <ng-container *ngSwitchCase="SwimlaneBackgroundShape.RoundLarge">
+    <svg viewBox="0 0 82 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M82 27.0274C82 12.2006 69.8744 0.164134 54.8697 0H0V54H54.925C69.8744 53.8906 82 41.8541 82 27.0274Z"
+        fill="currentColor"
+      />
+    </svg>
+  </ng-container>
+  <ng-container *ngSwitchCase="SwimlaneBackgroundShape.RoundSmall">
+    <svg viewBox="0 0 68 27" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M54.4439 0H54.389H0V27H54.3341H54.389C61.908 27 68 20.9455 68 13.4727C68 6.05454 61.908 0 54.4439 0Z"
+        fill="currentColor"
+      />
+    </svg>
+  </ng-container>
+</ng-container>
