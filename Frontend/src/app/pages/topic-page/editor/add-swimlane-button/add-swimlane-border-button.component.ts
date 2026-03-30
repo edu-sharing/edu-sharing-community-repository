@@ -3,7 +3,6 @@ import { TranslateService } from '@ngx-translate/core';
 import { v4 as uuidv4 } from 'uuid';
 import { SharedModule } from '../../../../shared/shared.module';
 import {
-    DEFAULT_ICON_PATH,
     SWIMLANE_GRID_OPTIONS,
     SWIMLANE_TYPE_OPTIONS,
 } from '../../shared/types/custom-definitions';
@@ -66,6 +65,5 @@ export class AddSwimlaneBorderButtonComponent {
         this.addSwimlaneTriggered.emit(newSwimlane);
     }
 
-    protected readonly iconPath: string = DEFAULT_ICON_PATH + 'editor/';
     protected readonly swimlaneGridOptions: SelectOption[] = SWIMLANE_GRID_OPTIONS;
 }

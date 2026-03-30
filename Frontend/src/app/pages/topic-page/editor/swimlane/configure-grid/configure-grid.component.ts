@@ -5,7 +5,7 @@ import { Closable } from '../../../../../features/dialogs/card-dialog/card-dialo
 import { YES_OR_NO } from '../../../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../../../../features/dialogs/dialogs.service';
 import { SharedModule } from '../../../../../shared/shared.module';
-import { DEFAULT_ICON_PATH, SWIMLANE_GRID_OPTIONS } from '../../../shared/types/custom-definitions';
+import { SWIMLANE_GRID_OPTIONS } from '../../../shared/types/custom-definitions';
 import { GridTile } from '../../../shared/types/grid-tile';
 import { SelectOption } from '../../../shared/types/select-option';
 
@@ -171,6 +171,5 @@ export class ConfigureGridComponent {
         this.gridUpdated.emit(gridCopy);
     }
 
-    protected readonly iconPath: string = DEFAULT_ICON_PATH + 'editor/';
     protected readonly swimlaneGridOptions: SelectOption[] = SWIMLANE_GRID_OPTIONS;
 }
