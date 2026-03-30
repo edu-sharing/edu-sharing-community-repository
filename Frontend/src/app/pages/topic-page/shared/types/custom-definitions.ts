@@ -70,22 +70,22 @@ export const SWIMLANE_GRID_OPTIONS: SelectOption[] = [
         viewValue: 'ONE_COLUMN',
     },
     {
-        icon: 'svg-two_columns',
+        icon: 'edu-two_columns',
         value: 'two_columns',
         viewValue: 'TWO_COLUMNS',
     },
     {
-        icon: 'svg-three_columns',
+        icon: 'edu-three_columns',
         value: 'three_columns',
         viewValue: 'THREE_COLUMNS',
     },
     {
-        icon: 'svg-left_side_panel',
+        icon: 'edu-left_side_panel',
         value: 'left_side_panel',
         viewValue: 'LEFT_SIDE_PANEL',
     },
     {
-        icon: 'svg-right_side_panel',
+        icon: 'edu-right_side_panel',
         value: 'right_side_panel',
         viewValue: 'RIGHT_SIDE_PANEL',
     },

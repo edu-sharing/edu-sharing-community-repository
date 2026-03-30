@@ -28,7 +28,20 @@
       <es-dashboard-interactivity-stream [events]="event.result.nodes" [type]="'activity'">
       </es-dashboard-interactivity-stream>
       <div class="show-more">
-        <a mat-button color="primary" [routerLink]="routerLink()" [queryParams]="event.params">
+        <a
+          mat-button
+          color="primary"
+          [routerLink]="routerLink()"
+          [queryParams]="event.params"
+          [attr.aria-label]="
+            'DASHBOARD_SWIMLANE.SHOW_MORE_FOR'
+              | translate
+                : {
+                    element:
+                      'DASHBOARD_SWIMLANE.' + swimlane().id + '.SUBTITLE.' + event.key | translate
+                  }
+          "
+        >
           {{ 'DASHBOARD_SWIMLANE.SHOW_MORE' | translate }}
         </a>
       </div>
@@ -42,7 +55,20 @@
       <es-dashboard-interactivity-stream [events]="event.result.nodes" [type]="'share'">
       </es-dashboard-interactivity-stream>
       <div class="show-more">
-        <a mat-button color="primary" [routerLink]="routerLink()" [queryParams]="event.params">
+        <a
+          mat-button
+          color="primary"
+          [routerLink]="routerLink()"
+          [queryParams]="event.params"
+          [attr.aria-label]="
+            'DASHBOARD_SWIMLANE.SHOW_MORE_FOR'
+              | translate
+                : {
+                    element:
+                      'DASHBOARD_SWIMLANE.' + swimlane().id + '.SUBTITLE.' + event.key | translate
+                  }
+          "
+        >
           {{ 'DASHBOARD_SWIMLANE.SHOW_MORE' | translate }}
         </a>
       </div>
@@ -73,7 +99,16 @@
       </ng-template>
     </es-node-entries-wrapper>
     <div class="show-more">
-      <a mat-button color="primary" [routerLink]="routerLink()" [queryParams]="routerQueryParams()">
+      <a
+        mat-button
+        color="primary"
+        [routerLink]="routerLink()"
+        [queryParams]="routerQueryParams()"
+        [attr.aria-label]="
+          'DASHBOARD_SWIMLANE.SHOW_MORE_FOR'
+            | translate : { element: 'DASHBOARD_SWIMLANE.' + swimlane().id + '.TITLE' | translate }
+        "
+      >
         {{ 'DASHBOARD_SWIMLANE.SHOW_MORE' | translate }}
       </a>
     </div>

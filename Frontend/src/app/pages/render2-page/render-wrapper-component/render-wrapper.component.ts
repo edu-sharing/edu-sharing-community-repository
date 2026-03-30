@@ -1,4 +1,13 @@
-import { Component, Input, OnChanges, signal, SimpleChanges, ViewChild } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    OnChanges,
+    Output,
+    signal,
+    SimpleChanges,
+    ViewChild,
+} from '@angular/core';
 import {
     ActionbarComponent,
     CombinedRenderData,
@@ -12,6 +21,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { RenderComponent, RenderingServiceLibModule } from 'ngx-rendering-service-lib';
 import { MdsModule } from '../../../features/mds/mds.module';
 import { SharedModule } from '../../../shared/shared.module';
+import { Node, NodeService, RestConstants } from 'ngx-edu-sharing-api';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
     selector: 'es-render-wrapper-component',
@@ -36,11 +47,16 @@ export class RenderWrapperComponent implements OnChanges {
     @Input() nodeId: string;
     @Input() repository: string;
     @Input() version: string;
+    @Input() childId: string = null;
+    @Output() childIdChange = new EventEmitter<string>();
 
     data = signal<CombinedRenderData>(null);
+    loading = signal(false);
+    children = signal<Node[]>(null);
 
     constructor(
         private renderHelperService: RenderHelperService,
+        private nodeService: NodeService,
         private translations: TranslationsService,
         private optionsHelper: OptionsHelperDataService,
     ) {
@@ -51,19 +67,46 @@ export class RenderWrapperComponent implements OnChanges {
 
     async ngOnChanges(changes: SimpleChanges) {
         if (changes.nodeId) {
-            const data = await this.renderHelperService.getRenderData(
-                changes.nodeId.currentValue,
-                this.version,
-                this.repository,
+            this.children.set(
+                (
+                    await firstValueFrom(
+                        this.nodeService.getChildren(changes.nodeId.currentValue, {
+                            repository: this.repository,
+                            filter: ['files'],
+                            maxItems: RestConstants.COUNT_UNLIMITED,
+                        }),
+                    )
+                ).nodes,
             );
-            setTimeout(async () => {
-                await this.optionsHelper.initComponents(this.actionbar);
-                await this.optionsHelper.refreshComponents();
-            });
-            this.data.set(data);
+        }
+        if (changes.nodeId || changes.childId) {
+            await this.refresh();
         }
     }
+    async refresh() {
+        await this.setNodeById(this.childId || this.nodeId);
+    }
+    private async setNodeById(nodeId: string) {
+        this.loading.set(true);
+        delete this.data()?.request;
+        this.data.set(this.data());
+        const data = await this.renderHelperService.getRenderData(
+            nodeId,
+            this.version,
+            this.repository,
+        );
+        setTimeout(async () => {
+            await this.optionsHelper.initComponents(this.actionbar);
+            await this.optionsHelper.refreshComponents();
+        });
+        this.loading.set(false);
+        this.data.set(data);
+    }
 
+    setChild(child: Node = null) {
+        this.childIdChange.emit(child?.ref?.id || null);
+        // void this.setNodeById(child ? child.ref.id : this.nodeId);
+    }
     goBack() {
         window.history.back();
     }

@@ -1627,6 +1627,7 @@
       "INFO_MESSAGE": "freigegeben"
     },
     "SHOW_MORE": "Alle anzeigen",
+    "SHOW_MORE_FOR": "Alle {{ element }} anzeigen",
     "NO_RESULTS": "Keine Elemente verfügbar",
     "featured-media": {
       "TITLE": "Ihre Mediathek"

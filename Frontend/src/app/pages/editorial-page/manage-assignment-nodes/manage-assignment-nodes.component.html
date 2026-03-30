@@ -21,9 +21,9 @@
         [disabled]="readonly()"
       >
         <ng-container *ngIf="translateReady$ | async">
-          <mat-option [value]="role" *ngFor="let role of ['SUPPLEMENTARY', 'SUBMITTABLE']">{{
-            'EDITORIAL.ASSIGNMENT.FORM.ROLE.' + role | translate : { fallback: role }
-          }}</mat-option>
+          <mat-option [value]="role" *ngFor="let role of ['SUPPLEMENTARY', 'SUBMITTABLE']"
+            >{{ 'EDITORIAL.ASSIGNMENT.FORM.ROLE.' + role | translate : { fallback: role } }}
+          </mat-option>
         </ng-container>
       </mat-select>
     </mat-form-field>
@@ -60,7 +60,13 @@
         <i esIcon="warning"></i>
       </div>
     </div>
-    <button mat-icon-button class="delete" (click)="remove(item)" [disabled]="readonly()">
+    <button
+      mat-icon-button
+      class="delete"
+      (click)="remove(item)"
+      [disabled]="readonly()"
+      [attr.aria-label]="'EDITORIAL.ASSIGNMENT.FORM.DELETE' | translate"
+    >
       <i esIcon="close"></i>
     </button>
   </div>

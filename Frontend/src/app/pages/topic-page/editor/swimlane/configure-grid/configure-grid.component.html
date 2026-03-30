@@ -17,11 +17,7 @@
     *ngFor="let option of swimlaneGridOptions"
     (click)="configureSwimlaneGrid(option.value)"
   >
-    <i
-      *ngIf="option.icon"
-      [esIcon]="option.icon"
-      [path]="option.icon.startsWith('svg-') ? iconPath : null"
-    ></i>
+    <i *ngIf="option.icon" [esIcon]="option.icon"></i>
     {{ 'TOPIC_PAGE.SWIMLANE.SELECT_LAYOUT.' + option.viewValue | translate }}
   </button>
 </mat-menu>

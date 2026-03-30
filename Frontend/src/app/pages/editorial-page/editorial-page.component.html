@@ -1,3 +1,4 @@
+<h1 esTitle class="cdk-visually-hidden">{{ 'EDITORIAL.TITLE' | translate }}</h1>
 <mat-sidenav-container>
   <mat-sidenav
     #leftSidenav
@@ -67,13 +68,13 @@
         ></es-actionbar>
       </div>
       <ng-container *ngIf="mainComponent$ | async as component">
-        @switch(component) { @case('manageAssignment') {
+        @switch (component) { @case ('manageAssignment') {
         <es-manage-assignment></es-manage-assignment>
-        } @case('assignmentSubmission') {
+        } @case ('assignmentSubmission') {
         <es-assignment-submission></es-assignment-submission>
-        } @case('submitAssignment') {
+        } @case ('submitAssignment') {
         <es-submit-assignment></es-submit-assignment>
-        }@default {
+        } @default {
         <span> Component "{{ component }}" not implemented </span>
         } }
       </ng-container>

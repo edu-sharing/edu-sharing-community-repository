@@ -22,6 +22,34 @@
   ></es-actionbar>
 </div>
 <es-info-message mode="error" *ngIf="data()?.error">{{ data().error | translate }}</es-info-message>
+<div class="child-objects" *ngIf="data()?.node && children()?.length > 0">
+  <ng-container *ngIf="data().nodeParent || data().node as node">
+    <div
+      class="wrapperouter clickable"
+      tabindex="0"
+      (click)="setChild(null)"
+      (keyup.enter)="setChild(null)"
+    >
+      <span class="itemTitle">{{ node | nodeTitle }}</span>
+      <div class="wrapper" [class.selected]="childId === null">
+        <img src="{{ node.preview.url }}&crop=true&width=100&height=75" alt="" />
+      </div>
+    </div>
+  </ng-container>
+  <div
+    *ngFor="let item of children(); let i = index"
+    tabindex="0"
+    class="wrapperouter clickable"
+    (click)="setChild(item)"
+    (keyup.enter)="setChild(item)"
+  >
+    <span class="itemTitle">{{ item | nodeTitle }}</span>
+    <div class="wrapper" [class.selected]="childId === item.ref.id">
+      <img src="{{ item.preview.url }}&crop=true&width=100&height=75" alt="" />
+    </div>
+  </div>
+</div>
+<es-spinner *ngIf="loading()"></es-spinner>
 <rs-root
   *ngIf="data()?.request && data()?.node"
   [node]="data().node"
@@ -29,9 +57,11 @@
 ></rs-root>
 <div class="meta" #meta>
   <es-mds-editor-wrapper
+    [class.display-none]="loading()"
     *ngIf="data()?.node && showMetadata"
     [embedded]="true"
     [editorMode]="'viewer'"
+    [nodeRefetch]="false"
     [groupId]="'io_render'"
     [nodes]="[data().node]"
   >

@@ -165,6 +165,7 @@
         "SUMMARY": "Beschreibung",
         "ADD_FILE": "Material hinzufügen",
         "AUTHORITY_ROLE": "Rolle",
+        "DELETE": "Löschen",
         "GROUP_MULTIPLY": "Beim Austeilen der Aufgabe werden alle Mitglieder der Gruppe als Einzel-Personen zugewiesen",
         "FILES": "Angehängte Dateien",
         "AUTHORITIES_EMPTY": "Noch nicht zugewiesen",

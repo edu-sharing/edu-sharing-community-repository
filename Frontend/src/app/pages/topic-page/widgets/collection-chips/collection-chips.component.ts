@@ -55,7 +55,7 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
     layoutOptions: LayoutOption[] = [
         {
             ariaLabel: 'BUTTONS_ARIA',
-            icon: 'svg-view_pills',
+            icon: 'edu-view_pills',
             value: CollectionListDisplayType.Chips,
             viewValue: 'BUTTONS',
         },

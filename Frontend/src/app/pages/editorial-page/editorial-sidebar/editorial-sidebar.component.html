@@ -8,13 +8,13 @@
       *ngIf="enabledOption() && !enabledOption().trap"
       (click)="enabledOption.set(null)"
     >
-      <i esIcon="keyboard_arrow_left"></i>
+      <i esIcon="keyboard_arrow_left" [aria]="true"></i>
     </button>
     <div>
       {{ title() | translate }}
     </div>
     <button mat-icon-button (click)="close()">
-      <i esIcon="close"></i>
+      <i esIcon="close" [aria]="true"></i>
     </button>
   </div>
   <div class="sidebar-container">

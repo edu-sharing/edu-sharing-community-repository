@@ -4,6 +4,63 @@ $rsPaddingHorizontal: 2vw;
 $rsPaddingVertical: 20px;
 $maxHeight: calc(100vh - var(--mainnavHeight) - $rsPaddingVertical);
 $minHeight: calc(100vh - var(--mainnavHeight) - $rsPaddingVertical - 100px);
+es-spinner {
+    height: 100%;
+    max-height: $maxHeight;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.child-objects {
+    padding: 30px 20px;
+    min-width: 100%;
+    text-align: center;
+    overflow: hidden;
+    position: relative;
+    white-space: nowrap;
+    .itemTitle {
+        color: #585858;
+        display: inline-block;
+        width: 100px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        text-align: center;
+        margin-bottom: -2px;
+    }
+    .wrapperouter {
+        display: inline-block;
+        position: relative;
+        margin: 0 10px;
+        .wrapper {
+            margin: 3px;
+            @include materialShadow();
+            img {
+                margin-bottom: -5px;
+                height: 75px;
+                width: 100px;
+                object-fit: cover;
+            }
+        }
+        .wrapper.selected {
+            margin: 0;
+            border: 3px solid var(--palette-primary-200);
+            @include materialShadowMediumLarge();
+        }
+        .wrapper.selected:after {
+            content: '';
+            position: absolute;
+            left: 43px;
+            top: 100px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid var(--palette-primary-200);
+            clear: both;
+        }
+    }
+}
 rs-root {
     //height: $minHeight;
     //max-height: $maxHeight;
