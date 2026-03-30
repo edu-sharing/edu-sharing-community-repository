@@ -25,6 +25,7 @@
   </ng-template>
 </es-node-entries-wrapper>
 
+<!-- custom card template -->
 <ng-template
   #cardSuggest
   *ngIf="genericWidgetGlobalService.getCustomCards(CustomCardRole.SuggestContent)?.[0]?.templateRef as templateRef"
@@ -33,6 +34,9 @@
     *ngTemplateOutlet="
       templateRef;
       context: {
+        hasEditRightsAndIsEditMode,
+        includeCard: includeCustomCard(),
+        includeCardChanged: onIncludeCardChanged.bind(this),
         nodeId: contextNodeId,
       }
     "

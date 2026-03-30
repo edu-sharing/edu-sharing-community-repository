@@ -162,6 +162,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
         }
         return criteriaArray;
     });
+    includeCustomCard: WritableSignal<boolean> = signal(true);
     initialized: WritableSignal<boolean> = signal(false);
     layoutOptions: LayoutOption[] = [
         {
@@ -307,6 +308,14 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
     }
 
     /**
+     * Updates the include custom card state and persists it to the node.
+     */
+    includeCardChanged(includeCard: boolean): void {
+        this.includeCustomCard.set(includeCard);
+        this.configChanged.emit();
+    }
+
+    /**
      * Reacts to es-node-entries (itemClicked) event and emits it.
      *
      * @param node
@@ -342,6 +351,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
         return {
             blacklistedNodeIds: this.blacklistedNodeIds,
             contentTeaserLayout: this.layout,
+            includeCustomCard: this.includeCustomCard(),
             propertyFilters: this.propertyFilters(),
             searchText: this.searchText ?? '',
         };
@@ -360,6 +370,9 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
         // 0 is a valid enum value, so check for undefined
         if (config.contentTeaserLayout !== undefined) {
             this.layout = config.contentTeaserLayout;
+        }
+        if (config.includeCustomCard !== undefined) {
+            this.includeCustomCard.set(config.includeCustomCard);
         }
         if (config.propertyFilters) {
             this.propertyFilters.set(config.propertyFilters);

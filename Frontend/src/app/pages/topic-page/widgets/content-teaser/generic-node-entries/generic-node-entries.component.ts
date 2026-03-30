@@ -4,7 +4,9 @@ import {
     ElementRef,
     EventEmitter,
     HostBinding,
+    input,
     Input,
+    InputSignal,
     OnChanges,
     OnDestroy,
     OnInit,
@@ -135,6 +137,7 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             }
         }
     }
+    includeCustomCard: InputSignal<boolean> = input(true);
     @Input() lastSearchUpdate: Date | null;
     private _layout: GenericNodeEntriesDisplayType;
     @Input() get layout() {
@@ -213,6 +216,7 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
     @Input() searchText: string;
     @Output() blacklistChanged: EventEmitter<string> = new EventEmitter<string>();
     @Output() displayTypeChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
+    @Output() includeCardChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
     @Output() itemClicked: EventEmitter<Node> = new EventEmitter<Node>();
     @Output() totalSearchResultCountChanged: EventEmitter<number> = new EventEmitter<number>();
     @Output() visibleNodesChanged: EventEmitter<Node[]> = new EventEmitter<Node[]>();
@@ -558,7 +562,9 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
 
         // avoid pushing potential duplicates
         // TODO: This duplicate check is currently necessary, as the same items might be requested again (and again)
-        const existingNodeIds: string[] = this.allRequestedNodes.map((n: Node) => n.ref.id);
+        const existingNodeIds: string[] = this.allRequestedNodes
+            .filter((n) => n.ref?.id)
+            .map((n: Node) => n.ref.id);
         searchResult.nodes?.forEach((node: Node) => {
             if (!existingNodeIds.includes(node.ref.id)) {
                 this.allRequestedNodes.push(node);
@@ -566,9 +572,11 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             }
         });
 
+        let customCardsCount: number;
         // in edit mode, display all requested nodes
         if (this.hasEditRightsAndIsEditMode) {
             this.dataSource.setData(this.allRequestedNodes, searchResult.pagination);
+            customCardsCount = this.allRequestedNodes.length;
         }
         // in view mode, display the filtered nodes
         else {
@@ -581,18 +589,20 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             );
             updatedPagination.total -= this.allRequestedNodes.length - filteredNodes.length;
             this.dataSource.setData(filteredNodes, updatedPagination);
-            // in view mode, inject custom card,
-            // if too few elements exist
-            // and if the correct type is selected (TODO: list is currently not supported)
-            const isGridItemType: boolean = [
-                GenericNodeEntriesDisplayType.SingleView,
-                GenericNodeEntriesDisplayType.SplitView,
-                GenericNodeEntriesDisplayType.StandardView,
-                GenericNodeEntriesDisplayType.CompactView,
-            ].includes(this.layout);
-            if (isGridItemType) {
-                this.injectCustomCards(filteredNodes.length);
-            }
+            customCardsCount = filteredNodes.length;
+        }
+
+        // inject custom card,
+        // if too few elements exist
+        // and if the correct type is selected (TODO: list is currently not supported)
+        const isGridItemType: boolean = [
+            GenericNodeEntriesDisplayType.SingleView,
+            GenericNodeEntriesDisplayType.SplitView,
+            GenericNodeEntriesDisplayType.StandardView,
+            GenericNodeEntriesDisplayType.CompactView,
+        ].includes(this.layout);
+        if ((this.includeCustomCard() || this.hasEditRightsAndIsEditMode) && isGridItemType) {
+            this.injectCustomCards(customCardsCount);
         }
 
         // emit the node statistics of the search result
@@ -784,7 +794,7 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
     ): void {
         nodes?.forEach((node: Node, index: number): void => {
             let element: HTMLElement | null = this.queryElement(index);
-            if (!element) {
+            if (!element || !node?.ref?.id) {
                 return;
             }
 
@@ -927,6 +937,13 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
      */
     onDisplayTypeChanged(): void {
         this.displayTypeChanged.emit(true);
+    }
+
+    /**
+     * Emits an event when the include custom card state changes.
+     */
+    onIncludeCardChanged(includeCard: boolean): void {
+        this.includeCardChanged.emit(includeCard);
     }
 
     /**
