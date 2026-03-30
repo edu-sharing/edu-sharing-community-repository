@@ -7012,6 +7012,9 @@
           "node": {
             "$ref": "#/components/schemas/Node"
           },
+          "renderingBaseUrl": {
+            "type": "string"
+          },
           "signature": {
             "type": "string"
           },
