@@ -173,7 +173,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
         },
         {
             ariaLabel: 'SPLIT_VIEW_ARIA',
-            icon: 'svg-view_carousel_split',
+            icon: 'edu-view_carousel_split',
             value: GenericNodeEntriesDisplayType.SplitView,
             viewValue: 'SPLIT_VIEW',
         },
