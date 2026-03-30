@@ -112,6 +112,20 @@
                 align-items: center;
                 justify-content: center;
             }
+            // fix size of background shapes in menus
+            es-swimlane-background-shape {
+                margin-right: var(--mat-menu-item-spacing, 12px);
+                width: 24px;
+                height: auto;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+
+                svg {
+                    max-width: 100%;
+                    max-height: 100%;
+                }
+            }
         }
     }
 }
