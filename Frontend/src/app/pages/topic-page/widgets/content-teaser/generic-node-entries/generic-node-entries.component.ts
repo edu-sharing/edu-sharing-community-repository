@@ -776,7 +776,10 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             if (positionToAdd > this.CUSTOM_CARD_POSITION_INDEX) {
                 positionToAdd = this.CUSTOM_CARD_POSITION_INDEX;
             }
-            this.dataSource.getData().splice(positionToAdd, 0, this.cardSuggestRef);
+            // workaround to check whether the custom card was already added (it is not a node with a ref ID)
+            if (this.dataSource.getData()?.[positionToAdd]?.ref?.id) {
+                this.dataSource.getData().splice(positionToAdd, 0, this.cardSuggestRef);
+            }
         }
     }
 
