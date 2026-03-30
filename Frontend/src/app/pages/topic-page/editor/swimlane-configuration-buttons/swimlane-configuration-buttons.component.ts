@@ -21,10 +21,10 @@ import { TopicPageHelperService } from '../../shared/services/topic-page-helper.
 import { SwimlaneBackgroundShape } from '../../shared/types/swimlane-background-shape';
 import {
     DEFAULT_BG_COLOR,
-    DEFAULT_ICON_PATH,
     SWIMLANE_BACKGROUND_SHAPE_OPTIONS,
 } from '../../shared/types/custom-definitions';
 import { ColorPickerComponent } from '../../widgets/shared/color-picker/color-picker.component';
+import { SwimlaneBackgroundShapeComponent } from '../swimlane-background-shape/swimlane-background-shape.component';
 
 @Component({
     selector: 'es-swimlane-configuration-buttons',
@@ -35,6 +35,7 @@ import { ColorPickerComponent } from '../../widgets/shared/color-picker/color-pi
         FormsModule,
         MatIconButton,
         MatMenuModule,
+        SwimlaneBackgroundShapeComponent,
         TranslateModule,
     ],
     templateUrl: './swimlane-configuration-buttons.component.html',
@@ -92,7 +93,6 @@ export class SwimlaneConfigurationButtonsComponent {
         this.swimlaneShapeMirroringToggled.emit();
     }
 
-    protected readonly iconPath: string = DEFAULT_ICON_PATH + 'background/';
     protected readonly SwimlaneBackgroundShape = SwimlaneBackgroundShape;
     protected readonly swimlaneBackgroundShapeOptions = SWIMLANE_BACKGROUND_SHAPE_OPTIONS;
 }

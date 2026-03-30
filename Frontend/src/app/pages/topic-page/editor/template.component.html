@@ -538,14 +538,16 @@
             </div>
           </ng-template>
           <ng-template #swimlaneShape let-swimlane="swimlane">
-            <i
-              *ngIf="swimlane.backgroundShape !== SwimlaneBackgroundShape.None"
+            <div
               class="bg-shape"
               [class.shape-mirrored]="swimlane.backgroundShapeMirrored"
-              [esIcon]="swimlaneShapeToImageMapping.get(swimlane.backgroundShape)"
-              [path]="iconPath + 'background/'"
               [style.color]="swimlane.backgroundColor ? swimlane.backgroundColor : null"
-            ></i>
+              *ngIf="swimlane.backgroundShape !== SwimlaneBackgroundShape.None"
+            >
+              <es-swimlane-background-shape
+                [shape]="swimlane.backgroundShape"
+              ></es-swimlane-background-shape>
+            </div>
           </ng-template>
           <ng-template #noSwimlanesCreatedYet>
             <div class="topic-page-swimlane-wrapper is-empty" [class.edit-mode]="editMode()">

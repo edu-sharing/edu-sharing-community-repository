@@ -86,7 +86,6 @@ import {
 import { TopicPageHelperService } from '../shared/services/topic-page-helper.service';
 import {
     DEFAULT_AI_CONFIG_PROP,
-    DEFAULT_ICON_PATH,
     DEFAULT_PAGE_CONFIG_ASPECT,
     DEFAULT_PAGE_CONFIG_PROP,
     DEFAULT_PAGE_CONFIG_PROPAGATE_REF_PROP,
@@ -101,7 +100,6 @@ import {
     DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP,
     DEFAULT_WIDGET_CONFIG_PROP,
     DEFAULT_WIDGET_NAME_PREFIX,
-    SWIMLANE_SHAPE_TO_IMAGE_MAPPING,
     SWIMLANE_TYPE_OPTIONS,
     WIDGET_TYPE,
     WIDGETS,
@@ -154,6 +152,7 @@ import {
 import { AddSwimlaneBorderButtonComponent } from './add-swimlane-button/add-swimlane-border-button.component';
 import { ConfigurePageVariantComponent } from './configure-page-variant/configure-page-variant.component';
 import { SwimlaneComponent } from './swimlane/swimlane.component';
+import { SwimlaneBackgroundShapeComponent } from './swimlane-background-shape/swimlane-background-shape.component';
 import { SwimlaneSettingsDialogComponent } from './swimlane/swimlane-settings-dialog/swimlane-settings-dialog.component';
 import { SwimlaneConfigurationButtonsComponent } from './swimlane-configuration-buttons/swimlane-configuration-buttons.component';
 import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/topic-page-filters-sidebar.component';
@@ -177,6 +176,7 @@ import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/t
         SharedModule,
         SideMenuItemComponent,
         SideMenuWrapperComponent,
+        SwimlaneBackgroundShapeComponent,
         SwimlaneComponent,
         SwimlaneConfigurationButtonsComponent,
         SwimlaneSearchCountPipe,
@@ -2538,9 +2538,7 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
         return bestMatchIndex;
     }
 
-    protected readonly iconPath: string = DEFAULT_ICON_PATH;
     protected readonly pageVariantConfigPrefix = DEFAULT_PAGE_VARIANT_NAME_PREFIX;
     protected readonly SwimlaneBackgroundShape = SwimlaneBackgroundShape;
-    protected readonly swimlaneShapeToImageMapping = SWIMLANE_SHAPE_TO_IMAGE_MAPPING;
     protected readonly WIDGETS = WIDGETS;
 }

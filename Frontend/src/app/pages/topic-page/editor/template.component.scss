@@ -335,26 +335,34 @@ es-side-menu-wrapper {
                 position: absolute;
                 top: 0;
                 left: 0;
+                width: 100%;
                 height: 100%;
                 z-index: 0;
-                width: auto;
-                max-width: 85%;
-                font-size: unset;
 
-                // mirror left-aligned shapes horizontally
-                &.shape-mirrored {
-                    left: unset;
-                    right: 0;
-                    transform: scaleX(-1);
+                es-swimlane-background-shape {
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: flex-start;
                 }
 
-                // override default style set by icon directive to display full view background SVG
-                ::ng-deep .svg-icons {
+                svg {
                     height: 100%;
                     max-height: 100%;
                     width: auto;
                     max-width: 100%;
                     display: block;
+                }
+
+                // mirror left-aligned shapes horizontally
+                &.shape-mirrored {
+                    es-swimlane-background-shape {
+                        justify-content: flex-end;
+                    }
+
+                    &::ng-deep svg {
+                        transform: scaleX(-1);
+                    }
                 }
             }
 
