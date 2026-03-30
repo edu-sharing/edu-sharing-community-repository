@@ -4,6 +4,13 @@ $rsPaddingHorizontal: 2vw;
 $rsPaddingVertical: 20px;
 $maxHeight: calc(100vh - var(--mainnavHeight) - $rsPaddingVertical);
 $minHeight: calc(100vh - var(--mainnavHeight) - $rsPaddingVertical - 100px);
+es-spinner {
+    height: 100%;
+    max-height: $maxHeight;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 .child-objects {
     padding: 30px 20px;
     min-width: 100%;

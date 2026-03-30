@@ -51,6 +51,7 @@ export class RenderWrapperComponent implements OnChanges {
     @Output() childIdChange = new EventEmitter<string>();
 
     data = signal<CombinedRenderData>(null);
+    loading = signal(false);
     children = signal<Node[]>(null);
 
     constructor(
@@ -86,7 +87,9 @@ export class RenderWrapperComponent implements OnChanges {
         await this.setNodeById(this.childId || this.nodeId);
     }
     private async setNodeById(nodeId: string) {
-        this.data.set(null);
+        this.loading.set(true);
+        delete this.data()?.request;
+        this.data.set(this.data());
         const data = await this.renderHelperService.getRenderData(
             nodeId,
             this.version,
@@ -96,6 +99,7 @@ export class RenderWrapperComponent implements OnChanges {
             await this.optionsHelper.initComponents(this.actionbar);
             await this.optionsHelper.refreshComponents();
         });
+        this.loading.set(false);
         this.data.set(data);
     }
 
