@@ -62,6 +62,7 @@ export class TopicsColumnBrowserComponent implements WidgetComponentInterface {
 
     // VARIABLES
     customUrl: (node: Node) => string;
+    customUrlTarget: '_self' | '_blank' = '_self';
     readonly dataSource: RemoteTreeDataSource<Node> = new RemoteTreeDataSource<Node>();
     initialized: WritableSignal<boolean> = signal(false);
     path: TreeNode<Node>[] = [];
@@ -80,6 +81,7 @@ export class TopicsColumnBrowserComponent implements WidgetComponentInterface {
         if (this.topicPageGlobalService.getCustomUrlFunction()) {
             this.customUrl = this.topicPageGlobalService.getCustomUrlFunction();
         }
+        this.customUrlTarget = this.topicPageGlobalService.getCustomUrlTarget();
     }
 
     /**

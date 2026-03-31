@@ -78,6 +78,7 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
 
     // VARIABLES
     customUrl: (node: Node) => string;
+    customUrlTarget: '_self' | '_blank' = '_self';
     private destroy$ = new Subject<void>();
     editorialMemberNodeIds: string[] = [];
     hasBreadcrumbExtension: WritableSignal<boolean> = signal(false);
@@ -123,6 +124,7 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
             this.customUrl = this.topicPageGlobalService.getCustomUrlFunction();
         }
         this.hasBreadcrumbExtension.set(this.topicPageGlobalService.hasCustomBreadcrumbExtension());
+        this.customUrlTarget = this.topicPageGlobalService.getCustomUrlTarget();
     }
 
     /**
