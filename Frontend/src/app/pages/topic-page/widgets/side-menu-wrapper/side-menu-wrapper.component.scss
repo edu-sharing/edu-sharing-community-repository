@@ -35,6 +35,12 @@
     min-width: 48px;
     max-width: 50px;
     max-height: 100%;
+
+    &.menu-hidden {
+        min-width: unset;
+        max-width: 0;
+        visibility: hidden;
+    }
 }
 
 .menu-content {

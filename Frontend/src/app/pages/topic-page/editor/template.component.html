@@ -16,7 +16,7 @@
   </button>
 </es-info-message>
 <main *ngIf="!pageConfigCheckFailed(); else pageConfigCheckFailedMessage">
-  <ng-container *ngIf="initialLoadSuccessfully()">
+  <ng-container *ngIf="initialLoadSuccessfully() && showBreadcrumb()">
     <!-- WORKAROUND FOR VISUAL NAVBAR OVERFLOW -->
     <div class="custom-breadcrumb-overflow-container" *ngIf="hasCustomBreadcrumbExtension()"></div>
     <!-- BREADCRUMBS -->
@@ -50,7 +50,7 @@
         <!-- wait until the initial load is successfully to retrieve the correct nodeID for the header -->
         <div
           class="template-header"
-          [class.sidebar-mobile-hidden]="sidebarMobileHidden()"
+          [class.sidebar-hidden]="sidebarMobileHidden() || !showSidebar()"
           [class.extra-padding-bottom]="
             (swimlanes | filterSwimlaneType : ANCHOR_TYPE : anchorTrigger)?.length > 0
           "
@@ -82,10 +82,11 @@
         </div>
       </ng-container>
 
-      <!-- RIGHT SIDE MENU WITH MULTIPLE COLLAPSIBLE ITEMS (VIEW MODE) -->
+      <!-- RIGHT SIDE MENU WITH MULTIPLE COLLAPSIBLE ITEMS -->
       <es-side-menu-wrapper
         [mobileHidden]="sidebarMobileHidden()"
         [selectedMenuItem]="selectedMenuItem"
+        [sideMenuHidden]="!showSidebar()"
         (closeContentView)="selectedMenuItem = ''"
         *ngIf="!editMode(); else editModeMenu"
       >
@@ -175,6 +176,7 @@
             !pageVariantSettingsValid()
           "
           [selectedMenuItem]="selectedMenuItem"
+          [sideMenuHidden]="!showSidebar()"
           (closeContentView)="selectedMenuItem = ''"
         >
           <ng-container slot="menu">
@@ -230,7 +232,7 @@
       <div
         class="topic-page-content-outer-wrapper"
         [class.edit-mode]="editMode()"
-        [class.sidebar-mobile-hidden]="sidebarMobileHidden()"
+        [class.sidebar-hidden]="sidebarMobileHidden() || !showSidebar()"
         [class.sidebar-open]="sidebarOpen()"
       >
         <div
