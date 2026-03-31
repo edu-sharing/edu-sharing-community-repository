@@ -55,6 +55,7 @@ export class RestConstants {
     public static CCM_ASPECT_CCLOM_GENERAL = 'cclom:general';
     public static CCM_ASPECT_IO_CHILDOBJECT = 'ccm:io_childobject';
     public static CCM_ASPECT_REMOTEREPOSITORY = 'ccm:remoterepository';
+    public static CCM_ASSOC_CHILDIO = 'ccm:childio';
 
     public static TOOLPERMISSION_INVITE = 'TOOLPERMISSION_INVITE';
     public static TOOLPERMISSION_INVITE_TIMEBASED = 'TOOLPERMISSION_INVITE_TIMEBASED';
@@ -150,6 +151,7 @@ export class RestConstants {
     public static CCM_PROP_CCRESSOURCEVERSION = 'ccm:ccressourceversion';
     public static CCM_PROP_PUBLISHED_ORIGINAL = 'ccm:published_original';
     public static CCM_PROP_MAPTYPE = 'ccm:maptype';
+    public static CCM_PROP_CHILDOBJECT_ORDER = 'ccm:childobject_order';
     public static NODE_VERSION_CURRENT = '-1';
     public static ACCESS_ADD_CHILDREN = 'AddChildren';
     public static ACCESS_WRITE = 'Write';

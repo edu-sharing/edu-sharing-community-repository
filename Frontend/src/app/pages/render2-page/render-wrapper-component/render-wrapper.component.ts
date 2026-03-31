@@ -73,6 +73,9 @@ export class RenderWrapperComponent implements OnChanges {
                         this.nodeService.getChildren(changes.nodeId.currentValue, {
                             repository: this.repository,
                             filter: ['files'],
+                            sortProperties: [RestConstants.CCM_PROP_CHILDOBJECT_ORDER],
+                            sortAscending: [true],
+                            assocName: RestConstants.CCM_ASSOC_CHILDIO,
                             maxItems: RestConstants.COUNT_UNLIMITED,
                         }),
                     )
