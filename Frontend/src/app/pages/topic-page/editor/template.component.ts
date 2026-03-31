@@ -1926,7 +1926,9 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
                 retrieveNodeId(node),
             );
             this.propagatingParentNode = parents.nodes.find(
-                (parent: Node) => !!retrievePageConfigPropagateRef(parent),
+                (parent: Node) =>
+                    retrieveNodeId(node) !== retrieveNodeId(parent) &&
+                    !!retrievePageConfigPropagateRef(parent),
             );
             if (this.propagatingParentNode) {
                 pageRef = retrievePageConfigPropagateRef(this.propagatingParentNode);
