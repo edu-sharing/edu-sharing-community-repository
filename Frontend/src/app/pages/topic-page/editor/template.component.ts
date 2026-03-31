@@ -300,6 +300,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     @Input() collectionId: string;
+    @Input() customUrl?: (node: Node) => string;
     showBreadcrumb: InputSignal<boolean> = input(true);
     showSidebar: InputSignal<boolean> = input(true);
     @Input() variantId: string;
@@ -474,6 +475,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                     await this.initializeComponent(params.variantId);
                 }
             });
+        // if a custom URL is input, register it in the topic page global service
+        if (this.customUrl) {
+            this.topicPageGlobalService.setCustomUrlFunction(this.customUrl);
+        }
     }
 
     /**
