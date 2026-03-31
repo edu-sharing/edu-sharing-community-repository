@@ -9,7 +9,9 @@ import {
     CUSTOM_ELEMENTS_SCHEMA,
     ElementRef,
     HostBinding,
+    input,
     Input,
+    InputSignal,
     OnChanges,
     OnDestroy,
     OnInit,
@@ -298,6 +300,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     @Input() collectionId: string;
+    showBreadcrumb: InputSignal<boolean> = input(true);
+    showSidebar: InputSignal<boolean> = input(true);
     @Input() variantId: string;
     initialTopicColor: string;
     @HostBinding('style.--topic-color') topicColor: string;

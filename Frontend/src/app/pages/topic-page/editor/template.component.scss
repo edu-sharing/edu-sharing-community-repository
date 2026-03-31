@@ -588,8 +588,8 @@ es-side-menu-wrapper {
         padding-top: var(--offcanvas-offset);
         padding-bottom: var(--offcanvas-offset);
 
-        // reset padding-right on mobile, if the offcanvas menu is moved to the main menu
-        &.sidebar-mobile-hidden {
+        // reset padding-right, if the offcanvas menu is hidden
+        &.sidebar-hidden {
             padding-right: var(--offcanvas-offset);
         }
 
@@ -608,8 +608,8 @@ es-side-menu-wrapper {
         }
     }
 
-    // mobile spacing adjustments
-    .topic-page-content-outer-wrapper.sidebar-mobile-hidden {
+    // spacing adjustments when sidebar is hidden
+    .topic-page-content-outer-wrapper.sidebar-hidden {
         // reset padding-right on mobile, as the offcanvas menu is moved to the main menu
         .topic-page-content-wrapper .topic-page-swimlane-wrapper {
             padding-right: var(--offcanvas-offset);
