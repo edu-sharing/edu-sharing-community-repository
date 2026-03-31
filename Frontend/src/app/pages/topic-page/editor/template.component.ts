@@ -600,7 +600,6 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
                 const swimlaneIndex: number = event?.swimlaneIndex ?? -1;
 
                 if (
-                    color !== '' &&
                     pageVariantNode &&
                     retrieveNodeId(pageVariantNode) === retrieveNodeId(this.pageVariantNode) &&
                     swimlaneIndex > -1
@@ -613,6 +612,9 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
                             await this.checkForCustomPageNodeExistence();
                             const pageVariant: PageVariantConfig = this.retrievePageVariant();
                             this.swimlanes[swimlaneIndex].backgroundColor = color;
+                            if (!color) {
+                                delete this.swimlanes[swimlaneIndex].backgroundColor;
+                            }
                             pageVariant.structure.swimlanes = this.swimlanes;
                             this.pageVariantNode =
                                 await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
