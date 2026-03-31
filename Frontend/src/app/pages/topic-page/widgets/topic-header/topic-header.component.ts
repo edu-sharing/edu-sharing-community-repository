@@ -122,14 +122,17 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
      * @param changes
      */
     async ngOnChanges(changes: SimpleChanges): Promise<void> {
+        const topicChanged: boolean = changes.topic && !changes.topic?.firstChange;
         if (
             changes.nodeId?.firstChange ||
-            changes.nodeId?.currentValue !== changes.nodeId?.previousValue
+            changes.nodeId?.currentValue !== changes.nodeId?.previousValue ||
+            topicChanged
         ) {
             // reset several variables if an actual change was detected
             if (
-                !changes.nodeId?.firstChange &&
-                changes.nodeId?.currentValue !== changes.nodeId?.previousValue
+                (!changes.nodeId?.firstChange &&
+                    changes.nodeId?.currentValue !== changes.nodeId?.previousValue) ||
+                topicChanged
             ) {
                 this.aiGeneratedImage = this.aiSupported();
                 this.aiGeneratedText.set(false);

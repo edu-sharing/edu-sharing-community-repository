@@ -10,11 +10,13 @@ import {
     ElementRef,
     HostBinding,
     Input,
+    OnChanges,
     OnDestroy,
     OnInit,
     QueryList,
     Signal,
     signal,
+    SimpleChanges,
     TemplateRef,
     ViewChild,
     ViewChildren,
@@ -197,7 +199,7 @@ import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/t
     styleUrls: ['./template.component.scss'],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
+export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, OnInit {
     readonly ACCORDION_TYPE: string = SWIMLANE_TYPE_OPTIONS.find(
         (o) => o.viewValue === 'ACCORDION_ELEMENT',
     )?.value;
@@ -468,6 +470,26 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
                     await this.initializeComponent(params.variantId);
                 }
             });
+    }
+
+    /**
+     * Listening to changes in the collection ID or variant ID to reinitialize the component.
+     *
+     * @param changes
+     */
+    async ngOnChanges(changes: SimpleChanges): Promise<void> {
+        const collectionIdChanged: boolean =
+            changes.collectionId && !changes.collectionId.firstChange;
+        const variantIdChanged: boolean = changes.variantId && !changes.variantId.firstChange;
+        if (collectionIdChanged || variantIdChanged) {
+            // reset several values to ensure that the component is properly initialized
+            this.selectedVariantPosition = -1;
+            this.pageConfigNode = null;
+            // set the collection ID
+            this.topicCollectionID.set(changes.collectionId?.currentValue || this.collectionId);
+            // initialize the component
+            await this.initializeComponent(changes.variantId?.currentValue || this.variantId);
+        }
     }
 
     /**
