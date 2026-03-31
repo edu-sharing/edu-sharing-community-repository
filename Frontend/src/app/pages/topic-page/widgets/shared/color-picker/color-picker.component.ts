@@ -3,7 +3,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { TranslateModule } from '@ngx-translate/core';
-import { NgxColorsColor, NgxColorsModule } from 'ngx-colors';
+import { NgxColorsModule } from 'ngx-colors';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import { ColorHelper } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
@@ -18,6 +18,7 @@ export class ColorPickerComponent implements OnInit {
     private _selectedColor: string = '#ffffff';
     private _initialColor: string | null = null;
 
+    @Input() addTransparency: boolean = false;
     @Input()
     get selectedColor(): string {
         return this._selectedColor;
@@ -42,7 +43,7 @@ export class ColorPickerComponent implements OnInit {
     set internalColor(value: string) {
         this._selectedColor = value;
     }
-    protected palette: NgxColorsColor[] = [];
+    protected palette: any[] = [];
 
     constructor(private configService: ConfigService) {}
 
@@ -60,6 +61,10 @@ export class ColorPickerComponent implements OnInit {
                 variants: ColorHelper.generateHslVariants(c, 7).reverse(),
             });
         });
+        // workaround to reset the color to the default undefined color
+        if (this.addTransparency) {
+            this.palette.push(undefined);
+        }
     }
 
     /**
