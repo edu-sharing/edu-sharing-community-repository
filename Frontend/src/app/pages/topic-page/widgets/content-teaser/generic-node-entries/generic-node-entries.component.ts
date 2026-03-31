@@ -605,15 +605,15 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             this.injectCustomCards(customCardsCount);
         }
 
-        // emit the node statistics of the search result
-        void this.emitVisibleNodes(
-            this.allRequestedNodes,
-            this.blacklistedNodeIds,
-            searchResult.pagination.total,
-            skipCount,
-            query,
-            criteria,
-        );
+        // emit the currently loaded visible nodes
+        const emitNodes = (mappingNodes: Node[]): void => {
+            const visibleNodes: Node[] = mappingNodes.filter(
+                (n) => n?.ref?.id && !this.blacklistedNodeIds.includes(n.ref.id),
+            );
+            this.visibleNodesChanged.emit(visibleNodes);
+        };
+
+        emitNodes(this.allRequestedNodes);
     }
 
     /**
@@ -830,73 +830,6 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             )?.[index];
         }
         return null;
-    }
-
-    /**
-     * Helper function to emit the visible nodes.
-     * Blacklisted nodes are not emitted.
-     */
-    async emitVisibleNodes(
-        nodes: Node[],
-        blacklistedIds: string[],
-        totalCount: number,
-        skipCount: number = 0,
-        query: string,
-        criteria: MdsQueryCriteria[],
-    ): Promise<void> {
-        // emit the visible nodes
-        const emitNodes = (mappingNodes: Node[]): void => {
-            const visibleNodes: Node[] = mappingNodes.filter(
-                (n) => n?.ref?.id && !blacklistedIds.includes(n.ref.id),
-            );
-            this.visibleNodesChanged.emit(visibleNodes);
-        };
-        // nodes have already removed duplicates, so no additional check is necessary
-        if (totalCount <= this.maxItems) {
-            emitNodes(nodes);
-        }
-
-        // an update should be emitted if it is the initial call and the totalCount is larger than the maxItems
-        // in this case, 100 items are loaded
-        // if (skipCount === 0 && totalCount > this.maxItems) {
-        //     const timeOfRequest: Date = new Date();
-        //     // TODO: remove, if implemented properly
-        //     if (this.customTypeInstance) {
-        //         return;
-        //     }
-        //     const request: SearchRequestParams = {
-        //         query,
-        //         repository: HOME_REPOSITORY,
-        //         maxItems: 100,
-        //         skipCount: 0,
-        //         propertyFilter: [PROPERTY_FILTER_ALL],
-        //         contentType: 'ALL',
-        //         metadataset: this.mds || this.genericWidgetGlobalService.getDefaultMds(),
-        //         sortProperties: ['cm:created'],
-        //         sortAscending: [true],
-        //         body: {
-        //             criteria,
-        //             resolveCollections: this.layout !== GenericNodeEntriesDisplayType.MapView,
-        //         },
-        //     };
-        //     const searchResult: SearchResults = await firstValueFrom(
-        //         this.searchService.search(request),
-        //     );
-        //     const copyOfAllRequestedNodes: Node[] = JSON.parse(
-        //         JSON.stringify(this.allRequestedNodes),
-        //     );
-        //     const existingNodeIds: string[] = copyOfAllRequestedNodes.map((n: Node) => n.ref.id);
-        //     // avoid pushing duplicates
-        //     searchResult.nodes?.forEach((node: Node): void => {
-        //         if (!existingNodeIds.includes(node.ref.id)) {
-        //             copyOfAllRequestedNodes.push(node);
-        //             existingNodeIds.push(node.ref.id);
-        //         }
-        //     });
-        //     if (!this.lastSearchUpdate || this.lastSearchUpdate < timeOfRequest) {
-        //         emitNodes(copyOfAllRequestedNodes);
-        //     }
-        // }
     }
 
     /**
