@@ -301,6 +301,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     @Input() collectionId: string;
     @Input() customUrl?: (node: Node) => string;
+    @Input() customUrlTarget?: '_self' | '_blank';
     showBreadcrumb: InputSignal<boolean> = input(true);
     showSidebar: InputSignal<boolean> = input(true);
     @Input() variantId: string;
@@ -478,6 +479,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         // if a custom URL is input, register it in the topic page global service
         if (this.customUrl) {
             this.topicPageGlobalService.setCustomUrlFunction(this.customUrl);
+        }
+        // if a custom URL target is input, register it in the topic page global service
+        if (this.customUrlTarget) {
+            this.topicPageGlobalService.setCustomUrlTarget(this.customUrlTarget);
         }
     }
 

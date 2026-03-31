@@ -111,7 +111,7 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
                 (queryParamsArray.length > 0 ? '?' + queryParamsArray.join('&') : '');
             await this.router.navigateByUrl(url);
         } else {
-            window.open(url, '_self');
+            window.open(url, this.topicPageGlobalService.getCustomUrlTarget());
         }
     }
 

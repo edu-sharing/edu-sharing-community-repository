@@ -31,6 +31,7 @@ export class TopicPageGlobalService {
     private customApplyFilterExtras: NavigationExtras;
     private customSideMenuItems: CustomSideMenuItem[] = [];
     private customUrlFunction: (node: Node) => string;
+    private customUrlTarget: '_self' | '_blank' = '_self';
     private sidebarMobileHidden: boolean = false;
     private visibleNodesMap: Map<string, Node[]> = new Map<string, Node[]>();
     private visibleNodesUpdated = new Subject<void>();
@@ -125,6 +126,13 @@ export class TopicPageGlobalService {
     }
 
     /**
+     * Sets a custom URL target for links.
+     */
+    setCustomUrlTarget(target: '_self' | '_blank'): void {
+        this.customUrlTarget = target;
+    }
+
+    /**
      * Retrieves the custom reurl component, if available.
      */
     getCustomReurlComponent(): string {
@@ -157,6 +165,13 @@ export class TopicPageGlobalService {
      */
     getCustomUrlFunction(): ((node: Node) => string) | null {
         return this.customUrlFunction;
+    }
+
+    /**
+     * Retrieves the custom URL target, if available.
+     */
+    getCustomUrlTarget(): '_self' | '_blank' {
+        return this.customUrlTarget;
     }
 
     /**
