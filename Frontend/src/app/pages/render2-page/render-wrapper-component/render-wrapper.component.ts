@@ -1,5 +1,6 @@
 import {
     Component,
+    ElementRef,
     EventEmitter,
     Input,
     OnChanges,
@@ -44,12 +45,25 @@ export class RenderWrapperComponent implements OnChanges {
     @ViewChild(ActionbarComponent) actionbar: ActionbarComponent;
     @Input() showTopbar = true;
     @Input() showMetadata = true;
+    /**
+     * shall childobjects be shown (as a list at the top)
+     */
+    @Input() showChildobjects = false;
     @Input() nodeId: string;
     @Input() repository: string;
     @Input() version: string;
     @Input() childId: string = null;
     @Output() childIdChange = new EventEmitter<string>();
 
+    @ViewChild('childobjects') childobjects: ElementRef;
+    /**
+     * updates via boxObserver
+     * and holds the information if scrolling in the direction is currently feasible
+     */
+    scroll = {
+        left: false,
+        right: false,
+    };
     data = signal<CombinedRenderData>(null);
     loading = signal(false);
     children = signal<Node[]>(null);
@@ -67,20 +81,24 @@ export class RenderWrapperComponent implements OnChanges {
 
     async ngOnChanges(changes: SimpleChanges) {
         if (changes.nodeId) {
-            this.children.set(
-                (
-                    await firstValueFrom(
-                        this.nodeService.getChildren(changes.nodeId.currentValue, {
-                            repository: this.repository,
-                            filter: ['files'],
-                            sortProperties: [RestConstants.CCM_PROP_CHILDOBJECT_ORDER],
-                            sortAscending: [true],
-                            assocName: RestConstants.CCM_ASSOC_CHILDIO,
-                            maxItems: RestConstants.COUNT_UNLIMITED,
-                        }),
-                    )
-                ).nodes,
-            );
+            if (this.showChildobjects) {
+                this.children.set(
+                    (
+                        await firstValueFrom(
+                            this.nodeService.getChildren(changes.nodeId.currentValue, {
+                                repository: this.repository,
+                                filter: ['files'],
+                                sortProperties: [RestConstants.CCM_PROP_CHILDOBJECT_ORDER],
+                                sortAscending: [true],
+                                assocName: RestConstants.CCM_ASSOC_CHILDIO,
+                                maxItems: RestConstants.COUNT_UNLIMITED,
+                            }),
+                        )
+                    ).nodes,
+                );
+            } else {
+                this.children.set(null);
+            }
         }
         if (changes.nodeId || changes.childId) {
             await this.refresh();
@@ -112,5 +130,36 @@ export class RenderWrapperComponent implements OnChanges {
     }
     goBack() {
         window.history.back();
+    }
+
+    private canScroll(direction: 'left' | 'right') {
+        const element = this.childobjects?.nativeElement;
+        if (element) {
+            if (direction === 'left') {
+                return element.scrollLeft > 0;
+            } else if (direction === 'right') {
+                /*
+                 use a small pixel buffer (10px) because scrolling aligns with the start of each card and
+                 it can cause slight alignment issues on the end of the container
+                 */
+                return element.scrollLeft < element.scrollWidth - element.clientWidth - 10;
+            }
+        }
+        return false;
+    }
+
+    updateScrollState() {
+        this.scroll.left = this.canScroll('left');
+        this.scroll.right = this.canScroll('right');
+    }
+    doScroll(direction: 'left' | 'right') {
+        // 1 is enough because the browser will handle it via css snapping
+        const leftScroll = this.childobjects?.nativeElement.scrollLeft;
+        const rect = this.childobjects?.nativeElement.getBoundingClientRect();
+        // using scroll because it works more reliable than scrollBy
+        this.childobjects?.nativeElement.scroll({
+            left: leftScroll + Math.max(250, rect.width * 0.4) * (direction === 'right' ? 1 : -1),
+            behavior: 'smooth',
+        });
     }
 }

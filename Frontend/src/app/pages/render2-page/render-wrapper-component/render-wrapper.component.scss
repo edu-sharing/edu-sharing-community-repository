@@ -2,8 +2,9 @@
 $rsPaddingHorizontal: 2vw;
 
 $rsPaddingVertical: 20px;
-$maxHeight: calc(100vh - var(--mainnavHeight) - $rsPaddingVertical);
-$minHeight: calc(100vh - var(--mainnavHeight) - $rsPaddingVertical - 100px);
+$horizontalScrollPadding: 1.5em;
+$maxHeight: calc(100vh - var(--mainnavHeight) - $rsPaddingVertical - 100px);
+$minHeight: calc(100vh - var(--mainnavHeight) - $rsPaddingVertical - 200px);
 es-spinner {
     height: 100%;
     max-height: $maxHeight;
@@ -11,53 +12,108 @@ es-spinner {
     justify-content: center;
     align-items: center;
 }
-.child-objects {
-    padding: 30px 20px;
-    min-width: 100%;
-    text-align: center;
-    overflow: hidden;
+.child-objects-wrapper {
     position: relative;
-    white-space: nowrap;
-    .itemTitle {
-        color: #585858;
-        display: inline-block;
-        width: 100px;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
+    margin: 30px 20px;
+    min-width: calc(100% - 60px);
+    .child-objects {
+        width: 100%;
+        padding: 10px;
         text-align: center;
-        margin-bottom: -2px;
-    }
-    .wrapperouter {
-        display: inline-block;
+        overflow-x: auto;
+        overflow-y: hidden;
+        @include materialScrollbar();
         position: relative;
-        margin: 0 10px;
-        .wrapper {
-            margin: 3px;
-            @include materialShadow();
-            img {
-                margin-bottom: -5px;
-                height: 75px;
-                width: 100px;
-                object-fit: cover;
+        white-space: nowrap;
+
+        .itemTitle {
+            color: #585858;
+            display: inline-block;
+            width: 100px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            text-align: center;
+            margin-bottom: -2px;
+        }
+
+        .wrapperouter {
+            display: inline-block;
+            position: relative;
+            margin: 0 10px;
+
+            .wrapper {
+                margin: 3px;
+                @include materialShadow();
+
+                img {
+                    margin-bottom: -5px;
+                    height: 75px;
+                    width: 100px;
+                    object-fit: cover;
+                }
+            }
+
+            .wrapper.selected {
+                margin: 0;
+                border: 3px solid var(--palette-primary-200);
+                @include materialShadowMediumLarge();
+            }
+
+            .wrapper.selected:after {
+                content: '';
+                position: absolute;
+                left: 43px;
+                top: 100px;
+                width: 0;
+                height: 0;
+                border-left: 10px solid transparent;
+                border-right: 10px solid transparent;
+                border-top: 10px solid var(--palette-primary-200);
+                clear: both;
             }
         }
-        .wrapper.selected {
-            margin: 0;
-            border: 3px solid var(--palette-primary-200);
-            @include materialShadowMediumLarge();
+    }
+    .scroll-helper-left,
+    .scroll-helper-right {
+        position: absolute;
+        width: 15%;
+        min-width: 60px;
+        max-width: calc(var(--cardWidth) * 0.4);
+        display: flex;
+        align-items: center;
+        // do not overlay scrollbar
+        height: calc(100% - 10px);
+        z-index: 5;
+        @include clickable();
+        > button {
+            background-color: #fff;
+            color: var(--primary);
+            @include materialShadowMediumLarge(false, 0.25);
         }
-        .wrapper.selected:after {
-            content: '';
-            position: absolute;
-            left: 43px;
-            top: 100px;
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-top: 10px solid var(--palette-primary-200);
-            clear: both;
+    }
+    .scroll-helper-left {
+        left: -$horizontalScrollPadding;
+        justify-content: flex-start;
+        background: linear-gradient(
+            to left,
+            transparent 0,
+            #fff calc(100% - $horizontalScrollPadding)
+        );
+        > button {
+            margin-left: calc($horizontalScrollPadding - 8px);
+        }
+    }
+    .scroll-helper-right {
+        right: -$horizontalScrollPadding;
+        justify-content: flex-end;
+        background: linear-gradient(
+            to right,
+            transparent 0,
+            #fff calc(100% - $horizontalScrollPadding)
+        );
+        > button {
+            margin-right: calc($horizontalScrollPadding - 8px);
         }
     }
 }
@@ -66,7 +122,7 @@ rs-root {
     //max-height: $maxHeight;
     margin: $rsPaddingVertical $rsPaddingHorizontal;
     padding: 0;
-    --containerHeight: #{$maxHeight};
+    --containerHeight: var(--renderWrapperHeight, #{$maxHeight});
     ::ng-deep {
         .module {
             width: 100%;
@@ -77,18 +133,12 @@ rs-root {
             &.module-JUPYTER,
             &.module-EDUHTML,
             &.module-BINDER,
-            &.module-PDF,
             &.module-SPREADSHEET,
             &.module-MOODLE,
-            &.module-HTML,
-            &.module-DOCUMENT {
+            &.module-HTML {
                 width: 70%;
                 height: auto;
                 aspect-ratio: 16 / 9;
-            }
-            &.module-H5P {
-                width: 70%;
-                height: auto;
             }
             &.module-VIDEO,
             &.module-url {
@@ -105,8 +155,12 @@ rs-root {
                     width: 90%;
                 }
             }
-            &.module-PDF ngx-extended-pdf-viewer .zoom {
-                height: $minHeight !important;
+            // @TODO: Move this into the library pdf component and obey the --containerHeight var!
+            &.module-DOCUMENT,
+            &.module-PDF {
+                ngx-extended-pdf-viewer .zoom {
+                    height: var(--containerHeight) !important;
+                }
             }
             // some modules should get 100% of the browser height
             rs-module-pdf {
