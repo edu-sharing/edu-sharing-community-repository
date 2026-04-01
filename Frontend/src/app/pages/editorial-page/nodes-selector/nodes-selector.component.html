@@ -148,7 +148,13 @@
         <!-- TODO: move into actionbar -->
         <mat-button-toggle-group
           class="collection-display-type"
-          [disabled]="collectionsDisplayTypeToggleDisabled()"
+          [disabled]="
+            collectionsDisplayTypeToggleDisabled() ||
+            (collectionsDisplayType() === NodeEntriesDisplayType.Tree &&
+              dataSourceCollectionsTree.isLoading) ||
+            (collectionsDisplayType() !== NodeEntriesDisplayType.Tree &&
+              dataSourceCollectionsFlat.isLoading)
+          "
           hideSingleSelectionIndicator
           [value]="collectionsDisplayType()"
           (change)="onCollectionsDisplayTypeChange($event)"
