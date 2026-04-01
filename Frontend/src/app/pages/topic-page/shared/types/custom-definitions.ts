@@ -116,38 +116,27 @@ export const SWIMLANE_BACKGROUND_SHAPE_OPTIONS: SwimlaneBackgroundOption[] = [
         viewValue: 'NONE',
     },
     {
-        image: 'svg-arrow_large_shape',
         shape: SwimlaneBackgroundShape.ArrowLarge,
         viewValue: 'ARROW_LARGE',
     },
     {
-        image: 'svg-arrow_small_shape',
         shape: SwimlaneBackgroundShape.ArrowSmall,
         viewValue: 'ARROW_SMALL',
     },
     {
-        image: 'svg-flag_large_shape',
         shape: SwimlaneBackgroundShape.FlagLarge,
         viewValue: 'FLAG_LARGE',
     },
     {
-        image: 'svg-flag_small_shape',
         shape: SwimlaneBackgroundShape.FlagSmall,
         viewValue: 'FLAG_SMALL',
     },
     {
-        image: 'svg-round_large_shape',
         shape: SwimlaneBackgroundShape.RoundLarge,
         viewValue: 'ROUND_LARGE',
     },
     {
-        image: 'svg-round_small_shape',
         shape: SwimlaneBackgroundShape.RoundSmall,
         viewValue: 'ROUND_SMALL',
     },
 ];
-
-export const SWIMLANE_SHAPE_TO_IMAGE_MAPPING: Map<SwimlaneBackgroundShape, string> = new Map<
-    SwimlaneBackgroundShape,
-    string
->(SWIMLANE_BACKGROUND_SHAPE_OPTIONS.map((option) => [option.shape, option.image]));

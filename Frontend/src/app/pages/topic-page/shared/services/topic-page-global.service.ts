@@ -1,5 +1,6 @@
 import { Injectable, TemplateRef, Type } from '@angular/core';
 import { NavigationExtras } from '@angular/router';
+import { NgxColorsColor } from 'ngx-colors';
 import { Node } from 'ngx-edu-sharing-api';
 import { Observable, Subject } from 'rxjs';
 import { BreadcrumbExtensionInterface } from '../../widgets/breadcrumb/breadcrumb.component';
@@ -29,8 +30,10 @@ export class TopicPageGlobalService {
     private customReurlExtras: NavigationExtras;
     private customApplyFilterComponent: string = '';
     private customApplyFilterExtras: NavigationExtras;
+    private customColorPalette: string[] | NgxColorsColor[] = [];
     private customSideMenuItems: CustomSideMenuItem[] = [];
     private customUrlFunction: (node: Node) => string;
+    private customUrlTarget: '_self' | '_blank' = '_self';
     private sidebarMobileHidden: boolean = false;
     private visibleNodesMap: Map<string, Node[]> = new Map<string, Node[]>();
     private visibleNodesUpdated = new Subject<void>();
@@ -69,6 +72,15 @@ export class TopicPageGlobalService {
      */
     setCustomReurlExtras(extras: NavigationExtras) {
         this.customReurlExtras = extras;
+    }
+
+    /**
+     * Sets a custom color palette for the topic page.
+     *
+     * @param palette
+     */
+    setCustomColorPalette(palette: string[] | NgxColorsColor[]) {
+        this.customColorPalette = palette;
     }
 
     /**
@@ -125,6 +137,13 @@ export class TopicPageGlobalService {
     }
 
     /**
+     * Sets a custom URL target for links.
+     */
+    setCustomUrlTarget(target: '_self' | '_blank'): void {
+        this.customUrlTarget = target;
+    }
+
+    /**
      * Retrieves the custom reurl component, if available.
      */
     getCustomReurlComponent(): string {
@@ -136,6 +155,13 @@ export class TopicPageGlobalService {
      */
     getCustomReurlExtras() {
         return this.customReurlExtras;
+    }
+
+    /**
+     * Retrieves the custom color palette, if available.
+     */
+    getCustomColorPalette(): string[] | NgxColorsColor[] {
+        return this.customColorPalette;
     }
 
     /**
@@ -157,6 +183,13 @@ export class TopicPageGlobalService {
      */
     getCustomUrlFunction(): ((node: Node) => string) | null {
         return this.customUrlFunction;
+    }
+
+    /**
+     * Retrieves the custom URL target, if available.
+     */
+    getCustomUrlTarget(): '_self' | '_blank' {
+        return this.customUrlTarget;
     }
 
     /**

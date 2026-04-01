@@ -9,12 +9,16 @@ import {
     CUSTOM_ELEMENTS_SCHEMA,
     ElementRef,
     HostBinding,
+    input,
     Input,
+    InputSignal,
+    OnChanges,
     OnDestroy,
     OnInit,
     QueryList,
     Signal,
     signal,
+    SimpleChanges,
     TemplateRef,
     ViewChild,
     ViewChildren,
@@ -86,7 +90,6 @@ import {
 import { TopicPageHelperService } from '../shared/services/topic-page-helper.service';
 import {
     DEFAULT_AI_CONFIG_PROP,
-    DEFAULT_ICON_PATH,
     DEFAULT_PAGE_CONFIG_ASPECT,
     DEFAULT_PAGE_CONFIG_PROP,
     DEFAULT_PAGE_CONFIG_PROPAGATE_REF_PROP,
@@ -101,7 +104,6 @@ import {
     DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP,
     DEFAULT_WIDGET_CONFIG_PROP,
     DEFAULT_WIDGET_NAME_PREFIX,
-    SWIMLANE_SHAPE_TO_IMAGE_MAPPING,
     SWIMLANE_TYPE_OPTIONS,
     WIDGET_TYPE,
     WIDGETS,
@@ -154,6 +156,7 @@ import {
 import { AddSwimlaneBorderButtonComponent } from './add-swimlane-button/add-swimlane-border-button.component';
 import { ConfigurePageVariantComponent } from './configure-page-variant/configure-page-variant.component';
 import { SwimlaneComponent } from './swimlane/swimlane.component';
+import { SwimlaneBackgroundShapeComponent } from './swimlane-background-shape/swimlane-background-shape.component';
 import { SwimlaneSettingsDialogComponent } from './swimlane/swimlane-settings-dialog/swimlane-settings-dialog.component';
 import { SwimlaneConfigurationButtonsComponent } from './swimlane-configuration-buttons/swimlane-configuration-buttons.component';
 import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/topic-page-filters-sidebar.component';
@@ -177,6 +180,7 @@ import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/t
         SharedModule,
         SideMenuItemComponent,
         SideMenuWrapperComponent,
+        SwimlaneBackgroundShapeComponent,
         SwimlaneComponent,
         SwimlaneConfigurationButtonsComponent,
         SwimlaneSearchCountPipe,
@@ -197,7 +201,7 @@ import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/t
     styleUrls: ['./template.component.scss'],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
+export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, OnInit {
     readonly ACCORDION_TYPE: string = SWIMLANE_TYPE_OPTIONS.find(
         (o) => o.viewValue === 'ACCORDION_ELEMENT',
     )?.value;
@@ -296,6 +300,10 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
     }
 
     @Input() collectionId: string;
+    @Input() customUrl?: (node: Node) => string;
+    @Input() customUrlTarget?: '_self' | '_blank';
+    showBreadcrumb: InputSignal<boolean> = input(true);
+    showSidebar: InputSignal<boolean> = input(true);
     @Input() variantId: string;
     initialTopicColor: string;
     @HostBinding('style.--topic-color') topicColor: string;
@@ -468,6 +476,34 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
                     await this.initializeComponent(params.variantId);
                 }
             });
+        // if a custom URL is input, register it in the topic page global service
+        if (this.customUrl) {
+            this.topicPageGlobalService.setCustomUrlFunction(this.customUrl);
+        }
+        // if a custom URL target is input, register it in the topic page global service
+        if (this.customUrlTarget) {
+            this.topicPageGlobalService.setCustomUrlTarget(this.customUrlTarget);
+        }
+    }
+
+    /**
+     * Listening to changes in the collection ID or variant ID to reinitialize the component.
+     *
+     * @param changes
+     */
+    async ngOnChanges(changes: SimpleChanges): Promise<void> {
+        const collectionIdChanged: boolean =
+            changes.collectionId && !changes.collectionId.firstChange;
+        const variantIdChanged: boolean = changes.variantId && !changes.variantId.firstChange;
+        if (collectionIdChanged || variantIdChanged) {
+            // reset several values to ensure that the component is properly initialized
+            this.selectedVariantPosition = -1;
+            this.pageConfigNode = null;
+            // set the collection ID
+            this.topicCollectionID.set(changes.collectionId?.currentValue || this.collectionId);
+            // initialize the component
+            await this.initializeComponent(changes.variantId?.currentValue || this.variantId);
+        }
     }
 
     /**
@@ -600,7 +636,6 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
                 const swimlaneIndex: number = event?.swimlaneIndex ?? -1;
 
                 if (
-                    color !== '' &&
                     pageVariantNode &&
                     retrieveNodeId(pageVariantNode) === retrieveNodeId(this.pageVariantNode) &&
                     swimlaneIndex > -1
@@ -613,6 +648,9 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
                             await this.checkForCustomPageNodeExistence();
                             const pageVariant: PageVariantConfig = this.retrievePageVariant();
                             this.swimlanes[swimlaneIndex].backgroundColor = color;
+                            if (!color) {
+                                delete this.swimlanes[swimlaneIndex].backgroundColor;
+                            }
                             pageVariant.structure.swimlanes = this.swimlanes;
                             this.pageVariantNode =
                                 await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
@@ -1987,7 +2025,9 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
                 retrieveNodeId(node),
             );
             this.propagatingParentNode = parents.nodes.find(
-                (parent: Node) => !!retrievePageConfigPropagateRef(parent),
+                (parent: Node) =>
+                    retrieveNodeId(node) !== retrieveNodeId(parent) &&
+                    !!retrievePageConfigPropagateRef(parent),
             );
             if (this.propagatingParentNode) {
                 pageRef = retrievePageConfigPropagateRef(this.propagatingParentNode);
@@ -2535,9 +2575,7 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
         return bestMatchIndex;
     }
 
-    protected readonly iconPath: string = DEFAULT_ICON_PATH;
     protected readonly pageVariantConfigPrefix = DEFAULT_PAGE_VARIANT_NAME_PREFIX;
     protected readonly SwimlaneBackgroundShape = SwimlaneBackgroundShape;
-    protected readonly swimlaneShapeToImageMapping = SWIMLANE_SHAPE_TO_IMAGE_MAPPING;
     protected readonly WIDGETS = WIDGETS;
 }
