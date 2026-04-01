@@ -126,6 +126,8 @@
     .mat-button-toggle {
         border: none;
         border-radius: 50%;
+        // fix focus should be limited to round button
+        overflow: hidden;
         padding: 0;
         width: 32px;
         height: 32px;
@@ -137,6 +139,10 @@
         &::ng-deep {
             .mat-button-toggle-button {
                 height: 100%;
+                // fix centering of icons
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
 
             .mat-button-toggle-label-content {
