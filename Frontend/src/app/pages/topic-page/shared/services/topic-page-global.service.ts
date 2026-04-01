@@ -1,5 +1,6 @@
 import { Injectable, TemplateRef, Type } from '@angular/core';
 import { NavigationExtras } from '@angular/router';
+import { NgxColorsColor } from 'ngx-colors';
 import { Node } from 'ngx-edu-sharing-api';
 import { Observable, Subject } from 'rxjs';
 import { BreadcrumbExtensionInterface } from '../../widgets/breadcrumb/breadcrumb.component';
@@ -29,6 +30,7 @@ export class TopicPageGlobalService {
     private customReurlExtras: NavigationExtras;
     private customApplyFilterComponent: string = '';
     private customApplyFilterExtras: NavigationExtras;
+    private customColorPalette: string[] | NgxColorsColor[] = [];
     private customSideMenuItems: CustomSideMenuItem[] = [];
     private customUrlFunction: (node: Node) => string;
     private customUrlTarget: '_self' | '_blank' = '_self';
@@ -70,6 +72,15 @@ export class TopicPageGlobalService {
      */
     setCustomReurlExtras(extras: NavigationExtras) {
         this.customReurlExtras = extras;
+    }
+
+    /**
+     * Sets a custom color palette for the topic page.
+     *
+     * @param palette
+     */
+    setCustomColorPalette(palette: string[] | NgxColorsColor[]) {
+        this.customColorPalette = palette;
     }
 
     /**
@@ -144,6 +155,13 @@ export class TopicPageGlobalService {
      */
     getCustomReurlExtras() {
         return this.customReurlExtras;
+    }
+
+    /**
+     * Retrieves the custom color palette, if available.
+     */
+    getCustomColorPalette(): string[] | NgxColorsColor[] {
+        return this.customColorPalette;
     }
 
     /**

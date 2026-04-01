@@ -3,10 +3,11 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { TranslateModule } from '@ngx-translate/core';
-import { NgxColorsModule } from 'ngx-colors';
+import { NgxColorsColor, NgxColorsModule } from 'ngx-colors';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import { ColorHelper } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
+import { TopicPageGlobalService } from '../../../shared/services/topic-page-global.service';
 
 @Component({
     selector: 'es-color-picker',
@@ -45,24 +46,37 @@ export class ColorPickerComponent implements OnInit {
     }
     protected palette: any[] = [];
 
-    constructor(private configService: ConfigService) {}
+    constructor(
+        private configService: ConfigService,
+        private topicPageGlobalService: TopicPageGlobalService,
+    ) {}
 
     /**
-     * Initializes the component by retrieving the default colors and generating the color palette.
+     * Initializes the component by retrieving a defined color palette or the default colors and generating the palette.
      */
     async ngOnInit() {
-        const colors = await this.configService.get<string[]>(
-            'collections.colors',
-            RestConstants.DEFAULT_COLLECTION_COLORS,
-        );
-        colors.forEach((c) => {
-            this.palette.push({
-                preview: c,
-                variants: ColorHelper.generateHslVariants(c, 7).reverse(),
+        // check whether a custom color palette is defined, otherwise use the default colors
+        if (this.topicPageGlobalService.getCustomColorPalette()?.length) {
+            // pushing is necessary to avoid conflicts among different instances of the color picker
+            this.topicPageGlobalService
+                .getCustomColorPalette()
+                .forEach((color: string | NgxColorsColor) => {
+                    this.palette.push(color);
+                });
+        } else {
+            const colors = await this.configService.get<string[]>(
+                'collections.colors',
+                RestConstants.DEFAULT_COLLECTION_COLORS,
+            );
+            colors.forEach((c) => {
+                this.palette.push({
+                    preview: c,
+                    variants: ColorHelper.generateHslVariants(c, 7).reverse(),
+                });
             });
-        });
+        }
         // workaround to reset the color to the default undefined color
-        if (this.addTransparency) {
+        if (this.addTransparency && !this.palette.includes(undefined)) {
             this.palette.push(undefined);
         }
     }
