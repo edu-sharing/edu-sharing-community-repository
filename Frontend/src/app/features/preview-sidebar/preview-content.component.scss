@@ -17,18 +17,18 @@ $previewHeight: 400px;
             display: grid;
         }
 
-        es-render-wrapper-component rs-root {
-            width: 100%;
-            height: auto;
-            min-height: $previewHeight;
-            max-height: $previewHeight;
-            margin: 0;
-            > div {
-                width: 100% !important;
-            }
+        es-render-wrapper-component {
+            --renderWrapperHeight: #{$previewHeight};
+            rs-root {
+                width: 100%;
+                height: auto;
+                min-height: $previewHeight;
+                max-height: $previewHeight;
+                margin: 0;
 
-            .module.module-PDF ngx-extended-pdf-viewer .zoom {
-                height: $previewHeight !important;
+                > div {
+                    width: 100% !important;
+                }
             }
         }
     }

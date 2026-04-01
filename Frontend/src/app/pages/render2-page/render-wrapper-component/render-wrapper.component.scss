@@ -2,8 +2,8 @@
 $rsPaddingHorizontal: 2vw;
 
 $rsPaddingVertical: 20px;
-$maxHeight: calc(100vh - var(--mainnavHeight) - $rsPaddingVertical);
-$minHeight: calc(100vh - var(--mainnavHeight) - $rsPaddingVertical - 100px);
+$maxHeight: calc(100vh - var(--mainnavHeight) - $rsPaddingVertical - 100px);
+$minHeight: calc(100vh - var(--mainnavHeight) - $rsPaddingVertical - 200px);
 es-spinner {
     height: 100%;
     max-height: $maxHeight;
@@ -66,7 +66,7 @@ rs-root {
     //max-height: $maxHeight;
     margin: $rsPaddingVertical $rsPaddingHorizontal;
     padding: 0;
-    --containerHeight: #{$maxHeight};
+    --containerHeight: var(--renderWrapperHeight, #{$maxHeight});
     ::ng-deep {
         .module {
             width: 100%;
@@ -77,12 +77,9 @@ rs-root {
             &.module-JUPYTER,
             &.module-EDUHTML,
             &.module-BINDER,
-            &.module-H5P,
-            &.module-PDF,
             &.module-SPREADSHEET,
             &.module-MOODLE,
-            &.module-HTML,
-            &.module-DOCUMENT {
+            &.module-HTML {
                 width: 70%;
                 height: auto;
                 aspect-ratio: 16 / 9;
@@ -102,8 +99,12 @@ rs-root {
                     width: 90%;
                 }
             }
-            &.module-PDF ngx-extended-pdf-viewer .zoom {
-                height: $minHeight !important;
+            // @TODO: Move this into the library pdf component and obey the --containerHeight var!
+            &.module-DOCUMENT,
+            &.module-PDF {
+                ngx-extended-pdf-viewer .zoom {
+                    height: var(--containerHeight) !important;
+                }
             }
             // some modules should get 100% of the browser height
             rs-module-pdf {
