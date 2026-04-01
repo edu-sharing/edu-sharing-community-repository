@@ -127,6 +127,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
 
     // Additional inputs that might be specific to certain widgets
     @Input() customUrl?: (node: Node) => string;
+    @Input() customUrlTarget?: '_self' | '_blank';
     @Input() defaultNodeId: string = '';
     @Input() displayLimit?: number;
     @Input() height?: string;
@@ -260,6 +261,10 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         // special case for customUrl: if defined, set it globally for the widgets
         if (this.customUrl) {
             this.topicPageGlobalService.setCustomUrlFunction(this.customUrl);
+        }
+        // if a custom URL target is input, register it in the topic page global service
+        if (this.customUrlTarget) {
+            this.topicPageGlobalService.setCustomUrlTarget(this.customUrlTarget);
         }
     }
 
