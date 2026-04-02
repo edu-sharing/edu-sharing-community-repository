@@ -50,14 +50,17 @@
 </ng-container>
 <ng-template #editMode>
   <es-self-adjusting-textarea
-    [showAiButtons]="showAiButtons"
+    [aiGenerated]="aiGenerated"
     [alignCenter]="alignCenter"
     [disabled]="disabled"
     [headerElement]="headerElement"
     [hideToolbar]="headerElement !== ''"
     [inputLimit]="inputLimit"
     [label]="label"
+    [showAiButtons]="showAiButtons"
+    [showAiCheckbox]="showAiCheckbox"
     [(text)]="text"
+    (generateWithAiChanged)="onGenerateWithAiChanged($event)"
     (textChange)="emitTextChange($event)"
   ></es-self-adjusting-textarea>
 </ng-template>

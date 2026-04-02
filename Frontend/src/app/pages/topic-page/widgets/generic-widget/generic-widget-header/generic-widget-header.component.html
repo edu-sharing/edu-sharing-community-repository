@@ -8,7 +8,9 @@
   [headerElement]="'h3'"
   [label]="'TOPIC_PAGE.WIDGET.SUB_HEADING_LABEL_OPTIONAL' | translate"
   [searchInput]="searchInput()"
+  [showAiCheckbox]="true"
   [text]="headline() | aiTextPrompt : editMode() : headlineMapping()"
+  (generateWithAiChanged)="onGenerateWithAiChanged($event, true)"
   (searchResultsUpdated)="onSearchResultsUpdated($event, 'headline')"
   (textChange)="onTextChange($event, true)"
 ></es-editable-text>
@@ -22,7 +24,9 @@
   [label]="descriptionLabel() | translate"
   [searchInput]="searchInput()"
   [showAiButtons]="aiSupported()"
+  [showAiCheckbox]="true"
   [text]="description() | aiTextPrompt : editMode() : descriptionMapping()"
+  (generateWithAiChanged)="onGenerateWithAiChanged($event, false)"
   (searchResultsUpdated)="onSearchResultsUpdated($event, 'description')"
   (textChange)="onTextChange($event)"
 ></es-editable-text>
