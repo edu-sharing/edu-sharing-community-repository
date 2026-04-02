@@ -22,7 +22,7 @@
   ></es-actionbar>
 </div>
 <es-info-message mode="error" *ngIf="data()?.error">{{ data().error | translate }}</es-info-message>
-<div class="child-objects-wrapper">
+<div class="child-objects-wrapper" *ngIf="data()?.node && children()?.length > 0">
   <div
     class="scroll-helper-left"
     role="presentation"
@@ -46,7 +46,6 @@
   <div
     class="child-objects"
     #childobjects
-    *ngIf="data()?.node && children()?.length > 0"
     (scroll)="updateScrollState()"
     (esBorderBoxObserver)="updateScrollState()"
   >
