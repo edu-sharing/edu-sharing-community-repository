@@ -68,7 +68,11 @@ import {
     WidgetEmbeddingOption,
 } from './configure-widget-embedding-dialog/configure-widget-embedding-dialog.component';
 import { GenericWidgetGlobalService } from './generic-widget-global.service';
-import { WidgetHeaderComponent } from './generic-widget-header/generic-widget-header.component';
+import {
+    GenerateWithAiChangeEvent,
+    TextChangeEvent,
+    WidgetHeaderComponent,
+} from './generic-widget-header/generic-widget-header.component';
 
 export interface WidgetComponentInterface {
     // inputs
@@ -127,6 +131,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
 
     // Additional inputs that might be specific to certain widgets
     @Input() customUrl?: (node: Node) => string;
+    @Input() customUrlTarget?: '_self' | '_blank';
     @Input() defaultNodeId: string = '';
     @Input() displayLimit?: number;
     @Input() height?: string;
@@ -155,6 +160,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     headlineMapping: PromptToTextMapping;
     headlineAiGenerated: WritableSignal<boolean> = signal(false);
     initialized: WritableSignal<boolean> = signal(false);
+    private readonly persistConfigTrigger$: Subject<void> = new Subject<void>();
     private searchResults: Map<string, number> = new Map<string, number>();
     updateInProgress: WritableSignal<boolean> = signal(false);
     private updateSearchResultCount$: Subject<void> = new Subject<void>();
@@ -201,6 +207,10 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                     void this.updateCommonProperties(widgetConfig, aiConfig);
                 }
             });
+        // listen to changes in the persist config trigger
+        this.persistConfigTrigger$
+            .pipe(debounceTime(200), takeUntilDestroyed(this.destroyRef))
+            .subscribe((): void => void this.persistConfig());
     }
 
     /**
@@ -261,6 +271,10 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         if (this.customUrl) {
             this.topicPageGlobalService.setCustomUrlFunction(this.customUrl);
         }
+        // if a custom URL target is input, register it in the topic page global service
+        if (this.customUrlTarget) {
+            this.topicPageGlobalService.setCustomUrlTarget(this.customUrlTarget);
+        }
     }
 
     /**
@@ -285,8 +299,8 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
             : {};
         let widgetConfig: WidgetConfig = { ...baseConfig, ...specificWidgetConfig };
         // retrieve an AI config object if either the description or the headline contains AI tags
-        const aiDescription: string = containsAiTags(this.description) ? this.description : '';
-        const aiHeadline: string = containsAiTags(this.headline) ? this.headline : '';
+        const aiDescription: string = this.descriptionAiGenerated() ? this.description : '';
+        const aiHeadline: string = this.headlineAiGenerated() ? this.headline : '';
         let keyValue;
         if (this.widgetInstance.retrieveCustomAiKeyValuePairs) {
             keyValue = this.widgetInstance.retrieveCustomAiKeyValuePairs();
@@ -341,16 +355,13 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     ): Promise<void> {
         // reset the mappings
         this.headlineMapping = null;
-        this.headlineAiGenerated.set(false);
         this.descriptionMapping = null;
-        this.descriptionAiGenerated.set(false);
-        // set description and headline
-        if (widgetConfig.description !== undefined) {
-            this.description = widgetConfig.description;
-        }
-        if (widgetConfig.headline) {
-            this.headline = widgetConfig.headline;
-        }
+        // do not automatically set the global variables as those would be input to the header component
+        let headlineAiGeneratedUpdated: boolean = false;
+        let descriptionAiGeneratedUpdated: boolean = false;
+        // do not automatically set the global variables for the headline and description, as the prompts would be visible
+        let headlineSyncedWithPrompt: boolean = false;
+        let descriptionSyncedWithPrompt: boolean = false;
         // in case an AI config is defined, execute the prompts and store the results
         if (aiConfig && Object.keys(aiConfig).length && this.aiSupported()) {
             if (aiConfig.headline) {
@@ -369,9 +380,11 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 const prompt: string = retrievePromptFromAiConfig(aiConfig, 'headline');
                 // make sure to sync both headline and prompt
                 this.headline = prompt;
+                headlineSyncedWithPrompt = true;
                 if (prompt && responseText) {
                     this.headlineMapping = new PromptToTextMapping(prompt, responseText);
                     this.headlineAiGenerated.set(true);
+                    headlineAiGeneratedUpdated = true;
                 }
             }
             if (aiConfig.description) {
@@ -389,9 +402,11 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 const responseText: string = retrieveResultString(promptResponse);
                 const prompt: string = retrievePromptFromAiConfig(aiConfig, 'description');
                 this.description = prompt;
+                descriptionSyncedWithPrompt = true;
                 if (responseText) {
                     this.descriptionMapping = new PromptToTextMapping(prompt, responseText);
                     this.descriptionAiGenerated.set(true);
+                    descriptionAiGeneratedUpdated = true;
                 }
             }
             if (this.widgetType === WIDGETS.MEDIA_RENDERING) {
@@ -399,6 +414,20 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
             }
             this.updateInProgress.set(false);
             this.widgetInstance.updateInProgress.set(false);
+        }
+        // when the headline or description are not synced with the prompt, set them to the config value
+        if (!headlineSyncedWithPrompt && widgetConfig.headline !== undefined) {
+            this.headline = widgetConfig.headline;
+        }
+        if (!descriptionSyncedWithPrompt && widgetConfig.description !== undefined) {
+            this.description = widgetConfig.description;
+        }
+        // when the headline or description were not AI-generated, reset the flag
+        if (!headlineAiGeneratedUpdated) {
+            this.headlineAiGenerated.set(false);
+        }
+        if (!descriptionAiGeneratedUpdated) {
+            this.descriptionAiGenerated.set(false);
         }
     }
 
@@ -463,11 +492,19 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
             if (Object.keys(widgetConfig).length) {
                 const commonAiProperties: (keyof WidgetConfig)[] = ['headline', 'description'];
                 commonAiProperties.forEach((property) => {
-                    if (widgetConfig[property] && containsAiTags(widgetConfig[property])) {
-                        if (property === 'headline' && this.headlineMapping?.text) {
+                    if (widgetConfig[property]) {
+                        if (
+                            property === 'headline' &&
+                            this.headlineMapping?.text &&
+                            this.headlineAiGenerated()
+                        ) {
                             widgetConfig[property] = this.headlineMapping.text;
                         }
-                        if (property === 'description' && this.descriptionMapping?.text) {
+                        if (
+                            property === 'description' &&
+                            this.descriptionMapping?.text &&
+                            this.descriptionAiGenerated()
+                        ) {
                             widgetConfig[property] = this.descriptionMapping.text;
                         }
                     }
@@ -565,11 +602,25 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     }
 
     /**
+     * Retrieves an update of the generate with AI flag.
+     *
+     * @param event
+     */
+    async onGenerateWithAiChanged(event: GenerateWithAiChangeEvent): Promise<void> {
+        if (event.isHeadline) {
+            this.headlineAiGenerated.set(event.aiGenerated);
+        } else {
+            this.descriptionAiGenerated.set(event.aiGenerated);
+        }
+        this.persistConfigTrigger$.next();
+    }
+
+    /**
      * Reacts to es-generic-widget-header (textChange) event by updating the widget config.
      *
      * @param event
      */
-    async onHeaderTextChange(event: { text: string; isHeadline: boolean }): Promise<void> {
+    async onHeaderTextChange(event: TextChangeEvent): Promise<void> {
         if (this.widgetInstance) {
             if (event.isHeadline) {
                 this.headline = event.text;
@@ -579,7 +630,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
             } else {
                 this.description = event.text;
             }
-            await this.persistConfig();
+            this.persistConfigTrigger$.next();
         }
     }
 

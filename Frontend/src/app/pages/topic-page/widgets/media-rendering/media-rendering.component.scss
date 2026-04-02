@@ -56,12 +56,6 @@
 
 // adjustments to the rendered content
 :host ::ng-deep {
-    es-render-wrapper-component {
-        // fix child-objects should not be displayed
-        .child-objects {
-            display: none;
-        }
-    }
     rs-root {
         // remove the margin from rendered content
         margin: 0 !important;

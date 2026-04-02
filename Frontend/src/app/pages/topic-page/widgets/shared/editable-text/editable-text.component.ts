@@ -46,6 +46,7 @@ export class EditableTextComponent {
         this.computeOutputText();
     }
     @Input() showAiButtons: boolean = false;
+    @Input() showAiCheckbox: boolean = false;
     @Input() showMoreLimit?: number;
     private _text: string;
     @Input() get text(): string {
@@ -55,6 +56,7 @@ export class EditableTextComponent {
         this._text = value ?? '';
         this.computeOutputText();
     }
+    @Output() generateWithAiChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
     @Output() searchResultsUpdated: EventEmitter<number> = new EventEmitter<number>();
     @Output() textChange: EventEmitter<string> = new EventEmitter<string>();
 
@@ -62,6 +64,15 @@ export class EditableTextComponent {
     showMore: boolean = false;
 
     constructor(private markdown: MarkdownPipe, private highlightSearch: HighlightSearchPipe) {}
+
+    /**
+     * Emits the change event whether the text should be generated with AI received by self-adjusting-textarea.
+     *
+     * @param checked
+     */
+    onGenerateWithAiChanged(checked: boolean): void {
+        this.generateWithAiChanged.emit(checked);
+    }
 
     /**
      * Emits text changes received by self-adjusting-textarea.
