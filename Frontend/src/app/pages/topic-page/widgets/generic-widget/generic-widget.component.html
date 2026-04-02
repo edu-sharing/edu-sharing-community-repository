@@ -13,6 +13,7 @@
   [editMode]="editMode()"
   [updateInProgress]="updateInProgress()"
   [searchInput]="searchInput()"
+  (generateWithAiChanged)="onGenerateWithAiChanged($event)"
   (textChange)="onHeaderTextChange($event)"
   (searchResultsUpdated)="onSearchResultsUpdated($event)"
 ></es-generic-widget-header>

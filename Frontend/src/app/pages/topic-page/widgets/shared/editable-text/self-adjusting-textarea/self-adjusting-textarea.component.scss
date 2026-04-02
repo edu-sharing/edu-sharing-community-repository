@@ -21,8 +21,10 @@
     flex-wrap: wrap;
 
     // conditionally allow to align toolbar to the right
-    &.justify-end {
-        justify-content: flex-end;
+    &.absolute-positioning {
+        position: absolute;
+        top: calc(50% - 17px);
+        right: 0;
     }
 
     // styling of markdown toolbar
@@ -72,6 +74,31 @@
         display: inline-flex;
         gap: 4px;
 
+        mat-checkbox ::ng-deep {
+            padding: 0;
+            --mdc-checkbox-state-layer-size: 18px;
+
+            .mat-internal-form-field {
+                --mat-checkbox-label-text-color: #{topicPageVars.$on-surface};
+            }
+
+            .mdc-label {
+                padding-left: 8px;
+                font-size: 15px;
+            }
+        }
+
+        .button-container {
+            display: inline-flex;
+            gap: 4px;
+
+            &.separator {
+                margin-left: 8px;
+                padding-left: 8px;
+                border-left: 1px solid #ccc;
+            }
+        }
+
         button {
             padding: 0;
             width: 24px;
@@ -87,11 +114,15 @@
                 cursor: not-allowed;
             }
 
+            &:hover {
+                color: topicPageVars.$primary;
+            }
+
             .mat-icon,
             .material-icons {
-                font-size: 18px;
-                height: 18px;
-                width: 18px;
+                font-size: 16px;
+                height: 16px;
+                width: 16px;
             }
         }
     }

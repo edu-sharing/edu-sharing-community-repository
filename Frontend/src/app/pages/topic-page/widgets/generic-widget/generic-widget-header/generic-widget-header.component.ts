@@ -1,9 +1,13 @@
 import { Component, computed, input, output } from '@angular/core';
-import { EduSharingUiModule } from 'ngx-edu-sharing-ui';
+import { SharedModule } from '../../../../../shared/shared.module';
 import { AiTextPromptPipe } from '../../../shared/pipes/ai-text-prompt.pipe';
 import { PromptToTextMapping } from '../../../shared/types/prompt-to-text-mapping';
 import { EditableTextComponent } from '../../shared/editable-text/editable-text.component';
 
+export interface GenerateWithAiChangeEvent {
+    aiGenerated: boolean;
+    isHeadline: boolean;
+}
 export interface SearchResultsEvent {
     count: number;
     type: string;
@@ -16,7 +20,7 @@ export interface TextChangeEvent {
 @Component({
     selector: 'es-generic-widget-header',
     standalone: true,
-    imports: [AiTextPromptPipe, EditableTextComponent, EduSharingUiModule],
+    imports: [AiTextPromptPipe, EditableTextComponent, SharedModule],
     templateUrl: './generic-widget-header.component.html',
     styleUrls: ['./generic-widget-header.component.scss'],
 })
@@ -34,6 +38,7 @@ export class WidgetHeaderComponent {
     updateInProgress = input<boolean>(false);
     searchInput = input<string>('');
 
+    generateWithAiChanged = output<GenerateWithAiChangeEvent>();
     textChange = output<TextChangeEvent>();
     searchResultsUpdated = output<SearchResultsEvent>();
 
@@ -54,6 +59,16 @@ export class WidgetHeaderComponent {
      */
     onTextChange = (text: string, isHeadline: boolean = false): void => {
         this.textChange.emit({ text, isHeadline });
+    };
+
+    /**
+     * Emits the change event whether the text should be generated with AI received by self-adjusting-textarea.
+     *
+     * @param checked
+     * @param isHeadline
+     */
+    onGenerateWithAiChanged = (checked: boolean, isHeadline: boolean): void => {
+        this.generateWithAiChanged.emit({ aiGenerated: checked, isHeadline });
     };
 
     /**
