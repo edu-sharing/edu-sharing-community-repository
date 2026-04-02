@@ -356,16 +356,12 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         // reset the mappings
         this.headlineMapping = null;
         this.descriptionMapping = null;
-        // do not automatically reset the global variables as those would be input to the header component
+        // do not automatically set the global variables as those would be input to the header component
         let headlineAiGeneratedUpdated: boolean = false;
         let descriptionAiGeneratedUpdated: boolean = false;
-        // set description and headline
-        if (widgetConfig.description !== undefined) {
-            this.description = widgetConfig.description;
-        }
-        if (widgetConfig.headline) {
-            this.headline = widgetConfig.headline;
-        }
+        // do not automatically set the global variables for the headline and description, as the prompts would be visible
+        let headlineSyncedWithPrompt: boolean = false;
+        let descriptionSyncedWithPrompt: boolean = false;
         // in case an AI config is defined, execute the prompts and store the results
         if (aiConfig && Object.keys(aiConfig).length && this.aiSupported()) {
             if (aiConfig.headline) {
@@ -384,6 +380,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 const prompt: string = retrievePromptFromAiConfig(aiConfig, 'headline');
                 // make sure to sync both headline and prompt
                 this.headline = prompt;
+                headlineSyncedWithPrompt = true;
                 if (prompt && responseText) {
                     this.headlineMapping = new PromptToTextMapping(prompt, responseText);
                     this.headlineAiGenerated.set(true);
@@ -405,6 +402,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 const responseText: string = retrieveResultString(promptResponse);
                 const prompt: string = retrievePromptFromAiConfig(aiConfig, 'description');
                 this.description = prompt;
+                descriptionSyncedWithPrompt = true;
                 if (responseText) {
                     this.descriptionMapping = new PromptToTextMapping(prompt, responseText);
                     this.descriptionAiGenerated.set(true);
@@ -416,6 +414,13 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
             }
             this.updateInProgress.set(false);
             this.widgetInstance.updateInProgress.set(false);
+        }
+        // when the headline or description are not synced with the prompt, set them to the config value
+        if (!headlineSyncedWithPrompt && widgetConfig.headline !== undefined) {
+            this.headline = widgetConfig.headline;
+        }
+        if (!descriptionSyncedWithPrompt && widgetConfig.description !== undefined) {
+            this.description = widgetConfig.description;
         }
         // when the headline or description were not AI-generated, reset the flag
         if (!headlineAiGeneratedUpdated) {
