@@ -281,7 +281,7 @@ es-side-menu-wrapper {
         }
 
         .topic-page-swimlane-wrapper {
-            --swimlane-gap: 16px;
+            --swimlane-gap: 32px;
             margin: 0 auto var(--swimlane-gap) auto;
             padding-left: var(--offcanvas-offset);
             padding-right: calc(var(--offcanvas-menu-width) + var(--offcanvas-offset));
@@ -499,7 +499,7 @@ es-side-menu-wrapper {
 
             // CONTAINERS
             .topic-page-container {
-                padding: 24px 0;
+                padding: 32px 0;
                 height: 100%;
                 box-sizing: border-box;
 
