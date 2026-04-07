@@ -1,5 +1,6 @@
 @use '@angular/material' as mat;
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
 $iconContainerHeight: 80px;
 $tileSize: 124px;
@@ -80,7 +81,7 @@ $tileSize: 124px;
     color: var(--landingPageShortcutTileFontColor);
     background-color: var(--landingPageShortcutTileBackground);
     border-radius: 8px;
-    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.4);
+    @include mixins.materialShadowBottom();
 
     &.drag-indicator {
         cursor: grab;
