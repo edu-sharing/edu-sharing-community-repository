@@ -18,9 +18,13 @@ es-node-entries-wrapper {
     transition: all vars.$transitionNormal;
     > h2 {
         font-weight: bold;
+        transition: all vars.$transitionNormal;
         // flex-grow: 1;
     }
     &:not(.toggle-open) {
+        h2 {
+            color: var(--textMediumLight);
+        }
         border-radius: var(--borderRadiusCards);
         // @include mixins.materialShadowBottom();
         &:hover,
