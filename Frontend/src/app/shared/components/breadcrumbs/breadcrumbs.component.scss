@@ -98,7 +98,8 @@ button {
     }
 }
 
-.breadcrumb-element-home {
+.breadcrumb-element-home,
+.breadcrumb-element-landing {
     text-decoration: none;
     @include clickable();
     .breadcrumb-inner {

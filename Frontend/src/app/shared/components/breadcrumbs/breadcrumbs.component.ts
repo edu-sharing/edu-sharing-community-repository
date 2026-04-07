@@ -1,6 +1,12 @@
 import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
 import { Params, QueryParamsHandling } from '@angular/router';
-import { CanDrop, DragData, DropSource, NodesDragDropService } from 'ngx-edu-sharing-ui';
+import {
+    CanDrop,
+    DragData,
+    DropSource,
+    NodesDragDropService,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 import { Node } from 'ngx-edu-sharing-api';
 import { RestNodeService } from '../../../core-module/core.module';
 
@@ -61,6 +67,11 @@ export class BreadcrumbsComponent {
      * prefer node name or title
      */
     @Input() preferredName: 'name' | 'title' = 'name';
+
+    /**
+     * show the landing page as a primary home option?
+     */
+    @Input() showLanding = false;
     /**
      * Should automatically be linked via angular routing.
      *
@@ -165,4 +176,5 @@ export class BreadcrumbsComponent {
     //     // DragCursorDirective.dragState.element = event.container.data;
     //     // DragCursorDirective.dragState.dropAllowed = true;
     // }
+    readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
 }

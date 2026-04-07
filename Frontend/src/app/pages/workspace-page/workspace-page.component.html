@@ -24,6 +24,7 @@
         <div class="mobile-move-top">
           <es-breadcrumbs
             *ngIf="isLoggedIn"
+            [showLanding]="true"
             [searchQuery]="searchQuery?.query"
             [home]="'WORKSPACE.' + root"
             [canDropNodes]="canDropOnBreadcrumb"
