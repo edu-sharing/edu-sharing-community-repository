@@ -216,6 +216,10 @@
   "SIDEBAR": {
     "LANDING": "Landing page",
     "LANDING_SHORT": "Landing",
+    "TASKS": "Tasks",
+    "TASKS_SHORT": "Tasks",
+    "EDITORIAL_SUGGESTIONS": "Content-Checking",
+    "EDITORIAL_SUGGESTIONS_SHORT": "Check",
     "WORKSPACE": "Workspace",
     "SEARCH": "Search",
     "COLLECTIONS": "Collections",

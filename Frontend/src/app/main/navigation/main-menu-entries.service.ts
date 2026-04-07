@@ -91,6 +91,23 @@ export class MainMenuEntriesService {
             isVisible: true,
         },
         {
+            name: 'SIDEBAR.TASKS',
+            icon: 'assignment',
+            target: { type: 'path', path: 'editorial/assignment' },
+            scope: 'editorial_assignment',
+            isVisible: () => !this.loginInfo.isGuest,
+        },
+        {
+            name: 'SIDEBAR.EDITORIAL_SUGGESTIONS',
+            icon: 'online_prediction',
+            target: { type: 'path', path: 'editorial/suggestions' },
+            scope: 'editorial_suggestions',
+            isVisible: () =>
+                this.loginInfo.toolPermissions?.includes(
+                    RestConstants.TOOLPERMISSION_EDITORIAL_SUGGESTIONS,
+                ),
+        },
+        {
             name: 'SIDEBAR.STREAM',
             icon: 'event',
             target: { type: 'path', path: 'stream' },

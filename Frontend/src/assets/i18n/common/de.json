@@ -242,6 +242,10 @@
   "SIDEBAR": {
     "LANDING": "Startseite",
     "LANDING_SHORT": "Start",
+    "TASKS": "Aufgaben",
+    "TASKS_SHORT": "Aufgaben",
+    "EDITORIAL_SUGGESTIONS": "Inhalte prüfen",
+    "EDITORIAL_SUGGESTIONS_SHORT": "Prüfen",
     "WORKSPACE": "Workspace",
     "SEARCH": "Suchumgebung",
     "COLLECTIONS": "Sammlungen",

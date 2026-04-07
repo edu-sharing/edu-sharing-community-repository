@@ -74,7 +74,7 @@ import { OptionsHelperService } from '../../services/options-helper.service';
 import { EditorialSidebarService } from './editorial-sidebar/editorial-sidebar.service';
 import { EditorialBreadcrumbService } from './editorial-breadcrumb/editorial-breadcrumb.service';
 
-export type PrimaryMode = 'activity' | 'share' | 'assignment';
+export type PrimaryMode = 'activity' | 'share' | 'assignment' | 'suggestions';
 export type MainComponentType = 'manageAssignment' | 'assignmentSubmission' | 'submitAssignment';
 type RouteConfig = {
     primaryMode: PrimaryMode;
@@ -176,7 +176,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         this.mainNav.setMainNavConfig({
             showUser: true,
             showScope: true,
-            currentScope: 'EDITORIAL',
+            currentScope: 'editorial',
             title: 'EDITORIAL.TITLE',
             show: true,
             hideSearchField: false,
@@ -319,7 +319,16 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 } else {
                     this.editorialPageService.registerTabsFromWidget(widget);
                 }
+            } else if (p.primaryMode === 'suggestions') {
+                this.mainNav.patchMainNavConfig({
+                    currentScope: 'editorial_suggestions',
+                    title: 'EDITORIAL.TITLE_SUGGESTIONS',
+                });
             } else if (p.primaryMode === 'assignment') {
+                this.mainNav.patchMainNavConfig({
+                    currentScope: 'editorial_assignment',
+                    title: 'EDITORIAL.TITLE_ASSIGNMENT',
+                });
                 this.columns.set({
                     Default: [
                         new ListItem('ASSIGNMENT', 'title'),

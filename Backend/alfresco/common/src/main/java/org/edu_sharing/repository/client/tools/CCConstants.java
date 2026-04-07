@@ -1021,6 +1021,8 @@ public class CCConstants {
 
     public final static String CCM_VALUE_TOOLPERMISSION_BAPI = "TOOLPERMISSION_BAPI";
 
+    public final static String CCM_VALUE_TOOLPERMISSION_EDITORIAL_SUGGESTIONS = "TOOLPERMISSION_EDITORIAL_SUGGESTIONS";
+
     public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_TEACHER = "teacher";
 
     public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_STUDENT = "student";

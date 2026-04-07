@@ -79,6 +79,7 @@ import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { BridgeService } from '../../../services/bridge.service';
 import { CollectionInfoBarComponent } from '../collection-info-bar/collection-info-bar.component';
 import { InfobarService } from '../infobar/infobar.service';
+import { EditorialSidebarService } from '../../editorial-page/editorial-sidebar/editorial-sidebar.service';
 
 @Component({
     selector: 'es-collection-content',
@@ -168,7 +169,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         });
     });
     addMaterialBinaryOptionItem = new OptionItem('OPTIONS.ADD_OBJECT', 'cloud_upload', () => {
-        void this.mainNavService.getMainNav().topBar.createMenu.openUploadSelect();
+        // void this.mainNavService.getMainNav().topBar.createMenu.openUploadSelect();
+        /*void this.editorialSidebarService.showOption({
+            option: 'SORT_INTO',
+        })*/
     });
     dataSourceCollections = new NodeDataSource<Node>();
     dataSourceReferences = new NodeDataSource<CollectionReference>();
@@ -183,6 +187,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     constructor(
         private authenticationService: AuthenticationService,
         private localEventsService: LocalEventsService,
+        private editorialSidebarService: EditorialSidebarService,
         private bridge: BridgeService,
         private collectionService: RestCollectionService,
         private configurationService: ConfigService,
