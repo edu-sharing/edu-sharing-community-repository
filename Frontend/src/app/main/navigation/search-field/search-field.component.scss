@@ -1,6 +1,7 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 @use 'sass:color';
-
+$fieldHeight: 40px;
 @mixin suggestionCardHeading {
     font-size: $fontSizeSmall;
     color: $textLight;
@@ -21,13 +22,14 @@ form {
     width: 100%;
     display: flex;
     background: $workspaceTopBarInputBackground;
+    height: $fieldHeight;
+    @include mixins.materialShadowBottom(0.05);
     border-radius: 3px;
     .search-field {
         display: flex;
         width: 100%;
         input {
             background: unset;
-            height: 100%;
             border: none;
             &:focus {
                 border: none;
@@ -129,6 +131,7 @@ form {
 
 .submit-button {
     display: flex;
+    height: $fieldHeight;
     align-items: center;
     justify-content: center;
     border-radius: 0 3px 3px 0;

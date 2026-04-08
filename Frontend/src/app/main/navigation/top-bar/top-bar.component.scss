@@ -1,5 +1,6 @@
 @use 'sass:color';
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 @use '../../../pages/admin-page/messages/messages.component' as messages;
 
 @mixin messageWrapper {
@@ -207,7 +208,7 @@ button.user {
         margin-left: 50px;
         padding-left: 16px;
         padding-right: 25px;
-        height: 39px;
+        height: 40px;
         display: flex;
         align-items: center;
         color: var(--workspaceTopBarFontColor);
@@ -215,6 +216,7 @@ button.user {
             from var(--workspaceTopBarFontColor) r g b / var(--workspaceTopBarNewAlpha)
         );
         border-radius: 0;
+        @include mixins.materialShadowBottom(0.05);
     }
 }
 .create-dummy {
