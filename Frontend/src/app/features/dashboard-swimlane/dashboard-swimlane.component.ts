@@ -267,7 +267,7 @@ export class DashboardSwimlaneComponent {
             const events = [] as ShareDetails[];
             [
                 ['toUser', 'toUser'],
-                ['toUserOrGroups', 'toUserOrGroups'],
+                ['toUserGroups', 'toUserGroups'],
                 ['fromUser', 'fromUser'],
             ].forEach(async (k, i) => {
                 events.splice(i, 0, {
