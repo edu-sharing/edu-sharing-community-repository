@@ -129,7 +129,7 @@ export class MdsHelperService {
         }
         for (let w of widgets) {
             if (w.id == cid) {
-                if (template === undefined || w.template?.includes(template)) {
+                if (!template?.length || w.template?.includes(template)) {
                     return w;
                 }
             }

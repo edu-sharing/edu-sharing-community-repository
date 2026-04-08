@@ -87,7 +87,9 @@ html .mat-mdc-slide-toggle {
     --mdc-switch-selected-pressed-handle-color: var(--palette-primary-contrast-500);
     --mdc-switch-selected-icon-color: var(--palette-primary-500);
 }
-
+.mat-mdc-outlined-button:not(:disabled) {
+    --mdc-outlined-button-outline-color: var(--palette-primary-500);
+}
 .mdc-button {
     span {
         display: flex;

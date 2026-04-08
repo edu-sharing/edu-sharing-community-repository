@@ -107,7 +107,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     isMobile$ = this.breakpointObserver
         .observe(['(max-width: 900px)'])
         .pipe(map(({ matches }) => matches));
-    sidenavLeft = signal(true);
+    sidenavLeft = signal(false);
     /**
      * mds group, used to fetch the template group AND search query id!
      */
@@ -603,6 +603,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         }
         this.nodeEntriesRef?.getSelection()?.toggle(event.element as Node);
         if (
+            this.nodeEntriesRef?.getSelection()?.selected.length === 1 &&
             (event.element as Node).mediatype &&
             !['collection', 'folder'].includes((event.element as Node).mediatype)
         ) {
@@ -668,9 +669,11 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     private setNewData(event: GenericSearchResults) {
         this.clearSelection();
         this.dataSource.setData(event.nodes, event.pagination);
-        this.nodeEntriesRef.addVirtualNodes(
-            this.editorialPageService.getVirtualNodes(this.params$.value.primaryMode),
-        );
+        if (this.editorialPageService.getVirtualNodes(this.params$.value.primaryMode)) {
+            this.nodeEntriesRef.addVirtualNodes(
+                this.editorialPageService.getVirtualNodes(this.params$.value.primaryMode),
+            );
+        }
     }
 
     private clearSelection() {

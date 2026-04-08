@@ -61,11 +61,6 @@
         <es-editorial-breadcrumb
           [class.display-none]="(observer.width$ | async) < 400"
         ></es-editorial-breadcrumb>
-        <es-actionbar
-          [class.display-none]="(mainComponent$ | async) !== null"
-          [numberOfAlwaysVisibleOptions]="2"
-          [showCaptions]="(observer.width$ | async) > 700"
-        ></es-actionbar>
       </div>
       <ng-container *ngIf="mainComponent$ | async as component">
         @switch (component) { @case ('manageAssignment') {
@@ -91,6 +86,19 @@
             </ng-template>
           </mat-tab>
         </mat-tab-group>
+        <div class="option-area">
+          <div class="options-left">
+            <button mat-stroked-button color="primary" (click)="sidenavLeft.set(!sidenavLeft())">
+              <i esIcon="filter_list" [aria]="false"></i>
+              {{ 'SEARCH.FILTERS' | translate }}
+            </button>
+          </div>
+          <es-actionbar
+            [class.display-none]="(mainComponent$ | async) !== null"
+            [numberOfAlwaysVisibleOptions]="3"
+            [showCaptions]="(observer.width$ | async) > 700"
+          ></es-actionbar>
+        </div>
         <ng-container *ngIf="(params$ | async).primaryMode as mode">
           <ng-container *ngIf="mode === 'activity' || mode === 'share' || mode === 'assignment'">
             <es-node-entries-wrapper
