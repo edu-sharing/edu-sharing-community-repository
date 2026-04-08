@@ -200,4 +200,6 @@ export class ActionbarComponent implements OnChanges {
     ngOnChanges(changes: SimpleChanges): void {
         this.invalidate();
     }
+
+    protected readonly UIService = UIService;
 }

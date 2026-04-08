@@ -16,6 +16,9 @@ es-node-entries-wrapper {
     gap: 10px;
     align-items: center;
     transition: all vars.$transitionNormal;
+    @media screen and (max-width: (vars.$mobileTabSwitchWidth)) {
+        justify-content: flex-start;
+    }
     > h2 {
         font-weight: bold;
         transition: all vars.$transitionNormal;

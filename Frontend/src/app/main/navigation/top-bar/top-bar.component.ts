@@ -16,8 +16,8 @@ import {
     WritableSignal,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
-import { Node, ConfigService, SessionStorageService, Store, User } from 'ngx-edu-sharing-api';
-import { OptionItem } from 'ngx-edu-sharing-ui';
+import { ConfigService, Node, SessionStorageService, User } from 'ngx-edu-sharing-api';
+import { OptionItem, UIService } from 'ngx-edu-sharing-ui';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { ConfigurationHelper, RestConnectorService } from '../../../core-module/core.module';
@@ -26,7 +26,6 @@ import { MainMenuDropdownComponent } from '../main-menu-dropdown/main-menu-dropd
 import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar.component';
 import { MainNavCreateConfig, MainNavService, TemplateSlot } from '../main-nav.service';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
-import { CLOSE } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 
 @Component({
     selector: 'es-top-bar',
@@ -135,4 +134,6 @@ export class TopBarComponent implements AfterViewInit {
             this.topbarRef.nativeElement?.getBoundingClientRect().height,
         );
     }
+
+    protected readonly UIService = UIService;
 }

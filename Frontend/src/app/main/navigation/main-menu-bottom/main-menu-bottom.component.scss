@@ -1,10 +1,12 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
 :host {
     display: flex;
     width: 100%;
     background-color: #fff;
     overflow-x: auto;
+    overflow-y: hidden;
     height: $mobileTabNavHeight;
     @include materialShadow();
 }
@@ -15,7 +17,7 @@ button {
     flex-grow: 1;
     flex-direction: column;
     width: 0;
-    min-width: 85px;
+    min-width: 50px;
     color: $textLight;
     border-top: 4px solid transparent;
     align-items: center;
@@ -35,5 +37,7 @@ button {
     > span {
         padding-top: 1px;
         font-size: 9pt;
+        word-break: break-all;
+        @include mixins.limitLineCount(1);
     }
 }

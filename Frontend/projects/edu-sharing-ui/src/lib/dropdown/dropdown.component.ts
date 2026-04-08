@@ -1,10 +1,12 @@
-import { Component, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, inject, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { OptionItem } from '../types/option-item';
 import { Helper } from '../util/helper';
 import { UIService } from '../services/ui.service';
 import { BehaviorSubject } from 'rxjs';
 import { Node } from 'ngx-edu-sharing-api';
+import { MatBottomSheet } from '@angular/material/bottom-sheet';
+import { DropdownBottomSheetComponent } from './dropdown-bottom-sheet/dropdown-bottom-sheet.component';
 
 /**
  * The dropdown is one base component of the action bar (showing more actions),
@@ -17,6 +19,8 @@ import { Node } from 'ngx-edu-sharing-api';
     standalone: false,
 })
 export class DropdownComponent implements OnChanges {
+    private _bottomSheet = inject(MatBottomSheet);
+
     @ViewChild('dropdown', { static: true }) menu: MatMenu;
     @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
 
@@ -75,5 +79,20 @@ export class DropdownComponent implements OnChanges {
         // there are options with `showDisabled: true`, showing a menu with no selectable option
         // causes a11y issues.
         return this.options$.value?.some((o) => o.isEnabled);
+    }
+
+    /**
+     * trigger/display a bottom sheet (for mobile devices)
+     */
+    triggerBottomSheet() {
+        this._bottomSheet.open(DropdownBottomSheetComponent, {
+            panelClass: 'es-bottom-sheet',
+            autoFocus: false,
+            data: {
+                options$: this.options$,
+                callbackObjects: this.callbackObjects,
+                showDisabled: this.showDisabled,
+            },
+        });
     }
 }

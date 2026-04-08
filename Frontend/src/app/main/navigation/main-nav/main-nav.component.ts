@@ -652,14 +652,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.elementsBottomY += diffBottom;
         this.elementsBottomY = Math.max(0, this.elementsBottomY);
         // For ios elastic scroll
-        if (
-            scrollContainer.scrollTop < 0 ||
-            this.fixScrollElements ||
-            !UIService.evaluateMediaQuery(
-                UIConstants.MEDIA_QUERY_MAX_WIDTH,
-                UIConstants.MOBILE_TAB_SWITCH_WIDTH,
-            )
-        ) {
+        if (scrollContainer.scrollTop < 0 || this.fixScrollElements || !UIService.isMobileWidth()) {
             this.elementsTopY = 0;
             this.elementsBottomY = 0;
         }

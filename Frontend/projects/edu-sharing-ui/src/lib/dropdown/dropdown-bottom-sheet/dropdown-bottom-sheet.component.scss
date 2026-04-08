@@ -1,0 +1,18 @@
+@use '../dropdown.component' as dropdown;
+ul {
+    @include dropdown.list();
+    > li {
+        > button {
+            width: 100%;
+            height: 50px;
+            justify-content: flex-start;
+            border-radius: 0;
+        }
+    }
+}
+
+::ng-deep .es-bottom-sheet {
+    .mat-bottom-sheet-container {
+        border-radius: 25px 25px 0 0;
+    }
+}

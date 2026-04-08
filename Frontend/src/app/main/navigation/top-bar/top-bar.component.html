@@ -165,24 +165,32 @@
         </div>
       </button>
       <es-notification-list class="notifications"></es-notification-list>
-      <button
-        mat-button
-        class="user"
-        esElementRef
-        #userRef="esElementRef"
-        *ngIf="currentUser && showUser"
-        [matMenuTriggerFor]="userDropdown.menu"
-        title="{{ 'USERMENU' | translate }}"
-        data-test="main-nav-user-menu-button"
-      >
-        <es-user-avatar [user]="currentUser" [size]="'small'"></es-user-avatar>
-        <span *ngIf="!connector.getCurrentLogin()?.isGuest">{{
-          currentUser | nodePersonName
-        }}</span>
-        <span *ngIf="connector.getCurrentLogin()?.isGuest">{{ 'USER_GUEST' | translate }}</span>
-        <i esIcon="keyboard_arrow_down" [aria]="false" class="iconArrow"></i>
-        <!-- <i class="material-icons barIcon iconPerson">account_circle</i>-->
-      </button>
+      <ng-container *ngIf="currentUser && showUser">
+        <button
+          *ngIf="!UIService.isMobileWidth()"
+          mat-button
+          class="user"
+          esElementRef
+          #userRef="esElementRef"
+          [matMenuTriggerFor]="userDropdown.menu"
+          title="{{ 'USERMENU' | translate }}"
+          data-test="main-nav-user-menu-button"
+        >
+          <ng-container *ngTemplateOutlet="userButton"></ng-container>
+        </button>
+        <button
+          *ngIf="UIService.isMobileWidth()"
+          mat-button
+          class="user"
+          esElementRef
+          #userRef="esElementRef"
+          (click)="userDropdown.triggerBottomSheet()"
+          title="{{ 'USERMENU' | translate }}"
+          data-test="main-nav-user-menu-button"
+        >
+          <ng-container *ngTemplateOutlet="userButton"></ng-container>
+        </button>
+      </ng-container>
       <es-dropdown #userDropdown class="userMenu" [options]="userMenuOptions"></es-dropdown>
     </div>
   </div>
@@ -215,3 +223,10 @@
     "
   ></ng-container>
 </ng-container>
+<ng-template #userButton>
+  <es-user-avatar [user]="currentUser" [size]="'small'"></es-user-avatar>
+  <span *ngIf="!connector.getCurrentLogin()?.isGuest">{{ currentUser | nodePersonName }}</span>
+  <span *ngIf="connector.getCurrentLogin()?.isGuest">{{ 'USER_GUEST' | translate }}</span>
+  <i esIcon="keyboard_arrow_down" [aria]="false" class="iconArrow"></i>
+  <!-- <i class="material-icons barIcon iconPerson">account_circle</i>-->
+</ng-template>

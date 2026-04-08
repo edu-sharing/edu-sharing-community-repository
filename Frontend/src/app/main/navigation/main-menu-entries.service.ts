@@ -126,7 +126,10 @@ export class MainMenuEntriesService {
             icon: 'lock',
             target: { type: 'path', path: 'workspace/safe' },
             scope: 'safe',
-            isVisible: () => !this.bridge.isRunningCordova() && this.hasAccessToSafeScope,
+            isVisible: () =>
+                !UIService.isMobileWidth() &&
+                !this.bridge.isRunningCordova() &&
+                this.hasAccessToSafeScope,
         },
         {
             name: 'SIDEBAR.PERMISSIONS',
@@ -134,7 +137,7 @@ export class MainMenuEntriesService {
             target: { type: 'path', path: 'permissions' },
             scope: 'permissions',
             isVisible: () =>
-                !this.ui.isMobile() &&
+                !UIService.isMobileWidth() &&
                 (this.organizations.canCreate ||
                     this.organizations.organizations.filter((group) => group.administrationAccess)
                         .length > 0),
@@ -144,7 +147,7 @@ export class MainMenuEntriesService {
             icon: 'settings',
             scope: 'admin',
             target: { type: 'path', path: 'admin' },
-            isVisible: () => !this.ui.isMobile() && this.showAdminEntry(),
+            isVisible: () => !UIService.isMobileWidth() && this.showAdminEntry(),
         },
     ];
 

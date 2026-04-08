@@ -11,6 +11,7 @@ import {
 import { MatMenuTrigger } from '@angular/material/menu';
 import { ClickSource, InteractionType } from '../entries-model';
 import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
+import { UIService } from '../../services/ui.service';
 import { CustomFieldSpecialType, NodeEntriesGlobalService } from '../node-entries-global.service';
 import { Target } from '../../types/option-item';
 import { NodeEntriesService } from '../../services/node-entries.service';
@@ -93,7 +94,15 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
                 event.target as HTMLElement
             ).getBoundingClientRect());
         }
-        this.entriesService.openDropdown(this.dropdown, node, () => this.menuTrigger.openMenu());
+        if (UIService.isMobileWidth()) {
+            this.entriesService.openDropdown(this.dropdown, node, () =>
+                this.dropdown.triggerBottomSheet(),
+            );
+        } else {
+            this.entriesService.openDropdown(this.dropdown, node, () =>
+                this.menuTrigger.openMenu(),
+            );
+        }
     }
 
     getVisibleColumns() {
@@ -101,7 +110,13 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
     }
 
     async openMenu(node: T) {
-        this.entriesService.openDropdown(this.dropdown, node);
+        if (UIService.isMobileWidth()) {
+            this.entriesService.openDropdown(this.dropdown, node, () =>
+                this.dropdown.triggerBottomSheet(),
+            );
+        } else {
+            this.entriesService.openDropdown(this.dropdown, node);
+        }
     }
 
     async ngOnInit() {
@@ -123,4 +138,6 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
             this.node as Node,
         );
     }
+
+    protected readonly UIService = UIService;
 }
