@@ -776,7 +776,7 @@
       <valuespace_i18n_prefix>shareDirection_</valuespace_i18n_prefix>
       <values>
         <entry icon="person">toUser</entry>
-        <entry icon="group">toUserOrGroups</entry>
+        <entry icon="group">toUserGroups</entry>
         <entry icon="send">fromUser</entry>
       </values>
     </widget>

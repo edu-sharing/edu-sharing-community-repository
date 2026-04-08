@@ -1646,7 +1646,7 @@
       "SUBTITLE": {
         "fromUser": "von mir",
         "toUser": "an mich",
-        "toUserOrGroups": "an mich oder meine Gruppen"
+        "toUserGroups": "an mich oder meine Gruppen"
       }
     },
     "recent-activities": {

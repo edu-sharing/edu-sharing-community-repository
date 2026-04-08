@@ -583,7 +583,7 @@
       "LTI_FIELDS_REQUIRED": "All required fields must be filled out in order to create a lti-resource",
       "LTI_FIELDS_REQUIRED_LINK": "Create regular link",
       "TO_ME_SHARED_PERSONAL": "Content shared with me is displayed",
-      "TO_ME_SHARED_ALL": "Content shared with me or my groups is displayed"
+      "TO_ME_SHARED_ALL": "Content shared with my groups is displayed"
     }
   }
 }
