@@ -7,6 +7,7 @@ import { NodeEntriesService } from '../../services/node-entries.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { Assignment, Node, Submission } from 'ngx-edu-sharing-api';
 import { DropdownComponent } from '../../dropdown/dropdown.component';
+import { UIService } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-node-entries-card-small',
@@ -37,7 +38,13 @@ export class NodeEntriesCardSmallComponent<T extends Node> {
     }
     async openMenu(event: MouseEvent, node: T) {
         event.stopPropagation();
-        this.entriesService.openDropdown(this.dropdown, node);
+        if (UIService.isMobileWidth()) {
+            this.entriesService.openDropdown(this.dropdown, node, () =>
+                this.dropdown.triggerBottomSheet(),
+            );
+        } else {
+            this.entriesService.openDropdown(this.dropdown, node);
+        }
     }
     openContextmenu(event: MouseEvent | Event) {
         event.preventDefault();
@@ -68,4 +75,6 @@ export class NodeEntriesCardSmallComponent<T extends Node> {
         }
         return 'high';
     }
+
+    protected readonly UIService = UIService;
 }

@@ -92,16 +92,27 @@
       <div class="type">
         <i esIcon="task"></i>
         <span>{{ 'ASSIGNMENT.CARD_TYPE' | translate }}</span>
-        <button
-          *ngIf="dropdown"
-          mat-icon-button
-          (click)="openMenu($event, node)"
-          [matMenuTriggerFor]="dropdown.menu"
-          [attr.aria-label]="'OPTIONS_FOR' | translate : { element: (node | nodeTitle) }"
-          data-test="card-options-button"
-        >
-          <i esIcon="more_vert"></i>
-        </button>
+        <ng-container *ngIf="dropdown">
+          <button
+            *ngIf="!UIService.isMobileWidth()"
+            mat-icon-button
+            (click)="openMenu($event, node)"
+            [matMenuTriggerFor]="dropdown.menu"
+            [attr.aria-label]="'OPTIONS_FOR' | translate : { element: (node | nodeTitle) }"
+            data-test="card-options-button"
+          >
+            <i esIcon="more_vert"></i>
+          </button>
+          <button
+            *ngIf="UIService.isMobileWidth()"
+            mat-icon-button
+            (click)="openMenu($event, node)"
+            [attr.aria-label]="'OPTIONS_FOR' | translate : { element: (node | nodeTitle) }"
+            data-test="card-options-button"
+          >
+            <i esIcon="more_vert"></i>
+          </button>
+        </ng-container>
       </div>
       <div class="title">
         {{ node | nodeTitle }}
