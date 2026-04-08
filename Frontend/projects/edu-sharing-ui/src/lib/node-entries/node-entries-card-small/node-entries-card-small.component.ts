@@ -7,7 +7,7 @@ import { NodeEntriesService } from '../../services/node-entries.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { Assignment, Node, Submission } from 'ngx-edu-sharing-api';
 import { DropdownComponent } from '../../dropdown/dropdown.component';
-import { UIService } from 'ngx-edu-sharing-ui';
+import { UIService } from '../../services/ui.service';
 
 @Component({
     selector: 'es-node-entries-card-small',
