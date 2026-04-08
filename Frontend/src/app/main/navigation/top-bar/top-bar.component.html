@@ -86,20 +86,35 @@
     <div class="add-material">
       <ng-container *ngTemplateOutlet="createButtonRef"></ng-container>
       <ng-container *ngIf="!createButtonRef">
-        <button
-          mat-button
-          matRippleColor="rgba(255,255,255,0.08)"
-          class="addDesktop mat-button-no-uppercase"
-          *ngIf="!connector.getCurrentLogin()?.isGuest && isCreateAllowed"
-          [disabled]="!isCreateAllowed || !createMenu.hasUsableOptions()"
-          #dropdownTrigger="matMenuTrigger"
-          (menuOpened)="createMenu.updateOptions()"
-          [matMenuTriggerFor]="createMenu.dropdown ? createMenu.dropdown.menu : null"
-          [attr.aria-label]="'WORKSPACE.ADD' | translate"
-          data-test="top-bar-add-button"
-        >
-          <i esIcon="add"></i> <span>{{ 'WORKSPACE.ADD' | translate }}</span>
-        </button>
+        <ng-container *ngIf="!connector.getCurrentLogin()?.isGuest && isCreateAllowed">
+          <button
+            mat-button
+            matRippleColor="rgba(255,255,255,0.08)"
+            class="addDesktop"
+            *ngIf="!UIService.isMobileWidth()"
+            [disabled]="!isCreateAllowed || !createMenu.hasUsableOptions()"
+            #dropdownTrigger="matMenuTrigger"
+            (menuOpened)="createMenu.updateOptions()"
+            [matMenuTriggerFor]="createMenu.dropdown ? createMenu.dropdown.menu : null"
+            [attr.aria-label]="'WORKSPACE.ADD' | translate"
+            data-test="top-bar-add-button"
+          >
+            <i esIcon="add"></i> <span>{{ 'WORKSPACE.ADD' | translate }}</span>
+          </button>
+          <button
+            mat-button
+            matRippleColor="rgba(255,255,255,0.08)"
+            class="addDesktop"
+            *ngIf="UIService.isMobileWidth()"
+            [disabled]="!isCreateAllowed || !createMenu.hasUsableOptions()"
+            (menuOpened)="createMenu.updateOptions()"
+            (click)="createMenu.dropdown?.triggerBottomSheet()"
+            [attr.aria-label]="'WORKSPACE.ADD' | translate"
+            data-test="top-bar-add-button"
+          >
+            <i esIcon="add"></i> <span>{{ 'WORKSPACE.ADD' | translate }}</span>
+          </button>
+        </ng-container>
         <button
           mat-button
           class="addDesktop mat-button-no-uppercase"
