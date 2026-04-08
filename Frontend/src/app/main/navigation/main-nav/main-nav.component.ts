@@ -8,6 +8,7 @@ import {
     NgZone,
     OnDestroy,
     OnInit,
+    TemplateRef,
     ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
@@ -80,6 +81,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     private static readonly ID_ATTRIBUTE_NAME = 'data-banner-id';
 
     @ViewChild(TopBarComponent) topBar: TopBarComponent;
+    @ViewChild('userMenuMobile') userMenuMobile: TemplateRef<unknown>;
     @ViewChild('tabNav') tabNav: ElementRef;
 
     private shouldAlwaysHide = this.storage.get(TemporaryStorageService.OPTION_HIDE_MAINNAV, false);
@@ -451,9 +453,18 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             const manageProfile = new OptionItem('EDIT_ACCOUNT', 'manage_accounts', () =>
                 this.openProfile(),
             );
+            manageProfile.customShowCallback = async () => !UIService.isMobileWidth();
             manageProfile.group = mainGroup;
             manageProfile.priority = 10;
             this.userMenuOptions.push(manageProfile);
+            const manageProfileMobile = new OptionItem('EDIT_ACCOUNT', 'manage_accounts', () =>
+                this.openProfile(),
+            );
+            manageProfileMobile.customTemplate = this.userMenuMobile;
+            manageProfileMobile.customShowCallback = async () => UIService.isMobileWidth();
+            manageProfileMobile.group = mainGroup;
+            manageProfileMobile.priority = 10;
+            this.userMenuOptions.push(manageProfileMobile);
             if (
                 this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_SIGNUP_GROUP)
             ) {

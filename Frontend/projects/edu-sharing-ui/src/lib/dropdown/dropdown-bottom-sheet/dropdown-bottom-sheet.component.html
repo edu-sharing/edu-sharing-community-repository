@@ -17,8 +17,15 @@
         (click)="click(option)"
         attr.data-test="menu-item-{{ option.name }}"
       >
-        <i *ngIf="option.icon" [esIcon]="option.icon" esIconContext="option"></i>
-        {{ option.name | translate }}
+        <ng-container *ngIf="option.customTemplate">
+          <ng-container
+            *ngTemplateOutlet="option.customTemplate; context: { option }"
+          ></ng-container>
+        </ng-container>
+        <ng-container *ngIf="!option.customTemplate">
+          <i *ngIf="option.icon" [esIcon]="option.icon" esIconContext="option"></i>
+          {{ option.name | translate }}
+        </ng-container>
       </button>
     </li>
   </ng-container>
