@@ -625,7 +625,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 trap: true,
                 optionConfig: {
                     state: TabType.COLLECTIONS,
-                    nodes: this.getObjects(object, data),
+                    selection: components.list.getSelection(),
                 } as NodesSelectorConfig,
             }),
         );

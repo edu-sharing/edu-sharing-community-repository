@@ -46,7 +46,6 @@ import {
     SubmissionConfig,
     SubmissionSidebarComponent,
 } from '../submission-sidebar/submission-sidebar.component';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { trigger } from '@angular/animations';
 
 export type SidebarContext = PrimaryMode | 'collections' | 'workspace' | 'search';
@@ -56,6 +55,12 @@ export type EditorialSidebarOption =
     | 'PREVIEW'
     | 'SORT_INTO'
     | 'MANAGE_SUBMISSION';
+
+/**
+ * list of options that support multi selection
+ */
+export const MULTISELECT_OPTIONS: EditorialSidebarOption[] = ['SORT_INTO'];
+
 export type OptionConfig = NodesSelectorConfig | SubmissionConfig;
 export type OptionState<T extends OptionConfig> = {
     option: EditorialSidebarOption;

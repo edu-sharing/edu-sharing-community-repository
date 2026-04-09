@@ -56,7 +56,6 @@ import {
     CollectionReference,
     ConfigurationHelper,
     LoginResult,
-    NodeWrapper,
     Permission,
 } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
@@ -80,6 +79,7 @@ import { BridgeService } from '../../../services/bridge.service';
 import { CollectionInfoBarComponent } from '../collection-info-bar/collection-info-bar.component';
 import { InfobarService } from '../infobar/infobar.service';
 import { EditorialSidebarService } from '../../editorial-page/editorial-sidebar/editorial-sidebar.service';
+import { SelectionChange } from '@angular/cdk/collections';
 
 @Component({
     selector: 'es-collection-content',
@@ -106,6 +106,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     @Input() collection: Node;
     /**
      * you can subscribe to the clickItem event in case if you want to use emitter
+     * used by extensions
      */
     @Input() interactionType: InteractionType = InteractionType.DefaultActionLink;
     @Input() scope: string;
@@ -573,17 +574,14 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         }
     }
 
+    handleSelection(selection: SelectionChange<Node>) {
+        if (this.interactionType === InteractionType.DefaultActionLink) {
+            this.editorialSidebarService.handleSelection(selection);
+        }
+    }
     private clickElementEvent(event: NodeClickEvent<CollectionReference | ProposalNode>) {
         if (this.interactionType === InteractionType.DefaultActionLink) {
-            this.nodeService
-                .getNodeMetadata(event.element.ref.id)
-                .subscribe((data: NodeWrapper) => {
-                    this.contentNode = data.node;
-                    void this.router.navigate([
-                        UIConstants.ROUTER_PREFIX + 'render',
-                        event.element.ref.id,
-                    ]);
-                });
+            this.editorialSidebarService.handleSelect(this.listReferences, event);
         } else {
             this.clickItem.emit(event);
         }

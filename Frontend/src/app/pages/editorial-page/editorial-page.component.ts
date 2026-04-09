@@ -593,32 +593,12 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         }
     }
     select(event: NodeClickEvent<NodeEntriesDataType>) {
-        if (
-            !(
-                this.nodeEntriesRef?.getSelection()?.selected.length === 1 &&
-                this.nodeEntriesRef?.getSelection()?.selected[0] === event.element
-            )
-        ) {
-            this.clearSelection();
-        }
-        this.nodeEntriesRef?.getSelection()?.toggle(event.element as Node);
-        if (
-            this.nodeEntriesRef?.getSelection()?.selected.length === 1 &&
-            (event.element as Node).mediatype &&
-            !['collection', 'folder'].includes((event.element as Node).mediatype)
-        ) {
-            this.editorialSidebarService.showOption({
-                option: 'PREVIEW',
-                trap: false,
-            });
-        }
+        this.editorialSidebarService.handleSelect(this.nodeEntriesRef, event);
     }
 
     selectionChange(event: SelectionChange<NodeEntriesDataType>) {
         this.selection.set(event.source);
-        if (this.selection()?.selected.length !== 1) {
-            this.editorialSidebarService.sidebarOpened.set(false);
-        }
+        this.editorialSidebarService.handleSelection(event);
     }
     fetchEvent(event: FetchEvent) {
         this.pagination$.next({

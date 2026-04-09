@@ -111,6 +111,7 @@
               isUserAllowedToEdit(collection) &&
               !sortCollections?.customSortingInProgress,
           }"
+          (selectionChange)="handleSelection($event)"
           (clickItem)="onContentClick($event)"
           (sortChange)="setReferenceSort($event)"
           [globalOptions]="
