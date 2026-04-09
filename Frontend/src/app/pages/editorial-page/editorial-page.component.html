@@ -1,5 +1,6 @@
 <h1 esTitle class="cdk-visually-hidden">{{ 'EDITORIAL.TITLE' | translate }}</h1>
 <mat-sidenav-container
+  [class.mat-sidenav-container-left-open]="sidenavLeft()"
   [class.mat-sidenav-container-right-open]="editorialSidebarService.sidebarOpened()"
 >
   <mat-sidenav

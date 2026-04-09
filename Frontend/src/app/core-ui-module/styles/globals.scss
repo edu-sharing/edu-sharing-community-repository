@@ -117,6 +117,7 @@ mat-sidenav.es-mat-sidenav {
         height: calc(100vh - 30px - var(--mainnavCurrentHeight));
         border-radius: var(--borderRadiusCards);
         overflow: hidden;
+        background-color: var(--roundedContainerBackground);
         @include materialShadowSmall();
     }
     .mat-sidenav-padding {

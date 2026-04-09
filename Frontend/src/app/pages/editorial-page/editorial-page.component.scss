@@ -33,6 +33,11 @@ mat-sidenav-container {
             }
         }
     }
+    &.mat-sidenav-container-left-open {
+        .main-content {
+            margin-left: 4px;
+        }
+    }
     &.mat-sidenav-container-right-open {
         .main-content {
             margin-right: 4px;
