@@ -6,7 +6,6 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { ResizableSidenavDirective } from './resizable-sidenav.directive';
 import { EditorialBreadcrumbComponent } from './editorial-breadcrumb/editorial-breadcrumb.component';
 import { MdsModule } from '../../features/mds/mds.module';
-import { EditorialSidebarComponent } from './editorial-sidebar/editorial-sidebar.component';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 import { TranslateModule } from '@ngx-translate/core';
 import { ManageAssignmentComponent } from './manage-assignment/manage-assignment.component';
@@ -14,13 +13,14 @@ import { ManageAssignmentNodesComponent } from './manage-assignment-nodes/manage
 import { AssignmentSubmissionComponent } from './assignment-submission/assignment-submission.component';
 import { EditorialBreadcrumbService } from './editorial-breadcrumb/editorial-breadcrumb.service';
 import { SubmitAssignmentComponent } from './submit-assignment/submit-assignment.component';
+import { EditorialSidebarModule } from '../../features/editorial-sidebar/editorial-sidebar.module';
 
 @NgModule({
     declarations: [EditorialPageComponent],
     imports: [
         ResizableSidenavDirective,
         EditorialBreadcrumbComponent,
-        EditorialSidebarComponent,
+        EditorialSidebarModule,
         ManageAssignmentComponent,
         AssignmentSubmissionComponent,
         ManageAssignmentNodesComponent,

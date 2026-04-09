@@ -1,4 +1,13 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    OnChanges,
+    OnDestroy,
+    OnInit,
+    Output,
+    SimpleChanges,
+} from '@angular/core';
 import { Node, SearchService } from 'ngx-edu-sharing-api';
 import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -34,7 +43,7 @@ import { MdsEditorInstanceServiceAbstract, MdsExtendedValues } from 'ngx-edu-sha
     ],
     standalone: false,
 })
-export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
+export class MdsEditorWrapperComponent implements OnInit, OnChanges, OnDestroy {
     // tslint:disable: no-output-on-prefix  // Keep API compatibility.
 
     @Input() addWidget = false;
@@ -107,6 +116,11 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
 
     getInstanceService() {
         return this.mdsEditorInstance;
+    }
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes.nodes) {
+            this.ngOnInit();
+        }
     }
 
     ngOnInit(): void {

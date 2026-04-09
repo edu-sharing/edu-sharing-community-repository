@@ -82,7 +82,7 @@ import { ThemeService } from '../../services/theme.service';
 import { RecycleMainComponent } from './recycle/recycle.component';
 import { DialogsService } from 'src/app/features/dialogs/dialogs.service';
 import { OptionsHelperService } from '../../services/options-helper.service';
-import { EditorialSidebarService } from '../editorial-page/editorial-sidebar/editorial-sidebar.service';
+import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
 
 type NodeWrapper = { node: Node };
 

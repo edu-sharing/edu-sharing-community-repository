@@ -37,12 +37,12 @@ import { AssignmentEditorConfig } from '../manage-assignment/manage-assignment.c
 import { PlatformLocation } from '@angular/common';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
-import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
 import { SubmissionFile } from '../../../../../dist/edu-sharing-api/lib/api/models/submission-file';
 import { NodesSelectorConfig, TabType } from '../nodes-selector/nodes-selector.component';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { Toast, ToastType } from '../../../services/toast';
 import { CommentsListComponent } from '../../../features/mds/mds-editor/widgets/mds-editor-widget-comments/comments-list/comments-list.component';
+import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 
 /**
  * submits an individual assignment (for student)

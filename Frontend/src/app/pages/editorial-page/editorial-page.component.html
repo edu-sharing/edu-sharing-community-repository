@@ -37,7 +37,6 @@
     <div class="es-mat-sidenav-content">
       <es-editorial-sidebar
         [primaryMode]="(params$ | async).primaryMode"
-        [nodes]="selection()?.selected"
         [component]="mainComponent$ | async"
         (showComponent)="goToComponent($event)"
         (closeTrigger)="editorialSidebarService.sidebarOpened.set(false)"
@@ -128,7 +127,6 @@
 <es-editorial-sidebar
   *ngIf="(isMobile$ | async) === true && editorialSidebarService.sidebarOpened()"
   [primaryMode]="(params$ | async).primaryMode"
-  [nodes]="selection()?.selected"
   [isModal]="true"
   (closeTrigger)="editorialSidebarService.sidebarOpened.set(false)"
 ></es-editorial-sidebar>

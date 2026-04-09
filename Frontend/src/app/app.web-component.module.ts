@@ -3,12 +3,12 @@ import { ActionbarComponent, SpinnerComponent } from 'ngx-edu-sharing-ui';
 import { extensionSchemas } from './extension/extension-schemas';
 import { WrapperComponent } from './web-components/wrapper/app/wrapper.component';
 import { WebComponentService } from './main/web-component.service';
-import { PreviewSidebarComponent } from './features/preview-sidebar/preview-sidebar.component';
 import { AppModule, Providers } from './app.module';
 import { GenericWidgetComponent } from './pages/topic-page/widgets/generic-widget/generic-widget.component';
 import { AppComponent } from './app.component';
 import { WebComponentOnlyService } from './main/web-component-only.service';
 import { TemplateComponent } from './pages/topic-page/editor/template.component';
+import { PreviewSidebarComponent } from './features/editorial-sidebar/preview-sidebar/preview-sidebar.component';
 
 @NgModule({
     imports: [AppModule],

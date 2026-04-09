@@ -70,10 +70,10 @@ import { Toast, ToastType } from '../../../services/toast';
 import { UploadDialogService } from '../../../services/upload-dialog.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { MessageType } from '../../../util/message-type';
-import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
-import { OptionState } from '../editorial-sidebar/editorial-sidebar.component';
 import { CreateSuggestionRequestDto } from '../../../../../dist/edu-sharing-api/lib/api/models/create-suggestion-request-dto';
 import { SelectionModel } from '@angular/cdk/collections';
+import { OptionState } from '../../../features/editorial-sidebar/editorial-sidebar.component';
+import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 
 export enum TabType {
     SEARCH = 'search',

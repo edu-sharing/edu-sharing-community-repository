@@ -68,8 +68,6 @@ import {
 } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { QrDialogModule } from '../../../features/dialogs/dialog-modules/qr-dialog/qr-dialog.module';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
-import { PreviewSidebarModule } from '../../../features/preview-sidebar/preview-sidebar.module';
-import { PreviewSidebarService } from '../../../features/preview-sidebar/preview-sidebar.service';
 import { MainNavService, TemplateSlot } from '../../../main/navigation/main-nav.service';
 import {
     SearchEvent,
@@ -160,6 +158,8 @@ import { SwimlaneBackgroundShapeComponent } from './swimlane-background-shape/sw
 import { SwimlaneSettingsDialogComponent } from './swimlane/swimlane-settings-dialog/swimlane-settings-dialog.component';
 import { SwimlaneConfigurationButtonsComponent } from './swimlane-configuration-buttons/swimlane-configuration-buttons.component';
 import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/topic-page-filters-sidebar.component';
+import { EditorialSidebarModule } from '../../../features/editorial-sidebar/editorial-sidebar.module';
+import { PreviewSidebarService } from '../../../features/editorial-sidebar/preview-sidebar/preview-sidebar.service';
 
 @Component({
     imports: [
@@ -174,7 +174,7 @@ import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/t
         FilterSwimlaneTypePipe,
         FilterVisibleSwimlanePipe,
         GenericWidgetComponent,
-        PreviewSidebarModule,
+        EditorialSidebarModule,
         ProfilingComponent,
         QrDialogModule,
         SharedModule,

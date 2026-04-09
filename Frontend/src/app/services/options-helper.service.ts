@@ -89,11 +89,11 @@ import { UIHelper } from '../core-ui-module/ui-helper';
 import { GlobalOptionsService } from './global-options.service';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Closable } from '../features/dialogs/card-dialog/card-dialog-config';
-import { EditorialSidebarService } from '../pages/editorial-page/editorial-sidebar/editorial-sidebar.service';
 import {
     NodesSelectorConfig,
     TabType,
 } from '../pages/editorial-page/nodes-selector/nodes-selector.component';
+import { EditorialSidebarService } from '../features/editorial-sidebar/editorial-sidebar.service';
 
 @Injectable()
 export class OptionsHelperService extends OptionsHelperServiceAbstract implements OnDestroy {
@@ -545,7 +545,12 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             Constrain.User,
         ];
         openParentNode.toolpermissions = [RestConstants.TOOLPERMISSION_WORKSPACE];
-        openParentNode.scopes = [Scope.CollectionsReferences, Scope.Search, Scope.Render];
+        openParentNode.scopes = [
+            Scope.CollectionsReferences,
+            Scope.Search,
+            Scope.Render,
+            Scope.EditorialPage,
+        ];
         openParentNode.customEnabledCallback = async (nodes: Node[]) => {
             if (nodes && nodes.length === 1) {
                 return new Promise<boolean>((resolve) => {
@@ -1444,12 +1449,17 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         configureList.isToggle = true;
          */
 
-        /*
+        const infoVersions = new OptionItem('OPTIONS.WORKSPACE_METADATA', 'info', (node: Node) => {
+            this.editorialSidebarService.showOption({
+                option: 'WORKSPACE_METADATA',
+                trap: false,
+            });
+        });
 
-            this.infoToggle = new OptionItem('WORKSPACE.OPTION.METADATA', 'info', (node: Node) => this.openMetadata(node));
-            this.infoToggle.isToggle = true;
-            options.push(this.infoToggle);
-         */
+        infoVersions.scopes = [Scope.WorkspaceList, Scope.Search, Scope.EditorialPage];
+        infoVersions.group = DefaultGroups.View;
+        infoVersions.priority = 20;
+
         const registerSelectionChange = (list: ListEventInterface<any>) => {
             const updateVisibility = () => {
                 toggleSelection.isToggleVisible =
@@ -1512,6 +1522,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         options.push(feedbackMaterialView);
         options.push(simpleEditNode);
         options.push(editNode);
+        options.push(infoVersions);
         options.push(sortInto);
         // add to collection
         //options.push(addNodeToCollection);

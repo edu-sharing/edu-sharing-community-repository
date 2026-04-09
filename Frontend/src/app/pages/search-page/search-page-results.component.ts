@@ -6,6 +6,8 @@ import {
     ElementType,
     InteractionType,
     ListSortConfig,
+    NodeClickEvent,
+    NodeEntriesDataType,
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
     OptionItem,
@@ -23,6 +25,8 @@ import { switchMap, takeUntil } from 'rxjs/operators';
 import { FrameEventsService } from '../../core-module/rest/services/frame-events.service';
 import { Values } from '../../features/mds/types/types';
 import { ConfigService, Node } from 'ngx-edu-sharing-api';
+import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
+import { SelectionChange } from '@angular/cdk/collections';
 
 export type SearchFilter = {
     propertyFilters: Values;
@@ -52,6 +56,7 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
         // Avoid changed-after-checked error.
         setTimeout(() => (this.actionbar = value));
     }
+
     actionbar: ActionbarComponent;
 
     readonly resultsDataSource = this.results.resultsDataSource;
@@ -64,12 +69,14 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
     readonly primaryAction = this.searchPage.primaryAction;
     readonly customTemplates = this.globalSearchPageInternal.customTemplates;
     defaultCustomOptions: CustomOptions;
+
     constructor(
         private globalSearchPageInternal: GlobalSearchPageServiceInternal,
         private results: SearchPageResultsService,
         private configService: ConfigService,
         public searchPage: SearchPageService,
         private temporaryStorageService: TemporaryStorageService,
+        private editorialSidebarService: EditorialSidebarService,
         private frameEventsService: FrameEventsService,
         private announcer: LiveAnnouncer,
         private translate: TranslateService,
@@ -114,9 +121,9 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
         this.previewMode = await this.configService.get('searchPreviewMode', 'Sidebar');
     }
 
-    onClick(event: Node) {
-        this.nodeEntriesResults.getSelection().setSelection(event);
-        this.results.onClick(event);
+    onClick(event: NodeClickEvent<Node>) {
+        this.editorialSidebarService.handleSelect(this.nodeEntriesResults, event, Scope.Search);
+        this.results.onClick(event.element);
     }
 
     toggleFilters(): void {
@@ -132,6 +139,7 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
             this.resultsDataSource,
         );
     }
+
     getContainerClass() {
         if (this.searchPage.searchString.getValue()) {
             return '-ngsearchword';
@@ -176,5 +184,10 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
                 this.primaryActionOptions = null;
             }
         });
+    }
+
+    selectionChange(selection: SelectionChange<NodeEntriesDataType>) {
+        this.searchPage.selection.next(selection.source.selected as Node[]);
+        this.editorialSidebarService.handleSelection(selection);
     }
 }

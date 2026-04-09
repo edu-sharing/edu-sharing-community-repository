@@ -66,6 +66,8 @@ import {
     UserService,
 } from 'ngx-edu-sharing-api';
 import { Sort } from '@angular/material/sort';
+import { SelectionChange } from '@angular/cdk/collections';
+import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 
 @Component({
     selector: 'es-workspace-explorer',
@@ -349,6 +351,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     }
     constructor(
         private connector: RestConnectorService,
+        private editorialSidebarService: EditorialSidebarService,
         private translate: TranslateService,
         private storage: SessionStorageService,
         private userService: UserService,
@@ -519,12 +522,11 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         void this.storage.set('workspaceColumns', columns);
     }
 
+    selectionChange(selection: SelectionChange<NodeEntriesDataType>) {
+        this.editorialSidebarService.handleSelection(selection);
+    }
     clickItem(event: NodeClickEvent<NodeEntriesDataType>) {
-        if (this.ui.isMobile()) {
-            this.openNode.emit(event.element);
-        } else {
-            this.select(event);
-        }
+        this.editorialSidebarService.handleSelect(this.nodeEntries, event, Scope.WorkspaceList);
     }
 
     syncTreeViewOnAdd(nodes: Node[]) {

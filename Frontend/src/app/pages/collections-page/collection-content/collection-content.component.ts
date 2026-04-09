@@ -78,8 +78,8 @@ import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { BridgeService } from '../../../services/bridge.service';
 import { CollectionInfoBarComponent } from '../collection-info-bar/collection-info-bar.component';
 import { InfobarService } from '../infobar/infobar.service';
-import { EditorialSidebarService } from '../../editorial-page/editorial-sidebar/editorial-sidebar.service';
 import { SelectionChange } from '@angular/cdk/collections';
+import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 
 @Component({
     selector: 'es-collection-content',
@@ -581,7 +581,11 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
     private clickElementEvent(event: NodeClickEvent<CollectionReference | ProposalNode>) {
         if (this.interactionType === InteractionType.DefaultActionLink) {
-            this.editorialSidebarService.handleSelect(this.listReferences, event);
+            this.editorialSidebarService.handleSelect(
+                this.listReferences,
+                event,
+                Scope.CollectionsReferences,
+            );
         } else {
             this.clickItem.emit(event);
         }

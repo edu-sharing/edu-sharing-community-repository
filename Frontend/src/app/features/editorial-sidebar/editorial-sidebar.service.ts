@@ -10,6 +10,7 @@ import {
     NodeClickEvent,
     NodeEntriesDataType,
     NodeEntriesWrapperComponent,
+    Scope,
 } from 'ngx-edu-sharing-ui';
 import { SelectionChange } from '@angular/cdk/collections';
 
@@ -18,10 +19,16 @@ import { SelectionChange } from '@angular/cdk/collections';
 })
 export class EditorialSidebarService {
     /**
+     * currently selected nodes
+     * (handled via handleSelection() and used by the component for displaying the item)
+     */
+    nodes = signal<NodeEntriesDataType[]>(null);
+    /**
      * triggered when in the sidebar a copy / apply event was performed (mode SORT_INTO)
      */
     applyNodeEmitted = new EventEmitter<{ nodes: Node[]; parent?: Node }>();
     configChange$ = new EventEmitter<OptionConfig>();
+    scope = signal(Scope.Search);
     private _editorialSidebar: EditorialSidebarComponent;
     readonly sidebarOpened = signal(false);
     /**
@@ -74,7 +81,9 @@ export class EditorialSidebarService {
     handleSelect(
         nodeEntriesRef: NodeEntriesWrapperComponent<NodeEntriesDataType>,
         event: NodeClickEvent<NodeEntriesDataType>,
+        scope: Scope,
     ) {
+        this.scope.set(scope);
         if (
             !(
                 nodeEntriesRef?.getSelection()?.selected.length === 1 &&
@@ -92,6 +101,7 @@ export class EditorialSidebarService {
             (event.element as Node).mediatype &&
             !['collection', 'folder'].includes((event.element as Node).mediatype)
         ) {
+            this.nodes.set([event.element]);
             this.showOption({
                 option: 'PREVIEW',
                 trap: false,
@@ -100,6 +110,7 @@ export class EditorialSidebarService {
     }
 
     handleSelection(selection: SelectionChange<NodeEntriesDataType>) {
+        this.nodes.set(selection.source.selected);
         if (selection.source.selected.length === 0) {
             this.close();
         } else if (

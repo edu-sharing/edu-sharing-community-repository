@@ -782,6 +782,7 @@
     "COLLECTION_PROPOSAL_ACCEPT": "Vorschlag bestätigen",
     "COLLECTION_PROPOSAL_DECLINE": "Vorschlag ablehnen",
     "OPEN": "Öffnen",
+    "WORKSPACE_METADATA": "Statistik & Versionen",
     "DOWNLOAD": "Herunterladen",
     "DOWNLOAD_SAFE": "Archivieren",
     "DOWNLOAD_ALL": "Zip herunterladen",

@@ -12,13 +12,13 @@ import {
 import { Node } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
 import { map, takeUntil, tap } from 'rxjs/operators';
-import { RestHelper } from '../../core-module/core.module';
-import { CardDialogRef } from '../dialogs/card-dialog/card-dialog-ref';
-import { DialogsService } from '../dialogs/dialogs.service';
-import { PreviewContentComponent } from './preview-content.component';
-import { GenericDialogData } from '../dialogs/dialog-modules/generic-dialog/generic-dialog-data';
+import { PreviewContentComponent } from './preview-content/preview-content.component';
+
 import { PreviewSidebarService } from './preview-sidebar.service';
-import { CustomOptions } from 'ngx-edu-sharing-ui';
+import { CustomOptions, RestHelper } from 'ngx-edu-sharing-ui';
+import { CardDialogRef } from '../../dialogs/card-dialog/card-dialog-ref';
+import { GenericDialogData } from '../../dialogs/dialog-modules/generic-dialog/generic-dialog-data';
+import { DialogsService } from '../../dialogs/dialogs.service';
 
 /**
  * Sidebar component that previews an element with preview image and some metadata.

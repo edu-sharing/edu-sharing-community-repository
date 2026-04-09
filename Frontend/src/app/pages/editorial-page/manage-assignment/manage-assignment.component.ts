@@ -4,7 +4,6 @@ import { MatStepper, MatStepperModule } from '@angular/material/stepper';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ShareDialogChooseDateComponent } from '../../../features/dialogs/dialog-modules/share-dialog/permission/choose-date/choose-date.component';
-import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
 import {
     ManageAssignmentNodesComponent,
     NodeWithRole,
@@ -33,6 +32,7 @@ import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { EditorialBreadcrumbService } from '../editorial-breadcrumb/editorial-breadcrumb.service';
 import { NodesSelectorConfig } from '../nodes-selector/nodes-selector.component';
 import { EditorialPageService } from '../editorial-page.service';
+import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 
 export type AssignmentBase = Pick<Assignment, 'title' | 'type' | 'summary'>;
 export const AssignmentEditorConfig = {

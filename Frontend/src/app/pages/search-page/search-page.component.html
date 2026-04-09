@@ -20,6 +20,7 @@
       *ngIf="availableRepositories.getValue().length > 1"
       [routerLink]="['./all']"
       [queryParams]="queryParamsAllRepositories"
+      (click)="goToAll()"
       routerLinkActive
       #routerLinkActive="routerLinkActive"
       [active]="routerLinkActive.isActive"
@@ -65,10 +66,7 @@ where. -->
         position="end"
       >
         <div class="es-mat-sidenav-content">
-          <es-editorial-sidebar
-            [primaryMode]="'search'"
-            [nodes]="searchPage.selection | async"
-          ></es-editorial-sidebar>
+          <es-editorial-sidebar [primaryMode]="'search'"></es-editorial-sidebar>
         </div>
       </mat-sidenav>
       <es-search-page-filters-sidebar></es-search-page-filters-sidebar>

@@ -52,7 +52,7 @@
   [columns]="resultColumns.value"
   [displayType]="(state | async).displayType"
   (displayTypeChange)="setDisplayType($event)"
-  (selectionChange)="searchPage.selection.next($event.source.selected)"
+  (selectionChange)="selectionChange($event)"
   [sort]="(state | async).sortConfig"
   (sortChange)="updateSort($event)"
   [primaryInstance]="true"
@@ -60,7 +60,7 @@
     previewMode === 'Sidebar' ? InteractionType.Emitter : InteractionType.DefaultActionLink
   "
   [initConfig]="{ actionbar, customOptions: primaryActionOptions || (searchPage.getCustomMaterialOptions | async)}"
-  (clickItem)="onClick($event.element)"
+  (clickItem)="onClick($event)"
   (dblClickItem)="onDblClick($event.element)"
   data-test="search-result-grid-material"
 >

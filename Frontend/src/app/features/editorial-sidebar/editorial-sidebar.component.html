@@ -31,7 +31,7 @@
         ></es-nodes-selector>
         <es-metadata-sidebar
           *ngIf="option === 'WORKSPACE_METADATA'"
-          [nodeSidebar]="$any(nodes())?.[0]"
+          [nodeSidebar]="$any(editorialSidebarService.nodes())?.[0]"
         ></es-metadata-sidebar>
         <es-submission-sidebar
           *ngIf="option === 'MANAGE_SUBMISSION'"
@@ -40,7 +40,7 @@
         ></es-submission-sidebar>
         <es-preview-sidebar
           *ngIf="option === 'PREVIEW'"
-          [node]="$any(nodes())?.[0]"
+          [node]="$any(editorialSidebarService.nodes())?.[0]"
         ></es-preview-sidebar>
       </div>
 
@@ -51,7 +51,7 @@
             *ngFor="let option of options()"
             [tabindex]="option.isEnabled ? 0 : -1"
             cdkMonitorElementFocus
-            (click)="option.callback(nodes())"
+            (click)="option.callback(editorialSidebarService.nodes())"
             [attr.aria-disabled]="!option.isEnabled"
             [class.disabled]="!option.isEnabled"
           >
@@ -66,7 +66,8 @@
         <es-info-message *ngIf="!options()?.length" mode="info">
           <div class="message">
             {{
-              'EDITORIAL.SIDEBAR.NO_OPTIONS' + (nodes()?.length ? '_SELECTION' : '_NO_SELECTION')
+              'EDITORIAL.SIDEBAR.NO_OPTIONS' +
+                (editorialSidebarService.nodes()?.length ? '_SELECTION' : '_NO_SELECTION')
                 | translate
             }}
           </div>

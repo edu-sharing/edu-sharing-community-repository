@@ -16,9 +16,7 @@ import { Node, RestConstants } from 'ngx-edu-sharing-api';
 import {
     Constrain,
     DefaultGroups,
-    EduSharingUiCommonModule,
     ElementType,
-    NodeEntriesDataType,
     NodeHelperService,
     OptionItem,
     OptionsHelperDataService,
@@ -27,26 +25,16 @@ import {
     UIConstants,
     UIService,
 } from 'ngx-edu-sharing-ui';
-import { TranslateModule } from '@ngx-translate/core';
-import { CommonModule } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog-ref';
-import { DialogsService } from '../../../features/dialogs/dialogs.service';
-import { MainComponentType, PrimaryMode } from '../editorial-page.component';
-import {
-    NodesSelectorComponent,
-    NodesSelectorConfig,
-} from '../nodes-selector/nodes-selector.component';
-import { MetadataSidebarComponent } from '../../workspace-page/metadata/metadata-sidebar.component';
-import { PreviewSidebarModule } from '../../../features/preview-sidebar/preview-sidebar.module';
 import { EditorialSidebarService } from './editorial-sidebar.service';
-import { CdkMonitorFocus } from '@angular/cdk/a11y';
-import {
-    SubmissionConfig,
-    SubmissionSidebarComponent,
-} from '../submission-sidebar/submission-sidebar.component';
 import { trigger } from '@angular/animations';
+import { NodesSelectorConfig } from '../../pages/editorial-page/nodes-selector/nodes-selector.component';
+import { CardDialogRef } from '../dialogs/card-dialog/card-dialog-ref';
+import { DialogsService } from '../dialogs/dialogs.service';
+import { SubmissionConfig } from '../../pages/editorial-page/submission-sidebar/submission-sidebar.component';
+
+export type PrimaryMode = 'activity' | 'share' | 'assignment' | 'suggestions';
+export type MainComponentType = 'manageAssignment' | 'assignmentSubmission' | 'submitAssignment';
 
 export type SidebarContext = PrimaryMode | 'collections' | 'workspace' | 'search';
 export type EditorialSidebarOption =
@@ -77,17 +65,7 @@ export type OptionState<T extends OptionConfig> = {
     selector: 'es-editorial-sidebar',
     templateUrl: 'editorial-sidebar.component.html',
     styleUrls: ['editorial-sidebar.component.scss'],
-    imports: [
-        EduSharingUiCommonModule,
-        CdkMonitorFocus,
-        CommonModule,
-        MatButtonModule,
-        TranslateModule,
-        SubmissionSidebarComponent,
-        NodesSelectorComponent,
-        MetadataSidebarComponent,
-        PreviewSidebarModule,
-    ],
+    standalone: false,
     providers: [OptionsHelperDataService],
     animations: [trigger('overlay', UIAnimation.openOverlay())],
 })
@@ -98,7 +76,6 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
      * current main component (only for editorial page context)
      */
     component = input<MainComponentType>();
-    nodes = input<NodeEntriesDataType[]>();
     primaryMode = input.required<SidebarContext>();
     enabledOption = signal<OptionState<unknown>>(null);
     isModal = input<boolean>(false);
@@ -173,9 +150,9 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
 
         this.optionsHelperDataService.setData({
             scope: this.primaryMode(),
-            activeObjects: this.nodes(),
-            selectedObjects: this.nodes(),
-            allObjects: this.nodes(),
+            activeObjects: this.editorialSidebarService.nodes(),
+            selectedObjects: this.editorialSidebarService.nodes(),
+            allObjects: this.editorialSidebarService.nodes(),
             customOptions: {
                 useDefaultOptions: false,
                 addOptions: options,
@@ -215,7 +192,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
                 this.enabledOption.set({
                     trap: false,
                     option: 'SORT_INTO',
-                    optionConfig: { nodes: this.nodes() },
+                    optionConfig: { nodes: this.editorialSidebarService.nodes() },
                 }),
         );
         manageContent.group = DefaultGroups.Edit;
@@ -225,9 +202,9 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         options.push(manageContent);
         this.optionsHelperDataService.setData({
             scope: this.primaryMode(),
-            activeObjects: this.nodes(),
-            selectedObjects: this.nodes(),
-            allObjects: this.nodes(),
+            activeObjects: this.editorialSidebarService.nodes(),
+            selectedObjects: this.editorialSidebarService.nodes(),
+            allObjects: this.editorialSidebarService.nodes(),
             customOptions: {
                 useDefaultOptions: false,
                 addOptions: options,

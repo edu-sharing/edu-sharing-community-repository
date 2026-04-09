@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject } from 'rxjs';
-import { UIHelper } from '../../core-ui-module/ui-helper';
-import { NodeHelperService } from '../../services/node-helper.service';
-import { BridgeService } from '../../services/bridge.service';
 import { PreviewSidebarComponent } from './preview-sidebar.component';
+import { BridgeService } from '../../../services/bridge.service';
+import { UIHelper } from '../../../core-ui-module/ui-helper';
+import { NodeHelperService } from '../../../services/node-helper.service';
 
 /**
  * Sidebar component that previews an element with preview image and some metadata.

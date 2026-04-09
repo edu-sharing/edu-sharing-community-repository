@@ -66,8 +66,6 @@ export class SearchPageService implements OnDestroy {
     readonly activeMetadataSet = this.userModifiableValues.createString();
     // Whether filters are visible---either as sidebar or dialog on mobile.
     readonly filterBarIsVisible = this.userModifiableValues.createBoolean(false);
-    // Current preview element, visible either as sidebar or dialog on mobile.
-    readonly previewNode = new BehaviorSubject<Node>(null);
     readonly selection = new BehaviorSubject<Node[]>(null);
     readonly searchFilters = this.userModifiableValues.createDict();
     readonly searchString = this.userModifiableValues.createString();

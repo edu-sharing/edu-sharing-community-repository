@@ -3,17 +3,16 @@ import { applicationConfig, type Meta, moduleMetadata, type StoryObj } from '@st
 import { PreviewSidebarComponent } from './preview-sidebar.component';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { Node } from 'ngx-edu-sharing-api';
-import { DummyNode, mdsStorybookProviders, ToastMock } from '../mds/mds-editor/storybook-utils';
-import { PreviewSidebarModule } from './preview-sidebar.module';
 import { Toast } from 'ngx-edu-sharing-ui';
-import { ActivatedRoute } from '@angular/router';
+import { EditorialSidebarModule } from '../editorial-sidebar.module';
+import { DummyNode, mdsStorybookProviders, ToastMock } from '../../mds/mds-editor/storybook-utils';
 
 const sidebar: Meta<PreviewSidebarComponent> = {
     title: 'Preview/Sidebar',
     component: PreviewSidebarComponent,
     decorators: [
         moduleMetadata({
-            imports: [PreviewSidebarModule, SharedModule],
+            imports: [EditorialSidebarModule, SharedModule],
         }),
         applicationConfig({
             providers: mdsStorybookProviders.concat([{ provide: Toast, useClass: ToastMock }]),

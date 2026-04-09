@@ -71,11 +71,13 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { SelectionChange, SelectionModel } from '@angular/cdk/collections';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { OptionsHelperService } from '../../services/options-helper.service';
-import { EditorialSidebarService } from './editorial-sidebar/editorial-sidebar.service';
 import { EditorialBreadcrumbService } from './editorial-breadcrumb/editorial-breadcrumb.service';
+import {
+    MainComponentType,
+    PrimaryMode,
+} from '../../features/editorial-sidebar/editorial-sidebar.component';
+import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
 
-export type PrimaryMode = 'activity' | 'share' | 'assignment' | 'suggestions';
-export type MainComponentType = 'manageAssignment' | 'assignmentSubmission' | 'submitAssignment';
 type RouteConfig = {
     primaryMode: PrimaryMode;
 };
@@ -593,7 +595,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         }
     }
     select(event: NodeClickEvent<NodeEntriesDataType>) {
-        this.editorialSidebarService.handleSelect(this.nodeEntriesRef, event);
+        this.editorialSidebarService.handleSelect(this.nodeEntriesRef, event, Scope.EditorialPage);
     }
 
     selectionChange(event: SelectionChange<NodeEntriesDataType>) {

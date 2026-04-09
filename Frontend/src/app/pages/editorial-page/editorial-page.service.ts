@@ -2,7 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { MdsWidget } from 'ngx-edu-sharing-api';
 import { NodeEntriesDataType, NodeEntriesDisplayType, Values } from 'ngx-edu-sharing-ui';
-import { PrimaryMode } from './editorial-page.component';
+import { PrimaryMode } from '../../features/editorial-sidebar/editorial-sidebar.component';
 
 export type EditorialTab = {
     id: string;
