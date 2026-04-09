@@ -63,9 +63,11 @@ $dark-secondary-text: rgba(black, 0.54);
     --mat-switch-track-outline-color: var(--mdc-switch-unselected-handle-color);
     --mdc-switch-handle-shape: var(--mat-sys-corner-full);
     --mdc-switch-track-shape: var(--mat-sys-corner-full);
+    --mat-sidenav-content-background-color: #{$backgroundColor};
 }
 html mat-sidenav {
     --mat-sidenav-container-divider-color: transparent;
+    --mat-sidenav-container-background-color: #{$backgroundColor};
 }
 html .mat-mdc-slide-toggle {
     --mat-switch-track-outline-width: 2px;
@@ -143,7 +145,7 @@ mat-button-toggle-group {
 }
 mat-tab-group {
     mat-tab-header {
-        background-color: $backgroundColor;
+        background-color: var(--roundedContainerBackground);
     }
 }
 .mat-tab-group.mat-dark {

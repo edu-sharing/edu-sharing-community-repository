@@ -2,6 +2,7 @@
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
 .sidebar-header {
+    background-color: #fff;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -34,6 +35,7 @@
     }
 }
 .sidebar-container {
+    background-color: #fff;
     overflow-y: auto;
     height: 0;
     flex-grow: 1;

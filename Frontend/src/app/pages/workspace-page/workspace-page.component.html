@@ -1,4 +1,6 @@
-<mat-sidenav-container>
+<mat-sidenav-container
+  [class.mat-sidenav-container-right-open]="editorialSidebarService.sidebarOpened()"
+>
   <mat-sidenav
     #rightSidenav
     [mode]="'side'"
@@ -73,7 +75,7 @@
             ><i esIcon="delete"></i> {{ 'WORKSPACE.RECYCLE' | translate }}</a
           >
         </div>
-        <div class="tree" *ngIf="isLoggedIn">
+        <div class="tree" [style.--treeOffset.px]="treeOffset" *ngIf="isLoggedIn">
           <es-workspace-tree
             [class.tree-quota]="user.person.quota.enabled"
             [path]="path"
