@@ -9,7 +9,7 @@ mat-sidenav-container {
     .main-content {
         padding: 20px 20px;
         min-height: calc(
-            100vh - 10px - var(--roundedContainerMargin) - var(--roundedContainerMargin) -
+            100vh - var(--roundedContainerMargin) - var(--roundedContainerMargin) -
                 var(--mainnavCurrentHeight)
         );
         margin: var(--roundedContainerMargin);
