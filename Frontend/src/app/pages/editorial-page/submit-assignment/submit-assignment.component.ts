@@ -122,6 +122,10 @@ export class SubmitAssignmentComponent implements OnDestroy {
             ),
     );
     submittableFiles = new NodeDataSource<Node>();
+    /**
+     * all files including user attached
+     */
+    submittableFilesAll = new NodeDataSource<Node>();
     supplementaryFiles = new NodeDataSource<Node>();
 
     constructor(
@@ -341,15 +345,24 @@ export class SubmitAssignmentComponent implements OnDestroy {
     }
 
     private syncSubmissionDataSource() {
+        const originalFiles = this.files()
+            .filter((f) => f.documentRole === 'SUBMITTABLE')
+            .map((n) => n.referNode);
+        this.submittableFiles.setData(originalFiles);
         const nodes = this.files()
             .filter((f) => f.documentRole === 'SUBMITTABLE')
-            .map((n) => n.referNode)
+            .map(
+                (o) =>
+                    // for submission view, prefer showing the "own" file names and content of the submitted files (if present)
+                    this.submissionFiles().find((s) => s.assignmentFile?.ref?.id === o.ref.id)
+                        ?.content || o.referNode,
+            )
             .concat(
                 (this.submissionFiles() || [])
                     .filter((f) => !f.assignmentFile)
                     .map((f) => f.content),
             );
-        this.submittableFiles.setData(nodes);
+        this.submittableFilesAll.setData(nodes);
         this.initOptions();
     }
 

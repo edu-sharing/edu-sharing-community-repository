@@ -73,7 +73,7 @@
 
         <div class="block files">
           <label
-            >{{ submittableFiles.getTotal() }}x
+            >{{ submittableFilesAll.getTotal() }}x
             {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.SUBMITTABLE' | translate }}</label
           >
           <div>
@@ -92,7 +92,7 @@
               "
               [initConfig]="submittableConfig"
               [elementInteractionType]="InteractionType.Emitter"
-              [dataSource]="submittableFiles"
+              [dataSource]="submittableFilesAll"
               [columns]="columns"
             >
               <ng-template #overlay let-element="element">
