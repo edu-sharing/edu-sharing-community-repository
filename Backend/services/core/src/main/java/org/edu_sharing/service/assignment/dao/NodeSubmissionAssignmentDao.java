@@ -366,7 +366,8 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
     }
 
     boolean canChangeAssignment() {
-        return getStatus() == Assignment.Status.DRAFT || (getStatus() == Assignment.Status.INPROGRESS && getSubmissions().isEmpty());
+        // status draft or in progress and no submissions so far (ignore the virtual, empty submissions)
+        return getStatus() == Assignment.Status.DRAFT || (getStatus() == Assignment.Status.INPROGRESS && getSubmissions().stream().allMatch(s -> s instanceof EmptySubmissionAssignmentDao));
     }
 
     private boolean canChangeMetadata() {
