@@ -78,8 +78,8 @@ export class NodeEntriesCardSmallComponent<T extends Node> {
             }
         } else if (permissions === 'ASSIGNEE') {
             if (
-                assignment.submissions?.[0].submissionStatus === 'FINISHED' ||
-                assignment.submissions?.[0].validationStatus === 'FINISHED'
+                assignment.submissions?.[0]?.submissionStatus === 'FINISHED' ||
+                assignment.submissions?.[0]?.validationStatus === 'FINISHED'
             ) {
                 return 'low';
             }
