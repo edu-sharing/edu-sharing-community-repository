@@ -1,5 +1,4 @@
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { TranslateService } from '@ngx-translate/core';
 import {
     applicationConfig,
     argsToTemplate,
@@ -22,22 +21,15 @@ import {
     Helper,
     NodeDataSource,
     NodeEntriesModule,
-    NodeEntriesService,
     OptionItem,
-    Toast,
 } from 'ngx-edu-sharing-ui';
 import { NodeEntriesWrapperComponent } from './node-entries-wrapper.component';
-import {
-    AuthenticationServiceMock,
-    NodeEntriesServiceMock,
-} from './node-entries-card/node-entries-card.component.stories';
+import { AuthenticationServiceMock } from './node-entries-card/node-entries-card.component.stories';
 import {
     DefaultColumns,
     DummyAssignment,
     DummyNode,
     mdsStorybookProviders,
-    ToastMock,
-    translateProvider,
 } from 'src/app/features/mds/mds-editor/storybook-utils';
 import { InteractionType, NodeEntriesDisplayType } from './entries-model';
 
@@ -59,6 +51,19 @@ const Assignments = Array(16)
         n.title += ' ' + i;
         const status: Assignment['status'][] = ['DRAFT', 'INPROGRESS', 'CANCELED', 'FINISHED'];
         n.status = status[Math.floor(Math.random() * status.length)];
+        const submissionStatus: Submission['submissionStatus'][] = [
+            'NOT_STARTED',
+            'PENDING',
+            'FINISHED',
+        ];
+        n.submissions = [
+            {
+                submissionStatus:
+                    submissionStatus[Math.floor(Math.random() * submissionStatus.length)],
+                validationStatus:
+                    submissionStatus[Math.floor(Math.random() * submissionStatus.length)],
+            } as Submission,
+        ];
         n.permissions = [
             {
                 role: 'COORDINATOR',
@@ -77,13 +82,7 @@ const Assignments = Array(16)
 const dummyDataSourceAssignments = new NodeDataSource<Assignment>(Helper.deepCopy(Assignments));
 const dummyDataSourceAssignmentsSubmission = new NodeDataSource<Assignment>(
     Helper.deepCopy(Assignments).map((a: Assignment) => {
-        const status: Submission['submissionStatus'][] = ['NOT_STARTED', 'PENDING', 'FINISHED'];
         a.permissions = a.permissions.filter((a) => a.role !== 'COORDINATOR');
-        a.submissions = [
-            {
-                submissionStatus: status[Math.floor(Math.random() * status.length)],
-            } as Submission,
-        ];
         return a;
     }),
 );

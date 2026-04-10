@@ -8,6 +8,7 @@ import { NodeHelperService } from '../../services/node-helper.service';
 import { Assignment, Node, Submission } from 'ngx-edu-sharing-api';
 import { DropdownComponent } from '../../dropdown/dropdown.component';
 import { UIService } from '../../services/ui.service';
+import { AssignmentPipe } from '../../pipes/assignment.pipe';
 
 @Component({
     selector: 'es-node-entries-card-small',
@@ -56,6 +57,11 @@ export class NodeEntriesCardSmallComponent<T extends Node> {
         PENDING: 'timer',
         FINISHED: 'done',
     };
+    readonly AssignmentValidationStatusIcon: { [key in Submission['validationStatus']]: string } = {
+        NOT_STARTED: 'timer',
+        PENDING: 'timer',
+        FINISHED: 'done',
+    };
     readonly AssignmentStatusIcon: { [key in Assignment['status']]: string } = {
         DRAFT: 'news',
         INPROGRESS: 'schedule_send',
@@ -63,17 +69,38 @@ export class NodeEntriesCardSmallComponent<T extends Node> {
         FINISHED: 'done',
     };
 
-    assignmentEndTimePriority(endTime: string) {
+    assignmentEndTimePriority(assignment: Assignment) {
         const now = new Date().getTime();
-        const delayUntil = Date.parse(endTime) - now;
+        const permissions = new AssignmentPipe().transform(assignment, { mode: 'permissions' });
+        if (permissions === 'COORDINATOR') {
+            if (assignment.status !== 'INPROGRESS') {
+                return 'low';
+            }
+        } else if (permissions === 'ASSIGNEE') {
+            if (
+                assignment.submissions?.[0].submissionStatus === 'FINISHED' ||
+                assignment.submissions?.[0].validationStatus === 'FINISHED'
+            ) {
+                return 'low';
+            }
+        }
+        const delayUntil =
+            (Date.parse(assignment.endTime as string) ||
+                (assignment.endTime as unknown as number)) - now;
         // > 5 days == low delay
-        if (delayUntil > 3600 * 1000 * 24 * 5) {
-            return 'low';
-            // > 2 days == medium delay
-        } else if (delayUntil > 3600 * 1000 * 24 * 2) {
+        if (delayUntil < 3600 * 1000 * 24 * 1) {
+            return 'high';
+        } else if (delayUntil < 3600 * 1000 * 24 * 2) {
             return 'medium';
         }
-        return 'high';
+        return 'low';
+    }
+
+    assignmentStatus(assignment: Assignment) {
+        if (assignment.submissions?.some((s) => s.submissionStatus === 'FINISHED')) {
+            return 'HAS_SUBMISSIONS';
+        }
+        return assignment.status;
     }
 
     protected readonly UIService = UIService;

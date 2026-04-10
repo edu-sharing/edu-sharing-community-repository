@@ -351,19 +351,20 @@
     "STATUS": {
       "DRAFT": "Entwurf",
       "INPROGRESS": "Ausgeteilt",
+      "HAS_SUBMISSIONS": "Zu korrigieren",
       "CANCELED": "Abgebrochen",
       "FINISHED": "Abgeschlossen"
     },
     "SUBMISSION_STATUS": {
-      "NOT_STARTED": "Abzugeben",
-      "PENDING": "Gestartet",
+      "NOT_STARTED": "Offen",
+      "PENDING": "Offen",
       "WITHDRAWN": "Eingezogen",
       "FINISHED": "Abgegeben"
     },
     "VALIDATION_STATUS": {
       "NOT_STARTED": "Zu korrigieren",
       "PENDING": "In Korrektur",
-      "FINISHED": "Abgeschlossen"
+      "FINISHED": "Korrigiert"
     }
   },
   "SUBMISSION": {
