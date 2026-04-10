@@ -526,7 +526,11 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         this.editorialSidebarService.handleSelection(selection);
     }
     clickItem(event: NodeClickEvent<NodeEntriesDataType>) {
-        this.editorialSidebarService.handleSelect(this.nodeEntries, event, Scope.WorkspaceList);
+        if (this.ui.isMobile() && (event.element as Node).isDirectory) {
+            this.openNode.emit(event.element);
+        } else {
+            this.editorialSidebarService.handleSelect(this.nodeEntries, event, Scope.WorkspaceList);
+        }
     }
 
     syncTreeViewOnAdd(nodes: Node[]) {
