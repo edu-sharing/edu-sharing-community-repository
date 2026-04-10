@@ -806,8 +806,8 @@ public class PersonLifecycleService {
 		refs.forEach((ref)->{
 			try {
 				NodeServiceFactory.getLocalService().removeNode(ref.getId(),null,false);
-			} catch (InvalidNodeRefException ignored){
-
+			} catch (InvalidNodeRefException e){
+				logger.info("Can not delete ref: " + ref.getId() + ": "+ e.getMessage());
 			}
 		});
 	}
