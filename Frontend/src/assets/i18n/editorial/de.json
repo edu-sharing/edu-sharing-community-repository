@@ -134,11 +134,11 @@
       "SUBMISSION_TIME": "Abgegeben",
       "SUBMISSION_SENT": "Diese Aufgabe wurde bereits abgegeben",
       "ADD_ASSIGNMENT_MATERIAL": "Weiteres Material anfügen",
-      "REPLACE_ASSIGNMENT_MATERIAL": "Dieses Material einreichen",
+      "REPLACE_ASSIGNMENT_MATERIAL": "Arbeitsmaterial einreichen",
       "SUBMITTABLE": "Arbeitsmaterial",
       "SUBMITTED": "Erfolgreich abgegeben",
       "SUPPLEMENTARY": "Begleitmaterial",
-      "SUBMIT": "Abgeben"
+      "SUBMIT": "Abgabe einreichen"
     },
     "ASSIGNMENT": {
       "STEP": {
