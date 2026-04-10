@@ -26,7 +26,7 @@
 </div>
 <div *ngIf="_nodes.length === 1">
   <span>{{ 'NODE_INFO.NODE_ASPECTS' | translate }}</span
-  ><span class="aspects">{{ _nodes[0].aspects.join('\n') }}</span>
+  ><span class="aspects">{{ _nodes[0].aspects?.join('\n') }}</span>
 </div>
 <div>
   <span>{{ 'NODE.mimetype' | translate }}</span

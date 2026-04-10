@@ -115,7 +115,7 @@ export class DeleteNodesDialogComponent implements OnInit {
         return (
             this.connector.getCurrentLogin()?.isAdmin &&
             this.data.nodes.every(
-                (n) => n.properties[RestConstants.CCM_PROP_REPLICATIONSOURCE] != null,
+                (n) => n.properties?.[RestConstants.CCM_PROP_REPLICATIONSOURCE] != null,
             )
         );
     }
