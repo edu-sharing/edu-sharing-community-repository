@@ -10,8 +10,8 @@ import {
     ViewChild,
 } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
-import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
-import { map, takeUntil, tap } from 'rxjs/operators';
+import { BehaviorSubject, firstValueFrom, of, Subject } from 'rxjs';
+import { takeUntil, tap } from 'rxjs/operators';
 import { PreviewContentComponent } from './preview-content/preview-content.component';
 
 import { PreviewSidebarService } from './preview-sidebar.service';
@@ -60,7 +60,7 @@ export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
 
     ngAfterViewInit(): void {
         // Wait for `contentRef` to be populated before calling `registerDialogOnMobile`.
-        this.registerDialogOnMobile();
+        // this.registerDialogOnMobile();
     }
 
     ngOnDestroy(): void {
@@ -128,9 +128,12 @@ export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
     }
 
     private getIsMobileScreen() {
+        // handled in editorial sidebar!
+        return of(false);
+        /*
         return this.breakpointObserver
             .observe(['(max-width: 900px)'])
-            .pipe(map(({ matches }) => matches));
+            .pipe(map(({ matches }) => matches));*/
     }
 
     async openModal() {

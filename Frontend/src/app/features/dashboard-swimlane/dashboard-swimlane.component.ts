@@ -12,6 +12,7 @@ import {
     ColumnType,
     EduSharingUiCommonModule,
     GridConfig,
+    HideMode,
     InteractionType,
     MdsHelperService,
     NodeDataSource,
@@ -187,6 +188,7 @@ export class DashboardSwimlaneComponent {
             createAssignment.toolpermissions = [
                 RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS,
             ];
+            createAssignment.toolpermissionsMode = HideMode.Hide;
             this.globalOptions.set([createAssignment]);
 
             void this.fetch(

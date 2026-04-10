@@ -334,11 +334,10 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 this.columns.set({
                     Default: [
                         new ListItem('ASSIGNMENT', 'title'),
-                        new ListItem('ASSIGNMENT', 'type'),
+                        // new ListItem('ASSIGNMENT', 'type'),
                         new ListItem('ASSIGNMENT', 'status'),
                         new ListItem('ASSIGNMENT', 'endTime'),
                         new ListItem('ASSIGNMENT', 'submissionStatus'),
-                        new ListItem('ASSIGNMENT', 'summary'),
                     ],
                 });
                 this.mdsDefinition$.next(

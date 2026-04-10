@@ -30,7 +30,7 @@
   <mat-sidenav
     #rightSidenav
     [mode]="'side'"
-    [opened]="editorialSidebarService.sidebarOpened() && (isMobile$ | async) === false"
+    [opened]="editorialSidebarService.sidebarOpened()"
     [defaultWidth]="0.3"
     storageKey="EDITORIAL_SIDENAV_RIGHT_WIDTH"
     class="es-mat-sidenav"
