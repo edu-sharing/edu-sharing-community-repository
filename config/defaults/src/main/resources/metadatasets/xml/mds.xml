@@ -1693,6 +1693,9 @@
         ]
         }}
       </basequery>
+      <specialFilter>exclude_system_folder</specialFilter>
+      <specialFilter>exclude_sites_folder</specialFilter>
+      <specialFilter>exclude_people_folder</specialFilter>
     </query>
     <query join="AND" id="sharedByMe">
       <basequery>{"bool":{
@@ -1707,6 +1710,9 @@
         ]
         }}
       </basequery>
+      <specialFilter>exclude_system_folder</specialFilter>
+      <specialFilter>exclude_sites_folder</specialFilter>
+      <specialFilter>exclude_people_folder</specialFilter>
     </query>
     <query join="AND" id="recentUserEvents">
       <basequery>{"bool":{
@@ -1721,6 +1727,9 @@
         "minimum_should_match": 1
         }}
       </basequery>
+      <specialFilter>exclude_system_folder</specialFilter>
+      <specialFilter>exclude_sites_folder</specialFilter>
+      <specialFilter>exclude_people_folder</specialFilter>
       <property name="ngsearchword">
         <statement>
           {"bool": {
