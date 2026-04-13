@@ -11,6 +11,7 @@ import {
 import {
     ColumnType,
     EduSharingUiCommonModule,
+    ElementType,
     GridConfig,
     HideMode,
     InteractionType,
@@ -24,8 +25,10 @@ import {
     NodeEntriesWrapperComponent,
     OptionItem,
     Scope,
+    Target,
     UIAnimation,
     UIConstants,
+    UIService,
 } from 'ngx-edu-sharing-ui';
 import { SwimlaneEntry } from '../../pages/landing-page/landing-page.component';
 import { MatButtonModule } from '@angular/material/button';
@@ -52,12 +55,13 @@ import { RestConstants } from '../../core-module/rest/rest-constants';
 import { Params, Router, RouterLink } from '@angular/router';
 import { filter, first } from 'rxjs/operators';
 import { DashboardInteractivityStreamComponent } from './dashboard-interactivity-stream/dashboard-interactivity-stream.component';
+import { OptionsHelperService } from '../../services/options-helper.service';
 
 type StreamDetails = { key: string; result: SearchResultGeneric<NodeEvent>; params: Params };
 type ShareDetails = { key: string; result: SearchResultGeneric<NodeShare>; params: Params };
 @Component({
     selector: 'es-dashboard-swimlane',
-    providers: [NodeEntriesService],
+    providers: [NodeEntriesService, OptionsHelperService],
     standalone: true,
     templateUrl: './dashboard-swimlane.component.html',
     styleUrls: ['./dashboard-swimlane.component.scss'],
@@ -117,6 +121,8 @@ export class DashboardSwimlaneComponent {
         private router: Router,
         private authenticationService: AuthenticationService,
         private searchService: SearchService,
+        private uiService: UIService,
+        private optionsHelperService: OptionsHelperService,
         private nodeService: NodeService,
         private assignmentService: AssignmentV1Service,
         private mdsHelperService: MdsHelperService,
@@ -185,11 +191,12 @@ export class DashboardSwimlaneComponent {
                     },
                 });
             });
+            createAssignment.elementType = [ElementType.NoneOrUnknown];
             createAssignment.toolpermissions = [
                 RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS,
             ];
             createAssignment.toolpermissionsMode = HideMode.Hide;
-            this.globalOptions.set([createAssignment]);
+            void this.setGlobalOptions([createAssignment]);
 
             void this.fetch(
                 this.assignmentService.searchAssignments({
@@ -226,15 +233,15 @@ export class DashboardSwimlaneComponent {
                     maxItems: this.maxItems,
                 }),
             );
-            this.globalOptions.set([
-                new OptionItem('OPTIONS.NEW_COLLECTION', 'add', () => {
-                    void this.router.navigate([
-                        UIConstants.ROUTER_PREFIX + 'collections/collection',
-                        'new',
-                        ROOT,
-                    ]);
-                }),
-            ]);
+            const newCollection = new OptionItem('OPTIONS.NEW_COLLECTION', 'add', () => {
+                void this.router.navigate([
+                    UIConstants.ROUTER_PREFIX + 'collections/collection',
+                    'new',
+                    ROOT,
+                ]);
+            });
+            newCollection.elementType = [ElementType.NoneOrUnknown];
+            void this.setGlobalOptions([newCollection]);
         } else if (this.swimlane().id === 'recent-activities') {
             this.routerLink.set('/' + UIConstants.ROUTER_PREFIX + 'editorial/activity');
             const events = [] as StreamDetails[];
@@ -301,5 +308,11 @@ export class DashboardSwimlaneComponent {
         this.nodes.set(await firstValueFrom(observable));
         // this.nodes.set({nodes: [], pagination: {} as any});
         void this.nodeNodeEntriesWrapperComponent?.initOptionsGenerator({});
+    }
+
+    private async setGlobalOptions(optionItems: OptionItem[]) {
+        this.globalOptions.set(
+            await this.optionsHelperService.filterOptions(optionItems, Target.ListGlobalOption),
+        );
     }
 }
