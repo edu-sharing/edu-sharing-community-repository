@@ -127,7 +127,6 @@ import {
     XmlAppPropertiesDialogData,
     XmlAppPropertiesDialogResult,
 } from './dialog-modules/xml-app-properties-dialog/xml-app-properties-dialog-data';
-import { NotificationDialogComponent } from '../../main/navigation/top-bar/notification-dialog/notification-dialog.component';
 import { Node, NodeShare, SharingV1Service } from 'ngx-edu-sharing-api';
 import {
     DropSource,
@@ -144,7 +143,6 @@ import {
     CheckboxDialogData,
     CheckboxDialogResult,
 } from './dialog-modules/checkbox-dialog/checkbox-dialog-data';
-import { AddMaterialDialogComponent } from './dialog-modules/add-material-dialog/add-material-dialog.component';
 import {
     NodePreviewMediaDialogData,
     NodePreviewMediaDialogResult,
@@ -1035,6 +1033,59 @@ export class DialogsService {
             minHeight: 800,
             data,
         });
+    }
+
+    async openAssignmentFinish() {
+        return await firstValueFrom(
+            (
+                await this.openGenericDialog({
+                    buttons: [
+                        {
+                            config: DialogButton.TYPE_CANCEL,
+                            label: 'CANCEL',
+                            callback: async (ref) => {
+                                return true;
+                            },
+                        },
+                        {
+                            config: DialogButton.TYPE_PRIMARY,
+                            label: 'EDITORIAL.ASSIGNMENT.SAVE_FINISH',
+                            callback: async (ref) => {
+                                return true;
+                            },
+                        },
+                    ],
+                    title: 'EDITORIAL.ASSIGNMENT.SAVE_FINISH',
+                    message: 'EDITORIAL.ASSIGNMENT.SAVE_FINISH_MESSAGE',
+                })
+            ).afterClosed(),
+        );
+    }
+    async openAssignmentResetDraft() {
+        return await firstValueFrom(
+            (
+                await this.openGenericDialog({
+                    buttons: [
+                        {
+                            config: DialogButton.TYPE_CANCEL,
+                            label: 'CANCEL',
+                            callback: async (ref) => {
+                                return true;
+                            },
+                        },
+                        {
+                            config: DialogButton.TYPE_DANGER,
+                            label: 'EDITORIAL.ASSIGNMENT.SAVE_RESET_DRAFT',
+                            callback: async (ref) => {
+                                return true;
+                            },
+                        },
+                    ],
+                    title: 'EDITORIAL.ASSIGNMENT.SAVE_RESET_DRAFT',
+                    message: 'EDITORIAL.ASSIGNMENT.RESET_DRAFT_MESSAGE',
+                })
+            ).afterClosed(),
+        );
     }
 }
 /**

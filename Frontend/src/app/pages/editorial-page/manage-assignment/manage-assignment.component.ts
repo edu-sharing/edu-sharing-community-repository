@@ -303,4 +303,18 @@ export class ManageAssignmentComponent {
             });
         }
     }
+
+    async resetToDraft() {
+        const result = await this.dialogsService.openAssignmentResetDraft();
+        if (result === 'EDITORIAL.ASSIGNMENT.SAVE_RESET_DRAFT') {
+            await this.submit('DRAFT');
+        }
+    }
+
+    async finishSubmission() {
+        const result = await this.dialogsService.openAssignmentFinish();
+        if (result === 'EDITORIAL.ASSIGNMENT.SAVE_FINISH') {
+            await this.submit('FINISHED');
+        }
+    }
 }

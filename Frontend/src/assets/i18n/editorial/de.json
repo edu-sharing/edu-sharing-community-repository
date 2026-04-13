@@ -150,8 +150,12 @@
       "MAIN_TITLE_EDIT": "Aufgabe bearbeiten",
       "PERMISSIONS_TITLE": "Aufgabe zuweisen",
       "SAVE_DRAFT": "Entwurf speichern",
+      "SAVE_RESET_DRAFT": "Aufgabe zurückziehen",
+      "SAVE_FINISH": "Aufgabe abschließen",
       "SUBMIT": "Aufgabe austeilen",
       "SELECT_FILE": "Anhängen",
+      "RESET_DRAFT_MESSAGE": "Die Aufgabe wird für alle Lernenden zurückgezogen und wieder in einen Entwurf umgewandelt. Dies ist nur möglich, solange noch keine Einreichung erfolgt ist.",
+      "SAVE_FINISH_MESSAGE": "Die Aufgabe wird für alle Beteiligten als abgeschlossen markiert.\n Sie wird aus dem Bereich „Aktiv“ in „Abgeschlossen“ verschoben.\n\nWeitere Einreichungen oder Änderungen am Feedback sind danach nicht mehr möglich.",
       "ERROR": {
         "FIELD_TITLE": "Bitte Titel eingeben",
         "FIELD_SUMMARY": "Bitte Beschreibung eingeben",

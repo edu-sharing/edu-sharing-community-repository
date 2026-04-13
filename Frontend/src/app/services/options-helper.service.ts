@@ -1302,6 +1302,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             // user has access to permissions => so it's a coordinator
             return (
                 assignment.type === 'SUBMISSION' &&
+                !['FINISHED', 'CANCELED'].includes(assignment.status) &&
                 new AssignmentPipe().transform(assignment, {
                     mode: 'permissions',
                 }) === 'COORDINATOR'
