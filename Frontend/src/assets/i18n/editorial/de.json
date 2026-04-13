@@ -138,9 +138,13 @@
       "ADD_ASSIGNMENT_MATERIAL": "Weiteres Material anfügen",
       "REPLACE_ASSIGNMENT_MATERIAL": "Arbeitsmaterial einreichen",
       "SUBMITTABLE": "Arbeitsmaterial",
-      "SUBMITTED": "Erfolgreich abgegeben",
       "SUPPLEMENTARY": "Begleitmaterial",
-      "SUBMIT": "Abgabe einreichen"
+      "SUBMIT": "Abgabe einreichen",
+      "FEEDBACK": {
+        "TITLE": "Rückmeldung zur Abgabe",
+        "FEEDBACK": "Rückmeldung",
+        "CORRECTED": "Korrigiertes arbeitsmaterial"
+      }
     },
     "ASSIGNMENT": {
       "STEP": {

@@ -54,6 +54,27 @@
             ></es-node-entries-wrapper>
           </div>
         </div>
+        <div class="block feedback" *ngIf="submission().validationStatus === 'FINISHED'">
+          <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.FEEDBACK.TITLE' | translate }}</label>
+          <div>
+            <div *ngIf="submission().feedback?.trim() as feedback">
+              <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.FEEDBACK.FEEDBACK' | translate }}</label>
+              <div [innerHTML]="feedback"></div>
+            </div>
+            <div *ngIf="submittableFilesAll.getTotal() > 0">
+              <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.FEEDBACK.CORRECTED' | translate }}</label>
+              <es-node-entries-wrapper
+                [displayType]="NodeEntriesDisplayType.Grid"
+                [checkbox]="false"
+                [dragDrop]="{ dragAllowed: false }"
+                [initConfig]="correctionConfig"
+                [elementInteractionType]="InteractionType.Emitter"
+                [dataSource]="correctedFiles"
+                [columns]="columns"
+              ></es-node-entries-wrapper>
+            </div>
+          </div>
+        </div>
       </div>
     </ng-template>
   </mat-tab>

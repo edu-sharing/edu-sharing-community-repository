@@ -58,16 +58,8 @@
         </div>
         <div class="feedback">
           <form [formGroup]="feedbackForm">
-            <mat-form-field floatLabel="always">
-              <mat-label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.FEEDBACK' | translate }}</mat-label>
-              <textarea
-                matInput
-                formControlName="feedback"
-                cdkTextareaAutosize
-                cdkAutosizeMinRows="2"
-                cdkAutosizeMaxRows="6"
-              ></textarea>
-            </mat-form-field>
+            <mat-label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.FEEDBACK' | translate }}</mat-label>
+            <editor [init]="editorConfig" formControlName="feedback"></editor>
             <mat-slide-toggle
               class="toggle-reverse show-notes"
               [ngModelOptions]="{ standalone: true }"

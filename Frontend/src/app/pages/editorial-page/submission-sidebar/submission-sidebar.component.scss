@@ -26,9 +26,9 @@
         .from,
         .title {
             font-size: vars.$fontSizeXLarge;
+            font-weight: bold;
         }
         label {
-            font-weight: bold;
             color: vars.$textVeryLight;
             font-size: vars.$fontSizeSmall;
             padding-bottom: 10px;

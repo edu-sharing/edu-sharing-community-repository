@@ -64,6 +64,33 @@ mat-tab-group {
                 @include card.assignmentBadge();
             }
         }
+        &.feedback {
+            background: linear-gradient(
+                    to right,
+                    var(--primary) 0,
+                    var(--primary) 5px,
+                    var(--palette-primary-50) 5px,
+                    var(--palette-primary-50) 5px
+                )
+                no-repeat;
+            padding: 20px;
+            > label {
+                font-size: vars.$fontSizeXLarge;
+                font-weight: bold;
+            }
+            > div {
+                > div {
+                    padding: 20px 0;
+                    &:not(:last-child) {
+                        border-bottom: 1px solid vars.$cardSeparatorLineColor;
+                    }
+                }
+                label {
+                    font-size: vars.$fontSizeLarge;
+                    font-weight: bold;
+                }
+            }
+        }
     }
     .submit,
     .add-comment {

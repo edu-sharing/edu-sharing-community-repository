@@ -84,6 +84,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
     submittableConfig: ListOptionsConfig;
     submittableConfigRO: ListOptionsConfig;
     supplementaryConfig: ListOptionsConfig;
+    correctionConfig: ListOptionsConfig;
     files = signal<AssignmentFile[]>(null);
     loading = signal(false);
     assignment = signal<Assignment>(null);
@@ -126,6 +127,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
      * all files including user attached
      */
     submittableFilesAll = new NodeDataSource<Node>();
+    correctedFiles = new NodeDataSource<Node>();
     supplementaryFiles = new NodeDataSource<Node>();
 
     constructor(
@@ -335,6 +337,12 @@ export class SubmitAssignmentComponent implements OnDestroy {
                 addOptions: [download],
             },
         };
+        this.correctionConfig = {
+            customOptions: {
+                useDefaultOptions: false,
+                addOptions: [download],
+            },
+        };
     }
 
     hasSubmissionFor(element: Node) {
@@ -363,7 +371,19 @@ export class SubmitAssignmentComponent implements OnDestroy {
                     .filter((f) => !f.assignmentFile)
                     .map((f) => f.content),
             );
+        console.log('all', this.submittableFilesAll);
         this.submittableFilesAll.setData(nodes);
+        this.correctedFiles.setData(
+            this.submissionFiles()
+                .filter((s) => s.validationStatus !== 'NOT_STARTED' && s.correction)
+                .map((s) => {
+                    return {
+                        ...s.correction,
+                        name: s.content?.name,
+                        title: s.content?.title,
+                    };
+                }),
+        );
         this.initOptions();
     }
 
