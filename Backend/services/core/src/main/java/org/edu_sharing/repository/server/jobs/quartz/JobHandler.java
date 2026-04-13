@@ -5,6 +5,7 @@ package org.edu_sharing.repository.server.jobs.quartz;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigValue;
+import lombok.Getter;
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 import org.alfresco.service.ServiceRegistry;
 import org.apache.log4j.Logger;
@@ -40,7 +41,8 @@ import static org.quartz.TriggerBuilder.newTrigger;
 @Component
 public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEvent> {
 
-    public static final Object KEY_RESULT_DATA = "JOB_RESULT_DATA";
+    public static final String KEY_RESULT_DATA = "JOB_RESULT_DATA";
+    public static final String KEY_JOB_UUID = "JOB_UUID";
     private static final int MAX_JOB_LOG_COUNT = 20; // maximal number of jobs to store for history and gui
     //public final static SimpleCache<String, List<JobInfo>> jobs = (SimpleCache)  AlfAppContextGate.getApplicationContext().getBean("eduSharingJobsListCache");
     public final static Map<String, List<JobInfo>> jobs = new ConcurrentHashMap<>();
@@ -609,7 +611,6 @@ public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEven
         String jobName = jobClass.getSimpleName() + IMMEDIATE_JOBNAME_SUFFIX;
 
         JobDataMap jdm = createJobDataMap(params);
-
         String triggerName = jobClass.getSimpleName() + "ImmediateTrigger";
         Trigger trigger = newTrigger()
                 .withIdentity(triggerName)
@@ -629,7 +630,7 @@ public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEven
 			}
 		};*/
 
-        ImmediateJobListener iJobListener = new ImmediateJobListener(jobListenerName);
+        ImmediateJobListener iJobListener = new ImmediateJobListener(jobListenerName, jdm.getString(KEY_JOB_UUID));
         quartzScheduler.getListenerManager().addJobListener(iJobListener);
         quartzScheduler.scheduleJob(jobDetail, trigger);
         /**
@@ -653,7 +654,7 @@ public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEven
 
     public static JobDataMap createJobDataMap(Map<String, Object> params) {
         JobDataMap jdm = new JobDataMap();
-
+        jdm.put(KEY_JOB_UUID, UUID.randomUUID().toString());
         if (params != null && params.size() > 0) {
             for (Map.Entry<String, Object> entry : params.entrySet()) {
                 jdm.put(entry.getKey(), entry.getValue());

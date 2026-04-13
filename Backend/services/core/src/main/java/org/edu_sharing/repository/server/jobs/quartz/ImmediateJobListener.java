@@ -27,6 +27,7 @@
  */
 package org.edu_sharing.repository.server.jobs.quartz;
 
+import lombok.Getter;
 import org.apache.log4j.Logger;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
@@ -39,7 +40,9 @@ import org.quartz.JobListener;
  *
  */
 public class ImmediateJobListener implements JobListener {
-	
+
+	@Getter
+	private final String uuid;
 	String jobName = null;
 	
 	boolean vetoed = false;
@@ -48,8 +51,9 @@ public class ImmediateJobListener implements JobListener {
 	
 	String vetoBy = null;
 	
-	public ImmediateJobListener(String name){
-		this.jobName = name;
+	public ImmediateJobListener(String jobListenerName, String uuid){
+		this.jobName = jobListenerName;
+		this.uuid = uuid;
 	}
 	
 	@Override
