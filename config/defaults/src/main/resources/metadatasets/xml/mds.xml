@@ -798,8 +798,8 @@
       <caption>cp_virtual_assignmentType</caption>
       <valuespace_i18n_prefix>assignmentType_</valuespace_i18n_prefix>
       <values>
-        <entry icon="place_item">assigned</entry>
         <entry icon="ios_share">created</entry>
+        <entry icon="place_item">assigned</entry>
       </values>
     </widget>
   </widgets>
