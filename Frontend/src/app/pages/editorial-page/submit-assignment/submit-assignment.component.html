@@ -6,6 +6,15 @@
     </ng-template>
     <ng-template matTabContent>
       <div *ngIf="assignment()" class="assignment-view">
+        <es-info-message *ngIf="submission().validationStatus === 'FINISHED'">
+          {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.VALIDATION_READY' | translate }}
+          <div>
+            <button mat-button (click)="scrollToFeedback()">
+              {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.VALIDATION_SCROLL' | translate
+              }}<i esIcon="arrow_downward"></i>
+            </button>
+          </div>
+        </es-info-message>
         <ng-container *ngTemplateOutlet="heading"></ng-container>
         <ng-container *ngTemplateOutlet="summary"></ng-container>
         <ng-container *ngTemplateOutlet="submitDetails"></ng-container>
@@ -140,9 +149,9 @@
   <div class="heading">
     <span>{{ assignment() | nodeTitle }}</span>
   </div>
-  <es-info-message *ngIf="submissionSent()">
+  <!--<es-info-message *ngIf="submissionSent()">
     {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.SUBMISSION_SENT' | translate }}
-  </es-info-message>
+  </es-info-message>-->
 </ng-template>
 <ng-template #summary>
   <div class="block">

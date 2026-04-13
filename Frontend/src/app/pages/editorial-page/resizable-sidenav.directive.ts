@@ -9,6 +9,8 @@ import {
 } from '@angular/core';
 import { MatSidenavContainer } from '@angular/material/sidenav';
 import { SessionStorageService } from 'ngx-edu-sharing-api';
+import { BehaviorSubject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 
 @Directive({
     selector: '[esResizableSidenav]',
@@ -24,13 +26,20 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
     @Input() maxWidth = 0.7;
     private resizer!: HTMLElement;
     private dragging = false;
+    private width$ = new BehaviorSubject<number>(0);
 
     constructor(
         private el: ElementRef,
         private renderer: Renderer2,
         private storage: SessionStorageService,
         @Optional() private sidenavContainer: MatSidenavContainer, // inject container
-    ) {}
+    ) {
+        this.width$.pipe(debounceTime(100)).subscribe((width) => {
+            if (this.storageKey) {
+                void this.storage.set(this.storageKey, width);
+            }
+        });
+    }
 
     async ngOnInit(): Promise<void> {
         this.addResizer();
@@ -86,10 +95,8 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
         }
 
         newWidth = this.applyWidthConstrains(newWidth);
+        this.width$.next(newWidth);
         this.renderer.setStyle(this.el.nativeElement, 'width', `${newWidth}px`);
-        if (this.storageKey) {
-            void this.storage.set(this.storageKey, newWidth);
-        }
     };
 
     private applyWidthConstrains(newWidth: number) {

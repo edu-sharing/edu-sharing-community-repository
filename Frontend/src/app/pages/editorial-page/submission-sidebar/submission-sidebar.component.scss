@@ -19,15 +19,28 @@
         gap: 20px;
     }
     padding: 20px;
-    label {
-        font-size: vars.$fontSizeSmall;
-    }
+
     .left {
         flex-grow: 1;
 
-        .from {
+        .from,
+        .title {
             font-size: vars.$fontSizeXLarge;
+        }
+        label {
             font-weight: bold;
+            color: vars.$textVeryLight;
+            font-size: vars.$fontSizeSmall;
+            padding-bottom: 10px;
+        }
+    }
+    .below {
+        label {
+            display: block;
+            font-weight: bold;
+            color: var(--textLight);
+            font-size: vars.$fontSizeXLarge;
+            padding-bottom: 20px;
         }
     }
     .details {

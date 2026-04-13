@@ -152,6 +152,11 @@ export class SubmissionSidebarComponent {
             }),
         );
         this.syncData(submission);
+        if (this.canGoForward()) {
+            await this.stepElement(+1);
+        } else {
+            this.editorialSidebarService.close();
+        }
     }
 
     private syncData(submission: Submission) {

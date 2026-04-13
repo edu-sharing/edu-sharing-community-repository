@@ -9,37 +9,41 @@
         <div class="left">
           <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_FROM' | translate }}</label>
           <div class="from details">{{ submission().assignee | authorityName }}</div>
-          <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_STATE' | translate }}</label>
-          <div class="state details">
-            <es-list-node-assignment
-              [node]="submission()"
-              [item]="submissionStatus"
-            ></es-list-node-assignment>
-            <es-list-node-assignment
-              [node]="submission()"
-              [item]="validationStatus"
-            ></es-list-node-assignment>
-          </div>
-          <ng-container *ngIf="submission().submissionDate">
-            <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_DATE' | translate }}</label>
-            <div class="details">
-              <es-list-node-assignment
-                [node]="submission()"
-                [item]="submissionDate"
-              ></es-list-node-assignment>
-            </div>
-          </ng-container>
-          <ng-container *ngIf="submission().returnDate">
-            <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.RETURN_DATE' | translate }}</label>
-            <div class="details">
-              <es-list-node-assignment
-                [node]="submission()"
-                [item]="returnDate"
-              ></es-list-node-assignment>
-            </div>
-          </ng-container>
+          <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_TITLE' | translate }}</label>
+          <div class="title details">{{ data().assignment?.title }}</div>
         </div>
         <es-user-avatar size="large" class="right" [user]="submission().assignee"></es-user-avatar>
+      </div>
+      <div class="below">
+        <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_STATE' | translate }}</label>
+        <div class="state details">
+          <es-list-node-assignment
+            [node]="submission()"
+            [item]="submissionStatus"
+          ></es-list-node-assignment>
+          <es-list-node-assignment
+            [node]="submission()"
+            [item]="validationStatus"
+          ></es-list-node-assignment>
+        </div>
+        <ng-container *ngIf="submission().submissionDate">
+          <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_DATE' | translate }}</label>
+          <div class="details">
+            <es-list-node-assignment
+              [node]="submission()"
+              [item]="submissionDate"
+            ></es-list-node-assignment>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="submission().returnDate">
+          <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.RETURN_DATE' | translate }}</label>
+          <div class="details">
+            <es-list-node-assignment
+              [node]="submission()"
+              [item]="returnDate"
+            ></es-list-node-assignment>
+          </div>
+        </ng-container>
       </div>
       <es-info-message *ngIf="data().submission.submissionStatus === 'NOT_STARTED'">
         {{ 'EDITORIAL.SIDEBAR.SUBMISSION.NOT_STARTED' | translate }}
@@ -99,7 +103,7 @@
             [disabled]="data().submission.validationStatus === 'FINISHED'"
             (click)="markAsFinished()"
           >
-            <i esIcon="send"></i>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SEND_BACK' | translate }}
+            {{ 'EDITORIAL.SIDEBAR.SUBMISSION.SEND_BACK' | translate }}
           </button>
           <button mat-button color="primary" (click)="stepElement(+1)" [disabled]="!canGoForward()">
             <i esIcon="arrow_forward"></i>

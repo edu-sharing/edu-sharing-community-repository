@@ -476,4 +476,5 @@ export class SubmitAssignmentComponent implements OnDestroy {
             );
         }
     }
+    scrollToFeedback() {}
 }
