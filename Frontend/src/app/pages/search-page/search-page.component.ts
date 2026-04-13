@@ -1,6 +1,14 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Component, HostBinding, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import {
+    Component,
+    effect,
+    HostBinding,
+    OnDestroy,
+    OnInit,
+    TemplateRef,
+    ViewChild,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfigService, NodeService, Repository, SavedSearchesService } from 'ngx-edu-sharing-api';
@@ -16,7 +24,7 @@ import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcru
 import { NavigationScheduler } from './navigation-scheduler';
 import { SearchPageService } from './search-page.service';
 import { OptionsHelperService } from '../../services/options-helper.service';
-import { EditorialSidebarService } from '../editorial-page/editorial-sidebar/editorial-sidebar.service';
+import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
 
 @Component({
     selector: 'es-search-page',
@@ -48,7 +56,6 @@ export class SearchPageComponent implements OnInit, OnDestroy {
     readonly activeRepository = this.searchPage.activeRepository;
     readonly showingAllRepositories = this.searchPage.showingAllRepositories;
     readonly filterBarIsVisible = this.searchPage.filterBarIsVisible;
-    readonly previewNode = this.searchPage.previewNode;
     readonly searchString = this.searchPage.searchString;
     readonly searchFilters = this.searchPage.searchFilters;
     readonly loadingProgress = this.searchPage.loadingProgress;
@@ -71,6 +78,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
         private configService: ConfigService,
         private translate: TranslateService,
     ) {
+        this.registerSidebars();
         this.searchPage.init();
         this.searchPage.sidebarOption.next(
             this.optionsHelperService.getOptionItemToggleSidebar(
@@ -90,7 +98,6 @@ export class SearchPageComponent implements OnInit, OnDestroy {
             .subscribe((tabBarIsVisible) => (this.tabBarIsVisible = tabBarIsVisible));
         this.registerProgressBarIsVisible();
         this.registerFilterDialog();
-        this.registerSidebars();
         this.registerQueryParamsAllRepositories();
         this.registerConfigBehaviours();
     }
@@ -123,6 +130,10 @@ export class SearchPageComponent implements OnInit, OnDestroy {
         this.navigationScheduler.scheduleNavigation({
             route: [UIConstants.ROUTER_PREFIX, 'search'],
         });
+        this.editorialSidebarService.close();
+    }
+    goToAll() {
+        this.editorialSidebarService.close();
     }
 
     private registerFilterDialog(): void {
@@ -154,10 +165,12 @@ export class SearchPageComponent implements OnInit, OnDestroy {
         this.filterBarIsVisible
             .observeValue()
             .pipe(takeUntil(this.destroyed), filter(isTrue))
-            .subscribe(() => this.previewNode.next(null));
-        this.previewNode
-            .pipe(takeUntil(this.destroyed), filter(notNull))
-            .subscribe(() => this.filterBarIsVisible.setUserValue(false));
+            .subscribe(() => this.editorialSidebarService.close());
+        effect(() => {
+            if (this.editorialSidebarService.sidebarOpened()) {
+                this.filterBarIsVisible.setUserValue(false);
+            }
+        });
     }
 
     private registerQueryParamsAllRepositories(): void {

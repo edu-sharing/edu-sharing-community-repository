@@ -1,4 +1,12 @@
-import { Component, computed, QueryList, signal, ViewChild, ViewChildren } from '@angular/core';
+import {
+    Component,
+    computed,
+    OnDestroy,
+    QueryList,
+    signal,
+    ViewChild,
+    ViewChildren,
+} from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import {
     Assignment,
@@ -12,9 +20,9 @@ import {
     Submission,
 } from 'ngx-edu-sharing-api';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { combineLatest, filter, firstValueFrom, of, throwError } from 'rxjs';
+import { combineLatest, filter, firstValueFrom, of, Subject, throwError } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
-import { catchError, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
+import { catchError, distinctUntilChanged, map, switchMap, takeUntil } from 'rxjs/operators';
 import { EditorialBreadcrumbService } from '../editorial-breadcrumb/editorial-breadcrumb.service';
 import {
     ColumnType,
@@ -37,12 +45,12 @@ import { AssignmentEditorConfig } from '../manage-assignment/manage-assignment.c
 import { PlatformLocation } from '@angular/common';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
-import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
 import { SubmissionFile } from '../../../../../dist/edu-sharing-api/lib/api/models/submission-file';
 import { NodesSelectorConfig, TabType } from '../nodes-selector/nodes-selector.component';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { Toast, ToastType } from '../../../services/toast';
 import { CommentsListComponent } from '../../../features/mds/mds-editor/widgets/mds-editor-widget-comments/comments-list/comments-list.component';
+import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 
 /**
  * submits an individual assignment (for student)
@@ -53,7 +61,7 @@ import { CommentsListComponent } from '../../../features/mds/mds-editor/widgets/
     styleUrls: ['submit-assignment.component.scss'],
     imports: [SharedModule, TranslateModule, EditorComponent, CommentsListComponent],
 })
-export class SubmitAssignmentComponent {
+export class SubmitAssignmentComponent implements OnDestroy {
     @ViewChild(CommentsListComponent) commentsRef: CommentsListComponent;
     @ViewChildren(NodeEntriesWrapperComponent) nodeEntriesRef: QueryList<
         NodeEntriesWrapperComponent<Node>
@@ -63,6 +71,7 @@ export class SubmitAssignmentComponent {
         base_url: this.platformLocation.getBaseHrefFromDOM() + 'tinymce',
         language: this.translateService.getDefaultLang(),
     };
+    readonly destroyed$ = new Subject<void>();
     columns: ColumnType = {
         Default: [new ListItem('NODE', 'title')],
     };
@@ -113,6 +122,10 @@ export class SubmitAssignmentComponent {
             ),
     );
     submittableFiles = new NodeDataSource<Node>();
+    /**
+     * all files including user attached
+     */
+    submittableFilesAll = new NodeDataSource<Node>();
     supplementaryFiles = new NodeDataSource<Node>();
 
     constructor(
@@ -133,22 +146,24 @@ export class SubmitAssignmentComponent {
         private uiService: UIService,
     ) {
         this.initOptions();
-        this.editorialSidebarService.applyNodeEmitted.subscribe(async ({ nodes }) => {
-            if (this.submissionReplaceFile()) {
-            } else {
-                let newFiles = nodes.map((node) => {
-                    return {
-                        assignmentFile: this.submissionAssignmentRefFile(),
-                        content: node,
-                        ref: node.ref,
-                        validationStatus: 'NOT_STARTED',
-                    } as SubmissionFile;
-                });
-                newFiles = await this.saveSubmissionFiles(newFiles);
-                this.submissionFiles.set((this.submissionFiles() || []).concat(newFiles));
-                this.syncSubmissionDataSource();
-            }
-        });
+        this.editorialSidebarService.applyNodeEmitted
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe(async ({ nodes }) => {
+                if (this.submissionReplaceFile()) {
+                } else {
+                    let newFiles = nodes.map((node) => {
+                        return {
+                            assignmentFile: this.submissionAssignmentRefFile(),
+                            content: node,
+                            ref: node.ref,
+                            validationStatus: 'NOT_STARTED',
+                        } as SubmissionFile;
+                    });
+                    newFiles = await this.saveSubmissionFiles(newFiles);
+                    this.submissionFiles.set((this.submissionFiles() || []).concat(newFiles));
+                    this.syncSubmissionDataSource();
+                }
+            });
         this.submitFormGroup = this.formBuilder.group({
             submitComment: ['', [Validators.required]],
         });
@@ -208,7 +223,10 @@ export class SubmitAssignmentComponent {
                 this.editorialBreadcrumbService.path.set([{ title: assignment.title }]);
             });
     }
-
+    ngOnDestroy(): void {
+        this.destroyed$.next();
+        this.destroyed$.complete();
+    }
     close() {
         void this.router.navigate([], {
             relativeTo: this.route,
@@ -327,15 +345,24 @@ export class SubmitAssignmentComponent {
     }
 
     private syncSubmissionDataSource() {
+        const originalFiles = this.files()
+            .filter((f) => f.documentRole === 'SUBMITTABLE')
+            .map((n) => n.referNode);
+        this.submittableFiles.setData(originalFiles);
         const nodes = this.files()
             .filter((f) => f.documentRole === 'SUBMITTABLE')
-            .map((n) => n.referNode)
+            .map(
+                (o) =>
+                    // for submission view, prefer showing the "own" file names and content of the submitted files (if present)
+                    this.submissionFiles().find((s) => s.assignmentFile?.ref?.id === o.ref.id)
+                        ?.content || o.referNode,
+            )
             .concat(
                 (this.submissionFiles() || [])
                     .filter((f) => !f.assignmentFile)
                     .map((f) => f.content),
             );
-        this.submittableFiles.setData(nodes);
+        this.submittableFilesAll.setData(nodes);
         this.initOptions();
     }
 

@@ -19,6 +19,7 @@
   [singleClickHint]="'static'"
   (sortChange)="setSorting($event)"
   (clickItem)="clickItem($event)"
+  (selectionChange)="selectionChange($event)"
   (dblClickItem)="openNode.emit($event.element)"
   (virtualNodesAdded)="syncTreeViewOnAdd($event)"
 >

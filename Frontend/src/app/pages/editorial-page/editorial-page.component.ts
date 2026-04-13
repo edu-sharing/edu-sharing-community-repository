@@ -71,11 +71,13 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { SelectionChange, SelectionModel } from '@angular/cdk/collections';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { OptionsHelperService } from '../../services/options-helper.service';
-import { EditorialSidebarService } from './editorial-sidebar/editorial-sidebar.service';
 import { EditorialBreadcrumbService } from './editorial-breadcrumb/editorial-breadcrumb.service';
+import {
+    MainComponentType,
+    PrimaryMode,
+} from '../../features/editorial-sidebar/editorial-sidebar.component';
+import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
 
-export type PrimaryMode = 'activity' | 'share' | 'assignment';
-export type MainComponentType = 'manageAssignment' | 'assignmentSubmission' | 'submitAssignment';
 type RouteConfig = {
     primaryMode: PrimaryMode;
 };
@@ -107,7 +109,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     isMobile$ = this.breakpointObserver
         .observe(['(max-width: 900px)'])
         .pipe(map(({ matches }) => matches));
-    sidenavLeft = signal(true);
+    sidenavLeft = signal(false);
     /**
      * mds group, used to fetch the template group AND search query id!
      */
@@ -176,7 +178,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         this.mainNav.setMainNavConfig({
             showUser: true,
             showScope: true,
-            currentScope: 'EDITORIAL',
+            currentScope: 'editorial',
             title: 'EDITORIAL.TITLE',
             show: true,
             hideSearchField: false,
@@ -319,15 +321,23 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 } else {
                     this.editorialPageService.registerTabsFromWidget(widget);
                 }
+            } else if (p.primaryMode === 'suggestions') {
+                this.mainNav.patchMainNavConfig({
+                    currentScope: 'editorial_suggestions',
+                    title: 'EDITORIAL.TITLE_SUGGESTIONS',
+                });
             } else if (p.primaryMode === 'assignment') {
+                this.mainNav.patchMainNavConfig({
+                    currentScope: 'editorial_assignment',
+                    title: 'EDITORIAL.TITLE_ASSIGNMENT',
+                });
                 this.columns.set({
                     Default: [
                         new ListItem('ASSIGNMENT', 'title'),
-                        new ListItem('ASSIGNMENT', 'type'),
+                        // new ListItem('ASSIGNMENT', 'type'),
                         new ListItem('ASSIGNMENT', 'status'),
                         new ListItem('ASSIGNMENT', 'endTime'),
                         new ListItem('ASSIGNMENT', 'submissionStatus'),
-                        new ListItem('ASSIGNMENT', 'summary'),
                     ],
                 });
                 this.mdsDefinition$.next(
@@ -584,31 +594,12 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         }
     }
     select(event: NodeClickEvent<NodeEntriesDataType>) {
-        if (
-            !(
-                this.nodeEntriesRef?.getSelection()?.selected.length === 1 &&
-                this.nodeEntriesRef?.getSelection()?.selected[0] === event.element
-            )
-        ) {
-            this.clearSelection();
-        }
-        this.nodeEntriesRef?.getSelection()?.toggle(event.element as Node);
-        if (
-            (event.element as Node).mediatype &&
-            !['collection', 'folder'].includes((event.element as Node).mediatype)
-        ) {
-            this.editorialSidebarService.showOption({
-                option: 'PREVIEW',
-                trap: false,
-            });
-        }
+        this.editorialSidebarService.handleSelect(this.nodeEntriesRef, event, Scope.EditorialPage);
     }
 
     selectionChange(event: SelectionChange<NodeEntriesDataType>) {
         this.selection.set(event.source);
-        if (this.selection()?.selected.length !== 1) {
-            this.editorialSidebarService.sidebarOpened.set(false);
-        }
+        this.editorialSidebarService.handleSelection(event);
     }
     fetchEvent(event: FetchEvent) {
         this.pagination$.next({
@@ -659,9 +650,14 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     private setNewData(event: GenericSearchResults) {
         this.clearSelection();
         this.dataSource.setData(event.nodes, event.pagination);
-        this.nodeEntriesRef.addVirtualNodes(
-            this.editorialPageService.getVirtualNodes(this.params$.value.primaryMode),
-        );
+        if (
+            this.nodeEntriesRef &&
+            this.editorialPageService.getVirtualNodes(this.params$.value.primaryMode)
+        ) {
+            this.nodeEntriesRef.addVirtualNodes(
+                this.editorialPageService.getVirtualNodes(this.params$.value.primaryMode),
+            );
+        }
     }
 
     private clearSelection() {

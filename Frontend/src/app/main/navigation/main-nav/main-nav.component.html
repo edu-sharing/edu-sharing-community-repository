@@ -52,3 +52,13 @@
     </div>
   </div>
 </ng-container>
+<!-- shown in bottom-sheet -->
+<ng-template #userMenuMobile let-option="option">
+  <div class="user-menu-mobile">
+    <es-user-avatar [user]="currentUser" [size]="'small'"></es-user-avatar>
+    <div>
+      <div class="user-name">{{ currentUser | nodePersonName }}</div>
+      <div class="manage-profile">{{ option.name | translate }}</div>
+    </div>
+  </div>
+</ng-template>

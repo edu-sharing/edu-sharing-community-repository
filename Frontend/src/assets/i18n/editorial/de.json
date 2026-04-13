@@ -3,6 +3,7 @@
     "SEARCH_PLACEHOLDER": {
       "ACTIVITY": "Aktivitätenliste durchsuchen...",
       "ASSIGNMENT": "Aufgaben durchsuchen...",
+      "SUGGESTIONS": "Inhalte durchsuchen...",
       "SHARE": "Freigaben durchsuchen..."
     },
     "SIDEBAR": {
@@ -49,7 +50,7 @@
       "WORKSPACE_METADATA_DESCRIPTION": "Verwendungsstatistiken, Versionsverwaltung und allgemeine Details anzeigen",
       "NODES_SELECTOR": {
         "METHODOLOGY": {
-          "TITLE": "Methodik",
+          "TITLE": "Pädagogik",
           "INFO": "Finde schneller, was du suchst. Baue dir Tagging-Vorlagen und tagge Material.\n Baue dir damit deine typischen Filter für die Suche.",
           "METADATA_SAVED_WRITE": "Metadaten an {{writeCount}} Element(en) aktualisiert",
           "METADATA_SUGGESTIONS": "Metadaten an {{suggestionCount}} Element(en) als Vorschlag hinterlegt, da keine ausreichenden Rechte vorhanden sind",
@@ -108,9 +109,12 @@
       }
     },
     "TITLE": "Verwalten",
+    "TITLE_ASSIGNMENT": "Aufgaben",
+    "TITLE_SUGGESTIONS": "Inhalte prüfen",
     "BREADCRUMB": {
       "HOME": "Startseite",
       "ACTIVITY": "Aktivitäten",
+      "SUGGESTIONS": "Inhalte prüfen",
       "ASSIGNMENT": "Aufgaben",
       "SHARE": "Freigaben"
     },
@@ -130,10 +134,11 @@
       "SUBMISSION_TIME": "Abgegeben",
       "SUBMISSION_SENT": "Diese Aufgabe wurde bereits abgegeben",
       "ADD_ASSIGNMENT_MATERIAL": "Weiteres Material anfügen",
-      "REPLACE_ASSIGNMENT_MATERIAL": "Dieses Material einreichen",
+      "REPLACE_ASSIGNMENT_MATERIAL": "Arbeitsmaterial einreichen",
       "SUBMITTABLE": "Arbeitsmaterial",
+      "SUBMITTED": "Erfolgreich abgegeben",
       "SUPPLEMENTARY": "Begleitmaterial",
-      "SUBMIT": "Abgeben"
+      "SUBMIT": "Abgabe einreichen"
     },
     "ASSIGNMENT": {
       "STEP": {
@@ -145,8 +150,12 @@
       "MAIN_TITLE_EDIT": "Aufgabe bearbeiten",
       "PERMISSIONS_TITLE": "Aufgabe zuweisen",
       "SAVE_DRAFT": "Entwurf speichern",
+      "SAVE_RESET_DRAFT": "Aufgabe zurückziehen",
+      "SAVE_FINISH": "Aufgabe abschließen",
       "SUBMIT": "Aufgabe austeilen",
       "SELECT_FILE": "Anhängen",
+      "RESET_DRAFT_MESSAGE": "Die Aufgabe wird für alle Lernenden zurückgezogen und wieder in einen Entwurf umgewandelt. Dies ist nur möglich, solange noch keine Einreichung erfolgt ist.",
+      "SAVE_FINISH_MESSAGE": "Die Aufgabe wird für alle Beteiligten als abgeschlossen markiert.\n Sie wird aus dem Bereich „Aktiv“ in „Abgeschlossen“ verschoben.\n\nWeitere Einreichungen oder Änderungen am Feedback sind danach nicht mehr möglich.",
       "ERROR": {
         "FIELD_TITLE": "Bitte Titel eingeben",
         "FIELD_SUMMARY": "Bitte Beschreibung eingeben",

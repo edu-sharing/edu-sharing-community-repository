@@ -20,13 +20,14 @@ own OptionsHelperService instance and take exclusive control of the actionbar. -
 </es-small-collection>
 
 <es-node-entries-wrapper
+  #wrapper
   *ngFor="let repo of repoData | async"
   [class.display-none]="repo.dataSource.isEmpty()"
   class="entries-wrapper"
   [dataSource]="repo.dataSource"
   [scope]="Scope.Search"
   [columns]="repo.columns | async"
-  (selectionChange)="searchPage.selection.next($event.source.selected)"
+  (selectionChange)="selectionChange($event)"
   [disableInfiniteScroll]="true"
   [elementInteractionType]="
     previewMode === 'Sidebar' ? InteractionType.Emitter : InteractionType.DefaultActionLink
@@ -35,7 +36,7 @@ own OptionsHelperService instance and take exclusive control of the actionbar. -
   [gridConfig]="{ layout: 'scroll' }"
   [checkbox]="false"
   [initConfig]="{ customOptions: addToCollectionMode.value?.customOptions }"
-  (clickItem)="onClick($event.element)"
+  (clickItem)="onClick(wrapper, $event)"
   (dblClickItem)="onDblClick($event.element)"
 >
   <ng-template #title>

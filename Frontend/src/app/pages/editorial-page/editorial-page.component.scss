@@ -3,23 +3,44 @@
 
 mat-sidenav-container {
     min-height: calc(100vh - var(--mainnavCurrentHeight));
-    --mat-sidenav-content-background-color: #fff;
     .es-mat-sidenav-content-mds {
         overflow: hidden;
     }
     .main-content {
         padding: 20px 20px;
-        min-height: calc(100vh - 10px - 15px - 15px - var(--mainnavCurrentHeight));
-        margin: 15px 4px 15px 4px;
+        min-height: calc(
+            100vh - var(--roundedContainerMargin) - var(--roundedContainerMargin) -
+                var(--mainnavCurrentHeight)
+        );
+        margin: var(--roundedContainerMargin);
+        background-color: var(--roundedContainerBackground);
         border-radius: var(--borderRadiusCards);
         @include mixins.materialShadowSmall();
         .top-area {
             display: flex;
+            flex-direction: column;
             justify-content: space-between;
             min-height: 68px;
             padding-bottom: 20px;
             es-editorial-breadcrumb {
             }
+        }
+        .option-area {
+            display: flex;
+            padding: 15px 0 10px 0;
+            .options-left {
+                flex-grow: 1;
+            }
+        }
+    }
+    &.mat-sidenav-container-left-open {
+        .main-content {
+            margin-left: 4px;
+        }
+    }
+    &.mat-sidenav-container-right-open {
+        .main-content {
+            margin-right: 4px;
         }
     }
 }

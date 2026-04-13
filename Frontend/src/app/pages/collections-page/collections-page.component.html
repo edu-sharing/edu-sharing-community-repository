@@ -62,7 +62,6 @@
       <es-editorial-sidebar
         [primaryMode]="'collections'"
         [parent]="collection"
-        [nodes]="collectionContentRef?.listReferences?.getSelection()?.selected"
       ></es-editorial-sidebar>
     </div>
   </mat-sidenav>
@@ -137,6 +136,7 @@
               <es-breadcrumbs
                 class="collections-breadcrumb"
                 [home]="'COLLECTIONS.TAB.' + tabSelected"
+                [showLanding]="true"
                 [homeRouterLink]="{
                   routerLink: ['.'],
                   queryParams: { scope: tabSelected, id: null },

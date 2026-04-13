@@ -47,7 +47,6 @@ import { RestConstants } from '../../core-module/rest/rest-constants';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserModifiableValuesService } from './user-modifiable-values';
 import { Sort } from '@angular/material/sort';
-import { EditorialSidebarService } from '../editorial-page/editorial-sidebar/editorial-sidebar.service';
 
 export abstract class SearchPageResults {
     diffCount?: Observable<number>;
@@ -59,15 +58,9 @@ export abstract class SearchPageResults {
         protected _router: Router,
         protected _searchPage: SearchPageService,
         protected _nodeHelper: NodeHelperService,
-        protected _editorialSidebarService: EditorialSidebarService,
     ) {}
     readonly onClick = (node: Node) => {
-        this._searchPage.previewNode.next(node);
         this._searchPage.filterBarIsVisible.setUserValue(false);
-        this._editorialSidebarService.showOption({
-            trap: false,
-            option: 'PREVIEW',
-        });
     };
 
     readonly onDblClick = (node: Node) => {
@@ -113,13 +106,12 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
         _router: Router,
         private _search: SearchService,
         _searchPage: SearchPageService,
-        _editorialSidebarService: EditorialSidebarService,
         private _searchPageRestore: SearchPageRestoreService,
         private _translate: TranslateService,
         private _route: ActivatedRoute,
         private _userModifiableValues: UserModifiableValuesService,
     ) {
-        super(_router, _searchPage, _nodeHelper, _editorialSidebarService);
+        super(_router, _searchPage, _nodeHelper);
         this._registerPageRestore();
         this._registerSearchObservables();
         this._registerColumns();

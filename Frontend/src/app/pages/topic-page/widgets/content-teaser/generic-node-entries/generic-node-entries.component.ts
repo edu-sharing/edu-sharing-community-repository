@@ -52,11 +52,11 @@ import {
 import { firstValueFrom, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
-import { PreviewSidebarService } from '../../../../../features/preview-sidebar/preview-sidebar.service';
 import { OptionsHelperService } from '../../../shared/services/options-helper.service';
 import { TopicPageHelperService } from '../../../shared/services/topic-page-helper.service';
 import { GenericNodeEntriesDisplayType } from '../../../shared/types/generic-node-entries-display-type';
 import { GenericWidgetGlobalService } from '../../generic-widget/generic-widget-global.service';
+import { PreviewSidebarService } from '../../../../../features/editorial-sidebar/preview-sidebar/preview-sidebar.service';
 
 export interface DisplayTypeComponentInterface {
     // inputs

@@ -2,6 +2,7 @@
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
 .sidebar-header {
+    background-color: #fff;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -13,8 +14,34 @@
         flex-grow: 1;
     }
 }
-
+::ng-deep {
+    @media screen and (max-width: (vars.$mobileTabSwitchWidth)) {
+        .mat-drawer-transition .mat-drawer-content,
+        .mat-drawer-transition .mat-drawer {
+            transition: none !important;
+        }
+    }
+}
 :host {
+    @media screen and (max-width: (vars.$mobileTabSwitchWidth)) {
+        position: fixed;
+        z-index: vars.$dialogZIndex - 10;
+        left: var(--roundedContainerMargin);
+        top: calc(var(--mainnavCurrentHeight) + var(--roundedContainerMargin));
+        right: var(--roundedContainerMargin);
+        bottom: calc(#{vars.$mobileTabNavHeight} + var(--roundedContainerMargin));
+        isolation: isolate;
+        border-radius: var(--borderRadiusCards);
+        overflow: hidden;
+        &::after {
+            isolation: isolate;
+            position: fixed;
+            z-index: -1;
+            content: '';
+            background: vars.$darkenColor;
+            inset: 0;
+        }
+    }
 }
 .option-show {
     animation: slide-fade 1s;
@@ -34,6 +61,7 @@
     }
 }
 .sidebar-container {
+    background-color: #fff;
     overflow-y: auto;
     height: 0;
     flex-grow: 1;

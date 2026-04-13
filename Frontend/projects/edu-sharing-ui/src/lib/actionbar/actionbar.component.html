@@ -46,7 +46,7 @@
     </button>
     <button
       *ngIf="!shouldHighlight(i, option)"
-      mat-button
+      mat-stroked-button
       color="primary"
       [disabled]="!option.isEnabled"
       [class]="
@@ -67,17 +67,30 @@
       >
     </button>
   </ng-container>
-  <button
-    mat-button
-    color="primary"
-    class="more"
-    [attr.aria-label]="'OPTIONS.SHOW_ALL_OPTIONS' | translate"
-    [matMenuTriggerFor]="dropdownRef.menu"
-    *ngIf="canShowDropdown()"
-    data-test="more-actions-button"
-  >
-    <i esIcon="more_vert" [aria]="false"></i>
-  </button>
+  <ng-container *ngIf="canShowDropdown()">
+    <button
+      *ngIf="!UIService.isMobileWidth()"
+      mat-button
+      color="primary"
+      class="more"
+      [attr.aria-label]="'OPTIONS.SHOW_ALL_OPTIONS' | translate"
+      [matMenuTriggerFor]="dropdownRef.menu"
+      data-test="more-actions-button"
+    >
+      <i esIcon="more_vert" [aria]="false"></i>
+    </button>
+    <button
+      *ngIf="UIService.isMobileWidth()"
+      mat-button
+      color="primary"
+      class="more"
+      [attr.aria-label]="'OPTIONS.SHOW_ALL_OPTIONS' | translate"
+      (click)="dropdownRef.triggerBottomSheet()"
+      data-test="more-actions-button"
+    >
+      <i esIcon="more_vert" [aria]="false"></i>
+    </button>
+  </ng-container>
   <div
     *ngIf="optionsToggleAfter.length"
     class="actionToggle after"

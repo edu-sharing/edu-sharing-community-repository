@@ -92,16 +92,27 @@
       <div class="type">
         <i esIcon="task"></i>
         <span>{{ 'ASSIGNMENT.CARD_TYPE' | translate }}</span>
-        <button
-          *ngIf="dropdown"
-          mat-icon-button
-          (click)="openMenu($event, node)"
-          [matMenuTriggerFor]="dropdown.menu"
-          [attr.aria-label]="'OPTIONS_FOR' | translate : { element: (node | nodeTitle) }"
-          data-test="card-options-button"
-        >
-          <i esIcon="more_vert"></i>
-        </button>
+        <ng-container *ngIf="dropdown">
+          <button
+            *ngIf="!UIService.isMobileWidth()"
+            mat-icon-button
+            (click)="openMenu($event, node)"
+            [matMenuTriggerFor]="dropdown.menu"
+            [attr.aria-label]="'OPTIONS_FOR' | translate : { element: (node | nodeTitle) }"
+            data-test="card-options-button"
+          >
+            <i esIcon="more_vert"></i>
+          </button>
+          <button
+            *ngIf="UIService.isMobileWidth()"
+            mat-icon-button
+            (click)="openMenu($event, node)"
+            [attr.aria-label]="'OPTIONS_FOR' | translate : { element: (node | nodeTitle) }"
+            data-test="card-options-button"
+          >
+            <i esIcon="more_vert"></i>
+          </button>
+        </ng-container>
       </div>
       <div class="title">
         {{ node | nodeTitle }}
@@ -110,22 +121,30 @@
       <div class="badges" *ngIf="$any(node).type === 'SUBMISSION'">
         <div
           *ngIf="($any(node) | assignment : { mode: 'permissions' }) === 'COORDINATOR'"
-          class="status status-{{ $any(node).status }}"
+          class="status status-{{ assignmentStatus($any(node)) }}"
         >
-          <i [esIcon]="$any(AssignmentStatusIcon)[$any(node).status]"></i>
-          {{ 'ASSIGNMENT.STATUS.' + $any(node).status | translate }}
+          <!--<i [esIcon]="$any(AssignmentStatusIcon)[$any(node).status]"></i>-->
+          {{ 'ASSIGNMENT.STATUS.' + assignmentStatus($any(node)) | translate }}
         </div>
         <div
           *ngIf="($any(node) | assignment : { mode: 'permissions' }) === 'ASSIGNEE'"
-          class="submission-status submission-status-{{ ($any(node).submissions?.[0]?.submissionStatus || 'NOT_STARTED') }}"
+          class="submission-status validation-status-{{ ($any(node).submissions?.[0]?.validationStatus || 'NOT_STARTED')}} submission-status-{{ ($any(node).submissions?.[0]?.submissionStatus || 'NOT_STARTED') }}"
         >
-          <i
-            [esIcon]="$any(AssignmentSubmissionStatusIcon)[($any(node).submissions?.[0]?.submissionStatus || 'NOT_STARTED')]"
-          ></i>
-          {{ 'ASSIGNMENT.SUBMISSION_STATUS.' + ($any(node).submissions?.[0]?.submissionStatus || 'NOT_STARTED') | translate }}
+          <ng-container *ngIf="$any(node).submissions?.[0]?.validationStatus === 'FINISHED'">
+            <!--<i
+              [esIcon]="$any(AssignmentSubmissionStatusIcon)[($any(node).submissions?.[0]?.submissionStatus || 'NOT_STARTED')]"
+            ></i>-->
+            {{ 'ASSIGNMENT.VALIDATION_STATUS.' + ($any(node).submissions?.[0]?.validationStatus || 'NOT_STARTED') | translate }}
+          </ng-container>
+          <ng-container *ngIf="$any(node).submissions?.[0]?.validationStatus !== 'FINISHED'">
+            <!--<i
+              [esIcon]="$any(AssignmentSubmissionStatusIcon)[($any(node).submissions?.[0]?.submissionStatus || 'NOT_STARTED')]"
+            ></i>-->
+            {{ 'ASSIGNMENT.SUBMISSION_STATUS.' + ($any(node).submissions?.[0]?.submissionStatus || 'NOT_STARTED') | translate }}
+          </ng-container>
         </div>
         <div
-          class="endTime endTime-{{ assignmentEndTimePriority(endTime) }}"
+          class="endTime endTime-{{ assignmentEndTimePriority($any(node)) }}"
           *ngIf="$any(node).endTime as endTime"
           [matTooltip]="endTime | formatDate : { relative: false, date: true, time: true }"
         >

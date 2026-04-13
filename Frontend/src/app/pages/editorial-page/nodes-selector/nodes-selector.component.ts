@@ -70,9 +70,10 @@ import { Toast, ToastType } from '../../../services/toast';
 import { UploadDialogService } from '../../../services/upload-dialog.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { MessageType } from '../../../util/message-type';
-import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
-import { OptionState } from '../editorial-sidebar/editorial-sidebar.component';
 import { CreateSuggestionRequestDto } from '../../../../../dist/edu-sharing-api/lib/api/models/create-suggestion-request-dto';
+import { SelectionModel } from '@angular/cdk/collections';
+import { OptionState } from '../../../features/editorial-sidebar/editorial-sidebar.component';
+import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 
 export enum TabType {
     SEARCH = 'search',
@@ -95,9 +96,9 @@ export type NodesSelectorConfig = {
     upload?: 'fast' | 'default';
     /**
      * selected nodes that should be sorted into
-     * If null, we assume that this component is used to select the nodes that SHALL be sorted into
+     * If null or an empty selection, we assume that this component is used to select the nodes that SHALL be sorted into
      */
-    nodes?: NodeEntriesDataType[];
+    selection?: SelectionModel<NodeEntriesDataType>;
     /**
      * the callback to check if the given selection is valid as a target
      */
@@ -252,7 +253,9 @@ export class NodesSelectorComponent implements OnInit {
     // shared among tabs
     flatNodeEntriesColumns: ColumnType;
     searchText = model('');
-    selectionMode = computed(() => (this.option()?.optionConfig?.nodes ? 'target' : 'source'));
+    selectionMode = computed(() =>
+        this.option()?.optionConfig?.selection?.selected.length > 0 ? 'target' : 'source',
+    );
 
     constructor(
         private apiCollectionService: ApiCollectionService,
@@ -280,7 +283,7 @@ export class NodesSelectorComponent implements OnInit {
                 void this.refreshData(option.optionConfig.state);
             }
             this.treeNodeService.setSelectionMode(
-                option?.optionConfig?.nodes ? 'target' : 'source',
+                option?.optionConfig?.selection?.selected?.length > 0 ? 'target' : 'source',
             );
         });
     }
@@ -588,7 +591,7 @@ export class NodesSelectorComponent implements OnInit {
      */
     async insertSelectedNodes(): Promise<void> {
         const target = this.selectedNodes()[0] as Node;
-        const source = this.option().optionConfig.nodes as Node[];
+        const source = this.option().optionConfig.selection?.selected as Node[];
         if (target.mediatype === 'collection') {
             this.editorialSidebarService.sidebarLoading.set(true);
             this.uiService.addToCollection(target, source, false, () => {
@@ -610,7 +613,7 @@ export class NodesSelectorComponent implements OnInit {
      */
     async saveMetadata(): Promise<void> {
         this.editorialSidebarService.sidebarLoading.set(true);
-        const source = this.option().optionConfig.nodes as Node[];
+        const source = this.option().optionConfig.selection?.selected as Node[];
         // convert the extended values to a flat object with the metadata keys as keys and the enabled values as values
         const values: MdsExtendedValues = this.currentExtendedValues() ?? {};
         const enabledMetadata: { [key: string]: string[] } = {};

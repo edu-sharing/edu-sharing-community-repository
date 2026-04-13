@@ -4,7 +4,6 @@ import { MatStepper, MatStepperModule } from '@angular/material/stepper';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ShareDialogChooseDateComponent } from '../../../features/dialogs/dialog-modules/share-dialog/permission/choose-date/choose-date.component';
-import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
 import {
     ManageAssignmentNodesComponent,
     NodeWithRole,
@@ -33,6 +32,7 @@ import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { EditorialBreadcrumbService } from '../editorial-breadcrumb/editorial-breadcrumb.service';
 import { NodesSelectorConfig } from '../nodes-selector/nodes-selector.component';
 import { EditorialPageService } from '../editorial-page.service';
+import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 
 export type AssignmentBase = Pick<Assignment, 'title' | 'type' | 'summary'>;
 export const AssignmentEditorConfig = {
@@ -301,6 +301,20 @@ export class ManageAssignmentComponent {
                     mainComponent: null,
                 },
             });
+        }
+    }
+
+    async resetToDraft() {
+        const result = await this.dialogsService.openAssignmentResetDraft();
+        if (result === 'EDITORIAL.ASSIGNMENT.SAVE_RESET_DRAFT') {
+            await this.submit('DRAFT');
+        }
+    }
+
+    async finishSubmission() {
+        const result = await this.dialogsService.openAssignmentFinish();
+        if (result === 'EDITORIAL.ASSIGNMENT.SAVE_FINISH') {
+            await this.submit('FINISHED');
         }
     }
 }

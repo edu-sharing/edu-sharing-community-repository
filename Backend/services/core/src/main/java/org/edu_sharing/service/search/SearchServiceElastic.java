@@ -79,7 +79,9 @@ import org.edu_sharing.service.model.CollectionRef;
 import org.edu_sharing.service.model.CollectionRefImpl;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.model.NodeRefImpl;
-import org.edu_sharing.service.nodeservice.*;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.nodeservice.PropertiesGetInterceptor;
+import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.search.model.*;
@@ -171,7 +173,7 @@ public class SearchServiceElastic implements SearchService {
 
     public static BoolQuery getFilesSharedToMeQuery(MetadataQueries queries, SharedToMeType type) {
         String username = AuthenticationUtil.getFullyAuthenticatedUser();
-        Set<String> memberships = getAllMemberships(username);
+        Set<String> memberships = getAllMemberships(username, true);
         String basequery = queries.findQuery("sharedToMe").getPrimaryBasequery();
 
         BoolQuery.Builder builder = QueryBuilders.bool()
@@ -197,10 +199,12 @@ public class SearchServiceElastic implements SearchService {
     }
 
     @NotNull
-    private static Set<String> getAllMemberships(String username) {
+    private static Set<String> getAllMemberships(String username, boolean includeUser) {
         ServiceRegistry serviceRegistry = (ServiceRegistry) AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
         Set<String> memberships = new HashSet<>();
-        memberships.add(username);
+        if(includeUser) {
+            memberships.add(username);
+        }
         memberships.addAll(serviceRegistry.getAuthorityService().getAuthorities());
         memberships.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
         return memberships;
@@ -912,23 +916,27 @@ public class SearchServiceElastic implements SearchService {
         }
         // mds specialFilter processing on per-query basis
         if (query != null) {
-            for (MetadataQuery.SpecialFilter filter : query.getSpecialFilter()) {
-                // we use "path" instead of "fullpath" since query performance of wildcard queries is worse
-                if (MetadataQuery.SpecialFilter.exclude_system_folder.equals(filter)) {
-                    queryBuilderGlobalConditions.mustNot(mustNot -> mustNot.match(wild -> wild.field("path").query(SystemFolder.getSystemFolderBase().getId())));
-                } else if (MetadataQuery.SpecialFilter.exclude_sites_folder.equals(filter)) {
-                    queryBuilderGlobalConditions.mustNot(mustNot -> mustNot.match(wild -> wild.field("path").query(SystemFolder.getSitesFolder().getId())));
-                } else if (MetadataQuery.SpecialFilter.exclude_people_folder.equals(filter)) {
-                    org.alfresco.service.cmr.repository.NodeRef personFolder = SystemFolder.getPersonFolder();
-                    if (personFolder != null) {
-                        queryBuilderGlobalConditions.mustNot(mustNot -> mustNot.match(wild -> wild.field("path").query(SystemFolder.getPersonFolder().getId())));
-                    } else {
-                        log.warn("People folder unknown, elastic query is skipping special filter");
-                    }
+            processSpecialFilters(query, queryBuilderGlobalConditions);
+        }
+        return queryBuilderGlobalConditions;
+    }
+
+    private static void processSpecialFilters(MetadataQuery query, BoolQuery.Builder queryBuilderGlobalConditions) {
+        for (MetadataQuery.SpecialFilter filter : query.getSpecialFilter()) {
+            // we use "path" instead of "fullpath" since query performance of wildcard queries is worse
+            if (MetadataQuery.SpecialFilter.exclude_system_folder.equals(filter)) {
+                queryBuilderGlobalConditions.mustNot(mustNot -> mustNot.match(wild -> wild.field("path").query(SystemFolder.getSystemFolderBase().getId())));
+            } else if (MetadataQuery.SpecialFilter.exclude_sites_folder.equals(filter)) {
+                queryBuilderGlobalConditions.mustNot(mustNot -> mustNot.match(wild -> wild.field("path").query(SystemFolder.getSitesFolder().getId())));
+            } else if (MetadataQuery.SpecialFilter.exclude_people_folder.equals(filter)) {
+                org.alfresco.service.cmr.repository.NodeRef personFolder = SystemFolder.getPersonFolder();
+                if (personFolder != null) {
+                    queryBuilderGlobalConditions.mustNot(mustNot -> mustNot.match(wild -> wild.field("path").query(SystemFolder.getPersonFolder().getId())));
+                } else {
+                    log.warn("People folder unknown, elastic query is skipping special filter");
                 }
             }
         }
-        return queryBuilderGlobalConditions;
     }
 
     public Set<String> getUserAuthorities() {
@@ -1708,9 +1716,9 @@ public class SearchServiceElastic implements SearchService {
                                                 .field("share.sharedWith")
                                                 .value(username)
                                         ));
-                                    } else if (direction.equals(UserShareDirection.toUserOrGroups)) {
+                                    } else if (direction.equals(UserShareDirection.toUserGroups)) {
                                         b.minimumShouldMatch("1");
-                                        for (String group : getAllMemberships(username)) {
+                                        for (String group : getAllMemberships(username, false)) {
                                             b = b.should(m -> m.term(t -> t
                                                     .field("share.sharedWith")
                                                     .value(group)
@@ -1797,7 +1805,7 @@ public class SearchServiceElastic implements SearchService {
                 ).must(
                         childQuery
                 );
-
+        processSpecialFilters(queryData, builder);
         searchToken.setElasticQuery(builder.build());
         searchToken.setSortDefinition(SortDefinition.SORT_DEFINITION_SCORE_ASC);
         SearchResultNodeRef queryResult = search(searchToken, true);
@@ -1883,7 +1891,7 @@ public class SearchServiceElastic implements SearchService {
     public SearchResultNodeRef getWorkflowReceive(String user, SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception {
         BoolQuery.Builder builder = QueryBuilders.bool();
         builder.minimumShouldMatch("1");
-        getAllMemberships(user).forEach(authority -> builder.should(b -> b.match(m -> m.field(
+        getAllMemberships(user, true).forEach(authority -> builder.should(b -> b.match(m -> m.field(
                 "properties.ccm:wf_receiver.keyword").query(authority)))
         );
         builder.mustNot(b -> b.exists(e -> e.field(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL))));

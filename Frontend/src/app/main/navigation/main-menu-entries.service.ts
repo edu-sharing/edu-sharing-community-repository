@@ -91,6 +91,23 @@ export class MainMenuEntriesService {
             isVisible: true,
         },
         {
+            name: 'SIDEBAR.TASKS',
+            icon: 'assignment',
+            target: { type: 'path', path: 'editorial/assignment' },
+            scope: 'editorial_assignment',
+            isVisible: () => !this.loginInfo.isGuest,
+        },
+        {
+            name: 'SIDEBAR.EDITORIAL_SUGGESTIONS',
+            icon: 'online_prediction',
+            target: { type: 'path', path: 'editorial/suggestions' },
+            scope: 'editorial_suggestions',
+            isVisible: () =>
+                this.loginInfo.toolPermissions?.includes(
+                    RestConstants.TOOLPERMISSION_EDITORIAL_SUGGESTIONS,
+                ),
+        },
+        {
             name: 'SIDEBAR.STREAM',
             icon: 'event',
             target: { type: 'path', path: 'stream' },
@@ -109,7 +126,10 @@ export class MainMenuEntriesService {
             icon: 'lock',
             target: { type: 'path', path: 'workspace/safe' },
             scope: 'safe',
-            isVisible: () => !this.bridge.isRunningCordova() && this.hasAccessToSafeScope,
+            isVisible: () =>
+                !UIService.isMobileWidth() &&
+                !this.bridge.isRunningCordova() &&
+                this.hasAccessToSafeScope,
         },
         {
             name: 'SIDEBAR.PERMISSIONS',
@@ -117,7 +137,7 @@ export class MainMenuEntriesService {
             target: { type: 'path', path: 'permissions' },
             scope: 'permissions',
             isVisible: () =>
-                !this.ui.isMobile() &&
+                !UIService.isMobileWidth() &&
                 (this.organizations.canCreate ||
                     this.organizations.organizations.filter((group) => group.administrationAccess)
                         .length > 0),
@@ -127,7 +147,7 @@ export class MainMenuEntriesService {
             icon: 'settings',
             scope: 'admin',
             target: { type: 'path', path: 'admin' },
-            isVisible: () => !this.ui.isMobile() && this.showAdminEntry(),
+            isVisible: () => !UIService.isMobileWidth() && this.showAdminEntry(),
         },
     ];
 

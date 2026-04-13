@@ -103,12 +103,21 @@
       </button>
     </mat-header-cell>
     <mat-cell *matCellDef="let node">
+      <ng-container *ngIf="entriesService.options?.[Target.List]?.length"> </ng-container>
       <button
         mat-icon-button
-        *ngIf="entriesService.options?.[Target.List]?.length"
+        *ngIf="!UIService.isMobileWidth()"
         color="primary"
         (click)="openMenu(node)"
         [matMenuTriggerFor]="dropdown.menu"
+      >
+        <i esIcon="more_vert" [aria]="true"></i>
+      </button>
+      <button
+        mat-icon-button
+        *ngIf="UIService.isMobileWidth()"
+        color="primary"
+        (click)="openMenu(node)"
       >
         <i esIcon="more_vert" [aria]="true"></i>
       </button>

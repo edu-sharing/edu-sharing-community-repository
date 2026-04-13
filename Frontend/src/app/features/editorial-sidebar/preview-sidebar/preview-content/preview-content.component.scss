@@ -1,5 +1,5 @@
-@use 'variables-scss' as *;
-@use 'mixins' as *;
+@use '../../../../../../projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use '../../../../../../projects/edu-sharing-ui/assets/scss/mixins' as *;
 
 $previewHeight: 400px;
 
@@ -77,6 +77,7 @@ es-render-wrapper-component {
         justify-content: space-between;
         align-items: center;
         gap: 12px;
+        padding-bottom: 10px;
         .stats-and-rating {
             display: flex;
             flex-direction: column;

@@ -1,6 +1,8 @@
 <ng-container *ngIf="clickable">
   <!-- Full (not short) breadcrumbs -->
   <div class="breadcrumb breadcrumb-full" [attr.role]="nodes.length > 0 ? 'list' : null">
+    <ng-container *ngTemplateOutlet="landingBreadcrumbElement"></ng-container>
+    <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
     <ng-container *ngTemplateOutlet="homeBreadcrumbElement"></ng-container>
     <ng-container *ngIf="nodes.length === 0 && showHomeNotice">
       <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
@@ -148,6 +150,19 @@ Short version works only with `short="always"`.
       <ng-container *ngTemplateOutlet="homeInner"></ng-container>
       <div mat-ripple [matRippleTrigger]="trigger" matRippleColor="primary"></div>
     </button>
+  </div>
+</ng-template>
+<ng-template #landingBreadcrumbElement>
+  <div role="listitem" class="breadcrumb-element">
+    <a
+      #trigger
+      cdkMonitorElementFocus
+      class="breadcrumb-element-landing"
+      [routerLink]="'/' + ROUTER_PREFIX + 'landing'"
+    >
+      {{ 'EDITORIAL.BREADCRUMB.HOME' | translate }}
+      <div mat-ripple [matRippleTrigger]="trigger" matRippleColor="primary"></div>
+    </a>
   </div>
 </ng-template>
 

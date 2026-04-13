@@ -93,9 +93,16 @@ export class UIService {
      * Prefer to subscribe to the isTouchSubject directly if viable
      *
      * Returns true if the current sessions seems to be running on a mobile device
+     * Please note that this means it's a touch device and does not tell anything about the screen size
      */
     public isMobile() {
         return this.isTouchSubject.value;
+    }
+    public static isMobileWidth() {
+        return UIService.evaluateMediaQuery(
+            UIConstants.MEDIA_QUERY_MAX_WIDTH,
+            UIConstants.MOBILE_TAB_SWITCH_WIDTH,
+        );
     }
     public static evaluateMediaQuery(type: string, value: number) {
         if (type == UIConstants.MEDIA_QUERY_MAX_WIDTH) return value > window.innerWidth;

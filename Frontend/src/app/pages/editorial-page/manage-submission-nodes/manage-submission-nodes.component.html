@@ -2,15 +2,17 @@
   {{ 'EDITORIAL.SIDEBAR.SUBMISSION.ATTACHMENT_EMPTY' | translate }}
 </div>
 <div class="node-list" *ngIf="files()?.length">
-  @for (item of files(); track item) { @if(item.assignmentFile?.referNode) {
+  @for (item of files(); track item) {
   <div
     tabindex="0"
     (click)="click(item)"
     [class.selected]="selected() === item"
     [class.new]="!item.validationStatus || item.validationStatus === 'NOT_STARTED'"
   >
-    <es-node-type-badge [node]="item.assignmentFile.referNode"></es-node-type-badge>
-    <div class="title">{{ item.assignmentFile.referNode | nodeTitle }}</div>
+    <es-node-type-badge
+      [node]="item.assignmentFile?.referNode || item.content"
+    ></es-node-type-badge>
+    <div class="title">{{ item.assignmentFile?.referNode || item.content | nodeTitle }}</div>
   </div>
-  } }
+  }
 </div>

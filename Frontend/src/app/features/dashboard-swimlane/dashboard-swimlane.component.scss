@@ -16,11 +16,18 @@ es-node-entries-wrapper {
     gap: 10px;
     align-items: center;
     transition: all vars.$transitionNormal;
+    @media screen and (max-width: (vars.$mobileTabSwitchWidth)) {
+        justify-content: flex-start;
+    }
     > h2 {
         font-weight: bold;
+        transition: all vars.$transitionNormal;
         // flex-grow: 1;
     }
     &:not(.toggle-open) {
+        h2 {
+            color: var(--textMediumLight);
+        }
         border-radius: var(--borderRadiusCards);
         // @include mixins.materialShadowBottom();
         &:hover,
@@ -80,13 +87,15 @@ es-node-entries-wrapper {
     .swimlane-type-2 {
         min-height: 235px;
     }
+    $swimlaneMinWidth: 160px;
+    $swimlaneGap: 20px;
     &.swimlane-stream {
         flex-direction: row;
-        flex-wrap: wrap;
-        gap: 20px;
+        gap: $swimlaneGap;
         justify-content: space-around;
+        overflow-y: auto;
         > .stream-lane {
-            min-width: 150px;
+            min-width: $swimlaneMinWidth;
             max-width: 450px;
             width: 0;
             flex-grow: 1;
@@ -94,6 +103,13 @@ es-node-entries-wrapper {
             flex-direction: column;
             > es-dashboard-interactivity-stream {
                 flex-grow: 1;
+            }
+        }
+        @media screen and (max-width: 590px) {
+            scroll-snap-type: x mandatory;
+            > .stream-lane {
+                min-width: calc(100vw - 80px);
+                max-width: calc(100vw - 80px);
             }
         }
     }

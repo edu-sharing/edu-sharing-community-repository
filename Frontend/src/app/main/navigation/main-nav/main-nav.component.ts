@@ -8,6 +8,7 @@ import {
     NgZone,
     OnDestroy,
     OnInit,
+    TemplateRef,
     ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
@@ -80,6 +81,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     private static readonly ID_ATTRIBUTE_NAME = 'data-banner-id';
 
     @ViewChild(TopBarComponent) topBar: TopBarComponent;
+    @ViewChild('userMenuMobile') userMenuMobile: TemplateRef<unknown>;
     @ViewChild('tabNav') tabNav: ElementRef;
 
     private shouldAlwaysHide = this.storage.get(TemporaryStorageService.OPTION_HIDE_MAINNAV, false);
@@ -451,9 +453,18 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             const manageProfile = new OptionItem('EDIT_ACCOUNT', 'manage_accounts', () =>
                 this.openProfile(),
             );
+            manageProfile.customShowCallback = async () => !UIService.isMobileWidth();
             manageProfile.group = mainGroup;
             manageProfile.priority = 10;
             this.userMenuOptions.push(manageProfile);
+            const manageProfileMobile = new OptionItem('EDIT_ACCOUNT', 'manage_accounts', () =>
+                this.openProfile(),
+            );
+            manageProfileMobile.customTemplate = this.userMenuMobile;
+            manageProfileMobile.customShowCallback = async () => UIService.isMobileWidth();
+            manageProfileMobile.group = mainGroup;
+            manageProfileMobile.priority = 10;
+            this.userMenuOptions.push(manageProfileMobile);
             if (
                 this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_SIGNUP_GROUP)
             ) {
@@ -652,14 +663,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.elementsBottomY += diffBottom;
         this.elementsBottomY = Math.max(0, this.elementsBottomY);
         // For ios elastic scroll
-        if (
-            scrollContainer.scrollTop < 0 ||
-            this.fixScrollElements ||
-            !UIService.evaluateMediaQuery(
-                UIConstants.MEDIA_QUERY_MAX_WIDTH,
-                UIConstants.MOBILE_TAB_SWITCH_WIDTH,
-            )
-        ) {
+        if (scrollContainer.scrollTop < 0 || this.fixScrollElements || !UIService.isMobileWidth()) {
             this.elementsTopY = 0;
             this.elementsBottomY = 0;
         }

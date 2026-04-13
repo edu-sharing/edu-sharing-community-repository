@@ -1,8 +1,22 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
 .frame {
     display: flex;
     flex-direction: column;
+    min-height: calc(
+        100vh - var(--roundedContainerMargin) - var(--roundedContainerMargin) -
+            var(--mainnavCurrentHeight)
+    );
+    margin: var(--roundedContainerMargin);
+    border-radius: var(--borderRadiusCards);
+    background-color: var(--roundedContainerBackground);
+    @include mixins.materialShadowSmall();
+}
+.mat-sidenav-container-right-open {
+    .frame {
+        margin-right: 4px;
+    }
 }
 mat-sidenav-container,
 mat-sidenav-content {
@@ -17,6 +31,7 @@ mat-sidenav-content {
     top: var(--mainnavHeight);
     z-index: 60;
     > div {
+        border-radius: var(--borderRadiusCards) var(--borderRadiusCards) 0 0;
         width: 100%;
         height: $workspaceBreadcrumbsHeight;
         background-color: #fff;
@@ -35,6 +50,7 @@ mat-sidenav-content {
             display: flex;
             align-items: center;
             z-index: 62;
+            border-radius: 0 var(--borderRadiusCards) 0 0;
             background: linear-gradient(
                 to right,
                 rgba(255, 255, 255, 0.001) 0,
@@ -74,21 +90,28 @@ mat-sidenav-content {
 }
 
 $quotaHeight: 60px;
+$treeOffset: calc(
+    #{$workspaceBreadcrumbsHeight} + var(--mainnavHeight) + var(--roundedContainerMargin) - var(--treeOffset)
+);
 .tree {
+    --treeOffset: 0px;
     min-width: $workspaceTreeWidth;
     max-width: $workspaceTreeWidth;
-    top: calc(#{$workspaceBreadcrumbsHeight} + var(--mainnavHeight));
+    top: $treeOffset;
     position: fixed;
-    height: calc(100% - #{$workspaceBreadcrumbsHeight} - var(--mainnavHeight));
+    border-radius: 0 0 0 var(--borderRadiusCards);
+    height: calc(100% - #{$treeOffset} - var(--roundedContainerMargin));
     z-index: 2;
     background: $workspaceTreeBackground;
     es-workspace-tree {
         min-width: $workspaceTreeWidth;
         max-width: $workspaceTreeWidth;
-        top: calc(#{$workspaceBreadcrumbsHeight} + var(--mainnavHeight));
+        border-radius: 0 0 0 var(--borderRadiusCards);
+        top: $treeOffset;
         position: fixed;
-        height: calc(100% - #{$workspaceBreadcrumbsHeight} - var(--mainnavHeight));
+        height: calc(100% - #{$treeOffset} - var(--roundedContainerMargin));
         overflow-y: auto;
+        @include mixins.materialScrollbarLight();
     }
     .tree-quota {
         height: calc(

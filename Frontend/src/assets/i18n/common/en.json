@@ -216,6 +216,10 @@
   "SIDEBAR": {
     "LANDING": "Landing page",
     "LANDING_SHORT": "Landing",
+    "TASKS": "Tasks",
+    "TASKS_SHORT": "Tasks",
+    "EDITORIAL_SUGGESTIONS": "Content-Checking",
+    "EDITORIAL_SUGGESTIONS_SHORT": "Check",
     "WORKSPACE": "Workspace",
     "SEARCH": "Search",
     "COLLECTIONS": "Collections",
@@ -678,6 +682,7 @@
     "MATERIAL_FEEDBACK": "Feedback...",
     "MATERIAL_FEEDBACK_VIEW": "View feedback",
     "OPEN": "Open",
+    "WORKSPACE_METADATA": "Statistics & Versioning",
     "DOWNLOAD": "Download",
     "DOWNLOAD_ALL": "download zip",
     "DOWNLOAD_METADATA": "download metadata",

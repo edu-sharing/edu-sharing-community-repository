@@ -5,8 +5,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.Data;
 import org.alfresco.error.AlfrescoRuntimeException;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
@@ -16,7 +14,6 @@ import org.edu_sharing.restservices.*;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.usage.Usage2Service;
 import org.edu_sharing.service.usage.UsageException;
-import org.edu_sharing.webservices.util.AuthenticationUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 
@@ -183,7 +180,9 @@ public class ErrorResponse {
 
         setError(t.getClass().getName());
         DisplayLevel level = DisplayLevel.valueOf(LightbendConfigLoader.get().getString("security.logging.displayLevel." + (AuthorityServiceHelper.isAdmin() ? "admin" : "default")));
-        if(Arrays.asList(DisplayLevel.details, DisplayLevel.full).contains(level)) {
+        if(Arrays.asList(DisplayLevel.details, DisplayLevel.full).contains(level)
+                || canShowErrorMessage(t)
+        ) {
             setMessage(t.getMessage());
         } else {
             setMessage("Details hidden: You can configure the output via security.logging.displayLevel");
@@ -201,6 +200,14 @@ public class ErrorResponse {
                 setStacktrace(writer.toString());
             }
         }
+    }
+
+    /**
+     * returns true if for the given permission type it is always safe to print the message contents, even if
+     * logging display level is too low
+     */
+    private boolean canShowErrorMessage(Throwable t) {
+        return (t instanceof DAOToolPermissionException);
     }
 
     public String[] getStacktraceArray() {

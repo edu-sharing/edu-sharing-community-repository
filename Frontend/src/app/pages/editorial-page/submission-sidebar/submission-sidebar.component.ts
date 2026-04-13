@@ -16,7 +16,6 @@ import {
     Submission,
     SubmissionFile,
 } from 'ngx-edu-sharing-api';
-import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
 import { ManageSubmissionNodesComponent } from '../manage-submission-nodes/manage-submission-nodes.component';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { debounceTime } from 'rxjs/operators';
@@ -26,6 +25,7 @@ import { EditorComponent } from '@tinymce/tinymce-angular';
 import { AssignmentEditorConfig } from '../manage-assignment/manage-assignment.component';
 import { TranslateService } from '@ngx-translate/core';
 import { PlatformLocation } from '@angular/common';
+import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 
 export type SubmissionConfig = {
     submission: SubmissionWithAssignment;

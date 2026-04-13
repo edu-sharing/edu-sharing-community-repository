@@ -377,7 +377,7 @@ export class UIHelper {
     }
 
     static getDefaultLocation(configService: ConfigurationService) {
-        let defaultLocation = configService.instant('loginDefaultLocation', 'workspace');
+        let defaultLocation = configService.instant('loginDefaultLocation', 'landing');
         if (!defaultLocation.match(/https?:\/\/*/)) {
             defaultLocation = UIConstants.ROUTER_PREFIX + defaultLocation;
         }

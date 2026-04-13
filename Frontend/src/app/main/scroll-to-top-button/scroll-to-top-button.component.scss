@@ -6,7 +6,7 @@
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-    z-index: $topBarZIndex;
+    z-index: $topBarZIndex - 1;
     padding: 0 17px;
     border-radius: 50px 50px 0 0;
     font-size: $fontSizeXSmall;

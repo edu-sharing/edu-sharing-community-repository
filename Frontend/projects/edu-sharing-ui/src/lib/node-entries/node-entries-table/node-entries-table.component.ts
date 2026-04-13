@@ -162,7 +162,15 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
                 event.target as HTMLElement
             ).getBoundingClientRect());
         }
-        this.entriesService.openDropdown(this.dropdown, node, () => this.menuTrigger.openMenu());
+        if (UIService.isMobileWidth()) {
+            this.entriesService.openDropdown(this.dropdown, node, () =>
+                this.dropdown.triggerBottomSheet(),
+            );
+        } else {
+            this.entriesService.openDropdown(this.dropdown, node, () =>
+                this.menuTrigger.openMenu(),
+            );
+        }
     }
 
     private updateSort(disableClear = false): void {
@@ -356,7 +364,13 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     }
 
     async openMenu(node: T) {
-        this.entriesService.openDropdown(this.dropdown, node);
+        if (UIService.isMobileWidth()) {
+            this.entriesService.openDropdown(this.dropdown, node, () =>
+                this.dropdown.triggerBottomSheet(),
+            );
+        } else {
+            this.entriesService.openDropdown(this.dropdown, node);
+        }
     }
 
     isBlocked(node: Node) {
@@ -374,4 +388,6 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         this.sort.direction = sort.direction;
         this.changeDetectorRef.detectChanges();*/
     }
+
+    protected readonly UIService = UIService;
 }

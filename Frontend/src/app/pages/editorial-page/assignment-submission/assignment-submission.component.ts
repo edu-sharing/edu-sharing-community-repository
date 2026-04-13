@@ -21,10 +21,10 @@ import {
     TranslationsService,
 } from 'ngx-edu-sharing-ui';
 import { EditorialPageService } from '../editorial-page.service';
-import { EditorialSidebarService } from '../editorial-sidebar/editorial-sidebar.service';
 import { SubmissionConfig } from '../submission-sidebar/submission-sidebar.component';
 import { NgxExtendedPdfViewerModule, NgxExtendedPdfViewerService } from 'ngx-extended-pdf-viewer';
 import { RenderWrapperComponent } from '../../render2-page/render-wrapper-component/render-wrapper.component';
+import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 
 /**
  * lists all submissions (for teacher view)

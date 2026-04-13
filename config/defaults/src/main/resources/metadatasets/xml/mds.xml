@@ -776,7 +776,7 @@
       <valuespace_i18n_prefix>shareDirection_</valuespace_i18n_prefix>
       <values>
         <entry icon="person">toUser</entry>
-        <entry icon="group">toUserOrGroups</entry>
+        <entry icon="group">toUserGroups</entry>
         <entry icon="send">fromUser</entry>
       </values>
     </widget>
@@ -1693,6 +1693,9 @@
         ]
         }}
       </basequery>
+      <specialFilter>exclude_system_folder</specialFilter>
+      <specialFilter>exclude_sites_folder</specialFilter>
+      <specialFilter>exclude_people_folder</specialFilter>
     </query>
     <query join="AND" id="sharedByMe">
       <basequery>{"bool":{
@@ -1707,6 +1710,9 @@
         ]
         }}
       </basequery>
+      <specialFilter>exclude_system_folder</specialFilter>
+      <specialFilter>exclude_sites_folder</specialFilter>
+      <specialFilter>exclude_people_folder</specialFilter>
     </query>
     <query join="AND" id="recentUserEvents">
       <basequery>{"bool":{
@@ -1721,6 +1727,9 @@
         "minimum_should_match": 1
         }}
       </basequery>
+      <specialFilter>exclude_system_folder</specialFilter>
+      <specialFilter>exclude_sites_folder</specialFilter>
+      <specialFilter>exclude_people_folder</specialFilter>
       <property name="ngsearchword">
         <statement>
           {"bool": {
@@ -1889,6 +1898,26 @@
         ]
         }}
       </basequery>
+      <property name="ngsearchword" asFilter="false">
+        <statement>
+          {"bool":{"should":[
+          {
+          "simple_query_string": {
+          "query": "${valueRaw}*",
+          "flags": "OR|AND|PREFIX|PHRASE|WHITESPACE",
+          "fields": [
+          "properties.cm:name^2",
+          "properties.cclom:title^5",
+          "properties.cclom:general_description^2"
+          ],
+          "default_operator": "and"
+          }
+          },
+          {"wildcard":{"nodeRef.id": {"value":"*${value}*", "case_insensitive": true }}}
+          ]
+          }}
+        </statement>
+      </property>
       <property name="virtual:assignmentType">
         <statement value="created">
           {"match": {"properties.cm:creator.keyword": "${user.cm:userName}" }},

@@ -27,7 +27,6 @@ import { Node } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule, NodeTitlePipe } from 'ngx-edu-sharing-ui';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { PreviewSidebarService } from '../../../../features/preview-sidebar/preview-sidebar.service';
 import { Toast } from '../../../../services/toast';
 import { SharedModule } from '../../../../shared/shared.module';
 import { RenderWrapperComponent } from '../../../render2-page/render-wrapper-component/render-wrapper.component';
@@ -39,6 +38,7 @@ import { MediaRenderingDisplayType } from '../../shared/types/media-rendering-di
 import { MediaRenderingConfig } from '../../shared/types/widget-config/media-rendering-config';
 import { WidgetComponentInterface } from '../generic-widget/generic-widget.component';
 import { WidgetConfigurationButtonsComponent } from '../shared/widget-configuration-buttons/widget-configuration-buttons.component';
+import { PreviewSidebarService } from '../../../../features/editorial-sidebar/preview-sidebar/preview-sidebar.service';
 
 @Component({
     selector: 'es-media-rendering',

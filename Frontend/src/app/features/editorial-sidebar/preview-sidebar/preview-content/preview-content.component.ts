@@ -15,15 +15,15 @@ import {
     NodeHelperService,
     OptionsHelperDataService,
     RenderHelperService,
-    Scope,
 } from 'ngx-edu-sharing-ui';
-import { CardDialogRef } from '../dialogs/card-dialog/card-dialog-ref';
 import { Subject } from 'rxjs';
-import { DialogsService } from '../dialogs/dialogs.service';
 import { Router } from '@angular/router';
-import { MdsEditorWrapperComponent } from '../mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { ModuleInfoService } from 'ngx-rendering-service-lib';
-import { PreviewSidebarTemplateService } from './preview-sidebar-template.service';
+import { PreviewSidebarTemplateService } from '../preview-sidebar-template.service';
+import { MdsEditorWrapperComponent } from '../../../mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import { DialogsService } from '../../../dialogs/dialogs.service';
+import { EditorialSidebarService } from '../../editorial-sidebar.service';
+import { CardDialogRef } from '../../../dialogs/card-dialog/card-dialog-ref';
 
 /**
  * The inner part of the preview sidebar.
@@ -96,6 +96,7 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
         public optionsHelper: OptionsHelperDataService,
         public moduleInfoService: ModuleInfoService,
         public previewSidebarTemplateService: PreviewSidebarTemplateService,
+        public editorialSidebarService: EditorialSidebarService,
         private renderHelperService: RenderHelperService,
         public router: Router,
         public about: AboutService,
@@ -153,7 +154,7 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
     private async updateOptions() {
         await this.optionsHelper.initComponents(this.actionbar);
         this.optionsHelper.setData({
-            scope: Scope.Search,
+            scope: this.editorialSidebarService.scope(),
             activeObjects: [this.node],
             customOptions: this.customOptions,
         });

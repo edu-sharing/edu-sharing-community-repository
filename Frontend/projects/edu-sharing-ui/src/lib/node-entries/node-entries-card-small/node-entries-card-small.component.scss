@@ -15,10 +15,10 @@ $collectionIconSize: 25px;
     align-items: center;
     padding: $paddingH 6px;
     border-radius: var(--borderRadiusBadges);
-    background-color: var(--palette-primary-100);
+    background-color: var(--palette-primary-200);
     gap: 5px;
     &.endTime-low {
-        background-color: color-mix(in srgb, var(--colorStatusPositive), 60% transparent);
+        background-color: color-mix(in srgb, var(--palette-primary-200), 60% transparent);
     }
     &.endTime-medium {
         background-color: color-mix(in srgb, var(--colorStatusWarning), 60% transparent);
@@ -29,25 +29,31 @@ $collectionIconSize: 25px;
     &.status-DRAFT {
         background-color: #ddd;
     }
+    &.status-HAS_SUBMISSIONS {
+        background-color: color-mix(in srgb, var(--colorStatusWarning), 60% transparent);
+    }
     &.type-SUBMISSION {
-        background-color: color-mix(in srgb, var(--palette-primary-100), 60% transparent);
+        background-color: color-mix(in srgb, var(--palette-primary-200), 60% transparent);
     }
     &.status-CANCELED {
         background-color: color-mix(in srgb, var(--colorStatusNegative), 60% transparent);
     }
     &.status-INPROGRESS {
-        background-color: color-mix(in srgb, var(--colorStatusWarning), 60% transparent);
+        background-color: color-mix(in srgb, var(--palette-primary-200), 60% transparent);
     }
     &.status-FINISHED {
-        background-color: color-mix(in srgb, var(--colorStatusPositive), 60% transparent);
+        background-color: #ddd;
     }
     &.submission-status-NOT_STARTED {
-        background-color: color-mix(in srgb, var(--colorStatusNegative), 60% transparent);
+        background-color: color-mix(in srgb, var(--palette-primary-200), 60% transparent);
     }
     &.submission-status-PENDING {
-        background-color: color-mix(in srgb, var(--colorStatusWarning), 60% transparent);
+        background-color: color-mix(in srgb, var(--palette-primary-200), 60% transparent);
     }
     &.submission-status-FINISHED {
+        background-color: color-mix(in srgb, var(--palette-primary-200), 60% transparent);
+    }
+    &.validation-status-FINISHED {
         background-color: color-mix(in srgb, var(--colorStatusPositive), 60% transparent);
     }
     &.submissionDate {

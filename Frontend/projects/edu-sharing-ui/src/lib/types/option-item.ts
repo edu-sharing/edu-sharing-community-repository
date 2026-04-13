@@ -8,6 +8,7 @@
 import { KeyboardShortcutCondition } from '../types/keyboard-shortcuts';
 import { Node } from 'ngx-edu-sharing-api';
 import { NodeEntriesDataType } from '../node-entries/data-type';
+import { TemplateRef } from '@angular/core';
 
 export enum NodesRightMode {
     // rights on the current node, no matter if its a reference or origianl
@@ -89,6 +90,11 @@ export class OptionItem {
      * Will be called by the optionsHelper
      */
     public customShowCallback: (nodes?: NodeEntriesDataType[] | any[]) => Promise<boolean>;
+    /**
+     * Custom template to render this option
+     * Note: This is currently only supported in the bottom-sheet (mobile) view
+     */
+    public customTemplate: TemplateRef<unknown>;
     /**
      * A function called with the node as param which should return true or false if the option should be enabled or not
      * Is handled by optionsHelper and may not be used otherwise

@@ -91,6 +91,23 @@
     </div>
     <div class="navigation">
       <button mat-button color="primary" matStepperPrevious>{{ 'BACK' | translate }}</button>
+      <ng-container *ngIf="assignment().status !== 'DRAFT'">
+        <button mat-button color="primary" matStepperNext (click)="submit('INPROGRESS')">
+          {{ 'SAVE' | translate }}
+        </button>
+        <button mat-flat-button color="primary" matStepperNext (click)="finishSubmission()">
+          {{ 'EDITORIAL.ASSIGNMENT.SAVE_FINISH' | translate }}
+        </button>
+        <button
+          mat-flat-button
+          color="warn"
+          [disabled]="submissionsWithContent()?.length > 0"
+          matStepperNext
+          (click)="resetToDraft()"
+        >
+          {{ 'EDITORIAL.ASSIGNMENT.SAVE_RESET_DRAFT' | translate }}
+        </button>
+      </ng-container>
       <button
         mat-button
         color="primary"
@@ -101,7 +118,13 @@
         <i esIcon="draft"></i>
         {{ 'EDITORIAL.ASSIGNMENT.SAVE_DRAFT' | translate }}
       </button>
-      <button mat-flat-button color="primary" matStepperNext (click)="submit('INPROGRESS')">
+      <button
+        mat-flat-button
+        *ngIf="assignment().status === 'DRAFT'"
+        color="primary"
+        matStepperNext
+        (click)="submit('INPROGRESS')"
+      >
         <i esIcon="send"></i>
         {{ 'EDITORIAL.ASSIGNMENT.SUBMIT' | translate }}
       </button>

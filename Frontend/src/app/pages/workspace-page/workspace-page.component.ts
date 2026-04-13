@@ -82,7 +82,7 @@ import { ThemeService } from '../../services/theme.service';
 import { RecycleMainComponent } from './recycle/recycle.component';
 import { DialogsService } from 'src/app/features/dialogs/dialogs.service';
 import { OptionsHelperService } from '../../services/options-helper.service';
-import { EditorialSidebarService } from '../editorial-page/editorial-sidebar/editorial-sidebar.service';
+import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
 
 type NodeWrapper = { node: Node };
 
@@ -135,6 +135,10 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
     showSelectRoot = false;
 
     private allowBinarySubject = new BehaviorSubject(true);
+    /**
+     * var to keep track of the tree position when scrolling
+     */
+    treeOffset = 0;
     get allowBinary() {
         return this.allowBinarySubject.value;
     }
@@ -259,6 +263,10 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
             // low session times for safe in backend to provide session hijacking
             // this.connector.logout().toPromise();
         }
+    }
+    @HostListener('window:scroll', ['$event'])
+    scrollDocument() {
+        this.treeOffset = Math.min(15, window.scrollY);
     }
 
     private handleScroll(event: Event) {

@@ -1,5 +1,8 @@
 <h1 esTitle class="cdk-visually-hidden">{{ 'EDITORIAL.TITLE' | translate }}</h1>
-<mat-sidenav-container>
+<mat-sidenav-container
+  [class.mat-sidenav-container-left-open]="sidenavLeft()"
+  [class.mat-sidenav-container-right-open]="editorialSidebarService.sidebarOpened()"
+>
   <mat-sidenav
     #leftSidenav
     [mode]="'side'"
@@ -27,7 +30,7 @@
   <mat-sidenav
     #rightSidenav
     [mode]="'side'"
-    [opened]="editorialSidebarService.sidebarOpened() && (isMobile$ | async) === false"
+    [opened]="editorialSidebarService.sidebarOpened()"
     [defaultWidth]="0.3"
     storageKey="EDITORIAL_SIDENAV_RIGHT_WIDTH"
     class="es-mat-sidenav"
@@ -37,7 +40,6 @@
     <div class="es-mat-sidenav-content">
       <es-editorial-sidebar
         [primaryMode]="(params$ | async).primaryMode"
-        [nodes]="selection()?.selected"
         [component]="mainComponent$ | async"
         (showComponent)="goToComponent($event)"
         (closeTrigger)="editorialSidebarService.sidebarOpened.set(false)"
@@ -61,11 +63,6 @@
         <es-editorial-breadcrumb
           [class.display-none]="(observer.width$ | async) < 400"
         ></es-editorial-breadcrumb>
-        <es-actionbar
-          [class.display-none]="(mainComponent$ | async) !== null"
-          [numberOfAlwaysVisibleOptions]="2"
-          [showCaptions]="(observer.width$ | async) > 700"
-        ></es-actionbar>
       </div>
       <ng-container *ngIf="mainComponent$ | async as component">
         @switch (component) { @case ('manageAssignment') {
@@ -91,6 +88,19 @@
             </ng-template>
           </mat-tab>
         </mat-tab-group>
+        <div class="option-area">
+          <div class="options-left">
+            <button mat-stroked-button color="primary" (click)="sidenavLeft.set(!sidenavLeft())">
+              <i esIcon="filter_list" [aria]="false"></i>
+              {{ 'SEARCH.FILTERS' | translate }}
+            </button>
+          </div>
+          <es-actionbar
+            [class.display-none]="(mainComponent$ | async) !== null"
+            [numberOfAlwaysVisibleOptions]="3"
+            [showCaptions]="(observer.width$ | async) > 700"
+          ></es-actionbar>
+        </div>
         <ng-container *ngIf="(params$ | async).primaryMode as mode">
           <ng-container *ngIf="mode === 'activity' || mode === 'share' || mode === 'assignment'">
             <es-node-entries-wrapper
@@ -120,7 +130,6 @@
 <es-editorial-sidebar
   *ngIf="(isMobile$ | async) === true && editorialSidebarService.sidebarOpened()"
   [primaryMode]="(params$ | async).primaryMode"
-  [nodes]="selection()?.selected"
   [isModal]="true"
   (closeTrigger)="editorialSidebarService.sidebarOpened.set(false)"
 ></es-editorial-sidebar>

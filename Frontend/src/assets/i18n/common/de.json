@@ -242,6 +242,10 @@
   "SIDEBAR": {
     "LANDING": "Startseite",
     "LANDING_SHORT": "Start",
+    "TASKS": "Aufgaben",
+    "TASKS_SHORT": "Aufgaben",
+    "EDITORIAL_SUGGESTIONS": "Inhalte prüfen",
+    "EDITORIAL_SUGGESTIONS_SHORT": "Prüfen",
     "WORKSPACE": "Workspace",
     "SEARCH": "Suchumgebung",
     "COLLECTIONS": "Sammlungen",
@@ -347,19 +351,20 @@
     "STATUS": {
       "DRAFT": "Entwurf",
       "INPROGRESS": "Ausgeteilt",
+      "HAS_SUBMISSIONS": "Zu korrigieren",
       "CANCELED": "Abgebrochen",
       "FINISHED": "Abgeschlossen"
     },
     "SUBMISSION_STATUS": {
-      "NOT_STARTED": "Abzugeben",
-      "PENDING": "Gestartet",
+      "NOT_STARTED": "Offen",
+      "PENDING": "Offen",
       "WITHDRAWN": "Eingezogen",
       "FINISHED": "Abgegeben"
     },
     "VALIDATION_STATUS": {
       "NOT_STARTED": "Zu korrigieren",
       "PENDING": "In Korrektur",
-      "FINISHED": "Abgeschlossen"
+      "FINISHED": "Korrigiert"
     }
   },
   "SUBMISSION": {
@@ -372,6 +377,8 @@
     "timestamp": "Zeitpunkt",
     "TYPE": {
       "EDIT_MATERIAL": "bearbeitet",
+      "DOWNLOAD_MATERIAL": "heruntergeladen",
+      "ADD_MATERIAL_TO_COLLECTION": "Material hinzugefügt",
       "VIEW_COLLECTION": "angesehen",
       "VIEW_MATERIAL": "angesehen",
       "ARCHIVE_MATERIAL": "archiviert/gelöscht",
@@ -776,6 +783,7 @@
     "COLLECTION_PROPOSAL_ACCEPT": "Vorschlag bestätigen",
     "COLLECTION_PROPOSAL_DECLINE": "Vorschlag ablehnen",
     "OPEN": "Öffnen",
+    "WORKSPACE_METADATA": "Statistik & Versionen",
     "DOWNLOAD": "Herunterladen",
     "DOWNLOAD_SAFE": "Archivieren",
     "DOWNLOAD_ALL": "Zip herunterladen",
@@ -1640,7 +1648,7 @@
       "SUBTITLE": {
         "fromUser": "von mir",
         "toUser": "an mich",
-        "toUserOrGroups": "an mich oder meine Gruppen"
+        "toUserGroups": "an meine Gruppen"
       }
     },
     "recent-activities": {

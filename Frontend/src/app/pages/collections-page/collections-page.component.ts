@@ -48,7 +48,7 @@ import { CollectionContentComponent } from './collection-content/collection-cont
 import { CollectionInfoBarComponent } from './collection-info-bar/collection-info-bar.component';
 import { GlobalCollectionsPageServiceInternal } from './global-collections-page.service';
 import { OptionsHelperService } from 'src/app/services/options-helper.service';
-import { EditorialSidebarService } from '../editorial-page/editorial-sidebar/editorial-sidebar.service';
+import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
 
 // component class
 @Component({

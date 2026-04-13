@@ -40,6 +40,8 @@ import { AssignmentPipe } from '../pipes/assignment.pipe';
 import { AuthorityColorPipe } from '../pipes/authority-color.pipe';
 import { AssetsPathPipe } from '../pipes/assets-path.pipe';
 import { InfoMessageComponent } from '../info-message/info-message.component';
+import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
+import { DropdownBottomSheetComponent } from '../dropdown/dropdown-bottom-sheet/dropdown-bottom-sheet.component';
 
 @NgModule({
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -50,6 +52,7 @@ import { InfoMessageComponent } from '../info-message/info-message.component';
         BorderBoxObserverDirective,
         CheckTextOverflowDirective,
         DropdownComponent,
+        DropdownBottomSheetComponent,
         FocusStateDirective,
         FormatDatePipe,
         FormatSizePipe,
@@ -82,6 +85,7 @@ import { InfoMessageComponent } from '../info-message/info-message.component';
         InfoMessageComponent,
         ToolpermissionPipe,
         MatButtonModule,
+        MatBottomSheetModule,
         HtmlTextPipe,
         MatTooltipModule,
         MatRippleModule,

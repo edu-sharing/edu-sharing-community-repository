@@ -62,7 +62,7 @@ export class ActionbarComponent implements OnChanges {
      * - `first`, `last`: The first / last of `optionsAlways` by order.
      * - `manual`: Highlight all options that set `isPrimary = true`.
      */
-    @Input() highlight: 'first' | 'last' | 'manual' = 'first';
+    @Input() highlight: 'first' | 'last' | 'manual' | 'none' = 'none';
     /**
      * Should disabled ("greyed out") options be shown or hidden?
      */
@@ -103,7 +103,7 @@ export class ActionbarComponent implements OnChanges {
         this.optionsToggleBefore = this.uiService.filterToggleOptions(options, true, 'before');
         this.optionsToggleAfter = this.uiService.filterToggleOptions(options, true, 'after');
         this.optionsAlways$.next(
-            this.getActionOptions(this.uiService.filterToggleOptions(options, false)).slice(
+            this.sortByActionOptions(this.uiService.filterToggleOptions(options, false)).slice(
                 0,
                 this.getNumberOptions(),
             ),
@@ -147,10 +147,13 @@ export class ActionbarComponent implements OnChanges {
         option.callback();
     }
 
-    private getActionOptions(options: OptionItem[]) {
+    private sortByActionOptions(options: OptionItem[]) {
         const result: OptionItem[] = [];
         for (const option of options) {
             if (option.showAsAction) result.push(option);
+        }
+        for (const option of options) {
+            if (!option.showAsAction) result.push(option);
         }
         return result;
     }
@@ -188,6 +191,8 @@ export class ActionbarComponent implements OnChanges {
 
     shouldHighlight(optionIndex: number, option: OptionItem): boolean {
         switch (this.highlight) {
+            case 'none':
+                return false;
             case 'first':
                 return optionIndex === 0;
             case 'last':
@@ -200,4 +205,6 @@ export class ActionbarComponent implements OnChanges {
     ngOnChanges(changes: SimpleChanges): void {
         this.invalidate();
     }
+
+    protected readonly UIService = UIService;
 }

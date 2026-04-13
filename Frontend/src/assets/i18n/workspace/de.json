@@ -621,7 +621,7 @@
       "LTI_FIELDS_REQUIRED": "Alle nötigen Felder müssen korrekt ausgefüllt sein, um eine LTI-Ressource anzulegen",
       "LTI_FIELDS_REQUIRED_LINK": "Als normalen Link anlegen",
       "TO_ME_SHARED_PERSONAL": "An mich freigegebene Inhalte werden angezeigt",
-      "TO_ME_SHARED_ALL": "An mich oder meine Gruppen freigegebene Inhalte werden angezeigt"
+      "TO_ME_SHARED_ALL": "An meine Gruppen freigegebene Inhalte werden angezeigt"
     }
   }
 }

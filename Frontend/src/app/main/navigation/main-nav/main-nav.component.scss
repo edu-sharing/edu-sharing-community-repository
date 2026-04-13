@@ -50,6 +50,32 @@ es-search-field {
     display: none;
 }
 
+.user-menu-mobile {
+    padding: 10px 20px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    > div {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        .user-name {
+            display: flex;
+            justify-content: flex-start;
+            color: var(--textMain);
+            font-size: $fontSizeXLarge;
+            text-align: left;
+        }
+
+        .manage-profile {
+            display: flex;
+            justify-content: flex-start;
+            color: var(--primary);
+            font-size: var(--fontSizeXSmall);
+        }
+    }
+}
+
 @media screen and (max-width: ($mobileTabSwitchWidth)) {
     #scrollToTop {
         display: none !important;
