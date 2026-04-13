@@ -163,6 +163,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
                     this.submissionFiles.set((this.submissionFiles() || []).concat(newFiles));
                     this.syncSubmissionDataSource();
                 }
+                this.editorialSidebarService.close();
             });
         this.submitFormGroup = this.formBuilder.group({
             submitComment: ['', [Validators.required]],
@@ -445,6 +446,9 @@ export class SubmitAssignmentComponent implements OnDestroy {
 
     async addComment() {
         const control = this.submitFormGroup.get('submitComment');
+        if (!control.value.trim()) {
+            return;
+        }
         control.disable();
         await this.prepareSubmission();
         await firstValueFrom(

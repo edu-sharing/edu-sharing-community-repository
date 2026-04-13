@@ -70,6 +70,11 @@ mat-tab-group {
         display: flex;
         justify-content: center;
         align-items: center;
+        > div {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
     }
 }
 .no-submission {
