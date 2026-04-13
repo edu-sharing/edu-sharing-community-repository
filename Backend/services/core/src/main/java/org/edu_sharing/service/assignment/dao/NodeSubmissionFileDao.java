@@ -3,7 +3,9 @@ package org.edu_sharing.service.assignment.dao;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.service.cmr.repository.*;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -282,7 +284,7 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
 
 
         Node correctionNode = null;
-        if (AssignmentUtil.isAssignmentCoordinator(permissionService, getCorrectionNodeId()) || submissionDao.isReturned()) {
+        if (AssignmentUtil.isAssignmentCoordinator(permissionService, getNodeId()) || submissionDao.isReturned()) {
             correctionNode = this.correctionNode.get();
         }
 
