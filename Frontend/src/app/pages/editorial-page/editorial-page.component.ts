@@ -389,7 +389,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             ),
             this.searchEvent$.pipe(
                 startWith({
-                    searchString: this.searchFieldService.getCurrentInstance()?.getSearchString(),
+                    searchString: this.queryParams$.value.q || '',
                     cleared: false,
                 }),
                 distinctUntilChanged(),
@@ -482,6 +482,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         this.prepareOptions();
         this.dataSource.isLoading = true;
         this.dataSource.reset();
+        this.clearSelection();
 
         this.nodeEntriesRef?.setPaginator(pagination);
         // wait for mds and delay to make sure the facets are registered
