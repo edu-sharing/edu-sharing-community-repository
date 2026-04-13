@@ -1889,6 +1889,26 @@
         ]
         }}
       </basequery>
+      <property name="ngsearchword" asFilter="false">
+        <statement>
+          {"bool":{"should":[
+          {
+          "simple_query_string": {
+          "query": "${valueRaw}*",
+          "flags": "OR|AND|PREFIX|PHRASE|WHITESPACE",
+          "fields": [
+          "properties.cm:name^2",
+          "properties.cclom:title^5",
+          "properties.cclom:general_description^2"
+          ],
+          "default_operator": "and"
+          }
+          },
+          {"wildcard":{"nodeRef.id": {"value":"*${value}*", "case_insensitive": true }}}
+          ]
+          }}
+        </statement>
+      </property>
       <property name="virtual:assignmentType">
         <statement value="created">
           {"match": {"properties.cm:creator.keyword": "${user.cm:userName}" }},
