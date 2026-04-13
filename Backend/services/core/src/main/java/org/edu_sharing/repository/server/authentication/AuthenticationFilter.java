@@ -134,7 +134,7 @@ public class AuthenticationFilter implements jakarta.servlet.Filter {
                         AuthenticationToolAPI.getInstance().authenticateUser(userName, ((HttpServletRequest) req).getSession(), CCConstants.AUTH_TYPE_OAUTH);
                     }
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    log.error(ex.getMessage(), ex);
                     httpRes.sendError(HttpServletResponse.SC_FORBIDDEN, ex.getMessage());
                     return;
                 }

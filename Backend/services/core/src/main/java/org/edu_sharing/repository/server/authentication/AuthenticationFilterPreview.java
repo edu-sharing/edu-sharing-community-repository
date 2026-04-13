@@ -1,19 +1,9 @@
 package org.edu_sharing.repository.server.authentication;
 
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.security.GeneralSecurityException;
-import java.util.HashMap;
-import java.util.Map;
-
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.FilterConfig;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
+import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
+import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.AuthenticationService;
@@ -30,27 +20,36 @@ import org.edu_sharing.repository.server.tools.AuthenticatorRemoteRepository;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.restservices.ApiAuthenticationFilter;
-import org.edu_sharing.service.authentication.oauth2.TokenService;
-import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.usage.Usage;
-import org.edu_sharing.service.usage.Usage2Service;
 import org.edu_sharing.service.usage.Usage2Exception;
+import org.edu_sharing.service.usage.Usage2Service;
+import org.edu_sharing.spring.security.server.oauth2.OAuth2TokenService;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 
-import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.security.GeneralSecurityException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AuthenticationFilterPreview implements jakarta.servlet.Filter {
 
 	Logger logger = Logger.getLogger(AuthenticationFilterPreview.class);
-	private TokenService tokenService;
+
+    private OAuth2TokenService oAuth2TokenService;
 	
 	@Override
 	public void init(FilterConfig config) throws ServletException {
 		ApplicationContext eduApplicationContext = 
 				org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
 
-		tokenService = (TokenService) eduApplicationContext.getBean("oauthTokenService");		
+        try {
+            oAuth2TokenService = eduApplicationContext.getBean(OAuth2TokenService.class);
+        }catch (NoSuchBeanDefinitionException e){
+            logger.info("Oauth2TokenService not found");
+        }
 	}
 	
 	
@@ -77,7 +76,10 @@ public class AuthenticationFilterPreview implements jakarta.servlet.Filter {
 		
 		String repoId = req.getParameter("repoId");
 		
-		String accessToken = req.getParameter(CCConstants.REQUEST_PARAM_ACCESSTOKEN);
+		String accessToken = null;
+        if(oAuth2TokenService != null) {
+            accessToken = oAuth2TokenService.getAccessToken((HttpServletRequest) req);
+        }
 
 		String authHdr = httpServletRequest.getHeader("Authorization");
 
@@ -175,27 +177,18 @@ public class AuthenticationFilterPreview implements jakarta.servlet.Filter {
             //invalidateTicket = true;
 			Context.getCurrentInstance().addSingleUseNode(nodeId);
 		}
-		else if (accessToken != null && !accessToken.trim().equals("")) {
+		else if (accessToken != null && !accessToken.trim().isEmpty()) {
 			//oAuth
-			try {
-				
-				Token token = tokenService.getToken(accessToken);
-				
-				if (token != null) {
-					
-					//validate and set current user
-					authTool.storeAuthInfoInSession(
-							token.getUsername(), 
-							token.getTicket(),
-							CCConstants.AUTH_TYPE_OAUTH,
-							httpServletRequest.getSession());						
-				}			
-				
-			} catch (Exception ex) {
-				ex.printStackTrace();
-				httpServletResponse.sendError(HttpServletResponse.SC_FORBIDDEN,ex.getMessage());
-				return;
-			}				
+            try {
+                String userName = oAuth2TokenService.extractUsername(accessToken);
+                if(userName != null) {
+                    AuthenticationToolAPI.getInstance().authenticateUser(userName, ((HttpServletRequest) req).getSession(), CCConstants.AUTH_TYPE_OAUTH);
+                }
+            } catch (Exception ex) {
+                logger.error(ex.getMessage(), ex);
+                httpServletResponse.sendError(HttpServletResponse.SC_FORBIDDEN, ex.getMessage());
+                return;
+            }
 			
 		} else if (authHdr!=null && authHdr.length() > 5 && authHdr.substring(0, 5).equalsIgnoreCase("BASIC")) {
 			try {
