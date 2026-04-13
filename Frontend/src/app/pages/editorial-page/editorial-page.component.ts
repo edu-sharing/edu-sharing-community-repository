@@ -67,7 +67,14 @@ import {
 } from '../../main/navigation/search-field/search-field.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EditorialPageService } from './editorial-page.service';
-import { debounceTime, delay, distinctUntilChanged, first, startWith } from 'rxjs/operators';
+import {
+    debounceTime,
+    delay,
+    distinctUntilChanged,
+    first,
+    startWith,
+    takeUntil,
+} from 'rxjs/operators';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { SelectionChange, SelectionModel } from '@angular/cdk/collections';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
@@ -386,15 +393,26 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         combineLatest([
             this.queryParams$.pipe(startWith(this.queryParams$.value)),
             this.params$.pipe(startWith(this.params$.value)),
+            this.editorialPageService.observeTabs().pipe(filter((t) => t?.length > 0)),
         ])
-            .pipe(debounceTime(10))
+            .pipe(takeUntil(this.destroyed$), debounceTime(10))
             .subscribe(([params, primary]) => {
                 void this.processCurrentValues(params, primary);
             });
+
+        // when primary mode change -> trigger a full reinit
+        this.params$
+            .pipe(
+                startWith(this.params$.value),
+                debounceTime(0),
+                distinctUntilChanged((a, b) => a?.primaryMode !== b?.primaryMode),
+            )
+            .subscribe(() => this.init$.next(false));
         combineLatest([
             this.init$.pipe(
+                takeUntil(this.destroyed$),
+                distinctUntilChanged(),
                 filter((i) => i),
-                first(),
             ),
             this.searchEvent$.pipe(
                 startWith({
@@ -410,6 +428,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             this.searchValues$.pipe(distinctUntilChanged((a, b) => Helper.objectEquals(a, b))),
         ])
             .pipe(
+                takeUntil(this.destroyed$),
                 filter(([init]) => init),
                 distinctUntilChanged(),
                 debounceTime(50),
