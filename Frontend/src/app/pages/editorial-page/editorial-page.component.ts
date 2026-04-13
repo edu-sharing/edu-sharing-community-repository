@@ -56,6 +56,7 @@ import {
     OptionItemToggle,
     Scope,
     SearchHelperService,
+    ToolpermissionPipe,
     UIService,
     Values,
 } from 'ngx-edu-sharing-ui';
@@ -367,7 +368,15 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                         this.TabWidgetAssignment,
                     );
                 } else {
-                    this.editorialPageService.registerTabsFromWidget(widget);
+                    const canCreate = await new ToolpermissionPipe(
+                        this.authenticationService,
+                    ).transform(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS);
+                    // hide created tab if user can not create assignments
+                    this.editorialPageService.registerTabs(
+                        this.editorialPageService
+                            .mapWidgetToTabs(widget)
+                            .filter((t) => canCreate || t.id !== 'created'),
+                    );
                 }
             }
         });

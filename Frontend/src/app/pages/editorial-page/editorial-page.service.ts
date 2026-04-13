@@ -41,17 +41,19 @@ export class EditorialPageService {
     registerTabs(tab: EditorialTab[]) {
         this.tabs$.next(tab);
     }
-    registerTabsFromWidget(widget: MdsWidget) {
+    registerTabsFromWidget(widget: MdsWidget): EditorialTab[] {
+        this.tabs$.next(this.mapWidgetToTabs(widget));
+        return this.tabs$.value;
+    }
+    mapWidgetToTabs(widget: MdsWidget) {
         this.tabWidgetId$.next(widget.id);
-        this.tabs$.next(
-            widget.values.map((v) => {
-                return {
-                    id: v.id,
-                    caption: v.caption,
-                    icon: v.icon,
-                };
-            }),
-        );
+        return widget.values.map((v) => {
+            return {
+                id: v.id,
+                caption: v.caption,
+                icon: v.icon,
+            };
+        });
     }
     getVirtualNodes(mode: PrimaryMode) {
         return this.virtualNodes$.value[mode];
