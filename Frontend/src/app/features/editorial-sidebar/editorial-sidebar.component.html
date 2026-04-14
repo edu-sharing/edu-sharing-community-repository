@@ -38,6 +38,10 @@
           [data]="$any(enabledOption().optionConfig)"
           (dataChange)="editorialSidebarService.patchOptionConfig($event)"
         ></es-submission-sidebar>
+        <es-assignment-sidebar
+          *ngIf="option === 'VIEW_ASSIGNMENT'"
+          [data]="$any(enabledOption().optionConfig)"
+        ></es-assignment-sidebar>
         <es-preview-sidebar
           *ngIf="option === 'PREVIEW'"
           [node]="$any(editorialSidebarService.nodes())?.[0]"

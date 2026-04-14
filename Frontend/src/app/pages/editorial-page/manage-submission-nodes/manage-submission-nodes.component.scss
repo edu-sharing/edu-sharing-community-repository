@@ -2,10 +2,7 @@
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 @use '../manage-assignment-nodes/manage-assignment-nodes.component' as man;
 
-.empty {
-    color: var(--textLight);
-}
-.node-list {
+@mixin nodeList() {
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -26,4 +23,10 @@
             font-weight: bold;
         }
     }
+}
+.empty {
+    color: var(--textLight);
+}
+.node-list {
+    @include nodeList();
 }

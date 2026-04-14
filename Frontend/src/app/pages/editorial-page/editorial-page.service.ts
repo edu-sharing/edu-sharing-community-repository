@@ -9,9 +9,17 @@ export type EditorialTab = {
     caption?: string;
     icon: string;
 };
+export type CloseConfig = {
+    show: boolean;
+    callback?: () => void;
+};
 @Injectable()
 export class EditorialPageService {
     readonly displayType = signal(NodeEntriesDisplayType.Table);
+    /**
+     * info for close button state (next to breadcrumbs)
+     */
+    readonly close = signal<CloseConfig>(null);
     private virtualNodes$ = new BehaviorSubject<{ [key: string]: NodeEntriesDataType[] }>({});
     private tabs$ = new BehaviorSubject<EditorialTab[]>(null);
     private tabWidgetId$ = new BehaviorSubject<string>(null);

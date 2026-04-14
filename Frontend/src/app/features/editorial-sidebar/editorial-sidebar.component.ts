@@ -31,7 +31,10 @@ import { trigger } from '@angular/animations';
 import { NodesSelectorConfig } from '../../pages/editorial-page/nodes-selector/nodes-selector.component';
 import { CardDialogRef } from '../dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../dialogs/dialogs.service';
-import { SubmissionConfig } from '../../pages/editorial-page/submission-sidebar/submission-sidebar.component';
+import {
+    AssignmentConfig,
+    SubmissionConfig,
+} from '../../pages/editorial-page/submission-sidebar/submission-sidebar.component';
 
 export type PrimaryMode = 'activity' | 'share' | 'assignment' | 'suggestions';
 export type MainComponentType = 'manageAssignment' | 'assignmentSubmission' | 'submitAssignment';
@@ -42,16 +45,21 @@ export type EditorialSidebarOption =
     | 'SHARE_QR'
     | 'PREVIEW'
     | 'SORT_INTO'
-    | 'MANAGE_SUBMISSION';
+    | 'MANAGE_SUBMISSION'
+    | 'VIEW_ASSIGNMENT';
 
 /**
  * list of options that support multi selection
  */
 export const MULTISELECT_OPTIONS: EditorialSidebarOption[] = ['SORT_INTO'];
 
-export type OptionConfig = NodesSelectorConfig | SubmissionConfig;
+export type OptionConfig = NodesSelectorConfig | SubmissionConfig | AssignmentConfig;
 export type OptionState<T extends OptionConfig> = {
     option: EditorialSidebarOption;
+    /**
+     * custom title to show in sidebar
+     */
+    title?: string;
     /**
      * any valid option config, varies for the selected option
      */
@@ -86,7 +94,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     private readonly destroyed = new Subject<void>();
     readonly title = computed(() =>
         this.enabledOption()
-            ? 'EDITORIAL.OPTIONS.' + this.enabledOption().option
+            ? this.enabledOption().title || 'EDITORIAL.OPTIONS.' + this.enabledOption().option
             : 'EDITORIAL.SIDEBAR.TITLE_' + this.primaryMode()?.toUpperCase(),
     );
     options = signal<OptionItem[]>(null);

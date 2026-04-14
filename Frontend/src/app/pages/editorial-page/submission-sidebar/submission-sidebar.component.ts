@@ -27,6 +27,11 @@ import { TranslateService } from '@ngx-translate/core';
 import { PlatformLocation } from '@angular/common';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 
+export type AssignmentConfig = {
+    submission: SubmissionWithAssignment;
+    submissionFiles: SubmissionFile[];
+    selected: SubmissionFile;
+};
 export type SubmissionConfig = {
     submission: SubmissionWithAssignment;
     /**

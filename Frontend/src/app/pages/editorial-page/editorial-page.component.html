@@ -63,6 +63,14 @@
         <es-editorial-breadcrumb
           [class.display-none]="(observer.width$ | async) < 400"
         ></es-editorial-breadcrumb>
+        <button
+          class="close"
+          mat-icon-button
+          (click)="editorialPageService.close().callback()"
+          *ngIf="editorialPageService.close()?.show"
+        >
+          <i esIcon="close"></i>
+        </button>
       </div>
       <ng-container *ngIf="mainComponent$ | async as component">
         @switch (component) { @case ('manageAssignment') {

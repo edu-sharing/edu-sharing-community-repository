@@ -18,7 +18,7 @@ mat-sidenav-container {
         @include mixins.materialShadowSmall();
         .top-area {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             justify-content: space-between;
             min-height: 68px;
             padding-bottom: 20px;

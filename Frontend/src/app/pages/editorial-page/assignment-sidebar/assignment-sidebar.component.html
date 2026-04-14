@@ -1,0 +1,49 @@
+<div class="details">
+  <label for="summary">{{ 'EDITORIAL.ASSIGNMENT.FORM.SUMMARY' | translate }}</label>
+  <div id="summary" class="summary" [innerHTML]="assignment().summary"></div>
+  <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_STATE' | translate }}</label>
+  <div class="state">
+    <es-list-node-assignment
+      [node]="submission()"
+      [item]="submissionStatus"
+    ></es-list-node-assignment>
+    <es-list-node-assignment
+      [node]="submission()"
+      [item]="validationStatus"
+    ></es-list-node-assignment>
+  </div>
+  <ng-container *ngIf="submission().submissionDate">
+    <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_DATE' | translate }}</label>
+    <div class="date">
+      <es-list-node-assignment
+        [node]="submission()"
+        [item]="submissionDate"
+      ></es-list-node-assignment>
+    </div>
+  </ng-container>
+  <div class="block feedback" *ngIf="submission().validationStatus === 'FINISHED'" #feedback>
+    <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.FEEDBACK.TITLE' | translate }}</label>
+    <div>
+      <div *ngIf="submission().feedback?.trim() as feedback">
+        <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.FEEDBACK.FEEDBACK' | translate }}</label>
+        <div [innerHTML]="feedback"></div>
+      </div>
+      <div *ngIf="correctedFiles()?.length > 0">
+        <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.FEEDBACK.CORRECTED' | translate }}</label>
+
+        <div class="node-list">
+          @for (item of correctedFiles(); track item) {
+          <div
+            tabindex="0"
+            (click)="setCorrectedFile(item)"
+            [class.selected]="selected()?.correction.ref.id === item.ref.id"
+          >
+            <es-node-type-badge [node]="item"></es-node-type-badge>
+            <div class="title">{{ item | nodeTitle }}</div>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

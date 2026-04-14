@@ -1,4 +1,30 @@
-<mat-tab-group [mat-stretch-tabs]="true">
+<ng-container *ngIf="selectedSubmissionFileUrl()">
+  <ngx-extended-pdf-viewer
+    [src]="selectedSubmissionFileUrl()"
+    [height]="'auto'"
+    [language]="language"
+    [textLayer]="true"
+    [customToolbar]="additionalButtons"
+    [zoom]="'page-fit'"
+  ></ngx-extended-pdf-viewer>
+</ng-container>
+<ng-template #additionalButtons>
+  <div
+    id="toolbarViewer"
+    esBorderBoxObserver
+    #observer="borderBoxObserver"
+    [class.medium]="(observer.width$ | async) < 800"
+    [class.small]="(observer.width$ | async) < 600"
+  >
+    <div id="toolbarViewerLeft">
+      <pdf-toggle-sidebar></pdf-toggle-sidebar>
+      <div class="toolbarButtonSpacer"></div>
+      <pdf-paging-area></pdf-paging-area>
+    </div>
+    <pdf-zoom-toolbar></pdf-zoom-toolbar>
+  </div>
+</ng-template>
+<mat-tab-group [mat-stretch-tabs]="true" *ngIf="!selectedSubmissionFileUrl()">
   <mat-tab>
     <ng-template mat-tab-label>
       <i esIcon="inbox"></i>
@@ -54,14 +80,14 @@
             ></es-node-entries-wrapper>
           </div>
         </div>
-        <div class="block feedback" *ngIf="submission().validationStatus === 'FINISHED'">
+        <div class="block feedback" *ngIf="submission().validationStatus === 'FINISHED'" #feedback>
           <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.FEEDBACK.TITLE' | translate }}</label>
           <div>
             <div *ngIf="submission().feedback?.trim() as feedback">
               <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.FEEDBACK.FEEDBACK' | translate }}</label>
               <div [innerHTML]="feedback"></div>
             </div>
-            <div *ngIf="submittableFilesAll.getTotal() > 0">
+            <div *ngIf="correctedFiles.getTotal() > 0">
               <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.FEEDBACK.CORRECTED' | translate }}</label>
               <es-node-entries-wrapper
                 [displayType]="NodeEntriesDisplayType.Grid"
@@ -69,6 +95,7 @@
                 [dragDrop]="{ dragAllowed: false }"
                 [initConfig]="correctionConfig"
                 [elementInteractionType]="InteractionType.Emitter"
+                (clickItem)="selectSubmissionFile($event.element)"
                 [dataSource]="correctedFiles"
                 [columns]="columns"
               ></es-node-entries-wrapper>

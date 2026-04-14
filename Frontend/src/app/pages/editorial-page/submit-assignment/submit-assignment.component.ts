@@ -1,6 +1,8 @@
 import {
     Component,
     computed,
+    effect,
+    ElementRef,
     OnDestroy,
     QueryList,
     signal,
@@ -35,8 +37,11 @@ import {
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
     NodeHelperService,
+    NodeTitlePipe,
     OptionData,
     OptionItem,
+    RepoUrlService,
+    TranslationsService,
 } from 'ngx-edu-sharing-ui';
 import { UIService } from '../../../core-module/rest/services/ui.service';
 import { OptionsHelperService } from '../../../services/options-helper.service';
@@ -51,6 +56,10 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { Toast, ToastType } from '../../../services/toast';
 import { CommentsListComponent } from '../../../features/mds/mds-editor/widgets/mds-editor-widget-comments/comments-list/comments-list.component';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
+import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { EditorialPageService } from '../editorial-page.service';
+import { AssignmentConfig } from '../submission-sidebar/submission-sidebar.component';
 
 /**
  * submits an individual assignment (for student)
@@ -59,9 +68,16 @@ import { EditorialSidebarService } from '../../../features/editorial-sidebar/edi
     selector: 'es-submit-assignment',
     templateUrl: 'submit-assignment.component.html',
     styleUrls: ['submit-assignment.component.scss'],
-    imports: [SharedModule, TranslateModule, EditorComponent, CommentsListComponent],
+    imports: [
+        SharedModule,
+        TranslateModule,
+        EditorComponent,
+        CommentsListComponent,
+        NgxExtendedPdfViewerModule,
+    ],
 })
 export class SubmitAssignmentComponent implements OnDestroy {
+    @ViewChild('feedback') feedbackRef: ElementRef;
     @ViewChild(CommentsListComponent) commentsRef: CommentsListComponent;
     @ViewChildren(NodeEntriesWrapperComponent) nodeEntriesRef: QueryList<
         NodeEntriesWrapperComponent<Node>
@@ -122,6 +138,8 @@ export class SubmitAssignmentComponent implements OnDestroy {
                 (f) => f.documentRole === 'SUPPLEMENTARY' || this.hasSubmissionFor(f.referNode),
             ),
     );
+    selectedSubmissionFile = signal<Node>(null);
+    selectedSubmissionFileUrl = signal<string>(undefined);
     submittableFiles = new NodeDataSource<Node>();
     /**
      * all files including user attached
@@ -129,12 +147,14 @@ export class SubmitAssignmentComponent implements OnDestroy {
     submittableFilesAll = new NodeDataSource<Node>();
     correctedFiles = new NodeDataSource<Node>();
     supplementaryFiles = new NodeDataSource<Node>();
+    language: string = 'de-DE';
 
     constructor(
         private route: ActivatedRoute,
         private router: Router,
         private editorialBreadcrumbService: EditorialBreadcrumbService,
         private editorialSidebarService: EditorialSidebarService,
+        private editorialPageService: EditorialPageService,
         private nodeHelperService: NodeHelperService,
         private translateService: TranslateService,
         private platformLocation: PlatformLocation,
@@ -142,12 +162,29 @@ export class SubmitAssignmentComponent implements OnDestroy {
         private commentV1Service: CommentV1Service,
         private assignmentService: AssignmentV1Service,
         private dialogs: DialogsService,
+        private translationsService: TranslationsService,
         private toast: Toast,
+        private repoUrlService: RepoUrlService,
         private optionsHelperService: OptionsHelperService,
         private formBuilder: FormBuilder,
         private uiService: UIService,
     ) {
         this.initOptions();
+        this.language = this.translationsService.getLocale();
+        effect(() => {
+            const file = this.selectedSubmissionFile();
+            this.selectedSubmissionFileUrl.set(undefined);
+            if (!file?.downloadUrl) {
+                this.selectedSubmissionFileUrl.set(null);
+            } else {
+                void this.repoUrlService
+                    .getRepoUrl(file.downloadUrl, file)
+                    .then((url) => this.selectedSubmissionFileUrl.set(url));
+            }
+        });
+        toObservable(this.selectedSubmissionFileUrl)
+            .pipe(takeUntil(this.destroyed$), distinctUntilChanged())
+            .subscribe(() => this.updateBreadcrumbs());
         this.editorialSidebarService.applyNodeEmitted
             .pipe(takeUntil(this.destroyed$))
             .subscribe(async ({ nodes }) => {
@@ -223,9 +260,33 @@ export class SubmitAssignmentComponent implements OnDestroy {
                 this.supplementaryFiles.setData(
                     files.filter((f) => f.documentRole === 'SUPPLEMENTARY').map((n) => n.referNode),
                 );
-                this.editorialBreadcrumbService.path.set([{ title: assignment.title }]);
+                this.updateBreadcrumbs();
             });
     }
+
+    private updateBreadcrumbs() {
+        if (this.selectedSubmissionFileUrl()) {
+            this.editorialPageService.close.set({
+                show: true,
+                callback: () => this.selectedSubmissionFile.set(null),
+            });
+            this.editorialBreadcrumbService.path.set([
+                {
+                    title: this.assignment()?.title,
+                    callback: () => this.selectedSubmissionFile.set(null),
+                },
+                {
+                    title: new NodeTitlePipe(this.translateService).transform(
+                        this.selectedSubmissionFile(),
+                    ),
+                },
+            ]);
+        } else {
+            this.editorialBreadcrumbService.path.set([{ title: this.assignment()?.title }]);
+            this.editorialPageService.close.set({ show: false });
+        }
+    }
+
     ngOnDestroy(): void {
         this.destroyed$.next();
         this.destroyed$.complete();
@@ -375,7 +436,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
         this.submittableFilesAll.setData(nodes);
         this.correctedFiles.setData(
             this.submissionFiles()
-                .filter((s) => s.validationStatus !== 'NOT_STARTED' && s.correction)
+                .filter((s) => s.validationStatus !== 'NOT_STARTED' && s.correction?.downloadUrl)
                 .map((s) => {
                     return {
                         ...s.correction,
@@ -496,5 +557,32 @@ export class SubmitAssignmentComponent implements OnDestroy {
             );
         }
     }
-    scrollToFeedback() {}
+    scrollToFeedback() {
+        this.uiService.scrollSmooth(this.feedbackRef.nativeElement.getBoundingClientRect().top);
+    }
+
+    selectSubmissionFile(element: Node) {
+        console.log(
+            this.submissionFiles().find((file) => file.correction?.ref.id === element.ref.id),
+            element,
+        );
+        if (!UIService.isMobileWidth()) {
+            this.editorialSidebarService.showOption({
+                option: 'VIEW_ASSIGNMENT',
+                trap: true,
+                title: this.assignment().title,
+                optionConfig: {
+                    submission: {
+                        ...this.submission(),
+                        assignment: this.assignment(),
+                    },
+                    selected: this.submissionFiles().find(
+                        (file) => file.correction?.ref.id === element.ref.id,
+                    ),
+                    submissionFiles: this.submissionFiles(),
+                } as AssignmentConfig,
+            });
+        }
+        this.selectedSubmissionFile.set(element);
+    }
 }
