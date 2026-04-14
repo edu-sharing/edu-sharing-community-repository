@@ -1,14 +1,17 @@
 package org.edu_sharing.service.nodeservice;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 public interface PropertiesGetInterceptor {
-
+    @Getter
+    @Setter
     class PropertiesContext {
         private NodeRef nodeRef;
         /**
@@ -25,63 +28,24 @@ public interface PropertiesGetInterceptor {
          */
         Map<String, Boolean> permissions;
         /**
+         * custom payload for interceptors
+         * can be used for set interceptors which may run before and after alfresco props set to keep their own state
+         */
+        Map<String, Object> customPayload = new HashMap<>();
+        /**
          * the context source of the node
          * this can be useful because you might don't want to do "expensive" taks e.g. in the search context
          */
         private CallSourceHelper.CallSource source;
         /**
+         * the stage (before or after alfresco properties have been set - only for set interceptors)
+         */
+        private PropertiesSetInterceptor.ContextStage stage;
+        /**
          * The elasticsearch source map
          * Hint: Only Non-Null if data was fetched via elasticsearch!
          */
         private Map<String, Object> elasticsearchSource;
-
-        public NodeRef getNodeRef() {
-            return nodeRef;
-        }
-
-        public void setNodeRef(NodeRef nodeRef) {
-            this.nodeRef = nodeRef;
-        }
-
-        public Map<String, Object> getProperties() {
-            return properties;
-        }
-
-        public void setProperties(Map<String, Object> properties) {
-            this.properties = properties;
-        }
-
-        public Collection<String> getAspects() {
-            return aspects;
-        }
-
-        public void setAspects(Collection<String> aspects) {
-            this.aspects = aspects;
-        }
-
-        public CallSourceHelper.CallSource getSource() {
-            return source;
-        }
-
-        public void setSource(CallSourceHelper.CallSource source) {
-            this.source = source;
-        }
-
-        public void setElasticsearchSource(Map<String, Object> elasticsearchSource) {
-            this.elasticsearchSource = elasticsearchSource;
-        }
-
-        public Map<String, Object> getElasticsearchSource() {
-            return elasticsearchSource;
-        }
-
-        public Map<String, Boolean> getPermissions() {
-            return permissions;
-        }
-
-        public void setPermissions(Map<String, Boolean> permissions) {
-            this.permissions = permissions;
-        }
 
         /**
          * checks if a given permissions is available for the node

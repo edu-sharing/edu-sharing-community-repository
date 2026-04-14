@@ -2,4 +2,7 @@
   *ngIf="nodeId() && version()"
   [nodeId]="nodeId()"
   [version]="version()"
+  [showChildobjects]="true"
+  [childId]="childId()"
+  (childIdChange)="setChildId($event)"
 ></es-render-wrapper-component>

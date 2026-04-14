@@ -1,22 +1,19 @@
 package org.edu_sharing.restservices.shared;
 
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-
-import java.io.Serializable;
-import java.util.Map;
-
 import lombok.Data;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.PreviewServlet;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
+
+import java.io.Serializable;
+import java.util.Map;
 
 @Data
 public class Preview implements Serializable {
@@ -47,21 +44,15 @@ public class Preview implements Serializable {
       if(detail != null) {
         setGenerated(!PreviewServlet.PreviewDetail.TYPE_USERDEFINED.equals(detail.getType()));
         setType(detail.getType());
+        setIcon(detail.isIcon());
       }
     } catch(Throwable ignored){
       // may fails for remote repos
     }
     setUrl(preview.getUrl());
-    if(CCConstants.CCM_TYPE_IO.equals(type) || CCConstants.CCM_TYPE_IO.equals(CCConstants.getValidGlobalName(type))) {
-      if(detail != null) {
-        setIcon(detail.getType().equals(PreviewServlet.PreviewDetail.TYPE_DEFAULT));
-      }
-    } else {
-      setIcon(!(nodeProps.containsKey(CCConstants.CCM_PROP_MAP_ICON) || nodeProps.containsKey(CCConstants.CM_ASSOC_THUMBNAILS)));
-    }
   }
 
-  public Preview(String storeProtocol, String storeIdentifier, String nodeId, NodeRef.Preview previewData) {
+  public Preview(String storeProtocol, String storeIdentifier, String nodeId, String nodeType, NodeRef.Preview previewData) {
     setUrl(NodeServiceFactory.getLocalService().getPreviewUrl(
             storeProtocol,
             storeIdentifier,
@@ -71,12 +62,16 @@ public class Preview implements Serializable {
     if(previewData.getIcon() != null) {
       setIcon(previewData.getIcon());
     } else {
-      Logger.getLogger(Preview.class).warn("no preview icon info in elastic index for node " + nodeId);
+        if(!nodeType.equals(CCConstants.CCM_TYPE_MAP)) {
+            Logger.getLogger(Preview.class).warn("no preview icon info in elastic index for node " + nodeId);
+        }
     }
     if(previewData.getType() != null) {
       setType(previewData.getType());
     } else {
-      Logger.getLogger(Preview.class).warn("no preview type info in elastic index for node " + nodeId);
+        if(!nodeType.equals(CCConstants.CCM_TYPE_MAP)) {
+            Logger.getLogger(Preview.class).warn("no preview type info in elastic index for node " + nodeId);
+        }
     }
     setMimetype(previewData.getMimetype());
     setData(previewData.getData());

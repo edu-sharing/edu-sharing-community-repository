@@ -338,7 +338,7 @@ public class MetadataTemplateRenderer {
 						if (renderingMode.equals(RenderingMode.HTML)) {
 							widgetHtml
 									.append(widget.isMultivalue() ? "<li " : "<div ")
-									.append("class='mdsValue' data-value-key='" + rawValue + "'>");
+									.append("class='mdsValue' data-value-key='" + ("license".equals(widget.getType()) ? rawValue : value) + "'>");
 							if (widget.getIcon() != null) {
 								widgetHtml.append(insertIcon(widget.getIcon()));
 							}

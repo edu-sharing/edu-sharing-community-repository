@@ -1,6 +1,22 @@
 export class RestConstants {
     public static USERHOME = '-userhome-';
+    // use not the maximum int value to prevent overflows in repository
+    public static COUNT_UNLIMITED = 1247483647;
 
+    public static DEFAULT_COLLECTION_COLORS: string[] = [
+        '#975B5D',
+        '#692426',
+        '#E6B247',
+        '#A89B39',
+        '#699761',
+        '#32662A',
+        '#60998F',
+        '#29685C',
+        '#759CB7',
+        '#537997',
+        '#976097',
+        '#692869',
+    ];
     public static COLLECTIONSCOPE_MY = 'MY';
     public static COLLECTIONSCOPE_ORGA = 'EDU_GROUPS';
     public static COLLECTIONSCOPE_ALL = 'EDU_ALL';
@@ -30,6 +46,16 @@ export class RestConstants {
     public static CCM_ASPECT_IO_REFERENCE = 'ccm:collection_io_reference';
     public static CCM_ASPECT_PUBLISHED = 'ccm:published';
     public static CCM_ASPECT_REVOKED = 'ccm:revoked';
+    public static CCM_ASPECT_TOOL_DEFINITION = 'ccm:tool_definition';
+    public static CCM_ASPECT_TOOL_OBJECT = 'ccm:tool_object';
+    public static CCM_ASPECT_TOOL_INSTANCE_LINK = 'ccm:tool_instance_link';
+    public static CCM_ASPECT_METADATA_PRESETTING = 'ccm:metadataPresetting';
+    public static CCM_ASPECT_MAP_REF = 'ccm:map_ref';
+    public static CCM_ASPECT_LOMREPLICATION = 'ccm:lomreplication';
+    public static CCM_ASPECT_CCLOM_GENERAL = 'cclom:general';
+    public static CCM_ASPECT_IO_CHILDOBJECT = 'ccm:io_childobject';
+    public static CCM_ASPECT_REMOTEREPOSITORY = 'ccm:remoterepository';
+    public static CCM_ASSOC_CHILDIO = 'ccm:childio';
 
     public static TOOLPERMISSION_INVITE = 'TOOLPERMISSION_INVITE';
     public static TOOLPERMISSION_INVITE_TIMEBASED = 'TOOLPERMISSION_INVITE_TIMEBASED';
@@ -85,7 +111,8 @@ export class RestConstants {
     public static TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS =
         'TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS';
     public static CCM_PROP_IMPORT_BLOCKED = 'ccm:importblocked';
-
+    public static CCM_PROP_PAGE_CONFIG_REF: string = 'ccm:page_config_ref';
+    public static CCM_PROP_PAGE_CONFIG_PROPAGATE_REF: string = 'ccm:page_config_propagate_ref';
     public static CCM_PROP_LICENSE = 'ccm:commonlicense_key';
     public static CCM_PROP_WF_RECEIVER = 'ccm:wf_receiver';
     public static CCM_PROP_WF_STATUS = 'ccm:wf_status';
@@ -124,6 +151,7 @@ export class RestConstants {
     public static CCM_PROP_CCRESSOURCEVERSION = 'ccm:ccressourceversion';
     public static CCM_PROP_PUBLISHED_ORIGINAL = 'ccm:published_original';
     public static CCM_PROP_MAPTYPE = 'ccm:maptype';
+    public static CCM_PROP_CHILDOBJECT_ORDER = 'ccm:childobject_order';
     public static NODE_VERSION_CURRENT = '-1';
     public static ACCESS_ADD_CHILDREN = 'AddChildren';
     public static ACCESS_WRITE = 'Write';

@@ -8,6 +8,7 @@ import org.alfresco.query.PagingRequest;
 import org.alfresco.query.PagingResults;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
+import org.alfresco.repo.security.authentication.TicketComponent;
 import org.alfresco.repo.security.authority.AuthorityInfo;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
@@ -25,6 +26,7 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.tika.utils.StringUtils;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.rpc.EduGroup;
@@ -49,6 +51,8 @@ import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
+import static org.edu_sharing.restservices.PersonDao.ME;
+
 
 @Slf4j
 @Component
@@ -71,6 +75,7 @@ public class AuthorityServiceImpl implements AuthorityService {
     private final PersonService personService;
     private final org.alfresco.service.cmr.security.MutableAuthenticationService authenticationService;
     private final org.alfresco.repo.security.authentication.RepositoryAuthenticationDao authenticationDao;
+    private final TicketComponent ticketComponent;
 
     /**
      * Returns a property for a certain authority (it will fetch the coressponding node and load the property)
@@ -983,5 +988,26 @@ public class AuthorityServiceImpl implements AuthorityService {
                 }, AuthenticationUtil.getFullyAuthenticatedUser()), false);
 
         return new QRCode2Fa(oneTimeTokenService.generateQRCode(username, secret), secret);
+    }
+
+    @Override
+    public void inValidateTickets(String user){
+        String fullyAuthenticatedUser = AuthenticationUtil.getFullyAuthenticatedUser();
+        if (ME.equals(user)) {
+            user = fullyAuthenticatedUser;
+        }
+
+        boolean isAdmin = AuthorityServiceHelper.isAdmin();
+        if(!user.equals(fullyAuthenticatedUser)){
+            if(!isAdmin){
+                throw new NotAnAdminException();
+            }
+        }
+
+        if(!isAdmin && (guestService.isGuestUser(user) || CCConstants.PROXY_USER.equals(user))){
+            throw new GuestCagePolicy.GuestPermissionDeniedException("guest has no permissions to do that");
+        }
+
+        ticketComponent.invalidateTicketByUser(user);
     }
 }

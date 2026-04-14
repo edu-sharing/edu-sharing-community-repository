@@ -6,6 +6,8 @@ import {
     Node,
     NodeListErrorResponses,
     NodeListService,
+    NodeService,
+    ROOT,
 } from 'ngx-edu-sharing-api';
 import {
     ClipboardObject,
@@ -29,6 +31,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import {
     BehaviorSubject,
+    firstValueFrom,
     forkJoin,
     forkJoin as observableForkJoin,
     Observable,
@@ -113,7 +116,8 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         private ngZone: NgZone,
         private nodeHelper: NodeHelperService,
         private nodeList: NodeListService,
-        private nodeService: RestNodeService,
+        private nodeService: NodeService,
+        private nodeServiceLegacy: RestNodeService,
         private route: ActivatedRoute,
         private router: Router,
         private storage: TemporaryStorageService,
@@ -177,7 +181,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         const target = data.parent.ref.id;
         const source = clip.nodes[nodes.length].ref.id;
         if (clip.copy) {
-            this.nodeService.copyNode(target, source).subscribe(
+            this.nodeServiceLegacy.copyNode(target, source).subscribe(
                 (nodeData: NodeWrapper) =>
                     this.pasteNode(components, data, addVirtualNodes, nodes.concat(nodeData.node)),
                 (error: any) => {
@@ -190,7 +194,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 },
             );
         } else {
-            this.nodeService.moveNode(target, source).subscribe(
+            this.nodeServiceLegacy.moveNode(target, source).subscribe(
                 (nodeData: NodeWrapper) =>
                     this.pasteNode(components, data, true, nodes.concat(nodeData.node)),
                 (error: any) => {
@@ -540,7 +544,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                     nodes = (
                         await forkJoin(
                             nodes.map((n) =>
-                                this.nodeService.getNodeMetadata(
+                                this.nodeServiceLegacy.getNodeMetadata(
                                     n.ref?.id || n.properties?.[RestConstants.NODE_ID]?.[0],
                                     [RestConstants.ALL],
                                 ),
@@ -668,7 +672,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                     const nodeId = RestHelper.removeSpacesStoreRef(
                         nodes[0].properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL][0],
                     );
-                    this.nodeService.getNodeMetadata(nodeId).subscribe(
+                    this.nodeServiceLegacy.getNodeMetadata(nodeId).subscribe(
                         () => {
                             resolve(true);
                         },
@@ -702,11 +706,12 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                     if (nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1) {
                         nodeId = nodes[0].properties[RestConstants.CCM_PROP_IO_ORIGINAL][0];
                     }
-                    this.nodeService.getNodeParents(nodeId, false, []).subscribe(
+                    this.nodeService.getParents(nodeId, { fullPath: false }).subscribe(
                         () => {
                             resolve(true);
                         },
                         (error) => {
+                            error.preventDefault();
                             resolve(false);
                         },
                     );
@@ -1326,6 +1331,48 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         relationNode.group = DefaultGroups.Edit;
         relationNode.priority = 70;
 
+        const topicPage = new OptionItem('OPTIONS.SHOW_TOPIC_PAGE', 'menu_book', async (node) =>
+            UIHelper.goToTopicPage(this.router, (await this.getObjectsAsync(node, data, false))[0]),
+        );
+        topicPage.constrains = [
+            Constrain.HomeRepository,
+            Constrain.Collections,
+            Constrain.NoBulk,
+            Constrain.User,
+        ];
+        topicPage.customShowCallback = async (objects) => {
+            if (
+                this.nodeHelper.getNodesRight(
+                    objects,
+                    RestConstants.ACCESS_WRITE,
+                    NodesRightMode.Effective,
+                )
+            ) {
+                return true;
+            }
+            if (objects[0].ref.id === ROOT) {
+                return false;
+            }
+            try {
+                if (objects[0].properties?.[RestConstants.CCM_PROP_PAGE_CONFIG_REF]?.[0]) {
+                    return true;
+                }
+                return (
+                    await firstValueFrom(
+                        this.nodeService.getParents(objects[0].ref.id, { fullPath: false }),
+                    )
+                ).nodes.some(
+                    (n) => n.properties[RestConstants.CCM_PROP_PAGE_CONFIG_PROPAGATE_REF]?.[0],
+                );
+            } catch (e) {
+                e.preventDefault();
+                return false;
+            }
+        };
+        topicPage.showAsAction = true;
+        topicPage.group = DefaultGroups.View;
+        topicPage.priority = 15;
+
         const editCollection = new OptionItem('OPTIONS.COLLECTION_EDIT', 'edit', (object) =>
             this.editCollection(this.getObjects(object, data)[0]),
         );
@@ -1530,6 +1577,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         options.push(openNode);
         options.push(editConnectorNode);
         options.push(bookmarkNode);
+        options.push(topicPage);
         options.push(editCollection);
         options.push(pinCollection);
         options.push(feedbackMaterial);
@@ -1571,7 +1619,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             data.postPrepareOptions(options, objects);
         }
         if (this.globalOptionsService.postPrepareOptions) {
-            this.globalOptionsService.postPrepareOptions(options, objects);
+            this.globalOptionsService.postPrepareOptions(options, data, objects);
         }
         return options;
     }
@@ -1580,7 +1628,16 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         const downloadNode = new OptionItem(
             'OPTIONS.DOWNLOAD' + (safe ? '_SAFE' : ''),
             'cloud_download',
-            (object) => this.nodeHelper.downloadNodes(this.getObjects(object, data)),
+            (object) => {
+                if (data.customDownloadUrl) {
+                    this.nodeHelper.downloadUrl(data.customDownloadUrl, 'download', {
+                        node: this.getObjects(object, data)?.[0],
+                        triggerTrackingEvent: true,
+                    });
+                    return;
+                }
+                this.nodeHelper.downloadNodes(this.getObjects(object, data));
+            },
         );
         downloadNode.elementType = OptionsHelperService.DownloadElementTypes;
         downloadNode.constrains = [Constrain.Files];
@@ -1589,6 +1646,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         downloadNode.priority = 40;
         downloadNode.customShowCallback = async (nodes) => {
             return (
+                !!data.customDownloadUrl ||
                 nodes.some((n) =>
                     n.properties?.[RestConstants.CCM_PROP_EDUSCOPENAME]?.includes(
                         RestConstants.SAFE_SCOPE,
@@ -1735,11 +1793,11 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
 
     private goToWorkspace(node: Node | any) {
         if (node.aspects.includes(RestConstants.CCM_ASPECT_IO_REFERENCE)) {
-            this.nodeService
+            this.nodeServiceLegacy
                 .getNodeMetadata(node.properties[RestConstants.CCM_PROP_IO_ORIGINAL][0])
                 .subscribe((org) =>
                     UIHelper.goToWorkspace(
-                        this.nodeService,
+                        this.nodeServiceLegacy,
                         this.router,
                         this.connector.getCurrentLogin(),
                         org.node,
@@ -1747,7 +1805,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 );
         } else {
             UIHelper.goToWorkspace(
-                this.nodeService,
+                this.nodeServiceLegacy,
                 this.router,
                 this.connector.getCurrentLogin(),
                 node,
@@ -1764,12 +1822,12 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             const originals = await observableForkJoin(
                 nodes.map((n) => {
                     if (n.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1) {
-                        return this.nodeService.getNodeMetadata(
+                        return this.nodeServiceLegacy.getNodeMetadata(
                             n.properties[RestConstants.CCM_PROP_IO_ORIGINAL][0],
                             [RestConstants.ALL],
                         );
                     } else if (n.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL) {
-                        return this.nodeService.getNodeMetadata(
+                        return this.nodeServiceLegacy.getNodeMetadata(
                             RestHelper.removeSpacesStoreRef(
                                 n.properties[RestConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET][0],
                             ),
@@ -2072,7 +2130,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 const properties: any = {};
                 properties[RestConstants.CCM_PROP_IMPORT_BLOCKED] = [null];
                 return new Observable((observer) => {
-                    this.nodeService
+                    this.nodeServiceLegacy
                         .editNodeMetadataNewVersion(
                             n.ref.id,
                             RestConstants.COMMENT_BLOCKED_IMPORT,
@@ -2082,7 +2140,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                             const permissions = new LocalPermissions();
                             permissions.inherited = true;
                             permissions.permissions = [];
-                            this.nodeService
+                            this.nodeServiceLegacy
                                 .setNodePermissions(node.ref.id, permissions)
                                 .subscribe(() => {
                                     observer.next(node);

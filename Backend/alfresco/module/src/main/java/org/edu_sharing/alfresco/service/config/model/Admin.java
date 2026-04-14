@@ -3,6 +3,7 @@ package org.edu_sharing.alfresco.service.config.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import jakarta.xml.bind.annotation.XmlElement;
+
 import java.io.Serializable;
 
 public class Admin implements Serializable {
@@ -15,6 +16,15 @@ public class Admin implements Serializable {
     public enum EditorType {
         Textarea,
         Monaco
+    }
+    @JsonProperty
+    @JsonPropertyDescription("wysiwyg to use by the ui when editing messages")
+    @XmlElement
+    public WysiwygType wysiwygType;
+
+    public enum WysiwygType {
+        Textarea,
+        TinyMCE
     }
 
 }

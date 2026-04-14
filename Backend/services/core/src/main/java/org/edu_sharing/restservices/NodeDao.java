@@ -2047,12 +2047,12 @@ public class NodeDao {
                 logger.warn("Error while fetching original node version from " + nodeId + ":" + t.getMessage());
             }
         }
+        if(this.version != null) {
+            return this.version;
+        }
         String version = (String) nodeProps.get(CCConstants.LOM_PROP_LIFECYCLE_VERSION);
         if (version == null) {
             version = (String) nodeProps.get(CCConstants.CM_PROP_VERSIONABLELABEL);
-        }
-        if (version == null) {
-            version = this.version;
         }
         return version;
     }
@@ -2183,10 +2183,11 @@ public class NodeDao {
     }
 
     public void addWorkflowHistory(WorkflowHistory history, boolean sendMail) throws DAOException {
-        Map<String, Object> properties = getNativeProperties();
         String nodeType = nodeService.getType(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
         List<String> aspects = Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId));
-
+        addWorkflowHistory(nodeId, nodeType, aspects, getNativeProperties(), history, sendMail);
+    }
+    public static void addWorkflowHistory(String nodeId, String nodeType, List<String> aspects, Map<String, Object> properties, WorkflowHistory history, boolean sendMail) throws DAOException {
         List<String> data = (List<String>) NodeServiceHelper.getPropertyNative(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
                 CCConstants.CCM_PROP_WF_PROTOCOL
         );
@@ -2221,6 +2222,9 @@ public class NodeDao {
     }
 
     public List<WorkflowHistory> getWorkflowHistory() throws DAOException {
+        return getWorkflowHistory(repoDao, nodeId);
+    }
+    public static List<WorkflowHistory> getWorkflowHistory(RepositoryDao repoDao, String nodeId) throws DAOException {
         List<WorkflowHistory> workflow = new ArrayList<>();
         List<String> data = (List<String>) NodeServiceHelper.getPropertyNative(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
                 CCConstants.CCM_PROP_WF_PROTOCOL
@@ -2349,6 +2353,7 @@ public class NodeDao {
 
     public String getJWT() throws GeneralSecurityException {
         String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        UserProfile userProfile = PersonDao.getPerson(repoDao, user).asPerson().getProfile();
 
         Node node = asNode();
 
@@ -2375,9 +2380,6 @@ public class NodeDao {
             }
         }
 
-        node.getAccessEffective();
-
-
         String replicationSource = Arrays.stream(getProperties()
                         .getOrDefault(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE), new String[0]))
                 .findFirst()
@@ -2387,7 +2389,7 @@ public class NodeDao {
                 .findFirst()
                 .orElse(null);
 
-        return JwtTokenUtil.generateToken(user, nodeId, permissions, getMimetype(), getMediatype(), replicationSource, resourceType);
+        return JwtTokenUtil.generateToken(user, nodeId, permissions, getMimetype(), getMediatype(), replicationSource, resourceType, userProfile);
     }
 
     private String getMimetype() {
@@ -2414,9 +2416,11 @@ public class NodeDao {
 
     private Preview getPreview() {
         if (previewData != null) {
+
             return new Preview(getStoreProtocol(),
                     getStoreIdentifier(),
                     remoteId != null ? remoteId : getRef().getId(),
+                    this.type,
                     previewData
             );
         }
@@ -2858,7 +2862,7 @@ public class NodeDao {
                     NodeServiceHelper.getProperties(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentRef));
             // ignore some technical properties, like mimetypes etc. (configured via lightbend)
             for (String prop : LightbendConfigLoader.get().getStringList("repository.childobjects.ignoredInheritMetadata")) {
-                propsParent.remove(prop);
+                propsParent.remove(CCConstants.getValidGlobalName(prop));
             }
             // override it with the props from the child
             for (Map.Entry<String, Object> entry : propsChild.entrySet()) {

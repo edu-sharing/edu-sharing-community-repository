@@ -1,4 +1,3 @@
-import { StatisticNode } from './statistic-node';
 import { WIDGET_TYPE } from './custom-definitions';
 
 export class GridTile {
@@ -9,7 +8,6 @@ export class GridTile {
     propagatedNodeId?: string;
     hasHits?: boolean;
     searchCount?: number;
-    statistics?: StatisticNode[];
 
     constructor(cols: number, rows: number) {
         this.cols = cols;

@@ -200,6 +200,12 @@ public class CCConstants {
 
 	public final static String NAMESPACE_SHORT_SITE = "st";
 
+    public final static String NAMESPACE_AUDIO = "http://www.alfresco.org/model/audio/1.0";
+
+    public final static String NAMESPACE_WEBDAV = "http://www.alfresco.org/model/webdav/1.0";
+
+    public final static String NAMESPACE_RENDITION = "http://www.alfresco.org/model/rendition/1.0";
+
 	public final static String NAMESPACE_SHORT_CCM = "ccm";
 
 	public final static String NAMESPACE_SHORT_LOM = "cclom";
@@ -211,6 +217,12 @@ public class CCConstants {
 	public final static String NAMESPACE_SHORT_VIRTUAL = "virtual";
 
 	public final static String NAMESPACE_SHORT_EXIF = "exif";
+
+    public final static String NAMESPACE_SHORT_AUDIO = "audio";
+
+    public final static String NAMESPACE_SHORT_WEBDAV = "webdav";
+
+    public final static String NAMESPACE_SHORT_RENDITION = "rendition";
 
 	public final static String CCM_TYPE_BASKET = "{http://www.campuscontent.de/model/1.0}basketfolder";
 
@@ -2177,15 +2189,18 @@ public class CCConstants {
 
 	public static final String CC_CACHE_MILLISECONDS_KEY = "CC_CACHE_MILLISECONDS_KEY";
 
-	private static final Map<String, String> nameSpaceMap = new HashMap<>(Map.of(
-			NAMESPACE_CCM, NAMESPACE_SHORT_CCM,
-			NAMESPACE_CM, NAMESPACE_SHORT_CM,
-			NAMESPACE_LOM, NAMESPACE_SHORT_LOM,
-			NAMESPACE_SYS,  NAMESPACE_SHORT_SYS,
-			NAMESPACE_VIRTUAL, NAMESPACE_SHORT_VIRTUAL,
-			NAMESPACE_EXIF, NAMESPACE_SHORT_EXIF,
-			NAMESPACE_APP, NAMESPACE_SHORT_APP,
-			NAMESPACE_SITE, NAMESPACE_SHORT_SITE
+    private static final Map<String, String> nameSpaceMap = new HashMap<>(Map.ofEntries(
+            Map.entry(NAMESPACE_CCM, NAMESPACE_SHORT_CCM),
+            Map.entry(NAMESPACE_CM, NAMESPACE_SHORT_CM),
+            Map.entry(NAMESPACE_LOM, NAMESPACE_SHORT_LOM),
+            Map.entry(NAMESPACE_SYS, NAMESPACE_SHORT_SYS),
+            Map.entry(NAMESPACE_VIRTUAL, NAMESPACE_SHORT_VIRTUAL),
+            Map.entry(NAMESPACE_EXIF, NAMESPACE_SHORT_EXIF),
+            Map.entry(NAMESPACE_APP, NAMESPACE_SHORT_APP),
+            Map.entry(NAMESPACE_SITE, NAMESPACE_SHORT_SITE),
+            Map.entry(NAMESPACE_AUDIO, NAMESPACE_SHORT_AUDIO),
+            Map.entry(NAMESPACE_WEBDAV, NAMESPACE_SHORT_WEBDAV),
+            Map.entry(NAMESPACE_RENDITION, NAMESPACE_SHORT_RENDITION)
     ));
 
     /**

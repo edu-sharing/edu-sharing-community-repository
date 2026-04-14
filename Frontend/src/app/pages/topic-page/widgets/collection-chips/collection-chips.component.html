@@ -50,7 +50,7 @@
             cdkDragHandle
             (click)="$event.stopPropagation(); $event.preventDefault()"
           >
-            <i esIcon="svg-drag_indicator"></i>
+            <i esIcon="drag_indicator"></i>
           </button>
         </button>
         <!-- display collection chip -->
@@ -68,7 +68,7 @@
         >
           <!-- note: this has to be a separate element to be aligned properly -->
           <span class="chip-title">
-            <i esIcon="svg-drag_indicator" role="button" *ngIf="editMode()" cdkDragHandle></i>
+            <i esIcon="drag_indicator" role="button" *ngIf="editMode()" cdkDragHandle></i>
             <ng-container *ngTemplateOutlet="collectionTitle; context: { node: n }"></ng-container>
             <i esIcon="arrow_forward"></i>
           </span>

@@ -51,6 +51,55 @@
       </chatCompletion>
     </aiConfig>
     <aiConfig>
+      <id>topic_page_ai_create_image</id>
+      <createImage>
+        {
+        "model": "dall-e-3",
+        "size": "1024x1024",
+        "n": 1,
+        "response_format": "b64_json"
+        }
+      </createImage>
+    </aiConfig>
+    <aiConfig>
+      <id>topic_page_ai_clear_cache</id>
+      <clearCache>true</clearCache>
+    </aiConfig>
+    <aiConfig>
+      <id>topic_page_ai_topic_header_image</id>
+      <createImage>
+        {
+        "prompt": "## Aufgabe\nErzeuge ein ansprechendes, realistisch wirkendes Vorschaubild zu einer Sammlung von Bildungsinhalten.  \n- Vermeide sämtliche Textelemente oder Logos im Bild.  \n- Nutze die zentralen Schlagwörter, um das Thema klar widerzuspiegeln.  \n- Richte Dich nach den folgenden Anforderungen und Stilvorgaben.\n## Anforderungen\n1. **Hauptmotiv**: Beschreibe das zentrale Element der Sammmlung (eine Szene oder ein Kernthema), das den Bildungsinhalt repräsentiert.  \n2. **Realismus**: Achte auf eine glaubwürdige Darstellung aller Objekte und Szenen, inklusiv und kulturell sensitiv.  \n3. **Minimalismus**: Reduziere Ablenkungen, konzentriere Dich auf das Wesentliche, um eine klare Botschaft zu vermitteln.  \n4. **Emotionale Ansprache**: Verwende warme Farben, natürliches Licht und eine einladende Atmosphäre.  \n5. **Keine Texte im Bild**: Verzichte gänzlich auf Schrift oder Logos, um Redundanz und visuelle Störungen zu vermeiden.  \n## Stilvorgaben\n- **Attribute**: hochdetailliert, scharfe Fokussierung, poliert, makellos, ansprechend, Symmetrie, kohärent, minimalistisch, sauber, aufgeräumt  \n- **Farben und Beleuchtung**: warme Farben, natürliches Licht  \n- **Designelemente**: klare Linien, einfache Formen, ausbalancierte Komposition  \n- **Qualität**: professionelle Qualität, hohe Auflösung  \n- **Ästhetik**: elegant, geradlinig, modern, klare visuelle Hierarchie  \n## Eingabedaten\n- **Beschreibung des Bildungsinhalts**: {{var(cm:name)|node(cm:name)|-}} ({{var(ccm:taxonid_DISPLAYNAME)|node(ccm:taxonid_DISPLAYNAME)|-}})  \n- **Wichtige Schlagwörter**: {{var(cclom:general_keyword)|node(cclom:general_keyword)|-}}\n**Integriere alle oben genannten Anforderungen und Stilvorgaben sowie die Eingabedaten 'Beschreibung des Bildungsinhalts' und 'Wichtige Schlagwörter'.**"
+        }
+      </createImage>
+    </aiConfig>
+    <aiConfig>
+      <id>topic_page_ai_topic_header_description</id>
+      <chatCompletion>
+        {
+        "messages": [
+        {
+        "role": "user",
+        "content": "## Aufgabe\n1. **Ziel**\n   - Erstelle einen ansprechenden, prägnanten Text, der eine Sammlung von Bildungsressourcen vorstellt.\n   - Wecke das Interesse der Leserinnen und Leser durch einen konkreten, thematischen Einstieg.\n   - Erkläre kurz und verständlich die wichtigsten Themen der Sammlung.\n   - Zeige, wie Lehrende und Lernende die Ressourcen praktisch einsetzen können.\n   - Integriere Hinweise auf konkrete Ressourcen der Sammlung in den Text, sofern Dir diese als Information vorliegen.\n2. **Struktur**\n   - **Absatz 1**: Thematischer Einstieg, der ein konkretes Problem, eine Frage oder ein Szenario aufgreift und so zum Weiterlesen einlädt. Benenne die zentralen Themen der Sammlung.\n   - **Absatz 2**: Übersicht der Hauptthemen, konkreter Mehrwert für Lehrende und Lernende, Bezug zu Lernzielen oder Kompetenzen. Schließe mit einem aktivierenden Satz, der zur Nutzung einlädt.\n3. **Sprache und Stil**\n   - **Verständlichkeit**: Vermeide unnötige Fachbegriffe. Erläutere komplexe Konzepte in einem Nebensatz oder durch ein Beispiel.\n   - **Aktive Formulierungen**: Verwende aktive Satzstrukturen. Vermeide Passivkonstruktionen, wo immer möglich.\n   - **Kohärenz**: Nutze einheitliche Terminologie. Vermeide Wiederholungen, Widersprüche und Synonymketten.\n   - **Prägnanz**: Schreibe kurze Sätze (max. 20 Wörter). Bevorzuge einfache Wörter (2–3 Silben).\n   - **Lesbarkeit**: Setze klare Absätze. Jeder Absatz verfolgt genau einen Gedanken.\n   - **Zielgruppenanpassung**: Passe Tonalität und Sprachniveau an Bildungsstufe und Fachgebiet an (z. B. spielerischer für Grundschule, fachlicher für Sekundarstufe II).\n4. **Inhaltliche Relevanz**\n   - Baue relevante Schlüsselbegriffe natürlich in den Fließtext ein.\n   - Orientiere dich am Vorwissen, den Interessen und dem Nutzen der Zielgruppe.\n   - Mache den Mehrwert der Sammlung greifbar: Was können Nutzende nach der Arbeit mit den Materialien besser?\n5. **Verboten**\n   - Eröffnungen mit 'Diese Sammlung...', 'Dieses Material...', 'Hier finden Sie...' oder ähnlichen Floskeln.\n   - Allgemeine, nichtssagende Aussagen wie 'Ein spannendes Thema für alle' oder 'Ideal für den Unterricht'.\n   - URLs, Markennamen und Dateinamen.\n   - Reine Aufzählung von Schlagworten ohne Satzstruktur.\n   - Inhalte erfinden, die nicht in den gegebenen Informationen enthalten sind.\n   - Übertriebene Superlative ('die beste Sammlung', 'unverzichtbar').\n6. **Output-Format**\n   - Gib den fertigen Text als zusammenhängende Beschreibung in genau zwei Absätzen aus.\n   - Halte die maximale Zeichenlänge ein (inkl. Leerzeichen).\n   - Gib ausschließlich den Beschreibungstext aus – keine Überschriften, keine Meta-Kommentare, keine Erklärungen.\n## Eingabedaten\n- **Thema der Sammlung:** {{var(cm:name)|node(cm:name)|-}}\n- **Bildungsstufe:** {{var(ccm:educationalcontext_DISPLAYNAME)|node(ccm:educationalcontext_DISPLAYNAME)|-}}\n- **Fachgebiet:** {{var(ccm:taxonid_DISPLAYNAME)|node(ccm:taxonid_DISPLAYNAME)|-}}\n- **Maximale Zeichenlänge:** 400"
+        }
+        ]
+        }
+      </chatCompletion>
+    </aiConfig>
+    <aiConfig>
+      <id>topic_page_ai_topic_header_text</id>
+      <chatCompletion>
+        {
+        "messages": [
+        {
+        "role": "user",
+        "content": "## Aufgabe\n1. **Ziel**  \n   - Erstelle einen ansprechenden, prägnanten Text, der eine Sammlung von Bildungsressourcen vorstellt.  \n   - Wecke das Interesse der Leserinnen und Leser.  \n   - Erkläre kurz und verständlich die wichtigsten Themen der Sammlung.  \n   - Zeige, wie die Ressourcen der Sammlung von Lehrenden und Lernenden genutzt werden können.  \n   - Erkläre zusätzlich: 'Wofür ist das wichtig?' → Stelle den Bezug zur Lebenswelt, zum Alltag oder Arbeitsleben her. Gib ggf. auch einen Ausblick auf gesellschaftliche oder wissenschaftliche Relevanz.  \n   - Integriere Hinweise auf konkrete Ressourcen der Sammlung in den Beschreibungstext, falls Dir diese als Information gegeben werden.\n2. **Struktur**\n   - **Absatz 1**: Kurzer Einstieg, der zentrale Themen nennt und Interesse weckt.  \n   - **Absatz 2**: Übersicht der Hauptthemen, Mehrwert für Lehrende und Lernende, Bezug zu Lernzielen. Beantworte hier auch die Frage 'Wofür ist das wichtig?' mit konkretem Nutzen und Relevanz für Alltag, Beruf, Gesellschaft oder Wissenschaft.\n3. **Sprache und Stil**\n   - **Verständlichkeit**: Keine unnötigen Fachbegriffe, kurze Erläuterung komplexer Themen.  \n   - **Aktive Formulierungen**: Verzichte nach Möglichkeit auf den Passivstil.  \n   - **Kohärenz**: Verwende konsistente Terminologie, vermeide Wiederholungen und Widersprüche.  \n   - **Prägnanz**: Nutze kurze Sätze (max. 20 Wörter) und möglichst einfache Wörter (2–3 Silben).  \n   - **Lesbarkeit**: Achte auf klare Absätze und ausreichend Leerraum.  \n   - **Zielgruppenanpassung**: Passe Stil und Sprachgebrauch an die Bedürfnisse der Zielgruppe und des Fachgebiets an.\n4. **Inhaltliche Relevanz**\n   - Baue relevante Schlüsselbegriffe ein.  \n   - Passe den Text an die Zielgruppe an (Vorwissen, Interessen, Nutzen).  \n   - Erkläre den Mehrwert der Inhalte und zeige auf, in welchen Kontexten das Wissen angewendet werden kann.\n5. **Output-Format**\n   - Gib den fertigen Text als zusammenhängende Beschreibung in **zwei Absätzen** aus.  \n   - Halte dich an die **maximale Zeichenlänge** (inkl. Leerzeichen).  \n   - Verzichte auf URLs, Markennamen und unnötige Füllwörter.\n## Eingabedaten\n- **Thema der Sammlung:** {{var(cm:name)|node(cm:name)|-}}\n- **Bildungsstufe:** {{var(ccm:educationalcontext_DISPLAYNAME)|node(ccm:educationalcontext_DISPLAYNAME)|-}}\n- **Fachgebiet:** {{var(ccm:taxonid_DISPLAYNAME)|node(ccm:taxonid_DISPLAYNAME)|-}} \n- **Maximale Zeichenlänge:** 400\n**Hinweis:** Verwende die oben genannten Informationen, um einen einheitlichen, gut strukturierten Text zu erstellen, der alle genannten Anforderungen erfüllt. Achte dabei besonders auf Sprachstil, Verständlichkeit und die Einhaltung der Zeichenbegrenzung."
+        }
+        ]
+        }
+      </chatCompletion>
+    </aiConfig>
+    <aiConfig>
       <id>topic_page_ai_text_widget</id>
       <chatCompletion>
         {
@@ -667,6 +716,11 @@
       <type>checkbox</type>
     </widget>
     <widget>
+      <id>cclom:location</id>
+      <type>text</type>
+      <textEscapingPolicy>all</textEscapingPolicy>
+    </widget>
+    <widget>
       <id>curriculum_title</id>
       <required>mandatory</required>
       <caption>Pinnwand-Titel</caption>
@@ -692,6 +746,23 @@
       <values>
         <entry cap="nur Leserechte">0</entry>
         <entry cap="Lese- und Bearbeitungsrechte">1</entry>
+      </values>
+    </widget>
+    <widget>
+      <id>virtual:collection_id_tree</id>
+      <caption>virtual_prop_collection_id_tree</caption>
+      <hideIfEmpty>true</hideIfEmpty>
+      <type>nodefilter</type>
+    </widget>
+    <widget>
+      <id>virtual:profiling_target_group</id>
+      <caption>virtual_profiling_target_group</caption>
+      <type>radioVertical</type>
+      <valuespace_i18n_prefix>virtual_profiling_target_group_</valuespace_i18n_prefix>
+      <values>
+        <value>learner</value>
+        <value>teacher</value>
+        <value>general</value>
       </values>
     </widget>
   </widgets>
@@ -839,6 +910,7 @@
     <template>
       <id>search</id>
       <html><![CDATA[
+          <virtual:collection_id_tree>
           <ccm:educationallearningresourcetype type="facetList" expandable="expanded">
           <cclom:general_keyword type="facetList" expandable="expanded">
           <license>
@@ -1030,6 +1102,13 @@
 				<curriculum_color>
 				<curriculum_editable>
 				]]></html>
+    </template>
+    <template>
+      <id>topic_page_profiling</id>
+      <html><![CDATA[
+          <virtual:profiling_target_group>
+          <ccm:educationalcontext type="checkboxVertical">
+      ]]></html>
     </template>
   </templates>
   <groups>
@@ -1224,6 +1303,13 @@
       <rendering>angular</rendering>
       <views>
         <view>search_relation_node</view>
+      </views>
+    </group>
+    <group>
+      <id>topic_page_profiling</id>
+      <rendering>angular</rendering>
+      <views>
+        <view>topic_page_profiling</view>
       </views>
     </group>
   </groups>
@@ -1866,6 +1952,28 @@
       </basequery>
       <specialFilter>exclude_sites_folder</specialFilter>
       <specialFilter>exclude_people_folder</specialFilter>
+      <property name="ngsearchword" asFilter="false">
+        <exactMatching>true</exactMatching>
+        <statement>
+            {
+                "bool": {
+                    "should": [
+                        {
+                            "simple_query_string": {
+                            "query": "${value}*",
+                            "fields": [
+                                "properties.cclom:title^4",
+                                "properties.cm:title^2",
+                                "properties.cm:name^1"
+                            ],
+                            "default_operator": "and"
+                            }
+                        }
+                    ]
+                }
+            }
+        </statement>
+      </property>
       <property name="ccm:page_variant_is_template">
         <statement>
           {"match":{"properties.ccm:page_variant_is_template.keyword":"${value}"}}

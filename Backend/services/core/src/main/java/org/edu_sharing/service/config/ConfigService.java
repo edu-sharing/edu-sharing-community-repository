@@ -18,7 +18,7 @@ public interface ConfigService {
      * @throws Exception
      */
     Context getContextByDomain(String domain) throws Exception;
-    List<Context> getAvailableContext() throws Exception;
+    List<Context> getAvailableContext(boolean includeStatic) throws Exception;
 
     Context getContextById(String id) throws Exception;
 

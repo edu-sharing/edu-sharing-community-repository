@@ -3,11 +3,12 @@ import { firstValueFrom } from 'rxjs';
 import { RenderDataRequestWithToken, RSApiConfiguration } from 'ngx-rendering-service-api';
 import {
     AboutService,
+    ConfigService,
     HOME_REPOSITORY,
     Node,
+    NodeService,
     NodeServiceUnwrapped,
     RestConstants,
-    UserService,
 } from 'ngx-edu-sharing-api';
 import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
 import { OptionsHelperDataService } from './options-helper-data.service';
@@ -15,6 +16,10 @@ import { Scope } from '../types/option-item';
 
 export type CombinedRenderData = {
     node: Node;
+    /**
+     * the parent node; only set if the current element is a series (child)
+     */
+    nodeParent?: Node;
     request?: RenderDataRequestWithToken;
     error?: string;
 };
@@ -23,9 +28,10 @@ export class RenderHelperService {
     constructor(
         private injector: Injector,
         private aboutService: AboutService,
+        private configService: ConfigService,
+        private nodeService: NodeService,
         private nodeApiUnwrapped: NodeServiceUnwrapped,
         private configuration: EduSharingUiConfiguration,
-        private userService: UserService,
         @Optional() private optionsHelperDataService: OptionsHelperDataService,
     ) {}
 
@@ -42,9 +48,11 @@ export class RenderHelperService {
                 version: version || RestConstants.NODE_VERSION_CURRENT,
             }),
         );
-        const node = securedNode.node;
-        const user = await firstValueFrom(this.userService.observeCurrentUserInfo());
-        console.info(this.injector.get(OptionsHelperDataService));
+        let node = securedNode.node;
+        let nodeParent: Node = null;
+        if (node.aspects?.includes(RestConstants.CCM_ASPECT_IO_CHILDOBJECT)) {
+            nodeParent = await this.inheritProps(node);
+        }
         this.optionsHelperDataService?.setData({
             scope: Scope.Render,
             activeObjects: [node],
@@ -78,16 +86,11 @@ export class RenderHelperService {
             securedNode: securedNode.signedNode,
             signature: securedNode.signature,
             token: token,
-            userData: {
-                authorityName: user.user.person.authorityName,
-                firstName: user.user.person.profile.firstName,
-                surName: user.user.person.profile.lastName,
-                userEMail: user.user.person.profile.email,
-            },
         } as RenderDataRequestWithToken;
 
         return {
             node,
+            nodeParent,
             request,
         };
     }
@@ -97,24 +100,16 @@ export class RenderHelperService {
         signature: string,
         jwt: string,
         renderUrl: string,
-        encodedUser: string,
     ): Promise<CombinedRenderData> {
         this.injector.get(RSApiConfiguration).rootUrl = renderUrl;
         const decodedNodeString = this.base64ToUtf8(encodedNode);
         const node = JSON.parse(decodedNodeString) as Node;
-        const userData = JSON.parse(this.base64ToUtf8(encodedUser));
         const request = {
             nodeId: node.ref.id,
             repoId: node.ref.repo,
             securedNode: encodedNode,
             signature: signature,
             token: jwt,
-            userData: {
-                authorityName: userData.authorityName ?? '',
-                firstName: userData.firstName ?? '',
-                surName: userData.lastName ?? '',
-                userEMail: userData.email ?? '',
-            },
         } as RenderDataRequestWithToken;
 
         return {
@@ -147,5 +142,29 @@ export class RenderHelperService {
         for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
 
         return new TextDecoder('utf-8', { fatal: false }).decode(bytes);
+    }
+
+    private async inheritProps(node: Node) {
+        try {
+            const parent = await firstValueFrom(
+                this.nodeService.getNode(node.parent.id, { repository: node.parent.repo }),
+            );
+            const config = await firstValueFrom(
+                this.configService.observeBackendConfig({ forceUpdate: false }),
+            );
+            Object.entries(parent.properties).forEach(([k, v]) => {
+                // @TODO: This might should be at a better location, i.e. in the widget definition of mds?
+                if (config.repository?.childobjects?.ignoredInheritMetadata?.includes(k)) {
+                    return;
+                }
+                if (!node.properties[k]) {
+                    node.properties[k] = v;
+                }
+            });
+            return parent;
+        } catch (e) {
+            e.preventDefault();
+        }
+        return null;
     }
 }

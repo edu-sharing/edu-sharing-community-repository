@@ -4,7 +4,7 @@ import { AfterViewInit, Directive, ElementRef, EventEmitter, Output } from '@ang
  * Provide event emitters for Angular lifecycle events.
  */
 @Directive({
-    selector: '[wloLifecycle]',
+    selector: '[esLifecycle]',
     standalone: true,
 })
 export class LifecycleDirective<T> implements AfterViewInit {

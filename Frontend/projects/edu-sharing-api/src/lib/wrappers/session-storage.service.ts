@@ -9,6 +9,7 @@ import {
     shareReplay,
     startWith,
     switchMap,
+    tap,
 } from 'rxjs/operators';
 import { RestConstants } from '../rest-constants';
 import { UserService } from './user.service';
@@ -27,10 +28,11 @@ import { AuthenticationService } from './authentication.service';
 @Injectable({ providedIn: 'root' })
 export class SessionStorageService {
     static readonly KEY_WORKSPACE_SORT = 'workspace_sort';
+    static readonly KEY_WORKSPACE_SAFE_DOWNLOAD_CONFIRM = 'workspace_safe_download_confirm';
     static readonly KEY_ROOT_COLLECTIONS = 'collections_root';
 
-    private readonly localStorage = new BrowserStorage(localStorage);
-    private readonly sessionStorage = new BrowserStorage(sessionStorage);
+    private readonly localStorage = new BrowserStorage(localStorage, this.authentication, false);
+    private readonly sessionStorage = new BrowserStorage(localStorage, this.authentication, true);
 
     /** User preferences from the backend were changed locally and pushed to the backend. */
     private readonly userPreferencesChanged = new Subject<{ [key: string]: any }>();
@@ -234,18 +236,49 @@ export enum Store {
     /** Only the current running session (via sessionStorage). */
     Session,
 }
+export type StorageWithTime<T> = {
+    expiry: number;
+    value: T;
+};
 
 class BrowserStorage {
+    private readonly SessionPrefix = 'ES_SESSION_KEY_';
     private entryChanged = new Subject<{ key: string; value: any }>();
 
-    constructor(private storage: Storage) {}
+    /**
+     * seconds of session lifetime (for session storage)
+     */
+    sessionTimeout: number = 60 * 60;
 
-    get(key: string, fallback: any): any {
-        const rawValue = this.storage.getItem(key);
+    constructor(
+        private storage: Storage,
+        private authentication: AuthenticationService,
+        private keepOnlyForSession: boolean,
+    ) {
+        if (keepOnlyForSession) {
+            this.authentication
+                .observeLoginInfo()
+                .pipe(filter((login) => !!login?.sessionTimeout))
+                .subscribe((login) => {
+                    this.sessionTimeout = login?.sessionTimeout;
+                });
+        }
+    }
+
+    get<T>(key: string, fallback: T): T {
+        const rawValue = this.storage.getItem(this.getKey(key));
+        if (rawValue && this.keepOnlyForSession) {
+            const value = JSON.parse(rawValue) as StorageWithTime<T>;
+            if (value.expiry < Date.now()) {
+                this.delete(key);
+                return fallback;
+            }
+            return value.value;
+        }
         return rawValue ? JSON.parse(rawValue) : fallback;
     }
 
-    observe(key: string, fallback: any): Observable<any> {
+    observe<T>(key: string, fallback: T): Observable<T> {
         return this.entryChanged.pipe(
             filter((entry) => entry.key === key),
             map((entry) => entry.value),
@@ -253,13 +286,27 @@ class BrowserStorage {
         );
     }
 
-    set(key: string, value: any): void {
-        this.storage.setItem(key, JSON.stringify(value));
+    set<T>(key: string, value: T): void {
+        if (this.keepOnlyForSession) {
+            this.storage.setItem(
+                this.getKey(key),
+                JSON.stringify({
+                    expiry: Date.now() + this.sessionTimeout * 1000,
+                    value,
+                } as StorageWithTime<T>),
+            );
+        } else {
+            this.storage.setItem(this.getKey(key), JSON.stringify(value));
+        }
         this.entryChanged.next({ key, value });
     }
 
     delete(key: string): void {
-        this.storage.removeItem(key);
+        this.storage.removeItem(this.getKey(key));
         this.entryChanged.next({ key, value: null });
+    }
+
+    private getKey(key: string) {
+        return this.keepOnlyForSession ? this.SessionPrefix + key : key;
     }
 }

@@ -164,28 +164,29 @@ public class ClientUtilsService {
 
 			HashSet<org.edu_sharing.service.model.NodeRef> nodes = new HashSet<>();
 			Config duplicateConfig = LightbendConfigLoader.get().getConfig("repository.communication.duplicate");
+			
+			SearchToken token = new SearchToken();
+			token.setMaxResult(10);
+			HashMap<String, String[]> queryData = new HashMap<>() {{
+				put("url", new String[]{url.trim()});
+			}};
+			if(StringUtils.isNotEmpty(info.getTitle())) {
+				queryData.put("title", new String[]{info.getTitle()});
+			}
+			if(StringUtils.isNotEmpty(info.getDescription())) {
+				queryData.put("description", new String[]{info.getDescription()});
+			}
+			if(info.getKeywords() != null) {
+				queryData.put("keywords", info.getKeywords());
+			}
+			// simple duplication detection via search API
+			nodes = new HashSet<>(searchService.search(MetadataHelper.getLocalDefaultMetadataset(), "link_duplicates", queryData, token).getData());
 
-			if (duplicateConfig == null || !duplicateConfig.hasPath("url")) {
-				SearchToken token = new SearchToken();
-				token.setMaxResult(10);
-				HashMap<String, String[]> queryData = new HashMap<>() {{
-					put("url", new String[]{url.trim()});
-				}};
-				if(StringUtils.isNotEmpty(info.getTitle())) {
-					queryData.put("title", new String[]{info.getTitle()});
-				}
-				if(StringUtils.isNotEmpty(info.getDescription())) {
-					queryData.put("description", new String[]{info.getDescription()});
-				}
-				if(info.getKeywords() != null) {
-					queryData.put("keywords", info.getKeywords());
-				}
-				// simple duplication detection via search API
-				nodes = new HashSet<>(searchService.search(MetadataHelper.getLocalDefaultMetadataset(), "link_duplicates", queryData, token).getData());
-			} else {
+			if (duplicateConfig != null && duplicateConfig.hasPath("url")) {
 				// duplication detection via external API
 				try {
 					String duplicateServiceUrl = duplicateConfig.getString("url");
+					logger.info("Search duplications via " + duplicateServiceUrl);
 					
 					// /detect/hash/by-metadata
 					RequestBuilder method = RequestBuilder.post(duplicateServiceUrl);
@@ -209,11 +210,12 @@ public class ClientUtilsService {
 
 					// Execute request
 					String responseBody = new HttpQueryTool().query(method);
+					logger.info("Search duplications response: " + responseBody);
 					JSONObject result = new JSONObject(responseBody);
 					
 					// Parse the response
             		if (result.has("duplicates")) {
-                		JSONArray duplicates = result.getJSONArray("duplicates");
+						JSONArray duplicates = result.getJSONArray("duplicates");
 						for (int i = 0; i < duplicates.length(); i++) {
 							JSONObject duplicate = duplicates.getJSONObject(i);
 							String nodeId = duplicate.getString("node_id");
@@ -224,6 +226,7 @@ public class ClientUtilsService {
 								nodes.add(new org.edu_sharing.service.model.NodeRefImpl(nodeId));
 							}
 						}
+						logger.info("Search duplications found results: " + nodes.size());
 					}
 				} catch (HttpClientErrorException e) {
     				// Handle HTTP 400 errors (invalid input, node not found)

@@ -12,6 +12,7 @@
   "SAVE": "save",
   "DISCARD": "discard",
   "APPLY": "apply",
+  "USE": "use",
   "CANCEL": "cancel",
   "YES_DELETE": "Yes, delete",
   "RESET": "Reset",
@@ -21,6 +22,7 @@
   "USER_GUEST": "guest",
   "IMPRINT": "Imprint",
   "PRIVACY_INFORMATION": "Privacy",
+  "NOTICE": "Notice",
   "ONLINE_HELP": "Online-Help",
   "WHATS_NEW": "What's new?",
   "USERMENU": "User menu",
@@ -218,6 +220,7 @@
     "SECURE": "Safe",
     "PERMISSIONS": "User management",
     "LOGIN": "Login",
+    "RENDER": "Render",
     "ADMIN": "Admin-Tools",
     "WORKSPACE_SHORT": "Workspace",
     "SEARCH_SHORT": "Search",
@@ -582,7 +585,6 @@
       "TOOL": ". generated with {{tool}}",
       "MODIFIED": "(has been modified)"
     },
-
     "NAMES": {
       "NONE": "No or unknown license",
       "MULTI": "Multiple licenses",
@@ -624,6 +626,17 @@
       "EDU": "edu-sharing Licenses",
       "CUSTOM": "define custom license",
       "UNTERRICHTS_UND_LEHRMEDIEN": "§60b Media collections for teaching"
+    },
+    "URLS": {
+      "CC_BY_ABOUT": "https://creativecommons.org/licenses/list.de",
+      "CC_BY": "https://creativecommons.org/licenses/by/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_ND": "https://creativecommons.org/licenses/by-nd/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_SA": "https://creativecommons.org/licenses/by-sa/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_NC": "https://creativecommons.org/licenses/by-nc/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_NC_ND": "https://creativecommons.org/licenses/by-nc-nd/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_NC_SA": "https://creativecommons.org/licenses/by-nc-sa/{{version}}/{{locale}}legalcode.de",
+      "CC_0": "https://creativecommons.org/publicdomain/zero/1.0/legalcode.de",
+      "PDM": "https://creativecommons.org/public-domain/pdm/"
     }
   },
   "LIST": {
@@ -651,10 +664,12 @@
     "SHOW_IN_FOLDER": "Open storage location",
     "DEBUG": "Debug",
     "INVITE": "Invite",
+    "APPLY_FILTER": "Apply result",
     "EDIT": "Edit info",
     "EDIT_ORIGINAL": "Edit source",
     "EDIT_SIMPLE": "Quick-Edit",
     "COLLECTION_EDIT": "Edit",
+    "SHOW_TOPIC_PAGE": "Go to topic page",
     "COLLECTION_PIN": "Pin collection",
     "MATERIAL_FEEDBACK": "Feedback...",
     "MATERIAL_FEEDBACK_VIEW": "View feedback",
@@ -1161,6 +1176,7 @@
     "AT": "Austria",
     "AU": "Australia",
     "BA": "Bosnia and Herzegovina",
+    "BE": "Belgium",
     "BG": "Bulgaria",
     "BH": "Bahrain",
     "BO": "Bolivia",
@@ -1474,6 +1490,7 @@
       "isPartOf": "is part of (isPartOf)",
       "isBasedOn": "is based on (isBasedOn)",
       "references": "refers to (references)"
-    }
+    },
+    "NOT_SUPPORTED_REMOTELY": "Relations to external elements are not supported."
   }
 }

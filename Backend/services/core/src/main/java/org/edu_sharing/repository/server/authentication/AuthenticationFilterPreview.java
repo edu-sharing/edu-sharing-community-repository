@@ -1,19 +1,9 @@
 package org.edu_sharing.repository.server.authentication;
 
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.security.GeneralSecurityException;
-import java.util.HashMap;
-import java.util.Map;
-
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.FilterConfig;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
+import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
+import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.AuthenticationService;
@@ -34,11 +24,15 @@ import org.edu_sharing.service.authentication.oauth2.TokenService;
 import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.usage.Usage;
-import org.edu_sharing.service.usage.Usage2Service;
 import org.edu_sharing.service.usage.Usage2Exception;
+import org.edu_sharing.service.usage.Usage2Service;
 import org.springframework.context.ApplicationContext;
 
-import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.security.GeneralSecurityException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AuthenticationFilterPreview implements jakarta.servlet.Filter {
 
@@ -199,7 +193,7 @@ public class AuthenticationFilterPreview implements jakarta.servlet.Filter {
 			
 		} else if (authHdr!=null && authHdr.length() > 5 && authHdr.substring(0, 5).equalsIgnoreCase("BASIC")) {
 			try {
-				Map<String, String> authResult = ApiAuthenticationFilter.httpBasicAuth(httpServletRequest, authHdr, true);
+				Map<String, String> authResult = ApiAuthenticationFilter.httpBasicAuth(httpServletRequest, authHdr);
 				if(authResult == null) {
 					throw new Exception("Auth failed");
 				}

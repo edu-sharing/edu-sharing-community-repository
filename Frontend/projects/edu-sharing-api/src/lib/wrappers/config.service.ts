@@ -12,6 +12,7 @@ import {
 } from 'rxjs/operators';
 import { ApiRequestConfiguration } from '../api-request-configuration';
 import * as apiModels from '../api/models';
+import { RepositoryMessage } from '../api/models';
 import { ConfigV1Service } from '../api/services';
 import { switchReplay } from '../utils/rxjs-operators/switch-replay';
 
@@ -37,6 +38,7 @@ export const LANGUAGES: { [key: string]: Locale } = {
 })
 export class ConfigService {
     private readonly updateTrigger = new Subject<void>();
+    private readonly updateTriggerMessages = new Subject<void>();
     private readonly localeSubject = new BehaviorSubject<{
         locale: Locale;
         language: string;
@@ -47,6 +49,11 @@ export class ConfigService {
         switchReplay(() => this.configV1.getConfig1()),
         tap((config) => this.configSubject.next(config.current)),
         map((config) => (config.current ? config : null)),
+    );
+    private readonly message$ = this.updateTriggerMessages.pipe(
+        startWith(void 0),
+        switchMap(() => this.configV1.getSystemMessages()),
+        shareReplay({ bufferSize: 1, refCount: true }),
     );
     private readonly variables$ = this.updateTrigger.pipe(
         startWith(void 0 as void),
@@ -94,6 +101,19 @@ export class ConfigService {
             this.updateTrigger.next();
         }
         return this.config$.pipe(map((c) => c?.current ?? null));
+    }
+    /**
+     * Returns the current system message (if one should be shown).
+     *
+     * The message might depend on the domain via which the application is served.
+     *
+     * The observable will update on changes.
+     */
+    observeSystemMessages({ forceUpdate = false } = {}): Observable<RepositoryMessage[]> {
+        if (forceUpdate) {
+            this.updateTriggerMessages.next();
+        }
+        return this.message$.pipe(filter((message) => message !== undefined));
     }
     /**
      * Returns the current system configuration for the (exposed) backend values.

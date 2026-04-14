@@ -91,8 +91,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SearchServiceElastic extends SearchServiceImpl {
-    public static final String WORKSPACE_INDEX = "workspace_10.0";
-    public static final String AUTHORITIES_INDEX = "authorities_10.0";
+    public static final String WORKSPACE_INDEX = "workspace_10.0.1";
+    public static final String AUTHORITIES_INDEX = "authorities_10.0.1";
     static RestClient restClient;
     static ElasticsearchClient client;
     static String rootHomeId;
@@ -980,7 +980,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         Boolean.parseBoolean(restrictedAccess)
                 ).stream().filter(permissions::contains).collect(Collectors.toList());
             } else {
-                logger.warn("Permission query matched more than one node " + nodeId + " " + StringUtils.join(permissions));
+                if (searchResult.hits().total().value() > 1) {
+                    logger.warn("Permission query matched more than one node " + nodeId + " " + StringUtils.join(permissions));
+                }
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -1176,7 +1178,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
         PropertiesGetInterceptor.PropertiesContext propertiesContext = PropertiesInterceptorFactory.getPropertiesContext(
                 alfNodeRef, props, eduNodeRef.getAspects(),
                 permissions,
-                sourceAsMap
+                sourceAsMap,
+                null
         );
         for (PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
             props = new HashMap<>(i.beforeDeliverProperties(propertiesContext));

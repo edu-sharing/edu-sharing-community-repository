@@ -1,6 +1,6 @@
 import { Node } from 'ngx-edu-sharing-api';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
-import { DEFAULT_MDS_WIDGET_PREFIX, DEFAULT_OER_LICENSES } from '../types/custom-definitions';
+import { DEFAULT_OER_LICENSES } from '../types/custom-definitions';
 
 /**
  * Checks, whether a given node has write access.
@@ -52,8 +52,3 @@ export const isOer = (node: Node): boolean => {
 export const checkMetadataset = (node: Node, type: string): boolean => {
     return node.properties?.[RestConstants.CM_PROP_METADATASET_EDU_METADATASET]?.[0] === type;
 };
-
-/**
- * Adds a prefix to a given widget ID string.
- */
-export const prefixWidgetId = (widgetId: string): string => DEFAULT_MDS_WIDGET_PREFIX + widgetId;

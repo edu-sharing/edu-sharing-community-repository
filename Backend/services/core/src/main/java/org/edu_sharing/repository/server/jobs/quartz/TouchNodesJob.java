@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.util.Map;
 
 @JobDescription(description = "touch nodes so they get re-indexed by search index, in case they have a wrong state in the index")
-public class TouchNodesJob extends FixElasticSearchBase{
+public class TouchNodesJob extends FixElasticSearchBase {
 
     @JobFieldDescription(description = "either to keep modified date or not", sampleValue = "true")
     boolean keepModifiedDate = true;
@@ -31,7 +31,7 @@ public class TouchNodesJob extends FixElasticSearchBase{
         AuthenticationUtil.runAsSystem(() -> {
             try {
                 Query.Builder builder = getBuilder(query);
-                search( builder.build(), new TouchHandler());
+                search(builder.build(), new TouchHandler());
             } catch (IOException e) {
                 logger.error(e.getMessage(), e);
             }
@@ -43,26 +43,30 @@ public class TouchNodesJob extends FixElasticSearchBase{
 
         @Override
         public void handleSearchHit(Hit<Map> searchHit) throws IOException {
-            NodeRef nodeRef = getNodeRef(searchHit);
-            String name = (String)nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
-            if(name == null){
-                logger.warn("ignoring node cause it has no name:" +nodeRef);
-                return;
-            }
+            try {
+                NodeRef nodeRef = getNodeRef(searchHit);
+                String name = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+                if (name == null) {
+                    logger.warn("ignoring node cause it has no name:" + nodeRef);
+                    return;
+                }
 
-            logger.info("touching node:"+nodeRef +" name:"+name);
-            if(execute){
-                RetryingTransactionHelper th = serviceRegistry.getTransactionService().getRetryingTransactionHelper();
-                th.doInTransaction(() -> {
-                    try {
-                        if (keepModifiedDate) policyBehaviourFilter.disableBehaviour(nodeRef);
-                        nodeService.addAspect(nodeRef, ContentModel.ASPECT_INDEX_CONTROL,null);
-                    } finally {
-                        nodeService.removeAspect(nodeRef, ContentModel.ASPECT_INDEX_CONTROL);
-                        if(keepModifiedDate) policyBehaviourFilter.enableBehaviour(nodeRef);
-                    }
-                    return null;
-                },false,true);
+                logger.info("touching node:" + nodeRef + " name:" + name);
+                if (execute) {
+                    RetryingTransactionHelper th = serviceRegistry.getTransactionService().getRetryingTransactionHelper();
+                    th.doInTransaction(() -> {
+                        try {
+                            if (keepModifiedDate) policyBehaviourFilter.disableBehaviour(nodeRef);
+                            nodeService.addAspect(nodeRef, ContentModel.ASPECT_INDEX_CONTROL, null);
+                        } finally {
+                            nodeService.removeAspect(nodeRef, ContentModel.ASPECT_INDEX_CONTROL);
+                            if (keepModifiedDate) policyBehaviourFilter.enableBehaviour(nodeRef);
+                        }
+                        return null;
+                    }, false, true);
+                }
+            } catch (Throwable t) {
+                logger.warn("Error while trying to touch node " + getNodeRef(searchHit) + ": " + t.getMessage(), t);
             }
         }
     }

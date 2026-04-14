@@ -59,6 +59,18 @@
       {
         "value": {
           "required": false,
+          "name": "alphaRemove"
+        }
+      },
+      {
+        "value": {
+          "required": false,
+          "name": "timeout"
+        }
+      },
+      {
+        "value": {
+          "required": false,
           "name": "endPage"
         }
       }
@@ -150,6 +162,8 @@
         {"sourceMediaType": "video/x-flv", "targetMediaType": "alfresco-metadata-extract"},
         {"sourceMediaType": "video/ogg", "targetMediaType": "alfresco-metadata-extract"},
         {"sourceMediaType": "video/x-ms-wmv", "targetMediaType": "alfresco-metadata-extract"},
+        {"sourceMediaType": "video/x-m4v", "targetMediaType": "alfresco-metadata-extract"},
+        {"sourceMediaType": "video/3gpp", "targetMediaType": "alfresco-metadata-extract"},
         {"sourceMediaType": "video/theora", "targetMediaType": "alfresco-metadata-extract"}
       ],
       "transformOptions": [

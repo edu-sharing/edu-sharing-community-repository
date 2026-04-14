@@ -47,6 +47,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.mime.MediaType;
 import org.edu_sharing.alfresco.HasPermissionsWork;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
+import org.edu_sharing.alfresco.policy.ThumbnailHandling;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.connector.ConnectorService;
 import org.edu_sharing.alfresco.service.guest.GuestService;
@@ -545,7 +546,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         }
 
         if (downloadAllowed) {
-            downloadAllowed = hasPermissions(nodeId, new String[]{CCConstants.PERMISSION_READ_ALL, CCConstants.PERMISSION_DOWNLOAD_CONTENT});
+            // use the @PermissionService to allow intercepting for Usage Nodes & Temporary Access!
+            downloadAllowed = PermissionServiceFactory.getLocalService()
+                    .hasAllPermissions(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, new String[]{CCConstants.PERMISSION_READ_ALL, CCConstants.PERMISSION_DOWNLOAD_CONTENT})
+                    .values().stream().allMatch(v -> v);
         }
         return downloadAllowed;
     }
@@ -819,7 +823,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                     nodeRef,
                     propsOutput,
                     Arrays.asList(aspects),
-                    null, null)
+                    null, null, null)
             ));
         }
 
@@ -1070,7 +1074,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                 propertiesFinal.put(CCConstants.CC_CACHE_MILLISECONDS_KEY, new Long(mdate.getTime()).toString());
                 for (PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
                     propertiesFinal = new HashMap<>(i.beforeCacheProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef, propertiesFinal,
-                            aspects.stream().map(QName::toString).collect(Collectors.toList()), null, null)));
+                            aspects.stream().map(QName::toString).collect(Collectors.toList()), null, null, null)));
                 }
                 repCache.put(nodeRef.getId(), propertiesFinal);
             }
@@ -1627,6 +1631,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         if(onComplete != null && nodeRef != null) {
             onComplete.run();
         }
+        new ThumbnailHandling().thumbnailHandling(nodeRef);
     }
 
     public void setUserDefinedPreview(String nodeId, byte[] content, String fileName) {
@@ -2132,25 +2137,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         return reader != null && reader.getSize() > 0;
     }
 
-    public void executeAction(String nodeId, String actionName, String actionId, Map<String, Object> parameters, boolean async) {
-
-        ActionService actionService = serviceRegistry.getActionService();
-        Action action = actionService.createAction(actionName);
-        action.setTrackStatus(true);
-
-        NodeRef nodeRef = new NodeRef(storeRef, nodeId);
-
-        if (async) {
-            ActionObserver.getInstance().addAction(nodeRef, action);
-        }
-        if (parameters != null) {
-            for (Object key : parameters.keySet()) {
-                action.setParameterValue((String) key, (Serializable) parameters.get(key));
-            }
-        }
-        actionService.executeAction(action, nodeRef, true, async);
-
-    }
 
     public String getGroupFolderId() throws Throwable {
         return getGroupFolderId(this.authenticationInfo.get(CCConstants.AUTH_USERNAME));

@@ -116,7 +116,7 @@ export class SelfAdjustingTextareaComponent implements OnInit, OnChanges {
             this.ngZone.onStable
                 .pipe(take(1))
                 .subscribe(() => this.autosize?.resizeToFitContent(true));
-        } else if (changes.text?.currentValue) {
+        } else if (changes.text?.previousValue !== changes.text?.currentValue) {
             this.latestStoredText = changes.text.currentValue;
             this.descriptionControl.patchValue(changes.text.currentValue);
         }

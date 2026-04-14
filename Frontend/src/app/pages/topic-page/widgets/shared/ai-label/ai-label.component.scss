@@ -1,9 +1,9 @@
-@use '../../../../topic-page/topic-page-variables' as *;
+@use '../../../topic-page-variables' as topicPageVars;
 
 .ai-label {
-    font-size: $font-size-x-small;
-    font-family: $brand-font-family;
-    font-weight: $font-weight-x-bold;
+    font-size: topicPageVars.$font-size-x-small;
+    font-family: topicPageVars.$brand-font-family;
+    font-weight: topicPageVars.$font-weight-x-bold;
     display: inline-flex;
     gap: 8px;
     align-items: center;
@@ -12,7 +12,7 @@
         padding: 0 16px;
         position: absolute;
         background: rgba(0, 0, 0, 0.45);
-        color: $on-primary;
+        color: topicPageVars.$on-primary;
         bottom: 2rem;
         right: 0;
         z-index: 11;
@@ -20,7 +20,7 @@
 
     &.text-container {
         padding: 0 8px;
-        color: $secondary;
+        color: topicPageVars.$secondary;
         float: right;
     }
 

@@ -376,6 +376,9 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
         }
     }
 
+    supportsLicensing() {
+        return !this.node?.isDirectory && this.node.type !== RestConstants.CCM_TYPE_SAVED_SEARCH;
+    }
     getType() {
         if (this.node?.isDirectory) {
             return this.node.collection ? 'COLLECTION' : 'DIRECTORY';
@@ -385,7 +388,11 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
     }
 
     copyAllowed() {
-        return this.publishCopyPermission && !this.node?.isDirectory;
+        return (
+            this.publishCopyPermission &&
+            !this.node?.isDirectory &&
+            this.node.type !== RestConstants.CCM_TYPE_SAVED_SEARCH
+        );
     }
 
     setRepublish() {

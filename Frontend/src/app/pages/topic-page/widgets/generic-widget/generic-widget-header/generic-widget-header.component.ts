@@ -1,45 +1,44 @@
 import { Component, computed, input, output } from '@angular/core';
 import { EduSharingUiModule } from 'ngx-edu-sharing-ui';
+import { AiTextPromptPipe } from '../../../shared/pipes/ai-text-prompt.pipe';
 import { PromptToTextMapping } from '../../../shared/types/prompt-to-text-mapping';
 import { EditableTextComponent } from '../../shared/editable-text/editable-text.component';
-import { AiTextPromptPipe } from '../../../shared/pipes/ai-text-prompt.pipe';
-
-export interface TextChangeEvent {
-    text: string;
-    isHeadline: boolean;
-}
 
 export interface SearchResultsEvent {
     count: number;
     type: string;
+}
+export interface TextChangeEvent {
+    text: string;
+    isHeadline: boolean;
 }
 
 @Component({
     selector: 'es-generic-widget-header',
     standalone: true,
     imports: [AiTextPromptPipe, EditableTextComponent, EduSharingUiModule],
-    styleUrls: ['./generic-widget-header.component.scss'],
     templateUrl: './generic-widget-header.component.html',
+    styleUrls: ['./generic-widget-header.component.scss'],
 })
 export class WidgetHeaderComponent {
+    aiSupported = input<boolean>(false);
     description = input<string>('');
     descriptionAiGenerated = input<boolean>(false);
     descriptionMapping = input<PromptToTextMapping>();
     descriptionOptional = input<boolean>(true);
+    hideDescription = input<boolean>(false);
     headline = input<string>('');
     headlineAiGenerated = input<boolean>(false);
     headlineMapping = input<PromptToTextMapping>();
     editMode = input<boolean>(false);
     updateInProgress = input<boolean>(false);
     searchInput = input<string>('');
-    hideDescription = input<boolean>(false);
 
     textChange = output<TextChangeEvent>();
     searchResultsUpdated = output<SearchResultsEvent>();
 
     // computed properties for template
     readonly shouldShowHeadline = computed(() => this.headline() || this.editMode());
-
     readonly shouldShowDescription = computed(
         () => (this.description() && !this.hideDescription()) || this.editMode(),
     );

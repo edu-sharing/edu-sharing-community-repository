@@ -1,0 +1,67 @@
+<div class="add-swimlane-container">
+  <div class="container-border"></div>
+  <button mat-mini-fab class="add-swimlane-btn" [matMenuTriggerFor]="addComponentMenu">
+    <i esIcon="add"></i>
+  </button>
+  <div class="container-border"></div>
+  <!-- note: the options are currently static due to the missing context in [matMenuTriggerFor] -->
+  <mat-menu #addComponentMenu="matMenu" class="topic-page-menu">
+    <div class="mat-menu-header-container">
+      {{ 'TOPIC_PAGE.SWIMLANE.SELECT_ELEMENT.HEADING' | translate }}
+    </div>
+    <button mat-menu-item [matMenuTriggerFor]="containerGrid">
+      <i esIcon="rectangle"></i>
+      <span>
+        {{ 'TOPIC_PAGE.SWIMLANE.SELECT_ELEMENT.CONTAINER_ELEMENT' | translate }}
+      </span>
+    </button>
+    <button mat-menu-item [matMenuTriggerFor]="accordionGrid">
+      <i esIcon="storage"></i>
+      <span>
+        {{ 'TOPIC_PAGE.SWIMLANE.SELECT_ELEMENT.ACCORDION_ELEMENT' | translate }}
+      </span>
+    </button>
+    <button mat-menu-item [matMenuTriggerFor]="anchorGrid">
+      <i esIcon="anchor"></i>
+      <span>
+        {{ 'TOPIC_PAGE.SWIMLANE.SELECT_ELEMENT.ANCHOR_MENU' | translate }}
+      </span>
+    </button>
+  </mat-menu>
+
+  <!-- menu for both types "container" and "accordion" with the same content defined in #gridConfiguration -->
+  <mat-menu #containerGrid="matMenu" class="topic-page-menu">
+    <ng-container
+      *ngTemplateOutlet="gridConfiguration; context: { type: 'container' }"
+    ></ng-container>
+  </mat-menu>
+
+  <mat-menu #accordionGrid="matMenu" class="topic-page-menu">
+    <ng-container
+      *ngTemplateOutlet="gridConfiguration; context: { type: 'accordion' }"
+    ></ng-container>
+  </mat-menu>
+
+  <mat-menu #anchorGrid="matMenu" class="topic-page-menu">
+    <ng-container *ngTemplateOutlet="gridConfiguration; context: { type: 'anchor' }"></ng-container>
+  </mat-menu>
+
+  <ng-template #gridConfiguration let-type="type">
+    <div class="mat-menu-header-container">
+      {{ 'TOPIC_PAGE.SWIMLANE.SELECT_LAYOUT.HEADING' | translate }}
+    </div>
+    <button
+      mat-menu-item
+      *ngFor="let option of swimlaneGridOptions"
+      (click)="configureSwimlaneAndGrid(type, option.value)"
+    >
+      <i
+        class="material-icons-sharp"
+        *ngIf="option.icon"
+        [esIcon]="option.icon"
+        [path]="option.icon.startsWith('svg-') ? iconPath : null"
+      ></i>
+      {{ 'TOPIC_PAGE.SWIMLANE.SELECT_LAYOUT.' + option.viewValue | translate }}
+    </button>
+  </ng-template>
+</div>

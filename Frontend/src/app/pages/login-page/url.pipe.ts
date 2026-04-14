@@ -6,6 +6,9 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class UrlPipe implements PipeTransform {
     transform(value: any, args: any): any {
+        if (!value.startsWith('http://') && !value.startsWith('https://')) {
+            value = 'https://' + value;
+        }
         let url = new URL(value);
         if (args['mode'] == 'domain') {
             return url.host;

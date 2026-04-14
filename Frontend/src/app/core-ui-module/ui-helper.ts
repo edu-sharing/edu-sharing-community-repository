@@ -195,6 +195,12 @@ export class UIHelper {
         void router.navigate([UIConstants.ROUTER_PREFIX, 'render', node.ref.id]);
     }
 
+    public static goToTopicPage(router: Router, node: Node) {
+        void router.navigate([UIConstants.ROUTER_PREFIX, 'topic-pages'], {
+            queryParams: { collectionId: node.ref.id },
+        });
+    }
+
     public static goToCollection(
         router: Router,
         node: Node,

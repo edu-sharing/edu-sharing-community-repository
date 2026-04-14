@@ -145,9 +145,9 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
     }
 
     @Override
-    public List<String> getAlteredNodes(java.util.Date from) {
+    public List<String> getAlteredNodes(java.util.Date from, java.util.Date to) {
         try (SqlSession session = new ConnectionDBAlfresco().getSqlSessionFactoryBean().openSession()) {
-            return session.getMapper(EduTrackingMapper.class).eduAlteredNodes(from).stream().
+            return session.getMapper(EduTrackingMapper.class).eduAlteredNodes(from,to).stream().
                     map(NodeResult::getNodeid).collect(Collectors.toList());
         }
     }

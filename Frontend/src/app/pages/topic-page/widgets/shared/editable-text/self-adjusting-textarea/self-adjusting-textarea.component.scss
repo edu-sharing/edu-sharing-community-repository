@@ -1,4 +1,4 @@
-@use '../../../../topic-page-variables' as *;
+@use '../../../../topic-page-variables' as topicPageVars;
 
 :host {
     width: 100%;
@@ -29,7 +29,7 @@
     markdown-toolbar {
         padding: 4px;
         display: inline-flex;
-        border: 1px solid $outline-light;
+        border: 1px solid topicPageVars.$outline-light;
         border-radius: 3px;
         outline: none;
         max-width: 100%;
@@ -42,7 +42,7 @@
             height: 24px;
             padding: 3px 5px;
             width: 28px;
-            color: $on-surface;
+            color: topicPageVars.$on-surface;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -55,11 +55,11 @@
             }
 
             &:hover {
-                color: $primary;
+                color: topicPageVars.$primary;
             }
 
             &:disabled {
-                color: $secondary-text;
+                color: topicPageVars.$secondary-text;
                 cursor: not-allowed;
             }
         }
@@ -67,7 +67,7 @@
 
     .ai-buttons {
         padding: 4px 8px;
-        border: 1px solid $outline-light;
+        border: 1px solid topicPageVars.$outline-light;
         border-radius: 3px;
         display: inline-flex;
         gap: 4px;
@@ -80,10 +80,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: $on-surface;
+            color: topicPageVars.$on-surface;
 
             &:disabled {
-                color: $secondary-text;
+                color: topicPageVars.$secondary-text;
                 cursor: not-allowed;
             }
 
@@ -123,7 +123,7 @@
         // avoid horizontal scrolling
         overflow: hidden;
 
-        &.wlo-text-center {
+        &.topic-page-text-center {
             text-align: center;
         }
     }

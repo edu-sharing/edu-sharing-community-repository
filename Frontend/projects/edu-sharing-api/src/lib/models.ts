@@ -75,6 +75,8 @@ export {
     SearchResultNode as SearchResults,
     SearchParameters,
     Repo as Repository,
+    RepositoryMessage,
+    RepositoryConfig,
     Statistics,
     StatisticsGroup,
     StreamEntry,

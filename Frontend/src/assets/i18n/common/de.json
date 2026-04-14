@@ -12,6 +12,7 @@
   "SAVE": "Speichern",
   "DISCARD": "Verwerfen",
   "APPLY": "Übernehmen",
+  "USE": "Verwenden",
   "CANCEL": "Abbrechen",
   "YES_DELETE": "Ja, löschen",
   "RESET": "Zurücksetzen",
@@ -22,6 +23,7 @@
   "USER_GUEST": "Gast",
   "IMPRINT": "Impressum",
   "PRIVACY_INFORMATION": "Datenschutz",
+  "NOTICE": "Hinweis",
   "ONLINE_HELP": "Online-Hilfe",
   "WHATS_NEW": "Was ist neu?",
   "SHOW": "Anzeigen",
@@ -244,6 +246,7 @@
     "SECURE": "Safe",
     "PERMISSIONS": "Kontenverwaltung",
     "LOGIN": "Login",
+    "RENDER": "Rendering",
     "ADMIN": "Admin-Tools",
     "WORKSPACE_SHORT": "Workspace",
     "SEARCH_SHORT": "Suche",
@@ -365,7 +368,7 @@
       "CC_SHARE_ND": "Keine Bearbeitung des Werks erlaubt.",
       "CC_SHARE_SA": "Bearbeitung erlaubt, wenn es unter gleichen Bedingungen weitergegeben wird.",
       "CC_COMMERCIAL_NC": "Keine kommerzielle Verwendung erlaubt.",
-      "CC_0": "Dieses Werk ist gemeinfrei.<br />Keine Attribuierung und Namensnennung notwendig.<br />Kommerzielle Nutzung erlaubt.",
+      "CC_0": "Dieses Werk ist gemeinfrei.<br />Keine Attributierung und Namensnennung notwendig.<br />Kommerzielle Nutzung erlaubt.",
       "COPYRIGHT_FREE": "Das Werk ist kostenfrei zugänglich.<br />Nutzung und Quellenangabe gemäß den allgemeingültigen gesetzlichen Regelungen (UrhG).",
       "COPYRIGHT_LICENSE": "Das Werk darf ausschließlich von einer eingeschränkten Anzahl von Personen gemäß den vertraglichen Bedingungen genutzt werden.<br />Keine Weitergabe an Dritte.<br />Quellenangabe gemäß der üblichen Praxis.",
       "SCHULFUNK": "Zugangsbeschränkte und zeitlich begrenzte Bereitstellung als Schulfunksendung nach §47 UrhG.<br />Keine Weitergabe an Dritte.<br />Quellenangabe gemäß der üblichen Praxis.",
@@ -382,6 +385,17 @@
       "UNTERRICHTS_UND_LEHRMEDIEN": "§60b Unterrichts- und Lehrmedien",
       "EDU": "edu-sharing Lizenzen",
       "CUSTOM": "eigene Lizenz definieren"
+    },
+    "URLS": {
+      "CC_BY_ABOUT": "https://creativecommons.org/licenses/list.de",
+      "CC_BY": "https://creativecommons.org/licenses/by/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_ND": "https://creativecommons.org/licenses/by-nd/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_SA": "https://creativecommons.org/licenses/by-sa/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_NC": "https://creativecommons.org/licenses/by-nc/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_NC_ND": "https://creativecommons.org/licenses/by-nc-nd/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_NC_SA": "https://creativecommons.org/licenses/by-nc-sa/{{version}}/{{locale}}legalcode.de",
+      "CC_0": "https://creativecommons.org/publicdomain/zero/1.0/legalcode.de",
+      "PDM": "https://creativecommons.org/public-domain/pdm/"
     }
   },
   "COOKIE_INFO": {
@@ -681,10 +695,12 @@
     "OPEN_ORIGINAL_NODE": "Original öffnen",
     "DEBUG": "Debug",
     "INVITE": "Freigeben",
+    "APPLY_FILTER": "Suchergebnis übernehmen",
     "EDIT": "Infos bearbeiten",
     "EDIT_ORIGINAL": "Quelle bearbeiten",
     "EDIT_SIMPLE": "Schnell-Bearbeitung",
     "COLLECTION_EDIT": "Bearbeiten",
+    "SHOW_TOPIC_PAGE": "Zur Themenseite",
     "COLLECTION_PIN": "Sammlung pinnen",
     "MATERIAL_FEEDBACK": "Feedback...",
     "MATERIAL_FEEDBACK_VIEW": "Feedback ansehen",
@@ -813,7 +829,8 @@
         "DECLINED": "Der Vorschlag wurde abgelehnt",
         "INVALID_VALUE": "Der Vorschlagswert war ungültig und konnte nicht verwendet werden"
       }
-    }
+    },
+    "OPEN_CLOSE_EXTENDED": "Ansicht öffnen/schließen"
   },
   "FEEDBACK": {
     "TITLE": "Feedback zum Material geben.",
@@ -1265,6 +1282,7 @@
     "AT": "Österreich",
     "AU": "Australien",
     "BA": "Bosnien und Herzegovina",
+    "BE": "Belgien",
     "BG": "Bulgarien",
     "BH": "Bahrain",
     "BO": "Bolivien",

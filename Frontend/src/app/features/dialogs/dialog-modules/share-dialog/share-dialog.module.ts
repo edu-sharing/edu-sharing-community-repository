@@ -25,6 +25,6 @@ export { ShareDialogComponent };
         ShareDialogRestrictedAccessComponent,
     ],
     imports: [SharedModule],
-    exports: [ShareDialogComponent],
+    exports: [ShareDialogComponent, ShareDialogChooseDateComponent],
 })
 export class ShareDialogModule {}

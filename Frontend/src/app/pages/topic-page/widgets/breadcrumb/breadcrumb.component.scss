@@ -1,0 +1,137 @@
+@use '@angular/material' as mat;
+@use '../../topic-page-variables' as topicPageVars;
+
+:host {
+    width: 100%;
+}
+
+// global style of breadcrumb
+.es-topic-page-breadcrumb {
+    margin-left: 1em;
+    padding: var(--breadcrumb-padding-y) 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    min-height: var(--breadcrumb-min-height);
+    box-sizing: border-box;
+    font-size: 0.9375rem;
+    --breadcrumb-min-height: 68px;
+    --breadcrumb-padding-y: 4px;
+
+    // left aligned breadcrumb items
+    .es-topic-page-breadcrumb-list {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        gap: 4px;
+
+        .es-topic-page-breadcrumb-list-item {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+
+            a,
+            .select-config-field {
+                font-weight: normal;
+                text-decoration: none;
+            }
+
+            .select-config-field {
+                // workaround to overflow the padding of the breadcrumb component
+                margin-top: calc(-1 * var(--breadcrumb-padding-y) + 4px);
+                margin-bottom: calc(-1 * var(--breadcrumb-padding-y));
+                // reduce padding-top to avoid overlapping the breadcrumb
+                padding-top: 4px;
+                // add padding-bottom to avoid uneven centered text
+                padding-bottom: 4px;
+                --disabled-config-select-color: #999;
+
+                // color adjustments
+                @include mat.form-field-overrides(
+                    (
+                        outlined-label-text-color: topicPageVars.$on-primary,
+                        outlined-hover-label-text-color: topicPageVars.$on-primary,
+                        outlined-focus-label-text-color: topicPageVars.$on-primary,
+                        outlined-input-text-color: topicPageVars.$on-primary,
+                        outlined-outline-color: topicPageVars.$on-primary,
+                        outlined-hover-outline-color: topicPageVars.$on-primary,
+                        outlined-focus-outline-color: topicPageVars.$on-primary,
+                        outlined-disabled-label-text-color: var(--disabled-config-select-color),
+                        outlined-disabled-input-text-color: var(--disabled-config-select-color),
+                        outlined-disabled-outline-color: var(--disabled-config-select-color),
+                    )
+                );
+
+                @include mat.select-overrides(
+                    (
+                        enabled-trigger-text-color: topicPageVars.$on-primary,
+                        enabled-arrow-color: topicPageVars.$on-primary,
+                        focused-arrow-color: topicPageVars.$on-primary,
+                        placeholder-text-color: topicPageVars.$on-primary,
+                        disabled-trigger-text-color: topicPageVars.$on-primary,
+                        disabled-arrow-color: var(--disabled-config-select-color),
+                    )
+                );
+
+                // guarantee mat-select floating label stays white
+                &:not(.mat-form-field-disabled) ::ng-deep .mdc-floating-label {
+                    color: topicPageVars.$on-primary !important;
+                }
+
+                &.mat-form-field-disabled {
+                    cursor: not-allowed;
+                }
+
+                // avoid uneven padding of the form field
+                &::ng-deep .mat-mdc-form-field-infix {
+                    padding-top: var(--mat-form-field-container-vertical-padding, 16px) !important;
+                }
+            }
+
+            &.last-item {
+                a {
+                    font-family: topicPageVars.$brand-font-family;
+                    font-weight: topicPageVars.$font-weight-x-bold;
+                }
+            }
+        }
+    }
+}
+
+// add a border-top to navigate to template option
+.navigate-to-template {
+    border-top: 1px solid #ccc;
+}
+
+// for extra small devices (portrait phones, less than 620px), reserve space for the bookmark
+// custom breakpoint
+@media (max-width: 619.98px) {
+    .es-topic-page-breadcrumb {
+        margin-right: 116px;
+
+        .es-topic-page-breadcrumb-list {
+            flex-wrap: wrap;
+
+            // reset workaround to overflow the padding of the breadcrumb component
+            .es-topic-page-breadcrumb-list-item .select-config-field {
+                margin-top: 0;
+                margin-bottom: 0;
+            }
+        }
+    }
+
+    .es-topic-page-breadcrumb.edit-mode {
+        flex-wrap: wrap;
+    }
+}
+
+// adjust spinner container to be placed in the breadcrumb container
+:host es-spinner ::ng-deep {
+    .spinnercontainer {
+        margin-top: unset;
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+}

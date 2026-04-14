@@ -3,7 +3,8 @@
   <es-node-entries
     class="main-content"
     [blacklistedNodeIds]="blacklistedNodeIds"
-    [queryId]="queryId()"
+    [contextNodeId]="contextNodeId"
+    [queryId]="queryId"
     [criteria]="criteria()"
     [layout]="layout"
     [scrollGradientColor]="swimlaneColor() && !swimlaneShapeSelected() ? swimlaneColor() : null"
@@ -12,8 +13,8 @@
     (blacklistChanged)="changedBlacklist($event)"
     (displayTypeChanged)="layoutChangeAction()"
     (itemClicked)="itemClicked($event)"
-    (nodeStatisticsChanged)="changeNodeStatistics($event)"
     (totalSearchResultCountChanged)="changeTotalSearchResultCount($event)"
+    (visibleNodesChanged)="changeVisibleNodes($event)"
   ></es-node-entries>
 
   <!-- color + configuration buttons -->

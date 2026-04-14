@@ -2,8 +2,8 @@
 @use 'sass:map';
 @use 'sass:meta';
 // make variables locally available, but also forward them to other files
-@use '../../../../projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
-@forward '../../../../projects/edu-sharing-ui/assets/scss/variables-scss';
+@use 'variables-scss' as vars;
+@forward 'variables-scss';
 
 // re-export important variables
 $mobileWidth: vars.$mobileWidth;
@@ -46,7 +46,6 @@ $surface-container-lowest: if(
     #fff
 );
 $surface-selected: #f2f5f8;
-$surface-wlo: #f6f8fb;
 
 // EXTENDED COLOR VARIABLES
 // status colors

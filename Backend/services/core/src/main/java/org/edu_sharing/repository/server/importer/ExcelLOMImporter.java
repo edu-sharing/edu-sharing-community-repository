@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
@@ -42,9 +43,9 @@ import java.util.*;
 import java.util.stream.Stream;
 
 
-public class ExcelLOMImporter {
 
-	Logger logger = Logger.getLogger(ExcelLOMImporter.class);
+@Slf4j
+public class ExcelLOMImporter {
 	
 	Map<String,String> excelAlfMap = null;
 	
@@ -109,7 +110,7 @@ public class ExcelLOMImporter {
 				try{
 					currentLevelObjects = apiClient.getChildren(parentFolder);
 				}catch(Throwable e){
-					logger.error(e.getMessage(),e);
+					log.error(e.getMessage(),e);
 				}
 				
 				if(!IdxColumnMap.isEmpty()){
@@ -128,7 +129,7 @@ public class ExcelLOMImporter {
 
 						String columnName = IdxColumnMap.get(colIdxIdx);
 						if(columnName == null){
-							logger.error("no column name found for column:"+colIdxIdx);
+							log.error("no column name found for column:"+colIdxIdx);
 							continue;
 						}
 						columnName = columnName.trim();
@@ -173,7 +174,7 @@ public class ExcelLOMImporter {
 										toSafe.put(QName.createQName(alfrescoProperty), value);
 									}
 								}else {
-									logger.error("unkown property: " + alfrescoProperty);
+									log.error("unkown property: " + alfrescoProperty);
 									continue;
 								}
 							}
@@ -194,36 +195,16 @@ public class ExcelLOMImporter {
 						String thumbUrl = (String)toSafe.get(qnameThumbnail);
 
 						if((thumbUrl == null || !thumbUrl.startsWith("http")) && (contentUrl == null || contentUrl.trim().isEmpty())) {
-							logger.error("invalid thumbnail url:" + thumbUrl +" for:" +toSafe.get(QName.createQName(CCConstants.CM_NAME))+" will not safe object");
+							log.error("invalid thumbnail url:" + thumbUrl +" for:" +toSafe.get(QName.createQName(CCConstants.CM_NAME))+" will not safe object");
 							createNode = false;
 						}
 						if(createNode) {
-							ChildAssociationRef newNode = nodeService.createNode(new NodeRef(MCAlfrescoAPIClient.storeRef,parentFolder),QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS), QName.createQName(nodeName),  QName.createQName(CCConstants.CCM_TYPE_IO),toSafe);
-							
-							if(contentUrl != null && !contentUrl.trim().isEmpty()){
-								String mimetype = MimeTypes.guessMimetype(contentUrl);
-								try {
-									InputStream inputStream = new URL(contentUrl).openConnection().getInputStream();
-									apiClient.writeContent(MCAlfrescoAPIClient.storeRef,
-											newNode.getChildRef().getId(),
-											inputStream,
-											mimetype,
-											null,
-											CCConstants.CM_PROP_CONTENT);
-								}catch (java.io.FileNotFoundException e){
-									logger.error("no content found for:" + toSafe.get(QName.createQName(CCConstants.CM_NAME))+ "url:" +contentUrl);
-								}
-							}
-						
-							apiClient.createVersion(newNode.getChildRef().getId());
-
-							logger.info("node created:" + serviceRegistry.getNodeService().getPath(newNode.getChildRef()));
-							addToCollections(newNode,collectionsToImportTo,addToCollection);
-						}
+                            createNode(addToCollection, parentFolder, nodeName, toSafe, contentUrl, collectionsToImportTo);
+                        }
 					}else {
-						logger.error("can not determine name property for row: "+row.getRowNum());
+						log.error("can not determine name property for row: "+row.getRowNum());
 					}
-					
+
 				}else{
 				//build the headers
 					for(Cell cell : row){
@@ -232,19 +213,53 @@ public class ExcelLOMImporter {
 						}
 					}
 				}
-				
+
+                log.info("processed row {}", rowCount);
 				rowCount++;
 			}
-			
-			
-			
+
+
+
 		}catch(Exception e){
 			throw e;
 		}
 
 	}
 
-	private void addThumbnail(Map<QName, Serializable> toSafe, String wwwUrl) {
+    private void createNode(Boolean addToCollection, String parentFolder, String nodeName, Map<QName, Serializable> toSafe, String contentUrl, LinkedHashSet<String> collectionsToImportTo) throws Exception {
+        serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+            try{
+                log.info("creating: {}, {}, {}",nodeName,contentUrl,(String)toSafe.get(CCConstants.CCM_PROP_IO_WWWURL));
+                ChildAssociationRef newNode = nodeService.createNode(new NodeRef(MCAlfrescoAPIClient.storeRef, parentFolder), QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS), QName.createQName(nodeName), QName.createQName(CCConstants.CCM_TYPE_IO), toSafe);
+
+                if (contentUrl != null && !contentUrl.trim().isEmpty()) {
+                    String mimetype = MimeTypes.guessMimetype(contentUrl);
+                    try {
+                        InputStream inputStream = new URL(contentUrl).openConnection().getInputStream();
+                        apiClient.writeContent(MCAlfrescoAPIClient.storeRef,
+                                newNode.getChildRef().getId(),
+                                inputStream,
+                                mimetype,
+                                null,
+                                CCConstants.CM_PROP_CONTENT);
+                    } catch (java.io.FileNotFoundException e) {
+                        log.error("no content found for:" + toSafe.get(QName.createQName(CCConstants.CM_NAME)) + "url:" + contentUrl);
+                    }
+                }
+
+                apiClient.createVersion(newNode.getChildRef().getId());
+
+                log.info("node created:" + serviceRegistry.getNodeService().getPath(newNode.getChildRef()));
+                addToCollections(newNode, collectionsToImportTo, addToCollection);
+
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+            return null;
+        });
+    }
+
+    private void addThumbnail(Map<QName, Serializable> toSafe, String wwwUrl) {
 		String thumbnailUrl = (String) toSafe.get(qnameThumbnail);
 		if(thumbnailUrl == null && wwwUrl != null && wwwUrl.contains("youtu")){
 			String youtubeId = getYoutubeId(wwwUrl);
@@ -312,7 +327,7 @@ public class ExcelLOMImporter {
 			String targetCollection = (collectionsForNode.size() == 1)
 					? parentCollection
 					: collectionsForNode.stream().skip(collectionsForNode.size() -1).findFirst().get();
-			logger.info("collections for node " + String.join("/",collectionsForNode) +" p:"+parentCollection +" c:"+targetCollection);
+			log.info("collections for node " + String.join("/",collectionsForNode) +" p:"+parentCollection +" c:"+targetCollection);
 
 			SearchToken searchToken = new SearchToken();
 			searchToken.setFrom(0);
@@ -337,7 +352,7 @@ public class ExcelLOMImporter {
 				String displayPath = path.toDisplayPath(serviceRegistry.getNodeService(),serviceRegistry.getPermissionService());
 				String targetCollectionName = (String)nodeService.getProperty(nodeRef,ContentModel.PROP_NAME);
 				displayPath += "/"+targetCollectionName;
-				logger.info("checking path for parent collection;\"" + parentCollection + "\";path:"+displayPath);
+				log.info("checking path for parent collection;\"" + parentCollection + "\";path:"+displayPath);
 				if(displayPath.contains(parentCollection) && displayPath.endsWith(targetCollection)){
 					pathsMatch.add(displayPath);
 					pathMatchesNodeRef.set(nodeRef);
@@ -346,22 +361,22 @@ public class ExcelLOMImporter {
 
 
 			if(pathsMatch.size() > 1){
-				logger.error("more than one path matches;"+nodeName +";"+newNode.getChildRef()+";" + String.join(";",pathsMatch));
+				log.error("more than one path matches;"+nodeName +";"+newNode.getChildRef()+";" + String.join(";",pathsMatch));
 			}else if(pathsMatch.isEmpty()){
-				logger.error("no path matches;"+nodeName +";"+newNode.getChildRef());
+				log.error("no path matches;"+nodeName +";"+newNode.getChildRef());
 			}else{
-				logger.info("adding;" + nodeName +";"+newNode.getChildRef() +";TO;" + pathsMatch.iterator().next() +"/"+nodeService.getProperty(pathMatchesNodeRef.get(),ContentModel.PROP_NAME));
+				log.info("adding;" + nodeName +";"+newNode.getChildRef() +";TO;" + pathsMatch.iterator().next());
 				try {
 					if(addToCollection) {
 						CollectionServiceFactory.getLocalService().addToCollection(pathMatchesNodeRef.get().getId(), newNode.getChildRef().getId(), null, false);
 					}
 				} catch (Throwable throwable) {
 
-					logger.error(throwable.getMessage(),throwable);
+					log.error(throwable.getMessage(),throwable);
 				}
 			}
 		}else{
-			this.logger.warn("addToCollections expects two collection to be defined in excelsheet;" + wwwUrl);
+			log.info("addToCollections expects minimum one collection to be defined in excelsheet;" + wwwUrl);
 		}
 	}
 
