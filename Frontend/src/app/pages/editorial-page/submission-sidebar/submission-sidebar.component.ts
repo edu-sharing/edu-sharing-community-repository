@@ -31,6 +31,7 @@ export type AssignmentConfig = {
     submission: SubmissionWithAssignment;
     submissionFiles: SubmissionFile[];
     selected: SubmissionFile;
+    selectedFileCallback: (selected: SubmissionFile) => void;
 };
 export type SubmissionConfig = {
     submission: SubmissionWithAssignment;

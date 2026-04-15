@@ -1,11 +1,5 @@
-import { Component, computed, model, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
-import {
-    ListItem,
-    ListItemsModule,
-    NodeDataSource,
-    NodeEntriesService,
-    TreeNodeService,
-} from 'ngx-edu-sharing-ui';
+import { Component, computed, model, ViewChild } from '@angular/core';
+import { ListItem, ListItemsModule, NodeEntriesService, TreeNodeService } from 'ngx-edu-sharing-ui';
 import { SharedModule } from '../../../shared/shared.module';
 import { CommentsListComponent } from '../../../features/mds/mds-editor/widgets/mds-editor-widget-comments/comments-list/comments-list.component';
 import { AssignmentConfig } from '../submission-sidebar/submission-sidebar.component';
@@ -47,5 +41,9 @@ export class AssignmentSidebarComponent {
             });
     });
 
-    setCorrectedFile(item: Node) {}
+    setCorrectedFile(item: Node) {
+        this.data().selectedFileCallback(
+            this.data().submissionFiles.find((f) => f.correction?.ref.id === item.ref.id),
+        );
+    }
 }

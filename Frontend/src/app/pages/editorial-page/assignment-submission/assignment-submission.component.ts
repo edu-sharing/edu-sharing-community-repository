@@ -1,10 +1,17 @@
-import { Component, effect, signal, ViewChild } from '@angular/core';
+import { Component, effect, OnDestroy, signal, ViewChild } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { EditorialBreadcrumbService } from '../editorial-breadcrumb/editorial-breadcrumb.service';
-import { combineLatest, distinctUntilChanged, filter, firstValueFrom } from 'rxjs';
+import {
+    combineLatest,
+    distinctUntilChanged,
+    filter,
+    firstValueFrom,
+    interval,
+    Subject,
+} from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { Assignment, AssignmentV1Service, Submission, SubmissionFile } from 'ngx-edu-sharing-api';
-import { map, switchMap, take, tap } from 'rxjs/operators';
+import { map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import {
     AuthorityNamePipe,
@@ -22,7 +29,12 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { EditorialPageService } from '../editorial-page.service';
 import { SubmissionConfig } from '../submission-sidebar/submission-sidebar.component';
-import { NgxExtendedPdfViewerModule, NgxExtendedPdfViewerService } from 'ngx-extended-pdf-viewer';
+import {
+    IPDFViewerApplication,
+    NgxExtendedPdfViewerComponent,
+    NgxExtendedPdfViewerModule,
+    NgxExtendedPdfViewerService,
+} from 'ngx-extended-pdf-viewer';
 import { RenderWrapperComponent } from '../../render2-page/render-wrapper-component/render-wrapper.component';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 
@@ -35,11 +47,14 @@ import { EditorialSidebarService } from '../../../features/editorial-sidebar/edi
     styleUrls: ['assignment-submission.component.scss'],
     imports: [SharedModule, TranslateModule, NgxExtendedPdfViewerModule, RenderWrapperComponent],
 })
-export class AssignmentSubmissionComponent {
+export class AssignmentSubmissionComponent implements OnDestroy {
+    @ViewChild(NgxExtendedPdfViewerComponent)
+    pdfViewer: NgxExtendedPdfViewerComponent;
     @ViewChild(NodeEntriesWrapperComponent)
     nodeEntries: NodeEntriesWrapperComponent<SubmissionWithAssignment>;
     dataSource = new NodeDataSource<SubmissionWithAssignment>();
     language: string = 'de-DE';
+
     columns = {
         Default: [
             new ListItem('SUBMISSION', 'assignee'),
@@ -47,6 +62,7 @@ export class AssignmentSubmissionComponent {
             new ListItem('SUBMISSION', 'validationStatus'),
         ],
     } as ColumnType;
+    private destroyed$ = new Subject<void>();
     private assignment = signal<Assignment>(null);
     hasCorrectionChanges = signal(false);
     tabSelected = signal(0);
@@ -66,6 +82,21 @@ export class AssignmentSubmissionComponent {
         public editorialSidebarService: EditorialSidebarService,
         private assignmentService: AssignmentV1Service,
     ) {
+        interval(500)
+            .pipe(
+                takeUntil(this.destroyed$),
+                map(() => {
+                    return (this.pdfViewerService as any)
+                        ?.PDFViewerApplication as IPDFViewerApplication;
+                }),
+            )
+            .subscribe((pdf) => {
+                this.hasCorrectionChanges.set(
+                    this.hasCorrectionChanges() ||
+                        (pdf?.pdfDocument?.annotationStorage?.size > 0 &&
+                            (pdf as any)?._annotationStorageModified),
+                );
+            });
         this.language = this.translationsService.getLocale();
         effect(() => {
             const file = this.selectedSubmissionFile();
@@ -78,6 +109,7 @@ export class AssignmentSubmissionComponent {
                 void this.repoUrlService
                     .getRepoUrl(correction.downloadUrl, correction)
                     .then((url) => this.selectedSubmissionFileUrl.set(url));
+                this.hasCorrectionChanges.set(false);
             }
             if (this.assignment() && this.selectedSubmissionFile()) {
                 this.editorialBreadcrumbService.path.set([
@@ -127,7 +159,10 @@ export class AssignmentSubmissionComponent {
                 );
             });
     }
-
+    ngOnDestroy() {
+        this.destroyed$.next();
+        this.destroyed$.complete();
+    }
     protected readonly InteractionType = InteractionType;
     protected readonly Scope = Scope;
     protected readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
