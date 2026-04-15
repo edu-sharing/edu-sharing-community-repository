@@ -2,7 +2,7 @@
   {{ 'EDITORIAL.ASSIGNMENT.FORM.AUTHORITIES_EMPTY' | translate }}
 </div>
 <div class="node-list" *ngIf="authorities()?.length">
-  @for (item of authorities(); track item) {
+  @for (item of authoritiesFiltered(); track item) {
   <div>
     <es-user-avatar [user]="item.authority" size="xsmall"></es-user-avatar>
     <div class="title">{{ item.authority | authorityName }}</div>

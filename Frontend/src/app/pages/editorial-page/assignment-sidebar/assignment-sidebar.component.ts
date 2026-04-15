@@ -61,7 +61,6 @@ export class AssignmentSidebarComponent {
         const file =
             this.data().submissionFiles.find((f) => f.correction?.ref.id === item.ref.id) ||
             this.data().assignmentFiles.find((f) => f.referNode?.ref.id === item.ref.id);
-        console.log(item);
         this.data().selectedFileCallback(item);
         this.data.set({ ...this.data(), selected: file });
     }
