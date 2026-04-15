@@ -273,15 +273,22 @@ export class NodeHelperService {
         }
         let data: { routerLink: string; queryParams: Params } = null;
         if (this.isNodeAssignment(node)) {
+            let mainComponent = 'submitAssignment';
+            if (
+                new AssignmentPipe().transform(node as Assignment, {
+                    mode: 'permissions',
+                }) === 'COORDINATOR'
+            ) {
+                if ((node as Assignment).status === 'DRAFT') {
+                    mainComponent = 'manageAssignment';
+                } else {
+                    mainComponent = 'assignmentSubmission';
+                }
+            }
             data = {
                 routerLink: UIConstants.ROUTER_PREFIX + 'editorial/assignment',
                 queryParams: {
-                    mainComponent:
-                        new AssignmentPipe().transform(node as Assignment, {
-                            mode: 'permissions',
-                        }) === 'COORDINATOR'
-                            ? 'manageAssignment'
-                            : 'submitAssignment',
+                    mainComponent,
                     assignment: node.ref.id,
                 },
             };
