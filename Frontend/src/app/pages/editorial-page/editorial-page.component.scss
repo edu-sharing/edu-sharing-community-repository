@@ -7,7 +7,6 @@ mat-sidenav-container {
         overflow: hidden;
     }
     .main-content {
-        padding: 20px 20px;
         min-height: calc(
             100vh - var(--roundedContainerMargin) - var(--roundedContainerMargin) -
                 var(--mainnavCurrentHeight)
@@ -20,14 +19,21 @@ mat-sidenav-container {
             display: flex;
             flex-direction: row;
             justify-content: space-between;
+            padding: var(--roundedContainerMargin);
             min-height: 68px;
-            padding-bottom: 20px;
             es-editorial-breadcrumb {
             }
         }
+        > node-entries-wrapper {
+            display: block;
+            padding: 0 var(--roundedContainerMargin);
+        }
+        mat-tab-group {
+            padding: 0;
+        }
         .option-area {
             display: flex;
-            padding: 15px 0 10px 0;
+            padding: 15px var(--roundedContainerMargin) 10px var(--roundedContainerMargin);
             .options-left {
                 flex-grow: 1;
             }

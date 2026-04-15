@@ -85,6 +85,7 @@
       </ng-container>
       <ng-container *ngIf="(mainComponent$ | async) === null">
         <mat-tab-group
+          class="mat-tab-group-shadow"
           *ngIf="(editorialPageService.observeTabs() | async)?.length"
           [selectedIndex]="tabSelection$ | async"
           (selectedIndexChange)="tabSelection$.next($event)"

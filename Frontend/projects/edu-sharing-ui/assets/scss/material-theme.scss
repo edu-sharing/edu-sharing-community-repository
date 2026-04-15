@@ -147,6 +147,9 @@ mat-tab-group {
     mat-tab-header {
         background-color: var(--roundedContainerBackground);
     }
+    &.mat-tab-group-shadow mat-tab-header {
+        @include materialShadowBottom();
+    }
 }
 .mat-tab-group.mat-dark {
     .mat-tab-header {

@@ -3,6 +3,8 @@
 @use 'projects/edu-sharing-ui/src/lib/node-entries/node-entries-card-small/node-entries-card-small.component'
     as card;
 
+$maxWidth: 1200px;
+
 @mixin feedback() {
     background: linear-gradient(
             to right,
@@ -31,22 +33,31 @@
     }
 }
 
-$maxWidth: 1200px;
 mat-tab-group {
     width: 100%;
-    max-width: $maxWidth;
     justify-self: center;
     display: flex;
+}
+mat-tab-header {
+    @include mixins.materialShadowBottom();
+}
+ngx-extended-pdf-viewer,
+es-render-wrapper-component {
+    display: block;
+    padding: 40px var(--roundedContainerMargin) var(--roundedContainerMargin)
+        var(--roundedContainerMargin);
 }
 .assignment-view,
 .assignment-submit {
     width: 100%;
+    max-width: $maxWidth;
     justify-self: center;
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
     gap: 20px;
-    padding-top: 40px;
+    padding: 40px var(--roundedContainerMargin) var(--roundedContainerMargin)
+        var(--roundedContainerMargin);
     .heading {
         width: 100%;
         display: flex;
@@ -63,7 +74,6 @@ mat-tab-group {
         border-bottom: 1px solid vars.$cardSeparatorLineColor;
     }
     .block {
-        padding: 0;
         display: flex;
         flex-direction: column;
         gap: 10px;

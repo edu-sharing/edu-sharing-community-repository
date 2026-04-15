@@ -4,6 +4,9 @@
 @use '../submit-assignment/submit-assignment.component' as sa;
 @use '../manage-submission-nodes/manage-submission-nodes.component' as ms;
 
+:host {
+    overflow-y: auto;
+}
 .details {
     display: flex;
     flex-direction: column;
@@ -24,6 +27,7 @@
 
     .feedback {
         @include sa.feedback();
+        margin-bottom: 20px;
     }
     .node-list {
         padding-top: 10px;
