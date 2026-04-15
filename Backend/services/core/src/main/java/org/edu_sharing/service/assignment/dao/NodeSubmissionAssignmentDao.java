@@ -18,6 +18,7 @@ import org.edu_sharing.restservices.MissingResourceException;
 import org.edu_sharing.restservices.assignment.v1.model.*;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.restservices.shared.UserSimple;
+import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.assignment.AssignmentConfig;
 import org.edu_sharing.service.assignment.AssignmentDao;
 import org.edu_sharing.service.assignment.AssignmentFileDao;
@@ -99,7 +100,6 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
         }));
 
         submissions = registerLazyProvider(createLazySubmissionsProvider());
-
     }
 
 
@@ -249,7 +249,7 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
         nodeService.setOwner(submissionId, ApplicationInfoList.getHomeRepository().getUsername());
         log.debug("Created submissions node {}", submissionId);
 
-        setAssignmentPermissions(request.permissions());
+        setAssignmentPermissions(request.permissions(), request.status() == Assignment.Status.DRAFT);
         setSubmissionPermissions(request.permissions());
         updateAssignmentFiles(request.assignmentFiles());
     }
@@ -273,13 +273,13 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
         log.debug("Update assignment node {} with {}", nodeId, properties);
         nodeService.updateNodeNative(nodeId, properties);
 
-        setAssignmentPermissions(request.permissions());
+        setAssignmentPermissions(request.permissions(), request.status() == Assignment.Status.DRAFT);
         setSubmissionPermissions(request.permissions());
         updateAssignmentFiles(request.assignmentFiles());
     }
 
 
-    private void setAssignmentPermissions(List<PermissionRequest> permissions) {
+    private void setAssignmentPermissions(List<PermissionRequest> permissions, boolean isDraft) {
         List<ACE> aceList = new ArrayList<>(permissions
                 .stream()
                 .flatMap(x -> switch (x.role()) {
@@ -288,10 +288,10 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
                         if (authorityType == AuthorityType.GROUP) {
                             yield authorityService.getMembershipsOfGroupRecursively(x.authorityName())
                                     .stream()
-                                    .flatMap(y -> Stream.of(new ACE(CCConstants.PERMISSION_ASSIGNEE, y), new ACE(CCConstants.PERMISSION_CONSUMER, y)));
+                                    .flatMap(y -> isDraft ? Stream.of(new ACE(CCConstants.PERMISSION_ASSIGNEE, y)) : Stream.of(new ACE(CCConstants.PERMISSION_ASSIGNEE, y), new ACE(CCConstants.PERMISSION_CONSUMER, y)));
 
                         } else {
-                            yield Stream.of(new ACE(CCConstants.PERMISSION_ASSIGNEE, x.authorityName()), new ACE(CCConstants.PERMISSION_CONSUMER, x.authorityName()));
+                            yield isDraft ? Stream.of(new ACE(CCConstants.PERMISSION_ASSIGNEE, x.authorityName())) : Stream.of(new ACE(CCConstants.PERMISSION_ASSIGNEE, x.authorityName()), new ACE(CCConstants.PERMISSION_CONSUMER, x.authorityName()));
                         }
                     }
                     case COORDINATOR ->
@@ -398,6 +398,8 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
             return null;
         }
 
+        validateAssigneeCanSeeAssignment();
+
         String creator = getCreator();
         List<Submission> submissions = getSubmissions().stream().map(SubmissionDao::getSubmission).toList();
         return new Assignment(
@@ -415,6 +417,12 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
                 getPermissions(),
                 submissions
         );
+    }
+
+    private void validateAssigneeCanSeeAssignment() {
+        if(AssignmentUtil.isAssignee(permissionService, getNodeId()) && getStatus() == Assignment.Status.DRAFT) {
+            throw new InsufficientPermissionException("Assignment with id " + getNodeId() + " is in draft mode and cannot be modified by assignees.");
+        }
     }
 
     @Override

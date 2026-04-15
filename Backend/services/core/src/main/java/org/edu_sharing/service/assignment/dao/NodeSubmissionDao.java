@@ -10,6 +10,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.RunAsSystem;
 import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
+import org.edu_sharing.restservices.assignment.v1.model.Assignment;
 import org.edu_sharing.restservices.assignment.v1.model.SubmissionValidationRequest;
 import org.edu_sharing.restservices.assignment.v1.model.Submission;
 import org.edu_sharing.restservices.assignment.v1.model.SubmissionFileRequest;
@@ -307,6 +308,10 @@ final class NodeSubmissionDao extends BasicNodeDaoImpl implements SubmissionDao 
     void validateAssigneeCanChangeSubmission() {
         if (AssignmentUtil.isAssignmentCoordinator(permissionService, assignmentDao.getNodeId())) {
             return;
+        }
+
+        if(assignmentDao.getStatus() == Assignment.Status.DRAFT) {
+            throw new InsufficientPermissionException("Assignment with id " + assignmentDao.getNodeId() + " is in draft mode and cannot be modified by assignees.");
         }
 
         if (assignmentDao.getEndDate() != null && assignmentDao.getEndDate().before(new Date())) {
