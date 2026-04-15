@@ -21,6 +21,14 @@
       ></es-list-node-assignment>
     </div>
   </ng-container>
+  <ng-container *ngIf="submittableFiles()?.length > 0">
+    <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.SUBMITTABLE' | translate }}</label>
+    <ng-container *ngTemplateOutlet="list; context: { items: submittableFiles() }"></ng-container>
+  </ng-container>
+  <ng-container *ngIf="supplementaryFiles()?.length > 0">
+    <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.SUPPLEMENTARY' | translate }}</label>
+    <ng-container *ngTemplateOutlet="list; context: { items: supplementaryFiles() }"></ng-container>
+  </ng-container>
   <div class="block feedback" *ngIf="submission().validationStatus === 'FINISHED'" #feedback>
     <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.FEEDBACK.TITLE' | translate }}</label>
     <div>
@@ -30,20 +38,18 @@
       </div>
       <div *ngIf="correctedFiles()?.length > 0">
         <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.FEEDBACK.CORRECTED' | translate }}</label>
-
-        <div class="node-list">
-          @for (item of correctedFiles(); track item) {
-          <div
-            tabindex="0"
-            (click)="setCorrectedFile(item)"
-            [class.selected]="selected()?.correction.ref.id === item.ref.id"
-          >
-            <es-node-type-badge [node]="item"></es-node-type-badge>
-            <div class="title">{{ item | nodeTitle }}</div>
-          </div>
-          }
-        </div>
+        <ng-container *ngTemplateOutlet="list; context: { items: correctedFiles() }"></ng-container>
       </div>
     </div>
   </div>
 </div>
+<ng-template #list let-items="items">
+  <div class="node-list">
+    @for (item of items; track item) {
+    <div tabindex="0" (click)="setFile(item)" [class.selected]="selectedRefId() === item.ref.id">
+      <es-node-type-badge [node]="item"></es-node-type-badge>
+      <div class="title">{{ item | nodeTitle }}</div>
+    </div>
+    }
+  </div>
+</ng-template>

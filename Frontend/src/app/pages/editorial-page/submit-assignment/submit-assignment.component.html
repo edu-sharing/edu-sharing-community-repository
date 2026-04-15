@@ -1,6 +1,13 @@
-<ng-container *ngIf="selectedSubmissionFileUrl()">
+<es-render-wrapper-component
+  *ngIf="selectedAssignmentFile()"
+  [showTopbar]="false"
+  [showMetadata]="false"
+  [nodeId]="selectedAssignmentFile().ref.id"
+  [repository]="selectedAssignmentFile().ref.repo"
+></es-render-wrapper-component>
+<ng-container *ngIf="selectedCorrectedFileUrl()">
   <ngx-extended-pdf-viewer
-    [src]="selectedSubmissionFileUrl()"
+    [src]="selectedCorrectedFileUrl()"
     [height]="'auto'"
     [language]="language"
     [textLayer]="true"
@@ -24,7 +31,10 @@
     <pdf-zoom-toolbar></pdf-zoom-toolbar>
   </div>
 </ng-template>
-<mat-tab-group [mat-stretch-tabs]="true" *ngIf="!selectedSubmissionFileUrl()">
+<mat-tab-group
+  [mat-stretch-tabs]="true"
+  *ngIf="!selectedCorrectedFileUrl() && !selectedAssignmentFile()"
+>
   <mat-tab>
     <ng-template mat-tab-label>
       <i esIcon="inbox"></i>
@@ -60,6 +70,7 @@
               [elementInteractionType]="InteractionType.Emitter"
               [dataSource]="submittableFiles"
               [columns]="columns"
+              (clickItem)="selectSubmissionFile($event.element)"
             ></es-node-entries-wrapper>
           </div>
         </div>
@@ -77,6 +88,7 @@
               [elementInteractionType]="InteractionType.Emitter"
               [dataSource]="supplementaryFiles"
               [columns]="columns"
+              (clickItem)="selectSubmissionFile($event.element)"
             ></es-node-entries-wrapper>
           </div>
         </div>
@@ -95,7 +107,7 @@
                 [dragDrop]="{ dragAllowed: false }"
                 [initConfig]="correctionConfig"
                 [elementInteractionType]="InteractionType.Emitter"
-                (clickItem)="selectSubmissionFile($event.element)"
+                (clickItem)="selectCorrectionFile($event.element)"
                 [dataSource]="correctedFiles"
                 [columns]="columns"
               ></es-node-entries-wrapper>

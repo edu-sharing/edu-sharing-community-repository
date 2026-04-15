@@ -1,4 +1,4 @@
-<ng-container *ngIf="!selectedSubmissionFile()">
+<ng-container *ngIf="!selectedCorrectedFile()">
   <es-node-entries-wrapper
     [primaryInstance]="true"
     [dataSource]="dataSource"
@@ -17,12 +17,12 @@
     </ng-template>
   </es-node-entries-wrapper>
 </ng-container>
-<ng-container *ngIf="selectedSubmissionFile() && selectedSubmissionFileUrl() !== undefined">
+<ng-container *ngIf="selectedCorrectedFile() && selectedSubmissionFileUrl() !== undefined">
   <!-- dirty hack via tabSelected: we need to fully unload the ngx-extended-pdf-viewer component since it can't be registered twice -->
   <mat-tab-group (selectedTabChange)="tabSelected.set($event.index)">
     <mat-tab
       *ngIf="
-        selectedSubmissionFileUrl() && selectedSubmissionFile().correction?.mediatype === 'file-pdf'
+        selectedSubmissionFileUrl() && selectedCorrectedFile().correction?.mediatype === 'file-pdf'
       "
     >
       <ng-template mat-tab-label>
@@ -46,11 +46,11 @@
         {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.VIEW_ORIGINAL' | translate }}
       </ng-template>
       <es-render-wrapper-component
-        *ngIf="tabSelected() === 1 && selectedSubmissionFile().content"
+        *ngIf="tabSelected() === 1 && selectedCorrectedFile().content"
         [showTopbar]="false"
         [showMetadata]="false"
-        [nodeId]="selectedSubmissionFile().content.ref.id"
-        [repository]="selectedSubmissionFile().content.ref.repo"
+        [nodeId]="selectedCorrectedFile().content.ref.id"
+        [repository]="selectedCorrectedFile().content.ref.repo"
       ></es-render-wrapper-component>
     </mat-tab>
   </mat-tab-group>

@@ -60,6 +60,7 @@ import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { EditorialPageService } from '../editorial-page.service';
 import { AssignmentConfig } from '../submission-sidebar/submission-sidebar.component';
+import { RenderWrapperComponent } from '../../render2-page/render-wrapper-component/render-wrapper.component';
 
 /**
  * submits an individual assignment (for student)
@@ -72,6 +73,7 @@ import { AssignmentConfig } from '../submission-sidebar/submission-sidebar.compo
         SharedModule,
         TranslateModule,
         EditorComponent,
+        RenderWrapperComponent,
         CommentsListComponent,
         NgxExtendedPdfViewerModule,
     ],
@@ -138,8 +140,9 @@ export class SubmitAssignmentComponent implements OnDestroy {
                 (f) => f.documentRole === 'SUPPLEMENTARY' || this.hasSubmissionFor(f.referNode),
             ),
     );
-    selectedSubmissionFile = signal<Node>(null);
-    selectedSubmissionFileUrl = signal<string>(undefined);
+    selectedAssignmentFile = signal<Node>(null);
+    selectedCorrectedFile = signal<Node>(null);
+    selectedCorrectedFileUrl = signal<string>(undefined);
     submittableFiles = new NodeDataSource<Node>();
     /**
      * all files including user attached
@@ -172,17 +175,20 @@ export class SubmitAssignmentComponent implements OnDestroy {
         this.initOptions();
         this.language = this.translationsService.getLocale();
         effect(() => {
-            const file = this.selectedSubmissionFile();
-            this.selectedSubmissionFileUrl.set(undefined);
+            const file = this.selectedCorrectedFile();
+            this.selectedCorrectedFileUrl.set(undefined);
             if (!file?.downloadUrl) {
-                this.selectedSubmissionFileUrl.set(null);
+                this.selectedCorrectedFileUrl.set(null);
             } else {
                 void this.repoUrlService
                     .getRepoUrl(file.downloadUrl, file)
-                    .then((url) => this.selectedSubmissionFileUrl.set(url));
+                    .then((url) => this.selectedCorrectedFileUrl.set(url));
             }
         });
-        toObservable(this.selectedSubmissionFileUrl)
+        combineLatest([
+            toObservable(this.selectedAssignmentFile),
+            toObservable(this.selectedCorrectedFileUrl),
+        ])
             .pipe(takeUntil(this.destroyed$), distinctUntilChanged())
             .subscribe(() => this.updateBreadcrumbs());
         this.editorialSidebarService.applyNodeEmitted
@@ -265,19 +271,23 @@ export class SubmitAssignmentComponent implements OnDestroy {
     }
 
     private updateBreadcrumbs() {
-        if (this.selectedSubmissionFileUrl()) {
+        if (this.selectedCorrectedFileUrl() || this.selectedAssignmentFile()) {
             this.editorialPageService.close.set({
                 show: true,
-                callback: () => this.selectedSubmissionFile.set(null),
+                callback: () => {
+                    this.editorialSidebarService.close();
+                    this.selectedAssignmentFile.set(null);
+                    this.selectedCorrectedFile.set(null);
+                },
             });
             this.editorialBreadcrumbService.path.set([
                 {
                     title: this.assignment()?.title,
-                    callback: () => this.selectedSubmissionFile.set(null),
+                    callback: () => this.selectedCorrectedFile.set(null),
                 },
                 {
                     title: new NodeTitlePipe(this.translateService).transform(
-                        this.selectedSubmissionFile(),
+                        this.selectedCorrectedFile(),
                     ),
                 },
             ]);
@@ -560,12 +570,16 @@ export class SubmitAssignmentComponent implements OnDestroy {
     scrollToFeedback() {
         this.uiService.scrollSmooth(this.feedbackRef.nativeElement.getBoundingClientRect().top);
     }
-
     selectSubmissionFile(element: Node) {
-        console.log(
-            this.submissionFiles().find((file) => file.correction?.ref.id === element.ref.id),
-            element,
-        );
+        this.selectedAssignmentFile.set(element);
+        this.showSidebar();
+    }
+    selectCorrectionFile(element: Node) {
+        this.selectedCorrectedFile.set(element);
+        this.showSidebar();
+    }
+
+    private showSidebar() {
         if (!UIService.isMobileWidth()) {
             this.editorialSidebarService.showOption({
                 option: 'VIEW_ASSIGNMENT',
@@ -576,14 +590,30 @@ export class SubmitAssignmentComponent implements OnDestroy {
                         ...this.submission(),
                         assignment: this.assignment(),
                     },
-                    selected: this.submissionFiles().find(
-                        (file) => file.correction?.ref.id === element.ref.id,
-                    ),
+                    selected:
+                        this.submissionFiles().find(
+                            (file) =>
+                                file.correction?.ref.id === this.selectedCorrectedFile()?.ref?.id,
+                        ) ||
+                        this.files().find(
+                            (file) =>
+                                file.referNode?.ref.id === this.selectedAssignmentFile()?.ref?.id,
+                        ),
+                    assignmentFiles: this.files(),
                     submissionFiles: this.submissionFiles(),
-                    selectedFileCallback: (f) => this.selectedSubmissionFile.set(f.correction),
+                    selectedFileCallback: (selected: Node) => {
+                        this.selectedAssignmentFile.set(
+                            this.files().find((f) => f.referNode?.ref?.id === selected.ref.id)
+                                ?.referNode,
+                        );
+                        this.selectedCorrectedFile.set(
+                            this.submissionFiles().find(
+                                (f) => f.correction?.ref?.id === selected.ref.id,
+                            )?.correction,
+                        );
+                    },
                 } as AssignmentConfig,
             });
         }
-        this.selectedSubmissionFile.set(element);
     }
 }

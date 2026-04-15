@@ -10,9 +10,11 @@ import {
 import { SharedModule } from '../../../shared/shared.module';
 import {
     Assignment,
+    AssignmentFile,
     AssignmentV1Service,
     CommentV1Service,
     HOME_REPOSITORY,
+    Node,
     Submission,
     SubmissionFile,
 } from 'ngx-edu-sharing-api';
@@ -29,9 +31,10 @@ import { EditorialSidebarService } from '../../../features/editorial-sidebar/edi
 
 export type AssignmentConfig = {
     submission: SubmissionWithAssignment;
+    assignmentFiles: AssignmentFile[];
     submissionFiles: SubmissionFile[];
-    selected: SubmissionFile;
-    selectedFileCallback: (selected: SubmissionFile) => void;
+    selected: AssignmentFile | SubmissionFile;
+    selectedFileCallback: (selected: Node) => void;
 };
 export type SubmissionConfig = {
     submission: SubmissionWithAssignment;

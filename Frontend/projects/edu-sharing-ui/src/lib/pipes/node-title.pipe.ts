@@ -14,8 +14,8 @@ export class NodeTitlePipe implements PipeTransform {
         node: Node | Assignment | AssignmentFile | NodeRoot | 'HOME',
         args?: { type: 'name' | 'title' },
     ): string {
-        if ((node as AssignmentFile).referNode) {
-            node = (node as AssignmentFile).referNode;
+        if ((node as AssignmentFile)?.referNode) {
+            node = (node as AssignmentFile)?.referNode;
         }
         if (!(node as Node)?.name && isString(node)) {
             if (node === 'HOME') {

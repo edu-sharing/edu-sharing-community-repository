@@ -67,7 +67,7 @@ export class AssignmentSubmissionComponent implements OnDestroy {
     hasCorrectionChanges = signal(false);
     tabSelected = signal(0);
     correctionSaving = signal(false);
-    selectedSubmissionFile = signal<SubmissionFile>(null);
+    selectedCorrectedFile = signal<SubmissionFile>(null);
     selectedSubmissionFileUrl = signal<string>(undefined);
     private submission = signal<Submission>(null);
     constructor(
@@ -99,7 +99,7 @@ export class AssignmentSubmissionComponent implements OnDestroy {
             });
         this.language = this.translationsService.getLocale();
         effect(() => {
-            const file = this.selectedSubmissionFile();
+            const file = this.selectedCorrectedFile();
             this.selectedSubmissionFileUrl.set(undefined);
             const correction = file?.correction;
 
@@ -111,11 +111,11 @@ export class AssignmentSubmissionComponent implements OnDestroy {
                     .then((url) => this.selectedSubmissionFileUrl.set(url));
                 this.hasCorrectionChanges.set(false);
             }
-            if (this.assignment() && this.selectedSubmissionFile()) {
+            if (this.assignment() && this.selectedCorrectedFile()) {
                 this.editorialBreadcrumbService.path.set([
                     {
                         title: this.assignment().title,
-                        callback: () => this.selectedSubmissionFile.set(null),
+                        callback: () => this.selectedCorrectedFile.set(null),
                     },
                     {
                         title: new AuthorityNamePipe(this.translate).transform(
@@ -178,7 +178,7 @@ export class AssignmentSubmissionComponent implements OnDestroy {
                 submission: event,
                 submissionList: this.dataSource.getData(),
                 submissionFileCallback: (submission) => {
-                    this.selectedSubmissionFile.set(submission);
+                    this.selectedCorrectedFile.set(submission);
                 },
             } as SubmissionConfig,
         });
@@ -202,11 +202,11 @@ export class AssignmentSubmissionComponent implements OnDestroy {
                 this.assignmentService.updateSubmissionFileValidation({
                     assignmentId: this.assignment().ref.id,
                     submissionId: this.submission().ref.id,
-                    submissionFileId: this.selectedSubmissionFile().ref.id,
+                    submissionFileId: this.selectedCorrectedFile().ref.id,
                     body: {
                         metadata: {
                             validationStatus:
-                                this.selectedSubmissionFile().validationStatus || 'PENDING',
+                                this.selectedCorrectedFile().validationStatus || 'PENDING',
                         },
                         binary,
                     },

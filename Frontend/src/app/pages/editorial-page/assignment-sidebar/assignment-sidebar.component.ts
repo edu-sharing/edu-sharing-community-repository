@@ -4,7 +4,7 @@ import { SharedModule } from '../../../shared/shared.module';
 import { CommentsListComponent } from '../../../features/mds/mds-editor/widgets/mds-editor-widget-comments/comments-list/comments-list.component';
 import { AssignmentConfig } from '../submission-sidebar/submission-sidebar.component';
 import { TranslateModule } from '@ngx-translate/core';
-import { Node } from 'ngx-edu-sharing-api';
+import { AssignmentFile, Node, SubmissionFile } from 'ngx-edu-sharing-api';
 
 /**
  * sidebar shows information about an assignment
@@ -27,6 +27,11 @@ export class AssignmentSidebarComponent {
     assignment = computed(() => this.data()?.submission?.assignment);
     submission = computed(() => this.data()?.submission);
     selected = computed(() => this.data()?.selected);
+    selectedRefId = computed(
+        () =>
+            (this.selected() as SubmissionFile)?.correction?.ref.id ||
+            (this.selected() as AssignmentFile)?.referNode?.ref.id,
+    );
     correctedFiles = computed(() => {
         return this.data()
             .submissionFiles?.filter(
@@ -41,9 +46,23 @@ export class AssignmentSidebarComponent {
             });
     });
 
-    setCorrectedFile(item: Node) {
-        this.data().selectedFileCallback(
-            this.data().submissionFiles.find((f) => f.correction?.ref.id === item.ref.id),
-        );
+    submittableFiles = computed(() => {
+        return this.data()
+            .assignmentFiles?.filter((s) => s?.documentRole === 'SUBMITTABLE')
+            .map((f) => f.referNode);
+    });
+    supplementaryFiles = computed(() => {
+        return this.data()
+            .assignmentFiles?.filter((s) => s?.documentRole === 'SUPPLEMENTARY')
+            .map((f) => f.referNode);
+    });
+
+    setFile(item: Node) {
+        const file =
+            this.data().submissionFiles.find((f) => f.correction?.ref.id === item.ref.id) ||
+            this.data().assignmentFiles.find((f) => f.referNode?.ref.id === item.ref.id);
+        console.log(item);
+        this.data().selectedFileCallback(item);
+        this.data.set({ ...this.data(), selected: file });
     }
 }
