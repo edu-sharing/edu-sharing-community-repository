@@ -281,23 +281,29 @@ public class ConnectorServlet extends HttpServlet  {
 				builder.setHeader("Content-Type", "application/x-www-form-urlencoded");
 			}
 		}
-		JSONObject result = new JSONObject(new HttpQueryTool().query(builder));
-		HashMap<String, Serializable> properties = new HashMap<String, Serializable>();
-		properties.put(CCConstants.CCM_PROP_CCRESSOURCETYPE, RessourceInfoExecuter.CCM_RESSOURCETYPE_CONNECTOR);
-		properties.put(CCConstants.CCM_PROP_CCRESSOURCESUBTYPE, simpleConnector.getId());
-		if(StringUtils.isNotEmpty(simpleConnector.getApi().getPostRequestHandler())) {
-			SimpleConnector.ConnectorRequest request = new SimpleConnector.ConnectorRequest(
-					requestParameters, simpleConnector, nodeRefOriginal
-			);
-            try {
-                properties.putAll(
-					((SimpleConnector.PostRequestHandler)Class.forName(simpleConnector.getApi().getPostRequestHandler()).getDeclaredConstructor().newInstance()).handleRequest(request, result)
+		String resultStr = new HttpQueryTool().query(builder);
+		try {
+			JSONObject result = new JSONObject(resultStr);
+			HashMap<String, Serializable> properties = new HashMap<String, Serializable>();
+			properties.put(CCConstants.CCM_PROP_CCRESSOURCETYPE, RessourceInfoExecuter.CCM_RESSOURCETYPE_CONNECTOR);
+			properties.put(CCConstants.CCM_PROP_CCRESSOURCESUBTYPE, simpleConnector.getId());
+			if (StringUtils.isNotEmpty(simpleConnector.getApi().getPostRequestHandler())) {
+				SimpleConnector.ConnectorRequest request = new SimpleConnector.ConnectorRequest(
+						requestParameters, simpleConnector, nodeRefOriginal
 				);
-            } catch (Throwable t) {
-				throw new RuntimeException("Error for postRequestHandler", t);
+				try {
+					properties.putAll(
+							((SimpleConnector.PostRequestHandler) Class.forName(simpleConnector.getApi().getPostRequestHandler()).getDeclaredConstructor().newInstance()).handleRequest(request, result)
+					);
+				} catch (Throwable t) {
+					throw new RuntimeException("Error for postRequestHandler", t);
+				}
 			}
-        }
-		return properties;
+			return properties;
+		} catch(JSONException e) {
+			logger.warn("Invalid json received from API " + builder, e);
+			throw e;
+		}
 	}
 
 	@NotNull

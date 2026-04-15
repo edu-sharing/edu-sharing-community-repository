@@ -555,7 +555,7 @@
     <widget>
       <id>curriculum_collapse_items</id>
       <caption>Karteninhalte standardmäßig einklappen </caption>
-      <defaultvalue>true</defaultvalue>
+      <defaultvalue>false</defaultvalue>
       <type>checkbox</type>
     </widget>
     <widget>
