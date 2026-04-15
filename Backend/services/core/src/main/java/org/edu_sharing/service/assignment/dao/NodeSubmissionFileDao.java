@@ -230,6 +230,7 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
             String contentNodeId;
             try {
                 Map<String, String[]> contentProperties = new HashMap<>(request.properties()) {{
+                    put(CCConstants.CM_NAME, new String[]{ "content" });
                     put(CCConstants.CCM_PROP_SUBMISSION_FILE_REFER_TO_ASSIGNMENT_FILE, new String[]{request.assignmentFile()});
                 }};
                 contentNodeId = nodeService.createNode(nodeId, CCConstants.CCM_TYPE_IO, contentProperties, CCConstants.CCM_ASPECT_SUBMISSION_FILE_CONTENT, true);
