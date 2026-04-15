@@ -553,7 +553,13 @@
       <type>checkbox</type>
     </widget>
     <widget>
-      <id>curriculum_only_edit_owned_items</id>
+      <id>curriculum_collapse_items</id>
+      <caption>Karteninhalte standardmäßig einklappen </caption>
+      <defaultvalue>true</defaultvalue>
+      <type>checkbox</type>
+    </widget>
+    <widget>
+      <id>curriculum_allow_copy</id>
       <caption>Pinnwand darf von anderen kopiert werden</caption>
       <defaultvalue>true</defaultvalue>
       <type>checkbox</type>
@@ -916,6 +922,7 @@
 				<curriculum_commentable>
 				<curriculum_auto_refresh>
 				<curriculum_only_edit_owned_items>
+				<curriculum_collapse_items>
 				<curriculum_allow_copy>
 				]]></html>
     </template>
