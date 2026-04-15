@@ -800,6 +800,7 @@
       <values>
         <entry icon="ios_share">created</entry>
         <entry icon="place_item">assigned</entry>
+        <entry icon="done_all">finished</entry>
       </values>
     </widget>
   </widgets>
@@ -1929,6 +1930,9 @@
           {"match": {"properties.ccm:assignment_status.keyword": "DRAFT" }}
           ]
           }}
+        </statement>
+        <statement value="assigned">
+          {"match": {"properties.ccm:assignment_status.keyword": "FINISHED" }}
         </statement>
       </property>
     </query>
