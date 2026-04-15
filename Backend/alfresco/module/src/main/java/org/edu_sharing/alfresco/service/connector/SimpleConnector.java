@@ -58,11 +58,11 @@ public class SimpleConnector implements Serializable {
 		/**
 		 * Java class implementing PostRequestHandler
 		 */
-		private String postRequestHandler;
+		@Optional private String postRequestHandler;
 		/**
 		 * Java class implementing BodyHandler
 		 */
-		private String bodyHandler;
+		@Optional private String bodyHandler;
 		@Optional private SimpleConnectorAuthentication authentication;
 		@Optional private BodyType bodyType;
 		private Map<String, Object> body;
