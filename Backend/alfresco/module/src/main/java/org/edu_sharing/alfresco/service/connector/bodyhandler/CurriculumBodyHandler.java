@@ -16,8 +16,6 @@ public class CurriculumBodyHandler implements SimpleConnector.BodyHandler {
         pairs.add(new BasicNameValuePair("description", getField(requestParameters, "curriculum_description")));
         pairs.add(new BasicNameValuePair("color", getField(requestParameters, "curriculum_color")));
         pairs.add(new BasicNameValuePair("editable", getField(requestParameters, "curriculum_editable")));
-        pairs.add(new BasicNameValuePair("owner_cn", getField(requestParameters, "curriculum_editable")));
-
         // boolean must be int
         pairs.add(new BasicNameValuePair("commentable", "true".equalsIgnoreCase(getField(requestParameters, "curriculum_commentable")) ? "1" : "0"));
         pairs.add(new BasicNameValuePair("auto_refresh", "true".equalsIgnoreCase(getField(requestParameters, "curriculum_auto_refresh")) ? "1" : "0"));

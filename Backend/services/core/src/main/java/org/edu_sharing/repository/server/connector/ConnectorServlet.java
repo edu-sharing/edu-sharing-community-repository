@@ -13,6 +13,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.action.RessourceInfoExecuter;
 import org.edu_sharing.alfresco.service.connector.Connector;
@@ -273,6 +274,9 @@ public class ConnectorServlet extends HttpServlet  {
 
 			} else if(simpleConnector.getApi().getBodyType().equals(SimpleConnector.SimpleConnectorApi.BodyType.Form)) {
 				List<? extends NameValuePair> data = mapSimpleConnectorBody(requestParameters, simpleConnector);
+				try {
+					logger.debug(EntityUtils.toString(new UrlEncodedFormEntity(data)));
+				}catch(Throwable ignored) {}
 				builder.setEntity(new UrlEncodedFormEntity(data));
 				builder.setHeader("Content-Type", "application/x-www-form-urlencoded");
 			}
