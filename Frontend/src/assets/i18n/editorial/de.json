@@ -173,6 +173,9 @@
         "EMPTY": "Für diese Aufgabe wurden noch keine Abgaben angelegt",
         "VIEW_ORIGINAL": "Originaldatei",
         "VIEW_CORRECT": "Korrigieren",
+        "CORRECTED": "Korrigiert",
+        "SAVE_CORRECTED": "Korrektur einreichen",
+        "ALL_CORRECTED": "Die Aufgabe wurde als vollständig korrigiert markiert",
         "CHANGES_SAVED": "Korrektur gespeichert"
       },
       "FORM": {

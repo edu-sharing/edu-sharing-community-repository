@@ -1,6 +1,18 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 0 var(--roundedContainerMargin) var(--roundedContainerMargin) 20px;
+    .actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 20px;
+    }
+}
 #toolbarViewer {
     height: 40px;
     display: flex;

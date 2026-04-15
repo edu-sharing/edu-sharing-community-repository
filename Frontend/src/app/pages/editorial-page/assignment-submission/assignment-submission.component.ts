@@ -63,12 +63,13 @@ export class AssignmentSubmissionComponent implements OnDestroy {
         ],
     } as ColumnType;
     private destroyed$ = new Subject<void>();
-    private assignment = signal<Assignment>(null);
+    assignment = signal<Assignment>(null);
     hasCorrectionChanges = signal(false);
     tabSelected = signal(0);
     correctionSaving = signal(false);
     selectedCorrectedFile = signal<SubmissionFile>(null);
     selectedSubmissionFileUrl = signal<string>(undefined);
+    corrected = signal(0);
     private submission = signal<Submission>(null);
     constructor(
         private route: ActivatedRoute,
@@ -96,6 +97,12 @@ export class AssignmentSubmissionComponent implements OnDestroy {
                         (pdf?.pdfDocument?.annotationStorage?.size > 0 &&
                             (pdf as any)?._annotationStorageModified),
                 );
+            });
+        this.dataSource
+            .connect()
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((s) => {
+                this.corrected.set(s.filter((f) => f.validationStatus === 'FINISHED')?.length);
             });
         this.language = this.translationsService.getLocale();
         effect(() => {
@@ -216,5 +223,23 @@ export class AssignmentSubmissionComponent implements OnDestroy {
         } catch (e) {}
         this.correctionSaving.set(false);
         this.hasCorrectionChanges.set(false);
+    }
+
+    async finishAll() {
+        /**
+         * @TODO
+        await firstValueFrom(this.assignmentService.createOrUpdateAssignment({
+            body: {
+                id: this.assignment().ref.id,
+                assignmentFiles: null,
+                status: 'FINISHED'
+            } as CreateAssignmentRequest
+        }));
+            */
+        this.assignment.set({
+            ...this.assignment(),
+            status: 'CORRECTED',
+        });
+        this.toast.toast('EDITORIAL.ASSIGNMENT.SUBMISSIONS.ALL_CORRECTED');
     }
 }

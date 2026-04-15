@@ -319,6 +319,7 @@
             "enum": [
               "DRAFT",
               "INPROGRESS",
+              "CORRECTED",
               "FINISHED",
               "CANCELED"
             ],
@@ -1727,6 +1728,7 @@
             "enum": [
               "DRAFT",
               "INPROGRESS",
+              "CORRECTED",
               "FINISHED",
               "CANCELED"
             ],

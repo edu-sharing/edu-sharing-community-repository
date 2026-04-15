@@ -80,6 +80,7 @@ public record Assignment(
             Status of the assignment
             * DRAFT: Assignment is in draft state, only visible to creator
             * ASSIGNED: Assignment is assigned and visible to all users with assignee permission
+            * CORRECTED: All submissions of this Assignment have been finished (only for type submission)
             * FINISHED: Assignment has been completed
             * CANCELED: Assignment has been canceled
             """
@@ -87,6 +88,7 @@ public record Assignment(
     public enum Status {
         DRAFT,
         INPROGRESS,
+        CORRECTED,
         FINISHED,
         CANCELED
     }

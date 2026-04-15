@@ -66,6 +66,7 @@ export class NodeEntriesCardSmallComponent<T extends Node> {
         DRAFT: 'news',
         INPROGRESS: 'schedule_send',
         CANCELED: 'cancel',
+        CORRECTED: 'done',
         FINISHED: 'done',
     };
 

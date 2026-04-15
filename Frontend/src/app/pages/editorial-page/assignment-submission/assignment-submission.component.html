@@ -1,21 +1,41 @@
 <ng-container *ngIf="!selectedCorrectedFile()">
-  <es-node-entries-wrapper
-    [primaryInstance]="true"
-    [dataSource]="dataSource"
-    [checkbox]="false"
-    [elementInteractionType]="InteractionType.Emitter"
-    [scope]="Scope.EditorialPage"
-    singleClickHint="static"
-    (clickItem)="select($event.element)"
-    [columns]="columns"
-    [displayType]="editorialPageService.displayType()"
-  >
-    <ng-template #empty>
-      <div class="empty">
-        {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.EMPTY' | translate }}
-      </div>
-    </ng-template>
-  </es-node-entries-wrapper>
+  <div class="list">
+    <es-node-entries-wrapper
+      [primaryInstance]="true"
+      [dataSource]="dataSource"
+      [checkbox]="false"
+      [elementInteractionType]="InteractionType.Emitter"
+      [scope]="Scope.EditorialPage"
+      singleClickHint="static"
+      (clickItem)="select($event.element)"
+      [columns]="columns"
+      [displayType]="editorialPageService.displayType()"
+    >
+      <ng-template #empty>
+        <div class="empty">
+          {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.EMPTY' | translate }}
+        </div>
+      </ng-template>
+    </es-node-entries-wrapper>
+    <div class="actions">
+      <span
+        >{{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.CORRECTED' | translate }}: {{ corrected() }} /
+        {{ dataSource.getTotal() }}</span
+      >
+      <button
+        mat-flat-button
+        color="primary"
+        [disabled]="
+          corrected() < dataSource.getTotal() ||
+          assignment()?.status === 'CORRECTED' ||
+          assignment()?.status === 'FINISHED'
+        "
+        (click)="finishAll()"
+      >
+        {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.SAVE_CORRECTED' | translate }}
+      </button>
+    </div>
+  </div>
 </ng-container>
 <ng-container *ngIf="selectedCorrectedFile() && selectedSubmissionFileUrl() !== undefined">
   <!-- dirty hack via tabSelected: we need to fully unload the ngx-extended-pdf-viewer component since it can't be registered twice -->
