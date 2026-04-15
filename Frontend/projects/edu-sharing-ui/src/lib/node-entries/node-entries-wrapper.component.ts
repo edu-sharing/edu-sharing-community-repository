@@ -149,7 +149,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
      *   selecting the element or displaying information in a complementary page area. The
      *   `dblClickItem` event can be used for a more disruptive action.
      * - When choosing 'dynamic', the `clickItem` event should trigger a major action like
-     *   navigating to a new page or closing a dialog.
+     *   navigating to a new page or closing a dialog. (will show a pointer cursor)
      */
     // TODO: Consider controlling the ui hints and the actual behavior with a single option.
     @Input() singleClickHint: 'dynamic' | 'static' = 'dynamic';
