@@ -580,6 +580,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
                         (file) => file.correction?.ref.id === element.ref.id,
                     ),
                     submissionFiles: this.submissionFiles(),
+                    selectedFileCallback: (f) => this.selectedSubmissionFile.set(f.correction),
                 } as AssignmentConfig,
             });
         }
