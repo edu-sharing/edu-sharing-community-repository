@@ -275,19 +275,19 @@ export class SubmitAssignmentComponent implements OnDestroy {
             this.editorialPageService.close.set({
                 show: true,
                 callback: () => {
-                    this.editorialSidebarService.close();
-                    this.selectedAssignmentFile.set(null);
-                    this.selectedCorrectedFile.set(null);
+                    this.closePreview();
                 },
             });
             this.editorialBreadcrumbService.path.set([
                 {
                     title: this.assignment()?.title,
-                    callback: () => this.selectedCorrectedFile.set(null),
+                    callback: () => {
+                        this.closePreview();
+                    },
                 },
                 {
                     title: new NodeTitlePipe(this.translateService).transform(
-                        this.selectedCorrectedFile(),
+                        this.selectedCorrectedFile() || this.selectedAssignmentFile(),
                     ),
                 },
             ]);
@@ -295,6 +295,12 @@ export class SubmitAssignmentComponent implements OnDestroy {
             this.editorialBreadcrumbService.path.set([{ title: this.assignment()?.title }]);
             this.editorialPageService.close.set({ show: false });
         }
+    }
+
+    private closePreview() {
+        this.editorialSidebarService.close();
+        this.selectedAssignmentFile.set(null);
+        this.selectedCorrectedFile.set(null);
     }
 
     ngOnDestroy(): void {
