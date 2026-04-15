@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements SubmissionFileDao {
@@ -116,7 +117,7 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
         }
         log.debug("Creating new submission file");
         Map<String, Object> properties = new HashMap<>() {{
-            put(CCConstants.CM_NAME, "content");
+            put(CCConstants.CM_NAME, UUID.randomUUID().toString());
         }};
         if(request.assignmentFile() != null) {
             properties.put(CCConstants.CCM_PROP_SUBMISSION_FILE_REFER_TO_ASSIGNMENT_FILE, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, request.assignmentFile()));
