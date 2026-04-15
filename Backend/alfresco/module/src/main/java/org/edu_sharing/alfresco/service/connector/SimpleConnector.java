@@ -4,6 +4,7 @@ import com.typesafe.config.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
 import java.io.Serializable;
@@ -30,6 +31,12 @@ public class SimpleConnector implements Serializable {
 		 */
 		Map<String, Serializable> handleRequest(ConnectorRequest request, JSONObject result);
 	}
+	public interface BodyHandler {
+		/**
+		 * handle and additional mapping of params
+		 */
+		List<BasicNameValuePair> handle(List<BasicNameValuePair> pairs, Map<String, String[]> requestParameters, SimpleConnector simpleConnector);
+	}
 	private String id;
 
 	private String icon;
@@ -52,6 +59,10 @@ public class SimpleConnector implements Serializable {
 		 * Java class implementing PostRequestHandler
 		 */
 		private String postRequestHandler;
+		/**
+		 * Java class implementing BodyHandler
+		 */
+		private String bodyHandler;
 		@Optional private SimpleConnectorAuthentication authentication;
 		@Optional private BodyType bodyType;
 		private Map<String, Object> body;

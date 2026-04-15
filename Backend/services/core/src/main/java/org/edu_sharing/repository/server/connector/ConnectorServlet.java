@@ -43,6 +43,7 @@ import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
@@ -271,10 +272,7 @@ public class ConnectorServlet extends HttpServlet  {
 			if(simpleConnector.getApi().getBodyType() == null) {
 
 			} else if(simpleConnector.getApi().getBodyType().equals(SimpleConnector.SimpleConnectorApi.BodyType.Form)) {
-				List<? extends NameValuePair> data = simpleConnector.getApi().getBody().entrySet().stream()
-						.map((e) -> new BasicNameValuePair(e.getKey(), replaceSimpleConnectorAttributes(requestParameters, e.getValue().toString(), StringUtils::join)))
-						.filter(f -> StringUtils.isNotBlank(f.getValue()))
-						.collect(Collectors.toList());
+				List<? extends NameValuePair> data = mapSimpleConnectorBody(requestParameters, simpleConnector);
 				builder.setEntity(new UrlEncodedFormEntity(data));
 				builder.setHeader("Content-Type", "application/x-www-form-urlencoded");
 			}
@@ -296,6 +294,23 @@ public class ConnectorServlet extends HttpServlet  {
 			}
         }
 		return properties;
+	}
+
+	@NotNull
+	private List<BasicNameValuePair> mapSimpleConnectorBody(Map<String, String[]> requestParameters, SimpleConnector simpleConnector) {
+		List<BasicNameValuePair> pairs = simpleConnector.getApi().getBody().entrySet().stream()
+				.map((e) -> new BasicNameValuePair(e.getKey(), replaceSimpleConnectorAttributes(requestParameters, e.getValue().toString(), StringUtils::join)))
+				.filter(f -> StringUtils.isNotBlank(f.getValue()))
+				.collect(Collectors.toList());
+		if (StringUtils.isNotEmpty(simpleConnector.getApi().getBodyHandler())) {
+			try {
+				SimpleConnector.BodyHandler handler = ((SimpleConnector.BodyHandler) Class.forName(simpleConnector.getApi().getBodyHandler()).getDeclaredConstructor().newInstance());
+				pairs = handler.handle(pairs, requestParameters, simpleConnector);
+			} catch(Exception e) {
+				logger.warn(e.getMessage(), e);
+			}
+		}
+		return pairs;
 	}
 
 	private interface Formatter {
