@@ -70,31 +70,6 @@ export class NodeEntriesCardSmallComponent<T extends Node> {
         FINISHED: 'done',
     };
 
-    assignmentEndTimePriority(assignment: Assignment) {
-        const now = new Date().getTime();
-        /*const permissions = new AssignmentPipe().transform(assignment, { mode: 'permissions' });
-        if (permissions === 'COORDINATOR') {
-            if (assignment.status !== 'INPROGRESS') {
-                return 'low';
-            }
-        } else if (permissions === 'ASSIGNEE') {
-            if (
-                assignment.submissions?.[0]?.submissionStatus === 'FINISHED' ||
-                assignment.submissions?.[0]?.validationStatus === 'FINISHED'
-            ) {
-                return 'low';
-            }
-        }*/
-        const delayUntil =
-            (Date.parse(assignment.endTime as string) ||
-                (assignment.endTime as unknown as number)) - now;
-        // delayed / old
-        if (delayUntil < 0) {
-            return 'high';
-        }
-        return 'low';
-    }
-
     assignmentStatus(assignment: Assignment) {
         if (
             assignment.status === 'INPROGRESS' &&

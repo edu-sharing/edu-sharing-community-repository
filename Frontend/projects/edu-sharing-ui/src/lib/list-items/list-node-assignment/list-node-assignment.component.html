@@ -10,11 +10,9 @@
     {{ 'ASSIGNMENT.STATUS.' + getValidationStatus($any(node)) | translate }}
   </span>
   <span *ngSwitchCase="'submissionDate'" class="status submissionDate">
-    <i esIcon="alarm"></i>
     {{ $any(node).submissionDate | formatDate : { time: true, relative: false } }}
   </span>
   <span *ngSwitchCase="'returnDate'" class="status returnDate">
-    <i esIcon="alarm"></i>
     {{ $any(node).returnDate | formatDate : { time: true, relative: false } }}
   </span>
 </ng-container>
@@ -25,10 +23,9 @@
   <ng-container *ngSwitchCase="'endTime'">
     <span
       *ngIf="$any(node).endTime as endTime"
-      class="status assignmentEndTime"
+      class="status endTime endTime-{{ $any(node) | assignment : { mode: 'endTimePriority' } }}"
       matTooltip="{{ endTime | formatDate : { time: true, relative: false } }}"
     >
-      <i esIcon="alarm"></i>
       {{ endTime | formatDate : { time: false, relative: false } }}
     </span>
   </ng-container>

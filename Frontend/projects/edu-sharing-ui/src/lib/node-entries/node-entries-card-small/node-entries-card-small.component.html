@@ -133,7 +133,7 @@
           {{ 'ASSIGNMENT.STATUS.' + assignmentStatusAssignee($any(node)) | translate }}
         </div>
         <div
-          class="endTime endTime-{{ assignmentEndTimePriority($any(node)) }}"
+          class="endTime endTime-{{ $any(node) | assignment : { mode: 'endTimePriority' } }}"
           *ngIf="$any(node).endTime as endTime"
           [matTooltip]="endTime | formatDate : { relative: false, date: true, time: true }"
         >
