@@ -84,6 +84,11 @@
               | translate
           "
           [(ngModel)]="searchText"
+          [disabled]="
+            isCollectionsTab() &&
+            collectionsDisplayType() === NodeEntriesDisplayType.Tree &&
+            dataSourceCollectionsTree.isLoading
+          "
           (keydown.enter)="executeSearch()"
         />
         <button
@@ -248,7 +253,7 @@
       </ng-template>
 
       <!-- FALLBACK -->
-      <ng-container *ngSwitchDefault> No view defined for tab {{ selectedTab() }}. </ng-container>
+      <ng-container *ngSwitchDefault> No view defined for tab {{ selectedTab() }}.</ng-container>
     </ng-container>
     <ng-template #configureCopy>
       <es-info-message mode="info">
@@ -267,7 +272,7 @@
         >
           ({{ 'MEDIATYPE.collection' | translate }})
         </ng-container>
-        <ng-template #folderType> ({{ 'MEDIATYPE.folder' | translate }}) </ng-template>
+        <ng-template #folderType> ({{ 'MEDIATYPE.folder' | translate }})</ng-template>
         <div
           class="checklist"
           *ngIf="

@@ -163,6 +163,7 @@ export class NodesSelectorComponent implements OnInit {
             selectedNodes.find((n) => !selectedNodeIds.includes(n.parent.id)) ?? selectedNodes[0]
         );
     });
+    isCollectionsTab: Signal<boolean> = computed(() => this.selectedTab() === TabType.COLLECTIONS);
     isMethodologyTab: Signal<boolean> = computed(() => this.selectedTab() === TabType.METHODOLOGY);
     methodologyTabWithValue: Signal<boolean> = computed(
         () => this.isMethodologyTab() && this.atLeastOneEnabledExtendedValue(),
