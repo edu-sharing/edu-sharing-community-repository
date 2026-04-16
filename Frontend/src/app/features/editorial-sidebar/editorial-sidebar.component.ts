@@ -156,16 +156,6 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         // preview.scopes = ['workspace', 'collections'];
         options.push(preview);
 
-        this.optionsHelperDataService.setData({
-            scope: this.primaryMode(),
-            activeObjects: this.editorialSidebarService.nodes(),
-            selectedObjects: this.editorialSidebarService.nodes(),
-            allObjects: this.editorialSidebarService.nodes(),
-            customOptions: {
-                useDefaultOptions: false,
-                addOptions: options,
-            },
-        });
         const createAssignment = new OptionItem(
             'EDITORIAL.OPTIONS.CREATE_ASSIGNMENT',
             'task',
