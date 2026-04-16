@@ -101,4 +101,6 @@ public interface AssignmentDao extends BasicNodeDao {
     String getSubmissionRefId();
 
     AssignmentFileDao getAssignmentFile(String id);
+
+    void setStatus(Assignment.Status status);
 }

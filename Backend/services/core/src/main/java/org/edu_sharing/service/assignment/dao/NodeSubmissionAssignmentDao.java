@@ -257,6 +257,14 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
     private void update(CreateAssignmentRequest request) {
         validateExists();
 
+        if (!canChangeMetadata()) {
+            throw new IllegalStateException("Cannot change metadata of assignment " + nodeId);
+        }
+
+        if(!canChangeStatus(request.status())){
+            throw new IllegalStateException("Cannot change status of assignment " + nodeId + " to " + request.status());
+        }
+
         Map<String, Object> properties = new HashMap<>() {{
             put(CCConstants.CM_NAME, UUID.randomUUID().toString());
             put(CCConstants.CM_PROP_TITLE, request.title());
@@ -265,10 +273,6 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
             put(CCConstants.CCM_PROP_ASSIGNMENT_ALLOW_ADDITIONAL_DOCUMENT_SUBMISSIONS, request.allowAdditionalDocumentSubmissions());
             put(CCConstants.CCM_PROP_ASSIGNMENT_END_DATE, request.endTime());
         }};
-
-        if (!canChangeMetadata()) {
-            throw new IllegalStateException("Cannot change metadata of assignment " + nodeId);
-        }
 
         log.debug("Update assignment node {} with {}", nodeId, properties);
         nodeService.updateNodeNative(nodeId, properties);
@@ -539,5 +543,52 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
             throw new IllegalArgumentException("AssignmentFile with id " + id + " does not exist.");
         }
         return assignmentFileDao;
+    }
+
+
+    @Override
+    @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
+    public void setStatus(Assignment.Status status) {
+        validateExists();
+        refresh();
+
+        if(!canChangeStatus(status)){
+            throw new IllegalStateException("Cannot change status of assignment " + nodeId + " to " + status);
+        }
+        
+        Assignment.Status currentStatus = getStatus();
+        if (currentStatus == status) {
+            log.debug("Submission status of {}, is already set to {}", nodeId, status);
+            return;
+        }
+
+        Map<String, Object> properties = new HashMap<>() {{
+            put(CCConstants.CCM_PROP_ASSIGNMENT_STATUS, status.name());
+        }};
+
+        AuthenticationUtil.runAsSystem(() -> {
+            nodeService.updateNodeNative(nodeId, properties);
+            return null;
+        });
+
+        // we need to update permissions based on the new status because of draft rules (e.g. consumer privileges)
+        List<PermissionRequest> permissions = getPermissions()
+                .stream()
+                .map(x -> new PermissionRequest(x.authority().getAuthorityName(), x.role()))
+                .toList();
+        setAssignmentPermissions(permissions, status == Assignment.Status.DRAFT);
+        setSubmissionPermissions(permissions);
+
+        refresh();
+    }
+
+    private boolean canChangeStatus(Assignment.Status newStatus) {
+        return switch (getStatus()) {
+            case CANCELED, FINISHED -> false;
+            default -> switch (newStatus) {
+                case DRAFT -> getSubmissions().stream().allMatch(s -> s instanceof EmptySubmissionAssignmentDao);
+                default -> true;
+            };
+        };
     }
 }

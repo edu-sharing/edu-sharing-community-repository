@@ -315,7 +315,7 @@
             "$ref": "#/components/schemas/NodeRef"
           },
           "status": {
-            "description": "Status of the assignment\n* DRAFT: Assignment is in draft state, only visible to creator\n* ASSIGNED: Assignment is assigned and visible to all users with assignee permission\n* FINISHED: Assignment has been completed\n* CANCELED: Assignment has been canceled\n",
+            "description": "Status of the assignment\n* DRAFT: Assignment is in draft state, only visible to creator\n* ASSIGNED: Assignment is assigned and visible to all users with assignee permission\n* CORRECTED: All submissions of this Assignment have been finished (only for type submission)\n* FINISHED: Assignment has been completed\n* CANCELED: Assignment has been canceled\n",
             "enum": [
               "DRAFT",
               "INPROGRESS",
@@ -741,6 +741,29 @@
               "type": "string"
             },
             "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ChildrenFileContentUpload": {
+        "description": "Multipart upload for node content",
+        "properties": {
+          "file": {
+            "description": "File content",
+            "format": "binary",
+            "type": "string"
+          },
+          "properties": {
+            "additionalProperties": {
+              "description": "JSON-Metadaten",
+              "items": {
+                "description": "JSON-Metadaten",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "description": "JSON-Metadaten",
+            "type": "object"
           }
         },
         "type": "object"
@@ -1724,7 +1747,7 @@
             "type": "array"
           },
           "status": {
-            "description": "Status of the assignment\n* DRAFT: Assignment is in draft state, only visible to creator\n* ASSIGNED: Assignment is assigned and visible to all users with assignee permission\n* FINISHED: Assignment has been completed\n* CANCELED: Assignment has been canceled\n",
+            "description": "Status of the assignment\n* DRAFT: Assignment is in draft state, only visible to creator\n* ASSIGNED: Assignment is assigned and visible to all users with assignee permission\n* CORRECTED: All submissions of this Assignment have been finished (only for type submission)\n* FINISHED: Assignment has been completed\n* CANCELED: Assignment has been canceled\n",
             "enum": [
               "DRAFT",
               "INPROGRESS",
@@ -15965,6 +15988,113 @@
           }
         },
         "summary": "get assignment files",
+        "tags": [
+          "Assignment v1"
+        ]
+      }
+    },
+    "/assignment/v1/{assignmentId}/status": {
+      "put": {
+        "description": "Set assignment Status.",
+        "operationId": "createOrUpdateAssignment_1",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignmentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "description": "Status of the assignment\n* DRAFT: Assignment is in draft state, only visible to creator\n* ASSIGNED: Assignment is assigned and visible to all users with assignee permission\n* CORRECTED: All submissions of this Assignment have been finished (only for type submission)\n* FINISHED: Assignment has been completed\n* CANCELED: Assignment has been canceled\n",
+              "enum": [
+                "DRAFT",
+                "INPROGRESS",
+                "CORRECTED",
+                "FINISHED",
+                "CANCELED"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Assignment"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Set assignment Status",
         "tags": [
           "Assignment v1"
         ]
@@ -32115,6 +32245,181 @@
         ]
       }
     },
+    "/node/v1/nodes/{repository}/{node}/children/_content": {
+      "post": {
+        "description": "Create a new child with content.",
+        "operationId": "createChildWithContent",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of parent node use -userhome- for userhome or -inbox- for inbox node",
+            "in": "path",
+            "name": "node",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "type of node",
+            "in": "query",
+            "name": "type",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "aspects of node",
+            "in": "query",
+            "name": "aspects",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "rename if the same node name exists",
+            "in": "query",
+            "name": "renameIfExists",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "comment, leave empty = no inital version",
+            "in": "query",
+            "name": "versionComment",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Association type, can be empty",
+            "in": "query",
+            "name": "assocType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "accept only properties from the specific mds set",
+            "in": "query",
+            "name": "obeyMds",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "encoding": {
+                "file": {
+                  "contentType": "application/octet-stream"
+                },
+                "properties": {
+                  "contentType": "application/json"
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/ChildrenFileContentUpload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodeEntry"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Create a new child with content.",
+        "tags": [
+          "NODE v1"
+        ]
+      }
+    },
     "/node/v1/nodes/{repository}/{node}/children/_copy": {
       "post": {
         "description": "Create a new child by copying.",
@@ -41518,7 +41823,7 @@
               "enum": [
                 "fromUser",
                 "toUser",
-                "toUserOrGroups"
+                "toUserGroups"
               ],
               "type": "string"
             }

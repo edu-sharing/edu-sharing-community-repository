@@ -317,4 +317,27 @@ final class NodeAssignmentDao extends BasicNodeDaoImpl implements AssignmentDao 
         }
         return assignmentFileDao;
     }
+
+    @Override
+    @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
+    public void setStatus(Assignment.Status status) {
+        validateExists();
+        refresh();
+
+        Assignment.Status currentStatus = getStatus();
+        if (currentStatus == status) {
+            log.debug("Submission status of {}, is already set to {}", nodeId, status);
+            return;
+        }
+
+        Map<String, Object> properties = new HashMap<>() {{
+            put(CCConstants.CCM_PROP_ASSIGNMENT_STATUS, status.name());
+        }};
+
+        AuthenticationUtil.runAsSystem(() -> {
+            nodeService.updateNodeNative(nodeId, properties);
+            return null;
+        });
+        refresh();
+    }
 }

@@ -83,6 +83,27 @@ public class AssignmentApi {
         return Response.ok().entity(assignment.getAssignment()).build();
     }
 
+    @PUT
+    @Path("/{assignmentId}/status")
+    @Operation(summary = "Set assignment Status", description = "Set assignment Status.")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Assignment.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            }
+    )
+    public Response createOrUpdateAssignment(@PathParam("assignmentId") String assignmentId,
+                                             @QueryParam("status") Assignment.Status status) {
+        AssignmentDao assignment = assignmentDaoFactory.assignmentDaoByNodeId(assignmentId);
+        assignment.setStatus(status);
+        return Response.ok().entity(assignment.getAssignment()).build();
+    }
+
     @Data
     @EqualsAndHashCode(callSuper = true)
     public static class AssignmentSearchResult extends SearchResult<Assignment> {
