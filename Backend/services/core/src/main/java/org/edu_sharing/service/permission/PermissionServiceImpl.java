@@ -961,6 +961,12 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
     }
 
     @Override
+    public Boolean isInherited(String storeProtocol, String storeId, String nodeId) {
+        NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);
+        return permissionService.getInheritParentPermissions(nodeRef);
+    }
+
+    @Override
     public ACL getPermissions(String nodeId) throws Exception {
         return retryingTransactionHelper.doInTransaction(() -> {
             NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);

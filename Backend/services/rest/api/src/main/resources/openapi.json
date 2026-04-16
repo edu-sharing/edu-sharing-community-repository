@@ -754,15 +754,21 @@
             "type": "string"
           },
           "properties": {
+            "$ref": "#/components/schemas/ChildrenMetadata"
+          }
+        },
+        "type": "object"
+      },
+      "ChildrenMetadata": {
+        "description": "JSON-Metadaten",
+        "properties": {
+          "properties": {
             "additionalProperties": {
-              "description": "JSON-Metadaten",
               "items": {
-                "description": "JSON-Metadaten",
                 "type": "string"
               },
               "type": "array"
             },
-            "description": "JSON-Metadaten",
             "type": "object"
           }
         },
@@ -1005,6 +1011,10 @@
           },
           "icon": {
             "$ref": "#/components/schemas/NodeIcon"
+          },
+          "inherited": {
+            "description": "Indicates if access permissions are inherited from parent nodes",
+            "type": "boolean"
           },
           "isDirectory": {
             "description": "Whether this node is a directory",
@@ -4326,6 +4336,10 @@
           "icon": {
             "$ref": "#/components/schemas/NodeIcon"
           },
+          "inherited": {
+            "description": "Indicates if access permissions are inherited from parent nodes",
+            "type": "boolean"
+          },
           "isDirectory": {
             "description": "Whether this node is a directory",
             "type": "boolean"
@@ -4493,6 +4507,10 @@
           },
           "icon": {
             "$ref": "#/components/schemas/NodeIcon"
+          },
+          "inherited": {
+            "description": "Indicates if access permissions are inherited from parent nodes",
+            "type": "boolean"
           },
           "isDirectory": {
             "description": "Whether this node is a directory",
@@ -32002,6 +32020,14 @@
                 "type": "string"
               },
               "type": "array"
+            }
+          },
+          {
+            "description": "Resolve inherited access permissions from parent nodes (default false)",
+            "in": "query",
+            "name": "resolveInheritedAccess",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],

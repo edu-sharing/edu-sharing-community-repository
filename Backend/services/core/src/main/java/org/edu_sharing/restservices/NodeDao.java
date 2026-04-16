@@ -115,12 +115,14 @@ public class NodeDao {
             CCConstants.PERMISSION_CC_PUBLISH,
             CCConstants.PERMISSION_READ_ALL
     };
-    final List<String> access;
+    @Getter
+    private final List<String> access;
     private final org.edu_sharing.service.model.NodeRef.Preview previewData;
     // true if the current Dao is the collection home folder
     private final boolean isCollectionHomePath;
     private final String ownerUsername;
     private final Map<NodeRefImpl.Relation, NodeDao> relations = new HashMap<>();
+    private Boolean inherited;
     private org.edu_sharing.service.model.NodeRef nodeRef = null;
     private CollectionRef collectionRef;
     private final List<Contributor> contributors = new ArrayList<>();
@@ -936,6 +938,7 @@ public class NodeDao {
             this.hasPermissions = nodeRef.getPermissions();
         } else {
             this.hasPermissions = usedPermissionService.hasAllPermissions(storeProtocol, storeId, nodeId, DAO_PERMISSIONS);
+            this.inherited = usedPermissionService.isInherited(storeProtocol, storeId, nodeId);
         }
     }
 
@@ -991,7 +994,7 @@ public class NodeDao {
         final Context context = Context.getCurrentInstance();
         final String scope = NodeServiceInterceptor.getEduSharingScope();
         ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        List<Node> nodes = null;
+        List<Node> nodes;
         java.util.Collection<Callable<Node>> tasks = list.stream().map(
                 (nodeRef) -> (Callable<Node>) () -> AuthenticationUtil.runAs(() -> {
                     try {
@@ -1494,6 +1497,7 @@ public class NodeDao {
 
         data.setProperties(getProperties());
 
+        data.setInherited(inherited);
         data.setAccess(access);
         // set access effective for original elements only
         if (!(data instanceof CollectionReference) && Objects.equals(CallSourceHelper.CallSource.Render, CallSourceHelper.getCallSource())) {

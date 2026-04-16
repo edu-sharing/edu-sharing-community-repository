@@ -151,4 +151,9 @@ public class PermissionServiceAdapter implements PermissionService {
     public List<String> getOrganizationsOfUser() {
         return List.of();
     }
+
+    @Override
+    public Boolean isInherited(String storeProtocol, String storeId, String nodeId) {
+        return null;
+    }
 }

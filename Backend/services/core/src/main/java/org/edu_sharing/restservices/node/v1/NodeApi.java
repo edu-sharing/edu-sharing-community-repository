@@ -970,8 +970,9 @@ public class NodeApi {
             @Parameter(description = RestConstants.MESSAGE_FILTER) @QueryParam("filter") List<String> filter,
             @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
             @Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-            @Parameter(description = "Filter for a specific association. May be empty", required = false, schema = @Schema(defaultValue = "")) @QueryParam("assocName") String assocName,
+            @Parameter(description = "Filter for a specific association. May be empty") @QueryParam("assocName") String assocName,
             @Parameter(description = RestConstants.MESSAGE_PROPERTY_FILTER, array = @ArraySchema(schema = @Schema(defaultValue = "-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
+            @Parameter(description = "Resolve inherited access permissions from parent nodes (default false)") @QueryParam("resolveInheritedAccess") Boolean resolveInheritedAccess,
             @Context HttpServletRequest req) {
 
         try {
@@ -1303,11 +1304,13 @@ public class NodeApi {
     @Schema(name = "ChildrenFileContentUpload", description = "Multipart upload for node content")
     public static class ChildrenFileContentUpload {
         @Schema(description = "JSON-Metadaten")
-        public Map<String, String[]> properties;
+        public ChildrenMetadata properties;
 
         @Schema(type = "string", format = "binary", description = "File content")
         public InputStream file;
     }
+
+    public record ChildrenMetadata(Map<String, String[]> properties){}
 
 
     @POST
@@ -1358,10 +1361,7 @@ public class NodeApi {
             @FormDataParam("file") FormDataContentDisposition fileMetaData) {
 
         metadataPart.setMediaType(MediaType.APPLICATION_JSON_TYPE);
-        Map<String, String[]> properties = ((Map<String, List<String>>) metadataPart.getValueAs(Map.class))
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toArray(String[]::new)));
+        Map<String, String[]> properties = metadataPart.getValueAs(ChildrenMetadata.class).properties();
 
         String[] url = properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_WWWURL));
         if (url != null && fileInputStream != null) {
