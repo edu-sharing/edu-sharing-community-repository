@@ -292,9 +292,9 @@ public class NodeDao {
 
             Signing signing = new Signing();
             PrivateKey privateKey = signing.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM);
-            byte[] signedNodeData = signing.sign(privateKey, serializedNode, CCConstants.SECURITY_SIGN_ALGORITHM);
-
-            return new SignedNode(serializedNode, signedNodeData);
+            String alg = LightbendConfigLoader.get().getString("security.sso.authByApp.alg.defaultSign");
+            byte[] signedNodeData = signing.sign(privateKey, serializedNode, alg);
+            return new SignedNode(serializedNode, signedNodeData,alg);
         } catch (Throwable t) {
             throw DAOException.mapping(t);
         }

@@ -13,6 +13,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -28,6 +29,7 @@ import org.edu_sharing.spring.ApplicationContextFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -74,6 +76,11 @@ public class AboutApi {
             about.setLastCacheUpdate(RepoFactory.getLastRefreshed());
 
             about.setThemesUrl(new MimeTypesV2(ApplicationInfoList.getHomeRepository()).getThemePath());
+
+            List<String> supportedSigAlg = LightbendConfigLoader.get().getStringList("security.sso.authByApp.alg.supported");
+            if(supportedSigAlg != null){
+                about.setSignatureAlgorithms(supportedSigAlg);
+            }
 
             Map<String, AboutService> services = new HashMap<>();
             for (Class<?> clazz : ApiApplication.SERVICES) {

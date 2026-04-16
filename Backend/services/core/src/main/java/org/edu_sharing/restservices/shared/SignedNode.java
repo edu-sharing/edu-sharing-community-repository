@@ -9,4 +9,5 @@ import lombok.EqualsAndHashCode;
 public class SignedNode {
 	private String node;
 	private byte[] signature;
+    private String signatureAlgorithm;
 }

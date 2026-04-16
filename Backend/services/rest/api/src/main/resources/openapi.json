@@ -81,6 +81,12 @@
             },
             "type": "array"
           },
+          "signatureAlgorithms": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
           "themesUrl": {
             "type": "string"
           },
