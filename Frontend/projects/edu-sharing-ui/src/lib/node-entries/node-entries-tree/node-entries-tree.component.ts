@@ -232,16 +232,32 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
         this.treeControl = new FlatTreeControl<DynamicFlatNode>(this.getLevel, this.isExpandable);
         this.dataSource = new DynamicDataSource(this.treeControl, this.treeNodeService);
         // retrieve the current nodes from the data source and initialize the tree with it
-        if (!this.treeNodeService.getDataMap().size) {
+        const alreadyInitialized = this.treeNodeService.getDataMap().size > 0;
+        if (!alreadyInitialized) {
             const nodes: Node[] = this.entriesService.dataSource.getData() as Node[];
             await this.treeNodeService.initializeTreeData(nodes);
         }
-        this.dataSource.data = this.treeNodeService.getInitialData();
-        // find a first level element that can be expanded and expand it
-        const firstLevelElement = this.dataSource.data.find((d) => d.level === 0 && d.expandable);
-        if (firstLevelElement) {
-            this.treeControl.expand(firstLevelElement);
-            await this.updateTree([firstLevelElement.item as Node]);
+        this.dataSource.data = this.treeNodeService.getCurrentData();
+        if (!alreadyInitialized) {
+            // find a first level element that can be expanded and expand it
+            const firstLevelElement = this.dataSource.data.find(
+                (d) => d.level === 0 && d.expandable,
+            );
+            if (firstLevelElement) {
+                this.treeControl.expand(firstLevelElement);
+                await this.updateTree([firstLevelElement.item as Node]);
+            }
+        } else {
+            // restore the previously existing expanded states
+            for (const nodeId of this.treeNodeService.getExpandedNodes()) {
+                const element = this.dataSource.data
+                    .slice()
+                    .reverse()
+                    .find((d) => d.item.ref.id === nodeId);
+                if (element) {
+                    this.treeControl.expansionModel.select(element);
+                }
+            }
         }
         this.treeInitialized.set(true);
         this.changeDetectorRef.detectChanges();

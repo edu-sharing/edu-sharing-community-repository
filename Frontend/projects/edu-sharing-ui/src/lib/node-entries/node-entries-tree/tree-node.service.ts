@@ -27,7 +27,7 @@ export class TreeNodeService {
         RestConstants.CCM_TYPE_MAP,
     ];
     // holds information on the initial data
-    private initialData: DynamicFlatNode[] = [];
+    private currentData: DynamicFlatNode[] = [];
     // holds information on the last loaded children node ID, which is used for pagination
     private parentIdToLastLoadedNodeId = new Map<string, string>();
     // avoid empty (faked) parents from being toggled, as the IDs do not exist
@@ -45,6 +45,8 @@ export class TreeNodeService {
     private initiallySelectedNodes: Node[] = [];
     private selectionMode: 'source' | 'target' = 'source';
     readonly nodesChanged = new EventEmitter<Node[]>();
+    // holds the currently expanded nodes
+    private expandedNodes: string[] = [];
 
     constructor(
         private collectionService: CollectionService,
@@ -150,14 +152,23 @@ export class TreeNodeService {
                 }
             });
         });
-        this.initialData = initialData;
+        this.setCurrentData(initialData);
     }
 
     /**
-     * Retrieves the initial data for the tree.
+     * Retrieves the current data for the tree.
      */
-    getInitialData(): DynamicFlatNode[] {
-        return this.initialData;
+    getCurrentData(): DynamicFlatNode[] {
+        return this.currentData;
+    }
+
+    /**
+     * Updates the current data of the tree.
+     *
+     * @param data
+     */
+    setCurrentData(data: DynamicFlatNode[]) {
+        this.currentData = data;
     }
 
     /**
@@ -168,97 +179,96 @@ export class TreeNodeService {
     async getChildren(node: Partial<Node>): Promise<Partial<Node>[] | undefined> {
         const nodeId = node.ref.id;
         let children: Partial<Node>[] = this.dataMap.get(nodeId) || [];
-        if (!children?.length) {
-            let nodeEntries: NodeEntries;
-            if (this.nodeHelperService.isNodeCollection(node as Node)) {
-                nodeEntries = await firstValueFrom(
+        // early return when children do already exist
+        if (children?.length) {
+            return children;
+        }
+        let nodeEntries: NodeEntries;
+        if (this.nodeHelperService.isNodeCollection(node as Node)) {
+            nodeEntries = await firstValueFrom(
+                this.collectionService
+                    .getSubcollections({
+                        collection: nodeId,
+                        scope: 'MY',
+                        repository: node.ref.repo,
+                        ...this.baseSearchParams,
+                        sortProperties: [
+                            this.nodeHelperService.getSortByForCollection(node as Node).active,
+                        ],
+                        sortAscending: [
+                            this.nodeHelperService.getSortByForCollection(node as Node)
+                                .direction === 'asc',
+                        ],
+                    })
+                    .pipe(
+                        map((s) => {
+                            return {
+                                pagination: s.pagination,
+                                nodes: s.collections,
+                            };
+                        }),
+                    ),
+            );
+            if (this.showFiles) {
+                const nodeEntriesRef = await firstValueFrom(
                     this.collectionService
-                        .getSubcollections({
+                        .getReferences({
                             collection: nodeId,
-                            scope: 'MY',
                             repository: node.ref.repo,
                             ...this.baseSearchParams,
                             sortProperties: [
-                                this.nodeHelperService.getSortByForCollection(node as Node).active,
+                                this.nodeHelperService.getSortByForCollectionReferences(
+                                    node as Node,
+                                ).active,
                             ],
                             sortAscending: [
-                                this.nodeHelperService.getSortByForCollection(node as Node)
-                                    .direction === 'asc',
+                                this.nodeHelperService.getSortByForCollectionReferences(
+                                    node as Node,
+                                ).direction === 'asc',
                             ],
                         })
                         .pipe(
                             map((s) => {
                                 return {
                                     pagination: s.pagination,
-                                    nodes: s.collections,
+                                    nodes: s.references,
                                 };
                             }),
                         ),
                 );
-                if (this.showFiles) {
-                    const nodeEntriesRef = await firstValueFrom(
-                        this.collectionService
-                            .getReferences({
-                                collection: nodeId,
-                                repository: node.ref.repo,
-                                ...this.baseSearchParams,
-                                sortProperties: [
-                                    this.nodeHelperService.getSortByForCollectionReferences(
-                                        node as Node,
-                                    ).active,
-                                ],
-                                sortAscending: [
-                                    this.nodeHelperService.getSortByForCollectionReferences(
-                                        node as Node,
-                                    ).direction === 'asc',
-                                ],
-                            })
-                            .pipe(
-                                map((s) => {
-                                    return {
-                                        pagination: s.pagination,
-                                        nodes: s.references,
-                                    };
-                                }),
-                            ),
-                    );
-                    nodeEntries.nodes = nodeEntries.nodes.concat(nodeEntriesRef.nodes);
-                    nodeEntriesRef.pagination.count += nodeEntries.pagination.count;
-                    nodeEntriesRef.pagination.total += nodeEntries.pagination.total;
-                }
-            } else {
-                // regular file/folders
-                nodeEntries = await firstValueFrom(
-                    this.nodeService.getChildren(nodeId, this.baseSearchParams),
+                nodeEntries.nodes = nodeEntries.nodes.concat(nodeEntriesRef.nodes);
+                nodeEntriesRef.pagination.count += nodeEntries.pagination.count;
+                nodeEntriesRef.pagination.total += nodeEntries.pagination.total;
+            }
+        } else {
+            // regular file/folders
+            nodeEntries = await firstValueFrom(
+                this.nodeService.getChildren(nodeId, this.baseSearchParams),
+            );
+            // filter out files if not requested and update the pagination
+            if (!this.showFiles) {
+                let filteredNodesCount: number = nodeEntries.nodes.length;
+                nodeEntries.nodes = nodeEntries.nodes.filter(
+                    (n) => n.type !== RestConstants.CCM_TYPE_IO,
                 );
-                // filter out files if not requested and update the pagination
-                if (!this.showFiles) {
-                    let filteredNodesCount: number = nodeEntries.nodes.length;
-                    nodeEntries.nodes = nodeEntries.nodes.filter(
-                        (n) => n.type !== RestConstants.CCM_TYPE_IO,
-                    );
-                    filteredNodesCount -= nodeEntries.nodes.length;
-                    nodeEntries.pagination.count -= filteredNodesCount;
-                    nodeEntries.pagination.total -= filteredNodesCount;
-                }
+                filteredNodesCount -= nodeEntries.nodes.length;
+                nodeEntries.pagination.count -= filteredNodesCount;
+                nodeEntries.pagination.total -= filteredNodesCount;
             }
-            children = this.replaceNodeReferences(nodeEntries?.nodes ?? []);
-            // hold the last loaded node ID to load the next elements
-            if (children.length < nodeEntries.pagination.total) {
-                this.parentIdToLastLoadedNodeId.set(
-                    node.ref.id,
-                    children[children.length - 1].ref.id,
-                );
-            } else if (this.parentIdToLastLoadedNodeId.has(node.ref.id)) {
-                this.parentIdToLastLoadedNodeId.delete(node.ref.id);
-            }
-
-            // workaround for holding information about empty folders
-            if (!children.length && !this.emptyFolders.includes(nodeId)) {
-                this.emptyFolders.push(nodeId);
-            }
-            this.dataMap.set(nodeId, children);
         }
+        children = this.replaceNodeReferences(nodeEntries?.nodes ?? []);
+        // hold the last loaded node ID to load the next elements
+        if (children.length < nodeEntries.pagination.total) {
+            this.parentIdToLastLoadedNodeId.set(node.ref.id, children[children.length - 1].ref.id);
+        } else if (this.parentIdToLastLoadedNodeId.has(node.ref.id)) {
+            this.parentIdToLastLoadedNodeId.delete(node.ref.id);
+        }
+
+        // workaround for holding information about empty folders
+        if (!children.length && !this.emptyFolders.includes(nodeId)) {
+            this.emptyFolders.push(nodeId);
+        }
+        this.dataMap.set(nodeId, children);
         return children;
     }
 
@@ -440,7 +450,7 @@ export class TreeNodeService {
     resetData(): void {
         this.dataMap = new Map<string, Partial<Node>[]>();
         this.emptyFolders = [];
-        this.initialData = [];
+        this.currentData = [];
         this.parentIdToLastLoadedNodeId = new Map<string, string>();
         this.emptyParentIds = [];
     }
@@ -477,6 +487,43 @@ export class TreeNodeService {
      */
     updateInitiallySelectedNodes(nodes: Node[]) {
         this.initiallySelectedNodes = nodes;
+    }
+
+    /**
+     * Removes a given node from the currently expanded nodes array.
+     *
+     * @param node
+     */
+    collapseNode(node: Partial<Node>): void {
+        if (!node?.ref.id) {
+            return;
+        }
+        const index = this.expandedNodes.indexOf(node.ref.id);
+        if (index > -1) {
+            this.expandedNodes.splice(index, 1);
+        }
+    }
+
+    /**
+     * Add a given node to the currently expanded nodes array.
+     *
+     * @param node
+     */
+    expandNode(node: Partial<Node>): void {
+        if (!node?.ref.id) {
+            return;
+        }
+        const index = this.expandedNodes.indexOf(node.ref.id);
+        if (index === -1) {
+            this.expandedNodes.push(node.ref.id);
+        }
+    }
+
+    /**
+     * Retrieves the currently expanded nodes.
+     */
+    getExpandedNodes(): string[] {
+        return this.expandedNodes;
     }
 
     /**
