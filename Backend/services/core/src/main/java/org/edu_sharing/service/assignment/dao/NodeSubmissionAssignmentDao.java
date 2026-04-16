@@ -24,7 +24,6 @@ import org.edu_sharing.service.assignment.AssignmentDao;
 import org.edu_sharing.service.assignment.AssignmentFileDao;
 import org.edu_sharing.service.assignment.SubmissionDao;
 import org.edu_sharing.service.authority.AuthorityService;
-import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
