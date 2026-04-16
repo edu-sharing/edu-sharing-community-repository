@@ -117,7 +117,7 @@
         .text {
             flex-grow: 1;
             .title {
-                @include mixins.limitLineCount(1);
+                @include mixins.limitLineCount(1, 1.25);
                 word-break: break-all;
                 font-size: vars.$fontSizeXLarge;
                 font-weight: bold;
