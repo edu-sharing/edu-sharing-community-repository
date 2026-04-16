@@ -61,8 +61,24 @@
           >
             <i class="icon" [esIcon]="option.icon"></i>
             <div class="text">
-              <div class="title">{{ option.name | translate }}</div>
-              <div class="description">{{ option.name + '_DESCRIPTION' | translate }}</div>
+              <div
+                class="title"
+                esCheckTextOverflow
+                #text="esCheckTextOverflow"
+                [matTooltip]="text.hasTextOverflow() ? (option.name | translate) : null"
+              >
+                {{ option.name | translate }}
+              </div>
+              <div
+                class="description"
+                esCheckTextOverflow
+                #description="esCheckTextOverflow"
+                [matTooltip]="
+                  description.hasTextOverflow() ? (option.name + '_DESCRIPTION' | translate) : null
+                "
+              >
+                {{ option.name + '_DESCRIPTION' | translate }}
+              </div>
             </div>
             <i class="navigate" esIcon="keyboard_arrow_right"></i>
           </div>
