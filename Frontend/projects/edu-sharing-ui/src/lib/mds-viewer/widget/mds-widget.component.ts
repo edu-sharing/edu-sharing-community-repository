@@ -74,6 +74,7 @@ export enum MdsWidgetType {
     MultiValueFixedBadges = 'multivalueFixedBadges',
     MultiValueSuggestBadges = 'multivalueSuggestBadges',
     MultiValueAuthorityBadges = 'multivalueAuthorityBadges',
+    MultiValueButtons = 'multivalueButtons',
     Nodefilter = 'nodefilter',
     Singleoption = 'singleoption',
     Slider = 'slider',
@@ -160,6 +161,7 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
         MdsWidgetType.MultiValueFixedBadges,
         MdsWidgetType.MultiValueSuggestBadges,
         MdsWidgetType.MultiValueTree,
+        MdsWidgetType.MultiValueButtons,
     ];
 
     readonly valueType = ValueType.String;

@@ -94,6 +94,7 @@ export class MdsViewerService {
             case 'multivalueSuggestBadges':
             case 'singlevalueSuggestBadges':
             case 'multivalueBadges':
+            case 'multivalueButtons':
             case 'singlevalueTree':
             case 'multivalueTree':
                 return flat ? 'array' : 'tree';
