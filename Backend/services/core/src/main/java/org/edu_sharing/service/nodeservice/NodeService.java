@@ -29,10 +29,10 @@ public interface NodeService {
     String createNode(String parentId, String nodeType, Map<String, String[]> props) throws Throwable;
 
     default String createNode(String parentId, String nodeType, HashMap<String, String[]> props, String childAssociation) throws Throwable {
-        return createNode(parentId, nodeType, props, childAssociation, true);
+        return createNode(parentId, nodeType, props, childAssociation, true, null);
     }
 
-    String createNode(String parentId, String nodeType, Map<String, String[]> props, String childAssociation, boolean obeyMds) throws Throwable;
+    String createNode(String parentId, String nodeType, Map<String, String[]> props, String childAssociation, boolean obeyMds, String[] aspects) throws Throwable;
 
     String createNodeBasic(String parentID, String nodeTypeString, Map<String, ?> _props);
 

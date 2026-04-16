@@ -1062,7 +1062,7 @@ public class NodeDao {
             int i = 2;
             while (true) {
                 try {
-                    childId = this.nodeService.createNode(nodeId, type, props, childAssoc, obeyMds);
+                    childId = this.nodeService.createNode(nodeId, type, props, childAssoc, obeyMds, aspects.toArray(new String[0]));
                     break;
                 } catch (DuplicateChildNodeNameException e) {
                     if (renameIfExists) {
@@ -2636,7 +2636,7 @@ public class NodeDao {
         }
     }
 
-    public void createVersion(String comment) throws Exception {
+    public void createVersion(String comment) {
         this.changePropertiesWithVersioning(getAllProperties(), true, comment);
     }
 

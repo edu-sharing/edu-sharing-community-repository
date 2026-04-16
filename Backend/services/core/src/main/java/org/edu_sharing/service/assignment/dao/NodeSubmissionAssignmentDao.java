@@ -420,6 +420,11 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
     }
 
     private void validateAssigneeCanSeeAssignment() {
+
+        if(AssignmentUtil.isAssignmentCoordinator(permissionService, getNodeId())) {
+            return;
+        }
+
         if(AssignmentUtil.isAssignee(permissionService, getNodeId()) && getStatus() == Assignment.Status.DRAFT) {
             throw new InsufficientPermissionException("Assignment with id " + getNodeId() + " is in draft mode and cannot be modified by assignees.");
         }
