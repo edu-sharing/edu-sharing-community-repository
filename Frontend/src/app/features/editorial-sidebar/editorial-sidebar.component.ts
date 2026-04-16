@@ -1,6 +1,7 @@
 import {
     Component,
     computed,
+    effect,
     EventEmitter,
     input,
     OnChanges,
@@ -111,6 +112,10 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         private optionsHelperDataService: OptionsHelperDataService,
     ) {
         this.editorialSidebarService.registerSidebar(this);
+        effect(() => {
+            this.editorialSidebarService.nodes();
+            void this.initOptions();
+        });
     }
 
     async ngOnChanges(changes: SimpleChanges) {
