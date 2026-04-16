@@ -12,7 +12,7 @@ import {
     TemplateRef,
     ViewChild,
 } from '@angular/core';
-import { Node, RestConstants } from 'ngx-edu-sharing-api';
+import { Node, RestConstants, ROOT } from 'ngx-edu-sharing-api';
 import {
     Constrain,
     DefaultGroups,
@@ -173,16 +173,20 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         // only show when no main component is active
         createAssignment.customShowCallback = async () => !this.component();
         options.push(createAssignment);
+
         const sortInto = new OptionItem(
             'EDITORIAL.OPTIONS.SORT_INTO',
             'splitscreen_vertical_add',
             () => this.enabledOption.set({ trap: false, option: 'SORT_INTO' }),
         );
         sortInto.customShowCallback = async () =>
-            this.parent() && this.nodeHelperService.isNodeCollection(this.parent());
+            this.parent() &&
+            this.parent().ref.id !== ROOT &&
+            this.nodeHelperService.isNodeCollection(this.parent());
         sortInto.elementType = [ElementType.NoneOrUnknown];
         sortInto.scopes = ['collections'];
         options.push(sortInto);
+
         const manageContent = new OptionItem(
             'EDITORIAL.OPTIONS.MANAGE_CONTENT',
             'tab_new_right',
