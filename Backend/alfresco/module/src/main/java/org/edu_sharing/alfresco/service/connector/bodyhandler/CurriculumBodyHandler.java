@@ -17,16 +17,20 @@ public class CurriculumBodyHandler implements SimpleConnector.BodyHandler {
         pairs.add(new BasicNameValuePair("color", getField(requestParameters, "curriculum_color")));
         pairs.add(new BasicNameValuePair("editable", getField(requestParameters, "curriculum_editable")));
         // boolean must be int
-        pairs.add(new BasicNameValuePair("commentable", "true".equalsIgnoreCase(getField(requestParameters, "curriculum_commentable")) ? "true" : "false"));
-        pairs.add(new BasicNameValuePair("auto_refresh", "true".equalsIgnoreCase(getField(requestParameters, "curriculum_auto_refresh")) ? "true" : "false"));
-        pairs.add(new BasicNameValuePair("only_edit_owned_items", "true".equalsIgnoreCase(getField(requestParameters, "curriculum_only_edit_owned_items")) ? "true" : "false"));
-        pairs.add(new BasicNameValuePair("collapse_items", "true".equalsIgnoreCase(getField(requestParameters, "curriculum_collapse_items")) ? "true" : "false"));
-        pairs.add(new BasicNameValuePair("only_allow_copy", "true".equalsIgnoreCase(getField(requestParameters, "curriculum_only_allow_copy")) ? "true" : "false"));
+        pairs.add(new BasicNameValuePair("commentable", "true".equalsIgnoreCase(getField(requestParameters, "curriculum_commentable")) ? "1" : "0"));
+        pairs.add(new BasicNameValuePair("auto_refresh", "true".equalsIgnoreCase(getField(requestParameters, "curriculum_auto_refresh")) ? "1" : "0"));
+        pairs.add(new BasicNameValuePair("only_edit_owned_items", "true".equalsIgnoreCase(getField(requestParameters, "curriculum_only_edit_owned_items")) ? "1" : "0"));
+        pairs.add(new BasicNameValuePair("collapse_items", "true".equalsIgnoreCase(getField(requestParameters, "curriculum_collapse_items")) ? "1" : "0"));
+        pairs.add(new BasicNameValuePair("only_allow_copy", "true".equalsIgnoreCase(getField(requestParameters, "curriculum_only_allow_copy")) ? "1" : "0"));
         return pairs;
     }
 
     @Nullable
     private static String getField(Map<String, String[]> requestParameters, String field) {
-        return StringUtils.join(requestParameters.get(field));
+        String data = StringUtils.join(requestParameters.get(field));
+        if(data == null) {
+            return "";
+        }
+        return data;
     }
 }

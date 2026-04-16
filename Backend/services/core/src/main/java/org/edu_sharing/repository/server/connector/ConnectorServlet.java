@@ -284,7 +284,7 @@ public class ConnectorServlet extends HttpServlet  {
 		String resultStr = new HttpQueryTool().query(builder);
 		try {
 			JSONObject result = new JSONObject(resultStr);
-			HashMap<String, Serializable> properties = new HashMap<String, Serializable>();
+			HashMap<String, Serializable> properties = new HashMap<>();
 			properties.put(CCConstants.CCM_PROP_CCRESSOURCETYPE, RessourceInfoExecuter.CCM_RESSOURCETYPE_CONNECTOR);
 			properties.put(CCConstants.CCM_PROP_CCRESSOURCESUBTYPE, simpleConnector.getId());
 			if (StringUtils.isNotEmpty(simpleConnector.getApi().getPostRequestHandler())) {
