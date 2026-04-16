@@ -233,7 +233,7 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
                     put(CCConstants.CM_NAME, new String[]{ "content" });
                     put(CCConstants.CCM_PROP_SUBMISSION_FILE_REFER_TO_ASSIGNMENT_FILE, new String[]{request.assignmentFile()});
                 }};
-                contentNodeId = nodeService.createNode(nodeId, CCConstants.CCM_TYPE_IO, contentProperties, CCConstants.CCM_ASPECT_SUBMISSION_FILE_CONTENT, true);
+                contentNodeId = nodeService.createNode(nodeId, CCConstants.CCM_TYPE_IO, contentProperties, CCConstants.CCM_ASPECT_SUBMISSION_FILE_CONTENT, true, null);
                 log.debug("Created new submission file content node {} for {}", contentNodeId, nodeId);
 
                 apiClient.writeContent(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, contentNodeId, fileInputStream, null, null, CCConstants.CM_PROP_CONTENT);

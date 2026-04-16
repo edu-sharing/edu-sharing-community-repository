@@ -234,11 +234,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     }
 
     @Override
-    public String createNode(String parentId, String nodeType, Map<String, String[]> props, String childAssociation, boolean obeyMds)
+    public String createNode(String parentId, String nodeType, Map<String, String[]> props, String childAssociation, boolean obeyMds, String[] aspects)
             throws Throwable {
         Map<String, Object> toSafeProps;
         if (obeyMds) {
-            toSafeProps = getToSafeProps(props, obeyMds, nodeType, null, null, parentId, null);
+            toSafeProps = getToSafeProps(props, obeyMds, nodeType, aspects, null, parentId, null);
         } else {
             toSafeProps = props.entrySet().stream()
                     .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), validatePropertyByDefinition(QName.createQName(entry.getKey()), entry.getValue())))
