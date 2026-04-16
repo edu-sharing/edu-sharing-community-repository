@@ -374,33 +374,6 @@ export class MdsEditorWidgetChipsComponent
         );
     }
 
-    toDisplayValue(value: MdsWidgetValue | string): DisplayValue {
-        if (typeof value === 'string') {
-            const knownValue = this.widget.definition.values?.find((v) => v.id === value);
-            if (!knownValue && this.widget.getInitialDisplayValues().value) {
-                const ds = this.widget
-                    .getInitialDisplayValues()
-                    .value.values?.find((v) => v.key === value)?.displayString;
-                return {
-                    key: value,
-                    label: ds || value,
-                };
-            }
-            if (knownValue) {
-                value = knownValue;
-            } else {
-                return {
-                    key: value,
-                    label: value,
-                };
-            }
-        }
-        return {
-            key: value.id,
-            label: value.caption,
-        };
-    }
-
     private filter(
         filterString: string | null,
         selectedValues: DisplayValue[],

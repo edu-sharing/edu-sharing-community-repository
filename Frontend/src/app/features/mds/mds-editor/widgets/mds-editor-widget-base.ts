@@ -1,5 +1,5 @@
 import { FormControl, UntypedFormControl, ValidatorFn, Validators } from '@angular/forms';
-import { InputStatus, MdsWidget, RequiredMode } from '../../types/types';
+import { InputStatus, MdsWidget, MdsWidgetValue, RequiredMode } from '../../types/types';
 import { Directive, EventEmitter } from '@angular/core';
 import { MdsEditorWidgetCore } from '../mds-editor-widget-core.directive';
 import { SuggestionResponseDto, SuggestionStatus } from 'ngx-edu-sharing-api';
@@ -98,7 +98,6 @@ export abstract class MdsEditorWidgetChipsSuggestionBase extends MdsEditorWidget
     chipsControl: UntypedFormControl;
 
     abstract add(value: DisplayValue): void;
-    abstract toDisplayValue(value: string): DisplayValue;
     initSuggestions(): void {
         this.chipsSuggestionsSubject = this.widget
             .getSuggestions()
@@ -148,5 +147,32 @@ export abstract class MdsEditorWidgetChipsSuggestionBase extends MdsEditorWidget
                 ),
             ),
         );
+    }
+
+    toDisplayValue(value: MdsWidgetValue | string): DisplayValue {
+        if (typeof value === 'string') {
+            const knownValue = this.widget.definition.values?.find((v) => v.id === value);
+            if (!knownValue && this.widget.getInitialDisplayValues().value) {
+                const ds = this.widget
+                    .getInitialDisplayValues()
+                    .value.values?.find((v) => v.key === value)?.displayString;
+                return {
+                    key: value,
+                    label: ds || value,
+                };
+            }
+            if (knownValue) {
+                value = knownValue;
+            } else {
+                return {
+                    key: value,
+                    label: value,
+                };
+            }
+        }
+        return {
+            key: value.id,
+            label: value.caption,
+        };
     }
 }
