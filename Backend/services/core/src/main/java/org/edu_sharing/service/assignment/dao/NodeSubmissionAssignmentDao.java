@@ -24,6 +24,7 @@ import org.edu_sharing.service.assignment.AssignmentDao;
 import org.edu_sharing.service.assignment.AssignmentFileDao;
 import org.edu_sharing.service.assignment.SubmissionDao;
 import org.edu_sharing.service.authority.AuthorityService;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
@@ -420,6 +421,11 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
     }
 
     private void validateAssigneeCanSeeAssignment() {
+
+        if(AssignmentUtil.isAssignmentCoordinator(permissionService, getNodeId())) {
+            return;
+        }
+
         if(AssignmentUtil.isAssignee(permissionService, getNodeId()) && getStatus() == Assignment.Status.DRAFT) {
             throw new InsufficientPermissionException("Assignment with id " + getNodeId() + " is in draft mode and cannot be modified by assignees.");
         }
