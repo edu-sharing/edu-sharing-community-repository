@@ -351,6 +351,9 @@
     "STATUS": {
       "DRAFT": "Entwurf",
       "INPROGRESS": "Ausgeteilt",
+      "CORRECTED": "Korrigiert",
+      "TO_SUBMIT": "Offen",
+      "SUBMITTED": "Abgegeben",
       "HAS_SUBMISSIONS": "Zu korrigieren",
       "CANCELED": "Abgebrochen",
       "FINISHED": "Abgeschlossen"

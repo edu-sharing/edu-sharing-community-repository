@@ -38,4 +38,14 @@ export class ListNodeAssignmentComponent extends ListWidget {
     constructor(private nodeHelper: NodeHelperService) {
         super();
     }
+
+    getValidationStatus(node: SubmissionWithAssignment) {
+        if (node.validationStatus === 'FINISHED') {
+            return 'CORRECTED';
+        }
+        if (node.submissionStatus !== 'FINISHED') {
+            return 'INPROGRESS';
+        }
+        return 'HAS_SUBMISSIONS';
+    }
 }

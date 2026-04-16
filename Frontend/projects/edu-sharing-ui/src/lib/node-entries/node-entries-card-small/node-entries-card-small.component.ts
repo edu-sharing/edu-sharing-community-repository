@@ -72,7 +72,7 @@ export class NodeEntriesCardSmallComponent<T extends Node> {
 
     assignmentEndTimePriority(assignment: Assignment) {
         const now = new Date().getTime();
-        const permissions = new AssignmentPipe().transform(assignment, { mode: 'permissions' });
+        /*const permissions = new AssignmentPipe().transform(assignment, { mode: 'permissions' });
         if (permissions === 'COORDINATOR') {
             if (assignment.status !== 'INPROGRESS') {
                 return 'low';
@@ -84,22 +84,36 @@ export class NodeEntriesCardSmallComponent<T extends Node> {
             ) {
                 return 'low';
             }
-        }
+        }*/
         const delayUntil =
             (Date.parse(assignment.endTime as string) ||
                 (assignment.endTime as unknown as number)) - now;
-        // > 5 days == low delay
-        if (delayUntil < 3600 * 1000 * 24 * 1) {
+        // delayed / old
+        if (delayUntil < 0) {
             return 'high';
-        } else if (delayUntil < 3600 * 1000 * 24 * 2) {
-            return 'medium';
         }
         return 'low';
     }
 
     assignmentStatus(assignment: Assignment) {
-        if (assignment.submissions?.some((s) => s.submissionStatus === 'FINISHED')) {
+        if (
+            assignment.status === 'INPROGRESS' &&
+            assignment.submissions?.some((s) => s.submissionStatus === 'FINISHED')
+        ) {
             return 'HAS_SUBMISSIONS';
+        }
+        return assignment.status;
+    }
+    assignmentStatusAssignee(assignment: Assignment) {
+        if (assignment.status === 'INPROGRESS') {
+            const sub = assignment.submissions?.[0];
+            if (sub.validationStatus === 'FINISHED') {
+                return 'CORRECTED';
+            } else if (sub.submissionStatus === 'FINISHED') {
+                return 'SUBMITTED';
+            } else {
+                return 'TO_SUBMIT';
+            }
         }
         return assignment.status;
     }

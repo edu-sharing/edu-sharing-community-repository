@@ -3,11 +3,11 @@
     <es-user-avatar size="xsmall" [user]="$any(node).assignee"></es-user-avatar>
     <span>{{ submission().assignee | authorityName }}</span>
   </span>
-  <span *ngSwitchCase="'submissionStatus'" class="status status-{{ submissionStatus() }}">
-    {{ 'ASSIGNMENT.SUBMISSION_STATUS.' + submissionStatus() | translate }}
-  </span>
-  <span *ngSwitchCase="'validationStatus'" class="status status-{{ $any(node).validationStatus }}">
-    {{ 'ASSIGNMENT.VALIDATION_STATUS.' + $any(node).validationStatus | translate }}
+  <span
+    *ngSwitchCase="'validationStatus'"
+    class="status status-{{ getValidationStatus($any(node)) }}"
+  >
+    {{ 'ASSIGNMENT.STATUS.' + getValidationStatus($any(node)) | translate }}
   </span>
   <span *ngSwitchCase="'submissionDate'" class="status submissionDate">
     <i esIcon="alarm"></i>

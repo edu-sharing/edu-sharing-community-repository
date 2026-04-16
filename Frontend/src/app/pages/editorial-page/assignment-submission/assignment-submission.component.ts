@@ -58,7 +58,6 @@ export class AssignmentSubmissionComponent implements OnDestroy {
     columns = {
         Default: [
             new ListItem('SUBMISSION', 'assignee'),
-            new ListItem('SUBMISSION', 'submissionStatus'),
             new ListItem('SUBMISSION', 'validationStatus'),
         ],
     } as ColumnType;
