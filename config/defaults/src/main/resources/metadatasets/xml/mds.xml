@@ -624,6 +624,22 @@
       <max>99</max>
     </widget>
     <widget>
+      <id>ccm:educationaltypicalagerangecluster</id>
+      <caption>lom_prop_educational_typicalagerange</caption>
+      <type>multivalueButtons</type>
+      <valuespace_i18n_prefix>ccm_educationaltypicalagerangecluster_</valuespace_i18n_prefix>
+      <values>
+        <value>5-6</value>
+        <value>6-8</value>
+        <value>8-10</value>
+        <value>10-12</value>
+        <value>12-14</value>
+        <value>14-16</value>
+        <value>16-19</value>
+        <value>19-99</value>
+      </values>
+    </widget>
+    <widget>
       <id>ccm:taxonid</id>
       <id rel="graphql">lom.classification.taxon</id>
       <caption>input_taxonentry</caption>
