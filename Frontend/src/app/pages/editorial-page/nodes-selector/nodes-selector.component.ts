@@ -20,6 +20,7 @@ import {
     AuthenticationService,
     CollectionService as ApiCollectionService,
     CONTENT_TYPE_ALL,
+    CreateSuggestionRequestDto,
     DEFAULT,
     HOME_REPOSITORY,
     MdsQueryCriteria,
@@ -75,7 +76,6 @@ import { Toast, ToastType } from '../../../services/toast';
 import { UploadDialogService } from '../../../services/upload-dialog.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { MessageType } from '../../../util/message-type';
-import { CreateSuggestionRequestDto } from '../../../../../dist/edu-sharing-api/lib/api/models/create-suggestion-request-dto';
 
 export enum TabType {
     SEARCH = 'search',
