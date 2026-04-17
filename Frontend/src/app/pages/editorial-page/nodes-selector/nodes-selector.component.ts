@@ -900,8 +900,10 @@ export class NodesSelectorComponent implements OnInit {
             // set the ID to the (fake) parent node
             collection.parent.id = recentCollectionsNode.ref.id;
             // reset childCollectionsCount and childReferencesCount to provide them as a flat list
-            collection.collection.childCollectionsCount = 0;
-            collection.collection.childReferencesCount = 0;
+            if (collection.collection) {
+                collection.collection.childCollectionsCount = 0;
+                collection.collection.childReferencesCount = 0;
+            }
         });
         initialData.push(recentCollectionsNode);
         initialData = initialData.concat(subRecentCollections.collections);
