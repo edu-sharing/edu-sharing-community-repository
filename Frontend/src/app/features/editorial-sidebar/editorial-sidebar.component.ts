@@ -187,10 +187,11 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         sortInto.customShowCallback = async () => {
             const validParent =
                 this.parent() && ![ROOT, RestConstants.USERHOME].includes(this.parent().ref.id);
-            const isMapOrFolder = [
-                RestConstants.CM_TYPE_FOLDER,
-                RestConstants.CCM_TYPE_MAP,
-            ].includes(this.parent().type);
+            const isMapOrFolder =
+                this.parent()?.type &&
+                [RestConstants.CM_TYPE_FOLDER, RestConstants.CCM_TYPE_MAP].includes(
+                    this.parent().type,
+                );
             return validParent && isMapOrFolder;
         };
         sortInto.elementType = [ElementType.NoneOrUnknown];
