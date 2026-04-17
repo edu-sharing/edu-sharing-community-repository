@@ -808,7 +808,7 @@ public class NodeDao {
             }
 
             if (nodeProps.containsKey(CCConstants.NODETYPE)) {
-                this.type = Optional.ofNullable((String)nodeProps.get(CCConstants.NODETYPE))
+                this.type = Optional.ofNullable((String) nodeProps.get(CCConstants.NODETYPE))
                         .map(CCConstants::getValidGlobalName)
                         .orElse((String) nodeProps.get(CCConstants.NODETYPE));
             } else {
@@ -1520,7 +1520,7 @@ public class NodeDao {
 
         data.setRating(getRating());
         try {
-            if(nodeService != null) {
+            if (nodeService != null) {
                 data.setPreview(getPreview());
             }
         } catch (Exception e) {
@@ -1807,6 +1807,11 @@ public class NodeDao {
 
             throw DAOException.mapping(t);
         }
+    }
+
+    public void setInherited(boolean inherit) {
+        org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getInstance().getService(repoDao.getId());
+        permissionService.setPermissionInherit(nodeId, inherit);
     }
 
     private static @NotNull List<org.edu_sharing.repository.client.rpc.ACE> getAceList(ACL permissions) {
@@ -2197,7 +2202,7 @@ public class NodeDao {
 
     public Map<String, Object> getNativeProperties(String versionLabel) throws DAOException {
         return versionLabel != null ? getNodeHistory()
-                .get(versionLabel) : nodeProps;
+                                      .get(versionLabel) : nodeProps;
     }
 
     public void addWorkflowHistory(WorkflowHistory history, boolean sendMail) throws DAOException {
@@ -2205,6 +2210,7 @@ public class NodeDao {
         List<String> aspects = Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId));
         addWorkflowHistory(nodeId, nodeType, aspects, getNativeProperties(), history, sendMail);
     }
+
     public static void addWorkflowHistory(String nodeId, String nodeType, List<String> aspects, Map<String, Object> properties, WorkflowHistory history, boolean sendMail) throws DAOException {
         List<String> data = (List<String>) NodeServiceHelper.getPropertyNative(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
                 CCConstants.CCM_PROP_WF_PROTOCOL
@@ -2244,6 +2250,7 @@ public class NodeDao {
     public List<WorkflowHistory> getWorkflowHistory() throws DAOException {
         return getWorkflowHistory(repoDao, nodeId);
     }
+
     public static List<WorkflowHistory> getWorkflowHistory(RepositoryDao repoDao, String nodeId) throws DAOException {
         List<WorkflowHistory> workflow = new ArrayList<>();
         List<String> data = (List<String>) NodeServiceHelper.getPropertyNative(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
@@ -2427,7 +2434,7 @@ public class NodeDao {
                             ((CollectionReference) data).getOriginalId(), CCConstants.LOM_PROP_TECHNICAL_SIZE));
         }
         return nodeProps.containsKey(CCConstants.LOM_PROP_TECHNICAL_SIZE) ? (String) nodeProps
-                .get(CCConstants.LOM_PROP_TECHNICAL_SIZE) : null;
+                                                                                     .get(CCConstants.LOM_PROP_TECHNICAL_SIZE) : null;
     }
 
     private String getRepositoryType() {
@@ -2607,7 +2614,7 @@ public class NodeDao {
 
     public void removeShare(String shareId) throws DAOException {
         throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
-        GlobalShareService service =ApplicationContextFactory.getApplicationContext().getBean(GlobalShareService.class);
+        GlobalShareService service = ApplicationContextFactory.getApplicationContext().getBean(GlobalShareService.class);
         for (Share share : service.getShares(this.nodeId)) {
             if (share.getNodeId().equals(shareId)) {
                 service.removeShare(this.nodeId, shareId);

@@ -1310,7 +1310,8 @@ public class NodeApi {
         public InputStream file;
     }
 
-    public record ChildrenMetadata(Map<String, String[]> properties){}
+    public record ChildrenMetadata(Map<String, String[]> properties) {
+    }
 
 
     @POST
@@ -1368,7 +1369,7 @@ public class NodeApi {
             throw new IllegalArgumentException("Cannot upload file and URL at the same time");
         }
 
-        if(url == null && fileInputStream == null) {
+        if (url == null && fileInputStream == null) {
             throw new IllegalArgumentException("Either file or URL must be provided");
         }
 
@@ -1387,7 +1388,7 @@ public class NodeApi {
                 renameIfExists != null && renameIfExists,
                 StringUtils.isBlank(assocType) ? assocType : null, obeyMds != Boolean.FALSE);
 
-        if(fileInputStream != null) {
+        if (fileInputStream != null) {
             nodeDao.changeContent(fileInputStream, null, versionComment);
         }
 
@@ -2240,6 +2241,35 @@ public class NodeApi {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
         }
 
+    }
+
+    @PUT
+    @Path("/nodes/{repository}/permissions/inheritance")
+
+    @Operation(summary = "Set local permissions of node.", description = "Set local permissions of node.")
+
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response set(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            SetNodePermissionInheritanceRequest nodeInheritance,
+            @Context HttpServletRequest req) {
+
+        RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+        for (NodePermissionInheritance item : nodeInheritance.inheritanceList()) {
+            NodeDao nodeDao = NodeDao.getNode(repoDao, item.node());
+            nodeDao.setInherited(item.inherit());
+        }
+
+        return Response.status(Response.Status.OK).build();
     }
 
 
