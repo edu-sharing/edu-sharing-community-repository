@@ -20,7 +20,6 @@ export class MdsEditorWidgetMultivalueButtonsComponent
     readonly valueType: ValueType = ValueType.MultiValue;
     inputControl = new UntypedFormControl();
     chipsControl: UntypedFormControl;
-    indeterminateValues$: BehaviorSubject<string[]>;
     hasFocus = true;
 
     async ngOnInit() {
@@ -44,10 +43,6 @@ export class MdsEditorWidgetMultivalueButtonsComponent
         this.chipsControl.valueChanges
             .pipe(distinctUntilChanged())
             .subscribe((values: DisplayValue[]) => this.setValue(values.map((value) => value.key)));
-
-        this.indeterminateValues$.subscribe((indeterminateValues) =>
-            this.widget.setIndeterminateValues(indeterminateValues),
-        );
 
         this.widget.addValue.subscribe((value: MdsWidgetValue) => {
             this.add(this.toDisplayValue(value));
@@ -81,7 +76,7 @@ export class MdsEditorWidgetMultivalueButtonsComponent
 
     isValueSelected(value: MdsWidgetValue): boolean {
         const displayValue = this.toDisplayValue(value);
-        return this.chipsControl.value.some(
+        return this.chipsControl?.value?.some(
             (selectedValue: DisplayValue) => selectedValue.key === displayValue.key,
         );
     }
