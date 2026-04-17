@@ -170,7 +170,6 @@ public class CollectionServiceElastic implements CollectionService {
     }
 
     private String addToCollection(String collectionId, String refNodeId, boolean allowDuplicate) throws Throwable {
-
         // use original
         String nodeId = refNodeId;
         String originalNodeId;
@@ -193,6 +192,7 @@ public class CollectionServiceElastic implements CollectionService {
             throw new Exception(message);
         }
         NodeRef collectionRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, collectionId);
+        throwIfNotACollection(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), collectionRef);
         boolean collectionIsPublic = false;
         Set<AccessPermission> permissions = permissionService.getAllSetPermissions(collectionRef);
         for (AccessPermission accessPermission : permissions) {
