@@ -141,7 +141,8 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
         }
         const node: T = flatNode.item as T;
         // either multiple selection is allowed or a key press on cmd / strg is detected
-        const multipleSelectionAllowed: boolean = this.treeNodeService.isMultipleSelectionAllowed();
+        const multipleSelectionAllowed: boolean =
+            this.entriesService.treeConfig?.multipleSelection || false;
         const ctrlOrMetaKeyPressed: boolean = event && (event.ctrlKey || event.metaKey);
         if (multipleSelectionAllowed || ctrlOrMetaKeyPressed) {
             // multi-select: add or remove the node from the selection

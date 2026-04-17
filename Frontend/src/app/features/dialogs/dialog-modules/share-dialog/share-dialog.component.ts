@@ -25,6 +25,7 @@ import {
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
     NodeHelperService,
+    TreeConfig,
     TreeNodeService,
     UIAnimation,
 } from 'ngx-edu-sharing-ui';
@@ -217,6 +218,9 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     atLeastOneTreeChild: WritableSignal<boolean> = signal(false);
     structureColumns: ColumnType;
     readonly structureTabId: string = 'structure_tab';
+    structureTreeConfig: TreeConfig = {
+        multipleSelection: true,
+    };
     dataSourceStructure: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
 
     constructor(
@@ -267,8 +271,6 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         };
         // do not show files in the node-entries-tree of the structure tab
         this.treeNodeService.updateShowFiles(false);
-        // allow multiple selection in the node-entries-tree of the structure tab
-        this.treeNodeService.updateMultipleSelectionAllowed(true);
 
         this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
             this.isSafe = data.currentScope != null;

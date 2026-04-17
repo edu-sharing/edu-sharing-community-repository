@@ -108,6 +108,10 @@ export type TableConfig = {
 };
 export type TreeConfig = {
     /**
+     * whether multiple selection is allowed
+     */
+    multipleSelection?: boolean;
+    /**
      * whether to display the file name instead of the title
      */
     showFileName?: boolean;

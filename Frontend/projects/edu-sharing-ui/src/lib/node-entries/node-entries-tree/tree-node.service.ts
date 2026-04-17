@@ -39,8 +39,6 @@ export class TreeNodeService {
     };
     // whether files should be requested and shown as well
     private showFiles: boolean = true;
-    // whether multiple selection is allowed
-    private multipleSelection: boolean = false;
     // holds initially selected nodes to allow later selections
     private initiallySelectedNodes: Node[] = [];
     private selectionMode: 'source' | 'target' = 'source';
@@ -462,22 +460,6 @@ export class TreeNodeService {
      */
     updateShowFiles(showFiles: boolean) {
         this.showFiles = showFiles;
-    }
-
-    /**
-     * Updates the multiple selection flag to a given value.
-     *
-     * @param multipleSelection
-     */
-    updateMultipleSelectionAllowed(multipleSelection: boolean) {
-        this.multipleSelection = multipleSelection;
-    }
-
-    /**
-     * Returns whether multiple selection is allowed.
-     */
-    isMultipleSelectionAllowed(): boolean {
-        return this.multipleSelection;
     }
 
     /**
