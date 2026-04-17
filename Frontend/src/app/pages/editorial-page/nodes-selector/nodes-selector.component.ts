@@ -744,17 +744,25 @@ export class NodesSelectorComponent implements OnInit {
         if (!this.parent) {
             return;
         }
+        // only files are selected -> directly copy them, depending on the parent type
         if (this.onlyFilesSelected()) {
             try {
                 this.toast.showProgressSpinner();
-                this.uiService.addToCollection(
-                    this.parent,
-                    this.selectedNodes() as Node[],
-                    false,
-                    () => {
-                        this.toast.closeProgressSpinner();
-                    },
-                );
+                if (this.nodeHelperService.isNodeCollection(this.parent)) {
+                    this.uiService.addToCollection(
+                        this.parent,
+                        this.selectedNodes() as Node[],
+                        false,
+                        () => {
+                            this.toast.closeProgressSpinner();
+                        },
+                    );
+                } else {
+                    await this.uiService.copyNodes(this.selectedNodes() as Node[], this.parent);
+                    this.localEventsService.nodesCreated.emit(this.selectedNodes() as Node[]);
+                    this.localEventsService.nodesChanged.emit([this.parent]);
+                    this.toast.closeProgressSpinner();
+                }
             } catch (e) {
                 console.error(e);
                 this.toast.closeProgressSpinner();
@@ -762,7 +770,9 @@ export class NodesSelectorComponent implements OnInit {
                     this.toast.error({}, this.i18nPrefix + 'COPY.ERROR');
                 });
             }
-        } else if (this.currentStep() === StepType.SELECT) {
+        }
+        // when there are not the only files selected, switch to the configuration mode
+        else if (this.currentStep() === StepType.SELECT) {
             const selectedNode: Partial<Node> = this.highestSelectedNode();
             // reset the default configuration and sync it with the view
             this.copyRoot.set(!!selectedNode.collection);
@@ -773,7 +783,9 @@ export class NodesSelectorComponent implements OnInit {
             // load the children of the selected node to be able to update the number of references
             const selectedNodeChildren = await this.treeNodeService.getChildren(selectedNode);
             this.selectedNodeChildren.set(selectedNodeChildren);
-        } else if (
+        }
+        // configuration step for collections
+        else if (
             this.currentStep() === StepType.CONFIGURE &&
             this.atLeastRootOrChildrenSelected()
         ) {
