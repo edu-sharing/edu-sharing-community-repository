@@ -1943,11 +1943,12 @@
           {"bool":{
           "must_not":[
           {"match": {"properties.cm:creator.keyword": "${user.cm:userName}" }},
-          {"match": {"properties.ccm:assignment_status.keyword": "DRAFT" }}
+          {"match": {"properties.ccm:assignment_status.keyword": "DRAFT" }},
+          {"match": {"properties.ccm:assignment_status.keyword": "FINISHED" }}
           ]
           }}
         </statement>
-        <statement value="assigned">
+        <statement value="finished">
           {"match": {"properties.ccm:assignment_status.keyword": "FINISHED" }}
         </statement>
       </property>
