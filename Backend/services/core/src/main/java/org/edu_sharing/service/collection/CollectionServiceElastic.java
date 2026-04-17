@@ -8,10 +8,10 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.json.JsonData;
 import lombok.extern.slf4j.Slf4j;
-import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.security.AccessPermission;
@@ -192,7 +192,7 @@ public class CollectionServiceElastic implements CollectionService {
             throw new Exception(message);
         }
         NodeRef collectionRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, collectionId);
-        throwIfNotACollection(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), collectionRef);
+        throwIfNotACollection(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), collectionId);
         boolean collectionIsPublic = false;
         Set<AccessPermission> permissions = permissionService.getAllSetPermissions(collectionRef);
         for (AccessPermission accessPermission : permissions) {
