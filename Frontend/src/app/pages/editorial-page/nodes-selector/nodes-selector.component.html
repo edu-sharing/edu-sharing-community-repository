@@ -114,7 +114,8 @@
           <es-node-entries-wrapper
             #searchWrapperRef
             *ngIf="
-              (selectedTab() === TabType.SEARCH && dataSourceSearch.isLoading) ||
+              selectedTab() === TabType.SEARCH &&
+              !dataSourceSearch.isLoading &&
               !dataSourceSearch.isEmpty()
             "
             [dragDrop]="{
@@ -135,6 +136,9 @@
             (fetchData)="loadMore($event)"
             (selectionChange)="onNodeSelectionChange($event)"
           ></es-node-entries-wrapper>
+          <ng-container *ngIf="dataSourceSearch.isLoading">
+            <ng-container *ngTemplateOutlet="loading"></ng-container>
+          </ng-container>
           <ng-container
             *ngTemplateOutlet="noSearchResults; context: { dataSource: dataSourceSearch }"
           ></ng-container>
@@ -251,6 +255,10 @@
         >
           {{ i18nPrefix + 'NO_SEARCH_RESULTS' | translate }}
         </es-info-message>
+      </ng-template>
+
+      <ng-template #loading>
+        <es-spinner></es-spinner>
       </ng-template>
 
       <!-- FALLBACK -->

@@ -1,3 +1,4 @@
+import { SelectionModel } from '@angular/cdk/collections';
 import {
     Component,
     computed,
@@ -18,6 +19,7 @@ import {
     AboutService,
     AuthenticationService,
     CollectionService as ApiCollectionService,
+    CONTENT_TYPE_ALL,
     DEFAULT,
     HOME_REPOSITORY,
     MdsQueryCriteria,
@@ -63,6 +65,8 @@ import { RestCollectionService } from '../../../core-module/rest/services/rest-c
 import { UIService } from '../../../core-module/rest/services/ui.service';
 import { AddMaterialDialogResult } from '../../../features/dialogs/dialog-modules/add-material-dialog/add-material-dialog-data';
 import { AddMaterialDialogModule } from '../../../features/dialogs/dialog-modules/add-material-dialog/add-material-dialog.module';
+import { OptionState } from '../../../features/editorial-sidebar/editorial-sidebar.component';
+import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 import { MdsModule } from '../../../features/mds/mds.module';
 import { MetadataTemplateManagementComponent } from '../../../features/metadata-template-management/metadata-template-management.component';
 import { BridgeService } from '../../../services/bridge.service';
@@ -72,9 +76,6 @@ import { UploadDialogService } from '../../../services/upload-dialog.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { MessageType } from '../../../util/message-type';
 import { CreateSuggestionRequestDto } from '../../../../../dist/edu-sharing-api/lib/api/models/create-suggestion-request-dto';
-import { SelectionModel } from '@angular/cdk/collections';
-import { OptionState } from '../../../features/editorial-sidebar/editorial-sidebar.component';
-import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 
 export enum TabType {
     SEARCH = 'search',
@@ -299,6 +300,7 @@ export class NodesSelectorComponent implements OnInit {
     async ngOnInit(): Promise<void> {
         if (this.selectedTab() === null) {
             this.selectedTab.set(this.supportedTabs()[0]);
+            await this.refreshData(this.selectedTab());
         }
         this.flatNodeEntriesColumns = await this.mdsHelperService.getColumnsByMdsId('search', {
             repository: HOME_REPOSITORY,
@@ -379,11 +381,6 @@ export class NodesSelectorComponent implements OnInit {
             // reset the search datasource if it is already initialized
             if (!this.dataSourceSearch.isEmpty()) {
                 this.dataSourceSearch.reset();
-            }
-            if (!this.searchText()) {
-                this.dataSourceSearch.setData([]);
-                this.dataSourceSearch.isLoading = false;
-                return;
             }
             const request = this.createSearchRequest();
             const searchResult: SearchResults = await firstValueFrom(
@@ -868,6 +865,7 @@ export class NodesSelectorComponent implements OnInit {
     private async updateSearchDataSource(): Promise<void> {
         this.dataSourceSearch.isLoading = true;
         this.dataSourceSearch.setData([]);
+        await this.executeSearch();
         this.dataSourceSearch.isLoading = false;
     }
 
@@ -1074,10 +1072,10 @@ export class NodesSelectorComponent implements OnInit {
             maxItems: 51,
             skipCount,
             propertyFilter: [PROPERTY_FILTER_ALL],
-            contentType: 'ALL',
-            metadataset: '-default-',
-            sortProperties: ['cm:created'],
-            sortAscending: [true],
+            contentType: CONTENT_TYPE_ALL,
+            metadataset: DEFAULT,
+            sortProperties: [RestConstants.CM_MODIFIED_DATE],
+            sortAscending: [false],
             body: {
                 criteria,
                 resolveCollections: true,
