@@ -82,9 +82,9 @@ export class NodeEntriesCardSmallComponent<T extends Node> {
     assignmentStatusAssignee(assignment: Assignment) {
         if (assignment.status === 'INPROGRESS') {
             const sub = assignment.submissions?.[0];
-            if (sub.validationStatus === 'FINISHED') {
+            if (sub?.validationStatus === 'FINISHED') {
                 return 'CORRECTED';
-            } else if (sub.submissionStatus === 'FINISHED') {
+            } else if (sub?.submissionStatus === 'FINISHED') {
                 return 'SUBMITTED';
             } else {
                 return 'TO_SUBMIT';
