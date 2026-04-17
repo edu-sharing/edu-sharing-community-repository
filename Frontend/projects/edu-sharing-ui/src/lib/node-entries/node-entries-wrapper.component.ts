@@ -43,6 +43,7 @@ import {
     NodeClickEvent,
     NodeEntriesDisplayType,
     TableConfig,
+    TreeConfig,
 } from './entries-model';
 import { NodeDataSource } from './node-data-source';
 import { Helper } from '../util/helper';
@@ -125,6 +126,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @Input() dragDrop: ListDragGropConfig<T>;
     @Input() gridConfig: GridConfig;
     @Input() tableConfig: TableConfig;
+    @Input() treeConfig: TreeConfig;
     /**
      * this can be set instead of calling initOptionsGenerator()
      */
@@ -278,6 +280,9 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.gridConfig = this.gridConfig;
         if (this.tableConfig) {
             this.entriesService.tableConfig = this.tableConfig;
+        }
+        if (this.treeConfig) {
+            this.entriesService.treeConfig = this.treeConfig;
         }
         this.entriesService.options = this.options;
         if (this.globalOptions) {

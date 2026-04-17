@@ -49,6 +49,7 @@ import {
     NodeEntriesWrapperComponent,
     NodesRightMode,
     Scope,
+    TreeConfig,
     TreeNodeService,
 } from 'ngx-edu-sharing-ui';
 import { firstValueFrom } from 'rxjs';
@@ -246,6 +247,9 @@ export class NodesSelectorComponent implements OnInit {
 
     // workspace tab
     dataSourceWorkspace: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
+    workspaceTreeConfig: TreeConfig = {
+        showFileName: true,
+    };
     @ViewChild('workspaceWrapperRef') workspaceWrapper!: NodeEntriesWrapperComponent<Node>;
 
     // upload tab

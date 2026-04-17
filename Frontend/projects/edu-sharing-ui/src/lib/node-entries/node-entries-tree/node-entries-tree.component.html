@@ -136,7 +136,14 @@
         #titleWrapper
       >
         <span #title>
-          {{ flatNode.item | nodeTitle }}
+          <ng-container
+            *ngIf="entriesService.treeConfig?.showFileName && flatNode.item.name; else defaultTitle"
+          >
+            {{ flatNode.item.name }}
+          </ng-container>
+          <ng-template #defaultTitle>
+            {{ flatNode.item | nodeTitle }}
+          </ng-template>
         </span>
       </span>
     </div>

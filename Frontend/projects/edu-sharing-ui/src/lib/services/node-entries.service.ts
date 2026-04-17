@@ -14,6 +14,7 @@ import {
     NodeClickEvent,
     NodeEntriesDisplayType,
     TableConfig,
+    TreeConfig,
 } from '../node-entries/entries-model';
 import { NodeDataSource } from '../node-entries/node-data-source';
 import {
@@ -141,6 +142,7 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     fetchData: EventEmitter<FetchEvent>;
     readonly gridConfig$ = new BehaviorSubject<GridConfig | null>(null);
     readonly tableConfig$ = new BehaviorSubject<TableConfig>(null);
+    readonly treeConfig$ = new BehaviorSubject<TreeConfig>(null);
     get gridConfig() {
         return this.gridConfig$.value;
     }
@@ -152,6 +154,12 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     }
     set tableConfig(value: TableConfig) {
         this.tableConfig$.next(value);
+    }
+    get treeConfig() {
+        return this.treeConfig$.value;
+    }
+    set treeConfig(value: TreeConfig) {
+        this.treeConfig$.next(value);
     }
     primaryInstance: boolean;
     singleClickHint: 'dynamic' | 'static';

@@ -106,6 +106,12 @@ export type TableConfig = {
      */
     dataColumnLayout: 'scroll' | 'limit';
 };
+export type TreeConfig = {
+    /**
+     * whether to display the file name instead of the title
+     */
+    showFileName?: boolean;
+};
 
 export interface ListEventInterface<T extends NodeEntriesDataType> {
     updateNodes(nodes: void | T[]): void;
