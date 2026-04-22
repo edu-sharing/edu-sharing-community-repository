@@ -263,19 +263,19 @@ export enum Scope {
     DebugShowAll = 'DebugShowAll', // Full debug mode which enables all options
 }
 export enum ElementType {
-    Node,
-    NodeChild, // Child object
-    Assignment,
-    AssignmentFile,
-    MapRef, // Map ref (link to another map)
-    NodePublishedCopy,
-    NodeRevoked, // revoked copy / revoked published node
-    NodeBlockedImport, // node with property ccm:importblocked == true
-    NodeProposal, // node proposal for a collection
-    Person,
-    Group,
-    SavedSearch,
-    NoneOrUnknown,
+    Node = 'Node',
+    NodeChild = 'NodeChild', // Child object
+    Assignment = 'Assignment',
+    AssignmentFile = 'AssignmentFile',
+    MapRef = 'MapRef', // Map ref (link to another map)
+    NodePublishedCopy = 'NodePublishedCopy',
+    NodeRevoked = 'NodeRevoked', // revoked copy / revoked published node
+    NodeBlockedImport = 'NodeBlockedImport', // node with property ccm:importblocked == true
+    NodeProposal = 'NodeProposal', // node proposal for a collection
+    Person = 'Person',
+    Group = 'Group',
+    SavedSearch = 'SavedSearch',
+    NoneOrUnknown = 'NoneOrUnknown',
 }
 export class OptionGroup {
     /**

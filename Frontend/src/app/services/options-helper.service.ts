@@ -42,6 +42,7 @@ import {
     OptionItemToggle,
     OptionsHelperComponents,
     OptionsHelperService as OptionsHelperServiceAbstract,
+    OptionTooltipPipe,
     Scope,
     Target,
     TemporaryStorageService,
@@ -320,6 +321,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 this.translate.instant(o.name),
                 o.scopes?.join(' '),
                 o.toolpermissions?.join(' '),
+                o.elementType?.join(' '),
                 new OptionTooltipPipe(this.translate).getKeyInfo(o)
                 ]
             ).map((a) => a.join(',')).join('\n')
