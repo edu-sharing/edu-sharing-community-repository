@@ -24,7 +24,10 @@ import org.apache.commons.compress.archivers.examples.Archiver;
 import org.apache.commons.compress.utils.FileNameUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
-import org.edu_sharing.alfresco.service.search.cmis.*;
+import org.edu_sharing.alfresco.service.search.cmis.Filters;
+import org.edu_sharing.alfresco.service.search.cmis.Query;
+import org.edu_sharing.alfresco.service.search.cmis.QueryBuilder;
+import org.edu_sharing.alfresco.service.search.cmis.QueryStatement;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.rpc.User;
@@ -246,7 +249,7 @@ public class DataProtectionService {
 
         AuthorityService authorityService = AuthorityServiceFactory.getInstance().getLocalService();
         Set<String> groupSet = authorityService.getMemberships(userName);
-        ArrayList<EduGroup> allEduGroups = AuthenticationUtil.runAsSystem(() -> authorityService.getAllEduGroups(userName));
+        ArrayList<EduGroup> allEduGroups = AuthenticationUtil.runAsSystem(() -> authorityService.getAllEduGroups(userName, false));
         List<String> groupList = groupSet.stream()
                 .filter(g -> (!g.startsWith("GROUP_ORG") && !g.startsWith("GROUP_MEDIA_CENTER")))
                 .map(g ->  (String)authorityService.getAuthorityProperty(g,CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME))

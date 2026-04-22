@@ -4,7 +4,6 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.rpc.User;
-import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -37,10 +36,10 @@ public interface AuthorityService {
 	 * @return ALL edugroups of current user
 	 */
 	default ArrayList<EduGroup> getAllEduGroups(){
-		return getAllEduGroups(AuthenticationUtil.getFullyAuthenticatedUser());
+		return getAllEduGroups(AuthenticationUtil.getFullyAuthenticatedUser(), false);
 	};
 
-	public ArrayList<EduGroup> getAllEduGroups(String authority);
+	public ArrayList<EduGroup> getAllEduGroups(String authority, boolean filterNamePattern);
 
 	/**
 	 * 
@@ -49,9 +48,9 @@ public interface AuthorityService {
 	public ArrayList<EduGroup> getEduGroups();
 
 	default ArrayList<EduGroup> getEduGroups(String scope){
-		return getEduGroups(AuthenticationUtil.getFullyAuthenticatedUser(),scope);
+		return getEduGroups(AuthenticationUtil.getFullyAuthenticatedUser(),scope,false);
 	}
-	public ArrayList<EduGroup> getEduGroups(String authority,String scope);
+	public ArrayList<EduGroup> getEduGroups(String authority, String scope, boolean filterNamePattern);
 	
 	/**
 	 * creates an edugroup with groupadministrators group in a scoped area

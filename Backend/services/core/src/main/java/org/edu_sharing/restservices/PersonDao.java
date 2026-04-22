@@ -409,7 +409,7 @@ public class PersonDao {
     private List<EduGroup> getParentOrganizations() {
         // may causes performance penalties!
         return AuthenticationUtil.runAsSystem(() ->
-                authorityService.getEduGroups(this.getUserName(), NodeServiceInterceptor.getEduSharingScope())
+                authorityService.getEduGroups(this.getUserName(), NodeServiceInterceptor.getEduSharingScope(), true)
         );
     }
 

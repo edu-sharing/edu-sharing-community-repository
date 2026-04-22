@@ -263,11 +263,20 @@ public class AuthorityServiceImpl implements AuthorityService {
     }
 
     @Override
-    public ArrayList<EduGroup> getAllEduGroups(String authority) {
+    public ArrayList<EduGroup> getAllEduGroups(String authority, boolean filterNamePattern) {
         Set<String> authoritiesForUser = authorityService.getAuthoritiesForUser(authority);
         ArrayList<EduGroup> result = new ArrayList<>();
 
         for (String a : authoritiesForUser) {
+            if(filterNamePattern) {
+                if (!a.startsWith(PermissionService.GROUP_PREFIX)) {
+                    a = PermissionService.GROUP_PREFIX + authority;
+                }
+                // filter non GROUP_ORG_ named entitities
+                if(!a.startsWith(PermissionService.GROUP_PREFIX + org.edu_sharing.alfresco.service.AuthorityService.ORG_GROUP_PREFIX)) {
+                    continue;
+                }
+            }
             EduGroup eg = getEduGroup(a);
             if (eg != null) result.add(eg);
         }
@@ -309,17 +318,26 @@ public class AuthorityServiceImpl implements AuthorityService {
         return getEduGroups(currentScope);
     }
 
+    /**
+     * @param authority
+     * @param scope
+     * @param filterNamePattern
+     * when true, only GROUP_ORG_ prefixed groups will be obeyed
+     * This might fail for old ORGs but is much faster
+     * @return
+     */
     @Override
-    public ArrayList<EduGroup> getEduGroups(String authority, String scope) {
-        ArrayList<EduGroup> result = new ArrayList<>();
-
-        for (EduGroup eduGroup : getAllEduGroups(authority)) {
-            if ((eduGroup.getScope() == null && scope == null)
-                    || (eduGroup.getScope() != null && eduGroup.getScope().equals(scope))) {
-                result.add(eduGroup);
+    public ArrayList<EduGroup> getEduGroups(String authority, String scope, boolean filterNamePattern) {
+        return transactionService.getRetryingTransactionHelper().doInTransaction(() -> {
+            ArrayList<EduGroup> result = new ArrayList<>();
+            for (EduGroup eduGroup : getAllEduGroups(authority, filterNamePattern)) {
+                if ((eduGroup.getScope() == null && scope == null)
+                        || (eduGroup.getScope() != null && eduGroup.getScope().equals(scope))) {
+                    result.add(eduGroup);
+                }
             }
-        }
-        return result;
+            return result;
+        });
     }
 
     @Override

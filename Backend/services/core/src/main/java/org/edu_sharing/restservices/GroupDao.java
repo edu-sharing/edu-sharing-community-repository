@@ -11,10 +11,10 @@ import org.alfresco.service.namespace.QName;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
-import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
+import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
@@ -34,8 +34,8 @@ import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.service.organization.GroupSignupMethod;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
-import org.springframework.context.ApplicationContext;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
+import org.springframework.context.ApplicationContext;
 
 import java.io.Serializable;
 import java.util.*;
@@ -172,7 +172,7 @@ public class GroupDao {
 
             // may causes performance penalties!
             this.parentOrganizations = AuthenticationUtil.runAsSystem(() ->
-                    authorityService.getEduGroups(this.authorityName, NodeServiceInterceptor.getEduSharingScope())
+                    authorityService.getEduGroups(this.authorityName, NodeServiceInterceptor.getEduSharingScope(), true)
             );
         } catch (Throwable t) {
 
