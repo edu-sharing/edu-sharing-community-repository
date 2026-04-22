@@ -473,6 +473,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         revokeNode.scopes = [Scope.Render];
         revokeNode.elementType = [ElementType.NodePublishedCopy];
         revokeNode.group = DefaultGroups.Delete;
+        revokeNode.color = 'warn';
         revokeNode.priority = 10;
         revokeNode.permissions = [RestConstants.ACCESS_DELETE];
         revokeNode.permissionsRightMode = NodesRightMode.Effective;
@@ -1118,6 +1119,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             keyCode: 'Delete',
         };
         deleteNode.group = DefaultGroups.Delete;
+        deleteNode.color = 'warn';
         deleteNode.priority = 10;
 
         const unblockNode = new OptionItem('OPTIONS.UNBLOCK_IMPORT', 'sync', async (object) => {
@@ -1153,6 +1155,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         removeNodeRef.permissionsMode = HideMode.Disable;
         removeNodeRef.scopes = [Scope.CollectionsReferences, Scope.Render];
         removeNodeRef.group = DefaultGroups.Delete;
+        removeNodeRef.color = 'warn';
         removeNodeRef.priority = 20;
 
         /*
@@ -1350,6 +1353,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             );
         };
         cancelAssignment.group = DefaultGroups.Delete;
+        cancelAssignment.color = 'warn';
         cancelAssignment.priority = 10;
 
         const finishAssignment = new OptionItem(

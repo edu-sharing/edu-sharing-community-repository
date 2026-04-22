@@ -5,6 +5,9 @@
     &:not(:disabled) > span {
         color: var(--primary);
     }
+    &.warn:not(:disabled) > span {
+        color: var(--warn);
+    }
     display: flex;
     align-items: center;
     > i {

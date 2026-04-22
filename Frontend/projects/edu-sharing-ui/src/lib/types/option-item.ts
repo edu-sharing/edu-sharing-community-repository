@@ -128,6 +128,11 @@ export class OptionItem {
     public keyboardShortcut: KeyboardShortcutCondition;
 
     /**
+     * Material color theme for the option. Use 'warn' for critical/destructive actions.
+     */
+    public color: 'warn' | 'primary' | 'accent' = 'primary';
+
+    /**
      * Or concat of supported element types for the action
      */
     public elementType = [ElementType.Node];
