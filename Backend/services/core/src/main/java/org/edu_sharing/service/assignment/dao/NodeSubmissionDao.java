@@ -71,29 +71,16 @@ final class NodeSubmissionDao extends BasicNodeDaoImpl implements SubmissionDao 
         }
 
         String creator = getCreator();
-        if (AssignmentUtil.isAssignmentCoordinator(permissionService, nodeId)) {
-            return new Submission(
-                    getNodeRef(),
-                    UserSimple.create(authorityService.getUser(creator), creator),
-                    getValidationNotes(),
-                    getFeedback(),
-                    getStatus(),
-                    getValidationStatus(),
-                    getSubmissionDate(),
-                    getReturnDate()
-            );
-        } else {
-            return new Submission(
-                    getNodeRef(),
-                    UserSimple.create(authorityService.getUser(creator), creator),
-                    null,
-                    isReturned() ? getFeedback() : null,
-                    getStatus(),
-                    isReturned() ? getValidationStatus() : Submission.Status.PENDING,
-                    getSubmissionDate(),
-                    getReturnDate()
-            );
-        }
+        return new Submission(
+                getNodeRef(),
+                UserSimple.create(authorityService.getUser(creator), creator),
+                getValidationNotes(),
+                getFeedback(),
+                getStatus(),
+                getValidationStatus(),
+                getSubmissionDate(),
+                getReturnDate()
+        );
     }
 
     @Override
@@ -108,7 +95,11 @@ final class NodeSubmissionDao extends BasicNodeDaoImpl implements SubmissionDao 
 
     @Override
     public boolean isReturned() {
-        return propertyMapper.get().getEnum(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, Submission.Status.class) == Submission.Status.FINISHED;
+        return switch (assignmentDao.getStatus()) {
+            case CORRECTED, FINISHED ->
+                    propertyMapper.get().getEnum(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, Submission.Status.class) == Submission.Status.FINISHED;
+            default -> false;
+        };
     }
 
     @Override
@@ -269,6 +260,9 @@ final class NodeSubmissionDao extends BasicNodeDaoImpl implements SubmissionDao 
     @Override
     public Submission.Status getValidationStatus() {
         if (!AssignmentUtil.isAssignmentCoordinator(permissionService, nodeId) && !isReturned()) {
+            if (propertyMapper.get().getEnum(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, Submission.Status.class) != Submission.Status.FINISHED) {
+                return Submission.Status.FINISHED;
+            }
             return Submission.Status.PENDING;
         }
         return propertyMapper.get().getEnum(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, Submission.Status.class);
@@ -276,7 +270,9 @@ final class NodeSubmissionDao extends BasicNodeDaoImpl implements SubmissionDao 
 
     @Override
     public String getFeedback() {
-        if (!AssignmentUtil.isAssignmentCoordinator(permissionService, nodeId) && !isReturned()) {
+        if (!AssignmentUtil.isAssignmentCoordinator(permissionService, nodeId)
+                && !isReturned()
+                && propertyMapper.get().getEnum(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, Submission.Status.class) != Submission.Status.FINISHED) {
             return null;
         }
 
@@ -310,7 +306,7 @@ final class NodeSubmissionDao extends BasicNodeDaoImpl implements SubmissionDao 
             return;
         }
 
-        if(assignmentDao.getStatus() == Assignment.Status.DRAFT) {
+        if (assignmentDao.getStatus() == Assignment.Status.DRAFT) {
             throw new InsufficientPermissionException("Assignment with id " + assignmentDao.getNodeId() + " is in draft mode and cannot be modified by assignees.");
         }
 
