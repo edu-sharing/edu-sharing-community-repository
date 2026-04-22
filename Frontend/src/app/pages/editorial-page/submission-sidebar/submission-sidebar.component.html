@@ -56,53 +56,53 @@
             (nodeClick)="data().submissionFileCallback($event)"
           ></es-manage-assignment-submissions>
         </div>
-        <div class="feedback">
-          <form [formGroup]="feedbackForm">
-            <mat-label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.FEEDBACK' | translate }}</mat-label>
-            <editor [init]="editorConfig" formControlName="feedback"></editor>
-            <mat-slide-toggle
-              class="toggle-reverse show-notes"
-              [ngModelOptions]="{ standalone: true }"
-              [disabled]="!!feedbackForm.get('validationNotes').value"
-              [ngModel]="showValidationNotes() || !!feedbackForm.get('validationNotes').value"
-              (ngModelChange)="showValidationNotes.set($event)"
-            >
-              {{ 'EDITORIAL.SIDEBAR.SUBMISSION.INTERNAL_NOTE_SHOW' | translate }}
-            </mat-slide-toggle>
-            <mat-form-field
-              floatLabel="always"
-              *ngIf="showValidationNotes() || !!feedbackForm.get('validationNotes').value"
-            >
-              <mat-label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.INTERNAL_NOTE' | translate }}</mat-label>
-              <textarea
-                matInput
-                formControlName="validationNotes"
-                cdkTextareaAutosize
-                cdkAutosizeMinRows="2"
-                cdkAutosizeMaxRows="6"
-              ></textarea>
-            </mat-form-field>
-          </form>
-        </div>
-        <div class="actions">
-          <button mat-button color="primary" (click)="stepElement(-1)" [disabled]="!canGoBack()">
-            <i esIcon="arrow_back"></i>
-            {{ 'EDITORIAL.SIDEBAR.SUBMISSION.PREVIOUS' | translate }}
-          </button>
-          <button
-            mat-flat-button
-            color="primary"
-            [disabled]="data().submission.validationStatus === 'FINISHED'"
-            (click)="markAsFinished()"
-          >
-            {{ 'EDITORIAL.SIDEBAR.SUBMISSION.SEND_BACK' | translate }}
-          </button>
-          <button mat-button color="primary" (click)="stepElement(+1)" [disabled]="!canGoForward()">
-            <i esIcon="arrow_forward"></i>
-            {{ 'EDITORIAL.SIDEBAR.SUBMISSION.NEXT' | translate }}
-          </button>
-        </div>
       </ng-container>
+      <div class="feedback">
+        <form [formGroup]="feedbackForm">
+          <mat-label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.FEEDBACK' | translate }}</mat-label>
+          <editor [init]="editorConfig" formControlName="feedback"></editor>
+          <mat-slide-toggle
+            class="toggle-reverse show-notes"
+            [ngModelOptions]="{ standalone: true }"
+            [disabled]="!!feedbackForm.get('validationNotes').value"
+            [ngModel]="showValidationNotes() || !!feedbackForm.get('validationNotes').value"
+            (ngModelChange)="showValidationNotes.set($event)"
+          >
+            {{ 'EDITORIAL.SIDEBAR.SUBMISSION.INTERNAL_NOTE_SHOW' | translate }}
+          </mat-slide-toggle>
+          <mat-form-field
+            floatLabel="always"
+            *ngIf="showValidationNotes() || !!feedbackForm.get('validationNotes').value"
+          >
+            <mat-label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.INTERNAL_NOTE' | translate }}</mat-label>
+            <textarea
+              matInput
+              formControlName="validationNotes"
+              cdkTextareaAutosize
+              cdkAutosizeMinRows="2"
+              cdkAutosizeMaxRows="6"
+            ></textarea>
+          </mat-form-field>
+        </form>
+      </div>
+      <div class="actions">
+        <button mat-button color="primary" (click)="stepElement(-1)" [disabled]="!canGoBack()">
+          <i esIcon="arrow_back"></i>
+          {{ 'EDITORIAL.SIDEBAR.SUBMISSION.PREVIOUS' | translate }}
+        </button>
+        <button
+          mat-flat-button
+          color="primary"
+          [disabled]="data().submission.validationStatus === 'FINISHED'"
+          (click)="markAsFinished()"
+        >
+          {{ 'EDITORIAL.SIDEBAR.SUBMISSION.SEND_BACK' | translate }}
+        </button>
+        <button mat-button color="primary" (click)="stepElement(+1)" [disabled]="!canGoForward()">
+          <i esIcon="arrow_forward"></i>
+          {{ 'EDITORIAL.SIDEBAR.SUBMISSION.NEXT' | translate }}
+        </button>
+      </div>
     </div>
   </mat-tab>
   <mat-tab *ngIf="data().submission.submissionStatus !== 'NOT_STARTED'">

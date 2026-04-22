@@ -25,11 +25,7 @@
       <button
         mat-flat-button
         color="primary"
-        [disabled]="
-          corrected() < dataSource.getTotal() ||
-          assignment()?.status === 'CORRECTED' ||
-          assignment()?.status === 'FINISHED'
-        "
+        [disabled]="assignment()?.status === 'CORRECTED' || assignment()?.status === 'FINISHED'"
         (click)="finishAll()"
       >
         {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.SAVE_CORRECTED' | translate }}

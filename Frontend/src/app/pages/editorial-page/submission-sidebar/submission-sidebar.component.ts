@@ -153,7 +153,7 @@ export class SubmissionSidebarComponent {
         await this.saveNotes();
         const submission = await firstValueFrom(
             this.assignmentV1Service.editSubmission1({
-                submissionId: this.data().submission.ref.id,
+                submissionId: this.submission().ref.id,
                 assignmentId: this.data().assignment.ref.id,
                 body: {
                     validationStatus: 'FINISHED',

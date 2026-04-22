@@ -176,7 +176,12 @@
         "CORRECTED": "Korrigiert",
         "SAVE_CORRECTED": "Korrektur einreichen",
         "ALL_CORRECTED": "Die Aufgabe wurde als vollständig korrigiert markiert",
-        "CHANGES_SAVED": "Korrektur gespeichert"
+        "CHANGES_SAVED": "Korrektur gespeichert",
+        "FINISH_ALL_CONFIRM_TITLE": "Korrektur zurückgeben",
+        "FINISH_ALL_CONFIRM_MESSAGE": "Alle Abgaben wurden korrigiert.\nDie Rückmeldungen werden jetzt für alle Schüler sichtbar.",
+        "FINISH_ALL_MISSING_MESSAGE": "{{ count }} Abgaben wurden noch nicht korrigiert.\nDiese Schüler erhalten keine Rückmeldung.\nDieser Schritt kann nicht rückgängig gemacht werden.",
+        "FINISH_ALL_CONFIRM_BUTTON": "Korrektur zurückgeben",
+        "FINISH_ALL_MISSING_CONFIRM_BUTTON": "Trotzdem zurückgeben"
       },
       "FORM": {
         "TITLE": "Titel",

@@ -37,6 +37,8 @@ import {
 } from 'ngx-extended-pdf-viewer';
 import { RenderWrapperComponent } from '../../render2-page/render-wrapper-component/render-wrapper.component';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { GenericDialogButton } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 
 /**
  * lists all submissions (for teacher view)
@@ -81,6 +83,7 @@ export class AssignmentSubmissionComponent implements OnDestroy {
         private toast: Toast,
         public editorialSidebarService: EditorialSidebarService,
         private assignmentService: AssignmentV1Service,
+        private dialogs: DialogsService,
     ) {
         interval(500)
             .pipe(
@@ -225,6 +228,31 @@ export class AssignmentSubmissionComponent implements OnDestroy {
     }
 
     async finishAll() {
+        const missing = this.dataSource.getTotal() - this.corrected();
+        const confirmLabel =
+            missing > 0
+                ? 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.FINISH_ALL_MISSING_CONFIRM_BUTTON'
+                : 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.FINISH_ALL_CONFIRM_BUTTON';
+        const buttons: GenericDialogButton<string>[] = [
+            { label: 'CANCEL', config: { color: 'standard' } },
+            { label: confirmLabel, config: { color: 'primary' } },
+        ];
+        const result = await firstValueFrom(
+            (
+                await this.dialogs.openGenericDialog({
+                    title: 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.FINISH_ALL_CONFIRM_TITLE',
+                    message:
+                        missing > 0
+                            ? 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.FINISH_ALL_MISSING_MESSAGE'
+                            : 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.FINISH_ALL_CONFIRM_MESSAGE',
+                    messageParameters: missing > 0 ? { count: String(missing) } : null,
+                    buttons,
+                })
+            ).afterClosed(),
+        );
+        if (result !== confirmLabel) {
+            return;
+        }
         await firstValueFrom(
             this.assignmentService.createOrUpdateAssignment1({
                 assignmentId: this.assignment().ref.id,
