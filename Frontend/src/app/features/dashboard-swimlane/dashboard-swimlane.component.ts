@@ -201,7 +201,9 @@ export class DashboardSwimlaneComponent {
             void this.fetch(
                 this.assignmentService.searchAssignments({
                     body: {
-                        criteria: [],
+                        criteria: [
+                            { property: 'virtual:assignmentType', values: ['swimlane_landing'] },
+                        ],
                     },
                     sortProperties: [RestConstants.CM_PROP_C_CREATED],
                     sortAscending: [false],

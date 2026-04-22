@@ -1936,6 +1936,14 @@
         </statement>
       </property>
       <property name="virtual:assignmentType">
+        <statement value="swimlane_landing">
+          {"bool":{
+          "must_not":[
+          {"match": {"properties.ccm:assignment_status.keyword": "CANCELED" }},
+          {"match": {"properties.ccm:assignment_status.keyword": "FINISHED" }}
+          ]
+          }}
+        </statement>
         <statement value="created">
           {"bool":{
           "must":[
