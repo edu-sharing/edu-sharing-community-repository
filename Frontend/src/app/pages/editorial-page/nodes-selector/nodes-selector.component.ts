@@ -191,6 +191,20 @@ export class NodesSelectorComponent implements OnInit {
             );
         }
     });
+    workspaceAction = model<'move' | 'copy'>('move');
+    canCopyWorkspaceNodes = computed(
+        () =>
+            this.option().optionConfig.selection?.selected?.length &&
+            this.option().optionConfig.selection?.selected.every(
+                (n: Node) => !n.aspects?.includes(RestConstants.CCM_ASPECT_IO_REFERENCE),
+            ) &&
+            this.nodeHelperService.getNodesRight(
+                this.option().optionConfig.selection?.selected as Node[],
+                RestConstants.ACCESS_CHANGE_PERMISSIONS,
+                NodesRightMode.Effective,
+            ),
+    );
+
     // initialize collection copy variables with true
     copyRoot = model(true);
     copyChildCollections = model(true);
@@ -603,7 +617,7 @@ export class NodesSelectorComponent implements OnInit {
         } else if (target.mediatype === 'folder') {
             this.editorialSidebarService.sidebarLoading.set(true);
             try {
-                await this.uiService.copyNodes(source, target);
+                await this.uiService.copyOrMoveNodes(source, target, this.workspaceAction());
                 this.editorialSidebarService.sidebarOpened.set(false);
             } catch (e) {}
             this.editorialSidebarService.sidebarLoading.set(false);
@@ -759,7 +773,11 @@ export class NodesSelectorComponent implements OnInit {
                         },
                     );
                 } else {
-                    await this.uiService.copyNodes(this.selectedNodes() as Node[], this.parent);
+                    await this.uiService.copyOrMoveNodes(
+                        this.selectedNodes() as Node[],
+                        this.parent,
+                        'copy',
+                    );
                     this.localEventsService.nodesCreated.emit(this.selectedNodes() as Node[]);
                     this.localEventsService.nodesChanged.emit([this.parent]);
                     this.toast.closeProgressSpinner();
