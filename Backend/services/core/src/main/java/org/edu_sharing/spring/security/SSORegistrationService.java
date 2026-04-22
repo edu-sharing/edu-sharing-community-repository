@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.springframework.aop.framework.Advised;
 
 @Slf4j
 @Component
@@ -21,15 +22,24 @@ public class SSORegistrationService {
     @Lazy
     ClientRegistrationRepository clientRegistrationRepository;
 
-    public List<ClientRegistration> getClientRegistrations(){
+    public List<ClientRegistration> getClientRegistrations() throws Exception {
         if(clientRegistrationRepository == null){
             return new ArrayList<>();
         }
-        if(!(clientRegistrationRepository instanceof InMemoryClientRegistrationRepository)){
+
+
+        InMemoryClientRegistrationRepository inMemoryClientRegistrationRepository = null;
+        if(clientRegistrationRepository instanceof InMemoryClientRegistrationRepository){
+            inMemoryClientRegistrationRepository = (InMemoryClientRegistrationRepository) clientRegistrationRepository;
+        }else if( clientRegistrationRepository instanceof Advised && ((Advised)clientRegistrationRepository).getTargetSource().getTarget() instanceof InMemoryClientRegistrationRepository ){
+            inMemoryClientRegistrationRepository = (InMemoryClientRegistrationRepository) ((Advised)clientRegistrationRepository).getTargetSource().getTarget();
+        }
+
+        if(inMemoryClientRegistrationRepository == null){
             log.warn("clientRegistrationRepository is not an instance of InMemoryClientRegistrationRepository");
             return new ArrayList<>();
         }
-        return StreamSupport.stream( ((InMemoryClientRegistrationRepository)clientRegistrationRepository).spliterator(), false)
+        return StreamSupport.stream( inMemoryClientRegistrationRepository.spliterator(), false)
                 .collect(Collectors.toList());
     }
 
