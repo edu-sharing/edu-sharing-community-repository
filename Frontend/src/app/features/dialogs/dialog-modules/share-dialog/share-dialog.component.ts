@@ -225,7 +225,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         selectParents: true,
     };
     dataSourceStructure: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
-    initallySkippedNodeIds: string[] = [];
+    initiallySkippedNodeIds: string[] = [];
 
     constructor(
         @Optional() @Inject(CARD_DIALOG_DATA) public dataCard: ShareDialogData,
@@ -1197,13 +1197,13 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         const inheritanceList: NodePermissionInheritance[] = [];
         event.added?.forEach((node: Node) => {
             // skip nodes that initally have inherited set to true
-            if (!node.inherited && !this.initallySkippedNodeIds.includes(node.ref.id)) {
+            if (!node.inherited && !this.initiallySkippedNodeIds.includes(node.ref.id)) {
                 inheritanceList.push({
                     node: node.ref.id,
                     inherit: true,
                 });
             } else {
-                this.initallySkippedNodeIds.push(node.ref.id);
+                this.initiallySkippedNodeIds.push(node.ref.id);
             }
         });
         event.removed?.forEach((node: Node) => {
