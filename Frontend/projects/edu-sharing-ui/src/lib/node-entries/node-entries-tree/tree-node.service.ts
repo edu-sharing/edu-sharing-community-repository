@@ -240,19 +240,11 @@ export class TreeNodeService {
             }
         } else {
             // regular file/folders
-            nodeEntries = await firstValueFrom(
-                this.nodeService.getChildren(nodeId, this.baseSearchParams),
-            );
-            // filter out files if not requested and update the pagination
-            if (!this.showFiles) {
-                let filteredNodesCount: number = nodeEntries.nodes.length;
-                nodeEntries.nodes = nodeEntries.nodes.filter(
-                    (n) => n.type !== RestConstants.CCM_TYPE_IO,
-                );
-                filteredNodesCount -= nodeEntries.nodes.length;
-                nodeEntries.pagination.count -= filteredNodesCount;
-                nodeEntries.pagination.total -= filteredNodesCount;
-            }
+            const request = {
+                ...this.baseSearchParams,
+                ...(this.showFiles ? {} : { filter: ['folders'] }),
+            };
+            nodeEntries = await firstValueFrom(this.nodeService.getChildren(nodeId, request));
         }
         children = this.replaceNodeReferences(nodeEntries?.nodes ?? []);
         // hold the last loaded node ID to load the next elements
@@ -280,13 +272,13 @@ export class TreeNodeService {
         this.parentIdToLastLoadedNodeId.delete(nodeId);
         // request both existing and further children and concat those
         const existingChildren: Partial<Node>[] = this.dataMap.get(nodeId) || [];
-        const extendedCriteria = JSON.parse(JSON.stringify(this.baseSearchParams));
-        extendedCriteria.skipCount = existingChildren.length;
+        const request = {
+            ...this.baseSearchParams,
+            skipCount: existingChildren.length,
+            ...(this.showFiles ? {} : { filter: ['folders'] }),
+        };
         const nodeEntries: NodeEntries = await firstValueFrom(
-            this.nodeService.getChildren(nodeId, {
-                ...this.baseSearchParams,
-                skipCount: existingChildren.length,
-            }),
+            this.nodeService.getChildren(nodeId, request),
         );
         const requestedChildren = nodeEntries?.nodes ?? [];
         const children = this.replaceNodeReferences(

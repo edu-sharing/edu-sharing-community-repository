@@ -219,6 +219,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     structureColumns: ColumnType;
     readonly structureTabId: string = 'structure_tab';
     structureTreeConfig: TreeConfig = {
+        showFileName: false,
         multipleSelection: true,
         selectParents: true,
     };
@@ -480,10 +481,15 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         // check whether the first node is either a collection or directory
         const isCollection: boolean = this.isCollection();
         const nodeIsDirectory: boolean =
-            !isCollection && this._nodes[0]?.type === RestConstants.CCM_TYPE_MAP;
+            !isCollection &&
+            this._nodes[0]?.type &&
+            [RestConstants.CCM_TYPE_MAP, RestConstants.CM_TYPE_FOLDER].includes(
+                this._nodes[0].type,
+            );
         this.isCollectionOrDirectory.set(
             this._nodes?.length > 0 && (isCollection || nodeIsDirectory),
         );
+        this.structureTreeConfig.showFileName = nodeIsDirectory;
         // count the number of tree children with type !== ccm:io
         const children: Node[] = this._nodes?.length
             ? (await firstValueFrom(this.nodeApi.getChildren(this._nodes[0].ref.id))).nodes
