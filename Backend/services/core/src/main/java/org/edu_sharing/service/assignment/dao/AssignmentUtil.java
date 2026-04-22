@@ -16,7 +16,7 @@ public final class AssignmentUtil {
             return false;
         }
 
-        if (AuthorityServiceHelper.isAdmin(AuthenticationUtil.getFullyAuthenticatedUser())) {
+        if (AuthorityServiceHelper.isAdmin(AuthenticationUtil.getRunAsUser())) {
             return true;
         }
 
@@ -28,7 +28,7 @@ public final class AssignmentUtil {
             return false;
         }
 
-        if (AuthorityServiceHelper.isAdmin(AuthenticationUtil.getFullyAuthenticatedUser())) {
+        if (AuthorityServiceHelper.isAdmin(AuthenticationUtil.getRunAsUser())) {
             return true;
         }
 
@@ -40,7 +40,7 @@ public final class AssignmentUtil {
             return false;
         }
 
-        if (AuthorityServiceHelper.isAdmin(AuthenticationUtil.getFullyAuthenticatedUser())) {
+        if (AuthorityServiceHelper.isAdmin(AuthenticationUtil.getRunAsUser())) {
             return true;
         }
 
@@ -52,7 +52,7 @@ public final class AssignmentUtil {
             return false;
         }
 
-        if (AuthorityServiceHelper.isAdmin(AuthenticationUtil.getFullyAuthenticatedUser())) {
+        if (AuthorityServiceHelper.isAdmin(AuthenticationUtil.getRunAsUser())) {
             return true;
         }
 

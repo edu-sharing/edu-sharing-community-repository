@@ -304,7 +304,7 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
                             Stream.of(new ACE(CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR, x.authorityName()));
                 })
                 .toList());
-        aceList.add(new ACE(CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR, AuthenticationUtil.getFullyAuthenticatedUser()));
+        aceList.add(new ACE(CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR, AuthenticationUtil.getRunAsUser()));
         log.debug("Setting permissions for assignment {}: {}", nodeId, aceList);
         permissionService.setPermissions(nodeId, aceList, false);
         refresh();
@@ -323,7 +323,7 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
                         }
                 )
                 .toList());
-        aceList.add(new ACE(CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR, AuthenticationUtil.getFullyAuthenticatedUser()));
+        aceList.add(new ACE(CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR, AuthenticationUtil.getRunAsUser()));
         log.debug("Setting permissions for submissions folder {}: {}", submissionFolderRef.get(), aceList);
         permissionService.setPermissions(submissionFolderRef.get(), aceList, false);
         refresh();
@@ -484,7 +484,7 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
     @Override
     public SubmissionDao getSubmission(String submissionId) {
         if ("-me-".equalsIgnoreCase(submissionId)) {
-            String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
+            String currentUser = AuthenticationUtil.getRunAsUser();
             return getSubmissionByCreator(currentUser)
                     .orElseThrow(() -> new MissingResourceException("No submission found for user " + currentUser));
         }
@@ -506,7 +506,7 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
     @Override
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
     public SubmissionDao createSubmissionByUserId(String username) {
-        return AuthenticationUtil.runAs(() -> getOrCreateSubmission(null), username);
+        return AuthenticationUtil.runAs(() -> getOrCreateSubmission("-me-"), username);
     }
 
     @Override
@@ -519,7 +519,7 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
             submissionDao.create();
             submissionsMap.get().put(submissionDao.getNodeId(), submissionDao);
         } else if ("-me-".equalsIgnoreCase(submissionId)) {
-            String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
+            String currentUser = AuthenticationUtil.getRunAsUser();
             Optional<SubmissionDao> submissionByCreator = getSubmissionByCreator(currentUser);
             if (submissionByCreator.isEmpty() || submissionByCreator.get() instanceof EmptySubmissionAssignmentDao) {
                 submissionDao = assignmentDaoFactory.submissionDaoByNodeId(this, null);

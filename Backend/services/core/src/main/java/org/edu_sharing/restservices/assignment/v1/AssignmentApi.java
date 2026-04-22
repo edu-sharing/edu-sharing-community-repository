@@ -300,7 +300,7 @@ public class AssignmentApi {
     }
 
     @PUT
-    @Path("/{assignmentId}/submissions/{user}")
+    @Path("/{assignmentId}/submissions/create")
     @Operation(summary = "create submission", description = "create submission by username")
     @ApiResponses(
             value = {
@@ -314,8 +314,8 @@ public class AssignmentApi {
             }
     )
     public Response createSubmission(@PathParam("assignmentId") String assignmentId,
-                                     @Parameter(description = "The userId, usually the account name")
-                                     @PathParam("user") String userId) {
+                                     @Parameter(description = "The userId, usually the account name", required = true)
+                                     @QueryParam("user") String userId) {
         AssignmentDao assignment = assignmentDaoFactory.assignmentDaoByNodeId(assignmentId);
         SubmissionDao submission = assignment.createSubmissionByUserId(userId);
         return Response.ok().entity(submission.getSubmission()).build();

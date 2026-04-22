@@ -99,6 +99,7 @@ final class NodeAssignmentDao extends BasicNodeDaoImpl implements AssignmentDao 
                 return Collections.emptyList();
             }
 
+            String user = AuthenticationUtil.getRunAsUser();
             return nodeRef.getPermissions()
                     .entrySet()
                     .stream()
@@ -110,7 +111,7 @@ final class NodeAssignmentDao extends BasicNodeDaoImpl implements AssignmentDao 
                             return null;
                         }
 
-                        return new Assignment.Permission(new Authority(AuthenticationUtil.getFullyAuthenticatedUser(), y), role);
+                        return new Assignment.Permission(new Authority(user, y), role);
                     })
                     .filter(Objects::nonNull)
                     .toList();
@@ -174,7 +175,7 @@ final class NodeAssignmentDao extends BasicNodeDaoImpl implements AssignmentDao 
                                 Stream.of(new ACE(CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR, x.authorityName()));
                     })
                     .toList());
-            aceList.add(new ACE(CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR, AuthenticationUtil.getFullyAuthenticatedUser()));
+            aceList.add(new ACE(CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR, AuthenticationUtil.getRunAsUser()));
             log.debug("Setting permissions for assignment {}: {}", nodeId, aceList);
             permissionService.setPermissions(nodeId, aceList, false);
         } catch (Exception t) {

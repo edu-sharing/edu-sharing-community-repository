@@ -196,6 +196,7 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
             throw new InsufficientPermissionException("You do not have permission to copy the original file. Required permission: " + CCConstants.PERMISSION_DOWNLOAD_CONTENT);
         }
 
+        String currentUser = AuthenticationUtil.getRunAsUser();
         AuthenticationUtil.runAsSystem(() -> {
             log.debug("Copying reference node {}", request.originalFile());
             NodeRef contentNodeRef = nodeService.copyNode(request.originalFile(), nodeId, CCConstants.CCM_ASSOC_SUBMISSION_FILE_CONTENT, true);
@@ -218,7 +219,6 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
             nodeService.addAspect(contentNodeRef.getId(), CCConstants.CCM_ASPECT_SUBMISSION_FILE_CONTENT);
             log.debug("Added content aspect to content node {}", contentNodeRef.getId());
 
-            String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
             permissionService.setPermission(contentNodeRef.getId(), currentUser, CCConstants.PERMISSION_CONSUMER);
             log.debug("Added consumer permission for {} to submission file {}", currentUser, contentNodeRef.getId());
             return null;
@@ -226,6 +226,7 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
     }
 
     private void handleFileUpload(SubmissionFileRequest request, InputStream fileInputStream) {
+        String currentUser = AuthenticationUtil.getRunAsUser();
         AuthenticationUtil.runAsSystem(() -> {
             String contentNodeId;
             try {
@@ -247,8 +248,7 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
             nodeService.addAspect(contentNodeId, CCConstants.CCM_ASPECT_SUBMISSION_FILE_CONTENT);
             log.debug("Added content aspect to content node {}", contentNodeId);
 
-            String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
-            permissionService.setPermission(contentNodeId, AuthenticationUtil.getFullyAuthenticatedUser(), CCConstants.PERMISSION_CONSUMER);
+            permissionService.setPermission(contentNodeId, currentUser, CCConstants.PERMISSION_CONSUMER);
             log.debug("Added consumer permission for {} to submission file {}", currentUser, contentNodeId);
             return null;
         });

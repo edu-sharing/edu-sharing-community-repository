@@ -2,6 +2,7 @@ package org.edu_sharing.service.assignment.dao;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -37,6 +38,8 @@ final class NodeSubmissionDao extends BasicNodeDaoImpl implements SubmissionDao 
     private PermissionService permissionService;
     @Setter(onMethod_ = @Autowired)
     private AuthorityService authorityService;
+    @Setter(onMethod_ = @Autowired)
+    private BehaviourFilter policyBehaviourFilter;
 
     private AssignmentDaoFactory assignmentDaoFactory;
     private NodeSubmissionAssignmentDao assignmentDao;
@@ -225,17 +228,25 @@ final class NodeSubmissionDao extends BasicNodeDaoImpl implements SubmissionDao 
             put(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, Submission.Status.NOT_STARTED.name());
         }};
 
-        String fullyAuthenticatedUser = AuthenticationUtil.getFullyAuthenticatedUser();
+        String user = AuthenticationUtil.getRunAsUser();
 
         AuthenticationUtil.runAsSystem(() -> {
             nodeId = nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, assignmentDao.getSubmissionRefId(), CCConstants.CCM_TYPE_SUBMISSION, CCConstants.CCM_ASSOC_SUBMISSIONS_SUBMISSION, properties);
+            // if a coordinator creates a submission, the creator and modifier needs to be set to the run as user otherwise it will be set to the coordinator
+            policyBehaviourFilter.disableBehaviour();
+            try {
+                nodeService.setProperty(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId, CCConstants.CM_PROP_C_CREATOR, user, true);
+                nodeService.setProperty(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId, CCConstants.CM_PROP_C_MODIFIER, user, true);
+            } finally {
+                policyBehaviourFilter.enableBehaviour();
+            }
             nodeService.setOwner(nodeId, ApplicationInfoList.getHomeRepository().getUsername());
-            log.debug("Created new submission for {}({}) to {}", fullyAuthenticatedUser, nodeId, assignmentDao.getSubmissionRefId());
+            log.debug("Created new submission for {}({}) to {}", user, nodeId, assignmentDao.getSubmissionRefId());
 
-            permissionService.setPermission(nodeId, fullyAuthenticatedUser, CCConstants.PERMISSION_ASSIGNEE);
-            permissionService.setPermission(nodeId, fullyAuthenticatedUser, CCConstants.PERMISSION_COMMENT);
+            permissionService.setPermission(nodeId, user, CCConstants.PERMISSION_ASSIGNEE);
+            permissionService.setPermission(nodeId, user, CCConstants.PERMISSION_COMMENT);
 
-            log.debug("Added permission {} for {} to submission {}", CCConstants.PERMISSION_ASSIGNEE, fullyAuthenticatedUser, nodeId);
+            log.debug("Added permission {} for {} to submission {}", CCConstants.PERMISSION_ASSIGNEE, user, nodeId);
             return null;
         });
     }
