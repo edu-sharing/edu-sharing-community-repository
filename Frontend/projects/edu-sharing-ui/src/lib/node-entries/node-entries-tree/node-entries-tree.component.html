@@ -144,7 +144,7 @@
     *ngIf="entriesService.checkbox && flatNode.level > 0"
     class="node-checkbox"
     [checked]="entriesService.selection.isSelected(flatNode.item)"
-    (change)="entriesService.onCheckboxChanged($any(flatNode.item), $event.checked)"
+    (change)="updateSelectedNodes(flatNode)"
     (click)="$event.stopPropagation()"
     color="primary"
     [attr.aria-label]="'SELECT' | translate : { element: (flatNode.item | nodeTitle) }"

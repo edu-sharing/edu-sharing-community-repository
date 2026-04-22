@@ -189,6 +189,40 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
             return;
         }
         const node: T = flatNode.item as T;
+        const handleParentSelection = (): void => {
+            if (this.entriesService.treeConfig?.selectParents) {
+                let parent = this.getParentNode(flatNode);
+                while (parent && parent.level > 0) {
+                    this.entriesService.selection.select(parent.item as T);
+                    parent = this.getParentNode(parent);
+                }
+            }
+        };
+        const handleChildrenDeselection = (): void => {
+            if (!this.entriesService.treeConfig?.selectParents) {
+                return;
+            }
+            const dataMap = this.treeNodeService.getDataMap();
+            const queue: string[] = [flatNode.item.ref.id];
+            const visited = new Set<string>();
+
+            while (queue.length) {
+                const parentId = queue.shift()!;
+                if (visited.has(parentId)) {
+                    continue;
+                }
+                visited.add(parentId);
+
+                const children: Partial<Node>[] = dataMap.get(parentId) ?? [];
+                for (const child of children) {
+                    this.entriesService.selection.deselect(child as T);
+                    const childId = child.ref?.id;
+                    if (childId && !visited.has(childId)) {
+                        queue.push(childId);
+                    }
+                }
+            }
+        };
         // either multiple selection is allowed or a key press on cmd / strg is detected
         const multipleSelectionAllowed: boolean =
             this.entriesService.treeConfig?.multipleSelection || false;
@@ -197,8 +231,10 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
             // multi-select: add or remove the node from the selection
             if (this.entriesService.selection.isSelected(node)) {
                 this.entriesService.selection.deselect(node);
+                handleChildrenDeselection();
             } else {
                 this.entriesService.selection.select(node);
+                handleParentSelection();
             }
             return;
         } else {
@@ -209,6 +245,7 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
             this.entriesService.selection.clear();
             if (!nodeAlreadySelected || multipleNodesSelected) {
                 this.entriesService.selection.select(node);
+                handleParentSelection();
             }
         }
     }
@@ -333,11 +370,32 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
      * @param nodeId
      */
     private async triggerNodeUpdate(nodeId: string): Promise<void> {
-        const treeElement = this.dataSource.data.find((d) => d.item.ref.id === nodeId);
+        const treeElement = this.treeNodeService
+            .getCurrentData()
+            .find((d) => d.item.ref.id === nodeId);
         if (treeElement) {
             const isExpanded = this.treeControl.isExpanded(treeElement);
             await this.dataSource.toggleNode(treeElement, !isExpanded);
             await this.dataSource.toggleNode(treeElement, isExpanded);
         }
+    }
+
+    /**
+     * Helper function to get the parent node of a given node in the tree.
+     *
+     * @param node
+     */
+    private getParentNode(node: DynamicFlatNode): DynamicFlatNode | null {
+        const parentId = node.item.parent?.id;
+        if (!parentId) {
+            return null;
+        }
+        const treeElement: DynamicFlatNode = this.treeNodeService
+            .getCurrentData()
+            .find((d) => d.item.ref.id === parentId);
+        if (!treeElement) {
+            return null;
+        }
+        return treeElement;
     }
 }

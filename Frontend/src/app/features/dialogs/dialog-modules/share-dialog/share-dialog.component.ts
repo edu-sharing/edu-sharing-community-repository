@@ -220,6 +220,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     readonly structureTabId: string = 'structure_tab';
     structureTreeConfig: TreeConfig = {
         multipleSelection: true,
+        selectParents: true,
     };
     dataSourceStructure: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
 

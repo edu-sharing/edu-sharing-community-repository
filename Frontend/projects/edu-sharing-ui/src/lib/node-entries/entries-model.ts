@@ -115,6 +115,10 @@ export type TreeConfig = {
      * whether to display the file name instead of the title
      */
     showFileName?: boolean;
+    /**
+     * whether the parents should be selected as well when selecting a node
+     */
+    selectParents?: boolean;
 };
 
 export interface ListEventInterface<T extends NodeEntriesDataType> {
