@@ -13,6 +13,7 @@ import {
     ActionbarComponent,
     CustomOptions,
     NodeHelperService,
+    OptionItemToggle,
     OptionsHelperDataService,
     RenderHelperService,
 } from 'ngx-edu-sharing-ui';
@@ -157,6 +158,14 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
             scope: this.editorialSidebarService.scope(),
             activeObjects: [this.node],
             customOptions: this.customOptions,
+            postPrepareOptions: (options) => {
+                // no toggles in sidebar
+                options.splice(
+                    0,
+                    options.length,
+                    ...options.filter((o) => !(o as OptionItemToggle).isToggle),
+                );
+            },
         });
         void this.optionsHelper.refreshComponents();
     }
