@@ -83,6 +83,12 @@ export class SubmissionSidebarComponent {
             this.data().submissionList?.length - 1,
     );
     readonly submission = computed(() => this.data()?.submission);
+    readonly isReadOnly = computed(
+        () =>
+            this.data()?.assignment?.status === 'CANCELED' ||
+            this.data()?.assignment?.status === 'DRAFT' ||
+            this.data()?.assignment?.status === 'FINISHED',
+    );
     readonly submissionStatus = new ListItem('SUBMISSION', 'submissionStatus');
     readonly validationStatus = new ListItem('SUBMISSION', 'validationStatus');
     readonly submissionDate = new ListItem('SUBMISSION', 'submissionDate');
@@ -104,6 +110,13 @@ export class SubmissionSidebarComponent {
                 feedback: this.submission().feedback || '',
             });
             this.feedbackForm.markAsPristine();
+            if (this.isReadOnly()) {
+                this.feedbackForm.disable();
+                this.submitFormGroup.disable();
+            } else {
+                this.feedbackForm.enable();
+                this.submitFormGroup.enable();
+            }
         });
         this.feedbackForm.valueChanges.pipe(debounceTime(3000)).subscribe(async (value) => {
             await this.saveNotes();

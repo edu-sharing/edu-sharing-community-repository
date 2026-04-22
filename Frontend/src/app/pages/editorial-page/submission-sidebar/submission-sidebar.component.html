@@ -64,7 +64,7 @@
           <mat-slide-toggle
             class="toggle-reverse show-notes"
             [ngModelOptions]="{ standalone: true }"
-            [disabled]="!!feedbackForm.get('validationNotes').value"
+            [disabled]="isReadOnly() || !!feedbackForm.get('validationNotes').value"
             [ngModel]="showValidationNotes() || !!feedbackForm.get('validationNotes').value"
             (ngModelChange)="showValidationNotes.set($event)"
           >
@@ -93,7 +93,7 @@
         <button
           mat-flat-button
           color="primary"
-          [disabled]="data().submission.validationStatus === 'FINISHED'"
+          [disabled]="isReadOnly() || data().submission.validationStatus === 'FINISHED'"
           (click)="markAsFinished()"
         >
           {{ 'EDITORIAL.SIDEBAR.SUBMISSION.SEND_BACK' | translate }}
@@ -118,7 +118,7 @@
         [node]="submission()?.ref?.id"
       ></es-comments-list>
       <editor [init]="editorConfig" formControlName="submitComment"></editor>
-      <button mat-flat-button color="primary" (click)="addComment()">
+      <button mat-flat-button color="primary" [disabled]="isReadOnly()" (click)="addComment()">
         {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.ADD_COMMENT' | translate }}
       </button>
     </form>

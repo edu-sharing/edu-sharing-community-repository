@@ -25,7 +25,11 @@
       <button
         mat-flat-button
         color="primary"
-        [disabled]="assignment()?.status === 'CORRECTED' || assignment()?.status === 'FINISHED'"
+        [disabled]="
+          assignment()?.status === 'CORRECTED' ||
+          assignment()?.status === 'FINISHED' ||
+          assignment()?.status === 'CANCELED'
+        "
         (click)="finishAll()"
       >
         {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.SAVE_CORRECTED' | translate }}

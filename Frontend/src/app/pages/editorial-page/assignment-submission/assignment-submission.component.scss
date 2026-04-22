@@ -1,6 +1,12 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
+:host ::ng-deep {
+    // we have no actions available
+    .cdk-column-actions {
+        display: none !important;
+    }
+}
 .list {
     display: flex;
     flex-direction: column;
