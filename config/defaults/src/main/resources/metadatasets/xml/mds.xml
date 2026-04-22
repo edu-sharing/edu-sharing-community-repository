@@ -1937,7 +1937,15 @@
       </property>
       <property name="virtual:assignmentType">
         <statement value="created">
-          {"match": {"properties.cm:creator.keyword": "${user.cm:userName}" }},
+          {"bool":{
+          "must":[
+          {"match": {"properties.cm:creator.keyword": "${user.cm:userName}" }}
+          ],
+          "must_not":[
+          {"match": {"properties.ccm:assignment_status.keyword": "CANCELED" }},
+          {"match": {"properties.ccm:assignment_status.keyword": "FINISHED" }}
+          ]
+          }}
         </statement>
         <statement value="assigned">
           {"bool":{
@@ -1949,7 +1957,12 @@
           }}
         </statement>
         <statement value="finished">
+          {"bool":{
+          "should":[
+          {"match": {"properties.ccm:assignment_status.keyword": "CANCELED" }},
           {"match": {"properties.ccm:assignment_status.keyword": "FINISHED" }}
+          ]
+          }}
         </statement>
       </property>
     </query>
@@ -2266,23 +2279,23 @@
       <property name="ngsearchword" asFilter="false">
         <exactMatching>true</exactMatching>
         <statement>
-            {
-                "bool": {
-                    "should": [
-                        {
-                            "simple_query_string": {
-                            "query": "${value}*",
-                            "fields": [
-                                "properties.cclom:title^4",
-                                "properties.cm:title^2",
-                                "properties.cm:name^1"
-                            ],
-                            "default_operator": "and"
-                            }
-                        }
-                    ]
-                }
-            }
+          {
+          "bool": {
+          "should": [
+          {
+          "simple_query_string": {
+          "query": "${value}*",
+          "fields": [
+          "properties.cclom:title^4",
+          "properties.cm:title^2",
+          "properties.cm:name^1"
+          ],
+          "default_operator": "and"
+          }
+          }
+          ]
+          }
+          }
         </statement>
       </property>
       <property name="ccm:page_variant_is_template">
