@@ -1,75 +1,24 @@
 package org.edu_sharing.repository.client.rpc;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serializable;
 
+@Setter
+@Getter
 public class EduGroup implements Serializable {
 	
 	public EduGroup() {
 	}
-	
-	String groupname;
-	
-	String groupDisplayName;
-	
-	String groupId;
-	
-	String folderName;
-	
-	String folderPath;
-	
-	String folderId;
-	
-	String scope;
 
-	public String getGroupname() {
-		return groupname;
-	}
+    String groupname;
+    String groupDisplayName;
+    String groupId;
+    String folderId;
+    String scope;
 
-	public void setGroupname(String groupname) {
-		this.groupname = groupname;
-	}
-
-	public String getGroupId() {
-		return groupId;
-	}
-
-	public void setGroupId(String groupId) {
-		this.groupId = groupId;
-	}
-
-	public String getFolderName() {
-		return folderName;
-	}
-
-	public void setFolderName(String folderName) {
-		this.folderName = folderName;
-	}
-
-	public String getFolderId() {
-		return folderId;
-	}
-
-	public void setFolderId(String folderId) {
-		this.folderId = folderId;
-	}
-
-	public String getGroupDisplayName() {
-		return groupDisplayName;
-	}
-	
-	public void setGroupDisplayName(String groupDisplayName) {
-		this.groupDisplayName = groupDisplayName;
-	}
-	
-	public void setScope(String scope) {
-		this.scope = scope;
-	}
-	
-	public String getScope() {
-		return scope;
-	}
-	
-	@Override
+    @Override
 	public boolean equals(Object obj) {
 
 		EduGroup eduGroup = (EduGroup)obj;
@@ -82,8 +31,7 @@ public class EduGroup implements Serializable {
 		if(this.groupname.equals(eduGroup.getGroupname())){
 			return true;
 		}
-		
-		
+
 		return super.equals(obj);
 	}
 	

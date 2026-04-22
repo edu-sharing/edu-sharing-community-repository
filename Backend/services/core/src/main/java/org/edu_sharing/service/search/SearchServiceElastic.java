@@ -2752,7 +2752,6 @@ public class SearchServiceElastic implements SearchService {
                                 eduGroup.setFolderId(nodeId);
                                 try {
                                     org.alfresco.service.cmr.repository.NodeRef folderRef = new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
-                                    eduGroup.setFolderName(NodeServiceHelper.getProperty(folderRef, CCConstants.CM_NAME));
                                     eduGroup.setScope(NodeServiceHelper.getProperty(folderRef, CCConstants.CCM_PROP_EDUSCOPE_NAME));
                                 } catch (Throwable t) {
                                     log.warn("Exception while fetching edu organization folder for {}(folder: {})", eduGroup.getGroupId(), nodeId, t);

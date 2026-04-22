@@ -150,10 +150,10 @@ public class OrganizationDao {
 	}
 
 	public static List<Organization> mapOrganizations(List<EduGroup> parentOrganizations) {
-		if(parentOrganizations != null && parentOrganizations.size() > 0){
+		if(parentOrganizations != null && !parentOrganizations.isEmpty()){
 			return AuthenticationUtil.runAsSystem(() -> parentOrganizations.stream().map((org) -> {
 				try {
-					return OrganizationDao.getInstant(RepositoryDao.getHomeRepository(), org.getGroupname()).asOrganization();
+					return new OrganizationDao(RepositoryDao.getHomeRepository(), org).asOrganizationSimple();
 				} catch (DAOException e) {
 					throw new RuntimeException(e);
 				}
@@ -170,29 +170,34 @@ public class OrganizationDao {
 		return AuthorityServiceFactory.getInstance().getService(repoDao.getId()).hasAdminAccessToOrganization(groupName);
 	}
 
-	public Organization asOrganization() {
-
+	/**
+	 * simple org info (faster) without access or group specific info
+	 * @return
+	 */
+	public Organization asOrganizationSimple() {
 		Organization data = new Organization();
 
 		data.setRef(getRef());
 		data.setAuthorityName(authorityName);
 		data.setAuthorityType(Authority.Type.GROUP);
 		data.setGroupName(groupName);
-		data.setAdministrationAccess(hasAdministrationAccess());
-
+		NodeRef ref = new NodeRef();
+		ref.setRepo(repoDao.getId());
+		ref.setId(eduGroup.getFolderId());
+		data.setSharedFolder(ref);
 		try {
-			Group group = GroupDao.getGroup(repoDao, authorityName).asGroup();
+			Group group = GroupDao.getGroup(repoDao, authorityName).asGroup(false);
 			data.setSignupMethod(group.getSignupMethod());
 			data.setProfile(group.getProfile());
 		}catch(Throwable t){
 			throw new RuntimeException("Error getting profile for organization "+authorityName,t);
 		}
+		return data;
+	}
+	public Organization asOrganization() {
 
-		NodeRef ref = new NodeRef();
-		ref.setRepo(repoDao.getId());
-		ref.setId(eduGroup.getFolderId());
-		data.setSharedFolder(ref);
-
+		Organization data = asOrganizationSimple();
+		data.setAdministrationAccess(hasAdministrationAccess());
 		return data;
 	}
 

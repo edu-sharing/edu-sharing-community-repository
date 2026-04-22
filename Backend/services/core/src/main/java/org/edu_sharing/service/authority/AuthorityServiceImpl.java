@@ -288,20 +288,14 @@ public class AuthorityServiceImpl implements AuthorityService {
         NodeRef nodeRefEduGroupHomeDir = (NodeRef) nodeService.getProperty(nodeRef,
                 QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
         if (nodeRefEduGroupHomeDir != null) {
-
-            Map<QName, Serializable> folderProps = nodeService.getProperties(nodeRefEduGroupHomeDir);
             EduGroup eduGroup = new EduGroup();
-            eduGroup.setFolderId((String) folderProps.get(QName.createQName(CCConstants.SYS_PROP_NODE_UID)));
-            eduGroup.setFolderName((String) folderProps.get(QName.createQName(CCConstants.CM_NAME)));
+            eduGroup.setFolderId(nodeRefEduGroupHomeDir.getId());
 
-            Map<QName, Serializable> groupProps = nodeService.getProperties(nodeRef);
-
-            eduGroup.setGroupId((String) groupProps.get(QName.createQName(CCConstants.SYS_PROP_NODE_UID)));
-            eduGroup.setGroupname(
-                    (String) groupProps.get(QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME)));
+            eduGroup.setGroupId(nodeRef.getId());
+            eduGroup.setGroupname(authority);
             eduGroup.setGroupDisplayName(
-                    (String) groupProps.get(QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME)));
-            eduGroup.setScope((String) groupProps.get(QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME)));
+                    (String) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME)));
+            eduGroup.setScope((String) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME)));
 
             return eduGroup;
         }
@@ -430,12 +424,9 @@ public class AuthorityServiceImpl implements AuthorityService {
 
                         String eduGroupHomeFolderId = eduGroup.getFolderId();
                         if (eduGroupHomeFolderId == null) {
-                            String folderName = eduGroup.getFolderName();
-                            if (folderName == null) {
-                                folderName = eduGroup.getGroupname().replace(PermissionService.GROUP_PREFIX, "");
-                                if (eduGroup.getScope() != null) {
-                                    folderName = folderName + "_" + eduGroup.getScope();
-                                }
+                            String folderName = eduGroup.getGroupname().replace(PermissionService.GROUP_PREFIX, "");
+                            if (eduGroup.getScope() != null) {
+                                folderName = folderName + "_" + eduGroup.getScope();
                             }
                             folderName = NodeServiceHelper.cleanupCmName(folderName);
                             Map<QName, Serializable> folderProps = new HashMap<>();
