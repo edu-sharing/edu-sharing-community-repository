@@ -110,8 +110,21 @@ export class SubmissionSidebarComponent {
         });
     }
 
+    private async ensureSubmissionExists() {
+        if (!this.data().submission.ref?.id) {
+            const created = await firstValueFrom(
+                this.assignmentV1Service.createSubmission({
+                    assignmentId: this.data().assignment.ref.id,
+                    user: this.submission().assignee.authorityName,
+                }),
+            );
+            this.syncData(created);
+        }
+    }
+
     private async saveNotes() {
         if (this.feedbackForm.dirty) {
+            await this.ensureSubmissionExists();
             const submission = await firstValueFrom(
                 this.assignmentV1Service.editSubmission1({
                     submissionId: this.data().submission.ref.id,
@@ -150,6 +163,7 @@ export class SubmissionSidebarComponent {
         });
     }
     async markAsFinished() {
+        await this.ensureSubmissionExists();
         await this.saveNotes();
         const submission = await firstValueFrom(
             this.assignmentV1Service.editSubmission1({
