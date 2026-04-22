@@ -14,6 +14,7 @@ import {
     ViewChild,
     WritableSignal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatTabChangeEvent } from '@angular/material/tabs';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -30,7 +31,8 @@ import {
     UIAnimation,
 } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
-import { firstValueFrom, forkJoin as observableForkJoin, of } from 'rxjs';
+import { firstValueFrom, forkJoin as observableForkJoin, of, Subject } from 'rxjs';
+import { catchError, debounceTime } from 'rxjs/operators';
 import {
     CollectionUsage,
     ConfigurationService,
@@ -76,7 +78,6 @@ import {
     ConfigMotivationDefaultConfig,
     MotivationConfig,
 } from '../share-publish-motivation/share-publish-motivation-dialog.component';
-import { catchError } from 'rxjs/operators';
 
 export type ExtendedAcl = {
     inherited: boolean;
@@ -226,6 +227,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     };
     dataSourceStructure: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
     initiallySkippedNodeIds: string[] = [];
+    private readonly inheritanceChange$ = new Subject<NodePermissionInheritance[]>();
 
     constructor(
         @Optional() @Inject(CARD_DIALOG_DATA) public dataCard: ShareDialogData,
@@ -282,6 +284,16 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
             this.isSafe = data.currentScope != null;
             this.updateToolpermissions();
         });
+        // initialize inheritance change subscription
+        this.inheritanceChange$
+            .pipe(debounceTime(1000), takeUntilDestroyed())
+            .subscribe(async (inheritanceList) => {
+                if (inheritanceList.length) {
+                    await firstValueFrom(
+                        this.nodeApi.setNodePermissionInheritance(inheritanceList),
+                    );
+                }
+            });
         // Call in constructor to avoid changed-after-checked error when setting `isLoading` state.
         this.initNodes();
     }
@@ -1193,10 +1205,9 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
      *
      * @param event
      */
-    async onNodeSelectionChange(event: SelectionChange<Node>) {
+    onNodeSelectionChange(event: SelectionChange<Node>) {
         const inheritanceList: NodePermissionInheritance[] = [];
         event.added?.forEach((node: Node) => {
-            // skip nodes that initally have inherited set to true
             if (!node.inherited && !this.initiallySkippedNodeIds.includes(node.ref.id)) {
                 inheritanceList.push({
                     node: node.ref.id,
@@ -1212,8 +1223,9 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                 inherit: false,
             });
         });
+
         if (inheritanceList.length) {
-            await firstValueFrom(this.nodeApi.setNodePermissionInheritance(inheritanceList));
+            this.inheritanceChange$.next(inheritanceList);
         }
     }
 
