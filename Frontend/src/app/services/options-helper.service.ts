@@ -13,6 +13,7 @@ import { TranslateService } from '@ngx-translate/core';
 import {
     Assignment,
     AssignmentFile,
+    AssignmentV1Service,
     AuthenticationService,
     LtiPlatformService,
     NetworkService,
@@ -140,6 +141,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         private nodeServiceLegacy: RestNodeService,
         private router: Router,
         private toast: Toast,
+        private assignmentV1Service: AssignmentV1Service,
         private ltiPlatformService: LtiPlatformService,
         private translate: TranslateService,
         private uiService: UIService,
@@ -1312,6 +1314,82 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         editAssignment.group = DefaultGroups.Edit;
         editAssignment.priority = 5;
 
+        const cancelAssignment = new OptionItem(
+            'OPTIONS.ASSIGNMENT_CANCEL',
+            'cancel',
+            async (object) => {
+                const assignment = this.getObjects(object, data)[0] as Assignment;
+                const dialogRef = await this.dialogs.openGenericDialog({
+                    title: 'OPTIONS.ASSIGNMENT_CANCEL',
+                    message: 'OPTIONS.ASSIGNMENT_CANCEL_CONFIRM',
+                    buttons: OK_OR_CANCEL,
+                });
+                dialogRef.afterClosed().subscribe((response) => {
+                    if (response === 'OK') {
+                        this.assignmentV1Service
+                            .createOrUpdateAssignment1({
+                                assignmentId: assignment.ref.id,
+                                status: 'CANCELED',
+                            })
+                            .subscribe(() =>
+                                this.localEvents.nodesChanged.emit([assignment as any]),
+                            );
+                    }
+                });
+            },
+        );
+        cancelAssignment.elementType = [ElementType.Assignment];
+        cancelAssignment.constrains = [Constrain.NoBulk, Constrain.User];
+        cancelAssignment.customShowCallback = async (objects) => {
+            const assignment = objects[0] as Assignment;
+            return (
+                assignment.type === 'SUBMISSION' &&
+                !['FINISHED', 'CANCELED'].includes(assignment.status) &&
+                new AssignmentPipe().transform(assignment, { mode: 'permissions' }) ===
+                    'COORDINATOR'
+            );
+        };
+        cancelAssignment.group = DefaultGroups.Delete;
+        cancelAssignment.priority = 10;
+
+        const finishAssignment = new OptionItem(
+            'OPTIONS.ASSIGNMENT_FINISH',
+            'done_all',
+            async (object) => {
+                const assignment = this.getObjects(object, data)[0] as Assignment;
+                const dialogRef = await this.dialogs.openGenericDialog({
+                    title: 'OPTIONS.ASSIGNMENT_FINISH',
+                    message: 'OPTIONS.ASSIGNMENT_FINISH_CONFIRM',
+                    buttons: OK_OR_CANCEL,
+                });
+                dialogRef.afterClosed().subscribe((response) => {
+                    if (response === 'OK') {
+                        this.assignmentV1Service
+                            .createOrUpdateAssignment1({
+                                assignmentId: assignment.ref.id,
+                                status: 'FINISHED',
+                            })
+                            .subscribe(() =>
+                                this.localEvents.nodesChanged.emit([assignment as any]),
+                            );
+                    }
+                });
+            },
+        );
+        finishAssignment.elementType = [ElementType.Assignment];
+        finishAssignment.constrains = [Constrain.NoBulk, Constrain.User];
+        finishAssignment.customShowCallback = async (objects) => {
+            const assignment = objects[0] as Assignment;
+            return (
+                assignment.type === 'SUBMISSION' &&
+                !['FINISHED', 'CANCELED'].includes(assignment.status) &&
+                new AssignmentPipe().transform(assignment, { mode: 'permissions' }) ===
+                    'COORDINATOR'
+            );
+        };
+        finishAssignment.group = DefaultGroups.Edit;
+        finishAssignment.priority = 10;
+
         const editCollection = new OptionItem('OPTIONS.COLLECTION_EDIT', 'edit', (object) =>
             this.editCollection(this.getObjects(object, data)[0]),
         );
@@ -1518,6 +1596,8 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         options.push(submitAssignment);
         options.push(viewAssignmentSubmission);
         options.push(editAssignment);
+        options.push(cancelAssignment);
+        options.push(finishAssignment);
         options.push(pinCollection);
         options.push(feedbackMaterial);
         options.push(feedbackMaterialView);
