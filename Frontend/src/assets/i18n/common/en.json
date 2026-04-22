@@ -948,7 +948,9 @@
     "DOWNLOAD_TRY_AGAIN": "Try again",
     "STORAGE_LOCATION_SAVED": "The folder \"{{name}}\" will be used by default for uploads in the future",
     "STORAGE_LOCATION_RESET": "The default folder for uploads has been reset",
-    "OPTION_DISABLED_OR_UNAVAILABLE": "The selected action is currently unavailable"
+    "OPTION_DISABLED_OR_UNAVAILABLE": "The selected action is currently unavailable",
+    "ASSIGNMENT_CANCEL": "The assignment has been canceled.",
+    "ASSIGNMENT_FINISH": "The assignment has been finished."
   },
   "NODE_SEARCH_SELECTOR": {
     "MORE_FILTERS": "Extended search filters",

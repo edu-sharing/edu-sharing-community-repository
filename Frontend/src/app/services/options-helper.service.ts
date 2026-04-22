@@ -86,7 +86,7 @@ import { KeyboardShortcutsService } from './keyboard-shortcuts.service';
 import { MessageType } from '../util/message-type';
 import { forkJoinWithErrors } from '../util/rxjs/forkJoinWithErrors';
 import { ConfigOptionItem, NodeHelperService } from './node-helper.service';
-import { Toast } from './toast';
+import { Toast, ToastType } from './toast';
 import { UIHelper } from '../core-ui-module/ui-helper';
 import { GlobalOptionsService } from './global-options.service';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -1329,18 +1329,29 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 const dialogRef = await this.dialogs.openGenericDialog({
                     title: 'OPTIONS.ASSIGNMENT_CANCEL',
                     message: 'OPTIONS.ASSIGNMENT_CANCEL_CONFIRM',
-                    buttons: OK_OR_CANCEL,
+                    buttons: [
+                        { label: 'CANCEL', config: { color: 'standard' } },
+                        {
+                            label: 'OPTIONS.ASSIGNMENT_CANCEL',
+                            config: { color: 'danger' },
+                        },
+                    ],
                 });
                 dialogRef.afterClosed().subscribe((response) => {
-                    if (response === 'OK') {
+                    if (response === 'OPTIONS.ASSIGNMENT_CANCEL') {
                         this.assignmentV1Service
                             .createOrUpdateAssignment1({
                                 assignmentId: assignment.ref.id,
                                 status: 'CANCELED',
                             })
-                            .subscribe(() =>
-                                this.localEvents.nodesChanged.emit([assignment as any]),
-                            );
+                            .subscribe((updated) => {
+                                this.toast.show({
+                                    type: 'info',
+                                    subtype: ToastType.InfoSimple,
+                                    message: 'TOAST.ASSIGNMENT_CANCEL',
+                                });
+                                this.localEvents.nodesChanged.emit([updated as any]);
+                            });
                     }
                 });
             },
@@ -1377,9 +1388,14 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                                 assignmentId: assignment.ref.id,
                                 status: 'FINISHED',
                             })
-                            .subscribe(() =>
-                                this.localEvents.nodesChanged.emit([assignment as any]),
-                            );
+                            .subscribe((updated) => {
+                                this.toast.show({
+                                    type: 'info',
+                                    subtype: ToastType.InfoSimple,
+                                    message: 'TOAST.ASSIGNMENT_FINISH',
+                                });
+                                this.localEvents.nodesChanged.emit([updated as any]);
+                            });
                     }
                 });
             },
