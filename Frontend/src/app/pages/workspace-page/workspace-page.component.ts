@@ -770,6 +770,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
             if (id === RestConstants.USERHOME) {
                 this.selectedNodeTree = null;
                 this.path = [];
+                this.breadcrumbsService.setNodePath(this.path);
             } else {
                 this.nodeService
                     .getParents(id, {
