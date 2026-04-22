@@ -43,6 +43,7 @@ import { MdsEditorWidgetSuggestionChipsComponent } from '../widgets/mds-editor-w
 import { JumpMark, JumpMarksService } from '../../../../services/jump-marks.service';
 import { MdsEditInterface } from '../mds-editor-single-widget/mds-editor-single-widget.component';
 import {
+    MdsViewerComponent,
     MdsViewerService,
     MdsWidgetComponent,
     MdsWidgetType,
@@ -182,6 +183,7 @@ export class MdsEditorViewComponent
         setTimeout(() => {
             this.injectWidgets();
             this.checkHideState();
+            MdsViewerService.hideEmpty(this.container);
         });
     }
 

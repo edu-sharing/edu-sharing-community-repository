@@ -107,4 +107,17 @@ export class MdsViewerService {
         }
         return 'unknown';
     }
+
+    /**
+     * hide empty widgets inside a closed container
+     */
+    static hideEmpty(c: ElementRef) {
+        console.log('hide');
+        for (let emptyGroup of c.nativeElement.getElementsByTagName('hideifempty')) {
+            console.log(emptyGroup);
+            if (!emptyGroup.getElementsByTagName('hideifempty-content')?.[0]?.innerText?.trim()) {
+                emptyGroup.parentElement.removeChild(emptyGroup);
+            }
+        }
+    }
 }
