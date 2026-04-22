@@ -78,6 +78,7 @@ export class ManageAssignmentComponent {
         status: 'DRAFT',
     } as Assignment;
     assignment = signal<Assignment>(this.EmptyAssignment);
+    saving = signal(false);
     authorities = signal<Permission[]>(null);
     mainDataFormGroup: FormGroup;
     nodes = signal<NodeWithRole[]>(null);
@@ -268,11 +269,17 @@ export class ManageAssignmentComponent {
             permissions,
             assignmentFiles,
         };
-        const newAssignment = await firstValueFrom(
-            this.assignmentService.createOrUpdateAssignment({
-                body: assignment,
-            }),
-        );
+        this.saving.set(true);
+        let newAssignment: Assignment;
+        try {
+            newAssignment = await firstValueFrom(
+                this.assignmentService.createOrUpdateAssignment({
+                    body: assignment,
+                }),
+            );
+        } finally {
+            this.saving.set(false);
+        }
         this.editorialPageService.addVirtualNodes([newAssignment], 'assignment');
         void this.router.navigate([], {
             relativeTo: this.route,

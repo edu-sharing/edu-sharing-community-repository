@@ -90,18 +90,33 @@
       ></es-manage-assignment-authorities>
     </div>
     <div class="navigation">
-      <button mat-button color="primary" matStepperPrevious>{{ 'BACK' | translate }}</button>
+      <es-spinner-small *ngIf="saving()"></es-spinner-small>
+      <button mat-button color="primary" matStepperPrevious [disabled]="saving()">
+        {{ 'BACK' | translate }}
+      </button>
       <ng-container *ngIf="assignment().status !== 'DRAFT'">
-        <button mat-button color="primary" matStepperNext (click)="submit('INPROGRESS')">
+        <button
+          mat-button
+          color="primary"
+          matStepperNext
+          (click)="submit('INPROGRESS')"
+          [disabled]="saving()"
+        >
           {{ 'SAVE' | translate }}
         </button>
-        <button mat-flat-button color="primary" matStepperNext (click)="finishSubmission()">
+        <button
+          mat-flat-button
+          color="primary"
+          matStepperNext
+          (click)="finishSubmission()"
+          [disabled]="saving()"
+        >
           {{ 'EDITORIAL.ASSIGNMENT.SAVE_FINISH' | translate }}
         </button>
         <button
           mat-flat-button
           color="warn"
-          [disabled]="submissionsWithContent()?.length > 0"
+          [disabled]="submissionsWithContent()?.length > 0 || saving()"
           matStepperNext
           (click)="resetToDraft()"
         >
@@ -114,6 +129,7 @@
         matStepperNext
         (click)="submit('DRAFT')"
         *ngIf="assignment().status === 'DRAFT'"
+        [disabled]="saving()"
       >
         <i esIcon="draft"></i>
         {{ 'EDITORIAL.ASSIGNMENT.SAVE_DRAFT' | translate }}
@@ -124,6 +140,7 @@
         color="primary"
         matStepperNext
         (click)="submit('INPROGRESS')"
+        [disabled]="saving()"
       >
         <i esIcon="send"></i>
         {{ 'EDITORIAL.ASSIGNMENT.SUBMIT' | translate }}

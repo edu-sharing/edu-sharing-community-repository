@@ -37,7 +37,11 @@ mat-stepper {
 }
 .navigation {
     display: flex;
+    align-items: center;
     justify-content: flex-end;
     padding-top: 20px;
     gap: 20px;
+    es-spinner-small {
+        display: flex;
+    }
 }
