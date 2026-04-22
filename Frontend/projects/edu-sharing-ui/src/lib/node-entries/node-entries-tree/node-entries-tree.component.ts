@@ -196,21 +196,31 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
         }
         const node: T = flatNode.item as T;
         const handleParentSelection = (): void => {
-            if (this.entriesService.treeConfig?.selectParents) {
-                let parent = this.getParentNode(flatNode);
-                while (parent && parent.level > 0) {
-                    this.entriesService.selection.select(parent.item as T);
-                    parent = this.getParentNode(parent);
-                }
+            if (!this.entriesService.treeConfig?.selectParents) {
+                return;
+            }
+
+            const parents: T[] = [];
+            let parent = this.getParentNode(flatNode);
+
+            while (parent && parent.level > 0) {
+                parents.push(parent.item as T);
+                parent = this.getParentNode(parent);
+            }
+
+            if (parents.length) {
+                this.entriesService.selection.select(...parents);
             }
         };
         const handleChildrenDeselection = (): void => {
             if (!this.entriesService.treeConfig?.selectParents) {
                 return;
             }
+
             const dataMap = this.treeNodeService.getDataMap();
             const queue: string[] = [flatNode.item.ref.id];
             const visited = new Set<string>();
+            const childrenToDeselect: T[] = [];
 
             while (queue.length) {
                 const parentId = queue.shift()!;
@@ -221,12 +231,16 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
 
                 const children: Partial<Node>[] = dataMap.get(parentId) ?? [];
                 for (const child of children) {
-                    this.entriesService.selection.deselect(child as T);
+                    childrenToDeselect.push(child as T);
                     const childId = child.ref?.id;
                     if (childId && !visited.has(childId)) {
                         queue.push(childId);
                     }
                 }
+            }
+
+            if (childrenToDeselect.length) {
+                this.entriesService.selection.deselect(...childrenToDeselect);
             }
         };
         // either multiple selection is allowed or a key press on cmd / strg is detected
