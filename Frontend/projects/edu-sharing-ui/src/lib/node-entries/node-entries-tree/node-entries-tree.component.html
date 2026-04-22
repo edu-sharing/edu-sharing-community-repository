@@ -25,8 +25,6 @@
     <!-- matTreeNodePaddingIndent 28 = 24 (width of icon) + 4 (gap between icon and text) -->
     <mat-tree-node
       *matTreeNodeDef="let node"
-      matTreeNodePadding
-      matTreeNodePaddingIndent="28"
       [class.selected]="entriesService.selection.isSelected(node.item)"
       cdkDrag
       esNodesDrag
@@ -45,16 +43,22 @@
         [item]="entriesService.columns[0]"
       ></es-drag-preview>
       <div class="child-tree-node-container">
-        <ng-container *ngTemplateOutlet="nodeInformation; context: { node: node }"></ng-container>
+        <ng-container *ngTemplateOutlet="checkboxTemplate; context: { node: node }"></ng-container>
+        <div
+          class="tree-node-indent"
+          [style.padding-left.px]="
+            node.level > 0
+              ? (node.level + indentOffset()) * treeNodeIndent + treeNodeIndent
+              : treeNodeIndent
+          "
+        >
+          <ng-container *ngTemplateOutlet="nodeInformation; context: { node: node }"></ng-container>
+        </div>
       </div>
     </mat-tree-node>
 
     <!-- load more button for leaf nodes -->
-    <mat-tree-node
-      *matTreeNodeDef="let node; when: isLoadMoreNode"
-      matTreeNodePadding
-      matTreeNodePaddingIndent="28"
-    >
+    <mat-tree-node *matTreeNodeDef="let node; when: isLoadMoreNode">
       <div class="load-more-container">
         <button mat-button color="primary" (click)="loadFurtherChildren(node)">
           <i esIcon="refresh"></i>
@@ -69,8 +73,6 @@
       class="parent-tree-node"
       [class.selected]="entriesService.selection.isSelected(node.item)"
       *matTreeNodeDef="let node; when: hasChild"
-      matTreeNodePadding
-      matTreeNodePaddingIndent="28"
       [cdkTreeNodeTypeaheadLabel]="node.item"
       cdkDrag
       cdkDragDisabled
@@ -86,44 +88,81 @@
         [item]="entriesService.columns[0]"
       ></es-drag-preview>
       <div class="parent-tree-node-container">
-        <a
-          matIconButton
-          matTreeNodeToggle
-          [attr.id]="'toggle-' + node.item.ref.id"
-          class="toggle-button fade"
-          role="button"
-          tabindex="0"
-          [attr.aria-label]="'Toggle ' + node.item.title"
+        <ng-container *ngTemplateOutlet="checkboxTemplate; context: { node: node }"></ng-container>
+        <div
+          class="tree-node-indent"
+          [style.padding-left.px]="
+            node.level > 0 ? (node.level + indentOffset()) * treeNodeIndent : 0
+          "
         >
-          <i [esIcon]="treeControl.isExpanded(node) ? 'expand_less' : 'chevron_right'"></i>
-        </a>
-        <ng-container *ngTemplateOutlet="nodeInformation; context: { node: node }"></ng-container>
+          <a
+            matIconButton
+            matTreeNodeToggle
+            [attr.id]="'toggle-' + node.item.ref.id"
+            class="toggle-button fade"
+            role="button"
+            tabindex="0"
+            [attr.aria-label]="'Toggle ' + node.item.title"
+          >
+            <i [esIcon]="treeControl.isExpanded(node) ? 'expand_less' : 'chevron_right'"></i>
+          </a>
+          <ng-container *ngTemplateOutlet="nodeInformation; context: { node: node }"></ng-container>
+        </div>
       </div>
 
       <ng-container *ngIf="node.isLoading()">
         <div class="flex-line-break"></div>
         <div
           class="placeholder-container"
-          *ngIf="node.item.collection?.childCollectionsCount; else loading"
+          *ngIf="node.item.collection?.childCollectionsCount; else loadingRow"
         >
           <div
             class="placeholder"
             *ngFor="let i of childrenIndices(node.item.collection.childCollectionsCount)"
           ></div>
         </div>
+        <ng-template #loadingRow>
+          <div
+            class="loading-row"
+            [style.padding-left.px]="
+              node.level > 0
+                ? (node.level + indentOffset()) * treeNodeIndent + treeNodeIndent
+                : treeNodeIndent
+            "
+          >
+            <ng-container *ngTemplateOutlet="loading"></ng-container>
+          </div>
+        </ng-template>
       </ng-container>
     </mat-tree-node>
   </mat-tree>
 </div>
 
+<!-- checkbox rendered before the toggle button / node information -->
+<ng-template #checkboxTemplate let-flatNode="node">
+  <mat-checkbox
+    *ngIf="entriesService.checkbox && flatNode.level > 0"
+    class="node-checkbox"
+    [checked]="entriesService.selection.isSelected(flatNode.item)"
+    (change)="entriesService.onCheckboxChanged($any(flatNode.item), $event.checked)"
+    (click)="$event.stopPropagation()"
+    color="primary"
+    [attr.aria-label]="'SELECT' | translate : { element: (flatNode.item | nodeTitle) }"
+  ></mat-checkbox>
+</ng-template>
+
 <ng-template #nodeInformation let-flatNode="node">
   <div
     class="node-information"
     [class.cursor-pointer]="
-      flatNode.level !== 0 && (selectionMode() !== 'target' || isValidInsertTarget(flatNode))
+      !entriesService.checkbox &&
+      flatNode.level !== 0 &&
+      (selectionMode() !== 'target' || isValidInsertTarget(flatNode))
     "
     [class.insert-not-allowed]="selectionMode() === 'target' && !isValidInsertTarget(flatNode)"
-    (click)="updateSelectedNodes(flatNode, $event)"
+    (click)="!entriesService.checkbox && updateSelectedNodes(flatNode, $event)"
+    (contextmenu)="onContextMenu($event, $any(flatNode.item))"
+    (keydown.ContextMenu)="onContextMenu($event, $any(flatNode.item))"
   >
     <div class="general-information container">
       <es-node-type-badge [node]="flatNode.item" [collectionIcons]="false"></es-node-type-badge>
@@ -146,6 +185,29 @@
           </ng-template>
         </span>
       </span>
+    </div>
+    <div class="node-options" *ngIf="dropdown && hasDropdownOptions()">
+      <button
+        mat-icon-button
+        *ngIf="!UIService.isMobileWidth()"
+        color="primary"
+        (click)="$event.stopPropagation(); openMenu($any(flatNode.item))"
+        [matMenuTriggerFor]="dropdown.menu"
+        [attr.aria-label]="'OPTIONS_FOR' | translate : { element: (flatNode.item | nodeTitle) }"
+        data-test="tree-options-button"
+      >
+        <i esIcon="more_vert"></i>
+      </button>
+      <button
+        mat-icon-button
+        *ngIf="UIService.isMobileWidth()"
+        color="primary"
+        (click)="$event.stopPropagation(); openMenu($any(flatNode.item))"
+        [attr.aria-label]="'OPTIONS_FOR' | translate : { element: (flatNode.item | nodeTitle) }"
+        data-test="tree-options-button"
+      >
+        <i esIcon="more_vert"></i>
+      </button>
     </div>
     <!--    Note: temporarily removed, as the tracker information is not updated properly -->
     <!--    <div-->

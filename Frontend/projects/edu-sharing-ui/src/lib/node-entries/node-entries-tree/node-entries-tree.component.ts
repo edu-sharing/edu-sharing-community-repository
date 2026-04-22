@@ -18,6 +18,7 @@ import { DropdownComponent } from '../../dropdown/dropdown.component';
 import { NodeEntriesService } from '../../services/node-entries.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { NodesDragDropService } from '../../services/nodes-drag-drop.service';
+import { UIService } from '../../services/ui.service';
 import { TranslationsService } from '../../translations/translations.service';
 import { CanDrop, DragData } from '../../types/drag-drop';
 import { Target } from '../../types/option-item';
@@ -39,6 +40,7 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
 {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Target = Target;
+    readonly UIService = UIService;
 
     @ViewChild(DropdownComponent) dropdown: DropdownComponent;
     @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
@@ -65,6 +67,9 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     };
     selectionMode: WritableSignal<'source' | 'target'> = signal('source');
     treeInitialized: WritableSignal<boolean> = signal(false);
+    indentOffset: WritableSignal<number> = signal(0);
+    // 28px (toggle, checkbox, icon) + 8px (gap)
+    protected readonly treeNodeIndent: number = 36;
 
     constructor(
         private changeDetectorRef: ChangeDetectorRef,
@@ -96,6 +101,50 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
             });
         // retrieve the selection mode
         this.selectionMode.set(this.treeNodeService.getSelectionMode());
+        // define the indent offset (checkbox does replace first indent)
+        if (this.entriesService.checkbox) {
+            this.indentOffset.set(-1);
+        }
+    }
+
+    onContextMenu(event: MouseEvent | Event, node: T): void {
+        event.stopPropagation();
+        event.preventDefault();
+        if (!this.dropdown) {
+            return;
+        }
+        if (event instanceof MouseEvent) {
+            ({ clientX: this.dropdownLeft, clientY: this.dropdownTop } = event);
+        } else {
+            ({ x: this.dropdownLeft, y: this.dropdownTop } = (
+                event.target as HTMLElement
+            ).getBoundingClientRect());
+        }
+        if (UIService.isMobileWidth()) {
+            this.entriesService.openDropdown(this.dropdown, node, () =>
+                this.dropdown.triggerBottomSheet(),
+            );
+        } else {
+            this.entriesService.openDropdown(this.dropdown, node, () =>
+                this.menuTrigger.openMenu(),
+            );
+        }
+    }
+
+    async openMenu(node: T): Promise<void> {
+        if (UIService.isMobileWidth()) {
+            this.entriesService.openDropdown(this.dropdown, node, () =>
+                this.dropdown.triggerBottomSheet(),
+            );
+        } else {
+            this.entriesService.openDropdown(this.dropdown, node);
+        }
+    }
+
+    hasDropdownOptions(): boolean {
+        return this.entriesService.options?.[Target.List]?.some(
+            (o) => o.isEnabled && !o.showAlways,
+        );
     }
 
     async ngAfterViewInit(): Promise<void> {

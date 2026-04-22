@@ -190,6 +190,7 @@
               dataSourceCollectionsFlat.isEmpty()
             )
           "
+          [checkbox]="collectionsDisplayType() !== NodeEntriesDisplayType.Tree"
           [columns]="flatNodeEntriesColumns"
           [dataSource]="
             collectionsDisplayType() === NodeEntriesDisplayType.Tree
@@ -219,6 +220,7 @@
         <es-node-entries-wrapper
           #workspaceWrapperRef
           *ngIf="selectedTab() === TabType.WORKSPACE"
+          [checkbox]="false"
           [columns]="flatNodeEntriesColumns"
           [dataSource]="dataSourceWorkspace"
           [displayType]="NodeEntriesDisplayType.Tree"

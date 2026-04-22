@@ -6,6 +6,7 @@
     flex-direction: column;
     gap: 16px;
     width: 100%;
+    --mdc-checkbox-state-layer-size: 28px;
 }
 
 .dropdown-dummy {
@@ -32,21 +33,41 @@ mat-tree-node.selected {
     width: 100%;
 }
 
+.child-tree-node-container,
+.parent-tree-node-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+
+    .node-checkbox {
+        flex-shrink: 0;
+    }
+
+    .tree-node-indent {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1;
+        min-width: 0;
+    }
+}
+
 .parent-tree-node {
     flex-wrap: wrap;
 
     .parent-tree-node-container {
-        display: flex;
-        align-items: center;
-        gap: 4px;
         width: 100%;
         min-height: 48px;
 
         .toggle-button {
             cursor: pointer;
             color: inherit;
+            width: 28px;
+            height: 28px;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
 
             &.fade {
                 opacity: 1;
@@ -64,9 +85,12 @@ mat-tree-node.selected {
         height: 0;
     }
 
+    .loading-row {
+        margin-bottom: 8px;
+    }
+
     .placeholder-container {
         margin: 16px 0 8px;
-        padding-left: 40px;
         display: flex;
         flex-direction: column;
         gap: 16px;
@@ -79,11 +103,16 @@ mat-tree-node.selected {
     }
 }
 
-// for children, reverse the same space that the toggle button takes (24px icon width + 4px gap)
+// for children (no toggle button), reverse the same space that the toggle button
+// takes (24px icon width + 4px gap) on the CONTENT wrapper so the checkbox still
+// sits at the very start of the line.
 .child-tree-node-container {
-    padding-left: 28px;
     width: 100%;
     max-width: 100%;
+
+    > .tree-node-indent {
+        padding-left: 28px;
+    }
 }
 
 .node-information {
@@ -106,6 +135,10 @@ mat-tree-node.selected {
         color: vars.$textVeryLight;
     }
 
+    .node-checkbox {
+        flex-shrink: 0;
+    }
+
     .general-information {
         // take up remaining space
         flex: 1;
@@ -113,8 +146,7 @@ mat-tree-node.selected {
         min-width: 0;
     }
 
-    .action-buttons {
-        // do not allow buttons to shrink
+    .node-options {
         flex-shrink: 0;
     }
 
