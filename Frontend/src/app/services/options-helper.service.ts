@@ -34,6 +34,7 @@ import {
     ListEventInterface,
     LocalEventsService,
     NodeEntriesDisplayType,
+    NodeEntriesGlobalService,
     NodeHelperService as NodeHelperServiceUi,
     NodesRightMode,
     OptionData,
@@ -125,6 +126,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         private collectionService: RestCollectionService,
         private configService: ConfigurationService,
         private globalOptionsService: GlobalOptionsService,
+        private nodeEntriesGlobalService: NodeEntriesGlobalService,
         private connector: RestConnectorService,
         private connectors: RestConnectorsService,
         private dialogs: DialogsService,
@@ -633,7 +635,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 trap: true,
                 optionConfig: {
                     state: TabType.COLLECTIONS,
-                    selection: components.list.getSelection(),
+                    selection:
+                        components.list?.getSelection() ||
+                        this.nodeEntriesGlobalService?.getPrimaryInstance()?.selection,
                 } as NodesSelectorConfig,
             }),
         );

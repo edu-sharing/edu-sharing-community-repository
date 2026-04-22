@@ -2,6 +2,8 @@ import { Injectable, TemplateRef } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { ListItemType } from '../types/list-item';
 import { Scope } from '../types/option-item';
+import type { NodeEntriesService } from '../services/node-entries.service';
+import { NodeEntriesDataType } from './data-type';
 
 export type CustomField = {
     type: ListItemType;
@@ -46,8 +48,16 @@ export class NodeEntriesGlobalService {
         DEFAULT: [25, 50, 75, 100],
     };
     private customCssClassProvider: (node: Node) => string;
+    private primaryInstance: NodeEntriesService<NodeEntriesDataType> | null = null;
 
     constructor() {}
+
+    public getPrimaryInstance(): NodeEntriesService<NodeEntriesDataType> | null {
+        return this.primaryInstance;
+    }
+    public setPrimaryInstance(instance: NodeEntriesService<NodeEntriesDataType> | null) {
+        this.primaryInstance = instance;
+    }
 
     public setPaginationStrategy(scope: PaginationScope, strategy: PaginationStrategy) {
         this.paginationStrategy[scope] = strategy;

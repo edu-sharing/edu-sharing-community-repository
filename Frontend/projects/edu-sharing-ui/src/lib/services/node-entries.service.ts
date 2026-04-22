@@ -161,7 +161,14 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     set treeConfig(value: TreeConfig) {
         this.treeConfig$.next(value);
     }
-    primaryInstance: boolean;
+    get primaryInstance(): boolean {
+        return this.entriesGlobal.getPrimaryInstance() === this;
+    }
+    set primaryInstance(value: boolean) {
+        if (value) {
+            this.entriesGlobal.setPrimaryInstance(this);
+        }
+    }
     singleClickHint: 'dynamic' | 'static';
     disableInfiniteScroll: boolean;
     showIconColumn = new BehaviorSubject(true);
