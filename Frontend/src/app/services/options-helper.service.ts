@@ -1291,6 +1291,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         viewAssignmentSubmission.customShowCallback = async (objects) => {
             const assignment = objects[0] as Assignment;
             return (
+                assignment.status !== 'DRAFT' &&
                 assignment.type === 'SUBMISSION' &&
                 new AssignmentPipe().transform(assignment, {
                     mode: 'permissions',
