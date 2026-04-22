@@ -352,6 +352,7 @@
       "DRAFT": "Entwurf",
       "INPROGRESS": "Ausgeteilt",
       "CORRECTED": "Korrigiert",
+      "SENDBACK": "Zurückgegeben",
       "TO_SUBMIT": "Offen",
       "SUBMITTED": "Abgegeben",
       "HAS_SUBMISSIONS": "Zu korrigieren",

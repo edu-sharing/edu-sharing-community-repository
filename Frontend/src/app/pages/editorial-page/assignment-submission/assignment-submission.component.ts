@@ -225,16 +225,12 @@ export class AssignmentSubmissionComponent implements OnDestroy {
     }
 
     async finishAll() {
-        /**
-         * @TODO
-        await firstValueFrom(this.assignmentService.createOrUpdateAssignment({
-            body: {
-                id: this.assignment().ref.id,
-                assignmentFiles: null,
-                status: 'FINISHED'
-            } as CreateAssignmentRequest
-        }));
-            */
+        await firstValueFrom(
+            this.assignmentService.createOrUpdateAssignment1({
+                assignmentId: this.assignment().ref.id,
+                status: 'CORRECTED',
+            }),
+        );
         this.assignment.set({
             ...this.assignment(),
             status: 'CORRECTED',
