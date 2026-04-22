@@ -3,7 +3,7 @@
     <li *ngIf="option.isEnabled || showDisabled" role="none">
       <button
         mat-button
-        color="primary"
+        [color]="option.color"
         class="mat-menu-item collection-item-{{
           option.name | replaceChars : { search: '.', replace: '-' }
         }}"
