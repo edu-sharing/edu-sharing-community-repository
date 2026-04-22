@@ -63,6 +63,7 @@ export { LicenseAgreement } from './api/models/license-agreement';
 export { ManualRegistrationData } from './api/models/manual-registration-data';
 export { HandleParam } from './api/models/handle-param';
 export { NodePermissions as NodePermissionsGet } from './api/models/node-permissions';
+export { NodePermissionInheritance } from './api/models/node-permission-inheritance';
 export { Mds as MdsDefinition } from './api/models/mds';
 export { MdsAiConfig } from './api/models/mds-ai-config';
 export { MdsGroup } from './api/models/mds-group';

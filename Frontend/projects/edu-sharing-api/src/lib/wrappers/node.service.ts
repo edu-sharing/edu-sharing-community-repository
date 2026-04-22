@@ -6,6 +6,7 @@ import { HOME_REPOSITORY } from '../constants';
 import {
     Node,
     NodeEntries,
+    NodePermissionInheritance,
     NodePermissions,
     NodePermissionsGet,
     NodeVersion,
@@ -460,6 +461,13 @@ export class NodeService {
      */
     getStats(nodeId: string, { repository = HOME_REPOSITORY } = {}): Observable<NodeStats> {
         return this.nodeV1.getStats({ repository, node: nodeId });
+    }
+
+    setNodePermissionInheritance(
+        inheritanceList: NodePermissionInheritance[],
+        { repository = HOME_REPOSITORY } = {},
+    ): Observable<void> {
+        return this.nodeV1.set({ repository, body: { inheritanceList } });
     }
 }
 function getParentsCacheKey(
