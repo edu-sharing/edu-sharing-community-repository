@@ -39,8 +39,10 @@ export class TreeNodeService {
     };
     // whether files should be requested and shown as well
     private showFiles: boolean = true;
-    // holds initially selected nodes to allow later selections
-    private initiallySelectedNodes: Node[] = [];
+    // holds an attribute used to decide whether a node is initially selected
+    private initialSelectionAttribute: string;
+    // callback provided by the tree component to apply a selection to the UI layer
+    private applySelectionCallback: ((nodes: Node[]) => void) | null = null;
     private selectionMode: 'source' | 'target' = 'source';
     readonly nodesChanged = new EventEmitter<Node[]>();
     // holds the currently expanded nodes
@@ -246,7 +248,9 @@ export class TreeNodeService {
             };
             nodeEntries = await firstValueFrom(this.nodeService.getChildren(nodeId, request));
         }
-        children = this.replaceNodeReferences(nodeEntries?.nodes ?? []);
+        // check whether an initial selection has to be made
+        this.checkAndSetInitialSelection(nodeEntries);
+        children = nodeEntries?.nodes ?? [];
         // hold the last loaded node ID to load the next elements
         if (children.length < nodeEntries.pagination.total) {
             this.parentIdToLastLoadedNodeId.set(node.ref.id, children[children.length - 1].ref.id);
@@ -280,10 +284,10 @@ export class TreeNodeService {
         const nodeEntries: NodeEntries = await firstValueFrom(
             this.nodeService.getChildren(nodeId, request),
         );
+        // check whether an initial selection has to be made
+        this.checkAndSetInitialSelection(nodeEntries);
         const requestedChildren = nodeEntries?.nodes ?? [];
-        const children = this.replaceNodeReferences(
-            existingChildren.concat(requestedChildren) as Node[],
-        );
+        const children = existingChildren.concat(requestedChildren) as Node[];
         this.dataMap.set(nodeId, children);
         // update the last loaded node ID to load the next elements
         if (children.length < nodeEntries.pagination.total) {
@@ -455,12 +459,12 @@ export class TreeNodeService {
     }
 
     /**
-     * Updates the initially selected nodes.
+     * Updates the initial selection attribute to a given value.
      *
-     * @param nodes
+     * @param initialSelectionAttribute
      */
-    updateInitiallySelectedNodes(nodes: Node[]) {
-        this.initiallySelectedNodes = nodes;
+    updateInitialSelectionAttribute(selectionAttribute: string) {
+        this.initialSelectionAttribute = selectionAttribute;
     }
 
     /**
@@ -501,28 +505,25 @@ export class TreeNodeService {
     }
 
     /**
-     * Helper function to replace node references of already selected nodes in a given array of nodes.
-     * This is necessary as the comparison of the SelectionModel uses reference equality (===) by default,
-     * so the selection is not detected properly, even when both JSON objects are identically.
+     * Sets the callback to apply a selection to the UI layer.
      *
-     * @param nodes
+     * @param callback
      */
-    private replaceNodeReferences(nodes: Node[]) {
-        if (this.initiallySelectedNodes?.length) {
-            nodes = nodes.map((child) => {
-                // check if a child exists that was initially selected and replace it
-                const match = this.initiallySelectedNodes.find(
-                    (initialNode) => child.ref.id === initialNode.ref.id,
-                );
-                // remove match as already added before
-                if (match) {
-                    this.initiallySelectedNodes = this.initiallySelectedNodes.filter(
-                        (initialNode) => initialNode.ref.id !== match.ref.id,
-                    );
-                }
-                return match ?? child;
-            });
+    setApplySelectionCallback(callback: ((nodes: Node[]) => void) | null): void {
+        this.applySelectionCallback = callback;
+    }
+
+    /**
+     * Checks if an initial selection attribute is present and applies it to given node entries.
+     *
+     * @param nodeEntries
+     */
+    private checkAndSetInitialSelection(nodeEntries: NodeEntries) {
+        if (this.initialSelectionAttribute && nodeEntries?.nodes?.length) {
+            const nodesToSelect = nodeEntries.nodes.filter((n) => n.inherited);
+            if (nodesToSelect.length) {
+                this.applySelectionCallback?.(nodesToSelect);
+            }
         }
-        return nodes;
     }
 }

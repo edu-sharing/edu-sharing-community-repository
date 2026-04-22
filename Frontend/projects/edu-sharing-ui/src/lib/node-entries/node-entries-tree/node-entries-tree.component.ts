@@ -105,6 +105,11 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
         if (this.entriesService.checkbox) {
             this.indentOffset.set(-1);
         }
+        // set apply selection callback
+        this.treeNodeService.setApplySelectionCallback((nodes: Node[]) => {
+            this.entriesService.selection.select(...(nodes as T[]));
+            this.changeDetectorRef.detectChanges();
+        });
     }
 
     onContextMenu(event: MouseEvent | Event, node: T): void {
@@ -162,6 +167,7 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     }
 
     ngOnDestroy(): void {
+        this.treeNodeService.setApplySelectionCallback(null);
         this.destroyed.next();
         this.destroyed.complete();
     }

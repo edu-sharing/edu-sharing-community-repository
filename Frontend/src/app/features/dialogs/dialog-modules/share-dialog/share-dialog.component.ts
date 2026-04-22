@@ -68,6 +68,7 @@ import {
     HOME_REPOSITORY,
     IamV1Service,
     Node,
+    NodePermissionInheritance,
     NodeService,
 } from 'ngx-edu-sharing-api';
 import { ShareDialogRestrictedAccessComponent } from './restricted-access/restricted-access.component';
@@ -224,6 +225,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         selectParents: true,
     };
     dataSourceStructure: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
+    initallySkippedNodeIds: string[] = [];
 
     constructor(
         @Optional() @Inject(CARD_DIALOG_DATA) public dataCard: ShareDialogData,
@@ -273,6 +275,8 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         };
         // do not show files in the node-entries-tree of the structure tab
         this.treeNodeService.updateShowFiles(false);
+        // update attribute name for initial selection
+        this.treeNodeService.updateInitialSelectionAttribute('inherited');
 
         this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
             this.isSafe = data.currentScope != null;
@@ -1179,29 +1183,38 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
      * Other nodes are loaded subsequently (first level on init, remaining levels on demand)
      */
     private async updateStructureView(): Promise<void> {
-        // TODO: request nodes with inherited permissions and select them in the node entries
-        const nodesWithInheritedPermissions: Node[] = [];
-        // Note: The comparison of the SelectionModel uses reference equality (===) by default,
-        //       so the selection is not detected properly, even when both JSON objects are identically
-        // set them in the service to be replaced when requested
-        this.treeNodeService.updateInitiallySelectedNodes(nodesWithInheritedPermissions);
         this.dataSourceStructure.isLoading = true;
         this.dataSourceStructure.setData(this._nodes);
         this.dataSourceStructure.isLoading = false;
-        // update the selection as soon as the data source is loaded
-        setTimeout(async () => {
-            this.structureTreeNodeEntries.getSelection().select(...nodesWithInheritedPermissions);
-        });
     }
 
-    onNodeSelectionChange(event: SelectionChange<Node>) {
-        /*console.log('onNodeSelectionChange', event);
+    /**
+     * Persists inheritance changes.
+     *
+     * @param event
+     */
+    async onNodeSelectionChange(event: SelectionChange<Node>) {
+        const inheritanceList: NodePermissionInheritance[] = [];
         event.added?.forEach((node: Node) => {
-            console.log('Check that node has inheritance set', node);
+            // skip nodes that initally have inherited set to true
+            if (!node.inherited && !this.initallySkippedNodeIds.includes(node.ref.id)) {
+                inheritanceList.push({
+                    node: node.ref.id,
+                    inherit: true,
+                });
+            } else {
+                this.initallySkippedNodeIds.push(node.ref.id);
+            }
         });
         event.removed?.forEach((node: Node) => {
-            console.log('Check that node has inheritance not set', node);
-        });*/
+            inheritanceList.push({
+                node: node.ref.id,
+                inherit: false,
+            });
+        });
+        if (inheritanceList.length) {
+            await firstValueFrom(this.nodeApi.setNodePermissionInheritance(inheritanceList));
+        }
     }
 
     protected readonly InteractionType = InteractionType;
