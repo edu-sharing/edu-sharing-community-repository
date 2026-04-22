@@ -158,7 +158,9 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
                             .map(ace -> {
                                 Assignment.Role role = mapPermissionToRole(ace.getPermission());
                                 if (role == null) {
-                                    log.error("Unknown permission for assignment {} {}", nodeId, ace.getPermission());
+                                    if(!ace.getPermission().equals(CCConstants.PERMISSION_CONSUMER)) {
+                                        log.error("Unknown permission for assignment {} {}", nodeId, ace.getPermission());
+                                    }
                                     return null;
                                 }
 
@@ -502,6 +504,12 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
     }
 
     @Override
+    @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
+    public SubmissionDao createSubmissionByUserId(String username) {
+        return AuthenticationUtil.runAs(() -> getOrCreateSubmission(null), username);
+    }
+
+    @Override
     public SubmissionDao getOrCreateSubmission(String submissionId) {
         submissionsMap.invalidate();
 
@@ -581,6 +589,7 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
 
         refresh();
     }
+
 
     private boolean canChangeStatus(Assignment.Status newStatus) {
         return switch (getStatus()) {

@@ -340,4 +340,9 @@ final class NodeAssignmentDao extends BasicNodeDaoImpl implements AssignmentDao 
         });
         refresh();
     }
+
+    @Override
+    public SubmissionDao createSubmissionByUserId(String username) {
+        throw new UnsupportedOperationException("Submissions are not supported for assignment of type " + getType());
+    }
 }
