@@ -15,7 +15,7 @@ $collectionIconSize: 25px;
     align-items: center;
     padding: $paddingH 6px;
     border-radius: var(--borderRadiusBadges);
-    background-color: var(--palette-primary-300);
+    background-color: color-mix(in srgb, var(--palette-primary-300), 60% transparent);
     gap: 5px;
     &.endTime-low {
         background-color: color-mix(in srgb, var(--palette-primary-300), 60% transparent);
@@ -31,7 +31,7 @@ $collectionIconSize: 25px;
     &.status-HAS_SUBMISSIONS {
         background-color: color-mix(in srgb, var(--colorStatusWarning), 60% transparent);
     }
-    &.status-CORRECTED {
+    &.status-SENDBACK {
         background-color: color-mix(in srgb, var(--colorStatusPositive), 60% transparent);
     }
     &.type-SUBMISSION {

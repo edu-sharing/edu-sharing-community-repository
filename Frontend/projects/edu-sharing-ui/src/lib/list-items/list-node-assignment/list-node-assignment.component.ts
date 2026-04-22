@@ -40,6 +40,13 @@ export class ListNodeAssignmentComponent extends ListWidget {
     }
 
     getValidationStatus(node: SubmissionWithAssignment) {
+        if (
+            true ||
+            node.assignment?.status === 'CORRECTED' ||
+            node.assignment?.status === 'FINISHED'
+        ) {
+            return 'SENDBACK';
+        }
         if (node.validationStatus === 'FINISHED') {
             return 'CORRECTED';
         }
