@@ -95,17 +95,16 @@
             node.level > 0 ? (node.level + indentOffset()) * treeNodeIndent : 0
           "
         >
-          <a
-            matIconButton
+          <button
+            mat-icon-button
             matTreeNodeToggle
             [attr.id]="'toggle-' + node.item.ref.id"
             class="toggle-button fade"
-            role="button"
-            tabindex="0"
+            [disabled]="node.isLoading()"
             [attr.aria-label]="'Toggle ' + node.item.title"
           >
             <i [esIcon]="treeControl.isExpanded(node) ? 'expand_less' : 'chevron_right'"></i>
-          </a>
+          </button>
           <ng-container *ngTemplateOutlet="nodeInformation; context: { node: node }"></ng-container>
         </div>
       </div>
