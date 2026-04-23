@@ -171,12 +171,14 @@ public class RenderingTool {
                     SignedNode signedNode = node.getSignedNode();
                     String encodedSignedNode = encoder.encodeToString(signedNode.getNode().getBytes());
                     String encodedSignature = encoder.encodeToString(signedNode.getSignature());
+                    String encodedSignatureAlgorithm = encoder.encodeToString(signedNode.getSignatureAlgorithm().getBytes());
                     RenderDataRequest request = RenderDataRequest.builder()
                             .repoId(ApplicationInfoList.getHomeRepository().getAppId())
                             .nodeId(nodeId)
                             .userData(userData)
                             .securedNode(encodedSignedNode)
                             .signature(encodedSignature)
+                            .signatureAlgorithm(encodedSignatureAlgorithm)
                             .build();
                     String response = restClient.post()
                             .uri("/rendering/public/renderdata")
@@ -229,6 +231,8 @@ public class RenderingTool {
 
         @NotNull
         private String signature;
+
+        private String signatureAlgorithm;
 
         @NotNull
         private RequestUserData userData;
