@@ -120,7 +120,7 @@
               !dataSourceSearch.isEmpty()
             "
             [dragDrop]="{
-              dragAllowed: true,
+              dragAllowed: selectionMode() !== 'target',
               dropAllowed: canDropOnSearchRef,
               dropped: dropped
             }"
@@ -200,7 +200,7 @@
           "
           [displayType]="collectionsDisplayType()"
           [dragDrop]="{
-            dragAllowed: true,
+            dragAllowed: selectionMode() !== 'target',
             dropAllowed: canDropOnCollection,
             dropped: dropOnCollection
           }"
@@ -237,7 +237,7 @@
           [dataSource]="dataSourceWorkspace"
           [displayType]="NodeEntriesDisplayType.Tree"
           [dragDrop]="{
-            dragAllowed: true,
+            dragAllowed: selectionMode() !== 'target',
             dropAllowed: canDropOnCollection,
             dropped: dropOnCollection
           }"
