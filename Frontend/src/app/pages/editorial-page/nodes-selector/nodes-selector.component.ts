@@ -167,6 +167,7 @@ export class NodesSelectorComponent implements OnInit {
     });
     isCollectionsTab: Signal<boolean> = computed(() => this.selectedTab() === TabType.COLLECTIONS);
     isMethodologyTab: Signal<boolean> = computed(() => this.selectedTab() === TabType.METHODOLOGY);
+    isSearchTab: Signal<boolean> = computed(() => this.selectedTab() === TabType.SEARCH);
     methodologyTabWithValue: Signal<boolean> = computed(
         () => this.isMethodologyTab() && this.atLeastOneEnabledExtendedValue(),
     );

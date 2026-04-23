@@ -85,9 +85,10 @@
           "
           [(ngModel)]="searchText"
           [disabled]="
-            isCollectionsTab() &&
-            collectionsDisplayType() === NodeEntriesDisplayType.Tree &&
-            dataSourceCollectionsTree.isLoading
+            (isSearchTab() && dataSourceSearch.isLoading) ||
+            (isCollectionsTab() &&
+              collectionsDisplayType() === NodeEntriesDisplayType.Tree &&
+              dataSourceCollectionsTree.isLoading)
           "
           (keydown.enter)="executeSearch()"
         />
