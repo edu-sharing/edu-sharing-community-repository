@@ -694,7 +694,7 @@ export class DialogsService {
         return this.cardDialog.open(AddWithConnectorDialogComponent, {
             width: 600,
             maxWidth: 800,
-            contentPadding: 0,
+            contentPadding: data.connector?.mdsGroup ? 0 : 25,
             data,
             closable: Closable.Casual,
         });
