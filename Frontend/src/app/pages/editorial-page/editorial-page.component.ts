@@ -132,7 +132,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
      * primary component to show in the center
      */
     mainComponent$ = new BehaviorSubject<MainComponentType>(null);
-    searchValues$ = new BehaviorSubject<Values>({});
+    searchValues$ = new BehaviorSubject<Values>(null);
     mdsLoaded$ = new BehaviorSubject(false);
     searchEvent$: Observable<SearchEvent>;
     /**
@@ -391,8 +391,8 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
     private initSubscription() {
         combineLatest([
-            this.queryParams$.pipe(startWith(this.queryParams$.value)),
-            this.params$.pipe(startWith(this.params$.value)),
+            this.queryParams$,
+            this.params$,
             this.editorialPageService.observeTabs().pipe(filter((t) => t?.length > 0)),
         ])
             .pipe(takeUntil(this.destroyed$), debounceTime(10))
@@ -405,7 +405,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             .pipe(
                 startWith(this.params$.value),
                 debounceTime(0),
-                distinctUntilChanged((a, b) => a?.primaryMode !== b?.primaryMode),
+                distinctUntilChanged((a, b) => a?.primaryMode === b?.primaryMode),
             )
             .subscribe(() => this.init$.next(false));
         combineLatest([
@@ -474,7 +474,8 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         };
         this.pagination$.next(pagination);
         this.tabSelection$.next(this.editorialPageService.resolveTabForCriteria(criteria));
-        this.searchValues$.next(criteria);
+        // deep copy since it is modified via IgnoredSearchFields!
+        this.searchValues$.next(Helper.deepCopy(criteria));
         let ngsearchword = '';
         if (params.q) {
             ngsearchword = params.q;

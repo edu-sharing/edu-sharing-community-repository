@@ -14,7 +14,7 @@
   >
     <div class="es-mat-sidenav-content es-mat-sidenav-content-mds">
       <es-mds-editor-wrapper
-        *ngIf="mdsGroup()"
+        *ngIf="mdsGroup() && (searchValues$ | async) != null"
         [groupId]="mdsGroup()"
         [embedded]="true"
         [repository]="HOME_REPOSITORY"
