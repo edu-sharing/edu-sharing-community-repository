@@ -31,8 +31,8 @@ import {
     UIAnimation,
 } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
-import { firstValueFrom, forkJoin as observableForkJoin, of, Subject } from 'rxjs';
-import { catchError, debounceTime } from 'rxjs/operators';
+import { buffer, firstValueFrom, forkJoin as observableForkJoin, of, Subject } from 'rxjs';
+import { catchError, debounceTime, filter, map } from 'rxjs/operators';
 import {
     CollectionUsage,
     ConfigurationService,
@@ -285,14 +285,16 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
             this.updateToolpermissions();
         });
         // initialize inheritance change subscription
+        const debounced$ = this.inheritanceChange$.pipe(debounceTime(1000));
         this.inheritanceChange$
-            .pipe(debounceTime(1000), takeUntilDestroyed())
+            .pipe(
+                buffer(debounced$),
+                map((lists) => this.mergeInheritanceLists(lists)),
+                filter((merged) => merged.length > 0),
+                takeUntilDestroyed(),
+            )
             .subscribe(async (inheritanceList) => {
-                if (inheritanceList.length) {
-                    await firstValueFrom(
-                        this.nodeApi.setNodePermissionInheritance(inheritanceList),
-                    );
-                }
+                await firstValueFrom(this.nodeApi.setNodePermissionInheritance(inheritanceList));
             });
         // Call in constructor to avoid changed-after-checked error when setting `isLoading` state.
         this.initNodes();
@@ -1228,6 +1230,22 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         if (inheritanceList.length) {
             this.inheritanceChange$.next(inheritanceList);
         }
+    }
+
+    /**
+     * Merges multiple incoming inheritance lists into one.
+     * If the same node appears multiple times, the latest value wins.
+     */
+    private mergeInheritanceLists(
+        lists: NodePermissionInheritance[][],
+    ): NodePermissionInheritance[] {
+        const merged = new Map<string, NodePermissionInheritance>();
+        for (const list of lists) {
+            for (const entry of list) {
+                merged.set(entry.node, entry);
+            }
+        }
+        return Array.from(merged.values());
     }
 
     protected readonly InteractionType = InteractionType;
