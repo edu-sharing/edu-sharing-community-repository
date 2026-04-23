@@ -1208,13 +1208,14 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     onNodeSelectionChange(event: SelectionChange<Node>) {
         const inheritanceList: NodePermissionInheritance[] = [];
         event.added?.forEach((node: Node) => {
-            if (!node.inherited && !this.initiallySkippedNodeIds.includes(node.ref.id)) {
+            // skip initial selection of nodes (inherited: true)
+            if (node.inherited && !this.initiallySkippedNodeIds.includes(node.ref.id)) {
+                this.initiallySkippedNodeIds.push(node.ref.id);
+            } else {
                 inheritanceList.push({
                     node: node.ref.id,
                     inherit: true,
                 });
-            } else {
-                this.initiallySkippedNodeIds.push(node.ref.id);
             }
         });
         event.removed?.forEach((node: Node) => {
