@@ -127,17 +127,16 @@
       <div *ngIf="assignment()" class="assignment-submit">
         <ng-container *ngTemplateOutlet="heading"></ng-container>
         <ng-container *ngTemplateOutlet="summary"></ng-container>
-        <form [formGroup]="submitFormGroup" class="main-form block">
-          <es-comments-list
-            *ngIf="submission()?.ref?.id"
-            mode="view"
-            text="html"
-            [node]="submission()?.ref?.id"
-          ></es-comments-list>
-          <editor [init]="editorConfig" formControlName="submitComment"></editor>
-          <div class="add-comment">
-            <button mat-stroked-button color="primary" (click)="addComment()">
-              {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.ADD_COMMENT' | translate }}
+        <form [formGroup]="submitFormGroup">
+          <editor [init]="editorConfig" formControlName="userNotes"></editor>
+          <div class="add-notes">
+            <button
+              mat-stroked-button
+              color="primary"
+              [disabled]="submissionSent() || loading()"
+              (click)="saveUserNotes()"
+            >
+              {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.SAVE_NOTES' | translate }}
             </button>
           </div>
         </form>

@@ -14,12 +14,11 @@ import {
     Assignment,
     AssignmentFile,
     AssignmentV1Service,
-    CommentV1Service,
-    HOME_REPOSITORY,
     ME,
     Node,
     NodeService,
     Submission,
+    SubmissionFile,
 } from 'ngx-edu-sharing-api';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { combineLatest, filter, firstValueFrom, of, Subject, throwError } from 'rxjs';
@@ -48,13 +47,11 @@ import { OptionsHelperService } from '../../../services/options-helper.service';
 import { EditorComponent } from '@tinymce/tinymce-angular';
 import { AssignmentEditorConfig } from '../manage-assignment/manage-assignment.component';
 import { PlatformLocation } from '@angular/common';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
-import { SubmissionFile } from '../../../../../dist/edu-sharing-api/lib/api/models/submission-file';
 import { NodesSelectorConfig, TabType } from '../nodes-selector/nodes-selector.component';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { Toast, ToastType } from '../../../services/toast';
-import { CommentsListComponent } from '../../../features/mds/mds-editor/widgets/mds-editor-widget-comments/comments-list/comments-list.component';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -74,13 +71,11 @@ import { RenderWrapperComponent } from '../../render2-page/render-wrapper-compon
         TranslateModule,
         EditorComponent,
         RenderWrapperComponent,
-        CommentsListComponent,
         NgxExtendedPdfViewerModule,
     ],
 })
 export class SubmitAssignmentComponent implements OnDestroy {
     @ViewChild('feedback') feedbackRef: ElementRef;
-    @ViewChild(CommentsListComponent) commentsRef: CommentsListComponent;
     @ViewChildren(NodeEntriesWrapperComponent) nodeEntriesRef: QueryList<
         NodeEntriesWrapperComponent<Node>
     >;
@@ -162,7 +157,6 @@ export class SubmitAssignmentComponent implements OnDestroy {
         private translateService: TranslateService,
         private platformLocation: PlatformLocation,
         private nodeService: NodeService,
-        private commentV1Service: CommentV1Service,
         private assignmentService: AssignmentV1Service,
         private dialogs: DialogsService,
         private translationsService: TranslationsService,
@@ -177,6 +171,11 @@ export class SubmitAssignmentComponent implements OnDestroy {
         effect(() => {
             const file = this.selectedCorrectedFile();
             this.selectedCorrectedFileUrl.set(undefined);
+            if (this.submissionSent()) {
+                this.submitFormGroup?.get('userNotes')?.disable();
+            } else {
+                this.submitFormGroup?.get('userNotes')?.enable();
+            }
             if (!file?.downloadUrl) {
                 this.selectedCorrectedFileUrl.set(null);
             } else {
@@ -211,8 +210,9 @@ export class SubmitAssignmentComponent implements OnDestroy {
                 this.editorialSidebarService.close();
             });
         this.submitFormGroup = this.formBuilder.group({
-            submitComment: ['', [Validators.required]],
+            userNotes: [''],
         });
+
         this.route.queryParams
             .pipe(
                 map((p) => p.assignment),
@@ -261,6 +261,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
                 this.assignment.set(assignment);
                 this.files.set(files);
                 this.submission.set(submission);
+                this.submitFormGroup.get('userNotes').setValue(submission?.userNotes ?? '');
                 this.submissionFiles.set(submissionFiles);
                 this.syncSubmissionDataSource();
                 this.supplementaryFiles.setData(
@@ -526,7 +527,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
                     submissionId: this.submission().ref.id,
                     body: {
                         status: 'FINISHED',
-                        userNotes: this.submission().userNotes,
+                        userNotes: this.submitFormGroup.get('userNotes').value,
                     },
                 }),
             );
@@ -544,23 +545,21 @@ export class SubmitAssignmentComponent implements OnDestroy {
         }
     }
 
-    async addComment() {
-        const control = this.submitFormGroup.get('submitComment');
-        if (!control.value.trim()) {
-            return;
-        }
-        control.disable();
+    async saveUserNotes() {
+        this.loading.set(true);
         await this.prepareSubmission();
-        await firstValueFrom(
-            this.commentV1Service.addComment({
-                repository: HOME_REPOSITORY,
-                node: this.submission().ref.id,
-                body: control.value,
+        const updated = await firstValueFrom(
+            this.assignmentService.editSubmissionInfo({
+                assignmentId: this.assignment().ref.id,
+                submissionId: this.submission().ref.id,
+                body: {
+                    status: this.submission().submissionStatus || 'PENDING',
+                    userNotes: this.submitFormGroup.get('userNotes').value,
+                },
             }),
         );
-        control.reset();
-        control.enable();
-        void this.commentsRef.refresh();
+        this.submission.set(updated);
+        this.loading.set(false);
     }
 
     private async prepareSubmission() {
@@ -572,7 +571,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
                         submissionId: ME,
                         body: {
                             status: 'PENDING',
-                            userNotes: this.submission().userNotes,
+                            userNotes: this.submitFormGroup.get('userNotes').value,
                         },
                     }),
                 ),
