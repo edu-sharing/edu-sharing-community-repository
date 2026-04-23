@@ -49,6 +49,10 @@
         {{ 'EDITORIAL.SIDEBAR.SUBMISSION.NOT_STARTED' | translate }}
       </es-info-message>
       <ng-container *ngIf="data().submission.submissionStatus !== 'NOT_STARTED'">
+        <div class="user-notes" *ngIf="submission().userNotes?.trim()">
+          <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.USER_NOTES' | translate }}</label>
+          <div [innerHTML]="submission().userNotes"></div>
+        </div>
         <div class="submissions">
           <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_ATTACHMENT' | translate }}</label>
           <es-manage-assignment-submissions
@@ -105,7 +109,7 @@
       </div>
     </div>
   </mat-tab>
-  <mat-tab *ngIf="data().submission.submissionStatus !== 'NOT_STARTED'">
+  <!--<mat-tab *ngIf="data().submission.submissionStatus !== 'NOT_STARTED'">
     <ng-template mat-tab-label>
       <i esIcon="comment" class="tab-icon"></i>
       <span class="tab-label">{{ 'EDITORIAL.SIDEBAR.SUBMISSION.TAB_DISCUSSION' | translate }}</span>
@@ -122,5 +126,5 @@
         {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.ADD_COMMENT' | translate }}
       </button>
     </form>
-  </mat-tab>
+  </mat-tab>-->
 </mat-tab-group>

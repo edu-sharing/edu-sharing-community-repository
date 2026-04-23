@@ -59,11 +59,15 @@
             justify-content: flex-end;
         }
     }
+    .user-notes,
     .submissions {
         padding-top: 50px;
         gap: 10px;
         display: flex;
         flex-direction: column;
+        > label {
+            font-weight: bold;
+        }
     }
     .feedback {
         padding-top: 50px;
