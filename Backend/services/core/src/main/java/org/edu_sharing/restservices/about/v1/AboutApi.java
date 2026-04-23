@@ -1,6 +1,7 @@
 
 package org.edu_sharing.restservices.about.v1;
 
+import com.typesafe.config.Config;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -77,10 +78,13 @@ public class AboutApi {
 
             about.setThemesUrl(new MimeTypesV2(ApplicationInfoList.getHomeRepository()).getThemePath());
 
-            List<String> supportedSigAlg = LightbendConfigLoader.get().getStringList("security.sso.authByApp.alg.supported");
-            if(supportedSigAlg != null){
-                about.setSignatureAlgorithms(supportedSigAlg);
+            Config config = LightbendConfigLoader.get().getConfig("security.sso.authByApp.alg");
+            List<String> supportedSigAlg = config.getStringList("supported");
+            String defaultVerify = config.getString("defaultVerify");
+            if(!supportedSigAlg.contains(defaultVerify)){
+                supportedSigAlg.add(defaultVerify);
             }
+            about.setSignatureAlgorithms(supportedSigAlg);
 
             Map<String, AboutService> services = new HashMap<>();
             for (Class<?> clazz : ApiApplication.SERVICES) {

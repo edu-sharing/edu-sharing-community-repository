@@ -337,7 +337,7 @@ public class RenderingProxy extends HttpServlet {
 
 			contentUrl = UrlTool.setParam(contentUrl, "sig",
 					RenderingTool.getSignatureSigned(rep_id, nodeId, timestamp,alg));
-            contentUrl = UrlTool.setParam(contentUrl, "sigAlg", alg);
+            contentUrl = UrlTool.setParam(contentUrl, "signedAlg", alg);
 		} catch (GeneralSecurityException e) {
 			throw new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
 					"Error building signature " + rep_id + " " + nodeId, RenderingException.I18N.encryption, e);

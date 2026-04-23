@@ -99,7 +99,7 @@ public class RenderingTool {
         String alg = StringUtils.isNullOrEmpty( appInfoRs1.getSignatureAlgorithm())  ? defaultAlg : appInfoRs1.getSignatureAlgorithm();
 
 		renderingService = UrlTool.setParam(renderingService, "sig", getSignatureSigned(appId,nodeId,timestamp,alg));
-        renderingService = UrlTool.setParam(renderingService, "sigAlg", alg);
+        renderingService = UrlTool.setParam(renderingService, "signedAlg", alg);
 		return renderingService;
 
 	}
