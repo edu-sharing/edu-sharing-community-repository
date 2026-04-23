@@ -114,6 +114,11 @@
         <div class="flex-line-break"></div>
         <div
           class="placeholder-container"
+          [style.padding-left.px]="
+            node.level > 0
+              ? (node.level + indentOffset()) * treeNodeIndent + treeNodeIndent
+              : treeNodeIndent
+          "
           *ngIf="node.item.collection?.childCollectionsCount; else loadingRow"
         >
           <div
