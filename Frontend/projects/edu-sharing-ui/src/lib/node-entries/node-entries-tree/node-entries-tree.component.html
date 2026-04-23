@@ -67,8 +67,14 @@
     <!-- load more button for leaf nodes -->
     <mat-tree-node *matTreeNodeDef="let node; when: isLoadMoreNode">
       <div class="load-more-container">
-        <button mat-button color="primary" (click)="loadFurtherChildren(node)">
-          <i esIcon="refresh"></i>
+        <button
+          mat-button
+          color="primary"
+          [disabled]="node.isLoading()"
+          (click)="loadFurtherChildren(node)"
+        >
+          <es-spinner-small *ngIf="node.isLoading()"></es-spinner-small>
+          <i esIcon="refresh" *ngIf="!node.isLoading()"></i>
           <span>{{ 'LOAD_MORE' | translate }}</span>
         </button>
       </div>

@@ -279,10 +279,17 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     async loadFurtherChildren(node: DynamicFlatNode): Promise<void> {
         const parentId: string = node.item.parent?.id;
         if (parentId) {
-            await this.treeNodeService.getFurtherChildren(parentId);
-            setTimeout(async () => {
-                await this.triggerNodeUpdate(parentId);
-            }, 100);
+            node.isLoading.set(true);
+            try {
+                await this.treeNodeService.getFurtherChildren(parentId);
+                setTimeout(async () => {
+                    await this.triggerNodeUpdate(parentId);
+                }, 100);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                node.isLoading.set(false);
+            }
         }
     }
 
