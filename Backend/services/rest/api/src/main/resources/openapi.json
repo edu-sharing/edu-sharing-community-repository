@@ -7024,6 +7024,9 @@
           "signature": {
             "type": "string"
           },
+          "signatureAlgorithm": {
+            "type": "string"
+          },
           "signedNode": {
             "type": "string"
           }
