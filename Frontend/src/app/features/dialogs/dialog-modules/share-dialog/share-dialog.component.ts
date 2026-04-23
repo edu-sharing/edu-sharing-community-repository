@@ -279,6 +279,8 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         this.treeNodeService.updateShowFiles(false);
         // update attribute name for initial selection
         this.treeNodeService.updateInitialSelectionAttribute('inherited');
+        // update the tree node service selection mode to control the selection behavior
+        this.treeNodeService.setSelectionMode('target');
 
         this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
             this.isSafe = data.currentScope != null;
