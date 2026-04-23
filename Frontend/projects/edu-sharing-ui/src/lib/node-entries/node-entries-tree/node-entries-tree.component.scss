@@ -119,6 +119,26 @@ mat-tree-node {
 
     .loading-row {
         margin-bottom: 8px;
+
+        // decrease size of spinner
+        es-spinner::ng-deep {
+            .spinnercontainer {
+                margin: 8px 0;
+                height: $rowMinHeight;
+
+                .inner {
+                    // keep the same ratio between width and height as before (30 / 50)
+                    width: 24px;
+                    height: 40px;
+
+                    > div {
+                        background-size: 40px;
+                        width: 40px;
+                        height: 40px;
+                    }
+                }
+            }
+        }
     }
 
     .placeholder-container {
