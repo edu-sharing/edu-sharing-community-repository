@@ -157,7 +157,8 @@
     [class.cursor-pointer]="
       !entriesService.checkbox &&
       flatNode.level !== 0 &&
-      (selectionMode() !== 'target' || isValidInsertTarget(flatNode))
+      (selectionMode() !== 'target' || isValidInsertTarget(flatNode)) &&
+      (selectionMode() !== 'source' || isValidSource(flatNode))
     "
     [class.insert-not-allowed]="selectionMode() === 'target' && !isValidInsertTarget(flatNode)"
     (click)="!entriesService.checkbox && updateSelectedNodes(flatNode, $event)"

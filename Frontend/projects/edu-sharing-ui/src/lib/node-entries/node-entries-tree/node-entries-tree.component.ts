@@ -190,7 +190,8 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     async updateSelectedNodes(flatNode: DynamicFlatNode, event?: MouseEvent): Promise<void> {
         if (
             flatNode.level === 0 ||
-            (this.selectionMode() === 'target' && !this.isValidInsertTarget(flatNode))
+            (this.selectionMode() === 'target' && !this.isValidInsertTarget(flatNode)) ||
+            (this.selectionMode() === 'source' && !this.isValidSource(flatNode))
         ) {
             return;
         }
@@ -329,6 +330,18 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
             return flatNode.item.mediatype === 'collection' || flatNode.item.mediatype === 'folder';
         }
         return false;
+    }
+
+    /**
+     * Util function to check if a node is a valid source.
+     *
+     * @param flatNode
+     */
+    isValidSource(flatNode: DynamicFlatNode): boolean {
+        return (
+            flatNode.item?.mediatype === 'collection' ||
+            flatNode.item?.type === RestConstants.CCM_TYPE_IO
+        );
     }
 
     // HELPER FUNCTIONS

@@ -179,7 +179,8 @@ export class NodesSelectorComponent implements OnInit {
     isValidSelection: Signal<boolean> = computed((): boolean => {
         if (this.selectionMode() === 'source') {
             return (
-                (this.onlyOneSelected() || this.onlyFilesSelected()) &&
+                ((this.onlyOneSelected() && this.selectedNodes()[0].mediatype === 'collection') ||
+                    this.onlyFilesSelected()) &&
                 (!this.option().optionConfig?.applyCallback ||
                     this.option().optionConfig?.applyCallback(this.selectedNodes() as Node[]))
             );
