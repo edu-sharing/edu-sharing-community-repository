@@ -25,6 +25,7 @@ import org.edu_sharing.service.organization.OrganizationService;
 import org.edu_sharing.service.organization.OrganizationServiceFactory;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.spring.ApplicationContextFactory;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -172,9 +173,22 @@ public class OrganizationDao {
 
 	/**
 	 * simple org info (faster) without access or group specific info
-	 * @return
+	 * used to resolve org memberships for single user
 	 */
 	public Organization asOrganizationSimple() {
+		Organization data = asOrganizationBase();
+		GroupProfile.GroupProfileBuilder profile = GroupProfile.builder();
+		try {
+			profile.displayName(((MCAlfrescoAPIClient) repoDao.getBaseClient()).getGroupDisplayName(this.groupName));
+		} catch (Exception e) {
+			log.debug(e.getMessage(), e);
+		}
+		data.setProfile(profile.build());
+		return data;
+	}
+
+	@NotNull
+	private Organization asOrganizationBase() {
 		Organization data = new Organization();
 
 		data.setRef(getRef());
@@ -185,6 +199,11 @@ public class OrganizationDao {
 		ref.setRepo(repoDao.getId());
 		ref.setId(eduGroup.getFolderId());
 		data.setSharedFolder(ref);
+		return data;
+	}
+
+	public Organization asOrganization() {
+		Organization data = asOrganizationBase();
 		try {
 			Group group = GroupDao.getGroup(repoDao, authorityName).asGroup(false);
 			data.setSignupMethod(group.getSignupMethod());
@@ -192,11 +211,6 @@ public class OrganizationDao {
 		}catch(Throwable t){
 			throw new RuntimeException("Error getting profile for organization "+authorityName,t);
 		}
-		return data;
-	}
-	public Organization asOrganization() {
-
-		Organization data = asOrganizationSimple();
 		data.setAdministrationAccess(hasAdministrationAccess());
 		return data;
 	}
@@ -254,41 +268,41 @@ public class OrganizationDao {
 			}
 		}
 		AuthenticationUtil.runAsSystem((RunAsWork<Void>) () -> {
-            // will throw if member is invalid user
-            repoDao.getBaseClient().getUserInfo(member).get(CCConstants.CM_PROP_PERSON_USERNAME);
+			// will throw if member is invalid user
+			repoDao.getBaseClient().getUserInfo(member).get(CCConstants.CM_PROP_PERSON_USERNAME);
 
-            if(deprovisioning != null) {
-                if(deprovisioning.getMode() == OrganizationUserDeprovisioning.Mode.assign) {
+			if(deprovisioning != null) {
+				if(deprovisioning.getMode() == OrganizationUserDeprovisioning.Mode.assign) {
 					ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 					ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
 
 					if(StringUtils.isBlank(deprovisioning.getReceiver())) {
-                        throw new RuntimeException("invalid parameters. Missing receiver for mode == assign");
-                    }
-                    Map<String, Object> filter = new HashMap<>() {{
+						throw new RuntimeException("invalid parameters. Missing receiver for mode == assign");
+					}
+					Map<String, Object> filter = new HashMap<>() {{
 						put("cmis:createdBy", member);
-                    }};
-                    List<org.alfresco.service.cmr.repository.NodeRef> refs = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO, filter);
-                    refs.addAll(CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_MAP, filter));
-                    refs = CMISSearchHelper.filterCMISResult(refs, new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, eduGroup.getFolderId()));
-                    log.info("Deprovisioning " + member + " from " + authorityName + ": " + refs.size() + " objects to process");
-                    PersonLifecycleService pls = new PersonLifecycleService();
-                    PersonDeleteOptions options = new PersonDeleteOptions();
-                    options.cleanupMetadata = false;
-                    options.receiver = deprovisioning.getReceiver();
-                    options.receiverGroup = authorityName;
-                    pls.setOwnerAndPermissions(refs, member, options, (ref) -> {
+					}};
+					List<org.alfresco.service.cmr.repository.NodeRef> refs = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO, filter);
+					refs.addAll(CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_MAP, filter));
+					refs = CMISSearchHelper.filterCMISResult(refs, new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, eduGroup.getFolderId()));
+					log.info("Deprovisioning " + member + " from " + authorityName + ": " + refs.size() + " objects to process");
+					PersonLifecycleService pls = new PersonLifecycleService();
+					PersonDeleteOptions options = new PersonDeleteOptions();
+					options.cleanupMetadata = false;
+					options.receiver = deprovisioning.getReceiver();
+					options.receiverGroup = authorityName;
+					pls.setOwnerAndPermissions(refs, member, options, (ref) -> {
 						serviceRegistry.getPermissionService().clearPermission(ref, member);
 						return null;
 					});
-                }
-            }
+				}
+			}
 
-            removeMember(groupName, member);
+			removeMember(groupName, member);
 
-            return null;
-        });
+			return null;
+		});
 	}
 
 	private String getAdminGroup() {
