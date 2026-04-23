@@ -521,10 +521,13 @@ export class SubmitAssignmentComponent implements OnDestroy {
             this.loading.set(true);
             await this.prepareSubmission();
             await firstValueFrom(
-                this.assignmentService.editSubmission({
+                this.assignmentService.editSubmissionInfo({
                     assignmentId: this.assignment().ref.id,
                     submissionId: this.submission().ref.id,
-                    status: 'FINISHED',
+                    body: {
+                        status: 'FINISHED',
+                        userNotes: this.submission().userNotes,
+                    },
                 }),
             );
             this.submission.set({ ...this.submission(), submissionStatus: 'FINISHED' });
@@ -564,10 +567,13 @@ export class SubmitAssignmentComponent implements OnDestroy {
         if (!this.submission().ref?.id) {
             this.submission.set(
                 await firstValueFrom(
-                    this.assignmentService.editSubmission({
+                    this.assignmentService.editSubmissionInfo({
                         assignmentId: this.assignment().ref.id,
                         submissionId: ME,
-                        status: 'PENDING',
+                        body: {
+                            status: 'PENDING',
+                            userNotes: this.submission().userNotes,
+                        },
                     }),
                 ),
             );

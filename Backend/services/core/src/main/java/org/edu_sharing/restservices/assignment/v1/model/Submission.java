@@ -22,7 +22,9 @@ public record Submission(
         @Schema(description = "The date of submission (from the assignee)")
         Date submissionDate,
         @Schema(description = "The date of getting it back (from the coordinator)")
-        Date returnDate
+        Date returnDate,
+        @Schema(description = "notes from the assignee (only modifiable by assignee)")
+        String userNotes
 ) {
     public enum Status {
         NOT_STARTED,

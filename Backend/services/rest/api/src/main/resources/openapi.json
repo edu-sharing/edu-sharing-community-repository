@@ -8052,6 +8052,10 @@
             ],
             "type": "string"
           },
+          "userNotes": {
+            "description": "notes from the assignee (only modifiable by assignee)",
+            "type": "string"
+          },
           "validationNotes": {
             "description": "internal note (not visible for assignee)",
             "type": "string"
@@ -8170,6 +8174,22 @@
           },
           "metadata": {
             "$ref": "#/components/schemas/SubmissionFileValidationRequest"
+          }
+        },
+        "type": "object"
+      },
+      "SubmissionInfoRequest": {
+        "properties": {
+          "status": {
+            "enum": [
+              "NOT_STARTED",
+              "PENDING",
+              "FINISHED"
+            ],
+            "type": "string"
+          },
+          "userNotes": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -16992,8 +17012,8 @@
     },
     "/assignment/v1/{assignmentId}/submissions/{submissionId}/submissionStatus": {
       "put": {
-        "description": "edit submission status",
-        "operationId": "editSubmission",
+        "description": "edit submission status & notes",
+        "operationId": "editSubmissionInfo",
         "parameters": [
           {
             "in": "path",
@@ -17011,20 +17031,17 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "in": "query",
-            "name": "status",
-            "schema": {
-              "enum": [
-                "NOT_STARTED",
-                "PENDING",
-                "FINISHED"
-              ],
-              "type": "string"
-            }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmissionInfoRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
@@ -17106,7 +17123,7 @@
     "/assignment/v1/{assignmentId}/submissions/{submissionId}/validation": {
       "put": {
         "description": "edit submission (only as coordinator of the task)",
-        "operationId": "editSubmission_1",
+        "operationId": "editSubmissionValidation",
         "parameters": [
           {
             "in": "path",

@@ -139,7 +139,7 @@ export class SubmissionSidebarComponent {
         if (this.feedbackForm.dirty) {
             await this.ensureSubmissionExists();
             const submission = await firstValueFrom(
-                this.assignmentV1Service.editSubmission1({
+                this.assignmentV1Service.editSubmissionValidation({
                     submissionId: this.data().submission.ref.id,
                     assignmentId: this.data().assignment.ref.id,
                     body: {
@@ -179,7 +179,7 @@ export class SubmissionSidebarComponent {
         await this.ensureSubmissionExists();
         await this.saveNotes();
         const submission = await firstValueFrom(
-            this.assignmentV1Service.editSubmission1({
+            this.assignmentV1Service.editSubmissionValidation({
                 submissionId: this.submission().ref.id,
                 assignmentId: this.data().assignment.ref.id,
                 body: {

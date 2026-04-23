@@ -265,7 +265,7 @@ public class AssignmentApi {
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
     )
-    public Response editSubmission(@PathParam("assignmentId") String assignmentId,
+    public Response editSubmissionValidation(@PathParam("assignmentId") String assignmentId,
                                    @Parameter(description = "id or -me- to get submission from current assignee")
                                    @PathParam("submissionId") String submissionId,
                                    SubmissionValidationRequest request) {
@@ -277,7 +277,7 @@ public class AssignmentApi {
 
     @PUT
     @Path("/{assignmentId}/submissions/{submissionId}/submissionStatus")
-    @Operation(summary = "edit submission status", description = "edit submission status")
+    @Operation(summary = "edit submission status", description = "edit submission status & notes")
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Submission.class))),
@@ -289,13 +289,14 @@ public class AssignmentApi {
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
     )
-    public Response editSubmission(@PathParam("assignmentId") String assignmentId,
-                                   @Parameter(description = "id or -me- to get submission from current assignee (only as coordinator of the task)")
+    public Response editSubmissionInfo(@PathParam("assignmentId") String assignmentId,
+                                       @Parameter(description = "id or -me- to get submission from current assignee (only as coordinator of the task)")
                                    @PathParam("submissionId") String submissionId,
-                                   @QueryParam("status") Submission.Status status) {
+                                       SubmissionInfoRequest request) {
         AssignmentDao assignment = assignmentDaoFactory.assignmentDaoByNodeId(assignmentId);
         SubmissionDao submission = assignment.getOrCreateSubmission(submissionId);
-        submission.setStatus(status);
+        submission.setStatus(request.status());
+        submission.setUserNotes(request.userNotes());
         return Response.ok().entity(submission.getSubmission()).build();
     }
 

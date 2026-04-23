@@ -1,8 +1,8 @@
 package org.edu_sharing.service.assignment;
 
-import org.edu_sharing.restservices.assignment.v1.model.SubmissionValidationRequest;
 import org.edu_sharing.restservices.assignment.v1.model.Submission;
 import org.edu_sharing.restservices.assignment.v1.model.SubmissionFileRequest;
+import org.edu_sharing.restservices.assignment.v1.model.SubmissionValidationRequest;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 
 import java.io.InputStream;
@@ -41,4 +41,8 @@ public interface SubmissionDao extends BasicNodeDao {
     String getFeedback();
 
     String getValidationNotes();
+
+    String getUserNotes();
+
+    void setUserNotes(String userNotes);
 }

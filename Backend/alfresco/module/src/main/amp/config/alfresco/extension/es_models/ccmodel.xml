@@ -2654,6 +2654,10 @@
                     <type>d:text</type>
                     <multiple>false</multiple>
                 </property>
+                <property name="ccm:submission_user_notes">
+                    <type>d:text</type>
+                    <multiple>false</multiple>
+                </property>
             </properties>
         </aspect>
 

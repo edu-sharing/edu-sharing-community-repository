@@ -39,7 +39,8 @@ public class EmptySubmissionAssignmentDao implements SubmissionDao {
                 getStatus(),
                 getValidationStatus(),
                 getSubmissionDate(),
-                getReturnDate()
+                getReturnDate(),
+                getUserNotes()
         );
     }
 
@@ -147,5 +148,15 @@ public class EmptySubmissionAssignmentDao implements SubmissionDao {
     @Override
     public String getValidationNotes() {
         return "";
+    }
+
+    @Override
+    public String getUserNotes() {
+        return "";
+    }
+
+    @Override
+    public void setUserNotes(String userNotes) {
+        throw new UnsupportedOperationException();
     }
 }

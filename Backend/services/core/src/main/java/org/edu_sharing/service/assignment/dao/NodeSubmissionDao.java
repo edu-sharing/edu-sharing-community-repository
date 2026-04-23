@@ -12,9 +12,9 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.RunAsSystem;
 import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
 import org.edu_sharing.restservices.assignment.v1.model.Assignment;
-import org.edu_sharing.restservices.assignment.v1.model.SubmissionValidationRequest;
 import org.edu_sharing.restservices.assignment.v1.model.Submission;
 import org.edu_sharing.restservices.assignment.v1.model.SubmissionFileRequest;
+import org.edu_sharing.restservices.assignment.v1.model.SubmissionValidationRequest;
 import org.edu_sharing.restservices.shared.UserSimple;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.assignment.SubmissionDao;
@@ -82,7 +82,8 @@ final class NodeSubmissionDao extends BasicNodeDaoImpl implements SubmissionDao 
                 getStatus(),
                 getValidationStatus(),
                 getSubmissionDate(),
-                getReturnDate()
+                getReturnDate(),
+                getUserNotes()
         );
     }
 
@@ -296,6 +297,24 @@ final class NodeSubmissionDao extends BasicNodeDaoImpl implements SubmissionDao 
             return null;
         }
         return propertyMapper.get().getString(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_NOTES);
+    }
+
+    @Override
+    public String getUserNotes() {
+        return propertyMapper.get().getString(CCConstants.CCM_PROP_SUBMISSION_USER_NOTES);
+    }
+
+    @Override
+    @RetryingTransaction
+    @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
+    public void setUserNotes(String userNotes) {
+        validateExists();
+        validateAssigneeCanChangeSubmission();
+        AuthenticationUtil.runAsSystem(() -> {
+            nodeService.updateNodeNative(nodeId, Map.of(CCConstants.CCM_PROP_SUBMISSION_USER_NOTES, userNotes));
+            return null;
+        });
+        refresh();
     }
 
     void validateCanCoordinatorChangeSubmission() {
