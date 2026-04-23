@@ -26,6 +26,9 @@
     <mat-tree-node
       *matTreeNodeDef="let node"
       [class.selected]="entriesService.selection.isSelected(node.item)"
+      [class.selected-when-dragging]="isDragging && entriesService.selection.isSelected(node.item)"
+      matRipple
+      [matRippleDisabled]="node.level === 0"
       cdkDrag
       esNodesDrag
       [cdkDragData]="getDragData(node.item)"
@@ -72,6 +75,7 @@
     <mat-tree-node
       class="parent-tree-node"
       [class.selected]="entriesService.selection.isSelected(node.item)"
+      [class.selected-when-dragging]="isDragging && entriesService.selection.isSelected(node.item)"
       *matTreeNodeDef="let node; when: hasChild"
       [cdkTreeNodeTypeaheadLabel]="node.item"
       cdkDrag

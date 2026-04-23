@@ -1,5 +1,8 @@
 @use 'sass:color';
+@use '../../../../assets/scss/mixins' as mixins;
 @use '../../../../assets/scss/variables-scss' as vars;
+
+$rowMinHeight: 48px;
 
 :host {
     display: flex;
@@ -23,8 +26,22 @@
     justify-content: end;
 }
 
-mat-tree-node.selected {
-    background: #f2fafe;
+mat-tree-node {
+    min-height: $rowMinHeight;
+    transition: background-color 0.15s ease;
+
+    &:not(.selected):hover {
+        background-color: rgb(var(--palette-primary-50));
+    }
+
+    &.selected {
+        background: var(--listItemSelectedBackground, #f2fafe);
+        box-shadow: inset 2px 0 0 0 var(--listItemSelectedBackgroundEffect, transparent);
+    }
+
+    &.selected-when-dragging {
+        opacity: 0.5;
+    }
 }
 
 .load-more-container {
@@ -39,6 +56,7 @@ mat-tree-node.selected {
     align-items: center;
     gap: 8px;
     width: 100%;
+    min-height: $rowMinHeight;
 
     .node-checkbox {
         flex-shrink: 0;
@@ -58,7 +76,6 @@ mat-tree-node.selected {
 
     .parent-tree-node-container {
         width: 100%;
-        min-height: 48px;
 
         .toggle-button {
             cursor: pointer;
@@ -71,6 +88,12 @@ mat-tree-node.selected {
             background: transparent;
             border: none;
             padding: 0;
+            border-radius: 50%;
+            transition: background-color 0.15s ease;
+
+            &:hover:not(:disabled) {
+                background-color: rgba(0, 0, 0, 0.06);
+            }
 
             &:disabled {
                 cursor: default;
@@ -80,7 +103,7 @@ mat-tree-node.selected {
 
             &.fade {
                 opacity: 1;
-                transition: opacity 0.5s ease; /* Smooth fade */
+                transition: opacity 0.5s ease, background-color 0.15s ease;
 
                 &.hidden {
                     opacity: 0 !important;
@@ -108,6 +131,7 @@ mat-tree-node.selected {
         .placeholder {
             background: #eee;
             height: 20px;
+            border-radius: 4px;
         }
     }
 }
@@ -135,6 +159,7 @@ mat-tree-node.selected {
     flex: 1;
     // allow shrinking
     min-width: 0;
+    border-radius: 4px;
 
     &.cursor-pointer {
         cursor: pointer;
@@ -186,6 +211,11 @@ mat-tree-node.selected {
                 height: 14px;
                 font-size: 14px;
             }
+        }
+
+        // unify box-shadow of both node-entries-table and tree
+        es-node-type-badge {
+            box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
         }
     }
 }
