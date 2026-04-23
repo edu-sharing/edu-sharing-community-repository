@@ -28,7 +28,11 @@
       [class.selected]="entriesService.selection.isSelected(node.item)"
       [class.selected-when-dragging]="isDragging && entriesService.selection.isSelected(node.item)"
       matRipple
-      [matRippleDisabled]="node.level === 0"
+      [matRippleDisabled]="
+        node.level === 0 ||
+        (selectionMode() === 'source' && !isValidSource(node)) ||
+        (selectionMode() === 'target' && !isValidInsertTarget(node))
+      "
       cdkDrag
       esNodesDrag
       [cdkDragData]="getDragData(node.item)"
@@ -78,6 +82,12 @@
       [class.selected-when-dragging]="isDragging && entriesService.selection.isSelected(node.item)"
       *matTreeNodeDef="let node; when: hasChild"
       [cdkTreeNodeTypeaheadLabel]="node.item"
+      matRipple
+      [matRippleDisabled]="
+        node.level === 0 ||
+        (selectionMode() === 'source' && !isValidSource(node)) ||
+        (selectionMode() === 'target' && !isValidInsertTarget(node))
+      "
       cdkDrag
       cdkDragDisabled
       esNodesDrag
