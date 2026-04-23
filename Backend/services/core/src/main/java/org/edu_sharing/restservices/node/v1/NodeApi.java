@@ -453,6 +453,7 @@ public class NodeApi  {
 			response.setJwt(nodeDao.getJWT());
 			response.setSignedNode(encodedSignedNode);
 			response.setSignature(encodedSignature);
+            response.setSignatureAlgorithm(signedNode.getSignatureAlgorithm());
 			ApplicationInfo rs = ApplicationInfoList.getRenderingService2();
 			if (rs != null) {
 				response.setRenderingBaseUrl(rs.getContentUrl());
