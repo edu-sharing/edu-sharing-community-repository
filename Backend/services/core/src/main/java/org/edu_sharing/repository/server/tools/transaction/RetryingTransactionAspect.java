@@ -16,7 +16,7 @@ import java.lang.reflect.Method;
 @Aspect
 @Component
 @RequiredArgsConstructor
-@Order(Ordered.HIGHEST_PRECEDENCE + 101)
+@Order(402) // run after RunAsSystem
 public class RetryingTransactionAspect {
 
     private final RetryingTransactionHelper retryingTransactionHelper;

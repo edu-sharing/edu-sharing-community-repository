@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 @RequiredArgsConstructor
-@Order(Ordered.HIGHEST_PRECEDENCE+100)
+@Order(401) // see org.springframework.security.authorization.method.AuthorizationInterceptorsOrder
 public class RunAsAspect {
 
     @Around("@annotation(RunAsSystem)")
