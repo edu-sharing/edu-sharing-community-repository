@@ -604,7 +604,6 @@
       "TOOL": ". generated with {{tool}}",
       "MODIFIED": "(has been modified)"
     },
-
     "NAMES": {
       "NONE": "No or unknown license",
       "MULTI": "Multiple licenses",
@@ -646,6 +645,17 @@
       "EDU": "edu-sharing Licenses",
       "CUSTOM": "define custom license",
       "UNTERRICHTS_UND_LEHRMEDIEN": "§60b Media collections for teaching"
+    },
+    "URLS": {
+      "CC_BY_ABOUT": "https://creativecommons.org/licenses/list.de",
+      "CC_BY": "https://creativecommons.org/licenses/by/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_ND": "https://creativecommons.org/licenses/by-nd/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_SA": "https://creativecommons.org/licenses/by-sa/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_NC": "https://creativecommons.org/licenses/by-nc/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_NC_ND": "https://creativecommons.org/licenses/by-nc-nd/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_NC_SA": "https://creativecommons.org/licenses/by-nc-sa/{{version}}/{{locale}}legalcode.de",
+      "CC_0": "https://creativecommons.org/publicdomain/zero/1.0/legalcode.de",
+      "PDM": "https://creativecommons.org/public-domain/pdm/"
     }
   },
   "LIST": {
@@ -906,6 +916,7 @@
     "CONVERTING": "Converting",
     "QUEUED": "Queued",
     "QUEUE_POSITION": "Queue position",
+    "OPEN_IN_NEW_TAB": "Open in new tab",
     "REVOKED": {
       "DETAILS_EMPTY": "The publisher or editorial team has revoked this object. Only the metadata are available.\n\nCheck the reason below for more details",
       "DETAILS": "The publisher or editorial team has revoked this object.\n\nCheck the reason below for more details",
@@ -1560,5 +1571,6 @@
     "SELECTIVE_MATERIALS": "selective_materials",
     "MATERIALS": "materials",
     "TO": "to"
-  }
+  },
+  "NOT_SUPPORTED_REMOTELY": "Relations to external elements are not supported."
 }

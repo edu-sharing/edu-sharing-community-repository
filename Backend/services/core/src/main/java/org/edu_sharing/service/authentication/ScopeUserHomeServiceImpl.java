@@ -226,7 +226,10 @@ public class ScopeUserHomeServiceImpl implements ScopeUserHomeService{
 					ChildAssociationRef primaryParent = nodeService.getPrimaryParent(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,eduGroup.getFolderId()));
 					
 					EduGroup scopedEduGroup = authorityService.getOrCreateEduGroup(tmEduGroup,eduGroup, primaryParent.getParentRef().getId());
-				
+				    if(scopedEduGroup == null){
+                      logger.warn(tmEduGroup.getGroupname() +" could not be resolved/created");
+                      continue;
+                    }
 					
 					RunAsWork<Void> runAs = new RunAsWork<Void>() {
 						@Override

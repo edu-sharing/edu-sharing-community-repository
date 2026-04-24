@@ -3,7 +3,7 @@
     <!--<i esIcon="public"></i>-->
     {{ 'WORKSPACE.SHARE.PUBLISH_' + getType() | translate }}
   </h4>
-  <ng-container *ngIf="!node?.isDirectory">
+  <ng-container *ngIf="supportsLicensing()">
     <es-info-message mode="warning" *ngIf="restrictedAccessComponent?.restrictedAccess">
       {{ 'WORKSPACE.SHARE.PUBLISH.PUBLISH_RESTRICTED_ACCESS' | translate }}
     </es-info-message>

@@ -1673,8 +1673,12 @@ public class AdminApi {
     @Path("/config/sso")
     @Operation(summary = "get registered sso.", description = "get registered sso.")
     public Response getSSOConfig() {
-        SSORegistrationService reg = ApplicationContextFactory.getApplicationContext().getBean(SSORegistrationService.class);
-        return Response.ok().entity(reg.getClientRegistrations()).build();
+        try {
+            SSORegistrationService reg = ApplicationContextFactory.getApplicationContext().getBean(SSORegistrationService.class);
+            return Response.ok().entity(reg.getClientRegistrations()).build();
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
     }
 
     public enum LuceneStore {

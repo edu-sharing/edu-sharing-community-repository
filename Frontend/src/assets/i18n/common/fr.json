@@ -164,7 +164,10 @@
     "TOOLPERMISSION_MANAGE_RELATIONS": "Gérer et créer des relations entre les éléments",
     "TOOLPERMISSION_RATE_WRITE": "L'autorisation de noter les matériaux (nécessite TOOLPERMISSION_RATE_READ)",
     "TOOLPERMISSION_COLLECTION_PROPOSAL": "Suggérer des documents pour des collections pour lesquelles l'utilisateur n'a pas de droits d'écriture",
-    "TOOLPERMISSION_RATE_READ": "Le droit de consulter les revues de matériel"
+    "TOOLPERMISSION_RATE_READ": "Le droit de consulter les revues de matériel",
+    "TOOLPERMISSION_INVITE_TIMEBASED": "Créer des autorisations à durée limitée.",
+    "TOOLPERMISSION_SUGGESTION_READ": "Récupérer des suggestions de métadonnées sur les éléments.",
+    "TOOLPERMISSION_SUGGESTION_WRITE": "Proposer des suggestions de métadonnées pour les éléments."
   },
   "NO_WRITE_PERMISSIONS": "Aucune autorisation",
   "NODE_SEARCH": "Éléments de recherche...",
@@ -279,7 +282,8 @@
     "ccm:taxonid": "Domaine d'expertise",
     "ccm:educationalintendedenduserrole": "Groupe cible",
     "ccm:eaf_sequence_title": "Titre de la séquence",
-    "ccm:collection_ordered_position": "Tri manuel"
+    "ccm:collection_ordered_position": "Tri manuel",
+    "random": "aléatoirement"
   },
   "COOKIE_INFO": {
     "ACCEPT": " Accepter",
@@ -331,7 +335,7 @@
     "COMMENT": "Fournir des informations supplémentaires sur le problème rencontré",
     "COMMENT_PLACEHOLDER": "Fournir des détails...",
     "EMAIL": "votre adresse électronique",
-    "EMAIL_PLACEHOLDER": "somebody@example.net",
+    "EMAIL_PLACEHOLDER": "personne@example.fr",
     "EMAIL_REQUIRED": "Veuillez fournir une adresse e-mail valide.",
     "REASON_REQUIRED": "Veuillez sélectionner le type de problème que vous rencontrez.",
     "DONE": "Merci pour votre message.",
@@ -405,7 +409,8 @@
     "tool_object": "Outil LTI",
     "file-csv": "Fichier CSV",
     "file-serlo": "Dossier Serlo",
-    "file-geogebra": "Fichier Geogebra"
+    "file-geogebra": "Fichier Geogebra",
+    "file-curriculum": "Kanban-Board"
   },
   "PERMISSION_TYPE": {
     "Consumer": "Visionneuse",
@@ -514,7 +519,8 @@
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "feuille de calcul (.xlsx)",
       "application/vnd.oasis.opendocument.spreadsheet": "feuille de calcul (.ods)",
       "application/vnd.openxmlformats-officedocument.presentationml.presentation": "présentation (.pptx)",
-      "application/vnd.oasis.opendocument.presentation": "présentation (.odp)"
+      "application/vnd.oasis.opendocument.presentation": "présentation (.odp)",
+      "h5p": "Fichier H5P (.h5p)"
     },
     "H5P": {
       "TITLE": "nouveau contenu H5P",
@@ -530,6 +536,10 @@
     },
     "GEOGEBRA": {
       "NAME": "Geogebra"
+    },
+    "CURRICULUM": {
+      "TITLE": "nouveau tableau d'affichage",
+      "NAME": "tableau d'affichage"
     }
   },
   "LICENSE": {
@@ -588,6 +598,12 @@
       "CC_BY_NC_SA": "https://creativecommons.org/licenses/by-nc-sa/{{version}}/{{locale}}legalcode.de",
       "CC_0": "https://creativecommons.org/publicdomain/zero/1.0/legalcode.de",
       "PDM": "https://creativecommons.org/public-domain/pdm/"
+    },
+    "AI": {
+      "NO_USAGE_ALLOWED": "Non approuvé pour la formation en IA.",
+      "GENERATED": "Généré par l'IA",
+      "TOOL": ". Créé avec {{tool}}",
+      "MODIFIED": "(a été modifié)"
     }
   },
   "LIST": {
@@ -627,7 +643,6 @@
     "NODE_REPORT": "Signaler un problème",
     "ADD_NODE_STORE": "Ajouter à la liste des mémos",
     "DELETE": "Supprimer",
-    "UNPUBLISH": "Dépublier",
     "UNBLOCK_IMPORT": "Réactiver",
     "REMOVE_REF": "Retirer de la collection",
     "CUT": "Couper",
@@ -662,7 +677,11 @@
     "EMBED": "Embarquer",
     "OPEN_ORIGINAL_NODE": "Ouvrir l'original",
     "COLLECTION_PROPOSAL_DECLINE": "Refuser la proposition",
-    "RELATIONS": "Gérer les relations"
+    "RELATIONS": "Gérer les relations",
+    "REVOKE": "Retirer l'objet",
+    "EDIT_REVOCATION": "Raison de la modification",
+    "SELECT_ALL": "Tout sélectionner",
+    "DESELECT": "Désélectionnez tout"
   },
   "NO_SIZE": "-",
   "VERSION_COMMENT": "Commentaire sur la version",
@@ -708,11 +727,18 @@
     "DELETE_KEY_NOTICE": "Supprimer avec la touche Delete",
     "SHOW_EXTENDED_FALSE": "cacher des informations supplémentaires",
     "SUGGEST_VALUE_SEND": "suggérer",
-    "SUGGESTION_TOOLTIP": "Valeur \"{{ valeur }}\" suggérée par \"{{ créateur }}\"",
+    "SUGGESTION_TOOLTIP": "Valeur \"{{ value }}\" suggérée par \"{{ creator }}\"",
     "NO_MATCHING_VALUES": "Pas de valeurs correspondantes",
     "ERROR_PREVIEW": "L'image de prévisualisation n'a pas pu être remplacée. Veuillez essayer un autre fichier image",
     "SUGGEST_VALUE_SENT": "La suggestion a été soumise et est en cours d'examen par l'équipe éditoriale. La suggestion n'apparaîtra que lorsqu'elle aura été activée par l'équipe éditoriale. Nous vous remercions de votre attention.",
-    "SUGGEST_VALUE_LABEL": "Proposer une nouvelle valeur"
+    "SUGGEST_VALUE_LABEL": "Proposer une nouvelle valeur",
+    "SUGGESTIONS": {
+      "LIST_TITLE": "Vorschläge für dieses Feld",
+      "TYPE_AI": "IA",
+      "TYPE_USER": "personne",
+      "APPLY": "accepter",
+      "DECLINE": "refuser"
+    }
   },
   "SIMPLE_EDIT": {
     "TITLE": "Édition rapide",
@@ -789,7 +815,8 @@
     "PASSWORD_PLACEHOLDER": "Saisir le mot de passe ...",
     "PASSWORD_CORRECT": "Mot de passe correct",
     "SUBELEMENT_SINGLE": "contient 1 élément supplémentaire",
-    "SUBELEMENT_MULTI": "contient {{count}} plus d'éléments"
+    "SUBELEMENT_MULTI": "contient {{count}} plus d'éléments",
+    "EMPTY_FOLDER": "Le dossier partagé ne contient encore aucun fichier."
   },
   "VIDEO_CONTROLS": {
     "HEADING": "Sélectionner un clip pour l'enregistrer dans une collection",
@@ -802,13 +829,14 @@
     "API_FORBIDDEN": "Aucune autorisation pour accéder à ce contenu",
     "API_FORBIDDEN_LOGIN": "Veuillez vous connecter pour accéder à cette section",
     "NO_CONNECTION": "Connexion internet instable, le contenu n'a pas pu être chargé. Veuillez réessayer plus tard",
-    "DOWNLOAD_STARTED": "Le téléchargement de \"{{nom}}\" a commencé",
-    "DOWNLOAD_FINISHED_ANDROID": "Le téléchargement de \"{{nom}}\" est terminé.\nVous pouvez trouver l'élément dans le dossier de téléchargement de l'appareil.",
-    "DOWNLOAD_FINISHED_IOS": "Le téléchargement de \"{{nom}}\" est terminé.\nVous pouvez trouver l'élément dans l'application des fichiers",
-    "DOWNLOAD_FAILED": "Le téléchargement de \"{{nom}}\" a échoué.\nVérifiez votre connexion Internet et réessayez",
+    "DOWNLOAD_STARTED": "Le téléchargement de \"{{name}}\" a commencé",
+    "DOWNLOAD_FINISHED_ANDROID": "Le téléchargement de \"{{name}}\" est terminé.\nVous pouvez trouver l'élément dans le dossier de téléchargement de l'appareil.",
+    "DOWNLOAD_FINISHED_IOS": "Le téléchargement de \"{{name}}\" est terminé.\nVous pouvez trouver l'élément dans l'application des fichiers",
+    "DOWNLOAD_FAILED": "Le téléchargement de \"{{name}}\" a échoué.\nVérifiez votre connexion Internet et réessayez",
     "DOWNLOAD_TRY_AGAIN": "Réessayer",
-    "STORAGE_LOCATION_SAVED": "Le dossier \"{{nom}}\" sera utilisé par défaut pour les téléchargements à l'avenir.",
-    "STORAGE_LOCATION_RESET": "Le dossier par défaut pour les téléchargements a été réinitialisé"
+    "STORAGE_LOCATION_SAVED": "Le dossier \"{{name}}\" sera utilisé par défaut pour les téléchargements à l'avenir.",
+    "STORAGE_LOCATION_RESET": "Le dossier par défaut pour les téléchargements a été réinitialisé",
+    "OPTION_DISABLED_OR_UNAVAILABLE": "L'action demandée n'est malheureusement pas disponible."
   },
   "VCARD": {
     "Givenname": "Prénom",
@@ -874,7 +902,8 @@
       "AlreadyMember": "Vous êtes déjà membre du groupe sélectionné.",
       "ADDED_TO_LIST": "Vous avez été placé sur la liste d'attente et l'administrateur-trice du groupe en sera informé-e. Vous recevrez une notification par courriel lorsque vous serez approuvé-e.",
       "ADDED_TO_GROUP": "Vous êtes maintenant membre du groupe {{group}}."
-    }
+    },
+    "SEARCH": "Parcourir la liste des groupes"
   },
   "KEY_MODIFIER": {
     "SHIFT": "MAJ",
@@ -1156,8 +1185,8 @@
     "youtube": "YouTube",
     "zum": "ZUM Wiki"
   },
-  "MONTHS_AGO": "{{ mois }} il y a un mois",
-  "YEARS_AGO": "{{ ans }} il y a un an(s)",
+  "MONTHS_AGO": "{{ months }} il y a un mois",
+  "YEARS_AGO": "{{ years }} il y a un an(s)",
   "STORAGE_LOCATION_SAVE": "Utiliser cet emplacement par défaut à l'avenir",
   "SEARCH_CLEAR": "Clair",
   "TOGGLE_SEARCH_FILTERS": "Afficher ou masquer les filtres de recherche",
@@ -1198,10 +1227,10 @@
   },
   "RATING": {
     "TOAST": {
-      "LIKE_REMOVED": "Recommandation pour le matériau \"{{nom}}\" supprimée",
-      "RATING_REMOVED": "Suppression du classement du matériau \"{{nom}}\".",
-      "RATED": "Le matériau \"{{nom}}\" a été évalué {{rating}}. Nous vous en remercions !",
-      "LIKED": "Matériau \"{{nom}}\" recommandé. Nous vous remercions de votre attention."
+      "LIKE_REMOVED": "Recommandation pour le matériau \"{{name}}\" supprimée",
+      "RATING_REMOVED": "Suppression du classement du matériau \"{{name}}\".",
+      "RATED": "Le matériau \"{{name}}\" a été évalué {{rating}}. Nous vous en remercions !",
+      "LIKED": "Matériau \"{{name}}\" recommandé. Nous vous remercions de votre attention."
     },
     "COUNT_RATINGS": "Nombre d'examens",
     "STARS_RATE": "Noter avec {{rating}}",
@@ -1219,13 +1248,13 @@
     "EMPTY_UNREAD": "Il n'y a pas de notifications non lues",
     "EMPTY_ALL": "Aucune notification",
     "DESCRIPTIONS": {
-      "AddToCollectionEvent": "{{créateur}} a ajouté le matériau \"{{titre}}\" à la collection {{collection}}.",
-      "ProposeForCollectionEvent": "{{créateur}} a proposé le matériel \"{{titre}}\" pour la collection {{collection}}.",
+      "AddToCollectionEvent": "{{creator}} a ajouté le matériau \"{{title}}\" à la collection {{collection}}.",
+      "ProposeForCollectionEvent": "{{creator}} a proposé le matériel \"{{title}}\" pour la collection {{collection}}.",
       "CommentEvent": "{{creator}} a écrit un commentaire sur le matériel \"{{title}}\".",
-      "InviteEvent": "{{créateur}} vous a remis l'objet \"{{titre}}\".",
-      "NodeIssueEvent": "{{créateur}} a signalé le problème \"{{motif}}\" sur le matériau \"{{titre}}\".",
-      "RatingEvent": "Une note a été attribuée à l'article \"{{titre}}\".",
-      "WorkflowEvent": "{{créateur}} a modifié l'état du flux de travail de la matière \"{{titre}}\" en \"{{état du flux de travail}}\".",
+      "InviteEvent": "{{creator}} vous a remis l'objet \"{{title}}\".",
+      "NodeIssueEvent": "{{creator}} a signalé le problème \"{{reason}}\" sur le matériau \"{{title}}\".",
+      "RatingEvent": "Une note a été attribuée à l'article \"{{title}}\".",
+      "WorkflowEvent": "{{creator}} a modifié l'état du flux de travail de la matière \"{{title}}\" en \"{{workflowStatus}}\".",
       "MetadataSuggestionEvent": ""
     }
   },
@@ -1244,7 +1273,7 @@
     "TITLE": "Donner un retour d'information sur le matériel",
     "VIEW_TITLE": "Retour d'information sur le matériel",
     "VIEW_EMPTY": "Aucun retour d'information n'a encore été donné sur le matériel",
-    "CREATOR": "Auteur {{créateur}}",
+    "CREATOR": "Auteur {{creator}}",
     "SAVE": "Envoyer",
     "TOAST": "Feedback envoyé. Nous vous remercions de votre attention."
   },
@@ -1268,7 +1297,7 @@
     "COPIED_TO_CLIPBOARD_NOTICE": "Le code d'intégration a été copié dans le presse-papiers."
   },
   "NODE_INFO": {
-    "TITLE": "Nœud \"{{nom}}\"",
+    "TITLE": "Nœud \"{{name}}\"",
     "LOCATION": "Chemin d'accès à l'article",
     "NODE_ASPECTS": "Aspects",
     "NODE_PROPERTIES": "Propriétés",
@@ -1283,7 +1312,9 @@
     "CHILDREN": "Les enfants",
     "CHILDREN_NONE": "Cet élément n'a pas d'objet enfant",
     "CUSTOM_PROPERTY_NAME": "Saisir le nom de la propriété personnalisée",
-    "CUSTOM_PROPERTY_VALUE": "Saisir la valeur de la propriété personnalisée"
+    "CUSTOM_PROPERTY_VALUE": "Saisir la valeur de la propriété personnalisée",
+    "CONTEXT_ACTIONS": "Actions pour ce type d'élément.",
+    "ALL_ACTIONS": "Toutes les actions (peuvent ne pas être compatibles avec ce type !)"
   },
   "NOTIFICATION": {
     "MENU": "Notifications",
@@ -1372,6 +1403,31 @@
       "isPartOf": "fait partie de (isPartOf)",
       "isBasedOn": "est basé sur (isBasedOn)",
       "references": "se réfère à (références)"
+    },
+    "NOT_SUPPORTED_REMOTELY": "Les relations entre éléments externes ne sont actuellement pas prises en charge."
+  },
+  "MAPTYPE": {
+    "IMAGES": "Images",
+    "USERDATAFOLDER": "documents",
+    "INBOX": "Boîte de réception"
+  },
+  "REVOKE_FEEDBACK": {
+    "TITLE": "Rédaction contact",
+    "REPORT_INFO": "Rédaction immédiate de \"{{name}}\" contacts",
+    "COMMENT": "Veuillez fournir des commentaires, par exemple sur l'utilisation ou l'application de ce matériel.",
+    "COMMENT_REQUIRED": "Veuillez saisir un commentaire/des détails.",
+    "COMMENT_PLACEHOLDER": "Fournissez des détails...",
+    "DONE": "Merci pour vos commentaires.",
+    "EMAIL": "Votre adresse e-mail",
+    "EMAIL_PLACEHOLDER": "personne@example.fr",
+    "EMAIL_REQUIRED": "S'il vous plaît, mettez une adresse email valide."
+  },
+  "RENDERING": {
+    "REVOKED": {
+      "DETAILS": "L'éditeur/l'équipe éditoriale a retiré cet article. Seules les métadonnées de l'article original restent disponibles.\n\nVous trouverez plus de détails dans l'explication ci-dessous.",
+      "DATE": "Date de suppression",
+      "REASON": "Motif de la suppression",
+      "FEEDBACK": "Contactez l'équipe éditoriale"
     }
   }
 }

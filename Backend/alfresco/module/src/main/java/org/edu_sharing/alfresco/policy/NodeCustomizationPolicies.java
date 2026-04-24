@@ -64,6 +64,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -273,11 +274,12 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 
             ContentReader reader = contentService.getReader(nodeRef, ContentModel.PROP_CONTENT);
 
-            LockStatus lockStatus = lockService.getLockStatus(nodeRef);
-            long contentSize = 0L;
+
+            long contentSize = 0l;
             if ((reader != null) && (reader.getContentData() != null)) contentSize = reader.getContentData().getSize();
             String mimetype = null;
             if (reader != null) mimetype = reader.getMimetype();
+            LockStatus lockStatus = lockService.getLockStatus(nodeRef);
             logger.debug(" reader.getContentData().getSize():" + contentSize + " newContent:" + newContent + " LockStatus:" + lockStatus + " mimetype:" + mimetype);
 
             if (reader != null) {
@@ -293,14 +295,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
             logger.debug("will do the resourceinfo. noderef:" + nodeRef);
             Action resourceInfoAction = actionService.createAction(CCConstants.ACTION_NAME_RESOURCEINFO);
             actionService.executeAction(resourceInfoAction, nodeRef, true, false);
-            logger.debug("lockStatus:" + lockStatus);
-            // new content seems to be false even when the binary has new data, so we trigger the preview
-            if (/*newContent */
-                    (LockStatus.NO_LOCK.equals(lockStatus) || LockStatus.LOCK_EXPIRED.equals(lockStatus))
-                            && (reader != null) && (reader.getContentData() != null) && reader.getContentData().getSize() > 0) {
 
-                new ThumbnailHandling().thumbnailHandling(nodeRef);
-            }
             if (verifyMimetypeEnabled()) {
                 if (newContent &&
                         !nodeService.getProperty(nodeRef, ContentModel.PROP_NODE_UUID)
@@ -361,6 +356,11 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
                 }
                 return null;
             });
+
+
+            logger.debug("lockStatus:" + lockStatus);
+            // new content seems to be false even when the binary has new data, so we trigger the preview
+
         }
         repositoryCache.remove(nodeRef.getId());
     }
@@ -741,6 +741,12 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
         props.addAll(Arrays.asList(LICENSE_PROPS));
         props.addAll(MetadataReader.getWidgetsByNode(ref, "de_DE").stream().
                 map(MetadataWidget::getId).map(CCConstants::getValidGlobalName).
+                collect(Collectors.toList()));
+
+        props.addAll(MetadataReader.getWidgetsByNode(ref, "de_DE").stream().
+                filter(w ->  "range".equals(w.getType())).
+                flatMap(w -> Stream.of(w.getId() + "_from", w.getId() + "_to")).
+                map(CCConstants::getValidGlobalName).
                 collect(Collectors.toList()));
         props.addAll(MetadataReader.getWidgetsByNode(ref, "de_DE").stream().
                 map(MetadataWidget::getSuggestDisplayProperty).filter(Objects::nonNull).map(CCConstants::getValidGlobalName).

@@ -738,7 +738,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
                 }
 
                 if (!authorityService.authorityExists(ace.getAuthority())
-                        && !"GROUP_EVERYONE".equals(ace.getAuthority())) {
+                                && !Arrays.asList("System", PermissionService.ALL_AUTHORITIES).contains(ace.getAuthority())) {
                     throw new Exception("authority " + ace.getAuthority() + " does not exist!");
                 }
 

@@ -37,11 +37,11 @@ spec:
         - "/bin/bash"
         - "-ec"
         - |
-          if [[ ! "$(ls -A /opt/bitnami/tomcat/shared/classes/config/cluster)" ]]; then
-            chown -R {{ .Values.securityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /opt/bitnami/tomcat/shared/classes/config/cluster
+          if [[ ! "$(ls -A /usr/local/tomcat/shared/classes/config/cluster)" ]]; then
+            chown -R {{ .Values.securityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /usr/local/tomcat/shared/classes/config/cluster
           fi
-          if [[ ! "$(ls -A /opt/bitnami/tomcat/shared/classes/config/node)" ]]; then
-            chown -R {{ .Values.securityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /opt/bitnami/tomcat/shared/classes/config/node
+          if [[ ! "$(ls -A /usr/local/tomcat/shared/classes/config/node)" ]]; then
+            chown -R {{ .Values.securityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /usr/local/tomcat/shared/classes/config/node
           fi
           if [[ ! "$(ls -A /opt/alfresco/alf_data)" ]]; then
             chown -R {{ .Values.securityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /opt/alfresco/alf_data
@@ -53,9 +53,9 @@ spec:
           {{- end }}
         volumeMounts:
         - name: data
-          mountPath: /opt/bitnami/tomcat/shared/classes/config/node
+          mountPath: /usr/local/tomcat/shared/classes/config/node
         - name: share-config
-          mountPath: /opt/bitnami/tomcat/shared/classes/config/cluster
+          mountPath: /usr/local/tomcat/shared/classes/config/cluster
         - name: share-data
           mountPath: /opt/alfresco/alf_data
         {{- if .Values.persistence.share.safe.enabled }}
@@ -208,9 +208,9 @@ spec:
         {{- end }}
         volumeMounts:
         - name: data
-          mountPath: /opt/bitnami/tomcat/shared/classes/config/node
+          mountPath: /usr/local/tomcat/shared/classes/config/node
         - name: share-config
-          mountPath: /opt/bitnami/tomcat/shared/classes/config/cluster
+          mountPath: /usr/local/tomcat/shared/classes/config/cluster
         - name: share-data
           mountPath: /opt/alfresco/alf_data
         {{- if .Values.persistence.share.safe.enabled }}
@@ -219,28 +219,33 @@ spec:
         {{- end }}
         {{- with .Values.config.override.config.application.client }}
         - name: file
-          mountPath: /opt/bitnami/tomcat/shared/classes/config/defaults/client.config.override.xml
+          mountPath: /usr/local/tomcat/shared/classes/config/defaults/client.config.override.xml
           subPath: config-application-client
         {{- end }}
         {{- with .Values.config.override.config.application.mds }}
         - name: file
-          mountPath: /opt/bitnami/tomcat/shared/classes/config/defaults/metadatasets/xml/mds_override.xml
+          mountPath: /usr/local/tomcat/shared/classes/config/defaults/metadatasets/xml/mds_override.xml
           subPath: config-application-mds
         {{- end }}
         {{- with .Values.config.override.config.application.settings }}
         - name: file-sec
-          mountPath: /opt/bitnami/tomcat/shared/classes/config/defaults/edu-sharing.override.conf
+          mountPath: /usr/local/tomcat/shared/classes/config/defaults/edu-sharing.override.conf
           subPath: config-application-settings
         {{- end }}
         {{- with .Values.config.override.logging.application }}
         - name: file
-          mountPath: /opt/bitnami/tomcat/webapps/alfresco/WEB-INF/log4j2-alfresco.properties
+          mountPath: /usr/local/tomcat/webapps/alfresco/WEB-INF/log4j2-alfresco.properties
           subPath: logging-application
         {{- end }}
         {{- with .Values.config.override.logging.server }}
         - name: file
-          mountPath: /opt/bitnami/tomcat/conf/logging.properties
+          mountPath: /usr/local/tomcat/conf/logging.properties
           subPath: logging-server
+        {{- end }}
+        {{- if .Values.persistence.data.temp.create }}
+        - name: temp
+          mountPath: /usr/local/tomcat/temp/Alfresco
+          subPath: Alfresco
         {{- end }}
         {{- with .Values.startupProbe }}
         startupProbe:
@@ -258,7 +263,11 @@ spec:
         {{- end }}
         {{- with .Values.livenessProbe }}
         livenessProbe:
-          tcpSocket:
+          httpGet:
+            httpHeaders:
+                - name: Accept
+                  value: application/json
+            path: /edu-sharing/rest/_about/health/liveness?timeoutSeconds={{ .timeoutSeconds }}
             port: api-internal
           failureThreshold: {{ .failureThreshold }}
           initialDelaySeconds: {{ .initialDelaySeconds }}
@@ -268,7 +277,7 @@ spec:
         {{- with .Values.readinessProbe }}
         readinessProbe:
           httpGet:
-            path: /edu-sharing/rest/_about/status/SERVICE?timeoutSeconds={{ .timeoutSeconds }}
+            path: /edu-sharing/rest/_about/health/readiness?timeoutSeconds={{ .timeoutSeconds }}
             httpHeaders:
             - name: Accept
               value: application/json
@@ -522,3 +531,9 @@ spec:
       name: data
       labels: {{ include "edusharing_common_lib.labels.app" . | nindent 8 }}
     spec: {{ merge .Values.persistence.data.config.spec .Values.global.cluster.storage.data.spec | toYaml | nindent 6 }}
+  {{- if .Values.persistence.data.temp.create }}
+  - metadata:
+      name: temp
+      labels: {{ include "edusharing_common_lib.labels.app" . | nindent 8 }}
+    spec: {{ merge .Values.persistence.data.temp.spec .Values.global.cluster.storage.data.spec | toYaml | nindent 6 }}
+  {{- end }}

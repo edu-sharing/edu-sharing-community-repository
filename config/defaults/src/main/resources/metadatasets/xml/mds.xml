@@ -732,6 +732,11 @@
       <type>checkbox</type>
     </widget>
     <widget>
+      <id>cclom:location</id>
+      <type>text</type>
+      <textEscapingPolicy>all</textEscapingPolicy>
+    </widget>
+    <widget>
       <id>curriculum_title</id>
       <required>mandatory</required>
       <caption>Pinnwand-Titel</caption>
@@ -2291,23 +2296,23 @@
       <property name="ngsearchword" asFilter="false">
         <exactMatching>true</exactMatching>
         <statement>
-          {
-          "bool": {
-          "should": [
-          {
-          "simple_query_string": {
-          "query": "${value}*",
-          "fields": [
-          "properties.cclom:title^4",
-          "properties.cm:title^2",
-          "properties.cm:name^1"
-          ],
-          "default_operator": "and"
-          }
-          }
-          ]
-          }
-          }
+            {
+                "bool": {
+                    "should": [
+                        {
+                            "simple_query_string": {
+                            "query": "${value}*",
+                            "fields": [
+                                "properties.cclom:title^4",
+                                "properties.cm:title^2",
+                                "properties.cm:name^1"
+                            ],
+                            "default_operator": "and"
+                            }
+                        }
+                    ]
+                }
+            }
         </statement>
       </property>
       <property name="ccm:page_variant_is_template">

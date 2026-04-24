@@ -20,6 +20,7 @@ const PROXY_CONFIG = [
             '/edu-sharing/eduservlet',
             '/edu-sharing/preview',
             '/edu-sharing/themes',
+            '/edu-sharing/share',
             '/edu-sharing/ccimages',
             '/edu-sharing/oauth2/',
             '/edu-sharing/oauth2server/',
@@ -31,6 +32,12 @@ const PROXY_CONFIG = [
         target: process.env.BACKEND_URL,
         secure: false,
         changeOrigin: true,
+        bypass(req, res, proxyOptions) {
+            if (req.method !== 'POST' && req.url.startsWith('/edu-sharing/share')) {
+                // proxy only the post request to the backend, not any other paths
+                return req.url;
+            }
+        },
         onProxyRes: function (proxyRes, req, res) {
             proxyRes.headers['X-Edu-Sharing-Proxy-Target'] = process.env.BACKEND_URL;
             const cookies = proxyRes.headers['set-cookie'];
@@ -111,7 +118,7 @@ const PROXY_CONFIG = [
                         `${rs2.protocol}//${escapedHost.replace(/:\\d+$/, '')}:\\d+${escapedPath}`,
                         'g',
                     );
-                    body = body.replace(regex, 'http://localhost:4200/rendering2/');
+                    body = body.replace(regex, 'http://localhost:4200/rendering2');
                     res.setHeader('content-length', Buffer.byteLength(body));
                     res.end(body);
                 });

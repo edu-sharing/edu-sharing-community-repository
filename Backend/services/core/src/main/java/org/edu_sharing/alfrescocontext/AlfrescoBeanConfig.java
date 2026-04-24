@@ -432,4 +432,9 @@ public class AlfrescoBeanConfig {
     public TicketComponent permissionServiceDAO() {
         return applicationContext.getBean("ticketComponent", TicketComponent.class);
     }
+
+    @Bean
+    public TicketComponent  ticketComponent() {
+        return applicationContext.getBean("ticketComponent", TicketComponent.class);
+    }
 }

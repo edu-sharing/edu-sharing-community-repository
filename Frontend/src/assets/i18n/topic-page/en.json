@@ -132,6 +132,10 @@
         "CHANGES_SAVED": "Profile saved – you'll now see relevant content!",
         "CHANGES_RESET": "Your profiling has been reset."
       },
+      "SEARCH_WIDGET": {
+        "SEARCH": "Search",
+        "SEARCH_PLACEHOLDER": "Search for contents on the topic page ..."
+      },
       "SHARE_OPTIONS": {
         "COPY_LINK": "Copy link",
         "COPY_LINK_TO_CONTENT": "Copy link to content",

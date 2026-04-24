@@ -18,7 +18,7 @@ import { ValueType } from 'ngx-edu-sharing-ui';
         {
             provide: TINYMCE_SCRIPT_SRC,
             useFactory: (platformLocation: PlatformLocation) => {
-                return platformLocation.getBaseHrefFromDOM() + 'tinymce/tinymce.min.js';
+                return platformLocation.getBaseHrefFromDOM() + 'assets/tinymce/tinymce.min.js';
             },
             deps: [PlatformLocation],
         },
@@ -88,7 +88,7 @@ export class MdsEditorWidgetTinyMCEComponent extends MdsEditorWidgetBase impleme
     async ngAfterViewInit() {
         this._html = (await this.widget.getInitalValuesAsync()).jointValues[0];
         (this.editorConfigDefault as any).base_url =
-            this.platformLocation.getBaseHrefFromDOM() + 'tinymce/';
+            this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce/';
         // dirty workaround for tinyMCE
         setTimeout(() => {
             if (this.widget.definition.configuration) {

@@ -19,7 +19,7 @@ import java.util.Map;
 
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @JobDescription(description = "touch nodes so they get re-indexed by search index, in case they have a wrong state in the index")
-public class TouchNodesJob extends FixElasticSearchBase{
+public class TouchNodesJob extends FixElasticSearchBase {
 
     @JobFieldDescription(description = "either to keep modified date or not", sampleValue = "true")
     boolean keepModifiedDate = true;
@@ -40,7 +40,7 @@ public class TouchNodesJob extends FixElasticSearchBase{
         AuthenticationUtil.runAsSystem(() -> {
             try {
                 Query.Builder builder = getBuilder(query);
-                search( builder.build(), new TouchHandler());
+                search(builder.build(), new TouchHandler());
             } catch (IOException e) {
                 logger.error(e.getMessage(), e);
             }

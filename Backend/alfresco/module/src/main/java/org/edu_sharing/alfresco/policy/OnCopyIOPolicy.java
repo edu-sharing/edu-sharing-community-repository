@@ -90,6 +90,14 @@ public class OnCopyIOPolicy implements OnCopyCompletePolicy, CopyServicePolicies
 			nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_TRACKING_VIEWS));
 		}
 
+        if(nodeService.hasAspect(targetNodeRef,QName.createQName(CCConstants.CCM_ASPECT_WORKFLOW))){
+            nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_WF_INSTRUCTIONS));
+            nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_WF_STATUS));
+            nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_WF_PROTOCOL));
+            nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_WF_RECEIVER));
+            nodeService.removeAspect(targetNodeRef, QName.createQName(CCConstants.CCM_ASPECT_WORKFLOW));
+        }
+
 		removeCopiedUsages(nodeService, targetNodeRef);
 	}
 	

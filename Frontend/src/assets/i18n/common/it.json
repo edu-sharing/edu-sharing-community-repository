@@ -9,11 +9,11 @@
   "BACK": "indietro",
   "NEXT": "continuare",
   "SKIP": "saltare",
-  "SAVE": "salvare",
+  "SAVE": "salva",
   "DISCARD": "scartare",
   "APPLY": "applicare",
   "USE": "utilizzare",
-  "CANCEL": "annullare",
+  "CANCEL": "annulla",
   "YES_DELETE": "Sì, eliminare",
   "RESET": "Reset",
   "START": "Inizio",
@@ -164,7 +164,10 @@
     "TOOLPERMISSION_MANAGE_RELATIONS": "Gestire e creare relazioni tra elementi",
     "TOOLPERMISSION_RATE_WRITE": "Il permesso di valutare i materiali (richiede TOOLPERMISSION_RATE_READ)",
     "TOOLPERMISSION_COLLECTION_PROPOSAL": "Suggerimento di materiali per collezioni per le quali l'utente non dispone dei permessi di scrittura",
-    "TOOLPERMISSION_RATE_READ": "Il diritto di visionare le recensioni dei materiali"
+    "TOOLPERMISSION_RATE_READ": "Il diritto di visionare le recensioni dei materiali",
+    "TOOLPERMISSION_INVITE_TIMEBASED": "Creare autorizzazioni limitate nel tempo.",
+    "TOOLPERMISSION_SUGGESTION_READ": "Recupera suggerimenti per i metadati sugli elementi.",
+    "TOOLPERMISSION_SUGGESTION_WRITE": "Crea suggerimenti per i metadati sugli elementi."
   },
   "NO_WRITE_PERMISSIONS": "Nessun permesso",
   "NODE_SEARCH": "Elementi di ricerca...",
@@ -236,7 +239,6 @@
     "description": "descrizione",
     "mimetype": "tipo di file",
     "size": "dimensione",
-    "cclom:size": "dimensione",
     "mediatype": "tipo di file",
     "ccm:commonlicense_key": "licenza",
     "ccm:educationallearningresourcetype": "Tipo",
@@ -257,7 +259,7 @@
     "sys:archivedDate": "cancellato",
     "cclom:version": "versione",
     "virtual:usagecount": "conteggio dell'utilizzo",
-    "ccm:author_freetext": "Informazioni generali sull'autore",
+    "ccm:author_freetext": "Informazioni sul creatore/creatrice",
     "ccm:lifecyclecontributer_authorFN": "autore",
     "ccm:wf_status": "stato",
     "ccm:eaf_productionyear": "Anno di produzione",
@@ -279,7 +281,8 @@
     "ccm:taxonid": "Area di competenza",
     "ccm:educationalintendedenduserrole": "Gruppo target",
     "ccm:eaf_sequence_title": "Titolo della sequenza",
-    "ccm:collection_ordered_position": "Smistamento manuale"
+    "ccm:collection_ordered_position": "Smistamento manuale",
+    "random": "Casualmente"
   },
   "COOKIE_INFO": {
     "ACCEPT": " Accettare",
@@ -331,7 +334,7 @@
     "COMMENT": "Fornire ulteriori informazioni sul problema che si è verificato",
     "COMMENT_PLACEHOLDER": "Fornisci i dettagli...",
     "EMAIL": "il vostro indirizzo e-mail",
-    "EMAIL_PLACEHOLDER": "somebody@example.net",
+    "EMAIL_PLACEHOLDER": "qualcuno@example.it",
     "EMAIL_REQUIRED": "Si prega di fornire un indirizzo e-mail valido.",
     "REASON_REQUIRED": "Selezionare il tipo di problema riscontrato.",
     "DONE": "Grazie per il suo messaggio.",
@@ -405,7 +408,8 @@
     "tool_object": "Strumento LTI",
     "file-csv": "File CSV",
     "file-serlo": "File Serlo",
-    "file-geogebra": "File Geogebra"
+    "file-geogebra": "File Geogebra",
+    "file-curriculum": "Kanban-Board"
   },
   "PERMISSION_TYPE": {
     "Consumer": "Visualizzatore",
@@ -514,7 +518,8 @@
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "foglio di calcolo (.xlsx)",
       "application/vnd.oasis.opendocument.spreadsheet": "foglio di calcolo (.ods)",
       "application/vnd.openxmlformats-officedocument.presentationml.presentation": "presentazione (.pptx)",
-      "application/vnd.oasis.opendocument.presentation": "presentazione (.odp)"
+      "application/vnd.oasis.opendocument.presentation": "presentazione (.odp)",
+      "h5p": "file H5P (.h5p)"
     },
     "H5P": {
       "TITLE": "nuovi contenuti H5P",
@@ -530,6 +535,10 @@
     },
     "GEOGEBRA": {
       "NAME": "Geogebra"
+    },
+    "CURRICULUM": {
+      "NAME": "Bacheca",
+      "TITLE": "Nuova bacheca"
     }
   },
   "LICENSE": {
@@ -560,7 +569,7 @@
       "CC_SHARE_ND": "I licenziatari possono copiare, distribuire, mostrare ed eseguire solo copie letterali dell'opera, non opere derivate o remix basati su di essa.",
       "CC_SHARE_SA": "I licenziatari possono copiare, distribuire, mostrare ed eseguire l'opera e realizzare opere derivate e remix basati su di essa, a condizione che distribuiscano opere derivate solo con una licenza identica (\"non più restrittiva\") a quella che regola l'opera originale.",
       "CC_COMMERCIAL_NC": "I licenziatari possono copiare, distribuire, visualizzare ed eseguire l'opera e realizzare lavori derivati e remix basati su di essa solo per scopi non commerciali.",
-      "CC_0": "Quest'opera è dedicata al pubblico dominio.<br /> È possibile copiare, modificare, distribuire ed eseguire l'opera, anche per scopi commerciali, il tutto senza chiedere il permesso.",
+      "CC_0": "Quest’opera è di pubblico dominio.<br /> Non è necessaria alcuna attribuzione o citazione del nome. È consentito l’uso commerciale.",
       "COPYRIGHT_FREE": "L'opera è accessibile gratuitamente.<br />L'uso e l'attribuzione sono conformi alle norme di legge generalmente applicabili.",
       "COPYRIGHT_LICENSE": "L'opera può essere utilizzata solo dal gruppo di utenti autorizzato secondo le condizioni stabilite nel contratto di licenza.<br />È vietata la cessione a terzi.<br />Attribuzione secondo le pratiche generalmente applicabili.",
       "SCHULFUNK": "Offerta limitata all'accesso e al tempo per le radio scolastiche ai sensi del §47 UrhG (legge tedesca sul diritto d'autore e sui diritti connessi).<br />È vietata la trasmissione a terzi.<br />Attribuzione secondo le pratiche generalmente applicabili.",
@@ -588,6 +597,12 @@
       "CC_BY_NC_SA": "https://creativecommons.org/licenses/by-nc-sa/{{version}}/{{locale}}legalcode.de",
       "CC_0": "https://creativecommons.org/publicdomain/zero/1.0/legalcode.de",
       "PDM": "https://creativecommons.org/public-domain/pdm/"
+    },
+    "AI": {
+      "NO_USAGE_ALLOWED": "Non approvato per l'addestramento all'intelligenza artificiale.",
+      "GENERATED": "Generato dall'intelligenza artificiale",
+      "TOOL": ". Creato con {{tool}}",
+      "MODIFIED": "(è stato modificato)"
     }
   },
   "LIST": {
@@ -613,7 +628,7 @@
     "SHOW_IN_FOLDER": "Luogo di stoccaggio aperto",
     "DEBUG": "Debug",
     "INVITE": "Invito",
-    "EDIT": "Modifica info",
+    "EDIT": "Modifica informazioni",
     "EDIT_ORIGINAL": "Modifica della fonte",
     "EDIT_SIMPLE": "Modifica rapida",
     "COLLECTION_EDIT": "Modifica",
@@ -627,7 +642,6 @@
     "NODE_REPORT": "Segnala il problema",
     "ADD_NODE_STORE": "Aggiungi all'elenco dei promemoria",
     "DELETE": "Cancellare",
-    "UNPUBLISH": "Non pubblicare",
     "UNBLOCK_IMPORT": "Riattivare",
     "REMOVE_REF": "Rimuovere dalla collezione",
     "CUT": "Tagliare",
@@ -662,27 +676,31 @@
     "EMBED": "Incorporato",
     "OPEN_ORIGINAL_NODE": "Aprire l'originale",
     "COLLECTION_PROPOSAL_DECLINE": "Declinare la proposta",
-    "RELATIONS": "Gestire le relazioni"
+    "RELATIONS": "Gestire le relazioni",
+    "REVOKE": "Ritirare l'oggetto",
+    "EDIT_REVOCATION": "Modifica motivo",
+    "SELECT_ALL": "Seleziona tutto",
+    "DESELECT": "Deseleziona tutto"
   },
   "NO_SIZE": "-",
-  "VERSION_COMMENT": "Commento sulla versione",
+  "VERSION_COMMENT": "Commento versione",
   "MDS": {
     "DIFFERENT_VALUES": "(Valori diversi)",
     "HAS_CHANGES": "modificato",
-    "TITLE": "Modifica info",
+    "TITLE": "Modifica informazioni",
     "SHOW_EXTENDED": "Mostra informazioni estese",
     "SHOW_EXTENDED_SEARCH": "Mostra altri filtri",
-    "AUTHOR_LABEL": "Sull'autore",
-    "AUTHOR_FREETEXT": "Informazioni generali sull'autore",
+    "AUTHOR_LABEL": "Informazioni sul creatore/creatrice",
+    "AUTHOR_FREETEXT": "Indicazione libera creatore",
     "AUTHOR_FREETEXT_PLACEHOLDER": "Chi sono gli autori di quest'opera? Come devono essere attribuiti?",
-    "AUTHOR_PERSON": "Autore e collaboratori",
+    "AUTHOR_PERSON": "Autori/Autrici e Collaboratori/Collaboratrici",
     "AUTHOR_UNSET": "<non impostato>",
     "LICENSE": "licenza",
     "WORKFLOW": "Stato del flusso di lavoro",
     "BULK_EDIT": "Modifica",
-    "LICENSE_LINK": "gestire la licenza",
+    "LICENSE_LINK": "Gestisci licenza",
     "TEMPLATE_LINK": "Gestire il modello di metadati",
-    "CONTRIBUTOR_LINK": "Contributori aggiuntivi",
+    "CONTRIBUTOR_LINK": "Altri collaboratori/collaboratrici",
     "ERROR_INVALID_TYPE_BULK": "Gli elementi di questo tipo non possono essere modificati in blocco.",
     "ERROR_INVALID_MDS_COMBINATION": "Gli elementi con metadatasets diversi non possono essere modificati in blocco",
     "ERROR_INVALID_TYPE_COMBINATION": "Gli elementi di tipo diverso (file/cartelle) non possono essere modificati in blocco",
@@ -708,11 +726,18 @@
     "DELETE_KEY_NOTICE": "Cancellare con il tasto Canc",
     "SHOW_EXTENDED_FALSE": "nascondere le informazioni aggiuntive",
     "SUGGEST_VALUE_SEND": "suggerire",
-    "SUGGESTION_TOOLTIP": "Valore \"{{ valore }}\" suggerito da \"{{ creatore }}\".",
+    "SUGGESTION_TOOLTIP": "Valore \"{{ value }}\" suggerito da \"{{ creator }}\".",
     "NO_MATCHING_VALUES": "Nessun valore corrispondente",
     "ERROR_PREVIEW": "Non è stato possibile sostituire l'immagine di anteprima. Provare con un altro file immagine",
     "SUGGEST_VALUE_SENT": "Il suggerimento è stato inviato ed è in fase di revisione da parte della redazione. Il suggerimento apparirà solo quando sarà stato attivato dalla redazione. Grazie!",
-    "SUGGEST_VALUE_LABEL": "Suggerisci un nuovo valore"
+    "SUGGEST_VALUE_LABEL": "Suggerisci un nuovo valore",
+    "SUGGESTIONS": {
+      "LIST_TITLE": "Suggerimenti per questo campo",
+      "TYPE_AI": "IA",
+      "TYPE_USER": "persona",
+      "APPLY": "Accettare",
+      "DECLINE": "Rifiutare"
+    }
   },
   "SIMPLE_EDIT": {
     "TITLE": "Modifica rapida",
@@ -789,7 +814,8 @@
     "PASSWORD_PLACEHOLDER": "Inserire la password ...",
     "PASSWORD_CORRECT": "Password corretta",
     "SUBELEMENT_SINGLE": "contiene 1 altro elemento",
-    "SUBELEMENT_MULTI": "contiene {{count}} più elementi"
+    "SUBELEMENT_MULTI": "contiene {{count}} più elementi",
+    "EMPTY_FOLDER": "La cartella condivisa non contiene ancora alcun file."
   },
   "VIDEO_CONTROLS": {
     "HEADING": "Selezionare una clip da salvare in una raccolta",
@@ -802,13 +828,14 @@
     "API_FORBIDDEN": "Nessun permesso per accedere a questo contenuto",
     "API_FORBIDDEN_LOGIN": "Effettuare il login per accedere a questa sezione",
     "NO_CONNECTION": "Connessione internet instabile, il contenuto non può essere caricato. Riprovare più tardi",
-    "DOWNLOAD_STARTED": "È iniziato il download di \"{{nome}}\".",
-    "DOWNLOAD_FINISHED_ANDROID": "Download di \"{{nome}}\" completato.\nL'elemento si trova nella cartella dei download del dispositivo.",
-    "DOWNLOAD_FINISHED_IOS": "Download di \"{{nome}}\" completato.\nÈ possibile trovare l'elemento nell'app dei file",
-    "DOWNLOAD_FAILED": "Il download di \"{{nome}}\" non è riuscito.\nControllare la connessione a Internet e riprovare",
+    "DOWNLOAD_STARTED": "È iniziato il download di \"{{name}}\".",
+    "DOWNLOAD_FINISHED_ANDROID": "Download di \"{{name}}\" completato.\nL'elemento si trova nella cartella dei download del dispositivo.",
+    "DOWNLOAD_FINISHED_IOS": "Download di \"{{name}}\" completato.\nÈ possibile trovare l'elemento nell'app dei file",
+    "DOWNLOAD_FAILED": "Il download di \"{{name}}\" non è riuscito.\nControllare la connessione a Internet e riprovare",
     "DOWNLOAD_TRY_AGAIN": "Riprova",
-    "STORAGE_LOCATION_SAVED": "La cartella \"{{nome}}\" sarà utilizzata di default per i caricamenti in futuro.",
-    "STORAGE_LOCATION_RESET": "La cartella predefinita per i caricamenti è stata ripristinata"
+    "STORAGE_LOCATION_SAVED": "La cartella \"{{name}}\" sarà utilizzata di default per i caricamenti in futuro.",
+    "STORAGE_LOCATION_RESET": "La cartella predefinita per i caricamenti è stata ripristinata",
+    "OPTION_DISABLED_OR_UNAVAILABLE": "Purtroppo l'azione richiesta non è disponibile."
   },
   "VCARD": {
     "Givenname": "Nome",
@@ -847,7 +874,7 @@
     "REQUIRED": "campi obbligatori",
     "REQUIREDPUBLISH": "per la pubblicazione dei campi obbligatori",
     "SHOW": "mostra",
-    "MESSAGE": "campi riempiti"
+    "MESSAGE": "campi compilati"
   },
   "SIGNUP_GROUP": {
     "TITLE": "Iscriversi al gruppo",
@@ -874,7 +901,8 @@
       "AlreadyMember": "L'utente è già membro del gruppo selezionato.",
       "ADDED_TO_LIST": "Siete stati inseriti nella lista d'attesa e l'amministratore del gruppo ne sarà informato. Riceverete una notifica via e-mail quando sarete stati approvati.",
       "ADDED_TO_GROUP": "Ora sei un membro del gruppo {{group}}."
-    }
+    },
+    "SEARCH": "Sfoglia l'elenco dei gruppi"
   },
   "KEY_MODIFIER": {
     "SHIFT": "MAIUSCOLO",
@@ -1156,20 +1184,20 @@
     "youtube": "YouTube",
     "zum": "ZUM Wiki"
   },
-  "MONTHS_AGO": "{{ mesi }}} mese/i fa",
-  "YEARS_AGO": "{anni }} anno/i fa",
+  "MONTHS_AGO": "{{ months }}} mese/i fa",
+  "YEARS_AGO": "{{ years }} anno/i fa",
   "STORAGE_LOCATION_SAVE": "Utilizzare questa posizione come predefinita in futuro",
   "SEARCH_CLEAR": "Libero",
   "TOGGLE_SEARCH_FILTERS": "Mostrare o nascondere i filtri di ricerca",
   "PAGINATOR": {
-    "getRangeLabel": "Pagina {{pagina}} di {{paginaCount}}",
+    "getRangeLabel": "Pagina {{page}} di {{pageCount}}",
     "itemsPerPageLabel": "Voci per pagina:",
     "nextPageLabel": "Pagina successiva",
     "previousPageLabel": "Pagina precedente"
   },
   "PUBLISHED_COPY_TOOLTIP": "Copia pubblicata",
   "CHILDOBJECT_COUNT": "{{count}} elementi (sequenza)",
-  "OPTIONS_FOR": "Azioni per {{elemento}}",
+  "OPTIONS_FOR": "Azioni per {{element}}",
   "NO_AVAILABLE_OPTIONS": "Non sono disponibili azioni per gli elementi selezionati",
   "NODE_SEARCH_SELECTOR": {
     "MORE_FILTERS": "Filtri di ricerca estesi",
@@ -1198,13 +1226,13 @@
   },
   "RATING": {
     "TOAST": {
-      "LIKE_REMOVED": "Raccomandazione per il materiale \"{{nome}}\" rimossa",
-      "RATING_REMOVED": "Valutazione del materiale \"{{nome}}\" rimossa",
-      "RATED": "Il materiale \"{{nome}}\" è stato valutato {{valutazione}}. Grazie!",
-      "LIKED": "Materiale \"{{nome}}\" consigliato. Grazie!"
+      "LIKE_REMOVED": "Raccomandazione per il materiale \"{{name}}\" rimossa",
+      "RATING_REMOVED": "Valutazione del materiale \"{{name}}\" rimossa",
+      "RATED": "Il materiale \"{{name}}\" è stato valutato {{rating}}. Grazie!",
+      "LIKED": "Materiale \"{{name}}\" consigliato. Grazie!"
     },
     "COUNT_RATINGS": "Numero di recensioni",
-    "STARS_RATE": "Valutare con {{valutazione}}",
+    "STARS_RATE": "Valutare con {{rating}}",
     "LIKES": "Raccomandare",
     "COUNT_LIKES": "Numero di raccomandazioni",
     "DELETE_RATING": "Rimuovere la recensione"
@@ -1219,13 +1247,13 @@
     "EMPTY_UNREAD": "Non ci sono notifiche non lette",
     "EMPTY_ALL": "Nessuna notifica",
     "DESCRIPTIONS": {
-      "AddToCollectionEvent": "Il {{creatore}} ha aggiunto il materiale \"{{titolo}}\" alla collezione {{collection}}.",
-      "ProposeForCollectionEvent": "Il {{creatore}} ha proposto il materiale \"{{titolo}}\" per la collezione {{collection}}.",
-      "CommentEvent": "Il {{creatore}} ha scritto un commento sul materiale \"{{titolo}}\".",
-      "InviteEvent": "Il {{creatore}} ha rilasciato all'utente l'oggetto \"{{titolo}}\".",
-      "NodeIssueEvent": "Il {{creatore}} ha segnalato il problema \"{{ragione}}\" sul materiale \"{{titolo}}\".",
-      "RatingEvent": "È stata assegnata una valutazione al materiale \"{{titolo}}\".",
-      "WorkflowEvent": "Il {{creatore}} ha modificato lo stato del flusso di lavoro del materiale \"{{titolo}}\" in \"{{workflowStatus}}\".",
+      "AddToCollectionEvent": "Il {{creator}} ha aggiunto il materiale \"{{title}}\" alla collezione {{collection}}.",
+      "ProposeForCollectionEvent": "Il {{creator}} ha proposto il materiale \"{{title}}\" per la collezione {{collection}}.",
+      "CommentEvent": "Il {{creator}} ha scritto un commento sul materiale \"{{title}}\".",
+      "InviteEvent": "Il {{creator}} ha rilasciato all'utente l'oggetto \"{{title}}\".",
+      "NodeIssueEvent": "Il {{creator}} ha segnalato il problema \"{{reason}}\" sul materiale \"{{title}}\".",
+      "RatingEvent": "È stata assegnata una valutazione al materiale \"{{title}}\".",
+      "WorkflowEvent": "Il {{creator}} ha modificato lo stato del flusso di lavoro del materiale \"{{title}}\" in \"{{workflowStatus}}\".",
       "MetadataSuggestionEvent": ""
     }
   },
@@ -1244,7 +1272,7 @@
     "TITLE": "Dare un feedback sul materiale",
     "VIEW_TITLE": "Feedback sul materiale",
     "VIEW_EMPTY": "Non è stato ancora fornito alcun feedback sul materiale",
-    "CREATOR": "Autore {{creatore}}",
+    "CREATOR": "Autore {{creator}}",
     "SAVE": "Inviare",
     "TOAST": "Feedback inviato. Grazie!"
   },
@@ -1268,7 +1296,7 @@
     "COPIED_TO_CLIPBOARD_NOTICE": "Il codice embed è stato copiato negli appunti."
   },
   "NODE_INFO": {
-    "TITLE": "Nodo \"{{nome}}\"",
+    "TITLE": "Nodo \"{{name}}\"",
     "LOCATION": "Percorso dell'articolo",
     "NODE_ASPECTS": "Aspetti",
     "NODE_PROPERTIES": "Proprietà",
@@ -1283,7 +1311,9 @@
     "CHILDREN": "I bambini",
     "CHILDREN_NONE": "Questo elemento non ha oggetti figli",
     "CUSTOM_PROPERTY_NAME": "Inserire il nome della proprietà personalizzata",
-    "CUSTOM_PROPERTY_VALUE": "Inserire il valore della proprietà personalizzata"
+    "CUSTOM_PROPERTY_VALUE": "Inserire il valore della proprietà personalizzata",
+    "CONTEXT_ACTIONS": "Azioni per questo tipo di elemento.",
+    "ALL_ACTIONS": "Tutte le azioni (potrebbero non essere compatibili con questo tipo!)"
   },
   "NOTIFICATION": {
     "MENU": "Notifiche",
@@ -1372,6 +1402,31 @@
       "isPartOf": "fa parte di (isPartOf)",
       "isBasedOn": "è basato su (isBasedOn)",
       "references": "si riferisce a (riferimenti)"
+    },
+    "NOT_SUPPORTED_REMOTELY": "Le relazioni tra elementi esterni non sono attualmente supportate."
+  },
+  "MAPTYPE": {
+    "IMAGES": "Immagini",
+    "USERDATAFOLDER": "Documenti",
+    "INBOX": "Posta in arrivo"
+  },
+  "REVOKE_FEEDBACK": {
+    "TITLE": "Contatta la redazione",
+    "REPORT_INFO": "Contatta la redazione in merito a \"{{name}}\"",
+    "COMMENT": "Fornire feedback, ad esempio, sull'uso o l'applicazione di questo materiale.",
+    "COMMENT_REQUIRED": "Inserisci un commento/dettagli.",
+    "COMMENT_PLACEHOLDER": "Inserisci i dettagli...",
+    "DONE": "Grazie per il tuo feedback.",
+    "EMAIL": "Il tuo indirizzo di posta elettronica",
+    "EMAIL_PLACEHOLDER": "qualcuno@example.it",
+    "EMAIL_REQUIRED": "Si prega di inserire un indirizzo email valido."
+  },
+  "RENDERING": {
+    "REVOKED": {
+      "DETAILS": "L'editore/redazione ha ritirato questo articolo. Sono ancora disponibili solo i metadati dell'articolo originale. Ulteriori dettagli sono disponibili nella spiegazione seguente.",
+      "DATE": "Data di cancellazione",
+      "REASON": "Motivo dell'eliminazione",
+      "FEEDBACK": "Contatta la redazione"
     }
   }
 }

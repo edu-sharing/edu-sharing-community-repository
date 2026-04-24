@@ -129,4 +129,6 @@ public interface AuthorityService {
 	boolean validate2Fa(String username, int code);
 
 	QRCode2Fa generate2FaQRCode(String username);
+
+    void inValidateTickets(String user);
 }

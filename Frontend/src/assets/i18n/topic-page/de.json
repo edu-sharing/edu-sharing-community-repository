@@ -132,6 +132,10 @@
         "CHANGES_SAVED": "Profil gespeichert – jetzt bekommst du passende Inhalte angezeigt!",
         "CHANGES_RESET": "Deine Profilierung wurde zurückgesetzt."
       },
+      "SEARCH_WIDGET": {
+        "SEARCH": "Suche",
+        "SEARCH_PLACEHOLDER": "Suche nach Inhalten auf der Themenseite ..."
+      },
       "SHARE_OPTIONS": {
         "COPY_LINK": "Link kopieren",
         "COPY_LINK_TO_CONTENT": "Link zum Inhalt kopieren",
@@ -346,7 +350,7 @@
       "VARIANT_OR_STRUCTURE_MISSING": "Es konnte entweder keine Seiten-Variante oder keine Struktur darin gefunden werden.",
       "MISSING_IN_PAGE_CONFIG": "Die Seiten-Konfiguration enthält keine Varianten."
     },
-    "NO_SEARCH_RESULTS": "Es konnen keine Suche-Ergebnisse in den Abschnitten gefunden werden.",
+    "NO_SEARCH_RESULTS": "Es konnten keine Suche-Ergebnisse in den Abschnitten gefunden werden.",
     "SAVE_CONFIG_MESSAGE": "Deine Änderungen werden gespeichert.",
     "SAVE_CONFIG_ERROR_ACTION": "Seite neuladen",
     "SAVE_CONFIG_ERROR_MESSAGE": "Beim Laden einer Ressource ist ein Fehler aufgetreten. Bitte laden Sie die Seite neu.",

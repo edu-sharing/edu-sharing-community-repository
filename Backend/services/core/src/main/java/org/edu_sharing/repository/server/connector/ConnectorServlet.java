@@ -210,7 +210,8 @@ public class ConnectorServlet extends SpringHttpServlet {
             }catch(Throwable t){}
             jsonObject.put("ticket", req.getSession().getAttribute(CCConstants.AUTH_TICKET));
 			jsonObject.put("api_url",homeRepo.getClientBaseUrl() + "/rest");
-			
+			jsonObject.put("appid",homeRepo.getAppId());
+
 			if(req.getSession().getAttribute(CCConstants.AUTH_SCOPE)==null){
 				ApplicationContext eduApplicationContext = org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
 				TokenService tokenService = (TokenService) eduApplicationContext.getBean("oauthTokenService");

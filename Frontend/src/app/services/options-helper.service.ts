@@ -1675,7 +1675,16 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         const downloadNode = new OptionItem(
             'OPTIONS.DOWNLOAD' + (safe ? '_SAFE' : ''),
             'cloud_download',
-            (object) => this.nodeHelper.downloadNodes(this.getObjects(object, data)),
+            (object) => {
+                if (data.customDownloadUrl) {
+                    this.nodeHelper.downloadUrl(data.customDownloadUrl, 'download', {
+                        node: this.getObjects(object, data)?.[0],
+                        triggerTrackingEvent: true,
+                    });
+                    return;
+                }
+                this.nodeHelper.downloadNodes(this.getObjects(object, data));
+            },
         );
         downloadNode.elementType = OptionsHelperService.DownloadElementTypes;
         downloadNode.constrains = [Constrain.Files];
@@ -1684,6 +1693,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         downloadNode.priority = 40;
         downloadNode.customShowCallback = async (nodes) => {
             return (
+                !!data.customDownloadUrl ||
                 nodes.some((n) =>
                     n.properties?.[RestConstants.CCM_PROP_EDUSCOPENAME]?.includes(
                         RestConstants.SAFE_SCOPE,

@@ -92,7 +92,13 @@
       "MEDIA_CENTER": "centre de médias",
       "MEDIA_CENTER_PROXY": "groupe proxy (centre de médias)",
       "MEDIACENTER_ADMINISTRATORS": "administrateur-trices (centre de médias)",
-      "ORG_ADMINISTRATORS": "administrateur-trices"
+      "ORG_ADMINISTRATORS": "administrateur-trices",
+      "CLASS": "Classe",
+      "WORKING_GROUP": "Groupe de travail",
+      "LESSON": "Instruction",
+      "SCHOOL_NATIONAL": "École publique",
+      "SCHOOL_MUNICIPAL": "École municipale",
+      "SCHOOL_PRIVATE": "École privée"
     },
     "SCOPE_TYPE": {
       "null": "Visibilité locale / par défaut",
@@ -173,7 +179,7 @@
         "FOLDER_STRUCTURE_CAPTION": "Structure des dossiers du répertoire..."
       },
       "SHARED_FOLDERS": {
-        "CAPTION": "Fichiers et dossiers de l'utilisateur-trice dans les répertoires partagés et tiers",
+        "CAPTION": "Fichiers et dossiers utilisateur dans les répertoires partagés et externes",
         "FOLDERS_CAPTION": "Dossiers",
         "PRIVATE_FILES_CAPTION": "Fichiers avec ou sans licence ouverte",
         "CC_FILES_CAPTION": "Fichiers sous licence ouverte (CC)"
@@ -237,6 +243,25 @@
       "simple_DETAILS": "Les utilisateurs peuvent s'inscrire indépendamment dans l'organisation/le groupe et devenir immédiatement membres.",
       "password_DETAILS": "Les utilisateur-trices peuvent s'inscrire dans l'organisation/le groupe indépendamment et devenir membres immédiatement s'ils connaissent le bon mot de passe.",
       "list_DETAILS": "Les utilisateur-trices peuvent s'inscrire eux-mêmes dans l'organisation/le groupe et sont placés sur une liste d'attente. Un-e administrateur-trice doit ensuite confirmer l'inscription."
+    },
+    "MENU_RESET_PASSWORD": "Réinitialiser le mot de passe",
+    "USER_QUOTA_HINT": "Si aucune valeur n'est définie, il n'y a aucune restriction.",
+    "NEW_PASSWORD": "Nouveau mot de passe",
+    "ERROR_PASSWORD_TO_WEAK": "Le mot de passe choisi n'est pas suffisamment sécurisé.",
+    "ERROR_PASSWORD_POLICY_NOT_MATCHED": "Le mot de passe choisi ne respecte pas la politique de mot de passe définie (Détails : {{cause}})",
+    "TOAST_PASSWORD_RESET": "Le mot de passe a été réinitialisé.",
+    "EXCLUDE": {
+      "TITLE": "Exclure la personne de l'organisation",
+      "DESCRIPTION": "En excluant un utilisateur, celui-ci perd l'accès au dossier de l'organisation dans \"Contenu partagé\" et à tous les contenus partagés avec cette organisation. Les partages qui lui ont été explicitement accordés restent accessibles. En mode \"Attribuer du contenu à une autre personne\", tout le contenu créé par cet utilisateur dans le dossier de l'organisation est attribué à une autre personne disposant de tous les droits.",
+      "MODE_LABEL": "Mode pour les éléments de la personne",
+      "MODE": {
+        "NONE": "Ne modifiez pas les éléments",
+        "ASSIGN": "Attribuer du contenu à une autre personne"
+      },
+      "ASSIGN_USER": "Récepteurs des éléments",
+      "ASSIGN_USER_PLACEHOLDER": "Recherche de personne...",
+      "ERROR_MISSING_RECEIVER": "Veuillez indiquer un destinataire.",
+      "ASSIGN_USER_NOT_ORG_MEMBER": "La personne sélectionnée \"{{user}}\" n'est pas membre de l'organisation \"{{org}}\". Veuillez bien réfléchir avant de la désigner comme destinataire."
     }
   }
 }

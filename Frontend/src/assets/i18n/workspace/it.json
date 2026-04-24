@@ -103,8 +103,8 @@
       "USAGES": "Usato e condiviso in:",
       "USAGE_INFO": "{{instance}}: Usato in {{type}} {{name}}",
       "USAGE_INDIRECT": "Questa autorizzazione è generata da un riferimento alla collezione e non può essere rimossa.",
-      "DELETE": "cancellare {{entità}}",
-      "DO_NOT_DELETE": "non cancellare {{entità}}",
+      "DELETE": "cancellare {{entity}}",
+      "DO_NOT_DELETE": "non cancellare {{entity}}",
       "DELETED": "Fare clic su \"APPLICA\" per rimuovere l'oggetto.",
       "TYPE_MENU_LABEL": "Scegliere il ruolo di {{user}}",
       "TYPE_MENU_LABEL_NEW": "Scegliere il ruolo per le persone e i gruppi aggiunti",
@@ -190,7 +190,7 @@
         "MODE_COPY": "Pubblicare come copia",
         "MODE_COPY_INFO": "Viene creata una copia dell'elemento. Questa verrà archiviata nell'area centrale dei contenuti pubblicati e resa disponibile al pubblico.\nLe modifiche o la cancellazione dell'originale non hanno alcuna influenza sulla copia pubblicata.\nSolo il team editoriale può controllare successivamente la pubblicazione. È possibile pubblicare più versioni contemporaneamente.",
         "NO_PUBLISH_COPY_PERMISSION": "Non avete il permesso di pubblicare una copia.",
-        "VERSION_COMMENT": "Commento sulla versione",
+        "VERSION_COMMENT": "Commento versione",
         "VERSION_NUMBER": "Numero di versione",
         "VERSION_DATE": "Data di pubblicazione",
         "VERSION_DATE_ABSOLUTE": "Pubblicizzato",
@@ -199,7 +199,10 @@
         "DOI_UPDATE": "Aggiornare la maniglia esistente",
         "DOI_UPDATE_INFO": "La nuova versione dell'elemento sarà resa disponibile in futuro con il vecchio indirizzo handle esistente. La versione precedentemente pubblicata non è più direttamente accessibile tramite l'indirizzo handle.",
         "LICENSE_REQUIRED": "Per pubblicare il materiale è necessario definire prima una licenza",
-        "AUTHOR_REQUIRED": "Per poter pubblicare il materiale è necessario definire prima l'autore"
+        "AUTHOR_REQUIRED": "Per poter pubblicare il materiale è necessario definire prima l'autore",
+        "PUBLISH_RESTRICTED_ACCESS": "Questo materiale è stato designato come concesso in licenza. Renderlo disponibile al pubblico non imporrebbe alcuna restrizione ai sensi della licenza, poiché chiunque sarebbe autorizzato ad accedervi.",
+        "UPDATE_LAST_NON_REVOKED": "L'aggiornamento dei metadati interesserà l'ultima versione non ritirata. Consulta l'elenco qui sotto.",
+        "REVOKED": "Questa pubblicazione è stata ritirata."
       },
       "STATE": {
         "PRIVATE": "Privato",
@@ -232,7 +235,18 @@
         "REPLACE_DESCRIPTION": "Le autorizzazioni selezionate sostituiranno le autorizzazioni esistenti degli utenti/gruppi."
       },
       "DOI_MISSING_ATTRIBUTE": "Per pubblicare questo materiale come DOI è necessario il seguente campo: {{key}}",
-      "DOI_METADATA": "Metadati aperti"
+      "DOI_METADATA": "Metadati aperti",
+      "TIMEBASED": {
+        "TOOLTIP": "Configurare le autorizzazioni basate sul tempo",
+        "INVALID_STATE": "Questa autorizzazione limitata nel tempo viene sovrascritta da un'altra autorizzazione permanente e non ha alcun effetto.",
+        "INVALID_STATE_TITLE": "Impostazioni non valide rilevate",
+        "INVALID_STATE_DETAILS": "Ci sono autorizzazioni a tempo limitato che saranno sostituite da autorizzazioni permanenti. Modificare il livello di autorizzazione dell'autorizzazione a tempo limitato o eliminarla in modo che i valori possano essere salvati.",
+        "FROM_CHECKBOX": "Imposta l'ora di inizio",
+        "TO_CHECKBOX": "Imposta un orario di fine",
+        "DATE_LABEL": "Data",
+        "TIME_LABEL": "tempo",
+        "INVALID_DATE": "Data non valida"
+      }
     },
     "INHERIT_DISABLED": "L'ereditarietà è attualmente disabilitata",
     "INHERIT_ACCESS_DENIED": "I diritti ereditati non possono essere mostrati perché non si ha accesso all'elemento genitore.",
@@ -283,7 +297,8 @@
         "BULK_MIGRATION": "Fase di migrazione per la conversione delle importazioni oai in importazioni etl/bulk",
         "REMOTE_OBJECT_INIT": "Oggetto importato dalla fonte di ricerca federata",
         "IMPORT_BLOCKED": "Stato modificato del blocco delle importazioni"
-      }
+      },
+      "STATISTICS_START": "Inizio del conteggio: "
     },
     "LTI_V13_PLATFORM": {
       "NODE": {
@@ -302,11 +317,11 @@
       "AUTHOR_LAST": "Cognome",
       "KEYWORDS": "Aggiungi parole chiave",
       "HINT_FILTER": "Inserire il termine per filtrare i valori",
-      "HINT_ENTER": "Premere Invio per aggiungere una voce",
+      "HINT_ENTER": "Conferma le voci con Invio",
       "AS_VERSION": "come Versione",
       "VERSION": "Versione",
       "VERSION_COMMENT": "Aggiungi un commento sulla versione",
-      "REPLACE_MATERIAL": "Sostituire il materiale",
+      "REPLACE_MATERIAL": "Sostituisci materiale",
       "REPLACE_PREVIEW": "Sostituire l'anteprima",
       "DELETE_PREVIEW": "Cancellare l'anteprima",
       "UPDATED": "Informazioni aggiornate",
@@ -335,7 +350,8 @@
       "LINK_INFO_FOLDER": "Chiunque abbia accesso a questo link può scaricare tutti i contenuti di questa cartella. Non è possibile accedere alle sottocartelle.",
       "LINK_DOWNLOADS": "Numero di download: {{ count }}",
       "COPIED_CLIPBOARD": "Link copiato negli appunti",
-      "COPIED_CLIPBOARD_ERROR": "Impossibile copiare il link. Contrassegnare e copiare manualmente"
+      "COPIED_CLIPBOARD_ERROR": "Impossibile copiare il link. Contrassegnare e copiare manualmente",
+      "PASSWORD_EDIT_HINT": "Inserendo queste informazioni nel campo verrà impostata una nuova password."
     },
     "WORKFLOW": {
       "TITLE": "flusso di lavoro",
@@ -356,7 +372,7 @@
       "PROCEED": "Sì, concedere le autorizzazioni",
       "BULK_WORKFLOWS_EXIST": "Alcuni dei documenti selezionati hanno già un flusso di lavoro attivo. Si prega di modificare questi documenti separatamente.",
       "INFO_MESSAGE": "Si prega di notare che la persona/il gruppo prescelto dovrà ottenere l'accesso completo a questo materiale nel processo, al fine di modificare e aggiornare il materiale e il flusso di lavoro.",
-      "SAVE": "Risparmiare"
+      "SAVE": "salva"
     },
     "CONTRIBUTOR": {
       "TITLE": "Contributori del set",
@@ -418,15 +434,15 @@
       "ONLY_OER": "Solo licenze OER",
       "OER": "OER",
       "NOT_OER": "nessun OER",
-      "CURRENT": "licenza attualmente selezionata",
+      "CURRENT": "Licenza attualmente selezionata",
       "VERSION": "versione",
       "LOCALE": "locale",
       "CUSTOM_RIGHTS": "GNU GPL o altre licenze...",
       "RELEASE": "Rilascio di oggetti sotto questa licenza",
       "RELEASE_MULTI": "Rilasciare {{count}} oggetti sotto questa licenza",
       "CONTACT": "Altri utenti possono contattarmi per ulteriori trattative di licenza.",
-      "CHECKBOX_AUTHOR": "Sono l'autore del materiale",
-      "MORE": "Ulteriori informazioni",
+      "CHECKBOX_AUTHOR": "Sono autore/autrice del materiale",
+      "MORE": "Maggiori informazioni",
       "MIXED_AUTHORS": "Contribuenti diversi",
       "MIXED_AUTHORS_INFO": "Gli elementi scelti hanno dati di contribuzione diversi. Per modificarli in modalità bulk è necessario sovrascriverli.\nScegliere \"Modifica\" se si desidera farlo.",
       "MIXED_AUTHORS_EDIT": "Modifica",
@@ -445,7 +461,7 @@
         "NAME_AUTHOR": "Informazioni di riferimento",
         "TITLE_OF_WORK": "Titolo del lavoro",
         "SOURCE_URL": "URL in cui è ospitata l'opera originale",
-        "PROFILE_URL": "link al profilo o alla homepage dell'autore",
+        "PROFILE_URL": "Link zum Profil des/der Autors{{GENDER_SEPARATOR}}in oder Homepage",
         "SHARE": "Consentire la modifica del proprio lavoro?",
         "SHARE_INFO": "Permette di condividere gli adattamenti delle sue opere?",
         "COMMERCIAL": "Consentire l'uso commerciale del proprio lavoro?",
@@ -457,6 +473,20 @@
         "CC0_INFO": "Sono l'unico detentore dei diritti d'autore di questo oggetto e scelgo di dedicare l'opera al pubblico dominio rinunciando a tutti i miei diritti sull'opera in tutto il mondo ai sensi della legge sul diritto d'autore, compresi tutti i diritti connessi e limitrofi, nella misura consentita dalla legge.",
         "PDM": "Marchio di pubblico dominio",
         "PDM_INFO": "Questo oggetto è privo di restrizioni note coperte dalla legge sul copyright."
+      },
+      "AI": {
+        "TITLE": "Informazioni sull'origine e l'uso dell'IA",
+        "USE_FOR_TRAINING": "Adatto per l'allenamento",
+        "USE_FOR_TRAINING_INFO": "Questo elemento può essere utilizzato per addestrare reti di intelligenza artificiale (in genere, a meno che non sia esplicitamente escluso).",
+        "GENERATED": "Generato dall'IA",
+        "GENERATED_INFO": "Questo elemento è stato generato utilizzando l'intelligenza artificiale.",
+        "TOOL": "Attrezzo",
+        "TOOL_INFO": "Quale strumento/modello è stato utilizzato per la generazione?",
+        "TOOL_CUSTOM": "Un altro strumento",
+        "TOOL_CUSTOM_NAME": "Nome dello strumento",
+        "TOOL_NO_INFO": "Nessuna informazione / Sconosciuto",
+        "MANUALLY_MODIFIED": "È stato modificato",
+        "MANUALLY_MODIFIED_INFO": "L'elemento è stato modificato manualmente o in misura rilevante dopo la generazione."
       }
     },
     "FILE_CHOOSER": {
@@ -518,6 +548,33 @@
       "DELETE_CONFIG": "Cancellare la configurazione",
       "DELETE_CONFIG_TITLE": "Cancellare la configurazione?",
       "DELETE_CONFIG_MESSAGE": "Si è sicuri di voler eliminare la configurazione dello strumento selezionata?\nGli oggetti già creati con questa configurazione non saranno più validi."
+    },
+    "COLLECTION_HOME": "Livello principale",
+    "UPLOAD_EXISTS": {
+      "TITLE": "Elementi esistenti",
+      "SINGLE": "L'elemento \"{{fileName}}\" esiste già in questa posizione. Vuoi sostituire l'elemento esistente o mantenerli entrambi?",
+      "MULTIPLE": "Esiste già almeno un elemento con lo stesso nome. Vuoi sostituire gli elementi esistenti o mantenerli tutti?",
+      "SINGLE_OVERWRITE": "Sostituisci elemento esistente",
+      "SINGLE_KEEP": "Entrambi gli elementi mantengono",
+      "MULTIPLE_OVERWRITE": "Sostituisci gli elementi esistenti",
+      "MULTIPLE_KEEP": "Tutti gli elementi mantengono",
+      "UPLOAD": "Caricamento"
+    },
+    "REVOCATION": {
+      "TITLE": "Ritirare la pubblicazione",
+      "REASON": "Fornisci una ragione",
+      "REVOKE": "Ritirare l'oggetto",
+      "DETAILS": "Questa operazione rimuoverà la pubblicazione di questo elemento. Rimarrà solo una pagina di notifica con i metadati. Se l'elemento contiene elementi di serie, anche questi verranno rimossi. Si prega di notare che questa azione non può essere annullata."
+    },
+    "SAFE_CONFIRM_DOWNLOAD_TITLE": "Avviso",
+    "SAFE_CONFIRM_DOWNLOAD_CHECKBOX": "Non visualizzare più in questa sessione",
+    "SAFE_CONFIRM_DOWNLOAD_MESSAGE": "Si prega di notare che i file archiviati localmente devono essere eliminati dalla cassaforte dati. Si consiglia inoltre di disattivare la sincronizzazione con i propri servizi cloud.",
+    "COPY_MOVE": {
+      "TITLE": "Sposta/copia elemento/i",
+      "MESSAGE_SINGLE": "Vuoi spostare/copiare l'elemento \"{{element}}\" da \"{{source}}\" a \"{{target}}\"?",
+      "MESSAGE_MULTIPLE": "Vuoi spostare/copiare {{count}} elementi da \"{{source}}\" a \"{{target}}\"?",
+      "MOVE": "Spostamento",
+      "COPY": "Copia"
     }
   }
 }

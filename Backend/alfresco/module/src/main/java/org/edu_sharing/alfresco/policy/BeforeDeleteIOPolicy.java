@@ -101,7 +101,8 @@ public class BeforeDeleteIOPolicy implements BeforeDeleteNodePolicy {
 					new UsageTool().removeUsage(ApplicationInfoList.getHomeRepository().getAppId(),
 							nodeService.getPrimaryParent(nodeRef).getParentRef().getId(),
 							originalId,
-							nodeRef.getId()
+							nodeRef.getId(),
+							true
 					);
 				}
 				return null;

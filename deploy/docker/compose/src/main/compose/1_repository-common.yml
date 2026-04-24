@@ -75,7 +75,6 @@ services:
       VIRTUAL_PORT: 8080
       VIRTUAL_DEST: /edu-sharing/
       VIRTUAL_PATH: "${REPOSITORY_SERVICE_PATH:-/edu-sharing}/"
-      ALLOW_EMPTY_PASSWORD: "yes"
       CACHE_CLUSTER: "false"
       CACHE_DATABASE: "0"
       CACHE_HOST: redis-cache
@@ -132,7 +131,6 @@ services:
       REPOSITORY_SERVICE_MAIL_SERVER_SMTP_USERNAME: "${REPOSITORY_SERVICE_MAIL_SERVER_SMTP_USERNAME:-}"
       REPOSITORY_SERVICE_MAIL_SERVER_SMTP_PASSWORD: "${REPOSITORY_SERVICE_MAIL_SERVER_SMTP_PASSWORD:-}"
       REPOSITORY_SERVICE_MAIL_SERVER_SMTP_AUTHTYPE: "${REPOSITORY_SERVICE_MAIL_SERVER_SMTP_AUTHTYPE:-}"
-      REPOSITORY_SERVICE_ALFRESCO_SHARE_ENABLED: "${REPOSITORY_SERVICE_ALFRESCO_SHARE_ENABLED:-false}"
       REPOSITORY_SERVICE_PATH_EXTERNAL: "${REPOSITORY_SERVICE_PATH:-/edu-sharing}"
       REPOSITORY_SERVICE_PORT_EXTERNAL: "${REPOSITORY_SERVICE_PORT:-8100}"
       REPOSITORY_SERVICE_PROT_EXTERNAL: "${REPOSITORY_SERVICE_PROT:-http}"
@@ -148,13 +146,13 @@ services:
       REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PROXYPORT: "${PROXY_PORT:-}"
       REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PROXYUSER: "${PROXY_USER:-}"
       REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PROXYPASS: "${PROXY_PASS:-}"
+      REPOSITORY_SERVICE_REQUEST_HEADER_SIZE: "${REPOSITORY_SERVICE_REQUEST_HEADER_SIZE:-8192}"
       REPOSITORY_TRANSFORM_HOST: repository-transform
       REPOSITORY_TRANSFORM_PORT: "8100"
       REPOSITORY_TRANSFORM_AIO_HOST: repository-transform-core-aio
       REPOSITORY_TRANSFORM_AIO_PORT: "8090"
       REPOSITORY_TRANSFORM_ES_HOST: repository-transform-edu-sharing
       REPOSITORY_TRANSFORM_ES_PORT: "8091"
-      TOMCAT_INSTALL_DEFAULT_WEBAPPS: "no"
     expose:
       - "7199"
       - "8080"
@@ -163,8 +161,8 @@ services:
       - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_SERVICE_PORT_AJP:-8102}:8009"
       - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_SERVICE_PORT_HTTP:-8100}:8081"
     volumes:
-      - "repository-service-volume-config-cluster:/opt/bitnami/tomcat/shared/classes/config/cluster"
-      - "repository-service-volume-config-node:/opt/bitnami/tomcat/shared/classes/config/node"
+      - "repository-service-volume-config-cluster:/usr/local/tomcat/shared/classes/config/cluster"
+      - "repository-service-volume-config-node:/usr/local/tomcat/shared/classes/config/node"
       - "repository-service-volume-data:/opt/alfresco/alf_data"
       - "repository-service-volume-safe:/opt/alfresco/alf_safe"
     depends_on:

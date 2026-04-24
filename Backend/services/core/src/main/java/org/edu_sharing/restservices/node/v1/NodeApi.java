@@ -15,17 +15,19 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.tika.utils.StringUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.NodeRefVersion;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LRMITool;
 import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
@@ -62,9 +64,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Path("/node/v1")
 @Tag(name = "NODE v1")
 @ApiService(value = "NODE", major = 1, minor = 0)
@@ -449,8 +453,9 @@ public class NodeApi {
         try {
             RepoProxy.RemoteRepoDetails remote = RepoProxyFactory.getRepoProxy().myTurn(repository, node);
             if (remote != null) {
-                return RepoProxyFactory.getRepoProxy().getMetadata(remote.getRepository(), remote.getNodeId(), Arrays.asList("-all-"), req);
+				return RepoProxyFactory.getRepoProxy().getMetadataSigned(remote.getRepository(), remote.getNodeId(), version, req);
             }
+
             RepositoryDao repoDao = RepositoryDao.getRepository(repository);
             node = NodeDao.mapNodeConstants(repoDao, node);
 
@@ -467,6 +472,10 @@ public class NodeApi {
             response.setJwt(nodeDao.getJWT());
             response.setSignedNode(encodedSignedNode);
             response.setSignature(encodedSignature);
+			ApplicationInfo rs = ApplicationInfoList.getRenderingService2();
+			if (rs != null) {
+				response.setRenderingBaseUrl(rs.getContentUrl());
+			}
 
             return Response.status(Response.Status.OK).entity(response).build();
 
@@ -905,8 +914,7 @@ public class NodeApi {
 
         try {
 
-            if (protocol != null && !protocol.trim().equals("")
-                    && store != null && !store.trim().equals("")) {
+    		if(StringUtils.isNotBlank(protocol) && StringUtils.isNotBlank(store)) {
 
                 if (!ApplicationInfoList.getHomeRepository().getUsername().equals(AuthenticationUtil.getFullyAuthenticatedUser())) {
                     throw new Exception("admin user required when trying to delete node of another store");
@@ -920,28 +928,28 @@ public class NodeApi {
             RepositoryDao repoDao = RepositoryDao.getRepository(repository);
             NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 
-            nodeDao.delete(recycle == null ? true : recycle);
+	    	nodeDao.delete(recycle == null || recycle);
 
             return Response.status(Response.Status.OK).build();
 
         } catch (DAOValidationException t) {
 
-            logger.warn(t.getMessage(), t);
+    		log.warn(t.getMessage(), t);
             return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
 
         } catch (DAOSecurityException t) {
 
-            logger.warn(t.getMessage(), t);
+    		log.warn(t.getMessage(), t);
             return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
 
         } catch (DAOMissingException t) {
 
-            logger.warn(t.getMessage(), t);
+    		log.warn(t.getMessage(), t);
             return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
 
         } catch (Throwable t) {
 
-            logger.error(t.getMessage(), t);
+    		log.error(t.getMessage(), t);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
         }
 
@@ -1282,10 +1290,7 @@ public class NodeApi {
         int min = (skipCount != null) ? Math.min(sorted.size(), skipCount) : 0;
         int max = (maxItems != null) ? Math.min(sorted.size(), min + maxItems) : sorted.size();
 
-        List<Node> data = new ArrayList<>();
-        for (Node child : sorted.subList(min, max)) {
-            data.add(child);
-        }
+        List<Node> data = new ArrayList<>(sorted.subList(min, max));
 
         Pagination pagination = new Pagination();
         pagination.setFrom(min);
@@ -2222,22 +2227,22 @@ public class NodeApi {
 
         } catch (DAOValidationException t) {
 
-            logger.warn(t.getMessage(), t);
+    		log.warn(t.getMessage(), t);
             return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
 
         } catch (DAOSecurityException t) {
 
-            logger.warn(t.getMessage(), t);
+    		log.warn(t.getMessage(), t);
             return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
 
         } catch (DAOMissingException t) {
 
-            logger.warn(t.getMessage(), t);
+    		log.warn(t.getMessage(), t);
             return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
 
         } catch (Throwable t) {
 
-            logger.error(t.getMessage(), t);
+    		log.error(t.getMessage(), t);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
         }
 
@@ -2306,22 +2311,22 @@ public class NodeApi {
 
         } catch (DAOValidationException t) {
 
-            logger.warn(t.getMessage(), t);
+	    		log.warn(t.getMessage(), t);
             return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
 
         } catch (DAOSecurityException t) {
 
-            logger.warn(t.getMessage(), t);
+	    		log.warn(t.getMessage(), t);
             return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
 
         } catch (DAOMissingException t) {
 
-            logger.warn(t.getMessage(), t);
+	    		log.warn(t.getMessage(), t);
             return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
 
         } catch (Throwable t) {
 
-            logger.error(t.getMessage(), t);
+	    		log.error(t.getMessage(), t);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
         }
 
@@ -2360,22 +2365,22 @@ public class NodeApi {
 
         } catch (DAOValidationException t) {
 
-            logger.warn(t.getMessage(), t);
+	    		log.warn(t.getMessage(), t);
             return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
 
         } catch (DAOSecurityException t) {
 
-            logger.warn(t.getMessage(), t);
+	    		log.warn(t.getMessage(), t);
             return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
 
         } catch (DAOMissingException t) {
 
-            logger.warn(t.getMessage(), t);
+	    		log.warn(t.getMessage(), t);
             return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
 
         } catch (Throwable t) {
 
-            logger.error(t.getMessage(), t);
+	    		log.error(t.getMessage(), t);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
         }
 
@@ -2388,7 +2393,7 @@ public class NodeApi {
 
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+		        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200),
                     @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -2419,22 +2424,22 @@ public class NodeApi {
 
         } catch (DAOValidationException t) {
 
-            logger.warn(t.getMessage(), t);
+	    		log.warn(t.getMessage(), t);
             return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
 
         } catch (DAOSecurityException t) {
 
-            logger.warn(t.getMessage(), t);
+	    		log.warn(t.getMessage(), t);
             return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
 
         } catch (DAOMissingException t) {
 
-            logger.warn(t.getMessage(), t);
+	    		log.warn(t.getMessage(), t);
             return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
 
         } catch (Throwable t) {
 
-            logger.error(t.getMessage(), t);
+	    		log.error(t.getMessage(), t);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
         }
 

@@ -8,7 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfresco.service.config.model.Config;
 import org.edu_sharing.alfresco.service.config.model.LoginSilentMode;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.authentication.AuthenticationFilter;
+import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.spring.ApplicationContextFactory;
 import org.edu_sharing.spring.security.oauth2.config.OAuth2ClientProperties;
@@ -42,7 +44,16 @@ public class SilentLoginModeRedirect {
 
         // preview redirect is problematic since browser seem to load random images from cache on 302 responses
         if (request.getServletPath().equals("/rest") || request.getServletPath().equals("/preview")) {
-            log.debug("path is rest");
+            log.debug("servlet path {} is not allowed",request.getServletPath());
+            return false;
+        }
+
+        // check other authentication methods
+        if(request.getParameter("ticket") != null
+                || request.getHeader("Authorization") != null
+                || ContextManagementFilter.accessTool.get() != null
+                || request.getParameter(CCConstants.REQUEST_PARAM_ACCESSTOKEN) != null){
+            log.debug("another auth method forced");
             return false;
         }
 
