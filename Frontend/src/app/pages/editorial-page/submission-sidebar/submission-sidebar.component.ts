@@ -32,8 +32,10 @@ export type AssignmentConfig = {
     submission: SubmissionWithAssignment;
     assignmentFiles: AssignmentFile[];
     submissionFiles: SubmissionFile[];
-    selected: AssignmentFile | SubmissionFile;
+    submissionFilesAll?: Node[];
+    selected: AssignmentFile | SubmissionFile | Node;
     selectedFileCallback: (selected: Node) => void;
+    mode?: 'assignment' | 'submission';
 };
 export type SubmissionConfig = {
     submission: SubmissionWithAssignment;

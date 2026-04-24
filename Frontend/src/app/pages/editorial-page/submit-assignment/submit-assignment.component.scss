@@ -111,6 +111,9 @@ es-render-wrapper-component {
         display: flex;
         justify-content: center;
         align-items: center;
+        &.add-notes {
+            margin-top: 20px;
+        }
         > div {
             display: flex;
             align-items: center;

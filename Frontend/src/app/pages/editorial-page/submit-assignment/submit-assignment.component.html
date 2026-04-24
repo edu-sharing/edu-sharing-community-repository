@@ -133,7 +133,7 @@
             <button
               mat-stroked-button
               color="primary"
-              [disabled]="submissionSent() || loading()"
+              [disabled]="!(isOpenForSubmission() || loading())"
               (click)="saveUserNotes()"
             >
               {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.SAVE_NOTES' | translate }}
@@ -165,6 +165,7 @@
               [elementInteractionType]="InteractionType.Emitter"
               [dataSource]="submittableFilesAll"
               [columns]="columns"
+              (clickItem)="selectSubmissionFile($event.element, 'submission')"
             >
               <ng-template #overlay let-element="element">
                 <div class="no-submission" *ngIf="!hasSubmissionFor(element)">

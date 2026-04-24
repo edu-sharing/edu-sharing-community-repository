@@ -30,7 +30,8 @@ export class AssignmentSidebarComponent {
     selectedRefId = computed(
         () =>
             (this.selected() as SubmissionFile)?.correction?.ref.id ||
-            (this.selected() as AssignmentFile)?.referNode?.ref.id,
+            (this.selected() as AssignmentFile)?.referNode?.ref.id ||
+            (this.selected() as Node)?.ref?.id,
     );
     correctedFiles = computed(() => {
         return this.data()
@@ -47,6 +48,9 @@ export class AssignmentSidebarComponent {
     });
 
     submittableFiles = computed(() => {
+        if (this.data()?.mode === 'submission' && this.data()?.submissionFilesAll) {
+            return this.data().submissionFilesAll;
+        }
         return this.data()
             .assignmentFiles?.filter((s) => s?.documentRole === 'SUBMITTABLE')
             .map((f) => f.referNode);
@@ -58,9 +62,14 @@ export class AssignmentSidebarComponent {
     });
 
     setFile(item: Node) {
-        const file =
-            this.data().submissionFiles.find((f) => f.correction?.ref.id === item.ref.id) ||
-            this.data().assignmentFiles.find((f) => f.referNode?.ref.id === item.ref.id);
+        let file: AssignmentFile | SubmissionFile | Node;
+        if (this.data()?.mode === 'submission') {
+            file = item;
+        } else {
+            file =
+                this.data().submissionFiles.find((f) => f.correction?.ref.id === item.ref.id) ||
+                this.data().assignmentFiles.find((f) => f.referNode?.ref.id === item.ref.id);
+        }
         this.data().selectedFileCallback(item);
         this.data.set({ ...this.data(), selected: file });
     }
