@@ -525,7 +525,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             orgSignupList.priority = 20;
             orgSignupList.constrains = [Constrain.NoBulk];
             options.push(orgSignupList);
-            const orgSignup = new OptionItem('PERMISSIONS.ORG_SIGNUP', 'checkbox', (data) => {
+            const orgSignup = new OptionItem('PERMISSIONS.ORG_SIGNUP', 'how_to_reg', (data) => {
                 this.groupSignup = this.getList(data)[0];
                 this.groupSignupDetails = {
                     signupMethod: this.getList(data)[0].signupMethod ?? 'disabled',
