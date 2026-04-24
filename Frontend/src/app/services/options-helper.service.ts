@@ -737,7 +737,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         bookmarkNode.priority = 20;
         bookmarkNode.customShowCallback = async (nodes) => {
             if (nodes) {
-                return nodes.every((n) => this.nodeHelper.referenceOriginalExists(n));
+                return nodes.every((n: Node) => this.nodeHelper.referenceOriginalExists(n));
             }
             return true;
         };

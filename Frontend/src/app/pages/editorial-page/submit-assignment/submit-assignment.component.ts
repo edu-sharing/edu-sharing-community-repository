@@ -135,6 +135,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
                 (f) => f.documentRole === 'SUPPLEMENTARY' || this.hasSubmissionFor(f.referNode),
             ),
     );
+    selectedTabIndex = signal(0);
     selectedAssignmentFile = signal<Node>(null);
     selectedCorrectedFile = signal<Node>(null);
     selectedCorrectedFileUrl = signal<string>(undefined);

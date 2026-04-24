@@ -34,6 +34,8 @@
 <mat-tab-group
   class="mat-tab-group-shadow"
   [mat-stretch-tabs]="true"
+  [selectedIndex]="selectedTabIndex()"
+  (selectedIndexChange)="selectedTabIndex.set($event)"
   *ngIf="!selectedCorrectedFileUrl() && !selectedAssignmentFile()"
 >
   <mat-tab>
