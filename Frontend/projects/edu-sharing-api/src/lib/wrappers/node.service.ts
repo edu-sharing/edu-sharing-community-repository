@@ -109,6 +109,33 @@ export class NodeService {
         return this.nodeV1.createChild(params).pipe(map((nodeEntry) => nodeEntry.node));
     }
 
+    /**
+     * Create a new child by copying.
+     */
+    createChildByCopying(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of parent node
+         */
+        node: string;
+
+        /**
+         * ID of source node
+         */
+        source: string;
+
+        /**
+         * flag for children
+         */
+        withChildren: boolean;
+    }): Observable<Node> {
+        return this.nodeV1.createChildByCopying(params).pipe(map((nodeEntry) => nodeEntry.node));
+    }
+
     deleteNode(
         id: string,
         { recycle = true, repository = HOME_REPOSITORY } = {},
