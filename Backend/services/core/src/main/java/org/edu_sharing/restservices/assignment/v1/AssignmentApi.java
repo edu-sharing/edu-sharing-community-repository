@@ -295,8 +295,8 @@ public class AssignmentApi {
                                        SubmissionInfoRequest request) {
         AssignmentDao assignment = assignmentDaoFactory.assignmentDaoByNodeId(assignmentId);
         SubmissionDao submission = assignment.getOrCreateSubmission(submissionId);
-        submission.setStatus(request.status());
         submission.setUserNotes(request.userNotes());
+        submission.setStatus(request.status());
         return Response.ok().entity(submission.getSubmission()).build();
     }
 

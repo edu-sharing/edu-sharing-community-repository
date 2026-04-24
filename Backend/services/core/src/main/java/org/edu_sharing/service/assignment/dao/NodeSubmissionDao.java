@@ -200,7 +200,6 @@ final class NodeSubmissionDao extends BasicNodeDaoImpl implements SubmissionDao 
     @Override
     @RetryingTransaction // node does not exists after return, because rollback is performed for no reason
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
-    @RunAsSystem
     public SubmissionFileDao createSubmissionFile(SubmissionFileRequest submissionFileRequest, InputStream fileInputStream, FormDataContentDisposition fileMetaData) {
         submissionFileRefs.invalidate();
         validateAssigneeCanChangeSubmission();
@@ -271,10 +270,11 @@ final class NodeSubmissionDao extends BasicNodeDaoImpl implements SubmissionDao 
 
     @Override
     public Submission.Status getValidationStatus() {
+        if (isReturned()) {
+            return Submission.Status.FINISHED;
+        }
+
         if (!AssignmentUtil.isAssignmentCoordinator(permissionService, nodeId) && !isReturned()) {
-            if (propertyMapper.get().getEnum(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, Submission.Status.class) != Submission.Status.FINISHED) {
-                return Submission.Status.FINISHED;
-            }
             return Submission.Status.PENDING;
         }
         return propertyMapper.get().getEnum(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, Submission.Status.class);

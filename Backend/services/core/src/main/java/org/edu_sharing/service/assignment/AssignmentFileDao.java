@@ -11,8 +11,6 @@ import org.edu_sharing.restservices.assignment.v1.model.AssignmentFileRequest;
  * with an AssignmentFile.
  */
 public interface AssignmentFileDao extends BasicNodeDao {
-    @RunAsSystem
-    @RetryingTransaction
     void create(AssignmentFileRequest request);
 
     /**

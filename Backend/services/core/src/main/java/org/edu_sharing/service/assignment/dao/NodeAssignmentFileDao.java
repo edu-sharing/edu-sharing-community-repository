@@ -3,10 +3,12 @@ package org.edu_sharing.service.assignment.dao;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.security.RunAsSystem;
 import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.assignment.v1.model.Assignment;
@@ -36,7 +38,6 @@ final class NodeAssignmentFileDao extends BasicNodeDaoImpl implements Assignment
         super(nodeId);
         this.assignmentDao = assignmentDao;
 
-
         referNode = registerLazyProvider(new LazyProvider<>(() -> {
             validateExists();
             return Optional.ofNullable(propertyMapper.get().getNodeRef(CCConstants.CCM_PROP_ASSIGNMENT_FILE_REFER_TO))
@@ -47,15 +48,13 @@ final class NodeAssignmentFileDao extends BasicNodeDaoImpl implements Assignment
 
 
     @Override
+    @RunAsSystem
     @RetryingTransaction
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
     public void create(AssignmentFileRequest request) {
         if (StringUtils.isNotBlank(nodeId)) {
             throw new IllegalStateException("AssignmentFile with id " + nodeId + " already exists.");
         }
-
-
-        validateCanChangeAssignment();
 
         log.debug("Creating new assignment file");
         Map<String, Object> properties = new HashMap<>() {{
@@ -93,12 +92,11 @@ final class NodeAssignmentFileDao extends BasicNodeDaoImpl implements Assignment
 
 
     @Override
+    @RunAsSystem
     @RetryingTransaction
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
     public void update(@NonNull AssignmentFileRequest assignmentFileRequest) {
         validateExists();
-
-        validateCanChangeAssignment();
 
         Map<String, Object> properties = new HashMap<>();
         if (!Objects.equals(assignmentFileRequest.refId(), getReferNodeId())) {
@@ -121,12 +119,12 @@ final class NodeAssignmentFileDao extends BasicNodeDaoImpl implements Assignment
     }
 
     @Override
+    @RunAsSystem
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
     public void delete() {
         if (!exists()) {
             return;
         }
-        validateCanChangeAssignment();
         doDelete();
         refresh();
     }
@@ -164,22 +162,5 @@ final class NodeAssignmentFileDao extends BasicNodeDaoImpl implements Assignment
     @Override
     public AssignmentFile.Role getDocumentRole() {
         return propertyMapper.get().getEnum(CCConstants.CCM_PROP_ASSIGNMENT_FILE_DOCUMENT_TYPE, AssignmentFile.Role.class);
-    }
-
-    private void validateCanChangeAssignment() {
-        if (assignmentDao.getType() != Assignment.Type.SUBMISSION) {
-            return;
-        }
-
-        switch (assignmentDao.getStatus()) {
-            case DRAFT -> { }
-            case INPROGRESS -> {
-                if (!assignmentDao.getSubmissions().isEmpty()) {
-                    throw new IllegalStateException("Cannot edit assignment with existing submissions.");
-                }
-            }
-            case FINISHED -> throw new IllegalStateException("Cannot edit assignment for finished assignment.");
-            case CANCELED -> throw new IllegalStateException("Cannot edit assignment for canceled assignment.");
-        }
     }
 }

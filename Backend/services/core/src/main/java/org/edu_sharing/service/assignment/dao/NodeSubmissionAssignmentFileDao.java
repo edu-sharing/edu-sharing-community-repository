@@ -7,6 +7,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.security.RunAsSystem;
 import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.assignment.v1.model.AssignmentFile;
@@ -46,6 +47,7 @@ final class NodeSubmissionAssignmentFileDao extends BasicNodeDaoImpl implements 
 
 
     @Override
+    @RunAsSystem
     @RetryingTransaction
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
     public void create(AssignmentFileRequest request) {
@@ -91,6 +93,7 @@ final class NodeSubmissionAssignmentFileDao extends BasicNodeDaoImpl implements 
 
 
     @Override
+    @RunAsSystem
     @RetryingTransaction
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
     public void update(@NonNull AssignmentFileRequest assignmentFileRequest) {
@@ -120,6 +123,7 @@ final class NodeSubmissionAssignmentFileDao extends BasicNodeDaoImpl implements 
     }
 
     @Override
+    @RunAsSystem
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
     public void delete() {
         if (!exists()) {

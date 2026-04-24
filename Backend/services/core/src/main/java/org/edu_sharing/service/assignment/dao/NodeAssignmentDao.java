@@ -62,7 +62,7 @@ final class NodeAssignmentDao extends BasicNodeDaoImpl implements AssignmentDao 
     private final LazyProvider<List<Assignment.Permission>> permissions;
 
     public NodeAssignmentDao() {
-        this((String)null);
+        this((String) null);
     }
 
     public NodeAssignmentDao(String nodeId) {
@@ -132,11 +132,11 @@ final class NodeAssignmentDao extends BasicNodeDaoImpl implements AssignmentDao 
     }
 
     @Override
-    @RunAsSystem
     @RetryingTransaction
     @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS, requiresUser = true)
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
     public void createOrUpdate(CreateAssignmentRequest request) {
+
         Map<String, Object> properties = new HashMap<>() {{
             put(CCConstants.CM_NAME, UUID.randomUUID().toString());
             put(CCConstants.CM_PROP_TITLE, request.title());
@@ -150,20 +150,25 @@ final class NodeAssignmentDao extends BasicNodeDaoImpl implements AssignmentDao 
         if (StringUtils.isNotBlank(nodeId)) {
             validateExists();
             log.debug("Update assignment node {} with {}", nodeId, properties);
-            nodeService.updateNodeNative(nodeId, properties);
+            AuthenticationUtil.runAsSystem(() -> {
+                nodeService.updateNodeNative(nodeId, properties);
+                return null;
+            });
         } else {
-            try {
-                String assignmentFolder = userEnvironmentTool.getEdu_SharingAssignmentFolder();
-                String parentFolder = NodeServiceHelper.getContainerId(assignmentFolder, assignmentConfig.getNodePattern());
-                nodeId = nodeService.createNodeBasic(parentFolder, CCConstants.CCM_TYPE_ASSIGNMENT, properties);
-                nodeService.setOwner(nodeId, ApplicationInfoList.getHomeRepository().getUsername());
-                log.debug("Created assignment node {}", nodeId);
-            } catch (Throwable t) {
-                log.error("Error while creating assignment", t);
-                throw new RuntimeException(t);
-            }
+            AuthenticationUtil.runAsSystem(() -> {
+                try {
+                    String assignmentFolder = userEnvironmentTool.getEdu_SharingAssignmentFolder();
+                    String parentFolder = NodeServiceHelper.getContainerId(assignmentFolder, assignmentConfig.getNodePattern());
+                    nodeId = nodeService.createNodeBasic(parentFolder, CCConstants.CCM_TYPE_ASSIGNMENT, properties);
+                    nodeService.setOwner(nodeId, ApplicationInfoList.getHomeRepository().getUsername());
+                    log.debug("Created assignment node {}", nodeId);
+                } catch (Throwable t) {
+                    log.error("Error while creating assignment", t);
+                    throw new RuntimeException(t);
+                }
+                return null;
+            });
         }
-
 
         try {
             List<ACE> aceList = new ArrayList<>(request.permissions()
@@ -177,7 +182,11 @@ final class NodeAssignmentDao extends BasicNodeDaoImpl implements AssignmentDao 
                     .toList());
             aceList.add(new ACE(CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR, AuthenticationUtil.getRunAsUser()));
             log.debug("Setting permissions for assignment {}: {}", nodeId, aceList);
-            permissionService.setPermissions(nodeId, aceList, false);
+
+            AuthenticationUtil.runAsSystem(() -> {
+                permissionService.setPermissions(nodeId, aceList, false);
+                return null;
+            });
         } catch (Exception t) {
             throw new RuntimeException(t);
         }
@@ -187,6 +196,7 @@ final class NodeAssignmentDao extends BasicNodeDaoImpl implements AssignmentDao 
     }
 
     @Override
+    @RunAsSystem
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
     public void delete() {
         if (!exists()) {
