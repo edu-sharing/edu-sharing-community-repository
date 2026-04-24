@@ -825,9 +825,14 @@ export class NodesSelectorComponent implements OnInit {
                     copyRefs: this.copyRefs(),
                     copyPermissions: true,
                 };
-                await firstValueFrom(this.apiCollectionService.copyCollection(copyParams));
+                const copyResponse: any = await firstValueFrom(
+                    this.apiCollectionService.copyCollection(copyParams),
+                );
                 this.bridge.showTemporaryMessage(MessageType.info, 'COLLECTIONS.TOAST.COPIED');
                 this.localEventsService.nodesChanged.emit([this.parent]);
+                if (copyResponse?.root) {
+                    this.localEventsService.nodesCreated.emit([copyResponse.root]);
+                }
                 this.toast.closeProgressSpinner();
                 this.goBack();
             } catch (e) {
