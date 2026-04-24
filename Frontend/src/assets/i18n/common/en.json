@@ -411,6 +411,7 @@
     "INFO_CHILDS": "material",
     "INFO_CHILDS_MULTI": "materials",
     "INFO_NO_CONTENT": "empty collection",
+    "INFO_UPDATING": "Being updated",
     "SCOPE": {
       "UNKNOWN": "Unknown type",
       "MY": "private",

@@ -21,6 +21,7 @@ import {
     ElementType,
     InteractionType,
     ListItem,
+    LocalEventsService,
     NodeDataSource,
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
@@ -239,6 +240,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         private route: ActivatedRoute,
         private mdsService: RestMdsService,
         private eventService: FrameEventsService,
+        private localEvents: LocalEventsService,
         private router: Router,
         private platformLocation: PlatformLocation,
         private toast: Toast,
@@ -944,6 +946,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     }
 
     private async save4(collection: EduData.Node) {
+        this.localEvents.nodesCreated.emit([collection]);
         if (this.parentId === RestConstants.ROOT) {
             const collections = await this.sessionStorageService.get(
                 SessionStorageService.KEY_ROOT_COLLECTIONS,

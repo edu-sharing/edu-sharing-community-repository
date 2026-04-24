@@ -561,6 +561,7 @@
     "INFO_CHILDS": "Material",
     "INFO_CHILDS_MULTI": "Materialien",
     "INFO_NO_CONTENT": "Leere Sammlung",
+    "INFO_UPDATING": "Wird aktualisiert",
     "SCOPE": {
       "UNKNOWN": "Unbekannter Typ",
       "MY": "Privat",

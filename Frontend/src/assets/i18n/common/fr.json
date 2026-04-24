@@ -364,6 +364,7 @@
     "INFO_CHILDS": "ressource",
     "INFO_CHILDS_MULTI": "ressources",
     "INFO_NO_CONTENT": "collection vide",
+    "INFO_UPDATING": "Mise à jour en cours",
     "SCOPE": {
       "UNKNOWN": "Type inconnu",
       "MY": "privé",
