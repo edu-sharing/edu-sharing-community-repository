@@ -76,6 +76,7 @@ import { Toast, ToastType } from '../../../services/toast';
 import { UploadDialogService } from '../../../services/upload-dialog.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { MessageType } from '../../../util/message-type';
+import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
 
 export enum TabType {
     SEARCH = 'search',
@@ -179,12 +180,31 @@ export class NodesSelectorComponent implements OnInit {
     );
     isValidSelection: Signal<boolean> = computed((): boolean => {
         if (this.selectionMode() === 'source') {
-            return (
-                ((this.onlyOneSelected() && this.selectedNodes()[0].mediatype === 'collection') ||
-                    this.onlyFilesSelected()) &&
-                (!this.option().optionConfig?.applyCallback ||
-                    this.option().optionConfig?.applyCallback(this.selectedNodes() as Node[]))
-            );
+            if (
+                this.option().optionConfig?.applyCallback &&
+                !this.option().optionConfig?.applyCallback(this.selectedNodes() as Node[])
+            ) {
+                return false;
+            }
+            // copy collection dialog
+            if (this.onlyOneSelected() && this.selectedNodes()[0].mediatype === 'collection') {
+                return true;
+            }
+            if (!this.onlyFilesSelected()) {
+                return false;
+            }
+            // only allow insert into collection when all have CCPublish
+            if (
+                this.nodeHelperService.isNodeCollection(this.parent) &&
+                !this.nodeHelperService.getNodesRight(
+                    this.selectedNodes() as Node[],
+                    RestConstants.ACCESS_CC_PUBLISH,
+                    NodesRightMode.Effective,
+                )
+            ) {
+                return false;
+            }
+            return true;
         } else {
             return (
                 this.onlyOneSelected() &&
@@ -275,6 +295,9 @@ export class NodesSelectorComponent implements OnInit {
     // shared among tabs
     flatNodeEntriesColumns: ColumnType;
     searchText = model('');
+    /**
+     * is this component acting as the target our source?
+     */
     selectionMode = computed(() =>
         this.option()?.optionConfig?.selection?.selected.length > 0 ? 'target' : 'source',
     );
@@ -1097,7 +1120,7 @@ export class NodesSelectorComponent implements OnInit {
                 ? RestConstants.QUERY_NAME_COLLECTIONS
                 : RestConstants.DEFAULT_QUERY_NAME,
             repository: HOME_REPOSITORY,
-            maxItems: 51,
+            maxItems: RestConnectorService.DEFAULT_NUMBER_PER_REQUEST,
             skipCount,
             propertyFilter: [PROPERTY_FILTER_ALL],
             contentType: CONTENT_TYPE_ALL,
