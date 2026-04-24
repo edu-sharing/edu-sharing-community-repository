@@ -1,4 +1,4 @@
-import { Component, computed, effect, model, signal, ViewChild } from '@angular/core';
+import { Component, computed, effect, model, signal } from '@angular/core';
 import {
     ListItem,
     ListItemsModule,
@@ -22,7 +22,6 @@ import { ManageSubmissionNodesComponent } from '../manage-submission-nodes/manag
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { debounceTime } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
-import { CommentsListComponent } from '../../../features/mds/mds-editor/widgets/mds-editor-widget-comments/comments-list/comments-list.component';
 import { EditorComponent } from '@tinymce/tinymce-angular';
 import { AssignmentEditorConfig } from '../manage-assignment/manage-assignment.component';
 import { TranslateService } from '@ngx-translate/core';
@@ -55,13 +54,13 @@ export type SubmissionConfig = {
         UserAvatarComponent,
         ListItemsModule,
         ManageSubmissionNodesComponent,
-        CommentsListComponent,
+        //CommentsListComponent,
         EditorComponent,
     ],
     providers: [NodeEntriesService, TreeNodeService],
 })
 export class SubmissionSidebarComponent {
-    @ViewChild(CommentsListComponent) commentsRef: CommentsListComponent;
+    //@ViewChild(CommentsListComponent) commentsRef: CommentsListComponent;
     readonly editorConfig = {
         ...AssignmentEditorConfig,
         base_url: this.platformLocation.getBaseHrefFromDOM() + 'tinymce',
@@ -164,7 +163,7 @@ export class SubmissionSidebarComponent {
         );
         control.reset();
         control.enable();
-        void this.commentsRef.refresh();
+        //void this.commentsRef.refresh();
     }
 
     async stepElement(offset: number) {
