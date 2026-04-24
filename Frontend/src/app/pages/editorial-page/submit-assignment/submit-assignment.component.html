@@ -172,7 +172,7 @@
                   <button
                     mat-button
                     class="overlay"
-                    (click)="showFileDialog(null, element)"
+                    (click)="showFileDialog(null, element); $event.stopPropagation()"
                     [disabled]="!canSubmitMaterials()"
                   >
                     <div class="upload">
