@@ -194,7 +194,7 @@ export class NodesSelectorComponent implements OnInit {
         }
     });
     workspaceAction = model<'move' | 'copy'>('move');
-    canCopyWorkspaceNodes = computed(
+    canMoveWorkspaceNodes = computed(
         () =>
             this.option().optionConfig.selection?.selected?.length &&
             this.option().optionConfig.selection?.selected.every(
@@ -307,6 +307,9 @@ export class NodesSelectorComponent implements OnInit {
             this.treeNodeService.setSelectionMode(
                 option?.optionConfig?.selection?.selected?.length > 0 ? 'target' : 'source',
             );
+            if (!this.canMoveWorkspaceNodes()) {
+                this.workspaceAction.set('copy');
+            }
         });
     }
 

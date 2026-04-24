@@ -223,10 +223,10 @@
           class="workspace-action-select"
         >
           <mat-select [(ngModel)]="workspaceAction">
-            <mat-option value="copy" [disabled]="!canCopyWorkspaceNodes()">{{
-              'WORKSPACE.COPY_MOVE.COPY' | translate
+            <mat-option value="copy">{{ 'WORKSPACE.COPY_MOVE.COPY' | translate }}</mat-option>
+            <mat-option value="move" [disabled]="!canMoveWorkspaceNodes()">{{
+              'WORKSPACE.COPY_MOVE.MOVE' | translate
             }}</mat-option>
-            <mat-option value="move">{{ 'WORKSPACE.COPY_MOVE.MOVE' | translate }}</mat-option>
           </mat-select>
         </mat-form-field>
         <es-node-entries-wrapper
