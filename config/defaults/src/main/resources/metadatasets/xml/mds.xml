@@ -1940,7 +1940,11 @@
           {"bool":{
           "must_not":[
           {"match": {"properties.ccm:assignment_status.keyword": "CANCELED" }},
-          {"match": {"properties.ccm:assignment_status.keyword": "FINISHED" }}
+          {"match": {"properties.ccm:assignment_status.keyword": "FINISHED" }},
+          {"bool":{"must":[
+          {"match": {"properties.ccm:assignment_status.keyword": "DRAFT" }},
+          {"bool":{"must_not":[{"match":{"properties.cm:creator.keyword":"${user.cm:userName}"}}]}}
+          ]}}
           ]
           }}
         </statement>
