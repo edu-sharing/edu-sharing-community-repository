@@ -104,7 +104,9 @@ public class SignatureVerifier {
                 }
 
                 List<String> supported = this.config.getStringList("security.sso.authByApp.alg.supported");
-                if(!supported.contains(algorithm) && !appInfo.getSignatureAlgorithm().equals(algorithm) && !algDefaultVerify.equals(algorithm)){
+                if(!supported.contains(algorithm)
+                        && (appInfo.getSignatureAlgorithm() != null && !appInfo.getSignatureAlgorithm().equals(algorithm))
+                        && !algDefaultVerify.equals(algorithm)){
                     return new Result(HttpServletResponse.SC_BAD_REQUEST,"ALGORITHM NOT SUPPORTED",appInfo);
                 }
 
