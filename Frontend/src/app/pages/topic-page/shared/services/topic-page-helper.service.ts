@@ -362,6 +362,22 @@ export class TopicPageHelperService {
     }
 
     /**
+     * Copies a node as a child of a given parent node.
+     */
+    async copyNodeAsChild(sourceNodeId: string, parentNodeId: string): Promise<Node> {
+        sourceNodeId = convertNodeRefIntoNodeId(sourceNodeId);
+        parentNodeId = convertNodeRefIntoNodeId(parentNodeId);
+        return await firstValueFrom(
+            this.nodeApi.createChildByCopying({
+                repository: HOME_REPOSITORY,
+                node: parentNodeId,
+                source: sourceNodeId,
+                withChildren: false,
+            }),
+        );
+    }
+
+    /**
      * Deletes a node with a given ID.
      */
     async deleteNode(nodeId: string): Promise<void> {
