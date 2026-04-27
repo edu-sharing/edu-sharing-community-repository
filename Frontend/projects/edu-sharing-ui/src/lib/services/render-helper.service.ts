@@ -101,6 +101,7 @@ export class RenderHelperService {
         signature: string,
         jwt: string,
         renderUrl: string,
+        signatureAlgorithm: string,
     ): Promise<CombinedRenderData> {
         this.injector.get(RSApiConfiguration).rootUrl = renderUrl;
         const decodedNodeString = this.base64ToUtf8(encodedNode);
@@ -111,6 +112,7 @@ export class RenderHelperService {
             securedNode: encodedNode,
             signature: signature,
             token: jwt,
+            signatureAlgorithm: signatureAlgorithm,
         } as RenderDataRequestWithToken;
 
         return {
