@@ -1193,15 +1193,17 @@ public class CollectionServiceElastic implements CollectionService {
     }
 
     private NodeRef copyInternal(CopyResult copyResult, NodeRef parent, NodeRef src, NodeRef dst, boolean copySrc, boolean copyRefs, boolean copyPermissions, boolean copyChildCollections) throws Throwable {
-        String parentNodeId = (copySrc) ? copy(copyResult,parent,src,dst,copyPermissions) : dst.getId();
-        List<ChildAssociationRef> childrenChildAssociationRef = eduNodeService.getChildrenChildAssociationRef(src.getId());
-        for (ChildAssociationRef childAssociationRef : childrenChildAssociationRef) {
-            if(!allowedToCopy(childAssociationRef.getChildRef(),copyRefs,copyChildCollections)){
-                continue;
+        String copyResultNodeId = (copySrc) ? copy(copyResult,parent,src,dst,copyPermissions) : dst.getId();
+        if(copyResultNodeId != null) {
+            List<ChildAssociationRef> childrenChildAssociationRef = eduNodeService.getChildrenChildAssociationRef(src.getId());
+            for (ChildAssociationRef childAssociationRef : childrenChildAssociationRef) {
+                if (!allowedToCopy(childAssociationRef.getChildRef(), copyRefs, copyChildCollections)) {
+                    continue;
+                }
+                copyInternal(copyResult, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, copyResultNodeId), childAssociationRef.getChildRef(), new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, copyResultNodeId), true, copyRefs, copyPermissions, copyChildCollections);
             }
-            copyInternal(copyResult,new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentNodeId), childAssociationRef.getChildRef(), new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentNodeId),true, copyRefs,copyPermissions,copyChildCollections);
         }
-        return (parentNodeId == null) ? null : new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentNodeId);
+        return (copyResultNodeId == null) ? null : new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,copyResultNodeId);
     }
 
     private boolean allowedToCopy(NodeRef src, boolean copyRefs, boolean copyChildCollections){
