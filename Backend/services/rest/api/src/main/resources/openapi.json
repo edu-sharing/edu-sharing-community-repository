@@ -1720,6 +1720,20 @@
         },
         "type": "object"
       },
+      "Copy": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/Entry"
+            },
+            "type": "array"
+          },
+          "root": {
+            "$ref": "#/components/schemas/Node"
+          }
+        },
+        "type": "object"
+      },
       "Counts": {
         "properties": {
           "elements": {
@@ -2059,6 +2073,22 @@
           },
           "type": {
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Entry": {
+        "properties": {
+          "errorCode": {
+            "enum": [
+              "NO_PUBLISH_PERMISSION",
+              "NO_RIGHTS_ON_PERMISSIONS",
+              "UNKNOWN_ERROR"
+            ],
+            "type": "string"
+          },
+          "node": {
+            "$ref": "#/components/schemas/Node"
           }
         },
         "type": "object"
@@ -20268,7 +20298,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CollectionEntry"
+                  "$ref": "#/components/schemas/Copy"
                 }
               }
             },
