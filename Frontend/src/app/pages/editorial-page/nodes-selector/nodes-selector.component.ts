@@ -295,6 +295,7 @@ export class NodesSelectorComponent implements OnInit {
 
     // shared among tabs
     flatNodeEntriesColumns: ColumnType;
+    searchCompleted: WritableSignal<boolean> = signal(false);
     searchText = model('');
     /**
      * is this component acting as the target our source?
@@ -390,6 +391,7 @@ export class NodesSelectorComponent implements OnInit {
         this.collectionsDisplayType.set(NodeEntriesDisplayType.Tree);
         this.selectedNodes.set([]);
         this.searchText.set('');
+        this.searchCompleted.set(false);
         this.searchSent.set(false);
         this.treeNodeService.resetData();
         // execute tab-specific actions
@@ -417,6 +419,7 @@ export class NodesSelectorComponent implements OnInit {
      * Executes the search query and updates the search datasource.
      */
     async executeSearch() {
+        this.searchCompleted.set(false);
         this.searchSent.set(true);
         this.resetNodeEntriesSelections();
         if (this.selectedTab() === TabType.SEARCH) {
@@ -430,6 +433,7 @@ export class NodesSelectorComponent implements OnInit {
                 this.searchService.search(request),
             );
             this.dataSourceSearch.setData(searchResult.nodes, searchResult.pagination);
+            this.searchCompleted.set(true);
             this.dataSourceSearch.isLoading = false;
         } else if (this.selectedTab() === TabType.COLLECTIONS) {
             this.dataSourceCollectionsFlat.isLoading = true;
@@ -447,6 +451,7 @@ export class NodesSelectorComponent implements OnInit {
                 this.dataSourceCollectionsFlat.setData(searchResult.nodes, searchResult.pagination);
             }
             this.collectionsDisplayType.set(NodeEntriesDisplayType.Table);
+            this.searchCompleted.set(true);
             this.dataSourceCollectionsFlat.isLoading = false;
         }
     }
@@ -461,6 +466,7 @@ export class NodesSelectorComponent implements OnInit {
         } else if (this.selectedTab() === TabType.COLLECTIONS) {
             // reset type to tree view and reset variables
             this.collectionsDisplayType.set(NodeEntriesDisplayType.Tree);
+            this.searchCompleted.set(false);
             this.searchSent.set(false);
         }
     }

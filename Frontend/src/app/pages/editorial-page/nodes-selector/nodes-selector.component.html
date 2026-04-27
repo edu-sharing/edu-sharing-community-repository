@@ -116,6 +116,7 @@
             #searchWrapperRef
             *ngIf="
               selectedTab() === TabType.SEARCH &&
+              searchCompleted() &&
               (!dataSourceSearch.isEmpty() || dataSourceSearch.isLoading)
             "
             [dragDrop]="{
@@ -139,6 +140,9 @@
           <ng-container
             *ngTemplateOutlet="noSearchResults; context: { dataSource: dataSourceSearch }"
           ></ng-container>
+          <ng-container *ngIf="!searchCompleted()">
+            <ng-container *ngTemplateOutlet="loading"></ng-container>
+          </ng-container>
         </div>
       </ng-container>
 
