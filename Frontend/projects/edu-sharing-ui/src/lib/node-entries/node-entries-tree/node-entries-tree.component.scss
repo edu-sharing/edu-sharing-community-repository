@@ -5,6 +5,9 @@
 $rowMinHeight: 48px;
 
 :host {
+    &.is-loading {
+        width: 100%;
+    }
     --mdc-checkbox-state-layer-size: 28px;
 }
 

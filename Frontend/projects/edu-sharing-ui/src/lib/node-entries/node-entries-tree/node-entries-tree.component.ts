@@ -5,6 +5,7 @@ import {
     ChangeDetectorRef,
     Component,
     ElementRef,
+    HostBinding,
     OnDestroy,
     signal,
     ViewChild,
@@ -41,6 +42,8 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Target = Target;
     readonly UIService = UIService;
+
+    @HostBinding('class.is-loading') protected isLoading = false;
 
     @ViewChild(DropdownComponent) dropdown: DropdownComponent;
     @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
@@ -88,6 +91,7 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
         this.entriesService.dataSource.isLoadingSubject
             .pipe(takeUntil(this.destroyed))
             .subscribe(async (isLoading) => {
+                this.isLoading = isLoading !== false;
                 // after initial load and when not already initialized, initialize the tree
                 if (!isLoading && !this.treeInitialized()) {
                     await this.initializeTree();
