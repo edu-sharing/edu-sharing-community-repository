@@ -110,7 +110,7 @@
 }
 
 // collections tab related styles
-.tree-search-container {
+.tab-search-container {
     display: flex;
     align-items: center;
 }
@@ -179,9 +179,9 @@ es-info-message {
     }
 }
 
-es-info-message.no-config-alert {
-    margin-top: 16px;
-    display: block;
+// fix empty container should take full width
+:host ::ng-deep es-node-entries-wrapper .empty-container {
+    width: 100%;
 }
 
 .checklist {

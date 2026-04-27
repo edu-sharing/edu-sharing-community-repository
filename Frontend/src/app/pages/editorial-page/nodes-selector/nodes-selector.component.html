@@ -71,7 +71,7 @@
   >
     <!-- search field + filter button -->
     <div
-      class="tree-search-container"
+      class="tab-search-container"
       *ngIf="[TabType.SEARCH, TabType.COLLECTIONS].includes(selectedTab()) && isSelectStep()"
     >
       <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
@@ -88,7 +88,7 @@
             (isSearchTab() && dataSourceSearch.isLoading) ||
             (isCollectionsTab() &&
               collectionsDisplayType() === NodeEntriesDisplayType.Tree &&
-              dataSourceCollectionsTree.isLoading)
+              (dataSourceCollectionsTree.isLoading || dataSourceCollectionsTree.isEmpty()))
           "
           (keydown.enter)="executeSearch()"
         />
@@ -161,7 +161,7 @@
           [disabled]="
             collectionsDisplayTypeToggleDisabled() ||
             (collectionsDisplayType() === NodeEntriesDisplayType.Tree &&
-              dataSourceCollectionsTree.isLoading) ||
+              (dataSourceCollectionsTree.isLoading || dataSourceCollectionsTree.isEmpty())) ||
             (collectionsDisplayType() !== NodeEntriesDisplayType.Tree &&
               dataSourceCollectionsFlat.isLoading)
           "
@@ -208,7 +208,13 @@
           (clickItem)="selectOnClick(collectionsWrapperRef, $event)"
           (fetchData)="loadMore($event, true)"
           (selectionChange)="onNodeSelectionChange($event)"
-        ></es-node-entries-wrapper>
+        >
+          <ng-template #empty>
+            <es-info-message mode="info" class="info-message">
+              {{ i18nPrefix + 'COLLECTIONS.EMPTY_MESSAGE' | translate }}
+            </es-info-message>
+          </ng-template>
+        </es-node-entries-wrapper>
         <ng-container *ngIf="collectionsDisplayType() !== NodeEntriesDisplayType.Tree">
           <ng-container
             *ngTemplateOutlet="noSearchResults; context: { dataSource: dataSourceCollectionsFlat }"
@@ -337,7 +343,7 @@
           </mat-checkbox>
         </div>
         <ng-template #noConfigOptions>
-          <es-info-message class="no-config-alert" mode="info">
+          <es-info-message class="info-message" mode="info">
             {{ i18nPrefix + 'CONFIGURE_CONFIG.NO_CONFIG_OPTIONS' | translate }}
           </es-info-message>
         </ng-template>

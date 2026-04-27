@@ -76,6 +76,7 @@
           "PLACEHOLDER": "Suche nach Inhalten"
         },
         "COLLECTIONS": {
+          "EMPTY_MESSAGE": "Du hast bisher weder eine eigene Sammlung angelegt oder Zugriff auf eine Sammlung erhalten.",
           "PLACEHOLDER": "Suche nach Sammlungen",
           "RECENT_COLLECTIONS": "Zuletzt verwendet",
           "MY_COLLECTIONS": "Meine Sammlungen",

@@ -1,5 +1,10 @@
 <!-- tree component -->
-<div class="tree-container" cdkDropList [cdkDropListSortingDisabled]="true">
+<div
+  class="tree-container"
+  cdkDropList
+  [cdkDropListSortingDisabled]="true"
+  *ngIf="dataSource && treeControl && dataSource.data?.length"
+>
   <es-dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></es-dropdown>
   <button
     #menuTrigger="matMenuTrigger"
@@ -16,11 +21,7 @@
     [displayType]="NodeEntriesDisplayType.Tree"
   >
   </es-node-entries-global-options>
-  <mat-tree
-    [dataSource]="dataSource"
-    [treeControl]="treeControl"
-    *ngIf="dataSource && treeControl && dataSource.data?.length"
-  >
+  <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
     <!-- child nodes -->
     <!-- matTreeNodePaddingIndent 28 = 24 (width of icon) + 4 (gap between icon and text) -->
     <mat-tree-node
