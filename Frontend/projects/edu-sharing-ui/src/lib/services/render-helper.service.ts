@@ -103,6 +103,7 @@ export class RenderHelperService {
         renderUrl: string,
         signatureAlgorithm: string,
     ): Promise<CombinedRenderData> {
+        console.log('Fetching render data for LMS with signature algorithm:', signatureAlgorithm);
         this.injector.get(RSApiConfiguration).rootUrl = renderUrl;
         const decodedNodeString = this.base64ToUtf8(encodedNode);
         const node = JSON.parse(decodedNodeString) as Node;

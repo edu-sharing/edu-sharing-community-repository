@@ -41,7 +41,6 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
     assetUrl: string;
     resourceUrl: string;
     previewUrl: string;
-    signatureAlgorithm: string | null;
 
     constructor(
         private renderHelperService: RenderHelperService,
@@ -62,7 +61,6 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
         this.assetUrl = this.assets_url;
         this.resourceUrl = this.resource_url;
         this.previewUrl = this.preview_url;
-        this.signatureAlgorithm = this.signature_algorithm ?? 'SHA1withRSA';
     }
 
     async ngOnChanges(changes: SimpleChanges) {
@@ -72,7 +70,7 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
                 this.signature,
                 this.jwt,
                 this.render_url,
-                this.signatureAlgorithm,
+                this.signature_algorithm ?? 'SHA1withRSA',
             );
             data.node.preview.url = this.previewUrl;
             this.node.set(data.node);
