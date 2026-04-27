@@ -387,7 +387,6 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
             }
         }
         this.treeInitialized.set(true);
-        this.changeDetectorRef.detectChanges();
     }
 
     /**
