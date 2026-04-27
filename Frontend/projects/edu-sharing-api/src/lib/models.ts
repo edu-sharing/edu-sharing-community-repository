@@ -49,6 +49,7 @@ export { CollectionReference } from './api/models/collection-reference';
 export { Context } from './api/models/context';
 export { CollectionsType } from './api/models/collections-type';
 export { CollectionsTypeConfig } from './api/models/collections-type-config';
+export { Copy } from './api/models/copy';
 export { CreateSuggestionRequestDto } from './api/models/create-suggestion-request-dto';
 export { DashboardShortcut } from './api/models/dashboard-shortcut';
 export { DashboardShortcutEntry } from './api/models/dashboard-shortcut-entry';

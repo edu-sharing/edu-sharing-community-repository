@@ -7,7 +7,7 @@ import { Node } from '../models';
 import { cachedShareReplay, KeyCache } from '../utils/decorators/cached-share-replay';
 import { ReferenceEntries } from '../api/models/reference-entries';
 import { CollectionEntries } from '../api/models/collection-entries';
-import { CollectionEntry } from '../api/models/collection-entry';
+import { Copy } from '../api/models/copy';
 
 @Injectable({
     providedIn: 'root',
@@ -107,7 +107,7 @@ export class CollectionService {
          * if true child collections will be copied
          */
         copyChildCollections?: boolean;
-    }): Observable<CollectionEntry> {
+    }): Observable<Copy> {
         return this.collectionV1.copyCollection(params);
     }
 }
