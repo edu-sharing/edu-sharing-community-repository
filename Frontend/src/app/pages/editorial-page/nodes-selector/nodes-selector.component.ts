@@ -20,6 +20,7 @@ import {
     AuthenticationService,
     CollectionService as ApiCollectionService,
     CONTENT_TYPE_ALL,
+    Copy,
     CreateSuggestionRequestDto,
     DEFAULT,
     HOME_REPOSITORY,
@@ -851,7 +852,7 @@ export class NodesSelectorComponent implements OnInit {
                     copyRefs: this.copyRefs(),
                     copyPermissions: true,
                 };
-                const copyResponse: any = await firstValueFrom(
+                const copyResponse: Copy = await firstValueFrom(
                     this.apiCollectionService.copyCollection(copyParams),
                 );
                 this.bridge.showTemporaryMessage(MessageType.info, 'COLLECTIONS.TOAST.COPIED');
