@@ -1044,8 +1044,10 @@ export class NodesSelectorComponent implements OnInit {
             // set the ID to the (fake) parent node
             node.parent.id = myContentsNode.ref.id;
         });
-        initialData.push(myContentsNode);
-        initialData = initialData.concat(subMyContents);
+        if (subMyContents?.length) {
+            initialData.push(myContentsNode);
+            initialData = initialData.concat(subMyContents);
+        }
         // shared contents
         const sharedContentsNode: Partial<Node> = this.createFakeNode(
             this.translate.instant(this.i18nPrefix + 'WORKSPACE.SHARED_CONTENTS'),
@@ -1058,8 +1060,10 @@ export class NodesSelectorComponent implements OnInit {
             // set the ID to the (fake) parent node
             node.parent.id = sharedContentsNode.ref.id;
         });
-        initialData.push(sharedContentsNode);
-        initialData = initialData.concat(subSharedContents);
+        if (subSharedContents?.length) {
+            initialData.push(sharedContentsNode);
+            initialData = initialData.concat(subSharedContents);
+        }
         this.dataSourceWorkspace.setData(initialData);
         this.dataSourceWorkspace.isLoading = false;
     }

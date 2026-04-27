@@ -83,6 +83,7 @@
           "EDITORIAL_COLLECTIONS": "Redaktionelle Sammlungen"
         },
         "WORKSPACE": {
+          "EMPTY_MESSAGE": "Du hast bisher weder eigene noch gemeinsame Inhalte angelegt.",
           "MY_CONTENTS": "Meine Inhalte",
           "SHARED_CONTENTS": "Gemeinsame Inhalte"
         },

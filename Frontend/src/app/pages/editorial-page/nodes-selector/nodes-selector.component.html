@@ -249,7 +249,13 @@
           }"
           [treeConfig]="workspaceTreeConfig"
           (selectionChange)="onNodeSelectionChange($event)"
-        ></es-node-entries-wrapper>
+        >
+          <ng-template #empty>
+            <es-info-message mode="info" class="info-message">
+              {{ i18nPrefix + 'WORKSPACE.EMPTY_MESSAGE' | translate }}
+            </es-info-message>
+          </ng-template>
+        </es-node-entries-wrapper>
       </ng-container>
 
       <!-- UPLOAD TAB -->
